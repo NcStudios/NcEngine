@@ -1,0 +1,2 @@
+deaw sprites
+only one component of a type
