@@ -48,11 +48,12 @@ namespace NCE::Engine
 
     PlatformProcedures platformProcedures;
     EngineData engineData;
+    EngineSystems engineSystems;
     EntityData entityData;
     IDManager idManager;
     NCE::LevelManagement::LevelManager levelManager(CreateEntity);
 
-    //Temp - Display.hpp has dimensions hard coded
+    //may chagne - dimensions hard coded in Win32 layer
     NCE::Common::Vector2 screenDimensions;
 
     std::vector<NCE::Common::Rect> entitySprites;
@@ -68,21 +69,110 @@ namespace NCE::Engine
     NCE::Common::Vector4 worldSpaceRect(0, 0, 0, 0);
     
 
-    void InitializeEngine(int t_screenWidth, int t_screenHeight, processSystemMessagesFunc t_processSystemMessages, renderFunc t_render)
+    void InitializeEngine(int t_screenWidth, int t_screenHeight, processSystemMessagesFunc t_processSystemMessages)
     {
         screenDimensions.Set(t_screenWidth, t_screenHeight);
         worldSpaceRect.Set(0, 0, t_screenWidth, t_screenHeight);
 
-        platformProcedures.processSystemMessages = t_processSystemMessages;
-        platformProcedures.render = t_render;
+        platformProcedures.Win32ProcessSystemMessages = t_processSystemMessages;
+        //platformProcedures.render = t_render;
 
         levelManager.CreateTestLevel();
     }
 
-    void NCEMain()
+    void InitializeRenderer(NCE::Graphics::Win32DisplayBufferFunc t_displayBuffer)
     {
+        std::cout << "start InitializeRenderer()" << '\n';
+        engineSystems.renderer = std::make_unique<NCE::Graphics::Renderer>(t_displayBuffer, screenDimensions.GetX(), screenDimensions.GetY());
+        std::cout << "end InitializeRenderer()" << '\n';
+    }
+
+    void ForceRender()
+    {
+        //need null check?
+        engineSystems.renderer->ForceRender();
+    }
+
+    void FrameUpdate()
+    {
+        if(Input::GetKeyDown('T'))
+        {
+            std::cout << "KeyDown" << '\n';
+        }
+        if (Input::GetKey('T'))
+        {
+            std::cout << "GetKey" << '\n';
+        }
+        if(Input::GetKeyUp('T'))
+        {
+            std::cout << "KeyUp" << '\n' << '\n';
+        }
+
+        //Frame Updates for GameObject/Component instances
+        SendInitializeToEntities();
+        SendFrameUpdateToEntities();
+        SendDestroyToEntities();
+
+        //Render
+        entitySprites = entityData.GetEntitySprites();
+        engineSystems.renderer->StartRenderCycle(entitySprites);
+        entitySprites.clear();
+
+        //Cleanup
+        NCE::Input::FlushQueue();
+        microSecondsSinceLastFrame = 0;
+
+        //std::cout << "-End Frame-" << '\n';
+    }
+
+    void FixedUpdate()
+    {
+        //std::cout << '\n' << "-Start Fixed-" << '\n';
+        // if (microSecondsSinceLastFixed / 1000000.0 > 0.051)
+        // {
+        //     std::cout << microSecondsSinceLastFixed / 1000000.0 << '\n';
+        // }
+        
+
+        
+        
+
+        
         NCE::Containers::QuadTree colliderQuadTree(4, worldSpaceRect);
 
+        entityColliders = entityData.GetEntityColliders();
+        
+        for (auto colliderPtr : entityColliders)
+        {
+            colliderQuadTree.AddElement(colliderPtr);
+        }
+
+        colliderQuadTree.CheckCollisions();
+
+        //fix somehow?
+        //entityColliders = entityData.GetEntityColliders();
+        for(auto colliderPtr : entityColliders)
+        {
+            if (colliderPtr.expired())
+            {
+                //why is this never reached??
+                std::cout << "colliderPtr expired" << '\n';
+            }
+            else
+            {
+                colliderPtr.lock()->NewPhysicsCycle();
+            }
+        }
+
+        SendFixedUpdateToEntities();
+
+        colliderQuadTree.Clear();
+        entityColliders.clear();
+        microSecondsSinceLastFixed = 0;
+    }
+
+    void NCEMain()
+    {
         while(engineData.isRunning)
         {
             //Time
@@ -91,83 +181,21 @@ namespace NCE::Engine
             microSecondsSinceLastFrame += microSecondsSinceLastCycle;
             microSecondsSinceLastFixed += microSecondsSinceLastCycle;
 
-            //Input
-            platformProcedures.processSystemMessages();
-            
-            //Debug stuff
-            if(Input::GetKeyDown('C'))
-            {
-                entityData.active.clear();
-                entityData.awaitingInitialize.clear();
-                entityData.inactive.clear();
-                entityData.awaitingDestroy.clear();
-            }
+            //System Input
+            platformProcedures.Win32ProcessSystemMessages();
 
             //Physics and Fixed Interval Update
             if (microSecondsSinceLastFixed > MICRO_SECONDS_PER_FIXED)
             {
-                //std::cout << '\n' << "-Start Fixed-" << '\n';
-                if (microSecondsSinceLastFixed / 1000000.0 > 0.051)
-                {
-                    std::cout << microSecondsSinceLastFixed / 1000000.0 << '\n';
-                }
-                
-
-                entityColliders = entityData.GetEntityColliders();
-                
-                for (auto colliderPtr : entityColliders)
-                {
-                    colliderQuadTree.AddElement(colliderPtr);
-                }
-
-                colliderQuadTree.CheckCollisions();
-
-                //fix somehow?
-                //entityColliders = entityData.GetEntityColliders();
-                for(auto colliderPtr : entityColliders)
-                {
-                    if (colliderPtr.expired())
-                    {
-                        //why is this never reached??
-                        std::cout << "colliderPtr expired" << '\n';
-                    }
-                    else
-                    {
-                        colliderPtr.lock()->NewPhysicsCycle();
-                    }
-                }
-
-                SendFixedUpdateToEntities();
-
-                colliderQuadTree.Clear();
-                entityColliders.clear();
-                microSecondsSinceLastFixed = 0;
-            } //End fixed update
+                FixedUpdate();
+            } 
 
             //Frame Update
             if (microSecondsSinceLastFrame > MICRO_SECONDS_PER_FRAME)
             {
-                //std::cout << '\n' << "-Start Frame-" << '\n'
-                //          << "time: " << microSecondsSinceLastFrame / 1000000.00 << '\n';
-
-                //Frame Updates for GameObject/Component instances
-                SendInitializeToEntities();
-                SendFrameUpdateToEntities();
-                SendDestroyToEntities();
-
-                //Render
-                entitySprites = entityData.GetEntitySprites();
-                platformProcedures.render(entitySprites);
-                entitySprites.clear();
-
-                //Cleanup
-                NCE::Input::FlushQueue();
-                microSecondsSinceLastFrame = 0;
-
-                //std::cout << "-End Frame-" << '\n';
-            } //End frame update
-
-        } //End main loop
+                FrameUpdate();
+            } 
+        }
     }
 
     void Exit()

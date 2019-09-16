@@ -15,13 +15,13 @@ void Character::OnFrameUpdate()
     int x = 0;
     int y = 0;
 
-    if (Input::GetKeyDown('W'))
+    if (Input::GetKey('W'))
         y -= _moveSpeed;
-    if (Input::GetKeyDown('S'))
+    if (Input::GetKey('S'))
         y += _moveSpeed;
-    if (Input::GetKeyDown('A'))
+    if (Input::GetKey('A'))
         x -= _moveSpeed;
-    if (Input::GetKeyDown('D'))
+    if (Input::GetKey('D'))
         x += _moveSpeed;
 
     if (_transform.lock() == nullptr)
