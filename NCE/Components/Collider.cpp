@@ -53,13 +53,14 @@ namespace NCE::Components
         m_currentCycleCollisions.clear();
     }
 
-    void Collider::RegisterCollisionEvent(std::weak_ptr<NCE::Components::Collider> other_)
+    void Collider::RegisterCollisionEvent(std::weak_ptr<NCE::Components::Collider> &other_)
     {
+        auto otherShared = other_.lock();
+
         for (auto& existing : m_currentCycleCollisions)
         {
-            if (existing.lock() == other_.lock())
+            if (existing.lock() == otherShared)
             {
-                //std::cout << "RegisterCollisionEvent() - this collision was already registered this cycle" << '\n';
                 return;
             }
         }
@@ -68,15 +69,13 @@ namespace NCE::Components
 
         for (auto& previousCollider : m_previousCycleCollisions)
         {
-            if (previousCollider.lock() == other_.lock())
+            if (previousCollider.lock() == otherShared)
             {
-                //std::cout << "SendCollisionStay()" << '\n';
-                GetEntity().lock()->SendCollisionStayToComponents(other_.lock()->GetEntity());
+                GetEntity().lock()->SendCollisionStayToComponents(otherShared->GetEntity());
                 return;
             }
         }
 
-        //std::cout << "SendCollisionEnter()" << '\n';
-        GetEntity().lock()->SendCollisionEnterToComponents(other_.lock()->GetEntity());
+        GetEntity().lock()->SendCollisionEnterToComponents(otherShared->GetEntity());
     }
 }

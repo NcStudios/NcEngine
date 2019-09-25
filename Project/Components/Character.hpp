@@ -14,7 +14,7 @@ class Character : public Component
 {
     private:
         std::weak_ptr<Transform> m_transform;
-        float _moveSpeed = 20;
+        float _moveSpeed = 10;
     public:
         Character(EntityWeakPtr parent_);
 

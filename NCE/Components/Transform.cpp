@@ -5,7 +5,7 @@ namespace NCE::Components
     Transform::Transform(Common::EntityWeakPtr parent_) : Component(parent_)
     {
         TypeId = ID_TRANSFORM;
-        m_rect.Set(0, 0, 0, 0);
+        m_rect = NCE::Common::Vector4::Zero();
     }
 
     int Transform::GetX() const { return m_rect.GetX(); }
@@ -21,22 +21,23 @@ namespace NCE::Components
 
     void Transform::Set(int x_, int y_, int w_, int h_) 
     {
-        m_rect.Set(x_, y_, w_, h_);
+        m_rect = NCE::Common::Vector4(x_, y_, w_, h_);
     }
 
     void Transform::SetPosition(int x_, int y_) 
     {
-        m_rect.Set(x_, y_, m_rect.GetZ(), m_rect.GetW());
+        m_rect = NCE::Common::Vector4(x_, y_, m_rect.GetZ(), m_rect.GetW());
     }
         
     void Transform::SetDimensions(int w_, int h_) 
     {
-        m_rect.Set(m_rect.GetX(), m_rect.GetY(), w_, h_);
+        m_rect = NCE::Common::Vector4(m_rect.GetX(), m_rect.GetY(), w_, h_);
     }
 
-    void Transform::Translate(int x_, int y_) 
+    void Transform::Translate(NCE::Common::Vector2 &v_) 
     {
-        m_rect.Set(m_rect.GetX() + x_, m_rect.GetY() + y_, m_rect.GetZ(), m_rect.GetW());
+        auto translation = v_.ToVector4();
+        m_rect.TranslateBy(translation);
     }
 
 }

@@ -27,7 +27,7 @@ namespace NCE::Components
             void SetPosition(int x_, int y_);
             void SetDimensions(int w_, int h_);
 
-            void Translate(int x_, int y_);
+            void Translate(NCE::Common::Vector2 &v_);
             
     };
 }

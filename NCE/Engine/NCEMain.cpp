@@ -65,16 +65,17 @@ namespace NCE::Engine
     uint64_t microSecondsSinceLastFixed = 0;
 
     NCE::Common::Vector4 worldSpaceRect(0, 0, 0, 0);
+
+    //debug for profiling physics update
+    double debug_total_time = 0.0;
+    int debug_total_fixed_cycles = 0;
     
 
     void InitializeEngine(int screenWidth_, int screenHeight_, processSystemMessagesFunc processSystemMessages_)
     {
-        screenDimensions.Set(screenWidth_, screenHeight_);
-        worldSpaceRect.Set(0, 0, screenWidth_, screenHeight_);
-
+        screenDimensions = NCE::Common::Vector2(screenWidth_, screenHeight_);
+        worldSpaceRect   = NCE::Common::Vector4(0, 0, screenWidth_, screenHeight_);
         platformProcedures.Win32ProcessSystemMessages = processSystemMessages_;
-        //platformProcedures.render = t_render;
-
         levelManager.CreateTestLevel();
     }
 
@@ -108,23 +109,29 @@ namespace NCE::Engine
 
     void FixedUpdate()
     {        
-        NCE::Containers::QuadTree colliderQuadTree(4, worldSpaceRect);
+        //debug
+        debug_total_time += microSecondsSinceLastFixed / 1000000.0;
+        ++debug_total_fixed_cycles;
+        std::cout << "average time since last FixedUpdate(): " << debug_total_time / debug_total_fixed_cycles << '\n';
+
+        
+        NCE::Containers::QuadTree colliderQuadTree(4, worldSpaceRect); //probably can instantiate once and clear each cycle
 
         entityColliders = entityData.GetEntityColliders();
         
-        for (auto colliderPtr : entityColliders)
+        for (auto& colliderPtr : entityColliders)
         {
             colliderQuadTree.AddElement(colliderPtr);
         }
 
         colliderQuadTree.CheckCollisions();
 
-        for(auto colliderPtr : entityColliders)
+        for(auto& colliderPtr : entityColliders)
         {
             if (colliderPtr.expired())
             {
                 //why is this never reached??
-                std::cout << "colliderPtr expired" << '\n';
+                std::cout << "colliderPtr expired\n";
             }
             else
             {

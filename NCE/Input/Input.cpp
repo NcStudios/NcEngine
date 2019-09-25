@@ -39,6 +39,21 @@ namespace NCE::Input
         MouseY = GET_Y_LPARAM(lparam_);
     }
 
+    double GetXAxis() //eventually binds inputs to axis from config file (controller/WASD/arrows)
+    {
+        double axis = 0.0;
+        if (GetKey('D')) { axis += 1.0; }
+        if (GetKey('A')) { axis -= 1.0; }
+        return axis;
+    }
+
+    double GetYAxis() //eventually binds inputs to axis from config file (controller/WASD/arrows)
+    {
+        double axis = 0.0;
+        if (GetKey('W')) { axis -= 1.0; }
+        if (GetKey('S')) { axis += 1.0; }
+        return axis;
+    }
 
     bool GetKeyDown(VKCode keyCode_)
     {

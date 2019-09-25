@@ -27,7 +27,7 @@ namespace NCE::Components
             
             const NCE::Common::Vector4 GetRect() const;
 
-            void RegisterCollisionEvent(std::weak_ptr<NCE::Components::Collider> other_);
+            void RegisterCollisionEvent(std::weak_ptr<NCE::Components::Collider> &other_);
             void NewPhysicsCycle();
             
 

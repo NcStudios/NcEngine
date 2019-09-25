@@ -22,26 +22,26 @@ namespace NCE::Containers
         m_childQuad1 = std::make_unique<QuadTree>(m_maxDensity, subRect);
 
 
-        subRect.Set( m_area.GetX(),      //this.x = new.x
-                     m_area.GetY(),      //this.y = new.y
-                     m_area.GetZ() / 2,  //this.width  / 2 = new.width
-                     m_area.GetW() / 2); //this.height / 2 = new.height
+        subRect = NCE::Common::Vector4(m_area.GetX(),      //this.x = new.x
+                                       m_area.GetY(),      //this.y = new.y
+                                       m_area.GetZ() / 2,  //this.width  / 2 = new.width
+                                       m_area.GetW() / 2); //this.height / 2 = new.height
 
         m_childQuad2 = std::make_unique<QuadTree>(m_maxDensity, subRect);
 
 
-        subRect.Set( m_area.GetX(),                          //this.x = new.x
-                     m_area.GetY() + m_area.GetW() / 2, //this.y + this.height / 2 = new.y
-                     m_area.GetZ() / 2,                      //this.width  / 2 = new.width
-                     m_area.GetW() / 2);                     //this.height / 2 = new.height
+        subRect = NCE::Common::Vector4( m_area.GetX(),                     //this.x = new.x
+                                        m_area.GetY() + m_area.GetW() / 2, //this.y + this.height / 2 = new.y
+                                        m_area.GetZ() / 2,                 //this.width  / 2 = new.width
+                                        m_area.GetW() / 2);                //this.height / 2 = new.height
 
         m_childQuad3 = std::make_unique<QuadTree>(m_maxDensity, subRect);
 
 
-        subRect.Set( m_area.GetX() + m_area.GetZ() / 2, //this.x + this.width  / 2 = new.x
-                     m_area.GetY() + m_area.GetW() / 2, //this.y + this.height / 2 = new.y
-                     m_area.GetZ() / 2,                      //this.width  / 2 = new.width
-                     m_area.GetW() / 2);                     //this.height / 2 = new.height
+        subRect = NCE::Common::Vector4( m_area.GetX() + m_area.GetZ() / 2, //this.x + this.width  / 2 = new.x
+                                        m_area.GetY() + m_area.GetW() / 2, //this.y + this.height / 2 = new.y
+                                        m_area.GetZ() / 2,                 //this.width  / 2 = new.width
+                                        m_area.GetW() / 2);                //this.height / 2 = new.height
 
         m_childQuad4 = std::make_unique<QuadTree>(m_maxDensity, subRect);
     }
@@ -60,7 +60,7 @@ namespace NCE::Containers
         return true;
     }
 
-    void QuadTree::AddElement(std::weak_ptr<NCE::Components::Collider> newElement_)
+    void QuadTree::AddElement(std::weak_ptr<NCE::Components::Collider> &newElement_)
     {
         if (!AreIntersecting(m_area, newElement_.lock()->GetRect()))
         {
@@ -112,18 +112,37 @@ namespace NCE::Containers
             return;
         }
 
-        for (auto& collider : m_containedElements)
-        {
-            for (auto& other : m_containedElements)
-            {
-                if (collider.lock() == other.lock())
-                {
-                    continue;
-                }
+        // for (auto& collider : m_containedElements)
+        // {
+        //     for (auto& other : m_containedElements)
+        //     {
+        //         if (collider.lock() == other.lock())
+        //         {
+        //             continue;
+        //         }
 
-                if (AreIntersecting(collider.lock()->GetRect(), other.lock()->GetRect()))
+        //         if (AreIntersecting(collider.lock()->GetRect(), other.lock()->GetRect()))
+        //         {
+        //             collider.lock()->RegisterCollisionEvent(other);
+        //         }
+        //     }
+        // }
+
+        int elementCount = m_containedElements.size();
+        std::shared_ptr<NCE::Components::Collider> first;
+        std::shared_ptr<NCE::Components::Collider> second;
+
+        for(int i = 0; i < elementCount; ++i)
+        {
+            for(int j = i + 1; j < elementCount; ++j)
+            {
+                first = m_containedElements[i].lock();
+                second = m_containedElements[j].lock();
+
+                if(AreIntersecting(first->GetRect(), second->GetRect()))
                 {
-                    collider.lock()->RegisterCollisionEvent(other);
+                    first->RegisterCollisionEvent(m_containedElements[j]);
+                    second->RegisterCollisionEvent(m_containedElements[i]);
                 }
             }
         }

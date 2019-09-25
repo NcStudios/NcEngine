@@ -25,7 +25,7 @@ namespace NCE::Containers
 
         public:
             QuadTree(int maxDensity_, NCE::Common::Vector4 area_);
-            void AddElement(std::weak_ptr<NCE::Components::Collider> newElement_);
+            void AddElement(std::weak_ptr<NCE::Components::Collider> &newElement_);
             void CheckCollisions();
             void Clear();
     };

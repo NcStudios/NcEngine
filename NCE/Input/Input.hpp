@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 
+
+
 namespace NCE::Input
 {
     typedef uint32_t VKCode;
@@ -28,6 +30,9 @@ namespace NCE::Input
 
     void AddToQueue(VKCode vkCode_, LPARAM lparam_);
     void Flush();
+
+    double GetXAxis();
+    double GetYAxis();
 
     bool GetKeyDown(VKCode keyCode_); //true when key is first pressed
     bool GetKeyUp(VKCode keyCode_);   //true when key is released

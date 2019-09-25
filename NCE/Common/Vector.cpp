@@ -2,15 +2,17 @@
 
 namespace NCE::Common
 {
-    void Vector2::Set(double x_, double y_)
+    double Vector2::Magnitude() const { return sqrt((m_x * m_x) + (m_y * m_y)); }
+    double Vector2::SquareMagnitude() const { return ((m_x * m_x) + (m_y * m_y)); }
+
+    Vector2 Vector2::GetNormalized() const
     {
-        m_x = x_;
-        m_y = y_;
+        double mag = Magnitude();
+        return mag == 0 ? Zero() : Vector2(m_x / mag, m_y / mag);
     }
 
-    double Vector2::Magnitude() { return sqrt((m_x * m_x) + (m_y * m_y)); }
-    double Vector2::SquareMagnitude() { return ((m_x * m_x) + (m_y * m_y)); }
-    double Vector2::SquareMagnitude(const Vector2 &v_) { return ((v_.GetX() * v_.GetX()) + (v_.GetY() * v_.GetY())); }
+    Vector3 Vector2::ToVector3() const { return Vector3(m_x, m_y, 0); }
+    Vector4 Vector2::ToVector4() const { return Vector4(m_x, m_y, 0, 0); }
 
     void Vector2::Normalize()
     {
@@ -20,18 +22,18 @@ namespace NCE::Common
         m_y /= mag;
     }
 
-    Vector2 Vector2::GetNormalized()
+    void Vector2::TranslateBy(const Vector2& v_)
     {
-        double mag = Magnitude();
-        return mag == 0 ?  Zero() : Vector2(m_x / mag, m_y / mag);
+        m_x += v_.GetX();
+        m_y += v_.GetY();
     }
 
-    Vector2 operator +(const Vector2 & lVal_, const Vector2& rVal_)
+    Vector2 operator +(const Vector2 &lVal_, const Vector2 &rVal_)
     {
         return Vector2(lVal_.GetX() + rVal_.GetX(), lVal_.GetX() + rVal_.GetY());
     }
 
-    Vector2 operator -(const Vector2 & lVal_, const Vector2& rVal_)
+    Vector2 operator -(const Vector2 &lVal_, const Vector2 &rVal_)
     {
         return Vector2(lVal_.GetX() - rVal_.GetX(), lVal_.GetY() - rVal_.GetY());
     }
@@ -70,11 +72,12 @@ namespace NCE::Common
 
     /* Vector4 */
     
-    void Vector4::Set(double x_, double y_, double z_, double w_)
+
+    void Vector4::TranslateBy(const Vector4 &v_)
     {
-        m_x = x_;
-        m_y = y_;
-        m_z = z_;
-        m_w = w_;
+        m_x += v_.GetX();
+        m_y += v_.GetY();
+        m_z += v_.GetZ();
+        m_w += v_.GetW();
     }
 }
