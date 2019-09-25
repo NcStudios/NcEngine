@@ -13,16 +13,16 @@ using namespace NCE::Components;
 class Character : public Component
 {
     private:
-        std::weak_ptr<Transform> _transform;
+        std::weak_ptr<Transform> m_transform;
         float _moveSpeed = 20;
     public:
-        Character(EntityWeakPtr t_parent);
+        Character(EntityWeakPtr parent_);
 
         void OnInitialize() override;
         void OnFrameUpdate() override;
         void OnDestroy() override;
 
-        void OnCollisionEnter(EntityWeakPtr t_other) override;
+        void OnCollisionEnter(EntityWeakPtr other_) override;
 };
 
 

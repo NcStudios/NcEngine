@@ -11,7 +11,6 @@
 #include "../Components/Transform.hpp"
 #include "../Components/Collider.hpp"
 #include "../../Project/Components/Character.hpp"
-//#include "../../Project/Components/Character2.hpp"
 #include "../../Project/Components/ThingSpawner.hpp"
 
 namespace NCE::LevelManagement
@@ -21,11 +20,10 @@ namespace NCE::LevelManagement
     class LevelManager
     {
         private:
-            createEntityFunc _createEntity;
+            createEntityFunc CreateEntity;
 
         public:
-            LevelManager(createEntityFunc t_createEntityFunc);
-            
+            LevelManager(createEntityFunc createEntityFunc_);
             void CreateTestLevel();
     };
 }

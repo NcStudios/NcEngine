@@ -33,19 +33,19 @@ namespace NCE::Common
     {            
         private:
             //EntityPtr _parentEntity;
-            EntityWeakPtr _parentEntity;
+            EntityWeakPtr m_parentEntity;
             
         public:
             uint32_t TypeId;
 
-            Component(EntityWeakPtr t_parent) { _parentEntity = t_parent; }
+            Component(EntityWeakPtr parent_) { m_parentEntity = parent_; }
             //~Component() { _parentEntity.lock() = nullptr; }
 
             EntityWeakPtr GetEntity() 
             { 
                 //std::shared_ptr<NCE::Common::Entity> _p = _parentEntity.lock();
 
-                    return _parentEntity;
+                    return m_parentEntity;
 
             }
             
@@ -55,8 +55,8 @@ namespace NCE::Common
             virtual void OnDisable(){}
             virtual void OnFrameUpdate(){}
             virtual void OnFixedUpdate(){}
-            virtual void OnCollisionEnter(EntityWeakPtr t_other){}
-            virtual void OnCollisionStay(EntityWeakPtr t_other){}
+            virtual void OnCollisionEnter(EntityWeakPtr other_){}
+            virtual void OnCollisionStay(EntityWeakPtr other_){}
             //virtual void OnCollisionExit(EntityWeakPtr t_other){}   
             virtual void OnCollisionExit(){}
     };
@@ -65,28 +65,28 @@ namespace NCE::Common
     class Entity
     {
         private:
-            ComponentSharedPtrVector _components;
-            int _id;
+            ComponentSharedPtrVector m_components;
+            int m_id;
 
         public:
-            Entity(int t_id, CreateEntityFunc t_createFunc, DestroyEntityFunc t_destroyFunc);
+            Entity(int id_, CreateEntityFunc createFunc_, DestroyEntityFunc destroyFunc_);
             ~Entity();
 
             int GetID() const;
 
             template<class T>
-            void AddComponent(EntityWeakPtr t_parent);
+            void AddComponent(EntityWeakPtr parent_);
 
             template<class T>
-            std::weak_ptr<T> GetComponent(uint32_t t_componentId);
+            std::weak_ptr<T> GetComponent(uint32_t componentId_);
 
             void SendInitializeToComponents();
             void SendFrameUpdateToComponents();
             void SendFixedUpdateToComponents();
             void SendDestroyToComponents();
 
-            void SendCollisionEnterToComponents(EntityWeakPtr t_other);
-            void SendCollisionStayToComponents(EntityWeakPtr t_other);
+            void SendCollisionEnterToComponents(EntityWeakPtr other_);
+            void SendCollisionStayToComponents(EntityWeakPtr other_);
             //void SendCollisionExit(EntityWeakPtr t_other);
             void SendCollisionExitToComponents();
 

@@ -14,11 +14,11 @@
 class ThingSpawner : public NCE::Common::Component
 {
     private:
-        double _spawnRate = 0.005;
-        double _currentTime = 0.0;
+        double m_spawnRate = 0.005;
+        double m_currentTime = 0.0;
 
     public:
-        ThingSpawner(NCE::Common::EntityWeakPtr t_parent);
+        ThingSpawner(NCE::Common::EntityWeakPtr parent_);
 
         void OnInitialize()  override;
         void OnFrameUpdate() override;

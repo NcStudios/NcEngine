@@ -27,20 +27,20 @@ namespace NCE::Graphics
     class Renderer
     {
         private:
-            RenderBuffer _buffer;
-            Win32DisplayBufferFunc _copyBufferToScreen;
+            RenderBuffer m_buffer;
+            Win32DisplayBufferFunc CopyBufferToScreen;
 
-            void AllocateRenderBuffer(int t_width, int t_height);
+            void AllocateRenderBuffer(int width_, int height_);
 
             void RenderTileMap();
-            void RenderSprites(std::vector<NCE::Common::Rect> &t_spriteRects);
+            void RenderSprites(std::vector<NCE::Common::Rect> &spriteRects_);
 
-            int GetTileMapValueAtCoordinates(int t_x, int t_y, int t_tileWidth);
+            int GetTileMapValueAtCoordinates(int x_, int y_, int tileWidth_);
 
         public:
-            Renderer(Win32DisplayBufferFunc t_displayBuffer, int t_initialWidth, int t_initialHeight);
+            Renderer(Win32DisplayBufferFunc displayBuffer_, int initialWidth_, int initialHeight_);
 
-            void StartRenderCycle(std::vector<NCE::Common::Rect> &t_spriteRects);
+            void StartRenderCycle(std::vector<NCE::Common::Rect> &spriteRects_);
             void ForceRender();
             
 

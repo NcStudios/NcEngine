@@ -5,47 +5,46 @@ namespace NCE::Input
     std::vector<InputItem> downKeys, upKeys;
     uint32_t MouseX, MouseY;
 
-    void AddToQueue(VKCode t_vkCode, LPARAM t_lparam)
+    void AddToQueue(VKCode vkCode_, LPARAM lparam_)
     {
         //how often is this called unnecessarily?
 
-        bool WasDown = ((t_lparam & (1 << 30)) != 0);
-        bool IsDown  = ((t_lparam & (1 << 31)) == 0);
+        bool WasDown = ((lparam_ & (1 << 30)) != 0);
+        bool IsDown  = ((lparam_ & (1 << 31)) == 0);
         
         if (WasDown)
         {
             if (!IsDown)
             {
-                InputItem newItem(t_vkCode, t_lparam);
+                InputItem newItem(vkCode_, lparam_);
                 upKeys.push_back(newItem);
             }
         }
         else if (IsDown)
         {
-            InputItem newItem(t_vkCode, t_lparam);
+            InputItem newItem(vkCode_, lparam_);
             downKeys.push_back(newItem);
         }
     }
 
-    void FlushQueue()
+    void Flush()
     {
         downKeys.clear();
         upKeys.clear();
     }
 
-    void UpdateMousePosition(LPARAM t_lparam)
+    void UpdateMousePosition(LPARAM lparam_)
     {
-        MouseX = GET_X_LPARAM(t_lparam); // extracted values can be negative so HI/LO WORD doesn't work
-        MouseY = GET_Y_LPARAM(t_lparam);
+        MouseX = GET_X_LPARAM(lparam_); // extracted values can be negative so HI/LO WORD doesn't work
+        MouseY = GET_Y_LPARAM(lparam_);
     }
 
 
-
-    bool GetKeyDown(VKCode t_keyCode)
+    bool GetKeyDown(VKCode keyCode_)
     {
         for(auto item : downKeys)
         {
-            if (item.keyCode == t_keyCode)
+            if (item.keyCode == keyCode_)
             {
                 return true;
             }
@@ -54,11 +53,11 @@ namespace NCE::Input
         return false;
     }
 
-    bool GetKeyUp(VKCode t_keyCode)
+    bool GetKeyUp(VKCode keyCode_)
     {
         for(auto item : upKeys)
         {
-            if (item.keyCode == t_keyCode)
+            if (item.keyCode == keyCode_)
             {
                 return true;
             }
@@ -67,9 +66,9 @@ namespace NCE::Input
         return false;
     }
 
-    bool GetKey(VKCode t_keyCode)
+    bool GetKey(VKCode keyCode_)
     {
-        //if sig bit is 1, key is down
-        return (GetAsyncKeyState(t_keyCode) & (1 << 15)) == 0 ? false : true;
+        //if most significant bit is 1, key is down
+        return (GetAsyncKeyState(keyCode_) & (1 << 15)) == 0 ? false : true;
     }
 }

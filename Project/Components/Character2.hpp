@@ -10,17 +10,17 @@ using namespace NCE;
 class Character2 : public Common::Component
 {
     private:
-        std::weak_ptr<Components::Transform> _transform;
-        float _moveSpeed = 5;
+        std::weak_ptr<Components::Transform> m_transform;
+        float m_moveSpeed = 5;
     public:
-        Character2(Common::EntityWeakPtr t_parent);
+        Character2(Common::EntityWeakPtr parent_);
 
         void OnInitialize() override;
         void OnFrameUpdate() override;
         void OnDestroy() override;
 
-        void OnCollisionEnter(Common::EntityWeakPtr t_other) override;
-        void OnCollisionStay(Common::EntityWeakPtr t_other) override;
+        void OnCollisionEnter(Common::EntityWeakPtr other_) override;
+        void OnCollisionStay(Common::EntityWeakPtr other_) override;
 };
  
 

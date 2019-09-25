@@ -27,12 +27,12 @@ WindowDimensions windowDimensions;
 WindowData windowData;
 
 
-WindowDimensions GetWindowDimensions(HWND t_hwnd)
+WindowDimensions GetWindowDimensions(HWND hwnd_)
 {
     RECT windowRect;
     WindowDimensions dimensions;
 
-    if (GetWindowRect(t_hwnd, &windowRect))
+    if (GetWindowRect(hwnd_, &windowRect))
     {
         dimensions.width  = windowRect.right - windowRect.left;
         dimensions.height = windowRect.bottom - windowRect.top;
@@ -45,26 +45,26 @@ WindowDimensions GetWindowDimensions(HWND t_hwnd)
 }
 
 
-void OnWindowResize(HWND hwnd)
+void OnWindowResize(HWND hwnd_)
 {
-    windowDimensions = GetWindowDimensions(hwnd);
+    windowDimensions = GetWindowDimensions(hwnd_);
 
     PatBlt(windowData.DeviceContext,
            0, 0, windowDimensions.width, windowDimensions.height,
            BLACKNESS);
 }
 
-void CopyBufferToScreen(void *t_buffer, BITMAPINFO &t_bufferInfo, int t_srcWidth, int t_srcHeight)
+void CopyBufferToScreen(void *buffer_, BITMAPINFO &bufferInfo_, int srcWidth_, int srcHeight_)
 {
     HDC deviceContext = GetDC(windowData.Window);
-    int xOffset = (windowDimensions.width - t_srcWidth) / 2;
-    int yOffset = (windowDimensions.height - t_srcHeight) / 2;
+    int xOffset = (windowDimensions.width - srcWidth_) / 2;
+    int yOffset = (windowDimensions.height - srcHeight_) / 2;
 
-    StretchDIBits(deviceContext,                             //destination (screen)
-                  xOffset, yOffset, t_srcWidth, t_srcHeight, //destination x, y, w, h
-                  0, 0, t_srcWidth, t_srcHeight,             //source x, y, w, h
-                  t_buffer, &t_bufferInfo,                   //source buffer, buffer formatting   
-                  DIB_RGB_COLORS, SRCCOPY);                  //RGB data flag, copy bits flag                            
+    StretchDIBits(deviceContext,                           //destination (screen)
+                  xOffset, yOffset, srcWidth_, srcHeight_, //destination x, y, w, h
+                  0, 0, srcWidth_, srcHeight_,             //source x, y, w, h
+                  buffer_, &bufferInfo_,                   //source buffer, buffer formatting   
+                  DIB_RGB_COLORS, SRCCOPY);                //RGB data flag, copy bits flag                            
 }
 
 void Win32ProcessSystemMessages()
@@ -101,17 +101,16 @@ void Win32ProcessSystemMessages()
     }
 }
 
-
-LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND window_, UINT message_, WPARAM wParam_, LPARAM lParam_)
 {
-	switch(message)
+	switch(message_)
 	{
         case WM_CREATE:
             
             break;
         case WM_SIZE:
         {
-            OnWindowResize(window);
+            OnWindowResize(window_);
         }
         break;
 
@@ -129,28 +128,25 @@ LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam
         {
             PAINTSTRUCT paint;
             //HDC deviceContext = BeginPaint(window, &paint);
-            BeginPaint(window, &paint);
+            BeginPaint(window_, &paint);
             //CopyBufferToScreen(deviceContext, &renderBuffer);
             NCE::Engine::ForceRender();
-            EndPaint(window, &paint);
+            EndPaint(window_, &paint);
         }
         break;
 
         default:
-            return DefWindowProc(window, message, wParam, lParam);
+            return DefWindowProc(window_, message_, wParam_, lParam_);
 	}
 	return 0;
 }
 
-
-
-
-int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLine, int showCommand )
+int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR commandLine_, int showCommand_ )
 {
     windowData.WindowClass = {}; 
     windowData.WindowClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;  //OWNDC allows device context to be retreived once rather than get/dispose each frame
 	windowData.WindowClass.lpfnWndProc = WndProc;                   //CALLBACK that windows will call for handling messages
-    windowData.WindowClass.hInstance = instance;                    //for windows to callback to the function it must also know about our process instance
+    windowData.WindowClass.hInstance = instance_;                    //for windows to callback to the function it must also know about our process instance
     windowData.WindowClass.lpszClassName = TEXT("NCEngine - Test Project");
 
     if (!RegisterClass(&windowData.WindowClass)){
@@ -163,7 +159,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
                                         "NCEngine - Test Project",
                                         WS_OVERLAPPEDWINDOW|WS_VISIBLE,
                                         0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2,
-                                        0, 0, instance, 0);
+                                        0, 0, instance_, 0);
     if (!windowData.Window){
         OutputDebugString(TEXT("Window handle not found\n"));
         return 0;

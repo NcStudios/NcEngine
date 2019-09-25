@@ -1,13 +1,13 @@
 #include "Character.hpp"
 
-Character::Character(EntityWeakPtr t_parent) : Component(t_parent)
+Character::Character(EntityWeakPtr parent_) : Component(parent_)
 {   
     TypeId = 10;
 }
 
 void Character::OnInitialize()
 {
-    _transform = GetEntity().lock()->GetComponent<Transform>(ID_TRANSFORM);
+    m_transform = GetEntity().lock()->GetComponent<Transform>(ID_TRANSFORM);
 }
 
 void Character::OnFrameUpdate()
@@ -24,13 +24,13 @@ void Character::OnFrameUpdate()
     if (Input::GetKey('D'))
         x += _moveSpeed;
 
-    if (_transform.lock() == nullptr)
+    if (m_transform.lock() == nullptr)
     {
         std::cout << "** in: Character::UpdatePosition() _position is null" << '\n';
         return;
     }
 
-    _transform.lock()->Translate(x, y);
+    m_transform.lock()->Translate(x, y);
 }
 
 

@@ -18,46 +18,46 @@ int TileMap[TILE_MAP_HEIGHT][TILE_MAP_WIDTH] =
 
 namespace NCE::Graphics
 {
-    Renderer::Renderer(Win32DisplayBufferFunc t_displayBuffer, int t_initialWidth, int t_initialHeight) : _copyBufferToScreen(t_displayBuffer)
+    Renderer::Renderer(Win32DisplayBufferFunc displayBuffer_, int initialWidth_, int initialHeight_) : CopyBufferToScreen(displayBuffer_)
     {
         std::cout << "start Renderer()" << '\n';
-        AllocateRenderBuffer(t_initialWidth, t_initialHeight);
+        AllocateRenderBuffer(initialWidth_, initialHeight_);
         std::cout << "end Renderer()" << '\n';
     }
 
-    void Renderer::AllocateRenderBuffer(int t_width, int t_height)
+    void Renderer::AllocateRenderBuffer(int width_, int height_)
     {
-        if (_buffer.memory){
-            VirtualFree(_buffer.memory, 0, MEM_RELEASE);
+        if (m_buffer.memory){
+            VirtualFree(m_buffer.memory, 0, MEM_RELEASE);
         }
 
-        _buffer.width  = t_width;
-        _buffer.height = t_height;
+        m_buffer.width  = width_;
+        m_buffer.height = height_;
         
-        _buffer.info.bmiHeader.biSize = sizeof(_buffer.info.bmiHeader);
-        _buffer.info.bmiHeader.biWidth = t_width;
-        _buffer.info.bmiHeader.biHeight = -t_height;
-        _buffer.info.bmiHeader.biPlanes = 1;
-        _buffer.info.bmiHeader.biBitCount = 32;
-        _buffer.info.bmiHeader.biCompression = BI_RGB;
+        m_buffer.info.bmiHeader.biSize = sizeof(m_buffer.info.bmiHeader);
+        m_buffer.info.bmiHeader.biWidth = width_;
+        m_buffer.info.bmiHeader.biHeight = -height_;
+        m_buffer.info.bmiHeader.biPlanes = 1;
+        m_buffer.info.bmiHeader.biBitCount = 32;
+        m_buffer.info.bmiHeader.biCompression = BI_RGB;
 
         int const bytesPerPixel = 4;
-        int bitmapMemorySize = (t_width * t_height) * bytesPerPixel;
-        _buffer.memory = VirtualAlloc(0, bitmapMemorySize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-        _buffer.bytesPerRow = t_width*bytesPerPixel; 
+        int bitmapMemorySize = (width_ * height_) * bytesPerPixel;
+        m_buffer.memory = VirtualAlloc(0, bitmapMemorySize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+        m_buffer.bytesPerRow = width_*bytesPerPixel; 
     }
 
-    void Renderer::StartRenderCycle(std::vector<NCE::Common::Rect> &t_spriteRects)
+    void Renderer::StartRenderCycle(std::vector<NCE::Common::Rect> &spriteRects_)
     {
         RenderTileMap();
-        RenderSprites(t_spriteRects);
-        _copyBufferToScreen(_buffer.memory, _buffer.info, _buffer.width, _buffer.height);
+        RenderSprites(spriteRects_);
+        CopyBufferToScreen(m_buffer.memory, m_buffer.info, m_buffer.width, m_buffer.height);
     }
 
     void Renderer::ForceRender()
     {
         //blit to screen
-        _copyBufferToScreen(_buffer.memory, _buffer.info, _buffer.width, _buffer.height);
+        CopyBufferToScreen(m_buffer.memory, m_buffer.info, m_buffer.width, m_buffer.height);
     }
 
     void Renderer::RenderTileMap()
@@ -68,13 +68,13 @@ namespace NCE::Graphics
         uint32_t colorOne = 11111111;
         uint32_t colorTwo = 10101010;
 
-        uint8_t *row = (uint8_t *)_buffer.memory;
+        uint8_t *row = (uint8_t *)m_buffer.memory;
 
-        for (int y = 0; y < _buffer.height; y++)
+        for (int y = 0; y < m_buffer.height; y++)
         {
             uint32_t *pixel = (uint32_t *)row;
 
-            for (int x = 0; x < _buffer.width; x++)
+            for (int x = 0; x < m_buffer.width; x++)
             {
                 tileValue = GetTileMapValueAtCoordinates(x, y, tileWidth);
 
@@ -87,17 +87,17 @@ namespace NCE::Graphics
                     *pixel++ = colorTwo;
                 }
             }
-            row += _buffer.bytesPerRow;
+            row += m_buffer.bytesPerRow;
         }
     }
 
-    void Renderer::RenderSprites(std::vector<NCE::Common::Rect> &t_positions)
+    void Renderer::RenderSprites(std::vector<NCE::Common::Rect> &positions_)
     {
-        uint32_t characterColor = 01010101;
+        uint32_t characterColor = 01010101; //temp value until sprite loading implemented
         int minX = 0;
         int minY = 0;
-        int maxX = (_buffer.width)  - 1;
-        int maxY = (_buffer.height) - 1;
+        int maxX = (m_buffer.width)  - 1;
+        int maxY = (m_buffer.height) - 1;
 
         int left, top, right, bottom,
             visibleLeft, visibleRight, visibleTop, visibleBottom,
@@ -106,7 +106,7 @@ namespace NCE::Graphics
         uint8_t  *row;
         uint32_t *pixel;
 
-        for (auto& position : t_positions)
+        for (auto& position : positions_)
         {
             left   = position.x;
             top    = position.y;
@@ -120,28 +120,28 @@ namespace NCE::Graphics
             visibleWidth  = visibleRight  - visibleLeft;
             visibleHeight = visibleBottom - visibleTop;
 
-            row = (uint8_t*)_buffer.memory;
-            row += visibleTop * (_buffer.bytesPerRow);
+            row = (uint8_t*)m_buffer.memory;
+            row += visibleTop * (m_buffer.bytesPerRow);
 
-            for (int col = 0; col < visibleHeight; col++)
+            for (int yPixelPos = 0; yPixelPos < visibleHeight; yPixelPos++)
             {
                 pixel = (uint32_t*)row;
                 pixel += visibleLeft;
 
-                for (int row = 0; row < visibleWidth; row++)
+                for (int xPixelPos = 0; xPixelPos < visibleWidth; xPixelPos++)
                 {
                     *pixel++ = characterColor;
                 }
 
-                row += _buffer.bytesPerRow;
+                row += m_buffer.bytesPerRow;
             }
         } //end rect loop
     }
 
-    int Renderer::GetTileMapValueAtCoordinates(int x, int y, int tileWidth)
+    int Renderer::GetTileMapValueAtCoordinates(int x_, int y_, int tileWidth_)
     {
-        int tileX = x / tileWidth;
-        int tileY = y / tileWidth;
+        int tileX = x_ / tileWidth_;
+        int tileY = y_ / tileWidth_;
         return TileMap[tileY][tileX];
     }
 }

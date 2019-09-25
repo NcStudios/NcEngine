@@ -1,7 +1,7 @@
 #include "ThingSpawner.hpp"
 
 
-ThingSpawner::ThingSpawner(NCE::Common::EntityWeakPtr t_parent) : NCE::Common::Component(t_parent)
+ThingSpawner::ThingSpawner(NCE::Common::EntityWeakPtr parent_) : NCE::Common::Component(parent_)
 {
     TypeId = 12;
 }
@@ -14,11 +14,11 @@ void ThingSpawner::OnInitialize()
 
 void ThingSpawner::OnFrameUpdate()
 {
-    _currentTime += NCE::Time::GetDeltaTime() / 1000000.0;
+    m_currentTime += NCE::Time::GetDeltaTime() / 1000000.0;
 
-    if (_currentTime > _spawnRate)
+    if (m_currentTime > m_spawnRate)
     {
-        _currentTime = 0;
+        m_currentTime = 0;
         SpawnThing();
     }
 }

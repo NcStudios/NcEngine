@@ -11,9 +11,9 @@ namespace NCE::Components
     class Transform : public NCE::Common::Component
     {
         private:
-            NCE::Common::Vector4 _rect;
+            NCE::Common::Vector4 m_rect;
         public:            
-            Transform(Common::EntityWeakPtr t_parent);
+            Transform(Common::EntityWeakPtr parent_);
 
             int GetX() const;
             int GetY() const;
@@ -23,11 +23,11 @@ namespace NCE::Components
             const NCE::Common::Vector4 GetVector4() const;
             const NCE::Common::Rect GetRect() const;
 
-            void Set(int t_x, int t_y, int t_w, int t_h);
-            void SetPosition(int t_x, int t_y);
-            void SetDimensions(int t_w, int t_h);
+            void Set(int x_, int y_, int w_, int h_);
+            void SetPosition(int x_, int y_);
+            void SetDimensions(int w_, int h_);
 
-            void Translate(int t_x, int t_y);
+            void Translate(int x_, int y_);
             
     };
 }

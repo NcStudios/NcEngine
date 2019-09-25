@@ -6,7 +6,7 @@
 namespace NCE::Common
 {
     template<class T>
-    void Entity::AddComponent(EntityWeakPtr t_parent)
+    void Entity::AddComponent(EntityWeakPtr parent_)
     {
         //make sure only one component of a type is attached?
 
@@ -17,19 +17,19 @@ namespace NCE::Common
         // auto castComponent = std::dynamic_pointer_cast<Component>(newComponent);
         // _components.push_back(castComponent);
 
-        _components.push_back( std::dynamic_pointer_cast<Component>(std::make_shared<T>(t_parent)) );
+        m_components.push_back( std::dynamic_pointer_cast<Component>(std::make_shared<T>(parent_)) );
     }
 
 
     template<class T>
-    std::weak_ptr<T> Entity::GetComponent(uint32_t t_componentId)
+    std::weak_ptr<T> Entity::GetComponent(uint32_t componentId_)
     {
         static_assert(std::is_base_of<Component, T>::value, "T must inherit from Component.");
 
 
-        for(auto& current : _components)
+        for(auto& current : m_components)
         {
-            if (t_componentId == current->TypeId)
+            if (componentId_ == current->TypeId)
             {
                 //static cast?
                 

@@ -1,12 +1,10 @@
 #include "NCEMain.hpp"
 
-
-
 namespace NCE::Engine
 {
     ColliderWeakPtrVector EntityData::GetEntityColliders()
     {
-        _entityColliders.clear();
+        m_entityColliders.clear();
         std::weak_ptr<NCE::Components::Collider> pCollider;
 
         for (auto pair : active)
@@ -17,29 +15,29 @@ namespace NCE::Engine
                 continue;
             }
 
-            _entityColliders.push_back(pCollider);
+            m_entityColliders.push_back(pCollider);
         }
 
-        return _entityColliders;
+        return m_entityColliders;
     }
 
     std::vector<NCE::Common::Rect> EntityData::GetEntitySprites()
     {
-        _spriteRects.clear();
-        std::weak_ptr<NCE::Components::Transform> pTransform;
+        m_spriteRects.clear();
+        std::weak_ptr<NCE::Components::Transform> transform;
 
         for (auto pair : active)
         {
-            pTransform = pair.second->GetComponent<NCE::Components::Transform>(1);
-            if (pTransform.lock() == nullptr)
+            transform = pair.second->GetComponent<NCE::Components::Transform>(1);
+            if (transform.lock() == nullptr)
             {
                 continue;
             }
 
-            _spriteRects.push_back(pTransform.lock()->GetRect());
+            m_spriteRects.push_back(transform.lock()->GetRect());
         }
 
-        return _spriteRects;
+        return m_spriteRects;
     }
 
     const int FPS = 60;
@@ -69,22 +67,20 @@ namespace NCE::Engine
     NCE::Common::Vector4 worldSpaceRect(0, 0, 0, 0);
     
 
-    void InitializeEngine(int t_screenWidth, int t_screenHeight, processSystemMessagesFunc t_processSystemMessages)
+    void InitializeEngine(int screenWidth_, int screenHeight_, processSystemMessagesFunc processSystemMessages_)
     {
-        screenDimensions.Set(t_screenWidth, t_screenHeight);
-        worldSpaceRect.Set(0, 0, t_screenWidth, t_screenHeight);
+        screenDimensions.Set(screenWidth_, screenHeight_);
+        worldSpaceRect.Set(0, 0, screenWidth_, screenHeight_);
 
-        platformProcedures.Win32ProcessSystemMessages = t_processSystemMessages;
+        platformProcedures.Win32ProcessSystemMessages = processSystemMessages_;
         //platformProcedures.render = t_render;
 
         levelManager.CreateTestLevel();
     }
 
-    void InitializeRenderer(NCE::Graphics::Win32DisplayBufferFunc t_displayBuffer)
+    void InitializeRenderer(NCE::Graphics::Win32DisplayBufferFunc displayBuffer_)
     {
-        std::cout << "start InitializeRenderer()" << '\n';
-        engineSystems.renderer = std::make_unique<NCE::Graphics::Renderer>(t_displayBuffer, screenDimensions.GetX(), screenDimensions.GetY());
-        std::cout << "end InitializeRenderer()" << '\n';
+        engineSystems.renderer = std::make_unique<NCE::Graphics::Renderer>(displayBuffer_, screenDimensions.GetX(), screenDimensions.GetY());
     }
 
     void ForceRender()
@@ -95,19 +91,6 @@ namespace NCE::Engine
 
     void FrameUpdate()
     {
-        if(Input::GetKeyDown('T'))
-        {
-            std::cout << "KeyDown" << '\n';
-        }
-        if (Input::GetKey('T'))
-        {
-            std::cout << "GetKey" << '\n';
-        }
-        if(Input::GetKeyUp('T'))
-        {
-            std::cout << "KeyUp" << '\n' << '\n';
-        }
-
         //Frame Updates for GameObject/Component instances
         SendInitializeToEntities();
         SendFrameUpdateToEntities();
@@ -119,25 +102,12 @@ namespace NCE::Engine
         entitySprites.clear();
 
         //Cleanup
-        NCE::Input::FlushQueue();
+        NCE::Input::Flush();
         microSecondsSinceLastFrame = 0;
-
-        //std::cout << "-End Frame-" << '\n';
     }
 
     void FixedUpdate()
-    {
-        //std::cout << '\n' << "-Start Fixed-" << '\n';
-        // if (microSecondsSinceLastFixed / 1000000.0 > 0.051)
-        // {
-        //     std::cout << microSecondsSinceLastFixed / 1000000.0 << '\n';
-        // }
-        
-
-        
-        
-
-        
+    {        
         NCE::Containers::QuadTree colliderQuadTree(4, worldSpaceRect);
 
         entityColliders = entityData.GetEntityColliders();
@@ -149,8 +119,6 @@ namespace NCE::Engine
 
         colliderQuadTree.CheckCollisions();
 
-        //fix somehow?
-        //entityColliders = entityData.GetEntityColliders();
         for(auto colliderPtr : entityColliders)
         {
             if (colliderPtr.expired())
@@ -166,8 +134,8 @@ namespace NCE::Engine
 
         SendFixedUpdateToEntities();
 
-        colliderQuadTree.Clear();
-        entityColliders.clear();
+        //colliderQuadTree.Clear();
+        //entityColliders.clear();
         microSecondsSinceLastFixed = 0;
     }
 
@@ -250,25 +218,25 @@ namespace NCE::Engine
         return newEntity;
     }
 
-    void RegisterEntity(Common::EntitySharedPtr t_entity)
+    void RegisterEntity(Common::EntitySharedPtr entity_)
     {
-        if (t_entity == nullptr)
+        if (entity_ == nullptr)
         {
             std::cout << "NCEMain.RegisterEntity() - t_entity is NULL" << '\n';
         }
         
-        entityData.awaitingInitialize.insert({t_entity->GetID(), t_entity});
+        entityData.awaitingInitialize.insert({entity_->GetID(), entity_});
     }
 
-    void DestroyEntity(int t_entityID)
+    void DestroyEntity(int entityID_)
     {
-        int found = entityData.active.count(t_entityID);
+        int found = entityData.active.count(entityID_);
 
         if (found)
         {
-            auto entity = entityData.active.at(t_entityID);
-            entityData.awaitingDestroy.insert( {t_entityID, entity} );
-            entityData.active.erase(t_entityID);
+            auto entity = entityData.active.at(entityID_);
+            entityData.awaitingDestroy.insert( {entityID_, entity} );
+            entityData.active.erase(entityID_);
         }
     }
 

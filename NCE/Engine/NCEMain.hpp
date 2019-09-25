@@ -47,8 +47,8 @@ namespace NCE::Engine
             std::vector<NCE::Common::Rect> GetEntitySprites();
 
             private:
-                ColliderWeakPtrVector _entityColliders;
-                std::vector<NCE::Common::Rect> _spriteRects;
+                ColliderWeakPtrVector m_entityColliders;
+                std::vector<NCE::Common::Rect> m_spriteRects;
         };
 
         //Get rid of this
@@ -57,8 +57,8 @@ namespace NCE::Engine
             processSystemMessagesFunc Win32ProcessSystemMessages;
         };
 
-        void InitializeEngine(int t_screenWidth, int t_screenHeight, processSystemMessagesFunc t_processSystemMessages);
-        void InitializeRenderer(NCE::Graphics::Win32DisplayBufferFunc t_displayBuffer);
+        void InitializeEngine(int screenWidth_, int screenHeight_, processSystemMessagesFunc processSystemMessages_);
+        void InitializeRenderer(NCE::Graphics::Win32DisplayBufferFunc displayBuffer_);
 
         void ForceRender();
 
@@ -74,8 +74,8 @@ namespace NCE::Engine
         void SendDestroyToEntities();
 
         Common::EntityWeakPtr CreateEntity();
-        void RegisterEntity(Common::EntitySharedPtr t_entity);
-        void DestroyEntity(int t_entityID);
+        void RegisterEntity(Common::EntitySharedPtr entity_);
+        void DestroyEntity(int entityID_);
 }
 
 
