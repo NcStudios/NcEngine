@@ -1,28 +1,37 @@
-#include "Character2.hpp"
+#include "Character2.h"
 
-Character2::Character2(Common::EntityWeakPtr parent_) : Common::Component(parent_)
-{
-    TypeId = 10;
-}
+Character2::Character2(ComponentHandle handle, EntityHandle parentHandle) : Component(handle, parentHandle){}
 
 void Character2::OnInitialize()
 {
-    m_transform = GetEntity().lock()->GetComponent<Components::Transform>(Components::ComponentID::ID_TRANSFORM);
 }
 
-void Character2::OnFrameUpdate()
+void Character2::FrameUpdate()
 {
     
 }
 
-void Character2::OnCollisionEnter(Common::EntityWeakPtr other_)
+void Character2::OnCollisionEnter(const EntityHandle other)
 {
-    GetEntity().lock()->DestroyEntity(GetEntity().lock()->GetID());   
+    Entity* otherPtr = NCE::GetEntityPtr(other);
+    if (otherPtr == nullptr) 
+        return;
+
+    if (otherPtr->HasComponent<Character>())
+    {
+        std::cout << "has character component" << std::endl;
+        NCE::DestroyEntity(GetEntityHandle());
+    }
+    else
+    {
+        //std::cout << "does not have character component" << std::endl;
+    }
+    
 }
 
-void Character2::OnCollisionStay(Common::EntityWeakPtr other_)
+void Character2::OnCollisionStay()
 {
-    GetEntity().lock()->DestroyEntity(GetEntity().lock()->GetID()); 
+
 }
 
 void Character2::OnDestroy()

@@ -1,0 +1,8 @@
+#standard c++ stuff
+*.obj
+*.o
+*.pch
+*.dll
+*.a
+*.exe
+*.out

@@ -1,10 +1,9 @@
-#include <windows.h>
-#include <stdint.h>
-#include <memory>
-#include <iostream>
-
-#include "../NCE/Engine/NCEMain.hpp"
-#include "../NCE/Input/Input.hpp"
+#include "Include/External.h"
+#include "Include/Win32Process.h"
+#include "Include/ProjectConfig.h"
+#include "Include/NCE.h"
+#include "Include/Time.h"
+#include "Include/Input.h"
 
 struct WindowDimensions
 {
@@ -19,13 +18,64 @@ struct WindowData
     HDC DeviceContext;
 };
 
+
+WindowDimensions GetWindowDimensions(HWND hwnd_);
+void OnWindowResize(HWND hwnd_);
+void CopyBufferToScreen(void *buffer_, BITMAPINFO &bufferInfo_, int srcWidth_, int srcHeight_);
+void Win32ProcessSystemMessages();
+LRESULT CALLBACK WndProc(HWND window_, UINT message_, WPARAM wParam_, LPARAM lParam_);
+
+
 //Temp - should be read at start up
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 576;
+const int FPS = 60;
+const double FRAME_UPDATE_INTERVAL = 1.0 / FPS;
+const double FIXED_UPDATE_INTERVAL = 0.02;
 
+ProjectConfig projectConfig {SCREEN_WIDTH, SCREEN_HEIGHT, FPS, FRAME_UPDATE_INTERVAL, FIXED_UPDATE_INTERVAL};
 WindowDimensions windowDimensions;
 WindowData windowData;
+Engine* enginePtr = nullptr;
 
+
+int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR commandLine_, int showCommand_ )
+{
+    windowData.WindowClass = {}; 
+    windowData.WindowClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;  //OWNDC allows device context to be retreived once rather than get/dispose each frame
+	windowData.WindowClass.lpfnWndProc = WndProc;                   //CALLBACK that windows will call for handling messages
+    windowData.WindowClass.hInstance = instance_;                    //for windows to callback to the function it must also know about our process instance
+    windowData.WindowClass.lpszClassName = TEXT("NCEngine - Test Project");
+
+    if (!RegisterClass(&windowData.WindowClass))
+    {
+        std::cout << "WNDCLASS not registered\n";
+        return 0;
+    }
+
+    windowData.Window = CreateWindowExA(0,
+                                        (LPCSTR)windowData.WindowClass.lpszClassName,
+                                        "NCEngine - Test Project",
+                                        WS_OVERLAPPEDWINDOW|WS_VISIBLE,
+                                        0, 0, projectConfig.ScreenWidth * 2, projectConfig.ScreenHeight * 2,
+                                        0, 0, instance_, 0);
+    if (!windowData.Window){
+        std::cout << "Window handle not found\n";
+        return 0;
+    }
+
+    windowData.DeviceContext = GetDC(windowData.Window);
+    windowDimensions = GetWindowDimensions(windowData.Window);
+
+    Win32Process win32Process;
+    win32Process.CopyBufferToScreen = CopyBufferToScreen;
+    win32Process.ProcessSystemQueue = Win32ProcessSystemMessages;
+
+    enginePtr = new Engine(win32Process, projectConfig);
+    enginePtr->MainLoop();
+
+	return 0;
+}
 
 WindowDimensions GetWindowDimensions(HWND hwnd_)
 {
@@ -75,13 +125,13 @@ void Win32ProcessSystemMessages()
         {
             case WM_QUIT:
             {
-                NCE::Engine::Exit();
+                enginePtr->Exit();
             } 
             break;
 
             case WM_MOUSEMOVE:
             {
-                NCE::Input::UpdateMousePosition(message.lParam);
+                Input::UpdateMousePosition(message.lParam);
             }
             break;
 
@@ -90,7 +140,7 @@ void Win32ProcessSystemMessages()
             case WM_KEYDOWN:
             case WM_KEYUP:
             {
-                NCE::Input::AddToQueue(message.wParam, message.lParam);
+                Input::AddToQueue(message.wParam, message.lParam);
             }
             break;
         }
@@ -114,20 +164,20 @@ LRESULT CALLBACK WndProc(HWND window_, UINT message_, WPARAM wParam_, LPARAM lPa
         break;
 
         case WM_CLOSE:
-            NCE::Engine::Exit();
+            enginePtr->Exit();
             break;
         case WM_ACTIVATEAPP:
 
             break;
         case WM_DESTROY:
-            NCE::Engine::Exit();
+            enginePtr->Exit();
             break;
 
         case WM_PAINT:
         {
             PAINTSTRUCT paint;
             BeginPaint(window_, &paint);
-            NCE::Engine::ForceRender();
+            //NCE::Engine::ForceRender();
             EndPaint(window_, &paint);
         }
         break;
@@ -135,41 +185,6 @@ LRESULT CALLBACK WndProc(HWND window_, UINT message_, WPARAM wParam_, LPARAM lPa
         default:
             return DefWindowProc(window_, message_, wParam_, lParam_);
 	}
-	return 0;
-}
-
-int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR commandLine_, int showCommand_ )
-{
-    windowData.WindowClass = {}; 
-    windowData.WindowClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;  //OWNDC allows device context to be retreived once rather than get/dispose each frame
-	windowData.WindowClass.lpfnWndProc = WndProc;                   //CALLBACK that windows will call for handling messages
-    windowData.WindowClass.hInstance = instance_;                    //for windows to callback to the function it must also know about our process instance
-    windowData.WindowClass.lpszClassName = TEXT("NCEngine - Test Project");
-
-    if (!RegisterClass(&windowData.WindowClass))
-    {
-        std::cout << "WNDCLASS not registered\n";
-        return 0;
-    }
-
-    windowData.Window = CreateWindowExA(0,
-                                        (LPCSTR)windowData.WindowClass.lpszClassName,
-                                        "NCEngine - Test Project",
-                                        WS_OVERLAPPEDWINDOW|WS_VISIBLE,
-                                        0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2,
-                                        0, 0, instance_, 0);
-    if (!windowData.Window){
-        std::cout << "Window handle not found\n";
-        return 0;
-    }
-
-    windowData.DeviceContext = GetDC(windowData.Window);
-    windowDimensions = GetWindowDimensions(windowData.Window);
-
-    NCE::Engine::InitializeEngine(SCREEN_WIDTH, SCREEN_HEIGHT, Win32ProcessSystemMessages);
-    NCE::Engine::InitializeRenderer(CopyBufferToScreen);
-    NCE::Engine::NCEMain();
-
 	return 0;
 }
 

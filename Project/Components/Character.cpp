@@ -1,24 +1,25 @@
-#include "Character.hpp"
+#include "Character.h"
 
-Character::Character(EntityWeakPtr parent_) : Component(parent_)
-{   
-    TypeId = 10;
+Character::Character(ComponentHandle handle, EntityHandle parentHandle) : Component(handle, parentHandle)
+{
+    std::cout << "creating character\n";
 }
 
 void Character::OnInitialize()
 {
-    m_transform = GetEntity().lock()->GetComponent<Transform>(ID_TRANSFORM);
 }
 
-void Character::OnFrameUpdate()
+void Character::FrameUpdate()
 {
-    auto t = m_transform.lock();
-    if (t)
+    Entity* entityPtr = NCE::GetEntityPtr(GetEntityHandle());
+    Transform* transform = entityPtr->GetTransform();
+
+    if (transform == nullptr)
     {
-        Vector2 axis(Input::GetXAxis(), Input::GetYAxis());
-        axis = axis.GetNormalized() * _moveSpeed; 
-        t->Translate((axis));
-    }  
+        std::cout << "transform ptr null\n";
+        return;
+    }
+    transform->Translate(Vector2(Input::GetXAxis(), Input::GetYAxis()).GetNormalized() * m_moveSpeed);
 }
 
 
@@ -27,8 +28,8 @@ void Character::OnDestroy()
 
 }
 
-void Character::OnCollisionEnter(EntityWeakPtr t_other)
+void Character::OnCollisionEnter(const EntityHandle other)
 {
-    //std::cout << "Character collision enter\n";
+
 }
 
