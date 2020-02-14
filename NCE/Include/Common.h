@@ -9,11 +9,4 @@ using ComponentIndex = uint32_t;
 using EntityHandle = uint32_t;
 using ComponentType = const char*;
 
-template<class T>
-ComponentType GetTypeName()
-{
-    return typeid(T).name();
-}
-
-
 #endif

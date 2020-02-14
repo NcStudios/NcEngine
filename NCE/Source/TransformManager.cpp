@@ -1,6 +1,9 @@
 #include "../Include/TransformManager.h"
 
-TransformManager::TransformManager() { m_transforms.reserve(50); }   //BUG - have pointers to things in vector, invalidated when vector resized
+
+/** @note There is a bug when vector is resized due to invalidating pointers */ 
+TransformManager::TransformManager() { m_transforms.reserve(50); }
+
 TransformManager::~TransformManager() {}
 
 ComponentIndex TransformManager::GetIndexFromHandle(const ComponentHandle handle)
@@ -11,26 +14,14 @@ ComponentIndex TransformManager::GetIndexFromHandle(const ComponentHandle handle
 
 void TransformManager::MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
 {
-    if (Contains(handle))
-    {
-        //std::cout << "  already contains handle\n";
-    }
-    else
-    {
+    if (!Contains(handle))
         m_indexMap.emplace(handle, targetIndex);
-    }
 }
 
 void TransformManager::RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
 {
     if (Contains(handle))
-    {
         m_indexMap.at(handle) = targetIndex;
-    }
-    else
-    {
-        //std::cout << "  does not contain handle\n";
-    }
 }
 
 const std::vector<Transform>& TransformManager::GetVectorOfTransforms() const

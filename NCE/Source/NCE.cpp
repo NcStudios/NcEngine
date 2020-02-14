@@ -1,6 +1,6 @@
 #include "../Include/NCE.h"
 
-    /* NCE */
+/* NCE */
 Engine* NCE::m_engine = nullptr;
 
 NCE::NCE(Engine* enginePtr) { NCE::m_engine = enginePtr; }
@@ -12,37 +12,24 @@ bool NCE::DestroyEntity(EntityHandle handle) { return NCE::m_engine->DestroyEnti
 Entity* NCE::GetEntityPtr(EntityHandle handle) { return NCE::m_engine->GetEntityPtr(handle); }
 
 Transform* NCE::GetTransformPtr(ComponentHandle handle) { return NCE::m_engine->GetTransformPtr(handle); }
-    /* end NCE */
+/* end NCE */
 
 
-    /* ENGINE */
-Engine::Engine(Win32Process win32Process, ProjectConfig projectConfig) 
-      : m_win32Process(win32Process), m_projectConfig(projectConfig)
+/* ENGINE */
+Engine::Engine(Win32Process win32Process, ProjectConfig projectConfig) : m_projectConfig(projectConfig)
 {
-    m_renderingSystem = std::make_unique<RenderingSystem>(m_win32Process.CopyBufferToScreen, m_projectConfig.ScreenWidth, m_projectConfig.ScreenHeight);
-    m_collisionSystem = std::make_unique<CollisionSystem>(this);
-    m_transformManager = std::make_unique<TransformManager>();
+    m_subsystem.Win32 = win32Process;
+    m_subsystem.Rendering = std::make_unique<RenderingSystem>(m_subsystem.Win32.CopyBufferToScreen, m_projectConfig.ScreenWidth, m_projectConfig.ScreenHeight);
+    m_subsystem.Collision = std::make_unique<CollisionSystem>(this);
+    m_subsystem.Transform = std::make_unique<TransformManager>();
 }
 
 Engine::~Engine() {}
 
 bool Engine::DoesEntityExist(EntityHandle handle) { return (m_entities.Active.count(handle) > 0) || (m_entities.AwaitingInitialize.count(handle) > 0); }
 
-class DefaultException : public std::exception
-{
-    private:
-        const char* message;
 
-    public:
-        DefaultException(const char* msg) : message(msg) {}
-
-        const char* what() const throw()
-        {
-            return message;
-        }
-};
-
-std::unordered_map<EntityHandle, Entity>& Engine::GetMapContainingEntity(EntityHandle handle, bool checkAll)
+auto& Engine::GetMapContainingEntity(EntityHandle handle, bool checkAll) noexcept(false)
 {
     if (m_entities.Active.count(handle) > 0)
         return m_entities.Active;
@@ -52,11 +39,13 @@ std::unordered_map<EntityHandle, Entity>& Engine::GetMapContainingEntity(EntityH
     if (checkAll && (m_entities.AwaitingDestroy.count(handle) > 0) ) //only check AwaitingDestroy if checkAll flag is set
         return m_entities.AwaitingDestroy;
 
-    std::cout << "uh oh" << std::endl;
     throw DefaultException("EntityNotFoundException");
 }
 
-Entity* Engine::GetEntityPtrFromAnyMap(EntityHandle handle) { return &GetMapContainingEntity(handle, true).at(handle); }
+Entity* Engine::GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false)
+{
+    return &GetMapContainingEntity(handle, true).at(handle);
+}
 
 void Engine::MainLoop()
 {
@@ -68,9 +57,14 @@ void Engine::MainLoop()
     {
         /* CYCLE START */
         time.UpdateTime();
-        m_win32Process.ProcessSystemQueue();
+        m_subsystem.Win32.ProcessSystemQueue();
 
         /* PHYSICS */
+        /** @note Change this so physics 'simulates' running at a fixed interval.
+         * It may need to run multiple times in a row in cases where FrameUpdate()
+         * runs slowly and execution doesn't return back to physics in time for the 
+         * next interval.
+         */
         if (Time::FixedDeltaTime > m_projectConfig.FixedUpdateInterval)
         {
             FixedUpdate();
@@ -92,24 +86,24 @@ void Engine::MainLoop()
 
 void Engine::FrameUpdate()
 {
+    // user component init and logic
     SendOnInitialize();
-
-    /* LOGIC */
     SendFrameUpdate();
 
-    /* RENDERING */
-    m_renderingSystem->StartRenderCycle(m_transformManager->GetVectorOfTransforms());
+    // rendering
+    m_subsystem.Rendering->StartRenderCycle(m_subsystem.Transform->GetVectorOfTransforms());
 
-    /* CLEANUP */
+    // clearup
     SendOnDestroy();
 }
 
 void Engine::FixedUpdate()
 {
-    /* LOGIC */
+    // user component fixed tick logic
     SendFixedUpdate();
-    /* COLLISIONS */
-    m_collisionSystem->CheckCollisions(m_transformManager->GetVectorOfTransforms());
+
+    // check collisions
+    m_subsystem.Collision->CheckCollisions(m_subsystem.Transform->GetVectorOfTransforms());
 }
 
 void Engine::Exit()
@@ -119,9 +113,9 @@ void Engine::Exit()
 
 EntityHandle Engine::CreateEntity()
 {
-    EntityHandle newHandle = m_handleManager.GenerateNewHandle();
+    EntityHandle newHandle = m_subsystem.Handle.GenerateNewHandle();
     Entity newEntity = Entity(newHandle);
-    newEntity.TransformHandle = m_transformManager->Add(newHandle);
+    newEntity.TransformHandle = m_subsystem.Transform->Add(newHandle);
     m_entities.AwaitingInitialize.emplace(newHandle, newEntity);
     return newHandle;
 }
@@ -145,10 +139,10 @@ Entity* Engine::GetEntityPtr(EntityHandle handle)
     return &containingMap.at(handle);       
 } 
 
-Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_transformManager->GetPointerTo(handle); }
+Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
 
 
-void Engine::SendOnInitialize()
+void Engine::SendOnInitialize() noexcept
 {
     for(auto& pair : m_entities.AwaitingInitialize)
     {
@@ -158,7 +152,7 @@ void Engine::SendOnInitialize()
     m_entities.AwaitingInitialize.clear();
 }
 
-void Engine::SendFrameUpdate()
+void Engine::SendFrameUpdate() noexcept
 {
     for(auto& pair : m_entities.Active)
     {
@@ -166,7 +160,7 @@ void Engine::SendFrameUpdate()
     }
 }
 
-void Engine::SendFixedUpdate()
+void Engine::SendFixedUpdate() noexcept
 {
     for(auto& pair : m_entities.Active)
     {
@@ -174,7 +168,7 @@ void Engine::SendFixedUpdate()
     }
 }
 
-void Engine::SendOnDestroy()
+void Engine::SendOnDestroy() noexcept
 {
     for(auto& pair : m_entities.AwaitingDestroy)
     {
@@ -186,8 +180,8 @@ void Engine::SendOnDestroy()
         }
 
         pair.second.SendOnDestroy();
-        m_transformManager->Remove(entityPtr->TransformHandle);
+        m_subsystem.Transform->Remove(entityPtr->TransformHandle);
     }
     m_entities.AwaitingDestroy.clear();
 }
-    /* end ENGINE */
+/* end ENGINE */

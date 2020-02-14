@@ -2,12 +2,12 @@
 
 #include "../Include/NCE.h"
 
-Transform* Entity::GetTransform()
+Transform* Entity::GetTransform() const noexcept
 {
     return NCE::GetTransformPtr(TransformHandle);
 }
 
-void Entity::SendOnInitialize()
+void Entity::SendOnInitialize() noexcept
 {
     for (auto& comp : m_components)
     {
@@ -15,7 +15,7 @@ void Entity::SendOnInitialize()
     }
 }
 
-void Entity::SendFrameUpdate()
+void Entity::SendFrameUpdate() noexcept
 {
     for (auto& comp : m_components)
     {
@@ -23,7 +23,7 @@ void Entity::SendFrameUpdate()
     }
 }
 
-void Entity::SendFixedUpdate()
+void Entity::SendFixedUpdate() noexcept
 {
     for(auto& comp : m_components)
     {
@@ -31,7 +31,7 @@ void Entity::SendFixedUpdate()
     }
 }
 
-void Entity::SendOnDestroy()
+void Entity::SendOnDestroy() noexcept
 {
     for (auto& comp : m_components)
     {
@@ -39,7 +39,7 @@ void Entity::SendOnDestroy()
     }
 }
 
-void Entity::SendOnCollisionEnter(const EntityHandle other)
+void Entity::SendOnCollisionEnter(const EntityHandle other) noexcept
 {
     for(auto& comp : m_components)
     {
@@ -47,7 +47,7 @@ void Entity::SendOnCollisionEnter(const EntityHandle other)
     }
 }
 
-void Entity::SendOnCollisionStay()
+void Entity::SendOnCollisionStay() noexcept
 {
     for(auto& comp : m_components)
     {
@@ -55,7 +55,7 @@ void Entity::SendOnCollisionStay()
     }
 }
 
-void Entity::SendOnCollisionExit()
+void Entity::SendOnCollisionExit() noexcept
 {
     for(auto& comp : m_components)
     {
