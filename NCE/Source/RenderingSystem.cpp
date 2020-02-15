@@ -1,5 +1,7 @@
 #include "../Include/RenderingSystem.h"
 
+namespace nc::internal{
+
 const int TILE_MAP_WIDTH  = 16;
 const int TILE_MAP_HEIGHT = 9;
 int TileMap[TILE_MAP_HEIGHT][TILE_MAP_WIDTH] = 
@@ -142,3 +144,5 @@ void RenderingSystem::ForceRender()
 {
     CopyBufferToScreen(m_buffer.memory, m_buffer.info, m_buffer.width, m_buffer.height);
 }
+
+} //end namespace nc::internal

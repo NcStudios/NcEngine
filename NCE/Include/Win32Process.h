@@ -1,13 +1,16 @@
-#ifndef WIN32_PROCESS
-#define WIN32_PROCESS
+#ifndef WIN32_PROCESS_H
+#define WIN32_PROCESS_H
 
 #include <windows.h>
 
-struct Win32Process
+namespace nc::internal
 {
-    void(*CopyBufferToScreen)(void*, BITMAPINFO&, int, int); //copy backbuffer to screen
-    void(*ProcessSystemQueue)(); //process windows messages
-};
+    struct Win32Process
+    {
+        void(*CopyBufferToScreen)(void*, BITMAPINFO&, int, int); //copy backbuffer to screen
+        void(*ProcessSystemQueue)();                             //process windows messages
+    };
+}
 
 
 #endif

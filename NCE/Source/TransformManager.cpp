@@ -1,5 +1,6 @@
 #include "../Include/TransformManager.h"
 
+namespace nc::internal{
 
 /** @note There is a bug when vector is resized due to invalidating pointers */ 
 TransformManager::TransformManager() { m_transforms.reserve(50); }
@@ -69,3 +70,5 @@ Transform* TransformManager::GetPointerTo(const ComponentHandle handle)
     ComponentIndex index = GetIndexFromHandle(handle);
     return &m_transforms.at(index);
 }
+
+} //end namespace nc::internal

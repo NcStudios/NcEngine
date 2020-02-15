@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+using namespace nc;
+
 class PointSpawner : public Component
 {
     private:

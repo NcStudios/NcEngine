@@ -1,6 +1,7 @@
 #include "../Include/Entity.h"
-
 #include "../Include/NCE.h"
+
+namespace nc{
 
 Transform* Entity::GetTransform() const noexcept
 {
@@ -63,5 +64,5 @@ void Entity::SendOnCollisionExit() noexcept
     }
 }
 
-
+} //end namespace nc
 

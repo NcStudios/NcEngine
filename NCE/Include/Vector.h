@@ -6,6 +6,9 @@
 
 #include "MathNCE.h"
 
+namespace nc
+{
+
 const double EPSILON = std::numeric_limits<double>::epsilon();
 
 class Vector3;
@@ -43,7 +46,7 @@ class Vector2
         //new - need to add to 3 and 4
         static Vector2 Lerp(const Vector2& lhs, const Vector2& rhs, float factor)
         { 
-            factor = MathNCE::Clamp(factor, 0, 1);
+            factor = math::MathNCE::Clamp(factor, 0, 1);
             return Vector2(lhs.m_x + (rhs.m_x - lhs.m_x) * factor,
                            lhs.m_y + (rhs.m_y - lhs.m_y) * factor);
         }
@@ -145,5 +148,7 @@ Vector4 operator *(const Vector4& vec, const double scalar);
 Vector4 operator /(const Vector4& vec, const double scalar);
 bool operator ==(const Vector4& lhs, const Vector4& rhs);
 bool operator !=(const Vector4& lhs, const Vector4& rhs);
+
+} //end namespace nc
 
 #endif

@@ -3,13 +3,16 @@
 
 #include <exception>
 
-class DefaultException : public std::exception
+namespace nc
 {
-    public:
-        DefaultException(const char* msg) : message(msg) {}
-        const char* what() const throw() { return message; }
-    private:
-        const char* message;
-};
+    class DefaultException : public std::exception
+    {
+        public:
+            DefaultException(const char* msg) : message(msg) {}
+            const char* what() const throw() { return message; }
+        private:
+            const char* message;
+    };
+}
 
 #endif

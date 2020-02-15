@@ -1,5 +1,7 @@
 #include "../Include/CollisionSystem.h"
 
+namespace nc::internal{
+
 CollisionSystem::CollisionSystem(Engine* enginePtr) : m_engine(enginePtr) {}
 
 bool CollisionSystem::AreIntersecting(const Vector4& first, const Vector4& second)
@@ -50,3 +52,4 @@ void CollisionSystem::CheckCollisions(const std::vector<Transform>& transforms)
         }
     }
 }
+} //end namespace nc::internal

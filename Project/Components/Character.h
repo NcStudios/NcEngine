@@ -7,7 +7,7 @@
 #include "../../NCE/Include/Input.h"
 #include "../../NCE/Include/Vector.h"
 
-
+using namespace nc;
 
 class Character : public Component
 {

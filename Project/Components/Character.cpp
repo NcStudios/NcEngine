@@ -19,7 +19,7 @@ void Character::FrameUpdate()
         std::cout << "transform ptr null\n";
         return;
     }
-    transform->Translate(Vector2(Input::GetXAxis(), Input::GetYAxis()).GetNormalized() * m_moveSpeed);
+    transform->Translate(Vector2(input::GetXAxis(), input::GetYAxis()).GetNormalized() * m_moveSpeed);
 }
 
 

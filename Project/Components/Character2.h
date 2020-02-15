@@ -5,6 +5,7 @@
 #include "../../NCE/Include/Component.h"
 #include "Character.h"
 
+using namespace nc;
 
 class Character2 : public Component
 {

@@ -36,7 +36,7 @@ const double FIXED_UPDATE_INTERVAL = 0.02;
 ProjectConfig projectConfig {SCREEN_WIDTH, SCREEN_HEIGHT, FPS, FRAME_UPDATE_INTERVAL, FIXED_UPDATE_INTERVAL};
 WindowDimensions windowDimensions;
 WindowData windowData;
-Engine* enginePtr = nullptr;
+nc::internal::Engine* enginePtr = nullptr;
 
 
 int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR commandLine_, int showCommand_ )
@@ -67,11 +67,11 @@ int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR command
     windowData.DeviceContext = GetDC(windowData.Window);
     windowDimensions = GetWindowDimensions(windowData.Window);
 
-    Win32Process win32Process;
+    nc::internal::Win32Process win32Process;
     win32Process.CopyBufferToScreen = CopyBufferToScreen;
     win32Process.ProcessSystemQueue = Win32ProcessSystemMessages;
 
-    enginePtr = new Engine(win32Process, projectConfig);
+    enginePtr = new nc::internal::Engine(win32Process, projectConfig);
     enginePtr->MainLoop();
 
 	return 0;
@@ -131,7 +131,7 @@ void Win32ProcessSystemMessages()
 
             case WM_MOUSEMOVE:
             {
-                Input::UpdateMousePosition(message.lParam);
+                nc::input::UpdateMousePosition(message.lParam);
             }
             break;
 
@@ -140,7 +140,7 @@ void Win32ProcessSystemMessages()
             case WM_KEYDOWN:
             case WM_KEYUP:
             {
-                Input::AddToQueue(message.wParam, message.lParam);
+                nc::input::AddToQueue(message.wParam, message.lParam);
             }
             break;
         }

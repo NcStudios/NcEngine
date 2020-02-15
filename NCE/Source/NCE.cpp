@@ -1,9 +1,11 @@
 #include "../Include/NCE.h"
 
+namespace nc{
+    
 /* NCE */
-Engine* NCE::m_engine = nullptr;
+internal::Engine* NCE::m_engine = nullptr;
 
-NCE::NCE(Engine* enginePtr) { NCE::m_engine = enginePtr; }
+NCE::NCE(internal::Engine* enginePtr) { NCE::m_engine = enginePtr; }
 
 EntityHandle NCE::CreateEntity() { return NCE::m_engine->CreateEntity(); }
 
@@ -13,8 +15,9 @@ Entity* NCE::GetEntityPtr(EntityHandle handle) { return NCE::m_engine->GetEntity
 
 Transform* NCE::GetTransformPtr(ComponentHandle handle) { return NCE::m_engine->GetTransformPtr(handle); }
 /* end NCE */
+} //end namespace nc
 
-
+namespace nc::internal{
 /* ENGINE */
 Engine::Engine(Win32Process win32Process, ProjectConfig projectConfig) : m_projectConfig(projectConfig)
 {
@@ -50,13 +53,13 @@ Entity* Engine::GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false)
 void Engine::MainLoop()
 {
     NCE nce(this);
-    Time time;
-    SceneManager sceneManager;
+    time::Time ncTime;
+    scene::SceneManager sceneManager;
 
     while(m_engineState.isRunning)
     {
         /* CYCLE START */
-        time.UpdateTime();
+        ncTime.UpdateTime();
         m_subsystem.Win32.ProcessSystemQueue();
 
         /* PHYSICS */
@@ -65,18 +68,18 @@ void Engine::MainLoop()
          * runs slowly and execution doesn't return back to physics in time for the 
          * next interval.
          */
-        if (Time::FixedDeltaTime > m_projectConfig.FixedUpdateInterval)
+        if (time::Time::FixedDeltaTime > m_projectConfig.FixedUpdateInterval)
         {
             FixedUpdate();
-            time.ResetFixedDeltaTime();
+            ncTime.ResetFixedDeltaTime();
         }
 
         /* FRAME */
-        if (Time::FrameDeltaTime > m_projectConfig.FrameUpdateInterval)
+        if (time::Time::FrameDeltaTime > m_projectConfig.FrameUpdateInterval)
         {
             FrameUpdate();
-            Input::Flush();
-            time.ResetFrameDeltaTime();
+            input::Flush();
+            ncTime.ResetFrameDeltaTime();
         }
 
         /* CYCLE CLEANUP */
@@ -185,3 +188,4 @@ void Engine::SendOnDestroy() noexcept
     m_entities.AwaitingDestroy.clear();
 }
 /* end ENGINE */
+} //end namspace nc::internal

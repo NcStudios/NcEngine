@@ -1,5 +1,7 @@
 #include "../Include/Time.h"
 
+namespace nc::time{
+
 uint64_t Time::CycleDeltaTime = 0;
 double Time::FixedDeltaTime = 0;
 double Time::FrameDeltaTime = 0;
@@ -28,3 +30,5 @@ void Time::ResetFrameDeltaTime()
 {
     Time::FrameDeltaTime = 0;
 }
+
+} //end namespace nc::time

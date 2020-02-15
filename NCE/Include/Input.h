@@ -6,7 +6,7 @@
 #include <vector>
 #include <iostream>
 
-namespace Input
+namespace nc::input
 {
     using VKCode = uint32_t;
 
@@ -32,6 +32,6 @@ namespace Input
     bool GetKeyUp(VKCode keyCode_);   //true when key is released
     bool GetKey(VKCode keyCode_);     //true while key is held down
 
-}
+} //end namespace nc::input
 
 #endif

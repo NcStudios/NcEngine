@@ -1,5 +1,5 @@
-#ifndef PROJECT_CONFIG
-#define PROJECT_CONFIG
+#ifndef PROJECT_CONFIG_H
+#define PROJECT_CONFIG_H
 
 struct ProjectConfig
 {

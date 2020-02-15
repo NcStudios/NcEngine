@@ -1,5 +1,7 @@
 #include "../Include/Vector.h"
 
+namespace nc{
+
     /* VECTOR 2 */
 double Vector2::Magnitude() const { return sqrt( (m_x * m_x) + (m_y * m_y) ); }
 
@@ -180,3 +182,5 @@ bool operator !=(const Vector4& lhs, const Vector4& rhs)
 {
     return !(lhs == rhs);
 }
+
+} //end namespace nc
