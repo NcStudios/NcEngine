@@ -1,34 +1,35 @@
 #ifndef PointSpawner_H
 #define PointSpawner_H
 
-#include "../../NCE/Include/NCE.h"
-#include "../../NCE/Include/Component.h"
-//#include "../../NCE/Include/Time.h"
-#include "../../NCE/Include/Transform.h"
-#include "../../NCE/Include/Vector.h"
+#include "../../NCE/include/NCE.h"
+#include "../../NCE/include/Component.h"
+#include "../../NCE/include/Time.h"
+#include "../../NCE/include/Transform.h"
+#include "../../NCE/include/Vector.h"
+#include "../../NCE/include/ProjectConfig.h"
+#include "Character2.h"
 
 #include <iostream>
+#include <random>
 
 using namespace nc;
 
 class PointSpawner : public Component
 {
     private:
-        const int numberOfPoints = 100000;
-
-        Vector2 upperBound;
-        Vector2 lowerLeftBound;
-        Vector2 lowerRightBound;
-        
-        Vector2 GetBoundPosition(const int boundIndex) const;
+        const float secondsPerSpawn = 0.5f;
+        float timeSinceLastSpawn = 0.0f;
+        int screenWidth = 0;
+        int screenHeight = 0;
+        int pointSize = 32;
 
     public:
         PointSpawner(ComponentHandle handle, EntityHandle parentHandle);
 
         void OnInitialize()  override;
+        void FrameUpdate() override;   
 
-        void InitializeBounds();
-        void SpawnPoints();     
+        void Spawn();
 };
 
 

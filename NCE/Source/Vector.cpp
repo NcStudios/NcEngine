@@ -1,4 +1,4 @@
-#include "../Include/Vector.h"
+#include "../include/Vector.h"
 
 namespace nc{
 

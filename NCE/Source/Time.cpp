@@ -1,4 +1,4 @@
-#include "../Include/Time.h"
+#include "../include/Time.h"
 
 namespace nc::time{
 

@@ -26,7 +26,7 @@ namespace nc::internal
             void AllocateRenderBuffer(int width, int height);
             void RenderTileMap();
             void RenderSprites(const std::vector<Transform> &transforms);
-            int GetTileMapValueAtCoordinates(int x, int y, int tileWidth);
+            int GetTileMapValueAtCoordinates(int x, int y);
 
         public:
             RenderingSystem(void (*displayBuffer)(void*, BITMAPINFO&, int, int), int initialWidth, int initialHeight);

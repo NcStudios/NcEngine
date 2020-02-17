@@ -16,21 +16,21 @@ namespace nc
             //pointer to Sprite
 
         public:
-            Transform(ComponentHandle handle, EntityHandle parentHandle) : Component(handle, parentHandle), m_physicsEnabled(false) {}
-            Vector4 GetRect() const { return m_rect; }
-            Vector2 GetPosition() const { return Vector2(m_rect.GetX(), m_rect.GetY()); }
-            double GetWidth() const { return m_rect.GetZ(); }
-            double GetHeight() const { return m_rect.GetW(); }
+            Transform(ComponentHandle handle, EntityHandle parentHandle) noexcept : Component(handle, parentHandle), m_physicsEnabled(false), m_renderingEnabled(false) {}
+            Vector4 GetRect() const noexcept { return m_rect; }
+            Vector2 GetPosition() const noexcept { return Vector2(m_rect.GetX(), m_rect.GetY()); }
+            double GetWidth() const noexcept { return m_rect.GetZ(); }
+            double GetHeight() const noexcept { return m_rect.GetW(); }
 
-            void SetRect(const Vector4& rect) { m_rect = rect; }
-            void SetPosition(const Vector2& pos) { m_rect = Vector4(pos.GetX(), pos.GetY(), m_rect.GetZ(), m_rect.GetW()); }
-            void Translate(const Vector2& vec) { m_rect.TranslateBy(vec); }
+            void SetRect(const Vector4& rect) noexcept { m_rect = rect; }
+            void SetPosition(const Vector2& pos) noexcept { m_rect = Vector4(pos.GetX(), pos.GetY(), m_rect.GetZ(), m_rect.GetW()); }
+            void Translate(const Vector2& vec) noexcept { m_rect.TranslateBy(vec); }
 
-            bool IsPhysicsEnabled() const { return m_physicsEnabled; }
-            bool IsRenderingEnabled() const { return m_renderingEnabled; }
+            bool IsPhysicsEnabled() const noexcept { return m_physicsEnabled; }
+            bool IsRenderingEnabled() const noexcept { return m_renderingEnabled; }
 
-            void TogglePhysicsEnabled(bool state) { m_physicsEnabled = state; }
-            void ToggleRenderingEnabled(bool state) { m_renderingEnabled = state; }
+            void TogglePhysicsEnabled(bool state) noexcept { m_physicsEnabled = state; }
+            void ToggleRenderingEnabled(bool state) noexcept { m_renderingEnabled = state; }
     };
 } //end namespace nc
 

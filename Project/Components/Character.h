@@ -1,11 +1,11 @@
 #ifndef CHARACTER
 #define CHARACTER
 
-#include "../../NCE/Include/NCE.h"
-#include "../../NCE/Include/Component.h"
-#include "../../NCE/Include/Transform.h"
-#include "../../NCE/Include/Input.h"
-#include "../../NCE/Include/Vector.h"
+#include "../../NCE/include/NCE.h"
+#include "../../NCE/include/Component.h"
+#include "../../NCE/include/Transform.h"
+#include "../../NCE/include/Input.h"
+#include "../../NCE/include/Vector.h"
 
 using namespace nc;
 

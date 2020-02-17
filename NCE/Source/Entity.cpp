@@ -1,5 +1,5 @@
-#include "../Include/Entity.h"
-#include "../Include/NCE.h"
+#include "../include/Entity.h"
+#include "../include/NCE.h"
 
 namespace nc{
 

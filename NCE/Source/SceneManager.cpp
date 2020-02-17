@@ -1,23 +1,23 @@
-#include "../Include/SceneManager.h"
+#include "../include/SceneManager.h"
 
 namespace nc::scene{
 
 SceneManager::SceneManager()
 {
-    CreateTestLevel();
+    Scene* initialScene = new InitialScene();
+    activeScenes.push_back(initialScene);
+    LoadScene(initialScene);
 }
 
-Vector4 GetRandomVector4()
+void SceneManager::LoadScene(Scene* scenePtr)
 {
-    double randX = rand() % 500 + 1;
-    double randY = rand() % 500 +1;
-    return Vector4(randX, randY, 64, 64);
+    scenePtr->Load();
 }
 
-void SceneManager::CreateTestLevel()
+void SceneManager::UnloadScene(Scene* scenePtr)
 {
-    EntityHandle thingSpawnerHandle = NCE::CreateEntity();
-    NCE::GetEntityPtr(thingSpawnerHandle)->AddComponent<PointSpawner>();
+    scenePtr->Unload();
+    //remove from vector
 }
 
 } //end namespace nc::scene

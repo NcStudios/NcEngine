@@ -1,28 +1,22 @@
 #ifndef SCENE_MANAGER_H
 #define SCENE_MANAGER_H
 
-#include <random>
+#include <vector>
+//#include <memory>
 
-#include "NCE.h"
-#include "Component.h"
-#include "Entity.h"
-#include "Transform.h"
-#include "Vector.h"
-
-//project includes
-#include "../../Project/Components/PointSpawner.h"
+#include "Scene.h"
+#include "../../project/Scenes/InitialScene.h"
 
 namespace nc::scene
 {
-    Vector4 GetRandomVector4();
-
     class SceneManager
     {
         private:
-
+            std::vector<Scene*> activeScenes;
         public:
             SceneManager();
-            void CreateTestLevel();
+            void LoadScene(Scene* scenePtr);
+            void UnloadScene(Scene* scenePtr);
     };
 } //end namespace nc::scene
 

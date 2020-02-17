@@ -1,4 +1,4 @@
-#include "../Include/NCE.h"
+#include "../include/NCE.h"
 
 namespace nc{
     
@@ -7,13 +7,35 @@ internal::Engine* NCE::m_engine = nullptr;
 
 NCE::NCE(internal::Engine* enginePtr) { NCE::m_engine = enginePtr; }
 
-EntityHandle NCE::CreateEntity() { return NCE::m_engine->CreateEntity(); }
+EntityHandle NCE::CreateEntity()
+{
+    return NCE::CreateEntity(Vector4::Zero(), false, false);
+}
 
-bool NCE::DestroyEntity(EntityHandle handle) { return NCE::m_engine->DestroyEntity(handle); }
+EntityHandle NCE::CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics)
+{
+    return NCE::m_engine->CreateEntity(rect, enableRendering, enablePhysics);
+}
 
-Entity* NCE::GetEntityPtr(EntityHandle handle) { return NCE::m_engine->GetEntityPtr(handle); }
+bool NCE::DestroyEntity(EntityHandle handle)
+{
+    return NCE::m_engine->DestroyEntity(handle);
+}
 
-Transform* NCE::GetTransformPtr(ComponentHandle handle) { return NCE::m_engine->GetTransformPtr(handle); }
+Entity* NCE::GetEntityPtr(EntityHandle handle)
+{
+    return NCE::m_engine->GetEntityPtr(handle);
+}
+
+Transform* NCE::GetTransformPtr(ComponentHandle handle)
+{
+    return NCE::m_engine->GetTransformPtr(handle);
+}
+
+ProjectConfig NCE::GetProjectConfig() noexcept
+{
+    return NCE::m_engine->GetProjectConfig();
+}
 /* end NCE */
 } //end namespace nc
 
@@ -96,7 +118,7 @@ void Engine::FrameUpdate()
     // rendering
     m_subsystem.Rendering->StartRenderCycle(m_subsystem.Transform->GetVectorOfTransforms());
 
-    // clearup
+    // cleanup
     SendOnDestroy();
 }
 
@@ -114,11 +136,15 @@ void Engine::Exit()
     m_engineState.isRunning = false;
 }
 
-EntityHandle Engine::CreateEntity()
+EntityHandle Engine::CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics)
 {
     EntityHandle newHandle = m_subsystem.Handle.GenerateNewHandle();
     Entity newEntity = Entity(newHandle);
     newEntity.TransformHandle = m_subsystem.Transform->Add(newHandle);
+    Transform* transformPtr = GetTransformPtr(newEntity.TransformHandle);
+    transformPtr->SetRect(rect);
+    transformPtr->ToggleRenderingEnabled(enableRendering);
+    transformPtr->TogglePhysicsEnabled(enablePhysics);
     m_entities.AwaitingInitialize.emplace(newHandle, newEntity);
     return newHandle;
 }
@@ -144,6 +170,7 @@ Entity* Engine::GetEntityPtr(EntityHandle handle)
 
 Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
 
+ProjectConfig Engine::GetProjectConfig() const noexcept { return m_projectConfig; }
 
 void Engine::SendOnInitialize() noexcept
 {

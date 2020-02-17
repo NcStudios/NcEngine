@@ -30,9 +30,11 @@ namespace nc
             NCE(internal::Engine* enginePtr);
 
             static EntityHandle CreateEntity();
+            static EntityHandle CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics);
             static bool DestroyEntity(EntityHandle handle);
             static Entity* GetEntityPtr(EntityHandle handle);
             static Transform* GetTransformPtr(ComponentHandle handle);
+            static ProjectConfig GetProjectConfig() noexcept;
         
         private:
             static internal::Engine* m_engine;
@@ -49,10 +51,12 @@ namespace nc
                 void MainLoop();
                 void Exit();
 
-                EntityHandle CreateEntity();                        //creates new Entity and Transform and adds it to AwaitingInitialize, returns handle to Entity
+                EntityHandle CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics); //creates new Entity and Transform and adds it to AwaitingInitialize, returns handle to Entity
                 bool DestroyEntity(EntityHandle handle);            //moves entity from current map to AwaitingDestroy, returns true if successful
                 Entity* GetEntityPtr(EntityHandle handle);          //returns ptr to entity in Active or AwaitingInitialize maps, returns nullptr if not found
                 Transform* GetTransformPtr(ComponentHandle handle); //returns ptr to Transform with given handle, returns nullptr if not found
+
+                ProjectConfig GetProjectConfig() const noexcept;
 
             private:
                 struct EngineState

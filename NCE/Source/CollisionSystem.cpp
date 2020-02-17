@@ -1,4 +1,4 @@
-#include "../Include/CollisionSystem.h"
+#include "../include/CollisionSystem.h"
 
 namespace nc::internal{
 

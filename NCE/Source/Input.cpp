@@ -1,4 +1,4 @@
-#include "../Include/Input.h"
+#include "../include/Input.h"
 
 namespace nc::input{
     

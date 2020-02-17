@@ -1,9 +1,15 @@
-#include "../Include/RenderingSystem.h"
+#include "../include/RenderingSystem.h"
 
 namespace nc::internal{
 
+
 const int TILE_MAP_WIDTH  = 16;
 const int TILE_MAP_HEIGHT = 9;
+const int TILE_WIDTH = 64;
+
+const uint32_t COLOR_ONE = 11111111;
+const uint32_t COLOR_TWO = 10101010;
+
 int TileMap[TILE_MAP_HEIGHT][TILE_MAP_WIDTH] = 
 {
     { 1, 0, 1, 0,  1, 0, 1, 0,  1, 0, 1, 0,  1, 0, 1, 0},
@@ -16,7 +22,6 @@ int TileMap[TILE_MAP_HEIGHT][TILE_MAP_WIDTH] =
     { 0, 1, 0, 1,  0, 1, 0, 1,  0, 1, 0, 1,  0, 1, 0, 1},
     { 1, 0, 1, 0,  1, 0, 1, 0,  1, 0, 1, 0,  1, 0, 1, 0}
 };
-
 
 RenderingSystem::RenderingSystem(void (*displayBuffer)(void*, BITMAPINFO&, int, int), int initialWidth, int initialHeight)
 {
@@ -45,31 +50,33 @@ void RenderingSystem::AllocateRenderBuffer(int width, int height)
     m_buffer.bytesPerRow = width*bytesPerPixel;
 }
 
+int RenderingSystem::GetTileMapValueAtCoordinates(int x, int y)
+{
+    const int tileX = x / TILE_WIDTH;
+    const int tileY = y / TILE_WIDTH;
+    return TileMap[tileY][tileX];
+}
+
 void RenderingSystem::RenderTileMap()
 {
-    int tileWidth = 64;
     int tileValue;
-
-    uint32_t colorOne = 11111111;
-    uint32_t colorTwo = 10101010;
-
     uint8_t *row = (uint8_t *)m_buffer.memory;
 
     for (int y = 0; y < m_buffer.height; y++)
     {
-        uint32_t *pixel = (uint32_t *)row;
+        uint32_t *pixel = (uint32_t*)row;
 
         for (int x = 0; x < m_buffer.width; x++)
         {
-            tileValue = GetTileMapValueAtCoordinates(x, y, tileWidth);
+            tileValue = GetTileMapValueAtCoordinates(x, y);
 
             if (tileValue == 0)
             {
-                *pixel++ = colorOne;
+                *pixel++ = COLOR_ONE;
             }
             else
             {
-                *pixel++ = colorTwo;
+                *pixel++ = COLOR_TWO;
             }
         }
         row += m_buffer.bytesPerRow;
@@ -124,13 +131,6 @@ void RenderingSystem::RenderSprites(const std::vector<Transform> &transforms)
             row += m_buffer.bytesPerRow;
         }
     } //end rect loop
-}
-
-int RenderingSystem::GetTileMapValueAtCoordinates(int x, int y, int tileWidth)
-{
-    int tileX = x / tileWidth;
-    int tileY = y / tileWidth;
-    return TileMap[tileY][tileX];
 }
 
 void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)

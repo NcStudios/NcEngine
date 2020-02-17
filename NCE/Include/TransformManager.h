@@ -26,7 +26,7 @@ namespace nc::internal
             const std::vector<Transform>& GetVectorOfTransforms() const;
             ComponentHandle virtual Add(const EntityHandle parentHandle);
             bool virtual Remove(const ComponentHandle handle);
-            bool virtual Contains(const ComponentHandle handle);
+            bool virtual Contains(const ComponentHandle handle) const;
             Transform* GetPointerTo(const ComponentHandle handle);
     };
 } //end namespace nc::internal

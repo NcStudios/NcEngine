@@ -1,4 +1,4 @@
-#include "../Include/TransformManager.h"
+#include "../include/TransformManager.h"
 
 namespace nc::internal{
 
@@ -59,7 +59,7 @@ bool TransformManager::Remove(const ComponentHandle handle)
     return true;
 }
 
-bool TransformManager::Contains(const ComponentHandle handle)
+bool TransformManager::Contains(const ComponentHandle handle) const
 {
     return m_indexMap.count(handle) > 0;
 }

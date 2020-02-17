@@ -1,9 +1,9 @@
-#include "Include/External.h"
-#include "Include/Win32Process.h"
-#include "Include/ProjectConfig.h"
-#include "Include/NCE.h"
-#include "Include/Time.h"
-#include "Include/Input.h"
+#include "include/External.h"
+#include "include/Win32Process.h"
+#include "include/ProjectConfig.h"
+#include "include/NCE.h"
+#include "include/Time.h"
+#include "include/Input.h"
 
 struct WindowDimensions
 {
