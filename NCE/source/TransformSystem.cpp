@@ -1,36 +1,37 @@
-#include "../include/TransformManager.h"
+#include "../include/TransformSystem.h"
+#include <iostream>
 
 namespace nc::internal{
 
-/** @note There is a bug when vector is resized due to invalidating pointers */ 
-TransformManager::TransformManager() { m_transforms.reserve(50); }
+/** @note should be fixed now that they're not pointers?: bug when vector is resized due to invalidating pointers */ 
+TransformSystem::TransformSystem() { m_transforms.reserve(50); }
 
-TransformManager::~TransformManager() {}
+TransformSystem::~TransformSystem() {}
 
-ComponentIndex TransformManager::GetIndexFromHandle(const ComponentHandle handle)
+ComponentIndex TransformSystem::GetIndexFromHandle(const ComponentHandle handle)
 {
     if (!Contains(handle)) return 0; //need value for unsuccessful
     return m_indexMap.at(handle);
 }
 
-void TransformManager::MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
+void TransformSystem::MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
 {
     if (!Contains(handle))
         m_indexMap.emplace(handle, targetIndex);
 }
 
-void TransformManager::RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
+void TransformSystem::RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
 {
     if (Contains(handle))
         m_indexMap.at(handle) = targetIndex;
 }
 
-const std::vector<Transform>& TransformManager::GetVectorOfTransforms() const
+const std::vector<Transform>& TransformSystem::GetVectorOfTransforms() const
 {
     return m_transforms;
 }
 
-ComponentHandle TransformManager::Add(const EntityHandle parentHandle)
+ComponentHandle TransformSystem::Add(const EntityHandle parentHandle)
 {
     ComponentHandle handle = handleManager.GenerateNewHandle();
     m_transforms.push_back(Transform(handle, parentHandle));
@@ -39,7 +40,7 @@ ComponentHandle TransformManager::Add(const EntityHandle parentHandle)
     return handle;
 }
 
-bool TransformManager::Remove(const ComponentHandle handle)
+bool TransformSystem::Remove(const ComponentHandle handle)
 {
     if (!Contains(handle))
     {
@@ -59,12 +60,12 @@ bool TransformManager::Remove(const ComponentHandle handle)
     return true;
 }
 
-bool TransformManager::Contains(const ComponentHandle handle) const
+bool TransformSystem::Contains(const ComponentHandle handle) const
 {
     return m_indexMap.count(handle) > 0;
 }
 
-Transform* TransformManager::GetPointerTo(const ComponentHandle handle)
+Transform* TransformSystem::GetPointerTo(const ComponentHandle handle)
 {
     if (!Contains(handle)) return nullptr;
     ComponentIndex index = GetIndexFromHandle(handle);

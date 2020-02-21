@@ -2,7 +2,6 @@
 #define CHARACTER2
 
 #include "../../NCE/include/NCE.h"
-#include "../../NCE/include/Component.h"
 #include "Character.h"
 
 using namespace nc;

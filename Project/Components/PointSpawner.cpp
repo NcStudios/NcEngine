@@ -5,9 +5,6 @@ PointSpawner::PointSpawner(ComponentHandle handle, EntityHandle parentHandle) : 
 
 void PointSpawner::OnInitialize()
 {
-    ProjectConfig config = NCE::GetProjectConfig();
-    screenWidth  = config.ScreenHeight;
-    screenHeight = config.ScreenHeight;
     srand(30);
 }
 
@@ -27,9 +24,9 @@ void PointSpawner::FrameUpdate()
 
 void PointSpawner::Spawn()
 {
-    int randX = rand() % screenWidth;
-    int randY = rand() % screenHeight;
+    int randX = rand() % nc::ProjectSettings::displaySettings.screenWidth;
+    int randY = rand() % nc::ProjectSettings::displaySettings.screenHeight;
 
-    nc::EntityHandle h = NCE::CreateEntity(Vector4(randX, randY, pointSize, pointSize), true, true);
-    NCE::GetEntityPtr(h)->AddComponent<Character2>();
+    nc::EntityHandle h = NCE::CreateEntity(Vector4(randX, randY, pointSize, pointSize), true, true, "");
+    NCE::GetEntity(h)->AddComponent<Character2>();
 }

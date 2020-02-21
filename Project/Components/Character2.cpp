@@ -5,7 +5,7 @@ Character2::Character2(ComponentHandle handle, EntityHandle parentHandle) : Comp
 
 void Character2::OnCollisionEnter(const EntityHandle other)
 {
-    Entity* otherPtr = NCE::GetEntityPtr(other);
+    Entity* otherPtr = NCE::GetEntity(other);
     if (otherPtr == nullptr) 
         return;
 

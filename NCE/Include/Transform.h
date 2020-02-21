@@ -4,6 +4,7 @@
 #include "Common.h"
 #include "Component.h"
 #include "Vector.h"
+#include "TransformHierarchyData.h"
 
 namespace nc
 {
@@ -11,6 +12,7 @@ namespace nc
     {
         private:
             Vector4 m_rect;
+            //TransformHierarchyData hierarchyData;
             bool m_physicsEnabled;
             bool m_renderingEnabled;
             //pointer to Sprite
@@ -28,7 +30,6 @@ namespace nc
 
             bool IsPhysicsEnabled() const noexcept { return m_physicsEnabled; }
             bool IsRenderingEnabled() const noexcept { return m_renderingEnabled; }
-
             void TogglePhysicsEnabled(bool state) noexcept { m_physicsEnabled = state; }
             void ToggleRenderingEnabled(bool state) noexcept { m_renderingEnabled = state; }
     };

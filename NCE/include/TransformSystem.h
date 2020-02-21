@@ -1,14 +1,13 @@
-#ifndef TRANSFORM_MANAGER_H
-#define TRANSFORM_MANAGER_H
+#ifndef TRANSFORM_SYSTEM_H
+#define TRANSFORM_SYSTEM_H
 
-#include "Common.h"
+#include <unordered_map>
 #include "NCE.h"
 #include "HandleManager.h"
-#include "Transform.h"
 
 namespace nc::internal
 {
-    class TransformManager
+    class TransformSystem
     {
         private:
             std::vector<Transform> m_transforms;
@@ -20,8 +19,8 @@ namespace nc::internal
             void RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex);
 
         public:
-            TransformManager();
-            virtual ~TransformManager();
+            TransformSystem();
+            virtual ~TransformSystem();
 
             const std::vector<Transform>& GetVectorOfTransforms() const;
             ComponentHandle virtual Add(const EntityHandle parentHandle);

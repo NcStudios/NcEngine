@@ -1,8 +1,9 @@
 #include "../include/CollisionSystem.h"
+#include <iostream>
 
 namespace nc::internal{
 
-CollisionSystem::CollisionSystem(Engine* enginePtr) : m_engine(enginePtr) {}
+CollisionSystem::CollisionSystem() {}
 
 bool CollisionSystem::AreIntersecting(const Vector4& first, const Vector4& second)
 {
@@ -33,7 +34,7 @@ void CollisionSystem::CheckCollisions(const std::vector<Transform>& transforms)
             EntityHandle firstHandle = transforms.at(i).GetEntityHandle();
             EntityHandle secondHandle = transforms.at(j).GetEntityHandle();
 
-            Entity* entity = m_engine->GetEntityPtr(firstHandle);
+            Entity* entity = NCE::GetEntity(firstHandle);
             if (entity == nullptr)
             {
                 std::cout << "CollisionSystem::CheckCollisions - 1st entity ptr null" << std::endl;
@@ -42,7 +43,7 @@ void CollisionSystem::CheckCollisions(const std::vector<Transform>& transforms)
 
             entity->SendOnCollisionEnter(secondHandle);
             
-            entity = m_engine->GetEntityPtr(secondHandle);
+            entity = NCE::GetEntity(secondHandle);
             if (entity == nullptr)
             {
                 std::cout << "CollisionSystem::CheckCollisions - 2nd entity ptr null" << std::endl;

@@ -2,11 +2,7 @@
 #define PointSpawner_H
 
 #include "../../NCE/include/NCE.h"
-#include "../../NCE/include/Component.h"
-#include "../../NCE/include/Time.h"
-#include "../../NCE/include/Transform.h"
-#include "../../NCE/include/Vector.h"
-#include "../../NCE/include/ProjectConfig.h"
+#include "../../NCE/include/ProjectSettings.h"
 #include "Character2.h"
 
 #include <iostream>

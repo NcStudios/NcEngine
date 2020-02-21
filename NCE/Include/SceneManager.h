@@ -2,7 +2,6 @@
 #define SCENE_MANAGER_H
 
 #include <vector>
-//#include <memory>
 
 #include "Scene.h"
 #include "../../project/Scenes/InitialScene.h"

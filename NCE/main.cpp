@@ -1,7 +1,7 @@
-#include "include/External.h"
+#include <windows.h>
 #include "include/Win32Process.h"
-#include "include/ProjectConfig.h"
-#include "include/NCE.h"
+#include "include/ProjectSettings.h"
+#include "include/Engine.h"
 #include "include/Time.h"
 #include "include/Input.h"
 
@@ -25,15 +25,9 @@ void CopyBufferToScreen(void *buffer_, BITMAPINFO &bufferInfo_, int srcWidth_, i
 void Win32ProcessSystemMessages();
 LRESULT CALLBACK WndProc(HWND window_, UINT message_, WPARAM wParam_, LPARAM lParam_);
 
-
 //Temp - should be read at start up
-const int SCREEN_WIDTH = 1024;
-const int SCREEN_HEIGHT = 576;
-const int FPS = 60;
-const double FRAME_UPDATE_INTERVAL = 1.0 / FPS;
-const double FIXED_UPDATE_INTERVAL = 0.02;
+const char* PROJECT_SETTINGS_FILEPATH = "../project/Settings/projectsettings.txt";
 
-ProjectConfig projectConfig {SCREEN_WIDTH, SCREEN_HEIGHT, FPS, FRAME_UPDATE_INTERVAL, FIXED_UPDATE_INTERVAL};
 WindowDimensions windowDimensions;
 WindowData windowData;
 nc::internal::Engine* enginePtr = nullptr;
@@ -41,11 +35,13 @@ nc::internal::Engine* enginePtr = nullptr;
 
 int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR commandLine_, int showCommand_ )
 {
+    nc::ProjectSettings::Load(PROJECT_SETTINGS_FILEPATH);
+
     windowData.WindowClass = {}; 
     windowData.WindowClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;  //OWNDC allows device context to be retreived once rather than get/dispose each frame
 	windowData.WindowClass.lpfnWndProc = WndProc;                   //CALLBACK that windows will call for handling messages
     windowData.WindowClass.hInstance = instance_;                    //for windows to callback to the function it must also know about our process instance
-    windowData.WindowClass.lpszClassName = TEXT("NCEngine - Test Project");
+    windowData.WindowClass.lpszClassName = TEXT(nc::ProjectSettings::projectName.c_str());
 
     if (!RegisterClass(&windowData.WindowClass))
     {
@@ -55,9 +51,9 @@ int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR command
 
     windowData.Window = CreateWindowExA(0,
                                         (LPCSTR)windowData.WindowClass.lpszClassName,
-                                        "NCEngine - Test Project",
+                                        nc::ProjectSettings::projectName.c_str(),
                                         WS_OVERLAPPEDWINDOW|WS_VISIBLE,
-                                        0, 0, projectConfig.ScreenWidth * 2, projectConfig.ScreenHeight * 2,
+                                        0, 0, nc::ProjectSettings::displaySettings.screenWidth * 2, nc::ProjectSettings::displaySettings.screenHeight * 2,
                                         0, 0, instance_, 0);
     if (!windowData.Window){
         std::cout << "Window handle not found\n";
@@ -71,7 +67,7 @@ int CALLBACK WinMain(HINSTANCE instance_, HINSTANCE prevInstance_, LPSTR command
     win32Process.CopyBufferToScreen = CopyBufferToScreen;
     win32Process.ProcessSystemQueue = Win32ProcessSystemMessages;
 
-    enginePtr = new nc::internal::Engine(win32Process, projectConfig);
+    enginePtr = new nc::internal::Engine(win32Process);
     enginePtr->MainLoop();
 
 	return 0;

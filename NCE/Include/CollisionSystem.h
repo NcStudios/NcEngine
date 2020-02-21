@@ -3,8 +3,6 @@
 
 #include <vector>
 #include "NCE.h"
-#include "Vector.h"
-#include "Transform.h"
 
 namespace nc::internal{
 
@@ -12,15 +10,12 @@ namespace nc::internal{
 
     class CollisionSystem
     {
-        private:
-            Engine* m_engine; //better way?
-
-            bool AreIntersecting(const Vector4& first, const Vector4& second);
-
         public:
-            CollisionSystem(Engine* enginePtr);
-
+            CollisionSystem();
             void CheckCollisions(const std::vector<Transform>& transforms);
+
+        private:
+            bool AreIntersecting(const Vector4& first, const Vector4& second);
     };
 
 } //end namespace nc::internal

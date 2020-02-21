@@ -2,10 +2,10 @@
 #define ENTITY_H
 
 #include <vector>
-#include <type_traits> //is_base_of
+#include <memory>
+#include <string>
 
 #include "Common.h"
-#include "External.h"
 #include "Component.h"
 #include "Transform.h"
 
@@ -13,13 +13,11 @@ namespace nc
 {
     class Entity
     {
-        private:
-            std::vector<std::shared_ptr<Component>> m_components;
-
         public:
-            Entity(EntityHandle handle) noexcept : Handle(handle), TransformHandle(0) {}
+            Entity(EntityHandle handle, const std::string& tag = "") noexcept : Handle(handle), TransformHandle(0), Tag(tag) {}
             const EntityHandle Handle;
             ComponentHandle TransformHandle;
+            const std::string Tag;
             
             void SendOnInitialize() noexcept;
             void SendFrameUpdate() noexcept;
@@ -35,13 +33,16 @@ namespace nc
             bool HasComponent() const noexcept;
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
-            bool AddComponent() noexcept;
+            std::shared_ptr<T> AddComponent() noexcept;
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             bool RemoveComponent() noexcept;
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             std::shared_ptr<T> GetComponent() const noexcept; 
+        
+        private:
+            std::vector<std::shared_ptr<Component>> m_components;
     };
 
     //template definitions
@@ -59,11 +60,12 @@ namespace nc
     }
 
     template<class T, class>
-    bool Entity::AddComponent() noexcept
+    std::shared_ptr<T> Entity::AddComponent() noexcept
     {
-        if (HasComponent<T>()) return false;
-        m_components.push_back(std::make_shared<T>(0, Handle));
-        return true;
+        if (HasComponent<T>()) return nullptr;
+        auto newComponent = std::make_shared<T>(0, Handle);
+        m_components.push_back(newComponent);
+        return newComponent;
     }
 
     template<class T, class>
