@@ -1,16 +1,21 @@
-#ifndef CHARACTER
-#define CHARACTER
+#ifndef HEAD_H
+#define HEAD_H
 
 #include "../../NCE/include/NCE.h"
+#include "Tail.h"
+#include "Point.h"
 
 using namespace nc;
 
-class Character : public Component
+class Head : public Component
 {
     private:
-        float m_moveSpeed = 200;
+        float m_moveSpeed = 500;
+        bool hasTail = false;
+        EntityHandle tail;
+
     public:
-        Character(ComponentHandle handle, EntityHandle parentHandle);
+        Head(ComponentHandle handle, EntityHandle parentHandle);
 
         void OnInitialize() override;
         void FrameUpdate() override;

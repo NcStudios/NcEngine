@@ -20,18 +20,20 @@ namespace nc
         public:
             NCE(internal::Engine* enginePtr);
 
+            static void Exit();
+
             static EntityHandle CreateEntity();
             static EntityHandle CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics, const std::string& tag);
             static bool DestroyEntity(EntityHandle handle);
-            static Entity* GetEntity(EntityHandle handle);
-            static Entity* GetEntity(const std::string& tag); //finds first active entity with specified tag, returns nullptr if not found
             static Transform* GetTransformPtr(ComponentHandle handle);
 
-            
-        
+            static Entity* GetEntity(EntityHandle handle);
+            static Entity* GetEntity(const std::string& tag); //finds first active entity with specified tag, returns nullptr if not found
+
         private:
             static internal::Engine* m_engine;
     };
+
 } //end namespace nc
 
 #endif

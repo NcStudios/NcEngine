@@ -2,16 +2,19 @@
 #define CHARACTER2
 
 #include "../../NCE/include/NCE.h"
-#include "Character.h"
+#include "Head.h"
+#include "PointSpawner.h"
 
 using namespace nc;
 
-class Character2 : public Component
+class Point : public Component
 {
     public:
-        Character2(ComponentHandle handle, EntityHandle parentHandle);
+        Point(ComponentHandle handle, EntityHandle parentHandle);
 
         void OnCollisionEnter(const EntityHandle other) override;
+
+        EntityHandle SpawnerHandle;
 };
  
 

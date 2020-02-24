@@ -7,7 +7,6 @@
 
 #include "Common.h"
 #include "NCException.h"
-#include "Win32Process.h"
 #include "ProjectSettings.h"
 #include "Vector.h"
 #include "Entity.h"
@@ -23,7 +22,7 @@ namespace nc::internal
     class Engine
     {
         public:
-            Engine(Win32Process win32Process);
+            Engine();
             ~Engine();
 
             void MainLoop();
@@ -31,10 +30,9 @@ namespace nc::internal
 
             EntityHandle CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics, const std::string& tag); //creates new Entity and Transform and adds it to AwaitingInitialize, returns handle to Entity
             bool DestroyEntity(EntityHandle handle);   //moves entity from current map to AwaitingDestroy, returns true if successful
+            Transform* GetTransformPtr(ComponentHandle handle); //returns ptr to Transform with given handle, returns nullptr if not found
             Entity* GetEntity(EntityHandle handle);    //returns ptr to entity in Active or AwaitingInitialize maps, returns nullptr if not found
             Entity* GetEntity(const std::string& tag); //returns pointer to first active found entity with tag or nullptr if not found
-            Transform* GetTransformPtr(ComponentHandle handle); //returns ptr to Transform with given handle, returns nullptr if not found
-            
 
         private:
             struct EngineState
@@ -44,7 +42,6 @@ namespace nc::internal
 
             struct Subsystem
             {
-                Win32Process Win32;
                 std::unique_ptr<HandleManager<EntityHandle>> Handle;
                 std::unique_ptr<RenderingSystem> Rendering;
                 std::unique_ptr<CollisionSystem> Collision;

@@ -2,7 +2,9 @@
 #define NC_UTILS_H
 
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <ctime>
 
 namespace debug
 {
@@ -19,6 +21,19 @@ namespace debug
         Log(args...);
     }
 
+    // void LogDump(const std::string& msg)
+    // {
+    //     const std::string FILE_NAME = "LOG_DUMP.txt";
+    //     std::ofstream outFile;
+    //     outFile.open(FILE_NAME);
+    //     std::time_t t = std::time(0);
+    //     std::tm* now = std::localtime(&t);
+
+    //     outFile << now->tm_hour     << ':' << now->tm_min  << ':' << now->tm_sec           << ' '
+    //             << (now->tm_mon +1) << '/' << now->tm_mday << '/' << (now->tm_year + 1900) << '\n'
+    //             << msg << '\n';
+    // }
+
     template<typename T>
     void CountItems(const T& container, std::string containerName = "unnamed")
     {
@@ -29,6 +44,8 @@ namespace debug
         }
         Log(containerName, " item count: ", count);
     }
+
+
 
 
 }

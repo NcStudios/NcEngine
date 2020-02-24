@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "../include/Engine.h"
 #include "../include/NCE.h"
+#include "../include/Window.h"
 #include "../include/TransformSystem.h"
 #include "../include/SceneManager.h"
 #include "../include/RenderingSystem.h"
@@ -9,10 +10,11 @@
 
 namespace nc::internal
 {
-Engine::Engine(Win32Process win32Process)
+Engine::Engine()//Win32Process win32Process)
 {
-    m_subsystem.Win32 = win32Process;
-    m_subsystem.Rendering = std::make_unique<RenderingSystem>(m_subsystem.Win32.CopyBufferToScreen, ProjectSettings::displaySettings.screenWidth, ProjectSettings::displaySettings.screenHeight);
+    //m_subsystem.Win32 = win32Process;
+    //m_subsystem.Rendering = std::make_unique<RenderingSystem>(m_subsystem.Win32.CopyBufferToScreen, ProjectSettings::displaySettings.screenWidth, ProjectSettings::displaySettings.screenHeight);
+    m_subsystem.Rendering = std::make_unique<RenderingSystem>(Window::CopyBufferToScreen, ProjectSettings::displaySettings.screenWidth, ProjectSettings::displaySettings.screenHeight);
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
     m_subsystem.Transform = std::make_unique<TransformSystem>();
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
@@ -51,8 +53,8 @@ void Engine::MainLoop()
     {
         /* CYCLE START */
         ncTime.UpdateTime();
-        m_subsystem.Win32.ProcessSystemQueue();
-
+        //m_subsystem.Win32.ProcessSystemQueue();
+        Window::ProcessSystemMessages();
         /* PHYSICS */
         /** @note Change this so physics 'simulates' running at a fixed interval.
          * It may need to run multiple times in a row in cases where FrameUpdate()

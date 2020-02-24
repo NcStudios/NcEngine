@@ -10,6 +10,11 @@ NCE::NCE(internal::Engine* enginePtr)
     NCE::m_engine = enginePtr;
 }
 
+void NCE::Exit()
+{
+    NCE::m_engine->Exit();
+}
+
 EntityHandle NCE::CreateEntity()
 {
     return NCE::CreateEntity(Vector4::Zero(), false, false, "");

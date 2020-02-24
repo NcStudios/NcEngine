@@ -55,6 +55,11 @@ double GetYAxis() //eventually binds inputs to axis from config file (controller
     return axis;
 }
 
+Vector2 GetAxis()
+{
+    return Vector2(GetXAxis(), GetYAxis());
+}
+
 bool GetKeyDown(VKCode keyCode_)
 {
     for(auto item : downKeys)

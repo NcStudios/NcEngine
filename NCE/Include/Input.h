@@ -5,6 +5,7 @@
 #include <windowsx.h>
 #include <vector>
 #include <iostream>
+#include "Vector.h"
 
 namespace nc::input
 {
@@ -27,6 +28,7 @@ namespace nc::input
 
     double GetXAxis();
     double GetYAxis();
+    Vector2 GetAxis();
 
     bool GetKeyDown(VKCode keyCode_); //true when key is first pressed
     bool GetKeyUp(VKCode keyCode_);   //true when key is released

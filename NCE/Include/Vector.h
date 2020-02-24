@@ -25,19 +25,8 @@ class Vector2
         static Vector2 Down()  { return Vector2(-1,  0); }
         static Vector2 Left()  { return Vector2( 0, -1); }
         static Vector2 Right() { return Vector2( 0,  1); }
+        
         static float SquareMagnitude(const Vector2& vec) { return ( (vec.m_x * vec.m_x) + (vec.m_y * vec.m_y) ); }
-
-        inline float GetX() const noexcept { return m_x; }
-        inline float GetY() const noexcept { return m_y; }
-
-        float Magnitude() const noexcept;
-        float SquareMagnitude() const noexcept;
-        Vector2 GetNormalized() const noexcept;
-        Vector3 ToVector3() const noexcept;
-        Vector4 ToVector4() const noexcept;
-
-        void Normalize() noexcept;
-        void TranslateBy(const Vector2& vec) noexcept;
 
         //new - need to add to 3 and 4
         static Vector2 Lerp(const Vector2& lhs, const Vector2& rhs, float factor) noexcept
@@ -52,12 +41,26 @@ class Vector2
             return lhs.m_x * rhs.m_x + lhs.m_y * rhs.m_y;
         }
 
+        //cross ?
+
         static float Distance(const Vector2& lhs, const Vector2& rhs) noexcept
         {
             float x = lhs.m_x - rhs.m_x;
             float y = lhs.m_y - rhs.m_y;
             return sqrt(x * x + y * y);
         }
+
+        inline float GetX() const noexcept { return m_x; }
+        inline float GetY() const noexcept { return m_y; }
+
+        float Magnitude() const noexcept;
+        float SquareMagnitude() const noexcept;
+        Vector2 GetNormalized() const noexcept;
+        Vector3 ToVector3() const noexcept;
+        Vector4 ToVector4() const noexcept;
+
+        void Normalize() noexcept;
+        void TranslateBy(const Vector2& vec) noexcept;
 
     private:
         float m_x, m_y;
