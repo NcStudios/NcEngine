@@ -3,7 +3,7 @@
 #include "../include/Input.h"
 #include "../include/ProjectSettings.h"
 
-#include "../../graphics/primitive/Cube.h"
+#include "../../graphics/primitive/Box.h"
 
 namespace nc {
 
@@ -45,9 +45,9 @@ Window::Window(HINSTANCE instance) noexcept
     //make cubes
     for(auto i = 0; i < 20; ++i)
     {
-        cubes.push_back
+        boxes.push_back
         (
-            std::make_unique<nc::graphics::primitive::Cube>
+            std::make_unique<nc::graphics::primitive::Box>
             (
                 *m_graphics.get(), rng, adist, ddist, odist, rdist
             )
@@ -146,7 +146,7 @@ void Window::CopyBufferToScreen(void *buffer, BITMAPINFO &bufferInfo, int width,
 
     wnd->m_graphics->ClearBuffer(0.0f, 0.0f, 0.0f);
 
-    for(auto& c : wnd->cubes)
+    for(auto& c : wnd->boxes)
     {
         c->Update(dt);
         c->Draw(*(wnd->m_graphics.get()));

@@ -1,13 +1,17 @@
-#include "Cube.h"
+#include "Box.h"
 #include "../internal/BindablePipeline.h"
 #include "../internal/DXException.h"
+
+
+#include "../internal/DirectXMath/Inc/DirectXMath.h"
+#include "Cube.h"
 
 namespace nc::graphics::primitive
 {
 
 	using namespace nc::graphics::internal;
 
-Cube::Cube(Graphics& graphics, std::mt19937& rng,
+Box::Box(Graphics& graphics, std::mt19937& rng,
          std::uniform_real_distribution<float>& adist,
          std::uniform_real_distribution<float>& ddist,
          std::uniform_real_distribution<float>& odist,
@@ -25,42 +29,24 @@ Cube::Cube(Graphics& graphics, std::mt19937& rng,
 {
 	if(!IsStaticInitialized())
 	{
+		//define vertex type
 		struct Vertex
 		{
-			struct{ float x, y, z; } pos;
+			DirectX::XMFLOAT3 pos;
 		};
 
-		const std::vector<Vertex> vertices =
-		{
-			{-1.0f, -1.0f, -1.0f},
-			{ 1.0f, -1.0f, -1.0f},
-			{-1.0f,  1.0f, -1.0f},
-			{ 1.0f,  1.0f, -1.0f},
-			{-1.0f, -1.0f,  1.0f},
-			{ 1.0f, -1.0f,  1.0f},
-			{-1.0f,  1.0f,  1.0f},
-			{ 1.0f,  1.0f,  1.0f},
-		};
+		//get cube vertices and indices
+		auto model = Cube::Make<Vertex>();
 
-		AddStaticBind(std::make_unique<VertexBuffer>(graphics, vertices));
+		AddStaticBind(std::make_unique<VertexBuffer>(graphics, model.vertices));
 
 		auto pvs = std::make_unique<VertexShader>(graphics, L"graphics\\shader\\compiled\\vertexshader.cso");
 		auto pvsbc = pvs->GetBytecode();
-		AddStaticBind( std::move( pvs ) );
+		AddStaticBind(std::move(pvs));
 
-		AddStaticBind( std::make_unique<PixelShader>(graphics, L"graphics\\shader\\compiled\\pixelshader.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(graphics, L"graphics\\shader\\compiled\\pixelshader.cso"));
 
-		const std::vector<unsigned short> indices =
-		{
-			0,2,1, 2,3,1,
-			1,3,5, 3,7,5,
-			2,6,3, 3,6,7,
-			4,5,7, 4,7,6,
-			0,4,2, 2,4,6,
-			0,1,4, 1,5,4
-		};
-
-		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(graphics, indices));
+		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(graphics, model.indices));
 
 		struct ConstantBuffer2
 		{
@@ -98,7 +84,7 @@ Cube::Cube(Graphics& graphics, std::mt19937& rng,
 	AddBind(std::make_unique<TransformCbuf>(graphics, *this));
 }
 
-void Cube::Update(float dt) noexcept
+void Box::Update(float dt) noexcept
 {
 	roll  += droll  * dt;
 	pitch += dpitch * dt;
@@ -108,7 +94,7 @@ void Cube::Update(float dt) noexcept
 	chi   += dchi   * dt;
 }
 
-DirectX::XMMATRIX Cube::GetTransformXM() const noexcept
+DirectX::XMMATRIX Box::GetTransformXM() const noexcept
 {
 	return DirectX::XMMatrixRotationRollPitchYaw( pitch,yaw,roll ) *
 		   DirectX::XMMatrixTranslation( r,0.0f,0.0f )             *

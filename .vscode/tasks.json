@@ -40,7 +40,8 @@
                 "graphics/internal/VertexBuffer.cpp",
                 "graphics/internal/VertexShader.cpp",
 
-                "graphics/primitive/Cube.cpp",
+                "graphics/primitive/Box.cpp",
+                //"graphics/primitive/Cube.cpp",
 
                 "project/Components/Head.cpp",
                 "project/Components/Tail.cpp",

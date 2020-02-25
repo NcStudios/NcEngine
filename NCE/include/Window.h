@@ -8,7 +8,7 @@
 
 #include <vector> //only for boxes
 
-namespace nc::graphics::primitive { class Cube; }
+namespace nc::graphics::primitive { class Box; }
 
 namespace nc
 {
@@ -39,7 +39,7 @@ namespace nc
             HINSTANCE m_hInstance;
             std::unique_ptr<graphics::internal::Graphics> m_graphics;
 
-            std::vector<std::unique_ptr<nc::graphics::primitive::Cube>> cubes;
+            std::vector<std::unique_ptr<nc::graphics::primitive::Box>> boxes;
 
             Window::WindowDimensions GetWindowDimensions();
     };
