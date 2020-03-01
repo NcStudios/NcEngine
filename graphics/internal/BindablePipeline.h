@@ -1,5 +1,4 @@
 #pragma once
-
 #include "ConstantBuffer.h"
 #include "IndexBuffer.h"
 #include "InputLayout.h"

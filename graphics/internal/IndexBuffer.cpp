@@ -1,5 +1,6 @@
 #include "IndexBuffer.h"
 #include "DXException.h"
+#include "Graphics.h"
 
 namespace nc::graphics::internal
 {

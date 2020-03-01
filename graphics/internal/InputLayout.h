@@ -1,6 +1,7 @@
 #pragma once
 #include "Bindable.h"
 #include <vector>
+#include <wrl/client.h>
 
 namespace nc::graphics::internal
 {

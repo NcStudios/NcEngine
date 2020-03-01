@@ -1,5 +1,6 @@
 #pragma once
 #include "Bindable.h"
+#include "wrl/client.h"
 #include "DXException.h"
 #include <vector>
 

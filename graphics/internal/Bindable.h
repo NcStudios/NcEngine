@@ -1,12 +1,10 @@
 #pragma once
-#include <windows.h>
 #include <d3d11.h>
-#include <wrl/client.h>
-#include "Graphics.h"
-#include "DXException.h"
 
 namespace nc::graphics::internal
 {
+    class Graphics;
+
     class Bindable
     {
         public:

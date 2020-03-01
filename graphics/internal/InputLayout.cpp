@@ -1,4 +1,5 @@
 #include "InputLayout.h"
+#include "Graphics.h"
 #include "DXException.h"
 
 namespace nc::graphics::internal

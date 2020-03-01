@@ -1,10 +1,11 @@
 #include "Graphics.h"
 #include <d3dcompiler.h>
-#include "DirectXMath/Inc/DirectXMath.h"
+//#include "DirectXMath.h"
 #include "DXException.h"
 
-//#include <cmath> //trig
+//#include "imgui_impl_dx11.h"
 
+#include <iostream>
 
 namespace nc::graphics::internal{
 
@@ -35,7 +36,7 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
                                       D3D11_SDK_VERSION, &sd, &m_swap,
                                       &m_device, nullptr, &m_context)
     );
-    
+
     //get back buffer
     Microsoft::WRL::ComPtr<ID3D11Resource> backBuffer = nullptr;
     ThrowIfFailed(m_swap->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer));
@@ -83,6 +84,29 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     viewport.TopLeftX = 0.0f;
     viewport.TopLeftY = 0.0f;
     m_context->RSSetViewports(1u, &viewport);
+
+    //imgui dx bindings
+    //ImGui_ImplDX11_Init(m_device.Get(), m_context.Get()); //shutdown in destr?
+}
+
+DirectX::XMMATRIX Graphics::GetCamera() const noexcept
+{
+    return m_camera;
+}
+
+DirectX::XMMATRIX Graphics::GetProjection() const noexcept
+{
+    return m_projection;
+}
+
+void Graphics::SetCamera(DirectX::FXMMATRIX cam) noexcept
+{
+    m_camera = cam;
+}
+
+void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
+{
+    m_projection = proj;
 }
 
 void Graphics::DrawIndexed(UINT count)
@@ -100,16 +124,6 @@ void Graphics::ClearBuffer(float red, float green, float blue)
     const float color[] = {red, green, blue, 1.0f};
     m_context->ClearRenderTargetView(m_target.Get(), color);
     m_context->ClearDepthStencilView(m_dsv.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
-}
-
-void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
-{
-    m_projection = proj;
-}
-
-DirectX::XMMATRIX Graphics::GetProjection() const noexcept
-{
-    return m_projection;
 }
 
 } // end namespace nc::internal

@@ -1,12 +1,14 @@
 #pragma once
 #include "Graphics.h"
-#include "DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #include <vector>
 #include <memory>
 #include "Bindable.h"
 
 namespace nc::graphics::internal
 {
+    class IndexBuffer;
+
     class Drawable
     {
         template<class T>
@@ -24,7 +26,7 @@ namespace nc::graphics::internal
         
         protected:
             void AddBind(std::unique_ptr<Bindable> bind);
-            void AddIndexBuffer(std::unique_ptr<class IndexBuffer> ibuf);
+            void AddIndexBuffer(std::unique_ptr<IndexBuffer> ibuf);
 
         private:
             const IndexBuffer* m_indexBuffer = nullptr;

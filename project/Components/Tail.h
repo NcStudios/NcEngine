@@ -1,7 +1,7 @@
 #ifndef TAIL_H
 #define TAIL_H
 
-#include "../../NCE/include/NCE.h"
+#include "NCE.h"
 
 using namespace nc;
 

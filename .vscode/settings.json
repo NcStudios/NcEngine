@@ -46,6 +46,8 @@
         "iterator": "cpp",
         "numeric": "cpp",
         "random": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "cstring": "cpp",
+        "cinttypes": "cpp"
     }
 }

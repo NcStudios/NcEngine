@@ -2,6 +2,7 @@
 #include "Bindable.h"
 #include <vector>
 #include <stdint.h>
+#include <wrl/client.h>
 
 namespace nc::graphics::internal
 {

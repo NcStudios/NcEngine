@@ -1,9 +1,9 @@
 #include "Box.h"
-#include "../internal/BindablePipeline.h"
-#include "../internal/DXException.h"
+#include "BindablePipeline.h"
+#include "DXException.h"
 
 
-#include "../internal/DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #include "Cube.h"
 
 namespace nc::graphics::primitive
@@ -33,43 +33,51 @@ Box::Box(Graphics& graphics, std::mt19937& rng,
 		struct Vertex
 		{
 			DirectX::XMFLOAT3 pos;
+			DirectX::XMFLOAT3 n;
 		};
 
 		//get cube vertices and indices
-		auto model = Cube::Make<Vertex>();
+		auto model = Cube::MakeIndependent<Vertex>();
+		model.SetNormalsIndependentFlat();
 
 		AddStaticBind(std::make_unique<VertexBuffer>(graphics, model.vertices));
 
-		auto pvs = std::make_unique<VertexShader>(graphics, L"graphics\\shader\\compiled\\vertexshader.cso");
+		auto pvs = std::make_unique<VertexShader>(graphics, L"graphics\\shader\\compiled\\litvertexshader.cso");
 		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
-		AddStaticBind(std::make_unique<PixelShader>(graphics, L"graphics\\shader\\compiled\\pixelshader.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(graphics, L"graphics\\shader\\compiled\\litpixelshader.cso"));
 
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(graphics, model.indices));
 
-		struct ConstantBuffer2
-		{
-			struct { float r, g, b, a; } face_colors[6];
-		};
+		// struct PSLightConstants
+		// {
+		// 	DirectX::XMVECTOR pos;
+		// };
 
-		const ConstantBuffer2 cb2 =
-		{
-			{
-				{ 1.0f, 0.0f, 1.0f },
-				{ 1.0f, 0.0f, 0.0f },
-				{ 0.0f, 1.0f, 0.0f },
-				{ 0.0f, 0.0f, 1.0f },
-				{ 1.0f, 1.0f, 0.0f },
-				{ 0.0f, 1.0f, 1.0f },
-			}
-		};
+		// struct ConstantBuffer2
+		// {
+		// 	struct { float r, g, b, a; } face_colors[6];
+		// };
 
-		AddStaticBind(std::make_unique<PixelConstantBuffer<ConstantBuffer2>>(graphics, cb2));
+		// const ConstantBuffer2 cb2 =
+		// {
+		// 	{
+		// 		{ 1.0f, 0.0f, 1.0f },
+		// 		{ 1.0f, 0.0f, 0.0f },
+		// 		{ 0.0f, 1.0f, 0.0f },
+		// 		{ 0.0f, 0.0f, 1.0f },
+		// 		{ 1.0f, 1.0f, 0.0f },
+		// 		{ 0.0f, 1.0f, 1.0f },
+		// 	}
+		// };
+
+		//AddStaticBind(std::make_unique<PixelConstantBuffer<PSLightConstants>>(graphics));
 
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
-			{ "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "Normal",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		AddStaticBind(std::make_unique<InputLayout>(graphics, ied, pvsbc));
@@ -98,8 +106,7 @@ DirectX::XMMATRIX Box::GetTransformXM() const noexcept
 {
 	return DirectX::XMMatrixRotationRollPitchYaw( pitch,yaw,roll ) *
 		   DirectX::XMMatrixTranslation( r,0.0f,0.0f )             *
-		   DirectX::XMMatrixRotationRollPitchYaw( theta,phi,chi )  *
-		   DirectX::XMMatrixTranslation( 0.0f,0.0f,20.0f );
+		   DirectX::XMMatrixRotationRollPitchYaw( theta,phi,chi );
 }
 
 }// end namespace nc::graphics::internal

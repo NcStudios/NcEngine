@@ -1,7 +1,7 @@
 #ifndef HEAD_H
 #define HEAD_H
 
-#include "../../NCE/include/NCE.h"
+#include "NCE.h"
 #include "Tail.h"
 #include "Point.h"
 

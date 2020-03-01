@@ -1,4 +1,5 @@
 #include "Topology.h"
+#include "Graphics.h"
 
 namespace nc::graphics::internal
 {

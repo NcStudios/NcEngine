@@ -1,9 +1,12 @@
 #pragma once
-#include <windows.h>
+#include "NCWin32.h"
+//#include <windows.h>
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <stdint.h>
-#include "DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath.h"
+
+namespace nc::editor { class EditorManager; }
 
 namespace nc::graphics::internal
 {
@@ -12,6 +15,7 @@ namespace nc::graphics::internal
     class Graphics
     {
         friend Bindable;
+        friend nc::editor::EditorManager;
 
         public:
             Graphics(HWND hwnd, float screenWidth, float screenHeight);
@@ -21,17 +25,19 @@ namespace nc::graphics::internal
             Graphics& operator=(const Graphics&) = delete;
             Graphics& operator=(Graphics&&) = delete;
 
-            //void DrawTriangle(float angle, float mouseX, float mouseY);
+            DirectX::XMMATRIX GetCamera() const noexcept;
+            DirectX::XMMATRIX GetProjection() const noexcept;
+
+            void SetCamera(DirectX::FXMMATRIX cam) noexcept;
+            void SetProjection(DirectX::FXMMATRIX proj) noexcept;
+
             void DrawIndexed(UINT count);
-            
             void EndFrame();
             void ClearBuffer(float red, float green, float blue);
 
-            void SetProjection(DirectX::FXMMATRIX proj) noexcept;
-            DirectX::XMMATRIX GetProjection() const noexcept;
-
         private:
             float m_screenWidth, m_screenHeight;
+            DirectX::XMMATRIX m_camera;
             DirectX::XMMATRIX m_projection;
             Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
             Microsoft::WRL::ComPtr<IDXGISwapChain> m_swap = nullptr;

@@ -1,9 +1,9 @@
 #ifndef CHARACTER2
 #define CHARACTER2
 
-#include "../../NCE/include/NCE.h"
+#include "NCE.h"
 #include "Head.h"
-#include "PointSpawner.h"
+//#include "PointSpawner.h"
 
 using namespace nc;
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "ConstantBuffer.h"
 #include "Drawable.h"
-#include "DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 
 namespace nc::graphics::internal
 {
@@ -12,7 +12,14 @@ namespace nc::graphics::internal
             void Bind(Graphics& graphics) noexcept override;
 
         private:
-            static std::unique_ptr<VertexConstantBuffer<DirectX::XMMATRIX>> m_vcbuf;
+            struct Transforms
+            {
+                DirectX::XMMATRIX modelView;
+                DirectX::XMMATRIX model;
+            };
+
+            static std::unique_ptr<VertexConstantBuffer<Transforms>> m_vcbuf;
+            //static std::unique_ptr<VertexConstantBuffer<DirectX::XMMATRIX>> m_vcbuf;
             const Drawable& m_parent;
     };
 }

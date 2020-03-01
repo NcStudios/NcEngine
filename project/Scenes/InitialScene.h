@@ -2,10 +2,10 @@
 #define INITIAL_SCENE_H
 
 #include <random>
-#include "../../NCE/include/Scene.h"
-#include "../../NCE/include/NCE.h"
-#include "../Components/Head.h"
-#include "../Components/PointSpawner.h"
+#include "Scene.h"
+#include "NCE.h"
+#include "Head.h"
+//#include "../Components/PointSpawner.h"
 
 class InitialScene : public nc::scene::Scene
 {
