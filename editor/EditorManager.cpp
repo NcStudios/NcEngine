@@ -84,7 +84,6 @@ namespace nc::editor
     }
 
     void EditorManager::PointLightControl(float* xPos,      float* yPos,      float* zPos,
-                                          float* matColorR, float* matColorG, float* matColorB,
                                           float* ambientR,  float* ambientG,  float* ambientB,
                                           float* difColorR, float* difColorG, float* difColorB,
                                           float* difIntens, float* attConst,  float* attLin, float* attQuad)
@@ -97,7 +96,6 @@ namespace nc::editor
             ImGui::SliderFloat("Z", zPos, -60.0f, 60.0f, "%.1f");
             
             ImGui::Text("Color");
-            ImGui::ColorEdit3("Material", matColorR);
             ImGui::ColorEdit3("Ambient", ambientR);
             ImGui::ColorEdit3("Diffuse", difColorR);
             ImGui::SliderFloat("Diffuse Intensity", difIntens, 0.01f, 2.0f, "%.05f", 2);

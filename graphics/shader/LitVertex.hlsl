@@ -1,12 +1,12 @@
 cbuffer CBuf
 {
-    matrix model;
+    matrix modelView;
     matrix modelViewProj;
 };
 
 struct VSOut
 {
-    float3 worldPos : Position;
+    float3 posFromCam : Position;
     float3 normal : Normal;
     float4 pos : SV_Position;
 };
@@ -14,8 +14,8 @@ struct VSOut
 VSOut main(float3 pos : Position, float3 n : Normal)
 {
     VSOut vso;
-    vso.worldPos = (float3)mul(float4(pos, 1.0f), model);  //transformation on homogeneous coords
-    vso.normal   = mul(n, (float3x3)model);                //apply rotation to normals, but not translation
+    vso.posFromCam = (float3)mul(float4(pos, 1.0f), modelView);  //transformation on homogeneous coords
+    vso.normal   = mul(n, (float3x3)modelView);                //apply rotation to normals, but not translation
     vso.pos      = mul(float4(pos, 1.0f), modelViewProj);  //
     return vso;
 }

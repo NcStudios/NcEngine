@@ -15,7 +15,8 @@ Box::Box(Graphics& graphics, std::mt19937& rng,
          std::uniform_real_distribution<float>& adist,
          std::uniform_real_distribution<float>& ddist,
          std::uniform_real_distribution<float>& odist,
-         std::uniform_real_distribution<float>& rdist )
+         std::uniform_real_distribution<float>& rdist,
+		 DirectX::XMFLOAT3 materialColor)
 	: r(rdist(rng)),
 	  theta(adist(rng)),
 	  phi(adist(rng)),
@@ -50,30 +51,6 @@ Box::Box(Graphics& graphics, std::mt19937& rng,
 
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(graphics, model.indices));
 
-		// struct PSLightConstants
-		// {
-		// 	DirectX::XMVECTOR pos;
-		// };
-
-		// struct ConstantBuffer2
-		// {
-		// 	struct { float r, g, b, a; } face_colors[6];
-		// };
-
-		// const ConstantBuffer2 cb2 =
-		// {
-		// 	{
-		// 		{ 1.0f, 0.0f, 1.0f },
-		// 		{ 1.0f, 0.0f, 0.0f },
-		// 		{ 0.0f, 1.0f, 0.0f },
-		// 		{ 0.0f, 0.0f, 1.0f },
-		// 		{ 1.0f, 1.0f, 0.0f },
-		// 		{ 0.0f, 1.0f, 1.0f },
-		// 	}
-		// };
-
-		//AddStaticBind(std::make_unique<PixelConstantBuffer<PSLightConstants>>(graphics));
-
 		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 		{
 			{ "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -90,6 +67,17 @@ Box::Box(Graphics& graphics, std::mt19937& rng,
 	}
 
 	AddBind(std::make_unique<TransformCbuf>(graphics, *this));
+
+	struct PSMaterialConstant
+	{
+		alignas(16)DirectX::XMFLOAT3 color;
+		float specularIntensity = 0.6;
+		float specularPower = 30.0f;
+		float padding[2];
+	} colorConst;
+
+	colorConst.color = materialColor;
+	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(graphics, colorConst, 1u));
 }
 
 void Box::Update(float dt) noexcept

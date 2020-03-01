@@ -27,7 +27,6 @@ namespace nc::editor
             static void CameraControl(float* zPos, float* phi, float* theta, float* xRot, float* yRot, float* zRot);
 
             static void PointLightControl(float* xPos,      float* yPos,      float* zPos,
-                                          float* matColorR, float* matColorG, float* matColorB,
                                           float* ambientR,  float* ambientG,  float* ambientB,
                                           float* difColorR, float* difColorG, float* difColorB,
                                           float* difIntens, float* attConst,  float* attLin, float* attQuad);

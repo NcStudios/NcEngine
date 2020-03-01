@@ -20,15 +20,19 @@ RenderingSystem::RenderingSystem(int initialWidth, int initialHeight, HWND hwnd)
       m_graphics(std::make_unique<graphics::internal::Graphics>(hwnd, initialWidth, initialHeight))
 {
     std::mt19937 rng( std::random_device{}() );
-	std::uniform_real_distribution<float> adist( 0.0f,3.1415f * 2.0f );
-	std::uniform_real_distribution<float> ddist( 0.0f,3.1415f * 2.0f );
-	std::uniform_real_distribution<float> odist( 0.0f,3.1415f * 0.3f );
-	std::uniform_real_distribution<float> rdist( 6.0f,20.0f );
+	std::uniform_real_distribution<float> adist(0.0f,3.1415f * 2.0f);
+	std::uniform_real_distribution<float> ddist(0.0f,3.1415f * 2.0f);
+	std::uniform_real_distribution<float> odist(0.0f,3.1415f * 0.3f);
+	std::uniform_real_distribution<float> rdist(6.0f,20.0f);
+    std::uniform_real_distribution<float> cdist(0.0f, 1.0f); 
 
     //make cubes
     for(auto i = 0; i < 70; ++i)
     {
-        m_drawables.push_back(std::make_unique<nc::graphics::primitive::Box>(GetGraphics(), rng, adist, ddist, odist, rdist));
+        const DirectX::XMFLOAT3 materialColor = {cdist(rng), cdist(rng), cdist(rng)};
+        m_drawables.push_back(std::make_unique<nc::graphics::primitive::Box>(GetGraphics(),
+                                                                             rng, adist, ddist, odist, rdist,
+                                                                             materialColor));
     }
 
     //make light
@@ -50,7 +54,7 @@ void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)
     
     m_graphics->SetCamera(m_camera->GetMatrix());
 
-    m_pointLight->Bind(GetGraphics());
+    m_pointLight->Bind(GetGraphics(), m_camera->GetMatrix());
 
     m_editorManager->BeginFrame();
     BeginFrame();

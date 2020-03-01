@@ -11,14 +11,14 @@ namespace nc::graphics
             
             void SpawnControlWindow() noexcept;
 
-            void Draw(internal::Graphics& graphics) const noexcept;
-            void Bind(internal::Graphics& graphics) const noexcept;
+            //void Draw(internal::Graphics& graphics) const noexcept;
+            void Bind(internal::Graphics& graphics, DirectX::FXMMATRIX view) const noexcept;
 
         private:
             struct PointLightCBuf
             {
                 alignas(16)DirectX::XMFLOAT3 pos;
-                alignas(16)DirectX::XMFLOAT3 materialColor;
+                //alignas(16)DirectX::XMFLOAT3 materialColor;
                 alignas(16)DirectX::XMFLOAT3 ambient;
                 alignas(16)DirectX::XMFLOAT3 diffuseColor;
                 float diffuseIntensity;

@@ -8,7 +8,7 @@ namespace nc::graphics::internal
     class TransformCbuf : public Bindable
     {
         public:
-            TransformCbuf(Graphics& graphics, const Drawable& parent);
+            TransformCbuf(Graphics& graphics, const Drawable& parent, UINT slot = 0u);
             void Bind(Graphics& graphics) noexcept override;
 
         private:
@@ -19,7 +19,6 @@ namespace nc::graphics::internal
             };
 
             static std::unique_ptr<VertexConstantBuffer<Transforms>> m_vcbuf;
-            //static std::unique_ptr<VertexConstantBuffer<DirectX::XMMATRIX>> m_vcbuf;
             const Drawable& m_parent;
     };
 }

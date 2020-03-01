@@ -11,12 +11,15 @@ namespace nc::graphics::primitive
                  std::uniform_real_distribution<float>& adist,
                  std::uniform_real_distribution<float>& ddist,
                  std::uniform_real_distribution<float>& odist,
-                 std::uniform_real_distribution<float>& rdist );
+                 std::uniform_real_distribution<float>& rdist,
+                 DirectX::XMFLOAT3 materialColor);
 
             void Update(float dt) noexcept override;
             DirectX::XMMATRIX GetTransformXM() const noexcept override;
             
         private:
+            //DirectX::XMFLOAT3 m_materialColor;
+            
             // positional
             float r;
             float roll = 0.0f;
