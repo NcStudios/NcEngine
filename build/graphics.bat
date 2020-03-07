@@ -1,14 +1,22 @@
 cd obj
 g++ -Wall -std=c++17^
- -I..\external\DirectXMath\Inc^
- -I..\graphics^
- -I..\graphics\internal^
- -I..\graphics\primitive^
- -I..\nce^
- -I..\utils\editor^
- -I..\utils\editor\imgui^
- -I..\utils\objloader^
- -I..\win32^
- -c ..\graphics\*.cpp^
- ..\graphics\internal\*.cpp^
- ..\graphics\primitive\*.cpp
+ -I..\nc^
+ -I..\nc\debug^
+ -I..\nc\engine^
+ -I..\nc\graphics^
+ -I..\nc\graphics\d3dresource^
+ -I..\nc\graphics\DirectXMath\Inc^
+ -I..\nc\graphics\primitive^
+ -I..\nc\input^
+ -I..\nc\math^
+ -I..\nc\scene^
+ -I..\nc\time^
+ -I..\nc\utils\editor^
+ -I..\nc\utils\editor\imgui^
+ -I..\nc\utils\objloader^
+ -I..\nc\win32^
+ -I..\project\Components^
+ -I..\project\Scenes^
+ -c ..\nc\graphics\*.cpp^
+ ..\nc\graphics\d3dresource\*.cpp^
+ ..\nc\graphics\primitive\*.cpp

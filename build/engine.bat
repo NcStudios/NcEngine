@@ -1,25 +1,25 @@
 cd obj
 g++ -Wall -std=c++17^
- -I..\external\DirectXMath\Inc^
- -I..\graphics^
- -I..\graphics\internal^
- -I..\graphics\primitive^
- -I..\nce^
- -I..\nce\debug^
- -I..\nce\input^
- -I..\nce\internal^
- -I..\nce\math^
- -I..\nce\scene^
- -I..\nce\time^
- -I..\utils\editor^
- -I..\utils\editor\imgui^
- -I..\utils\objloader^
+ -I..\nc^
+ -I..\nc\debug^
+ -I..\nc\engine^
+ -I..\nc\graphics^
+ -I..\nc\graphics\d3dresource^
+ -I..\nc\graphics\DirectXMath\Inc^
+ -I..\nc\graphics\primitive^
+ -I..\nc\input^
+ -I..\nc\math^
+ -I..\nc\scene^
+ -I..\nc\time^
+ -I..\nc\utils\editor^
+ -I..\nc\utils\editor\imgui^
+ -I..\nc\utils\objloader^
+ -I..\nc\win32^
  -I..\project\Components^
  -I..\project\Scenes^
- -I..\win32^
- -c ..\nce\*.cpp^
- ..\nce\input\*.cpp^
- ..\nce\internal\*.cpp^
- ..\nce\scene\*.cpp^
- ..\nce\time\*.cpp^
- ..\win32\*.cpp
+ -c ..\nc\*.cpp^
+ ..\nc\engine\*.cpp^
+ ..\nc\input\*.cpp^
+ ..\nc\scene\*.cpp^
+ ..\nc\time\*.cpp^
+ ..\nc\win32\*.cpp
