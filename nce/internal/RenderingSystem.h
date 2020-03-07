@@ -9,6 +9,8 @@
 //#include "Box2.h"
 //#include "Box.h"
 
+#include <set>
+
 //forwards
 namespace nc
 {
@@ -23,6 +25,11 @@ namespace nc
         {
             class Graphics;
             class Drawable;
+        }
+
+        namespace primitive
+        {
+            class Box;
         }
     }
 
@@ -53,6 +60,12 @@ namespace nc::internal
 
             std::unique_ptr<graphics::internal::Graphics> m_graphics;
             std::vector<std::unique_ptr<nc::graphics::internal::Drawable>> m_drawables;
+
+
+            std::vector<nc::graphics::primitive::Box*> m_boxes; 
+            std::optional<int> m_comboBoxIndex;
+            std::set<int> m_boxControlIds;
+
             editor::EditorManager* m_editorManager;
             bool m_isGuiEnabled = true;
             void BeginFrame();

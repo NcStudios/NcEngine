@@ -31,6 +31,9 @@ namespace nc::editor
                                           float* difColorR, float* difColorG, float* difColorB,
                                           float* difIntens, float* attConst,  float* attLin, float* attQuad);
 
+            static bool BoxControl(int id, float* matX, float* specIntensity, float* specPower,
+                                   float* r, float* theta, float* phi);
+
         private:
             bool m_isGuiActive;
     };

@@ -3,10 +3,11 @@
 
 namespace nc::graphics
 {
-    PointLight::PointLight(internal::Graphics& graphics, float radius)
+    PointLight::PointLight(internal::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius)
         : m_cBuf(graphics)
     {
-        m_constBufData.pos = {0.0f, 0.0f, 0.0f};
+        //m_constBufData.pos = {0.0f, 0.0f, 0.0f};
+        m_constBufData.pos = pos;
         //m_constBufData.materialColor = {0.4f, 0.4f, 0.6f};
         m_constBufData.ambient = {0.05f, 0.05f, 0.05f};
         m_constBufData.diffuseColor = {0.8f, 0.2f, 0.2f};

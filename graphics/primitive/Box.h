@@ -2,6 +2,11 @@
 #include "../internal/DrawableBase.h"
 #include <random>
 
+namespace nc::graphics::internal
+{
+    class Graphics;
+}
+
 namespace nc::graphics::primitive
 {
     class Box : public nc::graphics::internal::DrawableBase<Box>
@@ -16,10 +21,21 @@ namespace nc::graphics::primitive
 
             void Update(float dt) noexcept override;
             DirectX::XMMATRIX GetTransformXM() const noexcept override;
+
+            void SpawnControlWindow(int id, nc::graphics::internal::Graphics& graphics);
             
         private:
+            void SyncMaterialData(nc::graphics::internal::Graphics& graphics);
+
             //DirectX::XMFLOAT3 m_materialColor;
-            
+            struct PSMaterialConstants
+            {
+                DirectX::XMFLOAT3 color;
+                float specularIntensity = 0.6;
+                float specularPower = 30.0f;
+                float padding[3];
+            } m_materialData;
+
             // positional
             float r;
             float roll = 0.0f;

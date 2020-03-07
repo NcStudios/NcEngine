@@ -48,6 +48,7 @@
         "random": "cpp",
         "map": "cpp",
         "cstring": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "set": "cpp"
     }
 }

@@ -34,13 +34,32 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
         D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE,
                                       nullptr, 0, nullptr, 0,
                                       D3D11_SDK_VERSION, &sd, &m_swap,
-                                      &m_device, nullptr, &m_context)
+                                      &m_device, nullptr, &m_context),
+        __FILE__, __LINE__
     );
+
+    //rasterizer desc
+    D3D11_RASTERIZER_DESC rastDesc = {};
+    rastDesc.FillMode = D3D11_FILL_SOLID;
+    //rastDesc.CullMode = D3D11_CULL_NONE;
+    rastDesc.CullMode = D3D11_CULL_BACK;
+    rastDesc.FrontCounterClockwise = FALSE;
+    rastDesc.DepthBias = 0;
+    rastDesc.SlopeScaledDepthBias = 0.0f;
+    rastDesc.DepthBiasClamp = 0.0f;
+    rastDesc.DepthClipEnable = TRUE;
+    rastDesc.ScissorEnable = FALSE;
+    rastDesc.MultisampleEnable = FALSE;
+    rastDesc.AntialiasedLineEnable = FALSE;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
+    m_device->CreateRasterizerState(&rastDesc, &rasterizerState);
+    m_context->RSSetState(rasterizerState.Get());    
+
 
     //get back buffer
     Microsoft::WRL::ComPtr<ID3D11Resource> backBuffer = nullptr;
-    ThrowIfFailed(m_swap->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer));
-    ThrowIfFailed(m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_target));
+    ThrowIfFailed(m_swap->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer), __FILE__, __LINE__);
+    ThrowIfFailed(m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_target), __FILE__, __LINE__);
 
     //depth stencil state
     D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
@@ -48,7 +67,7 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
     depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-    ThrowIfFailed(m_device->CreateDepthStencilState(&depthStencilStateDesc, &depthStencilState));
+    ThrowIfFailed(m_device->CreateDepthStencilState(&depthStencilStateDesc, &depthStencilState), __FILE__, __LINE__);
     m_context->OMSetDepthStencilState(depthStencilState.Get(), 1u);
 
     //depth stencil texture
@@ -63,14 +82,14 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     depthTextDesc.SampleDesc.Quality = 0u;
     depthTextDesc.Usage = D3D11_USAGE_DEFAULT;
     depthTextDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    ThrowIfFailed(m_device->CreateTexture2D(&depthTextDesc, nullptr, &depthStencilTexture));
+    ThrowIfFailed(m_device->CreateTexture2D(&depthTextDesc, nullptr, &depthStencilTexture), __FILE__, __LINE__);
 
     //create depth stencil texture view
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
     dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
     dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     dsvDesc.Texture2D.MipSlice = 0u;
-    ThrowIfFailed(m_device->CreateDepthStencilView(depthStencilTexture.Get(), &dsvDesc, &m_dsv));
+    ThrowIfFailed(m_device->CreateDepthStencilView(depthStencilTexture.Get(), &dsvDesc, &m_dsv), __FILE__, __LINE__);
 
     //bind depth stencil view
     m_context->OMSetRenderTargets(1u, m_target.GetAddressOf(), m_dsv.Get());
@@ -84,6 +103,9 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     viewport.TopLeftX = 0.0f;
     viewport.TopLeftY = 0.0f;
     m_context->RSSetViewports(1u, &viewport);
+
+
+    
 
     //imgui dx bindings
     //ImGui_ImplDX11_Init(m_device.Get(), m_context.Get()); //shutdown in destr?
@@ -111,12 +133,13 @@ void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
 
 void Graphics::DrawIndexed(UINT count)
 {
+    //m_context->Draw(count, 0u);
     m_context->DrawIndexed(count, 0u, 0u);
 }
 
 void Graphics::EndFrame()
 {
-    ThrowIfFailed(m_swap->Present(1u, 0u));
+    ThrowIfFailed(m_swap->Present(1u, 0u), __FILE__, __LINE__);
 }
 
 void Graphics::ClearBuffer(float red, float green, float blue)

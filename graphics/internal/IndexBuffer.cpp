@@ -18,7 +18,8 @@ namespace nc::graphics::internal
         isd.pSysMem = indices.data();
         ThrowIfFailed
         (
-            GetDevice(graphics)->CreateBuffer(&ibd, &isd, &m_indexBuffer)
+            GetDevice(graphics)->CreateBuffer(&ibd, &isd, &m_indexBuffer),
+            __FILE__, __LINE__
         );
     }
 

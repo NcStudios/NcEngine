@@ -5,6 +5,12 @@
 
 #include "DirectXMath.h"
 #include "Cube.h"
+#include "EditorManager.h"
+
+#include "Graphics.h"
+
+#include "ObjLoader.h"
+#include "Model.h"
 
 namespace nc::graphics::primitive
 {
@@ -38,28 +44,26 @@ Box::Box(Graphics& graphics, std::mt19937& rng,
 		};
 
 		//get cube vertices and indices
-		auto model = Cube::MakeIndependent<Vertex>();
-		model.SetNormalsIndependentFlat();
+		//auto model = Cube::MakeIndependent<Vertex>();
+		//model.SetNormalsIndependentFlat();
+
+		utils::ObjLoader loader;
+		Model model = loader.Load("utils\\objloader\\testobj.obj");
+		//model.SetNormalsIndependentFlat();
 
 		AddStaticBind(std::make_unique<VertexBuffer>(graphics, model.vertices));
 
-		auto pvs = std::make_unique<VertexShader>(graphics, L"graphics\\shader\\compiled\\litvertexshader.cso");
+		auto pvs = std::make_unique<VertexShader>(graphics, model.vertShaderPath);
 		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
 
-		AddStaticBind(std::make_unique<PixelShader>(graphics, L"graphics\\shader\\compiled\\litpixelshader.cso"));
+		AddStaticBind(std::make_unique<PixelShader>(graphics, model.pixShaderPath));
 
 		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(graphics, model.indices));
 
-		const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-		{
-			{ "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "Normal",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-		};
+		AddStaticBind(std::make_unique<InputLayout>(graphics, model.ied, pvsbc));
 
-		AddStaticBind(std::make_unique<InputLayout>(graphics, ied, pvsbc));
-
-		AddStaticBind(std::make_unique<Topology>(graphics, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST ) );
+		AddStaticBind(std::make_unique<Topology>(graphics, model.topology));
 	} //end if !IsStaticInitialized()
 	else
 	{
@@ -68,26 +72,29 @@ Box::Box(Graphics& graphics, std::mt19937& rng,
 
 	AddBind(std::make_unique<TransformCbuf>(graphics, *this));
 
-	struct PSMaterialConstant
-	{
-		alignas(16)DirectX::XMFLOAT3 color;
-		float specularIntensity = 0.6;
-		float specularPower = 30.0f;
-		float padding[2];
-	} colorConst;
+	m_materialData.color = materialColor;
 
-	colorConst.color = materialColor;
-	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstant>>(graphics, colorConst, 1u));
+	AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstants>>(graphics, m_materialData, 1u));
 }
+
+
+template<typename T>
+T wrap_angle(T theta)
+{
+	const auto PI = 3.14159265358979;
+	const T t = fmod(theta, (T)2.0 * (T)PI);
+	return (t > (T)PI ? (t - (T)2.0 * (T)PI) : t);
+}
+
 
 void Box::Update(float dt) noexcept
 {
-	roll  += droll  * dt;
-	pitch += dpitch * dt;
-	yaw   += dyaw   * dt;
-	theta += dtheta * dt;
-	phi   += dphi   * dt;
-	chi   += dchi   * dt;
+	roll  = wrap_angle(roll  + droll  * dt);
+	pitch = wrap_angle(pitch + dpitch * dt);
+	yaw   = wrap_angle(yaw   + dyaw   * dt);
+	theta = wrap_angle(theta + dtheta * dt);
+	phi   = wrap_angle(phi   + dphi   * dt);
+	chi   = wrap_angle(chi   + dchi   * dt);
 }
 
 DirectX::XMMATRIX Box::GetTransformXM() const noexcept
@@ -95,6 +102,25 @@ DirectX::XMMATRIX Box::GetTransformXM() const noexcept
 	return DirectX::XMMatrixRotationRollPitchYaw( pitch,yaw,roll ) *
 		   DirectX::XMMatrixTranslation( r,0.0f,0.0f )             *
 		   DirectX::XMMatrixRotationRollPitchYaw( theta,phi,chi );
+}
+
+void Box::SpawnControlWindow(int id, Graphics& graphics)
+{
+	//bool open = true;
+	bool needSync = editor::EditorManager::BoxControl(id, &m_materialData.color.x, &m_materialData.specularIntensity, &m_materialData.specularPower,
+	                                                  &r, &theta, &phi);
+	if(needSync)
+	{
+		SyncMaterialData(graphics);
+	}
+	
+}
+
+void Box::SyncMaterialData(Graphics& graphics)
+{
+	auto pConstPS = QueryBindable<PixelConstantBuffer<PSMaterialConstants>>();
+	assert(pConstPS != nullptr);
+	pConstPS->Update(graphics, m_materialData);
 }
 
 }// end namespace nc::graphics::internal

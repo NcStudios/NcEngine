@@ -7,15 +7,14 @@ namespace nc::graphics::internal
 {
     VertexShader::VertexShader(Graphics& graphics, const std::wstring& path)
     {
-        ThrowIfFailed
-        (
-            D3DReadFileToBlob(path.c_str(),&m_bytecodeBlob)
-        );
+        ThrowIfFailed(D3DReadFileToBlob(path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
+        
         ThrowIfFailed
         (
             GetDevice(graphics)->CreateVertexShader(m_bytecodeBlob->GetBufferPointer(),
                                                     m_bytecodeBlob->GetBufferSize(),
-                                                    nullptr, &m_vertexShader)
+                                                    nullptr, &m_vertexShader),
+            __FILE__, __LINE__
         );
     }
 

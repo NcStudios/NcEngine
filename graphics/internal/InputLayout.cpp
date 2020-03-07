@@ -16,7 +16,8 @@ namespace nc::graphics::internal
                                                    (UINT)layout.size(),
                                                    vertexShaderBytecode->GetBufferPointer(),
                                                    vertexShaderBytecode->GetBufferSize(),
-                                                   &m_inputLayout)
+                                                   &m_inputLayout),
+            __FILE__, __LINE__
         );
     }
 

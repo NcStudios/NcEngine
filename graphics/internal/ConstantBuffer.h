@@ -35,7 +35,7 @@ namespace nc::graphics::internal
 
         D3D11_SUBRESOURCE_DATA csd = {};
         csd.pSysMem = &consts;
-        ThrowIfFailed(GetDevice(graphics)->CreateBuffer( &cbd,&csd,&m_constantBuffer) );
+        ThrowIfFailed(GetDevice(graphics)->CreateBuffer( &cbd,&csd,&m_constantBuffer), __FILE__, __LINE__);
     }
 
     template<class T>
@@ -49,7 +49,7 @@ namespace nc::graphics::internal
         cbd.MiscFlags = 0u;
         cbd.ByteWidth = sizeof(T);
         cbd.StructureByteStride = 0u;
-        ThrowIfFailed(GetDevice(graphics)->CreateBuffer(&cbd,nullptr,&m_constantBuffer));
+        ThrowIfFailed(GetDevice(graphics)->CreateBuffer(&cbd,nullptr,&m_constantBuffer), __FILE__, __LINE__);
     }
 
     template<class T>
@@ -58,8 +58,8 @@ namespace nc::graphics::internal
         D3D11_MAPPED_SUBRESOURCE msr;
         ThrowIfFailed
         (
-            GetContext(graphics)->Map(m_constantBuffer.Get(), 0u,
-                                      D3D11_MAP_WRITE_DISCARD,0u, &msr)
+            GetContext(graphics)->Map(m_constantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD,0u, &msr),
+            __FILE__, __LINE__
         );
         memcpy(msr.pData, &consts, sizeof(consts));
         GetContext(graphics)->Unmap(m_constantBuffer.Get(), 0u);

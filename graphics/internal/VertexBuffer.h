@@ -24,7 +24,8 @@ namespace nc::graphics::internal
                 sd.pSysMem = vertices.data();
                 ThrowIfFailed
                 (
-                    GetDevice(graphics)->CreateBuffer(&bd,&sd,&m_vertexBuffer)
+                    GetDevice(graphics)->CreateBuffer(&bd,&sd,&m_vertexBuffer),
+                    __FILE__, __LINE__
                 );
             }
 

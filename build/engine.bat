@@ -1,7 +1,5 @@
 cd obj
 g++ -Wall -std=c++17^
- -I..\editor^
- -I..\editor\imgui^
  -I..\external\DirectXMath\Inc^
  -I..\graphics^
  -I..\graphics\internal^
@@ -13,6 +11,9 @@ g++ -Wall -std=c++17^
  -I..\nce\math^
  -I..\nce\scene^
  -I..\nce\time^
+ -I..\utils\editor^
+ -I..\utils\editor\imgui^
+ -I..\utils\objloader^
  -I..\project\Components^
  -I..\project\Scenes^
  -I..\win32^

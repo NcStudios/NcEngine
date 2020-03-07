@@ -5,6 +5,9 @@
 #include "imgui_impl_dx11.h"
 #include "Graphics.h"
 
+#include <string>
+
+
 namespace nc::editor
 {
     EditorManager::EditorManager(HWND hwnd, nc::graphics::internal::Graphics& graphics)
@@ -106,6 +109,30 @@ namespace nc::editor
             ImGui::SliderFloat("Quadratic", attQuad, 0.0000001f, 10.0f, "%.7f", 10);
         }
         ImGui::End();
+    }
+
+    
+    bool EditorManager::BoxControl(int id, float* matX, float* specInten, float* specPwr,
+                                   float* r, float* theta, float* phi)
+    {
+        using namespace std::string_literals;
+
+        bool isDirty = false;
+        if(ImGui::Begin("Box "))// + std::to_string(id).c_str() ) )
+        {
+            bool mDirty  = ImGui::ColorEdit3("Material Color", matX);
+            bool siDirty = ImGui::SliderFloat("Specular Intensity", specInten, 0.05f, 4.0f, "%.2f", 2);
+            bool spDirty = ImGui::SliderFloat("Specular Power", specPwr, 1.0f, 200.0f, "%.2f", 2);
+            isDirty = mDirty || siDirty || spDirty;
+
+            ImGui::Text("Position");
+            ImGui::SliderFloat("R", r, 0.0f, 80.0f, "%.1f");
+            ImGui::SliderAngle("Theta", theta, -180.0f, 180.0f);
+            ImGui::SliderAngle("Phi", phi, -180.0f, 180.0f);
+        }
+        ImGui::End();
+
+        return isDirty;
     }
 
 }

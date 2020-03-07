@@ -2,12 +2,14 @@
 #include "Graphics.h"
 #include "ConstantBuffer.h"
 
+//namespace DirectX { class XMFLOAT3; }
+
 namespace nc::graphics
 {
     class PointLight
     {
         public:
-            PointLight(internal::Graphics& graphics, float radius = 0.5f);
+            PointLight(internal::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius = 0.5f);
             
             void SpawnControlWindow() noexcept;
 

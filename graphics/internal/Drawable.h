@@ -28,6 +28,19 @@ namespace nc::graphics::internal
             void AddBind(std::unique_ptr<Bindable> bind);
             void AddIndexBuffer(std::unique_ptr<IndexBuffer> ibuf);
 
+            template<class T>
+            T* QueryBindable() noexcept
+            {
+                for(auto& b : m_binds)
+                {
+                    if(auto pt = dynamic_cast<T*>(b.get()))
+                    {
+                        return pt;
+                    }
+                }
+                return nullptr;
+            }
+
         private:
             const IndexBuffer* m_indexBuffer = nullptr;
             std::vector<std::unique_ptr<Bindable>> m_binds;
