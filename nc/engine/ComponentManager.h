@@ -4,6 +4,7 @@
 #include <memory>
 #include "Common.h"
 #include "HandleManager.h"
+#include "EntityView.h"
 
 namespace nc::engine
 {
@@ -14,11 +15,13 @@ namespace nc::engine
             ComponentManager();
             virtual ~ComponentManager() = default;
             
-            ComponentHandle virtual Add(const EntityHandle parentHandle);
+            ComponentHandle virtual Add(const EntityView parentView);
             bool virtual Remove(const ComponentHandle handle);
             bool virtual Contains(const ComponentHandle handle) const;
             const virtual std::vector<T>& GetVector() const;
             T* GetPointerTo(const ComponentHandle handle);
+
+            ComponentHandle GetCurrentHandle();
 
         protected:
             std::vector<T> m_components;
@@ -37,10 +40,10 @@ namespace nc::engine
     } 
 
     template<class T>
-    ComponentHandle ComponentManager<T>::Add(const EntityHandle parentHandle)
+    ComponentHandle ComponentManager<T>::Add(const EntityView parentView)
     {
         ComponentHandle handle = handleManager.GenerateNewHandle();
-        m_components.push_back(T(handle, parentHandle));
+        m_components.push_back(T(handle, parentView));
         ComponentIndex lastIndex = m_components.size() - 1;
         MapHandleToIndex(handle, lastIndex);
         return handle;
@@ -55,7 +58,7 @@ namespace nc::engine
         ComponentIndex lastIndex = m_components.size() - 1;
         ComponentHandle lastElementHandle = m_components.at(lastIndex).GetHandle(); //no good
 
-        m_components.at(toRemove) = m_components.at(lastIndex);
+        m_components.at(toRemove) = std::move(m_components.at(lastIndex));
         m_components.pop_back();
         if(m_indexMap.erase(handle) != 1) { return false; }
         RemapHandleToIndex(lastElementHandle, toRemove);
@@ -81,6 +84,12 @@ namespace nc::engine
         if (!Contains(handle)) return nullptr;
         ComponentIndex index = GetIndexFromHandle(handle);
         return &m_components.at(index);
+    }
+
+    template<class T>
+    ComponentHandle ComponentManager<T>::GetCurrentHandle()
+    {
+        return handleManager.GetCurrent();
     }
 
     template<class T>

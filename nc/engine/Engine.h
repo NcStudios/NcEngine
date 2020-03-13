@@ -6,12 +6,14 @@
 #include <string>
 
 #include "Common.h"
-
+#include "Renderer.h"
 
 //forward declarations
 namespace nc
 {
+    class Camera;
     class Entity;
+    class EntityView;
     class Transform;
     class Vector4;
 
@@ -41,14 +43,19 @@ namespace nc::engine
             void MainLoop();
             void Exit();
 
-            EntityHandle CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics, const std::string& tag); //creates new Entity and Transform and adds it to AwaitingInitialize, returns handle to Entity
+            EntityView CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag); //creates new Entity and Transform and adds it to AwaitingInitialize, returns handle to Entity
             bool DestroyEntity(EntityHandle handle);   //moves entity from current map to AwaitingDestroy, returns true if successful
             Transform* GetTransformPtr(ComponentHandle handle); //returns ptr to Transform with given handle, returns nullptr if not found
             Entity* GetEntity(EntityHandle handle);    //returns ptr to entity in Active or AwaitingInitialize maps, returns nullptr if not found
             Entity* GetEntity(const std::string& tag); //returns pointer to first active found entity with tag or nullptr if not found
 
+            Renderer* AddRenderer(EntityHandle handle);
+            Renderer* GetRenderer(EntityHandle handle);
+            bool RemoveRenderer(EntityHandle handle);
+
             void BindEditorManager(utils::editor::EditorManager* editorManager);
 
+            EntityView* GetMainCamera();
             nc::graphics::Graphics& GetGraphics();
 
         private:
@@ -64,6 +71,10 @@ namespace nc::engine
             } m_subsystem;
 
             std::unique_ptr<EntityMaps> m_entities;
+
+            EntityView m_mainCameraView;
+
+            //std::unique_ptr<Camera> m_mainCamera;
             // struct EntityMaps
             // {
             //     std::unordered_map<EntityHandle, Entity> AwaitingInitialize;

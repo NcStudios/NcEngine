@@ -4,7 +4,7 @@
 #include <fstream>
 #include <stdint.h>
 
-namespace nc::graphics { class Model; }
+namespace nc::graphics { class MeshType; }
 namespace DirectX {struct XMFLOAT3; }
 
 namespace nc::utils
@@ -15,7 +15,8 @@ namespace nc::utils
             ObjLoader();
             ~ObjLoader();
 
-            nc::graphics::Model Load(const std::string& path);
+
+            void Load(nc::graphics::MeshType* mesh);
 
         private:
             std::vector<DirectX::XMFLOAT3> normals;
@@ -23,14 +24,14 @@ namespace nc::utils
             std::string GetFirstToken(const std::string& line);
             std::string GetLineTail(const std::string& line);
 
-            void StoreVertFromSimpleString(const std::string& str, nc::graphics::Model& model);
-            void StoreNormFromSimpleString(const std::string& str, nc::graphics::Model& model);
-            void StoreIndicesFromVertNormString(const std::string& str, nc::graphics::Model& model);
+            void StoreVertFromSimpleString(const std::string& str, nc::graphics::MeshType* mesh);
+            void StoreNormFromSimpleString(const std::string& str, nc::graphics::MeshType* mesh);
+            void StoreIndicesFromVertNormString(const std::string& str, nc::graphics::MeshType* mesh);
 
-            void CallProcessForToken(const std::string& token, const std::string& tail, nc::graphics::Model& model);
+            void CallProcessForToken(const std::string& token, const std::string& tail, nc::graphics::MeshType* mesh);
 
-            void ComputeIndependentNormals(nc::graphics::Model& model);
-            void ComputeAveragedNormals(nc::graphics::Model& model);
+            void ComputeIndependentNormals(nc::graphics::MeshType* mesh);
+            void ComputeAveragedNormals(nc::graphics::MeshType* mesh);
             
     };
 }

@@ -69,19 +69,19 @@ namespace nc::utils::editor
         ImGui::End();
     }
 
-    void EditorManager::CameraControl(float* zPos, float* phi, float* theta, float* xRot, float* yRot, float* zRot)
+    void EditorManager::CameraControl()//float* zPos, float* phi, float* theta, float* xRot, float* yRot, float* zRot)
     {
         if(ImGui::Begin("Camera Control"))
         {
-            ImGui::Text("Position");
-            ImGui::SliderFloat("Z Dist", zPos, 0.0f, 100.0f, "%.1f");
-            ImGui::SliderAngle("Phi", phi, -180.0f, 180.0f, "%.1f");
-            ImGui::SliderAngle("Theta", theta, -180.0f, 180.0f, "%.1f");
-            ImGui::Text("Rotation");
-            ImGui::SliderAngle("X Angle", xRot, -180.0f, 180.0f);
-            ImGui::SliderAngle("Y Angle", yRot, -180.0f, 180.0f);
-            ImGui::SliderAngle("Z Angle", zRot, -180.0f, 180.0f);
-            if(ImGui::Button("Reset")) { *zPos=20.0f;*phi=0;*theta=0;*xRot=0;*yRot=0;*zRot=0; }
+            // ImGui::Text("Position");
+            // ImGui::SliderFloat("Z Dist", zPos, 0.0f, 100.0f, "%.1f");
+            // ImGui::SliderAngle("Phi", phi, -180.0f, 180.0f, "%.1f");
+            // ImGui::SliderAngle("Theta", theta, -180.0f, 180.0f, "%.1f");
+            // ImGui::Text("Rotation");
+            // ImGui::SliderAngle("X Angle", xRot, -180.0f, 180.0f);
+            // ImGui::SliderAngle("Y Angle", yRot, -180.0f, 180.0f);
+            // ImGui::SliderAngle("Z Angle", zRot, -180.0f, 180.0f);
+            // if(ImGui::Button("Reset")) { *zPos=20.0f;*phi=0;*theta=0;*xRot=0;*yRot=0;*zRot=0; }
         }
         ImGui::End();
     }
@@ -112,8 +112,7 @@ namespace nc::utils::editor
     }
 
     
-    bool EditorManager::BoxControl(int id, float* matX, float* specInten, float* specPwr,
-                                   float* r, float* theta, float* phi)
+    bool EditorManager::BoxControl(int id, float* matX, float* specInten, float* specPwr)
     {
         using namespace std::string_literals;
 
@@ -125,10 +124,10 @@ namespace nc::utils::editor
             bool spDirty = ImGui::SliderFloat("Specular Power", specPwr, 1.0f, 200.0f, "%.2f", 2);
             isDirty = mDirty || siDirty || spDirty;
 
-            ImGui::Text("Position");
-            ImGui::SliderFloat("R", r, 0.0f, 80.0f, "%.1f");
-            ImGui::SliderAngle("Theta", theta, -180.0f, 180.0f);
-            ImGui::SliderAngle("Phi", phi, -180.0f, 180.0f);
+            // ImGui::Text("Position");
+            // ImGui::SliderFloat("R", r, 0.0f, 80.0f, "%.1f");
+            // ImGui::SliderAngle("Theta", theta, -180.0f, 180.0f);
+            // ImGui::SliderAngle("Phi", phi, -180.0f, 180.0f);
         }
         ImGui::End();
 

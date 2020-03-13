@@ -1,5 +1,8 @@
 #include "Drawable.h"
+#include "GraphicsResource.h"
+//#include "DirectXMath.h"
 #include "DXException.h"
+#include "Graphics.h"
 #include "IndexBuffer.h"
 
 namespace nc::graphics::d3dresource
@@ -11,7 +14,7 @@ namespace nc::graphics::d3dresource
         graphics.DrawIndexed(m_indexBuffer->GetCount());
     }
 
-    void Drawable::AddBind(std::unique_ptr<Bindable> bind)
+    void Drawable::AddBind(std::unique_ptr<GraphicsResource> bind)
     {
         //should SFINAE for bind != IndexBuffer
         m_binds.push_back(std::move(bind));

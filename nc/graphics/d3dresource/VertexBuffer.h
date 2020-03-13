@@ -1,12 +1,10 @@
 #pragma once
-#include "Bindable.h"
-#include "wrl/client.h"
+#include "GraphicsResource.h"
 #include "DXException.h"
-#include <vector>
 
 namespace nc::graphics::d3dresource
 {
-    class VertexBuffer : public Bindable
+    class VertexBuffer : public GraphicsResource
     {
         public:
             template<class V>

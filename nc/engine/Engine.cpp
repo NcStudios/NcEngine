@@ -8,7 +8,10 @@
 #include "RenderingSystem.h"
 #include "CollisionSystem.h"
 #include "HandleManager.h"
+#include "Camera.h"
 
+
+#include <iostream>
 
 namespace nc::engine
 {
@@ -29,7 +32,7 @@ Engine::Engine()
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
     //m_subsystem.Transform = std::make_unique<TransformSystem>();
     m_subsystem.TransformSystem = std::make_unique<ComponentManager<Transform>>();
-    m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
+    m_subsystem.Handle = std::make_unique<HandleManager<EntityHandle>>();
 }
 
 Engine::~Engine() {}
@@ -60,6 +63,9 @@ void Engine::MainLoop()
     NCE nce(this);
     time::Time ncTime;
     scene::SceneManager sceneManager;
+
+    m_mainCameraView = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
+    m_mainCameraView.Entity()->AddComponent<Camera>();
 
     while(m_engineState.isRunning)
     {
@@ -122,17 +128,20 @@ void Engine::Exit()
     m_engineState.isRunning = false;
 }
 
-EntityHandle Engine::CreateEntity(Vector4 rect, bool enableRendering, bool enablePhysics, const std::string& tag)
+EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag)
 {
     EntityHandle newHandle = m_subsystem.Handle->GenerateNewHandle();
     Entity newEntity = Entity(newHandle, tag);
-    newEntity.TransformHandle = m_subsystem.TransformSystem->Add(newHandle);
+
+    ComponentHandle transformHandle = m_subsystem.TransformSystem->GetCurrentHandle() + 1;
+
+    EntityView view(newHandle, transformHandle);
+
+    newEntity.TransformHandle = m_subsystem.TransformSystem->Add(view);
     Transform* transformPtr = GetTransformPtr(newEntity.TransformHandle);
-    transformPtr->SetRect(rect);
-    transformPtr->ToggleRenderingEnabled(enableRendering);
-    transformPtr->TogglePhysicsEnabled(enablePhysics);
+    transformPtr->Set(pos, rot, scale);
     m_entities->AwaitingInitialize.emplace(newHandle, newEntity);
-    return newHandle;
+    return EntityView(newHandle, newEntity.TransformHandle);
 }
 
 bool Engine::DestroyEntity(EntityHandle handle)
@@ -166,9 +175,36 @@ Entity* Engine::GetEntity(const std::string& tag)
     return nullptr;
 }
 
+Renderer* Engine::AddRenderer(EntityHandle handle)
+{
+    if(GetRenderer(handle))
+    {
+        return nullptr;
+    }
+
+    EntityView view(handle, GetEntity(handle)->TransformHandle);
+    GetEntity(handle)->RendererHandle = m_subsystem.Rendering->Add(view);
+    return GetRenderer(handle);
+}
+
+Renderer* Engine::GetRenderer(EntityHandle handle)
+{
+    return m_subsystem.Rendering->GetPointerTo(GetEntity(handle)->RendererHandle);
+}
+
+bool Engine::RemoveRenderer(EntityHandle handle)
+{
+    return m_subsystem.Rendering->Remove(handle);
+}
+
 nc::graphics::Graphics& Engine::GetGraphics()
 {
     return m_subsystem.Rendering->GetGraphics();
+}
+
+EntityView* Engine::GetMainCamera()
+{
+    return &m_mainCameraView;
 }
 
 void Engine::BindEditorManager(utils::editor::EditorManager* editorManager)

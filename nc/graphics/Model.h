@@ -6,49 +6,88 @@
 #include <d3d11.h>
 #include "DirectXMath.H"
 
+#include "DrawableBase.h"
+#include "Mesh.h"
+#include "MaterialType.h"
+#include "ObjLoader.h"
+#include "NCVector.h"
+#include "Transform.h"
+
 namespace nc::graphics
 {
-    struct Model
+    struct PSMaterialConstants
+    {
+        DirectX::XMFLOAT3 color;
+        float specularIntensity = 0.6;
+        float specularPower = 30.0f;
+        float padding[3];
+    };
+
+    using namespace nc::graphics::d3dresource;
+
+    template<typename T>
+    class Model : public DrawableBase<T> 
     {
         public:
-            struct Vertex
+            //Mesh mesh;
+            DirectX::XMMATRIX transformationMatrix;
+
+            //material
+            PSMaterialConstants m_materialData;
+
+            Model(Graphics& graphics, DirectX::XMFLOAT3 materialColor)
             {
-                DirectX::XMFLOAT3 pos;
-                DirectX::XMFLOAT3 norm;
-            };
-            
-            std::vector<Vertex> vertices;
-            std::vector<uint16_t> indices;
-
-            const std::wstring vertShaderPath = L"nc\\graphics\\shader\\compiled\\litvertexshader.cso";
-            const std::wstring pixShaderPath = L"nc\\graphics\\shader\\compiled\\litpixelshader.cso";
-
-            const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-            {
-                { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-                { "Normal",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-            };
-
-            const D3D_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-            void SetNormalsIndependentFlat()
-            {
-                assert(indices.size() % 3 == 0 && indices.size() > 0);
-
-                for(size_t i = 0; i < indices.size(); i += 3)
+                if(!DrawableBase<T>::IsStaticInitialized())
                 {
-                    auto& v0 = vertices[indices[i]];
-                    auto& v1 = vertices[indices[i + 1]];
-                    auto& v2 = vertices[indices[i + 2]];
-                    const auto p0 = DirectX::XMLoadFloat3(&v0.pos);
-                    const auto p1 = DirectX::XMLoadFloat3(&v1.pos);
-                    const auto p2 = DirectX::XMLoadFloat3(&v2.pos);
-                    const auto n = DirectX::XMVector3Normalize(DirectX::XMVector3Cross( (p1 - p0), (p2 - p0) ) );
-                
-                    DirectX::XMStoreFloat3(&v0.norm, n);
-                    DirectX::XMStoreFloat3(&v1.norm, n);
-                    DirectX::XMStoreFloat3(&v2.norm, n);
+                    utils::ObjLoader loader;
+                    T mesh;
+                    loader.Load(&mesh);
+                    
+                    DrawableBase<T>::AddStaticBind(std::make_unique<VertexBuffer>(graphics, mesh.Vertices));
+                    auto pvs = std::make_unique<VertexShader>(graphics, mesh.GetVertexShaderPath());
+                    auto pvsbc = pvs->GetBytecode();
+                    DrawableBase<T>::AddStaticBind(std::move(pvs));
+                    DrawableBase<T>::AddStaticBind(std::make_unique<PixelShader>(graphics, mesh.GetPixelShaderPath()));
+                    DrawableBase<T>::AddStaticIndexBuffer(std::make_unique<IndexBuffer>(graphics, mesh.Indices));
+                    DrawableBase<T>::AddStaticBind(std::make_unique<InputLayout>(graphics, mesh.GetIED(), pvsbc));
+                    DrawableBase<T>::AddStaticBind(std::make_unique<Topology>(graphics, mesh.GetTopology()));
                 }
+                else
+                {
+                    DrawableBase<T>::SetIndexFromStatic();
+                }
+
+                Drawable::AddBind(std::make_unique<TransformCbuf>(graphics, *this));
+                m_materialData.color = materialColor;
+                Drawable::AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstants>>(graphics, m_materialData, 1u));
             }
+
+            void UpdateTransformationMatrix(Transform* transform) noexcept override
+            {
+                // Vector3 pos = transform->GetPosition();
+                // Vector3 rot = transform->GetRotation();
+                // Vector3 scl = transform->GetScale();                
+
+                // transformationMatrix = DirectX::XMMatrixScaling(scl.GetX(), scl.GetY(), scl.GetZ())              *
+                //                        DirectX::XMMatrixRotationRollPitchYaw(rot.GetX(), rot.GetY(), rot.GetZ()) *
+                //                        DirectX::XMMatrixTranslation( pos.GetX(), pos.GetY(), pos.GetZ() );//             *
+                //                        //DirectX::XMMatrixRotationRollPitchYaw( theta,phi,chi );  
+
+                
+                //transformationMatrix = transform->CamGetMatrix();
+                transformationMatrix = transform->GetMatrixXM();
+            }
+
+            DirectX::XMMATRIX GetTransformXM() const noexcept override
+            {
+                return transformationMatrix;
+            }
+
+            PSMaterialConstants* GetMaterial() noexcept override
+            {
+                return &m_materialData;
+            }
+
+            
     };
 }

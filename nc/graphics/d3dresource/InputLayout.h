@@ -1,11 +1,9 @@
 #pragma once
-#include "Bindable.h"
-#include <vector>
-#include <wrl/client.h>
+#include "GraphicsResource.h"
 
 namespace nc::graphics::d3dresource
 {
-    class InputLayout : public Bindable
+    class InputLayout : public GraphicsResource
     {
         public:
             InputLayout(Graphics& graphics,

@@ -5,7 +5,7 @@ namespace nc{
 
 Transform* Entity::GetTransform() const noexcept
 {
-    return NCE::GetTransformPtr(TransformHandle);
+    return NCE::GetTransform(TransformHandle);
 }
 
 void Entity::SendOnInitialize() noexcept

@@ -4,7 +4,6 @@
 #include "ProjectSettings.h"
 #include "NCTime.h"
 
-#include "Box.h"
 #include "Drawable.h"
 
 #include "Camera.h"
@@ -13,45 +12,18 @@
 #include "Input.h"
 
 
+#include "NCE.h"
 #include "imgui.h"
 
 namespace nc::engine{
 
 RenderingSystem::RenderingSystem(int initialWidth, int initialHeight, HWND hwnd)
-    : m_camera(std::make_unique<Camera>()), 
-      m_graphics(std::make_unique<graphics::Graphics>(hwnd, initialWidth, initialHeight))
+    : m_graphics(std::make_unique<graphics::Graphics>(hwnd, initialWidth, initialHeight))
 {
-    std::mt19937 rng( std::random_device{}() );
-	std::uniform_real_distribution<float> adist(0.0f,3.1415f * 2.0f);
-	std::uniform_real_distribution<float> ddist(0.0f,3.1415f * 2.0f);
-	std::uniform_real_distribution<float> odist(0.0f,3.1415f * 0.3f);
-	std::uniform_real_distribution<float> rdist(6.0f,20.0f);
-    std::uniform_real_distribution<float> cdist(0.0f, 1.0f); 
-
-    //make cubes
-    for(auto i = 0; i < 70; ++i)
-    {
-        const DirectX::XMFLOAT3 materialColor = {cdist(rng), cdist(rng), cdist(rng)};
-        m_drawables.push_back(std::make_unique<nc::graphics::primitive::Box>(GetGraphics(),
-                                                                             rng, adist, ddist, odist, rdist,
-                                                                             materialColor));
-    }
-
-    //temp
-    for(auto& p : m_drawables)
-    {
-        if(auto box = dynamic_cast<nc::graphics::primitive::Box*>(p.get()) )
-        {
-            m_boxes.push_back(box);
-        }
-    }
-
-
     //make light
     m_pointLight = std::make_unique<graphics::PointLight>(GetGraphics(), DirectX::XMFLOAT3(0,0,0));
 
     m_graphics->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, (float)initialHeight / (float)initialWidth, 0.2f, 80.0f));
-
 }
 
 RenderingSystem::~RenderingSystem() = default;
@@ -65,25 +37,33 @@ void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)
         m_editorManager->ToggleGui();
     }
     
-    m_graphics->SetCamera(m_camera->GetMatrix());
+    //auto camMatrixXM = NCE::GetMainCamera()->Transform()->GetLookMatrix();
+    auto camMatrixXM = NCE::GetMainCamera()->Transform()->CamGetMatrix();
+    //auto camMatrixXM = NCE::GetMainCamera()->Transform()->GetMatrixXM();
 
-    m_pointLight->Bind(GetGraphics(), m_camera->GetMatrix());
+
+    m_graphics->SetCamera(camMatrixXM);
+
+    m_pointLight->Bind(GetGraphics(), camMatrixXM);
 
     m_editorManager->BeginFrame();
     BeginFrame();
 
-    auto dt = nc::time::Time::FrameDeltaTime;
+    auto dt = nc::time::Time::FrameDeltaTime * speed_factor / 2.0f;
+    auto& graphics = GetGraphics();
 
-    for(auto& c : m_drawables)
+    for(auto& r : m_components)
     {
-        c->Update(dt * speed_factor / 2.0f);
-        c->Draw(GetGraphics());
+        r.Update(graphics, dt);
     }
 
     if(m_editorManager->IsGuiActive())
     {
         m_editorManager->SpeedControl(&speed_factor);
-        utils::editor::EditorManager::CameraControl(&m_camera->zPos, &m_camera->phi, &m_camera->theta, &m_camera->xRot, &m_camera->yRot, &m_camera->zRot);
+
+        //Transform* camT = NCE::GetMainCamera()->Transform();
+
+        utils::editor::EditorManager::CameraControl();
         m_pointLight->SpawnControlWindow();
 
         if(ImGui::Begin("Boxes"))
@@ -91,7 +71,7 @@ void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)
             const auto preview = m_comboBoxIndex ? std::to_string(*m_comboBoxIndex) : "Choose a box...";
             if(ImGui::BeginCombo("Box Number", preview.c_str()))
             {
-                for(size_t i = 0; i < m_boxes.size(); ++i)
+                for(size_t i = 0; i < m_components.size(); ++i)
                 {
                     const bool selected = *m_comboBoxIndex == i;
                     if(ImGui::Selectable(std::to_string(i).c_str(), selected))
@@ -115,7 +95,7 @@ void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)
 
         for(auto id : m_boxControlIds)
         {
-            m_boxes[id]->SpawnControlWindow(id, GetGraphics());
+            m_components[id].SpawnControlWindow(id, graphics);
         }
     }
 

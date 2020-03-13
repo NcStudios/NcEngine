@@ -13,7 +13,7 @@ namespace nc::graphics::d3dresource
                 return !staticBinds.empty();
             }
 
-            void AddStaticBind(std::unique_ptr<Bindable> bind)
+            void AddStaticBind(std::unique_ptr<GraphicsResource> bind)
             {
                 staticBinds.push_back(std::move(bind));
             }
@@ -38,14 +38,14 @@ namespace nc::graphics::d3dresource
             }
 
         private:
-            static std::vector<std::unique_ptr<Bindable>> staticBinds;
+            static std::vector<std::unique_ptr<GraphicsResource>> staticBinds;
 
-            const std::vector<std::unique_ptr<Bindable>>& GetStaticBinds() const noexcept
+            const std::vector<std::unique_ptr<GraphicsResource>>& GetStaticBinds() const noexcept
             {
                 return staticBinds;
             }
     };
 
     template<class T>
-    std::vector<std::unique_ptr<Bindable>> DrawableBase<T>::staticBinds;
+    std::vector<std::unique_ptr<GraphicsResource>> DrawableBase<T>::staticBinds;
 }

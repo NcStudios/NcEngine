@@ -1,9 +1,9 @@
 #pragma once
-#include "Bindable.h"
+#include "GraphicsResource.h"
 
 namespace nc::graphics::d3dresource
 {
-    class Topology : public Bindable
+    class Topology : public GraphicsResource
     {
         public:
             Topology(Graphics& graphics,D3D11_PRIMITIVE_TOPOLOGY type);

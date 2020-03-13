@@ -13,5 +13,10 @@ namespace nc::engine
             {
                 return m_current++;
             }
+
+            T GetCurrent() 
+            {
+                return m_current;
+            }
     };
 }

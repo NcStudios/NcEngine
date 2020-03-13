@@ -1,6 +1,5 @@
 #pragma once
 #include "NCWin32.h"
-//#include <windows.h>
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <stdint.h>
@@ -8,13 +7,13 @@
 
 namespace nc::utils::editor { class EditorManager; }
 
-namespace nc::graphics::d3dresource { class Bindable; }
+namespace nc::graphics::d3dresource { class GraphicsResource; }
 
 namespace nc::graphics
 {
     class Graphics
     {
-        friend graphics::d3dresource::Bindable;
+        friend graphics::d3dresource::GraphicsResource;
         friend nc::utils::editor::EditorManager;
 
         public:

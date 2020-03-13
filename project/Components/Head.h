@@ -2,8 +2,7 @@
 #define HEAD_H
 
 #include "NCE.h"
-#include "Tail.h"
-#include "Point.h"
+#include <random>
 
 using namespace nc;
 
@@ -11,17 +10,21 @@ class Head : public Component
 {
     private:
         float m_moveSpeed = 500;
-        bool hasTail = false;
-        EntityHandle tail;
 
     public:
-        Head(ComponentHandle handle, EntityHandle parentHandle);
+        Head(ComponentHandle handle, EntityView parentHandle);
 
         void OnInitialize() override;
         void FrameUpdate() override;
         void OnDestroy() override;
 
         void OnCollisionEnter(const EntityHandle other) override;
+
+        std::mt19937 rng;
+        std::uniform_real_distribution<float> angleDist;
+        std::uniform_real_distribution<float> posDist;
+        std::uniform_real_distribution<float> scaleDist; 
+        std::uniform_real_distribution<float> colorDist;
 };
 
 

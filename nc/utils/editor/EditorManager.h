@@ -24,15 +24,14 @@ namespace nc::utils::editor
 
             static void SpeedControl(float* speed);
 
-            static void CameraControl(float* zPos, float* phi, float* theta, float* xRot, float* yRot, float* zRot);
+            static void CameraControl();
 
             static void PointLightControl(float* xPos,      float* yPos,      float* zPos,
                                           float* ambientR,  float* ambientG,  float* ambientB,
                                           float* difColorR, float* difColorG, float* difColorB,
                                           float* difIntens, float* attConst,  float* attLin, float* attQuad);
 
-            static bool BoxControl(int id, float* matX, float* specIntensity, float* specPower,
-                                   float* r, float* theta, float* phi);
+            static bool BoxControl(int id, float* matX, float* specIntensity, float* specPower);
 
         private:
             bool m_isGuiActive;

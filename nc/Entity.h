@@ -1,11 +1,11 @@
-#ifndef ENTITY_H
-#define ENTITY_H
+#pragma once
 
 #include <vector>
 #include <memory>
 #include <string>
 
 #include "Common.h"
+#include "EntityView.h"
 
 namespace nc
 {
@@ -18,6 +18,7 @@ namespace nc
             Entity(EntityHandle handle, const std::string& tag = "") noexcept : Handle(handle), TransformHandle(0), Tag(tag) {}
             const EntityHandle Handle;
             ComponentHandle TransformHandle;
+            ComponentHandle RendererHandle;
             const std::string Tag;
             
             void SendOnInitialize() noexcept;
@@ -64,7 +65,8 @@ namespace nc
     std::shared_ptr<T> Entity::AddComponent() noexcept
     {
         if (HasComponent<T>()) return nullptr;
-        auto newComponent = std::make_shared<T>(0, Handle);
+        EntityView view(Handle, TransformHandle);
+        auto newComponent = std::make_shared<T>(0, view);
         m_components.push_back(newComponent);
         return newComponent;
     }
@@ -97,6 +99,5 @@ namespace nc
 
         return nullptr; //doesn't have component
     }
-} //end namespace nc
 
-#endif
+} //end namespace nc

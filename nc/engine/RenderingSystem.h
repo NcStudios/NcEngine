@@ -9,7 +9,10 @@
 //#include "Box2.h"
 //#include "Box.h"
 
+#include "HandleManager.h"
 #include <set>
+#include "Renderer.h"
+#include "ComponentManager.h"
 
 //forwards
 namespace nc
@@ -30,7 +33,7 @@ namespace nc
 
 namespace nc::engine
 {
-    class RenderingSystem
+    class RenderingSystem : public ComponentManager<Renderer>
     {
         public:
             RenderingSystem(int initialWidth, int initialHeight, HWND hwnd);
@@ -44,14 +47,14 @@ namespace nc::engine
             void BindEditorManager(utils::editor::EditorManager* editorManager);
 
         private:
-            std::unique_ptr<Camera> m_camera;
+            //Camera& m_camera;
             std::unique_ptr<graphics::PointLight> m_pointLight;
 
             std::unique_ptr<graphics::Graphics> m_graphics;
-            std::vector<std::unique_ptr<nc::graphics::d3dresource::Drawable>> m_drawables;
+            //std::vector<nc::Renderer> m_renderers;
 
 
-            std::vector<nc::graphics::primitive::Box*> m_boxes; 
+            //std::vector<nc::Renderer*> m_rendererPointers; 
             std::optional<unsigned int> m_comboBoxIndex;
             std::set<unsigned int> m_boxControlIds;
 

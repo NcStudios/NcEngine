@@ -1,14 +1,40 @@
 #include "InitialScene.h"
 
+#include <random>
+#include "Renderer.h"
+#include "MeshTypeMonkey.h"
+#include "MeshTypeCube.h"
+
+
 void InitialScene::Load()
 {
-    //EntityHandle thingSpawnerHandle = NCE::CreateEntity();
-    //NCE::GetEntity(thingSpawnerHandle)->AddComponent<PointSpawner>();
+    using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
 
-    EntityHandle characterHandle = NCE::CreateEntity(Vector4(50, 50, 64, 64), true, true, "Head");
-    NCE::GetEntity(characterHandle)->AddComponent<Head>();
+    mt19937 rng( std::random_device{}() );
+	uniform_real_distribution<float> angDist(0.0f,3.1415f * 2.0f);
+	uniform_real_distribution<float> posDist(-10.0f,10.0f);
+    uniform_real_distribution<float> sclDist(0.5f, 2.0f); 
+    uniform_real_distribution<float> clrDist(0.0f, 1.0f);
+
+    for(int i = 0; i < 20; ++i)
+    {
+        Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
+        //Vector3  randRot (angDist(rng), angDist(rng), angDist(rng));
+        Vector3 randRot(0.0f, 0.0f, 0.0f);
+        Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
+        XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
+
+        EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
+        boxView.Entity()->AddComponent<Head>();
+        boxView.AddRenderer();
+
+        if( (i % 2) == 0)
+            boxView.Renderer()->SetModel<MeshTypeMonkey>(NCE::GetGraphics(), randClr);
+        else
+            boxView.Renderer()->SetModel<MeshTypeCube>(NCE::GetGraphics(), randClr);
+    }
 }
-
+ 
 void InitialScene::Unload()
 {
     

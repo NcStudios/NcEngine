@@ -1,5 +1,5 @@
 #pragma once
-#include "Bindable.h"
+#include "GraphicsResource.h"
 #include "Graphics.h"
 #include "DXException.h"
 
@@ -9,7 +9,7 @@ namespace nc::graphics::d3dresource
     //ConstantBuffer base class
     ///////////////////////////
     template<typename T>
-    class ConstantBuffer : public Bindable
+    class ConstantBuffer : public GraphicsResource
     {
         public:
             ConstantBuffer(Graphics& graphics, const T& consts, UINT slot = 0u);
@@ -73,7 +73,7 @@ namespace nc::graphics::d3dresource
     {
         using ConstantBuffer<T>::m_constantBuffer;
         using ConstantBuffer<T>::m_slot;
-        using Bindable::GetContext;
+        using GraphicsResource::GetContext;
         
         public:
             using ConstantBuffer<T>::ConstantBuffer;
@@ -91,7 +91,7 @@ namespace nc::graphics::d3dresource
     {
         using ConstantBuffer<T>::m_constantBuffer;
         using ConstantBuffer<T>::m_slot;
-        using Bindable::GetContext;
+        using GraphicsResource::GetContext;
         
         public:
             using ConstantBuffer<T>::ConstantBuffer;

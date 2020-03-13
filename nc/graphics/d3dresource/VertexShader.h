@@ -1,11 +1,10 @@
 #pragma once
-#include "Bindable.h"
-#include <wrl/client.h>
+#include "GraphicsResource.h"
 #include <string>
 
 namespace nc::graphics::d3dresource
 {
-    class VertexShader : public Bindable
+    class VertexShader : public GraphicsResource
     {
         public:
             VertexShader(Graphics& graphics, const std::wstring& path);

@@ -5,7 +5,7 @@
 
 namespace nc::graphics::d3dresource
 {
-    class TransformCbuf : public Bindable
+    class TransformCbuf : public GraphicsResource
     {
         public:
             TransformCbuf(Graphics& graphics, const Drawable& parent, UINT slot = 0u);

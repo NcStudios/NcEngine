@@ -6,7 +6,6 @@ g++ -Wall -std=c++17^
  -I..\nc\graphics^
  -I..\nc\graphics\d3dresource^
  -I..\nc\graphics\DirectXMath\Inc^
- -I..\nc\graphics\primitive^
  -I..\nc\input^
  -I..\nc\math^
  -I..\nc\scene^
@@ -18,5 +17,4 @@ g++ -Wall -std=c++17^
  -I..\project\Components^
  -I..\project\Scenes^
  -c ..\nc\utils\editor\*.cpp^
- ..\nc\utils\editor\imgui\*.cpp^
  ..\nc\utils\objloader\*.cpp

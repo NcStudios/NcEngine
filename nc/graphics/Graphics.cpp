@@ -1,10 +1,6 @@
 #include "Graphics.h"
 #include <d3dcompiler.h>
-//#include "DirectXMath.h"
 #include "DXException.h"
-
-//#include "imgui_impl_dx11.h"
-
 #include <iostream>
 
 namespace nc::graphics{

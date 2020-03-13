@@ -1,12 +1,10 @@
 #pragma once
-#include "Bindable.h"
-#include <vector>
+#include "GraphicsResource.h"
 #include <stdint.h>
-#include <wrl/client.h>
 
 namespace nc::graphics::d3dresource
 {
-    class IndexBuffer : public Bindable
+    class IndexBuffer : public GraphicsResource
     {
         public:
             IndexBuffer(Graphics& graphics, const std::vector<uint16_t>& indices);

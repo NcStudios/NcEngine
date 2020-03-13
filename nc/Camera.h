@@ -1,23 +1,13 @@
 #pragma once
-#include "DirectXMath.h"
-
-namespace nc::engine { class RenderingSystem; }
+#include "Common.h"
+#include "Component.h"
 
 namespace nc
 {
-    class Camera
+    class Camera : public Component
     {
-        friend nc::engine::RenderingSystem;
-
         public:
-            DirectX::XMMATRIX GetMatrix() const noexcept;
+            Camera(ComponentHandle handle, EntityView parentView);
 
-        public:
-            float zPos = 15.0f;
-            float theta = 0.0f;
-            float phi = 0.0f;
-            float xRot = 0.0f;
-            float yRot = 0.0f;
-            float zRot = 0.0f;
     };
 }

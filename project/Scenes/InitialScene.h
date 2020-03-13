@@ -5,7 +5,6 @@
 #include "Scene.h"
 #include "NCE.h"
 #include "Head.h"
-//#include "../Components/PointSpawner.h"
 
 class InitialScene : public nc::scene::Scene
 {

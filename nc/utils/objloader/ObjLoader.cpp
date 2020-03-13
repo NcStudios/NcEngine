@@ -6,7 +6,8 @@
 #include "DirectXMath.h"
 
 #include "NCException.h"
-#include "Model.h"
+#include "MeshType.h"
+//#include "Mesh.h"
 
 namespace nc::utils
 {
@@ -41,25 +42,25 @@ namespace nc::utils
     */
 
 
-    nc::graphics::Model ObjLoader::Load(const std::string& path)
+    void ObjLoader::Load(nc::graphics::MeshType* mesh)
     {
-        nc::graphics::Model model;
 
         //const float zInvert = invertCoordSystem ? -1.0f : 1.0f; //not currently using this
-
-        const auto pathSize = path.size();
+        std::string meshPath = mesh->GetMeshPath();
+        const auto pathSize = meshPath.size();
         
-        if(path.substr(pathSize - 4, pathSize) != ".obj")
+        
+        if(meshPath.substr(pathSize - 4, pathSize) != ".obj")
         {
             std::cerr << "Invalid file type\n";
             throw nc::DefaultException("Invalid file type");
         }
 
-        std::ifstream infile(path);
+        std::ifstream infile(meshPath);
 
         if(!infile)
         {
-            std::cerr << "Could not load file: " << path << '\n';
+            std::cerr << "Could not load file: " << meshPath << '\n';
             throw nc::DefaultException("Could not load file");
         }
 
@@ -72,14 +73,12 @@ namespace nc::utils
             std::string firstToken = GetFirstToken(currentLine);
             std::string tail = GetLineTail(currentLine);
 
-            CallProcessForToken(firstToken, tail, model);
+            CallProcessForToken(firstToken, tail, mesh);
         }
 
         infile.close();
 
-        ComputeAveragedNormals(model); //normals now set when reading face data
-
-        return model;
+        ComputeAveragedNormals(mesh); //normals now set when reading face data
     }
 
     std::string ObjLoader::GetFirstToken(const std::string& line)
@@ -92,7 +91,7 @@ namespace nc::utils
         return line.substr(line.find(' ') + 1, line.size());
     }
 
-    void ObjLoader::StoreVertFromSimpleString(const std::string& str, nc::graphics::Model& model)
+    void ObjLoader::StoreVertFromSimpleString(const std::string& str, nc::graphics::MeshType* mesh)
     {
         const auto firstSpace = str.find(' ');
         const auto lastSpace  = str.rfind(' ');
@@ -101,11 +100,11 @@ namespace nc::utils
         float y = std::stof( str.substr(firstSpace, lastSpace - firstSpace) );
         float z = std::stof( str.substr(lastSpace, str.size() - lastSpace) );
 
-        model.vertices.push_back (graphics::Model::Vertex{ {x,y,z} } );
+        mesh->Vertices.push_back (graphics::MeshType::Vertex{ {x,y,z} } );
         //model.vertices.push_back( graphics::Model::Vertex{ {x,y,z * -1.0f} } );
     }
 
-    void ObjLoader::StoreNormFromSimpleString(const std::string& str, nc::graphics::Model& model)
+    void ObjLoader::StoreNormFromSimpleString(const std::string& str, nc::graphics::MeshType* mesh)
     {
         const auto firstSpace = str.find(' ');
         const auto lastSpace  = str.rfind(' ');
@@ -118,7 +117,7 @@ namespace nc::utils
         //normals.push_back( {x,y,z * -1.0f} );
     }
 
-    void ObjLoader::StoreIndicesFromVertNormString(const std::string& str, nc::graphics::Model& model)
+    void ObjLoader::StoreIndicesFromVertNormString(const std::string& str, nc::graphics::MeshType* mesh)
     {
         const auto firstSpace = str.find(' ');
         const auto lastSpace  = str.rfind(' ');
@@ -145,17 +144,17 @@ namespace nc::utils
         uint16_t p2NormIndex = std::stoi(f3.substr(lastSlash + 1, f3.size() - lastSlash - 1)) - 1;
         
         //add indices
-        model.indices.push_back(p0VertIndex);
-        model.indices.push_back(p1VertIndex);
-        model.indices.push_back(p2VertIndex);
+        mesh->Indices.push_back(p0VertIndex);
+        mesh->Indices.push_back(p1VertIndex);
+        mesh->Indices.push_back(p2VertIndex);
 
         //add normal
-        model.vertices[p0VertIndex].norm = normals[p0NormIndex];
-        model.vertices[p1VertIndex].norm = normals[p1NormIndex];
-        model.vertices[p2VertIndex].norm = normals[p2NormIndex];
+        mesh->Vertices[p0VertIndex].norm = normals[p0NormIndex];
+        mesh->Vertices[p1VertIndex].norm = normals[p1NormIndex];
+        mesh->Vertices[p2VertIndex].norm = normals[p2NormIndex];
     }
 
-    void ObjLoader::CallProcessForToken(const std::string& token, const std::string& tail, nc::graphics::Model& model)
+    void ObjLoader::CallProcessForToken(const std::string& token, const std::string& tail, nc::graphics::MeshType* mesh)
     {
         if(token == COMMENT)
         {
@@ -169,17 +168,17 @@ namespace nc::utils
         }
         else if(token == VERTEX)
         {
-            StoreVertFromSimpleString(tail, model);
+            StoreVertFromSimpleString(tail, mesh);
             //std::cout << "vertex found\n";
         }
         else if(token == NORMAL)
         {
             //std::cout << "normal found" << std::endl;
-            StoreNormFromSimpleString(tail, model);
+            StoreNormFromSimpleString(tail, mesh);
         }
         else if(token == FACE)
         {
-            StoreIndicesFromVertNormString(tail, model);
+            StoreIndicesFromVertNormString(tail, mesh);
             //std::cout << "face found" << std::endl;
         }
         else
@@ -189,13 +188,13 @@ namespace nc::utils
         
     }
 
-    void ObjLoader::ComputeIndependentNormals(nc::graphics::Model& model)
+    void ObjLoader::ComputeIndependentNormals(nc::graphics::MeshType* mesh)
     {
-        for(size_t i = 0; i < model.indices.size() - 1; i += 3)
+        for(size_t i = 0; i < mesh->Indices.size() - 1; i += 3)
         {
-            auto& v0 = model.vertices[model.indices[i]];
-            auto& v1 = model.vertices[model.indices[i+1]];
-            auto& v2 = model.vertices[model.indices[i+2]];
+            auto& v0 = mesh->Vertices[mesh->Indices[i]];
+            auto& v1 = mesh->Vertices[mesh->Indices[i+1]];
+            auto& v2 = mesh->Vertices[mesh->Indices[i+2]];
             const auto p0 = DirectX::XMLoadFloat3(&v0.pos);
             const auto p1 = DirectX::XMLoadFloat3(&v1.pos);
             const auto p2 = DirectX::XMLoadFloat3(&v2.pos);
@@ -206,17 +205,17 @@ namespace nc::utils
         }
     }
 
-    void ObjLoader::ComputeAveragedNormals(nc::graphics::Model& model)
+    void ObjLoader::ComputeAveragedNormals(nc::graphics::MeshType* mesh)
     {
-        std::for_each(model.vertices.begin(), model.vertices.end(), [](auto& vert) { vert.norm = {0,0,0}; });
+        std::for_each(mesh->Vertices.begin(), mesh->Vertices.end(), [](auto& vert) { vert.norm = {0,0,0}; });
 
         DirectX::XMFLOAT3 zInverse(0, 0, 1);
 
-        for(size_t i = 0; i < model.indices.size() - 1; i+=3)
+        for(size_t i = 0; i < mesh->Indices.size() - 1; i+=3)
         {
-            auto& v0 = model.vertices[model.indices[i]];
-            auto& v1 = model.vertices[model.indices[i+1]];
-            auto& v2 = model.vertices[model.indices[i+2]];
+            auto& v0 = mesh->Vertices[mesh->Indices[i]];
+            auto& v1 = mesh->Vertices[mesh->Indices[i+1]];
+            auto& v2 = mesh->Vertices[mesh->Indices[i+2]];
             const auto p0 = DirectX::XMLoadFloat3(&v0.pos);
             const auto p1 = DirectX::XMLoadFloat3(&v1.pos);
             const auto p2 = DirectX::XMLoadFloat3(&v2.pos);
@@ -235,8 +234,8 @@ namespace nc::utils
             DirectX::XMStoreFloat3(&v2.norm, adjusted_vn2);
         }
 
-        std::for_each(model.vertices.begin(), 
-                      model.vertices.end(),
+        std::for_each(mesh->Vertices.begin(), 
+                      mesh->Vertices.end(),
                       [](auto& vert)
                       {
                           auto vec_norm = DirectX::XMLoadFloat3(&vert.norm);
