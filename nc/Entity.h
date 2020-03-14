@@ -42,9 +42,11 @@ namespace nc
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             std::shared_ptr<T> GetComponent() const noexcept; 
+
+            std::vector<std::shared_ptr<Component>> GetUserComponents() const noexcept;
         
         private:
-            std::vector<std::shared_ptr<Component>> m_components;
+            std::vector<std::shared_ptr<Component>> m_userComponents;
     };
 
     //template definitions
@@ -53,7 +55,7 @@ namespace nc
     bool Entity::HasComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));
-        for(auto& item : m_components)
+        for(auto& item : m_userComponents)
         {
             if (typeid(*item) == targetType) 
                 return true;
@@ -67,7 +69,7 @@ namespace nc
         if (HasComponent<T>()) return nullptr;
         EntityView view(Handle, TransformHandle);
         auto newComponent = std::make_shared<T>(0, view);
-        m_components.push_back(newComponent);
+        m_userComponents.push_back(newComponent);
         return newComponent;
     }
 
@@ -75,12 +77,12 @@ namespace nc
     bool Entity::RemoveComponent() noexcept
     {
         const std::type_info &targetType(typeid(T));
-        for(std::vector<Component>::size_type i = 0; i < m_components.size(); ++i)
+        for(std::vector<Component>::size_type i = 0; i < m_userComponents.size(); ++i)
         {
-            if (typeid(*m_components.at(i)) == targetType)
+            if (typeid(*m_userComponents.at(i)) == targetType)
             {
-                m_components.at(i) = m_components.at(m_components.size() - 1);
-                m_components.pop_back();
+                m_userComponents.at(i) = m_userComponents.at(m_userComponents.size() - 1);
+                m_userComponents.pop_back();
                 return true;
             }
         }
@@ -91,7 +93,7 @@ namespace nc
     std::shared_ptr<T> Entity::GetComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));
-        for(auto& item : m_components)
+        for(auto& item : m_userComponents)
         {
             if (typeid(*item) == targetType)
                 return std::dynamic_pointer_cast<T>(item);

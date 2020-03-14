@@ -34,6 +34,7 @@ namespace nc
                         ImGui::Text("Component: ");  ImGui::SameLine();  ImGui::Text(typeid(this).name());
                         ImGui::Indent();
                             ImGui::Text("ID: ");  ImGui::SameLine();    ImGui::Text(str.c_str());
+                        ImGui::Unindent();
                     ImGui::Separator();
                 ImGui::PopItemWidth();
             }

@@ -66,82 +66,37 @@ namespace nc::utils::editor
     bool EditorManager::IsGuiActive() const noexcept { return m_isGuiActive; }
 
 
-    void EditorManager::TransformGui(nc::Transform* t)
-    {
-        const float itemWidth = 60.0f;
-        const float dragSpeed = 0.75f;
-        Vector3& pos = t->m_position;
-        Vector3& rot = t->m_rotation;
-        Vector3& scl = t->m_scale;
 
-        ImGui::PushItemWidth(itemWidth);
-            ImGui::Spacing();  ImGui::Separator();  ImGui::Text("Transform");
-
-            ImGui::BeginGroup();
-                ImGui::Indent();    ImGui::Text("Position");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::DragFloat( "##xpos", &pos.m_x, dragSpeed, -80.0f, 80.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::DragFloat( "##ypos", &pos.m_y, dragSpeed, -80.0f, 80.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::DragFloat( "##zpos", &pos.m_z, dragSpeed, -80.0f, 80.0f, "%.1f");
-            ImGui::EndGroup();
-            ImGui::BeginGroup();
-                ImGui::Indent();    ImGui::Text("Rotation");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##xrot", &rot.m_x, -180.0f, 180.0f);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##yrot", &rot.m_y, -180.0f, 180.0f);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##zrot", &rot.m_z, -180.0f, 180.0f);
-            ImGui::EndGroup();
-            ImGui::BeginGroup();
-                ImGui::Indent();    ImGui::Text("Scale");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::DragFloat("##xscale", &scl.m_x, dragSpeed, 0.01f, 100.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::DragFloat("##yscale", &scl.m_y, dragSpeed, 0.01f, 100.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::DragFloat("##zscale", &scl.m_z, dragSpeed, 0.01f, 100.0f, "%.1f");
-            ImGui::EndGroup();
-            ImGui::Separator();
-        ImGui::PopItemWidth();
-    }
-
-    void EditorManager::EntityControl(nc::EntityView* view)
+    bool EditorManager::EntityControl(nc::EntityView* view)
     {   
         std::string handle_s = std::to_string(view->Entity()->Handle);
-
-        nc::Renderer* renderer = view->Renderer();
-
         float spacing = 60.0f;
+        bool open = true;
 
-        if(ImGui::Begin("Tree"))
+        if(ImGui::Begin("Entity"), &open)// + std::to_string(id).c_str() ) )
         {
-            if(ImGui::TreeNode("TreeNode"))
+            ImGui::Spacing(); ImGui::Separator();  ImGui::PushItemWidth(spacing);
+                ImGui::BeginGroup();
+                    ImGui::Text("Tag: ");  ImGui::SameLine(spacing, -1.0f);  ImGui::Text(view->Entity()->Tag.c_str());
+                ImGui::EndGroup();
+                ImGui::BeginGroup();
+                    ImGui::Text("Handle: ");  ImGui::SameLine(spacing, -1.0f);  ImGui::Text(handle_s.c_str());
+                ImGui::EndGroup();
+            ImGui::PopItemWidth();  ImGui::Separator();
+
+            view->Transform()->EditorGuiElement();
+
+            nc::Renderer* rend = view->Renderer();
+            if(rend) { rend->EditorGuiElement(); }
+
+            for(auto& comp : view->Entity()->GetUserComponents())
             {
-                ImGui::TreePop();
+                comp->EditorGuiElement();
             }
-            
         }
         ImGui::End();
 
-        if(ImGui::Begin("Entity"))// + std::to_string(id).c_str() ) )
-        {
-            ImGui::Spacing(); ImGui::Separator();
-            ImGui::PushItemWidth(spacing);
-                ImGui::BeginGroup();
-                    ImGui::Text("Tag: ");
-                    ImGui::SameLine(spacing, -1.0f);
-                    ImGui::Text(view->Entity()->Tag.c_str());
-                ImGui::EndGroup();
-
-                ImGui::BeginGroup();
-                    ImGui::Text("Handle: ");
-                    ImGui::SameLine(spacing, -1.0f);
-                    ImGui::Text(handle_s.c_str());
-                ImGui::EndGroup();
-            ImGui::PopItemWidth();
-            ImGui::Separator();
-
-            TransformGui(view->Transform());
-
-            renderer->EditorGuiElement();
-
-        }
-
-        ImGui::End();
+        return open;
     }
 
 

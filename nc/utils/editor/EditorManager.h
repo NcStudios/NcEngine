@@ -26,9 +26,7 @@ namespace nc::utils::editor
 
             
 
-            static void EntityControl(nc::EntityView* view);
-            static void TransformGui(nc::Transform* transform);
-
+            static bool EntityControl(nc::EntityView* view);
 
 
             static void SpeedControl(float* speed);

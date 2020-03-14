@@ -26,6 +26,8 @@ namespace nc
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&);
 
+            void EditorGuiElement() override;
+
             template<typename ModelType>
             void SetModel(graphics::Graphics& graphics, DirectX::XMFLOAT3 materialColor);
 

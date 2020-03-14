@@ -66,39 +66,68 @@ void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)
         utils::editor::EditorManager::CameraControl();
         m_pointLight->SpawnControlWindow();
 
-        if(ImGui::Begin("Boxes"))
+        if(ImGui::Begin("RenderingSystem"))
         {
-            const auto preview = m_comboBoxIndex ? std::to_string(*m_comboBoxIndex) : "Choose a box...";
-            if(ImGui::BeginCombo("Box Number", preview.c_str()))
+            for(size_t i = 0; i < m_components.size(); ++i)
             {
-                for(size_t i = 0; i < m_components.size(); ++i)
+                const bool selected = *m_comboBoxIndex == i;
+                std::string id = std::to_string(m_components[i].GetHandle());
+
+                if(ImGui::Selectable(id.c_str(), selected))
                 {
-                    const bool selected = *m_comboBoxIndex == i;
-                    if(ImGui::Selectable(std::to_string(i).c_str(), selected))
-                    {
-                        m_comboBoxIndex = i;
-                    }
-                    if(selected)
-                    {
-                        ImGui::SetItemDefaultFocus();
-                    }
+                    m_comboBoxIndex = i;
                 }
-                ImGui::EndCombo();
+                if(selected && m_comboBoxIndex.has_value())
+                {
+                     //ImGui::SetItemDefaultFocus();
+                     if(!nc::utils::editor::EditorManager::EntityControl(m_components[m_comboBoxIndex.value()].GetParentView()))
+                     {
+                         m_comboBoxIndex.reset();
+                     }
+                }
             }
-            if(ImGui::Button("Spawn Control Window") && m_comboBoxIndex)
-            {
-                m_boxControlIds.insert(*m_comboBoxIndex);
-                m_comboBoxIndex.reset();
-            }
+
+            // if(m_comboBoxIndex.has_value())
+            // {
+            //     nc::utils::editor::EditorManager::EntityControl(m_components[m_comboBoxIndex.value()].GetParentView());
+            //     m_comboBoxIndex.reset();
+            // }
         }
         ImGui::End();
 
-        for(auto id : m_boxControlIds)
-        {
-            nc::utils::editor::EditorManager::EntityControl(m_components[id].GetParentView());
+        // if(ImGui::Begin("Boxes"))
+        // {
+        //     const auto preview = m_comboBoxIndex ? std::to_string(*m_comboBoxIndex) : "Choose a box...";
+        //     if(ImGui::BeginCombo("Box Number", preview.c_str()))
+        //     {
+        //         for(size_t i = 0; i < m_components.size(); ++i)
+        //         {
+        //             const bool selected = *m_comboBoxIndex == i;
+        //             if(ImGui::Selectable(std::to_string(i).c_str(), selected))
+        //             {
+        //                 m_comboBoxIndex = i;
+        //             }
+        //             if(selected)
+        //             {
+        //                 ImGui::SetItemDefaultFocus();
+        //             }
+        //         }
+        //         ImGui::EndCombo();
+        //     }
+        //     if(ImGui::Button("Spawn Control Window") && m_comboBoxIndex)
+        //     {
+        //         m_boxControlIds.insert(*m_comboBoxIndex);
+        //         m_comboBoxIndex.reset();
+        //     }
+        // }
+        // ImGui::End();
 
-            //m_components[id].SpawnControlWindow(id, graphics);
-        }
+        // for(auto id : m_boxControlIds)
+        // {
+        //     nc::utils::editor::EditorManager::EntityControl(m_components[id].GetParentView());
+
+        //     //m_components[id].SpawnControlWindow(id, graphics);
+        // }
     }
 
     m_editorManager->EndFrame();

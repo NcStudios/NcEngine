@@ -1,14 +1,14 @@
 #pragma once
 #include "MathNCE.h"
 
-namespace nc::utils::editor { class EditorManager; }
+namespace nc { class Transform; }
 namespace DirectX { struct XMFLOAT3; }
 
 namespace nc
 {
     class Vector3
     {
-        friend nc::utils::editor::EditorManager;
+        friend nc::Transform;
 
         public:
             Vector3() noexcept;

@@ -11,10 +11,12 @@ namespace nc
 {
     class Transform : public Component
     {
-        friend nc::utils::editor::EditorManager;
+        //friend nc::utils::editor::EditorManager;
 
         public:
             Transform(ComponentHandle handle, EntityView parentView) noexcept;
+
+            void EditorGuiElement() override;
 
             inline Vector3 GetPosition() const noexcept;
             inline Vector3 GetRotation() const noexcept;

@@ -20,5 +20,9 @@ g++ -Wall -std=c++17^
  -I..\project\Models^
  -I..\project\Scenes^
  -c ..\nc\*.cpp^
- ..\nc\engine\*.cpp^
- ..\nc\win32\*.cpp
+ ..\nc\component\*.cpp^
+ ..\nc\input\*.cpp^
+ ..\nc\math\*.cpp^
+ ..\nc\scene\*.cpp^
+ ..\nc\time\*.cpp^
+ ..\nc\views\*.cpp

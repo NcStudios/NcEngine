@@ -3,6 +3,11 @@
 
 namespace nc{
 
+std::vector<std::shared_ptr<Component>> Entity::GetUserComponents() const noexcept
+{
+    return m_userComponents;
+}
+
 Transform* Entity::GetTransform() const noexcept
 {
     return NCE::GetTransform(TransformHandle);
@@ -10,7 +15,7 @@ Transform* Entity::GetTransform() const noexcept
 
 void Entity::SendOnInitialize() noexcept
 {
-    for (auto& comp : m_components)
+    for (auto& comp : m_userComponents)
     {
         comp->OnInitialize();
     }
@@ -18,7 +23,7 @@ void Entity::SendOnInitialize() noexcept
 
 void Entity::SendFrameUpdate() noexcept
 {
-    for (auto& comp : m_components)
+    for (auto& comp : m_userComponents)
     {
         comp->FrameUpdate();
     }
@@ -26,7 +31,7 @@ void Entity::SendFrameUpdate() noexcept
 
 void Entity::SendFixedUpdate() noexcept
 {
-    for(auto& comp : m_components)
+    for(auto& comp : m_userComponents)
     {
         comp->FixedUpdate();
     }
@@ -34,7 +39,7 @@ void Entity::SendFixedUpdate() noexcept
 
 void Entity::SendOnDestroy() noexcept
 {
-    for (auto& comp : m_components)
+    for (auto& comp : m_userComponents)
     {
         comp->OnDestroy();
     }
@@ -42,7 +47,7 @@ void Entity::SendOnDestroy() noexcept
 
 void Entity::SendOnCollisionEnter(const EntityHandle other) noexcept
 {
-    for(auto& comp : m_components)
+    for(auto& comp : m_userComponents)
     {
         comp->OnCollisionEnter(other);
     }
@@ -50,7 +55,7 @@ void Entity::SendOnCollisionEnter(const EntityHandle other) noexcept
 
 void Entity::SendOnCollisionStay() noexcept
 {
-    for(auto& comp : m_components)
+    for(auto& comp : m_userComponents)
     {
         comp->OnCollisionStay();
     }
@@ -58,7 +63,7 @@ void Entity::SendOnCollisionStay() noexcept
 
 void Entity::SendOnCollisionExit() noexcept
 {
-    for(auto& comp : m_components)
+    for(auto& comp : m_userComponents)
     {
         comp->OnCollisionExit();
     }

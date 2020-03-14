@@ -8,6 +8,36 @@ namespace nc
         : Component(handle, parentView) 
     {}
 
+    void Transform::EditorGuiElement()
+    {
+        const float itemWidth = 60.0f;
+        const float dragSpeed = 0.75f;
+
+        ImGui::PushItemWidth(itemWidth);
+            ImGui::Spacing();  ImGui::Separator();  ImGui::Text("Transform");
+
+            ImGui::BeginGroup();
+                ImGui::Indent();    ImGui::Text("Position");
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::DragFloat( "##xpos", &m_position.m_x, dragSpeed, -80.0f, 80.0f, "%.1f");  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::DragFloat( "##ypos", &m_position.m_y, dragSpeed, -80.0f, 80.0f, "%.1f");  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::DragFloat( "##zpos", &m_position.m_z, dragSpeed, -80.0f, 80.0f, "%.1f");
+            ImGui::EndGroup();
+            ImGui::BeginGroup();
+                ImGui::Indent();    ImGui::Text("Rotation");
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##xrot", &m_rotation.m_x, -180.0f, 180.0f);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##yrot", &m_rotation.m_y, -180.0f, 180.0f);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##zrot", &m_rotation.m_z, -180.0f, 180.0f);
+            ImGui::EndGroup();
+            ImGui::BeginGroup();
+                ImGui::Indent();    ImGui::Text("Scale");
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::DragFloat("##xscale", &m_scale.m_x, dragSpeed, 0.01f, 100.0f, "%.1f");  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::DragFloat("##yscale", &m_scale.m_y, dragSpeed, 0.01f, 100.0f, "%.1f");  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::DragFloat("##zscale", &m_scale.m_z, dragSpeed, 0.01f, 100.0f, "%.1f");
+            ImGui::EndGroup();
+            ImGui::Separator();
+        ImGui::PopItemWidth();
+    }
+
     inline Vector3 Transform::GetPosition() const noexcept { return m_position; }
     inline Vector3 Transform::GetRotation() const noexcept { return m_rotation; }
     inline Vector3 Transform::GetScale()    const noexcept { return m_scale;    }
