@@ -6,15 +6,18 @@
 #include <string>
 
 #include "Common.h"
-#include "Renderer.h"
+
+#include "EntityView.h"
+//#include "Renderer.h"
 
 //forward declarations
 namespace nc
 {
     class Camera;
     class Entity;
-    class EntityView;
+    class Renderer;
     class Transform;
+    class Vector3;
     class Vector4;
 
     namespace utils::editor { class EditorManager; }
@@ -66,21 +69,12 @@ namespace nc::engine
                 std::unique_ptr<HandleManager<EntityHandle>> Handle;
                 std::unique_ptr<RenderingSystem> Rendering;
                 std::unique_ptr<CollisionSystem> Collision;
-                //std::unique_ptr<TransformSystem> Transform;
                 std::unique_ptr<ComponentManager<Transform>> TransformSystem;
             } m_subsystem;
 
             std::unique_ptr<EntityMaps> m_entities;
 
             EntityView m_mainCameraView;
-
-            //std::unique_ptr<Camera> m_mainCamera;
-            // struct EntityMaps
-            // {
-            //     std::unordered_map<EntityHandle, Entity> AwaitingInitialize;
-            //     std::unordered_map<EntityHandle, Entity> Active;
-            //     std::unordered_map<EntityHandle, Entity> AwaitingDestroy;
-            // } m_entities;
 
             void FrameUpdate();
             void FixedUpdate();

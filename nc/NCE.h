@@ -3,7 +3,7 @@
 #include "Common.h"
 #include "Component.h"
 #include "Entity.h"
-#include "EntityView.h"
+#include "View.h"
 #include "Input.h"
 #include "NCTime.h"
 #include "Transform.h"

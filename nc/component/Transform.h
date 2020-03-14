@@ -1,16 +1,18 @@
 #pragma once
 #include "Common.h"
 #include "Component.h"
-#include "NCVector.h"
+#include "Vector3.h"
 
-//#include "DirectXMath.h"
-
+namespace nc::utils::editor { class EditorManager; }
 namespace DirectX { struct XMMATRIX; }
+
 
 namespace nc
 {
     class Transform : public Component
     {
+        friend nc::utils::editor::EditorManager;
+
         public:
             Transform(ComponentHandle handle, EntityView parentView) noexcept;
 

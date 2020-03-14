@@ -1,12 +1,15 @@
 #pragma once
 #include "MathNCE.h"
 
+namespace nc::utils::editor { class EditorManager; }
 namespace DirectX { struct XMFLOAT3; }
 
 namespace nc
 {
     class Vector3
     {
+        friend nc::utils::editor::EditorManager;
+
         public:
             Vector3() noexcept;
             Vector3(float x, float y, float z) noexcept;

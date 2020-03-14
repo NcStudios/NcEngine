@@ -21,13 +21,11 @@ namespace nc
             EntityView& operator=(const EntityView&);
             EntityView& operator=(EntityView&&);
 
-            EntityView*    MainCamera() noexcept;
-            Entity*    Entity()     noexcept;
-            Transform* Transform()  noexcept;
-            Renderer*  Renderer()   noexcept;
+            EntityView* MainCamera() noexcept;
+            Entity*     Entity()     noexcept;
+            Transform*  Transform()  noexcept;
+            Renderer*   Renderer()   noexcept;
 
             nc::Renderer* AddRenderer() noexcept;
-
-
     };
 }

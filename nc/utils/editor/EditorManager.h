@@ -1,6 +1,8 @@
 #pragma once
 #include "NCWinDef.h"
 
+namespace nc { class Transform; class EntityView; }
+
 namespace nc::graphics { class Graphics; }
 
 namespace nc::utils::editor
@@ -21,6 +23,13 @@ namespace nc::utils::editor
             void DisableGui() noexcept;
 
             bool IsGuiActive() const noexcept;
+
+            
+
+            static void EntityControl(nc::EntityView* view);
+            static void TransformGui(nc::Transform* transform);
+
+
 
             static void SpeedControl(float* speed);
 

@@ -9,7 +9,7 @@
 #include "CollisionSystem.h"
 #include "HandleManager.h"
 #include "Camera.h"
-
+#include "Renderer.h"
 
 #include <iostream>
 

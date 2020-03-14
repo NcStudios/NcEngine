@@ -1,6 +1,7 @@
 cd obj
 g++ -Wall -std=c++17^
  -I..\nc^
+ -I..\nc\component^
  -I..\nc\debug^
  -I..\nc\engine^
  -I..\nc\graphics^
@@ -13,14 +14,17 @@ g++ -Wall -std=c++17^
  -I..\nc\utils\editor^
  -I..\nc\utils\editor\imgui^
  -I..\nc\utils\objloader^
+ -I..\nc\views^
  -I..\nc\win32^
  -I..\project\Components^
  -I..\project\Models^
  -I..\project\Scenes^
  -c ..\nc\*.cpp^
+ ..\nc\component\*.cpp^
  ..\nc\engine\*.cpp^
  ..\nc\input\*.cpp^
  ..\nc\math\*.cpp^
  ..\nc\scene\*.cpp^
  ..\nc\time\*.cpp^
+ ..\nc\views\*.cpp^
  ..\nc\win32\*.cpp

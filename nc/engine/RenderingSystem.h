@@ -3,13 +3,9 @@
 #include <vector>
 #include <memory>
 #include "NCWinDef.h"
-//#include <windef.h> //HWND
 
-//#include "Drawable.h"
-//#include "Box2.h"
-//#include "Box.h"
 
-#include "HandleManager.h"
+//#include "HandleManager.h"
 #include <set>
 #include "Renderer.h"
 #include "ComponentManager.h"
@@ -47,19 +43,13 @@ namespace nc::engine
             void BindEditorManager(utils::editor::EditorManager* editorManager);
 
         private:
-            //Camera& m_camera;
             std::unique_ptr<graphics::PointLight> m_pointLight;
-
             std::unique_ptr<graphics::Graphics> m_graphics;
-            //std::vector<nc::Renderer> m_renderers;
-
-
-            //std::vector<nc::Renderer*> m_rendererPointers; 
             std::optional<unsigned int> m_comboBoxIndex;
             std::set<unsigned int> m_boxControlIds;
-
             utils::editor::EditorManager* m_editorManager;
             bool m_isGuiEnabled = true;
+            
             void BeginFrame();
             void EndFrame();
     };

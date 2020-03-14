@@ -1,6 +1,6 @@
 #include "CollisionSystem.h"
-#include "NCE.h"
-#include <iostream>
+//#include "NCE.h"
+//#include <iostream>
 
 namespace nc::engine{
 
@@ -8,13 +8,13 @@ CollisionSystem::CollisionSystem() {}
 
 bool CollisionSystem::AreIntersecting(const Vector4& first, const Vector4& second)
 {
-    if ((  first.X() > (second.X() + second.Z()) ) || //first.left > second.right
-        (  first.Y() > (second.Y() + second.W()) ) || //first.top  > second.bottom
-        ( (first.X() +  first.Z()) < second.X()  ) || //first.right < second.left
-        ( (first.Y() +  first.W()) < second.Y()  ))   //first.bottom < second.top
-    {
-        return false;
-    }
+    // if ((  first.X() > (second.X() + second.Z()) ) || //first.left > second.right
+    //     (  first.Y() > (second.Y() + second.W()) ) || //first.top  > second.bottom
+    //     ( (first.X() +  first.Z()) < second.X()  ) || //first.right < second.left
+    //     ( (first.Y() +  first.W()) < second.Y()  ))   //first.bottom < second.top
+    // {
+    //     return false;
+    // }
 
     return true;
 }

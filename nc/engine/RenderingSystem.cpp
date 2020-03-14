@@ -95,7 +95,9 @@ void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)
 
         for(auto id : m_boxControlIds)
         {
-            m_components[id].SpawnControlWindow(id, graphics);
+            nc::utils::editor::EditorManager::EntityControl(m_components[id].GetParentView());
+
+            //m_components[id].SpawnControlWindow(id, graphics);
         }
     }
 

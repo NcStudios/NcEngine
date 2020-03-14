@@ -32,13 +32,13 @@ void Head::FrameUpdate()
     float cameraRotationDY = 0.0f;
 
     if(GetKey(KeyCode::UpArrow))
-        cameraRotationDY += 1.0f;
-    if(GetKey(KeyCode::DownArrow))
-        cameraRotationDY -= 1.0f;
-    if(GetKey(KeyCode::RightArrow))
         cameraRotationDX += 1.0f;
-    if(GetKey(KeyCode::LeftArrow))
+    if(GetKey(KeyCode::DownArrow))
         cameraRotationDX -= 1.0f;
+    if(GetKey(KeyCode::RightArrow))
+        cameraRotationDY += 1.0f;
+    if(GetKey(KeyCode::LeftArrow))
+        cameraRotationDY -= 1.0f;
 
     const float clampMin = -3.14159 / 3.0f;
     const float clampMax =  3.14159 / 3.0f;
