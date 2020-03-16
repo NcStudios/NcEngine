@@ -1,5 +1,6 @@
 #pragma once
 #include "NCWinDef.h"
+#include <optional>
 
 namespace nc { class Transform; class EntityView; }
 
@@ -10,6 +11,8 @@ namespace nc::utils::editor
     class EditorManager
     {
         public:
+            std::optional<unsigned int> SelectedEntityIndex;
+
             EditorManager(HWND hwnd, nc::graphics::Graphics& graphics);
             ~EditorManager() noexcept;
 
@@ -31,14 +34,10 @@ namespace nc::utils::editor
 
             static void SpeedControl(float* speed);
 
-            static void CameraControl();
-
             static void PointLightControl(float* xPos,      float* yPos,      float* zPos,
                                           float* ambientR,  float* ambientG,  float* ambientB,
                                           float* difColorR, float* difColorG, float* difColorB,
                                           float* difIntens, float* attConst,  float* attLin, float* attQuad);
-
-            static bool BoxControl(int id, float* matX, float* specIntensity, float* specPower);
 
         private:
             bool m_isGuiActive;

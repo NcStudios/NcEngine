@@ -10,7 +10,7 @@
 #include "HandleManager.h"
 #include "Camera.h"
 #include "Renderer.h"
-
+#include "EditorManager.h"
 #include <iostream>
 
 namespace nc::engine
@@ -24,7 +24,7 @@ struct EntityMaps
 };
 
 
-Engine::Engine()
+Engine::Engine(HWND hwnd)
 {
     auto wndDim = Window::Instance->GetWindowDimensions();
     m_entities = std::make_unique<EntityMaps>();
@@ -33,6 +33,7 @@ Engine::Engine()
     //m_subsystem.Transform = std::make_unique<TransformSystem>();
     m_subsystem.TransformSystem = std::make_unique<ComponentManager<Transform>>();
     m_subsystem.Handle = std::make_unique<HandleManager<EntityHandle>>();
+    m_editorManager = std::make_unique<nc::utils::editor::EditorManager>(hwnd, GetGraphics());
 }
 
 Engine::~Engine() {}
@@ -68,12 +69,16 @@ void Engine::MainLoop()
     m_mainCameraView.Entity()->AddComponent<Camera>();
 
     while(m_engineState.isRunning)
-    {
-        /* CYCLE START */
+    {   
+        /**************
+        * CYCLE START *
+        ***************/    
         ncTime.UpdateTime();
         Window::Instance->ProcessSystemMessages();
 
-        /* PHYSICS */
+        /**********
+        * PHYSICS *
+        ***********/
         /** @note Change this so physics 'simulates' running at a fixed interval.
          * It may need to run multiple times in a row in cases where FrameUpdate()
          * runs slowly and execution doesn't return back to physics in time for the 
@@ -85,30 +90,80 @@ void Engine::MainLoop()
             ncTime.ResetFixedDeltaTime();
         }
 
-        /* FRAME */
+        /********
+        * FRAME *
+        *********/
         // if (time::Time::FrameDeltaTime > ProjectSettings::displaySettings.frameUpdateInterval)
         // {
         //     FrameUpdate();
         //     input::Flush();
         //     ncTime.ResetFrameDeltaTime();
         // }
-        FrameUpdate();
+
+        FrameUpdate(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
         input::Flush();
         ncTime.ResetFrameDeltaTime();
 
-        /* CYCLE CLEANUP */
+        /************
+        * CYCLE END *
+        *************/
 
     } //end main loop
 }
 
-void Engine::FrameUpdate()
+void Engine::FrameUpdate(float dt)
 {
-    // user component init and logic
+    //User component init and logic
     SendOnInitialize();
-    SendFrameUpdate();
+    SendFrameUpdate(dt);
 
-    // rendering
-    m_subsystem.Rendering->StartRenderCycle(m_subsystem.TransformSystem->GetVector());
+    //Debug gui setup
+    if(input::GetKeyUp(input::KeyCode::Tilde))
+    {
+        m_editorManager->ToggleGui();
+    }
+    m_editorManager->BeginFrame();
+
+    //Rendering
+    m_subsystem.Rendering->FrameBegin();
+    m_subsystem.Rendering->Frame();
+
+    if(m_editorManager->IsGuiActive())
+    {
+        m_editorManager->SpeedControl(&m_frameDeltaTimeFactor);
+        //m_pointLight->SpawnControlWindow();
+
+        static bool open = true;
+
+        if(ImGui::Begin("Entity Graph"), &open)
+        {
+            for(auto& pair : m_entities->Active)
+            {
+                const bool selected = *m_editorManager->SelectedEntityIndex == pair.first;
+
+                std::string id = pair.second.Tag + "##" + std::to_string(pair.first); //create unique labels
+
+                if(ImGui::Selectable(id.c_str(), selected))
+                {
+                    m_editorManager->SelectedEntityIndex = pair.first;
+                }
+                ImGui::Spacing();
+                if(selected && m_editorManager->SelectedEntityIndex.has_value())
+                {
+                    EntityView view(pair.second.Handle, pair.second.TransformHandle); 
+                    if(!m_editorManager->EntityControl(&view))
+                    {
+                        m_editorManager->SelectedEntityIndex.reset();
+                    }
+                }
+            }
+        }
+        ImGui::End();
+    }
+
+    m_editorManager->EndFrame();
+
+    m_subsystem.Rendering->FrameEnd();
 
     // cleanup
     SendOnDestroy();
@@ -202,14 +257,14 @@ nc::graphics::Graphics& Engine::GetGraphics()
     return m_subsystem.Rendering->GetGraphics();
 }
 
+nc::utils::editor::EditorManager* Engine::GetEditorManager()
+{
+    return m_editorManager.get();
+}
+
 EntityView* Engine::GetMainCamera()
 {
     return &m_mainCameraView;
-}
-
-void Engine::BindEditorManager(utils::editor::EditorManager* editorManager)
-{
-    m_subsystem.Rendering->BindEditorManager(editorManager);
 }
 
 Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.TransformSystem->GetPointerTo(handle); }
@@ -224,11 +279,11 @@ void Engine::SendOnInitialize() noexcept
     m_entities->AwaitingInitialize.clear();
 }
 
-void Engine::SendFrameUpdate() noexcept
+void Engine::SendFrameUpdate(float dt) noexcept
 {
     for(auto& pair : m_entities->Active)
     {
-        pair.second.SendFrameUpdate();
+        pair.second.SendFrameUpdate(dt);
     }
 }
 

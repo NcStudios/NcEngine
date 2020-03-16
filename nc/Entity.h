@@ -22,7 +22,7 @@ namespace nc
             const std::string Tag;
             
             void SendOnInitialize() noexcept;
-            void SendFrameUpdate() noexcept;
+            void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
             void SendOnCollisionEnter(const EntityHandle other) noexcept;

@@ -1,19 +1,9 @@
 #include "RenderingSystem.h"
+#include "NCE.h"
 #include "Graphics.h"
-#include "Transform.h"
-#include "ProjectSettings.h"
-#include "NCTime.h"
-
-#include "Drawable.h"
 
 #include "Camera.h"
 #include "PointLight.h"
-#include "EditorManager.h"
-#include "Input.h"
-
-
-#include "NCE.h"
-#include "imgui.h"
 
 namespace nc::engine{
 
@@ -28,130 +18,32 @@ RenderingSystem::RenderingSystem(int initialWidth, int initialHeight, HWND hwnd)
 
 RenderingSystem::~RenderingSystem() = default;
 
-void RenderingSystem::StartRenderCycle(const std::vector<Transform> &transforms)
+void RenderingSystem::FrameBegin()
 {
-    static float speed_factor = 1.0f;
-
-    if(input::GetKeyUp(input::KeyCode::Tilde))
-    {
-        m_editorManager->ToggleGui();
-    }
-    
-    //auto camMatrixXM = NCE::GetMainCamera()->Transform()->GetLookMatrix();
     auto camMatrixXM = NCE::GetMainCamera()->Transform()->CamGetMatrix();
-    //auto camMatrixXM = NCE::GetMainCamera()->Transform()->GetMatrixXM();
-
-
     m_graphics->SetCamera(camMatrixXM);
-
     m_pointLight->Bind(GetGraphics(), camMatrixXM);
+    m_graphics->ClearBuffer(0.0f, 0.0f, 0.0f);
+}
 
-    m_editorManager->BeginFrame();
-    BeginFrame();
-
-    auto dt = nc::time::Time::FrameDeltaTime * speed_factor / 2.0f;
+void RenderingSystem::Frame()
+{
     auto& graphics = GetGraphics();
 
     for(auto& r : m_components)
     {
-        r.Update(graphics, dt);
+        r.Update(graphics);
     }
+}
 
-    if(m_editorManager->IsGuiActive())
-    {
-        m_editorManager->SpeedControl(&speed_factor);
-
-        //Transform* camT = NCE::GetMainCamera()->Transform();
-
-        utils::editor::EditorManager::CameraControl();
-        m_pointLight->SpawnControlWindow();
-
-        if(ImGui::Begin("RenderingSystem"))
-        {
-            for(size_t i = 0; i < m_components.size(); ++i)
-            {
-                const bool selected = *m_comboBoxIndex == i;
-                std::string id = std::to_string(m_components[i].GetHandle());
-
-                if(ImGui::Selectable(id.c_str(), selected))
-                {
-                    m_comboBoxIndex = i;
-                }
-                if(selected && m_comboBoxIndex.has_value())
-                {
-                     //ImGui::SetItemDefaultFocus();
-                     if(!nc::utils::editor::EditorManager::EntityControl(m_components[m_comboBoxIndex.value()].GetParentView()))
-                     {
-                         m_comboBoxIndex.reset();
-                     }
-                }
-            }
-
-            // if(m_comboBoxIndex.has_value())
-            // {
-            //     nc::utils::editor::EditorManager::EntityControl(m_components[m_comboBoxIndex.value()].GetParentView());
-            //     m_comboBoxIndex.reset();
-            // }
-        }
-        ImGui::End();
-
-        // if(ImGui::Begin("Boxes"))
-        // {
-        //     const auto preview = m_comboBoxIndex ? std::to_string(*m_comboBoxIndex) : "Choose a box...";
-        //     if(ImGui::BeginCombo("Box Number", preview.c_str()))
-        //     {
-        //         for(size_t i = 0; i < m_components.size(); ++i)
-        //         {
-        //             const bool selected = *m_comboBoxIndex == i;
-        //             if(ImGui::Selectable(std::to_string(i).c_str(), selected))
-        //             {
-        //                 m_comboBoxIndex = i;
-        //             }
-        //             if(selected)
-        //             {
-        //                 ImGui::SetItemDefaultFocus();
-        //             }
-        //         }
-        //         ImGui::EndCombo();
-        //     }
-        //     if(ImGui::Button("Spawn Control Window") && m_comboBoxIndex)
-        //     {
-        //         m_boxControlIds.insert(*m_comboBoxIndex);
-        //         m_comboBoxIndex.reset();
-        //     }
-        // }
-        // ImGui::End();
-
-        // for(auto id : m_boxControlIds)
-        // {
-        //     nc::utils::editor::EditorManager::EntityControl(m_components[id].GetParentView());
-
-        //     //m_components[id].SpawnControlWindow(id, graphics);
-        // }
-    }
-
-    m_editorManager->EndFrame();
-    EndFrame();
+void RenderingSystem::FrameEnd()
+{
+    m_graphics->EndFrame();
 }
 
 nc::graphics::Graphics& RenderingSystem::GetGraphics()
 {
     return *m_graphics;
-}
-
-void RenderingSystem::BindEditorManager(utils::editor::EditorManager* editorManager)
-{
-    m_editorManager = editorManager;
-}
-
-void RenderingSystem::BeginFrame()
-{
-    m_graphics->ClearBuffer(0.0f, 0.0f, 0.0f);
-}
-
-void RenderingSystem::EndFrame()
-{
-    m_graphics->EndFrame();
 }
 
 } //end namespace nc::internal

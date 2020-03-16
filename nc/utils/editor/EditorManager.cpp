@@ -22,12 +22,11 @@ namespace nc::utils::editor
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsDark();
+        ImGui::StyleColorsClassic();
 
-        //setup win32 bindings
+        //setup win32/d3d11 bindings
         ImGui_ImplWin32_Init(hwnd);
-
-        //setup D3D11 bindings
         ImGui_ImplDX11_Init(graphics.m_device.Get(), graphics.m_context.Get());
     }
 
@@ -71,30 +70,33 @@ namespace nc::utils::editor
     {   
         std::string handle_s = std::to_string(view->Entity()->Handle);
         float spacing = 60.0f;
-        bool open = true;
+        static bool open = true;
 
-        if(ImGui::Begin("Entity"), &open)// + std::to_string(id).c_str() ) )
+        if(open) 
         {
-            ImGui::Spacing(); ImGui::Separator();  ImGui::PushItemWidth(spacing);
-                ImGui::BeginGroup();
-                    ImGui::Text("Tag: ");  ImGui::SameLine(spacing, -1.0f);  ImGui::Text(view->Entity()->Tag.c_str());
-                ImGui::EndGroup();
-                ImGui::BeginGroup();
-                    ImGui::Text("Handle: ");  ImGui::SameLine(spacing, -1.0f);  ImGui::Text(handle_s.c_str());
-                ImGui::EndGroup();
-            ImGui::PopItemWidth();  ImGui::Separator();
-
-            view->Transform()->EditorGuiElement();
-
-            nc::Renderer* rend = view->Renderer();
-            if(rend) { rend->EditorGuiElement(); }
-
-            for(auto& comp : view->Entity()->GetUserComponents())
+            if(ImGui::Begin("Entity"), &open)
             {
-                comp->EditorGuiElement();
+                ImGui::Spacing(); ImGui::Separator();  ImGui::PushItemWidth(spacing);
+                    ImGui::BeginGroup();
+                        ImGui::Text("Tag: ");  ImGui::SameLine(spacing, -1.0f);  ImGui::Text(view->Entity()->Tag.c_str());
+                    ImGui::EndGroup();
+                    ImGui::BeginGroup();
+                        ImGui::Text("Handle: ");  ImGui::SameLine(spacing, -1.0f);  ImGui::Text(handle_s.c_str());
+                    ImGui::EndGroup();
+                ImGui::PopItemWidth();  ImGui::Separator();
+
+                view->Transform()->EditorGuiElement();
+
+                nc::Renderer* rend = view->Renderer();
+                if(rend) { rend->EditorGuiElement(); }
+
+                for(auto& comp : view->Entity()->GetUserComponents())
+                {
+                    comp->EditorGuiElement();
+                }
             }
+            ImGui::End();
         }
-        ImGui::End();
 
         return open;
     }
@@ -102,27 +104,16 @@ namespace nc::utils::editor
 
     void EditorManager::SpeedControl(float* speed)
     {
-        if(ImGui::Begin("Simulation Speed"))
-        {
-            ImGui::SliderFloat("Factor", speed, 0.0f, 10.0f);
-            ImGui::Text("Average %.1f FPS (%.3f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
-        }
-        ImGui::End();
-    }
+        static bool open = true;
 
-    void EditorManager::CameraControl()//float* zPos, float* phi, float* theta, float* xRot, float* yRot, float* zRot)
-    {
-        if(ImGui::Begin("Camera Control"))
+        if(!open) return;
+
+        if(ImGui::Begin("Frame dt"), &open)
         {
-            // ImGui::Text("Position");
-            // ImGui::SliderFloat("Z Dist", zPos, 0.0f, 100.0f, "%.1f");
-            // ImGui::SliderAngle("Phi", phi, -180.0f, 180.0f, "%.1f");
-            // ImGui::SliderAngle("Theta", theta, -180.0f, 180.0f, "%.1f");
-            // ImGui::Text("Rotation");
-            // ImGui::SliderAngle("X Angle", xRot, -180.0f, 180.0f);
-            // ImGui::SliderAngle("Y Angle", yRot, -180.0f, 180.0f);
-            // ImGui::SliderAngle("Z Angle", zRot, -180.0f, 180.0f);
-            // if(ImGui::Button("Reset")) { *zPos=20.0f;*phi=0;*theta=0;*xRot=0;*yRot=0;*zRot=0; }
+            ImGui::DragFloat("Mult", speed, 0.75f, 0.0f, 10.0f, "%.05f");
+            float frameRate = ImGui::GetIO().Framerate;
+            ImGui::Text("Avg. %.1f FPS", frameRate);
+            ImGui::Text("(%.3f ms/frame)", 1000.0f / frameRate);
         }
         ImGui::End();
     }
@@ -151,28 +142,4 @@ namespace nc::utils::editor
         }
         ImGui::End();
     }
-
-    
-    bool EditorManager::BoxControl(int id, float* matX, float* specInten, float* specPwr)
-    {
-        using namespace std::string_literals;
-
-        bool isDirty = false;
-        if(ImGui::Begin("Box "))// + std::to_string(id).c_str() ) )
-        {
-            bool mDirty  = ImGui::ColorEdit3("Material Color", matX);
-            bool siDirty = ImGui::SliderFloat("Specular Intensity", specInten, 0.05f, 4.0f, "%.2f", 2);
-            bool spDirty = ImGui::SliderFloat("Specular Power", specPwr, 1.0f, 200.0f, "%.2f", 2);
-            isDirty = mDirty || siDirty || spDirty;
-
-            // ImGui::Text("Position");
-            // ImGui::SliderFloat("R", r, 0.0f, 80.0f, "%.1f");
-            // ImGui::SliderAngle("Theta", theta, -180.0f, 180.0f);
-            // ImGui::SliderAngle("Phi", phi, -180.0f, 180.0f);
-        }
-        ImGui::End();
-
-        return isDirty;
-    }
-
 }

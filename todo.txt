@@ -1,0 +1,18 @@
+-fix naming of user components in gui
+-add camera controls in debug mode
+-rotations are still strange(maybe need world & local?)
+-make point light components on entities
+-fix camera distortion
+-look into dockable gui / maybe drag gui windows offscreen?
+-fix window scaling so changes are made to Window, Graphics, and buffer sizes
+-fix no 'x'/close button on entity windows
+-sync material data from gui
+-camera needs parameters for fov/clipping planes
+-support for multiple cameras and lights
+-directional light, spot light
+
+
+
+-update physics for 3d
+-change from template meshes to single manager for all graphics resources
+-make small program for generating new user types quickly

@@ -3,7 +3,7 @@
 #include "Component.h"
 #include "Vector3.h"
 
-namespace nc::utils::editor { class EditorManager; }
+//namespace nc::utils::editor { class EditorManager; }
 namespace DirectX { struct XMMATRIX; }
 
 
@@ -11,8 +11,6 @@ namespace nc
 {
     class Transform : public Component
     {
-        //friend nc::utils::editor::EditorManager;
-
         public:
             Transform(ComponentHandle handle, EntityView parentView) noexcept;
 
@@ -21,6 +19,9 @@ namespace nc
             inline Vector3 GetPosition() const noexcept;
             inline Vector3 GetRotation() const noexcept;
             inline Vector3 GetScale()    const noexcept;
+            inline float   Pitch()       const noexcept;
+            inline float   Yaw()         const noexcept;
+            inline float   Roll()        const noexcept;
 
             DirectX::XMMATRIX GetMatrixXM();
             DirectX::XMMATRIX CamGetMatrix();

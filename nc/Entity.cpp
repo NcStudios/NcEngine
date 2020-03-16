@@ -21,11 +21,11 @@ void Entity::SendOnInitialize() noexcept
     }
 }
 
-void Entity::SendFrameUpdate() noexcept
+void Entity::SendFrameUpdate(float dt) noexcept
 {
     for (auto& comp : m_userComponents)
     {
-        comp->FrameUpdate();
+        comp->FrameUpdate(dt);
     }
 }
 

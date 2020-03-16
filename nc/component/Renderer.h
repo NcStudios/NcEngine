@@ -27,14 +27,15 @@ namespace nc
             Renderer& operator=(Renderer&&);
 
             void EditorGuiElement() override;
+            void SyncMaterialData(graphics::Graphics&);
 
             template<typename ModelType>
             void SetModel(graphics::Graphics& graphics, DirectX::XMFLOAT3 materialColor);
 
-            void Update(graphics::Graphics& graphics, float dt);
+            void Update(graphics::Graphics& graphics);
 
-            void SpawnControlWindow(int id, graphics::Graphics& graphics);
-            void SyncMaterialData(graphics::Graphics& graphics);
+
+        public:
 
         private:
             std::unique_ptr<nc::graphics::d3dresource::Drawable> m_model;

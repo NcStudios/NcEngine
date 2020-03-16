@@ -1,14 +1,11 @@
-#ifndef ENGINE_H
-#define ENGINE_H
-
+#pragma once
 #include <memory>
 #include <unordered_map>
 #include <string>
 
+#include "NCWinDef.h"
 #include "Common.h"
-
 #include "EntityView.h"
-//#include "Renderer.h"
 
 //forward declarations
 namespace nc
@@ -40,7 +37,7 @@ namespace nc::engine
     class Engine
     {
         public:
-            Engine();
+            Engine(HWND hwnd);
             ~Engine();
 
             void MainLoop();
@@ -56,13 +53,14 @@ namespace nc::engine
             Renderer* GetRenderer(EntityHandle handle);
             bool RemoveRenderer(EntityHandle handle);
 
-            void BindEditorManager(utils::editor::EditorManager* editorManager);
-
             EntityView* GetMainCamera();
             nc::graphics::Graphics& GetGraphics();
+            nc::utils::editor::EditorManager* GetEditorManager();
 
         private:
             struct EngineState { bool isRunning = true; } m_engineState;
+
+            float m_frameDeltaTimeFactor = 1.0f; //for slowing/pausing in debug editor
 
             struct Subsystem
             {
@@ -74,12 +72,13 @@ namespace nc::engine
 
             std::unique_ptr<EntityMaps> m_entities;
 
+            std::unique_ptr<utils::editor::EditorManager> m_editorManager;
             EntityView m_mainCameraView;
 
-            void FrameUpdate();
+            void FrameUpdate(float dt);
             void FixedUpdate();
             void SendOnInitialize() noexcept;
-            void SendFrameUpdate() noexcept;
+            void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
 
@@ -87,6 +86,4 @@ namespace nc::engine
             auto& GetMapContainingEntity(EntityHandle handle, bool checkAll = false) noexcept(false); //returns map containing entity, throws exception if not found
             Entity* GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false);                      //returns ptr to entity regardless of map it's in (AwaitingDestroy, etc.)
     };
-}// end namespace nc::internal
-
-#endif
+} // end namespace nc::internal

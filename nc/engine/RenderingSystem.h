@@ -1,30 +1,22 @@
 #pragma once
-
 #include <vector>
 #include <memory>
 #include "NCWinDef.h"
 
-
-//#include "HandleManager.h"
-#include <set>
 #include "Renderer.h"
 #include "ComponentManager.h"
 
 //forwards
 namespace nc
 {
-    class Transform;
+    //class Transform; 
     class Camera;
 
     namespace graphics 
     {
-        class PointLight;
+        class PointLight; 
         class Graphics;
-        namespace d3dresource { class Drawable; }
-        namespace primitive { class Box; }
     }
-
-    namespace utils::editor { class EditorManager; }
 }
 
 namespace nc::engine
@@ -37,20 +29,14 @@ namespace nc::engine
             RenderingSystem(const RenderingSystem&) = delete;
             RenderingSystem(RenderingSystem&&) = delete;
 
-            void StartRenderCycle(const std::vector<Transform> &transforms);
-            nc::graphics::Graphics& GetGraphics();
+            void FrameBegin();
+            void Frame();
+            void FrameEnd();
 
-            void BindEditorManager(utils::editor::EditorManager* editorManager);
+            nc::graphics::Graphics& GetGraphics();
 
         private:
             std::unique_ptr<graphics::PointLight> m_pointLight;
             std::unique_ptr<graphics::Graphics> m_graphics;
-            std::optional<unsigned int> m_comboBoxIndex;
-            std::set<unsigned int> m_boxControlIds;
-            utils::editor::EditorManager* m_editorManager;
-            bool m_isGuiEnabled = true;
-            
-            void BeginFrame();
-            void EndFrame();
     };
 } //end namespace nc::internal

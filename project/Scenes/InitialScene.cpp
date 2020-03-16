@@ -8,6 +8,11 @@
 
 void InitialScene::Load()
 {
+    //CamController
+    EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
+    camView.Entity()->AddComponent<CamController>();
+
+
     using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
 
     mt19937 rng( std::random_device{}() );
@@ -16,23 +21,33 @@ void InitialScene::Load()
     uniform_real_distribution<float> sclDist(0.5f, 2.0f); 
     uniform_real_distribution<float> clrDist(0.0f, 1.0f);
 
-    for(int i = 0; i < 20; ++i)
+    //Monkeys
+    for(int i = 0; i < 10; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
-        //Vector3  randRot (angDist(rng), angDist(rng), angDist(rng));
-        Vector3 randRot(0.0f, 0.0f, 0.0f);
+        Vector3  randRot (0.0f,         0.0f,         0.0f);
         Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
         XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
 
         EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
         boxView.Entity()->AddComponent<Head>();
-        boxView.AddRenderer();
-
-        if( (i % 2) == 0)
-            boxView.Renderer()->SetModel<MeshTypeMonkey>(NCE::GetGraphics(), randClr);
-        else
-            boxView.Renderer()->SetModel<MeshTypeCube>(NCE::GetGraphics(), randClr);
+        boxView.AddRenderer()->SetModel<MeshTypeMonkey>(NCE::GetGraphics(), randClr);
     }
+
+    //Boxes
+    for(int i = 0; i < 10; ++i)
+    {
+        Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
+        Vector3  randRot (0.0f,         0.0f,         0.0f);
+        Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
+        XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
+
+        EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
+        boxView.Entity()->AddComponent<Head>();
+        boxView.AddRenderer()->SetModel<MeshTypeCube>(NCE::GetGraphics(), randClr);
+    }
+
+    
 }
  
 void InitialScene::Unload()
