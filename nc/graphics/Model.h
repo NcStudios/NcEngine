@@ -1,21 +1,43 @@
 #pragma once
-
 #include <vector>
 #include <string>
+#include <memory>
 #include <stdint.h>
 #include <d3d11.h>
 #include "DirectXMath.H"
 
-#include "DrawableBase.h"
-#include "Mesh.h"
-#include "MaterialType.h"
-#include "ObjLoader.h"
-#include "NCVector.h"
-#include "Transform.h"
+namespace nc { class Transform; }
+namespace nc::graphics
+{
+    class Graphics;
+    namespace d3dresource
+    {
+        class GraphicsResource;
+        class IndexBuffer;
+    }
+}
 
 namespace nc::graphics
 {
-    struct PSMaterialConstants
+    struct Vertex
+    {
+        DirectX::XMFLOAT3 pos;
+        DirectX::XMFLOAT3 norm;
+    };
+
+    struct Mesh
+    {
+        std::string                           Name;
+        std::string                           MeshPath;
+        std::string                           VertexShaderPath;
+        std::string                           PixelShaderPath;
+        D3D_PRIMITIVE_TOPOLOGY                PrimitiveTopology;
+        std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDesc;
+        std::vector<Vertex>                   Vertices;
+        std::vector<uint16_t>                 Indices;
+    };
+
+    struct Material
     {
         DirectX::XMFLOAT3 color;
         float specularIntensity = 0.6;
@@ -23,71 +45,42 @@ namespace nc::graphics
         float padding[3];
     };
 
-    using namespace nc::graphics::d3dresource;
-
-    template<typename T>
-    class Model : public DrawableBase<T> 
+    class Model 
     {
         public:
-            //Mesh mesh;
-            DirectX::XMMATRIX transformationMatrix;
+            Model(Graphics& graphics, Mesh& mesh, DirectX::XMFLOAT3& materialColor);
 
-            //material
-            PSMaterialConstants m_materialData;
+            void Draw(Graphics& graphics) const noexcept;
 
-            Model(Graphics& graphics, DirectX::XMFLOAT3 materialColor)
-            {
-                if(!DrawableBase<T>::IsStaticInitialized())
-                {
-                    utils::ObjLoader loader;
-                    T mesh;
-                    loader.Load(&mesh);
-                    
-                    DrawableBase<T>::AddStaticBind(std::make_unique<VertexBuffer>(graphics, mesh.Vertices));
-                    auto pvs = std::make_unique<VertexShader>(graphics, mesh.GetVertexShaderPath());
-                    auto pvsbc = pvs->GetBytecode();
-                    DrawableBase<T>::AddStaticBind(std::move(pvs));
-                    DrawableBase<T>::AddStaticBind(std::make_unique<PixelShader>(graphics, mesh.GetPixelShaderPath()));
-                    DrawableBase<T>::AddStaticIndexBuffer(std::make_unique<IndexBuffer>(graphics, mesh.Indices));
-                    DrawableBase<T>::AddStaticBind(std::make_unique<InputLayout>(graphics, mesh.GetIED(), pvsbc));
-                    DrawableBase<T>::AddStaticBind(std::make_unique<Topology>(graphics, mesh.GetTopology()));
-                }
-                else
-                {
-                    DrawableBase<T>::SetIndexFromStatic();
-                }
+            void UpdateTransformationMatrix(Transform* transform) noexcept;
+            DirectX::XMMATRIX GetTransformXM() const noexcept;
+            Material* GetMaterial() noexcept;
 
-                Drawable::AddBind(std::make_unique<TransformCbuf>(graphics, *this));
-                m_materialData.color = materialColor;
-                Drawable::AddBind(std::make_unique<PixelConstantBuffer<PSMaterialConstants>>(graphics, m_materialData, 1u));
-            }
+            template<class T>
+            T* QueryGraphicsResource() noexcept;
+        
+        protected:
+            void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
 
-            void UpdateTransformationMatrix(Transform* transform) noexcept override
-            {
-                // Vector3 pos = transform->GetPosition();
-                // Vector3 rot = transform->GetRotation();
-                // Vector3 scl = transform->GetScale();                
+        private:
+            Mesh                m_mesh;
+            Material            m_material;
+            DirectX::XMMATRIX   m_transformationMatrix;
+            const d3dresource::IndexBuffer*  m_indexBuffer = nullptr;
+            std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
 
-                // transformationMatrix = DirectX::XMMatrixScaling(scl.GetX(), scl.GetY(), scl.GetZ())              *
-                //                        DirectX::XMMatrixRotationRollPitchYaw(rot.GetX(), rot.GetY(), rot.GetZ()) *
-                //                        DirectX::XMMatrixTranslation( pos.GetX(), pos.GetY(), pos.GetZ() );//             *
-                //                        //DirectX::XMMatrixRotationRollPitchYaw( theta,phi,chi );  
-
-                
-                //transformationMatrix = transform->CamGetMatrix();
-                transformationMatrix = transform->GetMatrixXM();
-            }
-
-            DirectX::XMMATRIX GetTransformXM() const noexcept override
-            {
-                return transformationMatrix;
-            }
-
-            PSMaterialConstants* GetMaterial() noexcept override
-            {
-                return &m_materialData;
-            }
-
-            
     };
+
+    template<class T>
+    T* Model::QueryGraphicsResource() noexcept
+    {
+        for(auto& res : m_resources)
+                {
+                    if(auto pt = dynamic_cast<T*>(res.get()))
+                    {
+                        return pt;
+                    }
+                }
+                return nullptr;
+    }
 }

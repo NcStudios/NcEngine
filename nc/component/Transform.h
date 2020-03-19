@@ -27,9 +27,9 @@ namespace nc
             DirectX::XMMATRIX CamGetMatrix();
             
             void Set(const Vector3& pos, const Vector3& rot, const Vector3& scale) noexcept;
-            inline void SetPosition(const Vector3& pos) noexcept;
-            inline void SetRotation(const Vector3& rot) noexcept;
-            inline void SetScale(const Vector3& scale)  noexcept;
+            inline void SetPosition(const Vector3& pos)   noexcept;
+            inline void SetRotation(const Vector3& rot)   noexcept;
+            inline void SetScale   (const Vector3& scale) noexcept;
 
             void Translate(const Vector3& vec) noexcept;
             void CamTranslate(Vector3& translation, float factor) noexcept;

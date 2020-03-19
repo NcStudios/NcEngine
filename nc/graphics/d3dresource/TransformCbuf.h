@@ -1,15 +1,29 @@
 #pragma once
 #include "ConstantBuffer.h"
-#include "Drawable.h"
 #include "DirectXMath.h"
+
+namespace nc::graphics { class Model; }
 
 namespace nc::graphics::d3dresource
 {
     class TransformCbuf : public GraphicsResource
     {
         public:
-            TransformCbuf(Graphics& graphics, const Drawable& parent, UINT slot = 0u);
+            TransformCbuf(Graphics& graphics, const std::string& tag, const Model& parent, UINT slot = 0u);
             void Bind(Graphics& graphics) noexcept override;
+
+            //static std::shared_ptr<GraphicsResource> Resolve()
+
+            static std::shared_ptr<GraphicsResource> AquireUnique(Graphics& graphics, const std::string& tag, const Model& parent, UINT slot)
+            {
+                return std::make_shared<TransformCbuf>(graphics, tag, parent, slot);
+                //return GraphicsResourceManager::Resolve<TransformCbuf>(graphics, tag, parent, slot);
+            }
+
+            static std::string GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept
+            {
+                return typeid(TransformCbuf).name() + tag;
+            }
 
         private:
             struct Transforms
@@ -19,6 +33,6 @@ namespace nc::graphics::d3dresource
             };
 
             static std::unique_ptr<VertexConstantBuffer<Transforms>> m_vcbuf;
-            const Drawable& m_parent;
+            const Model& m_parent;
     };
 }

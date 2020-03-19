@@ -15,10 +15,10 @@ namespace nc::engine
             ComponentManager();
             virtual ~ComponentManager() = default;
             
-            ComponentHandle virtual Add(const EntityView parentView);
-            bool virtual Remove(const ComponentHandle handle);
-            bool virtual Contains(const ComponentHandle handle) const;
-            const virtual std::vector<T>& GetVector() const;
+            virtual ComponentHandle Add(const EntityView parentView);
+            virtual bool Remove(const ComponentHandle handle);
+            virtual bool Contains(const ComponentHandle handle) const;
+            virtual const std::vector<T>& GetVector() const;
             T* GetPointerTo(const ComponentHandle handle);
 
             ComponentHandle GetCurrentHandle();

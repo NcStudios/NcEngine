@@ -2,8 +2,11 @@
 
 #include <random>
 #include "Renderer.h"
-#include "MeshTypeMonkey.h"
-#include "MeshTypeCube.h"
+
+#include "Model.h"
+//#include "MeshTypeMonkey.h"
+//#include "MeshTypeCube.h"
+
 
 
 void InitialScene::Load()
@@ -11,7 +14,6 @@ void InitialScene::Load()
     //CamController
     EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
     camView.Entity()->AddComponent<CamController>();
-
 
     using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
 
@@ -21,20 +23,34 @@ void InitialScene::Load()
     uniform_real_distribution<float> sclDist(0.5f, 2.0f); 
     uniform_real_distribution<float> clrDist(0.0f, 1.0f);
 
-    //Monkeys
-    for(int i = 0; i < 10; ++i)
+    nc::graphics::Mesh cubeMesh = {};
+    cubeMesh.Name               = "CubeMesh";
+    cubeMesh.MeshPath           = "project\\Models\\cube.obj";
+    cubeMesh.VertexShaderPath   = "nc\\graphics\\shader\\compiled\\litvertexshader.cso";
+    cubeMesh.PixelShaderPath    = "nc\\graphics\\shader\\compiled\\litpixelshader.cso";
+    cubeMesh.PrimitiveTopology  = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    cubeMesh.InputElementDesc   = 
     {
-        Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
-        Vector3  randRot (0.0f,         0.0f,         0.0f);
-        Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
-        XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
+        { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "Normal",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+    
 
-        EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
-        boxView.Entity()->AddComponent<Head>();
-        boxView.AddRenderer()->SetModel<MeshTypeMonkey>(NCE::GetGraphics(), randClr);
-    }
+    //Monkeys
+    // for(int i = 0; i < 10; ++i)
+    // {
+    //     Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
+    //     Vector3  randRot (0.0f,         0.0f,         0.0f);
+    //     Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
+    //     XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
+
+    //     EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
+    //     boxView.Entity()->AddComponent<Head>();
+    //     boxView.AddRenderer()->SetModel(NCE::GetGraphics(), randClr);
+    // }
 
     //Boxes
+
     for(int i = 0; i < 10; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
@@ -44,7 +60,7 @@ void InitialScene::Load()
 
         EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
         boxView.Entity()->AddComponent<Head>();
-        boxView.AddRenderer()->SetModel<MeshTypeCube>(NCE::GetGraphics(), randClr);
+        boxView.AddRenderer()->SetModel(NCE::GetGraphics(), cubeMesh, randClr);
     }
 
     

@@ -18,18 +18,13 @@ namespace nc
     class Vector4;
 
     namespace utils::editor { class EditorManager; }
-    namespace graphics { class Graphics; }
-    namespace engine
-    {
-        //class TransformSystem;
-        class CollisionSystem;
-        class RenderingSystem;
-        template<class T>
-        class HandleManager;
-        template<class T>
-        class ComponentManager;
-        struct EntityMaps;
-    }
+    namespace graphics      { class Graphics; }
+
+    namespace engine { struct EntityMaps;
+                       class CollisionSystem;
+                       class RenderingSystem;
+                       template<class T> class HandleManager;
+                       template<class T> class ComponentManager; }
 }
 
 namespace nc::engine
@@ -44,17 +39,17 @@ namespace nc::engine
             void Exit();
 
             EntityView CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag); //creates new Entity and Transform and adds it to AwaitingInitialize, returns handle to Entity
-            bool DestroyEntity(EntityHandle handle);   //moves entity from current map to AwaitingDestroy, returns true if successful
+            bool       DestroyEntity(EntityHandle handle);   //moves entity from current map to AwaitingDestroy, returns true if successful
             Transform* GetTransformPtr(ComponentHandle handle); //returns ptr to Transform with given handle, returns nullptr if not found
-            Entity* GetEntity(EntityHandle handle);    //returns ptr to entity in Active or AwaitingInitialize maps, returns nullptr if not found
-            Entity* GetEntity(const std::string& tag); //returns pointer to first active found entity with tag or nullptr if not found
+            Entity*    GetEntity(EntityHandle handle);    //returns ptr to entity in Active or AwaitingInitialize maps, returns nullptr if not found
+            Entity*    GetEntity(const std::string& tag); //returns pointer to first active found entity with tag or nullptr if not found
 
             Renderer* AddRenderer(EntityHandle handle);
             Renderer* GetRenderer(EntityHandle handle);
-            bool RemoveRenderer(EntityHandle handle);
+            bool      RemoveRenderer(EntityHandle handle);
 
-            EntityView* GetMainCamera();
-            nc::graphics::Graphics& GetGraphics();
+            EntityView*                       GetMainCamera();
+            nc::graphics::Graphics&           GetGraphics();
             nc::utils::editor::EditorManager* GetEditorManager();
 
         private:
@@ -77,13 +72,13 @@ namespace nc::engine
 
             void FrameUpdate(float dt);
             void FixedUpdate();
-            void SendOnInitialize() noexcept;
+            void SendOnInitialize()        noexcept;
             void SendFrameUpdate(float dt) noexcept;
-            void SendFixedUpdate() noexcept;
-            void SendOnDestroy() noexcept;
+            void SendFixedUpdate()         noexcept;
+            void SendOnDestroy()           noexcept;
 
-            bool DoesEntityExist(EntityHandle handle);                                                //returns true if entity is in Active or AwaitingInitialize, false otherwise
-            auto& GetMapContainingEntity(EntityHandle handle, bool checkAll = false) noexcept(false); //returns map containing entity, throws exception if not found
-            Entity* GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false);                      //returns ptr to entity regardless of map it's in (AwaitingDestroy, etc.)
+            bool    DoesEntityExist(EntityHandle handle);                                               //returns true if entity is in Active or AwaitingInitialize, false otherwise
+            auto&   GetMapContainingEntity(EntityHandle handle, bool checkAll = false) noexcept(false); //returns map containing entity, throws exception if not found
+            Entity* GetEntityPtrFromAnyMap(EntityHandle handle)                        noexcept(false); //returns ptr to entity regardless of map it's in (AwaitingDestroy, etc.)
     };
 } // end namespace nc::internal

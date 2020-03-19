@@ -11,10 +11,9 @@ namespace nc::math
 
     inline double Min(double a, double b) noexcept { return a < b ? a : b; }
     inline double Max(double a, double b) noexcept { return a > b ? a : b; }
-
-    inline double Ceiling(double val) noexcept { return (int)(val + 1); }
-    inline double Floor  (double val) noexcept { return (int) val; }
-    inline double Round  (double val) noexcept { return (int)(val + 0.5); }
+    inline double Ceiling(double val)     noexcept { return (int)(val + 1); }
+    inline double Floor  (double val)     noexcept { return (int) val; }
+    inline double Round  (double val)     noexcept { return (int)(val + 0.5); }
 
     inline double Clamp(double val, double min, double max) noexcept
     {
@@ -33,7 +32,7 @@ namespace nc::math
         return (modTwoPi > PI_DOUBLE ? (modTwoPi - 2.0L * PI_DOUBLE) : modTwoPi);
     }
 
-    inline double DegreeToRadian(double degrees) noexcept { return degrees * PI_DOUBLE / 180.0; }
-    inline double RadianToDegree(double radians) noexcept { return radians * 180.0 / PI_DOUBLE; }
+    inline double DegreeToRadian(double degrees) noexcept { return degrees * PI_DOUBLE / 180.0;     }
+    inline double RadianToDegree(double radians) noexcept { return radians *     180.0 / PI_DOUBLE; }
 
 } //end namespace nc::math

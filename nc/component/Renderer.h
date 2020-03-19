@@ -1,18 +1,10 @@
 #pragma once
-
+#include <memory>
 #include "Common.h"
 #include "Component.h"
-
-
 #include "Model.h"
-#include "Mesh.h"
-#include "MaterialType.h"
-
 #include "DirectXMath.h"
-#include "Drawable.h"
 #include "GraphicsResourcePipeline.h"
-#include <memory>
-//#include "NCE.h"
 
 
 namespace nc
@@ -29,22 +21,12 @@ namespace nc
             void EditorGuiElement() override;
             void SyncMaterialData(graphics::Graphics&);
 
-            template<typename ModelType>
-            void SetModel(graphics::Graphics& graphics, DirectX::XMFLOAT3 materialColor);
+            void SetModel(graphics::Graphics& graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor);
 
             void Update(graphics::Graphics& graphics);
 
-
-        public:
-
         private:
-            std::unique_ptr<nc::graphics::d3dresource::Drawable> m_model;
+            std::unique_ptr<graphics::Model> m_model;
     };
-
-
-    template<typename MeshType>
-    void Renderer::SetModel(graphics::Graphics& graphics, DirectX::XMFLOAT3 materialColor)
-    {
-        m_model = std::make_unique<graphics::Model<MeshType>>(graphics, materialColor);
-    }
+    
 }

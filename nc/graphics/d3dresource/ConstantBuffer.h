@@ -26,16 +26,19 @@ namespace nc::graphics::d3dresource
         : m_slot(slot)
     {
         D3D11_BUFFER_DESC cbd;
-        cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        cbd.Usage = D3D11_USAGE_DYNAMIC;
-        cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        cbd.MiscFlags = 0u;
-        cbd.ByteWidth = sizeof(consts);
-        cbd.StructureByteStride = 0u;
-
+        cbd.BindFlags              = D3D11_BIND_CONSTANT_BUFFER;
+        cbd.Usage                  = D3D11_USAGE_DYNAMIC;
+        cbd.CPUAccessFlags         = D3D11_CPU_ACCESS_WRITE;
+        cbd.MiscFlags              = 0u;
+        cbd.ByteWidth              = sizeof(consts);
+        cbd.StructureByteStride    = 0u;
         D3D11_SUBRESOURCE_DATA csd = {};
-        csd.pSysMem = &consts;
-        ThrowIfFailed(GetDevice(graphics)->CreateBuffer( &cbd,&csd,&m_constantBuffer), __FILE__, __LINE__);
+        csd.pSysMem                = &consts;
+        ThrowIfFailed
+        (
+            GetDevice(graphics)->CreateBuffer( &cbd,&csd,&m_constantBuffer),
+            __FILE__, __LINE__
+        );
     }
 
     template<class T>
@@ -43,13 +46,17 @@ namespace nc::graphics::d3dresource
         : m_slot(slot)
     {
         D3D11_BUFFER_DESC cbd;
-        cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        cbd.Usage = D3D11_USAGE_DYNAMIC;
-        cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        cbd.MiscFlags = 0u;
-        cbd.ByteWidth = sizeof(T);
+        cbd.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
+        cbd.Usage               = D3D11_USAGE_DYNAMIC;
+        cbd.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
+        cbd.MiscFlags           = 0u;
+        cbd.ByteWidth           = sizeof(T);
         cbd.StructureByteStride = 0u;
-        ThrowIfFailed(GetDevice(graphics)->CreateBuffer(&cbd,nullptr,&m_constantBuffer), __FILE__, __LINE__);
+        ThrowIfFailed
+        (
+            GetDevice(graphics)->CreateBuffer(&cbd,nullptr,&m_constantBuffer),
+            __FILE__, __LINE__
+        );
     }
 
     template<class T>
@@ -81,6 +88,16 @@ namespace nc::graphics::d3dresource
             {
                 GetContext(graphics)->VSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
             }
+
+            static std::shared_ptr<GraphicsResource> Aquire(Graphics& graphics, const T& consts, UINT slot)
+            {
+                return GraphicsResourceManager::Aquire<VertexConstantBuffer<T>>(graphics, consts, slot);
+            }
+
+            static std::string GetUID(const T& consts, UINT slot) noexcept
+            {
+                return typeid(VertexConstantBuffer<T>).name() + std::to_string(slot);
+            }
     };
 
     /////////////////////
@@ -98,6 +115,21 @@ namespace nc::graphics::d3dresource
             void Bind(Graphics& graphics) noexcept override
             {
                 GetContext(graphics)->PSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
+            }
+
+            // static std::shared_ptr<GraphicsResource> Resolve(Graphics& graphics, const T& consts, UINT slot)
+            // {
+            //     return GraphicsResourceManager::Resolve<PixelConstantBuffer<T>>(graphics, consts, slot);
+            // }
+
+            static std::shared_ptr<GraphicsResource> AquireUnique(Graphics& graphics, const T& consts, UINT slot)
+            {
+                return std::make_shared<PixelConstantBuffer<T>>(graphics, consts, slot);
+            }
+
+            static std::string GetUID(const T& consts, UINT slot) noexcept
+            {
+                return typeid(PixelConstantBuffer<T>).name() + std::to_string(slot);
             }
     };
 

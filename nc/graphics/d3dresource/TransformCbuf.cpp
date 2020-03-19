@@ -1,9 +1,10 @@
 #include "TransformCbuf.h"
 #include "Graphics.h"
+#include "Model.h"
 
 namespace nc::graphics::d3dresource
 {
-    TransformCbuf::TransformCbuf(Graphics& graphics, const Drawable& parent, UINT slot)
+    TransformCbuf::TransformCbuf(Graphics& graphics, const std::string& tag, const Model& parent, UINT slot)
         : m_parent( parent )
     {
         if(!m_vcbuf)

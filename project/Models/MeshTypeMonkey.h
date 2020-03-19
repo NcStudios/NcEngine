@@ -5,15 +5,15 @@ class MeshTypeMonkey : public nc::graphics::MeshType
 {
     public:
         std::string& GetMeshPath() override { return m_meshPath; }
-        std::wstring& GetVertexShaderPath() override { return m_vertexShaderPath; }
-        std::wstring & GetPixelShaderPath() override { return m_pixelShaderPath; }
+        std::string& GetVertexShaderPath() override { return m_vertexShaderPath; }
+        std::string & GetPixelShaderPath() override { return m_pixelShaderPath; }
         std::vector<D3D11_INPUT_ELEMENT_DESC>& GetIED() override { return m_ied; }
         D3D_PRIMITIVE_TOPOLOGY& GetTopology() override { return m_topology; } 
 
     private:
         std::string m_meshPath          = "project\\Models\\monkey.obj";;
-        std::wstring m_vertexShaderPath = L"nc\\graphics\\shader\\compiled\\litvertexshader.cso";
-        std::wstring m_pixelShaderPath  = L"nc\\graphics\\shader\\compiled\\litpixelshader.cso";
+        std::string m_vertexShaderPath = "nc\\graphics\\shader\\compiled\\litvertexshader.cso";
+        std::string m_pixelShaderPath  = "nc\\graphics\\shader\\compiled\\litpixelshader.cso";
 
         std::vector<D3D11_INPUT_ELEMENT_DESC> m_ied =
         {

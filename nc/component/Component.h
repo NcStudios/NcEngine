@@ -21,8 +21,8 @@ namespace nc
 
             virtual ~Component() {}
 
-            ComponentHandle GetHandle() const noexcept { return m_handle; }
-            EntityView* GetParentView() noexcept { return &m_parentView; }
+            ComponentHandle GetHandle()     const noexcept { return m_handle; }
+            EntityView*     GetParentView()       noexcept { return &m_parentView; }
 
             virtual void EditorGuiElement()
             {

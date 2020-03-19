@@ -37,6 +37,6 @@ namespace nc::engine
 
         private:
             std::unique_ptr<graphics::PointLight> m_pointLight;
-            std::unique_ptr<graphics::Graphics> m_graphics;
+            std::unique_ptr<graphics::Graphics>   m_graphics;
     };
 } //end namespace nc::internal

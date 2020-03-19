@@ -1,7 +1,7 @@
 #pragma once
 #include "MathNCE.h"
 
-namespace nc { class Transform; }
+namespace nc      { class  Transform; }
 namespace DirectX { struct XMFLOAT3; }
 
 namespace nc
@@ -11,17 +11,16 @@ namespace nc
         friend nc::Transform;
 
         public:
-            Vector3() noexcept;
-            Vector3(float x, float y, float z) noexcept;
-            Vector3(const Vector3& other) noexcept;
-            Vector3(Vector3&& other) noexcept;
-            Vector3(const DirectX::XMFLOAT3& xm) noexcept;
-            Vector3(DirectX::XMFLOAT3&& xm) noexcept;
-
-            Vector3& operator=(const Vector3& other) noexcept;
+            Vector3()                                       noexcept;
+            Vector3(float x, float y, float z)              noexcept;
+            Vector3(const Vector3& other)                   noexcept;
+            Vector3(Vector3&& other)                        noexcept;
+            Vector3(const DirectX::XMFLOAT3& xm)            noexcept;
+            Vector3(DirectX::XMFLOAT3&& xm)                 noexcept;
+            Vector3& operator=(const Vector3& other)        noexcept;
             Vector3& operator=(const DirectX::XMFLOAT3& xm) noexcept;
-            Vector3& operator=(Vector3&& other) noexcept;
-            Vector3& operator=(DirectX::XMFLOAT3&& xm) noexcept;
+            Vector3& operator=(Vector3&& other)             noexcept;
+            Vector3& operator=(DirectX::XMFLOAT3&& xm)      noexcept;
 
             DirectX::XMFLOAT3 GetXMFloat3() const noexcept;
 

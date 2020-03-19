@@ -17,6 +17,7 @@ g++ -Wall -std=c++17^
  -I..\nc\views^
  -I..\nc\win32^
  -I..\project\Components^
+ -I..\project\Models^
  -I..\project\Scenes^
  -c ..\nc\utils\editor\*.cpp^
  ..\nc\utils\objloader\*.cpp

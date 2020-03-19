@@ -5,10 +5,13 @@
 
 namespace nc::graphics::d3dresource
 {
-    PixelShader::PixelShader( Graphics& graphics,const std::wstring& path )
+    PixelShader::PixelShader( Graphics& graphics,const std::string& path )
+        : m_path(path)
     {
         Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-        ThrowIfFailed(D3DReadFileToBlob(path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
+        std::wstring w_path;
+        w_path.assign(path.begin(), path.end());
+        ThrowIfFailed(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
         ThrowIfFailed
         (
             GetDevice(graphics)->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),

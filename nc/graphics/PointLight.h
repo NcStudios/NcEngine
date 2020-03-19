@@ -16,7 +16,6 @@ namespace nc::graphics
             
             void SpawnControlWindow() noexcept;
 
-            //void Draw(internal::Graphics& graphics) const noexcept;
             void Bind(Graphics& graphics, DirectX::FXMMATRIX view) const noexcept;
 
         private:

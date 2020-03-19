@@ -5,9 +5,9 @@ namespace nc
 {
     struct DisplaySettings
     {
-        int screenWidth = 0;
-        int screenHeight = 0;
-        int targetFPS = 0;
+        int    screenWidth         = 0;
+        int    screenHeight        = 0;
+        int    targetFPS           = 0;
         double frameUpdateInterval = 0.0;
         double fixedUpdateInterval = 0.0;
     };
@@ -19,9 +19,9 @@ namespace nc
     
     struct ProjectSettings
     {
-        static std::string projectName;
+        static std::string     projectName;
         static DisplaySettings displaySettings;
-        static InputBindings inputBindings;
+        static InputBindings   inputBindings;
 
         static void Load(const std::string &settingsFileName);
     };   

@@ -6,6 +6,7 @@ namespace nc::graphics::d3dresource
 {
 
     InputLayout::InputLayout(Graphics& graphics,
+                             const std::string& tag,
                              const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
                              ID3DBlob* vertexShaderBytecode )
     {

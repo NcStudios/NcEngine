@@ -6,8 +6,7 @@
 #include "DirectXMath.h"
 
 #include "NCException.h"
-#include "MeshType.h"
-//#include "Mesh.h"
+#include "Model.h"
 
 namespace nc::utils
 {
@@ -42,11 +41,11 @@ namespace nc::utils
     */
 
 
-    void ObjLoader::Load(nc::graphics::MeshType* mesh)
+    void ObjLoader::Load(nc::graphics::Mesh* mesh)
     {
 
         //const float zInvert = invertCoordSystem ? -1.0f : 1.0f; //not currently using this
-        std::string meshPath = mesh->GetMeshPath();
+        std::string meshPath = mesh->MeshPath;
         const auto pathSize = meshPath.size();
         
         
@@ -91,7 +90,7 @@ namespace nc::utils
         return line.substr(line.find(' ') + 1, line.size());
     }
 
-    void ObjLoader::StoreVertFromSimpleString(const std::string& str, nc::graphics::MeshType* mesh)
+    void ObjLoader::StoreVertFromSimpleString(const std::string& str, nc::graphics::Mesh* mesh)
     {
         const auto firstSpace = str.find(' ');
         const auto lastSpace  = str.rfind(' ');
@@ -100,11 +99,11 @@ namespace nc::utils
         float y = std::stof( str.substr(firstSpace, lastSpace - firstSpace) );
         float z = std::stof( str.substr(lastSpace, str.size() - lastSpace) );
 
-        mesh->Vertices.push_back (graphics::MeshType::Vertex{ {x,y,z} } );
+        mesh->Vertices.push_back (graphics::Vertex{ {x,y,z} } );
         //model.vertices.push_back( graphics::Model::Vertex{ {x,y,z * -1.0f} } );
     }
 
-    void ObjLoader::StoreNormFromSimpleString(const std::string& str, nc::graphics::MeshType* mesh)
+    void ObjLoader::StoreNormFromSimpleString(const std::string& str, nc::graphics::Mesh* mesh)
     {
         const auto firstSpace = str.find(' ');
         const auto lastSpace  = str.rfind(' ');
@@ -117,7 +116,7 @@ namespace nc::utils
         //normals.push_back( {x,y,z * -1.0f} );
     }
 
-    void ObjLoader::StoreIndicesFromVertNormString(const std::string& str, nc::graphics::MeshType* mesh)
+    void ObjLoader::StoreIndicesFromVertNormString(const std::string& str, nc::graphics::Mesh* mesh)
     {
         const auto firstSpace = str.find(' ');
         const auto lastSpace  = str.rfind(' ');
@@ -154,7 +153,7 @@ namespace nc::utils
         mesh->Vertices[p2VertIndex].norm = normals[p2NormIndex];
     }
 
-    void ObjLoader::CallProcessForToken(const std::string& token, const std::string& tail, nc::graphics::MeshType* mesh)
+    void ObjLoader::CallProcessForToken(const std::string& token, const std::string& tail, nc::graphics::Mesh* mesh)
     {
         if(token == COMMENT)
         {
@@ -188,7 +187,7 @@ namespace nc::utils
         
     }
 
-    void ObjLoader::ComputeIndependentNormals(nc::graphics::MeshType* mesh)
+    void ObjLoader::ComputeIndependentNormals(nc::graphics::Mesh* mesh)
     {
         for(size_t i = 0; i < mesh->Indices.size() - 1; i += 3)
         {
@@ -205,7 +204,7 @@ namespace nc::utils
         }
     }
 
-    void ObjLoader::ComputeAveragedNormals(nc::graphics::MeshType* mesh)
+    void ObjLoader::ComputeAveragedNormals(nc::graphics::Mesh* mesh)
     {
         std::for_each(mesh->Vertices.begin(), mesh->Vertices.end(), [](auto& vert) { vert.norm = {0,0,0}; });
 

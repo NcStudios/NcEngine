@@ -65,6 +65,10 @@ namespace nc
         m_model->Draw(graphics);
     }
 
+    void Renderer::SetModel(graphics::Graphics& graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor)
+    {
+        m_model = std::make_unique<graphics::Model>(graphics, mesh, materialColor);
+    }
     
 
 }
