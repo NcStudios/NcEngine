@@ -2,10 +2,9 @@
 #include <memory>
 #include "Common.h"
 #include "Component.h"
-#include "Model.h"
 #include "DirectXMath.h"
-#include "GraphicsResourcePipeline.h"
 
+namespace nc::graphics { class Model; class Mesh; }
 
 namespace nc
 {

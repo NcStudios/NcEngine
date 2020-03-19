@@ -1,7 +1,6 @@
 #include "Renderer.h"
-
+#include "Model.h"
 #include "EditorManager.h"
-
 #include "NCE.h"
 
 namespace nc

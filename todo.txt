@@ -14,5 +14,4 @@
 
 
 -update physics for 3d
--change from template meshes to single manager for all graphics resources
 -make small program for generating new user types quickly

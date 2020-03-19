@@ -63,24 +63,23 @@ namespace nc::graphics
             void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
 
         private:
-            Mesh                m_mesh;
-            Material            m_material;
-            DirectX::XMMATRIX   m_transformationMatrix;
-            const d3dresource::IndexBuffer*  m_indexBuffer = nullptr;
+            Mesh m_mesh;
+            Material m_material;
+            DirectX::XMMATRIX m_transformationMatrix;
+            const d3dresource::IndexBuffer* m_indexBuffer = nullptr;
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
-
     };
 
     template<class T>
     T* Model::QueryGraphicsResource() noexcept
     {
         for(auto& res : m_resources)
-                {
-                    if(auto pt = dynamic_cast<T*>(res.get()))
-                    {
-                        return pt;
-                    }
-                }
-                return nullptr;
+        {
+            if(auto pt = dynamic_cast<T*>(res.get()))
+            {
+                return pt;
+            }
+        }
+        return nullptr;
     }
 }

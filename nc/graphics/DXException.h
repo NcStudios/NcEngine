@@ -4,10 +4,10 @@
 
 namespace nc::graphics
 {
-    class com_exception : public std::exception
+    class DX11Exception : public std::exception
     {
         public:
-            com_exception(HRESULT hr, const char* fileName, const int lineNumber) : result(hr), file(fileName), line(lineNumber) {}
+            DX11Exception(HRESULT hr, const char* fileName, const int lineNumber) : result(hr), file(fileName), line(lineNumber) {}
             virtual const char* what() const throw() override
             {
                 static char s_str[64] = {};
@@ -28,7 +28,7 @@ namespace nc::graphics
     {
         if(FAILED(hr))
         {
-            throw com_exception(hr, file, line);
+            throw DX11Exception(hr, file, line);
         }
     }
 }

@@ -3,7 +3,7 @@
 
 #include "DirectXMath.h"
 
-#include "ConstantBuffer.h"
+#include "GraphicsResource.h"
 
 namespace nc::graphics
 {
