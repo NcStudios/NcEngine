@@ -50,4 +50,10 @@ namespace nc
     {
         return component->GetParentView()->MainCamera()->Transform();
     }
+
+    template<>
+    inline PointLight* View<PointLight>(Component* component)
+    {
+        return component->GetParentView()->GetPointLight();
+    }
 }

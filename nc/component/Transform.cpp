@@ -10,7 +10,7 @@ namespace nc
 
     void Transform::EditorGuiElement()
     {
-        const float itemWidth = 60.0f;
+        const float itemWidth = 40.0f;
         const float dragSpeed = 0.75f;
 
         ImGui::PushItemWidth(itemWidth);
@@ -38,7 +38,7 @@ namespace nc
         ImGui::PopItemWidth();
     }
 
-    inline Vector3 Transform::GetPosition() const noexcept { return m_position;     }
+    Vector3 Transform::GetPosition() const noexcept { return m_position;     }
     inline Vector3 Transform::GetRotation() const noexcept { return m_rotation;     }
     inline Vector3 Transform::GetScale()    const noexcept { return m_scale;        }
     inline float   Transform::Pitch()       const noexcept { return m_rotation.m_x; }

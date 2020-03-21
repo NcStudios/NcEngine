@@ -11,7 +11,7 @@
 -support for multiple cameras and lights
 -directional light, spot light
 
-
+-build system into debug gui to show name and count of graphics resources in use
 
 -update physics for 3d
 -make small program for generating new user types quickly

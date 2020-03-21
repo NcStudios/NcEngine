@@ -5,6 +5,7 @@
 
 
 #include <iostream>
+#include "imgui.h"
 
 namespace nc::graphics { class Graphics; }
 
@@ -20,7 +21,12 @@ namespace nc::graphics::d3dresource
             {
                 return Get().Aquire_<T>(graphics, std::forward<Params>(p)...);
             }
-        
+
+            static void DisplayResources(bool* open)
+            {
+                Get().DisplayResources_(open);
+            }
+
         private:
             std::unordered_map<std::string, std::shared_ptr<GraphicsResource>> m_resources;
 
@@ -42,6 +48,18 @@ namespace nc::graphics::d3dresource
                     return res;
                 }
                 return i->second;
+            }
+
+            void DisplayResources_(bool* open)
+            {
+                if(!(*open)) return;
+
+                ImGui::Begin("Graphics Resources", open, ImGuiWindowFlags_NoBackground);
+                    for(auto& res : m_resources)
+                    {
+                        ImGui::Text(res.first.c_str());
+                    }
+                ImGui::End();
             }
     };
 }

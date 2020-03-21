@@ -13,8 +13,9 @@
 namespace nc
 {
     class Camera;
+    class PointLight;
     namespace engine { class Engine; }
-    
+
     class NCE
     {
         public:
@@ -34,6 +35,9 @@ namespace nc
             static Renderer*   AddRenderer(EntityHandle handle);
             static Renderer*   GetRenderer(EntityHandle handle);
             static bool        RemoveRenderer(EntityHandle handle);
+            static PointLight* AddPointLight(EntityHandle handle);
+            static PointLight* GetPointLight(EntityHandle handle);
+            static bool        RemovePointLight(EntityHandle handle);
 
         private:
             static engine::Engine* m_engine;

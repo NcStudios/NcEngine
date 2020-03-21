@@ -7,6 +7,7 @@ namespace nc
     class Entity;
     class Transform;
     class Renderer;
+    class PointLight;
 
     class EntityView
     {
@@ -25,6 +26,7 @@ namespace nc
             Entity*     Entity()     noexcept;
             Transform*  Transform()  noexcept;
             Renderer*   Renderer()   noexcept;
+            PointLight* GetPointLight() noexcept;
 
             nc::Renderer* AddRenderer() noexcept;
     };

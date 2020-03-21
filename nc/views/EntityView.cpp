@@ -57,6 +57,11 @@ namespace nc
         return NCE::GetRenderer(entityHandle);
     }
 
+    nc::PointLight* EntityView::GetPointLight() noexcept
+    {
+        return NCE::GetPointLight(entityHandle);
+    }
+
     nc::Renderer* EntityView::AddRenderer() noexcept
     {
         return NCE::AddRenderer(entityHandle);

@@ -76,4 +76,19 @@ bool NCE::RemoveRenderer(EntityHandle handle)
     return NCE::m_engine->RemoveRenderer(handle);
 }
 
+PointLight* NCE::AddPointLight(EntityHandle handle)
+{
+    return NCE::m_engine->AddPointLight(handle);
+}
+
+PointLight* NCE::GetPointLight(EntityHandle handle)
+{
+    return NCE::m_engine->GetPointLight(handle);
+}
+
+bool NCE::RemovePointLight(EntityHandle handle)
+{
+    return NCE::m_engine->RemovePointLight(handle);
+}
+
 } //end namespace nc

@@ -19,6 +19,7 @@ namespace nc
             const EntityHandle Handle;
             ComponentHandle TransformHandle;
             ComponentHandle RendererHandle;
+            ComponentHandle PointLightHandle;
             const std::string Tag;
             
             void SendOnInitialize() noexcept;

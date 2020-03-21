@@ -8,7 +8,7 @@ namespace nc::engine
         private:
             T m_current;
         public:
-            HandleManager() : m_current(0) {};
+            HandleManager() : m_current(1) {};
             T GenerateNewHandle()
             {
                 return m_current++;

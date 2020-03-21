@@ -16,7 +16,7 @@ namespace nc
 
             void EditorGuiElement() override;
 
-            inline Vector3 GetPosition() const noexcept;
+            Vector3 GetPosition() const noexcept;
             inline Vector3 GetRotation() const noexcept;
             inline Vector3 GetScale()    const noexcept;
             inline float   Pitch()       const noexcept;

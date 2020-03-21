@@ -11,10 +11,10 @@ namespace nc
 {
     //class Transform; 
     class Camera;
+    //class PointLight;
 
     namespace graphics 
     {
-        class PointLight; 
         class Graphics;
     }
 }
@@ -36,7 +36,6 @@ namespace nc::engine
             nc::graphics::Graphics& GetGraphics();
 
         private:
-            std::unique_ptr<graphics::PointLight> m_pointLight;
-            std::unique_ptr<graphics::Graphics>   m_graphics;
+            std::unique_ptr<graphics::Graphics>      m_graphics;
     };
-} //end namespace nc::internal
+} //end namespace nc::engine

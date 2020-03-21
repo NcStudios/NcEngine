@@ -5,8 +5,7 @@
 #include <stdint.h>
 #include "DirectXMath.h"
 
-namespace nc::utils::editor { class EditorManager; }
-
+namespace nc::utils::editor         { class EditorManager;    }
 namespace nc::graphics::d3dresource { class GraphicsResource; }
 
 namespace nc::graphics
@@ -38,10 +37,10 @@ namespace nc::graphics
             float m_screenWidth, m_screenHeight;
             DirectX::XMMATRIX m_camera;
             DirectX::XMMATRIX m_projection;
-            Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
-            Microsoft::WRL::ComPtr<IDXGISwapChain> m_swap = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_target = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11Device>           m_device  = nullptr;
+            Microsoft::WRL::ComPtr<IDXGISwapChain>         m_swap    = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11DeviceContext>    m_context = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_target  = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv     = nullptr;
     };  
 }

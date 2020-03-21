@@ -4,6 +4,7 @@
 #include "Renderer.h"
 
 #include "Model.h"
+#include "PointLight.h"
 //#include "MeshTypeMonkey.h"
 //#include "MeshTypeCube.h"
 
@@ -11,6 +12,10 @@
 
 void InitialScene::Load()
 {
+    //add light
+    EntityView lightView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "PointLight");
+    auto light = NCE::AddPointLight(lightView.Entity()->Handle);
+
     //CamController
     EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
     camView.Entity()->AddComponent<CamController>();
@@ -34,22 +39,11 @@ void InitialScene::Load()
         { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "Normal",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
+
+    nc::graphics::Mesh monkeyMesh = cubeMesh;
+    monkeyMesh.Name               = "MonkeyMesh";
+    monkeyMesh.MeshPath           = "project\\Models\\monkey.obj";
     
-
-    //Monkeys
-    // for(int i = 0; i < 10; ++i)
-    // {
-    //     Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
-    //     Vector3  randRot (0.0f,         0.0f,         0.0f);
-    //     Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
-    //     XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
-
-    //     EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
-    //     boxView.Entity()->AddComponent<Head>();
-    //     boxView.AddRenderer()->SetModel(NCE::GetGraphics(), randClr);
-    // }
-
-    //Boxes
 
     for(int i = 0; i < 10; ++i)
     {
@@ -58,12 +52,19 @@ void InitialScene::Load()
         Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
         XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
 
-        EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
-        boxView.Entity()->AddComponent<Head>();
-        boxView.AddRenderer()->SetModel(NCE::GetGraphics(), cubeMesh, randClr);
-    }
-
-    
+        if((i%2) == 0)
+        {
+            EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
+            boxView.Entity()->AddComponent<Head>();
+            boxView.AddRenderer()->SetModel(NCE::GetGraphics(), cubeMesh, randClr);
+        }
+        else
+        {
+            EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
+            boxView.Entity()->AddComponent<Head>();
+            boxView.AddRenderer()->SetModel(NCE::GetGraphics(), monkeyMesh, randClr);
+        }
+    }   
 }
  
 void InitialScene::Unload()

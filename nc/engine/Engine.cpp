@@ -6,12 +6,17 @@
 #include "ComponentManager.h"
 #include "SceneManager.h"
 #include "RenderingSystem.h"
+#include "LightSystem.h"
 #include "CollisionSystem.h"
 #include "HandleManager.h"
 #include "Camera.h"
 #include "Renderer.h"
 #include "EditorManager.h"
 #include <iostream>
+
+#include "PointLight.h"
+
+#include "GraphicsResourceManager.h"
 
 namespace nc::engine
 {
@@ -26,19 +31,23 @@ struct EntityMaps
 
 Engine::Engine(HWND hwnd)
 {
-    auto wndDim = Window::Instance->GetWindowDimensions();
-    m_entities = std::make_unique<EntityMaps>();
+    auto wndDim           = Window::Instance->GetWindowDimensions();
+    m_entities            = std::make_unique<EntityMaps>();
     m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, Window::Instance->GetHWND());
+    m_subsystem.Light     = std::make_unique<LightSystem>();
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
-    //m_subsystem.Transform = std::make_unique<TransformSystem>();
-    m_subsystem.TransformSystem = std::make_unique<ComponentManager<Transform>>();
-    m_subsystem.Handle = std::make_unique<HandleManager<EntityHandle>>();
-    m_editorManager = std::make_unique<nc::utils::editor::EditorManager>(hwnd, GetGraphics());
+    m_subsystem.Transform = std::make_unique<ComponentManager<Transform>>();
+    m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
+    m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(hwnd, GetGraphics());
 }
 
-Engine::~Engine() {}
+Engine::~Engine() 
+{}
 
-bool Engine::DoesEntityExist(EntityHandle handle) { return (m_entities->Active.count(handle) > 0) || (m_entities->AwaitingInitialize.count(handle) > 0); }
+bool Engine::DoesEntityExist(EntityHandle handle)
+{
+    return (m_entities->Active.count(handle) > 0) || (m_entities->AwaitingInitialize.count(handle) > 0);
+}
 
 
 auto& Engine::GetMapContainingEntity(EntityHandle handle, bool checkAll) noexcept(false)
@@ -117,52 +126,13 @@ void Engine::FrameUpdate(float dt)
     SendOnInitialize();
     SendFrameUpdate(dt);
 
-    //Debug gui setup
-    if(input::GetKeyUp(input::KeyCode::Tilde))
-    {
-        m_editorManager->ToggleGui();
-    }
+    //Rendering and debug gui
     m_editorManager->BeginFrame();
-
-    //Rendering
     m_subsystem.Rendering->FrameBegin();
+    m_subsystem.Light->BindLights(GetGraphics());
     m_subsystem.Rendering->Frame();
-
-    if(m_editorManager->IsGuiActive())
-    {
-        m_editorManager->SpeedControl(&m_frameDeltaTimeFactor);
-        //m_pointLight->SpawnControlWindow();
-
-        static bool open = true;
-
-        if(ImGui::Begin("Entity Graph"), &open)
-        {
-            for(auto& pair : m_entities->Active)
-            {
-                const bool selected = *m_editorManager->SelectedEntityIndex == pair.first;
-
-                std::string id = pair.second.Tag + "##" + std::to_string(pair.first); //create unique labels
-
-                if(ImGui::Selectable(id.c_str(), selected))
-                {
-                    m_editorManager->SelectedEntityIndex = pair.first;
-                }
-                ImGui::Spacing();
-                if(selected && m_editorManager->SelectedEntityIndex.has_value())
-                {
-                    EntityView view(pair.second.Handle, pair.second.TransformHandle); 
-                    if(!m_editorManager->EntityControl(&view))
-                    {
-                        m_editorManager->SelectedEntityIndex.reset();
-                    }
-                }
-            }
-        }
-        ImGui::End();
-    }
-
+    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_entities->Active);
     m_editorManager->EndFrame();
-
     m_subsystem.Rendering->FrameEnd();
 
     // cleanup
@@ -175,7 +145,7 @@ void Engine::FixedUpdate()
     SendFixedUpdate();
 
     // check collisions
-    m_subsystem.Collision->CheckCollisions(m_subsystem.TransformSystem->GetVector());
+    m_subsystem.Collision->CheckCollisions(m_subsystem.Transform->GetVector());
 }
 
 void Engine::Exit()
@@ -188,11 +158,11 @@ EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const s
     EntityHandle newHandle = m_subsystem.Handle->GenerateNewHandle();
     Entity newEntity = Entity(newHandle, tag);
 
-    ComponentHandle transformHandle = m_subsystem.TransformSystem->GetCurrentHandle() + 1;
+    ComponentHandle transformHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
 
     EntityView view(newHandle, transformHandle);
 
-    newEntity.TransformHandle = m_subsystem.TransformSystem->Add(view);
+    newEntity.TransformHandle = m_subsystem.Transform->Add(view);
     Transform* transformPtr = GetTransformPtr(newEntity.TransformHandle);
     transformPtr->Set(pos, rot, scale);
     m_entities->AwaitingInitialize.emplace(newHandle, newEntity);
@@ -252,6 +222,29 @@ bool Engine::RemoveRenderer(EntityHandle handle)
     return m_subsystem.Rendering->Remove(handle);
 }
 
+PointLight* Engine::AddPointLight(EntityHandle handle)
+{
+    if(GetPointLight(handle))
+    {
+        return nullptr;
+    }
+
+    EntityView view(handle, GetEntity(handle)->TransformHandle);
+    GetEntity(handle)->PointLightHandle = m_subsystem.Light->Add(view);
+    GetPointLight(handle)->Set(GetGraphics(), {0.0f, 0.0f, 0.0f});
+    return GetPointLight(handle);
+}
+
+PointLight* Engine::GetPointLight(EntityHandle handle)
+{
+    return m_subsystem.Light->GetPointerTo(GetEntity(handle)->PointLightHandle);
+}
+
+bool Engine::RemovePointLight(EntityHandle handle)
+{
+    return m_subsystem.Light->Remove(handle);
+}
+
 nc::graphics::Graphics& Engine::GetGraphics()
 {
     return m_subsystem.Rendering->GetGraphics();
@@ -267,7 +260,7 @@ EntityView* Engine::GetMainCamera()
     return &m_mainCameraView;
 }
 
-Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.TransformSystem->GetPointerTo(handle); }
+Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
 
 void Engine::SendOnInitialize() noexcept
 {
@@ -307,7 +300,7 @@ void Engine::SendOnDestroy() noexcept
         }
 
         pair.second.SendOnDestroy();
-        m_subsystem.TransformSystem->Remove(entityPtr->TransformHandle);
+        m_subsystem.Transform->Remove(entityPtr->TransformHandle);
     }
     m_entities->AwaitingDestroy.clear();
 }

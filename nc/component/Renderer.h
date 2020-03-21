@@ -4,7 +4,7 @@
 #include "Component.h"
 #include "DirectXMath.h"
 
-namespace nc::graphics { class Model; class Mesh; }
+namespace nc::graphics { class Model; class Mesh; class Graphics; }
 
 namespace nc
 {

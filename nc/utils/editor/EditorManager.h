@@ -1,6 +1,8 @@
 #pragma once
 #include "NCWinDef.h"
 #include <optional>
+#include <unordered_map>
+#include "Entity.h"
 
 namespace nc { class Transform; class EntityView; }
 
@@ -19,27 +21,28 @@ namespace nc::utils::editor
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
             void BeginFrame();
+            void Frame(float* dt, std::unordered_map<EntityHandle, Entity>& activeEntities);
             void EndFrame();
 
             void ToggleGui() noexcept;
             void EnableGui() noexcept;
             void DisableGui() noexcept;
-
             bool IsGuiActive() const noexcept;
 
             
 
-            static bool EntityControl(nc::EntityView* view);
-
-
-            static void SpeedControl(float* speed);
-
-            static void PointLightControl(float* xPos,      float* yPos,      float* zPos,
-                                          float* ambientR,  float* ambientG,  float* ambientB,
-                                          float* difColorR, float* difColorG, float* difColorB,
-                                          float* difIntens, float* attConst,  float* attLin, float* attQuad);
-
         private:
             bool m_isGuiActive;
+
+            bool m_openState_EntityGraph       = true;
+            bool m_openState_FramerateData     = true;
+            bool m_openState_GraphicsResources = true;
+            bool m_openState_ProjectSettings   = false;
+
+
+            void DrawMenu();
+            void DrawFrameControl(float* speed, bool* open);
+            void DrawEntityGraphControl(std::unordered_map<EntityHandle, Entity>& entities);
+            void DrawInspectorControl(nc::EntityView* view);
     };
 }
