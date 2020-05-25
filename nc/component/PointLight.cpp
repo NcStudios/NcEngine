@@ -12,16 +12,17 @@ namespace nc
 
     void PointLight::Set(graphics::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius)
     {
-        m_cBuf = std::make_unique<PixelConstBuf>(graphics);
-        m_constBufData.pos = pos;
-        m_constBufData.ambient = {0.05f, 0.05f, 0.05f};
-        m_constBufData.diffuseColor = {0.8f, 0.2f, 0.2f};
+        m_cBuf                          = std::make_unique<PixelConstBuf>(graphics);
+        m_constBufData.pos              = pos;
+        m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};
+        m_constBufData.diffuseColor     = {0.8f, 0.2f, 0.2f};
         m_constBufData.diffuseIntensity = 1.2f;
-        m_constBufData.attConst = 0.09f;
-        m_constBufData.attLin = 0.012f;
-        m_constBufData.attQuad = 0.0075f;
+        m_constBufData.attConst         = 0.09f;
+        m_constBufData.attLin           = 0.012f;
+        m_constBufData.attQuad          = 0.0075f;
     }
 
+    #ifdef NC_DEBUG
     void PointLight::EditorGuiElement()
     {
         const float itemWidth = 40.0f;
@@ -48,11 +49,12 @@ namespace nc
             ImGui::Unindent();
         ImGui::Separator();  ImGui::PopItemWidth();
     }
+    #endif
 
     void PointLight::Bind(graphics::Graphics& graphics, DirectX::FXMMATRIX view) noexcept
     {
         m_constBufData.pos = View<Transform>((Component*)this)->GetPosition().GetXMFloat3();
-        auto cBufCopy = m_constBufData;
+        PointLightCBuf cBufCopy = m_constBufData;
         const auto pos = DirectX::XMLoadFloat3(&m_constBufData.pos);
         DirectX::XMStoreFloat3(&cBufCopy.pos, DirectX::XMVector3Transform(pos, view));
         m_cBuf->Update(graphics, cBufCopy);

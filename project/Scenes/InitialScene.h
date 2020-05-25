@@ -1,5 +1,4 @@
-#ifndef INITIAL_SCENE_H
-#define INITIAL_SCENE_H
+#pragma once
 
 #include <random>
 #include "Scene.h"
@@ -13,6 +12,3 @@ class InitialScene : public nc::scene::Scene
         void Load() override;
         void Unload() override;
 };
-
-
-#endif

@@ -17,17 +17,18 @@ namespace nc::graphics
         utils::ObjLoader loader;
         loader.Load(&m_mesh);
 
-        auto pvs = GraphicsResourceManager::Aquire<VertexShader>(graphics, m_mesh.VertexShaderPath);
+        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(graphics, m_mesh.VertexShaderPath);
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         AddGraphicsResource(std::move(pvs));
-        AddGraphicsResource(GraphicsResourceManager::Aquire<PixelShader> (graphics, m_mesh.PixelShaderPath));
-        AddGraphicsResource(GraphicsResourceManager::Aquire<VertexBuffer>(graphics, m_mesh.Vertices, m_mesh.MeshPath));
-        AddGraphicsResource(GraphicsResourceManager::Aquire<IndexBuffer> (graphics, m_mesh.Indices, m_mesh.MeshPath));
-        AddGraphicsResource(GraphicsResourceManager::Aquire<InputLayout> (graphics, m_mesh.MeshPath, m_mesh.InputElementDesc, pvsbc));
-        AddGraphicsResource(GraphicsResourceManager::Aquire<Topology>    (graphics, m_mesh.PrimitiveTopology));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader> (graphics, m_mesh.PixelShaderPath));
 
-        AddGraphicsResource(TransformCbuf::AquireUnique(graphics, m_mesh.MeshPath, *this, 0u));
-        AddGraphicsResource(PixelConstantBuffer<Material>::AquireUnique(graphics, m_material, 1u));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(graphics, m_mesh.Vertices, m_mesh.MeshPath));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (graphics, m_mesh.Indices, m_mesh.MeshPath));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (graphics, m_mesh.MeshPath, m_mesh.InputElementDesc, pvsbc));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (graphics, m_mesh.PrimitiveTopology));
+
+        AddGraphicsResource(TransformCbuf::AcquireUnique(graphics, m_mesh.MeshPath, *this, 0u));
+        AddGraphicsResource(PixelConstantBuffer<Material>::AcquireUnique(graphics, m_material, 1u));
     }
 
     void Model::Draw(Graphics& graphics) const noexcept

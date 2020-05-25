@@ -16,7 +16,7 @@ Index of this file:
 // [SECTION] ImFontAtlas glyph ranges helpers
 // [SECTION] ImFontGlyphRangesBuilder
 // [SECTION] ImFont
-// [SECTION] ImGui Internal Render Helpers
+// [SECTION] Internal Render Helpers
 // [SECTION] Decompression code
 // [SECTION] Default font data (ProggyClean.ttf)
 
@@ -218,8 +218,6 @@ void ImGui::StyleColorsDark(ImGuiStyle* dst)
     colors[ImGuiCol_TabActive]              = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
     colors[ImGuiCol_TabUnfocused]           = ImLerp(colors[ImGuiCol_Tab],          colors[ImGuiCol_TitleBg], 0.80f);
     colors[ImGuiCol_TabUnfocusedActive]     = ImLerp(colors[ImGuiCol_TabActive],    colors[ImGuiCol_TitleBg], 0.40f);
-    colors[ImGuiCol_DockingPreview]         = colors[ImGuiCol_HeaderActive] * ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
-    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines]              = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
     colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -275,8 +273,6 @@ void ImGui::StyleColorsClassic(ImGuiStyle* dst)
     colors[ImGuiCol_TabActive]              = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
     colors[ImGuiCol_TabUnfocused]           = ImLerp(colors[ImGuiCol_Tab],          colors[ImGuiCol_TitleBg], 0.80f);
     colors[ImGuiCol_TabUnfocusedActive]     = ImLerp(colors[ImGuiCol_TabActive],    colors[ImGuiCol_TitleBg], 0.40f);
-    colors[ImGuiCol_DockingPreview]         = colors[ImGuiCol_Header] * ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
-    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines]              = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered]       = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
     colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -333,8 +329,6 @@ void ImGui::StyleColorsLight(ImGuiStyle* dst)
     colors[ImGuiCol_TabActive]              = ImLerp(colors[ImGuiCol_HeaderActive], colors[ImGuiCol_TitleBgActive], 0.60f);
     colors[ImGuiCol_TabUnfocused]           = ImLerp(colors[ImGuiCol_Tab],          colors[ImGuiCol_TitleBg], 0.80f);
     colors[ImGuiCol_TabUnfocusedActive]     = ImLerp(colors[ImGuiCol_TabActive],    colors[ImGuiCol_TitleBg], 0.40f);
-    colors[ImGuiCol_DockingPreview]         = colors[ImGuiCol_Header] * ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
-    colors[ImGuiCol_DockingEmptyBg]         = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
     colors[ImGuiCol_PlotLines]              = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
     colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
     colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
@@ -361,10 +355,10 @@ ImDrawListSharedData::ImDrawListSharedData()
     InitialFlags = ImDrawListFlags_None;
 
     // Lookup tables
-    for (int i = 0; i < IM_ARRAYSIZE(ArcFastVtx); i++)
+    for (int i = 0; i < IM_ARRAYSIZE(CircleVtx12); i++)
     {
-        const float a = ((float)i * 2 * IM_PI) / (float)IM_ARRAYSIZE(ArcFastVtx);
-        ArcFastVtx[i] = ImVec2(ImCos(a), ImSin(a));
+        const float a = ((float)i * 2 * IM_PI) / (float)IM_ARRAYSIZE(CircleVtx12);
+        CircleVtx12[i] = ImVec2(ImCos(a), ImSin(a));
     }
     memset(CircleSegmentCounts, 0, sizeof(CircleSegmentCounts)); // This will be set by SetCircleSegmentMaxError()
 }
@@ -904,18 +898,10 @@ void ImDrawList::PathArcToFast(const ImVec2& center, float radius, int a_min_of_
         _Path.push_back(center);
         return;
     }
-
-    // For legacy reason the PathArcToFast() always takes angles where 2*PI is represented by 12,
-    // but it is possible to set IM_DRAWLIST_ARCFAST_TESSELATION_MULTIPLIER to a higher value. This should compile to a no-op otherwise.
-#if IM_DRAWLIST_ARCFAST_TESSELLATION_MULTIPLIER != 1
-    a_min_of_12 *= IM_DRAWLIST_ARCFAST_TESSELLATION_MULTIPLIER;
-    a_max_of_12 *= IM_DRAWLIST_ARCFAST_TESSELLATION_MULTIPLIER;
-#endif
-
     _Path.reserve(_Path.Size + (a_max_of_12 - a_min_of_12 + 1));
     for (int a = a_min_of_12; a <= a_max_of_12; a++)
     {
-        const ImVec2& c = _Data->ArcFastVtx[a % IM_ARRAYSIZE(_Data->ArcFastVtx)];
+        const ImVec2& c = _Data->CircleVtx12[a % IM_ARRAYSIZE(_Data->CircleVtx12)];
         _Path.push_back(ImVec2(center.x + c.x * radius, center.y + c.y * radius));
     }
 }
@@ -1927,7 +1913,7 @@ struct ImFontBuildSrcData
     int                 DstIndex;           // Index into atlas->Fonts[] and dst_tmp_array[]
     int                 GlyphsHighest;      // Highest requested codepoint
     int                 GlyphsCount;        // Glyph count (excluding missing glyphs and glyphs already set by an earlier source font)
-    ImBitVector         GlyphsSet;          // Glyph bit map (random access, 1-bit per codepoint. This will be a maximum of 8KB)
+    ImBoolVector        GlyphsSet;          // Glyph bit map (random access, 1-bit per codepoint. This will be a maximum of 8KB)
     ImVector<int>       GlyphsList;         // Glyph codepoints list (flattened version of GlyphsMap)
 };
 
@@ -1937,19 +1923,19 @@ struct ImFontBuildDstData
     int                 SrcCount;           // Number of source fonts targeting this destination font.
     int                 GlyphsHighest;
     int                 GlyphsCount;
-    ImBitVector         GlyphsSet;          // This is used to resolve collision when multiple sources are merged into a same destination font.
+    ImBoolVector        GlyphsSet;          // This is used to resolve collision when multiple sources are merged into a same destination font.
 };
 
-static void UnpackBitVectorToFlatIndexList(const ImBitVector* in, ImVector<int>* out)
+static void UnpackBoolVectorToFlatIndexList(const ImBoolVector* in, ImVector<int>* out)
 {
     IM_ASSERT(sizeof(in->Storage.Data[0]) == sizeof(int));
-    const ImU32* it_begin = in->Storage.begin();
-    const ImU32* it_end = in->Storage.end();
-    for (const ImU32* it = it_begin; it < it_end; it++)
-        if (ImU32 entries_32 = *it)
-            for (ImU32 bit_n = 0; bit_n < 32; bit_n++)
-                if (entries_32 & ((ImU32)1 << bit_n))
-                    out->push_back((int)(((it - it_begin) << 5) + bit_n));
+    const int* it_begin = in->Storage.begin();
+    const int* it_end = in->Storage.end();
+    for (const int* it = it_begin; it < it_end; it++)
+        if (int entries_32 = *it)
+            for (int bit_n = 0; bit_n < 32; bit_n++)
+                if (entries_32 & (1u << bit_n))
+                    out->push_back((int)((it - it_begin) << 5) + bit_n);
 }
 
 bool    ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
@@ -2010,14 +1996,14 @@ bool    ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
     {
         ImFontBuildSrcData& src_tmp = src_tmp_array[src_i];
         ImFontBuildDstData& dst_tmp = dst_tmp_array[src_tmp.DstIndex];
-        src_tmp.GlyphsSet.Create(src_tmp.GlyphsHighest + 1);
+        src_tmp.GlyphsSet.Resize(src_tmp.GlyphsHighest + 1);
         if (dst_tmp.GlyphsSet.Storage.empty())
-            dst_tmp.GlyphsSet.Create(dst_tmp.GlyphsHighest + 1);
+            dst_tmp.GlyphsSet.Resize(dst_tmp.GlyphsHighest + 1);
 
         for (const ImWchar* src_range = src_tmp.SrcRanges; src_range[0] && src_range[1]; src_range += 2)
             for (unsigned int codepoint = src_range[0]; codepoint <= src_range[1]; codepoint++)
             {
-                if (dst_tmp.GlyphsSet.TestBit(codepoint))    // Don't overwrite existing glyphs. We could make this an option for MergeMode (e.g. MergeOverwrite==true)
+                if (dst_tmp.GlyphsSet.GetBit(codepoint))    // Don't overwrite existing glyphs. We could make this an option for MergeMode (e.g. MergeOverwrite==true)
                     continue;
                 if (!stbtt_FindGlyphIndex(&src_tmp.FontInfo, codepoint))    // It is actually in the font?
                     continue;
@@ -2025,8 +2011,8 @@ bool    ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
                 // Add to avail set/counters
                 src_tmp.GlyphsCount++;
                 dst_tmp.GlyphsCount++;
-                src_tmp.GlyphsSet.SetBit(codepoint);
-                dst_tmp.GlyphsSet.SetBit(codepoint);
+                src_tmp.GlyphsSet.SetBit(codepoint, true);
+                dst_tmp.GlyphsSet.SetBit(codepoint, true);
                 total_glyphs_count++;
             }
     }
@@ -2036,7 +2022,7 @@ bool    ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
     {
         ImFontBuildSrcData& src_tmp = src_tmp_array[src_i];
         src_tmp.GlyphsList.reserve(src_tmp.GlyphsCount);
-        UnpackBitVectorToFlatIndexList(&src_tmp.GlyphsSet, &src_tmp.GlyphsList);
+        UnpackBoolVectorToFlatIndexList(&src_tmp.GlyphsSet, &src_tmp.GlyphsList);
         src_tmp.GlyphsSet.Clear();
         IM_ASSERT(src_tmp.GlyphsList.Size == src_tmp.GlyphsCount);
     }
@@ -2564,7 +2550,8 @@ void ImFontGlyphRangesBuilder::AddText(const char* text, const char* text_end)
         text += c_len;
         if (c_len == 0)
             break;
-        AddChar((ImWchar)c);
+        if (c <= IM_UNICODE_CODEPOINT_MAX)
+            AddChar((ImWchar)c);
     }
 }
 
@@ -2608,7 +2595,6 @@ ImFont::ImFont()
     Scale = 1.0f;
     Ascent = Descent = 0.0f;
     MetricsTotalSurface = 0;
-    memset(Used4kPagesMap, 0, sizeof(Used4kPagesMap));
 }
 
 ImFont::~ImFont()
@@ -2641,17 +2627,12 @@ void ImFont::BuildLookupTable()
     IndexAdvanceX.clear();
     IndexLookup.clear();
     DirtyLookupTables = false;
-    memset(Used4kPagesMap, 0, sizeof(Used4kPagesMap));
     GrowIndex(max_codepoint + 1);
     for (int i = 0; i < Glyphs.Size; i++)
     {
         int codepoint = (int)Glyphs[i].Codepoint;
         IndexAdvanceX[codepoint] = Glyphs[i].AdvanceX;
         IndexLookup[codepoint] = (ImWchar)i;
-
-        // Mark 4K page as used
-        const int page_n = codepoint / 4096;
-        Used4kPagesMap[page_n >> 3] |= 1 << (page_n & 7);
     }
 
     // Create a glyph to handle TAB
@@ -2678,19 +2659,6 @@ void ImFont::BuildLookupTable()
     for (int i = 0; i < max_codepoint + 1; i++)
         if (IndexAdvanceX[i] < 0.0f)
             IndexAdvanceX[i] = FallbackAdvanceX;
-}
-
-// API is designed this way to avoid exposing the 4K page size
-// e.g. use with IsGlyphRangeUnused(0, 255)
-bool ImFont::IsGlyphRangeUnused(unsigned int c_begin, unsigned int c_last)
-{
-    unsigned int page_begin = (c_begin / 4096);
-    unsigned int page_last = (c_last / 4096);
-    for (unsigned int page_n = page_begin; page_n <= page_last; page_n++)
-        if ((page_n >> 3) < sizeof(Used4kPagesMap))
-            if (Used4kPagesMap[page_n >> 3] & (1 << (page_n & 7)))
-                return false;
-    return true;
 }
 
 void ImFont::SetGlyphVisible(ImWchar c, bool visible)
@@ -2757,7 +2725,7 @@ void ImFont::AddRemapChar(ImWchar dst, ImWchar src, bool overwrite_dst)
 
 const ImFontGlyph* ImFont::FindGlyph(ImWchar c) const
 {
-    if (c >= (size_t)IndexLookup.Size)
+    if (c >= IndexLookup.Size)
         return FallbackGlyph;
     const ImWchar i = IndexLookup.Data[c];
     if (i == (ImWchar)-1)
@@ -2767,7 +2735,7 @@ const ImFontGlyph* ImFont::FindGlyph(ImWchar c) const
 
 const ImFontGlyph* ImFont::FindGlyphNoFallback(ImWchar c) const
 {
-    if (c >= (size_t)IndexLookup.Size)
+    if (c >= IndexLookup.Size)
         return NULL;
     const ImWchar i = IndexLookup.Data[c];
     if (i == (ImWchar)-1)
@@ -3167,73 +3135,13 @@ void ImFont::RenderText(ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col
 }
 
 //-----------------------------------------------------------------------------
-// [SECTION] ImGui Internal Render Helpers
+// [SECTION] Internal Render Helpers
+// (progressively moved from imgui.cpp to here when they are redesigned to stop accessing ImGui global state)
 //-----------------------------------------------------------------------------
-// Vaguely redesigned to stop accessing ImGui global state:
-// - RenderArrow()
-// - RenderBullet()
-// - RenderCheckMark()
 // - RenderMouseCursor()
-// - RenderArrowDockMenu()
 // - RenderArrowPointingAt()
 // - RenderRectFilledRangeH()
-// - RenderRectFilledWithHole()
 //-----------------------------------------------------------------------------
-// Function in need of a redesign (legacy mess)
-// - RenderColorRectWithAlphaCheckerboard()
-//-----------------------------------------------------------------------------
-
-// Render an arrow aimed to be aligned with text (p_min is a position in the same space text would be positioned). To e.g. denote expanded/collapsed state
-void ImGui::RenderArrow(ImDrawList* draw_list, ImVec2 pos, ImU32 col, ImGuiDir dir, float scale)
-{
-    const float h = draw_list->_Data->FontSize * 1.00f;
-    float r = h * 0.40f * scale;
-    ImVec2 center = pos + ImVec2(h * 0.50f, h * 0.50f * scale);
-
-    ImVec2 a, b, c;
-    switch (dir)
-    {
-    case ImGuiDir_Up:
-    case ImGuiDir_Down:
-        if (dir == ImGuiDir_Up) r = -r;
-        a = ImVec2(+0.000f, +0.750f) * r;
-        b = ImVec2(-0.866f, -0.750f) * r;
-        c = ImVec2(+0.866f, -0.750f) * r;
-        break;
-    case ImGuiDir_Left:
-    case ImGuiDir_Right:
-        if (dir == ImGuiDir_Left) r = -r;
-        a = ImVec2(+0.750f, +0.000f) * r;
-        b = ImVec2(-0.750f, +0.866f) * r;
-        c = ImVec2(-0.750f, -0.866f) * r;
-        break;
-    case ImGuiDir_None:
-    case ImGuiDir_COUNT:
-        IM_ASSERT(0);
-        break;
-    }
-    draw_list->AddTriangleFilled(center + a, center + b, center + c, col);
-}
-
-void ImGui::RenderBullet(ImDrawList* draw_list, ImVec2 pos, ImU32 col)
-{
-    draw_list->AddCircleFilled(pos, draw_list->_Data->FontSize * 0.20f, col, 8);
-}
-
-void ImGui::RenderCheckMark(ImDrawList* draw_list, ImVec2 pos, ImU32 col, float sz)
-{
-    float thickness = ImMax(sz / 5.0f, 1.0f);
-    sz -= thickness * 0.5f;
-    pos += ImVec2(thickness * 0.25f, thickness * 0.25f);
-
-    float third = sz / 3.0f;
-    float bx = pos.x + third;
-    float by = pos.y + sz - third * 0.5f;
-    draw_list->PathLineTo(ImVec2(bx - third, by - third));
-    draw_list->PathLineTo(ImVec2(bx, by));
-    draw_list->PathLineTo(ImVec2(bx + third * 2.0f, by - third * 2.0f));
-    draw_list->PathStroke(col, false, thickness);
-}
 
 void ImGui::RenderMouseCursor(ImDrawList* draw_list, ImVec2 pos, float scale, ImGuiMouseCursor mouse_cursor, ImU32 col_fill, ImU32 col_border, ImU32 col_shadow)
 {
@@ -3267,14 +3175,6 @@ void ImGui::RenderArrowPointingAt(ImDrawList* draw_list, ImVec2 pos, ImVec2 half
     case ImGuiDir_Down:  draw_list->AddTriangleFilled(ImVec2(pos.x - half_sz.x, pos.y - half_sz.y), ImVec2(pos.x + half_sz.x, pos.y - half_sz.y), pos, col); return;
     case ImGuiDir_None: case ImGuiDir_COUNT: break; // Fix warnings
     }
-}
-
-// This is less wide than RenderArrow() and we use in dock nodes instead of the regular RenderArrow() to denote a change of functionality,
-// and because the saved space means that the left-most tab label can stay at exactly the same position as the label of a loose window.
-void ImGui::RenderArrowDockMenu(ImDrawList* draw_list, ImVec2 p_min, float sz, ImU32 col)
-{
-    draw_list->AddRectFilled(p_min + ImVec2(sz * 0.10f, sz * 0.15f), p_min + ImVec2(sz * 0.70f, sz * 0.30f), col);
-    RenderArrowPointingAt(draw_list, p_min + ImVec2(sz * 0.40f, sz * 0.85f), ImVec2(sz * 0.30f, sz * 0.40f), ImGuiDir_Down, col);
 }
 
 static inline float ImAcos01(float x)
@@ -3344,61 +3244,6 @@ void ImGui::RenderRectFilledRangeH(ImDrawList* draw_list, const ImRect& rect, Im
         }
     }
     draw_list->PathFillConvex(col);
-}
-
-// For CTRL+TAB within a docking node we need to render the dimming background in 8 steps
-// (Because the root node renders the background in one shot, in order to avoid flickering when a child dock node is not submitted)
-void ImGui::RenderRectFilledWithHole(ImDrawList* draw_list, ImRect outer, ImRect inner, ImU32 col, float rounding)
-{
-    const bool fill_L = (inner.Min.x > outer.Min.x);
-    const bool fill_R = (inner.Max.x < outer.Max.x);
-    const bool fill_U = (inner.Min.y > outer.Min.y);
-    const bool fill_D = (inner.Max.y < outer.Max.y);
-    if (fill_L) draw_list->AddRectFilled(ImVec2(outer.Min.x, inner.Min.y), ImVec2(inner.Min.x, inner.Max.y), col, rounding, (fill_U ? 0 : ImDrawCornerFlags_TopLeft) | (fill_D ? 0 : ImDrawCornerFlags_BotLeft));
-    if (fill_R) draw_list->AddRectFilled(ImVec2(inner.Max.x, inner.Min.y), ImVec2(outer.Max.x, inner.Max.y), col, rounding, (fill_U ? 0 : ImDrawCornerFlags_TopRight) | (fill_D ? 0 : ImDrawCornerFlags_BotRight));
-    if (fill_U) draw_list->AddRectFilled(ImVec2(inner.Min.x, outer.Min.y), ImVec2(inner.Max.x, inner.Min.y), col, rounding, (fill_L ? 0 : ImDrawCornerFlags_TopLeft) | (fill_R ? 0 : ImDrawCornerFlags_TopRight));
-    if (fill_D) draw_list->AddRectFilled(ImVec2(inner.Min.x, inner.Max.y), ImVec2(inner.Max.x, outer.Max.y), col, rounding, (fill_L ? 0 : ImDrawCornerFlags_BotLeft) | (fill_R ? 0 : ImDrawCornerFlags_BotRight));
-    if (fill_L && fill_U) draw_list->AddRectFilled(ImVec2(outer.Min.x, outer.Min.y), ImVec2(inner.Min.x, inner.Min.y), col, rounding, ImDrawCornerFlags_TopLeft);
-    if (fill_R && fill_U) draw_list->AddRectFilled(ImVec2(inner.Max.x, outer.Min.y), ImVec2(outer.Max.x, inner.Min.y), col, rounding, ImDrawCornerFlags_TopRight);
-    if (fill_L && fill_D) draw_list->AddRectFilled(ImVec2(outer.Min.x, inner.Max.y), ImVec2(inner.Min.x, outer.Max.y), col, rounding, ImDrawCornerFlags_BotLeft);
-    if (fill_R && fill_D) draw_list->AddRectFilled(ImVec2(inner.Max.x, inner.Max.y), ImVec2(outer.Max.x, outer.Max.y), col, rounding, ImDrawCornerFlags_BotRight);
-}
-
-// Helper for ColorPicker4()
-// NB: This is rather brittle and will show artifact when rounding this enabled if rounded corners overlap multiple cells. Caller currently responsible for avoiding that.
-// Spent a non reasonable amount of time trying to getting this right for ColorButton with rounding+anti-aliasing+ImGuiColorEditFlags_HalfAlphaPreview flag + various grid sizes and offsets, and eventually gave up... probably more reasonable to disable rounding alltogether.
-// FIXME: uses ImGui::GetColorU32
-void ImGui::RenderColorRectWithAlphaCheckerboard(ImDrawList* draw_list, ImVec2 p_min, ImVec2 p_max, ImU32 col, float grid_step, ImVec2 grid_off, float rounding, int rounding_corners_flags)
-{
-    if (((col & IM_COL32_A_MASK) >> IM_COL32_A_SHIFT) < 0xFF)
-    {
-        ImU32 col_bg1 = ImGui::GetColorU32(ImAlphaBlendColors(IM_COL32(204, 204, 204, 255), col));
-        ImU32 col_bg2 = ImGui::GetColorU32(ImAlphaBlendColors(IM_COL32(128, 128, 128, 255), col));
-        draw_list->AddRectFilled(p_min, p_max, col_bg1, rounding, rounding_corners_flags);
-
-        int yi = 0;
-        for (float y = p_min.y + grid_off.y; y < p_max.y; y += grid_step, yi++)
-        {
-            float y1 = ImClamp(y, p_min.y, p_max.y), y2 = ImMin(y + grid_step, p_max.y);
-            if (y2 <= y1)
-                continue;
-            for (float x = p_min.x + grid_off.x + (yi & 1) * grid_step; x < p_max.x; x += grid_step * 2.0f)
-            {
-                float x1 = ImClamp(x, p_min.x, p_max.x), x2 = ImMin(x + grid_step, p_max.x);
-                if (x2 <= x1)
-                    continue;
-                int rounding_corners_flags_cell = 0;
-                if (y1 <= p_min.y) { if (x1 <= p_min.x) rounding_corners_flags_cell |= ImDrawCornerFlags_TopLeft; if (x2 >= p_max.x) rounding_corners_flags_cell |= ImDrawCornerFlags_TopRight; }
-                if (y2 >= p_max.y) { if (x1 <= p_min.x) rounding_corners_flags_cell |= ImDrawCornerFlags_BotLeft; if (x2 >= p_max.x) rounding_corners_flags_cell |= ImDrawCornerFlags_BotRight; }
-                rounding_corners_flags_cell &= rounding_corners_flags;
-                draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), col_bg2, rounding_corners_flags_cell ? rounding : 0.0f, rounding_corners_flags_cell);
-            }
-        }
-    }
-    else
-    {
-        draw_list->AddRectFilled(p_min, p_max, col, rounding, rounding_corners_flags);
-    }
 }
 
 //-----------------------------------------------------------------------------

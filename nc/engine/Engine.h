@@ -18,8 +18,8 @@ namespace nc
     class Vector3;
     class Vector4;
 
-    namespace utils::editor { class EditorManager; }
-    namespace graphics      { class Graphics; }
+    namespace time     { class Timer;    }
+    namespace graphics { class Graphics; }
 
     namespace engine { struct EntityMaps;
                        class CollisionSystem;
@@ -27,6 +27,10 @@ namespace nc
                        class LightSystem;
                        template<class T> class HandleManager;
                        template<class T> class ComponentManager; }
+
+    #ifdef NC_DEBUG
+    namespace utils::editor { class EditorManager; }
+    #endif
 }
 
 namespace nc::engine
@@ -56,7 +60,10 @@ namespace nc::engine
 
             EntityView*                       GetMainCamera();
             nc::graphics::Graphics&           GetGraphics();
+            
+            #ifdef NC_DEBUG
             nc::utils::editor::EditorManager* GetEditorManager();
+            #endif
 
         private:
             struct EngineState { bool isRunning = true; } m_engineState;
@@ -73,11 +80,17 @@ namespace nc::engine
             } m_subsystem;
 
             std::unique_ptr<EntityMaps> m_entities;
-
+            
+            #ifdef NC_DEBUG
             std::unique_ptr<utils::editor::EditorManager> m_editorManager;
+            std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
+            #endif
+            
             EntityView m_mainCameraView;
 
-            void FrameUpdate(float dt);
+            void FrameLogic(float dt);
+            void FrameRender(float dt);
+            void FrameCleanup();
             void FixedUpdate();
             void SendOnInitialize()        noexcept;
             void SendFrameUpdate(float dt) noexcept;

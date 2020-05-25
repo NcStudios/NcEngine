@@ -6,6 +6,7 @@ namespace nc
         : Component(handle, parentView)
     {}
 
+    #ifdef NC_DEBUG_BUILD
     void Camera::EditorGuiElement()
     {
         std::string str = std::to_string(GetHandle());
@@ -20,4 +21,5 @@ namespace nc
             ImGui::Separator();
         ImGui::PopItemWidth();
     }
+    #endif
 }

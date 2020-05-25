@@ -3,7 +3,6 @@
 
 // Implemented features:
 //  [X] Renderer: User texture binding. Use 'ID3D11ShaderResourceView*' as ImTextureID. Read the FAQ about ImTextureID!
-//  [X] Renderer: Multi-viewport support. Enable with 'io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable'.
 //  [X] Renderer: Support for large meshes (64k+ vertices) with 16-bit indices.
 
 // You can copy and use unmodified imgui_impl_* files in your project. See main.cpp for an example of using this.
@@ -11,6 +10,8 @@
 // https://github.com/ocornut/imgui
 
 #pragma once
+
+#include "imgui.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;

@@ -1,6 +1,5 @@
 #pragma once
 #include "NCWin32.h"
-//#include <windows.h>
 #include <stdint.h>
 #include <vector>
 #include "NCVector.h"
@@ -19,10 +18,20 @@ namespace nc::input
         InputItem(VKCode vkCode, LPARAM param) : keyCode(vkCode), lparam(param) {}
     };
 
+    void SetMouseWheel(WPARAM wParam, LPARAM lParam);
+    // void SetLeftButton(WPARAM wParam, LPARAM lParam);
+    // void SetMiddleButton(WPARAM wParam, LPARAM lParam);
+    // void SetRightButton(WPARAM wParam, LPARAM lParam);
+    void ResetMouseState();
+
+    int32_t MouseWheel();
+    //bool    LeftButton();
+    //bool    MiddleButton();
+    //bool    RightButton();
+    
     extern std::vector<InputItem> downKeys, upKeys;
     extern uint32_t MouseX, MouseY;
     void UpdateMousePosition(LPARAM lParam);
-
     void AddToQueue(VKCode vkCode, LPARAM lParam);
     void Flush();
 
@@ -30,12 +39,14 @@ namespace nc::input
     double GetYAxis();
     Vector2 GetAxis();
 
-    bool GetKeyDown(KeyCode keyCode); //true when key is first pressed
-    bool GetKeyUp(KeyCode keyCode);   //true when key is released
-    bool GetKey(KeyCode keyCode);     //true while key is held down
+    bool     GetKeyDown(KeyCode keyCode); //true when key is first pressed
+    bool     GetKeyUp(KeyCode keyCode);   //true when key is released
+    bool     GetKey(KeyCode keyCode);     //true while key is held down
 
     enum class KeyCode : VKCode
     {
+        LeftButton = 1, RightButton = 2, MiddleButton = 4, MouseWheel = 7, //0x07 is undefined so we're stealing it
+        
         Zero = 48, One = 49, Two   = 50, Three = 51, Four = 52,
         Five = 53, Six = 54, Seven = 55, Eight = 56, Nine = 57,
 

@@ -5,15 +5,19 @@
 #include <stdint.h>
 #include "DirectXMath.h"
 
-namespace nc::utils::editor         { class EditorManager;    }
 namespace nc::graphics::d3dresource { class GraphicsResource; }
+#ifdef NC_DEBUG
+namespace nc::utils::editor         { class EditorManager;    }
+#endif
 
 namespace nc::graphics
 {
     class Graphics
     {
         friend graphics::d3dresource::GraphicsResource;
+        #ifdef NC_DEBUG
         friend nc::utils::editor::EditorManager;
+        #endif
 
         public:
             Graphics(HWND hwnd, float screenWidth, float screenHeight);
@@ -29,9 +33,13 @@ namespace nc::graphics
             void SetCamera(DirectX::FXMMATRIX cam) noexcept;
             void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 
+            void StartFrame();
             void DrawIndexed(UINT count);
             void EndFrame();
-            void ClearBuffer(float red, float green, float blue);
+
+            #ifdef NC_DEBUG
+            uint32_t GetDrawCallCount() const;
+            #endif
 
         private:
             float m_screenWidth, m_screenHeight;
@@ -42,5 +50,9 @@ namespace nc::graphics
             Microsoft::WRL::ComPtr<ID3D11DeviceContext>    m_context = nullptr;
             Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_target  = nullptr;
             Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv     = nullptr;
+
+            #ifdef NC_DEBUG
+            uint32_t m_drawCallCount = 0;
+            #endif
     };  
 }

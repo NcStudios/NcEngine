@@ -1,5 +1,6 @@
 cd obj
 g++ -Wall -std=c++17^
+ -D NC_DEBUG^
  -I..\nc^
  -I..\nc\component^
  -I..\nc\debug^

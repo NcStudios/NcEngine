@@ -1,22 +1,10 @@
 #pragma once
-//#include <vector>
 #include <memory>
-//#include "NCWinDef.h"
-
-//#include "Renderer.h"
 #include "ComponentManager.h"
 #include "PointLight.h"
 
-//forwards
-namespace nc
-{
-    //class Camera;
 
-    namespace graphics 
-    {
-        class Graphics;
-    }
-}
+namespace nc::graphics { class Graphics; }
 
 namespace nc::engine
 {
@@ -29,8 +17,5 @@ namespace nc::engine
             LightSystem(LightSystem&&) = delete;
 
             void BindLights(graphics::Graphics& graphics);
-
-        private:
-            //std::unique_ptr<graphics::Graphics>      m_graphics;
     };
 } //end namespace nc::engine

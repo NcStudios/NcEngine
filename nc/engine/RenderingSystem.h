@@ -6,17 +6,10 @@
 #include "Renderer.h"
 #include "ComponentManager.h"
 
-//forwards
 namespace nc
-{
-    //class Transform; 
+{ 
     class Camera;
-    //class PointLight;
-
-    namespace graphics 
-    {
-        class Graphics;
-    }
+    namespace graphics { class Graphics; }
 }
 
 namespace nc::engine

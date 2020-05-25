@@ -6,6 +6,27 @@ namespace nc::input{
 std::vector<InputItem> downKeys, upKeys;
 uint32_t MouseX, MouseY;
 
+int32_t m_wheel = 0;
+
+
+void SetMouseWheel(WPARAM wParam, LPARAM lParam)
+{
+    m_wheel = GET_WHEEL_DELTA_WPARAM(wParam);
+    //m_wheelWParam = wParam;
+    //m_wheelLParam = lParam;
+}
+
+void ResetMouseState()
+{
+    m_wheel        = 0;
+}
+
+int32_t MouseWheel()
+{
+    return m_wheel;
+}
+
+
 void AddToQueue(VKCode vkCode, LPARAM lParam)
 {
     //how often is this called unnecessarily?
@@ -32,6 +53,7 @@ void Flush()
 {
     downKeys.clear();
     upKeys.clear();
+    ResetMouseState();
 }
 
 void UpdateMousePosition(LPARAM lParam)
@@ -61,7 +83,7 @@ Vector2 GetAxis()
     return Vector2(GetXAxis(), GetYAxis());
 }
 
-bool GetKeyDown(VKCode keyCode)
+bool GetKeyDown(KeyCode keyCode)
 {
     for(auto item : downKeys)
     {
@@ -92,4 +114,6 @@ bool GetKey(KeyCode keyCode)
     //if most significant bit is 1, key is down
     return (GetAsyncKeyState((VKCode)keyCode) & (1 << 15)) == 0 ? false : true;
 }
+
+
 } //end namespace nc::input

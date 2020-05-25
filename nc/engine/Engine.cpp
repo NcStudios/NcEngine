@@ -11,12 +11,17 @@
 #include "HandleManager.h"
 #include "Camera.h"
 #include "Renderer.h"
-#include "EditorManager.h"
+#include "Graphics.h"
+
 #include <iostream>
 
 #include "PointLight.h"
 
 #include "GraphicsResourceManager.h"
+
+#ifdef NC_DEBUG
+#include "EditorManager.h"
+#endif
 
 namespace nc::engine
 {
@@ -38,7 +43,11 @@ Engine::Engine(HWND hwnd)
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
     m_subsystem.Transform = std::make_unique<ComponentManager<Transform>>();
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
+    
+    #ifdef NC_DEBUG
     m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(hwnd, GetGraphics());
+    m_frameLogicTimer     = std::make_unique<nc::time::Timer>();
+    #endif
 }
 
 Engine::~Engine() 
@@ -108,8 +117,15 @@ void Engine::MainLoop()
         //     input::Flush();
         //     ncTime.ResetFrameDeltaTime();
         // }
-
-        FrameUpdate(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
+        #ifdef NC_DEBUG
+        m_frameLogicTimer->Start();
+        #endif
+        FrameLogic(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
+        #ifdef NC_DEBUG
+        m_frameLogicTimer->Stop();
+        #endif
+        FrameRender(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
+        FrameCleanup();
         input::Flush();
         ncTime.ResetFrameDeltaTime();
 
@@ -120,22 +136,29 @@ void Engine::MainLoop()
     } //end main loop
 }
 
-void Engine::FrameUpdate(float dt)
+void Engine::FrameLogic(float dt)
 {
-    //User component init and logic
     SendOnInitialize();
     SendFrameUpdate(dt);
+}
 
-    //Rendering and debug gui
+void Engine::FrameRender(float dt)
+{
+    #ifdef NC_DEBUG
     m_editorManager->BeginFrame();
+    #endif
     m_subsystem.Rendering->FrameBegin();
     m_subsystem.Light->BindLights(GetGraphics());
     m_subsystem.Rendering->Frame();
-    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_entities->Active);
+    #ifdef NC_DEBUG
+    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), GetGraphics().GetDrawCallCount(), m_entities->Active);
     m_editorManager->EndFrame();
+    #endif
     m_subsystem.Rendering->FrameEnd();
+}
 
-    // cleanup
+void Engine::FrameCleanup()
+{
     SendOnDestroy();
 }
 
@@ -250,10 +273,12 @@ nc::graphics::Graphics& Engine::GetGraphics()
     return m_subsystem.Rendering->GetGraphics();
 }
 
+#ifdef NC_DEBUG
 nc::utils::editor::EditorManager* Engine::GetEditorManager()
 {
     return m_editorManager.get();
 }
+#endif
 
 EntityView* Engine::GetMainCamera()
 {

@@ -39,6 +39,11 @@ namespace nc
             inline float Y() const noexcept { return m_y; }
             inline float Z() const noexcept { return m_z; }
             inline float W() const noexcept { return m_w; }
+
+            inline void InvertX() noexcept { m_x *= -1.0f; }
+            inline void InvertY() noexcept { m_y *= -1.0f; }
+            inline void InvertZ() noexcept { m_z *= -1.0f; }
+            inline void InvertW() noexcept { m_w *= -1.0f; }
             
             inline float Magnitude() const noexcept
                 { return sqrt( (m_x * m_x) + (m_y * m_y) + (m_z * m_z) + (m_w * m_w) ); }

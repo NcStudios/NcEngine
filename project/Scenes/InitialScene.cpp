@@ -14,7 +14,7 @@ void InitialScene::Load()
 {
     //add light
     EntityView lightView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "PointLight");
-    auto light = NCE::AddPointLight(lightView.Entity()->Handle);
+    NCE::AddPointLight(lightView.Entity()->Handle);
 
     //CamController
     EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
@@ -23,10 +23,10 @@ void InitialScene::Load()
     using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
 
     mt19937 rng( std::random_device{}() );
-	uniform_real_distribution<float> angDist(0.0f,3.1415f * 2.0f);
-	uniform_real_distribution<float> posDist(-10.0f,10.0f);
-    uniform_real_distribution<float> sclDist(0.5f, 2.0f); 
-    uniform_real_distribution<float> clrDist(0.0f, 1.0f);
+	uniform_real_distribution<float> angDist(  0.0f,  3.1415f * 2.0f);
+	uniform_real_distribution<float> posDist(-10.0f, 10.0f);
+    uniform_real_distribution<float> sclDist(  0.5f,  2.0f); 
+    uniform_real_distribution<float> clrDist(  0.0f,  1.0f);
 
     nc::graphics::Mesh cubeMesh = {};
     cubeMesh.Name               = "CubeMesh";
@@ -43,6 +43,7 @@ void InitialScene::Load()
     nc::graphics::Mesh monkeyMesh = cubeMesh;
     monkeyMesh.Name               = "MonkeyMesh";
     monkeyMesh.MeshPath           = "project\\Models\\monkey.obj";
+
     
 
     for(int i = 0; i < 10; ++i)

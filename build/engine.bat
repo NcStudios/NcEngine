@@ -1,5 +1,6 @@
 cd obj
 g++ -Wall -std=c++17^
+ -D NC_DEBUG^
  -I..\nc^
  -I..\nc\component^
  -I..\nc\debug^
@@ -19,6 +20,5 @@ g++ -Wall -std=c++17^
  -I..\project\Components^
  -I..\project\Models^
  -I..\project\Scenes^
- -c ..\nc\*.cpp^
- ..\nc\engine\*.cpp^
+ -c ..\nc\engine\*.cpp^
  ..\nc\win32\*.cpp

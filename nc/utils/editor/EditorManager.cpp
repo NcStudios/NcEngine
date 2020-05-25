@@ -1,3 +1,4 @@
+#ifdef NC_DEBUG
 #include "EditorManager.h"
 #include <d3d11.h>
 #include "imgui.h"
@@ -10,6 +11,7 @@
 #include "PointLight.h"
 #include "Input.h"
 #include "GraphicsResourceManager.h"
+#include "NCTime.h"
 
 #include "Renderer.h" //prob not needed
 
@@ -19,23 +21,14 @@
 
 namespace nc::utils::editor
 {
-    const ImVec4 COLOR_TEAL_GRAY      (  0.0f, 0.102f, 0.094f, 1.0f);
-    const ImVec4 COLOR_TEAL_TEXT      (  0.6f,   1.0f,  0.98f, 1.0f);
+    const ImVec4 COLOR_DEFAULT_TEXT   (0.8f,   1.0f,   0.88f,  1.0f);
+    const ImVec4 COLOR_DEFAULT_BG     (0.1f,   0.3f,   0.225f, 1.0f);
+    const ImVec4 COLOR_DEFAULT_ACTIVE (0.225f, 0.714f, 0.6f,   1.0f);
+    const ImVec4 COLOR_DEFAULT_HOVERED(0.125f, 0.506f, 0.40f,  1.0f);
+    const ImVec4 COLOR_DEFAULT_ITEM   (0.1f,   0.404f, 0.325f, 1.0f);
 
-    const ImVec4 COLOR_TEAL_LIGHTEST  (0.137f, 0.408f, 0.388f, 1.0f);
-    const ImVec4 COLOR_TEAL_LIGHT     (0.408f, 0.616f,   0.6f, 1.0f);
-    const ImVec4 COLOR_TEAL_NORMAL    (0.255f, 0.514f, 0.494f, 1.0f);
-    const ImVec4 COLOR_TEAL_DARK      (0.051f, 0.306f,  0.29f, 1.0f);
-    const ImVec4 COLOR_TEAL_DARKEST   (  0.0f, 0.204f, 0.188f, 1.0f);
-    const ImVec4 COLOR_BLUE_NORMAL    (0.306f, 0.388f, 0.577f, 1.0f);
-    const ImVec4 COLOR_BLUE_DARK      (0.082f, 0.169f, 0.333f, 1.0f);
-    const ImVec4 COLOR_BLUE_DARKEST   (0.024f,  0.09f, 0.224f, 1.0f);
-    const ImVec4 COLOR_GREEN_LIGHTEST (0.216f, 0.545f,  0.18f, 1.0f);
-    const ImVec4 COLOR_GREEN_LIGHT    (0.573f,  0.82f, 0.545f, 1.0f);
-    const ImVec4 COLOR_GREEN_NORMAL   (0.373f, 0.682f, 0.341f, 1.0f);
-    const ImVec4 COLOR_GREEN_DARK     (0.102f, 0.408f, 0.067f, 1.0f);
-    const ImVec4 COLOR_GREEN_DARKEST  (0.027f, 0.275f,   0.0f, 1.0f);
-
+    //const ImVec4 COLOR_DEFAULT_  (0.137f, 0.508f, 0.388f, 1.0f);
+    //const ImVec4 COLOR_DEFAULT_  (0.408f, 0.716f,   0.6f, 1.0f);
 
     EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics& graphics)
         : m_isGuiActive(false)
@@ -45,6 +38,36 @@ namespace nc::utils::editor
         ImGui::StyleColorsDark();
         ImGui_ImplWin32_Init(hwnd);
         ImGui_ImplDX11_Init(graphics.m_device.Get(), graphics.m_context.Get());
+        auto& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigDockingWithShift = false;
+        auto& style = ImGui::GetStyle();
+        style.Colors[ImGuiCol_Text]                 = COLOR_DEFAULT_TEXT;
+        style.Colors[ImGuiCol_Separator]            = COLOR_DEFAULT_ACTIVE;
+        style.Colors[ImGuiCol_MenuBarBg]            = COLOR_DEFAULT_BG;
+        style.Colors[ImGuiCol_TitleBg]              = COLOR_DEFAULT_BG;
+        style.Colors[ImGuiCol_TitleBgCollapsed]     = COLOR_DEFAULT_BG;
+        style.Colors[ImGuiCol_ScrollbarBg]          = COLOR_DEFAULT_BG;
+        style.Colors[ImGuiCol_FrameBg]              = COLOR_DEFAULT_BG;
+        style.Colors[ImGuiCol_TabUnfocused]         = COLOR_DEFAULT_BG;
+        style.Colors[ImGuiCol_TabUnfocusedActive]   = COLOR_DEFAULT_ITEM;
+        style.Colors[ImGuiCol_ScrollbarGrab]        = COLOR_DEFAULT_ITEM;
+        style.Colors[ImGuiCol_SliderGrab]           = COLOR_DEFAULT_ITEM;
+        style.Colors[ImGuiCol_Header]               = COLOR_DEFAULT_ITEM;
+        style.Colors[ImGuiCol_ResizeGrip]           = COLOR_DEFAULT_ITEM;
+        style.Colors[ImGuiCol_Tab]                  = COLOR_DEFAULT_ITEM;
+        style.Colors[ImGuiCol_ScrollbarGrabHovered] = COLOR_DEFAULT_HOVERED;
+        style.Colors[ImGuiCol_HeaderHovered]        = COLOR_DEFAULT_HOVERED;
+        style.Colors[ImGuiCol_FrameBgHovered]       = COLOR_DEFAULT_HOVERED;
+        style.Colors[ImGuiCol_ResizeGripHovered]    = COLOR_DEFAULT_HOVERED;
+        style.Colors[ImGuiCol_TabHovered]           = COLOR_DEFAULT_HOVERED;
+        style.Colors[ImGuiCol_TitleBgActive]        = COLOR_DEFAULT_HOVERED;
+        style.Colors[ImGuiCol_ScrollbarGrabActive]  = COLOR_DEFAULT_ACTIVE;
+        style.Colors[ImGuiCol_SliderGrabActive]     = COLOR_DEFAULT_ACTIVE;
+        style.Colors[ImGuiCol_FrameBgActive]        = COLOR_DEFAULT_ACTIVE;
+        style.Colors[ImGuiCol_HeaderActive]         = COLOR_DEFAULT_ACTIVE;
+        style.Colors[ImGuiCol_ResizeGripActive]     = COLOR_DEFAULT_ACTIVE;
+        style.Colors[ImGuiCol_TabActive]            = COLOR_DEFAULT_ACTIVE;
     }
 
     EditorManager::~EditorManager() noexcept
@@ -68,48 +91,16 @@ namespace nc::utils::editor
         ImGui::NewFrame();
     }
 
-    void EditorManager::Frame(float* dt, std::unordered_map<EntityHandle, Entity>& activeEntities)
+    void EditorManager::Frame(float* dt, float frameLogicTime, uint32_t drawCallCount, std::unordered_map<EntityHandle, Entity>& activeEntities)
     {
         if(!m_isGuiActive) return;
 
-        ImGui::PushStyleColor(ImGuiCol_Text,                 COLOR_TEAL_TEXT);
-
-        ImGui::PushStyleColor(ImGuiCol_MenuBarBg,            COLOR_TEAL_DARKEST);
-
-        ImGui::PushStyleColor(ImGuiCol_TitleBg,              COLOR_TEAL_GRAY);
-        ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed,     COLOR_TEAL_GRAY);
-        ImGui::PushStyleColor(ImGuiCol_TitleBgActive,        COLOR_TEAL_DARKEST);
-
-        ImGui::PushStyleColor(ImGuiCol_ScrollbarBg,          COLOR_TEAL_DARK);
-        ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab,        COLOR_TEAL_NORMAL);
-        ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, COLOR_TEAL_LIGHTEST);
-        ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive,  COLOR_TEAL_LIGHTEST);
-
-        ImGui::PushStyleColor(ImGuiCol_SliderGrab,           COLOR_TEAL_DARKEST);
-        ImGui::PushStyleColor(ImGuiCol_SliderGrabActive,     COLOR_TEAL_DARK);
-
-        ImGui::PushStyleColor(ImGuiCol_FrameBg,              COLOR_TEAL_DARKEST);
-        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered,       COLOR_TEAL_DARK);
-        ImGui::PushStyleColor(ImGuiCol_FrameBgActive,        COLOR_TEAL_NORMAL);
-
-        ImGui::PushStyleColor(ImGuiCol_Header,               COLOR_TEAL_DARKEST);
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered,        COLOR_TEAL_DARK);
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive,         COLOR_TEAL_NORMAL);
-
-        ImGui::PushStyleColor(ImGuiCol_ResizeGrip,           COLOR_TEAL_DARKEST);
-        ImGui::PushStyleColor(ImGuiCol_ResizeGripHovered,    COLOR_TEAL_DARK);
-        ImGui::PushStyleColor(ImGuiCol_ResizeGripActive,     COLOR_TEAL_NORMAL);
-
-        ImGui::PushStyleColor(ImGuiCol_Separator,            COLOR_TEAL_LIGHTEST);
-
         DrawMenu();
-        DrawFrameControl(dt, &m_openState_FramerateData);
+        DrawTimingControl(dt, frameLogicTime, drawCallCount, &m_openState_FramerateData);
 
         graphics::d3dresource::GraphicsResourceManager::DisplayResources(&m_openState_GraphicsResources);
 
         DrawEntityGraphControl(activeEntities);
-
-        ImGui::PopStyleColor(21);
     }
 
     void EditorManager::EndFrame()
@@ -154,16 +145,19 @@ namespace nc::utils::editor
         ImGui::End();
     }
 
-    void EditorManager::DrawFrameControl(float* speed, bool* open)
+    void EditorManager::DrawTimingControl(float* speed, float frameLogicTime, uint32_t drawCallCount, bool* open)
     {
         if(!(*open)) return;
 
-        if(ImGui::Begin("Frame dt", open, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration))
+        //if(ImGui::Begin("Timing Data", open, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration))
+        if(ImGui::Begin("Timing Data", open))
         {
             float frameRate = ImGui::GetIO().Framerate;
             ImGui::DragFloat("dtX", speed, 0.75f, 0.0f, 5.0f, "%.05f");
-            ImGui::Text("Avg. %.1f FPS", frameRate);
-            ImGui::Text("(%.3f ms/frame)", 1000.0f / frameRate);
+            ImGui::Text("%.2f fps", frameRate);
+            ImGui::Text("%.2f ms/frame", 1000.0f / frameRate);
+            //ImGui::Text("%.2f ns/update", frameLogicTime);
+            ImGui::Text("%u Draw Calls", drawCallCount);
         }
         ImGui::End();
     }
@@ -231,3 +225,4 @@ namespace nc::utils::editor
         ImGui::Spacing();
     }
 }
+#endif

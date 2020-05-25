@@ -1,8 +1,11 @@
 #include "Renderer.h"
 #include "Graphics.h"
 #include "Model.h"
-#include "EditorManager.h"
 #include "NCE.h"
+#include "GraphicsResource.h"
+#ifdef NC_DEBUG
+#include "EditorManager.h"
+#endif
 
 namespace nc
 {
@@ -22,6 +25,7 @@ namespace nc
         return *this;
     }
 
+    #ifdef NC_DEBUG
     void Renderer::EditorGuiElement()
     {
         std::string str = std::to_string(GetHandle());
@@ -46,19 +50,20 @@ namespace nc
 
         if(mcDirty || siDirty || spDirty)
         {
-            //SyncMaterialData();
+            SyncMaterialData();
         }
     }
 
-    void Renderer::SyncMaterialData(graphics::Graphics& graphics)
+    void Renderer::SyncMaterialData()
     {
         if(!m_model) return;
 
         using namespace nc::graphics;
-        //auto pConstPS = m_model->QueryBindable<d3dresource::PixelConstantBuffer<PSMaterialConstants>>();
-	    //assert(pConstPS != nullptr);
-	    //pConstPS->Update(graphics, m_model->m_materialData);
+        auto pConstPS = m_model->QueryGraphicsResource<d3dresource::PixelConstantBuffer<Material>>();
+	    assert(pConstPS != nullptr);
+	    pConstPS->Update(NCE::GetGraphics(), *m_model->GetMaterial());
     }
+    #endif
 
     void Renderer::Update(graphics::Graphics& graphics)
     {

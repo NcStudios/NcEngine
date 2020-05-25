@@ -6,6 +6,8 @@ namespace DirectX { struct XMFLOAT3; }
 
 namespace nc
 {
+    class Vector2;
+
     class Vector3
     {
         friend nc::Transform;
@@ -17,6 +19,8 @@ namespace nc
             Vector3(Vector3&& other)                        noexcept;
             Vector3(const DirectX::XMFLOAT3& xm)            noexcept;
             Vector3(DirectX::XMFLOAT3&& xm)                 noexcept;
+            Vector3(float x, Vector2 yz)                    noexcept;
+            Vector3(Vector2 xy, float z)                    noexcept;
             Vector3& operator=(const Vector3& other)        noexcept;
             Vector3& operator=(const DirectX::XMFLOAT3& xm) noexcept;
             Vector3& operator=(Vector3&& other)             noexcept;
@@ -27,6 +31,10 @@ namespace nc
             inline float X() const noexcept { return m_x; }
             inline float Y() const noexcept { return m_y; }
             inline float Z() const noexcept { return m_z; }
+
+            inline void InvertX() noexcept { m_x *= -1.0f; }
+            inline void InvertY() noexcept { m_y *= -1.0f; }
+            inline void InvertZ() noexcept { m_z *= -1.0f; }
 
             inline float Magnitude() const noexcept
                 { return sqrt( (m_x * m_x) + (m_y * m_y) + (m_z * m_z) ); }
@@ -82,6 +90,9 @@ namespace nc
         { return Vector3(lhs.X() - rhs.X(), lhs.Y() - rhs.Y(), lhs.Z() - rhs.Z()); }
 
     inline Vector3 operator *(const Vector3& vec, const double scalar)
+        { return Vector3(vec.X() * scalar, vec.Y() * scalar, vec.Z() * scalar); }
+    
+    inline Vector3 operator *(const double scalar, const Vector3& vec)
         { return Vector3(vec.X() * scalar, vec.Y() * scalar, vec.Z() * scalar); }
 
     inline Vector3 operator /(const Vector3& vec, const double scalar)

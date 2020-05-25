@@ -9,7 +9,9 @@ namespace nc
         public:
             Camera(ComponentHandle handle, EntityView parentView);
 
+            #ifdef NC_DEBUG_BUILD
             void EditorGuiElement() override;
+            #endif
 
     };
 }

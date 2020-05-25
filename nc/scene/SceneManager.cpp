@@ -4,7 +4,6 @@
 
 namespace nc::scene
 {
-
     SceneManager::SceneManager()
     {
         Scene* initialScene = new InitialScene();

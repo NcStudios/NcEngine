@@ -1,6 +1,6 @@
 cd obj
-g++ -Wall -std=c++17^
- -D NC_DEBUG^
+del *.*
+g++ -O2 -std=c++17^
  -I..\nc^
  -I..\nc\component^
  -I..\nc\debug^
@@ -22,8 +22,17 @@ g++ -Wall -std=c++17^
  -I..\project\Scenes^
  -c ..\nc\*.cpp^
  ..\nc\component\*.cpp^
+ ..\nc\engine\*.cpp^
+ ..\nc\graphics\*.cpp^
+ ..\nc\graphics\d3dresource\*.cpp^
  ..\nc\input\*.cpp^
  ..\nc\math\*.cpp^
  ..\nc\scene\*.cpp^
  ..\nc\time\*.cpp^
- ..\nc\views\*.cpp
+ ..\nc\utils\editor\imgui\*.cpp^
+ ..\nc\utils\editor\*.cpp^
+ ..\nc\utils\objloader\*.cpp^
+ ..\nc\views\*.cpp^
+ ..\nc\win32\*.cpp^
+ ..\project\Components\*.cpp^
+ ..\project\Scenes\*.cpp

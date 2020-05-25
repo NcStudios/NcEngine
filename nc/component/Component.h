@@ -24,6 +24,7 @@ namespace nc
             ComponentHandle GetHandle()     const noexcept { return m_handle; }
             EntityView*     GetParentView()       noexcept { return &m_parentView; }
 
+            #ifdef NC_DEBUG
             virtual void EditorGuiElement()
             {
                 std::string str = std::to_string(m_handle);
@@ -38,6 +39,7 @@ namespace nc
                     ImGui::Separator();
                 ImGui::PopItemWidth();
             }
+            #endif
 
             virtual void FrameUpdate(float dt) {}
             virtual void FixedUpdate() {}

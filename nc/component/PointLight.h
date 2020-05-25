@@ -16,7 +16,9 @@ namespace nc
 
             void Set(graphics::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius = 0.5f);
 
+            #ifdef NC_DEBUG
             void EditorGuiElement() override;
+            #endif
 
             void Bind(graphics::Graphics& graphics, DirectX::FXMMATRIX view) noexcept;
 

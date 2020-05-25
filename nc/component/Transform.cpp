@@ -8,6 +8,7 @@ namespace nc
         : Component(handle, parentView) 
     {}
 
+    #ifdef NC_DEBUG
     void Transform::EditorGuiElement()
     {
         const float itemWidth = 40.0f;
@@ -37,13 +38,7 @@ namespace nc
             ImGui::Separator();
         ImGui::PopItemWidth();
     }
-
-    Vector3 Transform::GetPosition() const noexcept { return m_position;     }
-    inline Vector3 Transform::GetRotation() const noexcept { return m_rotation;     }
-    inline Vector3 Transform::GetScale()    const noexcept { return m_scale;        }
-    inline float   Transform::Pitch()       const noexcept { return m_rotation.m_x; }
-    inline float   Transform::Roll()        const noexcept { return m_rotation.m_z; }
-    inline float   Transform::Yaw()         const noexcept { return m_rotation.m_y; }
+    #endif
     
     DirectX::XMMATRIX Transform::GetMatrixXM()
     {
@@ -59,19 +54,17 @@ namespace nc
 
     DirectX::XMMATRIX Transform::CamGetMatrix()
     {
-        using xmf3 = DirectX::XMFLOAT3; using xmv = DirectX::XMVECTOR;
+        using xmf3 = DirectX::XMFLOAT3;
+        using xmv  = DirectX::XMVECTOR;
+
         const xmv forwardBaseVec = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         const xmv v_lookVector   = XMVector3Transform(forwardBaseVec, DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll()));
         xmf3      camPosition    = m_position.GetXMFloat3();
         const xmv v_camPosition  = XMLoadFloat3(&camPosition);
         const xmv v_camTarget    = v_camPosition + v_lookVector;
+
         return DirectX::XMMatrixLookAtLH(v_camPosition, v_camTarget, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
     }
-
-    void Transform::Set(const Vector3& pos, const Vector3& rot, const Vector3& scale) noexcept { m_position = pos; m_rotation = rot; m_scale = scale; }
-    inline void Transform::SetPosition(const Vector3& pos)                                   noexcept { m_position = pos;   }
-    inline void Transform::SetRotation(const Vector3& rot)                                   noexcept { m_rotation = rot;   }
-    inline void Transform::SetScale(const Vector3& scale)                                    noexcept { m_scale    = scale; }
 
     void Transform::Translate(const Vector3& vec) noexcept
     {

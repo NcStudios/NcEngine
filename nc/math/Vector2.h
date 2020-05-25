@@ -34,6 +34,9 @@ namespace nc
             inline float X() const noexcept { return m_x; }
             inline float Y() const noexcept { return m_y; }
 
+            inline void InvertX() noexcept { m_x *= -1.0f; }
+            inline void InvertY() noexcept { m_y *= -1.0f; }
+
             inline float Magnitude() const noexcept
                 { return sqrt( (m_x * m_x) + (m_y * m_y) ); }
 

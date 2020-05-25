@@ -76,7 +76,7 @@ namespace nc::graphics::d3dresource
             using ConstantBuffer<T>::ConstantBuffer;
             void Bind(Graphics& graphics) noexcept override;
             static std::string GetUID(const T& consts, UINT slot) noexcept;
-            static std::shared_ptr<GraphicsResource> AquireUnique(Graphics& graphics, const T& consts, UINT slot);      
+            static std::shared_ptr<GraphicsResource> AcquireUnique(Graphics& graphics, const T& consts, UINT slot);      
     };
 }
 
@@ -161,7 +161,7 @@ namespace nc::graphics::d3dresource
             static std::string GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept;
 
             //should test if these need to be unique
-            static std::shared_ptr<GraphicsResource> AquireUnique(Graphics& graphics, const std::string& tag, const Model& parent, UINT slot)
+            static std::shared_ptr<GraphicsResource> AcquireUnique(Graphics& graphics, const std::string& tag, const Model& parent, UINT slot)
             {
                 return std::make_shared<TransformCbuf>(graphics, tag, parent, slot);
             }
@@ -215,7 +215,7 @@ namespace nc::graphics::d3dresource
     ConstantBuffer<T>::ConstantBuffer(Graphics& graphics, const T& consts, UINT slot)
         : m_slot(slot)
     {
-        D3D11_BUFFER_DESC cbd;
+        D3D11_BUFFER_DESC            cbd;
         cbd.BindFlags              = D3D11_BIND_CONSTANT_BUFFER;
         cbd.Usage                  = D3D11_USAGE_DYNAMIC;
         cbd.CPUAccessFlags         = D3D11_CPU_ACCESS_WRITE;
@@ -235,7 +235,7 @@ namespace nc::graphics::d3dresource
     ConstantBuffer<T>::ConstantBuffer(Graphics& graphics, UINT slot)
         : m_slot(slot)
     {
-        D3D11_BUFFER_DESC cbd;
+        D3D11_BUFFER_DESC         cbd;
         cbd.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
         cbd.Usage               = D3D11_USAGE_DYNAMIC;
         cbd.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
@@ -281,7 +281,7 @@ namespace nc::graphics::d3dresource
     }
 
     template<class T>
-    std::shared_ptr<GraphicsResource> PixelConstantBuffer<T>::AquireUnique(Graphics& graphics, const T& consts, UINT slot)
+    std::shared_ptr<GraphicsResource> PixelConstantBuffer<T>::AcquireUnique(Graphics& graphics, const T& consts, UINT slot)
     {
         return std::make_shared<PixelConstantBuffer<T>>(graphics, consts, slot);
     }

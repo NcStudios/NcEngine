@@ -36,9 +36,9 @@
 #ifndef NOCLIPBOARD
 #define NOCLIPBOARD
 #endif
-#ifndef NOCOLOR
-#define NOCOLOR
-#endif
+//#ifndef NOCOLOR //used by imgui docking branch
+//#define NOCOLOR
+//#endif
 #ifndef NOCTLMGR
 #define NOCTLMGR
 #endif
@@ -48,9 +48,9 @@
 #ifndef NOKERNEL
 #define NOKERNEL
 #endif
-#ifndef NONLS
-#define NONLS
-#endif
+//#ifndef NONLS //used by imgui docking branch
+//#define NONLS
+//#endif
 #ifndef NOMEMMGR
 #define NOMEMMGR
 #endif

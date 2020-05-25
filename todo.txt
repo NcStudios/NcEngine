@@ -1,17 +1,26 @@
--fix naming of user components in gui
--add camera controls in debug mode
--rotations are still strange(maybe need world & local?)
--make point light components on entities
--fix camera distortion
--look into dockable gui / maybe drag gui windows offscreen?
+debug mode
+    -display draw calls and tris/verts
+    -fix camera controls
+    -add separate camera
+    -fix naming of user components in gui
+    -main window/main menu dilemma
+
+
+graphics resources
+    -meshes are loaded from ObjLoader even if v/i buffers already exist(in Model constructor)
+        -note: the 'shared' buffers are ultimately used, but file reading happens for each instance regardless
+    -is it necessary for resources to be unloaded?
+
+
+-rotations are still strange sometimes(also need world/local options)
+-improve point light components and how they relate to entities
 -fix window scaling so changes are made to Window, Graphics, and buffer sizes
--fix no 'x'/close button on entity windows
--sync material data from gui
 -camera needs parameters for fov/clipping planes
 -support for multiple cameras and lights
--directional light, spot light
+-additional light types (directional/spot)
 
--build system into debug gui to show name and count of graphics resources in use
 
--update physics for 3d
--make small program for generating new user types quickly
+Potentially Large Items
+    -update physics to 3d
+    -make (program?) for generating new user types quickly
+    -save changes in debug mode

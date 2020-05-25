@@ -2,9 +2,9 @@
 
 namespace nc::time{
 
-    uint64_t Time::CycleDeltaTime = 0;
-    double Time::FixedDeltaTime = 0;
-    double Time::FrameDeltaTime = 0;
+    uint64_t Time::CycleDeltaTime  = 0;
+    double   Time::FixedDeltaTime  = 0;
+    double   Time::FrameDeltaTime  = 0;
 
     Time::Time()
     {
@@ -29,6 +29,26 @@ namespace nc::time{
     void Time::ResetFrameDeltaTime()
     {
         Time::FrameDeltaTime = 0;
+    }
+
+
+    void Timer::Start()
+    {
+        m_start = Clock::now();
+    }
+
+    void Timer::Stop()
+    {
+        m_end = Clock::now();
+
+        auto u_sec = duration_cast<std::chrono::nanoseconds>(m_end - m_start).count();
+
+        m_time = u_sec;// / 1000000.0f;
+    }
+
+    float Timer::Value() const
+    {
+        return m_time;
     }
 
 } //end namespace nc::time

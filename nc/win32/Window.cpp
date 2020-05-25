@@ -3,8 +3,9 @@
 #include "ProjectSettings.h"
 #include <iostream>
 
+#ifdef NC_DEBUG
 #include "EditorManager.h"
-//#include "imgui_impl_win32.h"
+#endif
 
 namespace nc {
 
@@ -32,13 +33,10 @@ Window::Window(HINSTANCE instance) noexcept
 
     m_deviceContext = GetDC(m_hwnd);
     m_windowDimensions = GetWindowDimensions();
-
-    //ImGui_ImplWin32_Init(m_hwnd);
 }
 
 Window::~Window() noexcept
 {
-    //ImGui_ImplWin32_Shutdown();
     DestroyWindow(m_hwnd);
 }
 
@@ -47,10 +45,12 @@ HWND Window::GetHWND() const noexcept
     return m_hwnd;
 }
 
+#ifdef NC_DEBUG
 void Window::BindEditorManager(utils::editor::EditorManager* editorManager)
 {
     m_editorManager = editorManager;
 }
+#endif
 
 void Window::OnWindowResize()
 {
@@ -60,27 +60,22 @@ void Window::OnWindowResize()
 
 LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    // if(ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam))
-    // {
-    //     return true;
-    // }
+    #ifdef NC_DEBUG
     if(Window::Instance->m_editorManager->WndProc(hwnd, message, wParam, lParam))
     {
         return true;
     }
+    #endif
 
     switch(message)
 	{
-        case WM_SIZE: { Window::Instance->OnWindowResize(); } break;
-        case WM_CLOSE: { NCE::Exit(); } break;
-        case WM_DESTROY: { NCE::Exit(); } break;
-        // case WM_PAINT:
-        // {
-        //     PAINTSTRUCT paint;
-        //     BeginPaint(hwnd, &paint);
-        //     EndPaint(hwnd, &paint);
-        // }
-        break;
+        case WM_SIZE:        { Window::Instance->OnWindowResize();      } break;
+        case WM_CLOSE:       { NCE::Exit();                             } break;
+        case WM_DESTROY:     { NCE::Exit();                             } break;
+        case WM_MOUSEWHEEL:  { input::SetMouseWheel(wParam, lParam);    } break;
+        // case WM_LBUTTONDOWN: { input::SetLeftButton(wParam, lParam);    } break;
+        // case WM_MBUTTONDOWN: { input::SetMiddleButton(wParam, lParam);  } break;
+        // case WM_RBUTTONDOWN: { input::SetRightButton(wParam, lParam);   } break;
 
         default:
             return DefWindowProc(hwnd, message, wParam, lParam);
@@ -95,12 +90,18 @@ void Window::ProcessSystemMessages()
     {
         switch (message.message)
         {
-            case WM_QUIT: { NCE::Exit(); } break;
-            case WM_MOUSEMOVE: { input::UpdateMousePosition(message.lParam); } break;
-            case WM_SYSKEYDOWN: //fallthrough
-            case WM_SYSKEYUP:   //    |
-            case WM_KEYDOWN:    //    v
-            case WM_KEYUP: { input::AddToQueue(message.wParam, message.lParam); } break;
+            case WM_QUIT:      { NCE::Exit();                                       } break;
+            case WM_MOUSEMOVE: { input::UpdateMousePosition(message.lParam);        } break;
+            case WM_LBUTTONDOWN: //need to double check w/l params for mouse button events, don't think this is working
+            case WM_LBUTTONUP:
+            case WM_MBUTTONDOWN:
+            case WM_MBUTTONUP:
+            case WM_RBUTTONDOWN:
+            case WM_RBUTTONUP:
+            case WM_SYSKEYDOWN:// |
+            case WM_SYSKEYUP:  // |
+            case WM_KEYDOWN:   // v
+            case WM_KEYUP:     { input::AddToQueue(message.wParam, message.lParam); } break;
         }
         TranslateMessage(&message);
         DispatchMessage(&message);

@@ -16,11 +16,17 @@ namespace nc::graphics::d3dresource
     class GraphicsResourceManager
     {
         public:
-            template<class T, typename...Params>
-            static std::shared_ptr<GraphicsResource> Aquire(Graphics& graphics, Params&&...p)
+            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            static std::shared_ptr<GraphicsResource> Acquire(Graphics& graphics, Params&&...p)
             {
-                return Get().Aquire_<T>(graphics, std::forward<Params>(p)...);
+                return Get().Acquire_<T>(graphics, std::forward<Params>(p)...);
             }
+
+            // template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            // static bool Exists(Graphics& graphics, Params&&...p)
+            // {
+            //     return Get().Exists_<T>(graphics, std::forward<Params>(p)...);
+            // }
 
             static void DisplayResources(bool* open)
             {
@@ -36,8 +42,8 @@ namespace nc::graphics::d3dresource
                 return instance;
             }
 
-            template<class T, typename...Params>
-            std::shared_ptr<GraphicsResource> Aquire_(Graphics& graphics, Params&&...p)
+            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            std::shared_ptr<GraphicsResource> Acquire_(Graphics& graphics, Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
                 const auto i = m_resources.find(key);
@@ -49,6 +55,14 @@ namespace nc::graphics::d3dresource
                 }
                 return i->second;
             }
+
+            // template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            // bool Exists_(Graphics& graphics, Params&&...p)
+            // {
+            //     const auto key = T::GetUID(std::forward<Params>(p)...);
+            //     const auto count = m_resources.count(key);
+            //     return count ? true : false;
+            // }
 
             void DisplayResources_(bool* open)
             {

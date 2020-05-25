@@ -17,8 +17,10 @@ namespace nc
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&);
 
+            #ifdef NC_DEBUG
             void EditorGuiElement() override;
-            void SyncMaterialData(graphics::Graphics&);
+            void SyncMaterialData();
+            #endif
 
             void SetModel(graphics::Graphics& graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor);
 
