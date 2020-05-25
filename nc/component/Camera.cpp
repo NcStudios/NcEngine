@@ -6,7 +6,7 @@ namespace nc
         : Component(handle, parentView)
     {}
 
-    #ifdef NC_DEBUG_BUILD
+    #ifdef NC_DEBUG
     void Camera::EditorGuiElement()
     {
         std::string str = std::to_string(GetHandle());
