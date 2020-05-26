@@ -24,8 +24,15 @@ namespace nc
 
             EntityView* MainCamera() noexcept;
             Entity*     Entity()     noexcept;
+
+            
+
+
             Transform*  Transform()  noexcept;
             Renderer*   Renderer()   noexcept;
+
+
+
             PointLight* GetPointLight() noexcept;
 
             nc::Renderer* AddRenderer() noexcept;

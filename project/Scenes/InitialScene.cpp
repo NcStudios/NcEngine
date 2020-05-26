@@ -30,7 +30,7 @@ void InitialScene::Load()
 
     nc::graphics::Mesh cubeMesh = {};
     cubeMesh.Name               = "CubeMesh";
-    cubeMesh.MeshPath           = "project\\Models\\cube.obj";
+    cubeMesh.MeshPath           = "project\\Models\\cube_ind.obj";
     cubeMesh.VertexShaderPath   = "nc\\graphics\\shader\\compiled\\litvertexshader.cso";
     cubeMesh.PixelShaderPath    = "nc\\graphics\\shader\\compiled\\litpixelshader.cso";
     cubeMesh.PrimitiveTopology  = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -49,7 +49,7 @@ void InitialScene::Load()
     for(int i = 0; i < 10; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
-        Vector3  randRot (0.0f,         0.0f,         0.0f);
+        Vector3  randRot (        0.0f,         0.0f,         0.0f);
         Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
         XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
 
@@ -65,7 +65,7 @@ void InitialScene::Load()
             boxView.Entity()->AddComponent<Head>();
             boxView.AddRenderer()->SetModel(NCE::GetGraphics(), monkeyMesh, randClr);
         }
-    }   
+    }
 }
  
 void InitialScene::Unload()

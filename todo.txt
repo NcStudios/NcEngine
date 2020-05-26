@@ -18,6 +18,7 @@ graphics resources
 -camera needs parameters for fov/clipping planes
 -support for multiple cameras and lights
 -additional light types (directional/spot)
+-Entity (and other places) - many public methods could be private if Engine was friend
 
 
 Potentially Large Items
