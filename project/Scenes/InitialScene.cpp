@@ -13,6 +13,7 @@
 void InitialScene::Load()
 {
     int test;
+    int test2;
 
     //add light
     EntityView lightView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "PointLight");
