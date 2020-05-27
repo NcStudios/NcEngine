@@ -24,6 +24,8 @@ void CamController::FrameUpdate(float dt)
     transform->Rotate(camRot.Y(), camRot.X(), 0.0f, 1.0f);
 }
 
+// Test
+
 Vector3 CamController::GetCameraZoomMovement()
 {
     float wheelInput = input::MouseWheel();
