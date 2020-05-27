@@ -6,6 +6,7 @@
 *.a
 *.exe
 *.out
+*\.vs
 
 imgui_full_repo
 imgui.ini
