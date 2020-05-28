@@ -79,6 +79,7 @@ const std::vector<std::string> NC_BUILD_TARGETS_EXTERNAL =
 struct BuildOptions
 {
     std::string compiler      = "g++";
+    std::string mode          = "-g -D NC_DEBUG";
     std::string standard      = "-std=c++17";
     std::string optimizations = "";
     std::string warnings      = "-Wall";
@@ -112,9 +113,6 @@ std::string AssembleLinkCommand(const BuildOptions& buildOptions);
 bool Compile(const BuildOptions& buildOptions, LPSTR builDir);
 
 bool Link(BuildOptions& buildOptions, LPSTR buildDir);
-
-
-
 
 int main(int argc, char* argv[]){
     std::cout << "\nStarting NCBuild\n\n";
@@ -200,6 +198,13 @@ void ProcessOptionValue(BuildOptions& buildOptions, const std::string& option, c
     {
         buildOptions.appName = "-o " + arg;
     }
+    else if (option == "mode")
+    {
+        if ((arg == "release") || (arg == "RELEASE")) 
+        {
+            buildOptions.mode = "";
+        }
+    }
     else if(option == "def")
     {
         buildOptions.defines = " -D " + arg;
@@ -271,6 +276,7 @@ void ProcessOptionValue(BuildOptions& buildOptions, const std::string& option, c
 std::string AssembleCompileCommand(const BuildOptions& buildOptions)
 {
     return buildOptions.compiler      + " " +
+           buildOptions.mode      + " " +
            buildOptions.standard      + " " +
            buildOptions.optimizations + " " +
            buildOptions.warnings      + " " +
