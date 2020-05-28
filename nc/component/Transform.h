@@ -12,7 +12,7 @@ namespace nc
     class Transform : public Component
     {
         public:
-            Transform(ComponentHandle handle, EntityView parentView) noexcept;
+            Transform() noexcept;
 
             #ifdef NC_DEBUG
             void EditorGuiElement() override;

@@ -11,7 +11,7 @@ namespace nc
     class Renderer : public Component
     {
         public:
-            Renderer(ComponentHandle handle, EntityView parentView);
+            Renderer();
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;

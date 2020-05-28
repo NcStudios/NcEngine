@@ -7,7 +7,7 @@ using namespace nc;
 class CamController : public Component
 {
     public:
-        CamController(ComponentHandle handle, EntityView parentHandle);
+        CamController();
 
         void OnInitialize() override;
         void FrameUpdate(float dt) override;

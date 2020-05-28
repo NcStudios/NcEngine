@@ -4,8 +4,7 @@
 
 namespace nc
 {
-    Transform::Transform(ComponentHandle handle, EntityView parentView) noexcept
-        : Component(handle, parentView) 
+    Transform::Transform() noexcept
     {}
 
     #ifdef NC_DEBUG

@@ -9,7 +9,7 @@ namespace nc
     class Component
     {
         public:
-            Component(ComponentHandle handle, EntityView parentView) noexcept : m_handle(handle), m_parentView(parentView) {}
+            Component() noexcept {}
             Component(Component&& other) : m_handle(other.m_handle), m_parentView(other.m_parentView) {}
             Component& operator=(Component&& other)
             {
@@ -21,7 +21,13 @@ namespace nc
 
             virtual ~Component() {}
 
-            ComponentHandle GetHandle()     const noexcept { return m_handle; }
+            void Initialize(const ComponentHandle componentHandle, const EntityView parentView) noexcept
+            {
+                m_handle = componentHandle;
+                m_parentView = parentView;
+            }
+
+            ComponentHandle GetHandle()     const noexcept { return m_handle;      }
             EntityView*     GetParentView()       noexcept { return &m_parentView; }
 
             #ifdef NC_DEBUG
@@ -48,10 +54,16 @@ namespace nc
             virtual void OnCollisionEnter(const EntityHandle other) {}
             virtual void OnCollisionStay() {}
             virtual void OnCollisionExit() {}
-
-        private:
+        
+        protected:
             ComponentHandle m_handle;
             EntityView m_parentView;
+
+        private:
+            //ComponentHandle m_handle;
+            //EntityView m_parentView;
+
+            
     };
 
 } //end namespace nc
