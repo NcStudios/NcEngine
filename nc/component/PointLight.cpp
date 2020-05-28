@@ -6,8 +6,7 @@
 
 namespace nc
 {
-    PointLight::PointLight(ComponentHandle handle, EntityView parentView)
-        : Component(handle, parentView)
+    PointLight::PointLight()
     {}
 
     void PointLight::Set(graphics::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius)

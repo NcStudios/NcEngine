@@ -9,18 +9,20 @@
 
 namespace nc
 {
-    Renderer::Renderer(ComponentHandle handle, EntityView parentView)
-        : Component(handle, parentView), m_model(nullptr)
+    Renderer::Renderer()
     {}
 
     Renderer::Renderer(Renderer&& other)
-        : Component(other.GetHandle(), *View<EntityView>(&other))
     {
+        m_handle = other.GetHandle();
+        m_parentView = *View<EntityView>(&other);
         m_model = std::move(other.m_model);
     }
 
     Renderer& Renderer::operator=(Renderer&& other)
     {
+        m_handle = other.GetHandle();
+        m_parentView = *View<EntityView>(&other);
         m_model = std::move(other.m_model);
         return *this;
     }

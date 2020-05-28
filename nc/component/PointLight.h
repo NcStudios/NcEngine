@@ -12,7 +12,7 @@ namespace nc
     class PointLight : public Component
     {
         public:
-            PointLight(ComponentHandle handle, EntityView parentView);
+            PointLight();
 
             void Set(graphics::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius = 0.5f);
 

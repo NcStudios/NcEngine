@@ -3,7 +3,6 @@
 #include <vector>
 #include <memory>
 #include <string>
-
 #include "Common.h"
 #include "EntityView.h"
 
@@ -71,7 +70,8 @@ namespace nc
     {
         if (HasComponent<T>()) return nullptr;
         EntityView view(Handle, TransformHandle);
-        auto newComponent = std::make_shared<T>(0, view);
+        auto newComponent = std::make_shared<T>();
+        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, view);
         m_userComponents.push_back(newComponent);
         return newComponent;
     }

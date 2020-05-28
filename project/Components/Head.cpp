@@ -1,10 +1,5 @@
 #include "Head.h"
-
-#include <iostream>
 #include "Camera.h"
-
-Head::Head(ComponentHandle handle, EntityView parentView) 
-    : Component(handle, parentView) {}
 
 void Head::OnInitialize()
 {}

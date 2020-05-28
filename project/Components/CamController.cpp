@@ -5,8 +5,7 @@
 
 #include <iostream>
 
-CamController::CamController(ComponentHandle handle, EntityView parentView) 
-    : Component(handle, parentView) 
+CamController::CamController()
 {}
 
 void CamController::OnInitialize()

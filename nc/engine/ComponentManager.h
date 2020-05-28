@@ -43,7 +43,9 @@ namespace nc::engine
     ComponentHandle ComponentManager<T>::Add(const EntityView parentView)
     {
         ComponentHandle handle = handleManager.GenerateNewHandle();
-        m_components.push_back(T(handle, parentView));
+        T newComponent;
+        newComponent.Initialize(handle, parentView);
+        m_components.push_back(std::move(newComponent));
         ComponentIndex lastIndex = m_components.size() - 1;
         MapHandleToIndex(handle, lastIndex);
         return handle;
