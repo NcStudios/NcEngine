@@ -3,7 +3,6 @@
 #include <vector>
 #include <memory>
 #include <string>
-
 #include "Common.h"
 #include "EntityView.h"
 
