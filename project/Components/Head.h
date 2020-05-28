@@ -11,8 +11,6 @@ class Head : public Component
         float m_moveSpeed = 500;
 
     public:
-        Head(ComponentHandle handle, EntityView parentHandle);
-
         void OnInitialize() override;
         void FrameUpdate(float dt) override;
         void OnDestroy() override;
