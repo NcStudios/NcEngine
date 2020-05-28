@@ -6,6 +6,8 @@
 *.a
 *.exe
 *.out
+.vs/
+.vscode/
 
 imgui_full_repo
 imgui.ini
