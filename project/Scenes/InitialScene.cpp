@@ -2,12 +2,8 @@
 
 #include <random>
 #include "Renderer.h"
-
 #include "Model.h"
 #include "PointLight.h"
-//#include "MeshTypeMonkey.h"
-//#include "MeshTypeCube.h"
-
 
 
 void InitialScene::Load()

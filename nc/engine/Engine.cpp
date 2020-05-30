@@ -44,10 +44,10 @@ Engine::Engine(HWND hwnd)
     m_subsystem.Transform = std::make_unique<ComponentManager<Transform>>();
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
-    #ifdef NC_DEBUG
+#ifdef NC_DEBUG
     m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(hwnd, GetGraphics());
     m_frameLogicTimer     = std::make_unique<nc::time::Timer>();
-    #endif
+#endif
 }
 
 Engine::~Engine() 
@@ -320,7 +320,6 @@ void Engine::SendOnDestroy() noexcept
         Entity* entityPtr = GetEntityPtrFromAnyMap(pair.second.Handle);
         if (entityPtr == nullptr)
         {
-            //std::cout << "Engine::SendOnDestroy - entityPtr is null\n";
             continue;
         }
 

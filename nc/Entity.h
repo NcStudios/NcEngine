@@ -72,9 +72,8 @@ namespace nc
     std::shared_ptr<T> Entity::AddComponent(Args&& ... args) noexcept
     {
         if (HasComponent<T>()) return nullptr;
-        EntityView view(Handle, TransformHandle);
         auto newComponent = std::make_shared<T>(std::forward<Args>(args)...);
-        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, view);
+        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, EntityView(Handle, Transformhandle));
         m_userComponents.push_back(newComponent);
         return newComponent;
     }
