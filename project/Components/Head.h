@@ -17,7 +17,6 @@ class Head : public Component
         void OnDestroy() override;
 
         void OnCollisionEnter(const EntityHandle other) override;
-
 };
 
 

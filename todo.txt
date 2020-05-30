@@ -1,7 +1,7 @@
 ***********
 IN PROGRESS
 ***********
-
+-can Entity::AddComponent return raw ptr and store shared ptr?
 
 ***********
 BUGS

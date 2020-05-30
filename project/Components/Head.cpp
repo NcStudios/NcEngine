@@ -6,7 +6,6 @@
 #include <iostream>
 
 Head::Head()
-    : m_testString(testString), m_testInt(testInt)
 {}
 
 void Head::OnInitialize()
