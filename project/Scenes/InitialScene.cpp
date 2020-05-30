@@ -56,13 +56,13 @@ void InitialScene::Load()
         if((i%2) == 0)
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
-            boxView.Entity()->AddComponent<Head>("a box", 1);
+            boxView.Entity()->AddComponent<Head>();
             boxView.AddRenderer()->SetModel(NCE::GetGraphics(), cubeMesh, randClr);
         }
         else
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
-            boxView.Entity()->AddComponent<Head>("a monkey");
+            boxView.Entity()->AddComponent<Head>();
             boxView.AddRenderer()->SetModel(NCE::GetGraphics(), monkeyMesh, randClr);
         }
     }
