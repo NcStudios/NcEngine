@@ -10,7 +10,11 @@ class Head : public Component
     private:
         float m_moveSpeed = 500;
 
+        const char* m_testString;
+        const int m_testInt;
+
     public:
+        Head(const char* testString, const int testInt = 10);
         void OnInitialize() override;
         void FrameUpdate(float dt) override;
         void OnDestroy() override;

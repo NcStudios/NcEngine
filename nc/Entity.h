@@ -36,8 +36,11 @@ namespace nc
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             bool HasComponent() const noexcept;
 
-            template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
-            std::shared_ptr<T> AddComponent() noexcept;
+            template<class T,
+                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type,
+                     class ... Args>
+
+            std::shared_ptr<T> AddComponent(Args&& ... args) noexcept;
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             bool RemoveComponent() noexcept;
@@ -65,12 +68,12 @@ namespace nc
         return false;
     }
 
-    template<class T, class>
-    std::shared_ptr<T> Entity::AddComponent() noexcept
+    template<class T, class, class ... Args>
+    std::shared_ptr<T> Entity::AddComponent(Args&& ... args) noexcept
     {
         if (HasComponent<T>()) return nullptr;
         EntityView view(Handle, TransformHandle);
-        auto newComponent = std::make_shared<T>();
+        auto newComponent = std::make_shared<T>(std::forward<Args>(args)...);
         std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, view);
         m_userComponents.push_back(newComponent);
         return newComponent;

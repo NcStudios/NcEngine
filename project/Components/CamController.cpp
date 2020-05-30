@@ -14,8 +14,8 @@ void CamController::OnInitialize()
 void CamController::FrameUpdate(float dt)
 {
     const float zoomSpeed =  2.5f;
-    const float panSpeed  =  1.0f;
-    const float rotSpeed  = -2.0f;
+    const float panSpeed  =  15.0f;
+    const float rotSpeed  = -1.2f;
     Vector3     camTransl = dt * (GetCameraZoomMovement() * zoomSpeed + GetCameraPanMovement() * panSpeed);
     Vector3     camRot    = dt * (GetCameraRotationMovement() * rotSpeed);
     Transform*  transform = View<Camera, Transform>(this);
@@ -45,16 +45,12 @@ Vector3 CamController::GetCameraPanMovement()
         }
         else //button held
         {
-            //const float SCALE      = 0.01f;
             Vector2 curMousePos    = Vector2(input::MouseX, input::MouseY);
             Vector2 mousePosDelta  = (curMousePos - m_camPanState.initialMouse);           
             Vector3 camTranslation = Vector3(mousePosDelta, 0.0f);
             Vector3 curCamPos      = View<Camera, Transform>(this)->GetPosition();
             targetPosition         = m_camPanState.initialCam + camTranslation;
             targetPosition         = (targetPosition - curCamPos);
-            //float   distance       = Vector3::SquareMagnitude()
-            //float mag              = Vector3::SquareMagnitude(targetPosition);
-            //targetPosition         = targetPosition / mag;
             targetPosition.InvertY();
         }
     }
@@ -67,9 +63,7 @@ Vector3 CamController::GetCameraPanMovement()
             m_camPanState.initialCam   = Vector3::Zero();
         }
     }
-
-    //targetPosition = targetPosition * 0.01f;
-
+    
     return targetPosition.GetNormalized();
 }
 

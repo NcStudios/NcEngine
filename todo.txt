@@ -1,27 +1,31 @@
-debug mode
-    -display draw calls and tris/verts
-    -fix camera controls
-    -add separate camera
-    -fix naming of user components in gui
-    -main window/main menu dilemma
+***********
+IN PROGRESS
+***********
+-component constructor parameter forwarding
 
 
-graphics resources
-    -meshes are loaded from ObjLoader even if v/i buffers already exist(in Model constructor)
-        -note: the 'shared' buffers are ultimately used, but file reading happens for each instance regardless
-    -is it necessary for resources to be unloaded?
-
-
+***********
+BUGS
+***********
+-fix camera controls
 -rotations are still strange sometimes(also need world/local options)
--improve point light components and how they relate to entities
 -fix window scaling so changes are made to Window, Graphics, and buffer sizes
+-don't believe gfx resources are ever unloaded
+
+***********
+TO ADD
+***********
+-display draw calls and tris/verts
+-fix naming of user components in gui
+-main window/main menu dilemma
+-meshes are loaded from ObjLoader even if v/i buffers already exist(in Model constructor)
+        -note: the 'shared' buffers are ultimately used, but file reading happens for each instance regardless
+-improve point light components and how they relate to entities
 -camera needs parameters for fov/clipping planes
--support for multiple cameras and lights
+-support for multiple cameras
+-support for multiple lights
 -additional light types (directional/spot)
 -Entity (and other places) - many public methods could be private if Engine was friend
-
-
-Potentially Large Items
-    -update physics to 3d
-    -make (program?) for generating new user types quickly
-    -save changes in debug mode
+-update physics to 3d
+-make generating new user types easier/quicker (untility prog?)
+-save changes in debug mode

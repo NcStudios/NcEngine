@@ -95,23 +95,14 @@ struct BuildOptions
 };
 
 std::string GetBuildDirectory();
-
 void AddIncludePaths(BuildOptions& buildOptions, const std::vector<std::string>& includePaths);
-
 void AddLinkFlags(BuildOptions& buildOptions, const std::vector<std::string>& linkFlags);
-
 void AddTargets(BuildOptions& buildOptions, const std::vector<std::string>& targets);
-
 void CommandToOptionValue(const std::string& commandLineArg, std::string& optionOut, std::string& valueOut);
-
 void ProcessOptionValue(BuildOptions& buildOptions, const std::string& option, const std::string& value);
-
 std::string AssembleCompileCommand(const BuildOptions& buildOptions);
-
 std::string AssembleLinkCommand(const BuildOptions& buildOptions);
-
 bool Compile(const BuildOptions& buildOptions, LPSTR builDir);
-
 bool Link(BuildOptions& buildOptions, LPSTR buildDir);
 
 int main(int argc, char* argv[]){
