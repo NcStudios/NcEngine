@@ -8,6 +8,8 @@ CollisionSystem::CollisionSystem() {}
 
 bool CollisionSystem::AreIntersecting(const Vector4& first, const Vector4& second)
 {
+    (void)first;
+    (void)second;
     // if ((  first.X() > (second.X() + second.Z()) ) || //first.left > second.right
     //     (  first.Y() > (second.Y() + second.W()) ) || //first.top  > second.bottom
     //     ( (first.X() +  first.Z()) < second.X()  ) || //first.right < second.left
@@ -21,6 +23,7 @@ bool CollisionSystem::AreIntersecting(const Vector4& first, const Vector4& secon
 
 void CollisionSystem::CheckCollisions(const std::vector<Transform>& transforms)
 {
+    (void)transforms;
     //int numberTransforms = transforms.size();
 
     // for (int i = 0; i < numberTransforms; ++i)

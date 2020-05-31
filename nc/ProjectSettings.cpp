@@ -10,6 +10,7 @@ namespace nc
 
     void ProjectSettings::Load(const std::string &settingsFileName)
     {
+        (void)settingsFileName;
         // std::string inputLine;
 
         // std::ifstream settingsFile;

@@ -36,6 +36,6 @@ void Head::OnDestroy()
 
 void Head::OnCollisionEnter(const EntityHandle other)
 {
-
+    (void)other;
 }
 

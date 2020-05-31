@@ -134,6 +134,7 @@ namespace nc::graphics::d3dresource
     TransformCbuf::TransformCbuf(Graphics * graphics, const std::string& tag, const Model& parent, UINT slot)
         : m_parent( parent )
     {
+        (void)tag;
         if(!m_vcbuf)
         {
             m_vcbuf = std::make_unique<VertexConstantBuffer<Transforms>>(graphics, slot);
@@ -163,7 +164,8 @@ namespace nc::graphics::d3dresource
                              const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
                              ID3DBlob* vertexShaderBytecode )
     {
-
+        (void)tag;
+        
         ThrowIfFailed
         (
             GetDevice(graphics)->CreateInputLayout(layout.data(),
@@ -182,7 +184,11 @@ namespace nc::graphics::d3dresource
 
 
 
-    Topology::Topology(Graphics * graphics,D3D11_PRIMITIVE_TOPOLOGY type) : m_type(type) {}
+    Topology::Topology(Graphics * graphics, D3D11_PRIMITIVE_TOPOLOGY type)
+        : m_type(type)
+    {
+        (void)graphics;
+    }
 
     void Topology::Bind(Graphics * graphics) noexcept
     {
@@ -196,11 +202,13 @@ namespace nc::graphics::d3dresource
     ****************/
     std::string VertexBuffer::GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept
     {
+        (void)vertices;
         return typeid(VertexBuffer).name() + tag;
     }
 
     std::string IndexBuffer::GetUID(const std::vector<uint16_t>& indices, std::string& tag) noexcept
     {
+        (void)indices;
         return typeid(IndexBuffer).name() + tag;
     }
 
@@ -216,11 +224,15 @@ namespace nc::graphics::d3dresource
 
     std::string TransformCbuf::GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept
     {
+        (void)parent;
+        (void)slot;
         return typeid(TransformCbuf).name() + tag;
     }
 
     std::string InputLayout::GetUID(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode) noexcept
     {
+        (void)layout;
+        (void)vertexShaderByteCode;
         return typeid(InputLayout).name() + tag;
     }
 

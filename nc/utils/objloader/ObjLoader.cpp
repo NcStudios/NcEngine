@@ -99,12 +99,14 @@ namespace nc::utils
         float y = std::stof( str.substr(firstSpace, lastSpace - firstSpace) );
         float z = std::stof( str.substr(lastSpace, str.size() - lastSpace) );
 
-        mesh->Vertices.push_back (graphics::Vertex{ {x,y,z} } );
+        mesh->Vertices.push_back (graphics::Vertex{ {x,y,z}, {0, 0, 0}} );
         //model.vertices.push_back( graphics::Model::Vertex{ {x,y,z * -1.0f} } );
     }
 
     void ObjLoader::StoreNormFromSimpleString(const std::string& str, nc::graphics::Mesh* mesh)
     {
+        (void)mesh;
+
         const auto firstSpace = str.find(' ');
         const auto lastSpace  = str.rfind(' ');
 

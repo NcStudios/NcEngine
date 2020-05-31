@@ -27,6 +27,8 @@ TO ADD
     -additional values: initial scene name
 
 LOW PRIORITY
+-unused params are marked (void)param for now, many of these can be removed,
+    but some are there for uniformity (Aquire a gfx resource)
 -display draw calls and tris/verts
 -fix naming of user components in gui
 -main window/main menu dilemma

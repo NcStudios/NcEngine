@@ -150,6 +150,8 @@ namespace nc::utils::editor
     {
         if(!(*open)) return;
 
+        (void)frameLogicTime;
+
         //if(ImGui::Begin("Timing Data", open, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration))
         if(ImGui::Begin("Timing Data", open))
         {

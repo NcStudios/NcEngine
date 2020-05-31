@@ -13,6 +13,10 @@ const char* PROJECT_SETTINGS_FILEPATH = "project/Settings/projectsettings.txt";
 
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLine, int showCommand)
 {
+    (void)prevInstance;
+    (void)commandLine;
+    (void)showCommand;
+
     nc::ProjectSettings::Load(PROJECT_SETTINGS_FILEPATH);
     
     nc::Window window(instance);

@@ -27,8 +27,8 @@ namespace nc
                 m_parentView = parentView;
             }
 
-            ComponentHandle GetHandle()     const noexcept { return m_handle;      }
-            EntityView*     GetParentView()       noexcept { return &m_parentView; }
+            ComponentHandle GetHandle() const noexcept { return m_handle; }
+            EntityView* GetParentView() noexcept { return &m_parentView; }
 
             #ifdef NC_DEBUG
             virtual void EditorGuiElement()
@@ -47,11 +47,11 @@ namespace nc
             }
             #endif
 
-            virtual void FrameUpdate(float dt) {}
+            virtual void FrameUpdate(float dt) {(void)dt;}
             virtual void FixedUpdate() {}
             virtual void OnInitialize() {}
             virtual void OnDestroy() {}
-            virtual void OnCollisionEnter(const EntityHandle other) {}
+            virtual void OnCollisionEnter(const EntityHandle other) { (void)other;}
             virtual void OnCollisionStay() {}
             virtual void OnCollisionExit() {}
         
