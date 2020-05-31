@@ -145,6 +145,7 @@ void Engine::FrameLogic(float dt)
 
 void Engine::FrameRender(float dt)
 {
+    (void)dt;
     #ifdef NC_DEBUG
     m_editorManager->BeginFrame();
     #endif

@@ -11,6 +11,7 @@ int32_t m_wheel = 0;
 
 void SetMouseWheel(WPARAM wParam, LPARAM lParam)
 {
+    (void)lParam;
     m_wheel = GET_WHEEL_DELTA_WPARAM(wParam);
     //m_wheelWParam = wParam;
     //m_wheelLParam = lParam;

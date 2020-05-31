@@ -11,6 +11,7 @@ namespace nc
 
     void PointLight::Set(graphics::Graphics * graphics, DirectX::XMFLOAT3 pos, float radius)
     {
+        (void)radius; //currently unused
         m_cBuf                          = std::make_unique<PixelConstBuf>(graphics);
         m_constBufData.pos              = pos;
         m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};

@@ -199,7 +199,7 @@ namespace nc::graphics::d3dresource
     class Topology : public GraphicsResource
     {
         public:
-            Topology(Graphics * graphics,D3D11_PRIMITIVE_TOPOLOGY type);
+            Topology(Graphics * graphics, D3D11_PRIMITIVE_TOPOLOGY type);
             void Bind(Graphics * graphics) noexcept override;
             static std::string GetUID(D3D11_PRIMITIVE_TOPOLOGY topology) noexcept;
 

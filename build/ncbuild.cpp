@@ -82,7 +82,7 @@ struct BuildOptions
     std::string mode          = "-g -D NC_DEBUG";
     std::string standard      = "-std=c++17";
     std::string optimizations = "";
-    std::string warnings      = "-Wall";
+    std::string warnings      = "-Wall -Wextra -Wno-cast-function-type";
     std::string defines       = "";
     std::string includes      = "";
     std::string appName       = "-o app";
@@ -92,6 +92,18 @@ struct BuildOptions
     std::string objDirectory  = "obj";
     bool        link          = true;  
     bool        compile       = true;
+
+    void Display()
+    {
+        std::cout << "--Build Options--\n"
+                  << "mode:     " << mode          << '\n'
+                  << "std:      " << standard      << '\n'
+                  << "opt:      " << optimizations << '\n'
+                  << "warn:     " << warnings      << '\n'
+                  << "defs:     " << defines       << '\n'
+                  << "compile:  " << compile       << '\n'
+                  << "link:     " << link          << "\n\n";
+    }
 };
 
 std::string GetBuildDirectory();
@@ -124,6 +136,8 @@ int main(int argc, char* argv[]){
 
     std::string buildDirectoryString = GetBuildDirectory();
     LPSTR       buildDirectory       = const_cast<char *>(buildDirectoryString.c_str());
+
+    buildOptions.Display();
 
     if(buildOptions.compile)
     {
