@@ -98,7 +98,7 @@ template<> bool NCE::HasEngineComponent<Renderer>(const EntityHandle handle) noe
 }
 template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {
-    return AddRenderer(handle);
+    return NCE::AddRenderer(handle);
 }
 template<> bool NCE::RemoveEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {
@@ -126,15 +126,15 @@ template<> bool NCE::HasEngineComponent<PointLight>(const EntityHandle handle) n
 }
 template<> PointLight * NCE::AddEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
 {
-    return AddPointLight(handle);
+    return NCE::AddPointLight(handle);
 }
 template<> bool NCE::RemoveEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
 {
-    return RemovePointLight(handle);
+    return NCE::RemovePointLight(handle);
 }
 template<> PointLight * NCE::GetEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
 {
-    return GetPointLight(handle);
+    return NCE::GetPointLight(handle);
 }
 
 

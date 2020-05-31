@@ -32,6 +32,9 @@ namespace nc
              */
             static void Exit();
 
+            /** 
+             * Get EntityView for the main camera.
+             */
             static EntityView* GetMainCamera();
 
             /***************

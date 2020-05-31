@@ -21,7 +21,6 @@ namespace nc
             ComponentHandle PointLightHandle;
             const std::string Tag;
             
-
             //could make engine a friend and make these private
             void SendOnInitialize() noexcept;
             void SendFrameUpdate(float dt) noexcept;
@@ -35,11 +34,6 @@ namespace nc
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             bool HasUserComponent() const noexcept;
-
-            // template<class T,
-            //          class = typename std::enable_if<std::is_base_of<Component, T>::value>::type,
-            //          class ... Args>
-            // T * AddEngineComponent(Args&& ... args) noexcept;
 
             template<class T,
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type,

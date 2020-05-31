@@ -28,7 +28,7 @@ TO ADD
 
 LOW PRIORITY
 -unused params are marked (void)param for now, many of these can be removed,
-    but some are there for uniformity (Aquire a gfx resource)
+    but some are there for uniformity (ex: Aquire passes gfx* to resource constructor always)
 -display draw calls and tris/verts
 -fix naming of user components in gui
 -main window/main menu dilemma
