@@ -65,12 +65,6 @@ namespace nc
         return false;
     }
 
-    // template<class T, class, class ... Args>
-    // T * Entity::AddEngineComponent(Args&& ... args) noexcept
-    // {
-    //     return NCE::AddEngineComponent<T>(Handle);
-    // }
-
     template<class T, class, class ... Args>
     T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
