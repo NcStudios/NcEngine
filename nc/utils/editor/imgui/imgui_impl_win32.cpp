@@ -231,7 +231,7 @@ static BOOL CALLBACK ImGui_ImplWin32_UpdateMonitors_EnumFunc(HMONITOR monitor, H
 static void ImGui_ImplWin32_UpdateMonitors()
 {
     ImGui::GetPlatformIO().Monitors.resize(0);
-    ::EnumDisplayMonitors(NULL, NULL, ImGui_ImplWin32_UpdateMonitors_EnumFunc, NULL);
+    ::EnumDisplayMonitors(NULL, NULL, ImGui_ImplWin32_UpdateMonitors_EnumFunc, 0);
     g_WantUpdateMonitors = false;
 }
 

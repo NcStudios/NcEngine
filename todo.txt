@@ -1,16 +1,12 @@
 ***********
 IN PROGRESS
 ***********
--can Entity::AddComponent return raw ptr and store shared ptr?
 -AddEngineComponent takes param pack(renderer creation can be done through constructor then)
 -add global search to api - GlobalGetComponent
 
 ***********
 BUGS
 ***********
--NCE::GetTransform expects transform handle, not entity handle
-
-
 -fix camera controls
 -rotations are still strange sometimes(also need world/local options)
 -fix window scaling so changes are made to Window, Graphics, and buffer sizes
@@ -19,8 +15,6 @@ BUGS
 ***********
 TO ADD
 ***********
--easy way to get transform
--adding user comps/renderer/light/etc not handled in uniform way 
 -update physics to 3d
 -support for multiple cameras
 -lights

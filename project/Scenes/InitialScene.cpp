@@ -52,7 +52,6 @@ void InitialScene::Load()
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
             NCE::AddUserComponent<Head>(boxView.Handle);
             NCE::AddEngineComponent<Renderer>(boxView.Handle)->SetModel(NCE::GetGraphics(), cubeMesh, randClr);
-            Head * ptr = NCE::GetUserComponent<Head>(boxView.Handle); //a test
         }
         else
         {
