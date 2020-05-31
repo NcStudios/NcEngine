@@ -14,13 +14,13 @@ namespace nc
         public:
             PointLight();
 
-            void Set(graphics::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius = 0.5f);
+            void Set(graphics::Graphics * graphics, DirectX::XMFLOAT3 pos, float radius = 0.5f);
 
             #ifdef NC_DEBUG
             void EditorGuiElement() override;
             #endif
 
-            void Bind(graphics::Graphics& graphics, DirectX::FXMMATRIX view) noexcept;
+            void Bind(graphics::Graphics * graphics, DirectX::FXMMATRIX view) noexcept;
 
         private:
             struct PointLightCBuf

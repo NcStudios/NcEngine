@@ -26,7 +26,7 @@ void Head::FrameUpdate(float dt)
     if(GetKey(KeyCode::Z))
         objRotZ += 10.0f;
 
-    View<Transform>(this)->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
+    NCE::GetTransform(*GetParentView())->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
 }
 
 

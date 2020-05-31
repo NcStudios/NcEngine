@@ -58,8 +58,8 @@ namespace nc::engine
             PointLight* GetPointLight(EntityHandle handle);
             bool        RemovePointLight(EntityHandle handle);
 
-            EntityView*                       GetMainCamera();
-            nc::graphics::Graphics&           GetGraphics();
+            EntityView*             GetMainCamera();
+            nc::graphics::Graphics* GetGraphics();
             
             #ifdef NC_DEBUG
             nc::utils::editor::EditorManager* GetEditorManager();

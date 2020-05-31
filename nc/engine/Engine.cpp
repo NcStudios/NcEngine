@@ -84,7 +84,8 @@ void Engine::MainLoop()
     scene::SceneManager sceneManager;
 
     m_mainCameraView = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
-    m_mainCameraView.Entity()->AddComponent<Camera>();
+
+    NCE::AddUserComponent<Camera>(m_mainCameraView.Handle);
 
     while(m_engineState.isRunning)
     {   
@@ -151,7 +152,7 @@ void Engine::FrameRender(float dt)
     m_subsystem.Light->BindLights(GetGraphics());
     m_subsystem.Rendering->Frame();
     #ifdef NC_DEBUG
-    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), GetGraphics().GetDrawCallCount(), m_entities->Active);
+    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), GetGraphics()->GetDrawCallCount(), m_entities->Active);
     m_editorManager->EndFrame();
     #endif
     m_subsystem.Rendering->FrameEnd();
@@ -268,7 +269,7 @@ bool Engine::RemovePointLight(EntityHandle handle)
     return m_subsystem.Light->Remove(handle);
 }
 
-nc::graphics::Graphics& Engine::GetGraphics()
+nc::graphics::Graphics* Engine::GetGraphics()
 {
     return m_subsystem.Rendering->GetGraphics();
 }

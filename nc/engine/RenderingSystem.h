@@ -26,9 +26,9 @@ namespace nc::engine
             void Frame();
             void FrameEnd();
 
-            nc::graphics::Graphics& GetGraphics();
+            nc::graphics::Graphics* GetGraphics();
 
         private:
-            std::unique_ptr<graphics::Graphics>      m_graphics;
+            std::unique_ptr<graphics::Graphics> m_graphics;
     };
 } //end namespace nc::engine

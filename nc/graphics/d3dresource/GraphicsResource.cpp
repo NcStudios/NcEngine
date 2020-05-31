@@ -5,18 +5,18 @@
 
 namespace nc::graphics::d3dresource
 {
-    ID3D11DeviceContext* GraphicsResource::GetContext(Graphics& graphics) noexcept
+    ID3D11DeviceContext* GraphicsResource::GetContext(Graphics * graphics) noexcept
     {
-        return graphics.m_context.Get();
+        return graphics->m_context.Get();
     }
 
-    ID3D11Device* GraphicsResource::GetDevice(Graphics& graphics) noexcept
+    ID3D11Device* GraphicsResource::GetDevice(Graphics * graphics) noexcept
     {
-        return graphics.m_device.Get();
+        return graphics->m_device.Get();
     }
 
 
-    VertexBuffer::VertexBuffer(Graphics& graphics,const std::vector<Vertex>& vertices, const std::string& tag)
+    VertexBuffer::VertexBuffer(Graphics * graphics,const std::vector<Vertex>& vertices, const std::string& tag)
         : m_stride(sizeof(Vertex)), m_tag(tag)
     {
         D3D11_BUFFER_DESC bd      = {};
@@ -38,7 +38,7 @@ namespace nc::graphics::d3dresource
     }
 
 
-    void VertexBuffer::Bind(Graphics& graphics) noexcept
+    void VertexBuffer::Bind(Graphics * graphics) noexcept
     {
         const UINT offset = 0u;
         GetContext(graphics)->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &offset);
@@ -46,7 +46,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    IndexBuffer::IndexBuffer(Graphics& graphics, const std::vector<uint16_t>& indices, std::string& tag)
+    IndexBuffer::IndexBuffer(Graphics * graphics, const std::vector<uint16_t>& indices, std::string& tag)
         : m_count((UINT)indices.size()), m_tag(tag)
     {
         D3D11_BUFFER_DESC ibd      = {};
@@ -67,7 +67,7 @@ namespace nc::graphics::d3dresource
         );
     }
 
-    void IndexBuffer::Bind(Graphics& graphics) noexcept
+    void IndexBuffer::Bind(Graphics * graphics) noexcept
     {
         GetContext(graphics)->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
     }
@@ -80,7 +80,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    VertexShader::VertexShader(Graphics& graphics, const std::string& path)
+    VertexShader::VertexShader(Graphics * graphics, const std::string& path)
         : m_path(path)
     {
         std::wstring w_path;
@@ -96,7 +96,7 @@ namespace nc::graphics::d3dresource
         );
     }
 
-    void VertexShader::Bind(Graphics& graphics) noexcept
+    void VertexShader::Bind(Graphics * graphics) noexcept
     {
         GetContext(graphics)->VSSetShader(m_vertexShader.Get(),nullptr,0u);
     }
@@ -108,7 +108,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    PixelShader::PixelShader( Graphics& graphics,const std::string& path )
+    PixelShader::PixelShader( Graphics * graphics,const std::string& path )
         : m_path(path)
     {
         Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
@@ -124,14 +124,14 @@ namespace nc::graphics::d3dresource
         );
     }
 
-    void PixelShader::Bind(Graphics& graphics) noexcept
+    void PixelShader::Bind(Graphics * graphics) noexcept
     {
         GetContext(graphics)->PSSetShader(m_pixelShader.Get(),nullptr,0u);
     }
 
 
 
-    TransformCbuf::TransformCbuf(Graphics& graphics, const std::string& tag, const Model& parent, UINT slot)
+    TransformCbuf::TransformCbuf(Graphics * graphics, const std::string& tag, const Model& parent, UINT slot)
         : m_parent( parent )
     {
         if(!m_vcbuf)
@@ -140,13 +140,13 @@ namespace nc::graphics::d3dresource
         }
     }
 
-    void TransformCbuf::Bind(Graphics& graphics) noexcept
+    void TransformCbuf::Bind(Graphics * graphics) noexcept
     {
-        const auto modelView = m_parent.GetTransformXM() * graphics.GetCamera();
+        const auto modelView = m_parent.GetTransformXM() * graphics->GetCamera();
         const Transforms t = 
         {
             DirectX::XMMatrixTranspose(modelView),
-            DirectX::XMMatrixTranspose(modelView * graphics.GetProjection())
+            DirectX::XMMatrixTranspose(modelView * graphics->GetProjection())
         };
 
         m_vcbuf->Update(graphics, t);
@@ -158,7 +158,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    InputLayout::InputLayout(Graphics& graphics,
+    InputLayout::InputLayout(Graphics * graphics,
                              const std::string& tag,
                              const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
                              ID3DBlob* vertexShaderBytecode )
@@ -175,16 +175,16 @@ namespace nc::graphics::d3dresource
         );
     }
 
-    void InputLayout::Bind(Graphics& graphics) noexcept
+    void InputLayout::Bind(Graphics * graphics) noexcept
     {
         GetContext(graphics)->IASetInputLayout(m_inputLayout.Get());
     }
 
 
 
-    Topology::Topology(Graphics& graphics,D3D11_PRIMITIVE_TOPOLOGY type) : m_type(type) {}
+    Topology::Topology(Graphics * graphics,D3D11_PRIMITIVE_TOPOLOGY type) : m_type(type) {}
 
-    void Topology::Bind(Graphics& graphics) noexcept
+    void Topology::Bind(Graphics * graphics) noexcept
     {
         GetContext(graphics)->IASetPrimitiveTopology(m_type);
     }

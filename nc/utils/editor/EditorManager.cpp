@@ -12,6 +12,7 @@
 #include "Input.h"
 #include "GraphicsResourceManager.h"
 #include "NCTime.h"
+#include "NCE.h"
 
 #include "Renderer.h" //prob not needed
 
@@ -30,14 +31,14 @@ namespace nc::utils::editor
     //const ImVec4 COLOR_DEFAULT_  (0.137f, 0.508f, 0.388f, 1.0f);
     //const ImVec4 COLOR_DEFAULT_  (0.408f, 0.716f,   0.6f, 1.0f);
 
-    EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics& graphics)
+    EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics * graphics)
         : m_isGuiActive(false)
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::StyleColorsDark();
         ImGui_ImplWin32_Init(hwnd);
-        ImGui_ImplDX11_Init(graphics.m_device.Get(), graphics.m_context.Get());
+        ImGui_ImplDX11_Init(graphics->m_device.Get(), graphics->m_context.Get());
         auto& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigDockingWithShift = false;
@@ -194,7 +195,7 @@ namespace nc::utils::editor
 
     void EditorManager::DrawInspectorControl(nc::EntityView* view)
     {   
-        std::string handle_s = std::to_string(view->Entity()->Handle);
+        std::string handle_s = std::to_string(view->Handle);
         const float spacing = 60.0f;
 
         ImGui::Spacing(); 
@@ -202,20 +203,20 @@ namespace nc::utils::editor
         ImGui::PushItemWidth(spacing);
             ImGui::Text("Entity");
             ImGui::Indent();
-                ImGui::Text("Tag:    ");  ImGui::SameLine();  ImGui::Text(view->Entity()->Tag.c_str());
+                ImGui::Text("Tag:    ");  ImGui::SameLine();  ImGui::Text(NCE::GetEntity(view->Handle)->Tag.c_str());
                 ImGui::Text("Handle: ");  ImGui::SameLine();  ImGui::Text(handle_s.c_str());
             ImGui::Unindent();
         ImGui::PopItemWidth();  ImGui::Separator();
 
-        view->Transform()->EditorGuiElement();
+        NCE::GetEngineComponent<nc::Transform>(view->Handle)->EditorGuiElement();
 
-        nc::Renderer* rend = view->Renderer();
+        nc::Renderer* rend = NCE::GetEngineComponent<nc::Renderer>(view->Handle);
         if(rend) { rend->EditorGuiElement(); }
 
-        nc::PointLight* light = view->GetPointLight();
+        nc::PointLight* light = NCE::GetEngineComponent<PointLight>(view->Handle);
         if(light) { light->EditorGuiElement(); }
 
-        for(auto& comp : view->Entity()->GetUserComponents())
+        for(auto& comp : NCE::GetEntity(view->Handle)->GetUserComponents())
         {
             comp->EditorGuiElement();
         }

@@ -10,11 +10,11 @@ void InitialScene::Load()
 {
     //add light
     EntityView lightView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "PointLight");
-    NCE::AddPointLight(lightView.Entity()->Handle);
+    NCE::AddEngineComponent<PointLight>(lightView.Handle);
 
     //CamController
     EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
-    camView.Entity()->AddComponent<CamController>();
+    NCE::AddUserComponent<CamController>(camView.Handle);
 
     using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
 
@@ -40,8 +40,6 @@ void InitialScene::Load()
     monkeyMesh.Name               = "MonkeyMesh";
     monkeyMesh.MeshPath           = "project\\Models\\monkey.obj";
 
-    
-
     for(int i = 0; i < 10; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
@@ -52,16 +50,15 @@ void InitialScene::Load()
         if((i%2) == 0)
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
-            boxView.Entity()->AddComponent<Head>();
-            boxView.AddRenderer()->SetModel(NCE::GetGraphics(), cubeMesh, randClr);
-
-            Head * ptr = boxView.Entity()->GetComponent<Head>();
+            NCE::AddUserComponent<Head>(boxView.Handle);
+            NCE::AddEngineComponent<Renderer>(boxView.Handle)->SetModel(NCE::GetGraphics(), cubeMesh, randClr);
+            Head * ptr = NCE::GetUserComponent<Head>(boxView.Handle); //a test
         }
         else
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
-            boxView.Entity()->AddComponent<Head>();
-            boxView.AddRenderer()->SetModel(NCE::GetGraphics(), monkeyMesh, randClr);
+            NCE::AddUserComponent<Head>(boxView.Handle);
+            NCE::AddEngineComponent<Renderer>(boxView.Handle)->SetModel(NCE::GetGraphics(), monkeyMesh, randClr);
         }
     }
 }

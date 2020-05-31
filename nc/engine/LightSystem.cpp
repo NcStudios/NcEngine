@@ -8,9 +8,9 @@ namespace nc::engine
 
     LightSystem::~LightSystem() = default;
 
-    void LightSystem::BindLights(graphics::Graphics& graphics)
+    void LightSystem::BindLights(graphics::Graphics * graphics)
     {
-        auto camMatrixXM = NCE::GetMainCamera()->Transform()->CamGetMatrix();
+        auto camMatrixXM = NCE::GetTransform(*NCE::GetMainCamera())->CamGetMatrix();
 
         for(auto& light : m_components)
         {

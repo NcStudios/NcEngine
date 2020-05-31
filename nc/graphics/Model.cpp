@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    Model::Model(Graphics& graphics, Mesh& mesh, DirectX::XMFLOAT3& materialColor)
+    Model::Model(Graphics * graphics, Mesh& mesh, DirectX::XMFLOAT3& materialColor)
     {
         using namespace nc::graphics::d3dresource;
 
@@ -31,13 +31,13 @@ namespace nc::graphics
         AddGraphicsResource(PixelConstantBuffer<Material>::AcquireUnique(graphics, m_material, 1u));
     }
 
-    void Model::Draw(Graphics& graphics) const noexcept
+    void Model::Draw(Graphics * graphics) const noexcept
     {
         for(auto& res : m_resources)
         {
             res->Bind(graphics);
         }
-        graphics.DrawIndexed(m_indexBuffer->GetCount());
+        graphics->DrawIndexed(m_indexBuffer->GetCount());
     }
 
     void Model::UpdateTransformationMatrix(Transform* transform) noexcept

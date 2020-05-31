@@ -15,14 +15,14 @@ namespace nc
     Renderer::Renderer(Renderer&& other)
     {
         m_handle = other.GetHandle();
-        m_parentView = *View<EntityView>(&other);
+        m_parentView = *other.GetParentView();
         m_model = std::move(other.m_model);
     }
 
     Renderer& Renderer::operator=(Renderer&& other)
     {
         m_handle = other.GetHandle();
-        m_parentView = *View<EntityView>(&other);
+        m_parentView = *other.GetParentView();
         m_model = std::move(other.m_model);
         return *this;
     }
@@ -67,13 +67,13 @@ namespace nc
     }
     #endif
 
-    void Renderer::Update(graphics::Graphics& graphics)
+    void Renderer::Update(graphics::Graphics * graphics)
     {
-        m_model->UpdateTransformationMatrix(View<Transform>(this));
+        m_model->UpdateTransformationMatrix(NCE::GetTransform(*GetParentView()));
         m_model->Draw(graphics);
     }
 
-    void Renderer::SetModel(graphics::Graphics& graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor)
+    void Renderer::SetModel(graphics::Graphics * graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor)
     {
         m_model = std::make_unique<graphics::Model>(graphics, mesh, materialColor);
     }
