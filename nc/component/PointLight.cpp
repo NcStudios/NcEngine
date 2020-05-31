@@ -1,7 +1,7 @@
 #include "PointLight.h"
 #include "Graphics.h"
 #include "EditorManager.h"
-#include "View.h"
+//#include "View.h"
 #include "NCE.h"
 
 namespace nc
@@ -9,7 +9,7 @@ namespace nc
     PointLight::PointLight()
     {}
 
-    void PointLight::Set(graphics::Graphics& graphics, DirectX::XMFLOAT3 pos, float radius)
+    void PointLight::Set(graphics::Graphics * graphics, DirectX::XMFLOAT3 pos, float radius)
     {
         m_cBuf                          = std::make_unique<PixelConstBuf>(graphics);
         m_constBufData.pos              = pos;
@@ -50,9 +50,10 @@ namespace nc
     }
     #endif
 
-    void PointLight::Bind(graphics::Graphics& graphics, DirectX::FXMMATRIX view) noexcept
+    void PointLight::Bind(graphics::Graphics* graphics, DirectX::FXMMATRIX view) noexcept
     {
-        m_constBufData.pos = View<Transform>((Component*)this)->GetPosition().GetXMFloat3();
+        auto trans = NCE::GetTransform(*GetParentView());
+        m_constBufData.pos = trans->GetPosition().GetXMFloat3();
         PointLightCBuf cBufCopy = m_constBufData;
         const auto pos = DirectX::XMLoadFloat3(&m_constBufData.pos);
         DirectX::XMStoreFloat3(&cBufCopy.pos, DirectX::XMVector3Transform(pos, view));

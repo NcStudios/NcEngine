@@ -1,12 +1,16 @@
 ***********
 IN PROGRESS
 ***********
--component constructor parameter forwarding
-
+-can Entity::AddComponent return raw ptr and store shared ptr?
+-AddEngineComponent takes param pack(renderer creation can be done through constructor then)
+-add global search to api - GlobalGetComponent
 
 ***********
 BUGS
 ***********
+-NCE::GetTransform expects transform handle, not entity handle
+
+
 -fix camera controls
 -rotations are still strange sometimes(also need world/local options)
 -fix window scaling so changes are made to Window, Graphics, and buffer sizes
@@ -15,17 +19,28 @@ BUGS
 ***********
 TO ADD
 ***********
+-easy way to get transform
+-adding user comps/renderer/light/etc not handled in uniform way 
+-update physics to 3d
+-support for multiple cameras
+-lights
+    -improve point light components and how they relate to entities
+    -support for multiple lights
+    -additional light types (directional/spot)
+-config files
+    -enable reading from files again
+    -make human readable(xml or with property keys?)
+    -additional values: initial scene name
+
+LOW PRIORITY
 -display draw calls and tris/verts
 -fix naming of user components in gui
 -main window/main menu dilemma
 -meshes are loaded from ObjLoader even if v/i buffers already exist(in Model constructor)
         -note: the 'shared' buffers are ultimately used, but file reading happens for each instance regardless
--improve point light components and how they relate to entities
 -camera needs parameters for fov/clipping planes
--support for multiple cameras
--support for multiple lights
--additional light types (directional/spot)
 -Entity (and other places) - many public methods could be private if Engine was friend
--update physics to 3d
 -make generating new user types easier/quicker (untility prog?)
 -save changes in debug mode
+-certain win/dx3d types aren't forward declared(HWND), can they be?
+

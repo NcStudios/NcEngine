@@ -37,7 +37,7 @@ namespace nc::engine
     ComponentManager<T>::ComponentManager()
     {
         m_components.reserve(50);
-    } 
+    }
 
     template<class T>
     ComponentHandle ComponentManager<T>::Add(const EntityView parentView)

@@ -34,19 +34,23 @@ namespace nc
             Transform* GetTransform() const noexcept;
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
-            bool HasComponent() const noexcept;
+            bool HasUserComponent() const noexcept;
+
+            // template<class T,
+            //          class = typename std::enable_if<std::is_base_of<Component, T>::value>::type,
+            //          class ... Args>
+            // T * AddEngineComponent(Args&& ... args) noexcept;
 
             template<class T,
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type,
                      class ... Args>
-
-            std::shared_ptr<T> AddComponent(Args&& ... args) noexcept;
-
-            template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
-            bool RemoveComponent() noexcept;
+            T * AddUserComponent(Args&& ... args) noexcept;
 
             template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
-            std::shared_ptr<T> GetComponent() const noexcept; 
+            bool RemoveUserComponent() noexcept;
+
+            template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            T * GetUserComponent() const noexcept; 
 
             std::vector<std::shared_ptr<Component>> GetUserComponents() const noexcept;
         
@@ -55,9 +59,8 @@ namespace nc
     };
 
     //template definitions
-
     template<class T, class>
-    bool Entity::HasComponent() const noexcept
+    bool Entity::HasUserComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));
         for(auto& item : m_userComponents)
@@ -68,19 +71,24 @@ namespace nc
         return false;
     }
 
+    // template<class T, class, class ... Args>
+    // T * Entity::AddEngineComponent(Args&& ... args) noexcept
+    // {
+    //     return NCE::AddEngineComponent<T>(Handle);
+    // }
+
     template<class T, class, class ... Args>
-    std::shared_ptr<T> Entity::AddComponent(Args&& ... args) noexcept
+    T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
-        if (HasComponent<T>()) return nullptr;
-        EntityView view(Handle, TransformHandle);
+        if (HasUserComponent<T>()) return nullptr;
         auto newComponent = std::make_shared<T>(std::forward<Args>(args)...);
-        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, view);
+        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, EntityView(Handle, TransformHandle));
         m_userComponents.push_back(newComponent);
-        return newComponent;
+        return newComponent.get();
     }
 
     template<class T, class>
-    bool Entity::RemoveComponent() noexcept
+    bool Entity::RemoveUserComponent() noexcept
     {
         const std::type_info &targetType(typeid(T));
         for(std::vector<Component>::size_type i = 0; i < m_userComponents.size(); ++i)
@@ -96,13 +104,13 @@ namespace nc
     }
 
     template<class T, class>
-    std::shared_ptr<T> Entity::GetComponent() const noexcept
+    T * Entity::GetUserComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));
         for(auto& item : m_userComponents)
         {
             if (typeid(*item) == targetType)
-                return std::dynamic_pointer_cast<T>(item);
+                return dynamic_cast<T*>(item.get());
         }
 
         return nullptr; //doesn't have component

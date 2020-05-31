@@ -17,14 +17,14 @@ RenderingSystem::~RenderingSystem() = default;
 
 void RenderingSystem::FrameBegin()
 {
-    auto camMatrixXM = NCE::GetMainCamera()->Transform()->CamGetMatrix();
+    auto camMatrixXM = NCE::GetTransform(*NCE::GetMainCamera())->CamGetMatrix();
     m_graphics->StartFrame();
     m_graphics->SetCamera(camMatrixXM);
 }
 
 void RenderingSystem::Frame()
 {
-    auto& graphics = GetGraphics();
+    auto graphics = GetGraphics();
 
     for(auto& r : m_components)
     {
@@ -37,9 +37,9 @@ void RenderingSystem::FrameEnd()
     m_graphics->EndFrame();
 }
 
-nc::graphics::Graphics& RenderingSystem::GetGraphics()
+nc::graphics::Graphics* RenderingSystem::GetGraphics()
 {
-    return *m_graphics;
+    return m_graphics.get();
 }
 
 } //end namespace nc::internal

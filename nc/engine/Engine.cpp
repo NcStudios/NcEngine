@@ -44,10 +44,10 @@ Engine::Engine(HWND hwnd)
     m_subsystem.Transform = std::make_unique<ComponentManager<Transform>>();
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
-    #ifdef NC_DEBUG
+#ifdef NC_DEBUG
     m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(hwnd, GetGraphics());
     m_frameLogicTimer     = std::make_unique<nc::time::Timer>();
-    #endif
+#endif
 }
 
 Engine::~Engine() 
@@ -84,7 +84,8 @@ void Engine::MainLoop()
     scene::SceneManager sceneManager;
 
     m_mainCameraView = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
-    m_mainCameraView.Entity()->AddComponent<Camera>();
+
+    NCE::AddUserComponent<Camera>(m_mainCameraView.Handle);
 
     while(m_engineState.isRunning)
     {   
@@ -151,7 +152,7 @@ void Engine::FrameRender(float dt)
     m_subsystem.Light->BindLights(GetGraphics());
     m_subsystem.Rendering->Frame();
     #ifdef NC_DEBUG
-    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), GetGraphics().GetDrawCallCount(), m_entities->Active);
+    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), GetGraphics()->GetDrawCallCount(), m_entities->Active);
     m_editorManager->EndFrame();
     #endif
     m_subsystem.Rendering->FrameEnd();
@@ -268,7 +269,7 @@ bool Engine::RemovePointLight(EntityHandle handle)
     return m_subsystem.Light->Remove(handle);
 }
 
-nc::graphics::Graphics& Engine::GetGraphics()
+nc::graphics::Graphics* Engine::GetGraphics()
 {
     return m_subsystem.Rendering->GetGraphics();
 }
@@ -320,7 +321,6 @@ void Engine::SendOnDestroy() noexcept
         Entity* entityPtr = GetEntityPtrFromAnyMap(pair.second.Handle);
         if (entityPtr == nullptr)
         {
-            //std::cout << "Engine::SendOnDestroy - entityPtr is null\n";
             continue;
         }
 

@@ -19,7 +19,7 @@ namespace nc::utils::editor
         public:
             std::optional<unsigned int> SelectedEntityIndex;
 
-            EditorManager(HWND hwnd, nc::graphics::Graphics& graphics);
+            EditorManager(HWND hwnd, nc::graphics::Graphics * graphics);
             ~EditorManager() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
