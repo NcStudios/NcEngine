@@ -187,7 +187,7 @@ namespace nc::utils::editor
                 ImGui::Spacing();
                 if(selected && SelectedEntityIndex.has_value())
                 {
-                    EntityView view(pair.second.Handle, pair.second.TransformHandle); 
+                    EntityView view(pair.second.Handle, pair.second.Handles.transform); 
                     DrawInspectorControl(&view);
                 }
             }

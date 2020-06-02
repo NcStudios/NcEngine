@@ -180,18 +180,17 @@ void Engine::Exit()
 
 EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag)
 {
-    EntityHandle newHandle = m_subsystem.Handle->GenerateNewHandle();
-    Entity newEntity = Entity(newHandle, tag);
-
-    ComponentHandle transformHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
-
-    EntityView view(newHandle, transformHandle);
-
-    newEntity.TransformHandle = m_subsystem.Transform->Add(view);
-    Transform* transformPtr = GetTransformPtr(newEntity.TransformHandle);
+    EntityHandle entityHandle = m_subsystem.Handle->GenerateNewHandle();
+    ComponentHandle expectedTransHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
+    ComponentHandle transHandle = m_subsystem.Transform->Add(EntityView(entityHandle, expectedTransHandle));
+    
+    Entity newEntity = Entity(entityHandle, tag);
+    newEntity.Handles.transform = transHandle;
+    
+    Transform* transformPtr = GetTransformPtr(newEntity.Handles.transform);
     transformPtr->Set(pos, rot, scale);
-    m_entities->AwaitingInitialize.emplace(newHandle, newEntity);
-    return EntityView(newHandle, newEntity.TransformHandle);
+    m_entities->AwaitingInitialize.emplace(entityHandle, newEntity);
+    return EntityView(entityHandle, transHandle);
 }
 
 bool Engine::DestroyEntity(EntityHandle handle)
@@ -232,14 +231,14 @@ Renderer* Engine::AddRenderer(EntityHandle handle)
         return nullptr;
     }
 
-    EntityView view(handle, GetEntity(handle)->TransformHandle);
-    GetEntity(handle)->RendererHandle = m_subsystem.Rendering->Add(view);
+    EntityView view(handle, GetEntity(handle)->Handles.transform);
+    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view);
     return GetRenderer(handle);
 }
 
 Renderer* Engine::GetRenderer(EntityHandle handle)
 {
-    return m_subsystem.Rendering->GetPointerTo(GetEntity(handle)->RendererHandle);
+    return m_subsystem.Rendering->GetPointerTo(GetEntity(handle)->Handles.renderer);
 }
 
 bool Engine::RemoveRenderer(EntityHandle handle)
@@ -254,15 +253,15 @@ PointLight* Engine::AddPointLight(EntityHandle handle)
         return nullptr;
     }
 
-    EntityView view(handle, GetEntity(handle)->TransformHandle);
-    GetEntity(handle)->PointLightHandle = m_subsystem.Light->Add(view);
+    EntityView view(handle, GetEntity(handle)->Handles.transform);
+    GetEntity(handle)->Handles.pointLight = m_subsystem.Light->Add(view);
     GetPointLight(handle)->Set(GetGraphics(), {0.0f, 0.0f, 0.0f});
     return GetPointLight(handle);
 }
 
 PointLight* Engine::GetPointLight(EntityHandle handle)
 {
-    return m_subsystem.Light->GetPointerTo(GetEntity(handle)->PointLightHandle);
+    return m_subsystem.Light->GetPointerTo(GetEntity(handle)->Handles.pointLight);
 }
 
 bool Engine::RemovePointLight(EntityHandle handle)
@@ -326,7 +325,7 @@ void Engine::SendOnDestroy() noexcept
         }
 
         pair.second.SendOnDestroy();
-        m_subsystem.Transform->Remove(entityPtr->TransformHandle);
+        m_subsystem.Transform->Remove(entityPtr->Handles.transform);
     }
     m_entities->AwaitingDestroy.clear();
 }
