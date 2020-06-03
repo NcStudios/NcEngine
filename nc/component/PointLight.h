@@ -20,7 +20,7 @@ namespace nc
             void EditorGuiElement() override;
             #endif
 
-            void Bind(graphics::Graphics * graphics, DirectX::FXMMATRIX view) noexcept;
+            void Bind(graphics::Graphics * graphics, DirectX::FXMMATRIX view) noexcept(false);
 
         private:
             struct PointLightCBuf

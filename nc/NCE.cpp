@@ -44,7 +44,7 @@ bool NCE::DestroyEntity(EntityHandle handle)
 
 EntityView NCE::GetEntityView(EntityHandle handle)
 {
-    ComponentHandle transHandle = NCE::GetEntity(handle)->TransformHandle;
+    ComponentHandle transHandle = NCE::GetEntity(handle)->Handles.transform;
     return EntityView(handle, transHandle);
 }
 

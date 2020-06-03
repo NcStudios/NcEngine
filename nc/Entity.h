@@ -5,6 +5,7 @@
 #include <string>
 #include "Common.h"
 #include "EntityView.h"
+#include "EngineComponentGroup.h"
 
 namespace nc
 {
@@ -14,12 +15,14 @@ namespace nc
     class Entity
     {
         public:
-            Entity(EntityHandle handle, const std::string& tag = "") noexcept : Handle(handle), TransformHandle(0), Tag(tag) {}
+            Entity(EntityHandle handle, const std::string& tag = "") noexcept;
+            Entity(const Entity& other) = default;
+            Entity(Entity&& other) = default;
+            ~Entity() = default;
+
             const EntityHandle Handle;
-            ComponentHandle TransformHandle;
-            ComponentHandle RendererHandle;
-            ComponentHandle PointLightHandle;
             const std::string Tag;
+            EngineComponentHandleGroup Handles;
             
             //could make engine a friend and make these private
             void SendOnInitialize() noexcept;
@@ -32,7 +35,8 @@ namespace nc
 
             Transform* GetTransform() const noexcept;
 
-            template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            template<class T, 
+                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             bool HasUserComponent() const noexcept;
 
             template<class T,
@@ -40,10 +44,12 @@ namespace nc
                      class ... Args>
             T * AddUserComponent(Args&& ... args) noexcept;
 
-            template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            template<class T,
+                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             bool RemoveUserComponent() noexcept;
 
-            template<class T, class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            template<class T,
+                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             T * GetUserComponent() const noexcept; 
 
             std::vector<std::shared_ptr<Component>> GetUserComponents() const noexcept;
@@ -65,18 +71,12 @@ namespace nc
         return false;
     }
 
-    // template<class T, class, class ... Args>
-    // T * Entity::AddEngineComponent(Args&& ... args) noexcept
-    // {
-    //     return NCE::AddEngineComponent<T>(Handle);
-    // }
-
     template<class T, class, class ... Args>
     T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
         if (HasUserComponent<T>()) return nullptr;
         auto newComponent = std::make_shared<T>(std::forward<Args>(args)...);
-        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, EntityView(Handle, TransformHandle));
+        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, EntityView(Handle, Handles.transform));
         m_userComponents.push_back(newComponent);
         return newComponent.get();
     }

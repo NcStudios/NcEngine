@@ -3,6 +3,22 @@
 
 namespace nc{
 
+Entity::Entity(EntityHandle handle, const std::string& tag) noexcept
+    : Handle(handle), 
+      Tag(tag)
+{
+}
+
+// Entity::Entity(Entity&& other) noexcept
+//     : Handle(other.Handle),
+//       Tag(std::move(other.Tag))
+// {
+// }
+
+// Entity::~Entity() 
+// {
+// }
+
 std::vector<std::shared_ptr<Component>> Entity::GetUserComponents() const noexcept
 {
     return m_userComponents;
@@ -10,7 +26,7 @@ std::vector<std::shared_ptr<Component>> Entity::GetUserComponents() const noexce
 
 Transform* Entity::GetTransform() const noexcept
 {
-    return NCE::GetTransform(TransformHandle);
+    return NCE::GetTransform(Handles.transform);
 }
 
 void Entity::SendOnInitialize() noexcept
