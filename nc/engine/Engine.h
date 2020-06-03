@@ -33,6 +33,21 @@ namespace nc
     #endif
 }
 
+/**
+ * Engine
+ * {
+ *      EntitySystem
+ * 
+ *      ComponentSystems
+ *          Transform
+ *          Renderer
+ *          Lights
+ * 
+ *      GameLoop
+ * }
+ * 
+ */
+
 namespace nc::engine
 {
     class Engine
