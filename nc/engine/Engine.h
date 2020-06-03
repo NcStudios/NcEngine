@@ -36,14 +36,18 @@ namespace nc
 /**
  * Engine
  * {
+ *      GameLoop
+ * 
  *      EntitySystem
+ *          HandleManager<EntityHandle>
+ *          map<Handle, Entity>
+ *          Create, Destroy, Get
+ * 
  * 
  *      ComponentSystems
  *          Transform
  *          Renderer
  *          Lights
- * 
- *      GameLoop
  * }
  * 
  */
