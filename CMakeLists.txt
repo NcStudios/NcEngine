@@ -18,6 +18,8 @@ set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47")
 
 add_executable(${EXE_NAME})
 
+set_target_properties(${EXE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+
 if(DEBUG_BUILD)
   add_definitions(-DNC_DEBUG)
   target_compile_options(${EXE_NAME} PUBLIC ${GCC_DEBUG_FLAGS})
@@ -58,14 +60,14 @@ add_subdirectory(nc)
 
 add_subdirectory(project)
 
-add_custom_command(TARGET ${EXE_NAME}
-                   POST_BUILD
-                     #copy project/models to build dir
-                     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ROOT_DIR}/project/models/ ${PROJECT_BINARY_DIR}/project/models/
-
-                     #copy project/shaders to build dir
-                     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ROOT_DIR}/project/shaders/ ${PROJECT_BINARY_DIR}/project/shaders/
-
-                     #copy project/settings to build dir
-                     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ROOT_DIR}/project/settings/ ${PROJECT_BINARY_DIR}/project/settings/
-                  )
+#add_custom_command(TARGET ${EXE_NAME}
+#                   POST_BUILD
+#                     #copy project/models to build dir
+#                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${ROOT_DIR}/project/models/ ${PROJECT_BINARY_DIR}/project/models/
+#
+#                     #copy project/shaders to build dir
+#                     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ROOT_DIR}/project/shaders/ ${PROJECT_BINARY_DIR}/project/shaders/
+#
+#                     #copy project/settings to build dir
+#                     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ROOT_DIR}/project/settings/ ${PROJECT_BINARY_DIR}/project/settings/
+#                  )
