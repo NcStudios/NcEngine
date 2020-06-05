@@ -10,7 +10,11 @@ void InitialScene::Load()
 {
     //add light
     EntityView lightView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "PointLight");
+    EntityView lightView2 = NCE::CreateEntity(Vector3::One(), Vector3::Zero(), Vector3::Zero(), "PointLight2");
+    EntityView lightView3 = NCE::CreateEntity(Vector3::One(), Vector3::Zero(), Vector3::Zero(), "PointLight3");
     NCE::AddEngineComponent<PointLight>(lightView.Handle);
+    NCE::AddEngineComponent<PointLight>(lightView2.Handle);
+    NCE::AddEngineComponent<PointLight>(lightView3.Handle);
 
     //CamController
     EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
