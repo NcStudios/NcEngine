@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "ComponentManager.h"
+#include "ComponentSystem.h"
 #include "PointLight.h"
 
 
@@ -8,7 +8,7 @@ namespace nc::graphics { class Graphics; }
 
 namespace nc::engine
 {
-    class LightSystem : public ComponentManager<PointLight>
+    class LightSystem : public ComponentSystem<PointLight>
     {
         public:
             LightSystem();

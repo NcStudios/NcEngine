@@ -26,7 +26,7 @@ namespace nc
                        class RenderingSystem;
                        class LightSystem;
                        template<class T> class HandleManager;
-                       template<class T> class ComponentManager; }
+                       template<class T> class ComponentSystem; }
 
     #ifdef NC_DEBUG
     namespace utils::editor { class EditorManager; }
@@ -36,14 +36,18 @@ namespace nc
 /**
  * Engine
  * {
+ *      GameLoop
+ * 
  *      EntitySystem
+ *          HandleManager<EntityHandle>
+ *          map<Handle, Entity>
+ *          Create, Destroy, Get
+ * 
  * 
  *      ComponentSystems
  *          Transform
  *          Renderer
  *          Lights
- * 
- *      GameLoop
  * }
  * 
  */
@@ -91,7 +95,7 @@ namespace nc::engine
                 std::unique_ptr<RenderingSystem>             Rendering;
                 std::unique_ptr<LightSystem>                 Light;
                 std::unique_ptr<CollisionSystem>             Collision;
-                std::unique_ptr<ComponentManager<Transform>> Transform;
+                std::unique_ptr<ComponentSystem<Transform>> Transform;
             } m_subsystem;
 
             std::unique_ptr<EntityMaps> m_entities;

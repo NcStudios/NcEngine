@@ -8,6 +8,7 @@
 *.out
 .vs/
 .vscode/
+build/
 
 imgui_full_repo
 imgui.ini

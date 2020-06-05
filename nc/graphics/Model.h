@@ -54,10 +54,10 @@ namespace nc::graphics
 
             void UpdateTransformationMatrix(Transform* transform) noexcept;
             DirectX::XMMATRIX GetTransformXM() const noexcept;
-            Material* GetMaterial() noexcept;
+            Material * GetMaterial() noexcept;
 
             template<class T>
-            T* QueryGraphicsResource() noexcept;
+            T * QueryGraphicsResource() noexcept;
         
         protected:
             void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
@@ -66,7 +66,7 @@ namespace nc::graphics
             Mesh m_mesh;
             Material m_material;
             DirectX::XMMATRIX m_transformationMatrix;
-            const d3dresource::IndexBuffer* m_indexBuffer = nullptr;
+            const d3dresource::IndexBuffer * m_indexBuffer = nullptr;
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
     };
 
