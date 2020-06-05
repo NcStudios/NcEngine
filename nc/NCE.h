@@ -195,19 +195,12 @@ namespace nc
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             static T * GetEngineComponent(const EntityHandle handle) noexcept(false);
 
+
         private:
             static engine::Engine* m_engine;
 
-            static Renderer*   AddRenderer(EntityHandle handle);
-            static PointLight* AddPointLight(EntityHandle handle);
-
-            static Renderer*   GetRenderer(EntityHandle handle);
-            static PointLight* GetPointLight(EntityHandle handle);
-
-            static bool RemoveRenderer(EntityHandle handle);
-            static bool RemovePointLight(EntityHandle handle);
-
     }; //end class NCE
+
 
     /**************************
      * Template Definitions

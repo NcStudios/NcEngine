@@ -62,33 +62,25 @@ Entity* NCE::GetEntity(const std::string& tag)
  * Transform Component
  *********************/
 
-/* Private */
-
 /* Public Get */
 Transform* NCE::GetTransform(const ComponentHandle transformHandle)
 {
-    return NCE::m_engine->GetTransformPtr(transformHandle);
+    return m_engine->GetTransformPtr(transformHandle);
 }
 
 Transform * NCE::GetTransform(const EntityView& view)
 {
-    return NCE::m_engine->GetTransformPtr(view.TransformHandle);
+    return m_engine->GetTransformPtr(view.TransformHandle);
 }
 
 template<> Transform * NCE::GetEngineComponent<Transform>(const EntityHandle handle) noexcept(false)
 {
-    EntityView ev = NCE::GetEntityView(handle);
-    return GetTransform(ev.TransformHandle);
+    return m_engine->GetTransformPtr(GetEntityView(handle).TransformHandle);
 }
 
 /*********************
  * Renderer Component
  *********************/
-
-/* Private Get/Set */
-Renderer* NCE::AddRenderer(EntityHandle handle) { return NCE::m_engine->AddRenderer(handle);}
-bool NCE::RemoveRenderer(EntityHandle handle)   { return NCE::m_engine->RemoveRenderer(handle);}
-Renderer* NCE::GetRenderer(EntityHandle handle) { return NCE::m_engine->GetRenderer(handle);}
 
 /* Public Get/Set */
 template<> bool NCE::HasEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
@@ -98,25 +90,20 @@ template<> bool NCE::HasEngineComponent<Renderer>(const EntityHandle handle) noe
 }
 template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {
-    return NCE::AddRenderer(handle);
+    return m_engine->AddRenderer(handle);
 }
 template<> bool NCE::RemoveEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {
-    return NCE::RemoveRenderer(handle);
+    return m_engine->RemoveRenderer(handle);
 }
 template<> Renderer * NCE::GetEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {
-    return NCE::GetRenderer(handle);
+    return m_engine->GetRenderer(handle);
 }
 
 /**********************
  * PointLight Component
  **********************/
-
-/* Private Get/Set */
-PointLight* NCE::AddPointLight(EntityHandle handle) { return NCE::m_engine->AddPointLight(handle); }
-bool NCE::RemovePointLight(EntityHandle handle) { return NCE::m_engine->RemovePointLight(handle); }
-PointLight* NCE::GetPointLight(EntityHandle handle) { return NCE::m_engine->GetPointLight(handle); }
 
 /* Public Get/Set */
 template<> bool NCE::HasEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
@@ -126,16 +113,15 @@ template<> bool NCE::HasEngineComponent<PointLight>(const EntityHandle handle) n
 }
 template<> PointLight * NCE::AddEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
 {
-    return NCE::AddPointLight(handle);
+    return m_engine->AddPointLight(handle);
 }
 template<> bool NCE::RemoveEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
 {
-    return NCE::RemovePointLight(handle);
+    return m_engine->RemovePointLight(handle);
 }
 template<> PointLight * NCE::GetEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
 {
-    return NCE::GetPointLight(handle);
+    return m_engine->GetPointLight(handle);
 }
-
 
 } //end namespace nc
