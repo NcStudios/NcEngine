@@ -9,6 +9,8 @@ IN PROGRESS
 ***********
 BUGS
 ***********
+-Component::Initialize() is called after constructor runs meaning handle/entity data
+    is not available at the time of constructor invocation
 -fix camera controls
 -rotations are still strange sometimes(also need world/local options)
 -fix window scaling so changes are made to Window, Graphics, and buffer sizes

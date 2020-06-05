@@ -12,7 +12,7 @@ namespace nc::engine
     {
         auto camMatrixXM = NCE::GetTransform(*NCE::GetMainCamera())->CamGetMatrix();
 
-        for(auto& light : m_components)
+        for(auto& light : GetVector())
         {
             light.Bind(graphics, camMatrixXM);
         }

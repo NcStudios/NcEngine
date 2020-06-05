@@ -4,7 +4,7 @@
 #include "NCWinDef.h"
 
 #include "Renderer.h"
-#include "ComponentManager.h"
+#include "ComponentSystem.h"
 
 namespace nc
 { 
@@ -14,7 +14,7 @@ namespace nc
 
 namespace nc::engine
 {
-    class RenderingSystem : public ComponentManager<Renderer>
+    class RenderingSystem : public ComponentSystem<Renderer>
     {
         public:
             RenderingSystem(int initialWidth, int initialHeight, HWND hwnd);

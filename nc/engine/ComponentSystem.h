@@ -9,40 +9,41 @@
 namespace nc::engine
 {
     template<class T>
-    class ComponentManager
+    class ComponentSystem
     {
         public:
-            ComponentManager();
-            virtual ~ComponentManager() = default;
+            ComponentSystem(const unsigned int reserveSize = 50);
+            virtual ~ComponentSystem() = default;
             
             virtual ComponentHandle Add(const EntityView parentView);
             virtual bool Remove(const ComponentHandle handle);
             virtual bool Contains(const ComponentHandle handle) const;
-            virtual const std::vector<T>& GetVector() const;
+            virtual std::vector<T>& GetVector();
             T* GetPointerTo(const ComponentHandle handle);
 
             ComponentHandle GetCurrentHandle();
 
         protected:
-            std::vector<T> m_components;
-            std::unordered_map<ComponentHandle, ComponentIndex> m_indexMap;
-            HandleManager<ComponentHandle> handleManager;
-
             ComponentIndex GetIndexFromHandle(const ComponentHandle handle) const;
             void MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex);
             void RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex);
+
+        private:
+            std::vector<T> m_components;
+            std::unordered_map<ComponentHandle, ComponentIndex> m_indexMap;
+            HandleManager<ComponentHandle> m_handleManager;
     };
 
     template<class T>
-    ComponentManager<T>::ComponentManager()
+    ComponentSystem<T>::ComponentSystem(const unsigned int reserveSize)
     {
-        m_components.reserve(50);
+        m_components.reserve(reserveSize);
     }
 
     template<class T>
-    ComponentHandle ComponentManager<T>::Add(const EntityView parentView)
+    ComponentHandle ComponentSystem<T>::Add(const EntityView parentView)
     {
-        ComponentHandle handle = handleManager.GenerateNewHandle();
+        ComponentHandle handle = m_handleManager.GenerateNewHandle();
         T newComponent;
         newComponent.Initialize(handle, parentView);
         m_components.push_back(std::move(newComponent));
@@ -52,7 +53,7 @@ namespace nc::engine
     }
 
     template<class T>
-    bool ComponentManager<T>::Remove(const ComponentHandle handle)
+    bool ComponentSystem<T>::Remove(const ComponentHandle handle)
     {
         if (!Contains(handle)) { return false; }
 
@@ -69,19 +70,19 @@ namespace nc::engine
     }
 
     template<class T>
-    bool ComponentManager<T>::Contains(const ComponentHandle handle) const
+    bool ComponentSystem<T>::Contains(const ComponentHandle handle) const
     {
         return m_indexMap.count(handle) > 0;
     }
 
     template<class T>
-    const std::vector<T>& ComponentManager<T>::GetVector() const
+    std::vector<T>& ComponentSystem<T>::GetVector()
     {
         return m_components;
     }
 
     template<class T>
-    T* ComponentManager<T>::GetPointerTo(const ComponentHandle handle)
+    T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
     {
         if (!Contains(handle)) return nullptr;
         ComponentIndex index = GetIndexFromHandle(handle);
@@ -89,26 +90,26 @@ namespace nc::engine
     }
 
     template<class T>
-    ComponentHandle ComponentManager<T>::GetCurrentHandle()
+    ComponentHandle ComponentSystem<T>::GetCurrentHandle()
     {
-        return handleManager.GetCurrent();
+        return m_handleManager.GetCurrent();
     }
 
     template<class T>
-    ComponentIndex ComponentManager<T>::GetIndexFromHandle(const ComponentHandle handle) const
+    ComponentIndex ComponentSystem<T>::GetIndexFromHandle(const ComponentHandle handle) const
     {
         if (!Contains(handle)) return 0; //need value for unsuccessful
         return m_indexMap.at(handle);
     }
 
     template<class T>
-    void ComponentManager<T>::MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
+    void ComponentSystem<T>::MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
     {
         if (!Contains(handle)) { m_indexMap.emplace(handle, targetIndex); }
     }
 
     template<class T>
-    void ComponentManager<T>::RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
+    void ComponentSystem<T>::RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
     {
         if (Contains(handle)) { m_indexMap.at(handle) = targetIndex; }
     }
