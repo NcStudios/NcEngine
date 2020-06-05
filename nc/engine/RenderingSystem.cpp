@@ -26,7 +26,7 @@ void RenderingSystem::Frame()
 {
     auto graphics = GetGraphics();
 
-    for(auto& r : m_components)
+    for(auto& r : GetVector())
     {
         r.Update(graphics);
     }

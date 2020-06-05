@@ -3,7 +3,7 @@
 #include "NCException.h"
 #include "ProjectSettings.h"
 #include "Window.h"
-#include "ComponentManager.h"
+#include "ComponentSystem.h"
 #include "SceneManager.h"
 #include "RenderingSystem.h"
 #include "LightSystem.h"
@@ -41,7 +41,7 @@ Engine::Engine(HWND hwnd)
     m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, Window::Instance->GetHWND());
     m_subsystem.Light     = std::make_unique<LightSystem>();
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
-    m_subsystem.Transform = std::make_unique<ComponentManager<Transform>>();
+    m_subsystem.Transform = std::make_unique<ComponentSystem<Transform>>();
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
 #ifdef NC_DEBUG
@@ -170,7 +170,7 @@ void Engine::FixedUpdate()
     SendFixedUpdate();
 
     // check collisions
-    m_subsystem.Collision->CheckCollisions(m_subsystem.Transform->GetVector());
+    m_subsystem.Collision->CheckCollisions(const_cast<const std::vector<Transform>&>(m_subsystem.Transform->GetVector()));
 }
 
 void Engine::Exit()

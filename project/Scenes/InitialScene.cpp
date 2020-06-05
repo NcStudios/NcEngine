@@ -26,9 +26,9 @@ void InitialScene::Load()
 
     nc::graphics::Mesh cubeMesh = {};
     cubeMesh.Name               = "CubeMesh";
-    cubeMesh.MeshPath           = "project\\Models\\cube_ind.obj";
-    cubeMesh.VertexShaderPath   = "nc\\graphics\\shader\\compiled\\litvertexshader.cso";
-    cubeMesh.PixelShaderPath    = "nc\\graphics\\shader\\compiled\\litpixelshader.cso";
+    cubeMesh.MeshPath           = "project\\models\\cube_ind.obj";
+    cubeMesh.VertexShaderPath   = "project\\shaders\\compiled\\litvertexshader.cso";
+    cubeMesh.PixelShaderPath    = "project\\shaders\\compiled\\litpixelshader.cso";
     cubeMesh.PrimitiveTopology  = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     cubeMesh.InputElementDesc   = 
     {
@@ -38,7 +38,7 @@ void InitialScene::Load()
 
     nc::graphics::Mesh monkeyMesh = cubeMesh;
     monkeyMesh.Name               = "MonkeyMesh";
-    monkeyMesh.MeshPath           = "project\\Models\\monkey.obj";
+    monkeyMesh.MeshPath           = "project\\models\\monkey.obj";
 
     for(int i = 0; i < 10; ++i)
     {
