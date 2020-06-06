@@ -1,5 +1,9 @@
 #include "Camera.h"
 
+#ifdef NC_DEBUG
+#include "imgui.h"
+#endif
+
 namespace nc
 {
     Camera::Camera()

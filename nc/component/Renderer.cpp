@@ -3,7 +3,9 @@
 #include "Model.h"
 #include "NCE.h"
 #include "GraphicsResource.h"
+
 #ifdef NC_DEBUG
+#include "imgui.h"
 #include "EditorManager.h"
 #endif
 

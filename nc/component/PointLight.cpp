@@ -4,6 +4,10 @@
 //#include "View.h"
 #include "NCE.h"
 
+#ifdef NC_DEBUG
+#include "imgui.h"
+#endif
+
 namespace nc
 {
     PointLight::PointLight()

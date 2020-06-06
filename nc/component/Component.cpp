@@ -1,5 +1,9 @@
 #include "Component.h"
 
+#ifdef NC_DEBUG
+#include "imgui.h"
+#endif
+
 namespace nc
 {
 

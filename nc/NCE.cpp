@@ -9,37 +9,37 @@ engine::Engine* NCE::m_engine = nullptr;
 
 NCE::NCE(engine::Engine* enginePtr)
 {
-    NCE::m_engine = enginePtr;
+    m_engine = enginePtr;
 }
 
 graphics::Graphics* NCE::GetGraphics()
 {
-    return NCE::m_engine->GetGraphics();
+    return m_engine->GetGraphics();
 }
 
 EntityView* NCE::GetMainCamera()
 {
-    return NCE::m_engine->GetMainCamera();
+    return m_engine->GetMainCamera();
 }
 
 void NCE::Exit()
 {
-    NCE::m_engine->Exit();
+    m_engine->Exit();
 }
 
 EntityView NCE::CreateEntity()
 {
-    return NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), "");
+    return CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), "");
 }
 
 EntityView NCE::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
-    return NCE::m_engine->CreateEntity(pos, rot, scale, tag);
+    return m_engine->CreateEntity(pos, rot, scale, tag);
 }
 
 bool NCE::DestroyEntity(EntityHandle handle)
 {
-    return NCE::m_engine->DestroyEntity(handle);
+    return m_engine->DestroyEntity(handle);
 }
 
 EntityView NCE::GetEntityView(EntityHandle handle)
@@ -50,12 +50,12 @@ EntityView NCE::GetEntityView(EntityHandle handle)
 
 Entity* NCE::GetEntity(EntityHandle handle)
 {
-    return NCE::m_engine->GetEntity(handle);
+    return m_engine->GetEntity(handle);
 }
 
 Entity* NCE::GetEntity(const std::string& tag)
 {
-    return NCE::m_engine->GetEntity(tag);
+    return m_engine->GetEntity(tag);
 }
 
 /*********************

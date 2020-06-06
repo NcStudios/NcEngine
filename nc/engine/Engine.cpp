@@ -1,21 +1,25 @@
 #include "Engine.h"
 #include "NCE.h"
+#include "Window.h"
+#include "Graphics.h"
 #include "NCException.h"
 #include "ProjectSettings.h"
-#include "Window.h"
 #include "ComponentSystem.h"
 #include "SceneManager.h"
 #include "RenderingSystem.h"
 #include "LightSystem.h"
 #include "CollisionSystem.h"
 #include "HandleManager.h"
+
 #include "Camera.h"
 #include "Renderer.h"
-#include "Graphics.h"
+#include "PointLight.h"
+
 
 #include <iostream>
+#include <unordered_map>
 
-#include "PointLight.h"
+
 
 #include "GraphicsResourceManager.h"
 
@@ -28,9 +32,11 @@ namespace nc::engine
 
 struct EntityMaps
 {
-    std::unordered_map<EntityHandle, Entity> AwaitingInitialize;
-    std::unordered_map<EntityHandle, Entity> Active;
-    std::unordered_map<EntityHandle, Entity> AwaitingDestroy;
+    /** @todo need entity graphs to support entity hierarchies */
+    using EntityMap_t = std::unordered_map<EntityHandle, Entity>;
+    EntityMap_t ToInitialize;
+    EntityMap_t Active;
+    EntityMap_t ToDestroy;
 };
 
 
@@ -55,7 +61,7 @@ Engine::~Engine()
 
 bool Engine::DoesEntityExist(EntityHandle handle)
 {
-    return (m_entities->Active.count(handle) > 0) || (m_entities->AwaitingInitialize.count(handle) > 0);
+    return (m_entities->Active.count(handle) > 0) || (m_entities->ToInitialize.count(handle) > 0);
 }
 
 
@@ -63,13 +69,13 @@ auto& Engine::GetMapContainingEntity(EntityHandle handle, bool checkAll) noexcep
 {
     if (m_entities->Active.count(handle) > 0)
         return m_entities->Active;
-    else if (m_entities->AwaitingInitialize.count(handle) > 0)
-        return m_entities->AwaitingInitialize;
+    else if (m_entities->ToInitialize.count(handle) > 0)
+        return m_entities->ToInitialize;
 
-    if (checkAll && (m_entities->AwaitingDestroy.count(handle) > 0) ) //only check AwaitingDestroy if checkAll flag is set
-        return m_entities->AwaitingDestroy;
+    if (checkAll && (m_entities->ToDestroy.count(handle) > 0) ) //only check ToDestroy if checkAll flag is set
+        return m_entities->ToDestroy;
 
-    throw DefaultException("EntityNotFoundException");
+    throw DefaultException("Engine::GetmapContainingEntity() - Entity not found.");
 }
 
 Entity* Engine::GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false)
@@ -149,13 +155,16 @@ void Engine::FrameRender(float dt)
     #ifdef NC_DEBUG
     m_editorManager->BeginFrame();
     #endif
+
     m_subsystem.Rendering->FrameBegin();
     m_subsystem.Light->BindLights(GetGraphics());
     m_subsystem.Rendering->Frame();
+
     #ifdef NC_DEBUG
     m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), GetGraphics()->GetDrawCallCount(), m_entities->Active);
     m_editorManager->EndFrame();
     #endif
+
     m_subsystem.Rendering->FrameEnd();
 }
 
@@ -180,17 +189,17 @@ void Engine::Exit()
 
 EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag)
 {
-    EntityHandle entityHandle = m_subsystem.Handle->GenerateNewHandle();
-    ComponentHandle expectedTransHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
-    ComponentHandle transHandle = m_subsystem.Transform->Add(EntityView(entityHandle, expectedTransHandle));
+    auto entityHandle = m_subsystem.Handle->GenerateNewHandle();
+    auto expectedTransHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
+    auto transHandle = m_subsystem.Transform->Add(EntityView { entityHandle, expectedTransHandle } );
     
-    Entity newEntity = Entity(entityHandle, tag);
+    auto newEntity = Entity(entityHandle, tag);
     newEntity.Handles.transform = transHandle;
     
-    Transform* transformPtr = GetTransformPtr(newEntity.Handles.transform);
+    auto transformPtr = GetTransformPtr(newEntity.Handles.transform);
     transformPtr->Set(pos, rot, scale);
-    m_entities->AwaitingInitialize.emplace(entityHandle, newEntity);
-    return EntityView(entityHandle, transHandle);
+    m_entities->ToInitialize.emplace(entityHandle, newEntity);
+    return EntityView { entityHandle, transHandle };
 }
 
 bool Engine::DestroyEntity(EntityHandle handle)
@@ -198,7 +207,7 @@ bool Engine::DestroyEntity(EntityHandle handle)
     if (!DoesEntityExist(handle))
         return false;
     auto& containingMap = GetMapContainingEntity(handle);
-    m_entities->AwaitingDestroy.emplace(handle, containingMap.at(handle));
+    m_entities->ToDestroy.emplace(handle, containingMap.at(handle));
     containingMap.erase(handle);
     return true;
 }
@@ -231,7 +240,7 @@ Renderer* Engine::AddRenderer(EntityHandle handle)
         return nullptr;
     }
 
-    EntityView view(handle, GetEntity(handle)->Handles.transform);
+    auto view = EntityView { handle, GetEntity(handle)->Handles.transform };
     GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view);
     return GetRenderer(handle);
 }
@@ -290,12 +299,12 @@ Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.
 
 void Engine::SendOnInitialize() noexcept
 {
-    for(auto& pair : m_entities->AwaitingInitialize)
+    for(auto& pair : m_entities->ToInitialize)
     {
         pair.second.SendOnInitialize();
         m_entities->Active.emplace(std::move(pair));
     }
-    m_entities->AwaitingInitialize.clear();
+    m_entities->ToInitialize.clear();
 }
 
 void Engine::SendFrameUpdate(float dt) noexcept
@@ -316,7 +325,7 @@ void Engine::SendFixedUpdate() noexcept
 
 void Engine::SendOnDestroy() noexcept
 {
-    for(auto& pair : m_entities->AwaitingDestroy)
+    for(auto& pair : m_entities->ToDestroy)
     {
         Entity* entityPtr = GetEntityPtrFromAnyMap(pair.second.Handle);
         if (entityPtr == nullptr)
@@ -327,6 +336,6 @@ void Engine::SendOnDestroy() noexcept
         pair.second.SendOnDestroy();
         m_subsystem.Transform->Remove(entityPtr->Handles.transform);
     }
-    m_entities->AwaitingDestroy.clear();
+    m_entities->ToDestroy.clear();
 }
 }// end namespace nc::internal

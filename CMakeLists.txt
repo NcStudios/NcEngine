@@ -29,6 +29,8 @@ target_compile_options(${EXE_NAME} PUBLIC ${GCC_WARNING_FLAGS})
 
 target_link_libraries(${EXE_NAME} PUBLIC ${WIN32_LINK_FLAGS})
 
+#target_precompile_headers(${EXE_NAME} PUBLIC ${ROOT_DIR}/nc/PCH.h)
+
 #should have files use relative paths from root directory
 target_include_directories(${EXE_NAME}
                              PUBLIC
