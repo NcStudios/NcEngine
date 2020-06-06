@@ -1,5 +1,5 @@
 #include "CamController.h"
-#include "Camera.h"
+#include "component/Camera.h"
 
 
 

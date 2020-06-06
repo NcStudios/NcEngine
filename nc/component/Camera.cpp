@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 #ifdef NC_DEBUG
-#include "imgui.h"
+#include "utils/editor/imgui/imgui.h"
 #endif
 
 namespace nc

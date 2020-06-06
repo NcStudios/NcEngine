@@ -1,12 +1,10 @@
 #include "ObjLoader.h"
+#include "graphics/DirectXMath/Inc/DirectXMath.h"
+#include "debug/NCException.h"
+#include "graphics/Model.h"
 
 #include <iostream>
-
 #include <algorithm>
-#include "DirectXMath.h"
-
-#include "NCException.h"
-#include "Model.h"
 
 namespace nc::utils
 {

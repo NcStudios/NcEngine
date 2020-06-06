@@ -1,11 +1,11 @@
 #pragma once
-#include <memory>
 
-#include <string>
-
-#include "NCWinDef.h"
+#include "win32/NCWinDef.h"
 #include "Common.h"
-#include "EntityView.h"
+#include "views/EntityView.h"
+
+#include <memory>
+#include <string>
 
 //forward declarations
 namespace nc

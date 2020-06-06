@@ -1,30 +1,23 @@
 #include "Engine.h"
-#include "NCE.h"
-#include "Window.h"
-#include "Graphics.h"
-#include "NCException.h"
-#include "ProjectSettings.h"
-#include "ComponentSystem.h"
-#include "SceneManager.h"
 #include "RenderingSystem.h"
 #include "LightSystem.h"
 #include "CollisionSystem.h"
-#include "HandleManager.h"
-
-#include "Camera.h"
-#include "Renderer.h"
-#include "PointLight.h"
-
+#include "win32/Window.h"
+#include "NCE.h"
+#include "ProjectSettings.h"
+#include "scene/SceneManager.h"
+#include "graphics/Graphics.h"
+#include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "debug/NCException.h"
+#include "component/Camera.h"
+#include "component/Renderer.h"
+#include "component/PointLight.h"
 
 #include <iostream>
 #include <unordered_map>
 
-
-
-#include "GraphicsResourceManager.h"
-
 #ifdef NC_DEBUG
-#include "EditorManager.h"
+#include "utils/editor/EditorManager.h"
 #endif
 
 namespace nc::engine

@@ -1,7 +1,7 @@
 #include "NCE.h"
-#include "Engine.h"
-#include "Renderer.h"
-#include "PointLight.h"
+#include "engine/Engine.h"
+#include "component/Renderer.h"
+#include "component/PointLight.h"
 
 namespace nc{
     

@@ -1,9 +1,9 @@
 #pragma once
-#include "NCWin32.h"
+#include "win32/NCWin32.h"
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <stdint.h>
-#include "DirectXMath.h"
+#include "DirectXMath/Inc/DirectXMath.h"
 
 namespace nc::graphics::d3dresource { class GraphicsResource; }
 #ifdef NC_DEBUG

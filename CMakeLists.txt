@@ -37,20 +37,11 @@ target_include_directories(${EXE_NAME}
                                ${ROOT_DIR}
                                ${ROOT_DIR}/nc
                                ${ROOT_DIR}/nc/component
-                               ${ROOT_DIR}/nc/debug
-                               ${ROOT_DIR}/nc/engine
-                               ${ROOT_DIR}/nc/graphics
-                               ${ROOT_DIR}/nc/graphics/d3dresource
-                               ${ROOT_DIR}/nc/graphics/DirectXMath/Inc
                                ${ROOT_DIR}/nc/input
                                ${ROOT_DIR}/nc/math
                                ${ROOT_DIR}/nc/scene
                                ${ROOT_DIR}/nc/time
-                               ${ROOT_DIR}/nc/utils/editor
-                               ${ROOT_DIR}/nc/utils/editor/imgui
-                               ${ROOT_DIR}/nc/utils/objloader
                                ${ROOT_DIR}/nc/views
-                               ${ROOT_DIR}/nc/win32
                                ${ROOT_DIR}/project
                                ${ROOT_DIR}/project/components
                                ${ROOT_DIR}/project/models

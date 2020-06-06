@@ -1,9 +1,9 @@
 #include "RenderingSystem.h"
 #include "NCE.h"
-#include "Graphics.h"
+#include "graphics/Graphics.h"
 
-#include "Camera.h"
-#include "PointLight.h"
+#include "component/Camera.h"
+#include "component/PointLight.h"
 
 namespace nc::engine{
 

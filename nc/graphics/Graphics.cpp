@@ -1,6 +1,7 @@
 #include "Graphics.h"
-#include <d3dcompiler.h>
 #include "DXException.h"
+
+#include <d3dcompiler.h>
 #include <iostream>
 
 namespace nc::graphics{
@@ -23,7 +24,7 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
         DXGI_USAGE_RENDER_TARGET_OUTPUT, 1,       //BufferUsage, BufferCount
         hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD, 0   //OutputWindow, Windowed, SwapEffect, Flags
     };
-    ThrowIfFailed
+    THROW_FAILED
     (
         D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE,
                                       nullptr, 0, nullptr, 0,
@@ -52,8 +53,8 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
 
     //get back buffer & render target view
     Microsoft::WRL::ComPtr<ID3D11Resource> backBuffer = nullptr;
-    ThrowIfFailed(m_swap->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer), __FILE__, __LINE__);
-    ThrowIfFailed(m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_target), __FILE__, __LINE__);
+    THROW_FAILED(m_swap->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer), __FILE__, __LINE__);
+    THROW_FAILED(m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_target), __FILE__, __LINE__);
 
     //depth stencil state
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  depthStencilState;
@@ -61,7 +62,7 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     depthStencilStateDesc.DepthEnable              = TRUE;
     depthStencilStateDesc.DepthWriteMask           = D3D11_DEPTH_WRITE_MASK_ALL;
     depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
-    ThrowIfFailed(m_device->CreateDepthStencilState(&depthStencilStateDesc, &depthStencilState), __FILE__, __LINE__);
+    THROW_FAILED(m_device->CreateDepthStencilState(&depthStencilStateDesc, &depthStencilState), __FILE__, __LINE__);
     m_context->OMSetDepthStencilState(depthStencilState.Get(), 1u);
 
     //depth stencil texture
@@ -77,14 +78,14 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
         D3D11_BIND_DEPTH_STENCIL,   //BindFlags
         0u, 0u                      //CPUFlags, MiscFlags
     };
-    ThrowIfFailed(m_device->CreateTexture2D(&depthTextDesc, nullptr, &depthStencilTexture), __FILE__, __LINE__);
+    THROW_FAILED(m_device->CreateTexture2D(&depthTextDesc, nullptr, &depthStencilTexture), __FILE__, __LINE__);
 
     //create depth stencil texture view
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
     dsvDesc.Format                        = DXGI_FORMAT_D32_FLOAT;
     dsvDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2D;
     dsvDesc.Texture2D.MipSlice            = 0u;
-    ThrowIfFailed(m_device->CreateDepthStencilView(depthStencilTexture.Get(), &dsvDesc, &m_dsv), __FILE__, __LINE__);
+    THROW_FAILED(m_device->CreateDepthStencilView(depthStencilTexture.Get(), &dsvDesc, &m_dsv), __FILE__, __LINE__);
 
     //bind depth stencil view
     m_context->OMSetRenderTargets(1u, m_target.GetAddressOf(), m_dsv.Get());
@@ -139,7 +140,7 @@ void Graphics::DrawIndexed(UINT count)
 
 void Graphics::EndFrame()
 {
-    ThrowIfFailed(m_swap->Present(1u, 0u), __FILE__, __LINE__);
+    THROW_FAILED(m_swap->Present(1u, 0u), __FILE__, __LINE__);
 }
 
 #ifdef NC_DEBUG

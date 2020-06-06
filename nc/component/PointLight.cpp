@@ -1,11 +1,10 @@
 #include "PointLight.h"
-#include "Graphics.h"
-#include "EditorManager.h"
-//#include "View.h"
+#include "graphics/Graphics.h"
+#include "utils/editor/EditorManager.h"
 #include "NCE.h"
 
 #ifdef NC_DEBUG
-#include "imgui.h"
+#include "utils/editor/imgui/imgui.h"
 #endif
 
 namespace nc

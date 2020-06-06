@@ -1,20 +1,20 @@
 #ifdef NC_DEBUG
 #include "EditorManager.h"
 #include <d3d11.h>
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_dx11.h"
-#include "Graphics.h"
-#include "Transform.h"
-#include "EntityView.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_win32.h"
+#include "imgui/imgui_impl_dx11.h"
+#include "graphics/Graphics.h"
+#include "component/Transform.h"
+#include "views/EntityView.h"
 #include "Entity.h"
-#include "PointLight.h"
-#include "Input.h"
-#include "GraphicsResourceManager.h"
-#include "NCTime.h"
+#include "component/PointLight.h"
+#include "input/Input.h"
+#include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "time/NCTime.h"
 #include "NCE.h"
 
-#include "Renderer.h" //prob not needed
+#include "component/Renderer.h" //prob not needed
 
 
 #include <string>

@@ -1,7 +1,6 @@
 #pragma once
-#include "Common.h"
 #include "Component.h"
-#include "Vector3.h"
+#include "math/Vector3.h"
 
 //namespace nc::utils::editor { class EditorManager; }
 namespace DirectX { struct XMMATRIX; }

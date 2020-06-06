@@ -4,8 +4,8 @@
 #include <memory>
 #include <string>
 #include "Common.h"
-#include "EntityView.h"
-#include "EngineComponentGroup.h"
+#include "views/EntityView.h"
+#include "component/EngineComponentGroup.h"
 
 namespace nc
 {

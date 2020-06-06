@@ -1,6 +1,6 @@
 #pragma once
 #include "Common.h"
-#include "EntityView.h"
+#include "views/EntityView.h"
 #include <string>
 
 namespace nc

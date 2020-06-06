@@ -1,10 +1,9 @@
 #include "Model.h"
-#include "ObjLoader.h"
-#include "NCVector.h"
-#include "Transform.h"
+#include "utils/objloader/ObjLoader.h"
+#include "math/NCVector.h"
+#include "component/Transform.h"
 #include "Graphics.h"
-
-#include "GraphicsResourceManager.h"
+#include "d3dresource/GraphicsResourceManager.h"
 
 namespace nc::graphics
 {

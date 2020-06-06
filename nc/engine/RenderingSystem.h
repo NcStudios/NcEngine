@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "NCWinDef.h"
+#include "win32/NCWinDef.h"
 
-#include "Renderer.h"
+#include "component/Renderer.h"
 #include "ComponentSystem.h"
 
 namespace nc

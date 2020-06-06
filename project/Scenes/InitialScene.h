@@ -1,7 +1,7 @@
 #pragma once
 
 #include <random>
-#include "Scene.h"
+#include "scene/Scene.h"
 #include "NCE.h"
 #include "Head.h"
 #include "CamController.h"

@@ -1,10 +1,10 @@
 #include "Transform.h"
-#include "DirectXMath.h"
+#include "graphics/DirectXMath/Inc/DirectXMath.h"
 
 #include <limits>
 
 #ifdef NC_DEBUG
-#include "imgui.h"
+#include "utils/editor/imgui/imgui.h"
 #endif
 
 namespace nc

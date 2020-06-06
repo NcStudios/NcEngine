@@ -2,12 +2,12 @@
 #include <string>
 #include "Common.h"
 #include "Entity.h"
-#include "Component.h"
-#include "Transform.h"
-#include "Input.h"
-#include "NCVector.h"
-#include "NCTime.h"
-#include "NCException.h"
+#include "component/Component.h"
+#include "component/Transform.h"
+#include "input/Input.h"
+#include "math/NCVector.h"
+#include "time/NCTime.h"
+#include "debug/NCException.h"
 
 namespace nc
 {

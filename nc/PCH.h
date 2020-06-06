@@ -4,5 +4,5 @@
 #include <iostream>
 
 #include "Common.h"
-#include "NCVector.h"
-#include "NCTime.h"
+#include "math/NCVector.h"
+#include "time/NCTime.h"
