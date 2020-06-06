@@ -191,7 +191,7 @@ EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const s
     
     auto transformPtr = GetTransformPtr(newEntity.Handles.transform);
     transformPtr->Set(pos, rot, scale);
-    m_entities->ToInitialize.emplace(entityHandle, newEntity);
+    m_entities->ToInitialize.emplace(entityHandle, std::move(newEntity));
     return EntityView { entityHandle, transHandle };
 }
 
@@ -200,7 +200,7 @@ bool Engine::DestroyEntity(EntityHandle handle)
     if (!DoesEntityExist(handle))
         return false;
     auto& containingMap = GetMapContainingEntity(handle);
-    m_entities->ToDestroy.emplace(handle, containingMap.at(handle));
+    m_entities->ToDestroy.emplace(handle, std::move(containingMap.at(handle)));
     containingMap.erase(handle);
     return true;
 }

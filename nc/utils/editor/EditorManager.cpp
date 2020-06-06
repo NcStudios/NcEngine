@@ -218,7 +218,7 @@ namespace nc::utils::editor
         nc::PointLight* light = NCE::GetEngineComponent<PointLight>(view->Handle);
         if(light) { light->EditorGuiElement(); }
 
-        for(auto& comp : NCE::GetEntity(view->Handle)->GetUserComponents())
+        for(const auto& comp : NCE::GetEntity(view->Handle)->GetUserComponents())
         {
             comp->EditorGuiElement();
         }
