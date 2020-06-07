@@ -1,7 +1,7 @@
 #include "GraphicsResource.h"
-#include "Graphics.h"
+#include "../Graphics.h"
 #include <d3dcompiler.h>
-#include "DirectXMath.h"
+#include "../DirectXMath/Inc/DirectXMath.h"
 
 namespace nc::graphics::d3dresource
 {
@@ -30,7 +30,7 @@ namespace nc::graphics::d3dresource
         D3D11_SUBRESOURCE_DATA sd = {};
         sd.pSysMem                = vertices.data();
 
-        ThrowIfFailed
+        THROW_FAILED
         (
             GetDevice(graphics)->CreateBuffer(&bd,&sd,&m_vertexBuffer),
             __FILE__, __LINE__
@@ -60,7 +60,7 @@ namespace nc::graphics::d3dresource
         D3D11_SUBRESOURCE_DATA isd = {};
         isd.pSysMem                = indices.data();
 
-        ThrowIfFailed
+        THROW_FAILED
         (
             GetDevice(graphics)->CreateBuffer(&ibd, &isd, &m_indexBuffer),
             __FILE__, __LINE__
@@ -85,9 +85,9 @@ namespace nc::graphics::d3dresource
     {
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
-        ThrowIfFailed(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
+        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
         
-        ThrowIfFailed
+        THROW_FAILED
         (
             GetDevice(graphics)->CreateVertexShader(m_bytecodeBlob->GetBufferPointer(),
                                                     m_bytecodeBlob->GetBufferSize(),
@@ -114,8 +114,8 @@ namespace nc::graphics::d3dresource
         Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
-        ThrowIfFailed(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
-        ThrowIfFailed
+        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
+        THROW_FAILED
         (
             GetDevice(graphics)->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),
                                                     m_bytecodeBlob->GetBufferSize(),
@@ -166,7 +166,7 @@ namespace nc::graphics::d3dresource
     {
         (void)tag;
         
-        ThrowIfFailed
+        THROW_FAILED
         (
             GetDevice(graphics)->CreateInputLayout(layout.data(),
                                                    (UINT)layout.size(),

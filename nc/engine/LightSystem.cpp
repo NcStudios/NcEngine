@@ -1,5 +1,5 @@
 #include "LightSystem.h"
-#include "Graphics.h"
+#include "graphics/Graphics.h"
 #include "NCE.h"
 
 namespace nc::engine

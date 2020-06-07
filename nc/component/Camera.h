@@ -1,5 +1,4 @@
 #pragma once
-#include "Common.h"
 #include "Component.h"
 
 namespace nc

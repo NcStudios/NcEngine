@@ -1,5 +1,5 @@
 #include "Head.h"
-#include "Camera.h"
+#include "component/Camera.h"
 
 
 //temp

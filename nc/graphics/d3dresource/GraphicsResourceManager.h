@@ -1,11 +1,14 @@
 #pragma once
-#include <memory>
-#include <unordered_map>
+
 #include "GraphicsResource.h"
 
-
 #include <iostream>
-#include "imgui.h"
+#include <memory>
+#include <unordered_map>
+
+#ifdef NC_DEBUG
+#include "external/imgui/imgui.h"
+#endif
 
 namespace nc::graphics { class Graphics; }
 

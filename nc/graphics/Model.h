@@ -4,9 +4,9 @@
 #include <memory>
 #include <stdint.h>
 #include <d3d11.h>
-#include "DirectXMath.H"
 #include "Mesh.h"
 #include "Material.h"
+#include "DirectXMath/Inc/DirectXMath.h"
 
 namespace nc { class Transform; }
 namespace nc::graphics

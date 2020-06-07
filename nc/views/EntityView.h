@@ -19,5 +19,8 @@ namespace nc
             EntityView(EntityView&&);
             EntityView& operator=(const EntityView&);
             EntityView& operator=(EntityView&&);
+
+            bool operator==(const EntityView& other) const;
+            bool operator!=(const EntityView& other) const;
     };
 }

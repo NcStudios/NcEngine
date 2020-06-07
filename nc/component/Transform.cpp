@@ -1,6 +1,11 @@
 #include "Transform.h"
+#include "graphics/DirectXMath/Inc/DirectXMath.h"
+
 #include <limits>
-#include "DirectXMath.h"
+
+#ifdef NC_DEBUG
+#include "external/imgui/imgui.h"
+#endif
 
 namespace nc
 {

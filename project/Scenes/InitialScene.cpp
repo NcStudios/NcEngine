@@ -1,12 +1,11 @@
 #include "InitialScene.h"
 
 #include <random>
-#include "Renderer.h"
-#include "Mesh.h"
-#include "Material.h"
-#include "Model.h"
-#include "PointLight.h"
-
+#include "component/Renderer.h"
+#include "graphics/Model.h"
+#include "graphics/Mesh.h"
+#include "graphics/Material.h"
+#include "component/PointLight.h"
 
 void InitialScene::Load()
 {

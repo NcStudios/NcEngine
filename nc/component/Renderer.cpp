@@ -1,10 +1,12 @@
 #include "Renderer.h"
-#include "Graphics.h"
-#include "Model.h"
+#include "graphics/Graphics.h"
+#include "graphics/Model.h"
 #include "NCE.h"
-#include "GraphicsResource.h"
+#include "graphics/d3dresource/GraphicsResource.h"
+
 #ifdef NC_DEBUG
-#include "EditorManager.h"
+#include "external/imgui/imgui.h"
+#include "utils/editor/EditorManager.h"
 #endif
 
 namespace nc

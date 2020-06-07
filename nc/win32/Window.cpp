@@ -4,7 +4,7 @@
 #include <iostream>
 
 #ifdef NC_DEBUG
-#include "EditorManager.h"
+#include "utils/editor/EditorManager.h"
 #endif
 
 namespace nc {
