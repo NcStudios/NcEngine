@@ -70,7 +70,7 @@ namespace graphics
     #endif
 
     /* Mesh stubs */
-    Mesh::Mesh(graphics::Graphics * graphics, std::string meshPath) {(void)graphics, (void)meshPath;}
+    Mesh::Mesh(std::string meshPath) {(void)meshPath;}
     MeshData& Mesh::GetMeshData() {return m_meshData;}
 } //end namespace graphics
 

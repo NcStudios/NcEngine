@@ -7,6 +7,7 @@
 #include "ProjectSettings.h"
 #include "scene/SceneManager.h"
 #include "graphics/Graphics.h"
+#include "graphics/Mesh.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "debug/NCException.h"
 #include "component/Camera.h"

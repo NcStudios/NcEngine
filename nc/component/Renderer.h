@@ -1,15 +1,12 @@
 #pragma once
 
 #include <memory>
-#include "Common.h"
-#include "graphics/Mesh.h"
-#include "graphics/Material.h"
 #include "Component.h"
 #include "graphics/DirectXMath/Inc/DirectXMath.h"
 
 #include <memory>
 
-namespace nc::graphics { class Model; class Mesh; class Graphics; }
+namespace nc::graphics { class Model; class Mesh; class Material; class Graphics; }
 
 namespace nc
 {

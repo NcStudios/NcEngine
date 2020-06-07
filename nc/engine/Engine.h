@@ -3,7 +3,6 @@
 #include "win32/NCWinDef.h"
 #include "Common.h"
 #include "views/EntityView.h"
-#include "graphics/Mesh.h"
 
 #include <memory>
 #include <string>
@@ -20,7 +19,7 @@ namespace nc
     class Vector4;
 
     namespace time     { class Timer;    }
-    namespace graphics { class Graphics; }
+    namespace graphics { class Graphics; class Mesh; }
 
     namespace engine { struct EntityMaps;
                        class CollisionSystem;

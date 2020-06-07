@@ -13,7 +13,7 @@ const char separator =
 
 namespace nc::graphics::detail
 {
-    bool HasValidMeshExtension(std::string fileExtension) 
+    bool HasValidMeshExtension(const std::string& fileExtension) 
     {
         if (fileExtension.compare("fbx") == 0 || fileExtension.compare("FBX") == 0)
         {
@@ -26,12 +26,12 @@ namespace nc::graphics::detail
         return false;
     }
 
-    std::string GetMeshFileName(std::string meshPath) 
+    std::string GetMeshFileName(const std::string& meshPath) 
     {
         std::size_t fileNameStartPosition = meshPath.rfind(separator);
-        std::string fileNameWithExtension = meshPath.substr(fileNameStartPosition+1);
+        const std::string& fileNameWithExtension = meshPath.substr(fileNameStartPosition+1);
         std::size_t periodPosition = fileNameWithExtension.find('.');
-        std::string fileExtension = fileNameWithExtension.substr(periodPosition+1);
+        const std::string& fileExtension = fileNameWithExtension.substr(periodPosition+1);
 
         if (!HasValidMeshExtension(fileExtension)) 
         {
@@ -45,7 +45,7 @@ namespace nc::graphics::detail
 
 namespace nc::graphics
 {
-    Mesh::Mesh(Graphics * graphics, std::string meshPath)
+    Mesh::Mesh(std::string meshPath)
     : m_meshData {}
     {
         m_meshData.MeshPath = std::move(meshPath);

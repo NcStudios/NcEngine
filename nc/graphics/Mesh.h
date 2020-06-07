@@ -36,7 +36,7 @@ namespace nc::graphics
     class Mesh
     {
         public:
-            Mesh(Graphics * graphics, std::string meshPath);
+            Mesh(std::string meshPath);
             Mesh(const Mesh& other) = default;
             Mesh(Mesh&& other) = default;
             Mesh& operator=(Mesh&& other) = default;
