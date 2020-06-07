@@ -228,7 +228,7 @@ Entity* Engine::GetEntity(const std::string& tag)
     return nullptr;
 }
 
-Renderer* Engine::AddRenderer(EntityHandle handle)
+Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh)
 {
     if(GetRenderer(handle))
     {
@@ -236,7 +236,7 @@ Renderer* Engine::AddRenderer(EntityHandle handle)
     }
 
     auto view = EntityView { handle, GetEntity(handle)->Handles.transform };
-    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view);
+    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view, graphics, mesh);
     return GetRenderer(handle);
 }
 

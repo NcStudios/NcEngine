@@ -50,10 +50,11 @@ namespace nc::graphics
     class Model 
     {
         public:
-            Model(Graphics * graphics, Mesh& mesh, Material& material = Material());
+        // TODO: Can we pass material by ptr?
+            Model(Graphics * graphics, Mesh& mesh, Material material = Material());
 
-            void SetMaterial(Graphics * graphics, Material& material) noexcept;
-            void SetMesh(Graphics * graphics, Mesh& mesh) noexcept;
+            void SetMaterial(Material& material) noexcept;
+            void SetMesh(Mesh& mesh) noexcept;
 
             void Draw(Graphics * graphics) const noexcept;
 

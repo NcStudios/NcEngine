@@ -3,7 +3,7 @@
 #include <d3d11.h>
 #include <string>
 #include <vector>
-#include "DirectXMath.H"
+#include "graphics/DirectXMath/Inc/DirectXMath.h"
 
 namespace nc::graphics
 {

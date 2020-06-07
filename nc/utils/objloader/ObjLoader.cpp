@@ -2,17 +2,9 @@
 #include "graphics/DirectXMath/Inc/DirectXMath.h"
 #include "debug/NCException.h"
 #include "graphics/Model.h"
-
+#include "graphics/Mesh.h"
 #include <iostream>
 #include <algorithm>
-<<<<<<< HEAD
-#include "DirectXMath.h"
-
-#include "NCException.h"
-#include "Model.h"
-#include "Mesh.h"
-=======
->>>>>>> 0e9bead850f7a4c8ea9e19f46178bbb875064a01
 
 namespace nc::utils
 {

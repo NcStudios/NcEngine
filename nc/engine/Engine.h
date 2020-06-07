@@ -3,6 +3,7 @@
 #include "win32/NCWinDef.h"
 #include "Common.h"
 #include "views/EntityView.h"
+#include "graphics/Mesh.h"
 
 #include <memory>
 #include <string>
@@ -69,7 +70,7 @@ namespace nc::engine
             Entity *    GetEntity(EntityHandle handle);    //returns ptr to entity in Active or ToInitialize maps, returns nullptr if not found
             Entity *    GetEntity(const std::string& tag); //returns pointer to first active found entity with tag or nullptr if not found
 
-            Renderer *  AddRenderer(EntityHandle handle);
+            Renderer *  AddRenderer(EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh);
             Renderer *  GetRenderer(EntityHandle handle);
             bool        RemoveRenderer(EntityHandle handle);
 

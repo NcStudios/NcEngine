@@ -2,8 +2,8 @@
 
 #include <memory>
 #include "Common.h"
-#include "Mesh.h"
-#include "Material.h"
+#include "graphics/Mesh.h"
+#include "graphics/Material.h"
 #include "Component.h"
 #include "graphics/DirectXMath/Inc/DirectXMath.h"
 
@@ -16,7 +16,7 @@ namespace nc
     class Renderer : public Component
     {
         public:
-            Renderer(graphics::Mesh& mesh); // TODO: enforce model has mesh
+            Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh); // TODO: Remove req to pass in graphics
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
@@ -27,8 +27,8 @@ namespace nc
             void SyncMaterialData();
             #endif
 
-            void SetMesh(graphics::Graphics * graphics, graphics::Mesh& mesh);
-            void SetMaterial(graphics::Graphics * graphics, graphics::Material&);
+            void SetMesh(graphics::Mesh& mesh);
+            void SetMaterial(graphics::Material& material);
             void Update(graphics::Graphics * graphics);
 
         private:

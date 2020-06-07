@@ -12,10 +12,9 @@
 namespace nc
 {
     // TODO: Ensure argument forwarding works on engines components
-    Renderer::Renderer(graphics::Mesh &mesh)
-        : m_model {mesh}
+    Renderer::Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh)
+        : m_model (std::make_unique<graphics::Model> (graphics, mesh))
     {
-        
     }
 
     Renderer::Renderer(Renderer&& other)
@@ -79,28 +78,14 @@ namespace nc
         m_model->Draw(graphics);
     }
 
-    void Renderer::SetMesh(graphics::Graphics * graphics, graphics::Mesh& mesh)
+    void Renderer::SetMesh(graphics::Mesh& mesh)
     {
-        if (m_model == nullptr) 
-        {
-            m_model = std::make_unique<graphics::Model>(graphics, mesh);
-        }
-        else 
-        {
-            m_model->SetMesh(graphics, mesh);
-        }
+        m_model->SetMesh(mesh);
     }
     
-    void Renderer::SetMaterial(graphics::Graphics * graphics, graphics::Material& material) 
+    void Renderer::SetMaterial(graphics::Material& material) 
     {
-        if (m_model == nullptr) 
-        {
-            m_model = std::make_unique<graphics::Model>(graphics, material);
-        }
-        else 
-        {
-            m_model->SetMaterial(graphics, material);
-        }
+        m_model->SetMaterial(material);
     }
 
 }
