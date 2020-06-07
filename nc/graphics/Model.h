@@ -48,9 +48,9 @@ namespace nc::graphics
     class Model 
     {
         public:
-            Model(Graphics * graphics, Mesh& mesh, DirectX::XMFLOAT3& materialColor);
+            Model(Mesh& mesh, DirectX::XMFLOAT3& materialColor);
 
-            void Draw(Graphics * graphics) const noexcept;
+            void Draw() const noexcept;
 
             void UpdateTransformationMatrix(Transform* transform) noexcept;
             DirectX::XMMATRIX GetTransformXM() const noexcept;

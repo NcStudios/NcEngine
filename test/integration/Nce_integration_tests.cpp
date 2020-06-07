@@ -33,14 +33,14 @@ namespace nc
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
     void Renderer::EditorGuiElement() {}
     void Renderer::SyncMaterialData(){}
-    void Renderer::SetModel(graphics::Graphics * graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor) {(void)graphics;(void)mesh;(void)materialColor;}
-    void Renderer::Update(graphics::Graphics * graphics){(void)graphics;}
+    void Renderer::SetModel(graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor) {(void)mesh;(void)materialColor;}
+    void Renderer::Update(){}
 
     /* PointLight stubs */
     PointLight::PointLight() {}
     void PointLight::EditorGuiElement() {}
-    void PointLight::Set(graphics::Graphics * graphics, DirectX::XMFLOAT3 pos, float radius) {(void)graphics;(void)pos;(void)radius;}
-    void PointLight::Bind(graphics::Graphics * graphics, DirectX::FXMMATRIX view) noexcept(false) {(void)graphics;(void)view;}
+    void PointLight::Set(DirectX::XMFLOAT3 pos, float radius) {(void)pos;(void)radius;}
+    void PointLight::Bind(DirectX::FXMMATRIX view) noexcept(false) {(void)view;}
 
 namespace engine
 {

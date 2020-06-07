@@ -208,6 +208,9 @@ namespace nc::graphics::d3dresource
     };
 }
 
+
+
+
 /* Template Definitions */
 namespace nc::graphics::d3dresource
 {
@@ -215,18 +218,21 @@ namespace nc::graphics::d3dresource
     ConstantBuffer<T>::ConstantBuffer(Graphics * graphics, const T& consts, UINT slot)
         : m_slot(slot)
     {
-        D3D11_BUFFER_DESC            cbd;
-        cbd.BindFlags              = D3D11_BIND_CONSTANT_BUFFER;
-        cbd.Usage                  = D3D11_USAGE_DYNAMIC;
-        cbd.CPUAccessFlags         = D3D11_CPU_ACCESS_WRITE;
-        cbd.MiscFlags              = 0u;
-        cbd.ByteWidth              = sizeof(consts);
-        cbd.StructureByteStride    = 0u;
-        D3D11_SUBRESOURCE_DATA csd = {};
-        csd.pSysMem                = &consts;
+        auto cbd = D3D11_BUFFER_DESC
+        {
+            sizeof(consts),             //ByteWidth
+            D3D11_USAGE_DYNAMIC,        //Usage
+            D3D11_BIND_CONSTANT_BUFFER, //BindFlags
+            D3D11_CPU_ACCESS_WRITE,     //CPUAccessFlags
+            0u, 0u                      //MiscFlags, StructureByteStride
+        };
+        auto csd = D3D11_SUBRESOURCE_DATA
+        {
+            &consts, 0u, 0u //pSysMem, SysMemPitch, SysMemSlicePitch
+        };
         THROW_FAILED
         (
-            GetDevice(graphics)->CreateBuffer( &cbd,&csd,&m_constantBuffer),
+            GetDevice(graphics)->CreateBuffer(&cbd,&csd,&m_constantBuffer),
             __FILE__, __LINE__
         );
     }
@@ -235,13 +241,14 @@ namespace nc::graphics::d3dresource
     ConstantBuffer<T>::ConstantBuffer(Graphics * graphics, UINT slot)
         : m_slot(slot)
     {
-        D3D11_BUFFER_DESC         cbd;
-        cbd.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
-        cbd.Usage               = D3D11_USAGE_DYNAMIC;
-        cbd.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
-        cbd.MiscFlags           = 0u;
-        cbd.ByteWidth           = sizeof(T);
-        cbd.StructureByteStride = 0u;
+        auto cbd = D3D11_BUFFER_DESC
+        {
+            sizeof(T),                  //ByteWidth
+            D3D11_USAGE_DYNAMIC,        //Usage
+            D3D11_BIND_CONSTANT_BUFFER, //BindFlags
+            D3D11_CPU_ACCESS_WRITE,     //CPUAccessFlags
+            0u, 0u                      //MiscFlags, StructureByteStride
+        };
         THROW_FAILED
         (
             GetDevice(graphics)->CreateBuffer(&cbd,nullptr,&m_constantBuffer),
@@ -252,7 +259,7 @@ namespace nc::graphics::d3dresource
     template<class T>
     void ConstantBuffer<T>::Update(Graphics * graphics, const T& consts)
     {
-        D3D11_MAPPED_SUBRESOURCE msr;
+        auto msr = D3D11_MAPPED_SUBRESOURCE {};
         THROW_FAILED
         (
             GetContext(graphics)->Map(m_constantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD,0u, &msr),

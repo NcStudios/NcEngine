@@ -22,9 +22,9 @@ namespace nc
             void SyncMaterialData();
             #endif
 
-            void SetModel(graphics::Graphics * graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor);
+            void SetModel(graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor);
 
-            void Update(graphics::Graphics * graphics);
+            void Update();
 
         private:
             std::unique_ptr<graphics::Model> m_model;

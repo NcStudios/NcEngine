@@ -152,7 +152,7 @@ void Engine::FrameRender(float dt)
     #endif
 
     m_subsystem.Rendering->FrameBegin();
-    m_subsystem.Light->BindLights(GetGraphics());
+    m_subsystem.Light->BindLights();
     m_subsystem.Rendering->Frame();
 
     #ifdef NC_DEBUG
@@ -259,7 +259,7 @@ PointLight* Engine::AddPointLight(EntityHandle handle)
 
     EntityView view(handle, GetEntity(handle)->Handles.transform);
     GetEntity(handle)->Handles.pointLight = m_subsystem.Light->Add(view);
-    GetPointLight(handle)->Set(GetGraphics(), {0.0f, 0.0f, 0.0f});
+    GetPointLight(handle)->Set({0.0f, 0.0f, 0.0f});
     return GetPointLight(handle);
 }
 

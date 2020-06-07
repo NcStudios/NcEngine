@@ -24,11 +24,9 @@ void RenderingSystem::FrameBegin()
 
 void RenderingSystem::Frame()
 {
-    auto graphics = GetGraphics();
-
     for(auto& r : GetVector())
     {
-        r.Update(graphics);
+        r.Update();
     }
 }
 

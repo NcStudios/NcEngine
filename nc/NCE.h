@@ -200,7 +200,7 @@ namespace nc
             static engine::Engine* m_engine;
 
     }; //end class NCE
-
+    
 
     /**************************
      * Template Definitions

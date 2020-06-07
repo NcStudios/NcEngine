@@ -69,15 +69,15 @@ namespace nc
     }
     #endif
 
-    void Renderer::Update(graphics::Graphics * graphics)
+    void Renderer::Update()
     {
         m_model->UpdateTransformationMatrix(NCE::GetTransform(*GetParentView()));
-        m_model->Draw(graphics);
+        m_model->Draw();
     }
 
-    void Renderer::SetModel(graphics::Graphics * graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor)
+    void Renderer::SetModel(graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor)
     {
-        m_model = std::make_unique<graphics::Model>(graphics, mesh, materialColor);
+        m_model = std::make_unique<graphics::Model>(mesh, materialColor);
     }
     
 

@@ -19,17 +19,17 @@ namespace nc::graphics::d3dresource
     VertexBuffer::VertexBuffer(Graphics * graphics,const std::vector<Vertex>& vertices, const std::string& tag)
         : m_stride(sizeof(Vertex)), m_tag(tag)
     {
-        D3D11_BUFFER_DESC bd      = {};
-        bd.BindFlags              = D3D11_BIND_VERTEX_BUFFER;
-        bd.Usage                  = D3D11_USAGE_DEFAULT;
-        bd.CPUAccessFlags         = 0u;
-        bd.MiscFlags              = 0u;
-        bd.ByteWidth              = UINT(m_stride * vertices.size());
-        bd.StructureByteStride    = m_stride;
-
-        D3D11_SUBRESOURCE_DATA sd = {};
-        sd.pSysMem                = vertices.data();
-
+        auto bd = D3D11_BUFFER_DESC
+        {
+            UINT(m_stride * vertices.size()), //ByteWidth
+            D3D11_USAGE_DEFAULT,              //Usage
+            D3D11_BIND_VERTEX_BUFFER,         //BindFlags
+            0u, 0u, m_stride                  //CPUAccessFlags, MiscFlags, StructureByteStride
+        };
+        auto sd = D3D11_SUBRESOURCE_DATA
+        {
+            vertices.data(), 0u, 0u //pSysMem, SysMemPitch, SysMemSlicePitch
+        };
         THROW_FAILED
         (
             GetDevice(graphics)->CreateBuffer(&bd,&sd,&m_vertexBuffer),
