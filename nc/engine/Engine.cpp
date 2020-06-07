@@ -7,6 +7,7 @@
 #include "ProjectSettings.h"
 #include "scene/SceneManager.h"
 #include "graphics/Graphics.h"
+#include "graphics/Mesh.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "debug/NCException.h"
 #include "component/Camera.h"
@@ -228,7 +229,7 @@ Entity* Engine::GetEntity(const std::string& tag)
     return nullptr;
 }
 
-Renderer* Engine::AddRenderer(EntityHandle handle)
+Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh)
 {
     if(GetRenderer(handle))
     {
@@ -236,7 +237,7 @@ Renderer* Engine::AddRenderer(EntityHandle handle)
     }
 
     auto view = EntityView { handle, GetEntity(handle)->Handles.transform };
-    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view);
+    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view, graphics, mesh);
     return GetRenderer(handle);
 }
 

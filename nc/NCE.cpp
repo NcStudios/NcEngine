@@ -88,9 +88,9 @@ template<> bool NCE::HasEngineComponent<Renderer>(const EntityHandle handle) noe
     (void)handle;
     return true; //not impl 
 }
-template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
+template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh) noexcept(false)
 {
-    return m_engine->AddRenderer(handle);
+    return m_engine->AddRenderer(handle, graphics, mesh);
 }
 template<> bool NCE::RemoveEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {

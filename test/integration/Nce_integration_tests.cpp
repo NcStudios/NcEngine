@@ -28,13 +28,14 @@ namespace nc
     Window * Window::Instance = new Window((HINSTANCE)nullptr);
 
     /* Renderer stubs */
-    Renderer::Renderer() {}
+    Renderer::Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh) {(void)graphics;(void)mesh;}
     Renderer::Renderer(Renderer&& o) {(void)o;}
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
     void Renderer::EditorGuiElement() {}
     void Renderer::SyncMaterialData(){}
-    void Renderer::SetModel(graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor) {(void)mesh;(void)materialColor;}
-    void Renderer::Update(){}
+    void Renderer::SetMaterial(graphics::Material& material) {(void)material;}
+    void Renderer::SetMesh(graphics::Mesh& mesh) {(void)mesh;}
+    void Renderer::Update(graphics::Graphics * graphics){(void)graphics;}
 
     /* PointLight stubs */
     PointLight::PointLight() {}
@@ -67,6 +68,10 @@ namespace graphics
     #ifdef NC_DEBUG
     uint32_t Graphics::GetDrawCallCount() const { return 0; }
     #endif
+
+    /* Mesh stubs */
+    Mesh::Mesh(std::string meshPath) {(void)meshPath;}
+    MeshData& Mesh::GetMeshData() {return m_meshData;}
 } //end namespace graphics
 
 namespace utils::editor

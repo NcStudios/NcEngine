@@ -3,8 +3,9 @@
 #include <random>
 #include "component/Renderer.h"
 #include "graphics/Model.h"
+#include "graphics/Mesh.h"
+#include "graphics/Material.h"
 #include "component/PointLight.h"
-
 
 void InitialScene::Load()
 {
@@ -24,21 +25,8 @@ void InitialScene::Load()
     uniform_real_distribution<float> sclDist(  0.5f,  2.0f); 
     uniform_real_distribution<float> clrDist(  0.0f,  1.0f);
 
-    nc::graphics::Mesh cubeMesh = {};
-    cubeMesh.Name               = "CubeMesh";
-    cubeMesh.MeshPath           = "project\\models\\cube_ind.obj";
-    cubeMesh.VertexShaderPath   = "project\\shaders\\compiled\\litvertexshader.cso";
-    cubeMesh.PixelShaderPath    = "project\\shaders\\compiled\\litpixelshader.cso";
-    cubeMesh.PrimitiveTopology  = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    cubeMesh.InputElementDesc   = 
-    {
-        { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "Normal",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
-    nc::graphics::Mesh monkeyMesh = cubeMesh;
-    monkeyMesh.Name               = "MonkeyMesh";
-    monkeyMesh.MeshPath           = "project\\models\\monkey.obj";
+    nc::graphics::Mesh monkeyMesh = nc::graphics::Mesh("project\\models\\monkey.obj");
+    nc::graphics::Mesh ncMesh = nc::graphics::Mesh("project\\models\\defaultMesh.obj");
 
     for(int i = 0; i < 10; ++i)
     {
@@ -47,17 +35,25 @@ void InitialScene::Load()
         Vector3  randScl (sclDist(rng), sclDist(rng), sclDist(rng));
         XMFLOAT3 randClr (clrDist(rng), clrDist(rng), clrDist(rng));
 
+        nc::graphics::Material material = {};
+        material.color = randClr;
+
         if((i%2) == 0)
         {
-            EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Box");
+            EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
             NCE::AddUserComponent<Head>(boxView.Handle);
-            NCE::AddEngineComponent<Renderer>(boxView.Handle)->SetModel(cubeMesh, randClr);
+            NCE::AddEngineComponent<Renderer>(boxView.Handle, NCE::GetGraphics(), ncMesh);
         }
         else
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
             NCE::AddUserComponent<Head>(boxView.Handle);
+<<<<<<< HEAD
             NCE::AddEngineComponent<Renderer>(boxView.Handle)->SetModel(monkeyMesh, randClr);
+=======
+            //NCE::AddEngineComponent<Renderer>(boxView.Handle)->SetMesh(NCE::GetGraphics(), monkeyMesh);
+            NCE::AddEngineComponent<Renderer>(boxView.Handle, NCE::GetGraphics(), monkeyMesh)->SetMaterial(material);
+>>>>>>> 9dd2280cac1d73cebdd7d86cddefab81e4168b26
         }
     }
 }

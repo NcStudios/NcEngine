@@ -11,8 +11,10 @@
 
 namespace nc
 {
-    Renderer::Renderer()
-    {}
+    Renderer::Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh)
+        : m_model (std::make_unique<graphics::Model> (graphics, mesh))
+    {
+    }
 
     Renderer::Renderer(Renderer&& other)
     {
@@ -75,10 +77,14 @@ namespace nc
         m_model->Draw();
     }
 
-    void Renderer::SetModel(graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor)
+    void Renderer::SetMesh(graphics::Mesh& mesh)
     {
-        m_model = std::make_unique<graphics::Model>(mesh, materialColor);
+        m_model->SetMesh(mesh);
     }
     
+    void Renderer::SetMaterial(graphics::Material& material) 
+    {
+        m_model->SetMaterial(material);
+    }
 
 }
