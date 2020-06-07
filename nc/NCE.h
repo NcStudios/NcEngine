@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "component/Component.h"
 #include "component/Transform.h"
+#include "graphics/Mesh.h"
 #include "input/Input.h"
 #include "math/NCVector.h"
 #include "time/NCTime.h"
@@ -169,9 +170,19 @@ namespace nc
              * @note Returned ptr not safe to cache.
              */
             template<class T,
-                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type,
-                     class ... Args>
-            static T * AddEngineComponent(const EntityHandle handle, Args&& ... args) noexcept(false);
+                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            static T * AddEngineComponent(const EntityHandle handle) noexcept(false);
+
+            /**
+             * Adds new engine component to Entity.
+             * @param handle Handle of the Entity.
+             * @return Non-owning, non-cacheable pointer to T on success.
+             * @throw BadHandle
+             * @note Returned ptr not safe to cache.
+             */
+            template<class Renderer_t,
+                     class = typename std::enable_if<std::is_base_of<Component, Renderer_t>::value>::type>
+            static Renderer_t * AddEngineComponent(const EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh) noexcept(false);
 
             /**
              * Remove engine component from Entity.

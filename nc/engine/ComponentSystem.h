@@ -17,7 +17,8 @@ namespace nc::engine
             ComponentSystem(const unsigned int reserveSize = 50);
             virtual ~ComponentSystem() = default;
             
-            virtual ComponentHandle Add(const EntityView parentView);
+            template<class ... Args>
+            ComponentHandle Add(const EntityView parentView, Args&& ... args);
             virtual bool Remove(const ComponentHandle handle);
             virtual bool Contains(const ComponentHandle handle) const;
             virtual std::vector<T>& GetVector();
@@ -43,10 +44,11 @@ namespace nc::engine
     }
 
     template<class T>
-    ComponentHandle ComponentSystem<T>::Add(const EntityView parentView)
+    template<class ... Args>
+    ComponentHandle ComponentSystem<T>::Add(const EntityView parentView, Args&& ... args)
     {
         ComponentHandle handle = m_handleManager.GenerateNewHandle();
-        T newComponent;
+        T newComponent((args)...);
         newComponent.Initialize(handle, parentView);
         m_components.push_back(std::move(newComponent));
         ComponentIndex lastIndex = m_components.size() - 1;
