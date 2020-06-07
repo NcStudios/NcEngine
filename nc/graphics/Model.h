@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <d3d11.h>
 #include "DirectXMath.H"
+#include "Mesh.h"
+#include "Material.h"
 
 namespace nc { class Transform; }
 namespace nc::graphics
@@ -19,36 +21,39 @@ namespace nc::graphics
 
 namespace nc::graphics
 {
-    struct Vertex
-    {
-        DirectX::XMFLOAT3 pos;
-        DirectX::XMFLOAT3 norm;
-    };
+    // struct Vertex
+    // {
+    //     DirectX::XMFLOAT3 pos;
+    //     DirectX::XMFLOAT3 norm;
+    // };
 
-    struct Mesh
-    {
-        std::string                           Name;
-        std::string                           MeshPath;
-        std::string                           VertexShaderPath;
-        std::string                           PixelShaderPath;
-        D3D_PRIMITIVE_TOPOLOGY                PrimitiveTopology;
-        std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDesc;
-        std::vector<Vertex>                   Vertices;
-        std::vector<uint16_t>                 Indices;
-    };
+    // struct Mesh
+    // {
+    //     std::string                           Name;
+    //     std::string                           MeshPath;
+    //     std::string                           VertexShaderPath;
+    //     std::string                           PixelShaderPath;
+    //     D3D_PRIMITIVE_TOPOLOGY                PrimitiveTopology;
+    //     std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDesc;
+    //     std::vector<Vertex>                   Vertices;
+    //     std::vector<uint16_t>                 Indices;
+    // };
 
-    struct Material
-    {
-        DirectX::XMFLOAT3 color;
-        float specularIntensity = 0.6;
-        float specularPower = 30.0f;
-        float padding[3];
-    };
+    // struct Material
+    // {
+    //     DirectX::XMFLOAT3 color;
+    //     float specularIntensity = 0.6;
+    //     float specularPower = 30.0f;
+    //     float padding[3];
+    // };
 
     class Model 
     {
         public:
-            Model(Graphics * graphics, Mesh& mesh, DirectX::XMFLOAT3& materialColor);
+            Model(Graphics * graphics, Mesh& mesh, Material& material = Material());
+
+            void SetMaterial(Graphics * graphics, Material& material) noexcept;
+            void SetMesh(Graphics * graphics, Mesh& mesh) noexcept;
 
             void Draw(Graphics * graphics) const noexcept;
 

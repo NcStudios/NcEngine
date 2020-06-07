@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
 #include "Common.h"
+#include "Mesh.h"
+#include "Material.h"
 #include "Component.h"
 #include "DirectXMath.h"
 
@@ -11,7 +13,7 @@ namespace nc
     class Renderer : public Component
     {
         public:
-            Renderer();
+            Renderer(graphics::Mesh& mesh); // TODO: enforce model has mesh
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
@@ -22,8 +24,8 @@ namespace nc
             void SyncMaterialData();
             #endif
 
-            void SetModel(graphics::Graphics * graphics, graphics::Mesh& mesh, DirectX::XMFLOAT3& materialColor);
-
+            void SetMesh(graphics::Graphics * graphics, graphics::Mesh& mesh);
+            void SetMaterial(graphics::Graphics * graphics, graphics::Material&);
             void Update(graphics::Graphics * graphics);
 
         private:
