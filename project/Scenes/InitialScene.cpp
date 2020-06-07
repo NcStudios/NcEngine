@@ -1,9 +1,9 @@
 #include "InitialScene.h"
 
 #include <random>
-#include "Renderer.h"
-#include "Model.h"
-#include "PointLight.h"
+#include "component/Renderer.h"
+#include "graphics/Model.h"
+#include "component/PointLight.h"
 
 
 void InitialScene::Load()

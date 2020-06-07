@@ -1,10 +1,12 @@
 #pragma once
+
+#include "Common.h"
+#include "HandleManager.h"
+#include "views/EntityView.h"
+
 #include <vector>
 #include <unordered_map>
 #include <memory>
-#include "Common.h"
-#include "HandleManager.h"
-#include "EntityView.h"
 
 namespace nc::engine
 {

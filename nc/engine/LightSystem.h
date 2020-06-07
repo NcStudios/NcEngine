@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "ComponentSystem.h"
-#include "PointLight.h"
+#include "component/PointLight.h"
 
 
 namespace nc::graphics { class Graphics; }

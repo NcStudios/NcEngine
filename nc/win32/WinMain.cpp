@@ -1,12 +1,12 @@
 #include "NCWin32.h"
 #include "Window.h"
 #include "ProjectSettings.h"
-#include "Engine.h"
+#include "engine/Engine.h"
 
-#include "Graphics.h"
+#include "graphics/Graphics.h"
 
 #ifdef NC_DEBUG
-#include "EditorManager.h"
+#include "utils/editor/EditorManager.h"
 #endif
 
 const char* PROJECT_SETTINGS_FILEPATH = "project/Settings/projectsettings.txt";
@@ -21,7 +21,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     
     nc::Window window(instance);
     
-    nc::engine::Engine* enginePtr = new nc::engine::Engine(window.GetHWND());
+    nc::engine::Engine* enginePtr = new nc::engine::Engine();//window.GetHWND());
 
     #ifdef NC_DEBUG
     window.BindEditorManager(enginePtr->GetEditorManager());

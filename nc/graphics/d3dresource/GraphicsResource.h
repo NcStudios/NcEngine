@@ -1,14 +1,14 @@
 #pragma once
+
+#include "GraphicsResourceManager.h"
+#include "../DXException.h"
+#include "../Model.h" //for Vertex
+
 #include <vector>
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <string>
 #include <stdint.h>
-#include "GraphicsResourceManager.h"
-
-
-#include "DXException.h"
-#include "Model.h" //for Vertex
 
 namespace nc::graphics { class  Graphics; }
 namespace DirectX      { struct XMMATRIX; }
@@ -224,7 +224,7 @@ namespace nc::graphics::d3dresource
         cbd.StructureByteStride    = 0u;
         D3D11_SUBRESOURCE_DATA csd = {};
         csd.pSysMem                = &consts;
-        ThrowIfFailed
+        THROW_FAILED
         (
             GetDevice(graphics)->CreateBuffer( &cbd,&csd,&m_constantBuffer),
             __FILE__, __LINE__
@@ -242,7 +242,7 @@ namespace nc::graphics::d3dresource
         cbd.MiscFlags           = 0u;
         cbd.ByteWidth           = sizeof(T);
         cbd.StructureByteStride = 0u;
-        ThrowIfFailed
+        THROW_FAILED
         (
             GetDevice(graphics)->CreateBuffer(&cbd,nullptr,&m_constantBuffer),
             __FILE__, __LINE__
@@ -253,7 +253,7 @@ namespace nc::graphics::d3dresource
     void ConstantBuffer<T>::Update(Graphics * graphics, const T& consts)
     {
         D3D11_MAPPED_SUBRESOURCE msr;
-        ThrowIfFailed
+        THROW_FAILED
         (
             GetContext(graphics)->Map(m_constantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD,0u, &msr),
             __FILE__, __LINE__

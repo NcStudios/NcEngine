@@ -1,6 +1,11 @@
 #pragma once
+
+#include "win32/NCWinDef.h"
+
 #include <exception>
 #include <iostream>
+
+#define THROW_FAILED(hr, file, line) if ( (HRESULT)hr < 0 ) { throw DX11Exception(hr, file, line); }
 
 namespace nc::graphics
 {
@@ -24,11 +29,11 @@ namespace nc::graphics
     };
 
 
-    inline void ThrowIfFailed(HRESULT hr, const char* file, const int line)
-    {
-        if(FAILED(hr))
-        {
-            throw DX11Exception(hr, file, line);
-        }
-    }
+    // inline void ThrowIfFailed(HRESULT hr, const char* file, const int line)
+    // {
+    //     if(FAILED(hr))
+    //     {
+    //         throw DX11Exception(hr, file, line);
+    //     }
+    // }
 }

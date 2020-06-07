@@ -3,25 +3,27 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include "Common.h"
-#include "EntityView.h"
-#include "EngineComponentGroup.h"
+#include "Component.h"
+#include "views/EntityView.h"
+#include "component/EngineComponentGroup.h"
 
 namespace nc
 {
-    class Component; 
+    //class Component; 
     class Transform;
 
     class Entity
     {
         public:
             Entity(EntityHandle handle, const std::string& tag = "") noexcept;
-            Entity(const Entity& other) = default;
-            Entity(Entity&& other) = default;
+            Entity(const Entity& other) = delete;
+            Entity& operator=(const Entity&) = delete;
+            Entity(Entity&& other);
+            Entity& operator=(Entity&& other);
             ~Entity() = default;
 
-            const EntityHandle Handle;
-            const std::string Tag;
+            mutable EntityHandle Handle;
+            mutable std::string Tag;
             EngineComponentHandleGroup Handles;
             
             //could make engine a friend and make these private
@@ -52,10 +54,10 @@ namespace nc
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             T * GetUserComponent() const noexcept; 
 
-            std::vector<std::shared_ptr<Component>> GetUserComponents() const noexcept;
+            const std::vector<std::unique_ptr<Component>> & GetUserComponents() const noexcept;
         
         private:
-            std::vector<std::shared_ptr<Component>> m_userComponents;
+            std::vector<std::unique_ptr<Component>> m_userComponents;
     };
 
     //template definitions
@@ -74,11 +76,14 @@ namespace nc
     template<class T, class, class ... Args>
     T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
-        if (HasUserComponent<T>()) return nullptr;
-        auto newComponent = std::make_shared<T>(std::forward<Args>(args)...);
-        std::dynamic_pointer_cast<Component>(newComponent)->Initialize(0, EntityView(Handle, Handles.transform));
-        m_userComponents.push_back(newComponent);
-        return newComponent.get();
+        if (HasUserComponent<T>())
+        {
+            return nullptr;
+        }
+        m_userComponents.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+        Component * ptr = m_userComponents.back().get();
+        ptr->Initialize(0, EntityView { Handle, Handles.transform });
+        return dynamic_cast<T*>(ptr);
     }
 
     template<class T, class>
@@ -89,7 +94,7 @@ namespace nc
         {
             if (typeid(*m_userComponents.at(i)) == targetType)
             {
-                m_userComponents.at(i) = m_userComponents.at(m_userComponents.size() - 1);
+                m_userComponents.at(i) = std::move(m_userComponents.at(m_userComponents.size() - 1));
                 m_userComponents.pop_back();
                 return true;
             }

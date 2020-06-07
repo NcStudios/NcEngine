@@ -1,6 +1,6 @@
 #include "SceneManager.h"
 #include "Scene.h"
-#include "InitialScene.h"
+#include "project/scenes/InitialScene.h"
 
 namespace nc::scene
 {

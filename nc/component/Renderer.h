@@ -1,8 +1,8 @@
 #pragma once
-#include <memory>
-#include "Common.h"
 #include "Component.h"
-#include "DirectXMath.h"
+#include "graphics/DirectXMath/Inc/DirectXMath.h"
+
+#include <memory>
 
 namespace nc::graphics { class Model; class Mesh; class Graphics; }
 

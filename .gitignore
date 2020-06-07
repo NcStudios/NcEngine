@@ -6,9 +6,13 @@
 *.a
 *.exe
 *.out
+
+#directories
 .vs/
 .vscode/
 build/
+external/gtest/
+Testing/
 
 imgui_full_repo
 imgui.ini

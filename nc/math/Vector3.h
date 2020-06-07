@@ -1,5 +1,5 @@
 #pragma once
-#include "MathNCE.h"
+#include "math/MathNCE.h"
 
 namespace nc      { class  Transform; }
 namespace DirectX { struct XMFLOAT3; }

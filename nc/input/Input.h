@@ -1,8 +1,8 @@
 #pragma once
-#include "NCWin32.h"
+#include "win32/NCWin32.h"
 #include <stdint.h>
 #include <vector>
-#include "NCVector.h"
+#include "math/NCVector.h"
 
 namespace nc::input
 {

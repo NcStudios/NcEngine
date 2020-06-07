@@ -1,6 +1,6 @@
 #ifdef NC_DEBUG
 #pragma once
-#include "NCWinDef.h"
+#include "win32/NCWinDef.h"
 #include <optional>
 #include <unordered_map>
 #include "Entity.h"

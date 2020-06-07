@@ -2,12 +2,12 @@
 #include <string>
 #include "Common.h"
 #include "Entity.h"
-#include "Component.h"
-#include "Transform.h"
-#include "Input.h"
-#include "NCVector.h"
-#include "NCTime.h"
-#include "NCException.h"
+#include "component/Component.h"
+#include "component/Transform.h"
+#include "input/Input.h"
+#include "math/NCVector.h"
+#include "time/NCTime.h"
+#include "debug/NCException.h"
 
 namespace nc
 {
@@ -195,19 +195,12 @@ namespace nc
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             static T * GetEngineComponent(const EntityHandle handle) noexcept(false);
 
+
         private:
             static engine::Engine* m_engine;
 
-            static Renderer*   AddRenderer(EntityHandle handle);
-            static PointLight* AddPointLight(EntityHandle handle);
-
-            static Renderer*   GetRenderer(EntityHandle handle);
-            static PointLight* GetPointLight(EntityHandle handle);
-
-            static bool RemoveRenderer(EntityHandle handle);
-            static bool RemovePointLight(EntityHandle handle);
-
     }; //end class NCE
+
 
     /**************************
      * Template Definitions
