@@ -21,35 +21,10 @@ namespace nc::graphics
 
 namespace nc::graphics
 {
-    // struct Vertex
-    // {
-    //     DirectX::XMFLOAT3 pos;
-    //     DirectX::XMFLOAT3 norm;
-    // };
-
-    // struct Mesh
-    // {
-    //     std::string                           Name;
-    //     std::string                           MeshPath;
-    //     std::string                           VertexShaderPath;
-    //     std::string                           PixelShaderPath;
-    //     D3D_PRIMITIVE_TOPOLOGY                PrimitiveTopology;
-    //     std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDesc;
-    //     std::vector<Vertex>                   Vertices;
-    //     std::vector<uint16_t>                 Indices;
-    // };
-
-    // struct Material
-    // {
-    //     DirectX::XMFLOAT3 color;
-    //     float specularIntensity = 0.6;
-    //     float specularPower = 30.0f;
-    //     float padding[3];
-    // };
-
     class Model 
     {
         public:
+        
         // TODO: Can we pass material by ptr?
             Model(Graphics * graphics, Mesh& mesh, Material material = Material());
 

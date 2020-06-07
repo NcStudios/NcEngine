@@ -11,7 +11,6 @@
 
 namespace nc
 {
-    // TODO: Ensure argument forwarding works on engines components
     Renderer::Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh)
         : m_model (std::make_unique<graphics::Model> (graphics, mesh))
     {

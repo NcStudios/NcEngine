@@ -10,13 +10,9 @@
 #directories
 .vs/
 .vscode/
-<<<<<<< HEAD
-build/*
-=======
 build/
 external/gtest/
 Testing/
->>>>>>> 0e9bead850f7a4c8ea9e19f46178bbb875064a01
 
 imgui_full_repo
 imgui.ini
