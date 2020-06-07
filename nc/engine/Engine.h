@@ -57,7 +57,7 @@ namespace nc::engine
     class Engine
     {
         public:
-            Engine(HWND hwnd);
+            Engine();//HWND hwnd);
             ~Engine();
 
             void MainLoop();

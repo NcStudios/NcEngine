@@ -1,7 +1,7 @@
 #include "Component.h"
 
 #ifdef NC_DEBUG
-#include "utils/editor/imgui/imgui.h"
+#include "external/imgui/imgui.h"
 #endif
 
 namespace nc

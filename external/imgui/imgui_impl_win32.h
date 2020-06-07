@@ -10,7 +10,7 @@
 
 #pragma once
 #include "win32/NCWinDef.h"
-#include "utils/editor/imgui/imgui.h"
+#include "external/imgui/imgui.h"
 
 IMGUI_IMPL_API bool     ImGui_ImplWin32_Init(void* hwnd);
 IMGUI_IMPL_API void     ImGui_ImplWin32_Shutdown();

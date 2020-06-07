@@ -21,7 +21,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     
     nc::Window window(instance);
     
-    nc::engine::Engine* enginePtr = new nc::engine::Engine(window.GetHWND());
+    nc::engine::Engine* enginePtr = new nc::engine::Engine();//window.GetHWND());
 
     #ifdef NC_DEBUG
     window.BindEditorManager(enginePtr->GetEditorManager());

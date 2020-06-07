@@ -33,18 +33,20 @@ struct EntityMaps
 };
 
 
-Engine::Engine(HWND hwnd)
+Engine::Engine()//HWND hwnd)
 {
-    auto wndDim           = Window::Instance->GetWindowDimensions();
+    Window * wndInst = Window::Instance;
+
+    auto wndDim           = wndInst->GetWindowDimensions();
     m_entities            = std::make_unique<EntityMaps>();
-    m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, Window::Instance->GetHWND());
+    m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
     m_subsystem.Light     = std::make_unique<LightSystem>();
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
     m_subsystem.Transform = std::make_unique<ComponentSystem<Transform>>();
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
 #ifdef NC_DEBUG
-    m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(hwnd, GetGraphics());
+    m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(wndInst->GetHWND(), GetGraphics());
     m_frameLogicTimer     = std::make_unique<nc::time::Timer>();
 #endif
 }
@@ -245,7 +247,7 @@ Renderer* Engine::GetRenderer(EntityHandle handle)
 
 bool Engine::RemoveRenderer(EntityHandle handle)
 {
-    return m_subsystem.Rendering->Remove(handle);
+    return m_subsystem.Rendering->Remove(GetEntity(handle)->Handles.renderer);
 }
 
 PointLight* Engine::AddPointLight(EntityHandle handle)

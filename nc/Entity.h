@@ -94,7 +94,7 @@ namespace nc
         {
             if (typeid(*m_userComponents.at(i)) == targetType)
             {
-                m_userComponents.at(i) = m_userComponents.at(m_userComponents.size() - 1);
+                m_userComponents.at(i) = std::move(m_userComponents.at(m_userComponents.size() - 1));
                 m_userComponents.pop_back();
                 return true;
             }

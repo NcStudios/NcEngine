@@ -36,4 +36,14 @@ namespace nc
         TransformHandle = other.TransformHandle;
         return *this;
     }
+    
+    bool EntityView::operator==(const EntityView& other) const
+    {
+        return (Handle == other.Handle) && (TransformHandle == other.TransformHandle);
+    }
+
+    bool EntityView::operator!=(const EntityView& other) const
+    {
+        return !(*this == other);
+    }
 } // end namespace nc
