@@ -26,8 +26,8 @@ namespace nc::graphics
         AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (graphics, meshData.Indices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (graphics, meshData.MeshPath, meshData.InputElementDesc, pvsbc));
         AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (graphics, meshData.PrimitiveTopology));
-
         AddGraphicsResource(TransformCbuf::AcquireUnique(graphics, meshData.MeshPath, *this, 0u));
+        
         AddGraphicsResource(PixelConstantBuffer<Material>::AcquireUnique(graphics, m_material, 1u));
     }
 
@@ -64,6 +64,8 @@ namespace nc::graphics
     {
         return &m_material;
     }
+
+    void Model::SetGraphicsResourcesForMesh()
 
     void Model::AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res)
     {
