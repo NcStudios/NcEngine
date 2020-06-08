@@ -47,7 +47,7 @@ Engine::Engine()//HWND hwnd)
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
 #ifdef NC_DEBUG
-    m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(wndInst->GetHWND(), GetGraphics());
+    m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(wndInst->GetHWND(), m_subsystem.Rendering->GetGraphics());
     m_frameLogicTimer     = std::make_unique<nc::time::Timer>();
 #endif
 }
@@ -157,7 +157,7 @@ void Engine::FrameRender(float dt)
     m_subsystem.Rendering->Frame();
 
     #ifdef NC_DEBUG
-    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), GetGraphics()->GetDrawCallCount(), m_entities->Active);
+    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_entities->Active);
     m_editorManager->EndFrame();
     #endif
 
@@ -229,7 +229,7 @@ Entity* Engine::GetEntity(const std::string& tag)
     return nullptr;
 }
 
-Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh)
+Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Mesh& mesh)
 {
     if(GetRenderer(handle))
     {
@@ -237,7 +237,7 @@ Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Graphics * graphics
     }
 
     auto view = EntityView { handle, GetEntity(handle)->Handles.transform };
-    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view, graphics, mesh);
+    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view, mesh);
     return GetRenderer(handle);
 }
 
@@ -272,11 +272,6 @@ PointLight* Engine::GetPointLight(EntityHandle handle)
 bool Engine::RemovePointLight(EntityHandle handle)
 {
     return m_subsystem.Light->Remove(handle);
-}
-
-nc::graphics::Graphics* Engine::GetGraphics()
-{
-    return m_subsystem.Rendering->GetGraphics();
 }
 
 #ifdef NC_DEBUG

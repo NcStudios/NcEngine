@@ -26,7 +26,7 @@ namespace nc
             /**
              * Get ptr to the Graphics object.
              */
-            static graphics::Graphics* GetGraphics();
+            //static graphics::Graphics* GetGraphics();
 
             /**
              * Clean up and shut down engine.
@@ -181,8 +181,9 @@ namespace nc
              * @note Returned ptr not safe to cache.
              */
             template<class Renderer_t,
+                     //class = typename std::enable_if<std::is_same<Renderer, Renderer_t>::value>::type>
                      class = typename std::enable_if<std::is_base_of<Component, Renderer_t>::value>::type>
-            static Renderer_t * AddEngineComponent(const EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh) noexcept(false);
+            static Renderer_t * AddEngineComponent(const EntityHandle handle, graphics::Mesh& mesh) noexcept(false);
 
             /**
              * Remove engine component from Entity.

@@ -10,6 +10,7 @@ namespace nc::engine{
 RenderingSystem::RenderingSystem(int initialWidth, int initialHeight, HWND hwnd)
     : m_graphics(std::make_unique<graphics::Graphics>(hwnd, initialWidth, initialHeight))
 {
+    graphics::d3dresource::GraphicsResourceManager::SetGraphics(m_graphics.get());
     m_graphics->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, (float)initialHeight / (float)initialWidth, 0.5f, 400.0f));
 }
 
@@ -26,7 +27,7 @@ void RenderingSystem::Frame()
 {
     for(auto& r : GetVector())
     {
-        r.Update();
+        r.Update(m_graphics.get());
     }
 }
 

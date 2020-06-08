@@ -8,35 +8,28 @@
 
 namespace nc::graphics
 {
-<<<<<<< HEAD
-    Model::Model(Mesh& mesh, DirectX::XMFLOAT3& materialColor)
-    {
-        using namespace nc::graphics::d3dresource;
-        auto gfx = NCE::GetGraphics();
-=======
-    Model::Model(Graphics * graphics, Mesh& mesh, Material material)
+    Model::Model(Mesh& mesh, Material material)
         : m_mesh(mesh), m_material(material)
     {
         using namespace nc::graphics::d3dresource;
         using DirectX::XMFLOAT3;
->>>>>>> 9dd2280cac1d73cebdd7d86cddefab81e4168b26
 
         XMFLOAT3 randClr (11, 218, 81);
 
         MeshData meshData = m_mesh.GetMeshData();
 
-        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(graphics, "project\\shaders\\compiled\\litvertexshader.cso");
+        auto pvs = GraphicsResourceManager::Acquire<VertexShader>("project\\shaders\\compiled\\litvertexshader.cso");
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         AddGraphicsResource(std::move(pvs));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader> (graphics, "project\\shaders\\compiled\\litpixelshader.cso"));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader> ("project\\shaders\\compiled\\litpixelshader.cso"));
 
-        AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(graphics, meshData.Vertices, meshData.MeshPath));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (graphics, meshData.Indices, meshData.MeshPath));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (graphics, meshData.MeshPath, meshData.InputElementDesc, pvsbc));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (graphics, meshData.PrimitiveTopology));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, meshData.MeshPath));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, meshData.MeshPath));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshData.MeshPath, meshData.InputElementDesc, pvsbc));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (meshData.PrimitiveTopology));
 
-        AddGraphicsResource(TransformCbuf::AcquireUnique(graphics, meshData.MeshPath, *this, 0u));
-        AddGraphicsResource(PixelConstantBuffer<Material>::AcquireUnique(graphics, m_material, 1u));
+        AddGraphicsResource(TransformCbuf::AcquireUnique(meshData.MeshPath, *this, 0u));
+        AddGraphicsResource(PixelConstantBuffer<Material>::AcquireUnique(m_material, 1u));
     }
 
     void Model::SetMaterial(Material& material) noexcept
@@ -49,12 +42,11 @@ namespace nc::graphics
         m_mesh = mesh;
     }
 
-    void Model::Draw(Graphics * graphics) const noexcept
+    void Model::Draw(Graphics* gfx) const noexcept
     {
-        auto gfx = NCE::GetGraphics();
         for(auto& res : m_resources)
         {
-            res->Bind(gfx);
+            res->Bind();
         }
         gfx->DrawIndexed(m_indexBuffer->GetCount());
     }

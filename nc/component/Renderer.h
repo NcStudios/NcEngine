@@ -13,7 +13,7 @@ namespace nc
     class Renderer : public Component
     {
         public:
-            Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh); // TODO: Remove req to pass in graphics
+            Renderer(graphics::Mesh& mesh); // TODO: Remove req to pass in graphics
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
@@ -26,7 +26,7 @@ namespace nc
 
             void SetMesh(graphics::Mesh& mesh);
             void SetMaterial(graphics::Material& material);
-            void Update(graphics::Graphics * graphics);
+            void Update(graphics::Graphics * gfx);
 
         private:
             std::unique_ptr<graphics::Model> m_model;

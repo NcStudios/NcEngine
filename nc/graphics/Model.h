@@ -26,12 +26,12 @@ namespace nc::graphics
         public:
         
         // TODO: Can we pass material by ptr?
-            Model(Graphics * graphics, Mesh& mesh, Material material = Material());
+            Model(Mesh& mesh, Material material = Material());
 
             void SetMaterial(Material& material) noexcept;
             void SetMesh(Mesh& mesh) noexcept;
 
-            void Draw() const noexcept;
+            void Draw(Graphics* gfx) const noexcept;
 
             void UpdateTransformationMatrix(Transform* transform) noexcept;
             DirectX::XMMATRIX GetTransformXM() const noexcept;

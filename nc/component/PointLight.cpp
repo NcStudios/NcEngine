@@ -15,7 +15,7 @@ namespace nc
     void PointLight::Set(DirectX::XMFLOAT3 pos, float radius)
     {
         (void)radius; //currently unused
-        m_cBuf                          = std::make_unique<PixelConstBuf>(NCE::GetGraphics());
+        m_cBuf                          = std::make_unique<PixelConstBuf>();
         m_constBufData.pos              = pos;
         m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};
         m_constBufData.diffuseColor     = {0.8f, 0.2f, 0.2f};
@@ -61,13 +61,12 @@ namespace nc
         {
             throw DefaultException("PointLight::Bind - Bad Transform Pointer");
         }
-        auto gfx = NCE::GetGraphics();
         m_constBufData.pos = trans->GetPosition().GetXMFloat3();
         PointLightCBuf cBufCopy = m_constBufData;
         const auto pos = DirectX::XMLoadFloat3(&m_constBufData.pos);
         DirectX::XMStoreFloat3(&cBufCopy.pos, DirectX::XMVector3Transform(pos, view));
-        m_cBuf->Update(gfx, cBufCopy);
-        m_cBuf->Bind(gfx);
+        m_cBuf->Update(cBufCopy);
+        m_cBuf->Bind();
     }
 
 }

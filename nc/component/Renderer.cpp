@@ -11,8 +11,8 @@
 
 namespace nc
 {
-    Renderer::Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh)
-        : m_model (std::make_unique<graphics::Model> (graphics, mesh))
+    Renderer::Renderer(graphics::Mesh& mesh)
+        : m_model (std::make_unique<graphics::Model> (mesh))
     {
     }
 
@@ -67,14 +67,14 @@ namespace nc
         using namespace nc::graphics;
         auto pConstPS = m_model->QueryGraphicsResource<d3dresource::PixelConstantBuffer<Material>>();
 	    assert(pConstPS != nullptr);
-	    pConstPS->Update(NCE::GetGraphics(), *m_model->GetMaterial());
+	    pConstPS->Update(*m_model->GetMaterial());
     }
     #endif
 
-    void Renderer::Update()
+    void Renderer::Update(graphics::Graphics * gfx)
     {
         m_model->UpdateTransformationMatrix(NCE::GetTransform(*GetParentView()));
-        m_model->Draw();
+        m_model->Draw(gfx);
     }
 
     void Renderer::SetMesh(graphics::Mesh& mesh)
