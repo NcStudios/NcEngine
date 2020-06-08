@@ -8,13 +8,12 @@ namespace nc::engine
 
     LightSystem::~LightSystem() = default;
 
-    void LightSystem::BindLights(graphics::Graphics * graphics)
+    void LightSystem::BindLights()
     {
         auto camMatrixXM = NCE::GetTransform(*NCE::GetMainCamera())->CamGetMatrix();
-
         for(auto& light : GetVector())
         {
-            light.Bind(graphics, camMatrixXM);
+            light.Bind(camMatrixXM);
         }
     }
 }

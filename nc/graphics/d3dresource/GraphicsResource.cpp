@@ -5,48 +5,48 @@
 
 namespace nc::graphics::d3dresource
 {
-    ID3D11DeviceContext* GraphicsResource::GetContext(Graphics * graphics) noexcept
+    ID3D11DeviceContext* GraphicsResource::GetContext() noexcept
     {
-        return graphics->m_context.Get();
+        return GraphicsResourceManager::GetGraphics()->m_context.Get();
     }
 
-    ID3D11Device* GraphicsResource::GetDevice(Graphics * graphics) noexcept
+    ID3D11Device* GraphicsResource::GetDevice() noexcept
     {
-        return graphics->m_device.Get();
+        return GraphicsResourceManager::GetGraphics()->m_device.Get();
     }
 
 
-    VertexBuffer::VertexBuffer(Graphics * graphics,const std::vector<Vertex>& vertices, const std::string& tag)
+    VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag)
         : m_stride(sizeof(Vertex)), m_tag(tag)
     {
-        D3D11_BUFFER_DESC bd      = {};
-        bd.BindFlags              = D3D11_BIND_VERTEX_BUFFER;
-        bd.Usage                  = D3D11_USAGE_DEFAULT;
-        bd.CPUAccessFlags         = 0u;
-        bd.MiscFlags              = 0u;
-        bd.ByteWidth              = UINT(m_stride * vertices.size());
-        bd.StructureByteStride    = m_stride;
-
-        D3D11_SUBRESOURCE_DATA sd = {};
-        sd.pSysMem                = vertices.data();
-
+        auto bd = D3D11_BUFFER_DESC
+        {
+            UINT(m_stride * vertices.size()), //ByteWidth
+            D3D11_USAGE_DEFAULT,              //Usage
+            D3D11_BIND_VERTEX_BUFFER,         //BindFlags
+            0u, 0u, m_stride                  //CPUAccessFlags, MiscFlags, StructureByteStride
+        };
+        auto sd = D3D11_SUBRESOURCE_DATA
+        {
+            vertices.data(), 0u, 0u //pSysMem, SysMemPitch, SysMemSlicePitch
+        };
         THROW_FAILED
         (
-            GetDevice(graphics)->CreateBuffer(&bd,&sd,&m_vertexBuffer),
+            GetDevice()->CreateBuffer(&bd,&sd,&m_vertexBuffer),
             __FILE__, __LINE__
         );
     }
 
 
-    void VertexBuffer::Bind(Graphics * graphics) noexcept
+    void VertexBuffer::Bind() noexcept
     {
         const UINT offset = 0u;
-        GetContext(graphics)->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &offset);
+        GetContext()->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &offset);
     }
 
 
 
-    IndexBuffer::IndexBuffer(Graphics * graphics, const std::vector<uint16_t>& indices, std::string& tag)
+    IndexBuffer::IndexBuffer(const std::vector<uint16_t>& indices, std::string& tag)
         : m_count((UINT)indices.size()), m_tag(tag)
     {
         D3D11_BUFFER_DESC ibd      = {};
@@ -62,14 +62,14 @@ namespace nc::graphics::d3dresource
 
         THROW_FAILED
         (
-            GetDevice(graphics)->CreateBuffer(&ibd, &isd, &m_indexBuffer),
+            GetDevice()->CreateBuffer(&ibd, &isd, &m_indexBuffer),
             __FILE__, __LINE__
         );
     }
 
-    void IndexBuffer::Bind(Graphics * graphics) noexcept
+    void IndexBuffer::Bind() noexcept
     {
-        GetContext(graphics)->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+        GetContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
     }
 
     UINT IndexBuffer::GetCount() const noexcept
@@ -80,7 +80,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    VertexShader::VertexShader(Graphics * graphics, const std::string& path)
+    VertexShader::VertexShader(const std::string& path)
         : m_path(path)
     {
         std::wstring w_path;
@@ -89,16 +89,16 @@ namespace nc::graphics::d3dresource
         
         THROW_FAILED
         (
-            GetDevice(graphics)->CreateVertexShader(m_bytecodeBlob->GetBufferPointer(),
+            GetDevice()->CreateVertexShader(m_bytecodeBlob->GetBufferPointer(),
                                                     m_bytecodeBlob->GetBufferSize(),
                                                     nullptr, &m_vertexShader),
             __FILE__, __LINE__
         );
     }
 
-    void VertexShader::Bind(Graphics * graphics) noexcept
+    void VertexShader::Bind() noexcept
     {
-        GetContext(graphics)->VSSetShader(m_vertexShader.Get(),nullptr,0u);
+        GetContext()->VSSetShader(m_vertexShader.Get(),nullptr,0u);
     }
 
     ID3DBlob* VertexShader::GetBytecode() const noexcept
@@ -108,7 +108,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    PixelShader::PixelShader( Graphics * graphics,const std::string& path )
+    PixelShader::PixelShader(const std::string& path )
         : m_path(path)
     {
         Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
@@ -117,41 +117,43 @@ namespace nc::graphics::d3dresource
         THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
         THROW_FAILED
         (
-            GetDevice(graphics)->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),
+            GetDevice()->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),
                                                     m_bytecodeBlob->GetBufferSize(),
                                                     nullptr, &m_pixelShader),
             __FILE__, __LINE__
         );
     }
 
-    void PixelShader::Bind(Graphics * graphics) noexcept
+    void PixelShader::Bind() noexcept
     {
-        GetContext(graphics)->PSSetShader(m_pixelShader.Get(),nullptr,0u);
+        GetContext()->PSSetShader(m_pixelShader.Get(),nullptr,0u);
     }
 
 
 
-    TransformCbuf::TransformCbuf(Graphics * graphics, const std::string& tag, const Model& parent, UINT slot)
+    TransformCbuf::TransformCbuf(const std::string& tag, const Model& parent, UINT slot)
         : m_parent( parent )
     {
         (void)tag;
         if(!m_vcbuf)
         {
-            m_vcbuf = std::make_unique<VertexConstantBuffer<Transforms>>(graphics, slot);
+            m_vcbuf = std::make_unique<VertexConstantBuffer<Transforms>>(slot);
         }
     }
 
-    void TransformCbuf::Bind(Graphics * graphics) noexcept
+    void TransformCbuf::Bind() noexcept
     {
-        const auto modelView = m_parent.GetTransformXM() * graphics->GetCamera();
+        auto gfx = GraphicsResourceManager::GetGraphics();
+
+        const auto modelView = m_parent.GetTransformXM() * gfx->GetCamera();
         const Transforms t = 
         {
             DirectX::XMMatrixTranspose(modelView),
-            DirectX::XMMatrixTranspose(modelView * graphics->GetProjection())
+            DirectX::XMMatrixTranspose(modelView * gfx->GetProjection())
         };
 
-        m_vcbuf->Update(graphics, t);
-        m_vcbuf->Bind(graphics);
+        m_vcbuf->Update(t);
+        m_vcbuf->Bind();
     }
 
     std::unique_ptr<VertexConstantBuffer<TransformCbuf::Transforms>> TransformCbuf::m_vcbuf;
@@ -159,8 +161,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    InputLayout::InputLayout(Graphics * graphics,
-                             const std::string& tag,
+    InputLayout::InputLayout(const std::string& tag,
                              const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
                              ID3DBlob* vertexShaderBytecode )
     {
@@ -168,7 +169,7 @@ namespace nc::graphics::d3dresource
         
         THROW_FAILED
         (
-            GetDevice(graphics)->CreateInputLayout(layout.data(),
+            GetDevice()->CreateInputLayout(layout.data(),
                                                    (UINT)layout.size(),
                                                    vertexShaderBytecode->GetBufferPointer(),
                                                    vertexShaderBytecode->GetBufferSize(),
@@ -177,22 +178,21 @@ namespace nc::graphics::d3dresource
         );
     }
 
-    void InputLayout::Bind(Graphics * graphics) noexcept
+    void InputLayout::Bind() noexcept
     {
-        GetContext(graphics)->IASetInputLayout(m_inputLayout.Get());
+        GetContext()->IASetInputLayout(m_inputLayout.Get());
     }
 
 
 
-    Topology::Topology(Graphics * graphics, D3D11_PRIMITIVE_TOPOLOGY type)
+    Topology::Topology( D3D11_PRIMITIVE_TOPOLOGY type)
         : m_type(type)
     {
-        (void)graphics;
     }
 
-    void Topology::Bind(Graphics * graphics) noexcept
+    void Topology::Bind() noexcept
     {
-        GetContext(graphics)->IASetPrimitiveTopology(m_type);
+        GetContext()->IASetPrimitiveTopology(m_type);
     }
 
 

@@ -16,6 +16,6 @@ namespace nc::engine
             LightSystem(const LightSystem&) = delete;
             LightSystem(LightSystem&&) = delete;
 
-            void BindLights(graphics::Graphics * graphics);
+            void BindLights();
     };
 } //end namespace nc::engine

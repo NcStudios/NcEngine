@@ -25,7 +25,7 @@ namespace nc::utils::editor
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
             void BeginFrame();
-            void Frame(float* dt, float frameLogicTime, uint32_t drawCallCount, std::unordered_map<EntityHandle, Entity>& activeEntities);
+            void Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities);
             void EndFrame();
 
             void ToggleGui() noexcept;
@@ -39,6 +39,8 @@ namespace nc::utils::editor
             bool m_openState_FramerateData     = true;
             bool m_openState_GraphicsResources = true;
             bool m_openState_ProjectSettings   = false;
+            nc::graphics::Graphics * m_graphics = nullptr;
+
 
             void DrawMenu();
             void DrawTimingControl(float* speed, float frameLogicTime, uint32_t drawCallCount, bool* open);

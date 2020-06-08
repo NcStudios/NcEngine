@@ -46,14 +46,13 @@ void InitialScene::Load()
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
             NCE::AddUserComponent<Head>(boxView.Handle);
-            NCE::AddEngineComponent<Renderer>(boxView.Handle, NCE::GetGraphics(), ncMesh);
+            NCE::AddEngineComponent<Renderer>(boxView.Handle, ncMesh);
         }
         else
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
             NCE::AddUserComponent<Head>(boxView.Handle);
-            NCE::AddEngineComponent<Renderer>(boxView.Handle, NCE::GetGraphics(), monkeyMesh)->SetMaterial(material);
-            //NCE::AddEngineComponent<Renderer>(boxView.Handle, NCE::GetGraphics(), monkeyMesh)->SetMesh(ncMesh);
+            NCE::AddEngineComponent<Renderer>(boxView.Handle, monkeyMesh)->SetMaterial(material);
         }
     }
 }

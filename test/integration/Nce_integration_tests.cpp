@@ -28,20 +28,20 @@ namespace nc
     Window * Window::Instance = new Window((HINSTANCE)nullptr);
 
     /* Renderer stubs */
-    Renderer::Renderer(graphics::Graphics * graphics, graphics::Mesh& mesh) {(void)graphics;(void)mesh;}
+    Renderer::Renderer(graphics::Mesh& mesh) {(void)mesh;}
     Renderer::Renderer(Renderer&& o) {(void)o;}
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
     void Renderer::EditorGuiElement() {}
     void Renderer::SyncMaterialData(){}
     void Renderer::SetMaterial(graphics::Material& material) {(void)material;}
     void Renderer::SetMesh(graphics::Mesh& mesh) {(void)mesh;}
-    void Renderer::Update(graphics::Graphics * graphics){(void)graphics;}
+    void Renderer::Update(graphics::Graphics * gfx){(void)gfx;}
 
     /* PointLight stubs */
     PointLight::PointLight() {}
     void PointLight::EditorGuiElement() {}
-    void PointLight::Set(graphics::Graphics * graphics, DirectX::XMFLOAT3 pos, float radius) {(void)graphics;(void)pos;(void)radius;}
-    void PointLight::Bind(graphics::Graphics * graphics, DirectX::FXMMATRIX view) noexcept(false) {(void)graphics;(void)view;}
+    void PointLight::Set(DirectX::XMFLOAT3 pos, float radius) {(void)pos;(void)radius;}
+    void PointLight::Bind(DirectX::FXMMATRIX view) noexcept(false) {(void)view;}
 
 namespace engine
 {
@@ -82,7 +82,7 @@ namespace utils::editor
     LRESULT EditorManager::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {(void)hwnd;(void)message;(void)wParam;(void)lParam; return LRESULT{}; }
 
     void EditorManager::BeginFrame() {}
-    void EditorManager::Frame(float* dt, float frameLogicTime, uint32_t drawCallCount, std::unordered_map<EntityHandle, Entity>& activeEntities) {(void)dt;(void)frameLogicTime;(void)drawCallCount; (void)activeEntities;}
+    void EditorManager::Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities) {(void)dt;(void)frameLogicTime;(void)activeEntities;}
     void EditorManager::EndFrame() {}
 
     void EditorManager::ToggleGui() noexcept {}

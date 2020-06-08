@@ -69,7 +69,7 @@ namespace nc::engine
             Entity *    GetEntity(EntityHandle handle);    //returns ptr to entity in Active or ToInitialize maps, returns nullptr if not found
             Entity *    GetEntity(const std::string& tag); //returns pointer to first active found entity with tag or nullptr if not found
 
-            Renderer *  AddRenderer(EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh);
+            Renderer *  AddRenderer(EntityHandle handle, graphics::Mesh& mesh);
             Renderer *  GetRenderer(EntityHandle handle);
             bool        RemoveRenderer(EntityHandle handle);
 
@@ -79,7 +79,7 @@ namespace nc::engine
 
             EntityView * GetMainCamera();
 
-            nc::graphics::Graphics * GetGraphics();
+            //nc::graphics::Graphics * GetGraphics();
             
             #ifdef NC_DEBUG
             nc::utils::editor::EditorManager* GetEditorManager();
