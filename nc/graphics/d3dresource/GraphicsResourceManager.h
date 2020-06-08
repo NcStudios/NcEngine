@@ -19,10 +19,16 @@ namespace nc::graphics::d3dresource
     class GraphicsResourceManager
     {
         public:
-            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
-            static std::shared_ptr<GraphicsResource> Acquire(Graphics * graphics, Params&&...p)
+            static void SetGraphics(Graphics * gfx)
             {
-                return Get().Acquire_<T>(graphics, std::forward<Params>(p)...);
+                Get().m_graphics = gfx;
+            }
+            static Graphics * GetGraphics() { return Get().m_graphics;}
+
+            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            static std::shared_ptr<GraphicsResource> Acquire(Params&&...p)
+            {
+                return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
 
             static void DisplayResources(bool* open)
@@ -32,6 +38,7 @@ namespace nc::graphics::d3dresource
 
         private:
             std::unordered_map<std::string, std::shared_ptr<GraphicsResource>> m_resources;
+            Graphics * m_graphics = nullptr;
 
             static GraphicsResourceManager& Get()
             {
@@ -40,13 +47,13 @@ namespace nc::graphics::d3dresource
             }
 
             template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
-            std::shared_ptr<GraphicsResource> Acquire_(Graphics * graphics, Params&&...p)
+            std::shared_ptr<GraphicsResource> Acquire_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
                 const auto i = m_resources.find(key);
                 if(i == m_resources.end())
                 {
-                    auto res = std::make_shared<T>(graphics, std::forward<Params>(p)...);
+                    auto res = std::make_shared<T>(std::forward<Params>(p)...);
                     m_resources[key] = res;
                     return res;
                 }

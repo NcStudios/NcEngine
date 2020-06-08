@@ -21,12 +21,12 @@ namespace nc::graphics::d3dresource
     {
         public:
             virtual ~GraphicsResource() = default;
-            virtual void Bind(Graphics * graphics) noexcept = 0;
+            virtual void Bind() noexcept = 0;
             static std::string GetUID() noexcept { return ""; }
         
         protected:
-            static ID3D11DeviceContext* GetContext(Graphics * graphics) noexcept;
-            static ID3D11Device*        GetDevice (Graphics * graphics) noexcept;
+            static ID3D11DeviceContext* GetContext() noexcept;
+            static ID3D11Device*        GetDevice () noexcept;
     };
 }
 
@@ -37,9 +37,9 @@ namespace nc::graphics::d3dresource
     class ConstantBuffer : public GraphicsResource
     {
         public:
-            ConstantBuffer(Graphics * graphics, const T& consts, UINT slot = 0u);
-            ConstantBuffer(Graphics * graphics, UINT slot = 0u);
-            void Update(Graphics * graphics, const T& consts);
+            ConstantBuffer(const T& consts, UINT slot = 0u);
+            ConstantBuffer(UINT slot = 0u);
+            void Update(const T& consts);
         
         protected:
             Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
@@ -58,7 +58,7 @@ namespace nc::graphics::d3dresource
         
         public:
             using ConstantBuffer<T>::ConstantBuffer;
-            void Bind(Graphics * graphics) noexcept override;
+            void Bind() noexcept override;
             static std::string GetUID(const T& consts, UINT slot) noexcept;
     };
 }
@@ -74,9 +74,9 @@ namespace nc::graphics::d3dresource
         
         public:
             using ConstantBuffer<T>::ConstantBuffer;
-            void Bind(Graphics * graphics) noexcept override;
+            void Bind() noexcept override;
             static std::string GetUID(const T& consts, UINT slot) noexcept;
-            static std::shared_ptr<GraphicsResource> AcquireUnique(Graphics * graphics, const T& consts, UINT slot);      
+            static std::shared_ptr<GraphicsResource> AcquireUnique(const T& consts, UINT slot);      
     };
 }
 
@@ -86,8 +86,8 @@ namespace nc::graphics::d3dresource
     class VertexBuffer : public GraphicsResource
     {
         public:
-            VertexBuffer(Graphics * graphics,const std::vector<Vertex>& vertices, const std::string& tag);
-            void Bind(Graphics * graphics) noexcept override;
+            VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag);
+            void Bind() noexcept override;
             static std::string GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept;
             
         protected:
@@ -103,8 +103,8 @@ namespace nc::graphics::d3dresource
     class IndexBuffer : public GraphicsResource
     {
         public:
-            IndexBuffer(Graphics * graphics, const std::vector<uint16_t>& indices, std::string& tag);
-            void Bind(Graphics * graphics) noexcept override;
+            IndexBuffer(const std::vector<uint16_t>& indices, std::string& tag);
+            void Bind() noexcept override;
             static std::string GetUID(const std::vector<uint16_t>& indices, std::string& tag) noexcept;
             UINT GetCount() const noexcept;
         
@@ -121,8 +121,8 @@ namespace nc::graphics::d3dresource
     class VertexShader : public GraphicsResource
     {
         public:
-            VertexShader(Graphics * graphics, const std::string& path);
-            void Bind(Graphics * graphics) noexcept override;
+            VertexShader(const std::string& path);
+            void Bind() noexcept override;
             static std::string GetUID(const std::string& path) noexcept;
             ID3DBlob* GetBytecode() const noexcept;
         
@@ -139,8 +139,8 @@ namespace nc::graphics::d3dresource
     class PixelShader : public GraphicsResource
     {
         public:
-            PixelShader(Graphics * graphics, const std::string& path);
-            void Bind(Graphics * graphics) noexcept override;
+            PixelShader(const std::string& path);
+            void Bind() noexcept override;
             static std::string GetUID(const std::string& path) noexcept;
 
         protected:
@@ -156,14 +156,14 @@ namespace nc::graphics::d3dresource
     class TransformCbuf : public GraphicsResource
     {
         public:
-            TransformCbuf(Graphics * graphics, const std::string& tag, const Model& parent, UINT slot = 0u);
-            void Bind(Graphics * graphics) noexcept override;
+            TransformCbuf(const std::string& tag, const Model& parent, UINT slot = 0u);
+            void Bind() noexcept override;
             static std::string GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept;
 
             //should test if these need to be unique
-            static std::shared_ptr<GraphicsResource> AcquireUnique(Graphics * graphics, const std::string& tag, const Model& parent, UINT slot)
+            static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, const Model& parent, UINT slot)
             {
-                return std::make_shared<TransformCbuf>(graphics, tag, parent, slot);
+                return std::make_shared<TransformCbuf>(tag, parent, slot);
             }
 
         private:
@@ -184,8 +184,8 @@ namespace nc::graphics::d3dresource
     class InputLayout : public GraphicsResource
     {
         public:
-            InputLayout(Graphics * graphics, const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode);
-            void Bind(Graphics * graphics) noexcept override;
+            InputLayout(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode);
+            void Bind() noexcept override;
             static std::string GetUID(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode) noexcept;
 
         protected:
@@ -199,8 +199,8 @@ namespace nc::graphics::d3dresource
     class Topology : public GraphicsResource
     {
         public:
-            Topology(Graphics * graphics, D3D11_PRIMITIVE_TOPOLOGY type);
-            void Bind(Graphics * graphics) noexcept override;
+            Topology(D3D11_PRIMITIVE_TOPOLOGY type);
+            void Bind() noexcept override;
             static std::string GetUID(D3D11_PRIMITIVE_TOPOLOGY topology) noexcept;
 
         protected:
@@ -208,64 +208,71 @@ namespace nc::graphics::d3dresource
     };
 }
 
+
+
+
 /* Template Definitions */
 namespace nc::graphics::d3dresource
 {
     template<class T>
-    ConstantBuffer<T>::ConstantBuffer(Graphics * graphics, const T& consts, UINT slot)
+    ConstantBuffer<T>::ConstantBuffer(const T& consts, UINT slot)
         : m_slot(slot)
     {
-        D3D11_BUFFER_DESC            cbd;
-        cbd.BindFlags              = D3D11_BIND_CONSTANT_BUFFER;
-        cbd.Usage                  = D3D11_USAGE_DYNAMIC;
-        cbd.CPUAccessFlags         = D3D11_CPU_ACCESS_WRITE;
-        cbd.MiscFlags              = 0u;
-        cbd.ByteWidth              = sizeof(consts);
-        cbd.StructureByteStride    = 0u;
-        D3D11_SUBRESOURCE_DATA csd = {};
-        csd.pSysMem                = &consts;
+        auto cbd = D3D11_BUFFER_DESC
+        {
+            sizeof(consts),             //ByteWidth
+            D3D11_USAGE_DYNAMIC,        //Usage
+            D3D11_BIND_CONSTANT_BUFFER, //BindFlags
+            D3D11_CPU_ACCESS_WRITE,     //CPUAccessFlags
+            0u, 0u                      //MiscFlags, StructureByteStride
+        };
+        auto csd = D3D11_SUBRESOURCE_DATA
+        {
+            &consts, 0u, 0u //pSysMem, SysMemPitch, SysMemSlicePitch
+        };
         THROW_FAILED
         (
-            GetDevice(graphics)->CreateBuffer( &cbd,&csd,&m_constantBuffer),
+            GetDevice()->CreateBuffer(&cbd, &csd, &m_constantBuffer),
             __FILE__, __LINE__
         );
     }
 
     template<class T>
-    ConstantBuffer<T>::ConstantBuffer(Graphics * graphics, UINT slot)
+    ConstantBuffer<T>::ConstantBuffer(UINT slot)
         : m_slot(slot)
     {
-        D3D11_BUFFER_DESC         cbd;
-        cbd.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
-        cbd.Usage               = D3D11_USAGE_DYNAMIC;
-        cbd.CPUAccessFlags      = D3D11_CPU_ACCESS_WRITE;
-        cbd.MiscFlags           = 0u;
-        cbd.ByteWidth           = sizeof(T);
-        cbd.StructureByteStride = 0u;
+        auto cbd = D3D11_BUFFER_DESC
+        {
+            sizeof(T),                  //ByteWidth
+            D3D11_USAGE_DYNAMIC,        //Usage
+            D3D11_BIND_CONSTANT_BUFFER, //BindFlags
+            D3D11_CPU_ACCESS_WRITE,     //CPUAccessFlags
+            0u, 0u                      //MiscFlags, StructureByteStride
+        };
         THROW_FAILED
         (
-            GetDevice(graphics)->CreateBuffer(&cbd,nullptr,&m_constantBuffer),
+            GetDevice()->CreateBuffer(&cbd,nullptr,&m_constantBuffer),
             __FILE__, __LINE__
         );
     }
 
     template<class T>
-    void ConstantBuffer<T>::Update(Graphics * graphics, const T& consts)
+    void ConstantBuffer<T>::Update(const T& consts)
     {
-        D3D11_MAPPED_SUBRESOURCE msr;
+        auto msr = D3D11_MAPPED_SUBRESOURCE {};
         THROW_FAILED
         (
-            GetContext(graphics)->Map(m_constantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD,0u, &msr),
+            GetContext()->Map(m_constantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD,0u, &msr),
             __FILE__, __LINE__
         );
         memcpy(msr.pData, &consts, sizeof(consts));
-        GetContext(graphics)->Unmap(m_constantBuffer.Get(), 0u);
+        GetContext()->Unmap(m_constantBuffer.Get(), 0u);
     }
 
     template<class T>
-    void VertexConstantBuffer<T>::Bind(Graphics * graphics) noexcept
+    void VertexConstantBuffer<T>::Bind() noexcept
     {
-        GetContext(graphics)->VSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
+        GetContext()->VSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
     }
 
     template<class T>
@@ -275,15 +282,15 @@ namespace nc::graphics::d3dresource
     }
 
     template<class T>
-    void PixelConstantBuffer<T>::Bind(Graphics * graphics) noexcept
+    void PixelConstantBuffer<T>::Bind() noexcept
     {
-        GetContext(graphics)->PSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
+        GetContext()->PSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
     }
 
     template<class T>
-    std::shared_ptr<GraphicsResource> PixelConstantBuffer<T>::AcquireUnique(Graphics * graphics, const T& consts, UINT slot)
+    std::shared_ptr<GraphicsResource> PixelConstantBuffer<T>::AcquireUnique(const T& consts, UINT slot)
     {
-        return std::make_shared<PixelConstantBuffer<T>>(graphics, consts, slot);
+        return std::make_shared<PixelConstantBuffer<T>>(consts, slot);
     }
 
     template<class T>

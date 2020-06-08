@@ -12,11 +12,6 @@ NCE::NCE(engine::Engine* enginePtr)
     m_engine = enginePtr;
 }
 
-graphics::Graphics* NCE::GetGraphics()
-{
-    return m_engine->GetGraphics();
-}
-
 EntityView* NCE::GetMainCamera()
 {
     return m_engine->GetMainCamera();
@@ -88,9 +83,9 @@ template<> bool NCE::HasEngineComponent<Renderer>(const EntityHandle handle) noe
     (void)handle;
     return true; //not impl 
 }
-template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle, graphics::Graphics * graphics, graphics::Mesh& mesh) noexcept(false)
+template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle, graphics::Mesh& mesh) noexcept(false)
 {
-    return m_engine->AddRenderer(handle, graphics, mesh);
+    return m_engine->AddRenderer(handle, mesh);
 }
 template<> bool NCE::RemoveEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {

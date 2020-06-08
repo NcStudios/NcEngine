@@ -32,7 +32,7 @@ namespace nc::utils::editor
     //const ImVec4 COLOR_DEFAULT_  (0.408f, 0.716f,   0.6f, 1.0f);
 
     EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics * graphics)
-        : m_isGuiActive(false)
+        : m_isGuiActive(false), m_graphics(graphics)
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -92,9 +92,11 @@ namespace nc::utils::editor
         ImGui::NewFrame();
     }
 
-    void EditorManager::Frame(float* dt, float frameLogicTime, uint32_t drawCallCount, std::unordered_map<EntityHandle, Entity>& activeEntities)
+    void EditorManager::Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities)
     {
         if(!m_isGuiActive) return;
+
+        int drawCallCount = m_graphics->GetDrawCallCount();
 
         DrawMenu();
         DrawTimingControl(dt, frameLogicTime, drawCallCount, &m_openState_FramerateData);
