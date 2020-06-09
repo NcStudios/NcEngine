@@ -1,17 +1,21 @@
 #pragma once
+
+#include "Material.h"
+#include "Mesh.h"
+
 #include <vector>
 #include <string>
 #include <memory>
 #include <stdint.h>
 #include <d3d11.h>
-#include "Mesh.h"
-#include "Material.h"
 #include "DirectXMath/Inc/DirectXMath.h"
 
 namespace nc { class Transform; }
 namespace nc::graphics
 {
     class Graphics;
+    class Material;
+    class Mesh;
     namespace d3dresource
     {
         class GraphicsResource;
@@ -26,10 +30,11 @@ namespace nc::graphics
         public:
         
         // TODO: Can we pass material by ptr?
-            Model(Mesh& mesh, Material material = Material());
+            Model(const Mesh&);
+            Model(const Mesh& mesh, const Material& material);
 
-            void SetMaterial(Material& material) noexcept;
-            void SetMesh(Mesh& mesh) noexcept;
+            void SetMaterial(const Material& material) noexcept;
+            void SetMesh(const Mesh& mesh) noexcept;
 
             void Draw(Graphics* gfx) const noexcept;
 

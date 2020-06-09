@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics/DirectXMath/Inc/DirectXMath.h"
+
 namespace nc::graphics
 {
     struct Material

@@ -11,4 +11,16 @@ namespace nc
         private:
             const char* message;
     };
+
+    inline void IfThrow_(bool expr, const char* msg)
+    {
+        if(expr)
+            throw DefaultException(msg);
+    }
+
+    #ifdef NC_DEBUG
+    #define IF_THROW(expr, msg) IfThrow_(expr, msg)
+    #else
+    #define IF_THROW(expr, msg)
+    #endif
 }

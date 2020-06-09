@@ -57,10 +57,7 @@ namespace nc
     void PointLight::Bind(DirectX::FXMMATRIX view) noexcept(false)
     {
         auto trans = NCE::GetTransform(*GetParentView());
-        if(trans == nullptr)
-        {
-            throw DefaultException("PointLight::Bind - Bad Transform Pointer");
-        }
+        IF_THROW(trans == nullptr, "PointLight::Bind - Bad Transform Ptr");
         m_constBufData.pos = trans->GetPosition().GetXMFloat3();
         PointLightCBuf cBufCopy = m_constBufData;
         const auto pos = DirectX::XMLoadFloat3(&m_constBufData.pos);

@@ -6,9 +6,15 @@
 #include "Graphics.h"
 #include "d3dresource/GraphicsResourceManager.h"
 
+
 namespace nc::graphics
 {
-    Model::Model(Mesh& mesh, Material material)
+    Model::Model(const Mesh& mesh)
+        : Model(mesh, Material{})
+    {
+    }
+
+    Model::Model(const Mesh& mesh, const Material& material)
         : m_mesh(mesh), m_material(material)
     {
         using namespace nc::graphics::d3dresource;
@@ -31,17 +37,17 @@ namespace nc::graphics
         AddGraphicsResource(PixelConstantBuffer<Material>::AcquireUnique(m_material, 1u));
     }
 
-    void Model::SetMaterial(Material& material) noexcept
+    void Model::SetMaterial(const Material& material) noexcept
     {
         m_material = material;
 
         using namespace nc::graphics;
         auto pConstPS = this->QueryGraphicsResource<d3dresource::PixelConstantBuffer<Material>>();
 	    assert(pConstPS != nullptr);
-	    pConstPS->Update(material);
+	    pConstPS->Update(m_material);
     }
     
-    void Model::SetMesh(Mesh& mesh) noexcept
+    void Model::SetMesh(const Mesh& mesh) noexcept
     {
         m_mesh = mesh;
     }

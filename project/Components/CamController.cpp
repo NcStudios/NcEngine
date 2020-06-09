@@ -1,9 +1,12 @@
 #include "CamController.h"
 #include "component/Camera.h"
 
-
-
-#include <iostream>
+namespace
+{
+    const float CAM_ZOOM_SPEED    =  2.5f;
+    const float CAM_PAN_SPEED     =  25.0f;
+    const float CAM_ROTATE_SPEED  = -1.2f;
+}
 
 CamController::CamController()
 {}
@@ -13,11 +16,8 @@ void CamController::OnInitialize()
 
 void CamController::FrameUpdate(float dt)
 {
-    const float zoomSpeed =  2.5f;
-    const float panSpeed  =  15.0f;
-    const float rotSpeed  = -1.2f;
-    Vector3     camTransl = dt * (GetCameraZoomMovement() * zoomSpeed + GetCameraPanMovement() * panSpeed);
-    Vector3     camRot    = dt * (GetCameraRotationMovement() * rotSpeed);
+    Vector3     camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
+    Vector3     camRot    = dt * (GetCameraRotationMovement());
     Transform*  transform = NCE::GetTransform(*NCE::GetMainCamera());
     transform->CamTranslate(camTransl, 1.0f);
     transform->Rotate(camRot.Y(), camRot.X(), 0.0f, 1.0f);
@@ -25,31 +25,30 @@ void CamController::FrameUpdate(float dt)
 
 Vector3 CamController::GetCameraZoomMovement()
 {
-    float wheelInput = input::MouseWheel();
-    return Vector3(0.0f, 0.0f, wheelInput);
+    return Vector3{ 0.0f, 0.0f, CAM_ZOOM_SPEED * (float)input::MouseWheel() };
 }
 
 Vector3 CamController::GetCameraPanMovement()
 {
-    Vector3 targetPosition = Vector3::Zero();
+    Vector3 targetPosition = { };
 
     if(input::GetKey(input::KeyCode::MiddleButton))
     {
         if(!m_camPanState.isActive) //button pressed
         {
             m_camPanState.isActive     = true;
-            m_camPanState.initialMouse = Vector2(input::MouseX, input::MouseY);
+            m_camPanState.initialMouse = Vector2{ (float)input::MouseX, (float)input::MouseY };
             m_camPanState.initialCam   = NCE::GetTransform(*GetParentView())->GetPosition();
         }
         else //button held
         {
-            Vector2 curMousePos    = Vector2(input::MouseX, input::MouseY);
-            Vector2 mousePosDelta  = (curMousePos - m_camPanState.initialMouse);           
-            Vector3 camTranslation = Vector3(mousePosDelta, 0.0f);
-            Vector3 curCamPos      = NCE::GetTransform(*GetParentView())->GetPosition();
-            targetPosition         = m_camPanState.initialCam + camTranslation;
-            targetPosition         = (targetPosition - curCamPos);
-            targetPosition.InvertY();
+            auto curMousePos = Vector2{ (float)input::MouseX, (float)input::MouseY };
+            auto mousePosDelta = curMousePos - m_camPanState.initialMouse;
+            auto camTranslation = Vector3{ mousePosDelta, 0.0f };
+            auto curCamPos = NCE::GetTransform(*GetParentView())->GetPosition();
+            targetPosition = m_camPanState.initialCam + camTranslation;
+            targetPosition = targetPosition - curCamPos;
+            targetPosition.InvertX();
         }
     }
     else
@@ -62,7 +61,7 @@ Vector3 CamController::GetCameraPanMovement()
         }
     }
     
-    return targetPosition.GetNormalized();
+    return CAM_PAN_SPEED * targetPosition.GetNormalized();
 }
 
 Vector3 CamController::GetCameraRotationMovement()
@@ -97,5 +96,5 @@ Vector3 CamController::GetCameraRotationMovement()
         }
     }
 
-    return targetRotation.GetNormalized();
+    return CAM_ROTATE_SPEED * targetRotation.GetNormalized();
 }
