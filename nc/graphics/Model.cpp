@@ -34,6 +34,11 @@ namespace nc::graphics
     void Model::SetMaterial(Material& material) noexcept
     {
         m_material = material;
+
+        using namespace nc::graphics;
+        auto pConstPS = this->QueryGraphicsResource<d3dresource::PixelConstantBuffer<Material>>();
+	    assert(pConstPS != nullptr);
+	    pConstPS->Update(material);
     }
     
     void Model::SetMesh(Mesh& mesh) noexcept
