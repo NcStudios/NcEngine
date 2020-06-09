@@ -62,14 +62,17 @@ namespace nc::graphics::d3dresource
 
             void DisplayResources_(bool* open)
             {
-                if(!(*open)) return;
+                if( !(*open) ) 
+                    return;
 
+                #ifdef NC_DEBUG
                 ImGui::Begin("Graphics Resources", open, ImGuiWindowFlags_NoBackground);
-                    for(auto& res : m_resources)
-                    {
-                        ImGui::Text(res.first.c_str());
-                    }
+                for(auto& res : m_resources)
+                {
+                    ImGui::Text(res.first.c_str());
+                }
                 ImGui::End();
+                #endif
             }
     };
 }
