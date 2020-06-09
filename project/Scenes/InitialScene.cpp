@@ -30,7 +30,8 @@ void InitialScene::Load()
     nc::graphics::Mesh ncMesh = nc::graphics::Mesh("project\\models\\defaultMesh.obj");
 
     // Create materials to be added to the entities' Renderer component
-    //nc::graphics::Material monkeyMaterial = nc::graphics::Material()
+    //nc::graphics::Shader litShader = nc::graphics::Shader("project\\shaders\\LitVertex.hlsl", "project\\shaders\\LitPixel.hlsl");
+    //nc::graphics::Material monkeyMaterial = nc::graphics::Material();
 
     for(int i = 0; i < 10; ++i)
     {
