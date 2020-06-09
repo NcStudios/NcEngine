@@ -69,6 +69,7 @@ namespace nc
 	    assert(pConstPS != nullptr);
 	    pConstPS->Update(*m_model->GetMaterial());
     }
+    
     #endif
 
     void Renderer::Update(graphics::Graphics * gfx)
