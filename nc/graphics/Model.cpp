@@ -22,7 +22,6 @@ namespace nc::graphics
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         AddGraphicsResource(std::move(pvs));
         AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader> ("project\\shaders\\compiled\\litpixelshader.cso"));
-
         AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshData.MeshPath, meshData.InputElementDesc, pvsbc));
@@ -35,6 +34,11 @@ namespace nc::graphics
     void Model::SetMaterial(Material& material) noexcept
     {
         m_material = material;
+
+        using namespace nc::graphics;
+        auto pConstPS = this->QueryGraphicsResource<d3dresource::PixelConstantBuffer<Material>>();
+	    assert(pConstPS != nullptr);
+	    pConstPS->Update(material);
     }
     
     void Model::SetMesh(Mesh& mesh) noexcept

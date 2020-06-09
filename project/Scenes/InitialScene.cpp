@@ -25,8 +25,12 @@ void InitialScene::Load()
     uniform_real_distribution<float> sclDist(  0.5f,  2.0f); 
     uniform_real_distribution<float> clrDist(  0.0f,  1.0f);
 
+    // Create meshes to be added to the entities' Renderer component
     nc::graphics::Mesh monkeyMesh = nc::graphics::Mesh("project\\models\\monkey.obj");
     nc::graphics::Mesh ncMesh = nc::graphics::Mesh("project\\models\\defaultMesh.obj");
+
+    // Create materials to be added to the entities' Renderer component
+    //nc::graphics::Material monkeyMaterial = nc::graphics::Material()
 
     for(int i = 0; i < 10; ++i)
     {
