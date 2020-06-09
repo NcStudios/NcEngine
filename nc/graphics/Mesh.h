@@ -1,9 +1,9 @@
 #pragma once
 
+#include "graphics/DirectXMath/Inc/DirectXMath.h"
 #include <d3d11.h>
 #include <string>
 #include <vector>
-#include "graphics/DirectXMath/Inc/DirectXMath.h"
 
 namespace nc::graphics
 {
