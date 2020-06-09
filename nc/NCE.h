@@ -222,10 +222,7 @@ namespace nc
     bool NCE::HasUserComponent(const EntityHandle handle) noexcept(false)
     {
         auto hnd = NCE::GetEntity(handle);
-        if(hnd == nullptr)
-        {
-            throw DefaultException("NCE::HasUserComponent : bad handle");
-        }
+        IF_THROW(hnd == nullptr, "NCE::HasUserComponent : bad handle");
         return hnd->HasUserComponent<T>();
     }
 
@@ -233,10 +230,7 @@ namespace nc
     T * NCE::AddUserComponent(const EntityHandle handle, Args&& ... args) noexcept(false)
     {
         auto hnd = NCE::GetEntity(handle);
-        if(hnd == nullptr)
-        {
-            throw DefaultException("NCE::AddUserComponent : bad handle");
-        }
+        IF_THROW(hnd == nullptr, "NCE::AddUserComponent : bad handle");
         return hnd->AddUserComponent<T>(std::forward(args)...);
     }
 
@@ -244,10 +238,7 @@ namespace nc
     bool NCE::RemoveUserComponent(const EntityHandle handle) noexcept(false)
     {
         auto hnd = NCE::GetEntity(handle);
-        if(hnd == nullptr)
-        {
-            throw DefaultException("NCE::RemoveUserComponent : bad handle");
-        }
+        IF_THROW(hnd == nullptr, "NCE::RemoveUserComponent : bad handle");
         return hnd->RemoveUserComponent<T>();
     }
 
@@ -255,10 +246,7 @@ namespace nc
     T * NCE::GetUserComponent(const EntityHandle handle) noexcept(false)
     {
         auto hnd = NCE::GetEntity(handle);
-        if(hnd == nullptr)
-        {
-            throw DefaultException("NCE::GetUserComponent : bad handle");
-        }
+        IF_THROW(hnd == nullptr, "NCE::GetUserComponent : bad handle");
         return hnd->GetUserComponent<T>();
     }
 } //end namespace nc

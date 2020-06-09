@@ -27,13 +27,4 @@ namespace nc::graphics
             const char* file;
             const int line;
     };
-
-
-    // inline void ThrowIfFailed(HRESULT hr, const char* file, const int line)
-    // {
-    //     if(FAILED(hr))
-    //     {
-    //         throw DX11Exception(hr, file, line);
-    //     }
-    // }
 }

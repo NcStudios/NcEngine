@@ -31,15 +31,19 @@ namespace nc
     Renderer::Renderer(graphics::Mesh& mesh) {(void)mesh;}
     Renderer::Renderer(Renderer&& o) {(void)o;}
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
+    #ifdef NC_DEBUG
     void Renderer::EditorGuiElement() {}
     void Renderer::SyncMaterialData(){}
+    #endif
     void Renderer::SetMaterial(graphics::Material& material) {(void)material;}
     void Renderer::SetMesh(graphics::Mesh& mesh) {(void)mesh;}
     void Renderer::Update(graphics::Graphics * gfx){(void)gfx;}
 
     /* PointLight stubs */
     PointLight::PointLight() {}
+    #ifdef NC_DEBUG
     void PointLight::EditorGuiElement() {}
+    #endif
     void PointLight::Set(DirectX::XMFLOAT3 pos, float radius) {(void)pos;(void)radius;}
     void PointLight::Bind(DirectX::FXMMATRIX view) noexcept(false) {(void)view;}
 
@@ -76,6 +80,7 @@ namespace graphics
 
 namespace utils::editor
 {
+    #ifdef NC_DEBUG
     EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics * graphics) {(void)hwnd;(void)graphics;}
     EditorManager::~EditorManager() noexcept {}
 
@@ -89,6 +94,7 @@ namespace utils::editor
     void EditorManager::EnableGui() noexcept {}
     void EditorManager::DisableGui() noexcept {}
     bool EditorManager::IsGuiActive() const noexcept { return false; }
+    #endif
 
 } //end namespace utils::editor
 } //end namespace nc
