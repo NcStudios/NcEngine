@@ -46,12 +46,9 @@ namespace nc
     
     DirectX::XMMATRIX Transform::GetMatrixXM()
     {
-        auto pos           = m_position.GetXMFloat3();
-        //1auto rot           = m_rotation.GetXMFloat3();
-        auto scl           = m_scale.GetXMFloat3();
         auto v_rotMatrix   = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
-        auto v_scaleMatrix = DirectX::XMMatrixScaling(scl.x,scl.y,scl.z);
-        auto v_transMatrix = DirectX::XMMatrixTranslation(pos.x,pos.y,pos.z);
+        auto v_scaleMatrix = DirectX::XMMatrixScaling(m_scale.X(), m_scale.Y(), m_scale.Z());
+        auto v_transMatrix = DirectX::XMMatrixTranslation(m_position.X(), m_rotation.X(), m_rotation.Z());
 
         return v_rotMatrix * v_scaleMatrix * v_transMatrix;
     }

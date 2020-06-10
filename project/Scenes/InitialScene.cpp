@@ -32,7 +32,7 @@ void InitialScene::Load()
     // Create materials to be added to the entities' Renderer component
     //nc::graphics::Material monkeyMaterial = nc::graphics::Material()
 
-    for(int i = 0; i < 10; ++i)
+    for(int i = 0; i < 1000; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
         Vector3  randRot (        0.0f,         0.0f,         0.0f);
