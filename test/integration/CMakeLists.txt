@@ -22,7 +22,8 @@ add_executable(Nce_integration_tests
                    ${ROOT_DIR}/nc/utils/objloader/ObjLoader.cpp
                    ${ROOT_DIR}/project/scenes/InitialScene.cpp
                    ${ROOT_DIR}/project/components/Head.cpp
-                   ${ROOT_DIR}/project/components/CamController.cpp)
+                   ${ROOT_DIR}/project/components/CamController.cpp
+                   ${ROOT_DIR}/project/components/Timer.cpp)
 
 if(DEBUG_BUILD)
   #add_definitions(-DNC_DEBUG)

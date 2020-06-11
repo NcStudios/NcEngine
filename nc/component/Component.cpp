@@ -7,7 +7,7 @@
 namespace nc
 {
 
-void Component::Initialize(const ComponentHandle componentHandle, const EntityView parentView) noexcept
+void Component::Register(const ComponentHandle componentHandle, const EntityView parentView) noexcept
 {
     m_handle = componentHandle;
     m_parentView = parentView;

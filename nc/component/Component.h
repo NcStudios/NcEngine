@@ -18,7 +18,7 @@ namespace nc
             /**
              * Called by owning Entity after construction.
              */
-            void Initialize(const ComponentHandle componentHandle, const EntityView parentView) noexcept;
+            void Register(const ComponentHandle componentHandle, const EntityView parentView) noexcept;
 
             ComponentHandle GetHandle() const noexcept;
             EntityView* GetParentView() noexcept;
