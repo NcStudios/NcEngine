@@ -49,7 +49,7 @@ namespace nc::engine
     {
         ComponentHandle handle = m_handleManager.GenerateNewHandle();
         T newComponent((args)...);
-        newComponent.Initialize(handle, parentView);
+        newComponent.Register(handle, parentView);
         m_components.push_back(std::move(newComponent));
         ComponentIndex lastIndex = m_components.size() - 1;
         MapHandleToIndex(handle, lastIndex);

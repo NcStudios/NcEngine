@@ -1,0 +1,38 @@
+#include "Timer.h"
+
+#include <chrono>
+#include <iostream>
+
+using namespace nc::input;
+
+void Timer::FrameUpdate(float dt)
+{
+    if (m_started)
+    {
+        ++m_frames;
+        m_seconds += dt;
+    }
+
+    if (GetKeyDown(KeyCode::Space))
+    {
+        m_started ? stop() : start();
+    }
+}
+
+void Timer::start()
+{
+    std::cout << "\n--Starting Timer--\n";
+    m_frames  = 0;
+    m_seconds = 0.0f;
+    m_started = true;
+}
+
+void Timer::stop()
+{
+    std::cout << "\n--Stopping Timer--\n"
+              << "    Results: " << '\n'
+              << "    Frames:  " << m_frames << '\n'
+              << "    Seconds: " << m_seconds << '\n'
+              << "    FPS:     " << (float)m_frames / m_seconds << '\n';
+    m_started = false;
+}

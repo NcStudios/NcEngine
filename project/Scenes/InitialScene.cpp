@@ -6,6 +6,7 @@
 #include "graphics/Mesh.h"
 #include "graphics/Material.h"
 #include "component/PointLight.h"
+#include "Timer.h"
 
 void InitialScene::Load()
 {
@@ -16,6 +17,10 @@ void InitialScene::Load()
     //CamController
     EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
     NCE::AddUserComponent<CamController>(camView.Handle);
+
+    //Timer
+    EntityView timerV = NCE::CreateEntity({}, {}, {}, "Timer");
+    NCE::AddUserComponent<Timer>(timerV.Handle);
 
     using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
 
@@ -32,7 +37,7 @@ void InitialScene::Load()
     // Create materials to be added to the entities' Renderer component
     //nc::graphics::Material monkeyMaterial = nc::graphics::Material()
 
-    for(int i = 0; i < 10; ++i)
+    for(int i = 0; i < 1000; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
         Vector3  randRot (        0.0f,         0.0f,         0.0f);

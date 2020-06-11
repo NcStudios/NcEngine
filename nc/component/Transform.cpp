@@ -46,14 +46,11 @@ namespace nc
     
     DirectX::XMMATRIX Transform::GetMatrixXM()
     {
-        auto pos           = m_position.GetXMFloat3();
-        //1auto rot           = m_rotation.GetXMFloat3();
-        auto scl           = m_scale.GetXMFloat3();
-        auto v_rotMatrix   = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
-        auto v_scaleMatrix = DirectX::XMMatrixScaling(scl.x,scl.y,scl.z);
-        auto v_transMatrix = DirectX::XMMatrixTranslation(pos.x,pos.y,pos.z);
+        auto v_rot = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
+        auto v_scl = DirectX::XMMatrixScaling(m_scale.X(), m_scale.Y(), m_scale.Z());
+        auto v_trn = DirectX::XMMatrixTranslation(m_position.X(), m_rotation.X(), m_rotation.Z());
 
-        return v_rotMatrix * v_scaleMatrix * v_transMatrix;
+        return v_rot * v_scl * v_trn;
     }
 
     DirectX::XMMATRIX Transform::CamGetMatrix()
@@ -87,18 +84,22 @@ namespace nc
 
     void Transform::Rotate(float xAngle, float yAngle, float zAngle, float speed) noexcept
     {
-        float xRot = math::WrapAngle(m_rotation.X() + xAngle * speed);
-        float yRot = math::WrapAngle(m_rotation.Y() + yAngle * speed);
-        float zRot = math::WrapAngle(m_rotation.Z() + zAngle * speed);
-        m_rotation = Vector3(xRot, yRot, zRot);
+        m_rotation = Vector3
+        {
+            (float)math::WrapAngle(m_rotation.X() + xAngle * speed),
+            (float)math::WrapAngle(m_rotation.Y() + yAngle * speed),
+            (float)math::WrapAngle(m_rotation.Z() + zAngle * speed)
+        };
     }
 
     void Transform::RotateClamped(float xAngle, float yAngle, float zAngle, float speed, float min, float max) noexcept
     {
-        float xRot = math::Clamp(m_rotation.X() + xAngle * speed, min, max);
-        float yRot = math::Clamp(m_rotation.Y() + yAngle * speed, min, max);
-        float zRot = math::Clamp(m_rotation.Z() + zAngle * speed, min, max);
-        m_rotation = Vector3(xRot, yRot, zRot);
+        m_rotation = Vector3
+        {
+            (float)math::Clamp(m_rotation.X() + xAngle * speed, min, max),
+            (float)math::Clamp(m_rotation.Y() + yAngle * speed, min, max),
+            (float)math::Clamp(m_rotation.Z() + zAngle * speed, min, max)
+        };
     }
 
 
