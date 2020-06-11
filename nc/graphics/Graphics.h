@@ -3,7 +3,7 @@
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <stdint.h>
-#include "DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath/DirectXMath.h"
 
 namespace nc::graphics::d3dresource { class GraphicsResource; }
 #ifdef NC_DEBUG

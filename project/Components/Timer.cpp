@@ -29,10 +29,10 @@ void Timer::start()
 
 void Timer::stop()
 {
-    std::cout << "\n--Stopping Timer--\n"
-              << "    Results: " << '\n'
-              << "    Frames:  " << m_frames << '\n'
-              << "    Seconds: " << m_seconds << '\n'
-              << "    FPS:     " << (float)m_frames / m_seconds << '\n';
+    std::cout << "--Timer Results--" << '\n'
+              << "-  Frames:  " << m_frames << '\n'
+              << "-  Seconds: " << m_seconds << '\n'
+              << "-  FPS:     " << (float)m_frames / m_seconds << '\n'
+              << "--Stopping Timer--\n";
     m_started = false;
 }

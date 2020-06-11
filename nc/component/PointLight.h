@@ -1,6 +1,6 @@
 #pragma once
 #include "Component.h"
-#include "graphics/DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath/DirectXMath.h"
 
 #include "graphics/d3dresource/GraphicsResource.h"
 
@@ -33,7 +33,7 @@ namespace nc
                 float attQuad;
             } m_constBufData;
 
-            using PixelConstBuf = graphics::d3dresource::PixelConstantBuffer<PointLightCBuf>;
+            using PixelConstBuf = graphics::d3dresource::PixelConstBuffer<PointLightCBuf>;
             mutable std::unique_ptr<PixelConstBuf> m_cBuf;
     };
 }

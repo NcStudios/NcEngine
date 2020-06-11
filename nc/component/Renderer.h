@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "Component.h"
-#include "graphics/DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath/DirectXMath.h"
 
 #include <memory>
 

@@ -39,6 +39,7 @@ target_include_directories(Nce_integration_tests
                                ${NC_COMMON_DIRS}
                                ${PROJECT_INCLUDE_DIRS}
                                ${ROOT_DIR}/external/gtest/googletest/include
+                               ${EXTERNAL_INCLUDE_DIRS}
 )
 
 #target_link_libraries()

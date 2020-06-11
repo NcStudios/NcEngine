@@ -66,7 +66,7 @@ namespace nc::graphics::d3dresource
 namespace nc::graphics::d3dresource
 {
     template<typename T>
-    class PixelConstantBuffer : public ConstantBuffer<T>
+    class PixelConstBuffer : public ConstantBuffer<T>
     {
         using ConstantBuffer<T>::m_constantBuffer;
         using ConstantBuffer<T>::m_slot;
@@ -153,17 +153,17 @@ namespace nc::graphics::d3dresource
 /* Transform Constant Buffer */
 namespace nc::graphics::d3dresource
 {
-    class TransformCbuf : public GraphicsResource
+    class TransformConstBuffer : public GraphicsResource
     {
         public:
-            TransformCbuf(const std::string& tag, const Model& parent, UINT slot = 0u);
+            TransformConstBuffer(const std::string& tag, const Model& parent, UINT slot = 0u);
             void Bind() noexcept override;
             static std::string GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept;
 
             //should test if these need to be unique
             static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, const Model& parent, UINT slot)
             {
-                return std::make_shared<TransformCbuf>(tag, parent, slot);
+                return std::make_shared<TransformConstBuffer>(tag, parent, slot);
             }
 
         private:
@@ -282,20 +282,20 @@ namespace nc::graphics::d3dresource
     }
 
     template<class T>
-    void PixelConstantBuffer<T>::Bind() noexcept
+    void PixelConstBuffer<T>::Bind() noexcept
     {
         GetContext()->PSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
     }
 
     template<class T>
-    std::shared_ptr<GraphicsResource> PixelConstantBuffer<T>::AcquireUnique(const T& consts, UINT slot)
+    std::shared_ptr<GraphicsResource> PixelConstBuffer<T>::AcquireUnique(const T& consts, UINT slot)
     {
-        return std::make_shared<PixelConstantBuffer<T>>(consts, slot);
+        return std::make_shared<PixelConstBuffer<T>>(consts, slot);
     }
 
     template<class T>
-    std::string PixelConstantBuffer<T>::GetUID(const T& consts, UINT slot) noexcept
+    std::string PixelConstBuffer<T>::GetUID(const T& consts, UINT slot) noexcept
     {
-        return typeid(PixelConstantBuffer<T>).name() + std::to_string(slot);
+        return typeid(PixelConstBuffer<T>).name() + std::to_string(slot);
     }
 }

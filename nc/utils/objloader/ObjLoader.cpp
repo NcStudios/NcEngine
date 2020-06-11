@@ -1,5 +1,5 @@
 #include "ObjLoader.h"
-#include "graphics/DirectXMath/Inc/DirectXMath.h"
+#include "DirectXMath/DirectXMath.h"
 #include "debug/NCException.h"
 #include "graphics/Model.h"
 #include "graphics/Mesh.h"
