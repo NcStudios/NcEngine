@@ -65,7 +65,7 @@ namespace nc
         if(!m_model) return;
 
         using namespace nc::graphics;
-        auto pConstPS = m_model->QueryGraphicsResource<d3dresource::PixelConstantBuffer<Material>>();
+        auto pConstPS = m_model->QueryGraphicsResource<d3dresource::PixelConstBuffer<Material>>();
 	    assert(pConstPS != nullptr);
 	    pConstPS->Update(*m_model->GetMaterial());
     }

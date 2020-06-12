@@ -14,5 +14,8 @@ build/
 external/gtest/
 Testing/
 
-imgui_full_repo
+#cal's scratch dir
+scratch/
+
+#imgui state file
 imgui.ini

@@ -1,7 +1,7 @@
 #include "GraphicsResource.h"
 #include "../Graphics.h"
 #include <d3dcompiler.h>
-#include "../DirectXMath/Inc/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 
 namespace nc::graphics::d3dresource
 {
@@ -131,7 +131,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    TransformCbuf::TransformCbuf(const std::string& tag, const Model& parent, UINT slot)
+    TransformConstBuffer::TransformConstBuffer(const std::string& tag, const Model& parent, UINT slot)
         : m_parent( parent )
     {
         (void)tag;
@@ -141,7 +141,7 @@ namespace nc::graphics::d3dresource
         }
     }
 
-    void TransformCbuf::Bind() noexcept
+    void TransformConstBuffer::Bind() noexcept
     {
         auto gfx = GraphicsResourceManager::GetGraphics();
 
@@ -156,7 +156,7 @@ namespace nc::graphics::d3dresource
         m_vcbuf->Bind();
     }
 
-    std::unique_ptr<VertexConstantBuffer<TransformCbuf::Transforms>> TransformCbuf::m_vcbuf;
+    std::unique_ptr<VertexConstantBuffer<TransformConstBuffer::Transforms>> TransformConstBuffer::m_vcbuf;
 
 
 
@@ -222,11 +222,11 @@ namespace nc::graphics::d3dresource
         return typeid(PixelShader).name() + path;
     }
 
-    std::string TransformCbuf::GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept
+    std::string TransformConstBuffer::GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept
     {
         (void)parent;
         (void)slot;
-        return typeid(TransformCbuf).name() + tag;
+        return typeid(TransformConstBuffer).name() + tag;
     }
 
     std::string InputLayout::GetUID(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode) noexcept
