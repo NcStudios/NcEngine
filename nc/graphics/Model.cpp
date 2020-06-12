@@ -33,8 +33,8 @@ namespace nc::graphics
         AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshData.MeshPath, meshData.InputElementDesc, pvsbc));
         AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (meshData.PrimitiveTopology));
 
-        AddGraphicsResource(TransformCbuf::AcquireUnique(meshData.MeshPath, *this, 0u));
-        AddGraphicsResource(PixelConstantBuffer<Material>::AcquireUnique(m_material, 1u));
+        AddGraphicsResource(TransformConstBuffer::AcquireUnique(meshData.MeshPath, *this, 0u));
+        AddGraphicsResource(PixelConstBuffer<Material>::AcquireUnique(m_material, 1u));
     }
 
     void Model::SetMaterial(const Material& material) noexcept
@@ -42,7 +42,7 @@ namespace nc::graphics
         m_material = material;
 
         using namespace nc::graphics;
-        auto pConstPS = this->QueryGraphicsResource<d3dresource::PixelConstantBuffer<Material>>();
+        auto pConstPS = this->QueryGraphicsResource<d3dresource::PixelConstBuffer<Material>>();
 	    assert(pConstPS != nullptr);
 	    pConstPS->Update(m_material);
     }
