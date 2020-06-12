@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DirectXMath/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 #include <d3d11.h>
 #include <string>
 #include <vector>

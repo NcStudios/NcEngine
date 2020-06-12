@@ -1,7 +1,7 @@
 #include "GraphicsResource.h"
 #include "../Graphics.h"
 #include <d3dcompiler.h>
-#include "DirectXMath/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 
 namespace nc::graphics::d3dresource
 {

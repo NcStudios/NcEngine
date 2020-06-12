@@ -8,7 +8,7 @@
 #include <memory>
 #include <stdint.h>
 #include <d3d11.h>
-#include "DirectXMath/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 
 namespace nc { class Transform; }
 namespace nc::graphics

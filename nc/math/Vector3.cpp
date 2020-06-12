@@ -1,6 +1,6 @@
 #include "Vector3.h"
 #include "Vector2.h"
-#include "DirectXMath/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 
 namespace nc
 {

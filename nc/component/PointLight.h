@@ -1,6 +1,6 @@
 #pragma once
 #include "Component.h"
-#include "DirectXMath/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 
 #include "graphics/d3dresource/GraphicsResource.h"
 

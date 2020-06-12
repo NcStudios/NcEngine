@@ -14,7 +14,7 @@ set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 set(GCC_WARNING_FLAGS -Wall -Wextra -Wno-cast-function-type)
 set(GCC_DEBUG_FLAGS "-g")
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47")
-set(EXTERNAL_INCLUDE_DIRS ${ROOT_DIR}/external/directx)
+set(EXTERNAL_INCLUDE_DIRS ${ROOT_DIR}/external)
 set(PROJECT_INCLUDE_DIRS ${ROOT_DIR}/project ${ROOT_DIR}/project/components ${ROOT_DIR}/project/models ${ROOT_DIR}/project/scenes ${ROOT_DIR}/project/settings)
 set(NC_COMMON_DIRS ${ROOT_DIR} ${ROOT_DIR}/nc ${ROOT_DIR}/nc/component ${ROOT_DIR}/nc/input ${ROOT_DIR}/nc/math ${ROOT_DIR}/nc/scene ${ROOT_DIR}/nc/time ${ROOT_DIR}/nc/views)
 

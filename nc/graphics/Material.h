@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DirectXMath/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 
 namespace nc::graphics
 {

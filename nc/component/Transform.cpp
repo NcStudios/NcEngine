@@ -1,5 +1,5 @@
 #include "Transform.h"
-#include "DirectXMath/DirectXMath.h"
+#include "directx/math/DirectXMath.h"
 
 #include <limits>
 
