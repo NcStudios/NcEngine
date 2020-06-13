@@ -32,11 +32,6 @@ struct BoundingBox;
 struct BoundingOrientedBox;
 struct BoundingFrustum;
 
-#pragma warning(push)
-#pragma warning(disable:4324 4820)
-// C4324: alignment padding warnings
-// C4820: Off by default noise
-
 //-------------------------------------------------------------------------------------
 // Bounding sphere
 //-------------------------------------------------------------------------------------
@@ -320,34 +315,12 @@ namespace TriangleTests
                                                          _In_ CXMVECTOR Plane3, _In_ CXMVECTOR Plane4, _In_ CXMVECTOR Plane5 );
         // Test a triangle against six planes at once (see BoundingFrustum::GetPlanes)
 }
-
-#pragma warning(pop)
-
+ 
 /****************************************************************************
  *
  * Implementation
  *
  ****************************************************************************/
-
-#pragma warning(push)
-#pragma warning(disable : 4068 4365 4616 6001)
-// C4068/4616: ignore unknown pragmas
-// C4365: Off by default noise
-// C6001: False positives
-
-#ifdef _PREFAST_
-#pragma prefast(push)
-#pragma prefast(disable : 25000, "FXMVECTOR is 16 bytes")
-#pragma prefast(disable : 26495, "Union initialization confuses /analyze")
-#endif
-
 #include "DirectXCollision.inl"
-
-#ifdef _PREFAST_
-#pragma prefast(pop)
-#endif
-
-#pragma warning(pop)
-
 } // namespace DirectX
 

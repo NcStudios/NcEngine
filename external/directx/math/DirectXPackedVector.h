@@ -16,9 +16,6 @@ namespace DirectX
 
 namespace PackedVector
 {
-
-#pragma warning(push)
-#pragma warning(disable:4201 4365 4324 4996)
 // C4201: nonstandard extension used
 // C4365: Off by default noise
 // C4324: alignment padding warnings
@@ -698,6 +695,8 @@ struct XM_DEPRECATED XMXDEC4
 // integers for the z, y, and x components.  The w component is stored in the
 // most significant bits and the x component in the least significant bits
 // (W2Z10Y10X10): [32] wwzzzzzz zzzzyyyy yyyyyyxx xxxxxxxx [0]
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 struct XM_DEPRECATED XMDECN4
 {
     union
@@ -839,6 +838,7 @@ struct XMUDEC4
 
     XMUDEC4& operator= (uint32_t Packed) { v = Packed; return *this; }
 };
+#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------------
 // 4D Vector; 8 bit signed normalized integer components
@@ -1039,9 +1039,6 @@ struct XMU555
     XMU555& operator= (uint16_t Packed) { v = Packed; return *this; }
 };
 
-#pragma warning(pop)
-
-
 /****************************************************************************
  *
  * Data conversion operations
@@ -1097,14 +1094,12 @@ XMVECTOR    XM_CALLCONV     XMLoadUByte4(_In_ const XMUBYTE4* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadUNibble4(_In_ const XMUNIBBLE4* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadU555(_In_ const XMU555* pSource);
 
-#pragma warning(push)
-#pragma warning(disable : 4996)
-// C4996: ignore deprecation warning
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 XMVECTOR    XM_DEPRECATED XM_CALLCONV XMLoadDecN4(_In_ const XMDECN4* pSource);
 XMVECTOR    XM_DEPRECATED XM_CALLCONV XMLoadDec4(_In_ const XMDEC4* pSource);
 XMVECTOR    XM_DEPRECATED XM_CALLCONV XMLoadXDec4(_In_ const XMXDEC4* pSource);
-#pragma warning(pop)
+#pragma GCC diagnostic pop
 
 /****************************************************************************
  *
@@ -1143,15 +1138,12 @@ void    XM_CALLCONV     XMStoreUByteN4(_Out_ XMUBYTEN4* pDestination, _In_ FXMVE
 void    XM_CALLCONV     XMStoreUByte4(_Out_ XMUBYTE4* pDestination, _In_ FXMVECTOR V);
 void    XM_CALLCONV     XMStoreUNibble4(_Out_ XMUNIBBLE4* pDestination, _In_ FXMVECTOR V);
 void    XM_CALLCONV     XMStoreU555(_Out_ XMU555* pDestination, _In_ FXMVECTOR V);
-
-#pragma warning(push)
-#pragma warning(disable : 4996)
-// C4996: ignore deprecation warning
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 void    XM_DEPRECATED XM_CALLCONV XMStoreDecN4(_Out_ XMDECN4* pDestination, _In_ FXMVECTOR V);
 void    XM_DEPRECATED XM_CALLCONV XMStoreDec4(_Out_ XMDEC4* pDestination, _In_ FXMVECTOR V);
 void    XM_DEPRECATED XM_CALLCONV XMStoreXDec4(_Out_ XMXDEC4* pDestination, _In_ FXMVECTOR V);
-#pragma warning(pop)
+#pragma GCC diagnostic pop
 
 /****************************************************************************
  *
@@ -1159,26 +1151,7 @@ void    XM_DEPRECATED XM_CALLCONV XMStoreXDec4(_Out_ XMXDEC4* pDestination, _In_
  *
  ****************************************************************************/
 
-#pragma warning(push)
-#pragma warning(disable:4068 4214 4204 4365 4616 6001 6101)
-// C4068/4616: ignore unknown pragmas
-// C4214/4204: nonstandard extension used
-// C4365: Off by default noise
-// C6001/6101: False positives
-
-#ifdef _PREFAST_
-#pragma prefast(push)
-#pragma prefast(disable : 25000, "FXMVECTOR is 16 bytes")
-#pragma prefast(disable : 26495, "Union initialization confuses /analyze")
-#endif
-
 #include "DirectXPackedVector.inl"
-
-#ifdef _PREFAST_
-#pragma prefast(pop)
-#endif
-
-#pragma warning(pop)
 
 } // namespace PackedVector
 
