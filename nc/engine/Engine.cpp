@@ -55,13 +55,13 @@ Engine::Engine()//HWND hwnd)
 Engine::~Engine() 
 {}
 
-bool Engine::DoesEntityExist(EntityHandle handle)
+bool Engine::DoesEntityExist(const EntityHandle handle) const
 {
     return (m_entities->Active.count(handle) > 0) || (m_entities->ToInitialize.count(handle) > 0);
 }
 
 
-auto& Engine::GetMapContainingEntity(EntityHandle handle, bool checkAll) noexcept(false)
+auto& Engine::GetMapContainingEntity(const EntityHandle handle, bool checkAll) const noexcept(false)
 {
     if (m_entities->Active.count(handle) > 0)
         return m_entities->Active;
@@ -74,7 +74,7 @@ auto& Engine::GetMapContainingEntity(EntityHandle handle, bool checkAll) noexcep
     throw DefaultException("Engine::GetmapContainingEntity() - Entity not found.");
 }
 
-Entity* Engine::GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false)
+Entity* Engine::GetEntityPtrFromAnyMap(const EntityHandle handle) const noexcept(false)
 {
     return &GetMapContainingEntity(handle, true).at(handle);
 }
@@ -183,7 +183,7 @@ void Engine::Exit()
     m_engineState.isRunning = false;
 }
 
-EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag)
+EntityView Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
     auto entityHandle = m_subsystem.Handle->GenerateNewHandle();
     auto expectedTransHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
@@ -198,7 +198,7 @@ EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const s
     return EntityView { entityHandle, transHandle };
 }
 
-bool Engine::DestroyEntity(EntityHandle handle)
+bool Engine::DestroyEntity(const EntityHandle handle)
 {
     if (!DoesEntityExist(handle))
         return false;
@@ -208,7 +208,7 @@ bool Engine::DestroyEntity(EntityHandle handle)
     return true;
 }
 
-Entity* Engine::GetEntity(EntityHandle handle)
+Entity* Engine::GetEntity(const EntityHandle handle) const
 {
     if (!DoesEntityExist(handle))
         return nullptr;
@@ -217,7 +217,7 @@ Entity* Engine::GetEntity(EntityHandle handle)
     return &containingMap.at(handle);       
 } 
 
-Entity* Engine::GetEntity(const std::string& tag)
+Entity* Engine::GetEntity(const std::string& tag) const
 {
     for(auto& pair : m_entities->Active)
     {
@@ -229,7 +229,7 @@ Entity* Engine::GetEntity(const std::string& tag)
     return nullptr;
 }
 
-Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Mesh& mesh)
+Renderer* Engine::AddRenderer(const EntityHandle handle, graphics::Mesh& mesh)
 {
     if(GetRenderer(handle))
     {
@@ -241,17 +241,17 @@ Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Mesh& mesh)
     return GetRenderer(handle);
 }
 
-Renderer* Engine::GetRenderer(EntityHandle handle)
+Renderer* Engine::GetRenderer(const EntityHandle handle) const
 {
     return m_subsystem.Rendering->GetPointerTo(GetEntity(handle)->Handles.renderer);
 }
 
-bool Engine::RemoveRenderer(EntityHandle handle)
+bool Engine::RemoveRenderer(const EntityHandle handle)
 {
     return m_subsystem.Rendering->Remove(GetEntity(handle)->Handles.renderer);
 }
 
-PointLight* Engine::AddPointLight(EntityHandle handle)
+PointLight* Engine::AddPointLight(const EntityHandle handle)
 {
     if(GetPointLight(handle))
     {
@@ -264,12 +264,12 @@ PointLight* Engine::AddPointLight(EntityHandle handle)
     return GetPointLight(handle);
 }
 
-PointLight* Engine::GetPointLight(EntityHandle handle)
+PointLight* Engine::GetPointLight(const EntityHandle handle) const
 {
     return m_subsystem.Light->GetPointerTo(GetEntity(handle)->Handles.pointLight);
 }
 
-bool Engine::RemovePointLight(EntityHandle handle)
+bool Engine::RemovePointLight(const EntityHandle handle)
 {
     return m_subsystem.Light->Remove(handle);
 }
@@ -286,7 +286,7 @@ EntityView* Engine::GetMainCamera()
     return &m_mainCameraView;
 }
 
-Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
+Transform* Engine::GetTransformPtr(const ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
 
 void Engine::SendOnInitialize() noexcept
 {
