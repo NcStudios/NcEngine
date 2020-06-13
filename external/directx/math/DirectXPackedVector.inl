@@ -8,6 +8,8 @@
 //-------------------------------------------------------------------------------------
 
 #pragma once
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 /****************************************************************************
  *
@@ -1567,9 +1569,8 @@ inline XMVECTOR XM_CALLCONV XMLoadXDecN4
 }
 
 //------------------------------------------------------------------------------
-#pragma warning(push)
-#pragma warning(disable : 4996)
-// C4996: ignore deprecation warning
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 _Use_decl_annotations_
 inline XMVECTOR XM_CALLCONV XMLoadXDec4
@@ -1619,8 +1620,6 @@ inline XMVECTOR XM_CALLCONV XMLoadXDec4
     return vTemp;
 #endif
 }
-
-#pragma warning(pop)
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
@@ -1766,9 +1765,6 @@ inline XMVECTOR XM_CALLCONV XMLoadUDec4
 }
 
 //------------------------------------------------------------------------------
-#pragma warning(push)
-#pragma warning(disable : 4996)
-// C4996: ignore deprecation warning
 
 _Use_decl_annotations_
 inline XMVECTOR XM_CALLCONV XMLoadDecN4
@@ -1869,8 +1865,6 @@ inline XMVECTOR XM_CALLCONV XMLoadDec4
 #endif
 }
 
-#pragma warning(pop)
-
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
 inline XMVECTOR XM_CALLCONV XMLoadUByteN4
@@ -1910,6 +1904,7 @@ inline XMVECTOR XM_CALLCONV XMLoadUByteN4
     return vTemp;
 #endif
 }
+#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
@@ -2990,9 +2985,6 @@ inline void XM_CALLCONV XMStoreXDecN4
 }
 
 //------------------------------------------------------------------------------
-#pragma warning(push)
-#pragma warning(disable : 4996)
-// C4996: ignore deprecation warning
 
 _Use_decl_annotations_
 inline void XM_CALLCONV XMStoreXDec4
@@ -3060,8 +3052,6 @@ inline void XM_CALLCONV XMStoreXDec4
     _mm_store_ss(reinterpret_cast<float *>(&pDestination->v),_mm_castsi128_ps(vResulti));
 #endif
 }
-
-#pragma warning(pop)
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
@@ -3273,9 +3263,6 @@ inline void XM_CALLCONV XMStoreUDec4
 }
 
 //------------------------------------------------------------------------------
-#pragma warning(push)
-#pragma warning(disable : 4996)
-// C4996: ignore deprecation warning
 
 _Use_decl_annotations_
 inline void XM_CALLCONV XMStoreDecN4
@@ -3397,8 +3384,6 @@ inline void XM_CALLCONV XMStoreDec4
     _mm_store_ss(reinterpret_cast<float *>(&pDestination->v),_mm_castsi128_ps(vResulti));
 #endif
 }
-
-#pragma warning(pop)
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
@@ -4270,10 +4255,6 @@ inline XMXDECN4::XMXDECN4
  *
  ****************************************************************************/
 
-#pragma warning(push)
-#pragma warning(disable : 4996)
-// C4996: ignore deprecation warning
-
 //------------------------------------------------------------------------------
 
 inline XMXDEC4::XMXDEC4
@@ -4354,8 +4335,6 @@ inline XMDEC4::XMDEC4
 {
     XMStoreDec4(this, XMLoadFloat4(reinterpret_cast<const XMFLOAT4*>(pArray)));
 }
-
-#pragma warning(pop)
 
 /****************************************************************************
  *
@@ -4591,3 +4570,4 @@ inline XMU555::XMU555
     XMStoreU555(this, XMVectorSetW(V, ((_w) ? 1.0f : 0.0f) ));
 }
 
+#pragma GCC diagnostic pop

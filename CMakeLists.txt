@@ -75,11 +75,8 @@ endif()
 #target_precompile_headers(${EXE_NAME} PUBLIC ${ROOT_DIR}/nc/PCH.h)
 
 #LINK OPTIONS
-target_link_libraries(${EXE_NAME}
-    PRIVATE
-        ${WIN32_LINK_FLAGS}
-        #DirectXTK
-)
+link_directories(${ROOT_DIR}/external/lib/)
+target_link_libraries(${EXE_NAME} PUBLIC ${WIN32_LINK_FLAGS} ${ROOT_DIR}/external/lib/DirectXTK.lib)
 
 if(NC_EDITOR_ENABLED)
     target_link_libraries(${EXE_NAME}
