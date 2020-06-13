@@ -1,9 +1,9 @@
 target_sources(${EXE_NAME} 
-                 PUBLIC
-                   #nc directory
-                   ${ROOT_DIR}/nc/Entity.cpp
-                   ${ROOT_DIR}/nc/NCE.cpp
-                   ${ROOT_DIR}/nc/ProjectSettings.cpp)
+    PRIVATE
+        #nc directory
+        ${ROOT_DIR}/nc/Entity.cpp
+        ${ROOT_DIR}/nc/NCE.cpp
+        ${ROOT_DIR}/nc/ProjectSettings.cpp)
 
 add_subdirectory(component)
 add_subdirectory(engine)

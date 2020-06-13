@@ -3,7 +3,7 @@
 
 #include <limits>
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "external/imgui/imgui.h"
 #endif
 
@@ -12,7 +12,7 @@ namespace nc
     Transform::Transform() noexcept
     {}
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     void Transform::EditorGuiElement()
     {
         const float itemWidth = 40.0f;

@@ -15,7 +15,7 @@ namespace nc
 
             void Set(DirectX::XMFLOAT3 pos, float radius = 0.5f);
 
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
 

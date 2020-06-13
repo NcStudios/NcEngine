@@ -1,1 +1,4 @@
-target_sources(${EXE_NAME} PUBLIC ${ROOT_DIR}/nc/scene/SceneManager.cpp)
+target_sources(${EXE_NAME}
+    PRIVATE
+    ${ROOT_DIR}/nc/scene/SceneManager.cpp
+)

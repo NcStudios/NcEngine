@@ -1,6 +1,6 @@
 #include "Component.h"
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "external/imgui/imgui.h"
 #endif
 
@@ -31,7 +31,7 @@ void Component::OnCollisionEnter(const EntityHandle other) { (void)other;}
 void Component::OnCollisionStay() {}
 void Component::OnCollisionExit() {}
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 void Component::EditorGuiElement()
 {
     std::string str = std::to_string(m_handle);

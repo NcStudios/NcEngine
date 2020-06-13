@@ -31,7 +31,7 @@ namespace nc
     Renderer::Renderer(graphics::Mesh& mesh) {(void)mesh;}
     Renderer::Renderer(Renderer&& o) {(void)o;}
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     void Renderer::EditorGuiElement() {}
     void Renderer::SyncMaterialData(){}
     #endif
@@ -41,7 +41,7 @@ namespace nc
 
     /* PointLight stubs */
     PointLight::PointLight() {}
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     void PointLight::EditorGuiElement() {}
     #endif
     void PointLight::Set(DirectX::XMFLOAT3 pos, float radius) {(void)pos;(void)radius;}
@@ -69,7 +69,7 @@ namespace graphics
     void Graphics::StartFrame() {}
     void Graphics::DrawIndexed(UINT count) { (void)count; }
     void Graphics::EndFrame() {}
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     uint32_t Graphics::GetDrawCallCount() const { return 0; }
     #endif
 
@@ -80,7 +80,7 @@ namespace graphics
 
 namespace utils::editor
 {
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics * graphics) {(void)hwnd;(void)graphics;}
     EditorManager::~EditorManager() noexcept {}
 

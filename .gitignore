@@ -12,6 +12,7 @@
 .vscode/
 build/
 external/gtest/
+external/directx/tk/
 Testing/
 
 #cal's scratch dir

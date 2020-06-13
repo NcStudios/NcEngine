@@ -35,7 +35,7 @@ namespace nc
             ComponentHandle m_handle;
             EntityView m_parentView;          
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
         public:
             virtual void EditorGuiElement();
 #endif

@@ -5,7 +5,7 @@
 
 #include "graphics/Graphics.h"
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "utils/editor/EditorManager.h"
 #endif
 
@@ -23,7 +23,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     
     nc::engine::Engine* enginePtr = new nc::engine::Engine();//window.GetHWND());
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     window.BindEditorManager(enginePtr->GetEditorManager());
     #endif
 

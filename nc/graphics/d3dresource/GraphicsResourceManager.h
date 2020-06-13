@@ -6,7 +6,7 @@
 #include <memory>
 #include <unordered_map>
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "external/imgui/imgui.h"
 #endif
 
@@ -65,7 +65,7 @@ namespace nc::graphics::d3dresource
                 if( !(*open) ) 
                     return;
 
-                #ifdef NC_DEBUG
+                #ifdef NC_EDITOR_ENABLED
                 ImGui::Begin("Graphics Resources", open, ImGuiWindowFlags_NoBackground);
                 for(auto& res : m_resources)
                 {

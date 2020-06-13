@@ -19,7 +19,7 @@ namespace nc
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&);
 
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             void SyncMaterialData();
             #endif

@@ -3,7 +3,7 @@
 #include "utils/editor/EditorManager.h"
 #include "NCE.h"
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "external/imgui/imgui.h"
 #endif
 
@@ -25,7 +25,7 @@ namespace nc
         m_constBufData.attQuad          = 0.0075f;
     }
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     void PointLight::EditorGuiElement()
     {
         const float itemWidth = 40.0f;

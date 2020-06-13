@@ -1,4 +1,4 @@
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "EditorManager.h"
 #include <d3d11.h>
 #include "external/imgui/imgui.h"

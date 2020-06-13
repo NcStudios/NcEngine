@@ -13,7 +13,7 @@ namespace nc
         public:
             Transform() noexcept;
 
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
 

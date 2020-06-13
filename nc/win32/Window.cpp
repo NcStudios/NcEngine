@@ -3,7 +3,7 @@
 #include "ProjectSettings.h"
 #include <iostream>
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "utils/editor/EditorManager.h"
 #endif
 
@@ -45,7 +45,7 @@ HWND Window::GetHWND() const noexcept
     return m_hwnd;
 }
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 void Window::BindEditorManager(utils::editor::EditorManager* editorManager)
 {
     m_editorManager = editorManager;
@@ -60,7 +60,7 @@ void Window::OnWindowResize()
 
 LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     if(Window::Instance->m_editorManager->WndProc(hwnd, message, wParam, lParam))
     {
         return true;

@@ -4,7 +4,9 @@
 #include <d3dcompiler.h>
 #include <iostream>
 
-namespace nc::graphics{
+
+namespace nc::graphics
+{
 
 Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     : m_screenWidth(screenWidth), m_screenHeight(screenHeight)
@@ -12,17 +14,14 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     //d3d core init
     auto sd = DXGI_SWAP_CHAIN_DESC
     {
-        {                                         //struct BufferDesc
-            0, 0, { 0, 0 },                       //Width, Height, RefreshRate {Num,Den}
-            DXGI_FORMAT_B8G8R8A8_UNORM,           //Format
-            DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, //ScanlineOrdering
-            DXGI_MODE_SCALING_UNSPECIFIED         //Scaling
-        },
-        {                                         //struct SampleDesc
-            1, 0                                  //Count, Quality
-        }, 
-        DXGI_USAGE_RENDER_TARGET_OUTPUT, 1,       //BufferUsage, BufferCount
-        hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD, 0   //OutputWindow, Windowed, SwapEffect, Flags
+        //struct BufferDesc
+        { 0, 0, { 0, 0 },                       //Width, Height, RefreshRate {Num,Den}
+          DXGI_FORMAT_B8G8R8A8_UNORM,           //Format
+          DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, //ScanlineOrdering
+          DXGI_MODE_SCALING_UNSPECIFIED },      //Scaling
+        { 1, 0 },                               //struct SampleDesc {Count,Quality}
+        DXGI_USAGE_RENDER_TARGET_OUTPUT, 1,     //BufferUsage, BufferCount
+        hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD, 0 //OutputWindow, Windowed, SwapEffect, Flags
     };
     THROW_FAILED
     (
@@ -122,7 +121,7 @@ void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
 
 void Graphics::StartFrame()
 {
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     m_drawCallCount = 0;
     #endif
     static const float color[] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -132,7 +131,7 @@ void Graphics::StartFrame()
 
 void Graphics::DrawIndexed(UINT count)
 {
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     ++m_drawCallCount;
     #endif
     m_context->DrawIndexed(count, 0u, 0u);
@@ -143,7 +142,7 @@ void Graphics::EndFrame()
     THROW_FAILED(m_swap->Present(1u, 0u), __FILE__, __LINE__);
 }
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 uint32_t Graphics::GetDrawCallCount() const
 {
     return m_drawCallCount;

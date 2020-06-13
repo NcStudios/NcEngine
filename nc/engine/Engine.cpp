@@ -17,7 +17,7 @@
 #include <iostream>
 #include <unordered_map>
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "utils/editor/EditorManager.h"
 #endif
 
@@ -46,7 +46,7 @@ Engine::Engine()//HWND hwnd)
     m_subsystem.Transform = std::make_unique<ComponentSystem<Transform>>();
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
     m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(wndInst->GetHWND(), m_subsystem.Rendering->GetGraphics());
     m_frameLogicTimer     = std::make_unique<nc::time::Timer>();
 #endif
@@ -120,11 +120,11 @@ void Engine::MainLoop()
         //     input::Flush();
         //     ncTime.ResetFrameDeltaTime();
         // }
-        #ifdef NC_DEBUG
+        #ifdef NC_EDITOR_ENABLED
         m_frameLogicTimer->Start();
         #endif
         FrameLogic(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
-        #ifdef NC_DEBUG
+        #ifdef NC_EDITOR_ENABLED
         m_frameLogicTimer->Stop();
         #endif
         FrameRender(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
@@ -148,7 +148,7 @@ void Engine::FrameLogic(float dt)
 void Engine::FrameRender(float dt)
 {
     (void)dt;
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     m_editorManager->BeginFrame();
     #endif
 
@@ -156,7 +156,7 @@ void Engine::FrameRender(float dt)
     m_subsystem.Light->BindLights();
     m_subsystem.Rendering->Frame();
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_entities->Active);
     m_editorManager->EndFrame();
     #endif
@@ -274,7 +274,7 @@ bool Engine::RemovePointLight(EntityHandle handle)
     return m_subsystem.Light->Remove(handle);
 }
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 nc::utils::editor::EditorManager* Engine::GetEditorManager()
 {
     return m_editorManager.get();

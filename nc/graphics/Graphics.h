@@ -1,12 +1,12 @@
 #pragma once
 #include "win32/NCWin32.h"
-#include <d3d11.h>
 #include <wrl/client.h>
+#include <d3d11.h>
 #include <stdint.h>
 #include "directx/math/DirectXMath.h"
 
 namespace nc::graphics::d3dresource { class GraphicsResource; }
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 namespace nc::utils::editor         { class EditorManager;    }
 #endif
 
@@ -15,7 +15,7 @@ namespace nc::graphics
     class Graphics
     {
         friend graphics::d3dresource::GraphicsResource;
-        #ifdef NC_DEBUG
+        #ifdef NC_EDITOR_ENABLED
         friend nc::utils::editor::EditorManager;
         #endif
 
@@ -37,7 +37,7 @@ namespace nc::graphics
             void DrawIndexed(UINT count);
             void EndFrame();
 
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             uint32_t GetDrawCallCount() const;
             #endif
 
@@ -45,14 +45,15 @@ namespace nc::graphics
             float m_screenWidth, m_screenHeight;
             DirectX::XMMATRIX m_camera;
             DirectX::XMMATRIX m_projection;
-            Microsoft::WRL::ComPtr<ID3D11Device>           m_device  = nullptr;
-            Microsoft::WRL::ComPtr<IDXGISwapChain>         m_swap    = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11DeviceContext>    m_context = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_target  = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv     = nullptr;
 
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             uint32_t m_drawCallCount = 0;
             #endif
+
+            Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
+            Microsoft::WRL::ComPtr<IDXGISwapChain> m_swap = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_target = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv = nullptr;
     };  
 }
