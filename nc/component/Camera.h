@@ -8,7 +8,7 @@ namespace nc
         public:
             Camera();
 
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
 

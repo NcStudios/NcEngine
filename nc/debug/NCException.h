@@ -18,7 +18,7 @@ namespace nc
             throw DefaultException(msg);
     }
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     #define IF_THROW(expr, msg) IfThrow_(expr, msg)
     #else
     #define IF_THROW(expr, msg)

@@ -4,7 +4,7 @@
 
 namespace nc
 {
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     namespace utils::editor { class EditorManager; }
     #endif
 
@@ -23,7 +23,7 @@ namespace nc
             HWND GetHWND() const noexcept;
             std::pair<int, int> GetWindowDimensions() const noexcept;
 
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             void BindEditorManager(utils::editor::EditorManager* editorManager);
             #endif
 
@@ -39,7 +39,7 @@ namespace nc
             HINSTANCE m_hInstance;
             std::pair<int, int> m_windowDimensions; 
             
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             utils::editor::EditorManager* m_editorManager;
             #endif
     };

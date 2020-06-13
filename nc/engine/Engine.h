@@ -28,7 +28,7 @@ namespace nc
                        template<class T> class HandleManager;
                        template<class T> class ComponentSystem; }
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     namespace utils::editor { class EditorManager; }
     #endif
 }
@@ -81,7 +81,7 @@ namespace nc::engine
 
             //nc::graphics::Graphics * GetGraphics();
             
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             nc::utils::editor::EditorManager* GetEditorManager();
             #endif
 
@@ -105,7 +105,7 @@ namespace nc::engine
 
             std::unique_ptr<EntityMaps> m_entities;
             
-            #ifdef NC_DEBUG
+            #ifdef NC_EDITOR_ENABLED
             std::unique_ptr<utils::editor::EditorManager> m_editorManager;
             std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
             #endif

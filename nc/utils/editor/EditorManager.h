@@ -1,4 +1,4 @@
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #pragma once
 #include "win32/NCWinDef.h"
 #include <optional>

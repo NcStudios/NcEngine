@@ -4,7 +4,7 @@
 #include "NCE.h"
 #include "graphics/d3dresource/GraphicsResource.h"
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "external/imgui/imgui.h"
 #include "utils/editor/EditorManager.h"
 #endif
@@ -31,7 +31,7 @@ namespace nc
         return *this;
     }
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     void Renderer::EditorGuiElement()
     {
         std::string str = std::to_string(GetHandle());

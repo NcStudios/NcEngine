@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-#ifdef NC_DEBUG
+#ifdef NC_EDITOR_ENABLED
 #include "external/imgui/imgui.h"
 #endif
 
@@ -9,7 +9,7 @@ namespace nc
     Camera::Camera()
     {}
 
-    #ifdef NC_DEBUG
+    #ifdef NC_EDITOR_ENABLED
     void Camera::EditorGuiElement()
     {
         std::string str = std::to_string(GetHandle());
