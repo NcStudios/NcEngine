@@ -54,9 +54,6 @@ endif()
 add_library(directxtk-lib
         STATIC
             ${ROOT_DIR}/external/directx/tk/Src/AlignedNew.h
-            ${ROOT_DIR}/external/directx/tk/Src/AlphaTestEffect.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/BasicEffect.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/BasicPostProcess.cpp
             ${ROOT_DIR}/external/directx/tk/Src/Bezier.h
             ${ROOT_DIR}/external/directx/tk/Src/BinaryReader.cpp
             ${ROOT_DIR}/external/directx/tk/Src/BinaryReader.h
@@ -64,17 +61,12 @@ add_library(directxtk-lib
             ${ROOT_DIR}/external/directx/tk/Src/CommonStates.cpp
             ${ROOT_DIR}/external/directx/tk/Src/dds.h
             ${ROOT_DIR}/external/directx/tk/Src/DDSTextureLoader.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/DebugEffect.cpp
             ${ROOT_DIR}/external/directx/tk/Src/DemandCreate.h
-            ${ROOT_DIR}/external/directx/tk/Src/DGSLEffect.cpp
             ${ROOT_DIR}/external/directx/tk/Src/DGSLEffectFactory.cpp
             ${ROOT_DIR}/external/directx/tk/Src/DirectXHelpers.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/DualPostProcess.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/DualTextureEffect.cpp
             ${ROOT_DIR}/external/directx/tk/Src/EffectCommon.cpp
             ${ROOT_DIR}/external/directx/tk/Src/EffectCommon.h
             ${ROOT_DIR}/external/directx/tk/Src/EffectFactory.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/EnvironmentMapEffect.cpp
             ${ROOT_DIR}/external/directx/tk/Src/GeometricPrimitive.cpp
             ${ROOT_DIR}/external/directx/tk/Src/Geometry.h
             ${ROOT_DIR}/external/directx/tk/Src/Geometry.cpp
@@ -84,8 +76,6 @@ add_library(directxtk-lib
             ${ROOT_DIR}/external/directx/tk/Src/ModelLoadCMO.cpp
             ${ROOT_DIR}/external/directx/tk/Src/ModelLoadSDKMESH.cpp
             ${ROOT_DIR}/external/directx/tk/Src/ModelLoadVBO.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/NormalMapEffect.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/PBREffect.cpp
             ${ROOT_DIR}/external/directx/tk/Src/PBREffectFactory.cpp
             ${ROOT_DIR}/external/directx/tk/Src/pch.h
             ${ROOT_DIR}/external/directx/tk/Src/PlatformHelpers.h
@@ -93,11 +83,8 @@ add_library(directxtk-lib
             ${ROOT_DIR}/external/directx/tk/Src/SDKMesh.h
             ${ROOT_DIR}/external/directx/tk/Src/SharedResourcePool.h
             ${ROOT_DIR}/external/directx/tk/Src/SimpleMath.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/SkinnedEffect.cpp
-            ${ROOT_DIR}/external/directx/tk/Src/SpriteBatch.cpp
             ${ROOT_DIR}/external/directx/tk/Src/SpriteFont.cpp
             ${ROOT_DIR}/external/directx/tk/Src/TeapotData.inc
-            ${ROOT_DIR}/external/directx/tk/Src/ToneMapPostProcess.cpp
             ${ROOT_DIR}/external/directx/tk/Src/vbo.h
             ${ROOT_DIR}/external/directx/tk/Src/VertexTypes.cpp
     )
