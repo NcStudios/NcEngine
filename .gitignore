@@ -12,7 +12,7 @@
 .vscode/
 build/
 external/gtest/
-external/directx/tk/
+external/directx/tk/Src/Shaders/
 Testing/
 
 #cal's scratch dir
