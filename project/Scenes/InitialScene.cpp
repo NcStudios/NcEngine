@@ -22,12 +22,12 @@ void InitialScene::Load()
     EntityView timerV = NCE::CreateEntity({}, {}, {}, "Timer");
     NCE::AddUserComponent<Timer>(timerV.Handle);
 
-    using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
+    using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution; using std::exponential_distribution;
 
     mt19937 rng( std::random_device{}() );
 	uniform_real_distribution<float> angDist(  0.0f,  3.1415f * 2.0f);
-	uniform_real_distribution<float> posDist(-10.0f, 10.0f);
-    uniform_real_distribution<float> sclDist(  0.5f,  2.0f); 
+	uniform_real_distribution<float> posDist( -25.0f, 25.0f);
+    uniform_real_distribution<float> sclDist(  0.2f,  1.0f); 
     uniform_real_distribution<float> clrDist(  0.0f,  1.0f);
 
     // Create meshes to be added to the entities' Renderer component
@@ -38,7 +38,7 @@ void InitialScene::Load()
     //nc::graphics::Shader litShader = nc::graphics::Shader("project\\shaders\\LitVertex.hlsl", "project\\shaders\\LitPixel.hlsl");
     //nc::graphics::Material monkeyMaterial = nc::graphics::Material();
 
-    for(int i = 0; i < 4; ++i)
+    for(int i = 0; i < 10000; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
         Vector3  randRot (        0.0f,         0.0f,         0.0f);
@@ -52,7 +52,7 @@ void InitialScene::Load()
         {
             EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
             NCE::AddUserComponent<Head>(boxView.Handle);
-            NCE::AddEngineComponent<Renderer>(boxView.Handle, ncMesh);
+            NCE::AddEngineComponent<Renderer>(boxView.Handle, ncMesh)->SetMaterial(material);
         }
         else
         {
