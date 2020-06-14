@@ -20,16 +20,15 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     auto sd = DXGI_SWAP_CHAIN_DESC
     {
         //struct BufferDesc
-        { static_cast<unsigned int>(m_screenWidth),  //Width, 
-          static_cast<unsigned int>(m_screenHeight), //Height, 
-          { 0, 0 },                                  //RefreshRate {Num,Den}
-          DXGI_FORMAT_B8G8R8A8_UNORM,                //Format
-          DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,      //ScanlineOrdering
-          DXGI_MODE_SCALING_UNSPECIFIED },           //Scaling
-        { 1, 0 },                                    //struct SampleDesc {Count,Quality}
-        DXGI_USAGE_RENDER_TARGET_OUTPUT, 1,          //BufferUsage, BufferCount
-        hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD,        //OutputWindow, Windowed, SwapEffect,
-        DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH       //Flags (Allows full-screen mode)
+        { 0, 0,                                 //Width, Height, 
+          { 0, 0 },                             //RefreshRate {Num,Den}
+          DXGI_FORMAT_B8G8R8A8_UNORM,           //Format
+          DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, //ScanlineOrdering
+          DXGI_MODE_SCALING_UNSPECIFIED },      //Scaling
+        { 1, 0 },                               //struct SampleDesc {Count,Quality}
+        DXGI_USAGE_RENDER_TARGET_OUTPUT, 1,     //BufferUsage, BufferCount
+        hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD,   //OutputWindow, Windowed, SwapEffect,
+        DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH  //Flags (Allows full-screen mode)
     };
     THROW_FAILED
     (
@@ -44,22 +43,22 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     m_states = std::make_unique<DirectX::CommonStates>(m_device.Get());
 
     //rasterizer state
-    // Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
-    // auto rasterizerDesc = D3D11_RASTERIZER_DESC 
-    // {
-    //     D3D11_FILL_SOLID, //FillMode
-    //     D3D11_CULL_BACK,  //CullMode
-    //     FALSE,            //FrontCounterClockwise
-    //     0,                //DepthBias
-    //     0.0f,             //DepthBiasClamp
-    //     0.0f,             //SlopeScaledDepthBias
-    //     TRUE,             //DepthClipEnable
-    //     FALSE,            //ScissorEnable
-    //     FALSE,            //MultisampleEnable
-    //     FALSE             //AntialiasedLineEnable
-    // };
-    // m_device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
-    m_context->RSSetState(m_states->CullNone());    
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
+    auto rasterizerDesc = D3D11_RASTERIZER_DESC 
+    {
+        D3D11_FILL_SOLID, //FillMode
+        D3D11_CULL_BACK,  //CullMode
+        FALSE,            //FrontCounterClockwise
+        0,                //DepthBias
+        0.0f,             //DepthBiasClamp
+        0.0f,             //SlopeScaledDepthBias
+        TRUE,             //DepthClipEnable
+        FALSE,            //ScissorEnable
+        FALSE,            //MultisampleEnable
+        FALSE             //AntialiasedLineEnable
+    };
+    m_device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
+    m_context->RSSetState(rasterizerState.Get());    
 
     //get back buffer & render target view
     Microsoft::WRL::ComPtr<ID3D11Resource> backBuffer = nullptr;
@@ -68,15 +67,13 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     THROW_FAILED(backBuffer->Release(), __FILE__, __LINE__);
 
     //depth stencil state
-    // Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  depthStencilState;
-    // D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
-    // depthStencilStateDesc.DepthEnable              = TRUE;
-    // depthStencilStateDesc.DepthWriteMask           = D3D11_DEPTH_WRITE_MASK_ALL;
-    // depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
-    // THROW_FAILED(m_device->CreateDepthStencilState(&depthStencilStateDesc, &depthStencilState), __FILE__, __LINE__);
-
-    //depth stencil state
-    m_context->OMSetDepthStencilState(m_states->DepthNone(), 1u);
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  depthStencilState;
+    D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
+    depthStencilStateDesc.DepthEnable              = TRUE;
+    depthStencilStateDesc.DepthWriteMask           = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
+    THROW_FAILED(m_device->CreateDepthStencilState(&depthStencilStateDesc, &depthStencilState), __FILE__, __LINE__);
+    m_context->OMSetDepthStencilState(depthStencilState.Get(), 1u);
 
     //depth stencil texture
     Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilTexture;

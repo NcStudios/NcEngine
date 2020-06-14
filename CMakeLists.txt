@@ -110,7 +110,6 @@ add_library(directxtk-lib
           "-ld3dcompiler_47"
   )
 
-
 ### TARGET GAME.EXE ###
 add_executable(${EXE_NAME})
 

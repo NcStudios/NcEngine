@@ -37,9 +37,9 @@ struct EntityMaps
 Engine::Engine()//HWND hwnd)
 {
     Window * wndInst = Window::Instance;
-
+    auto wndDim           = wndInst->GetWindowDimensions();
     m_entities            = std::make_unique<EntityMaps>();
-    m_subsystem.Rendering = std::make_unique<RenderingSystem>(ProjectSettings::displaySettings.screenWidth, ProjectSettings::displaySettings.screenHeight, wndInst->GetHWND());
+    m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
     m_subsystem.Light     = std::make_unique<LightSystem>();
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
     m_subsystem.Transform = std::make_unique<ComponentSystem<Transform>>();
