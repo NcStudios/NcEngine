@@ -133,7 +133,7 @@ class Block
         {
             // if (unused.cend() != std::find(unused.cbegin(), unused.cend(), current))
             // {
-            //     ++current; 
+            //     ++current;
             //     continue;
             // }
             

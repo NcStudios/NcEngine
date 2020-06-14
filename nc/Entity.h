@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include "Component.h"
-#include "views/EntityView.h"
 #include "component/EngineComponentGroup.h"
 
 namespace nc
@@ -35,7 +34,7 @@ namespace nc
             void SendOnCollisionStay() noexcept;
             void SendOnCollisionExit() noexcept;
 
-            Transform* GetTransform() const noexcept;
+            Transform * GetTransform() const noexcept;
 
             template<class T, 
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
@@ -82,7 +81,7 @@ namespace nc
         }
         m_userComponents.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
         Component * ptr = m_userComponents.back().get();
-        ptr->Register(0, EntityView{ Handle, Handles.transform });
+        ptr->Register(0, Handle);
         return dynamic_cast<T*>(ptr);
     }
 

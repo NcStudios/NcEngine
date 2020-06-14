@@ -12,20 +12,20 @@
 void InitialScene::Load()
 {
     //add light
-    EntityView lightView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "PointLight");
-    NCE::AddEngineComponent<PointLight>(lightView.Handle);
+    auto lvHandle = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "PointLight");
+    NCE::AddEngineComponent<PointLight>(lvHandle);
 
     //CamController
-    EntityView camView = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
-    NCE::AddUserComponent<CamController>(camView.Handle);
+    auto camHandle = NCE::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "CameraController");
+    NCE::AddUserComponent<CamController>(camHandle);
 
     //Timer
-    EntityView timerV = NCE::CreateEntity({}, {}, {}, "Timer");
-    NCE::AddUserComponent<Timer>(timerV.Handle);
+    auto timerHandle = NCE::CreateEntity({}, {}, {}, "Timer");
+    NCE::AddUserComponent<Timer>(timerHandle);
 
     //Spawner
-    EntityView spawnV = NCE::CreateEntity({}, {}, {}, "Spawner");
-    NCE::AddUserComponent<Spawner>(spawnV.Handle);
+    auto spawnHandle = NCE::CreateEntity({}, {}, {}, "Spawner");
+    NCE::AddUserComponent<Spawner>(spawnHandle);
 
     // using DirectX::XMFLOAT3; using std::mt19937; using std::uniform_real_distribution;
 

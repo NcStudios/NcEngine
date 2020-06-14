@@ -1,6 +1,5 @@
 #pragma once
 #include "Common.h"
-#include "views/EntityView.h"
 #include <string>
 
 namespace nc
@@ -24,10 +23,10 @@ namespace nc
             /**
              * Called by owning Entity after construction.
              */
-            void Register(const ComponentHandle componentHandle, const EntityView parentView) noexcept;
+            void Register(const ComponentHandle componentHandle, const EntityHandle parentHandle) noexcept;
 
             ComponentHandle GetHandle() const noexcept;
-            EntityView* GetParentView() noexcept;
+            EntityHandle GetParentHandle() noexcept;
 
             virtual void FrameUpdate(float dt);
             virtual void FixedUpdate();
@@ -39,7 +38,7 @@ namespace nc
         
         protected:
             ComponentHandle m_handle;
-            EntityView m_parentView;
+            EntityHandle m_parentHandle;
 
 #ifdef NC_EDITOR_ENABLED
         public:

@@ -2,7 +2,6 @@
 
 #include "Common.h"
 #include "HandleManager.h"
-#include "views/EntityView.h"
 #include "alloc/BlockAllocator.h"
 #include "debug/NcException.h"
 
@@ -29,7 +28,7 @@ class ComponentSystem
         ComponentHandle GetCurrentHandle();
 
         template<class ... Args>
-        ComponentHandle Add(const EntityView parentView, Args&& ... args);
+        ComponentHandle Add(const EntityHandle parentHandle, Args&& ... args);
 
         bool Remove(const ComponentHandle handle);
 
@@ -90,17 +89,13 @@ ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
 
 template<class T>
 template<class ... Args>
-ComponentHandle ComponentSystem<T>::Add(const EntityView parentView, Args&& ... args)
+ComponentHandle ComponentSystem<T>::Add(const EntityHandle parentHandle, Args&& ... args)
 {
     T * component = nullptr;
     auto indexPair = AllocateNew(&component);
-    //T newComp = T((args)...);
-    //*component = std::move(newComp);
     *component = T((args)...);
-    
-    
     auto handle = m_handleManager.GenerateNewHandle();
-    component->Register(handle, parentView);
+    component->Register(handle, parentHandle);
     MapHandleToIndexPair(handle, indexPair);
     return handle;
 }

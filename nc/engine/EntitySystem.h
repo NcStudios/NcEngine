@@ -18,7 +18,7 @@ class EntitySystem
     public:
         EntitySystem();
 
-        EntityView CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag); //creates new Entity and Transform and adds it to ToInitialize, returns handle to Entity
+        EntityHandle CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag); //creates new Entity and Transform and adds it to ToInitialize, returns handle to Entity
         bool DestroyEntity(EntityHandle handle);   //moves entity from current map to ToDestroy, returns true if successful
         Transform* GetTransformPtr(ComponentHandle handle); //returns ptr to Transform with given handle, returns nullptr if not found
         Entity* GetEntity(EntityHandle handle);    //returns ptr to entity in Active or ToInitialize maps, returns nullptr if not found

@@ -18,7 +18,8 @@ RenderingSystem::~RenderingSystem() = default;
 
 void RenderingSystem::FrameBegin()
 {
-    auto camMatrixXM = NCE::GetTransform(*NCE::GetMainCamera())->CamGetMatrix();
+    auto camT = NCE::GetMainCameraTransform();
+    auto camMatrixXM = camT->CamGetMatrix();
     m_graphics->StartFrame();
     m_graphics->SetCamera(camMatrixXM);
 }

@@ -2,7 +2,6 @@
 
 #include "win32/NCWinDef.h"
 #include "Common.h"
-#include "views/EntityView.h"
 
 #include <memory>
 #include <string>
@@ -45,7 +44,7 @@ namespace nc::engine
             void Exit();
 
             //creates new Entity and Transform and adds it to ToInitialize, returns handle to Entity
-            EntityView CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
+            EntityHandle CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
 
             //moves entity from current map to ToDestroy, returns true if successful
             bool DestroyEntity(const EntityHandle handle);
@@ -67,7 +66,7 @@ namespace nc::engine
             PointLight * GetPointLight(const EntityHandle handle) const;
             bool RemovePointLight(const EntityHandle handle);
 
-            EntityView * GetMainCamera();
+            Transform * GetMainCameraTransform();
             
             #ifdef NC_EDITOR_ENABLED
             nc::utils::editor::EditorManager* GetEditorManager();
@@ -98,7 +97,7 @@ namespace nc::engine
             std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
             #endif
             
-            EntityView m_mainCameraView;
+            Transform * m_mainCameraTransform;
 
             void FrameLogic(float dt);
             void FrameRender(float dt);

@@ -86,7 +86,7 @@ namespace nc
     {
         if (!m_transform)
         {
-            m_transform = NCE::GetTransform(m_parentView);
+            m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
         }
         IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
         

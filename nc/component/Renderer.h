@@ -10,6 +10,8 @@ namespace nc::graphics { class Model; class Mesh; class Material; class Graphics
 
 namespace nc
 {
+    class Transform;
+
     class Renderer : public Component
     {
         public:

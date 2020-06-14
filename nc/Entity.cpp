@@ -31,9 +31,9 @@ const std::vector<std::unique_ptr<Component>> & Entity::GetUserComponents() cons
     return m_userComponents;
 }
 
-Transform* Entity::GetTransform() const noexcept
+Transform * Entity::GetTransform() const noexcept
 {
-    return NCE::GetTransform(Handles.transform);
+    return NCE::GetTransformFromHandle(Handles.transform);
 }
 
 void Entity::SendOnInitialize() noexcept

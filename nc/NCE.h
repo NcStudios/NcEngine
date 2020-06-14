@@ -24,19 +24,14 @@ namespace nc
             NCE(engine::Engine* enginePtr);
 
             /**
-             * Get ptr to the Graphics object.
-             */
-            //static graphics::Graphics* GetGraphics();
-
-            /**
              * Clean up and shut down engine.
              */
             static void Exit();
 
             /** 
-             * Get EntityView for the main camera.
+             * Get pointer to the main camera.
              */
-            static EntityView* GetMainCamera();
+            static Transform * GetMainCameraTransform();
 
             /***************
              * Entity Access
@@ -44,9 +39,9 @@ namespace nc
              ***************/
             /**
              * Create default constructed Entity.
-             * @return EntityView for the new Entity.
+             * @return EntityHandle for the new Entity.
              */
-            static EntityView CreateEntity();
+            static EntityHandle CreateEntity();
 
             /**
              * Create Entity with specified Transform data and tag.
@@ -54,21 +49,16 @@ namespace nc
              * @param rot Initial rotation.
              * @param scale Initial scale.
              * @param tag Name for entity (no validation for unique tags).
-             * @return EntityView for the new Entity.
+             * @return EntityHandle for the new Entity.
              */
-            static EntityView CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
-
-            /**
-             * Construct an EntityView from EntityHandle.
-             */
-            static EntityView GetEntityView(EntityHandle handle);
+            static EntityHandle CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
 
             /**
              * Get ptr to an Entity
              * @return Non-owning, non-cacheable ptr on success,
              *         nullptr on failure.
              */
-            static Entity* GetEntity(EntityHandle handle);
+            static Entity * GetEntity(EntityHandle handle);
 
             /**
              * Get first active Entity matching tag.
@@ -138,19 +128,19 @@ namespace nc
             *****************************/
            /**
              * Get a Component's Transform.
-             * @param handle Handle of the component.
+             * @param handle The transform's handle.
              * @return Pointer to Transform on success, nullptr on failure.
              * @note Returned ptr not safe to cache.
              */
-            static Transform* GetTransform(const ComponentHandle handle);
+            static Transform* GetTransformFromHandle(const ComponentHandle handle);
 
             /**
              * Get and Entity's Transform.
-             * @param view EntityView of the Entity.
+             * @param handle EntityHandle of the transform's parent.
              * @return Pointer to Transform on success, nullptr on failure.
              * @note Returned ptr not safe to cache.
              */
-            static Transform* GetTransform(const EntityView& view);
+            static Transform* GetTransformFromEntityHandle(const EntityHandle handle);
 
             /**
              * Check if Entity has an engine component.
@@ -229,9 +219,9 @@ namespace nc
     template<class T, class, class ... Args>
     T * NCE::AddUserComponent(const EntityHandle handle, Args&& ... args) noexcept(false)
     {
-        auto hnd = NCE::GetEntity(handle);
-        IF_THROW(hnd == nullptr, "NCE::AddUserComponent : bad handle");
-        return hnd->AddUserComponent<T>(std::forward(args)...);
+        auto ptr = NCE::GetEntity(handle);
+        IF_THROW(ptr == nullptr, "NCE::AddUserComponent : bad handle");
+        return ptr->AddUserComponent<T>(std::forward(args)...);
     }
 
     template<class T, class>

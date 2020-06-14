@@ -10,7 +10,8 @@ namespace nc::engine
 
     void LightSystem::BindLights()
     {
-        auto camMatrixXM = NCE::GetTransform(*NCE::GetMainCamera())->CamGetMatrix();
+        auto camT = NCE::GetMainCameraTransform();
+        auto camMatrixXM = camT->CamGetMatrix();
 
         ComponentSystem<PointLight>::ForEach([&camMatrixXM](auto & light)
         {

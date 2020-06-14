@@ -8,7 +8,6 @@ add_executable(Nce_integration_tests
     ${ROOT_DIR}/nc/component/Component.cpp
     ${ROOT_DIR}/nc/component/Transform.cpp
     ${ROOT_DIR}/nc/component/Camera.cpp
-    ${ROOT_DIR}/nc/views/EntityView.cpp
     ${ROOT_DIR}/nc/math/Vector3.cpp
     ${ROOT_DIR}/nc/time/NCTime.cpp
     ${ROOT_DIR}/nc/input/Input.cpp

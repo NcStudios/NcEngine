@@ -21,32 +21,32 @@ Spawner::Spawner()
 
 void Spawner::OnInitialize()
 {
-    for(size_t i = 0; i < m_initialCount; ++i)
-    {
-        Vector3  randPos{ m_posDist(m_rng), m_posDist(m_rng), m_posDist(m_rng) };
-        Vector3  randRot{ };
-        Vector3  randScl{ m_sclDist(m_rng), m_sclDist(m_rng), m_sclDist(m_rng) };
-        DirectX::XMFLOAT3 randClr{ m_clrDist(m_rng), m_clrDist(m_rng), m_clrDist(m_rng) };
-        graphics::Material material{ };
-        material.color = randClr;
+    // for(size_t i = 0; i < m_initialCount; ++i)
+    // {
+    //     Vector3  randPos{ m_posDist(m_rng), m_posDist(m_rng), m_posDist(m_rng) };
+    //     Vector3  randRot{ };
+    //     Vector3  randScl{ m_sclDist(m_rng), m_sclDist(m_rng), m_sclDist(m_rng) };
+    //     DirectX::XMFLOAT3 randClr{ m_clrDist(m_rng), m_clrDist(m_rng), m_clrDist(m_rng) };
+    //     graphics::Material material{ };
+    //     material.color = randClr;
 
-        if (i % 2 == 0)
-        {
-            EntityView view = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
-            NCE::AddUserComponent<Head>(view.Handle);
-            auto rend = NCE::AddEngineComponent<Renderer>(view.Handle, m_ncMesh);
-            rend->SetMaterial(material);
-            m_entities.push_back(view.Handle);
-        }
-        else
-        {
-            EntityView view = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
-            NCE::AddUserComponent<Head>(view.Handle);
-            auto rend = NCE::AddEngineComponent<Renderer>(view.Handle, m_monkeyMesh);
-            rend->SetMaterial(material);
-            m_entities.push_back(view.Handle);
-        }
-    }
+    //     if (i % 2 == 0)
+    //     {
+    //         EntityHandle handle = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
+    //         NCE::AddUserComponent<Head>(handle);
+    //         auto rend = NCE::AddEngineComponent<Renderer>(handle, m_ncMesh);
+    //         rend->SetMaterial(material);
+    //         m_entities.push_back(handle);
+    //     }
+    //     else
+    //     {
+    //         EntityHandle handle = NCE::CreateEntity(randPos, randRot, randScl, "Monkey");
+    //         NCE::AddUserComponent<Head>(handle);
+    //         auto rend = NCE::AddEngineComponent<Renderer>(handle, m_monkeyMesh);
+    //         rend->SetMaterial(material);
+    //         m_entities.push_back(handle);
+    //     }
+    // }
 }
 
 void Spawner::FrameUpdate(float dt)
@@ -65,11 +65,11 @@ void Spawner::FrameUpdate(float dt)
         graphics::Material material{ };
         material.color = randClr;
 
-        EntityView boxView = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
-        NCE::AddUserComponent<Head>(boxView.Handle);
-        auto rend = NCE::AddEngineComponent<Renderer>(boxView.Handle, m_ncMesh);
+        EntityHandle boxHandle = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
+        NCE::AddUserComponent<Head>(boxHandle);
+        auto rend = NCE::AddEngineComponent<Renderer>(boxHandle, m_ncMesh);
         rend->SetMaterial(material);
-        m_entities.push_back(boxView.Handle);
+        m_entities.push_back(boxHandle);
     }
 
     if (m_timeSinceDespawn > m_despawnRate)

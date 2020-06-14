@@ -90,12 +90,11 @@ void Engine::MainLoop()
      * Camera should not be created here. But where?
      * Maybe each scene is responsible?
      */ 
-    m_mainCameraView = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
-    NCE::AddUserComponent<Camera>(m_mainCameraView.Handle);
+    auto camHandle = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
+    m_mainCameraTransform = GetTransformPtr(camHandle);
+    NCE::AddUserComponent<Camera>(camHandle);
 
     scene::SceneManager sceneManager;
-
-
 
     while(m_engineState.isRunning)
     {   
@@ -191,13 +190,10 @@ void Engine::Exit()
     m_engineState.isRunning = false;
 }
 
-EntityView Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
+EntityHandle Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
     auto entityHandle = m_subsystem.Handle->GenerateNewHandle();
-    auto expectedTransHandle = m_subsystem.Transform->GetCurrentHandle();
-    auto transHandle = m_subsystem.Transform->Add(EntityView { entityHandle, expectedTransHandle });
-    IF_THROW(transHandle != expectedTransHandle, "Engine::CreateEntity - handles don't match");
-
+    auto transHandle = m_subsystem.Transform->Add(entityHandle);
     auto newEntity = Entity(entityHandle, tag);
     newEntity.Handles.transform = transHandle;
     
@@ -206,7 +202,7 @@ EntityView Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Ve
     auto transformPtr = GetTransformPtr(newEntity.Handles.transform);
     transformPtr->Set(pos, rot, scale);
     m_entities->ToInitialize.emplace(entityHandle, std::move(newEntity));
-    return EntityView { entityHandle, transHandle };
+    return entityHandle;
 }
 
 bool Engine::DestroyEntity(const EntityHandle handle)
@@ -247,8 +243,7 @@ Renderer* Engine::AddRenderer(const EntityHandle handle, graphics::Mesh& mesh)
         return nullptr;
     }
 
-    auto view = EntityView { handle, GetEntity(handle)->Handles.transform };
-    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view, mesh);
+    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(handle, mesh);
     return GetRenderer(handle);
 }
 
@@ -269,8 +264,7 @@ PointLight* Engine::AddPointLight(const EntityHandle handle)
         return nullptr;
     }
 
-    EntityView view(handle, GetEntity(handle)->Handles.transform);
-    GetEntity(handle)->Handles.pointLight = m_subsystem.Light->Add(view);
+    GetEntity(handle)->Handles.pointLight = m_subsystem.Light->Add(handle);
     GetPointLight(handle)->Set({0.0f, 0.0f, 0.0f});
     return GetPointLight(handle);
 }
@@ -292,9 +286,9 @@ nc::utils::editor::EditorManager* Engine::GetEditorManager()
 }
 #endif
 
-EntityView* Engine::GetMainCamera()
+Transform * Engine::GetMainCameraTransform()
 {
-    return &m_mainCameraView;
+    return m_mainCameraTransform;
 }
 
 Transform* Engine::GetTransformPtr(const ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }

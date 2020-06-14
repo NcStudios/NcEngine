@@ -12,9 +12,9 @@ NCE::NCE(engine::Engine* enginePtr)
     m_engine = enginePtr;
 }
 
-EntityView* NCE::GetMainCamera()
+Transform * NCE::GetMainCameraTransform()
 {
-    return m_engine->GetMainCamera();
+    return m_engine->GetMainCameraTransform();
 }
 
 void NCE::Exit()
@@ -22,12 +22,12 @@ void NCE::Exit()
     m_engine->Exit();
 }
 
-EntityView NCE::CreateEntity()
+EntityHandle NCE::CreateEntity()
 {
     return CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), "");
 }
 
-EntityView NCE::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
+EntityHandle NCE::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
     return m_engine->CreateEntity(pos, rot, scale, tag);
 }
@@ -35,12 +35,6 @@ EntityView NCE::CreateEntity(const Vector3& pos, const Vector3& rot, const Vecto
 bool NCE::DestroyEntity(EntityHandle handle)
 {
     return m_engine->DestroyEntity(handle);
-}
-
-EntityView NCE::GetEntityView(EntityHandle handle)
-{
-    ComponentHandle transHandle = NCE::GetEntity(handle)->Handles.transform;
-    return EntityView(handle, transHandle);
 }
 
 Entity* NCE::GetEntity(EntityHandle handle)
@@ -58,19 +52,23 @@ Entity* NCE::GetEntity(const std::string& tag)
  *********************/
 
 /* Public Get */
-Transform* NCE::GetTransform(const ComponentHandle transformHandle)
+Transform* NCE::GetTransformFromHandle(const ComponentHandle transformHandle)
 {
     return m_engine->GetTransformPtr(transformHandle);
 }
 
-Transform * NCE::GetTransform(const EntityView& view)
+Transform * NCE::GetTransformFromEntityHandle(const EntityHandle handle)
 {
-    return m_engine->GetTransformPtr(view.TransformHandle);
+    auto ptr = GetEntity(handle);
+    IF_THROW(!ptr, "NCE::GetTransform - bad handle");
+    return m_engine->GetTransformPtr(ptr->Handles.transform);
 }
 
 template<> Transform * NCE::GetEngineComponent<Transform>(const EntityHandle handle) noexcept(false)
 {
-    return m_engine->GetTransformPtr(GetEntityView(handle).TransformHandle);
+    auto ptr = GetEntity(handle);
+    IF_THROW(!ptr, "NCE::GetEngineComponent<Transform> - bad handle");
+    return m_engine->GetTransformPtr(ptr->Handles.transform);
 }
 
 /*********************

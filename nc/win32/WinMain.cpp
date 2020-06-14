@@ -36,6 +36,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     catch(const nc::NcException& e)
     {
         e.what();
+        enginePtr->Exit();
     }
     catch(...)
     {

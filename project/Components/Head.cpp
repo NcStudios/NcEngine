@@ -10,7 +10,7 @@ Head::Head()
 
 void Head::OnInitialize()
 {
-    m_transform = NCE::GetTransform(m_parentView);
+    m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
 }
 
 void Head::FrameUpdate(float dt)
@@ -29,7 +29,6 @@ void Head::FrameUpdate(float dt)
         objRotZ += 10.0f;
 
     m_transform->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
-    //NCE::GetTransform(*GetParentView())->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
 }
 
 

@@ -7,10 +7,10 @@
 namespace nc
 {
 
-void Component::Register(const ComponentHandle componentHandle, const EntityView parentView) noexcept
+void Component::Register(const ComponentHandle componentHandle, const EntityHandle parentHandle) noexcept
 {
     m_handle = componentHandle;
-    m_parentView = parentView;
+    m_parentHandle = parentHandle;
 }
 
 ComponentHandle Component::GetHandle() const noexcept
@@ -18,9 +18,9 @@ ComponentHandle Component::GetHandle() const noexcept
     return m_handle;
 }
 
-EntityView* Component::GetParentView() noexcept
+EntityHandle Component::GetParentHandle() noexcept
 {
-    return &m_parentView;
+    return m_parentHandle;
 }
 
 void Component::FrameUpdate(float dt) {(void)dt;}
