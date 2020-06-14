@@ -51,6 +51,64 @@ if(NC_EDITOR_ENABLED)
   )
 endif()
 
+add_library(directxtk-lib
+        STATIC
+            ${ROOT_DIR}/external/directx/tk/Src/AlignedNew.h
+            ${ROOT_DIR}/external/directx/tk/Src/AlphaTestEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/BasicEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/BasicPostProcess.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/Bezier.h
+            ${ROOT_DIR}/external/directx/tk/Src/BinaryReader.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/BinaryReader.h
+            ${ROOT_DIR}/external/directx/tk/Src/BufferHelpers.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/CommonStates.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/dds.h
+            ${ROOT_DIR}/external/directx/tk/Src/DDSTextureLoader.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/DebugEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/DemandCreate.h
+            ${ROOT_DIR}/external/directx/tk/Src/DGSLEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/DGSLEffectFactory.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/DirectXHelpers.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/DualPostProcess.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/DualTextureEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/EffectCommon.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/EffectCommon.h
+            ${ROOT_DIR}/external/directx/tk/Src/EffectFactory.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/EnvironmentMapEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/GeometricPrimitive.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/Geometry.h
+            ${ROOT_DIR}/external/directx/tk/Src/Geometry.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/Keyboard.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/LoaderHelpers.h
+            ${ROOT_DIR}/external/directx/tk/Src/Model.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/ModelLoadCMO.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/ModelLoadSDKMESH.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/ModelLoadVBO.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/NormalMapEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/PBREffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/PBREffectFactory.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/pch.h
+            ${ROOT_DIR}/external/directx/tk/Src/PlatformHelpers.h
+            ${ROOT_DIR}/external/directx/tk/Src/PrimitiveBatch.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/SDKMesh.h
+            ${ROOT_DIR}/external/directx/tk/Src/SharedResourcePool.h
+            ${ROOT_DIR}/external/directx/tk/Src/SimpleMath.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/SkinnedEffect.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/SpriteBatch.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/SpriteFont.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/TeapotData.inc
+            ${ROOT_DIR}/external/directx/tk/Src/ToneMapPostProcess.cpp
+            ${ROOT_DIR}/external/directx/tk/Src/vbo.h
+            ${ROOT_DIR}/external/directx/tk/Src/VertexTypes.cpp
+    )
+    target_include_directories(directxtk-lib
+        PRIVATE
+            ${NC_COMMON_DIRS}
+    )
+  target_link_libraries(directxtk-lib
+      PRIVATE
+          "-ld3dcompiler_47"
+  )
 
 ### TARGET GAME.EXE ###
 add_executable(${EXE_NAME})
@@ -75,11 +133,10 @@ endif()
 #target_precompile_headers(${EXE_NAME} PUBLIC ${ROOT_DIR}/nc/PCH.h)
 
 #LINK OPTIONS
-link_directories(${ROOT_DIR}/external/lib/)
 target_link_libraries(${EXE_NAME}
     PRIVATE
         ${WIN32_LINK_FLAGS}
-        ${ROOT_DIR}/external/lib/DirectXTK.lib
+        directxtk-lib
 )
 
 if(NC_EDITOR_ENABLED)
