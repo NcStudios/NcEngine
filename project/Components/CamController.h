@@ -21,6 +21,8 @@ class CamController : public Component
             Vector2 initialMouse = {0.0f,0.0f};
         } m_camPanState, m_camRotateState;
 
+        Transform * m_mainCameraTransform = nullptr;
+
         Vector3 GetCameraZoomMovement();
         Vector3 GetCameraPanMovement();
         Vector3 GetCameraRotationMovement();

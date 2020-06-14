@@ -9,6 +9,10 @@
 
 namespace nc::graphics
 {
+    Model::Model()
+    {
+    }
+
     Model::Model(const Mesh& mesh)
         : Model(mesh, Material{})
     {

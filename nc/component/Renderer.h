@@ -13,7 +13,8 @@ namespace nc
     class Renderer : public Component
     {
         public:
-            Renderer(graphics::Mesh& mesh); // TODO: Remove req to pass in graphics
+            Renderer();
+            Renderer(graphics::Mesh& mesh);
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
@@ -30,6 +31,7 @@ namespace nc
 
         private:
             std::unique_ptr<graphics::Model> m_model;
+            Transform * m_transform;
     };
     
 }

@@ -63,6 +63,7 @@ set_target_properties(${EXE_NAME}
 target_compile_options(${EXE_NAME}
     PUBLIC
         ${GCC_WARNING_FLAGS}
+        -O2
 )
 
 if(NC_EDITOR_ENABLED)

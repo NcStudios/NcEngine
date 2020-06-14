@@ -3,10 +3,10 @@
 
 namespace nc
 {
-    class DefaultException : public std::exception
+    class NcException : public std::exception
     {
         public:
-            DefaultException(const char* msg) : message(msg) {}
+            NcException(const char* msg) : message(msg) {}
             const char* what() const throw() { return message; }
         private:
             const char* message;
@@ -15,7 +15,7 @@ namespace nc
     inline void IfThrow_(bool expr, const char* msg)
     {
         if(expr)
-            throw DefaultException(msg);
+            throw NcException(msg);
     }
 
     #ifdef NC_EDITOR_ENABLED

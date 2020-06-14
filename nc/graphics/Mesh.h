@@ -36,6 +36,7 @@ namespace nc::graphics
     class Mesh
     {
         public:
+            Mesh() = default;
             Mesh(std::string meshPath);
             Mesh(const Mesh& other) = default;
             Mesh(Mesh&& other) = default;

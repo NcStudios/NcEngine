@@ -1,4 +1,4 @@
-#include "Debug\NCException.h"
+#include "debug\NcException.h"
 #include "graphics\d3dresource\GraphicsResourceManager.h"
 #include "graphics\Mesh.h"
 #include "utils\objloader\ObjLoader.h"
@@ -35,7 +35,7 @@ namespace nc::graphics::detail
 
         if (!HasValidMeshExtension(fileExtension)) 
         {
-           throw DefaultException("nc::graphics::detail::GetMeshFileName::HasValidMeshExtension - Invalid file type loaded for mesh.");
+           throw NcException("nc::graphics::detail::GetMeshFileName::HasValidMeshExtension - Invalid file type loaded for mesh.");
         }
 
         return fileNameWithExtension.substr(0, periodPosition);

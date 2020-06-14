@@ -82,7 +82,7 @@ namespace nc
         }
         m_userComponents.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
         Component * ptr = m_userComponents.back().get();
-        ptr->Register(0, EntityView { Handle, Handles.transform });
+        ptr->Register(0, EntityView{ Handle, Handles.transform });
         return dynamic_cast<T*>(ptr);
     }
 

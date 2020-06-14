@@ -202,7 +202,7 @@ TEST(NceTest, HasUserComponent_badHandle_throws)
     {
         NCE::HasUserComponent<PhonyComponent>(1);
     }
-    catch(const DefaultException& e)
+    catch(const NcException& e)
     {
         caught = true;
     }
@@ -225,7 +225,7 @@ TEST(NceTest, AddUserComponent_badHandle_throws)
     {
         NCE::AddUserComponent<PhonyComponent>(1);
     }
-    catch(const DefaultException& e)
+    catch(const NcException& e)
     {
         caught = true;
     }
@@ -263,7 +263,7 @@ TEST(NceTest, RemoveUserComponent_badHandle_throws)
     {
         NCE::RemoveUserComponent<PhonyComponent>(1);
     }
-    catch(const DefaultException& e)
+    catch(const NcException& e)
     {
         caught = true;
     }

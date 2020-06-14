@@ -25,10 +25,12 @@ void RenderingSystem::FrameBegin()
 
 void RenderingSystem::Frame()
 {
-    for(auto& r : GetVector())
+    auto gfx = m_graphics.get();
+
+    ComponentSystem<Renderer>::ForEach([&gfx](auto & rend)
     {
-        r.Update(m_graphics.get());
-    }
+        rend.Update(gfx);
+    });
 }
 
 void RenderingSystem::FrameEnd()

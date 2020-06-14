@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "TransformSystem.h"
 #include "RenderingSystem.h"
 #include "LightSystem.h"
 #include "CollisionSystem.h"
@@ -9,7 +10,7 @@
 #include "graphics/Graphics.h"
 #include "graphics/Mesh.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
-#include "debug/NCException.h"
+#include "debug/NcException.h"
 #include "component/Camera.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
@@ -35,15 +36,16 @@ struct EntityMaps
 
 
 Engine::Engine()//HWND hwnd)
+    : m_entities{ std::make_unique<EntityMaps>() }
 {
     Window * wndInst = Window::Instance;
 
     auto wndDim           = wndInst->GetWindowDimensions();
-    m_entities            = std::make_unique<EntityMaps>();
+    //m_entities            = std::make_unique<EntityMaps>();
     m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
     m_subsystem.Light     = std::make_unique<LightSystem>();
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
-    m_subsystem.Transform = std::make_unique<ComponentSystem<Transform>>();
+    m_subsystem.Transform = std::move(std::make_unique<ComponentSystem<Transform>>());
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
 #ifdef NC_EDITOR_ENABLED
@@ -71,7 +73,7 @@ auto& Engine::GetMapContainingEntity(const EntityHandle handle, bool checkAll) c
     if (checkAll && (m_entities->ToDestroy.count(handle) > 0) ) //only check ToDestroy if checkAll flag is set
         return m_entities->ToDestroy;
 
-    throw DefaultException("Engine::GetmapContainingEntity() - Entity not found.");
+    throw NcException("Engine::GetmapContainingEntity() - Entity not found.");
 }
 
 Entity* Engine::GetEntityPtrFromAnyMap(const EntityHandle handle) const noexcept(false)
@@ -83,11 +85,17 @@ void Engine::MainLoop()
 {
     NCE nce(this);
     time::Time ncTime;
+
+    /** @todo
+     * Camera should not be created here. But where?
+     * Maybe each scene is responsible?
+     */ 
+    m_mainCameraView = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
+    NCE::AddUserComponent<Camera>(m_mainCameraView.Handle);
+
     scene::SceneManager sceneManager;
 
-    m_mainCameraView = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
 
-    NCE::AddUserComponent<Camera>(m_mainCameraView.Handle);
 
     while(m_engineState.isRunning)
     {   
@@ -175,7 +183,7 @@ void Engine::FixedUpdate()
     SendFixedUpdate();
 
     // check collisions
-    m_subsystem.Collision->CheckCollisions(const_cast<const std::vector<Transform>&>(m_subsystem.Transform->GetVector()));
+    //m_subsystem.Collision->CheckCollisions(const_cast<const std::vector<Transform>&>(m_subsystem.Transform->GetVector()));
 }
 
 void Engine::Exit()
@@ -186,12 +194,15 @@ void Engine::Exit()
 EntityView Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
     auto entityHandle = m_subsystem.Handle->GenerateNewHandle();
-    auto expectedTransHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
-    auto transHandle = m_subsystem.Transform->Add(EntityView { entityHandle, expectedTransHandle } );
-    
+    auto expectedTransHandle = m_subsystem.Transform->GetCurrentHandle();
+    auto transHandle = m_subsystem.Transform->Add(EntityView { entityHandle, expectedTransHandle });
+    IF_THROW(transHandle != expectedTransHandle, "Engine::CreateEntity - handles don't match");
+
     auto newEntity = Entity(entityHandle, tag);
     newEntity.Handles.transform = transHandle;
     
+    /** @todo it would be better to set t's initial state by passing
+     *  this stuff to the TransSystem and init in t's c'tor. */
     auto transformPtr = GetTransformPtr(newEntity.Handles.transform);
     transformPtr->Set(pos, rot, scale);
     m_entities->ToInitialize.emplace(entityHandle, std::move(newEntity));

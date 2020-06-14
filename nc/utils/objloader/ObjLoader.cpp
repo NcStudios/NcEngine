@@ -1,6 +1,6 @@
 #include "ObjLoader.h"
 #include "directx/math/DirectXMath.h"
-#include "debug/NCException.h"
+#include "debug/NcException.h"
 #include "graphics/Model.h"
 #include "graphics/Mesh.h"
 #include <iostream>
@@ -49,7 +49,7 @@ namespace nc::utils
         if(meshPath.substr(pathSize - 4, pathSize) != ".obj")
         {
             std::cerr << "Invalid file type\n";
-            throw nc::DefaultException("Invalid file type");
+            throw nc::NcException("Invalid file type");
         }
 
         std::ifstream infile(meshPath);
@@ -57,7 +57,7 @@ namespace nc::utils
         if(!infile)
         {
             std::cerr << "Could not load file: " << meshPath << '\n';
-            throw nc::DefaultException("Could not load file");
+            throw nc::NcException("Could not load file");
         }
 
         std::string currentLine = "";

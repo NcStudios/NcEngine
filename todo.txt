@@ -19,6 +19,9 @@ BUGS
 ***********
 TO ADD
 ***********
+-all d3d "slots" are passed at uint literalts, look into what exactly
+    is needed here - can we use an enum for these so there is some 
+    semantic meaning tied to the values passed?
 -update physics to 3d
 -support for multiple cameras
 -lights

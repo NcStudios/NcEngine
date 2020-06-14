@@ -9,6 +9,7 @@ class Head : public Component
 {
     private:
         float m_moveSpeed = 500;
+        Transform * m_transform = nullptr;
 
     public:
         Head();

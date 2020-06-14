@@ -5,8 +5,14 @@
 
 namespace nc
 {
+    namespace engine::alloc { template<class T> class Block; }
+
     class Component
     {
+
+        template<class T>
+        friend class engine::alloc::Block;
+
         public:
             Component() = default;
             Component(const Component&) = default;
@@ -33,7 +39,7 @@ namespace nc
         
         protected:
             ComponentHandle m_handle;
-            EntityView m_parentView;          
+            EntityView m_parentView;
 
 #ifdef NC_EDITOR_ENABLED
         public:

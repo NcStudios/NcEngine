@@ -9,7 +9,9 @@ Head::Head()
 {}
 
 void Head::OnInitialize()
-{}
+{
+    m_transform = NCE::GetTransform(m_parentView);
+}
 
 void Head::FrameUpdate(float dt)
 {
@@ -26,7 +28,8 @@ void Head::FrameUpdate(float dt)
     if(GetKey(KeyCode::Z))
         objRotZ += 10.0f;
 
-    NCE::GetTransform(*GetParentView())->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
+    m_transform->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
+    //NCE::GetTransform(*GetParentView())->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
 }
 
 

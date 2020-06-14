@@ -29,7 +29,8 @@ namespace nc::graphics
     {
         public:
         
-        // TODO: Can we pass material by ptr?
+        /** @todo Can we pass material by ptr? */
+            Model();
             Model(const Mesh&);
             Model(const Mesh& mesh, const Material& material);
 

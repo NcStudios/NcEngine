@@ -39,6 +39,9 @@ namespace nc::graphics::d3dresource
         public:
             ConstantBuffer(const T& consts, UINT slot = 0u);
             ConstantBuffer(UINT slot = 0u);
+            ~ConstantBuffer() = default;
+            ConstantBuffer(ConstantBuffer&&);
+            ConstantBuffer& operator=(ConstantBuffer&&);
             void Update(const T& consts);
         
         protected:
@@ -156,12 +159,12 @@ namespace nc::graphics::d3dresource
     class TransformConstBuffer : public GraphicsResource
     {
         public:
-            TransformConstBuffer(const std::string& tag, const Model& parent, UINT slot = 0u);
+            TransformConstBuffer(const std::string& tag, Model& parent, UINT slot = 0u);
             void Bind() noexcept override;
-            static std::string GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept;
+            static std::string GetUID(const std::string& tag) noexcept; //, const Model& parent, UINT slot) noexcept;
 
             //should test if these need to be unique
-            static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, const Model& parent, UINT slot)
+            static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, Model & parent, UINT slot)
             {
                 return std::make_shared<TransformConstBuffer>(tag, parent, slot);
             }
@@ -174,7 +177,7 @@ namespace nc::graphics::d3dresource
             };
 
             static std::unique_ptr<VertexConstantBuffer<Transforms>> m_vcbuf;
-            const Model& m_parent;
+            Model & m_parent;
     };
 }
 
@@ -254,6 +257,21 @@ namespace nc::graphics::d3dresource
             GetDevice()->CreateBuffer(&cbd,nullptr,&m_constantBuffer),
             __FILE__, __LINE__
         );
+    }
+
+    template<class T>
+    ConstantBuffer<T>::ConstantBuffer(ConstantBuffer<T>&& other)
+        : m_constantBuffer{ other.m_constantBuffer },
+          m_slot { other.m_slot }
+    {
+    }
+    
+    template<class T>
+    ConstantBuffer<T>& ConstantBuffer<T>::operator=(ConstantBuffer<T>&& other)
+    {
+        m_constantBuffer = other.m_constantBuffer;
+        m_slot = other.m_slot;
+        return *this;
     }
 
     template<class T>

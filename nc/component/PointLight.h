@@ -8,10 +8,17 @@ namespace nc::graphics { class Graphics; }
 
 namespace nc
 {
+    //class Transform;
+
     class PointLight : public Component
     {
         public:
             PointLight();
+            ~PointLight();
+            PointLight(PointLight&&);
+            PointLight& operator=(PointLight&&);
+            PointLight(const PointLight&) = delete;
+            PointLight& operator=(const PointLight&) = delete;
 
             void Set(DirectX::XMFLOAT3 pos, float radius = 0.5f);
 
@@ -34,6 +41,10 @@ namespace nc
             } m_constBufData;
 
             using PixelConstBuf = graphics::d3dresource::PixelConstBuffer<PointLightCBuf>;
-            mutable std::unique_ptr<PixelConstBuf> m_cBuf;
+
+            /** @todo took away ptr for debug */
+            //mutable std::unique_ptr<PixelConstBuf> m_cBuf;
+            mutable PixelConstBuf m_cBuf;
+            Transform * m_transform;
     };
 }

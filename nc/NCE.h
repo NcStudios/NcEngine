@@ -8,7 +8,7 @@
 #include "input/Input.h"
 #include "math/NCVector.h"
 #include "time/NCTime.h"
-#include "debug/NCException.h"
+#include "debug/NcException.h"
 
 namespace nc
 {

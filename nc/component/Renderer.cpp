@@ -11,8 +11,15 @@
 
 namespace nc
 {
+    Renderer::Renderer()
+        : m_model{ nullptr },
+          m_transform{ nullptr }
+    {
+    }
+    
     Renderer::Renderer(graphics::Mesh& mesh)
-        : m_model (std::make_unique<graphics::Model> (mesh))
+        : m_model{ std::make_unique<graphics::Model>(mesh) },
+          m_transform{ nullptr }
     {
     }
 
@@ -74,7 +81,18 @@ namespace nc
 
     void Renderer::Update(graphics::Graphics * gfx)
     {
-        m_model->UpdateTransformationMatrix(NCE::GetTransform(*GetParentView()));
+        if (!m_transform)
+        {
+            m_transform = NCE::GetTransform(m_parentView);
+        }
+
+        if (!m_transform)
+        {
+            throw NcException("Renderer::Update - bad trans ptr");
+        }
+
+        m_model->UpdateTransformationMatrix(m_transform);
+        //m_model->UpdateTransformationMatrix(NCE::GetTransform(*GetParentView()));
         m_model->Draw(gfx);
     }
 
