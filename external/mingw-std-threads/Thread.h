@@ -20,10 +20,6 @@
 #ifndef WIN32STDTHREAD_H
 #define WIN32STDTHREAD_H
 
-#if !defined(__cplusplus) || (__cplusplus < 201103L)
-#error A C++11 compiler is required!
-#endif
-
 //  Use the standard classes for std::, if available.
 #include <thread>
 

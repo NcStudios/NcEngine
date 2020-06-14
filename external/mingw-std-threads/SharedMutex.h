@@ -27,10 +27,6 @@
 #ifndef MINGW_SHARED_MUTEX_H_
 #define MINGW_SHARED_MUTEX_H_
 
-#if !defined(__cplusplus) || (__cplusplus < 201103L)
-#error A C++11 compiler is required!
-#endif
-
 #include <cassert>
 //  For descriptive errors.
 #include <system_error>

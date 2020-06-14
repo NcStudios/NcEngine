@@ -15,10 +15,6 @@
 #ifndef MINGW_FUTURE_H_
 #define MINGW_FUTURE_H_
 
-#if !defined(__cplusplus) || (__cplusplus < 201103L)
-#error The MinGW STD Threads library requires a compiler supporting C++11.
-#endif
-
 #include <future>
 
 #include <cassert>

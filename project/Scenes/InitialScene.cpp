@@ -38,7 +38,7 @@ void InitialScene::Load()
     //nc::graphics::Shader litShader = nc::graphics::Shader("project\\shaders\\LitVertex.hlsl", "project\\shaders\\LitPixel.hlsl");
     //nc::graphics::Material monkeyMaterial = nc::graphics::Material();
 
-    for(int i = 0; i < 10000; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         Vector3  randPos (posDist(rng), posDist(rng), posDist(rng));
         Vector3  randRot (        0.0f,         0.0f,         0.0f);
