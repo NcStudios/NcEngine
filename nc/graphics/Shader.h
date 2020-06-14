@@ -4,5 +4,9 @@ namespace nc::graphics
 {
     class Shader
     {
+        public:
+
+        private:
+        
     };
 }

@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <stdint.h>
 #include "directx/math/DirectXMath.h"
+#include "directx/tk/CommonStates.h"
 
 namespace nc::graphics::d3dresource { class GraphicsResource; }
 #ifdef NC_EDITOR_ENABLED
@@ -21,7 +22,7 @@ namespace nc::graphics
 
         public:
             Graphics(HWND hwnd, float screenWidth, float screenHeight);
-            ~Graphics() = default;
+            ~Graphics();
             Graphics(const Graphics&) = delete;
             Graphics(Graphics&&) = delete;
             Graphics& operator=(const Graphics&) = delete;
@@ -51,9 +52,11 @@ namespace nc::graphics
             #endif
 
             Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
-            Microsoft::WRL::ComPtr<IDXGISwapChain> m_swap = nullptr;
+            Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain = nullptr;
             Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_target = nullptr;
+            Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTarget = nullptr;
             Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv = nullptr;
+            std::unique_ptr<DirectX::CommonStates> m_states = nullptr;
+            
     };  
 }

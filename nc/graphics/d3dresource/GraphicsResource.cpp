@@ -106,8 +106,6 @@ namespace nc::graphics::d3dresource
         return m_bytecodeBlob.Get();
     }
 
-
-
     PixelShader::PixelShader(const std::string& path )
         : m_path(path)
     {
@@ -118,8 +116,8 @@ namespace nc::graphics::d3dresource
         THROW_FAILED
         (
             GetDevice()->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),
-                                                    m_bytecodeBlob->GetBufferSize(),
-                                                    nullptr, &m_pixelShader),
+                                            m_bytecodeBlob->GetBufferSize(),
+                                            nullptr, &m_pixelShader),
             __FILE__, __LINE__
         );
     }

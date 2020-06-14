@@ -1,4 +1,4 @@
-%~dp0\..\nc\graphics\shader\fxc /T vs_5_0 /Fo %~dp0\..\nc\graphics\shader\compiled\vertexshader.cso %~dp0\..\nc\graphics\shader\VertexShader.hlsl
-%~dp0\..\nc\graphics\shader\fxc /T ps_5_0 /Fo %~dp0\..\nc\graphics\shader\compiled\pixelshader.cso %~dp0\..\nc\graphics\shader\PixelShader.hlsl
-%~dp0\..\nc\graphics\shader\fxc /T vs_5_0 /Fo %~dp0\..\nc\graphics\shader\compiled\litvertexshader.cso %~dp0\..\nc\graphics\shader\LitVertex.hlsl
-%~dp0\..\nc\graphics\shader\fxc /T ps_5_0 /Fo %~dp0\..\nc\graphics\shader\compiled\litpixelshader.cso %~dp0\..\nc\graphics\shader\LitPixel.hlsl
+fxc /T vs_5_0 /Fo %~dp0\..\project\shaders\compiled\vertexshader.cso %~dp0\..\project\shaders\VertexShader.hlsl
+fxc /T ps_5_0 /Fo %~dp0\..\project\shaders\compiled\pixelshader.cso %~dp0\..\project\shaders\PixelShader.hlsl
+fxc /T vs_5_0 /Fo %~dp0\..\project\shaders\compiled\litvertexshader.cso %~dp0\..\project\shaders\LitVertex.hlsl
+fxc /T ps_5_0 /Fo %~dp0\..\project\shaders\compiled\litpixelshader.cso %~dp0\..\project\shaders\LitPixel.hlsl
