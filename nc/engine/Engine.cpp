@@ -29,7 +29,6 @@ struct EntityMaps
 {
     /** @todo need entity graphs to support entity hierarchies */
     using EntityMap_t = std::unordered_map<EntityHandle, Entity>;
-    EntityMap_t ToInitialize;
     EntityMap_t Active;
     EntityMap_t ToDestroy;
 };
@@ -41,7 +40,6 @@ Engine::Engine()//HWND hwnd)
     Window * wndInst = Window::Instance;
 
     auto wndDim           = wndInst->GetWindowDimensions();
-    //m_entities            = std::make_unique<EntityMaps>();
     m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
     m_subsystem.Light     = std::make_unique<LightSystem>();
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
@@ -59,7 +57,7 @@ Engine::~Engine()
 
 bool Engine::DoesEntityExist(const EntityHandle handle) const
 {
-    return (m_entities->Active.count(handle) > 0) || (m_entities->ToInitialize.count(handle) > 0);
+    return m_entities->Active.count(handle) > 0;
 }
 
 
@@ -67,8 +65,6 @@ auto& Engine::GetMapContainingEntity(const EntityHandle handle, bool checkAll) c
 {
     if (m_entities->Active.count(handle) > 0)
         return m_entities->Active;
-    else if (m_entities->ToInitialize.count(handle) > 0)
-        return m_entities->ToInitialize;
 
     if (checkAll && (m_entities->ToDestroy.count(handle) > 0) ) //only check ToDestroy if checkAll flag is set
         return m_entities->ToDestroy;
@@ -148,7 +144,6 @@ void Engine::MainLoop()
 
 void Engine::FrameLogic(float dt)
 {
-    SendOnInitialize();
     SendFrameUpdate(dt);
 }
 
@@ -201,7 +196,7 @@ EntityHandle Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const 
      *  this stuff to the TransSystem and init in t's c'tor. */
     auto transformPtr = GetTransformPtr(newEntity.Handles.transform);
     transformPtr->Set(pos, rot, scale);
-    m_entities->ToInitialize.emplace(entityHandle, std::move(newEntity));
+    m_entities->Active.emplace(entityHandle, std::move(newEntity));
     return entityHandle;
 }
 
@@ -293,16 +288,6 @@ Transform * Engine::GetMainCameraTransform()
 
 Transform* Engine::GetTransformPtr(const ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
 
-void Engine::SendOnInitialize() noexcept
-{
-    for(auto& pair : m_entities->ToInitialize)
-    {
-        pair.second.SendOnInitialize();
-        m_entities->Active.emplace(std::move(pair));
-    }
-    m_entities->ToInitialize.clear();
-}
-
 void Engine::SendFrameUpdate(float dt) noexcept
 {
     for(auto& pair : m_entities->Active)
@@ -334,4 +319,4 @@ void Engine::SendOnDestroy() noexcept
     }
     m_entities->ToDestroy.clear();
 }
-}// end namespace nc::internal
+}// end namespace nc::engine

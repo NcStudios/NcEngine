@@ -8,13 +8,13 @@
 Head::Head()
 {}
 
-void Head::OnInitialize()
-{
-    m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
-}
-
 void Head::FrameUpdate(float dt)
 {
+    if (!m_transform)
+    {
+        m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
+    }
+
     using namespace nc::input;
     float rotateSpeed = 0.2f * dt;
     float objRotX = 0.0f;

@@ -28,17 +28,20 @@ namespace nc
             ComponentHandle GetHandle() const noexcept;
             EntityHandle GetParentHandle() noexcept;
 
+            MemoryState GetMemoryState() const;
+            void SetMemoryState(const MemoryState state);
+
             virtual void FrameUpdate(float dt);
             virtual void FixedUpdate();
-            virtual void OnInitialize();
             virtual void OnDestroy();
             virtual void OnCollisionEnter(const EntityHandle other);
             virtual void OnCollisionStay();
             virtual void OnCollisionExit();
         
         protected:
-            ComponentHandle m_handle;
-            EntityHandle m_parentHandle;
+            ComponentHandle m_handle = NullHandle;
+            EntityHandle m_parentHandle = NullHandle;
+            MemoryState m_MemoryState;
 
 #ifdef NC_EDITOR_ENABLED
         public:

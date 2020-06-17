@@ -26,7 +26,6 @@ namespace nc
             EngineComponentHandleGroup Handles;
             
             //could make engine a friend and make these private
-            void SendOnInitialize() noexcept;
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;

@@ -11,7 +11,6 @@ class Spawner : public nc::Component
     public:
         Spawner();
 
-        void OnInitialize() override;
         void FrameUpdate(float dt) override;
 
     private:
@@ -28,7 +27,7 @@ class Spawner : public nc::Component
 
         float m_timeSinceSpawn;
         float m_timeSinceDespawn;
-        const float m_spawnRate = 0.5f;
+        const float m_spawnRate = 0.1f;
         const float m_despawnRate = 3.0f;
         const unsigned int m_initialCount = 10u;
 };

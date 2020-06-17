@@ -76,14 +76,14 @@ ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
     {
         if (!m_blocks[i].IsFull())
         {
-            auto freePos = m_blocks[i].GetNextFree(newItemOut);
+            auto freePos = m_blocks[i].Alloc(newItemOut);
             return { i, freePos };
         }
     }
 
     m_blocks.push_back(alloc::Block<T>(m_blockSize));
     uint32_t blockIndex = m_blocks.size() - 1;
-    uint32_t freePos = m_blocks.back().GetNextFree(newItemOut);
+    uint32_t freePos = m_blocks.back().Alloc(newItemOut);
     return { blockIndex, freePos };
 }
 
@@ -94,6 +94,7 @@ ComponentHandle ComponentSystem<T>::Add(const EntityHandle parentHandle, Args&& 
     T * component = nullptr;
     auto indexPair = AllocateNew(&component);
     *component = T((args)...);
+    component->SetMemoryState(MemoryState::Valid);
     auto handle = m_handleManager.GenerateNewHandle();
     component->Register(handle, parentHandle);
     MapHandleToIndexPair(handle, indexPair);
@@ -108,8 +109,10 @@ bool ComponentSystem<T>::Remove(const ComponentHandle handle)
         return false;
     }
 
-    auto toRemove = GetIndexPairFromHandle(handle);
-    m_blocks[toRemove.indexInBlockCollection].Free(toRemove.indexInBlock);
+    auto removePair = GetIndexPairFromHandle(handle);
+    auto & owningBlock = m_blocks[removePair.indexInBlockCollection];
+    owningBlock.GetPtrTo(removePair.indexInBlock)->SetMemoryState(MemoryState::Invalid);
+    owningBlock.Free(removePair.indexInBlock);
 
     if (m_indexMap.erase(handle) != 1)
     {

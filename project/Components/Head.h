@@ -13,7 +13,6 @@ class Head : public Component
 
     public:
         Head();
-        void OnInitialize() override;
         void FrameUpdate(float dt) override;
         void OnDestroy() override;
 

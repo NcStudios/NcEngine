@@ -36,14 +36,6 @@ Transform * Entity::GetTransform() const noexcept
     return NCE::GetTransformFromHandle(Handles.transform);
 }
 
-void Entity::SendOnInitialize() noexcept
-{
-    for (auto& comp : m_userComponents)
-    {
-        comp->OnInitialize();
-    }
-}
-
 void Entity::SendFrameUpdate(float dt) noexcept
 {
     for (auto& comp : m_userComponents)

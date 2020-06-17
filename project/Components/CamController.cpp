@@ -11,13 +11,13 @@ namespace
 CamController::CamController()
 {}
 
-void CamController::OnInitialize()
-{
-    m_mainCameraTransform = NCE::GetMainCameraTransform();
-}
-
 void CamController::FrameUpdate(float dt)
 {
+    if (!m_mainCameraTransform)
+    {
+        m_mainCameraTransform = NCE::GetMainCameraTransform();
+    }
+
     Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
     Vector3 camRot = dt * (GetCameraRotationMovement());
     m_mainCameraTransform->CamTranslate(camTransl, 1.0f);

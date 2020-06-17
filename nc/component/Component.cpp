@@ -23,9 +23,18 @@ EntityHandle Component::GetParentHandle() noexcept
     return m_parentHandle;
 }
 
+void Component::SetMemoryState(const MemoryState state)
+{
+    m_MemoryState = state;
+}
+
+MemoryState Component::GetMemoryState() const
+{
+    return m_MemoryState;
+}
+
 void Component::FrameUpdate(float dt) {(void)dt;}
 void Component::FixedUpdate() {}
-void Component::OnInitialize() {}
 void Component::OnDestroy() {}
 void Component::OnCollisionEnter(const EntityHandle other) { (void)other;}
 void Component::OnCollisionStay() {}

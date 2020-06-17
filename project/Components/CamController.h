@@ -9,7 +9,6 @@ class CamController : public Component
     public:
         CamController();
 
-        void OnInitialize() override;
         void FrameUpdate(float dt) override;
 
     private:

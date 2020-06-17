@@ -103,7 +103,7 @@ namespace nc::engine
             void FrameRender(float dt);
             void FrameCleanup();
             void FixedUpdate();
-            void SendOnInitialize() noexcept;
+            //void SendOnInitialize() noexcept;
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
