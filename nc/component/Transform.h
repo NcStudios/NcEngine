@@ -12,6 +12,7 @@ namespace nc
     {
         public:
             Transform() noexcept;
+            Transform(const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;

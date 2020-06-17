@@ -3,9 +3,11 @@
 
 namespace nc{
 
-Entity::Entity(EntityHandle handle, const std::string& tag) noexcept
-    : Handle  {handle}, Tag {tag},
-      Handles {},       m_userComponents {}
+Entity::Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag) noexcept
+    : Handle{ handle }, 
+      Tag{ tag },
+      Handles{ transformHandle, NullHandle, NullHandle },
+      m_userComponents{ }
 {
 }
 

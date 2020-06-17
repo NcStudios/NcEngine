@@ -14,7 +14,7 @@ namespace nc
     class Entity
     {
         public:
-            Entity(EntityHandle handle, const std::string& tag = "") noexcept;
+            Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag = "") noexcept;
             Entity(const Entity& other) = delete;
             Entity& operator=(const Entity&) = delete;
             Entity(Entity&& other);

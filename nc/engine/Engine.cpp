@@ -187,15 +187,8 @@ void Engine::Exit()
 EntityHandle Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
     auto entityHandle = m_subsystem.Handle->GenerateNewHandle();
-    auto transHandle = m_subsystem.Transform->Add(entityHandle);
-    auto newEntity = Entity(entityHandle, tag);
-    newEntity.Handles.transform = transHandle;
-    
-    /** @todo it would be better to set t's initial state by passing
-     *  this stuff to the TransSystem and init in t's c'tor. */
-    auto transformPtr = GetTransformPtr(newEntity.Handles.transform);
-    transformPtr->Set(pos, rot, scale);
-    m_entities->Active.emplace(entityHandle, std::move(newEntity));
+    auto transHandle = m_subsystem.Transform->Add(entityHandle, pos, rot, scale);
+    m_entities->Active.emplace(entityHandle, Entity{entityHandle, transHandle, tag} );
     return entityHandle;
 }
 
