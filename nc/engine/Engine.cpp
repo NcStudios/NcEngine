@@ -38,7 +38,6 @@ Engine::Engine()//HWND hwnd)
     : m_entities{ std::make_unique<EntityMaps>() }
 {
     Window * wndInst = Window::Instance;
-
     auto wndDim           = wndInst->GetWindowDimensions();
     m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
     m_subsystem.Light     = std::make_unique<LightSystem>();

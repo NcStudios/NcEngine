@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include <d3d11.h>
 #include "directx/math/DirectXMath.h"
+#include "directx/tk/CommonStates.h"
+#include "directx/tk/Effects.h"
+#include "directx/tk/PrimitiveBatch.h"
+#include "directx/tk/VertexTypes.h"
 
 namespace nc { class Transform; }
 namespace nc::graphics
@@ -50,11 +54,19 @@ namespace nc::graphics
             void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
 
         private:
+            void InitializeGraphicsPipeline();
+
             Mesh m_mesh;
             Material m_material;
             DirectX::XMMATRIX m_transformationMatrix;
             const d3dresource::IndexBuffer * m_indexBuffer = nullptr;
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
+
+            // DirextXTK
+            using VertexType = DirectX::VertexPositionColor;
+            std::unique_ptr<DirectX::CommonStates> m_states;
+            std::unique_ptr<DirectX::BasicEffect> m_effect;
+            std::unique_ptr<DirectX::PrimitiveBatch<VertexType>> m_batch;
     };
 
     template<class T>

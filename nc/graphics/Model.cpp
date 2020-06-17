@@ -21,22 +21,24 @@ namespace nc::graphics
     Model::Model(const Mesh& mesh, const Material& material)
         : m_mesh(mesh), m_material(material)
     {
-        using namespace nc::graphics::d3dresource;
-        using DirectX::XMFLOAT3;
+        InitializeGraphicsPipeline();
+    }
 
-        XMFLOAT3 randClr (11, 218, 81);
+    void Model::InitializeGraphicsPipeline() 
+    {
+        using namespace nc::graphics::d3dresource;
+        using namespace nc::graphics;
 
         MeshData meshData = m_mesh.GetMeshData();
-
         auto pvs = GraphicsResourceManager::Acquire<VertexShader>("project\\shaders\\compiled\\litvertexshader.cso");
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
+
         AddGraphicsResource(std::move(pvs));
         AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader> ("project\\shaders\\compiled\\litpixelshader.cso"));
         AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshData.MeshPath, meshData.InputElementDesc, pvsbc));
         AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (meshData.PrimitiveTopology));
-
         AddGraphicsResource(TransformConstBuffer::AcquireUnique(meshData.MeshPath, *this, 0u));
         AddGraphicsResource(PixelConstBuffer<Material>::AcquireUnique(m_material, 1u));
     }

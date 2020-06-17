@@ -8,29 +8,39 @@
 namespace nc::graphics
 {
 
+Graphics::~Graphics() 
+{
+    m_swapChain->SetFullscreenState(FALSE, nullptr); // D3D can't close in fullscreen mode. switch to windowed mode on attempting to close
+}
+
 Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     : m_screenWidth(screenWidth), m_screenHeight(screenHeight)
-{
+{  
     //d3d core init
     auto sd = DXGI_SWAP_CHAIN_DESC
     {
         //struct BufferDesc
-        { 0, 0, { 0, 0 },                       //Width, Height, RefreshRate {Num,Den}
+        { 0, 0,                                 //Width, Height, 
+          { 0, 0 },                             //RefreshRate {Num,Den}
           DXGI_FORMAT_B8G8R8A8_UNORM,           //Format
           DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, //ScanlineOrdering
           DXGI_MODE_SCALING_UNSPECIFIED },      //Scaling
         { 1, 0 },                               //struct SampleDesc {Count,Quality}
         DXGI_USAGE_RENDER_TARGET_OUTPUT, 1,     //BufferUsage, BufferCount
-        hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD, 0 //OutputWindow, Windowed, SwapEffect, Flags
+        hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD,   //OutputWindow, Windowed, SwapEffect,
+        DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH  //Flags (Allows full-screen mode)
     };
     THROW_FAILED
     (
         D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE,
                                       nullptr, 0, nullptr, 0,
-                                      D3D11_SDK_VERSION, &sd, &m_swap,
+                                      D3D11_SDK_VERSION, &sd, &m_swapChain,
                                       &m_device, nullptr, &m_context),
         __FILE__, __LINE__
     );
+
+    // Common states
+    m_states = std::make_unique<DirectX::CommonStates>(m_device.Get());
 
     //rasterizer state
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
@@ -52,8 +62,9 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
 
     //get back buffer & render target view
     Microsoft::WRL::ComPtr<ID3D11Resource> backBuffer = nullptr;
-    THROW_FAILED(m_swap->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer), __FILE__, __LINE__);
-    THROW_FAILED(m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_target), __FILE__, __LINE__);
+    THROW_FAILED(m_swapChain->GetBuffer(0, __uuidof(ID3D11Resource), &backBuffer), __FILE__, __LINE__);
+    THROW_FAILED(m_device->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_renderTarget), __FILE__, __LINE__);
+    THROW_FAILED(backBuffer->Release(), __FILE__, __LINE__);
 
     //depth stencil state
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  depthStencilState;
@@ -87,7 +98,7 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
     THROW_FAILED(m_device->CreateDepthStencilView(depthStencilTexture.Get(), &dsvDesc, &m_dsv), __FILE__, __LINE__);
 
     //bind depth stencil view
-    m_context->OMSetRenderTargets(1u, m_target.GetAddressOf(), m_dsv.Get());
+    m_context->OMSetRenderTargets(1u, m_renderTarget.GetAddressOf(), m_dsv.Get());
 
     //Viewport configuration
     auto viewport = D3D11_VIEWPORT
@@ -125,7 +136,7 @@ void Graphics::StartFrame()
     m_drawCallCount = 0;
     #endif
     static const float color[] = {0.0f, 0.0f, 0.0f, 1.0f};
-    m_context->ClearRenderTargetView(m_target.Get(), color);
+    m_context->ClearRenderTargetView(m_renderTarget.Get(), color);
     m_context->ClearDepthStencilView(m_dsv.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
 
@@ -139,7 +150,7 @@ void Graphics::DrawIndexed(UINT count)
 
 void Graphics::EndFrame()
 {
-    THROW_FAILED(m_swap->Present(1u, 0u), __FILE__, __LINE__);
+    THROW_FAILED(m_swapChain->Present(1u, 0u), __FILE__, __LINE__);
 }
 
 #ifdef NC_EDITOR_ENABLED
