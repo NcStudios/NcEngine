@@ -88,12 +88,10 @@ uint32_t Block<T>::Alloc(T ** out)
 template<class T>
 void Block<T>::Free(uint32_t pos)
 {
-    if (data[pos].GetMemoryState() == MemoryState::Invalid)
-    {
-        throw NcException("Block::Free - attempt to free unowned component");
-    }
-
-    data[pos].SetMemoryState(MemoryState::Invalid);
+    /** Not currently doing a valid memory check as GetPtrTo
+     *  is called right before this and performs a check. Also,
+     *  the mem state is set to invalid in that call so the 
+     *  standard if state==invalid check fails. */
 
     if (nextFree - 1 == pos)
     {

@@ -21,6 +21,7 @@ namespace nc
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&);
+            ~Renderer() = default;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
