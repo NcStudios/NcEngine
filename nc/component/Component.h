@@ -1,12 +1,17 @@
 #pragma once
 #include "Common.h"
-#include "views/EntityView.h"
 #include <string>
 
 namespace nc
 {
+    namespace engine::alloc { template<class T> class Block; }
+
     class Component
     {
+
+        template<class T>
+        friend class engine::alloc::Block;
+
         public:
             Component() = default;
             Component(const Component&) = default;
@@ -18,22 +23,25 @@ namespace nc
             /**
              * Called by owning Entity after construction.
              */
-            void Register(const ComponentHandle componentHandle, const EntityView parentView) noexcept;
+            void Register(const ComponentHandle componentHandle, const EntityHandle parentHandle) noexcept;
 
             ComponentHandle GetHandle() const noexcept;
-            EntityView* GetParentView() noexcept;
+            EntityHandle GetParentHandle() noexcept;
+
+            MemoryState GetMemoryState() const;
+            void SetMemoryState(const MemoryState state);
 
             virtual void FrameUpdate(float dt);
             virtual void FixedUpdate();
-            virtual void OnInitialize();
             virtual void OnDestroy();
             virtual void OnCollisionEnter(const EntityHandle other);
             virtual void OnCollisionStay();
             virtual void OnCollisionExit();
         
         protected:
-            ComponentHandle m_handle;
-            EntityView m_parentView;          
+            ComponentHandle m_handle = NullHandle;
+            EntityHandle m_parentHandle = NullHandle;
+            MemoryState m_MemoryState;
 
 #ifdef NC_EDITOR_ENABLED
         public:

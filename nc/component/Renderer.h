@@ -10,14 +10,18 @@ namespace nc::graphics { class Model; class Mesh; class Material; class Graphics
 
 namespace nc
 {
+    class Transform;
+
     class Renderer : public Component
     {
         public:
-            Renderer(graphics::Mesh& mesh); // TODO: Remove req to pass in graphics
+            Renderer();
+            Renderer(graphics::Mesh& mesh);
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&);
+            ~Renderer() = default;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
@@ -30,6 +34,7 @@ namespace nc
 
         private:
             std::unique_ptr<graphics::Model> m_model;
+            Transform * m_transform;
     };
     
 }

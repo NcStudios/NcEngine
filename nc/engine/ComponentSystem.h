@@ -2,7 +2,8 @@
 
 #include "Common.h"
 #include "HandleManager.h"
-#include "views/EntityView.h"
+#include "alloc/BlockAllocator.h"
+#include "debug/NcException.h"
 
 #include <vector>
 #include <unordered_map>
@@ -10,112 +11,160 @@
 
 namespace nc::engine
 {
-    template<class T>
-    class ComponentSystem
-    {
-        public:
-            ComponentSystem(const unsigned int reserveSize = 50);
-            virtual ~ComponentSystem() = default;
-            
-            template<class ... Args>
-            ComponentHandle Add(const EntityView parentView, Args&& ... args);
-            virtual bool Remove(const ComponentHandle handle);
-            virtual bool Contains(const ComponentHandle handle) const;
-            virtual std::vector<T>& GetVector();
-            T* GetPointerTo(const ComponentHandle handle);
 
-            ComponentHandle GetCurrentHandle();
+struct ComponentIndexPair
+{
+    uint32_t indexInBlockCollection;
+    uint32_t indexInBlock;
+};
 
-        protected:
-            ComponentIndex GetIndexFromHandle(const ComponentHandle handle) const;
-            void MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex);
-            void RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex);
-
-        private:
-            std::vector<T> m_components;
-            std::unordered_map<ComponentHandle, ComponentIndex> m_indexMap;
-            HandleManager<ComponentHandle> m_handleManager;
-    };
-
-    template<class T>
-    ComponentSystem<T>::ComponentSystem(const unsigned int reserveSize)
-    {
-        m_components.reserve(reserveSize);
-    }
-
-    template<class T>
-    template<class ... Args>
-    ComponentHandle ComponentSystem<T>::Add(const EntityView parentView, Args&& ... args)
-    {
-        ComponentHandle handle = m_handleManager.GenerateNewHandle();
-        T newComponent((args)...);
-        newComponent.Register(handle, parentView);
-        m_components.push_back(std::move(newComponent));
-        ComponentIndex lastIndex = m_components.size() - 1;
-        MapHandleToIndex(handle, lastIndex);
-        return handle;
-    }
-
-    template<class T>
-    bool ComponentSystem<T>::Remove(const ComponentHandle handle)
-    {
-        if (!Contains(handle)) { return false; }
-
-        ComponentIndex toRemove = GetIndexFromHandle(handle);
-        ComponentIndex lastIndex = m_components.size() - 1;
-        ComponentHandle lastElementHandle = m_components.at(lastIndex).GetHandle(); //no good
-
-        m_components.at(toRemove) = std::move(m_components.at(lastIndex));
-        m_components.pop_back();
-        if(m_indexMap.erase(handle) != 1) { return false; }
-        RemapHandleToIndex(lastElementHandle, toRemove);
+template<class T>
+class ComponentSystem
+{
+    public:
+        ComponentSystem(const uint32_t reserveSize = 100u);
+        virtual ~ComponentSystem() = default;
         
-        return true;
+        ComponentHandle GetCurrentHandle();
+
+        template<class ... Args>
+        ComponentHandle Add(const EntityHandle parentHandle, Args&& ... args);
+
+        bool Remove(const ComponentHandle handle);
+
+        bool Contains(const ComponentHandle handle) const;
+
+        T * GetPointerTo(const ComponentHandle handle);
+
+        template<class Func>
+        void ForEach(Func func);        
+
+    protected:
+        ComponentIndexPair GetIndexPairFromHandle(const ComponentHandle handle) const;
+        void MapHandleToIndexPair(const ComponentHandle handle, const ComponentIndexPair targetIndex);
+        ComponentIndexPair AllocateNew(T ** newItemOut);
+
+    private:
+        uint32_t m_blockSize;
+        std::vector<alloc::Block<T>> m_blocks;
+        std::unordered_map<ComponentHandle, ComponentIndexPair> m_indexMap;
+        HandleManager<ComponentHandle> m_handleManager;      
+};
+
+template<class T>
+ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize)
+    : m_blockSize{ reserveSize },
+        m_blocks {}
+{
+    m_blocks.emplace_back(alloc::Block<T>(m_blockSize));
+}
+
+template<class T>
+template<class Func>
+void ComponentSystem<T>::ForEach(Func func)
+{
+    for(auto & block : m_blocks)
+    {
+        block.ForEach(func);
+    }
+}
+
+template<class T>
+ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
+{
+    for(uint32_t i = 0; i < m_blocks.size(); ++i)
+    {
+        if (!m_blocks[i].IsFull())
+        {
+            auto freePos = m_blocks[i].Alloc(newItemOut);
+            return { i, freePos };
+        }
     }
 
-    template<class T>
-    bool ComponentSystem<T>::Contains(const ComponentHandle handle) const
+    m_blocks.push_back(alloc::Block<T>(m_blockSize));
+    uint32_t blockIndex = m_blocks.size() - 1;
+    uint32_t freePos = m_blocks.back().Alloc(newItemOut);
+    return { blockIndex, freePos };
+}
+
+template<class T>
+template<class ... Args>
+ComponentHandle ComponentSystem<T>::Add(const EntityHandle parentHandle, Args&& ... args)
+{
+    T * component = nullptr;
+    auto indexPair = AllocateNew(&component);
+    *component = T((args)...);
+    component->SetMemoryState(MemoryState::Valid);
+    auto handle = m_handleManager.GenerateNewHandle();
+    component->Register(handle, parentHandle);
+    MapHandleToIndexPair(handle, indexPair);
+    return handle;
+}
+
+template<class T>
+bool ComponentSystem<T>::Remove(const ComponentHandle handle)
+{
+    if (!Contains(handle))
     {
-        return m_indexMap.count(handle) > 0;
+        return false;
     }
 
-    template<class T>
-    std::vector<T>& ComponentSystem<T>::GetVector()
+    auto removePair = GetIndexPairFromHandle(handle);
+    auto & owningBlock = m_blocks[removePair.indexInBlockCollection];
+    owningBlock.GetPtrTo(removePair.indexInBlock)->SetMemoryState(MemoryState::Invalid);
+    owningBlock.Free(removePair.indexInBlock);
+
+    if (m_indexMap.erase(handle) != 1)
     {
-        return m_components;
+        throw NcException("ComponentSystem::Remove - unexpected erase result");
     }
 
-    template<class T>
-    T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
+    return true;
+}
+
+template<class T>
+bool ComponentSystem<T>::Contains(const ComponentHandle handle) const
+{
+    return m_indexMap.count(handle) > 0;
+}
+
+template<class T>
+T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
+{
+    if (!Contains(handle))
     {
-        if (!Contains(handle)) return nullptr;
-        ComponentIndex index = GetIndexFromHandle(handle);
-        return &m_components.at(index);
+        return nullptr;
     }
 
-    template<class T>
-    ComponentHandle ComponentSystem<T>::GetCurrentHandle()
-    {
-        return m_handleManager.GetCurrent();
-    }
+    ComponentIndexPair pair = GetIndexPairFromHandle(handle);
 
-    template<class T>
-    ComponentIndex ComponentSystem<T>::GetIndexFromHandle(const ComponentHandle handle) const
-    {
-        if (!Contains(handle)) return 0; //need value for unsuccessful
-        return m_indexMap.at(handle);
-    }
 
-    template<class T>
-    void ComponentSystem<T>::MapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
-    {
-        if (!Contains(handle)) { m_indexMap.emplace(handle, targetIndex); }
-    }
+    return m_blocks[pair.indexInBlockCollection].GetPtrTo(pair.indexInBlock);
+}
 
-    template<class T>
-    void ComponentSystem<T>::RemapHandleToIndex(const ComponentHandle handle, const ComponentIndex targetIndex)
+template<class T>
+ComponentHandle ComponentSystem<T>::GetCurrentHandle()
+{
+    return m_handleManager.GetCurrent();
+}
+
+template<class T>
+ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(const ComponentHandle handle) const
+{
+    if (!Contains(handle))
     {
-        if (Contains(handle)) { m_indexMap.at(handle) = targetIndex; }
+        throw NcException("ComponentSystem::GetIndexPairFromHandle - bad handle");
     }
+    return m_indexMap.at(handle);
+}
+
+template<class T>
+void ComponentSystem<T>::MapHandleToIndexPair(const ComponentHandle handle, const ComponentIndexPair pair)
+{
+    if (!Contains(handle))
+    {
+        m_indexMap.emplace(handle, pair);
+    }
+}
 
 }

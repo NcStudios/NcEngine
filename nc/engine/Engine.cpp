@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "TransformSystem.h"
 #include "RenderingSystem.h"
 #include "LightSystem.h"
 #include "CollisionSystem.h"
@@ -9,7 +10,7 @@
 #include "graphics/Graphics.h"
 #include "graphics/Mesh.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
-#include "debug/NCException.h"
+#include "debug/NcException.h"
 #include "component/Camera.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
@@ -28,21 +29,20 @@ struct EntityMaps
 {
     /** @todo need entity graphs to support entity hierarchies */
     using EntityMap_t = std::unordered_map<EntityHandle, Entity>;
-    EntityMap_t ToInitialize;
     EntityMap_t Active;
     EntityMap_t ToDestroy;
 };
 
 
 Engine::Engine()//HWND hwnd)
+    : m_entities{ std::make_unique<EntityMaps>() }
 {
     Window * wndInst = Window::Instance;
     auto wndDim           = wndInst->GetWindowDimensions();
-    m_entities            = std::make_unique<EntityMaps>();
     m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
     m_subsystem.Light     = std::make_unique<LightSystem>();
     m_subsystem.Collision = std::make_unique<CollisionSystem>();
-    m_subsystem.Transform = std::make_unique<ComponentSystem<Transform>>();
+    m_subsystem.Transform = std::move(std::make_unique<ComponentSystem<Transform>>());
     m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
     
 #ifdef NC_EDITOR_ENABLED
@@ -54,26 +54,24 @@ Engine::Engine()//HWND hwnd)
 Engine::~Engine() 
 {}
 
-bool Engine::DoesEntityExist(EntityHandle handle)
+bool Engine::DoesEntityExist(const EntityHandle handle) const
 {
-    return (m_entities->Active.count(handle) > 0) || (m_entities->ToInitialize.count(handle) > 0);
+    return m_entities->Active.count(handle) > 0;
 }
 
 
-auto& Engine::GetMapContainingEntity(EntityHandle handle, bool checkAll) noexcept(false)
+auto& Engine::GetMapContainingEntity(const EntityHandle handle, bool checkAll) const noexcept(false)
 {
     if (m_entities->Active.count(handle) > 0)
         return m_entities->Active;
-    else if (m_entities->ToInitialize.count(handle) > 0)
-        return m_entities->ToInitialize;
 
     if (checkAll && (m_entities->ToDestroy.count(handle) > 0) ) //only check ToDestroy if checkAll flag is set
         return m_entities->ToDestroy;
 
-    throw DefaultException("Engine::GetmapContainingEntity() - Entity not found.");
+    throw NcException("Engine::GetmapContainingEntity() - Entity not found.");
 }
 
-Entity* Engine::GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false)
+Entity* Engine::GetEntityPtrFromAnyMap(const EntityHandle handle) const noexcept(false)
 {
     return &GetMapContainingEntity(handle, true).at(handle);
 }
@@ -82,11 +80,16 @@ void Engine::MainLoop()
 {
     NCE nce(this);
     time::Time ncTime;
+
+    /** @todo
+     * Camera should not be created here. But where?
+     * Maybe each scene is responsible?
+     */ 
+    auto camHandle = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
+    m_mainCameraTransform = GetTransformPtr(camHandle);
+    NCE::AddUserComponent<Camera>(camHandle);
+
     scene::SceneManager sceneManager;
-
-    m_mainCameraView = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
-
-    NCE::AddUserComponent<Camera>(m_mainCameraView.Handle);
 
     while(m_engineState.isRunning)
     {   
@@ -140,7 +143,6 @@ void Engine::MainLoop()
 
 void Engine::FrameLogic(float dt)
 {
-    SendOnInitialize();
     SendFrameUpdate(dt);
 }
 
@@ -174,7 +176,7 @@ void Engine::FixedUpdate()
     SendFixedUpdate();
 
     // check collisions
-    m_subsystem.Collision->CheckCollisions(const_cast<const std::vector<Transform>&>(m_subsystem.Transform->GetVector()));
+    //m_subsystem.Collision->CheckCollisions(const_cast<const std::vector<Transform>&>(m_subsystem.Transform->GetVector()));
 }
 
 void Engine::Exit()
@@ -182,22 +184,15 @@ void Engine::Exit()
     m_engineState.isRunning = false;
 }
 
-EntityView Engine::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag)
+EntityHandle Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
     auto entityHandle = m_subsystem.Handle->GenerateNewHandle();
-    auto expectedTransHandle = m_subsystem.Transform->GetCurrentHandle() + 1;
-    auto transHandle = m_subsystem.Transform->Add(EntityView { entityHandle, expectedTransHandle } );
-    
-    auto newEntity = Entity(entityHandle, tag);
-    newEntity.Handles.transform = transHandle;
-    
-    auto transformPtr = GetTransformPtr(newEntity.Handles.transform);
-    transformPtr->Set(pos, rot, scale);
-    m_entities->ToInitialize.emplace(entityHandle, std::move(newEntity));
-    return EntityView { entityHandle, transHandle };
+    auto transHandle = m_subsystem.Transform->Add(entityHandle, pos, rot, scale);
+    m_entities->Active.emplace(entityHandle, Entity{entityHandle, transHandle, tag} );
+    return entityHandle;
 }
 
-bool Engine::DestroyEntity(EntityHandle handle)
+bool Engine::DestroyEntity(const EntityHandle handle)
 {
     if (!DoesEntityExist(handle))
         return false;
@@ -207,7 +202,7 @@ bool Engine::DestroyEntity(EntityHandle handle)
     return true;
 }
 
-Entity* Engine::GetEntity(EntityHandle handle)
+Entity* Engine::GetEntity(const EntityHandle handle) const
 {
     if (!DoesEntityExist(handle))
         return nullptr;
@@ -216,7 +211,7 @@ Entity* Engine::GetEntity(EntityHandle handle)
     return &containingMap.at(handle);       
 } 
 
-Entity* Engine::GetEntity(const std::string& tag)
+Entity* Engine::GetEntity(const std::string& tag) const
 {
     for(auto& pair : m_entities->Active)
     {
@@ -228,47 +223,45 @@ Entity* Engine::GetEntity(const std::string& tag)
     return nullptr;
 }
 
-Renderer* Engine::AddRenderer(EntityHandle handle, graphics::Mesh& mesh)
+Renderer* Engine::AddRenderer(const EntityHandle handle, graphics::Mesh& mesh)
 {
     if(GetRenderer(handle))
     {
         return nullptr;
     }
 
-    auto view = EntityView { handle, GetEntity(handle)->Handles.transform };
-    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(view, mesh);
+    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(handle, mesh);
     return GetRenderer(handle);
 }
 
-Renderer* Engine::GetRenderer(EntityHandle handle)
+Renderer* Engine::GetRenderer(const EntityHandle handle) const
 {
     return m_subsystem.Rendering->GetPointerTo(GetEntity(handle)->Handles.renderer);
 }
 
-bool Engine::RemoveRenderer(EntityHandle handle)
+bool Engine::RemoveRenderer(const EntityHandle handle)
 {
     return m_subsystem.Rendering->Remove(GetEntity(handle)->Handles.renderer);
 }
 
-PointLight* Engine::AddPointLight(EntityHandle handle)
+PointLight* Engine::AddPointLight(const EntityHandle handle)
 {
     if(GetPointLight(handle))
     {
         return nullptr;
     }
 
-    EntityView view(handle, GetEntity(handle)->Handles.transform);
-    GetEntity(handle)->Handles.pointLight = m_subsystem.Light->Add(view);
+    GetEntity(handle)->Handles.pointLight = m_subsystem.Light->Add(handle);
     GetPointLight(handle)->Set({0.0f, 0.0f, 0.0f});
     return GetPointLight(handle);
 }
 
-PointLight* Engine::GetPointLight(EntityHandle handle)
+PointLight* Engine::GetPointLight(const EntityHandle handle) const
 {
     return m_subsystem.Light->GetPointerTo(GetEntity(handle)->Handles.pointLight);
 }
 
-bool Engine::RemovePointLight(EntityHandle handle)
+bool Engine::RemovePointLight(const EntityHandle handle)
 {
     return m_subsystem.Light->Remove(handle);
 }
@@ -280,22 +273,12 @@ nc::utils::editor::EditorManager* Engine::GetEditorManager()
 }
 #endif
 
-EntityView* Engine::GetMainCamera()
+Transform * Engine::GetMainCameraTransform()
 {
-    return &m_mainCameraView;
+    return m_mainCameraTransform;
 }
 
-Transform* Engine::GetTransformPtr(ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
-
-void Engine::SendOnInitialize() noexcept
-{
-    for(auto& pair : m_entities->ToInitialize)
-    {
-        pair.second.SendOnInitialize();
-        m_entities->Active.emplace(std::move(pair));
-    }
-    m_entities->ToInitialize.clear();
-}
+Transform* Engine::GetTransformPtr(const ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
 
 void Engine::SendFrameUpdate(float dt) noexcept
 {
@@ -328,4 +311,4 @@ void Engine::SendOnDestroy() noexcept
     }
     m_entities->ToDestroy.clear();
 }
-}// end namespace nc::internal
+}// end namespace nc::engine

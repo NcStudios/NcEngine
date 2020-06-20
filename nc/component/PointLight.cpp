@@ -2,20 +2,48 @@
 #include "graphics/Graphics.h"
 #include "utils/editor/EditorManager.h"
 #include "NCE.h"
+#include "debug/NcException.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "external/imgui/imgui.h"
 #endif
 
+#include <iostream>
+
 namespace nc
 {
     PointLight::PointLight()
-    {}
+        : m_cBuf{},
+          m_transform{ nullptr }
+    {
+        m_constBufData.pos              = {0,0,0};
+        m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};
+        m_constBufData.diffuseColor     = {0.8f, 0.2f, 0.2f};
+        m_constBufData.diffuseIntensity = 1.2f;
+        m_constBufData.attConst         = 0.09f;
+        m_constBufData.attLin           = 0.012f;
+        m_constBufData.attQuad          = 0.0075f;
+    }
+
+    PointLight::~PointLight() = default;
+    
+    PointLight::PointLight(PointLight&& other)
+        : m_constBufData { other.m_constBufData },
+          m_cBuf { std::move(other.m_cBuf) }
+    {
+    }
+
+    PointLight & PointLight::operator=(PointLight&& other)
+    {
+        m_constBufData = other.m_constBufData;
+        m_cBuf = std::move(other.m_cBuf);
+        return *this;
+    }
 
     void PointLight::Set(DirectX::XMFLOAT3 pos, float radius)
     {
         (void)radius; //currently unused
-        m_cBuf                          = std::make_unique<PixelConstBuf>();
+        //m_cBuf                          = std::make_unique<PixelConstBuf>();
         m_constBufData.pos              = pos;
         m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};
         m_constBufData.diffuseColor     = {0.8f, 0.2f, 0.2f};
@@ -56,14 +84,18 @@ namespace nc
 
     void PointLight::Bind(DirectX::FXMMATRIX view) noexcept(false)
     {
-        auto trans = NCE::GetTransform(*GetParentView());
-        IF_THROW(trans == nullptr, "PointLight::Bind - Bad Transform Ptr");
-        m_constBufData.pos = trans->GetPosition().GetXMFloat3();
+        if (!m_transform)
+        {
+            m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
+        }
+        IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
+        
+        m_constBufData.pos = m_transform->GetPosition().GetXMFloat3();
         PointLightCBuf cBufCopy = m_constBufData;
         const auto pos = DirectX::XMLoadFloat3(&m_constBufData.pos);
         DirectX::XMStoreFloat3(&cBufCopy.pos, DirectX::XMVector3Transform(pos, view));
-        m_cBuf->Update(cBufCopy);
-        m_cBuf->Bind();
+        m_cBuf.Update(cBufCopy);
+        m_cBuf.Bind();
     }
 
 }

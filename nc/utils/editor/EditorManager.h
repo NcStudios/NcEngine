@@ -8,7 +8,6 @@
 namespace nc 
 {
     class Transform;
-    class EntityView;
     namespace graphics { class Graphics; }
 }
 
@@ -45,7 +44,7 @@ namespace nc::utils::editor
             void DrawMenu();
             void DrawTimingControl(float* speed, float frameLogicTime, uint32_t drawCallCount, bool* open);
             void DrawEntityGraphControl(std::unordered_map<EntityHandle, Entity>& entities);
-            void DrawInspectorControl(nc::EntityView* view);
+            void DrawInspectorControl(nc::EntityHandle handle);
     };
 }
 #endif

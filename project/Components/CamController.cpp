@@ -11,16 +11,17 @@ namespace
 CamController::CamController()
 {}
 
-void CamController::OnInitialize()
-{}
-
 void CamController::FrameUpdate(float dt)
 {
-    Vector3     camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
-    Vector3     camRot    = dt * (GetCameraRotationMovement());
-    Transform*  transform = NCE::GetTransform(*NCE::GetMainCamera());
-    transform->CamTranslate(camTransl, 1.0f);
-    transform->Rotate(camRot.Y(), camRot.X(), 0.0f, 1.0f);
+    if (!m_mainCameraTransform)
+    {
+        m_mainCameraTransform = NCE::GetMainCameraTransform();
+    }
+
+    Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
+    Vector3 camRot = dt * (GetCameraRotationMovement());
+    m_mainCameraTransform->CamTranslate(camTransl, 1.0f);
+    m_mainCameraTransform->Rotate(camRot.Y(), camRot.X(), 0.0f, 1.0f);
 }
 
 Vector3 CamController::GetCameraZoomMovement()
@@ -30,7 +31,7 @@ Vector3 CamController::GetCameraZoomMovement()
 
 Vector3 CamController::GetCameraPanMovement()
 {
-    Vector3 targetPosition = { };
+    Vector3 targetPosition = {};
 
     if(input::GetKey(input::KeyCode::MiddleButton))
     {
@@ -38,14 +39,15 @@ Vector3 CamController::GetCameraPanMovement()
         {
             m_camPanState.isActive     = true;
             m_camPanState.initialMouse = Vector2{ (float)input::MouseX, (float)input::MouseY };
-            m_camPanState.initialCam   = NCE::GetTransform(*GetParentView())->GetPosition();
+            m_camPanState.initialCam   = NCE::GetTransformFromEntityHandle(GetParentHandle())->GetPosition();
         }
         else //button held
         {
             auto curMousePos = Vector2{ (float)input::MouseX, (float)input::MouseY };
             auto mousePosDelta = curMousePos - m_camPanState.initialMouse;
             auto camTranslation = Vector3{ mousePosDelta, 0.0f };
-            auto curCamPos = NCE::GetTransform(*GetParentView())->GetPosition();
+            //auto curCamPos = m_mainCameraTransform->GetPosition();
+            auto curCamPos = NCE::GetTransformFromEntityHandle(GetParentHandle())->GetPosition();
             targetPosition = m_camPanState.initialCam + camTranslation;
             targetPosition = targetPosition - curCamPos;
             targetPosition.InvertX();
@@ -74,14 +76,14 @@ Vector3 CamController::GetCameraRotationMovement()
         {
             m_camRotateState.isActive     = true;
             m_camRotateState.initialMouse = Vector2(input::MouseX, input::MouseY);
-            m_camRotateState.initialCam   = NCE::GetTransform(*GetParentView())->GetRotation();
+            m_camRotateState.initialCam   = NCE::GetTransformFromHandle(GetParentHandle())->GetRotation();
         }
         else //button held
         {
             Vector2 currentMousePos  = Vector2(input::MouseX, input::MouseY);
             Vector2 mouseDelta       = m_camRotateState.initialMouse - currentMousePos;
             Vector3 cameraRotation   = Vector3(mouseDelta.X(), mouseDelta.Y(), 0.0f);
-            Vector3 currentCameraRot = NCE::GetTransform(*GetParentView())->GetRotation();
+            Vector3 currentCameraRot = NCE::GetTransformFromEntityHandle(GetParentHandle())->GetRotation();
             targetRotation           = m_camRotateState.initialCam + cameraRotation;
             targetRotation           = (targetRotation - currentCameraRot);
         }

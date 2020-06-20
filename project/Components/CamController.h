@@ -9,7 +9,6 @@ class CamController : public Component
     public:
         CamController();
 
-        void OnInitialize() override;
         void FrameUpdate(float dt) override;
 
     private:
@@ -20,6 +19,8 @@ class CamController : public Component
             Vector3 initialCam   = {0.0f,0.0f,0.0f};
             Vector2 initialMouse = {0.0f,0.0f};
         } m_camPanState, m_camRotateState;
+
+        Transform * m_mainCameraTransform = nullptr;
 
         Vector3 GetCameraZoomMovement();
         Vector3 GetCameraPanMovement();

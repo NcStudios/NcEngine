@@ -6,7 +6,6 @@
 #include "external/imgui/imgui_impl_dx11.h"
 #include "graphics/Graphics.h"
 #include "component/Transform.h"
-#include "views/EntityView.h"
 #include "Entity.h"
 #include "component/PointLight.h"
 #include "input/Input.h"
@@ -189,17 +188,16 @@ namespace nc::utils::editor
                 ImGui::Spacing();
                 if(selected && SelectedEntityIndex.has_value())
                 {
-                    EntityView view(pair.second.Handle, pair.second.Handles.transform); 
-                    DrawInspectorControl(&view);
+                    DrawInspectorControl(pair.first);
                 }
             }
         }
         ImGui::End();
     }
 
-    void EditorManager::DrawInspectorControl(nc::EntityView* view)
+    void EditorManager::DrawInspectorControl(nc::EntityHandle handle)
     {   
-        std::string handle_s = std::to_string(view->Handle);
+        std::string handle_s = std::to_string(handle);
         const float spacing = 60.0f;
 
         ImGui::Spacing(); 
@@ -207,20 +205,20 @@ namespace nc::utils::editor
         ImGui::PushItemWidth(spacing);
             ImGui::Text("Entity");
             ImGui::Indent();
-                ImGui::Text("Tag:    ");  ImGui::SameLine();  ImGui::Text(NCE::GetEntity(view->Handle)->Tag.c_str());
+                ImGui::Text("Tag:    ");  ImGui::SameLine();  ImGui::Text(NCE::GetEntity(handle)->Tag.c_str());
                 ImGui::Text("Handle: ");  ImGui::SameLine();  ImGui::Text(handle_s.c_str());
             ImGui::Unindent();
         ImGui::PopItemWidth();  ImGui::Separator();
 
-        NCE::GetEngineComponent<nc::Transform>(view->Handle)->EditorGuiElement();
+        NCE::GetEngineComponent<nc::Transform>(handle)->EditorGuiElement();
 
-        nc::Renderer* rend = NCE::GetEngineComponent<nc::Renderer>(view->Handle);
+        nc::Renderer* rend = NCE::GetEngineComponent<nc::Renderer>(handle);
         if(rend) { rend->EditorGuiElement(); }
 
-        nc::PointLight* light = NCE::GetEngineComponent<PointLight>(view->Handle);
+        nc::PointLight* light = NCE::GetEngineComponent<PointLight>(handle);
         if(light) { light->EditorGuiElement(); }
 
-        for(const auto& comp : NCE::GetEntity(view->Handle)->GetUserComponents())
+        for(const auto& comp : NCE::GetEntity(handle)->GetUserComponents())
         {
             comp->EditorGuiElement();
         }

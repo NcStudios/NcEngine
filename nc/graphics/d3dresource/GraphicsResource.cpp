@@ -2,6 +2,7 @@
 #include "../Graphics.h"
 #include <d3dcompiler.h>
 #include "directx/math/DirectXMath.h"
+#include "Transform.h"
 
 namespace nc::graphics::d3dresource
 {
@@ -129,7 +130,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    TransformConstBuffer::TransformConstBuffer(const std::string& tag, const Model& parent, UINT slot)
+    TransformConstBuffer::TransformConstBuffer(const std::string& tag, Model & parent, UINT slot)
         : m_parent( parent )
     {
         (void)tag;
@@ -141,9 +142,9 @@ namespace nc::graphics::d3dresource
 
     void TransformConstBuffer::Bind() noexcept
     {
-        auto gfx = GraphicsResourceManager::GetGraphics();
-
+        const auto gfx = GraphicsResourceManager::GetGraphics();
         const auto modelView = m_parent.GetTransformXM() * gfx->GetCamera();
+
         const Transforms t = 
         {
             DirectX::XMMatrixTranspose(modelView),
@@ -220,10 +221,8 @@ namespace nc::graphics::d3dresource
         return typeid(PixelShader).name() + path;
     }
 
-    std::string TransformConstBuffer::GetUID(const std::string& tag, const Model& parent, UINT slot) noexcept
+    std::string TransformConstBuffer::GetUID(const std::string& tag) noexcept
     {
-        (void)parent;
-        (void)slot;
         return typeid(TransformConstBuffer).name() + tag;
     }
 

@@ -1,1 +1,0 @@
-/obj is the .o output directory for ncb

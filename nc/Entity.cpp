@@ -3,9 +3,11 @@
 
 namespace nc{
 
-Entity::Entity(EntityHandle handle, const std::string& tag) noexcept
-    : Handle  {handle}, Tag {tag},
-      Handles {},       m_userComponents {}
+Entity::Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag) noexcept
+    : Handle{ handle }, 
+      Tag{ tag },
+      Handles{ transformHandle, NullHandle, NullHandle },
+      m_userComponents{ }
 {
 }
 
@@ -31,17 +33,9 @@ const std::vector<std::unique_ptr<Component>> & Entity::GetUserComponents() cons
     return m_userComponents;
 }
 
-Transform* Entity::GetTransform() const noexcept
+Transform * Entity::GetTransform() const noexcept
 {
-    return NCE::GetTransform(Handles.transform);
-}
-
-void Entity::SendOnInitialize() noexcept
-{
-    for (auto& comp : m_userComponents)
-    {
-        comp->OnInitialize();
-    }
+    return NCE::GetTransformFromHandle(Handles.transform);
 }
 
 void Entity::SendFrameUpdate(float dt) noexcept

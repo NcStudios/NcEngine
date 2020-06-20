@@ -2,7 +2,6 @@
 
 #include "win32/NCWinDef.h"
 #include "Common.h"
-#include "views/EntityView.h"
 
 #include <memory>
 #include <string>
@@ -18,7 +17,7 @@ namespace nc
     class Vector3;
     class Vector4;
 
-    namespace time     { class Timer;    }
+    namespace time     { class Timer; }
     namespace graphics { class Graphics; class Mesh; }
 
     namespace engine { struct EntityMaps;
@@ -33,25 +32,6 @@ namespace nc
     #endif
 }
 
-/**
- * Engine
- * {
- *      GameLoop
- * 
- *      EntitySystem
- *          HandleManager<EntityHandle>
- *          map<Handle, Entity>
- *          Create, Destroy, Get
- * 
- * 
- *      ComponentSystems
- *          Transform
- *          Renderer
- *          Lights
- * }
- * 
- */
-
 namespace nc::engine
 {
     class Engine
@@ -63,23 +43,30 @@ namespace nc::engine
             void MainLoop();
             void Exit();
 
-            EntityView  CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, const std::string& tag); //creates new Entity and Transform and adds it to ToInitialize, returns handle to Entity
-            bool        DestroyEntity(EntityHandle handle);   //moves entity from current map to ToDestroy, returns true if successful
-            Transform * GetTransformPtr(ComponentHandle handle); //returns ptr to Transform with given handle, returns nullptr if not found
-            Entity *    GetEntity(EntityHandle handle);    //returns ptr to entity in Active or ToInitialize maps, returns nullptr if not found
-            Entity *    GetEntity(const std::string& tag); //returns pointer to first active found entity with tag or nullptr if not found
+            //creates new Entity and Transform and adds it to ToInitialize, returns handle to Entity
+            EntityHandle CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
 
-            Renderer *  AddRenderer(EntityHandle handle, graphics::Mesh& mesh);
-            Renderer *  GetRenderer(EntityHandle handle);
-            bool        RemoveRenderer(EntityHandle handle);
+            //moves entity from current map to ToDestroy, returns true if successful
+            bool DestroyEntity(const EntityHandle handle);
+            
+            //returns ptr to Transform with given handle, returns nullptr if not found
+            Transform * GetTransformPtr(const ComponentHandle handle);
+            
+            //returns ptr to entity in Active or ToInitialize maps, returns nullptr if not found
+            Entity * GetEntity(const EntityHandle handle) const;
+            
+            //returns pointer to first active found entity with tag or nullptr if not found
+            Entity * GetEntity(const std::string& tag) const;
 
-            PointLight * AddPointLight(EntityHandle handle);
-            PointLight * GetPointLight(EntityHandle handle);
-            bool         RemovePointLight(EntityHandle handle);
+            Renderer * AddRenderer(const EntityHandle handle, graphics::Mesh& mesh);
+            Renderer * GetRenderer(const EntityHandle handle) const;
+            bool RemoveRenderer(const EntityHandle handle);
 
-            EntityView * GetMainCamera();
+            PointLight * AddPointLight(const EntityHandle handle);
+            PointLight * GetPointLight(const EntityHandle handle) const;
+            bool RemovePointLight(const EntityHandle handle);
 
-            //nc::graphics::Graphics * GetGraphics();
+            Transform * GetMainCameraTransform();
             
             #ifdef NC_EDITOR_ENABLED
             nc::utils::editor::EditorManager* GetEditorManager();
@@ -110,19 +97,24 @@ namespace nc::engine
             std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
             #endif
             
-            EntityView m_mainCameraView;
+            Transform * m_mainCameraTransform;
 
             void FrameLogic(float dt);
             void FrameRender(float dt);
             void FrameCleanup();
             void FixedUpdate();
-            void SendOnInitialize() noexcept;
+            //void SendOnInitialize() noexcept;
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
 
-            bool    DoesEntityExist(EntityHandle handle); //returns true if entity is in Active or ToInitialize, false otherwise
-            auto&   GetMapContainingEntity(EntityHandle handle, bool checkAll = false) noexcept(false); //returns map containing entity, throws exception if not found
-            Entity* GetEntityPtrFromAnyMap(EntityHandle handle) noexcept(false); //returns ptr to entity regardless of map it's in (ToDestroy, etc.)
+            //returns true if entity is in Active or ToInitialize, false otherwise
+            bool DoesEntityExist(const EntityHandle handle) const ; 
+
+            //returns map containing entity, throws exception if not found
+            auto& GetMapContainingEntity(const EntityHandle handle, bool checkAll = false) const noexcept(false);
+
+            //returns ptr to entity regardless of map it's in (ToDestroy, etc.)
+            Entity* GetEntityPtrFromAnyMap(const EntityHandle handle) const noexcept(false);
     };
 } // end namespace nc::internal

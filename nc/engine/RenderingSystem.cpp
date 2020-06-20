@@ -18,17 +18,20 @@ RenderingSystem::~RenderingSystem() = default;
 
 void RenderingSystem::FrameBegin()
 {
-    auto camMatrixXM = NCE::GetTransform(*NCE::GetMainCamera())->CamGetMatrix();
+    auto camT = NCE::GetMainCameraTransform();
+    auto camMatrixXM = camT->CamGetMatrix();
     m_graphics->StartFrame();
     m_graphics->SetCamera(camMatrixXM);
 }
 
 void RenderingSystem::Frame()
 {
-    for(auto& r : GetVector())
+    auto gfx = m_graphics.get();
+
+    ComponentSystem<Renderer>::ForEach([&gfx](auto & rend)
     {
-        r.Update(m_graphics.get());
-    }
+        rend.Update(gfx);
+    });
 }
 
 void RenderingSystem::FrameEnd()

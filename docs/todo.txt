@@ -1,10 +1,7 @@
 ***********
 IN PROGRESS
 ***********
--AddEngineComponent takes param pack(renderer creation can be done through constructor then)
--add global search to api - GlobalGetComponent
--ensure all handles start at 1 (null_handle == 0)
-    -they do, need to make documentation to keep track of things like this
+
 
 ***********
 BUGS
@@ -19,6 +16,10 @@ BUGS
 ***********
 TO ADD
 ***********
+-add global search to api - GlobalGetComponent
+-all d3d "slots" are passed at uint literalts, look into what exactly
+    is needed here - can we use an enum for these so there is some 
+    semantic meaning tied to the values passed?
 -update physics to 3d
 -support for multiple cameras
 -lights

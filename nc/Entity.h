@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include "Component.h"
-#include "views/EntityView.h"
 #include "component/EngineComponentGroup.h"
 
 namespace nc
@@ -15,7 +14,7 @@ namespace nc
     class Entity
     {
         public:
-            Entity(EntityHandle handle, const std::string& tag = "") noexcept;
+            Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag = "") noexcept;
             Entity(const Entity& other) = delete;
             Entity& operator=(const Entity&) = delete;
             Entity(Entity&& other);
@@ -27,7 +26,6 @@ namespace nc
             EngineComponentHandleGroup Handles;
             
             //could make engine a friend and make these private
-            void SendOnInitialize() noexcept;
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
@@ -35,7 +33,7 @@ namespace nc
             void SendOnCollisionStay() noexcept;
             void SendOnCollisionExit() noexcept;
 
-            Transform* GetTransform() const noexcept;
+            Transform * GetTransform() const noexcept;
 
             template<class T, 
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
@@ -82,7 +80,7 @@ namespace nc
         }
         m_userComponents.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
         Component * ptr = m_userComponents.back().get();
-        ptr->Register(0, EntityView { Handle, Handles.transform });
+        ptr->Register(0, Handle);
         return dynamic_cast<T*>(ptr);
     }
 

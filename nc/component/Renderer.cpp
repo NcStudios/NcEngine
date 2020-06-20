@@ -11,22 +11,29 @@
 
 namespace nc
 {
+    Renderer::Renderer()
+        : m_model{ nullptr },
+          m_transform{ nullptr }
+    {
+    }
+    
     Renderer::Renderer(graphics::Mesh& mesh)
-        : m_model (std::make_unique<graphics::Model> (mesh))
+        : m_model{ std::make_unique<graphics::Model>(mesh) },
+          m_transform{ nullptr }
     {
     }
 
     Renderer::Renderer(Renderer&& other)
     {
         m_handle = other.GetHandle();
-        m_parentView = *other.GetParentView();
+        m_parentHandle = other.GetParentHandle();
         m_model = std::move(other.m_model);
     }
 
     Renderer& Renderer::operator=(Renderer&& other)
     {
         m_handle = other.GetHandle();
-        m_parentView = *other.GetParentView();
+        m_parentHandle = other.GetParentHandle();
         m_model = std::move(other.m_model);
         return *this;
     }
@@ -74,7 +81,17 @@ namespace nc
 
     void Renderer::Update(graphics::Graphics * gfx)
     {
-        m_model->UpdateTransformationMatrix(NCE::GetTransform(*GetParentView()));
+        if (!m_transform)
+        {
+            m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
+        }
+
+        if (!m_transform)
+        {
+            throw NcException("Renderer::Update - bad trans ptr");
+        }
+
+        m_model->UpdateTransformationMatrix(m_transform);
         m_model->Draw(gfx);
     }
 

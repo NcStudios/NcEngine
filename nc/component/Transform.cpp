@@ -10,7 +10,14 @@
 namespace nc
 {
     Transform::Transform() noexcept
-    {}
+        : Transform({},{},{})
+    {
+    }
+
+    Transform::Transform(const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept
+        : m_position { pos }, m_rotation { rot }, m_scale { scl }
+    {
+    }
 
     #ifdef NC_EDITOR_ENABLED
     void Transform::EditorGuiElement()

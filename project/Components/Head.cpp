@@ -8,11 +8,13 @@
 Head::Head()
 {}
 
-void Head::OnInitialize()
-{}
-
 void Head::FrameUpdate(float dt)
 {
+    if (!m_transform)
+    {
+        m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
+    }
+
     using namespace nc::input;
     float rotateSpeed = 0.2f * dt;
     float objRotX = 0.0f;
@@ -26,7 +28,7 @@ void Head::FrameUpdate(float dt)
     if(GetKey(KeyCode::Z))
         objRotZ += 10.0f;
 
-    NCE::GetTransform(*GetParentView())->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
+    m_transform->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
 }
 
 
