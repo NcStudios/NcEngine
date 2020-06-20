@@ -2,7 +2,7 @@
 
 #include "Common.h"
 #include "HandleManager.h"
-#include "alloc/BlockAllocator.h"
+#include "alloc/PoolArray.h"
 #include "debug/NcException.h"
 
 #include <vector>
@@ -14,8 +14,8 @@ namespace nc::engine
 
 struct ComponentIndexPair
 {
-    uint32_t indexInBlockCollection;
-    uint32_t indexInBlock;
+    uint32_t indexInPoolCollection;
+    uint32_t indexInPool;
 };
 
 template<class T>
@@ -45,46 +45,46 @@ class ComponentSystem
         ComponentIndexPair AllocateNew(T ** newItemOut);
 
     private:
-        uint32_t m_blockSize;
-        std::vector<alloc::Block<T>> m_blocks;
+        uint32_t m_poolSize;
+        std::vector<alloc::PoolArray<T>> m_poolArrays;
         std::unordered_map<ComponentHandle, ComponentIndexPair> m_indexMap;
         HandleManager<ComponentHandle> m_handleManager;      
 };
 
 template<class T>
 ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize)
-    : m_blockSize{ reserveSize },
-        m_blocks {}
+    : m_poolSize{ reserveSize },
+        m_poolArrays {}
 {
-    m_blocks.emplace_back(alloc::Block<T>(m_blockSize));
+    m_poolArrays.emplace_back(alloc::PoolArray<T>(m_poolSize));
 }
 
 template<class T>
 template<class Func>
 void ComponentSystem<T>::ForEach(Func func)
 {
-    for(auto & block : m_blocks)
+    for(auto & pool : m_poolArrays)
     {
-        block.ForEach(func);
+        pool.ForEach(func);
     }
 }
 
 template<class T>
 ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
 {
-    for(uint32_t i = 0; i < m_blocks.size(); ++i)
+    for(uint32_t i = 0; i < m_poolArrays.size(); ++i)
     {
-        if (!m_blocks[i].IsFull())
+        if (!m_poolArrays[i].IsFull())
         {
-            auto freePos = m_blocks[i].Alloc(newItemOut);
+            auto freePos = m_poolArrays[i].Alloc(newItemOut);
             return { i, freePos };
         }
     }
 
-    m_blocks.push_back(alloc::Block<T>(m_blockSize));
-    uint32_t blockIndex = m_blocks.size() - 1;
-    uint32_t freePos = m_blocks.back().Alloc(newItemOut);
-    return { blockIndex, freePos };
+    m_poolArrays.push_back(alloc::PoolArray<T>(m_poolSize));
+    uint32_t poolIndex = m_poolArrays.size() - 1;
+    uint32_t freePos = m_poolArrays.back().Alloc(newItemOut);
+    return { poolIndex, freePos };
 }
 
 template<class T>
@@ -110,9 +110,9 @@ bool ComponentSystem<T>::Remove(const ComponentHandle handle)
     }
 
     auto removePair = GetIndexPairFromHandle(handle);
-    auto & owningBlock = m_blocks[removePair.indexInBlockCollection];
-    owningBlock.GetPtrTo(removePair.indexInBlock)->SetMemoryState(MemoryState::Invalid);
-    owningBlock.Free(removePair.indexInBlock);
+    auto & owningPool = m_poolArrays[removePair.indexInPoolCollection];
+    owningPool.GetPtrTo(removePair.indexInPool)->SetMemoryState(MemoryState::Invalid);
+    owningPool.Free(removePair.indexInPool);
 
     if (m_indexMap.erase(handle) != 1)
     {
@@ -139,7 +139,7 @@ T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
     ComponentIndexPair pair = GetIndexPairFromHandle(handle);
 
 
-    return m_blocks[pair.indexInBlockCollection].GetPtrTo(pair.indexInBlock);
+    return m_poolArrays[pair.indexInPoolCollection].GetPtrTo(pair.indexInPool);
 }
 
 template<class T>

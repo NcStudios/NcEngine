@@ -43,7 +43,6 @@ namespace nc
     void PointLight::Set(DirectX::XMFLOAT3 pos, float radius)
     {
         (void)radius; //currently unused
-        //m_cBuf                          = std::make_unique<PixelConstBuf>();
         m_constBufData.pos              = pos;
         m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};
         m_constBufData.diffuseColor     = {0.8f, 0.2f, 0.2f};
