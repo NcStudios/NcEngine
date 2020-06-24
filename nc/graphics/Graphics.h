@@ -50,6 +50,13 @@ namespace nc::graphics
             uint32_t m_drawCallCount = 0;
             #endif
 
+            void CreateDeviceAndSwapchain(HWND hwnd);
+            void CreateRasterizerState();
+            void CreateRenderTargetViewFromBackBuffer();
+            void CreateDepthStencilView();
+            void BindDepthStencilView();
+            void ConfigureViewport();
+
             Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
             Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain = nullptr;
             Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context = nullptr;
