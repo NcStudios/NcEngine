@@ -1,6 +1,34 @@
-#Nce Functional Tests
+### PoolArray Functional Tests ###
+add_executable(PoolArray_tests
+    ${ROOT_DIR}/test/integration/PoolArray_tests.cpp
+)
 
+target_include_directories(PoolArray_tests
+    PRIVATE
+        ${NC_COMMON_INCLUDE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
 
+if(DEBUG_BUILD)
+  target_compile_options(PoolArray_tests
+      PUBLIC
+          ${GCC_DEBUG_FLAGS}
+  )
+endif()
+
+target_compile_options(PoolArray_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(PoolArray_tests
+    PRIVATE
+        gtest
+)
+
+add_test(PoolArray_tests PoolArray_tests)
+
+#### Nce Functional Tests ###
 add_executable(Nce_integration_tests 
     ${ROOT_DIR}/test/integration/Nce_integration_tests.cpp 
     ${ROOT_DIR}/nc/NCE.cpp
@@ -22,6 +50,7 @@ add_executable(Nce_integration_tests
     ${ROOT_DIR}/project/scenes/InitialScene.cpp
     ${ROOT_DIR}/project/components/Head.cpp
     ${ROOT_DIR}/project/components/CamController.cpp
+    ${ROOT_DIR}/project/components/Spawner.cpp
     ${ROOT_DIR}/project/components/Timer.cpp
 )
 
@@ -42,13 +71,15 @@ target_link_libraries(Nce_integration_tests
     PRIVATE
         ${WIN32_LINK_FLAGS}
         gtest
-        imgui-lib
+        ${EXTERNAL_LIB_DIR}/libimgui.a
 )
 
 target_include_directories(Nce_integration_tests
     PRIVATE
-        ${NC_COMMON_DIRS}
-        ${PROJECT_INCLUDE_DIRS}
+        ${NC_COMMON_INCLUDE_DIR}
+        ${PROJECT_INCLUDE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
-        ${EXTERNAL_INCLUDE_DIRS}
+        ${EXTERNAL_INCLUDE_DIR}
 )
+
+add_test(Nce_integration_tests Nce_integration_tests)

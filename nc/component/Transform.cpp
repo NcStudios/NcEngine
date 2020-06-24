@@ -4,7 +4,7 @@
 #include <limits>
 
 #ifdef NC_EDITOR_ENABLED
-#include "external/imgui/imgui.h"
+#include "imgui/imgui.h"
 #endif
 
 namespace nc

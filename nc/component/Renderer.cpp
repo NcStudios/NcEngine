@@ -5,7 +5,7 @@
 #include "graphics/d3dresource/GraphicsResource.h"
 
 #ifdef NC_EDITOR_ENABLED
-#include "external/imgui/imgui.h"
+#include "imgui/imgui.h"
 #include "utils/editor/EditorManager.h"
 #endif
 

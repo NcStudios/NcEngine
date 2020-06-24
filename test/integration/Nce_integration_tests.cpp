@@ -28,6 +28,7 @@ namespace nc
     Window * Window::Instance = new Window((HINSTANCE)nullptr);
 
     /* Renderer stubs */
+    Renderer::Renderer() = default;
     Renderer::Renderer(graphics::Mesh& mesh) {(void)mesh;}
     Renderer::Renderer(Renderer&& o) {(void)o;}
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
@@ -41,6 +42,9 @@ namespace nc
 
     /* PointLight stubs */
     PointLight::PointLight() {}
+    PointLight::~PointLight() = default;
+    PointLight::PointLight(PointLight&&) {} //don't need actual impl on these?
+    PointLight& PointLight::operator=(PointLight&&) {return *this;}
     #ifdef NC_EDITOR_ENABLED
     void PointLight::EditorGuiElement() {}
     #endif
@@ -62,6 +66,7 @@ namespace graphics
 {
     /* Graphics stubs */
     Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight){ (void)hwnd; (void)screenWidth; (void)screenHeight; }
+    Graphics::~Graphics() = default;
     DirectX::XMMATRIX Graphics::GetCamera() const noexcept { return DirectX::XMMATRIX{}; }
     DirectX::XMMATRIX Graphics::GetProjection() const noexcept {return DirectX::XMMATRIX{}; }
     void Graphics::SetCamera(DirectX::FXMMATRIX cam) noexcept { (void)cam; }
@@ -106,95 +111,60 @@ namespace nc
     };
 }
 
-engine::Engine g_engine;
-
-void Init()
-{
-    Window window((HINSTANCE)nullptr);
-    NCE nce(&g_engine);
-    //scene::SceneManager sceneManager;
-}
-
-void TearDown()
-{
-}
-
-// void AdvanceFrame()
-// {
-//     g_engine.FixedUpdate();
-//     g_engine.FrameLogic();
-//     g_engine.FrameCleanup();
-// }
 
 
 TEST(EntityTest, constructorTests)
 {
-    Entity entity(2u, "Test");
+    Entity entity(2u, 0u, "Test");
     EXPECT_EQ(entity.Handle, 2u);
     EXPECT_EQ(entity.Tag, "Test");
+    EXPECT_EQ(entity.Handles.transform, 0u);
 }
 
 /***********
  * NCE TESTS
  ***********/
-
-/* CreateEntity */
-
-/* GetEntity */
-TEST(NceTest, GetEntity_exists_returnsPtr)
+TEST(Nce, GetEntity_exists_returnsPtr)
 {
-    auto eView = NCE::CreateEntity();
-    auto ePtr = NCE::GetEntity(eView.Handle);
-    EXPECT_NE(ePtr, nullptr);
-    NCE::DestroyEntity(eView.Handle);
+    // auto handle = NCE::CreateEntity();
+    // auto ptr = NCE::GetEntity(handle);
+    // EXPECT_NE(ptr, nullptr);
+    //NCE::DestroyEntity(handle);
 }
-TEST(NceTest, GetEntity_doesNotExist_returnsNull)
+TEST(Nce, GetEntity_doesNotExist_returnsNull)
 {
     NCE::DestroyEntity(1);
     auto ePtr = NCE::GetEntity(1);
     EXPECT_EQ(ePtr, nullptr);
 }
-// TEST(NceTest, GetEntity_byTag_returnsPtr)
-// {
-//     auto handle = NCE::CreateEntity({}, {}, {}, "Tag").Handle;
-//     AdvanceFrame();
-//     auto actualPtr = NCE::GetEntity("Tag");
-//     ASSERT_NE(actualPtr, nullptr);
-//     EXPECT_EQ(handle, actualPtr->Handle);
-//     NCE::DestroyEntity(handle);
-// }
-
-/* DestroyEntity */
-TEST(NceTest, DestroyEntity_exists_returnsTrue)
+TEST(Nce, DestroyEntity_exists_returnsTrue)
 {
-    auto eView = NCE::CreateEntity();
-    auto actual = NCE::DestroyEntity(eView.Handle);
+    auto handle = NCE::CreateEntity();
+    auto actual = NCE::DestroyEntity(handle);
     EXPECT_EQ(actual, true);
 }
-TEST(NceTest, DestroyEntity_doesNotExist_returnsFalse)
+TEST(Nce, DestroyEntity_doesNotExist_returnsFalse)
 {
     NCE::DestroyEntity(1);
     auto actual = NCE::DestroyEntity(1);
     EXPECT_EQ(actual, false);
 }
-
-/* HasUserComponent */
-TEST(NceTest, HasUserComponent_has_returnsTrue)
+TEST(Nce, HasUserComponent_has_returnsTrue)
 {
-    auto eView = NCE::CreateEntity();
-    NCE::AddUserComponent<PhonyComponent>(eView.Handle);
-    auto actual = NCE::HasUserComponent<PhonyComponent>(eView.Handle);
+    auto handle = NCE::CreateEntity();
+    NCE::AddUserComponent<PhonyComponent>(handle);
+    auto actual = NCE::HasUserComponent<PhonyComponent>(handle);
     EXPECT_EQ(actual, true);
-    NCE::DestroyEntity(eView.Handle);
+    NCE::DestroyEntity(handle);
 }
-TEST(NceTest,HasUserComponent_doesNotHave_returnsFalse)
+TEST(Nce,HasUserComponent_doesNotHave_returnsFalse)
 {
-    auto eView = NCE::CreateEntity();
-    auto actual = NCE::HasUserComponent<PhonyComponent>(eView.Handle);
+    auto handle = NCE::CreateEntity();
+    auto actual = NCE::HasUserComponent<PhonyComponent>(handle);
     EXPECT_EQ(actual, false);
-    NCE::DestroyEntity(eView.Handle);
+    NCE::DestroyEntity(handle);
 }
-TEST(NceTest, HasUserComponent_badHandle_throws)
+TEST(Nce, HasUserComponent_badHandle_throws)
 {
     NCE::DestroyEntity(1);
     auto caught = false;
@@ -208,16 +178,14 @@ TEST(NceTest, HasUserComponent_badHandle_throws)
     }
     EXPECT_EQ(caught, true);
 }
-
-/* AddUserComponent */
-TEST(NceTest, AddUserComponent_goodValues_succeeds)
+TEST(Nce, AddUserComponent_goodValues_succeeds)
 {
-    auto eView = NCE::CreateEntity();
-    EXPECT_NE(nullptr, NCE::AddUserComponent<PhonyComponent>(eView.Handle));
-    EXPECT_EQ(true, NCE::HasUserComponent<PhonyComponent>(eView.Handle));
-    NCE::DestroyEntity(eView.Handle);
+    auto handle = NCE::CreateEntity();
+    EXPECT_NE(nullptr, NCE::AddUserComponent<PhonyComponent>(handle));
+    EXPECT_EQ(true, NCE::HasUserComponent<PhonyComponent>(handle));
+    NCE::DestroyEntity(handle);
 }
-TEST(NceTest, AddUserComponent_badHandle_throws)
+TEST(Nce, AddUserComponent_badHandle_throws)
 {
     NCE::DestroyEntity(1);
     auto caught = false;
@@ -231,31 +199,29 @@ TEST(NceTest, AddUserComponent_badHandle_throws)
     }
     EXPECT_EQ(caught, true);
 }
-TEST(NceTest, AddUserComponent_doubleCall_returnsNull)
+TEST(Nce, AddUserComponent_doubleCall_returnsNull)
 {
-    auto eView = NCE::CreateEntity();
-    NCE::AddUserComponent<PhonyComponent>(eView.Handle);
-    auto actual = NCE::AddUserComponent<PhonyComponent>(eView.Handle);
+    auto handle = NCE::CreateEntity();
+    NCE::AddUserComponent<PhonyComponent>(handle);
+    auto actual = NCE::AddUserComponent<PhonyComponent>(handle);
     EXPECT_EQ(actual, nullptr);
 }
-
-/* RemoveUserComponent */
-TEST(NceTest, RemoveUserComponent_hasComp_returnsTrue)
+TEST(Nce, RemoveUserComponent_hasComp_returnsTrue)
 {
-    auto handle = NCE::CreateEntity().Handle;
+    auto handle = NCE::CreateEntity();
     NCE::AddUserComponent<PhonyComponent>(handle);
     auto actual = NCE::RemoveUserComponent<PhonyComponent>(handle);
     EXPECT_EQ(actual, true);
     NCE::DestroyEntity(handle);
 }
-TEST(NceTest, RemoveUserComponent_doesNotHave_returnsFalse)
+TEST(Nce, RemoveUserComponent_doesNotHave_returnsFalse)
 {
-    auto handle = NCE::CreateEntity().Handle;
+    auto handle = NCE::CreateEntity();
     auto actual = NCE::RemoveUserComponent<PhonyComponent>(handle);
     EXPECT_EQ(actual, false);
     NCE::DestroyEntity(handle);
 }
-TEST(NceTest, RemoveUserComponent_badHandle_throws)
+TEST(Nce, RemoveUserComponent_badHandle_throws)
 {
     NCE::DestroyEntity(1);
     auto caught = false;
@@ -274,6 +240,5 @@ TEST(NceTest, RemoveUserComponent_badHandle_throws)
 int main(int argc, char ** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
-    Init();
     return RUN_ALL_TESTS();
 }

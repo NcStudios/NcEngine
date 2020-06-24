@@ -11,8 +11,7 @@
 .vs/
 .vscode/
 build/
-external/gtest/
-external/directx/tk/Src/Shaders/
+external/src/gtest/
 Testing/
 
 #cal's scratch dir
