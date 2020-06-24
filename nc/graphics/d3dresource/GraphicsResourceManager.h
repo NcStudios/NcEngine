@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 #ifdef NC_EDITOR_ENABLED
-#include "external/imgui/imgui.h"
+#include "imgui/imgui.h"
 #endif
 
 namespace nc::graphics { class Graphics; }

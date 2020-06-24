@@ -39,9 +39,6 @@ Graphics::Graphics(HWND hwnd, float screenWidth, float screenHeight)
         __FILE__, __LINE__
     );
 
-    // Common states
-    m_states = std::make_unique<DirectX::CommonStates>(m_device.Get());
-
     //rasterizer state
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
     auto rasterizerDesc = D3D11_RASTERIZER_DESC 

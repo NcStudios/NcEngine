@@ -5,7 +5,7 @@ add_executable(PoolArray_tests
 
 target_include_directories(PoolArray_tests
     PRIVATE
-        ${NC_COMMON_DIRS}
+        ${NC_COMMON_INCLUDE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
@@ -71,15 +71,15 @@ target_link_libraries(Nce_integration_tests
     PRIVATE
         ${WIN32_LINK_FLAGS}
         gtest
-        imgui-lib
+        ${EXTERNAL_LIB_DIR}/libimgui.a
 )
 
 target_include_directories(Nce_integration_tests
     PRIVATE
-        ${NC_COMMON_DIRS}
-        ${PROJECT_INCLUDE_DIRS}
+        ${NC_COMMON_INCLUDE_DIR}
+        ${PROJECT_INCLUDE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
-        ${EXTERNAL_INCLUDE_DIRS}
+        ${EXTERNAL_INCLUDE_DIR}
 )
 
 add_test(Nce_integration_tests Nce_integration_tests)
