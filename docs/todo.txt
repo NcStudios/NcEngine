@@ -1,7 +1,9 @@
 ***********
 IN PROGRESS
 ***********
-
+-build issues
+    -gtest must be dl'd manually
+    -model (obj) files are ignored by git
 
 ***********
 BUGS
@@ -17,9 +19,6 @@ BUGS
 TO ADD
 ***********
 -add global search to api - GlobalGetComponent
--all d3d "slots" are passed at uint literalts, look into what exactly
-    is needed here - can we use an enum for these so there is some 
-    semantic meaning tied to the values passed?
 -update physics to 3d
 -support for multiple cameras
 -lights
@@ -44,4 +43,7 @@ LOW PRIORITY
 -make generating new user types easier/quicker (untility prog?)
 -save changes in debug mode
 -certain win/dx3d types aren't forward declared(HWND), can they be?
+-all d3d "slots" are passed at uint literals, look into what exactly
+    is needed here - can we use an enum for these so there is some 
+    semantic meaning tied to the values passed?
 
