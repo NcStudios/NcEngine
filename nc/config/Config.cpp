@@ -5,9 +5,6 @@
 #include <limits>
 #include <type_traits>
 
-#include <iostream>
-
-
 namespace nc::config
 {
 
@@ -18,7 +15,10 @@ bool Project::Validate() const
 
 bool Graphics::Validate() const
 {
-    return true;
+    return { (screenWidth > 0) &&
+             (screenHeight > 0) &&
+             (targetFPS > 0) &&
+             (frameUpdateInterval > 0.0f) };
 }
 
 bool Physics::Validate() const
