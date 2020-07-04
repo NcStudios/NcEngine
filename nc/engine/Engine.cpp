@@ -5,7 +5,7 @@
 #include "CollisionSystem.h"
 #include "win32/Window.h"
 #include "NCE.h"
-#include "ProjectSettings.h"
+#include "config/Config.h"
 #include "scene/SceneManager.h"
 #include "graphics/Graphics.h"
 #include "graphics/Mesh.h"
@@ -34,20 +34,24 @@ struct EntityMaps
 };
 
 
-Engine::Engine()//HWND hwnd)
-    : m_entities{ std::make_unique<EntityMaps>() }
+Engine::Engine(config::Config config )
+    : m_mainCameraTransform{ nullptr },
+      m_configData{ std::move(config) },
+      m_isRunning{ true },
+      m_frameDeltaTimeFactor{ 1.0f }
 {
     Window * wndInst = Window::Instance;
-    auto wndDim           = wndInst->GetWindowDimensions();
-    m_subsystem.Rendering = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
-    m_subsystem.Light     = std::make_unique<LightSystem>();
-    m_subsystem.Collision = std::make_unique<CollisionSystem>();
-    m_subsystem.Transform = std::move(std::make_unique<ComponentSystem<Transform>>());
-    m_subsystem.Handle    = std::make_unique<HandleManager<EntityHandle>>();
-    
+    auto wndDim = wndInst->GetWindowDimensions();
+    m_renderingSystem = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
+    m_entities = std::make_unique<EntityMaps>();
+    m_handleManager = std::make_unique<HandleManager<EntityHandle>>();
+    m_transformSystem = std::make_unique<ComponentSystem<Transform>>();
+    m_lightSystem = std::make_unique<LightSystem>();
+    m_collisionSystem = std::make_unique<CollisionSystem>();
+
 #ifdef NC_EDITOR_ENABLED
-    m_editorManager       = std::make_unique<nc::utils::editor::EditorManager>(wndInst->GetHWND(), m_subsystem.Rendering->GetGraphics());
-    m_frameLogicTimer     = std::make_unique<nc::time::Timer>();
+    m_editorManager = std::make_unique<nc::utils::editor::EditorManager>(wndInst->GetHWND(), m_renderingSystem->GetGraphics());
+    m_frameLogicTimer = std::make_unique<nc::time::Timer>();
 #endif
 }
 
@@ -91,7 +95,7 @@ void Engine::MainLoop()
 
     scene::SceneManager sceneManager;
 
-    while(m_engineState.isRunning)
+    while(m_isRunning)
     {   
         /**************
         * CYCLE START *
@@ -107,7 +111,7 @@ void Engine::MainLoop()
          * runs slowly and execution doesn't return back to physics in time for the 
          * next interval.
          */
-        if (time::Time::FixedDeltaTime > ProjectSettings::displaySettings.fixedUpdateInterval)
+        if (time::Time::FixedDeltaTime > m_configData.physics.fixedUpdateInterval)
         {
             FixedUpdate();
             ncTime.ResetFixedDeltaTime();
@@ -153,16 +157,16 @@ void Engine::FrameRender(float dt)
     m_editorManager->BeginFrame();
     #endif
 
-    m_subsystem.Rendering->FrameBegin();
-    m_subsystem.Light->BindLights();
-    m_subsystem.Rendering->Frame();
+    m_renderingSystem->FrameBegin();
+    m_lightSystem->BindLights();
+    m_renderingSystem->Frame();
 
     #ifdef NC_EDITOR_ENABLED
     m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_entities->Active);
     m_editorManager->EndFrame();
     #endif
 
-    m_subsystem.Rendering->FrameEnd();
+    m_renderingSystem->FrameEnd();
 }
 
 void Engine::FrameCleanup()
@@ -174,20 +178,17 @@ void Engine::FixedUpdate()
 {
     // user component fixed tick logic
     SendFixedUpdate();
-
-    // check collisions
-    //m_subsystem.Collision->CheckCollisions(const_cast<const std::vector<Transform>&>(m_subsystem.Transform->GetVector()));
 }
 
 void Engine::Exit()
 {
-    m_engineState.isRunning = false;
+    m_isRunning = false;
 }
 
 EntityHandle Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
-    auto entityHandle = m_subsystem.Handle->GenerateNewHandle();
-    auto transHandle = m_subsystem.Transform->Add(entityHandle, pos, rot, scale);
+    auto entityHandle = m_handleManager->GenerateNewHandle();
+    auto transHandle = m_transformSystem->Add(entityHandle, pos, rot, scale);
     m_entities->Active.emplace(entityHandle, Entity{entityHandle, transHandle, tag} );
     return entityHandle;
 }
@@ -230,18 +231,18 @@ Renderer* Engine::AddRenderer(const EntityHandle handle, graphics::Mesh& mesh)
         return nullptr;
     }
 
-    GetEntity(handle)->Handles.renderer = m_subsystem.Rendering->Add(handle, mesh);
+    GetEntity(handle)->Handles.renderer = m_renderingSystem->Add(handle, mesh);
     return GetRenderer(handle);
 }
 
 Renderer* Engine::GetRenderer(const EntityHandle handle) const
 {
-    return m_subsystem.Rendering->GetPointerTo(GetEntity(handle)->Handles.renderer);
+    return m_renderingSystem->GetPointerTo(GetEntity(handle)->Handles.renderer);
 }
 
 bool Engine::RemoveRenderer(const EntityHandle handle)
 {
-    return m_subsystem.Rendering->Remove(GetEntity(handle)->Handles.renderer);
+    return m_renderingSystem->Remove(GetEntity(handle)->Handles.renderer);
 }
 
 PointLight* Engine::AddPointLight(const EntityHandle handle)
@@ -251,19 +252,19 @@ PointLight* Engine::AddPointLight(const EntityHandle handle)
         return nullptr;
     }
 
-    GetEntity(handle)->Handles.pointLight = m_subsystem.Light->Add(handle);
+    GetEntity(handle)->Handles.pointLight = m_lightSystem->Add(handle);
     GetPointLight(handle)->Set({0.0f, 0.0f, 0.0f});
     return GetPointLight(handle);
 }
 
 PointLight* Engine::GetPointLight(const EntityHandle handle) const
 {
-    return m_subsystem.Light->GetPointerTo(GetEntity(handle)->Handles.pointLight);
+    return m_lightSystem->GetPointerTo(GetEntity(handle)->Handles.pointLight);
 }
 
 bool Engine::RemovePointLight(const EntityHandle handle)
 {
-    return m_subsystem.Light->Remove(handle);
+    return m_lightSystem->Remove(handle);
 }
 
 #ifdef NC_EDITOR_ENABLED
@@ -278,7 +279,7 @@ Transform * Engine::GetMainCameraTransform()
     return m_mainCameraTransform;
 }
 
-Transform* Engine::GetTransformPtr(const ComponentHandle handle) { return m_subsystem.Transform->GetPointerTo(handle); }
+Transform* Engine::GetTransformPtr(const ComponentHandle handle) { return m_transformSystem->GetPointerTo(handle); }
 
 void Engine::SendFrameUpdate(float dt) noexcept
 {
@@ -307,7 +308,7 @@ void Engine::SendOnDestroy() noexcept
         }
 
         pair.second.SendOnDestroy();
-        m_subsystem.Transform->Remove(entityPtr->Handles.transform);
+        m_transformSystem->Remove(entityPtr->Handles.transform);
     }
     m_entities->ToDestroy.clear();
 }

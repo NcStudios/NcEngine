@@ -26,9 +26,10 @@ TO ADD
     -support for multiple lights
     -additional light types (directional/spot)
 -config files
-    -enable reading from files again
-    -make human readable(xml or with property keys?)
     -additional values: initial scene name
+-rendering improvements
+    -way to mark things static so batching is possible
+    -add frustrum and occlusion culling
 
 LOW PRIORITY
 -unused params are marked (void)param for now, many of these can be removed,

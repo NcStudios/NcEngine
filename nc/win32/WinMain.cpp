@@ -1,6 +1,6 @@
 #include "NCWin32.h"
 #include "Window.h"
-#include "ProjectSettings.h"
+#include "config/Config.h"
 #include "engine/Engine.h"
 #include "debug/NcException.h"
 #include "graphics/Graphics.h"
@@ -10,8 +10,7 @@
 #endif
 
 #include <iostream>
-
-const char* PROJECT_SETTINGS_FILEPATH = "project/Settings/projectsettings.txt";
+#include <memory>
 
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLine, int showCommand)
 {
@@ -19,24 +18,31 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     (void)commandLine;
     (void)showCommand;
 
-    nc::ProjectSettings::Load(PROJECT_SETTINGS_FILEPATH);
+    const auto configPaths = nc::config::detail::ConfigPaths
+    {
+        "project/config/project.ini",
+        "project/config/graphics.ini",
+        "project/config/physics.ini"
+    };
+
+    auto config = nc::config::detail::Read(configPaths);
     
-    nc::Window window(instance);
+    nc::Window window(instance, config);
     
-    nc::engine::Engine* enginePtr = new nc::engine::Engine();//window.GetHWND());
+    auto engine = std::make_unique<nc::engine::Engine>(std::move(config));
 
     #ifdef NC_EDITOR_ENABLED
-    window.BindEditorManager(enginePtr->GetEditorManager());
+    window.BindEditorManager(engine->GetEditorManager());
     #endif
 
     try
     {
-        enginePtr->MainLoop();
+        engine->MainLoop();
     }
     catch(const nc::NcException& e)
     {
         e.what();
-        enginePtr->Exit();
+        engine->Exit();
     }
     catch(...)
     {
