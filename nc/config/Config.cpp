@@ -54,7 +54,6 @@ bool ParseLine(const std::string& line, std::string& key, std::string& value)
     return true;
 }
 
-
 template<class Out,
          class KeyValueMapFunc,
          class = typename std::enable_if<std::is_invocable<KeyValueMapFunc, const std::string&, const std::string&, Out&>::value>::type>
@@ -104,7 +103,7 @@ Project ReadProjectConfig(const std::string& path)
         }
         else
         {
-            throw nc::NcException("ConfigReader::ReadProjectConfig::mapFunc - unkown key");
+            throw nc::NcException("ConfigReader::ReadProjectConfig::mapFunc - unknown key");
         }
     };
     return ConfigReader<config::Project>(path, mapFunc);
