@@ -3,9 +3,10 @@ target_sources(${EXE_NAME}
         #nc directory
         ${ROOT_DIR}/nc/Entity.cpp
         ${ROOT_DIR}/nc/NCE.cpp
-        ${ROOT_DIR}/nc/ProjectSettings.cpp)
+)
 
 add_subdirectory(component)
+add_subdirectory(config)
 add_subdirectory(engine)
 add_subdirectory(graphics)
 add_subdirectory(input)

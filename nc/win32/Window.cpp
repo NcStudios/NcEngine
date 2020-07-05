@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "NCE.h"
-#include "ProjectSettings.h"
+#include "config/Config.h"
+#include "debug/NCException.h"
 #include <iostream>
 
 #ifdef NC_EDITOR_ENABLED
@@ -11,7 +12,7 @@ namespace nc {
 
 Window* Window::Instance = nullptr;
 
-Window::Window(HINSTANCE instance) noexcept
+Window::Window(HINSTANCE instance, const config::Config& config)
 {
     Window::Instance = this; //is it worth doing this the other way?
     
@@ -19,14 +20,17 @@ Window::Window(HINSTANCE instance) noexcept
     m_wndClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
     m_wndClass.lpfnWndProc = Window::WndProc;
     m_wndClass.hInstance = instance;
-    m_wndClass.lpszClassName = TEXT("PROJECT NAME"); //TEXT(ProjectSettings::projectName.c_str());
+    m_wndClass.lpszClassName = TEXT(config.project.projectName.c_str());
 
-    if(!RegisterClass(&m_wndClass)) std::cerr << "Failed to retrieve window rect" << std::endl; //should throw/terminate
+    if(!RegisterClass(&m_wndClass))
+    {
+        throw NcException("Window::Constructor - failed to register wnd class");
+    }
 
     m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
-                             ProjectSettings::projectName.c_str(),
+                             config.project.projectName.c_str(),
                              WS_OVERLAPPEDWINDOW|WS_VISIBLE,
-                             0, 0, ProjectSettings::displaySettings.screenWidth, ProjectSettings::displaySettings.screenHeight,
+                             0, 0, config.graphics.screenWidth, config.graphics.screenHeight,
                              0, 0, instance, 0);
                              
     if(!m_hwnd) std::cerr<< "HWND not found" << std::endl; //should throw/terminate
@@ -55,7 +59,6 @@ void Window::BindEditorManager(utils::editor::EditorManager* editorManager)
 void Window::OnWindowResize()
 {
     m_windowDimensions = GetWindowDimensions();
-    //PatBlt(m_deviceContext, 0, 0, m_windowDimensions.first, m_windowDimensions.second, BLACKNESS);
 }
 
 LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -73,9 +76,6 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         case WM_CLOSE:       { NCE::Exit();                             } break;
         case WM_DESTROY:     { NCE::Exit();                             } break;
         case WM_MOUSEWHEEL:  { input::SetMouseWheel(wParam, lParam);    } break;
-        // case WM_LBUTTONDOWN: { input::SetLeftButton(wParam, lParam);    } break;
-        // case WM_MBUTTONDOWN: { input::SetMiddleButton(wParam, lParam);  } break;
-        // case WM_RBUTTONDOWN: { input::SetRightButton(wParam, lParam);   } break;
 
         default:
             return DefWindowProc(hwnd, message, wParam, lParam);

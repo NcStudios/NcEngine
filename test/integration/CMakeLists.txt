@@ -36,10 +36,10 @@ add_executable(Nce_integration_tests
     ${ROOT_DIR}/nc/component/Component.cpp
     ${ROOT_DIR}/nc/component/Transform.cpp
     ${ROOT_DIR}/nc/component/Camera.cpp
+    ${ROOT_DIR}/nc/config/Config.cpp
     ${ROOT_DIR}/nc/math/Vector3.cpp
     ${ROOT_DIR}/nc/time/NCTime.cpp
     ${ROOT_DIR}/nc/input/Input.cpp
-    ${ROOT_DIR}/nc/ProjectSettings.cpp
     ${ROOT_DIR}/nc/engine/Engine.cpp
     ${ROOT_DIR}/nc/engine/LightSystem.cpp
     ${ROOT_DIR}/nc/engine/CollisionSystem.cpp

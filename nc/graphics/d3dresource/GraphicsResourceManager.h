@@ -23,7 +23,11 @@ namespace nc::graphics::d3dresource
             {
                 Get().m_graphics = gfx;
             }
-            static Graphics * GetGraphics() { return Get().m_graphics;}
+
+            static Graphics * GetGraphics()
+            {
+                return Get().m_graphics;
+            }
 
             template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
             static std::shared_ptr<GraphicsResource> Acquire(Params&&...p)
