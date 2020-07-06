@@ -86,6 +86,7 @@ endif()
 
 target_link_libraries(${EXE_NAME}
     PRIVATE
+        ${EXTERNAL_LIB_DIR}/libassimp.dll.a
         ${WIN32_LINK_FLAGS}
 )
 
