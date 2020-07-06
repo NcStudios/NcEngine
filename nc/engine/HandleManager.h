@@ -21,5 +21,10 @@ class HandleManager
         {
             return m_current;
         }
+
+        void Reset()
+        {
+            m_current = 1;
+        }
 };
 }

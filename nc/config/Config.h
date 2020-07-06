@@ -12,9 +12,9 @@ namespace nc::config
     struct Graphics
     {
         bool Validate() const;
-        int screenWidth;
-        int screenHeight;
-        int targetFPS;
+        unsigned int screenWidth;
+        unsigned int screenHeight;
+        unsigned int targetFPS;
         double frameUpdateInterval;
     };
     

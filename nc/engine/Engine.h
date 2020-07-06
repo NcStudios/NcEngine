@@ -1,6 +1,4 @@
 #pragma once
-
-#include "win32/NCWinDef.h"
 #include "Common.h"
 #include "config/Config.h"
 
@@ -18,8 +16,9 @@ namespace nc
     class Vector3;
     class Vector4;
 
-    namespace time     { class Timer; }
+    namespace time { class Timer; }
     namespace graphics { class Graphics; class Mesh; }
+    namespace scene {class Scene; }
 
     namespace engine { struct EntityMaps;
                        class CollisionSystem;
@@ -44,21 +43,15 @@ namespace nc::engine
             void MainLoop();
             void Exit();
 
-            //creates new Entity and Transform and adds it to ToInitialize, returns handle to Entity
-            EntityHandle CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
+            void ChangeScene(std::unique_ptr<scene::Scene>&& scene);
 
-            //moves entity from current map to ToDestroy, returns true if successful
+            EntityHandle CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
             bool DestroyEntity(const EntityHandle handle);
-            
-            //returns ptr to Transform with given handle, returns nullptr if not found
-            Transform * GetTransformPtr(const ComponentHandle handle);
-            
-            //returns ptr to entity in Active or ToInitialize maps, returns nullptr if not found
             Entity * GetEntity(const EntityHandle handle) const;
-            
-            //returns pointer to first active found entity with tag or nullptr if not found
             Entity * GetEntity(const std::string& tag) const;
 
+            Transform * GetTransformPtr(const ComponentHandle handle);
+            
             Renderer * AddRenderer(const EntityHandle handle, graphics::Mesh& mesh);
             Renderer * GetRenderer(const EntityHandle handle) const;
             bool RemoveRenderer(const EntityHandle handle);
@@ -67,6 +60,7 @@ namespace nc::engine
             PointLight * GetPointLight(const EntityHandle handle) const;
             bool RemovePointLight(const EntityHandle handle);
 
+            void RegisterMainCamera(Camera * camera);
             Transform * GetMainCameraTransform();
             
             #ifdef NC_EDITOR_ENABLED
@@ -80,16 +74,22 @@ namespace nc::engine
             std::unique_ptr<RenderingSystem> m_renderingSystem;
             std::unique_ptr<LightSystem> m_lightSystem;
             std::unique_ptr<CollisionSystem> m_collisionSystem;
-            Transform * m_mainCameraTransform;
+            
+            Transform * m_mainCameraTransform; //non-owning
             config::Config m_configData;
             bool m_isRunning;
+
+            bool m_isSceneSwapScheduled;
+            std::unique_ptr<scene::Scene> m_activeScene;
+            std::unique_ptr<scene::Scene> m_swapScene;
+
             float m_frameDeltaTimeFactor; //for slowing/pausing in debug editor
 
             #ifdef NC_EDITOR_ENABLED
             std::unique_ptr<utils::editor::EditorManager> m_editorManager;
             std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
             #endif
-            
+
             void FrameLogic(float dt);
             void FrameRender(float dt);
             void FrameCleanup();
@@ -97,6 +97,9 @@ namespace nc::engine
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
+
+            void DoSceneSwap();
+            void ClearAllStateData();
 
             //returns true if entity is in Active or ToInitialize, false otherwise
             bool DoesEntityExist(const EntityHandle handle) const ; 

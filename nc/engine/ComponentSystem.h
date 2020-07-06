@@ -39,6 +39,8 @@ class ComponentSystem
         template<class Func>
         void ForEach(Func func);        
 
+        void Clear();
+
     protected:
         ComponentIndexPair GetIndexPairFromHandle(const ComponentHandle handle) const;
         void MapHandleToIndexPair(const ComponentHandle handle, const ComponentIndexPair targetIndex);
@@ -57,6 +59,16 @@ ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize)
         m_poolArrays {}
 {
     m_poolArrays.emplace_back(alloc::PoolArray<T>(m_poolSize));
+}
+
+template<class T>
+void ComponentSystem<T>::Clear()
+{
+    m_poolArrays.clear();
+    m_poolArrays.shrink_to_fit();
+    m_poolArrays.emplace_back(alloc::PoolArray<T>(m_poolSize));
+    m_indexMap.clear();
+    m_handleManager.Reset();
 }
 
 template<class T>
