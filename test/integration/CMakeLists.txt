@@ -75,6 +75,7 @@ target_link_libraries(Nce_integration_tests
         gtest
         ${EXTERNAL_LIB_DIR}/libimgui.a
         ${EXTERNAL_LIB_DIR}/windowscodecs.lib
+        ${EXTERNAL_LIB_DIR}/libassimp.dll.a
 )
 
 target_include_directories(Nce_integration_tests

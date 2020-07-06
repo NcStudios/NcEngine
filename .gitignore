@@ -19,3 +19,7 @@ scratch/
 
 #imgui state file
 imgui.ini
+
+#assimp libs
+!libassimp.dll
+!libassimp.dll.a
