@@ -4,6 +4,7 @@
 
 namespace nc
 {
+    namespace config { struct Config; }
     #ifdef NC_EDITOR_ENABLED
     namespace utils::editor { class EditorManager; }
     #endif
@@ -13,7 +14,7 @@ namespace nc
         public:
             static Window* Instance;
 
-            Window(HINSTANCE instance) noexcept;
+            Window(HINSTANCE instance, const config::Config& config);
             ~Window() noexcept;
             Window(const Window& other) = delete;
             Window(Window&& other) = delete;

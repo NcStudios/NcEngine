@@ -2,6 +2,7 @@
 
 #include "win32/NCWinDef.h"
 #include "Common.h"
+#include "config/Config.h"
 
 #include <memory>
 #include <string>
@@ -37,7 +38,7 @@ namespace nc::engine
     class Engine
     {
         public:
-            Engine();//HWND hwnd);
+            Engine(config::Config config);
             ~Engine();
 
             void MainLoop();
@@ -73,37 +74,26 @@ namespace nc::engine
             #endif
 
         private:
-            struct EngineState
-            {
-                bool isRunning = true;
-            } m_engineState;
-
-            float m_frameDeltaTimeFactor = 1.0f; //for slowing/pausing in debug editor
-
-            struct Subsystem
-            {
-                std::unique_ptr<HandleManager<EntityHandle>> Handle;
-                std::unique_ptr<ComponentSystem<Transform>>  Transform;
-                std::unique_ptr<RenderingSystem>             Rendering;
-                std::unique_ptr<LightSystem>                 Light;
-                std::unique_ptr<CollisionSystem>             Collision;
-                
-            } m_subsystem;
-
             std::unique_ptr<EntityMaps> m_entities;
-            
+            std::unique_ptr<HandleManager<EntityHandle>> m_handleManager;
+            std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
+            std::unique_ptr<RenderingSystem> m_renderingSystem;
+            std::unique_ptr<LightSystem> m_lightSystem;
+            std::unique_ptr<CollisionSystem> m_collisionSystem;
+            Transform * m_mainCameraTransform;
+            config::Config m_configData;
+            bool m_isRunning;
+            float m_frameDeltaTimeFactor; //for slowing/pausing in debug editor
+
             #ifdef NC_EDITOR_ENABLED
             std::unique_ptr<utils::editor::EditorManager> m_editorManager;
             std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
             #endif
             
-            Transform * m_mainCameraTransform;
-
             void FrameLogic(float dt);
             void FrameRender(float dt);
             void FrameCleanup();
             void FixedUpdate();
-            //void SendOnInitialize() noexcept;
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;

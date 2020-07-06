@@ -6,6 +6,10 @@ if(${PROJECT_SOURCE_DIR} EQUAL ${PROJECT_BINARY_DIR})
     message(FATAL_ERROR "Don't be fool, out-of-source build with your tool.")
 endif()
 
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/build)
+    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/build)
+endif()
+
 #VARIABLES
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

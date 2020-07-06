@@ -12,6 +12,7 @@
 #include "component/Renderer.h"
 #include "component/PointLight.h"
 #include "utils/editor/EditorManager.h"
+#include "config/Config.h"
 
 #include <memory>
 
@@ -20,12 +21,12 @@ using namespace nc;
 namespace nc
 {
     /* Window stubs */
-    Window::Window(HINSTANCE hi) noexcept { (void)hi; }
+    Window::Window(HINSTANCE hi, const config::Config& config) { (void)hi;(void)config; }
     Window::~Window() {}
     HWND Window::GetHWND() const noexcept { return (HWND)nullptr; }
     std::pair<int, int> Window::GetWindowDimensions() const noexcept { return m_windowDimensions; }
     void Window::ProcessSystemMessages() {}
-    Window * Window::Instance = new Window((HINSTANCE)nullptr);
+    Window * Window::Instance = new Window((HINSTANCE)nullptr, {});
 
     /* Renderer stubs */
     Renderer::Renderer() = default;
