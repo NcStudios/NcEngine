@@ -5,5 +5,6 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/nc/graphics/d3dresource/GraphicsResource.cpp
         ${ROOT_DIR}/nc/graphics/Material.cpp
         ${ROOT_DIR}/nc/graphics/Mesh.cpp
-        ${ROOT_DIR}/nc/graphics/Shader.cpp
+        ${ROOT_DIR}/nc/graphics/WICTextureLoader.cpp
+        ${ROOT_DIR}/nc/graphics/PBRMaterial.cpp
 )

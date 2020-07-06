@@ -23,8 +23,7 @@ Spawner::Spawner()
         Vector3  randRot{ };
         Vector3  randScl{ m_sclDist(m_rng), m_sclDist(m_rng), m_sclDist(m_rng) };
         DirectX::XMFLOAT3 randClr{ m_clrDist(m_rng), m_clrDist(m_rng), m_clrDist(m_rng) };
-        graphics::Material material{ };
-        material.color = randClr;
+        graphics::PBRMaterial material{ };
 
         if (i % 2 == 0)
         {
@@ -59,8 +58,7 @@ void Spawner::FrameUpdate(float dt)
         Vector3  randRot{ m_angDist(m_rng), m_angDist(m_rng), m_angDist(m_rng) };
         Vector3  randScl{ m_sclDist(m_rng), m_sclDist(m_rng), m_sclDist(m_rng) };
         DirectX::XMFLOAT3 randClr{ m_clrDist(m_rng), m_clrDist(m_rng), m_clrDist(m_rng) };
-        graphics::Material material{ };
-        material.color = randClr;
+        graphics::PBRMaterial material{ };
 
         EntityHandle boxHandle = NCE::CreateEntity(randPos, randRot, randScl, "Worm");
         NCE::AddUserComponent<Head>(boxHandle);

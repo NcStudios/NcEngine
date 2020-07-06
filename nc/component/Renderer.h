@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace nc::graphics { class Model; class Mesh; class Material; class Graphics; }
+namespace nc::graphics { class Model; class Mesh; class Material; class Graphics; class PBRMaterial;}
 
 namespace nc
 {
@@ -24,12 +24,12 @@ namespace nc
             ~Renderer() = default;
 
             #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            void SyncMaterialData();
+            // void EditorGuiElement() override;
+            // void SyncMaterialData();
             #endif
 
             void SetMesh(graphics::Mesh& mesh);
-            void SetMaterial(graphics::Material& material);
+            void SetMaterial(graphics::PBRMaterial& material);
             void Update(graphics::Graphics * gfx);
 
         private:

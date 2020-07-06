@@ -81,6 +81,7 @@ if(NC_EDITOR_ENABLED)
     target_link_libraries(${EXE_NAME}
         PRIVATE
             ${EXTERNAL_LIB_DIR}/libimgui.a
+            ${EXTERNAL_LIB_DIR}/windowscodecs.lib
     )
 endif()
 

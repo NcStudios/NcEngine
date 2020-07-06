@@ -23,9 +23,16 @@ void InitialScene::Load()
     auto timerHandle = NCE::CreateEntity({}, {}, {}, "Timer");
     NCE::AddUserComponent<Timer>(timerHandle);
 
-    //Spawner
-    auto spawnHandle = NCE::CreateEntity({}, {}, {}, "Spawner");
-    NCE::AddUserComponent<Spawner>(spawnHandle);
+    //Floor
+    Vector3  position{ -15.0f, 0.0f, 0.0f };
+    Vector3  scale{ 50.0f, 50.0f, 50.0f };
+    Vector3  rotation{ -53.0f, 83.0f, -52.0f };
+    EntityHandle handle = NCE::CreateEntity(position, rotation, scale, "Square");
+    NCE::AddUserComponent<Head>(handle);
+    auto mesh = nc::graphics::Mesh("project\\models\\plane.obj");
+    auto rend = NCE::AddEngineComponent<Renderer>(handle, mesh);
+    auto pbrMaterial = nc::graphics::PBRMaterial();
+    rend->SetMaterial(pbrMaterial);
 }
  
 void InitialScene::Unload()

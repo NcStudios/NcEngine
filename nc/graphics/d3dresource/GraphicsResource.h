@@ -118,6 +118,40 @@ namespace nc::graphics::d3dresource
     };
 }
 
+/* Sampler */
+namespace nc::graphics::d3dresource
+{
+    class Sampler : public GraphicsResource
+    {
+        public: 
+            Sampler(const std::string& tag);
+            void Bind() noexcept override;
+            static std::string GetUID(const std::string& tag) noexcept;
+
+        private:
+            const std::string m_tag;
+            Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
+    };
+}
+
+/* Texture */
+namespace nc::graphics::d3dresource
+{
+    class Texture : public GraphicsResource
+    {
+        public:
+            Texture(const std::string& path);
+            void Bind() noexcept override;
+            static std::string GetUID(const std::string& path) noexcept;
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTextureView();
+        
+        protected:
+            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureView;
+            Microsoft::WRL::ComPtr<ID3D11Resource> m_texture;
+            const std::string m_path;
+    };
+}
+
 /* Vertex Shader */
 namespace nc::graphics::d3dresource
 {
@@ -136,6 +170,23 @@ namespace nc::graphics::d3dresource
     };
 }
 
+// /* Pixel Shader */
+// namespace nc::graphics::d3dresource
+// {
+//     class PixelShader : public GraphicsResource
+//     {
+//         public:
+//             PixelShader(const std::string& path);
+//             void Bind() noexcept override;
+//             static std::string GetUID(const std::string& path) noexcept;
+
+//         protected:
+//             Microsoft::WRL::ComPtr<ID3DBlob> m_bytecodeBlob;
+//             Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+//             std::string m_path;
+//     };
+// }
+
 /* Pixel Shader */
 namespace nc::graphics::d3dresource
 {
@@ -145,11 +196,14 @@ namespace nc::graphics::d3dresource
             PixelShader(const std::string& path);
             void Bind() noexcept override;
             static std::string GetUID(const std::string& path) noexcept;
+            void SetTextureView(const ID3D11ShaderResourceView* textureView);
 
         protected:
             Microsoft::WRL::ComPtr<ID3DBlob> m_bytecodeBlob;
             Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+            unsigned int m_shaderResourceCount;
             std::string m_path;
+
     };
 }
 

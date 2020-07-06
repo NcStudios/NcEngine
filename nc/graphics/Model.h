@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Material.h"
+#include "PBRMaterial.h"
 #include "Mesh.h"
 
 #include <vector>
@@ -14,7 +14,6 @@ namespace nc { class Transform; }
 namespace nc::graphics
 {
     class Graphics;
-    class Material;
     class Mesh;
     namespace d3dresource
     {
@@ -32,16 +31,16 @@ namespace nc::graphics
         /** @todo Can we pass material by ptr? */
             Model();
             Model(const Mesh&);
-            Model(const Mesh& mesh, const Material& material);
+            Model(const Mesh& mesh, const PBRMaterial& material);
 
-            void SetMaterial(const Material& material) noexcept;
+            void SetMaterial(const PBRMaterial& material) noexcept;
             void SetMesh(const Mesh& mesh) noexcept;
 
             void Draw(Graphics* gfx) const noexcept;
 
             void UpdateTransformationMatrix(Transform* transform) noexcept;
             DirectX::XMMATRIX GetTransformXM() const noexcept;
-            Material * GetMaterial() noexcept;
+            PBRMaterial * GetMaterial() noexcept;
 
             template<class T>
             T * QueryGraphicsResource() noexcept;
@@ -53,7 +52,8 @@ namespace nc::graphics
             void InitializeGraphicsPipeline();
 
             Mesh m_mesh;
-            Material m_material;
+            PBRMaterial m_material;
+            PBRMaterial m_materialTest;
             DirectX::XMMATRIX m_transformationMatrix;
             const d3dresource::IndexBuffer * m_indexBuffer = nullptr;
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;

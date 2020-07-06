@@ -45,6 +45,8 @@ add_executable(Nce_integration_tests
     ${ROOT_DIR}/nc/engine/CollisionSystem.cpp
     ${ROOT_DIR}/nc/scene/SceneManager.cpp
     ${ROOT_DIR}/nc/graphics/Model.cpp
+    ${ROOT_DIR}/nc/graphics/PBRMaterial.cpp
+    ${ROOT_DIR}/nc/graphics/WICTextureLoader.cpp
     ${ROOT_DIR}/nc/graphics/d3dresource/GraphicsResource.cpp
     ${ROOT_DIR}/nc/utils/objloader/ObjLoader.cpp
     ${ROOT_DIR}/project/scenes/InitialScene.cpp
@@ -72,6 +74,7 @@ target_link_libraries(Nce_integration_tests
         ${WIN32_LINK_FLAGS}
         gtest
         ${EXTERNAL_LIB_DIR}/libimgui.a
+        ${EXTERNAL_LIB_DIR}/windowscodecs.lib
 )
 
 target_include_directories(Nce_integration_tests

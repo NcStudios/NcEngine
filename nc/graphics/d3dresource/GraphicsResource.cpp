@@ -3,6 +3,7 @@
 #include <d3dcompiler.h>
 #include "directx/math/DirectXMath.h"
 #include "Transform.h"
+#include "graphics/WICTextureLoader.h"
 
 namespace nc::graphics::d3dresource
 {
@@ -16,6 +17,25 @@ namespace nc::graphics::d3dresource
         return GraphicsResourceManager::GetGraphics()->m_device.Get();
     }
 
+    Sampler::Sampler(const std::string& tag)
+    {
+        D3D11_SAMPLER_DESC samplerDesc = {};
+        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+
+        THROW_FAILED
+        (
+            GetDevice()->CreateSamplerState(&samplerDesc, &m_sampler),
+            __FILE__, __LINE__
+        );
+    }
+
+    void Sampler::Bind() noexcept
+    {
+        GetContext()->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
+    }
 
     VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag)
         : m_stride(sizeof(Vertex)), m_tag(tag)
@@ -44,8 +64,6 @@ namespace nc::graphics::d3dresource
         const UINT offset = 0u;
         GetContext()->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &offset);
     }
-
-
 
     IndexBuffer::IndexBuffer(const std::vector<uint16_t>& indices, std::string& tag)
         : m_count((UINT)indices.size()), m_tag(tag)
@@ -78,8 +96,24 @@ namespace nc::graphics::d3dresource
         return m_count;
     }
 
+    Texture::Texture(const std::string& path) 
+        : m_path(path)
+    {
+        std::wstring w_path;
+        w_path.assign(path.begin(), path.end());
 
+        THROW_FAILED(CreateWICTextureFromFile(GetDevice(), GetContext(), w_path.c_str(), &m_texture, &m_textureView, 0), __FILE__, __LINE__);
+    }
 
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture::GetTextureView()
+    {
+        return m_textureView;
+    }
+
+    void Texture::Bind() noexcept
+    {
+        GetContext()->PSSetShaderResources(0u, 1u, m_textureView.GetAddressOf());
+    }
 
     VertexShader::VertexShader(const std::string& path)
         : m_path(path)
@@ -110,10 +144,13 @@ namespace nc::graphics::d3dresource
     PixelShader::PixelShader(const std::string& path )
         : m_path(path)
     {
+        // Read the shader code into a blob
         Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
         THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
+
+        // Create the shader
         THROW_FAILED
         (
             GetDevice()->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),
@@ -121,6 +158,26 @@ namespace nc::graphics::d3dresource
                                             nullptr, &m_pixelShader),
             __FILE__, __LINE__
         );
+
+        // // Reflect the shader to get information about it and its variables
+        // ID3D11ShaderReflection* shaderReflection;
+        // D3DReflect( m_bytecodeBlob->GetBufferPointer(),
+        //             m_bytecodeBlob->GetBufferSize(),
+        //             IID_ID3D11ShaderReflection,
+        //             (void**)&shaderReflection);
+
+        // // Get the shader description
+        // D3D11_SHADER_DESC shaderDesc;
+        // shaderReflection->GetDesc(&shaderDesc);
+
+        // // Create the resource arrays
+        // m_shaderResourceCount = shaderDesc.ConstantBuffers;
+        
+    }
+
+    void PixelShader::SetTextureView(const ID3D11ShaderResourceView* textureView) 
+    {
+
     }
 
     void PixelShader::Bind() noexcept
@@ -199,6 +256,11 @@ namespace nc::graphics::d3dresource
     /****************
     * UID Functions *
     ****************/
+    std::string Sampler::GetUID(const std::string& tag) noexcept
+    {
+        return typeid(Sampler).name() + tag;
+    }
+
     std::string VertexBuffer::GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept
     {
         (void)vertices;
@@ -236,5 +298,10 @@ namespace nc::graphics::d3dresource
     std::string Topology::GetUID(D3D11_PRIMITIVE_TOPOLOGY topology) noexcept
     {
         return typeid(Topology).name() + std::to_string(topology);
+    }
+
+    std::string Texture::GetUID(const std::string& path) noexcept
+    {
+        return typeid(Texture).name() + path;
     }
 }
