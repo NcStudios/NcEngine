@@ -1,7 +1,14 @@
 #pragma once
-
 #include "NCE.h"
+#include "scenes/InitialScene.h"
+#include <memory>
 
+class SceneReset : public nc::Component
+{
+    public:
+        SceneReset() = default;
+        void FrameUpdate(float dt);
+};
 
 class Timer : public nc::Component
 {

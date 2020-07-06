@@ -8,8 +8,6 @@
 #include "imgui/imgui.h"
 #endif
 
-#include <iostream>
-
 namespace nc
 {
     PointLight::PointLight()
@@ -17,8 +15,8 @@ namespace nc
           m_transform{ nullptr }
     {
         m_constBufData.pos              = {0,0,0};
-        m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};
-        m_constBufData.diffuseColor     = {0.8f, 0.2f, 0.2f};
+        m_constBufData.ambient          = {0.8f, 0.8f, 0.8f};
+        m_constBufData.diffuseColor     = {1.0f, 1.0f, 1.0f};
         m_constBufData.diffuseIntensity = 1.2f;
         m_constBufData.attConst         = 0.09f;
         m_constBufData.attLin           = 0.012f;
@@ -44,8 +42,8 @@ namespace nc
     {
         (void)radius; //currently unused
         m_constBufData.pos              = pos;
-        m_constBufData.ambient          = {0.05f, 0.05f, 0.05f};
-        m_constBufData.diffuseColor     = {0.8f, 0.2f, 0.2f};
+        m_constBufData.ambient          = {0.4f, 0.4f, 0.4f};
+        m_constBufData.diffuseColor     = {0.8f, 0.8f, 0.6f};
         m_constBufData.diffuseIntensity = 1.2f;
         m_constBufData.attConst         = 0.09f;
         m_constBufData.attLin           = 0.012f;

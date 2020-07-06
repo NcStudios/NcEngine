@@ -15,9 +15,9 @@ bool Project::Validate() const
 
 bool Graphics::Validate() const
 {
-    return { (screenWidth > 0) &&
-             (screenHeight > 0) &&
-             (targetFPS > 0) &&
+    return { (screenWidth != 0) &&
+             (screenHeight != 0) &&
+             (targetFPS != 0) &&
              (frameUpdateInterval > 0.0f) };
 }
 

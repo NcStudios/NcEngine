@@ -1,9 +1,18 @@
-#include "Timer.h"
+#include "DebugUtils.h"
 
 #include <chrono>
 #include <iostream>
 
 using namespace nc::input;
+
+void SceneReset::FrameUpdate(float dt)
+{
+    (void)dt;
+    if (GetKeyDown(KeyCode::F1))
+    {
+        nc::NCE::ChangeScene(std::make_unique<InitialScene>());
+    }
+}
 
 void Timer::FrameUpdate(float dt)
 {

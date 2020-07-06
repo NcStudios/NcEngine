@@ -6,7 +6,6 @@
 #include "win32/Window.h"
 #include "NCE.h"
 #include "config/Config.h"
-#include "scene/SceneManager.h"
 #include "graphics/Graphics.h"
 #include "graphics/Mesh.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
@@ -14,6 +13,8 @@
 #include "component/Camera.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
+#include "scene/Scene.h"
+#include "project/scenes/InitialScene.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -33,11 +34,13 @@ struct EntityMaps
     EntityMap_t ToDestroy;
 };
 
-
 Engine::Engine(config::Config config )
     : m_mainCameraTransform{ nullptr },
       m_configData{ std::move(config) },
       m_isRunning{ true },
+      m_isSceneSwapScheduled{ false },
+      m_activeScene{ nullptr },
+      m_swapScene{ nullptr },
       m_frameDeltaTimeFactor{ 1.0f }
 {
     Window * wndInst = Window::Instance;
@@ -57,6 +60,47 @@ Engine::Engine(config::Config config )
 
 Engine::~Engine() 
 {}
+
+void Engine::ChangeScene(std::unique_ptr<scene::Scene>&& scene)
+{
+    m_isSceneSwapScheduled = true;
+    m_swapScene = std::move(scene);
+}
+
+void Engine::DoSceneSwap()
+{
+    m_activeScene->Unload();
+    ClearAllStateData();
+    m_activeScene = std::move(m_swapScene);
+    m_activeScene->Load();
+}
+
+void Engine::ClearAllStateData()
+{
+    m_isSceneSwapScheduled = false;
+
+    auto handles = std::vector<EntityHandle>{};
+    for(const auto& pair : m_entities->Active)
+    {
+        handles.emplace_back(pair.first);
+    }
+    for(const auto handle : handles)
+    {
+        DestroyEntity(handle);
+    }
+    SendOnDestroy();
+    
+    m_entities->Active.clear();
+    m_entities->ToDestroy.clear();
+    m_handleManager->Reset();
+    m_activeScene = nullptr;
+    //do not clear swap scene
+    m_mainCameraTransform = nullptr;
+
+    m_transformSystem->Clear();
+    m_renderingSystem->Clear();
+    m_lightSystem->Clear();   
+}
 
 bool Engine::DoesEntityExist(const EntityHandle handle) const
 {
@@ -85,15 +129,8 @@ void Engine::MainLoop()
     NCE nce(this);
     time::Time ncTime;
 
-    /** @todo
-     * Camera should not be created here. But where?
-     * Maybe each scene is responsible?
-     */ 
-    auto camHandle = CreateEntity(Vector3(0.0f, 0.0f, -15.0f), Vector3::Zero(), Vector3::Zero(), "MainCamera");
-    m_mainCameraTransform = GetTransformPtr(camHandle);
-    NCE::AddUserComponent<Camera>(camHandle);
-
-    scene::SceneManager sceneManager;
+    m_activeScene = std::make_unique<InitialScene>();
+    m_activeScene->Load();
 
     while(m_isRunning)
     {   
@@ -135,7 +172,6 @@ void Engine::MainLoop()
         #endif
         FrameRender(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
         FrameCleanup();
-        input::Flush();
         ncTime.ResetFrameDeltaTime();
 
         /************
@@ -172,6 +208,11 @@ void Engine::FrameRender(float dt)
 void Engine::FrameCleanup()
 {
     SendOnDestroy();
+    if(m_isSceneSwapScheduled)
+    {
+        DoSceneSwap();
+    }
+    input::Flush();
 }
 
 void Engine::FixedUpdate()
@@ -274,6 +315,14 @@ nc::utils::editor::EditorManager* Engine::GetEditorManager()
 }
 #endif
 
+void Engine::RegisterMainCamera(Camera * camera)
+{
+    auto handle = camera->GetParentHandle();
+    auto entity = GetEntity(handle);
+    m_mainCameraTransform = GetTransformPtr(entity->Handles.transform);
+    IF_THROW(!m_mainCameraTransform, "Engine::RegisterMainCamera - bad args");
+}
+
 Transform * Engine::GetMainCameraTransform()
 {
     return m_mainCameraTransform;
@@ -308,7 +357,10 @@ void Engine::SendOnDestroy() noexcept
         }
 
         pair.second.SendOnDestroy();
-        m_transformSystem->Remove(entityPtr->Handles.transform);
+        const auto& handles = entityPtr->Handles;
+        m_transformSystem->Remove(handles.transform);
+        m_renderingSystem->Remove(handles.renderer);
+        m_lightSystem->Remove(handles.pointLight);
     }
     m_entities->ToDestroy.clear();
 }
