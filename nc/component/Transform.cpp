@@ -55,7 +55,7 @@ namespace nc
     {
         auto v_rot = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
         auto v_scl = DirectX::XMMatrixScaling(m_scale.X(), m_scale.Y(), m_scale.Z());
-        auto v_trn = DirectX::XMMatrixTranslation(m_position.X(), m_rotation.X(), m_rotation.Z());
+        auto v_trn = DirectX::XMMatrixTranslation(m_position.X(), m_position.Y(), m_position.Z());
 
         return v_rot * v_scl * v_trn;
     }
@@ -76,7 +76,7 @@ namespace nc
 
     void Transform::Translate(const Vector3& vec) noexcept
     {
-        m_position.TranslateBy(vec);
+        m_position = m_position + vec;
     }
 
     void Transform::CamTranslate(Vector3& translation, float factor) noexcept
@@ -108,40 +108,4 @@ namespace nc
             (float)math::Clamp(m_rotation.Z() + zAngle * speed, min, max)
         };
     }
-
-
-    // DirectX::XMMATRIX GetLookMatrix() const noexcept
-    // {
-    //     const auto zero = DirectX::XMVectorZero();
-    //     const auto up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    //     const auto pos = DirectX::XMVectorSet(m_position.GetX(), m_position.GetY(), -m_position.GetZ(), 0.0f);
-    //     const auto rot = DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0.0f);
-    //     const auto transformedPos = DirectX::XMVector3Transform(pos, rot);
-
-    //     return DirectX::XMMatrixLookAtLH(transformedPos, zero, up) *
-    //            DirectX::XMMatrixRotationRollPitchYaw(0, 0, 0);
-    // }
-
-    //void Rotate(const Vector3& vec)    noexcept { m_rotation.TranslateBy(vec); } 
-
-    // void RotateAround(const Vector3& axis, const float angle)
-    // {
-    //     m_rotation = m_rotation + (axis * angle);
-    // }
-
-    // void RotateByVector(const Vector3& vec) noexcept
-    // {
-    //     auto cameraRotation   = m_rotation.GetXMFloat3();
-    //     auto rotationVector   = vec.GetXMFloat3();
-    //     auto v_cameraRotation = DirectX::XMLoadFloat3(&cameraRotation);//  m_rotation.GetXMVector();
-    //     auto v_rotationVector = DirectX::XMLoadFloat3(&rotationVector);
-
-    //     v_cameraRotation = DirectX::XMVector3Transform(v_cameraRotation, DirectX::XMMatrixRotationRollPitchYawFromVector(v_rotationVector));
-
-    //     DirectX::XMStoreFloat3(&cameraRotation, v_cameraRotation);
-
-    //     m_rotation = m_rotation + Vector3(cameraRotation);
-    // }
-
-
 }

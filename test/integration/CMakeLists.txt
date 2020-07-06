@@ -43,7 +43,6 @@ add_executable(Nce_integration_tests
     ${ROOT_DIR}/nc/engine/Engine.cpp
     ${ROOT_DIR}/nc/engine/LightSystem.cpp
     ${ROOT_DIR}/nc/engine/CollisionSystem.cpp
-    ${ROOT_DIR}/nc/scene/SceneManager.cpp
     ${ROOT_DIR}/nc/graphics/Model.cpp
     ${ROOT_DIR}/nc/graphics/d3dresource/GraphicsResource.cpp
     ${ROOT_DIR}/nc/utils/objloader/ObjLoader.cpp

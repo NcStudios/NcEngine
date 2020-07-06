@@ -7,6 +7,7 @@
 #include "graphics/Mesh.h"
 #include "input/Input.h"
 #include "math/NCVector.h"
+#include "scene/Scene.h"
 #include "time/NCTime.h"
 #include "debug/NcException.h"
 
@@ -28,8 +29,18 @@ namespace nc
              */
             static void Exit();
 
+            static void ChangeScene(std::unique_ptr<scene::Scene>&& scene);
+
+            /**
+             * Sets the camera that NCE::GetMainCameraTransform()
+             * refers to.
+             */
+            static void RegisterMainCamera(Camera * camera);
+
             /** 
              * Get pointer to the main camera.
+             * @return Pointer to main camera's transform, nullptr 
+             * if no camera has been registered.
              */
             static Transform * GetMainCameraTransform();
 

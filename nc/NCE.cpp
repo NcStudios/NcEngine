@@ -12,14 +12,24 @@ NCE::NCE(engine::Engine* enginePtr)
     m_engine = enginePtr;
 }
 
-Transform * NCE::GetMainCameraTransform()
-{
-    return m_engine->GetMainCameraTransform();
-}
-
 void NCE::Exit()
 {
     m_engine->Exit();
+}
+
+void NCE::ChangeScene(std::unique_ptr<scene::Scene>&& scene)
+{
+    m_engine->ChangeScene(std::move(scene));
+}
+
+void NCE::RegisterMainCamera(Camera * camera)
+{
+    m_engine->RegisterMainCamera(camera);
+}
+
+Transform * NCE::GetMainCameraTransform()
+{
+    return m_engine->GetMainCameraTransform();
 }
 
 EntityHandle NCE::CreateEntity()
