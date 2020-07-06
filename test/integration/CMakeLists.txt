@@ -72,6 +72,7 @@ target_link_libraries(Nce_integration_tests
         ${WIN32_LINK_FLAGS}
         gtest
         ${EXTERNAL_LIB_DIR}/libimgui.a
+        ${EXTERNAL_LIB_DIR}/libassimp.dll.a
 )
 
 target_include_directories(Nce_integration_tests
