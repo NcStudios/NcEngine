@@ -1,7 +1,11 @@
 #include "debug\NcException.h"
 #include "graphics\d3dresource\GraphicsResourceManager.h"
 #include "graphics\Mesh.h"
-#include "utils\objloader\ObjLoader.h"
+#include <assimp\Importer.hpp>
+#include <assimp\scene.h>
+#include <assimp\postprocess.h>
+#include <vector>
+#include "external\include\directx\math\DirectXMath.h"
 
 const char separator = 
 #ifdef _WIN32
@@ -49,8 +53,41 @@ namespace nc::graphics
     : m_meshData {}
     {
         m_meshData.MeshPath = std::move(meshPath);
-        utils::ObjLoader loader;
-        loader.Load(&m_meshData);
+
+        struct Vertex
+        {
+            DirectX::XMFLOAT3 pos;
+            DirectX::XMFLOAT3 normal;
+            DirectX::XMFLOAT2 uvs;
+        };
+
+        Assimp::Importer imp;
+        const auto pModel = imp.ReadFile(m_meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
+        const auto pMesh = pModel->mMeshes[0];
+
+        // Load vertex and normal data
+        m_meshData.Vertices.reserve(pMesh -> mNumVertices);
+        for (unsigned int i = 0; i < pMesh->mNumVertices; i++)
+        {
+            m_meshData.Vertices.push_back( {
+                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mVertices[i]),
+                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mNormals[i]),
+                *reinterpret_cast<DirectX::XMFLOAT2*>(&pMesh->mTextureCoords[0][i])
+            } );
+        }
+
+        // Load index data
+        std::vector<unsigned short> indices;
+        m_meshData.Indices.reserve(pMesh -> mNumFaces * 3); // Multiply by 3 because we told assimp to triangulate (aiProcess_Triangulate). Each face has 3 indices
+        for (unsigned int i = 0; i < pMesh->mNumFaces; i++)
+        {
+            const auto& face = pMesh->mFaces[i];
+            assert(face.mNumIndices == 3);
+            m_meshData.Indices.push_back(face.mIndices[0]);
+            m_meshData.Indices.push_back(face.mIndices[1]);
+            m_meshData.Indices.push_back(face.mIndices[2]);
+        }
+
         m_meshData.Name = detail::GetMeshFileName(m_meshData.MeshPath);
         m_meshData.PrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         m_meshData.InputElementDesc = 

@@ -1,6 +1,5 @@
 #include "Model.h"
 #include "NCE.h"
-#include "utils/objloader/ObjLoader.h"
 #include "math/NCVector.h"
 #include "component/Transform.h"
 #include "Graphics.h"
