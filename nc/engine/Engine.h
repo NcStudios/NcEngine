@@ -17,7 +17,7 @@ namespace nc
     class Vector4;
 
     namespace time { class Timer; }
-    namespace graphics { class Graphics; class Mesh; }
+    namespace graphics { class Graphics; class Mesh; class PBRMaterial; }
     namespace scene {class Scene; }
 
     namespace engine { struct EntityMaps;
@@ -52,7 +52,9 @@ namespace nc::engine
 
             Transform * GetTransformPtr(const ComponentHandle handle);
             
-            Renderer * AddRenderer(const EntityHandle handle, graphics::Mesh& mesh);
+            const config::Config& GetConfigReference() const;
+
+            Renderer * AddRenderer(const EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material);
             Renderer * GetRenderer(const EntityHandle handle) const;
             bool RemoveRenderer(const EntityHandle handle);
 

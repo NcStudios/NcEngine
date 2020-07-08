@@ -18,7 +18,8 @@ bool Graphics::Validate() const
     return { (screenWidth != 0) &&
              (screenHeight != 0) &&
              (targetFPS != 0) &&
-             (frameUpdateInterval > 0.0f) };
+             (frameUpdateInterval > 0.0f) &&
+             (shadersPath != "")};
 }
 
 bool Physics::Validate() const
@@ -33,6 +34,7 @@ const std::string SCREEN_WIDTH_KEY{"screen_width"};
 const std::string SCREEN_HEIGHT_KEY{"screen_height"};
 const std::string TARGET_FPS_KEY{"target_fps"};
 const std::string FIXED_UPDATE_INTERVAL_KEY{"fixed_update_interval"};
+const std::string SHADERS_PATH_KEY{"shaders_path"};
 const std::string INI_SKIP_CHARS{";#["};
 const char INI_KEY_VALUE_DELIM = '=';
 
@@ -125,6 +127,10 @@ Graphics ReadGraphicsConfig(const std::string& path)
         {
             out.targetFPS = std::stoi(value);
             out.frameUpdateInterval = 1.0 / static_cast<double>(out.targetFPS);
+        }
+        else if (key == SHADERS_PATH_KEY)
+        {
+            out.shadersPath = value;
         }
         else
         {

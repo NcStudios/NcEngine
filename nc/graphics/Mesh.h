@@ -21,6 +21,7 @@ namespace nc::graphics
     {
         DirectX::XMFLOAT3 pos;
         DirectX::XMFLOAT3 norm;
+        DirectX::XMFLOAT2 uvs;
     };
 
     struct MeshData

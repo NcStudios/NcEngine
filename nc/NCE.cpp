@@ -22,6 +22,11 @@ void NCE::ChangeScene(std::unique_ptr<scene::Scene>&& scene)
     m_engine->ChangeScene(std::move(scene));
 }
 
+const config::Config& NCE::GetConfigReference()
+{
+    return m_engine->GetConfigReference();
+}
+
 void NCE::RegisterMainCamera(Camera * camera)
 {
     m_engine->RegisterMainCamera(camera);
@@ -91,9 +96,9 @@ template<> bool NCE::HasEngineComponent<Renderer>(const EntityHandle handle) noe
     (void)handle;
     return true; //not impl 
 }
-template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle, graphics::Mesh& mesh) noexcept(false)
+template<> Renderer * NCE::AddEngineComponent<Renderer>(const EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material) noexcept(false)
 {
-    return m_engine->AddRenderer(handle, mesh);
+    return m_engine->AddRenderer(handle, mesh, material);
 }
 template<> bool NCE::RemoveEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
 {

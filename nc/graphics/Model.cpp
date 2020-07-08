@@ -1,11 +1,10 @@
 #include "Model.h"
 #include "NCE.h"
-#include "utils/objloader/ObjLoader.h"
 #include "math/NCVector.h"
 #include "component/Transform.h"
 #include "Graphics.h"
 #include "d3dresource/GraphicsResourceManager.h"
-
+#include "PBRMaterial.h"
 
 namespace nc::graphics
 {
@@ -13,12 +12,7 @@ namespace nc::graphics
     {
     }
 
-    Model::Model(const Mesh& mesh)
-        : Model(mesh, Material{})
-    {
-    }
-
-    Model::Model(const Mesh& mesh, const Material& material)
+    Model::Model(const Mesh& mesh, const PBRMaterial& material)
         : m_mesh(mesh), m_material(material)
     {
         InitializeGraphicsPipeline();
@@ -27,30 +21,34 @@ namespace nc::graphics
     void Model::InitializeGraphicsPipeline() 
     {
         using namespace nc::graphics::d3dresource;
-        using namespace nc::graphics;
 
-        MeshData meshData = m_mesh.GetMeshData();
-        auto pvs = GraphicsResourceManager::Acquire<VertexShader>("project\\shaders\\compiled\\litvertexshader.cso");
+        // Create and bind the texture data.
+        for (const auto& texturePathRef : m_material.GetTexturePaths()) 
+        {
+            AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(texturePathRef));
+        }
+
+        // Create and bind the Vertex Shader
+        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(m_material.GetVertexShaderPath());
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
-
         AddGraphicsResource(std::move(pvs));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader> ("project\\shaders\\compiled\\litpixelshader.cso"));
+
+        // Create and bind the Pixel Shader
+        AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader>(m_material.GetPixelShaderPath()));
+
+        // Create and bind the Vertex Buffer, Index buffer, Input Layout and Topology from mesh
+        MeshData meshData = m_mesh.GetMeshData();
         AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshData.MeshPath, meshData.InputElementDesc, pvsbc));
         AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (meshData.PrimitiveTopology));
         AddGraphicsResource(TransformConstBuffer::AcquireUnique(meshData.MeshPath, *this, 0u));
-        AddGraphicsResource(PixelConstBuffer<Material>::AcquireUnique(m_material, 1u));
     }
 
-    void Model::SetMaterial(const Material& material) noexcept
+    void Model::SetMaterial(const PBRMaterial& material) noexcept
     {
         m_material = material;
-
-        using namespace nc::graphics;
-        auto pConstPS = this->QueryGraphicsResource<d3dresource::PixelConstBuffer<Material>>();
-	    assert(pConstPS != nullptr);
-	    pConstPS->Update(m_material);
+        // TODO: Set material
     }
     
     void Model::SetMesh(const Mesh& mesh) noexcept
@@ -77,7 +75,7 @@ namespace nc::graphics
         return m_transformationMatrix;
     }
 
-    Material* Model::GetMaterial() noexcept
+    PBRMaterial* Model::GetMaterial() noexcept
     {
         return &m_material;
     }
