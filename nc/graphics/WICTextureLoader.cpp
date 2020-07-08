@@ -30,12 +30,7 @@
 
 #include <dxgiformat.h>
 #include <assert.h>
-
-#pragma warning(push)
-#pragma warning(disable : 4005)
 #include <wincodec.h>
-#pragma warning(pop)
-
 #include <memory>
 
 #include "WICTextureLoader.h"

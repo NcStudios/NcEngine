@@ -9,13 +9,32 @@ namespace nc::graphics
 {
     namespace d3dresource { class GraphicsResource; }
 
+    namespace detail 
+    {
+        const DirectX::XMFLOAT3 DefaultColor = {1.0f, 1.0f, 1.0f};
+        const std::string DefaultTexturePath = "nc\\graphics\\DefaultTexture.png";
+    }
+
     class PBRMaterial
     {
-        public:
-            PBRMaterial(const std::string& albedoTexturePath = "D:\\NC\\NCEngine\\nc\\graphics\\DefaultTexture.png", const std::string& normalTexturePath = "D:\\NC\\NCEngine\\nc\\graphics\\DefaultTexture.png", const std::string& metallicTexturePath = "D:\\NC\\NCEngine\\nc\\graphics\\DefaultTexture.png", const std::string& roughnessTexturePath = "D:\\NC\\NCEngine\\nc\\graphics\\DefaultTexture.png");
-            std::vector<std::shared_ptr<d3dresource::GraphicsResource>> Resources;
+        public: 
+
+        PBRMaterial(const DirectX::XMFLOAT3& diffuseColor = detail::DefaultColor,
+                    const std::string& albedoTexturePath = detail::DefaultTexturePath, 
+                    const std::string& normalTexturePath = detail::DefaultTexturePath, 
+                    const std::string& metallicTexturePath = detail::DefaultTexturePath, 
+                    const std::string& roughnessTexturePath = detail::DefaultTexturePath);
+        
+            const DirectX::XMFLOAT3& GetDiffuseColor() const;
+            const std::string& GetVertexShaderPath() const;
+            const std::string& GetPixelShaderPath() const;
+            const std::vector<std::string>& GetTexturePaths() const;
 
         private:
-            void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
+        
+            DirectX::XMFLOAT3 m_diffuseColor;
+            std::vector<std::string> m_texturePaths;
+            std::string m_pixelShaderPath;
+            std::string m_vertexShaderPath;
     };
 }

@@ -18,6 +18,7 @@ namespace nc::graphics::d3dresource
     }
 
     Sampler::Sampler(const std::string& tag)
+        : m_tag(tag)
     {
         D3D11_SAMPLER_DESC samplerDesc = {};
         samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -158,34 +159,12 @@ namespace nc::graphics::d3dresource
                                             nullptr, &m_pixelShader),
             __FILE__, __LINE__
         );
-
-        // // Reflect the shader to get information about it and its variables
-        // ID3D11ShaderReflection* shaderReflection;
-        // D3DReflect( m_bytecodeBlob->GetBufferPointer(),
-        //             m_bytecodeBlob->GetBufferSize(),
-        //             IID_ID3D11ShaderReflection,
-        //             (void**)&shaderReflection);
-
-        // // Get the shader description
-        // D3D11_SHADER_DESC shaderDesc;
-        // shaderReflection->GetDesc(&shaderDesc);
-
-        // // Create the resource arrays
-        // m_shaderResourceCount = shaderDesc.ConstantBuffers;
-        
-    }
-
-    void PixelShader::SetTextureView(const ID3D11ShaderResourceView* textureView) 
-    {
-
     }
 
     void PixelShader::Bind() noexcept
     {
         GetContext()->PSSetShader(m_pixelShader.Get(),nullptr,0u);
     }
-
-
 
     TransformConstBuffer::TransformConstBuffer(const std::string& tag, Model & parent, UINT slot)
         : m_parent( parent )

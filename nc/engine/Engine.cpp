@@ -265,14 +265,14 @@ Entity* Engine::GetEntity(const std::string& tag) const
     return nullptr;
 }
 
-Renderer* Engine::AddRenderer(const EntityHandle handle, graphics::Mesh& mesh)
+Renderer* Engine::AddRenderer(const EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material)
 {
     if(GetRenderer(handle))
     {
         return nullptr;
     }
 
-    GetEntity(handle)->Handles.renderer = m_renderingSystem->Add(handle, mesh);
+    GetEntity(handle)->Handles.renderer = m_renderingSystem->Add(handle, mesh, material);
     return GetRenderer(handle);
 }
 
@@ -336,6 +336,11 @@ void Engine::SendFrameUpdate(float dt) noexcept
     {
         pair.second.SendFrameUpdate(dt);
     }
+}
+
+const config::Config& Engine::GetConfigReference() const
+{
+    return m_configData;
 }
 
 void Engine::SendFixedUpdate() noexcept

@@ -16,6 +16,7 @@ namespace nc::config
         unsigned int screenHeight;
         unsigned int targetFPS;
         double frameUpdateInterval;
+        std::string shadersPath;
     };
     
     struct Physics

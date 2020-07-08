@@ -43,7 +43,6 @@ namespace nc::graphics::detail
         }
 
         return fileNameWithExtension.substr(0, periodPosition);
-
     } 
 }
 
@@ -62,7 +61,7 @@ namespace nc::graphics
         };
 
         Assimp::Importer imp;
-        const auto pModel = imp.ReadFile(m_meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
+        const auto pModel = imp.ReadFile(m_meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded); // ConvertToLeftHanded formats the output to match DirectX
         const auto pMesh = pModel->mMeshes[0];
 
         // Load vertex and normal data

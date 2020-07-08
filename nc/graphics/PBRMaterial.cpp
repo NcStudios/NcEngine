@@ -1,26 +1,41 @@
 #include "PBRMaterial.h"
-#include "Graphics.h"
-#include "d3dresource/GraphicsResourceManager.h"
-#include "d3dresource/GraphicsResource.h"
+#include "NCE.h"
+#include "config/Config.h"
 
 namespace nc::graphics
 {
-    PBRMaterial::PBRMaterial(const std::string& albedoTexturePath, const std::string& normalTexturePath, const std::string& metallicTexturePath, const std::string& roughnessTexturePath) 
+    #pragma GCC diagnostic ignored "-Wunused-parameter"
+    PBRMaterial::PBRMaterial(const DirectX::XMFLOAT3& diffuseColor,
+                    const std::string& albedoTexturePath, 
+                    const std::string& normalTexturePath, 
+                    const std::string& metallicTexturePath, 
+                    const std::string& roughnessTexturePath)
+                    : m_diffuseColor { diffuseColor },
+                      m_texturePaths { albedoTexturePath}
+
     {
-        using namespace d3dresource;
-
-        AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(albedoTexturePath));
-        //AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(normalTexturePath));
-        //AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(metallicTexturePath));
-        //AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(roughnessTexturePath));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<Sampler>("PBRSampler"));
-
-        // Shaders
-
+        const auto defaultShaderPath = NCE::GetConfigReference().graphics.shadersPath;
+        m_vertexShaderPath = defaultShaderPath + "pbrvertexshader.cso";
+        m_pixelShaderPath = defaultShaderPath + "pbrpixelshader.cso";
     }
 
-    void PBRMaterial::AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res)
+    const DirectX::XMFLOAT3& PBRMaterial::GetDiffuseColor() const
     {
-        Resources.push_back(std::move(res));
+        return m_diffuseColor;
+    }
+
+    const std::vector<std::string>& PBRMaterial::GetTexturePaths() const
+    {
+        return m_texturePaths;
+    }
+
+    const std::string& PBRMaterial::GetVertexShaderPath() const
+    {
+        return m_vertexShaderPath;
+    }
+
+    const std::string& PBRMaterial::GetPixelShaderPath() const
+    {
+        return m_pixelShaderPath;
     }
 }

@@ -4,7 +4,6 @@
 #include "Entity.h"
 #include "component/Component.h"
 #include "component/Transform.h"
-#include "graphics/Mesh.h"
 #include "input/Input.h"
 #include "math/NCVector.h"
 #include "scene/Scene.h"
@@ -14,7 +13,8 @@
 namespace nc
 {
     namespace engine { class Engine; }
-    namespace graphics { class Graphics; }
+    namespace graphics { class Graphics; class Mesh; class PBRMaterial; }
+    namespace config { class Config; }
     class Renderer;
     class Camera;
     class PointLight;
@@ -30,6 +30,12 @@ namespace nc
             static void Exit();
 
             static void ChangeScene(std::unique_ptr<scene::Scene>&& scene);
+
+            /**
+             * Returns a reference to the Config data object.
+             * @return Const reference to Config on success.
+             */
+            static const config::Config& GetConfigReference();
 
             /**
              * Sets the camera that NCE::GetMainCameraTransform()
@@ -184,7 +190,7 @@ namespace nc
             template<class Renderer_t,
                      //class = typename std::enable_if<std::is_same<Renderer, Renderer_t>::value>::type>
                      class = typename std::enable_if<std::is_base_of<Component, Renderer_t>::value>::type>
-            static Renderer_t * AddEngineComponent(const EntityHandle handle, graphics::Mesh& mesh) noexcept(false);
+            static Renderer_t * AddEngineComponent(const EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material) noexcept(false);
 
             /**
              * Remove engine component from Entity.

@@ -69,6 +69,8 @@ Various settings can be controlled through the .ini files located in project/con
     screen_height=1200
     [Frame]
     target_fps=60
+    [Shaders]
+    shaders_path=project\shaders\compiled\
     
 ### Physics.ini defaults
     fixed_update_interval=0.2

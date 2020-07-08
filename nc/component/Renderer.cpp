@@ -17,8 +17,8 @@ namespace nc
     {
     }
     
-    Renderer::Renderer(graphics::Mesh& mesh)
-        : m_model{ std::make_unique<graphics::Model>(mesh) },
+    Renderer::Renderer(graphics::Mesh& mesh, graphics::PBRMaterial& material)
+        : m_model{ std::make_unique<graphics::Model>(mesh, material) },
           m_transform{ nullptr }
     {
     }

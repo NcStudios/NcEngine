@@ -30,11 +30,7 @@
 #endif
 
 #include <d3d11.h>
-
-#pragma warning(push)
-#pragma warning(disable : 4005)
 #include <stdint.h>
-#pragma warning(pop)
 
 HRESULT CreateWICTextureFromMemory( _In_ ID3D11Device* d3dDevice,
                                     _In_opt_ ID3D11DeviceContext* d3dContext,

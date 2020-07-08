@@ -5,17 +5,10 @@
 #include "Graphics.h"
 #include "d3dresource/GraphicsResourceManager.h"
 #include "PBRMaterial.h"
-#include "Material.h"
-
 
 namespace nc::graphics
 {
     Model::Model()
-    {
-    }
-
-    Model::Model(const Mesh& mesh)
-        : Model(mesh, PBRMaterial{})
     {
     }
 
@@ -28,16 +21,22 @@ namespace nc::graphics
     void Model::InitializeGraphicsPipeline() 
     {
         using namespace nc::graphics::d3dresource;
-        using namespace nc::graphics;
 
-        AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>("D:\\NC\\NCEngine\\nc\\graphics\\DefaultTexture.png"));
-        
-        auto pvs = GraphicsResourceManager::Acquire<VertexShader>("project\\shaders\\compiled\\pbrvertexshader.cso");
+        // Create and bind the texture data.
+        for (const auto& texturePathRef : m_material.GetTexturePaths()) 
+        {
+            AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(texturePathRef));
+        }
+
+        // Create and bind the Vertex Shader
+        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(m_material.GetVertexShaderPath());
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         AddGraphicsResource(std::move(pvs));
 
-        AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader>("project\\shaders\\compiled\\pbrpixelshader.cso"));
+        // Create and bind the Pixel Shader
+        AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader>(m_material.GetPixelShaderPath()));
 
+        // Create and bind the Vertex Buffer, Index buffer, Input Layout and Topology from mesh
         MeshData meshData = m_mesh.GetMeshData();
         AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, meshData.MeshPath));
@@ -49,11 +48,7 @@ namespace nc::graphics
     void Model::SetMaterial(const PBRMaterial& material) noexcept
     {
         m_material = material;
-
-        // using namespace nc::graphics;
-        // auto pConstPS = this->QueryGraphicsResource<d3dresource::PixelConstBuffer<PBRMaterial>>();
-	    // assert(pConstPS != nullptr);
-	    // pConstPS->Update(m_material);
+        // TODO: Set material
     }
     
     void Model::SetMesh(const Mesh& mesh) noexcept

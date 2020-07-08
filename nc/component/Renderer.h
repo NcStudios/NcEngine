@@ -16,7 +16,7 @@ namespace nc
     {
         public:
             Renderer();
-            Renderer(graphics::Mesh& mesh);
+            Renderer(graphics::Mesh& mesh, graphics::PBRMaterial& material);
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
