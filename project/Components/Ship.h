@@ -1,5 +1,5 @@
 #pragma once
-#include "NCE.h"
+#include "NcCommon.h"
 
 class Ship : public nc::Component
 {

@@ -1,4 +1,5 @@
 #include "Ship.h"
+#include "input/Input.h"
 
 using namespace nc;
 
@@ -14,7 +15,7 @@ void Ship::FrameUpdate(float dt)
 
     if (!m_transform)
     {
-        m_transform = NCE::GetTransformFromEntityHandle(m_parentHandle);
+        m_transform = NcGetTransformFromEntityHandle(m_parentHandle);
     }
 
     using namespace nc::input;
