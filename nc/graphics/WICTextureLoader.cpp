@@ -30,7 +30,7 @@
 
 #include <dxgiformat.h>
 #include <assert.h>
-#include <wincodec.h>
+#include "wincodec.h"
 #include <memory>
 
 #include "WICTextureLoader.h"

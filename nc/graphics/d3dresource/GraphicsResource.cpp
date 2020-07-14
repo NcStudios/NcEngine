@@ -4,6 +4,7 @@
 #include "directx/math/DirectXMath.h"
 #include "Transform.h"
 #include "graphics/WICTextureLoader.h"
+#include <string>
 
 namespace nc::graphics::d3dresource
 {
@@ -97,8 +98,8 @@ namespace nc::graphics::d3dresource
         return m_count;
     }
 
-    Texture::Texture(const std::string& path) 
-        : m_path(path)
+    Texture::Texture(const std::string& path, uint32_t shaderIndex) 
+        : m_path(path), m_shaderIndex(shaderIndex)
     {
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
@@ -106,14 +107,14 @@ namespace nc::graphics::d3dresource
         THROW_FAILED(CreateWICTextureFromFile(GetDevice(), GetContext(), w_path.c_str(), &m_texture, &m_textureView, 0), __FILE__, __LINE__);
     }
 
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture::GetTextureView()
+    uint32_t Texture::GetShaderIndex() 
     {
-        return m_textureView;
+        return m_shaderIndex;
     }
 
     void Texture::Bind() noexcept
     {
-        GetContext()->PSSetShaderResources(0u, 1u, m_textureView.GetAddressOf());
+        GetContext()->PSSetShaderResources(m_shaderIndex, 1u, m_textureView.GetAddressOf());
     }
 
     VertexShader::VertexShader(const std::string& path)
@@ -279,7 +280,7 @@ namespace nc::graphics::d3dresource
         return typeid(Topology).name() + std::to_string(topology);
     }
 
-    std::string Texture::GetUID(const std::string& path) noexcept
+    std::string Texture::GetUID(const std::string& path, uint32_t shaderIndex) noexcept
     {
         return typeid(Texture).name() + path;
     }

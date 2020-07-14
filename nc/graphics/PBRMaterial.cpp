@@ -11,7 +11,7 @@ namespace nc::graphics
                     const std::string& metallicTexturePath, 
                     const std::string& roughnessTexturePath)
                     : m_diffuseColor { diffuseColor },
-                      m_texturePaths { albedoTexturePath}
+                      m_texturePaths { albedoTexturePath, normalTexturePath, metallicTexturePath, roughnessTexturePath }
 
     {
         const auto defaultShaderPath = NCE::GetConfigReference().graphics.shadersPath;

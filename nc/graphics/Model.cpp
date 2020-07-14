@@ -23,9 +23,10 @@ namespace nc::graphics
         using namespace nc::graphics::d3dresource;
 
         // Create and bind the texture data.
+        uint32_t shaderIndex = 0;
         for (const auto& texturePathRef : m_material.GetTexturePaths()) 
         {
-            AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(texturePathRef));
+            AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(texturePathRef, shaderIndex++));
         }
 
         // Create and bind the Vertex Shader

@@ -140,15 +140,16 @@ namespace nc::graphics::d3dresource
     class Texture : public GraphicsResource
     {
         public:
-            Texture(const std::string& path);
+            Texture(const std::string& path, uint32_t shaderIndex);
             void Bind() noexcept override;
-            static std::string GetUID(const std::string& path) noexcept;
-            Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTextureView();
+            static std::string GetUID(const std::string& path, uint32_t shaderIndex) noexcept;
+            uint32_t GetShaderIndex();
         
         protected:
             Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureView;
             Microsoft::WRL::ComPtr<ID3D11Resource> m_texture;
             const std::string m_path;
+            uint32_t m_shaderIndex;
     };
 }
 
