@@ -1,5 +1,6 @@
 #include "DebugUtils.h"
-
+#include "input/Input.h"
+#include "NcScene.h"
 #include <chrono>
 #include <iostream>
 
@@ -10,7 +11,7 @@ void SceneReset::FrameUpdate(float dt)
     (void)dt;
     if (GetKeyDown(KeyCode::F1))
     {
-        nc::NCE::ChangeScene(std::make_unique<InitialScene>());
+        nc::scene::NcChangeScene(std::make_unique<InitialScene>());
     }
 }
 

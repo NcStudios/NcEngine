@@ -1,0 +1,8 @@
+target_sources(${EXE_NAME}
+    PRIVATE
+        ${ROOT_DIR}/nc/source/component/Camera.cpp
+        ${ROOT_DIR}/nc/source/component/Component.cpp
+        ${ROOT_DIR}/nc/source/component/PointLight.cpp
+        ${ROOT_DIR}/nc/source/component/Renderer.cpp
+        ${ROOT_DIR}/nc/source/component/Transform.cpp
+)

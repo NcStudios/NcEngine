@@ -1,10 +1,8 @@
 #pragma once
-#include "NCE.h"
+#include "NcCommon.h"
+#include "math/Vector2.h"
 
-using namespace nc;
-
-
-class CamController : public Component
+class CamController : public nc::Component
 {
     public:
         CamController();
@@ -15,15 +13,15 @@ class CamController : public Component
         
         struct CamActionState
         {
-            bool    isActive     = false;
-            Vector3 initialCam   = {0.0f,0.0f,0.0f};
-            Vector2 initialMouse = {0.0f,0.0f};
+            nc::Vector2 initialMouse = {0.0f,0.0f};
+            nc::Vector3 initialCam = {0.0f,0.0f,0.0f};
+            bool isActive = false;
         } m_camPanState, m_camRotateState;
 
-        Transform * m_mainCameraTransform = nullptr;
+        nc::Transform * m_mainCameraTransform = nullptr;
 
-        Vector3 GetCameraZoomMovement();
-        Vector3 GetCameraPanMovement();
-        Vector3 GetCameraRotationMovement();
+        nc::Vector3 GetCameraZoomMovement();
+        nc::Vector3 GetCameraPanMovement();
+        nc::Vector3 GetCameraRotationMovement();
 
 };

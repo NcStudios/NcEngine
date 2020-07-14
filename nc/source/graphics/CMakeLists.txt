@@ -1,0 +1,9 @@
+target_sources(${EXE_NAME} 
+    PRIVATE
+        ${ROOT_DIR}/nc/source/graphics/Graphics.cpp
+        ${ROOT_DIR}/nc/source/graphics/Model.cpp
+        ${ROOT_DIR}/nc/source/graphics/d3dresource/GraphicsResource.cpp
+        ${ROOT_DIR}/nc/source/graphics/Mesh.cpp
+        ${ROOT_DIR}/nc/source/graphics/WICTextureLoader.cpp
+        ${ROOT_DIR}/nc/source/graphics/PBRMaterial.cpp
+)
