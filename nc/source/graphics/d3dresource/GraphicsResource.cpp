@@ -108,7 +108,7 @@ namespace nc::graphics::d3dresource
         THROW_FAILED(CreateWICTextureFromFile(GetDevice(), GetContext(), w_path.c_str(), &m_texture, &m_textureView, 0), __FILE__, __LINE__);
     }
 
-    uint32_t Texture::GetShaderIndex() 
+    uint32_t Texture::GetShaderIndex() const
     {
         return m_shaderIndex;
     }

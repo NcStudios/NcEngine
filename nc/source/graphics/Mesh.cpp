@@ -52,16 +52,6 @@ namespace nc::graphics
     : m_meshData {}
     {
         m_meshData.MeshPath = std::move(meshPath);
-
-        struct Vertex
-        {
-            DirectX::XMFLOAT3 pos;
-            DirectX::XMFLOAT3 normal;
-            DirectX::XMFLOAT2 uvs;
-            DirectX::XMFLOAT3 tangent;
-            DirectX::XMFLOAT3 bitangent;
-        };
-
         Assimp::Importer imp;
         const auto pModel = imp.ReadFile(m_meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace); // ConvertToLeftHanded formats the output to match DirectX
         const auto pMesh = pModel->mMeshes[0];

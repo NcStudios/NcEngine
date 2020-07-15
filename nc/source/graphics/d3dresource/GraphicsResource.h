@@ -143,7 +143,7 @@ namespace nc::graphics::d3dresource
             Texture(const std::string& path, uint32_t shaderIndex);
             void Bind() noexcept override;
             static std::string GetUID(const std::string& path, uint32_t shaderIndex) noexcept;
-            uint32_t GetShaderIndex();
+            uint32_t GetShaderIndex() const;
         
         protected:
             Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureView;
