@@ -52,16 +52,8 @@ namespace nc::graphics
     : m_meshData {}
     {
         m_meshData.MeshPath = std::move(meshPath);
-
-        struct Vertex
-        {
-            DirectX::XMFLOAT3 pos;
-            DirectX::XMFLOAT3 normal;
-            DirectX::XMFLOAT2 uvs;
-        };
-
         Assimp::Importer imp;
-        const auto pModel = imp.ReadFile(m_meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded); // ConvertToLeftHanded formats the output to match DirectX
+        const auto pModel = imp.ReadFile(m_meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace); // ConvertToLeftHanded formats the output to match DirectX
         const auto pMesh = pModel->mMeshes[0];
 
         // Load vertex and normal data
@@ -71,7 +63,9 @@ namespace nc::graphics
             m_meshData.Vertices.push_back( {
                 *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mVertices[i]),
                 *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mNormals[i]),
-                *reinterpret_cast<DirectX::XMFLOAT2*>(&pMesh->mTextureCoords[0][i])
+                *reinterpret_cast<DirectX::XMFLOAT2*>(&pMesh->mTextureCoords[0][i]),
+                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mTangents[i]),
+                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mBitangents[i])
             } );
         }
 
@@ -93,7 +87,9 @@ namespace nc::graphics
         {
             { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "Normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            { "TexCoord", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+            { "TexCoord", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "Tangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+            { "Bitangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 }
         };
     }
 

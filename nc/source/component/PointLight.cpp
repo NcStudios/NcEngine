@@ -15,12 +15,12 @@ namespace nc
           m_transform{ nullptr }
     {
         m_constBufData.pos              = {0,0,0};
-        m_constBufData.ambient          = {0.8f, 0.8f, 0.8f};
+        m_constBufData.ambient          = {0.80f, 0.80f, 0.80f};
         m_constBufData.diffuseColor     = {1.0f, 1.0f, 1.0f};
-        m_constBufData.diffuseIntensity = 1.2f;
-        m_constBufData.attConst         = 0.09f;
-        m_constBufData.attLin           = 0.012f;
-        m_constBufData.attQuad          = 0.0075f;
+        m_constBufData.diffuseIntensity = 0.21515f;
+        m_constBufData.attConst         = 1.41f;
+        m_constBufData.attLin           = 0.0001f;
+        m_constBufData.attQuad          = 0.0000001f;
     }
 
     PointLight::~PointLight() = default;
@@ -42,37 +42,37 @@ namespace nc
     {
         (void)radius; //currently unused
         m_constBufData.pos              = pos;
-        m_constBufData.ambient          = {0.4f, 0.4f, 0.4f};
-        m_constBufData.diffuseColor     = {0.8f, 0.8f, 0.6f};
-        m_constBufData.diffuseIntensity = 1.2f;
-        m_constBufData.attConst         = 0.09f;
-        m_constBufData.attLin           = 0.012f;
-        m_constBufData.attQuad          = 0.0075f;
+        m_constBufData.ambient          = {0.80f, 0.80f, 0.80f};
+        m_constBufData.diffuseColor     = {1.0f, 1.0f, 1.0f};
+        m_constBufData.diffuseIntensity = 0.21515f;
+        m_constBufData.attConst         = 1.41f;
+        m_constBufData.attLin           = 0.0001f;
+        m_constBufData.attQuad          = 0.0000001f;
     }
 
     #ifdef NC_EDITOR_ENABLED
     void PointLight::EditorGuiElement()
     {
-        const float itemWidth = 40.0f;
-        const float dragSpeed = 0.75f;
+        const float itemWidth = 80.0f;
+        const float dragSpeed = 1.0f;
 
         ImGui::PushItemWidth(itemWidth);    ImGui::Spacing();   ImGui::Separator();
             ImGui::Text("Point Light");
             ImGui::Indent();
                 ImGui::Text("Ambient    ");
                 ImGui::Indent();
-                ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##ambcolor",         &m_constBufData.ambient.x, ImGuiColorEditFlags_NoInputs);
+                ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##ambcolor", &m_constBufData.ambient.x, ImGuiColorEditFlags_NoInputs);
                 ImGui::Unindent();
                 ImGui::Text("Diffuse    ");
                 ImGui::Indent();  
-                ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##difcolor",         &m_constBufData.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
-                ImGui::Text("Intensity  ");   ImGui::SameLine();  ImGui::DragFloat( "##diffuseintensity", &m_constBufData.diffuseIntensity, dragSpeed, 0.01f, 2.0f, "%.05f");
+                ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##difcolor", &m_constBufData.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
+                ImGui::Text("Intensity  ");   ImGui::SameLine();  ImGui::SliderFloat( "##diffuseintensity", &m_constBufData.diffuseIntensity, 0.1f, 2.0f, "%.05f", dragSpeed);
                 ImGui::Unindent();
                 ImGui::Text("Attenuation");
                 ImGui::Indent();
-                ImGui::Text("Constant   ");   ImGui::SameLine();  ImGui::DragFloat("##attconst",          &m_constBufData.attConst, dragSpeed,         0.05f, 10.0f, "%.2f", 2);
-                ImGui::Text("Linear     ");   ImGui::SameLine();  ImGui::DragFloat("##attlin",            &m_constBufData.attLin,   dragSpeed,       0.0001f,  4.0f, "%.4f", 4);
-                ImGui::Text("Quadratic  ");   ImGui::SameLine();  ImGui::DragFloat("##attquad",           &m_constBufData.attQuad,  dragSpeed,    0.0000001f, 10.0f, "%.7f", 8);
+                ImGui::Text("Constant   ");   ImGui::SameLine();  ImGui::SliderFloat("##attconst", &m_constBufData.attConst, 0.05f, 10.0f, "%.2f", dragSpeed);
+                ImGui::Text("Linear     ");   ImGui::SameLine();  ImGui::SliderFloat("##attlin", &m_constBufData.attLin, 0.0001f,  4.0f, "%.4f", dragSpeed);
+                ImGui::Text("Quadratic  ");   ImGui::SameLine();  ImGui::SliderFloat("##attquad", &m_constBufData.attQuad, 0.0000001f, 10.0f, "%.7f", dragSpeed);
                 ImGui::Unindent();
             ImGui::Unindent();
         ImGui::Separator();  ImGui::PopItemWidth();

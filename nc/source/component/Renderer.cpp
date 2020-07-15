@@ -39,43 +39,46 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    // void Renderer::EditorGuiElement()
-    // {
-    //     std::string str = std::to_string(GetHandle());
+    void Renderer::EditorGuiElement()
+    {
+        std::string str = std::to_string(GetHandle());
 
-    //     auto mat = m_model->GetMaterial();
+        auto& mat = m_model->GetMaterial()->properties;
+        const float dragSpeed = 1.0f;
 
-    //     ImGui::PushItemWidth(40.0f);
-    //         ImGui::Spacing();
-    //         ImGui::Separator();
-    //             ImGui::Text("Renderer");
-    //             ImGui::Indent();
-    //                 ImGui::Text("ID: ");  ImGui::SameLine();    ImGui::Text(str.c_str());
-    //                 ImGui::Text("Material Color");  ImGui::SameLine();  bool mcDirty = ImGui::ColorEdit3("##mc", &(mat->color.x), ImGuiColorEditFlags_NoInputs);
-    //                 ImGui::Text("Specular");
-    //                 ImGui::Indent();
-    //                 ImGui::Text("Intensity");  ImGui::SameLine();  bool siDirty = ImGui::DragFloat("##si",  &(mat->specularIntensity), 0.75f, 0.05f,   4.0f, "%.2f", 2);
-    //                 ImGui::Text("Power    ");  ImGui::SameLine();  bool spDirty = ImGui::DragFloat("##sp",  &(mat->specularPower),     0.75f,  1.0f, 200.0f, "%.2f", 2);
-    //                 ImGui::Unindent();
-    //             ImGui::Unindent();
-    //         ImGui::Separator();
-    //     ImGui::PopItemWidth();
+        ImGui::PushItemWidth(80.0f);
+            ImGui::Spacing();
+            ImGui::Separator();
+                ImGui::Text("Renderer");
+                ImGui::Indent();
+                    ImGui::Text("ID: "); ImGui::SameLine(); ImGui::Text(str.c_str());
+                    ImGui::Text("Material Color"); ImGui::SameLine(); bool mcDirty = ImGui::ColorEdit3("##mc", &(mat.color.x), ImGuiColorEditFlags_NoInputs);
+                    ImGui::Text("Specular");
+                    ImGui::Indent();
+                    ImGui::Text("Intensity"); ImGui::SameLine(); bool siDirty = ImGui::SliderFloat("##si", &(mat.specularIntensity), 0.05f, 4.0f, "%.2f", dragSpeed);
+                    ImGui::Text("Power    "); ImGui::SameLine(); bool spDirty = ImGui::SliderFloat("##sp", &(mat.specularPower), 0.5f, 13.0f, "%.2f", dragSpeed);
+                    ImGui::Unindent();
+                    ImGui::Text("Tiling X"); ImGui::SameLine(); bool txDirty = ImGui::SliderFloat("##tx", &(mat.xTiling), 0.001f, 100.0f, "%.2f", dragSpeed);
+                    ImGui::Text("Tiling Y"); ImGui::SameLine(); bool tyDirty = ImGui::SliderFloat("##ty", &(mat.yTiling), 0.001f, 100.0f, "%.2f", dragSpeed);
+                ImGui::Unindent();
+            ImGui::Separator();
+        ImGui::PopItemWidth();
 
-    //     if(mcDirty || siDirty || spDirty)
-    //     {
-    //         SyncMaterialData();
-    //     }
-    // }
+        if(mcDirty || siDirty || spDirty || txDirty || tyDirty)
+        {
+            SyncMaterialData();
+        }
+    }
 
-    // void Renderer::SyncMaterialData()
-    // {
-    //     if(!m_model) return;
+    void Renderer::SyncMaterialData()
+    {
+        if(!m_model) return;
 
-    //     using namespace nc::graphics;
-    //     auto pConstPS = m_model->QueryGraphicsResource<d3dresource::PixelConstBuffer<Material>>();
-	//     assert(pConstPS != nullptr);
-	//     pConstPS->Update(*m_model->GetMaterial());
-    // }
+        using namespace nc::graphics;
+        auto pConstPS = m_model->QueryGraphicsResource<d3dresource::PixelConstantBuffer<MaterialProperties>>();
+	    assert(pConstPS != nullptr);
+	    pConstPS->Update(m_model->GetMaterial()->properties);
+    }
     
     #endif
 
