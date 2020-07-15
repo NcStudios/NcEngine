@@ -22,17 +22,16 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void Transform::EditorGuiElement()
     {
-        const float itemWidth = 40.0f;
-        const float dragSpeed = 0.75f;
+        const float itemWidth = 80.0f;
+        const float dragSpeed = 1.0f;
 
         ImGui::PushItemWidth(itemWidth);
             ImGui::Spacing();  ImGui::Separator();  ImGui::Text("Transform");
-
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Position");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::DragFloat( "##xpos", &m_position.m_x, dragSpeed, -80.0f, 80.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::DragFloat( "##ypos", &m_position.m_y, dragSpeed, -80.0f, 80.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::DragFloat( "##zpos", &m_position.m_z, dragSpeed, -80.0f, 80.0f, "%.1f");
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat( "##xpos", &m_position.m_x, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat( "##ypos", &m_position.m_y, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat( "##zpos", &m_position.m_z,  -80.0f, 80.0f, "%.1f", dragSpeed);
             ImGui::EndGroup();
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Rotation");
@@ -42,9 +41,9 @@ namespace nc
             ImGui::EndGroup();
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Scale");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::DragFloat("##xscale", &m_scale.m_x, dragSpeed, 0.01f, 100.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::DragFloat("##yscale", &m_scale.m_y, dragSpeed, 0.01f, 100.0f, "%.1f");  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::DragFloat("##zscale", &m_scale.m_z, dragSpeed, 0.01f, 100.0f, "%.1f");
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##xscale", &m_scale.m_x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##yscale", &m_scale.m_y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##zscale", &m_scale.m_z, 0.01f, 100.0f, "%.1f", dragSpeed);
             ImGui::EndGroup();
             ImGui::Separator();
         ImGui::PopItemWidth();

@@ -35,13 +35,17 @@ namespace nc::graphics
         // Create and bind the Pixel Shader
         AddGraphicsResource(GraphicsResourceManager::Acquire<PixelShader>(m_material.GetPixelShaderPath()));
 
+        // Create and bind the texture sample.
+        AddGraphicsResource(GraphicsResourceManager::Acquire<Sampler>("PBRSampler"));
+
         // Create and bind the Vertex Buffer, Index buffer, Input Layout and Topology from mesh
         MeshData meshData = m_mesh.GetMeshData();
         AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, meshData.MeshPath));
         AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshData.MeshPath, meshData.InputElementDesc, pvsbc));
         AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (meshData.PrimitiveTopology));
-        AddGraphicsResource(TransformConstBuffer::AcquireUnique(meshData.MeshPath, *this, 0u));
+        AddGraphicsResource(TransformConstBufferVertexPixel::AcquireUnique(meshData.MeshPath, *this, 0u, 2u));
+        AddGraphicsResource(PixelConstantBuffer<MaterialProperties>::AcquireUnique(m_material.properties, 1u));
     }
 
     void Model::SetMaterial(const PBRMaterial& material) noexcept

@@ -69,7 +69,7 @@ namespace nc::graphics::d3dresource
 namespace nc::graphics::d3dresource
 {
     template<typename T>
-    class PixelConstBuffer : public ConstantBuffer<T>
+    class PixelConstantBuffer : public ConstantBuffer<T>
     {
         using ConstantBuffer<T>::m_constantBuffer;
         using ConstantBuffer<T>::m_slot;
@@ -208,31 +208,57 @@ namespace nc::graphics::d3dresource
     };
 }
 
-/* Transform Constant Buffer */
+/* Transform Constant Buffers */
 namespace nc::graphics::d3dresource
 {
-    class TransformConstBuffer : public GraphicsResource
+    // Binds the model transforms to the Vertex Shader
+    class TransformConstBufferVertex : public GraphicsResource
     {
         public:
-            TransformConstBuffer(const std::string& tag, Model& parent, UINT slot = 0u);
+            TransformConstBufferVertex(const std::string& tag, Model& parent, UINT slot = 0u);
             void Bind() noexcept override;
             static std::string GetUID(const std::string& tag) noexcept; //, const Model& parent, UINT slot) noexcept;
 
             //should test if these need to be unique
             static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, Model & parent, UINT slot)
             {
-                return std::make_shared<TransformConstBuffer>(tag, parent, slot);
+                return std::make_shared<TransformConstBufferVertex>(tag, parent, slot);
             }
 
-        private:
+        protected:
             struct Transforms
             {
                 DirectX::XMMATRIX modelView;
                 DirectX::XMMATRIX model;
+                DirectX::XMFLOAT2 tiling;
             };
+            void UpdateBindImplementation(const Transforms& transforms) noexcept;
+            Transforms GetTransforms() noexcept;
 
+        private:
             static std::unique_ptr<VertexConstantBuffer<Transforms>> m_vcbuf;
             Model & m_parent;
+    };
+
+    // Binds the model transforms to the Vertex Shader and the Pixel Shader
+    class TransformConstBufferVertexPixel : public TransformConstBufferVertex
+    {
+        public:
+            TransformConstBufferVertexPixel(const std::string& tag, Model& parent, UINT slotVertex = 0u, UINT slotPixel = 2u);
+            void Bind() noexcept override;
+            static std::string GetUID(const std::string& tag) noexcept; //, const Model& parent, UINT slot) noexcept;
+
+            //should test if these need to be unique
+            static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, Model & parent, UINT slotVertex, UINT slotPixel)
+            {
+                return std::make_shared<TransformConstBufferVertexPixel>(tag, parent, slotVertex, slotPixel);
+            }
+
+        protected:
+            void UpdateBindImplementation(const Transforms& transforms) noexcept;
+
+        private:
+            static std::unique_ptr<PixelConstantBuffer<Transforms>> m_pcbuf;
     };
 }
 
@@ -355,20 +381,20 @@ namespace nc::graphics::d3dresource
     }
 
     template<class T>
-    void PixelConstBuffer<T>::Bind() noexcept
+    void PixelConstantBuffer<T>::Bind() noexcept
     {
         GetContext()->PSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
     }
 
     template<class T>
-    std::shared_ptr<GraphicsResource> PixelConstBuffer<T>::AcquireUnique(const T& consts, UINT slot)
+    std::shared_ptr<GraphicsResource> PixelConstantBuffer<T>::AcquireUnique(const T& consts, UINT slot)
     {
-        return std::make_shared<PixelConstBuffer<T>>(consts, slot);
+        return std::make_shared<PixelConstantBuffer<T>>(consts, slot);
     }
 
     template<class T>
-    std::string PixelConstBuffer<T>::GetUID(const T& consts, UINT slot) noexcept
+    std::string PixelConstantBuffer<T>::GetUID(const T& consts, UINT slot) noexcept
     {
-        return typeid(PixelConstBuffer<T>).name() + std::to_string(slot);
+        return typeid(PixelConstantBuffer<T>).name() + std::to_string(slot);
     }
 }
