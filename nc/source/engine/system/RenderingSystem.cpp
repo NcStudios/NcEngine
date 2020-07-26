@@ -4,7 +4,8 @@
 #include "component/PointLight.h"
 #include "component/Transform.h"
 
-namespace nc::engine{
+namespace nc::engine::system
+{
 
 RenderingSystem::RenderingSystem(int initialWidth, int initialHeight, HWND hwnd)
     : m_graphics(std::make_unique<graphics::Graphics>(hwnd, initialWidth, initialHeight))

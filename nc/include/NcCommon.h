@@ -90,14 +90,7 @@ namespace nc
      * @param handle The transform's handle.
      * @return Pointer to Transform on success, nullptr on failure.
      */
-    Transform* NcGetTransformFromHandle(const ComponentHandle handle);
-
-    /**
-     * Get and Entity's Transform.
-     * @param handle EntityHandle of the transform's parent.
-     * @return Pointer to Transform on success, nullptr on failure.
-     */
-    Transform* NcGetTransformFromEntityHandle(const EntityHandle handle);
+    Transform* NcGetTransform(const ComponentHandle handle) noexcept(false);
 
     /**
      * Check if Entity has an engine component.

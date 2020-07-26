@@ -24,9 +24,9 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     {
         nc::engine::NcStartEngine();
     }
-    catch(const nc::NcException& e)
+    catch(const std::runtime_error& e)
     {
-        e.what();
+        std::cerr << "Fatal error:\n" << e.what();
         nc::engine::NcShutdownEngine();
     }
     catch(...)

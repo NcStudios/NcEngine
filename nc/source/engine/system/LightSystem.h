@@ -6,7 +6,7 @@
 
 namespace nc::graphics { class Graphics; }
 
-namespace nc::engine
+namespace nc::engine::system
 {
     class LightSystem : public ComponentSystem<PointLight>
     {

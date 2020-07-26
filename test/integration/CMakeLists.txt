@@ -33,7 +33,6 @@ add_test(PoolArray_tests PoolArray_tests)
 #### Nce Functional Tests ###
 add_executable(Nce_integration_tests 
     ${ROOT_DIR}/test/integration/Nce_integration_tests.cpp 
-    ${ROOT_DIR}/nc/source/NcInterface.cpp
     ${ROOT_DIR}/nc/source/entity/Entity.cpp
     ${ROOT_DIR}/nc/source/component/Component.cpp
     ${ROOT_DIR}/nc/source/component/Transform.cpp

@@ -1,5 +1,5 @@
 #pragma once
-#include "NCWin32.h"
+#include "NcWin32.h"
 #include <utility> //std::pair
 
 namespace nc

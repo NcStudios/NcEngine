@@ -1,7 +1,6 @@
 target_sources(${EXE_NAME} 
     PRIVATE
         ${ROOT_DIR}/nc/source/entity/Entity.cpp
-        ${ROOT_DIR}/nc/source/NcInterface.cpp
 )
 
 add_subdirectory(component)

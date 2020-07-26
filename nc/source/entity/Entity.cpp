@@ -33,11 +33,6 @@ const std::vector<std::unique_ptr<Component>> & Entity::GetUserComponents() cons
     return m_userComponents;
 }
 
-Transform * Entity::GetTransform() const noexcept
-{
-    return NcGetTransformFromHandle(Handles.transform);
-}
-
 void Entity::SendFrameUpdate(float dt) noexcept
 {
     for (auto& comp : m_userComponents)

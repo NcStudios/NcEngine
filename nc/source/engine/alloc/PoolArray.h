@@ -70,7 +70,7 @@ uint32_t PoolArray<T>::Alloc(T ** out)
 {
     if (IsFull())
     {
-        throw NcException("PoolArray::Alloc - PoolArray full");
+        throw std::runtime_error("PoolArray::Alloc - PoolArray full");
     }
 
     if(!unused.empty())
@@ -107,7 +107,7 @@ T * PoolArray<T>::GetPtrTo(uint32_t pos)
 {
     if (data[pos].GetMemoryState() == MemoryState::Invalid)
     {
-        throw NcException("PoolArray::GetPtrTo - attempt to get unowned component");
+        throw std::runtime_error("PoolArray::GetPtrTo - attempt to get unowned component");
     }
 
     return &data[pos];

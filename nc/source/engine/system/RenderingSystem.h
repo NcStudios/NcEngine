@@ -12,7 +12,7 @@ namespace nc
     namespace graphics { class Graphics; }
 }
 
-namespace nc::engine
+namespace nc::engine::system
 {
     class RenderingSystem : public ComponentSystem<Renderer>
     {
