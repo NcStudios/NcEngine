@@ -40,7 +40,7 @@ namespace nc
                 float attQuad;
             } m_constBufData;
 
-            using PixelConstBuf = graphics::d3dresource::PixelConstBuffer<PointLightCBuf>;
+            using PixelConstBuf = graphics::d3dresource::PixelConstantBuffer<PointLightCBuf>;
 
             /** @todo took away ptr for debug */
             //mutable std::unique_ptr<PixelConstBuf> m_cBuf;
