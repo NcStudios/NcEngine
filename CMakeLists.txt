@@ -57,6 +57,10 @@ if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()
 
+if(DEBUG_BUILD)
+    add_definitions(-DDEBUG_BUILD)
+endif()
+
 #Compile Flags
 target_compile_options(${EXE_NAME}
     PUBLIC

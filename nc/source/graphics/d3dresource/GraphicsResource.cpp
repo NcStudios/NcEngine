@@ -315,6 +315,7 @@ namespace nc::graphics::d3dresource
 
     std::string Texture::GetUID(const std::string& path, uint32_t shaderIndex) noexcept
     {
+        (void)shaderIndex;
         return typeid(Texture).name() + path;
     }
 }

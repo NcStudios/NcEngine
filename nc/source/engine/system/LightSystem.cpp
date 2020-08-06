@@ -3,7 +3,7 @@
 #include "graphics/Graphics.h"
 #include "component/Transform.h"
 
-namespace nc::engine
+namespace nc::engine::system
 {
     LightSystem::LightSystem() {}
 

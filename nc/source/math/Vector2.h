@@ -6,14 +6,14 @@ namespace nc
     class Vector2
     {
         public:
-            Vector2() noexcept
+            constexpr Vector2() noexcept
                 : m_x(0), m_y(0) {}
 
-            Vector2(float x, float y) noexcept 
-                : m_x(x),       m_y(y)       {}
+            constexpr Vector2(float x, float y) noexcept 
+                : m_x(x), m_y(y) {}
 
             Vector2(const Vector2& vec) noexcept 
-                : m_x(vec.m_x), m_y(vec.m_y) {}
+                : m_x(vec.m_x), m_y(vec.m_y){}
 
             Vector2(Vector2&& vec) noexcept 
                 : m_x(vec.m_x), m_y(vec.m_y) {}

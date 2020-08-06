@@ -39,7 +39,7 @@ namespace nc::graphics::detail
 
         if (!HasValidMeshExtension(fileExtension)) 
         {
-           throw NcException("nc::graphics::detail::GetMeshFileName::HasValidMeshExtension - Invalid file type loaded for mesh.");
+           throw std::runtime_error("nc::graphics::detail::GetMeshFileName::HasValidMeshExtension - Invalid file type loaded for mesh.");
         }
 
         return fileNameWithExtension.substr(0, periodPosition);
