@@ -13,18 +13,18 @@ namespace nc
         friend nc::Transform;
 
         public:
-            Vector3()                                       noexcept;
-            Vector3(float x, float y, float z)              noexcept;
-            Vector3(const Vector3& other)                   noexcept;
-            Vector3(Vector3&& other)                        noexcept;
-            Vector3(const DirectX::XMFLOAT3& xm)            noexcept;
-            Vector3(DirectX::XMFLOAT3&& xm)                 noexcept;
-            Vector3(float x, Vector2 yz)                    noexcept;
-            Vector3(Vector2 xy, float z)                    noexcept;
-            Vector3& operator=(const Vector3& other)        noexcept;
+            Vector3() noexcept;
+            Vector3(float x, float y, float z) noexcept;
+            Vector3(const Vector3& other) noexcept;
+            Vector3(Vector3&& other) noexcept;
+            Vector3(const DirectX::XMFLOAT3& xm) noexcept;
+            Vector3(DirectX::XMFLOAT3&& xm) noexcept;
+            Vector3(float x, Vector2 yz) noexcept;
+            Vector3(Vector2 xy, float z) noexcept;
+            Vector3& operator=(const Vector3& other) noexcept;
             Vector3& operator=(const DirectX::XMFLOAT3& xm) noexcept;
-            Vector3& operator=(Vector3&& other)             noexcept;
-            Vector3& operator=(DirectX::XMFLOAT3&& xm)      noexcept;
+            Vector3& operator=(Vector3&& other) noexcept;
+            Vector3& operator=(DirectX::XMFLOAT3&& xm) noexcept;
 
             DirectX::XMFLOAT3 GetXMFloat3() const noexcept;
 

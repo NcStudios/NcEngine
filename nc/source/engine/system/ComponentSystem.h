@@ -2,7 +2,7 @@
 
 #include "NcCommonTypes.h"
 #include "HandleManager.h"
-#include "alloc/PoolArray.h"
+#include "engine/alloc/PoolArray.h"
 #include "NcDebug.h"
 
 #include <vector>
@@ -17,6 +17,9 @@ struct ComponentIndexPair
     uint32_t indexInPoolCollection;
     uint32_t indexInPool;
 };
+
+namespace system
+{
 
 template<class T>
 class ComponentSystem
@@ -128,7 +131,7 @@ bool ComponentSystem<T>::Remove(const ComponentHandle handle)
 
     if (m_indexMap.erase(handle) != 1)
     {
-        throw NcException("ComponentSystem::Remove - unexpected erase result");
+        throw std::runtime_error("ComponentSystem::Remove - unexpected erase result");
     }
 
     return true;
@@ -163,7 +166,7 @@ ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(const ComponentHan
 {
     if (!Contains(handle))
     {
-        throw NcException("ComponentSystem::GetIndexPairFromHandle - bad handle");
+        throw std::runtime_error("ComponentSystem::GetIndexPairFromHandle - bad handle");
     }
     return m_indexMap.at(handle);
 }
@@ -177,4 +180,5 @@ void ComponentSystem<T>::MapHandleToIndexPair(const ComponentHandle handle, cons
     }
 }
 
-}
+} //end namespace system 
+} //end namespace nc::engine

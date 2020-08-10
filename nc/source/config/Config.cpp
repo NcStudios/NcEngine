@@ -48,7 +48,7 @@ bool ParseLine(const std::string& line, std::string& key, std::string& value)
     auto delimIndex = line.find(INI_KEY_VALUE_DELIM);
     if (delimIndex == line.npos)
     {
-        throw NcException("ParseLine - invalid syntax in config file");
+        throw std::runtime_error("ParseLine - invalid syntax in config file");
     }
 
     key = line.substr(0, delimIndex);
@@ -65,7 +65,7 @@ Out ConfigReader(const std::string& path, KeyValueMapFunc& map)
     inFile.open(path);
     if(!inFile.is_open())
     {
-        throw NcException("ConfigReader - failed to load file");
+        throw std::runtime_error("ConfigReader - failed to load file");
     }
 
     Out out{};
@@ -76,7 +76,7 @@ Out ConfigReader(const std::string& path, KeyValueMapFunc& map)
     {
         if(inFile.fail())
         {
-            throw NcException("ConfigReader - ifstream failure");
+            throw std::runtime_error("ConfigReader - ifstream failure");
         }
 
         std::getline(inFile, line, '\n');
@@ -90,7 +90,7 @@ Out ConfigReader(const std::string& path, KeyValueMapFunc& map)
     
     if (!out.Validate())
     {
-        throw NcException("ConfigReader - invalid config");
+        throw std::runtime_error("ConfigReader - invalid config");
     }
     return out;
 }
@@ -105,7 +105,7 @@ Project ReadProjectConfig(const std::string& path)
         }
         else
         {
-            throw nc::NcException("ConfigReader::ReadProjectConfig::mapFunc - unknown key");
+            throw std::runtime_error("ConfigReader::ReadProjectConfig::mapFunc - unknown key");
         }
     };
     return ConfigReader<config::Project>(path, mapFunc);
@@ -134,7 +134,7 @@ Graphics ReadGraphicsConfig(const std::string& path)
         }
         else
         {
-            throw nc::NcException("ConfigReader::ReadGraphicsConfig::mapFunc - unkown key");
+            throw std::runtime_error("ConfigReader::ReadGraphicsConfig::mapFunc - unkown key");
         }
     };
     return ConfigReader<config::Graphics>(path, mapFunc);
@@ -150,7 +150,7 @@ Physics ReadPhysicsConfig(const std::string& path)
         }
         else
         {
-            throw nc::NcException("ConfigReader::ReadPhysicsConfig::mapFunc - unkown key");
+            throw std::runtime_error("ConfigReader::ReadPhysicsConfig::mapFunc - unkown key");
         }
     };
     return ConfigReader<config::Physics>(path, mapFunc);

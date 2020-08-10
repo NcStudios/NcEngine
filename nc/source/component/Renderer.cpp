@@ -86,12 +86,12 @@ namespace nc
     {
         if (!m_transform)
         {
-            m_transform = NcGetTransformFromEntityHandle(m_parentHandle);
+            m_transform = NcGetEngineComponent<Transform>(m_parentHandle);
         }
 
         if (!m_transform)
         {
-            throw NcException("Renderer::Update - bad trans ptr");
+            throw std::runtime_error("Renderer::Update - bad trans ptr");
         }
 
         m_model->UpdateTransformationMatrix(m_transform);

@@ -2,7 +2,7 @@
 #include "ComponentSystem.h"
 #include "component/Transform.h"
 
-namespace nc::engine
+namespace nc::engine::system
 {
     class TransformSystem : public ComponentSystem<Transform>
     {

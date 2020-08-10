@@ -1,261 +1,151 @@
-#include "Engine.h"
-#include "TransformSystem.h"
-#include "RenderingSystem.h"
-#include "LightSystem.h"
-#include "CollisionSystem.h"
-#include "win32/Window.h"
-#include "config/Config.h"
+#include "EngineSystems.h"
+#include "EngineData.h"
 #include "graphics/Graphics.h"
 #include "graphics/Mesh.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
-#include "NcDebug.h"
-#include "component/Camera.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
-#include "scene/Scene.h"
 #include "scenes/InitialScene.h"
-#include "time/NcTime.h"
 #include "input/Input.h"
 
+#include "NcCamera.h"
+#include "NcCommon.h"
+#include "NcConfig.h"
+#include "NcDebug.h"
+#include "NcEngine.h"
+#include "NcScene.h"
+
 #include <iostream>
-#include <unordered_map>
+#include <memory>
 
-#ifdef NC_EDITOR_ENABLED
-#include "utils/editor/EditorManager.h"
-#endif
+using namespace nc;
 
-namespace nc::engine
+/** Engine State */
+namespace
 {
-
-struct EntityMaps
-{
-    /** @todo need entity graphs to support entity hierarchies */
-    using EntityMap_t = std::unordered_map<EntityHandle, Entity>;
-    EntityMap_t Active;
-    EntityMap_t ToDestroy;
-};
-
-Engine::Engine(config::Config config )
-    : m_mainCameraTransform{ nullptr },
-      m_configData{ std::move(config) },
-      m_isRunning{ true },
-      m_isSceneSwapScheduled{ false },
-      m_activeScene{ nullptr },
-      m_swapScene{ nullptr },
-      m_frameDeltaTimeFactor{ 1.0f }
-{
-    Window * wndInst = Window::Instance;
-    auto wndDim = wndInst->GetWindowDimensions();
-    m_renderingSystem = std::make_unique<RenderingSystem>(wndDim.first, wndDim.second, wndInst->GetHWND());
-    m_entities = std::make_unique<EntityMaps>();
-    m_handleManager = std::make_unique<HandleManager<EntityHandle>>();
-    m_transformSystem = std::make_unique<ComponentSystem<Transform>>();
-    m_lightSystem = std::make_unique<LightSystem>();
-    m_collisionSystem = std::make_unique<CollisionSystem>();
-
-#ifdef NC_EDITOR_ENABLED
-    m_editorManager = std::make_unique<nc::utils::editor::EditorManager>(wndInst->GetHWND(), m_renderingSystem->GetGraphics());
-    m_frameLogicTimer = std::make_unique<nc::time::Timer>();
-#endif
+    std::unique_ptr<Window> g_WindowInstance{nullptr};
+    engine::internal::EngineSystems g_EngineSystems{};
+    engine::internal::EngineData g_EngineData{};
 }
 
-Engine::~Engine() 
-{}
-
-void Engine::ChangeScene(std::unique_ptr<scene::Scene>&& scene)
+/** Internal Declarations */
+namespace nc::engine::internal
 {
-    m_isSceneSwapScheduled = true;
-    m_swapScene = std::move(scene);
+    void MainLoop();
+    void Exit();
+    void ClearAllStateData();
+    void DoSceneSwap();
+
+    void FrameLogic(float dt);
+    void FrameRender(float dt);
+    void FixedUpdate();
+    void FrameCleanup();
+    void SendFrameUpdateToEntities(float dt);
+    void SendFixedUpdateToEntities();
+    void SendOnDestroyToEntities();
 }
 
-void Engine::DoSceneSwap()
+/**
+ * Interface Impl */
+void nc::engine::NcInitializeEngine(HINSTANCE hInstance, const config::detail::ConfigPaths& configPaths)
 {
-    m_activeScene->Unload();
-    ClearAllStateData();
-    m_activeScene = std::move(m_swapScene);
-    m_activeScene->Load();
-}
-
-void Engine::ClearAllStateData()
-{
-    m_isSceneSwapScheduled = false;
-
-    auto handles = std::vector<EntityHandle>{};
-    for(const auto& pair : m_entities->Active)
+    if (g_WindowInstance)
     {
-        handles.emplace_back(pair.first);
+        throw std::runtime_error("InitializeEngine - engine is already initialized");
     }
-    for(const auto handle : handles)
-    {
-        DestroyEntity(handle);
-    }
-    SendOnDestroy();
-    
-    m_entities->Active.clear();
-    m_entities->ToDestroy.clear();
-    m_handleManager->Reset();
-    m_activeScene = nullptr;
-    //do not clear swap scene
-    m_mainCameraTransform = nullptr;
 
-    m_transformSystem->Clear();
-    m_renderingSystem->Clear();
-    m_lightSystem->Clear();   
-}
-
-bool Engine::DoesEntityExist(const EntityHandle handle) const
-{
-    return m_entities->Active.count(handle) > 0;
-}
-
-
-auto& Engine::GetMapContainingEntity(const EntityHandle handle, bool checkAll) const noexcept(false)
-{
-    if (m_entities->Active.count(handle) > 0)
-        return m_entities->Active;
-
-    if (checkAll && (m_entities->ToDestroy.count(handle) > 0) ) //only check ToDestroy if checkAll flag is set
-        return m_entities->ToDestroy;
-
-    throw NcException("Engine::GetmapContainingEntity() - Entity not found.");
-}
-
-Entity* Engine::GetEntityPtrFromAnyMap(const EntityHandle handle) const noexcept(false)
-{
-    return &GetMapContainingEntity(handle, true).at(handle);
-}
-
-void Engine::MainLoop()
-{
-    time::Time ncTime;
-
-    m_activeScene = std::make_unique<InitialScene>();
-    m_activeScene->Load();
-
-    while(m_isRunning)
-    {   
-        /**************
-        * CYCLE START *
-        ***************/    
-        ncTime.UpdateTime();
-        Window::Instance->ProcessSystemMessages();
-
-        /**********
-        * PHYSICS *
-        ***********/
-        /** @note Change this so physics 'simulates' running at a fixed interval.
-         * It may need to run multiple times in a row in cases where FrameUpdate()
-         * runs slowly and execution doesn't return back to physics in time for the 
-         * next interval.
-         */
-        if (time::Time::FixedDeltaTime > m_configData.physics.fixedUpdateInterval)
-        {
-            FixedUpdate();
-            ncTime.ResetFixedDeltaTime();
-        }
-
-        /********
-        * FRAME *
-        *********/
-        // if (time::Time::FrameDeltaTime > ProjectSettings::displaySettings.frameUpdateInterval)
-        // {
-        //     FrameUpdate();
-        //     input::Flush();
-        //     ncTime.ResetFrameDeltaTime();
-        // }
-        #ifdef NC_EDITOR_ENABLED
-        m_frameLogicTimer->Start();
-        #endif
-        FrameLogic(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
-        #ifdef NC_EDITOR_ENABLED
-        m_frameLogicTimer->Stop();
-        #endif
-        FrameRender(time::Time::FrameDeltaTime * m_frameDeltaTimeFactor);
-        FrameCleanup();
-        ncTime.ResetFrameDeltaTime();
-
-        /************
-        * CYCLE END *
-        *************/
-
-    } //end main loop
-}
-
-void Engine::FrameLogic(float dt)
-{
-    SendFrameUpdate(dt);
-}
-
-void Engine::FrameRender(float dt)
-{
-    (void)dt;
-    #ifdef NC_EDITOR_ENABLED
-    m_editorManager->BeginFrame();
-    #endif
-
-    m_renderingSystem->FrameBegin();
-    m_lightSystem->BindLights();
-    m_renderingSystem->Frame();
+    auto config = config::detail::Read(configPaths);
+    g_WindowInstance = std::make_unique<Window>(hInstance, config);
+    auto dimensions = g_WindowInstance->GetWindowDimensions();
+    auto hwnd = g_WindowInstance->GetHWND();
+    g_EngineSystems = internal::EngineSystems{ dimensions.first, dimensions.second, hwnd };
+    g_EngineData = internal::EngineData{ std::move(config) };
 
     #ifdef NC_EDITOR_ENABLED
-    m_editorManager->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_entities->Active);
-    m_editorManager->EndFrame();
+    g_WindowInstance->BindEditorManager(g_EngineSystems.editor.get());
     #endif
-
-    m_renderingSystem->FrameEnd();
 }
 
-void Engine::FrameCleanup()
+void nc::engine::NcStartEngine()
 {
-    SendOnDestroy();
-    if(m_isSceneSwapScheduled)
+    if (!g_WindowInstance)
     {
-        DoSceneSwap();
+        throw std::runtime_error("StartEngine - engine is not properly initialized");
     }
-    input::Flush();
+    internal::MainLoop();
 }
 
-void Engine::FixedUpdate()
+void nc::engine::NcShutdownEngine()
 {
-    // user component fixed tick logic
-    SendFixedUpdate();
+    if (!g_WindowInstance)
+    {
+        throw std::runtime_error("ShutdownEngine - engine is not running");
+    }
+    internal::Exit();
+    g_EngineData = internal::EngineData{};
+    g_EngineSystems = internal::EngineSystems{};
+    g_WindowInstance = nullptr;
 }
 
-void Engine::Exit()
+void nc::scene::NcChangeScene(std::unique_ptr<scene::Scene>&& scene)
 {
-    m_isRunning = false;
+    g_EngineData.isSceneSwapScheduled = true;
+    g_EngineData.swapScene = std::move(scene);
 }
 
-EntityHandle Engine::CreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
+const config::Config& nc::config::NcGetConfigReference()
 {
-    auto entityHandle = m_handleManager->GenerateNewHandle();
-    auto transHandle = m_transformSystem->Add(entityHandle, pos, rot, scale);
-    m_entities->Active.emplace(entityHandle, Entity{entityHandle, transHandle, tag} );
+    return g_EngineData.configData;
+}
+
+void nc::NcRegisterMainCamera(Camera * camera)
+{
+    auto handle = camera->GetParentHandle();
+    auto entity = NcGetEntity(handle);
+    g_EngineData.mainCameraTransform = NcGetTransform(entity->Handles.transform);
+    IF_THROW(!g_EngineData.mainCameraTransform, "NcRegisterMainCamera - bad args");
+}
+
+Transform * nc::NcGetMainCameraTransform()
+{
+    return g_EngineData.mainCameraTransform;
+}
+
+EntityHandle nc::NcCreateEntity()
+{
+    return NcCreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), "");
+}
+
+EntityHandle nc::NcCreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
+{
+    auto entityHandle = g_EngineSystems.entity->handleManager.GenerateNewHandle();
+    auto transHandle = g_EngineSystems.transform->Add(entityHandle, pos, rot, scale);
+    g_EngineSystems.entity->GetActiveEntities().emplace(entityHandle, Entity{entityHandle, transHandle, tag} );
     return entityHandle;
 }
 
-bool Engine::DestroyEntity(const EntityHandle handle)
+bool nc::NcDestroyEntity(EntityHandle handle)
 {
-    if (!DoesEntityExist(handle))
+    if (!g_EngineSystems.entity->DoesEntityExist(handle))
         return false;
-    auto& containingMap = GetMapContainingEntity(handle);
-    m_entities->ToDestroy.emplace(handle, std::move(containingMap.at(handle)));
+    auto& containingMap = g_EngineSystems.entity->GetMapContainingEntity(handle);
+    g_EngineSystems.entity->GetToDestroyEntities().emplace(handle, std::move(containingMap.at(handle)));
     containingMap.erase(handle);
     return true;
 }
 
-Entity* Engine::GetEntity(const EntityHandle handle) const
+Entity * nc::NcGetEntity(EntityHandle handle)
 {
-    if (!DoesEntityExist(handle))
+    if (!g_EngineSystems.entity->DoesEntityExist(handle))
         return nullptr;
 
-    auto& containingMap = GetMapContainingEntity(handle);
-    return &containingMap.at(handle);       
-} 
+    auto& containingMap = g_EngineSystems.entity->GetMapContainingEntity(handle);
+    return &containingMap.at(handle); 
+}
 
-Entity* Engine::GetEntity(const std::string& tag) const
+Entity * nc::NcGetEntity(const std::string& tag)
 {
-    for(auto& pair : m_entities->Active)
+    for(auto& pair : g_EngineSystems.entity->GetActiveEntities())
     {
         if(tag == pair.second.Tag)
         {
@@ -265,97 +155,229 @@ Entity* Engine::GetEntity(const std::string& tag) const
     return nullptr;
 }
 
-Renderer* Engine::AddRenderer(const EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material)
+Transform * nc::NcGetTransform(const ComponentHandle transformHandle) noexcept(false)
 {
-    if(GetRenderer(handle))
+    auto exists = g_EngineSystems.transform->Contains(transformHandle);
+    IF_THROW(!exists, "NcGetTransform - bad handle");
+    return g_EngineSystems.transform->GetPointerTo(transformHandle);
+}
+
+template<> Transform * nc::NcGetEngineComponent<Transform>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "GetEngineComponent<Transform> - bad handle");
+    return g_EngineSystems.transform->GetPointerTo(entity->Handles.transform);
+}
+
+template<> bool nc::NcHasEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcHasEngineComponent<Renderer> - bad handle");
+    return g_EngineSystems.light->Contains(entity->Handles.renderer);
+}
+
+template<> Renderer * nc::NcAddEngineComponent<Renderer>(const EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcAddEngineComponent<Renderer> - bad handle");
+    IF_THROW(g_EngineSystems.rendering->Contains(entity->Handles.renderer), "NcAddEngineComponent<Renderer> - entity already has a renderer");
+
+    auto rendererHandle = g_EngineSystems.rendering->Add(handle, mesh, material);
+    entity->Handles.renderer = rendererHandle;
+    return g_EngineSystems.rendering->GetPointerTo(rendererHandle);
+}
+
+template<> bool nc::NcRemoveEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcRemoveEngineComponent<Renderer> - bad handle");
+    return g_EngineSystems.rendering->Remove(entity->Handles.renderer);
+}
+
+template<> Renderer * nc::NcGetEngineComponent<Renderer>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcGetEngineComponent<Renderer> - bad handle");
+    return g_EngineSystems.rendering->GetPointerTo(entity->Handles.renderer);
+}
+
+template<> bool nc::NcHasEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcHasEngineComponent<PointLight> - bad handle");
+    return g_EngineSystems.light->Contains(entity->Handles.pointLight);
+}
+
+template<> PointLight * nc::NcAddEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcAddEngineComponent<PointLight> - bad handle");
+    IF_THROW(g_EngineSystems.light->Contains(entity->Handles.pointLight), "NcAddEngineComponent<PointLight> - entity already has a point light");
+
+    auto lightHandle = g_EngineSystems.light->Add(handle);
+    entity->Handles.pointLight = lightHandle;
+    auto lightPtr = g_EngineSystems.light->GetPointerTo(lightHandle);
+    lightPtr->Set({0.0f, 0.0f, 0.0f});
+    return lightPtr;
+}
+
+template<> bool nc::NcRemoveEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcRemoveEngineComponent<PointLight> - bad handle");
+    return g_EngineSystems.light->Remove(entity->Handles.pointLight);
+}
+
+template<> PointLight * nc::NcGetEngineComponent<PointLight>(const EntityHandle handle) noexcept(false)
+{
+    auto entity = NcGetEntity(handle);
+    IF_THROW(!entity, "NcRemoveEngineComponent<PointLight> - bad handle");
+    return g_EngineSystems.light->GetPointerTo(entity->Handles.pointLight);
+}
+
+// Internal Impl
+namespace nc::engine::internal
+{
+void MainLoop()
+{
+    time::Time ncTime;
+
+    g_EngineData.activeScene = std::make_unique<InitialScene>();
+    g_EngineData.activeScene->Load();
+
+    while(g_EngineData.isRunning)
     {
-        return nullptr;
-    }
+        ncTime.UpdateTime();
+        g_WindowInstance->ProcessSystemMessages();
 
-    GetEntity(handle)->Handles.renderer = m_renderingSystem->Add(handle, mesh, material);
-    return GetRenderer(handle);
+        /** @note Change this so physics 'simulates' running at a fixed interval.
+         * It may need to run multiple times in a row in cases where FrameUpdate()
+         * runs slowly and execution doesn't return back to physics in time for the 
+         * next interval.
+         */
+        if (time::Time::FixedDeltaTime > g_EngineData.configData.physics.fixedUpdateInterval)
+        {
+            FixedUpdate();
+            ncTime.ResetFixedDeltaTime();
+        }
+
+        auto dt = time::Time::FrameDeltaTime * g_EngineData.frameDeltaTimeFactor;
+
+        #ifdef NC_EDITOR_ENABLED
+        g_EngineSystems.frameLogicTimer->Start();
+        #endif
+        FrameLogic(dt);
+        #ifdef NC_EDITOR_ENABLED
+        g_EngineSystems.frameLogicTimer->Stop();
+        #endif
+        FrameRender(dt);
+        FrameCleanup();
+        ncTime.ResetFrameDeltaTime();
+    } //end main loop
 }
 
-Renderer* Engine::GetRenderer(const EntityHandle handle) const
+void Exit()
 {
-    return m_renderingSystem->GetPointerTo(GetEntity(handle)->Handles.renderer);
+    g_EngineData.isRunning = false;
 }
 
-bool Engine::RemoveRenderer(const EntityHandle handle)
+void ClearAllStateData()
 {
-    return m_renderingSystem->Remove(GetEntity(handle)->Handles.renderer);
-}
-
-PointLight* Engine::AddPointLight(const EntityHandle handle)
-{
-    if(GetPointLight(handle))
+    auto handles = std::vector<EntityHandle>{};
+    for(const auto& pair : g_EngineSystems.entity->GetActiveEntities())
     {
-        return nullptr;
+        handles.emplace_back(pair.first);
     }
+    for(const auto handle : handles)
+    {
+        NcDestroyEntity(handle);
+    }
+    SendOnDestroyToEntities();
+    
+    g_EngineSystems.entity->GetActiveEntities().clear();
+    g_EngineSystems.entity->GetToDestroyEntities().clear();
+    g_EngineSystems.entity->handleManager.Reset();
+    g_EngineData.isSceneSwapScheduled = false;
+    g_EngineData.activeScene = nullptr;
+    //do not clear swap scene
+    g_EngineData.mainCameraTransform = nullptr;
 
-    GetEntity(handle)->Handles.pointLight = m_lightSystem->Add(handle);
-    GetPointLight(handle)->Set({0.0f, 0.0f, 0.0f});
-    return GetPointLight(handle);
+    g_EngineSystems.transform->Clear();
+    g_EngineSystems.rendering->Clear();
+    g_EngineSystems.light->Clear();   
 }
 
-PointLight* Engine::GetPointLight(const EntityHandle handle) const
+void DoSceneSwap()
 {
-    return m_lightSystem->GetPointerTo(GetEntity(handle)->Handles.pointLight);
+    g_EngineData.activeScene->Unload();
+    ClearAllStateData();
+    g_EngineData.activeScene = std::move(g_EngineData.swapScene);
+    g_EngineData.activeScene->Load();
 }
 
-bool Engine::RemovePointLight(const EntityHandle handle)
+void FrameLogic(float dt)
 {
-    return m_lightSystem->Remove(handle);
+    SendFrameUpdateToEntities(dt);
 }
 
-#ifdef NC_EDITOR_ENABLED
-nc::utils::editor::EditorManager* Engine::GetEditorManager()
+void FrameRender(float dt)
 {
-    return m_editorManager.get();
+    (void)dt;
+    #ifdef NC_EDITOR_ENABLED
+    g_EngineSystems.editor->BeginFrame();
+    #endif
+
+    g_EngineSystems.rendering->FrameBegin();
+    g_EngineSystems.light->BindLights();
+    g_EngineSystems.rendering->Frame();
+
+    #ifdef NC_EDITOR_ENABLED
+    g_EngineSystems.editor->Frame(&g_EngineData.frameDeltaTimeFactor,
+                                  g_EngineSystems.frameLogicTimer->Value(),
+                                  g_EngineSystems.entity->GetActiveEntities());
+    g_EngineSystems.editor->EndFrame();
+    #endif
+
+    g_EngineSystems.rendering->FrameEnd();
 }
-#endif
 
-void Engine::RegisterMainCamera(Camera * camera)
+void FixedUpdate()
 {
-    auto handle = camera->GetParentHandle();
-    auto entity = GetEntity(handle);
-    m_mainCameraTransform = GetTransformPtr(entity->Handles.transform);
-    IF_THROW(!m_mainCameraTransform, "Engine::RegisterMainCamera - bad args");
+    SendFixedUpdateToEntities();
 }
 
-Transform * Engine::GetMainCameraTransform()
+void FrameCleanup()
 {
-    return m_mainCameraTransform;
+    SendOnDestroyToEntities();
+    if(g_EngineData.isSceneSwapScheduled)
+    {
+        DoSceneSwap();
+    }
+    input::Flush();
 }
 
-Transform* Engine::GetTransformPtr(const ComponentHandle handle) { return m_transformSystem->GetPointerTo(handle); }
-
-void Engine::SendFrameUpdate(float dt) noexcept
+void SendFrameUpdateToEntities(float dt)
 {
-    for(auto& pair : m_entities->Active)
+    for(auto & pair : g_EngineSystems.entity->GetActiveEntities())
     {
         pair.second.SendFrameUpdate(dt);
     }
 }
 
-const config::Config& Engine::GetConfigReference() const
+void SendFixedUpdateToEntities()
 {
-    return m_configData;
-}
-
-void Engine::SendFixedUpdate() noexcept
-{
-    for(auto& pair : m_entities->Active)
+    for(auto & pair : g_EngineSystems.entity->GetActiveEntities())
     {
         pair.second.SendFixedUpdate();
     }
 }
 
-void Engine::SendOnDestroy() noexcept
+void SendOnDestroyToEntities()
 {
-    for(auto& pair : m_entities->ToDestroy)
+    auto & toDestroy = g_EngineSystems.entity->GetToDestroyEntities();
+    for(auto & pair : toDestroy)
     {
-        Entity* entityPtr = GetEntityPtrFromAnyMap(pair.second.Handle);
+        Entity* entityPtr = g_EngineSystems.entity->GetEntityPtrFromAnyMap(pair.second.Handle);
         if (entityPtr == nullptr)
         {
             continue;
@@ -363,10 +385,15 @@ void Engine::SendOnDestroy() noexcept
 
         pair.second.SendOnDestroy();
         const auto& handles = entityPtr->Handles;
-        m_transformSystem->Remove(handles.transform);
-        m_renderingSystem->Remove(handles.renderer);
-        m_lightSystem->Remove(handles.pointLight);
+        g_EngineSystems.transform->Remove(handles.transform);
+        g_EngineSystems.rendering->Remove(handles.renderer);
+        g_EngineSystems.light->Remove(handles.pointLight);
     }
-    m_entities->ToDestroy.clear();
+    toDestroy.clear();
 }
-}// end namespace nc::engine
+
+const config::Config & GetConfigReference()
+{
+    return g_EngineData.configData;
+}
+}// end namespace nc::engine::internal

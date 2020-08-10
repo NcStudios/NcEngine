@@ -36,7 +36,7 @@ TEST(PoolArray, Alloc_PoolFull_Throws)
     PoolArray<Mock> allocator(1);
     Mock * mock = nullptr;
     auto pos = allocator.Alloc(&mock);
-    EXPECT_THROW(allocator.Alloc(&mock), nc::NcException);
+    EXPECT_THROW(allocator.Alloc(&mock), std::runtime_error);
     allocator.Free(pos);
 }
 
@@ -55,7 +55,7 @@ TEST(PoolArray, GetPtrTo_GoodArgs_GetsPtr)
 TEST(PoolArray, GetPtrTo_BadArgs_Throws)
 {
     PoolArray<Mock> allocator(1);
-    EXPECT_THROW(allocator.GetPtrTo(1u), nc::NcException);
+    EXPECT_THROW(allocator.GetPtrTo(1u), std::runtime_error);
 }
 
 int main(int argc, char ** argv)

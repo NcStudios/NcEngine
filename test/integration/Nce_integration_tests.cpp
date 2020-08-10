@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "component/Component.h"
-//#include "engine/Engine.h"
 #include "NcCommon.h"
 
 /** stubbed */
@@ -175,7 +174,7 @@ TEST(Nce, HasUserComponent_badHandle_throws)
     {
         NcHasUserComponent<PhonyComponent>(1);
     }
-    catch(const NcException& e)
+    catch(const std::runtime_error& e)
     {
         caught = true;
     }
@@ -196,7 +195,7 @@ TEST(Nce, AddUserComponent_badHandle_throws)
     {
         NcAddUserComponent<PhonyComponent>(1);
     }
-    catch(const NcException& e)
+    catch(const std::runtime_error& e)
     {
         caught = true;
     }
@@ -232,7 +231,7 @@ TEST(Nce, RemoveUserComponent_badHandle_throws)
     {
         NcRemoveUserComponent<PhonyComponent>(1);
     }
-    catch(const NcException& e)
+    catch(const std::runtime_error& e)
     {
         caught = true;
     }

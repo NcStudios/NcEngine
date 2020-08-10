@@ -42,14 +42,14 @@ Vector3 CamController::GetCameraPanMovement()
         {
             m_camPanState.isActive = true;
             m_camPanState.initialMouse = Vector2{ (float)input::MouseX, (float)input::MouseY };
-            m_camPanState.initialCam = NcGetTransformFromEntityHandle(GetParentHandle())->GetPosition();
+            m_camPanState.initialCam = NcGetEngineComponent<Transform>(GetParentHandle())->GetPosition();
         }
         else //button held
         {
             auto curMousePos = Vector2{ (float)input::MouseX, (float)input::MouseY };
             auto mousePosDelta = curMousePos - m_camPanState.initialMouse;
             auto camTranslation = Vector3{ mousePosDelta, 0.0f };
-            auto curCamPos = NcGetTransformFromEntityHandle(GetParentHandle())->GetPosition();
+            auto curCamPos = NcGetEngineComponent<Transform>(GetParentHandle())->GetPosition();
             targetPosition = m_camPanState.initialCam + camTranslation;
             targetPosition = targetPosition - curCamPos;
             targetPosition.InvertX();
@@ -78,14 +78,14 @@ Vector3 CamController::GetCameraRotationMovement()
         {
             m_camRotateState.isActive = true;
             m_camRotateState.initialMouse = Vector2(input::MouseX, input::MouseY);
-            m_camRotateState.initialCam = NcGetTransformFromEntityHandle(GetParentHandle())->GetRotation();
+            m_camRotateState.initialCam = NcGetEngineComponent<Transform>(GetParentHandle())->GetRotation();
         }
         else //button held
         {
             Vector2 currentMousePos = Vector2(input::MouseX, input::MouseY);
             Vector2 mouseDelta = m_camRotateState.initialMouse - currentMousePos;
             Vector3 cameraRotation = Vector3(mouseDelta.X(), mouseDelta.Y(), 0.0f);
-            Vector3 currentCameraRot = NcGetTransformFromEntityHandle(GetParentHandle())->GetRotation();
+            Vector3 currentCameraRot = NcGetEngineComponent<Transform>(GetParentHandle())->GetRotation();
             targetRotation = m_camRotateState.initialCam + cameraRotation;
             targetRotation = targetRotation - currentCameraRot;
         }

@@ -26,7 +26,7 @@ Window::Window(HINSTANCE instance, const config::Config& config)
 
     if(!RegisterClass(&m_wndClass))
     {
-        throw NcException("Window::Constructor - failed to register wnd class");
+        throw std::runtime_error("Window::Constructor - failed to register wnd class");
     }
 
     m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
@@ -37,7 +37,7 @@ Window::Window(HINSTANCE instance, const config::Config& config)
                              
     if(!m_hwnd)
     {
-        throw NcException("Window constructor - CreateWindow failed");
+        throw std::runtime_error("Window constructor - CreateWindow failed");
     }
 
     m_deviceContext = GetDC(m_hwnd);

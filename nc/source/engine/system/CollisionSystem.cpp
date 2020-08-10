@@ -1,6 +1,6 @@
-#include "engine/CollisionSystem.h"
+#include "CollisionSystem.h"
 
-namespace nc::engine
+namespace nc::engine::system
 {
 
 CollisionSystem::CollisionSystem()

@@ -33,8 +33,6 @@ namespace nc
             void SendOnCollisionStay() noexcept;
             void SendOnCollisionExit() noexcept;
 
-            Transform * GetTransform() const noexcept;
-
             template<class T, 
                      class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
             bool HasUserComponent() const noexcept;
