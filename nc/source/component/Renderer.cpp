@@ -6,7 +6,6 @@
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
-#include "utils/editor/EditorManager.h"
 #endif
 
 namespace nc

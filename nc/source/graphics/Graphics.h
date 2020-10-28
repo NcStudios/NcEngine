@@ -5,63 +5,64 @@
 #include <stdint.h>
 #include "directx/math/DirectXMath.h"
 
-namespace nc::graphics::d3dresource { class GraphicsResource; }
-#ifdef NC_EDITOR_ENABLED
-namespace nc::utils::editor         { class EditorManager;    }
-#endif
-
-namespace nc::graphics
+namespace nc
 {
-    class Graphics
+    namespace ui { class UI; }
+
+    namespace graphics
     {
-        friend graphics::d3dresource::GraphicsResource;
-        #ifdef NC_EDITOR_ENABLED
-        friend nc::utils::editor::EditorManager;
-        #endif
+        namespace d3dresource { class GraphicsResource; }
 
-        public:
-            Graphics(HWND hwnd, float screenWidth, float screenHeight);
-            ~Graphics();
-            Graphics(const Graphics&) = delete;
-            Graphics(Graphics&&) = delete;
-            Graphics& operator=(const Graphics&) = delete;
-            Graphics& operator=(Graphics&&) = delete;
+        class Graphics
+        {
+            friend graphics::d3dresource::GraphicsResource;
+            friend ::nc::ui::UI;
 
-            DirectX::XMMATRIX GetCamera() const noexcept;
-            DirectX::XMMATRIX GetProjection() const noexcept;
+            public:
+                Graphics(HWND hwnd, float screenWidth, float screenHeight);
+                ~Graphics();
+                Graphics(const Graphics&) = delete;
+                Graphics(Graphics&&) = delete;
+                Graphics& operator=(const Graphics&) = delete;
+                Graphics& operator=(Graphics&&) = delete;
 
-            void SetCamera(DirectX::FXMMATRIX cam) noexcept;
-            void SetProjection(DirectX::FXMMATRIX proj) noexcept;
+                DirectX::XMMATRIX GetCamera() const noexcept;
+                DirectX::XMMATRIX GetProjection() const noexcept;
 
-            void StartFrame();
-            void DrawIndexed(UINT count);
-            void EndFrame();
+                void SetCamera(DirectX::FXMMATRIX cam) noexcept;
+                void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 
-            #ifdef NC_EDITOR_ENABLED
-            uint32_t GetDrawCallCount() const;
-            #endif
+                void StartFrame();
+                void DrawIndexed(UINT count);
+                void EndFrame();
 
-        private:
-            float m_screenWidth, m_screenHeight;
-            DirectX::XMMATRIX m_camera;
-            DirectX::XMMATRIX m_projection;
+                #ifdef NC_EDITOR_ENABLED
+                uint32_t GetDrawCallCount() const;
+                #endif
 
-            #ifdef NC_EDITOR_ENABLED
-            uint32_t m_drawCallCount = 0;
-            #endif
+            private:
+                float m_screenWidth, m_screenHeight;
+                DirectX::XMMATRIX m_camera;
+                DirectX::XMMATRIX m_projection;
 
-            void CreateDeviceAndSwapchain(HWND hwnd);
-            void CreateRasterizerState();
-            void CreateRenderTargetViewFromBackBuffer();
-            void CreateDepthStencilView();
-            void BindDepthStencilView();
-            void ConfigureViewport();
+                #ifdef NC_EDITOR_ENABLED
+                uint32_t m_drawCallCount = 0;
+                #endif
 
-            Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
-            Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTarget = nullptr;
-            Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv = nullptr;
-            
-    };  
-}
+                void CreateDeviceAndSwapchain(HWND hwnd);
+                void CreateRasterizerState();
+                void CreateRenderTargetViewFromBackBuffer();
+                void CreateDepthStencilView();
+                void BindDepthStencilView();
+                void ConfigureViewport();
+
+                Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
+                Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain = nullptr;
+                Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context = nullptr;
+                Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTarget = nullptr;
+                Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv = nullptr;
+        };
+    } //end namespace graphics
+} //end namespace nc
+
+

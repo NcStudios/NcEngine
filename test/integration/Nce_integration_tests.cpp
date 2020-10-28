@@ -9,7 +9,7 @@
 #include "engine/ComponentSystem.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
-#include "utils/editor/EditorManager.h"
+#include "ui/UI.h"
 #include "config/Config.h"
 
 #include <memory>
@@ -25,7 +25,7 @@ namespace nc
     std::pair<int, int> Window::GetWindowDimensions() const noexcept { return m_windowDimensions; }
     void Window::ProcessSystemMessages() {}
     #ifdef NC_EDITOR_ENABLED
-    void Window::BindEditorManager(utils::editor::EditorManager * editor){(void)editor;}
+    void Window::BindUI(ui::UI * ui){(void)ui;}
     #endif
     Window * Window::Instance = new Window((HINSTANCE)nullptr, {});
 
@@ -85,22 +85,20 @@ namespace graphics
     MeshData& Mesh::GetMeshData() {return m_meshData;}
 } //end namespace graphics
 
-namespace utils::editor
+namespace nc::ui::editor
 {
     #ifdef NC_EDITOR_ENABLED
-    EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics * graphics) {(void)hwnd;(void)graphics;}
-    EditorManager::~EditorManager() noexcept {}
+    Editor::Editor(HWND hwnd, nc::graphics::Graphics * graphics) {(void)hwnd;(void)graphics;}
+    Editor::~Editor() noexcept {}
 
-    LRESULT EditorManager::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {(void)hwnd;(void)message;(void)wParam;(void)lParam; return LRESULT{}; }
+    LRESULT Editor::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {(void)hwnd;(void)message;(void)wParam;(void)lParam; return LRESULT{}; }
 
-    void EditorManager::BeginFrame() {}
-    void EditorManager::Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities) {(void)dt;(void)frameLogicTime;(void)activeEntities;}
-    void EditorManager::EndFrame() {}
+    void Editor::Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities) {(void)dt;(void)frameLogicTime;(void)activeEntities;}
 
-    void EditorManager::ToggleGui() noexcept {}
-    void EditorManager::EnableGui() noexcept {}
-    void EditorManager::DisableGui() noexcept {}
-    bool EditorManager::IsGuiActive() const noexcept { return false; }
+    void Editor::ToggleGui() noexcept {}
+    void Editor::EnableGui() noexcept {}
+    void Editor::DisableGui() noexcept {}
+    bool Editor::IsGuiActive() const noexcept { return false; }
     #endif
 
 } //end namespace utils::editor

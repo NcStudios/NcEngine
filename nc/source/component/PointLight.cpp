@@ -1,6 +1,5 @@
 #include "PointLight.h"
 #include "graphics/Graphics.h"
-#include "utils/editor/EditorManager.h"
 #include "NcDebug.h"
 #include "NcCommon.h"
 
