@@ -36,7 +36,7 @@ namespace nc::graphics
         std::vector<uint16_t>                 Indices;
     };
 
-    class Mesh
+    class Mesh : public ResourceGroup
     {
         public:
             Mesh() = default;
@@ -46,9 +46,9 @@ namespace nc::graphics
             Mesh& operator=(Mesh&& other) = default;
             Mesh& operator=(const Mesh& other) = default;
             ~Mesh() = default;
-            MeshData& GetMeshData();
+            void ParseMesh(std::string meshPath, MeshData& meshData);
 
         private:
-            MeshData m_meshData;
+            void InitializeGraphicsPipeline(MeshData meshData);
     };
 }

@@ -29,6 +29,12 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
         std::cerr << "Fatal error:\n" << e.what();
         nc::engine::NcShutdownEngine();
     }
+    catch(std::exception& e)
+    {
+        std::cerr << "Exception: \n";
+        std::cerr << e.what();
+        nc::engine::NcShutdownEngine();
+    }
     catch(...)
     {
         std::cerr << "WinMain.cpp - unkown exception caught\n";

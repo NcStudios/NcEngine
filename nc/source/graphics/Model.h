@@ -42,9 +42,6 @@ namespace nc::graphics
             DirectX::XMMATRIX GetTransformXM() const noexcept;
             PBRMaterial * GetMaterial() noexcept;
 
-            template<class T>
-            T * QueryGraphicsResource() noexcept;
-        
         protected:
             void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
 
@@ -58,17 +55,4 @@ namespace nc::graphics
             const d3dresource::IndexBuffer * m_indexBuffer = nullptr;
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
     };
-
-    template<class T>
-    T* Model::QueryGraphicsResource() noexcept
-    {
-        for(auto& res : m_resources)
-        {
-            if(auto pt = dynamic_cast<T*>(res.get()))
-            {
-                return pt;
-            }
-        }
-        return nullptr;
-    }
 }
