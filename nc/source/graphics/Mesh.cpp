@@ -111,8 +111,10 @@ namespace nc::graphics
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         Mesh::AddGraphicsResource(std::move(pvs));
 
-        Mesh::AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, meshData.MeshPath));
-        Mesh::AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, meshData.MeshPath));
+        auto vertexBufferId = std::to_string(GraphicsResourceManager::AssignId());
+        auto indexBufferId = std::to_string(GraphicsResourceManager::AssignId());
+        Mesh::AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(meshData.Vertices, vertexBufferId));
+        Mesh::AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer> (meshData.Indices, indexBufferId));
         Mesh::AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshData.MeshPath, meshData.InputElementDesc, pvsbc));
         Mesh::AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>    (meshData.PrimitiveTopology));
     }

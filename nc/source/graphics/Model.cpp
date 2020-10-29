@@ -22,11 +22,8 @@ namespace nc::graphics
     void Model::InitializeGraphicsPipeline() 
     {
         using namespace nc::graphics::d3dresource;
-
-        // TODO: Generate unique tag for this model to refer to it later.
-        srand(time(NULL));
-        auto randomId = std::to_string(rand());
-        AddGraphicsResource(TransformConstBufferVertexPixel::AcquireUnique(randomId, *this, 0u, 2u));
+        auto bufferId = std::to_string(GraphicsResourceManager::AssignId());
+        AddGraphicsResource(TransformConstBufferVertexPixel::AcquireUnique(bufferId, *this, 0u, 2u));
         m_indexBuffer = m_mesh.QueryGraphicsResource<d3dresource::IndexBuffer>();
     }
 

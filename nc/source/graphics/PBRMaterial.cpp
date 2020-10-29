@@ -23,7 +23,8 @@ namespace nc::graphics
 
         const auto defaultShaderPath = nc::config::NcGetConfigReference().graphics.shadersPath;
         PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "pbrpixelshader.cso"));
-        PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Sampler>("PBRSampler"));
+        auto samplerId = std::to_string(GraphicsResourceManager::AssignId());
+        PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Sampler>(samplerId));
         PBRMaterial::AddGraphicsResource(PixelConstantBuffer<MaterialProperties>::AcquireUnique(properties, 1u));
     }
 }
