@@ -3,6 +3,8 @@
 #include <string>
 #include <memory>
 #include <vector>
+
+#include "ResourceGroup.h"
 #include "directx/math/DirectXMath.h"
 
 namespace nc::graphics
@@ -24,23 +26,16 @@ namespace nc::graphics
         float padding[1];
     };
 
-    class PBRMaterial
+    class PBRMaterial : public ResourceGroup
     {
         public: 
 
-        PBRMaterial(const std::string& albedoTexturePath = detail::DefaultTexturePath, 
-                    const std::string& normalTexturePath = detail::DefaultTexturePath, 
-                    const std::string& metallicTexturePath = detail::DefaultTexturePath, 
-                    const std::string& roughnessTexturePath = detail::DefaultTexturePath);
-        
-        const std::string& GetVertexShaderPath() const;
-        const std::string& GetPixelShaderPath() const;
-        const std::vector<std::string>& GetTexturePaths() const;
-        MaterialProperties properties;
+            PBRMaterial() = default;
+            PBRMaterial(const std::vector<std::string>& texturePaths);
+            MaterialProperties properties;
 
         private:
-            std::vector<std::string> m_texturePaths;
-            std::string m_pixelShaderPath;
-            std::string m_vertexShaderPath;
+
+            void InitializeGraphicsPipeline(const std::vector<std::string>& texturePaths);
     };
 }

@@ -35,6 +35,11 @@ namespace nc::graphics::d3dresource
                 return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
 
+            static int AssignId()
+            {
+                return Get().m_resourceId++;
+            }
+
             static void DisplayResources(bool* open)
             {
                 Get().DisplayResources_(open);
@@ -43,6 +48,7 @@ namespace nc::graphics::d3dresource
         private:
             std::unordered_map<std::string, std::shared_ptr<GraphicsResource>> m_resources;
             Graphics * m_graphics = nullptr;
+            uint32_t m_resourceId;
 
             static GraphicsResourceManager& Get()
             {
