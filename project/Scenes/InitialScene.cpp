@@ -16,13 +16,8 @@ void InitialScene::Load()
     auto lvHandle = NcCreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
     NcAddEngineComponent<PointLight>(lvHandle);
 
-<<<<<<< HEAD
     //CamController
     auto camHandle = NcCreateEntity({0.0f, 80.0f, 0.0f}, {1.5f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
-=======
-    // CamController
-    auto camHandle = NcCreateEntity({30.0f, 20.0f, -20.0f}, {45.0f, -45.0f, 0.0f}, Vector3::Zero(), "Main Camera");
->>>>>>> cad37de7e896847d92ffc6d60579c0f129050504
     auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
     NcRegisterMainCamera(camComponentPtr);
     NcAddUserComponent<CamController>(camHandle);
