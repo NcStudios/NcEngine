@@ -14,6 +14,8 @@ BUGS
 -rotations are still strange sometimes(also need world/local options)
 -fix window scaling so changes are made to Window, Graphics, and buffer sizes
 -don't believe gfx resources are ever unloaded
+- PBRMaterial.cpp GraphicsResource wont bind two consecutive same textures because the index won't increment if the first same resources has been added.
+
 
 ***********
 TO ADD

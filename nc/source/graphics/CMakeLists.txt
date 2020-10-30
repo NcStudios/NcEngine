@@ -6,4 +6,5 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/nc/source/graphics/Mesh.cpp
         ${ROOT_DIR}/nc/source/graphics/WICTextureLoader.cpp
         ${ROOT_DIR}/nc/source/graphics/PBRMaterial.cpp
+        ${ROOT_DIR}/nc/source/graphics/ResourceGroup.cpp
 )

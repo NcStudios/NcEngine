@@ -35,8 +35,8 @@ namespace nc
     Renderer::Renderer(Renderer&& o) {(void)o;}
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
     #ifdef NC_EDITOR_ENABLED
-    // void Renderer::EditorGuiElement() {}
-    // void Renderer::SyncMaterialData(){}
+    void Renderer::EditorGuiElement() {}
+    void Renderer::SyncMaterialData() {}
     #endif
     void Renderer::SetMaterial(graphics::PBRMaterial& material) {(void)material;}
     void Renderer::SetMesh(graphics::Mesh& mesh) {(void)mesh;}
