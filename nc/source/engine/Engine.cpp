@@ -321,12 +321,12 @@ void FrameLogic(float dt)
 void FrameRender(float dt)
 {
     (void)dt;
-    g_EngineSystems.ui->BeginFrame();
+    g_EngineSystems.ui->FrameBegin();
     g_EngineSystems.rendering->FrameBegin();
     g_EngineSystems.light->BindLights();
     g_EngineSystems.rendering->Frame();
     g_EngineSystems.ui->Frame(&g_EngineData.frameDeltaTimeFactor, g_EngineSystems.frameLogicTimer->Value(), g_EngineSystems.entity->GetActiveEntities());
-    g_EngineSystems.ui->EndFrame();
+    g_EngineSystems.ui->FrameEnd();
     g_EngineSystems.rendering->FrameEnd();
 }
 

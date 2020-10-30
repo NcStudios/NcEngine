@@ -20,9 +20,9 @@ namespace nc
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-                void BeginFrame();
+                void FrameBegin();
                 void Frame(float* dt, float frameLogicTime, std::unordered_map<nc::EntityHandle, nc::Entity>& activeEntities);
-                void EndFrame();
+                void FrameEnd();
 
             private:
                 #ifdef NC_EDITOR_ENABLED

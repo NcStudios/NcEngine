@@ -6,7 +6,11 @@
 
 namespace
 {
-    constexpr auto HUD_WINDOW_FLAGS = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize;
+    constexpr auto HUD_WINDOW_FLAGS = ImGuiWindowFlags_MenuBar |
+                                      ImGuiWindowFlags_NoCollapse |
+                                      ImGuiWindowFlags_NoTitleBar |
+                                      ImGuiWindowFlags_NoResize;
+                                      
     constexpr unsigned RESOURCE_ICON_SIZE = 16;
 }
 

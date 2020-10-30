@@ -34,7 +34,7 @@ namespace nc::ui
         return ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam);
     }
 
-    void UI::BeginFrame()
+    void UI::FrameBegin()
     {
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
@@ -47,7 +47,7 @@ namespace nc::ui
         m_hud.Draw();
     }
 
-    void UI::EndFrame()
+    void UI::FrameEnd()
     {
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
