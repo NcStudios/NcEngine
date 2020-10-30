@@ -23,7 +23,7 @@ void CamController::FrameUpdate(float dt)
     }
 
     Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
-    m_mainCameraTransform->CamTranslate(camTransl, 1.0f);
+    m_mainCameraTransform->Translate(camTransl, Space::Local);
 }
 
 Vector3 CamController::GetCameraZoomMovement()

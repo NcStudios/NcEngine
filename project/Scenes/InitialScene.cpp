@@ -38,7 +38,7 @@ void InitialScene::Load()
 
     // Ship
     auto beeMaterial = graphics::PBRMaterial{{"project//Textures//bee_albedo.png", "project//Textures//bee_normal.jpg",  "project//Textures//bee_roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto shipHandle = NcCreateEntity(Vector3::Zero(), {1.5708f, 0.0f, 0.0f}, Vector3::One() * 10, "Ship");
+    auto shipHandle = NcCreateEntity(Vector3::Zero(), {0.5f, 0.5f, 0.5f}, Vector3::One() * 10, "Ship");
     NcAddUserComponent<Ship>(shipHandle);
     auto beeMesh = graphics::Mesh{"project//Models//bee.fbx"};
     NcAddEngineComponent<Renderer>(shipHandle, beeMesh, beeMaterial);

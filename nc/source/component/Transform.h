@@ -6,6 +6,11 @@ namespace DirectX { struct XMMATRIX; }
 
 namespace nc
 {
+    enum class Space : uint8_t
+    {
+        World, Local
+    };
+
     class Transform : public Component
     {
         public:
@@ -53,11 +58,9 @@ namespace nc
                 m_scale = scale;
             }
 
-            void Translate(const Vector3& vec) noexcept;
-            void CamTranslate(Vector3& translation, float factor) noexcept;
+            void Translate(Vector3 vec, Space space = Space::Local) noexcept;
             void Rotate(float xAngle, float yAngle, float zAngle, float speed) noexcept;
             void RotateClamped(float xAngle, float yAngle, float zAngle, float speed, float min, float max) noexcept;
-            //void MoveToward()
 
         private:
             Vector3 m_position;

@@ -72,18 +72,18 @@ namespace nc
         return DirectX::XMMatrixLookAtLH(v_camPosition, v_camTarget, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
     }
 
-    void Transform::Translate(const Vector3& vec) noexcept
+    void Transform::Translate(Vector3 translation, Space space) noexcept
     {
-        m_position = m_position + vec;
-    }
+        if(space == Space::World)
+        {
+            m_position = m_position + translation;
+            return;
+        }
 
-    void Transform::CamTranslate(Vector3& translation, float factor) noexcept
-    {
         auto trans       = translation.GetXMFloat3();
         auto v_trans     = DirectX::XMLoadFloat3(&trans);
         auto v_rotMatrix = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
-        auto v_sclMatrix = DirectX::XMMatrixScaling(factor, factor, factor);
-        XMStoreFloat3(&trans, DirectX::XMVector3Transform(v_trans, v_rotMatrix * v_sclMatrix));
+        XMStoreFloat3(&trans, DirectX::XMVector3Transform(v_trans, v_rotMatrix));
         m_position = m_position + Vector3(trans);
     }
 
