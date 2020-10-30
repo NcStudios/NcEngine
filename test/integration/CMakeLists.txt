@@ -42,16 +42,20 @@ add_executable(Nce_integration_tests
     ${ROOT_DIR}/nc/source/time/NCTime.cpp
     ${ROOT_DIR}/nc/source/input/Input.cpp
     ${ROOT_DIR}/nc/source/engine/Engine.cpp
-    ${ROOT_DIR}/nc/source/engine/LightSystem.cpp
-    ${ROOT_DIR}/nc/source/engine/CollisionSystem.cpp
+    ${ROOT_DIR}/nc/source/engine/system/LightSystem.cpp
+    ${ROOT_DIR}/nc/source/engine/system/CollisionSystem.cpp
     ${ROOT_DIR}/nc/source/graphics/Model.cpp
     ${ROOT_DIR}/nc/source/graphics/PBRMaterial.cpp
     ${ROOT_DIR}/nc/source/graphics/WICTextureLoader.cpp
     ${ROOT_DIR}/nc/source/graphics/d3dresource/GraphicsResource.cpp
+    ${ROOT_DIR}/nc/source/ui/UI.cpp
     ${ROOT_DIR}/project/scenes/InitialScene.cpp
     ${ROOT_DIR}/project/components/CamController.cpp
     ${ROOT_DIR}/project/components/DebugUtils.cpp
     ${ROOT_DIR}/project/components/Ship.cpp
+    ${ROOT_DIR}/project/ui/HUD.cpp
+    ${ROOT_DIR}/project/ui/LogUIElement.cpp
+    ${ROOT_DIR}/project/ui/TurnPhaseUIElement.cpp
 )
 
 target_compile_options(Nce_integration_tests
@@ -94,6 +98,6 @@ target_link_libraries(Nce_integration_tests
 add_test(SOMETEST Nce_integration_tests)
 
 
-gtest_discover_tests(Nce_integration_tests)
+#gtest_discover_tests(Nce_integration_tests)
 
 #add_test(Nce_integration_tests Nce_integration_tests)

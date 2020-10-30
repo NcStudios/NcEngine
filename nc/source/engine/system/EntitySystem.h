@@ -24,7 +24,7 @@ namespace nc::engine::system
             EntityMap m_toDestroy;
     };
 
-        bool EntitySystem::DoesEntityExist(const EntityHandle handle) noexcept
+    bool EntitySystem::DoesEntityExist(const EntityHandle handle) noexcept
     {
         return m_active.count(handle) > 0;
     }
