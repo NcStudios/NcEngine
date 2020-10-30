@@ -35,7 +35,7 @@ namespace nc::graphics::d3dresource
                 return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
 
-            static int AssignId()
+            static uint32_t AssignId()
             {
                 return Get().m_resourceId++;
             }
