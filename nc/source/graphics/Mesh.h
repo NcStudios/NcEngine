@@ -46,7 +46,7 @@ namespace nc::graphics
             Mesh& operator=(Mesh&& other) = default;
             Mesh& operator=(const Mesh& other) = default;
             ~Mesh() = default;
-            void ParseMesh(std::string meshPath, MeshData& meshData);
+            MeshData ParseMesh(std::string meshPath);
 
         private:
             void InitializeGraphicsPipeline(MeshData meshData);

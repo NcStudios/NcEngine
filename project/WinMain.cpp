@@ -31,8 +31,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     }
     catch(std::exception& e)
     {
-        std::cerr << "Exception: \n";
-        std::cerr << e.what();
+        std::cerr << "Exception: \n" << e.what();
         nc::engine::NcShutdownEngine();
     }
     catch(...)

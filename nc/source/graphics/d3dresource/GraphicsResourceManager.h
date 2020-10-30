@@ -48,7 +48,7 @@ namespace nc::graphics::d3dresource
         private:
             std::unordered_map<std::string, std::shared_ptr<GraphicsResource>> m_resources;
             Graphics * m_graphics = nullptr;
-            int m_resourceId;
+            uint32_t m_resourceId;
 
             static GraphicsResourceManager& Get()
             {

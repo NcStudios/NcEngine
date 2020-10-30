@@ -2,7 +2,6 @@
 #include "graphics\d3dresource\GraphicsResourceManager.h"
 #include "graphics\Mesh.h"
 #include "NcConfig.h"
-#include "config/Config.h"
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
 #include <assimp\postprocess.h>
@@ -52,14 +51,13 @@ namespace nc::graphics
 {
     Mesh::Mesh(std::string meshPath)
     {
-        MeshData meshData;
-        Mesh::ParseMesh(meshPath, meshData);
-        InitializeGraphicsPipeline(meshData);
+        InitializeGraphicsPipeline(Mesh::ParseMesh(std::move(meshPath)));
     }
 
-    void Mesh::ParseMesh(std::string meshPath, MeshData& meshData) 
+    MeshData Mesh::ParseMesh(std::string meshPath) 
     {
-        meshData.MeshPath = std::move(meshPath);
+        MeshData meshData;
+        meshData.MeshPath = meshPath;
         Assimp::Importer imp;
         const auto pModel = imp.ReadFile(meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace); // ConvertToLeftHanded formats the output to match DirectX
         const auto pMesh = pModel->mMeshes[0];
@@ -99,6 +97,7 @@ namespace nc::graphics
             { "Tangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "Bitangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 }
         };
+        return meshData;
     }
 
     void Mesh::InitializeGraphicsPipeline(MeshData meshData)
