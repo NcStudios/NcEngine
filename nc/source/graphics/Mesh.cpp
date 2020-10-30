@@ -57,7 +57,7 @@ namespace nc::graphics
     MeshData Mesh::ParseMesh(std::string meshPath) 
     {
         MeshData meshData;
-        meshData.MeshPath = meshPath;
+        meshData.MeshPath = std::move(meshPath);
         Assimp::Importer imp;
         const auto pModel = imp.ReadFile(meshData.MeshPath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_CalcTangentSpace); // ConvertToLeftHanded formats the output to match DirectX
         const auto pMesh = pModel->mMeshes[0];
