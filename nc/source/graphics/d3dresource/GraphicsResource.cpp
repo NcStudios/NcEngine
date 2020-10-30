@@ -118,6 +118,11 @@ namespace nc::graphics::d3dresource
         GetContext()->PSSetShaderResources(m_shaderIndex, 1u, m_textureView.GetAddressOf());
     }
 
+    ID3D11ShaderResourceView* Texture::GetShaderResourceView()
+    {
+        return m_textureView.Get();
+    }
+
     VertexShader::VertexShader(const std::string& path)
         : m_path(path)
     {

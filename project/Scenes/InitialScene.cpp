@@ -1,9 +1,9 @@
 #include "InitialScene.h"
+#include "NcCamera.h"
 #include "component/Renderer.h"
+#include "component/PointLight.h"
 #include "graphics/Model.h"
 #include "graphics/Mesh.h"
-#include "component/PointLight.h"
-#include "NcCamera.h"
 #include "CamController.h"
 #include "DebugUtils.h"
 #include "Ship.h"
@@ -16,8 +16,8 @@ void InitialScene::Load()
     auto lvHandle = NcCreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
     NcAddEngineComponent<PointLight>(lvHandle);
 
-    // CamController
-    auto camHandle = NcCreateEntity({30.0f, 20.0f, -20.0f}, {45.0f, -45.0f, 0.0f}, Vector3::Zero(), "Main Camera");
+    //CamController
+    auto camHandle = NcCreateEntity({0.0f, 80.0f, 0.0f}, {1.5f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
     auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
     NcRegisterMainCamera(camComponentPtr);
     NcAddUserComponent<CamController>(camHandle);

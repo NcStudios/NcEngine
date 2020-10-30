@@ -2,9 +2,7 @@
 #include "component/Component.h"
 #include "math/Vector3.h"
 
-//namespace nc::utils::editor { class EditorManager; }
 namespace DirectX { struct XMMATRIX; }
-
 
 namespace nc
 {
@@ -35,8 +33,8 @@ namespace nc
             inline float Yaw() const noexcept { return m_rotation.m_y; }
             inline float Roll() const noexcept { return m_rotation.m_z; }
 
-            DirectX::XMMATRIX GetMatrixXM();
-            DirectX::XMMATRIX CamGetMatrix();
+            DirectX::XMMATRIX GetMatrixXM() const;
+            DirectX::XMMATRIX CamGetMatrix() const;
 
             inline void Set(const Vector3& pos, const Vector3& rot, const Vector3& scale) noexcept 
             {

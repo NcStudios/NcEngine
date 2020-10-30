@@ -1,15 +1,17 @@
 #include "gtest/gtest.h"
 #include "component/Component.h"
 #include "NcCommon.h"
+#include "NcEngine.h"
 
 /** stubbed */
 #include "graphics/Graphics.h"
 #include "win32/Window.h"
-#include "engine/RenderingSystem.h"
-#include "engine/ComponentSystem.h"
+#include "engine/system/RenderingSystem.h"
+#include "engine/system/ComponentSystem.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
-#include "utils/editor/EditorManager.h"
+#include "ui/UI.h"
+#include "ui/Editor.h"
 #include "config/Config.h"
 
 #include <memory>
@@ -22,10 +24,10 @@ namespace nc
     Window::Window(HINSTANCE hi, const config::Config& config) { (void)hi;(void)config; }
     Window::~Window() {}
     HWND Window::GetHWND() const noexcept { return (HWND)nullptr; }
-    std::pair<int, int> Window::GetWindowDimensions() const noexcept { return m_windowDimensions; }
+    std::pair<int, int> Window::GetWindowDimensions() const noexcept { return {0,0}; }
     void Window::ProcessSystemMessages() {}
     #ifdef NC_EDITOR_ENABLED
-    void Window::BindEditorManager(utils::editor::EditorManager * editor){(void)editor;}
+    void Window::BindUI(ui::UI * ui){(void)ui;}
     #endif
     Window * Window::Instance = new Window((HINSTANCE)nullptr, {});
 
@@ -53,7 +55,7 @@ namespace nc
     void PointLight::Set(DirectX::XMFLOAT3 pos, float radius) {(void)pos;(void)radius;}
     void PointLight::Bind(DirectX::FXMMATRIX view) noexcept(false) {(void)view;}
 
-namespace engine
+namespace engine::system
 {
     /* RenderingSystem stubs */
     RenderingSystem::RenderingSystem(int a, int b, HWND c) {(void)a;(void)b;(void)c;}
@@ -85,25 +87,18 @@ namespace graphics
     MeshData& Mesh::GetMeshData() {return m_meshData;}
 } //end namespace graphics
 
-namespace utils::editor
+namespace ui::editor
 {
     #ifdef NC_EDITOR_ENABLED
-    EditorManager::EditorManager(HWND hwnd, nc::graphics::Graphics * graphics) {(void)hwnd;(void)graphics;}
-    EditorManager::~EditorManager() noexcept {}
-
-    LRESULT EditorManager::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {(void)hwnd;(void)message;(void)wParam;(void)lParam; return LRESULT{}; }
-
-    void EditorManager::BeginFrame() {}
-    void EditorManager::Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities) {(void)dt;(void)frameLogicTime;(void)activeEntities;}
-    void EditorManager::EndFrame() {}
-
-    void EditorManager::ToggleGui() noexcept {}
-    void EditorManager::EnableGui() noexcept {}
-    void EditorManager::DisableGui() noexcept {}
-    bool EditorManager::IsGuiActive() const noexcept { return false; }
+    Editor::Editor(nc::graphics::Graphics * graphics) {(void)graphics;}
+    void Editor::Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities) {(void)dt;(void)frameLogicTime;(void)activeEntities;}
+    void Editor::ToggleGui() noexcept {}
+    void Editor::EnableGui() noexcept {}
+    void Editor::DisableGui() noexcept {}
+    bool Editor::IsGuiActive() const noexcept { return false; }
     #endif
 
-} //end namespace utils::editor
+} //end namespace ui::editor
 } //end namespace nc
 
 namespace nc
@@ -114,24 +109,28 @@ namespace nc
 }
 
 
-
-TEST(EntityTest, constructorTests)
+void InitEngine()
 {
-    Entity entity(2u, 0u, "Test");
-    EXPECT_EQ(entity.Handle, 2u);
-    EXPECT_EQ(entity.Tag, "Test");
-    EXPECT_EQ(entity.Handles.transform, 0u);
+    const auto configPaths = nc::config::detail::ConfigPaths
+    {
+        "project/config/project.ini",
+        "project/config/graphics.ini",
+        "project/config/physics.ini"
+    };
+
+    nc::engine::NcInitializeEngine(nullptr, std::move(configPaths));
 }
+
 
 /***********
  * NCE TESTS
  ***********/
 TEST(Nce, GetEntity_exists_returnsPtr)
 {
-    // auto handle = NcCreateEntity();
-    // auto ptr = NcGetEntity(handle);
-    // EXPECT_NE(ptr, nullptr);
-    //NcDestroyEntity(handle);
+    auto handle = NcCreateEntity();
+    auto ptr = NcGetEntity(handle);
+    EXPECT_NE(ptr, nullptr);
+    // NcDestroyEntity(handle);
 }
 TEST(Nce, GetEntity_doesNotExist_returnsNull)
 {
@@ -242,5 +241,6 @@ TEST(Nce, RemoveUserComponent_badHandle_throws)
 int main(int argc, char ** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
+    InitEngine();
     return RUN_ALL_TESTS();
 }

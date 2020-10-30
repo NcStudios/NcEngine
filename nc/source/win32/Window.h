@@ -5,9 +5,7 @@
 namespace nc
 {
     namespace config { struct Config; }
-    #ifdef NC_EDITOR_ENABLED
-    namespace utils::editor { class EditorManager; }
-    #endif
+    namespace ui { class UI; }
 
     class Window
     {
@@ -24,9 +22,7 @@ namespace nc
             HWND GetHWND() const noexcept;
             std::pair<int, int> GetWindowDimensions() const noexcept;
 
-            #ifdef NC_EDITOR_ENABLED
-            void BindEditorManager(utils::editor::EditorManager* editorManager);
-            #endif
+            void BindUI(ui::UI* ui);
 
             void OnWindowResize();
             void ProcessSystemMessages();
@@ -39,10 +35,7 @@ namespace nc
             HDC m_deviceContext;
             HINSTANCE m_hInstance;
             std::pair<int, int> m_windowDimensions; 
-            
-            #ifdef NC_EDITOR_ENABLED
-            utils::editor::EditorManager* m_editorManager;
-            #endif
+            ui::UI* m_ui;
     };
 
 } //end namespace nc

@@ -3,14 +3,12 @@
 #include "config/Config.h"
 #include "NcDebug.h"
 #include "input/Input.h"
-
+#include "ui/UI.h"
 #include <iostream>
 
-#ifdef NC_EDITOR_ENABLED
-#include "utils/editor/EditorManager.h"
-#endif
 
-namespace nc {
+namespace nc
+{
 
 Window* Window::Instance = nullptr;
 
@@ -54,12 +52,10 @@ HWND Window::GetHWND() const noexcept
     return m_hwnd;
 }
 
-#ifdef NC_EDITOR_ENABLED
-void Window::BindEditorManager(utils::editor::EditorManager* editorManager)
+void Window::BindUI(ui::UI* ui)
 {
-    m_editorManager = editorManager;
+    m_ui = ui;
 }
-#endif
 
 void Window::OnWindowResize()
 {
@@ -68,12 +64,10 @@ void Window::OnWindowResize()
 
 LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    #ifdef NC_EDITOR_ENABLED
-    if(Window::Instance->m_editorManager->WndProc(hwnd, message, wParam, lParam))
+    if(Window::Instance->m_ui->WndProc(hwnd, message, wParam, lParam))
     {
         return true;
     }
-    #endif
 
     switch(message)
 	{

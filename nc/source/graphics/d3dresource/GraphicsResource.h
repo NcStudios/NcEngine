@@ -145,6 +145,8 @@ namespace nc::graphics::d3dresource
             static std::string GetUID(const std::string& path, uint32_t shaderIndex) noexcept;
             uint32_t GetShaderIndex() const;
         
+            ID3D11ShaderResourceView* GetShaderResourceView();
+
         protected:
             Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureView;
             Microsoft::WRL::ComPtr<ID3D11Resource> m_texture;

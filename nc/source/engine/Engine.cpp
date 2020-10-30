@@ -7,7 +7,7 @@
 #include "component/PointLight.h"
 #include "scenes/InitialScene.h"
 #include "input/Input.h"
-
+#include "ui/UI.h"
 #include "NcCamera.h"
 #include "NcCommon.h"
 #include "NcConfig.h"
@@ -61,9 +61,7 @@ void nc::engine::NcInitializeEngine(HINSTANCE hInstance, const config::detail::C
     g_EngineSystems = internal::EngineSystems{ dimensions.first, dimensions.second, hwnd };
     g_EngineData = internal::EngineData{ std::move(config) };
 
-    #ifdef NC_EDITOR_ENABLED
-    g_WindowInstance->BindEditorManager(g_EngineSystems.editor.get());
-    #endif
+    g_WindowInstance->BindUI(g_EngineSystems.ui.get());
 }
 
 void nc::engine::NcStartEngine()
@@ -323,21 +321,12 @@ void FrameLogic(float dt)
 void FrameRender(float dt)
 {
     (void)dt;
-    #ifdef NC_EDITOR_ENABLED
-    g_EngineSystems.editor->BeginFrame();
-    #endif
-
+    g_EngineSystems.ui->FrameBegin();
     g_EngineSystems.rendering->FrameBegin();
     g_EngineSystems.light->BindLights();
     g_EngineSystems.rendering->Frame();
-
-    #ifdef NC_EDITOR_ENABLED
-    g_EngineSystems.editor->Frame(&g_EngineData.frameDeltaTimeFactor,
-                                  g_EngineSystems.frameLogicTimer->Value(),
-                                  g_EngineSystems.entity->GetActiveEntities());
-    g_EngineSystems.editor->EndFrame();
-    #endif
-
+    g_EngineSystems.ui->Frame(&g_EngineData.frameDeltaTimeFactor, g_EngineSystems.frameLogicTimer->Value(), g_EngineSystems.entity->GetActiveEntities());
+    g_EngineSystems.ui->FrameEnd();
     g_EngineSystems.rendering->FrameEnd();
 }
 
@@ -390,10 +379,5 @@ void SendOnDestroyToEntities()
         g_EngineSystems.light->Remove(handles.pointLight);
     }
     toDestroy.clear();
-}
-
-const config::Config & GetConfigReference()
-{
-    return g_EngineData.configData;
 }
 }// end namespace nc::engine::internal

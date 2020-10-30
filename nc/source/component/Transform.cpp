@@ -1,6 +1,5 @@
 #include "Transform.h"
 #include "directx/math/DirectXMath.h"
-
 #include <limits>
 
 #ifdef NC_EDITOR_ENABLED
@@ -50,7 +49,7 @@ namespace nc
     }
     #endif
     
-    DirectX::XMMATRIX Transform::GetMatrixXM()
+    DirectX::XMMATRIX Transform::GetMatrixXM() const
     {
         auto v_rot = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
         auto v_scl = DirectX::XMMatrixScaling(m_scale.X(), m_scale.Y(), m_scale.Z());
@@ -59,7 +58,7 @@ namespace nc
         return v_rot * v_scl * v_trn;
     }
 
-    DirectX::XMMATRIX Transform::CamGetMatrix()
+    DirectX::XMMATRIX Transform::CamGetMatrix() const
     {
         using xmf3 = DirectX::XMFLOAT3;
         using xmv  = DirectX::XMVECTOR;
