@@ -13,6 +13,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
 
     const auto configPaths = nc::config::detail::ConfigPaths
     {
+        "project/config/player.ini",
         "project/config/project.ini",
         "project/config/graphics.ini",
         "project/config/physics.ini"

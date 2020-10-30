@@ -1,8 +1,10 @@
 #pragma once
 #include <memory>
 
+#include "NcConfig.h"
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"
+#include "EditNameUIElement.h"
 
 namespace nc::graphics::d3dresource
 {
@@ -19,12 +21,15 @@ namespace project::ui
             void Draw();
 
         private:
+            const ::nc::config::Config& m_config;
             LogUIElement m_logUIElement;
             TurnPhaseUIElement m_turnPhaseUIElement;
+            EditNameUIElement m_editNameUIElement;
             std::unique_ptr<nc::graphics::d3dresource::Texture> m_texture;
 
             void DrawHUD();
             void DrawMenu();
+            void DrawTurnHeader();
             void DrawResources();
             void DrawResource(nc::graphics::d3dresource::Texture* texture, unsigned count, const char* label);
 

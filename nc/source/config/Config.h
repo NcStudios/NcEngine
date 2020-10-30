@@ -3,10 +3,17 @@
 
 namespace nc::config
 {
+    struct Player
+    {
+        bool Validate() const;
+        std::string playerName;
+    };
+
     struct Project
     {
         bool Validate() const;
         std::string projectName;
+        std::string playerName;
     };
 
     struct Graphics
@@ -27,6 +34,7 @@ namespace nc::config
 
     struct Config
     {
+        Player player;
         Project project;
         Graphics graphics;
         Physics physics;
@@ -36,6 +44,7 @@ namespace nc::config
     {
         struct ConfigPaths
         {
+            const std::string playerConfigPath;
             const std::string projectConfigPath;
             const std::string graphicsConfigPath;
             const std::string physicsConfigPath;

@@ -1,9 +1,6 @@
 ***********
 IN PROGRESS
 ***********
--Mesh::InitializeGraphics pipeline - since things are no longer cached, graphics resources can be changed to not take const 
-    refs. Then we can move vectors and such from MeshData. (also in Model and PBRMaterial)
-
 -build issues
     -gtest must be dl'd manually
     -model (obj) files are ignored by git
@@ -13,7 +10,6 @@ BUGS
 ***********
 -Component::Initialize() is called after constructor runs meaning handle/entity data
     is not available at the time of constructor invocation
--fix camera controls
 -rotations are still strange sometimes(also need world/local options)
 -fix window scaling so changes are made to Window, Graphics, and buffer sizes
 -don't believe gfx resources are ever unloaded

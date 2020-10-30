@@ -9,6 +9,7 @@ namespace
     const float CAM_ZOOM_SPEED = 2.5f;
     const float CAM_PAN_SPEED = 70.0f;
     const unsigned EDGE_PAN_WIDTH = 180;
+    const unsigned HUD_HEIGHT = 200;
 }
 
 CamController::CamController()
@@ -23,18 +24,23 @@ void CamController::FrameUpdate(float dt)
     }
 
     Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
-    m_mainCameraTransform->Translate(camTransl, Space::Local);
+    m_mainCameraTransform->Translate(camTransl, Space::World);
 }
 
 Vector3 CamController::GetCameraZoomMovement()
 {
-    return Vector3{ 0.0f, 0.0f, CAM_ZOOM_SPEED * (float)input::MouseWheel() };
+    return Vector3{ 0.0f, -1.0f * CAM_ZOOM_SPEED * (float)input::MouseWheel(), 0.0f };
 }
 
 Vector3 CamController::GetCameraPanMovement()
 {
     auto xPan = 0.0f;
-    auto yPan = 0.0f;
+    auto zPan = 0.0f;
+
+    if(input::MouseY > m_config.graphics.screenHeight - HUD_HEIGHT)
+    {
+        return Vector3::Zero();
+    }
 
     if(input::MouseX < EDGE_PAN_WIDTH)
     {
@@ -46,12 +52,12 @@ Vector3 CamController::GetCameraPanMovement()
     }
     if(input::MouseY < EDGE_PAN_WIDTH)
     {
-        yPan = 1.0;
+        zPan = 1.0;
     }
-    else if(input::MouseY > m_config.graphics.screenHeight - EDGE_PAN_WIDTH)
+    else if(input::MouseY > m_config.graphics.screenHeight - EDGE_PAN_WIDTH - HUD_HEIGHT)
     {
-        yPan = -1.0;
+        zPan = -1.0;
     }
 
-    return CAM_PAN_SPEED * Vector3{ xPan, yPan, 0}.GetNormalized();
+    return CAM_PAN_SPEED * Vector3{ xPan, 0.0f, zPan}.GetNormalized();
 }

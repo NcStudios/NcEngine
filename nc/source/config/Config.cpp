@@ -8,6 +8,11 @@
 namespace nc::config
 {
 
+bool Player::Validate() const
+{
+    return playerName == "" ? false : true;
+}
+
 bool Project::Validate() const
 {
     return projectName == "" ? false : true;
@@ -29,6 +34,7 @@ bool Physics::Validate() const
 
 namespace detail
 {
+const std::string PLAYER_NAME_KEY{"player_name"};
 const std::string PROJECT_NAME_KEY{"project_name"};
 const std::string SCREEN_WIDTH_KEY{"screen_width"};
 const std::string SCREEN_HEIGHT_KEY{"screen_height"};
@@ -95,6 +101,22 @@ Out ConfigReader(const std::string& path, KeyValueMapFunc& map)
     return out;
 }
 
+Player ReadPlayerConfig(const std::string& path)
+{
+    auto mapFunc = [](const std::string& key, const std::string& value, Player& out)
+    {
+        if (key == PLAYER_NAME_KEY)
+        {
+            out.playerName = value;
+        }
+        else
+        {
+            throw std::runtime_error("ConfigReader::ReadPlayerConfig::mapFunc - unknown key");
+        }
+    };
+    return ConfigReader<config::Player>(path, mapFunc);
+}
+
 Project ReadProjectConfig(const std::string& path)
 {
     auto mapFunc = [](const std::string& key, const std::string& value, Project& out)
@@ -158,7 +180,8 @@ Physics ReadPhysicsConfig(const std::string& path)
 
 Config Read(const ConfigPaths& paths)
 {
-    return { ReadProjectConfig(paths.projectConfigPath),
+    return { ReadPlayerConfig(paths.playerConfigPath),
+             ReadProjectConfig(paths.projectConfigPath),
              ReadGraphicsConfig(paths.graphicsConfigPath),
              ReadPhysicsConfig(paths.physicsConfigPath) };
 }

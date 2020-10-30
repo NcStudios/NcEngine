@@ -17,7 +17,7 @@ void InitialScene::Load()
     NcAddEngineComponent<PointLight>(lvHandle);
 
     //CamController
-    auto camHandle = NcCreateEntity({0.0f, 80.0f, 0.0f}, {1.5f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
+    auto camHandle = NcCreateEntity({0.0f, 80.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
     auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
     NcRegisterMainCamera(camComponentPtr);
     NcAddUserComponent<CamController>(camHandle);
