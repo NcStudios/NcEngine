@@ -4,9 +4,10 @@
 #include "system/LightSystem.h"
 #include "system/CollisionSystem.h"
 #include "system/EntitySystem.h"
+#include "ui/UISystem.h"
+#include "log/ILog.h"
 #include "win32/Window.h"
 #include "time/NcTime.h"
-#include "ui/UI.h"
 
 namespace nc::engine::internal
 {
@@ -21,7 +22,8 @@ namespace nc::engine::internal
             transform = std::make_unique<system::ComponentSystem<Transform>>();
             light = std::make_unique<system::LightSystem>();
             collision = std::make_unique<system::CollisionSystem>();
-            ui = std::make_unique<ui::UI>(hwnd, rendering->GetGraphics());
+            ui = std::make_unique<ui::UISystem>(hwnd, rendering->GetGraphics());
+            gameLog = nullptr;
             #ifdef NC_EDITOR_ENABLED
             frameLogicTimer = std::make_unique<nc::time::Timer>();
             #endif
@@ -32,7 +34,8 @@ namespace nc::engine::internal
         std::unique_ptr<system::RenderingSystem> rendering;
         std::unique_ptr<system::LightSystem> light;
         std::unique_ptr<system::CollisionSystem> collision;
-        std::unique_ptr<ui::UI> ui;
+        std::unique_ptr<ui::UISystem> ui;
+        log::ILog* gameLog;
         #ifdef NC_EDITOR_ENABLED
         std::unique_ptr<nc::time::Timer> frameLogicTimer;
         #endif

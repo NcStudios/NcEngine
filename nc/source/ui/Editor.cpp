@@ -12,7 +12,7 @@
 #include <d3d11.h>
 #include <string>
 
-namespace nc::ui::editor
+namespace nc::ui
 {
     Editor::Editor(nc::graphics::Graphics * graphics)
         : m_isGuiActive(false), m_graphics(graphics)

@@ -104,9 +104,9 @@ namespace nc::graphics
     {
         using namespace nc::graphics::d3dresource;
 
-        const auto defaultShaderPath = nc::config::NcGetConfigReference().graphics.shadersPath;
+        auto defaultShaderPath = nc::config::NcGetConfigReference().graphics.shadersPath;
 
-        auto pvs = d3dresource::GraphicsResourceManager::Acquire<d3dresource::VertexShader>(defaultShaderPath + "pbrvertexshader.cso");
+        auto pvs = d3dresource::GraphicsResourceManager::Acquire<d3dresource::VertexShader>(std::move(defaultShaderPath) + "pbrvertexshader.cso");
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         Mesh::AddGraphicsResource(std::move(pvs));
 

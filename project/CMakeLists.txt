@@ -9,3 +9,5 @@ target_sources(${EXE_NAME}
         ${USER_SCENE_SOURCE}
         ${USER_UI_SOURCE}
 )
+
+add_subdirectory(source)

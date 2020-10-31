@@ -2,7 +2,7 @@
 
 #include "imgui/imgui.h"
 
-namespace nc::ui
+namespace project::ui
 {
     const ImVec4 COLOR_WHITE                (1.000f, 1.000f, 1.000f, 1.000f);
     const ImVec4 COLOR_TRANS_WHITE          (1.000f, 1.000f, 1.000f, 0.700f);

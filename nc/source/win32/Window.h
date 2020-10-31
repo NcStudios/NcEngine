@@ -5,7 +5,7 @@
 namespace nc
 {
     namespace config { struct Config; }
-    namespace ui { class UI; }
+    namespace ui { class UISystem; }
 
     class Window
     {
@@ -22,7 +22,7 @@ namespace nc
             HWND GetHWND() const noexcept;
             std::pair<int, int> GetWindowDimensions() const noexcept;
 
-            void BindUI(ui::UI* ui);
+            void BindUISystem(ui::UISystem* ui);
 
             void OnWindowResize();
             void ProcessSystemMessages();
@@ -35,7 +35,7 @@ namespace nc
             HDC m_deviceContext;
             HINSTANCE m_hInstance;
             std::pair<int, int> m_windowDimensions; 
-            ui::UI* m_ui;
+            ui::UISystem* m_ui;
     };
 
 } //end namespace nc

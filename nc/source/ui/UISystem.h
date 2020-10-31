@@ -3,8 +3,8 @@
 
 #include "NcCommon.h"
 #include "win32/NCWinDef.h"
-#include "ui/Editor.h"
-#include "project/ui/HUD.h"
+#include "IUI.h"
+#include "Editor.h"
 
 namespace nc
 {
@@ -12,13 +12,15 @@ namespace nc
 
     namespace ui
     {
-        class UI
+        class UISystem
         {
             public:
-                UI(HWND hwnd, nc::graphics::Graphics * graphics);
-                ~UI() noexcept;
+                UISystem(HWND hwnd, nc::graphics::Graphics * graphics);
+                ~UISystem() noexcept;
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+                void BindProjectUI(IUI* ui);
 
                 void FrameBegin();
                 void Frame(float* dt, float frameLogicTime, std::unordered_map<nc::EntityHandle, nc::Entity>& activeEntities);
@@ -26,10 +28,10 @@ namespace nc
 
             private:
                 #ifdef NC_EDITOR_ENABLED
-                editor::Editor m_editor;
+                Editor m_editor;
                 #endif
                 
-                project::ui::HUD m_hud;
+                IUI* m_projectUI;
         };
     } //end namespace ui
 } //end namespace nc

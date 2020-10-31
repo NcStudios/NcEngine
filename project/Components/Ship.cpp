@@ -39,9 +39,7 @@ void Ship::FrameUpdate(float dt)
     if(GetKey(KeyCode::E))
         up -= 1;
 
-    m_transform->Translate({strafe * m_moveSpeed, up * m_moveSpeed , forward * m_moveSpeed});
-
-    //m_transform->Rotate(objRotX, objRotY, objRotZ, rotateSpeed);
+    m_transform->Translate({strafe * m_moveSpeed, up * m_moveSpeed , forward * m_moveSpeed}, Space::World);
 }
 
 

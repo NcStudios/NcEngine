@@ -2,6 +2,10 @@
 #include "config/Config.h"
 #include "NcDebug.h"
 #include "NcEngine.h"
+#include "NcLog.h"
+#include "NcUI.h"
+#include "project/source/ui/UI.h"
+#include "project/source/log/GameLog.h"
 
 #include <iostream>
 
@@ -13,12 +17,17 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
 
     const auto configPaths = nc::config::detail::ConfigPaths
     {
+        "project/config/player.ini",
         "project/config/project.ini",
         "project/config/graphics.ini",
         "project/config/physics.ini"
     };
 
     nc::engine::NcInitializeEngine(instance, std::move(configPaths));
+    project::GameLog gameLog;
+    nc::log::NcRegisterGameLog(&gameLog);
+    project::ui::UI projectUI(&gameLog);
+    nc::ui::NcRegisterUI(&projectUI);
 
     try
     {
