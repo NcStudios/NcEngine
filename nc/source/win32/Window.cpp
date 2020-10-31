@@ -3,7 +3,7 @@
 #include "config/Config.h"
 #include "NcDebug.h"
 #include "input/Input.h"
-#include "ui/UI.h"
+#include "ui/UISystem.h"
 #include <iostream>
 
 
@@ -52,7 +52,7 @@ HWND Window::GetHWND() const noexcept
     return m_hwnd;
 }
 
-void Window::BindUI(ui::UI* ui)
+void Window::BindUISystem(ui::UISystem* ui)
 {
     m_ui = ui;
 }

@@ -2,6 +2,10 @@
 #include "NcCamera.h"
 #include "input/Input.h"
 
+
+//for testing
+#include "NcLog.h"
+
 using namespace nc;
 
 namespace
@@ -22,6 +26,9 @@ void CamController::FrameUpdate(float dt)
     {
         m_mainCameraTransform = NcGetMainCameraTransform();
     }
+
+    std::string posString = std::to_string(input::MouseX);
+    log::NcLogToGame(posString);
 
     Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
     m_mainCameraTransform->Translate(camTransl, Space::World);

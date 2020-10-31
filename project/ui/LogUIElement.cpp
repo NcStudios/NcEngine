@@ -1,26 +1,24 @@
 #include "LogUIElement.h"
+#include "project/source/GameLog.h"
+#include "input/Input.h"
 
 namespace project::ui
 {
-    LogUIElement::LogUIElement(bool startOpen)
-        : UIElement(startOpen)
+    LogUIElement::LogUIElement(bool startOpen, GameLog* gameLog)
+        : UIElement(startOpen),
+          m_gameLog{ gameLog }
     {
     }
 
     void LogUIElement::Draw()
     {
-        if(!isOpen) return;
-
-        if(ImGui::Begin("Log", &(this->isOpen), ImGuiWindowFlags_NoCollapse))
+        auto width = ImGui::GetWindowSize().x;
+        ImGui::SetNextItemWidth(width);
+        ImGui::Text("Log");
+        ImGui::Separator();
+        for(auto& item : m_gameLog->GetItems())
         {
-            ImGui::Text("Entry");
-            ImGui::Text("Entry");
-            ImGui::Text("Entry");
-            ImGui::Text("Entry");
-            ImGui::Text("Entry");
-            ImGui::Text("Entry");
-            ImGui::Text("Entry");
+            ImGui::Text(item.c_str());
         }
-        ImGui::End();
     }
 }

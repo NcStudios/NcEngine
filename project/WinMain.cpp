@@ -2,6 +2,10 @@
 #include "config/Config.h"
 #include "NcDebug.h"
 #include "NcEngine.h"
+#include "NcLog.h"
+#include "NcUI.h"
+#include "project/ui/UI.h"
+#include "project/source/GameLog.h"
 
 #include <iostream>
 
@@ -20,6 +24,10 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     };
 
     nc::engine::NcInitializeEngine(instance, std::move(configPaths));
+    project::GameLog gameLog;
+    nc::log::NcRegisterGameLog(&gameLog);
+    project::ui::UI projectUI(&gameLog);
+    nc::ui::NcRegisterUI(&projectUI);
 
     try
     {

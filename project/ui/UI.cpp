@@ -1,8 +1,10 @@
-#include "HUD.h"
+#include "UI.h"
 #include "imgui/imgui.h"
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"
+#include "UIStyle.h"
+#include "project/source/GameLog.h"
 
 namespace
 {
@@ -10,51 +12,67 @@ namespace
                                       ImGuiWindowFlags_NoCollapse |
                                       ImGuiWindowFlags_NoTitleBar |
                                       ImGuiWindowFlags_NoResize;
-
-    constexpr unsigned HUD_HEIGHT = 200;
-
-    constexpr unsigned RESOURCE_ICON_SIZE = 16;
+    constexpr auto HUD_HEIGHT = 200u;
+    constexpr auto HUD_HORIZONTAL_FUDGE = 16u;
+    constexpr auto HUD_VERTICAL_FUDGE = 39u;
+    const auto RESOURCE_ICON_SIZE = ImVec2{16, 16};
+    const auto PLAYER_PANEL_SIZE = ImVec2{220, 100};
+    const auto LOG_PANEL_SIZE = ImVec2{400, 150};
 }
 
 namespace project::ui
 {
-    HUD::HUD()
+    UI::UI(GameLog* gameLog)
         : m_config { ::nc::config::NcGetConfigReference() },
-          m_logUIElement {true},
-          m_turnPhaseUIElement {true},
+          m_logUIElement {true, gameLog},
+          m_turnPhaseUIElement {false},
           m_editNameUIElement {false, m_config.player.playerName},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) }
     {
+        SetImGuiStyle();
     }
 
-    HUD::~HUD()
+    UI::~UI()
     {
     }
 
-    void HUD::Draw()
+    void UI::Draw()
     {
         DrawHUD();
-        m_logUIElement.Draw();
         m_turnPhaseUIElement.Draw();
         m_editNameUIElement.Draw();
     }
 
-    void HUD::DrawHUD()
+    void UI::DrawHUD()
     {
-        ImGui::SetNextWindowPos({0, (float)m_config.graphics.screenHeight - HUD_HEIGHT});
-        ImGui::SetNextWindowSize({(float)m_config.graphics.screenWidth - 1, HUD_HEIGHT});
+        ImGui::SetNextWindowPos({0, (float)m_config.graphics.screenHeight - (HUD_HEIGHT + HUD_VERTICAL_FUDGE)}, ImGuiCond_Once);
+        
+        ImGui::SetNextWindowSize({(float)m_config.graphics.screenWidth - HUD_HORIZONTAL_FUDGE, HUD_HEIGHT}, ImGuiCond_Once);
 
         if(ImGui::Begin("Hud", nullptr, HUD_WINDOW_FLAGS))
         {
             DrawMenu();
-            DrawTurnHeader();
-            ImGui::Spacing();
-            DrawResources();
+
+            if(ImGui::BeginChild("PlayerPanel", PLAYER_PANEL_SIZE, true))
+            {
+                DrawTurnHeader();
+                ImGui::Spacing();
+                DrawResources();
+            }
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            if(ImGui::BeginChild("LogPanel", LOG_PANEL_SIZE, true))
+            {
+                m_logUIElement.Draw();
+            }
+            ImGui::EndChild();
         }
         ImGui::End();
     }
 
-    void HUD::DrawMenu()
+    void UI::DrawMenu()
     {
         if(ImGui::BeginMenuBar())
         {
@@ -86,14 +104,14 @@ namespace project::ui
         }
     }
 
-    void HUD::DrawTurnHeader()
+    void UI::DrawTurnHeader()
     {
         ImGui::Text(m_config.player.playerName.c_str()); ImGui::SameLine();
         ImGui::Text("Turn: %d", 1); ImGui::SameLine();
         ImGui::Text("Phase: Harvest");
     }
 
-    void HUD::DrawResources()
+    void UI::DrawResources()
     {
         DrawResource(m_texture.get(), 1, "Dwarves"); ImGui::SameLine();
         DrawResource(m_texture.get(), 4, "Food"); ImGui::SameLine();
@@ -108,10 +126,10 @@ namespace project::ui
         DrawResource(m_texture.get(), 1, "Cow"); ImGui::SameLine();
     }
 
-    void HUD::DrawResource(nc::graphics::d3dresource::Texture* texture, unsigned count, const char* label)
+    void UI::DrawResource(nc::graphics::d3dresource::Texture* texture, unsigned count, const char* label)
     {
         ImGui::BeginGroup();
-        ImGui::Image((void*)texture->GetShaderResourceView(), ImVec2(RESOURCE_ICON_SIZE, RESOURCE_ICON_SIZE));
+        ImGui::Image((void*)texture->GetShaderResourceView(), RESOURCE_ICON_SIZE);
         ImGui::SameLine();
         ImGui::Text("%d", count);
         ImGui::EndGroup();

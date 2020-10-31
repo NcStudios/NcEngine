@@ -7,7 +7,7 @@
 
 namespace nc
 {
-    namespace ui { class UI; }
+    namespace ui { class UISystem; }
 
     namespace graphics
     {
@@ -16,7 +16,7 @@ namespace nc
         class Graphics
         {
             friend graphics::d3dresource::GraphicsResource;
-            friend ::nc::ui::UI;
+            friend ::nc::ui::UISystem;
 
             public:
                 Graphics(HWND hwnd, float screenWidth, float screenHeight);

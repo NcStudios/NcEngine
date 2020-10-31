@@ -7,13 +7,14 @@
 #include "component/PointLight.h"
 #include "scenes/InitialScene.h"
 #include "input/Input.h"
-#include "ui/UI.h"
 #include "NcCamera.h"
 #include "NcCommon.h"
 #include "NcConfig.h"
 #include "NcDebug.h"
 #include "NcEngine.h"
+#include "NcLog.h"
 #include "NcScene.h"
+#include "NcUI.h"
 
 #include <iostream>
 #include <memory>
@@ -60,8 +61,7 @@ void nc::engine::NcInitializeEngine(HINSTANCE hInstance, const config::detail::C
     auto hwnd = g_WindowInstance->GetHWND();
     g_EngineSystems = internal::EngineSystems{ dimensions.first, dimensions.second, hwnd };
     g_EngineData = internal::EngineData{ std::move(config) };
-
-    g_WindowInstance->BindUI(g_EngineSystems.ui.get());
+    g_WindowInstance->BindUISystem(g_EngineSystems.ui.get());
 }
 
 void nc::engine::NcStartEngine()
@@ -96,6 +96,20 @@ const config::Config& nc::config::NcGetConfigReference()
     return g_EngineData.configData;
 }
 
+void nc::log::NcRegisterGameLog(nc::log::ILog* log)
+{
+    g_EngineSystems.gameLog = log;
+}
+
+void nc::log::NcLogToGame(std::string item)
+{
+    if(g_EngineSystems.gameLog == nullptr)
+    {
+        throw std::runtime_error("NcLogToGame - no game log registered");
+    }
+    g_EngineSystems.gameLog->AddItem(std::move(item));
+}
+
 void nc::NcRegisterMainCamera(Camera * camera)
 {
     auto handle = camera->GetParentHandle();
@@ -107,6 +121,11 @@ void nc::NcRegisterMainCamera(Camera * camera)
 Transform * nc::NcGetMainCameraTransform()
 {
     return g_EngineData.mainCameraTransform;
+}
+
+void nc::ui::NcRegisterUI(IUI* ui)
+{
+    g_EngineSystems.ui->BindProjectUI(ui);
 }
 
 EntityHandle nc::NcCreateEntity()

@@ -1,5 +1,4 @@
-#include "UI.h"
-#include "UIStyle.h"
+#include "UISystem.h"
 #include "graphics/Graphics.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
@@ -7,47 +6,54 @@
 
 namespace nc::ui
 {
-    UI::UI(HWND hwnd, ::nc::graphics::Graphics * graphics)
+    UISystem::UISystem(HWND hwnd, ::nc::graphics::Graphics * graphics)
         : 
             #ifdef NC_EDITOR_ENABLED
             m_editor{ graphics },
             #endif
-            m_hud{}
+            m_projectUI{ nullptr }
 
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
         ImGui_ImplDX11_Init(graphics->m_device.Get(), graphics->m_context.Get());
-        SetImGuiStyle();
     }
 
-    UI::~UI()
+    UISystem::~UISystem()
     {
         ImGui_ImplWin32_Shutdown();
         ImGui_ImplDX11_Shutdown();
         ImGui::DestroyContext();
     }
 
-    LRESULT UI::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT UISystem::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         return ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam);
     }
 
-    void UI::FrameBegin()
+    void UISystem::BindProjectUI(IUI* ui)
+    {
+        m_projectUI = ui;
+    }
+
+    void UISystem::FrameBegin()
     {
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
     }
 
-    void UI::Frame(float* dt, float frameLogicTime, std::unordered_map<::nc::EntityHandle, ::nc::Entity>& activeEntities)
+    void UISystem::Frame(float* dt, float frameLogicTime, std::unordered_map<::nc::EntityHandle, ::nc::Entity>& activeEntities)
     {
         m_editor.Frame(dt, frameLogicTime, activeEntities);
-        m_hud.Draw();
+        if(m_projectUI)
+        {
+            m_projectUI->Draw();
+        }
     }
 
-    void UI::FrameEnd()
+    void UISystem::FrameEnd()
     {
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

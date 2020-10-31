@@ -1,13 +1,24 @@
 #pragma once
 
 #include "UIElement.h"
+#include "project/source/GameLog.h"
+#include <deque>
+#include <string>
 
-namespace project::ui
+namespace project
 {
-    class LogUIElement : public UIElement
+    class GameLog;
+    
+    namespace ui
     {
-        public:
-            LogUIElement(bool startOpen);
-            void Draw() override;
-    };
+        class LogUIElement : public UIElement
+        {
+            public:
+                LogUIElement(bool startOpen, GameLog* gameLog);
+                void Draw() override;
+            
+            private:
+                GameLog* m_gameLog;
+        };
+    }
 }
