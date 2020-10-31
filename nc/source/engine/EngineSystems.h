@@ -5,7 +5,7 @@
 #include "system/CollisionSystem.h"
 #include "system/EntitySystem.h"
 #include "ui/UISystem.h"
-#include "log/ILog.h"
+#include "log/IGameLog.h"
 #include "win32/Window.h"
 #include "time/NcTime.h"
 
@@ -35,7 +35,7 @@ namespace nc::engine::internal
         std::unique_ptr<system::LightSystem> light;
         std::unique_ptr<system::CollisionSystem> collision;
         std::unique_ptr<ui::UISystem> ui;
-        log::ILog* gameLog;
+        log::IGameLog* gameLog;
         #ifdef NC_EDITOR_ENABLED
         std::unique_ptr<nc::time::Timer> frameLogicTimer;
         #endif

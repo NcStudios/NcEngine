@@ -22,7 +22,7 @@ namespace
 
 namespace project::ui
 {
-    UI::UI(GameLog* gameLog)
+    UI::UI(log::GameLog* gameLog)
         : m_config { ::nc::config::NcGetConfigReference() },
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},

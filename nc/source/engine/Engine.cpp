@@ -5,6 +5,7 @@
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
+#include "log/Logger.h"
 #include "scenes/InitialScene.h"
 #include "input/Input.h"
 #include "NcCamera.h"
@@ -24,6 +25,7 @@ using namespace nc;
 /** Engine State */
 namespace
 {
+    std::unique_ptr<log::Logger> g_Logger{nullptr};
     std::unique_ptr<Window> g_WindowInstance{nullptr};
     engine::internal::EngineSystems g_EngineSystems{};
     engine::internal::EngineData g_EngineData{};
@@ -33,7 +35,7 @@ namespace
 namespace nc::engine::internal
 {
     void MainLoop();
-    void Exit();
+    void NukeStateData();
     void ClearAllStateData();
     void DoSceneSwap();
 
@@ -46,6 +48,16 @@ namespace nc::engine::internal
     void SendOnDestroyToEntities();
 }
 
+#ifdef VERBOSE_LOGGING_ENABLED
+    #define V_LOG(item); \
+            g_Logger->Log(item); \
+            g_Logger->Log(std::string("    Func: ") + __PRETTY_FUNCTION__); \
+            g_Logger->Log(std::string("    File: ") + __FILE__); \
+            g_Logger->Log(std::string("    Line: ") + std::to_string(__LINE__));
+#else
+    #define V_LOG(item);
+#endif
+
 /**
  * Interface Impl */
 void nc::engine::NcInitializeEngine(HINSTANCE hInstance, const config::detail::ConfigPaths& configPaths)
@@ -55,17 +67,22 @@ void nc::engine::NcInitializeEngine(HINSTANCE hInstance, const config::detail::C
         throw std::runtime_error("InitializeEngine - engine is already initialized");
     }
 
+
     auto config = config::detail::Read(configPaths);
+    g_Logger = std::make_unique<log::Logger>(config.project.logFilePath);
     g_WindowInstance = std::make_unique<Window>(hInstance, config);
     auto dimensions = g_WindowInstance->GetWindowDimensions();
     auto hwnd = g_WindowInstance->GetHWND();
     g_EngineSystems = internal::EngineSystems{ dimensions.first, dimensions.second, hwnd };
     g_EngineData = internal::EngineData{ std::move(config) };
     g_WindowInstance->BindUISystem(g_EngineSystems.ui.get());
+
+    V_LOG("Engine initialized");
 }
 
 void nc::engine::NcStartEngine()
 {
+    V_LOG("Starting engine");
     if (!g_WindowInstance)
     {
         throw std::runtime_error("StartEngine - engine is not properly initialized");
@@ -73,20 +90,23 @@ void nc::engine::NcStartEngine()
     internal::MainLoop();
 }
 
-void nc::engine::NcShutdownEngine()
+void nc::engine::NcShutdownEngine(bool forceImmediate)
 {
-    if (!g_WindowInstance)
+    V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
+
+    if (forceImmediate)
     {
-        throw std::runtime_error("ShutdownEngine - engine is not running");
+        internal::NukeStateData();
     }
-    internal::Exit();
-    g_EngineData = internal::EngineData{};
-    g_EngineSystems = internal::EngineSystems{};
-    g_WindowInstance = nullptr;
+    else
+    {
+        g_EngineData.isRunning = false;
+    }
 }
 
 void nc::scene::NcChangeScene(std::unique_ptr<scene::Scene>&& scene)
 {
+    V_LOG("Setting swap scene to - " + std::string(typeid(scene).name()));
     g_EngineData.isSceneSwapScheduled = true;
     g_EngineData.swapScene = std::move(scene);
 }
@@ -96,8 +116,9 @@ const config::Config& nc::config::NcGetConfigReference()
     return g_EngineData.configData;
 }
 
-void nc::log::NcRegisterGameLog(nc::log::ILog* log)
+void nc::log::NcRegisterGameLog(nc::log::IGameLog* log)
 {
+    V_LOG("Registering game log");
     g_EngineSystems.gameLog = log;
 }
 
@@ -107,11 +128,17 @@ void nc::log::NcLogToGame(std::string item)
     {
         throw std::runtime_error("NcLogToGame - no game log registered");
     }
-    g_EngineSystems.gameLog->AddItem(std::move(item));
+    g_EngineSystems.gameLog->Log(std::move(item));
+}
+
+void nc::log::NcLogToDiagnostics(std::string item)
+{
+    g_Logger->Log(std::move(item));
 }
 
 void nc::NcRegisterMainCamera(Camera * camera)
 {
+    V_LOG("Registering main camera");
     auto handle = camera->GetParentHandle();
     auto entity = NcGetEntity(handle);
     g_EngineData.mainCameraTransform = NcGetTransform(entity->Handles.transform);
@@ -125,6 +152,7 @@ Transform * nc::NcGetMainCameraTransform()
 
 void nc::ui::NcRegisterUI(IUI* ui)
 {
+    V_LOG("Registering project UI");
     g_EngineSystems.ui->BindProjectUI(ui);
 }
 
@@ -135,6 +163,7 @@ EntityHandle nc::NcCreateEntity()
 
 EntityHandle nc::NcCreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag)
 {
+    V_LOG("Creating entity: " + tag);
     auto entityHandle = g_EngineSystems.entity->handleManager.GenerateNewHandle();
     auto transHandle = g_EngineSystems.transform->Add(entityHandle, pos, rot, scale);
     g_EngineSystems.entity->GetActiveEntities().emplace(entityHandle, Entity{entityHandle, transHandle, tag} );
@@ -143,6 +172,7 @@ EntityHandle nc::NcCreateEntity(const Vector3& pos, const Vector3& rot, const Ve
 
 bool nc::NcDestroyEntity(EntityHandle handle)
 {
+    V_LOG("Destroying entity: " + std::to_string(handle));
     if (!g_EngineSystems.entity->DoesEntityExist(handle))
         return false;
     auto& containingMap = g_EngineSystems.entity->GetMapContainingEntity(handle);
@@ -257,8 +287,8 @@ namespace nc::engine::internal
 {
 void MainLoop()
 {
+    V_LOG("Starting engine loop");
     time::Time ncTime;
-
     g_EngineData.activeScene = std::make_unique<InitialScene>();
     g_EngineData.activeScene->Load();
 
@@ -291,15 +321,22 @@ void MainLoop()
         FrameCleanup();
         ncTime.ResetFrameDeltaTime();
     } //end main loop
+
+    internal::NukeStateData();
 }
 
-void Exit()
+void NukeStateData()
 {
-    g_EngineData.isRunning = false;
+    V_LOG("Nuking engine state");
+    g_EngineData = internal::EngineData{};
+    g_EngineSystems = internal::EngineSystems{};
+    g_WindowInstance = nullptr;
+    g_Logger = nullptr;
 }
 
 void ClearAllStateData()
 {
+    V_LOG("Clearing engine state");
     auto handles = std::vector<EntityHandle>{};
     for(const auto& pair : g_EngineSystems.entity->GetActiveEntities())
     {
@@ -326,6 +363,7 @@ void ClearAllStateData()
 
 void DoSceneSwap()
 {
+    V_LOG("Swapping scene to - " + std::string(typeid(g_EngineData.swapScene).name()));
     g_EngineData.activeScene->Unload();
     ClearAllStateData();
     g_EngineData.activeScene = std::move(g_EngineData.swapScene);

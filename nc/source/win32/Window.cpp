@@ -83,6 +83,11 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         }
         case WM_DESTROY:
         {
+            PostQuitMessage(0);
+            break;
+        }
+        case WM_QUIT:
+        {
             break;
         }
         case WM_MOUSEWHEEL:
@@ -107,8 +112,6 @@ void Window::ProcessSystemMessages()
         {
             case WM_QUIT:
             {
-                std::cerr << "WM_QUIT\n";
-                engine::NcShutdownEngine();
                 break;
             }
             case WM_MOUSEMOVE:

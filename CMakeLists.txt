@@ -61,6 +61,10 @@ if(DEBUG_BUILD)
     add_definitions(-DDEBUG_BUILD)
 endif()
 
+if(VERBOSE_LOGGING_ENABLED)
+    add_definitions(-DVERBOSE_LOGGING_ENABLED)
+endif()
+
 #Compile Flags
 target_compile_options(${EXE_NAME}
     PUBLIC

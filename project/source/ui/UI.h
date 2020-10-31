@@ -12,14 +12,14 @@ namespace nc::graphics::d3dresource
     class Texture;
 }
 
-namespace project { class GameLog; }
+namespace project::log { class GameLog; }
 
 namespace project::ui
 {
     class UI : public nc::ui::IUI
     {
         public:
-            UI(GameLog* gameLog);
+            UI(log::GameLog* gameLog);
             ~UI();
             void Draw() override;
 

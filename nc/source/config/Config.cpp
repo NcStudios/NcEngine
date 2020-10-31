@@ -15,7 +15,7 @@ bool Player::Validate() const
 
 bool Project::Validate() const
 {
-    return projectName == "" ? false : true;
+    return (projectName != "") && (logFilePath != "");
 }
 
 bool Graphics::Validate() const
@@ -36,6 +36,7 @@ namespace detail
 {
 const std::string PLAYER_NAME_KEY{"player_name"};
 const std::string PROJECT_NAME_KEY{"project_name"};
+const std::string LOG_FILE_PATH_KEY{"log_file_path"};
 const std::string SCREEN_WIDTH_KEY{"screen_width"};
 const std::string SCREEN_HEIGHT_KEY{"screen_height"};
 const std::string TARGET_FPS_KEY{"target_fps"};
@@ -124,6 +125,10 @@ Project ReadProjectConfig(const std::string& path)
         if (key == PROJECT_NAME_KEY)
         {
             out.projectName = value;
+        }
+        else if (key == LOG_FILE_PATH_KEY)
+        {
+            out.logFilePath = value;
         }
         else
         {

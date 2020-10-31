@@ -13,7 +13,7 @@ namespace nc::config
     {
         bool Validate() const;
         std::string projectName;
-        std::string playerName;
+        std::string logFilePath;
     };
 
     struct Graphics
