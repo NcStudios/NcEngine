@@ -4,7 +4,7 @@
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"
 #include "UIStyle.h"
-#include "project/source/GameLog.h"
+#include "project/source/log/GameLog.h"
 
 namespace
 {

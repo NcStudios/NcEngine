@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UIElement.h"
-#include "project/source/GameLog.h"
+#include "project/source/log/GameLog.h"
 #include <deque>
 #include <string>
 

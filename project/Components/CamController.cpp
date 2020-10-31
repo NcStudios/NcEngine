@@ -2,7 +2,6 @@
 #include "NcCamera.h"
 #include "input/Input.h"
 
-
 //for testing
 #include "NcLog.h"
 

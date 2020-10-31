@@ -8,7 +8,8 @@ namespace nc
 {
     enum class Space : uint8_t
     {
-        World, Local
+        World,
+        Local
     };
 
     class Transform : public Component

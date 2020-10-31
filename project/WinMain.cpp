@@ -4,8 +4,8 @@
 #include "NcEngine.h"
 #include "NcLog.h"
 #include "NcUI.h"
-#include "project/ui/UI.h"
-#include "project/source/GameLog.h"
+#include "project/source/ui/UI.h"
+#include "project/source/log/GameLog.h"
 
 #include <iostream>
 
