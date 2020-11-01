@@ -6,6 +6,11 @@
 #include "ui/UISystem.h"
 #include <iostream>
 
+namespace
+{
+    auto WND_CLASS_STYLE_FLAGS = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    auto WND_STYLE_FLAGS = (WS_OVERLAPPEDWINDOW ^ WS_SIZEBOX) | WS_VISIBLE;
+}
 
 namespace nc
 {
@@ -17,7 +22,7 @@ Window::Window(HINSTANCE instance, const config::Config& config)
     Window::Instance = this; //is it worth doing this the other way?
     
     m_wndClass = {};
-    m_wndClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
+    m_wndClass.style = WND_CLASS_STYLE_FLAGS;
     m_wndClass.lpfnWndProc = Window::WndProc;
     m_wndClass.hInstance = instance;
     m_wndClass.lpszClassName = TEXT(config.project.projectName.c_str());
@@ -26,10 +31,9 @@ Window::Window(HINSTANCE instance, const config::Config& config)
     {
         throw std::runtime_error("Window::Constructor - failed to register wnd class");
     }
-
     m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
                              config.project.projectName.c_str(),
-                             WS_OVERLAPPEDWINDOW|WS_VISIBLE,
+                             WND_STYLE_FLAGS,
                              0, 0, config.graphics.screenWidth, config.graphics.screenHeight,
                              0, 0, instance, 0);
                              
