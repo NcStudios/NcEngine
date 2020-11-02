@@ -37,6 +37,11 @@ namespace nc::ui
         m_projectUI = ui;
     }
 
+    bool UISystem::IsProjectUIHovered() const
+    {
+        return m_projectUI->IsHovered();
+    }
+
     void UISystem::FrameBegin()
     {
         ImGui_ImplDX11_NewFrame();

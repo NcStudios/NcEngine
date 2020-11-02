@@ -160,6 +160,15 @@ void nc::ui::NcRegisterUI(IUI* ui)
     g_EngineSystems.ui->BindProjectUI(ui);
 }
 
+bool nc::ui::NcIsUIHovered()
+{
+    if (g_EngineSystems.ui == nullptr)
+    {
+        throw std::runtime_error("NcIsUIHovered - no project UI registered");
+    }
+    return g_EngineSystems.ui->IsProjectUIHovered();
+}
+
 EntityHandle nc::NcCreateEntity()
 {
     return NcCreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), "");

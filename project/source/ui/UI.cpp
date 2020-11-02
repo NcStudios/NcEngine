@@ -27,7 +27,8 @@ namespace project::ui
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
           m_editNameUIElement {false, m_config.user.userName},
-          m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) }
+          m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
+          m_isHovered { false }
     {
         SetImGuiStyle();
     }
@@ -41,12 +42,17 @@ namespace project::ui
         DrawHUD();
         m_turnPhaseUIElement.Draw();
         m_editNameUIElement.Draw();
+        m_isHovered = ImGui::IsAnyWindowHovered();
+    }
+
+    bool UI::IsHovered()
+    {
+        return m_isHovered;
     }
 
     void UI::DrawHUD()
     {
         ImGui::SetNextWindowPos({0, (float)m_config.graphics.screenHeight - (HUD_HEIGHT + HUD_VERTICAL_FUDGE)}, ImGuiCond_Once);
-        
         ImGui::SetNextWindowSize({(float)m_config.graphics.screenWidth - HUD_HORIZONTAL_FUDGE, HUD_HEIGHT}, ImGuiCond_Once);
 
         if(ImGui::Begin("Hud", nullptr, HUD_WINDOW_FLAGS))

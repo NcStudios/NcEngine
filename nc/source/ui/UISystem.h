@@ -21,6 +21,7 @@ namespace nc
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
                 void BindProjectUI(IUI* ui);
+                bool IsProjectUIHovered() const;
 
                 void FrameBegin();
                 void Frame(float* dt, float frameLogicTime, std::unordered_map<nc::EntityHandle, nc::Entity>& activeEntities);

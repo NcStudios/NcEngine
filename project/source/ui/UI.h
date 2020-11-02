@@ -22,6 +22,7 @@ namespace project::ui
             UI(log::GameLog* gameLog);
             ~UI();
             void Draw() override;
+            bool IsHovered() override;
 
         private:
             const ::nc::config::Config& m_config;
@@ -29,6 +30,7 @@ namespace project::ui
             TurnPhaseUIElement m_turnPhaseUIElement;
             EditNameUIElement m_editNameUIElement;
             std::unique_ptr<nc::graphics::d3dresource::Texture> m_texture;
+            bool m_isHovered;
 
             void DrawHUD();
             void DrawMenu();

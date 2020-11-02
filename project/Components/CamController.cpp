@@ -1,6 +1,7 @@
 #include "CamController.h"
 #include "NcCamera.h"
 #include "input/Input.h"
+#include "NcUI.h"
 
 //for testing
 #include "NcLog.h"
@@ -26,6 +27,11 @@ void CamController::FrameUpdate(float dt)
         m_mainCameraTransform = NcGetMainCameraTransform();
     }
 
+    if (ui::NcIsUIHovered())
+    {
+        return;
+    }
+
     std::string posString = std::to_string(input::MouseX);
     log::NcLogToGame(posString);
 
@@ -42,11 +48,6 @@ Vector3 CamController::GetCameraPanMovement()
 {
     auto xPan = 0.0f;
     auto zPan = 0.0f;
-
-    if(input::MouseY > m_config.graphics.screenHeight - HUD_HEIGHT)
-    {
-        return Vector3::Zero();
-    }
 
     if(input::MouseX < EDGE_PAN_WIDTH)
     {
