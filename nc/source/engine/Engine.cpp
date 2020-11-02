@@ -60,15 +60,14 @@ namespace nc::engine::internal
 
 /**
  * Interface Impl */
-void nc::engine::NcInitializeEngine(HINSTANCE hInstance, const config::detail::ConfigPaths& configPaths)
+void nc::engine::NcInitializeEngine(HINSTANCE hInstance)
 {
     if (g_WindowInstance)
     {
         throw std::runtime_error("InitializeEngine - engine is already initialized");
     }
 
-
-    auto config = config::detail::Read(configPaths);
+    auto config = config::detail::Load();
     g_Logger = std::make_unique<log::Logger>(config.project.logFilePath);
     g_WindowInstance = std::make_unique<Window>(hInstance, config);
     auto dimensions = g_WindowInstance->GetWindowDimensions();
@@ -114,6 +113,11 @@ void nc::scene::NcChangeScene(std::unique_ptr<scene::Scene>&& scene)
 const config::Config& nc::config::NcGetConfigReference()
 {
     return g_EngineData.configData;
+}
+
+void nc::config::NcSetUserName(std::string name)
+{
+    g_EngineData.configData.user.userName = std::move(name);
 }
 
 void nc::log::NcRegisterGameLog(nc::log::IGameLog* log)
@@ -328,6 +332,7 @@ void MainLoop()
 void NukeStateData()
 {
     V_LOG("Nuking engine state");
+    config::detail::Save(g_EngineData.configData);
     g_EngineData = internal::EngineData{};
     g_EngineSystems = internal::EngineSystems{};
     g_WindowInstance = nullptr;

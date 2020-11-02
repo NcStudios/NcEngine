@@ -15,17 +15,9 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     (void)commandLine;
     (void)showCommand;
 
-    const auto configPaths = nc::config::detail::ConfigPaths
-    {
-        "project/config/player.ini",
-        "project/config/project.ini",
-        "project/config/graphics.ini",
-        "project/config/physics.ini"
-    };
-
     try
     {
-        nc::engine::NcInitializeEngine(instance, std::move(configPaths));
+        nc::engine::NcInitializeEngine(instance);
         project::log::GameLog gameLog;
         nc::log::NcRegisterGameLog(&gameLog);
         project::ui::UI projectUI(&gameLog);

@@ -3,8 +3,6 @@
 
 namespace nc
 {
-    namespace config::detail { struct ConfigPaths; }
-
     namespace engine
     {
         /**
@@ -14,7 +12,7 @@ namespace nc
          * @throw std::runtime_error if attempting to 
          * @note A call to this should have a matching call to NcShutDownEngine.
          */
-        void NcInitializeEngine(HINSTANCE hInstance, const config::detail::ConfigPaths& configPaths);
+        void NcInitializeEngine(HINSTANCE hInstance);
 
         /**
          * Start the engine's game loop.

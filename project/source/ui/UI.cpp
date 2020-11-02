@@ -26,7 +26,7 @@ namespace project::ui
         : m_config { ::nc::config::NcGetConfigReference() },
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
-          m_editNameUIElement {false, m_config.player.playerName},
+          m_editNameUIElement {false, m_config.user.userName},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) }
     {
         SetImGuiStyle();
@@ -106,7 +106,7 @@ namespace project::ui
 
     void UI::DrawTurnHeader()
     {
-        ImGui::Text(m_config.player.playerName.c_str()); ImGui::SameLine();
+        ImGui::Text(m_config.user.userName.c_str()); ImGui::SameLine();
         ImGui::Text("Turn: %d", 1); ImGui::SameLine();
         ImGui::Text("Phase: Harvest");
     }
