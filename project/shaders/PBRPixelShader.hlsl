@@ -74,5 +74,5 @@ float4 main(VSOut vertexOutput) : SV_Target
     const float3 specularReflectionColor = specularSample.rgb;
     const float3 specular = att * specularReflectionColor * specularIntensity * pow( max(0.0f, dot(-r, viewCamToFrag) ), specularPower);
 
-    return float4(saturate((diffuse + ambient + 1.0f) * albedoTex.Sample(splr, vertexOutput.uv).rgb * color + specular), 1.0f);
+    return float4(saturate((diffuse + ambient + 2.0f) * albedoTex.Sample(splr, vertexOutput.uv).rgb * color + specular), 1.0f);
 }
