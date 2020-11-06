@@ -2,10 +2,11 @@
 
 #include "LayerMask.h"
 #include "IClickable.h"
+#include "math/Vector2.h"
 #include "directx/math/DirectXMath.h"
 
 #include <vector>
-#include <utility>
+
 
 namespace nc
 {
@@ -20,7 +21,7 @@ namespace nc::physics
         public:
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove);
-            void RaycastToIClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, std::pair<unsigned, unsigned> windowDimensions, LayerMask mask);
+            void RaycastToIClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask);
 
         private:
             std::vector<nc::physics::IClickable*> m_clickableComponents;

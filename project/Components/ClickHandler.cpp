@@ -10,7 +10,7 @@ namespace project
 
         if(nc::input::GetKeyDown(nc::input::KeyCode::LeftButton))
         {
-            nc::physics::NcRaycastToIClickables(nc::physics::Layer::GamePiece);
+            nc::physics::NcRaycastToClickables(nc::physics::Layer::GamePiece);
         }
     }
 }

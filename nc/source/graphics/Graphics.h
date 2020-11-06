@@ -44,11 +44,11 @@ namespace nc
                 #endif
 
             private:
-                ID3D11Device* m_device = nullptr;
-                ID3D11DeviceContext* m_context = nullptr;
-                IDXGISwapChain* m_swapChain = nullptr;
-                ID3D11RenderTargetView* m_renderTarget = nullptr;
-                ID3D11DepthStencilView* m_dsv = nullptr;
+                ID3D11Device* m_device;
+                ID3D11DeviceContext* m_context;
+                IDXGISwapChain* m_swapChain;
+                ID3D11RenderTargetView* m_renderTarget;
+                ID3D11DepthStencilView* m_dsv;
 
                 bool m_isFullscreen;
                 DirectX::XMMATRIX m_camera;

@@ -52,8 +52,8 @@ namespace project::ui
     void UI::DrawHUD()
     {
         auto dim = nc::NcGetScreenDimensions();
-        ImGui::SetNextWindowPos({0, (float)dim.second - HUD_HEIGHT});
-        ImGui::SetNextWindowSize({(float)dim.first, HUD_HEIGHT});
+        ImGui::SetNextWindowPos({0, (float)dim.Y() - HUD_HEIGHT});
+        ImGui::SetNextWindowSize({(float)dim.X(), HUD_HEIGHT});
 
         if(ImGui::Begin("Hud", nullptr, HUD_WINDOW_FLAGS))
         {

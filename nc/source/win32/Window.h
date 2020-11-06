@@ -1,6 +1,6 @@
 #pragma once
 #include "NcWin32.h"
-#include <utility> //std::pair
+#include "math/Vector2.h"
 
 namespace nc
 {
@@ -21,12 +21,12 @@ namespace nc
             Window& operator=(Window&& other) = delete;
 
             HWND GetHWND() const noexcept;
-            std::pair<unsigned, unsigned> GetWindowDimensions() const;
+            Vector2 GetWindowDimensions() const;
 
             void BindGraphics(graphics::Graphics* graphics);
             void BindUISystem(ui::UISystem* ui);
 
-            void OnResize(unsigned width, unsigned height);
+            void OnResize(float width, float height);
             void ProcessSystemMessages();
 
             static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -38,7 +38,7 @@ namespace nc
             graphics::Graphics* m_graphics;
             ui::UISystem* m_ui;
 
-            std::pair<unsigned, unsigned> m_dimensions;
+            Vector2 m_dimensions;
     };
 
 } //end namespace nc

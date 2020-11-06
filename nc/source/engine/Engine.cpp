@@ -76,8 +76,8 @@ void nc::engine::NcInitializeEngine(HINSTANCE hInstance)
     g_EngineSystems = internal::EngineSystems
     {
         hwnd,
-        (float)dim.first,
-        (float)dim.second,
+        dim.X(),
+        dim.Y(),
         (float)config.graphics.nearClip,
         (float)config.graphics.farClip,
         config.graphics.launchInFullscreen
@@ -120,7 +120,7 @@ void nc::scene::NcChangeScene(std::unique_ptr<scene::Scene>&& scene)
     g_EngineData.swapScene = std::move(scene);
 }
 
-std::pair<unsigned, unsigned> nc::NcGetScreenDimensions()
+nc::Vector2 nc::NcGetScreenDimensions()
 {
     return g_WindowInstance->GetWindowDimensions();
 }
@@ -194,7 +194,7 @@ void nc::physics::NcUnregisterClickable(nc::physics::IClickable* clickable)
     g_EngineSystems.physics->UnregisterClickable(clickable);
 }
 
-void nc::physics::NcRaycastToIClickables(nc::physics::LayerMask mask)
+void nc::physics::NcRaycastToClickables(nc::physics::LayerMask mask)
 {
     g_EngineSystems.physics->RaycastToIClickables
     (

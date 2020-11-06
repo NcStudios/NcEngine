@@ -1,8 +1,8 @@
 #pragma once
 
-#include <utility>
+#include "math/Vector2.h"
 
 namespace nc
 {
-    std::pair<unsigned, unsigned> NcGetScreenDimensions();
+    Vector2 NcGetScreenDimensions();
 }

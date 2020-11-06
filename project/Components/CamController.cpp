@@ -49,7 +49,7 @@ Vector3 CamController::GetCameraPanMovement()
     {
         xPan = -1.0;
     }
-    else if(input::MouseX > dim.first - EDGE_PAN_WIDTH)
+    else if(input::MouseX > dim.X() - EDGE_PAN_WIDTH)
     {
         xPan = 1.0;
     }
@@ -57,7 +57,7 @@ Vector3 CamController::GetCameraPanMovement()
     {
         zPan = 1.0;
     }
-    else if(input::MouseY > dim.second - EDGE_PAN_WIDTH - HUD_HEIGHT)
+    else if(input::MouseY > dim.Y() - EDGE_PAN_WIDTH - HUD_HEIGHT)
     {
         zPan = -1.0;
     }

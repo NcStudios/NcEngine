@@ -40,22 +40,22 @@ Window::Window(HINSTANCE instance, const config::Config& config)
 
     if(config.graphics.useNativeResolution)
     {
-        m_dimensions = { (unsigned)nativeWidth, (unsigned)nativeHeight };
+        m_dimensions = { (float)nativeWidth, (float)nativeHeight };
     }
     else
     {
-        m_dimensions = { config.graphics.screenWidth, config.graphics.screenHeight };
+        m_dimensions = { (float)config.graphics.screenWidth, (float)config.graphics.screenHeight };
     }
 
-    auto left = math::Clamp((nativeWidth - (int)m_dimensions.first) / 2, 0, nativeWidth);
-    auto top = math::Clamp((nativeHeight - (int)m_dimensions.second) / 2, 0, nativeHeight);
+    auto left = math::Clamp(((int)nativeWidth - (int)m_dimensions.X()) / 2, 0, nativeWidth);
+    auto top = math::Clamp(((int)nativeHeight - (int)m_dimensions.Y()) / 2, 0, nativeHeight);
 
     auto clientRect = RECT
     {
         (LONG)left,
         (LONG)top,
-        (LONG)(left + m_dimensions.first),
-        (LONG)(top + m_dimensions.second)
+        (LONG)(left + m_dimensions.X()),
+        (LONG)(top + m_dimensions.Y())
     };
 
     if(!AdjustWindowRect(&clientRect, WND_STYLE_FLAGS, FALSE))
@@ -99,7 +99,7 @@ HWND Window::GetHWND() const noexcept
     return m_hwnd;
 }
 
-std::pair<unsigned, unsigned> Window::GetWindowDimensions() const
+Vector2 Window::GetWindowDimensions() const
 {
     return m_dimensions;
 }
@@ -114,7 +114,7 @@ void Window::BindGraphics(graphics::Graphics* graphics)
     m_graphics = graphics;
 }
 
-void Window::OnResize(unsigned width, unsigned height)
+void Window::OnResize(float width, float height)
 {
     if(!(m_graphics))
     {
@@ -123,7 +123,7 @@ void Window::OnResize(unsigned width, unsigned height)
 
     m_dimensions = {width, height};
     const auto& config = config::NcGetConfigReference();
-    m_graphics->OnResize(m_dimensions.first, m_dimensions.second, config.graphics.nearClip, config.graphics.farClip);
+    m_graphics->OnResize(m_dimensions.X(), m_dimensions.Y(), config.graphics.nearClip, config.graphics.farClip);
 }
 
 LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

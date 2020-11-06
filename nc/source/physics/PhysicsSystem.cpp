@@ -26,10 +26,9 @@ namespace nc::physics
         m_clickableComponents.pop_back();
     }
 
-    void PhysicsSystem::RaycastToIClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, std::pair<unsigned, unsigned> windowDimensions, LayerMask mask)
+    void PhysicsSystem::RaycastToIClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
     {
         auto worldMatrix = DirectX::XMMatrixIdentity();
-
         auto unit = Vector3(1,1,1).GetNormalized().GetXMFloat3();
         auto unit_v = DirectX::XMLoadFloat3(&unit);
         unit_v = DirectX::XMVector3Transform(unit_v, viewMatrix);
@@ -48,7 +47,7 @@ namespace nc::physics
             auto worldPos_v = DirectX::XMLoadFloat3(&worldPos);
             auto screenPos_v = DirectX::XMVector3Project(worldPos_v,
                                                          0.0f, 0.0f,
-                                                         windowDimensions.first, windowDimensions.second,
+                                                         windowDimensions.X(), windowDimensions.Y(),
                                                          0.0f, 1.0f,
                                                          projectionMatrix, viewMatrix, worldMatrix);
             DirectX::XMStoreFloat3(&screenPos, screenPos_v);
