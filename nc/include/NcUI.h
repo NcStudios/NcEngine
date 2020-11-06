@@ -5,4 +5,5 @@
 namespace nc::ui
 {
     void NcRegisterUI(IUI* ui);
+    bool NcIsUIHovered();
 }

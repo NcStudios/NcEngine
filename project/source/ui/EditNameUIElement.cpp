@@ -1,4 +1,5 @@
 #include "EditNameUIElement.h"
+#include "NcConfig.h"
 
 namespace project::ui
 {
@@ -12,9 +13,14 @@ namespace project::ui
     {
         if(!isOpen) return;
 
-        if(ImGui::Begin("Player Name", &(this->isOpen)))
+        if(ImGui::Begin("Edit Player Name", &(this->isOpen)))
         {
-            ImGui::InputText(m_buffer , m_buffer, m_bufferSize);
+            ImGui::InputText("Enter Name" , m_buffer, m_bufferSize);
+            
+            if(ImGui::Button("Save"))
+            {
+                nc::config::NcSetUserName(m_buffer);
+            }
         }
         ImGui::End();
     }

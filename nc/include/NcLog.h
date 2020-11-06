@@ -1,11 +1,13 @@
 #pragma once
 
-#include "log/Ilog.h"
+#include "log/IGamelog.h"
 #include <string>
 
 namespace nc::log
 {
-    void NcRegisterGameLog(log::ILog* gameLog);
+    void NcRegisterGameLog(log::IGameLog* gameLog);
 
     void NcLogToGame(std::string item);
+
+    void NcLogToDiagnostics(std::string item);
 }

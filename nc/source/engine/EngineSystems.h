@@ -4,8 +4,9 @@
 #include "system/LightSystem.h"
 #include "system/CollisionSystem.h"
 #include "system/EntitySystem.h"
+#include "physics/PhysicsSystem.h"
 #include "ui/UISystem.h"
-#include "log/ILog.h"
+#include "log/IGameLog.h"
 #include "win32/Window.h"
 #include "time/NcTime.h"
 
@@ -15,13 +16,14 @@ namespace nc::engine::internal
     {
         EngineSystems() = default;
 
-        EngineSystems(int screenWidth, int screenHeight, HWND hwnd)
+        EngineSystems(HWND hwnd, float screenWidth, float screenHeight, float nearZ, float farZ, bool fullscreen)
         {
-            rendering = std::make_unique<system::RenderingSystem>(screenWidth, screenHeight, hwnd);
+            rendering = std::make_unique<system::RenderingSystem>(hwnd, screenWidth, screenHeight, nearZ, farZ, fullscreen);
             entity = std::make_unique<system::EntitySystem>();
             transform = std::make_unique<system::ComponentSystem<Transform>>();
             light = std::make_unique<system::LightSystem>();
             collision = std::make_unique<system::CollisionSystem>();
+            physics = std::make_unique<physics::PhysicsSystem>();
             ui = std::make_unique<ui::UISystem>(hwnd, rendering->GetGraphics());
             gameLog = nullptr;
             #ifdef NC_EDITOR_ENABLED
@@ -34,8 +36,9 @@ namespace nc::engine::internal
         std::unique_ptr<system::RenderingSystem> rendering;
         std::unique_ptr<system::LightSystem> light;
         std::unique_ptr<system::CollisionSystem> collision;
+        std::unique_ptr<physics::PhysicsSystem> physics;
         std::unique_ptr<ui::UISystem> ui;
-        log::ILog* gameLog;
+        log::IGameLog* gameLog;
         #ifdef NC_EDITOR_ENABLED
         std::unique_ptr<nc::time::Timer> frameLogicTimer;
         #endif

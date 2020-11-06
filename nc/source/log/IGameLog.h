@@ -4,9 +4,9 @@
 
 namespace nc::log
 {
-    class ILog
+    class IGameLog
     {
         public:
-            virtual void AddItem(std::string item) = 0;
+            virtual void Log(std::string item) = 0;
     };
 }

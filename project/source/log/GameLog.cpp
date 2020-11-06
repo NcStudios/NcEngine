@@ -1,8 +1,8 @@
 #include "GameLog.h"
 
-namespace project
+namespace project::log
 {
-    void GameLog::AddItem(std::string item)
+    void GameLog::Log(std::string item)
     {
         m_items.push_back(std::move(item));
         if(m_items.size() > m_itemCount)

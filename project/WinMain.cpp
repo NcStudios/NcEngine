@@ -15,39 +15,34 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     (void)commandLine;
     (void)showCommand;
 
-    const auto configPaths = nc::config::detail::ConfigPaths
-    {
-        "project/config/player.ini",
-        "project/config/project.ini",
-        "project/config/graphics.ini",
-        "project/config/physics.ini"
-    };
-
-    nc::engine::NcInitializeEngine(instance, std::move(configPaths));
-    project::GameLog gameLog;
-    nc::log::NcRegisterGameLog(&gameLog);
-    project::ui::UI projectUI(&gameLog);
-    nc::ui::NcRegisterUI(&projectUI);
-
     try
     {
+        nc::engine::NcInitializeEngine(instance);
+        project::log::GameLog gameLog;
+        nc::log::NcRegisterGameLog(&gameLog);
+        project::ui::UI projectUI(&gameLog);
+        nc::ui::NcRegisterUI(&projectUI);
         nc::engine::NcStartEngine();
     }
     catch(const std::runtime_error& e)
     {
         std::cerr << "Fatal error:\n" << e.what();
-        nc::engine::NcShutdownEngine();
+        nc::log::NcLogToDiagnostics(e.what());
+        nc::engine::NcShutdownEngine(true);
     }
     catch(std::exception& e)
     {
         std::cerr << "Exception: \n" << e.what();
-        nc::engine::NcShutdownEngine();
+        nc::log::NcLogToDiagnostics(e.what());
+        nc::engine::NcShutdownEngine(true);
     }
     catch(...)
     {
         std::cerr << "WinMain.cpp - unkown exception caught\n";
-        nc::engine::NcShutdownEngine();
+        nc::log::NcLogToDiagnostics("WinMain.cpp - unkown exception");
+        nc::engine::NcShutdownEngine(true);
     }
 
+    std::cout << "WinMain - Exiting\n";
 	return 0;
 }

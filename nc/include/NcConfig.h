@@ -10,5 +10,7 @@ namespace nc
          * @return Const reference to Config on success.
          */
         const config::Config& NcGetConfigReference();
+
+        void NcSetUserName(std::string name);
     }
 }

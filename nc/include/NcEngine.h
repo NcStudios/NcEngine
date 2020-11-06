@@ -3,8 +3,6 @@
 
 namespace nc
 {
-    namespace config::detail { struct ConfigPaths; }
-
     namespace engine
     {
         /**
@@ -14,7 +12,7 @@ namespace nc
          * @throw std::runtime_error if attempting to 
          * @note A call to this should have a matching call to NcShutDownEngine.
          */
-        void NcInitializeEngine(HINSTANCE hInstance, const config::detail::ConfigPaths& configPaths);
+        void NcInitializeEngine(HINSTANCE hInstance);
 
         /**
          * Start the engine's game loop.
@@ -23,9 +21,12 @@ namespace nc
         void NcStartEngine();
 
         /**
-         * Stop the engine and clean up state.
-         * @throw std::runtime_error if engine is not initialized.
+         * Sets the engine to an uninitialized state after the current loop finishes 
+         * or immediately, depending on the value of forceImmediate.
+         * @param forceImmediate Should be false for typical shutdown. In the case
+         * of an irrecoverable exception, set to true to immediately wipe state as
+         * the engine will not be able to.
          */
-        void NcShutdownEngine();
+        void NcShutdownEngine(bool forceImmediate = false);
     }
 }

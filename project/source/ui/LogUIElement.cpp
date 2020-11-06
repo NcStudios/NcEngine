@@ -4,7 +4,7 @@
 
 namespace project::ui
 {
-    LogUIElement::LogUIElement(bool startOpen, GameLog* gameLog)
+    LogUIElement::LogUIElement(bool startOpen, log::GameLog* gameLog)
         : UIElement(startOpen),
           m_gameLog{ gameLog }
     {

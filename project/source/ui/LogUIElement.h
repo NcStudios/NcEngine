@@ -7,18 +7,18 @@
 
 namespace project
 {
-    class GameLog;
+    namespace log { class GameLog; }
     
     namespace ui
     {
         class LogUIElement : public UIElement
         {
             public:
-                LogUIElement(bool startOpen, GameLog* gameLog);
+                LogUIElement(bool startOpen, log::GameLog* gameLog);
                 void Draw() override;
             
             private:
-                GameLog* m_gameLog;
+                log::GameLog* m_gameLog;
         };
     }
 }

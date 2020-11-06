@@ -316,11 +316,7 @@ namespace nc::graphics::d3dresource
         {
             &consts, 0u, 0u //pSysMem, SysMemPitch, SysMemSlicePitch
         };
-        THROW_FAILED
-        (
-            GetDevice()->CreateBuffer(&cbd, &csd, &m_constantBuffer),
-            __FILE__, __LINE__
-        );
+        THROW_FAILED(GetDevice()->CreateBuffer(&cbd, &csd, &m_constantBuffer));
     }
 
     template<class T>
@@ -335,11 +331,7 @@ namespace nc::graphics::d3dresource
             D3D11_CPU_ACCESS_WRITE,     //CPUAccessFlags
             0u, 0u                      //MiscFlags, StructureByteStride
         };
-        THROW_FAILED
-        (
-            GetDevice()->CreateBuffer(&cbd,nullptr,&m_constantBuffer),
-            __FILE__, __LINE__
-        );
+        THROW_FAILED(GetDevice()->CreateBuffer(&cbd,nullptr,&m_constantBuffer));
     }
 
     template<class T>
@@ -361,11 +353,7 @@ namespace nc::graphics::d3dresource
     void ConstantBuffer<T>::Update(const T& consts)
     {
         auto msr = D3D11_MAPPED_SUBRESOURCE {};
-        THROW_FAILED
-        (
-            GetContext()->Map(m_constantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD,0u, &msr),
-            __FILE__, __LINE__
-        );
+        THROW_FAILED(GetContext()->Map(m_constantBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD,0u, &msr));
         memcpy(msr.pData, &consts, sizeof(consts));
         GetContext()->Unmap(m_constantBuffer.Get(), 0u);
     }

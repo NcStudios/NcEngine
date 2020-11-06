@@ -12,16 +12,17 @@ namespace nc::graphics::d3dresource
     class Texture;
 }
 
-namespace project { class GameLog; }
+namespace project::log { class GameLog; }
 
 namespace project::ui
 {
     class UI : public nc::ui::IUI
     {
         public:
-            UI(GameLog* gameLog);
+            UI(log::GameLog* gameLog);
             ~UI();
             void Draw() override;
+            bool IsHovered() override;
 
         private:
             const ::nc::config::Config& m_config;
@@ -29,6 +30,7 @@ namespace project::ui
             TurnPhaseUIElement m_turnPhaseUIElement;
             EditNameUIElement m_editNameUIElement;
             std::unique_ptr<nc::graphics::d3dresource::Texture> m_texture;
+            bool m_isHovered;
 
             void DrawHUD();
             void DrawMenu();

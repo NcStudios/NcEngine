@@ -12,9 +12,9 @@
 #ifndef NOGDICAPMASKS
 #define NOGDICAPMASKS
 #endif
-#ifndef NOSYSMETRICS
-#define NOSYSMETRICS
-#endif
+//#ifndef NOSYSMETRICS //used by Window to get native resolution
+//#define NOSYSMETRICS
+//#endif
 #ifndef NOMENUS
 #define NOMENUS
 #endif

@@ -11,12 +11,12 @@ namespace nc::graphics::d3dresource
 {
     ID3D11DeviceContext* GraphicsResource::GetContext() noexcept
     {
-        return GraphicsResourceManager::GetGraphics()->m_context.Get();
+        return GraphicsResourceManager::GetGraphics()->m_context;
     }
 
     ID3D11Device* GraphicsResource::GetDevice() noexcept
     {
-        return GraphicsResourceManager::GetGraphics()->m_device.Get();
+        return GraphicsResourceManager::GetGraphics()->m_device;
     }
 
     Sampler::Sampler(const std::string& tag)
@@ -28,11 +28,7 @@ namespace nc::graphics::d3dresource
         samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
         samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 
-        THROW_FAILED
-        (
-            GetDevice()->CreateSamplerState(&samplerDesc, &m_sampler),
-            __FILE__, __LINE__
-        );
+        THROW_FAILED(GetDevice()->CreateSamplerState(&samplerDesc, &m_sampler));
     }
 
     void Sampler::Bind() noexcept
@@ -54,11 +50,7 @@ namespace nc::graphics::d3dresource
         {
             vertices.data(), 0u, 0u //pSysMem, SysMemPitch, SysMemSlicePitch
         };
-        THROW_FAILED
-        (
-            GetDevice()->CreateBuffer(&bd,&sd,&m_vertexBuffer),
-            __FILE__, __LINE__
-        );
+        THROW_FAILED(GetDevice()->CreateBuffer(&bd,&sd,&m_vertexBuffer));
     }
 
 
@@ -82,11 +74,7 @@ namespace nc::graphics::d3dresource
         D3D11_SUBRESOURCE_DATA isd = {};
         isd.pSysMem                = indices.data();
 
-        THROW_FAILED
-        (
-            GetDevice()->CreateBuffer(&ibd, &isd, &m_indexBuffer),
-            __FILE__, __LINE__
-        );
+        THROW_FAILED(GetDevice()->CreateBuffer(&ibd, &isd, &m_indexBuffer));
     }
 
     void IndexBuffer::Bind() noexcept
@@ -105,7 +93,7 @@ namespace nc::graphics::d3dresource
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
 
-        THROW_FAILED(CreateWICTextureFromFile(GetDevice(), GetContext(), w_path.c_str(), &m_texture, &m_textureView, 0), __FILE__, __LINE__);
+        THROW_FAILED(CreateWICTextureFromFile(GetDevice(), GetContext(), w_path.c_str(), &m_texture, &m_textureView, 0));
     }
 
     uint32_t Texture::GetShaderIndex() const
@@ -128,14 +116,13 @@ namespace nc::graphics::d3dresource
     {
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
-        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
+        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob));
         
         THROW_FAILED
         (
             GetDevice()->CreateVertexShader(m_bytecodeBlob->GetBufferPointer(),
-                                                    m_bytecodeBlob->GetBufferSize(),
-                                                    nullptr, &m_vertexShader),
-            __FILE__, __LINE__
+                                            m_bytecodeBlob->GetBufferSize(),
+                                            nullptr, &m_vertexShader)
         );
     }
 
@@ -156,15 +143,14 @@ namespace nc::graphics::d3dresource
         Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
-        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob), __FILE__, __LINE__);
+        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob));
 
         // Create the shader
         THROW_FAILED
         (
             GetDevice()->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),
                                             m_bytecodeBlob->GetBufferSize(),
-                                            nullptr, &m_pixelShader),
-            __FILE__, __LINE__
+                                            nullptr, &m_pixelShader)
         );
     }
 
@@ -247,8 +233,7 @@ namespace nc::graphics::d3dresource
                                                    (UINT)layout.size(),
                                                    vertexShaderBytecode->GetBufferPointer(),
                                                    vertexShaderBytecode->GetBufferSize(),
-                                                   &m_inputLayout),
-            __FILE__, __LINE__
+                                                   &m_inputLayout)
         );
     }
 

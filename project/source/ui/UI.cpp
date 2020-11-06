@@ -5,6 +5,7 @@
 #include "TurnPhaseUIElement.h"
 #include "UIStyle.h"
 #include "project/source/log/GameLog.h"
+#include "NcScreen.h"
 
 namespace
 {
@@ -13,8 +14,6 @@ namespace
                                       ImGuiWindowFlags_NoTitleBar |
                                       ImGuiWindowFlags_NoResize;
     constexpr auto HUD_HEIGHT = 200u;
-    constexpr auto HUD_HORIZONTAL_FUDGE = 16u;
-    constexpr auto HUD_VERTICAL_FUDGE = 39u;
     const auto RESOURCE_ICON_SIZE = ImVec2{16, 16};
     const auto PLAYER_PANEL_SIZE = ImVec2{220, 100};
     const auto LOG_PANEL_SIZE = ImVec2{400, 150};
@@ -22,12 +21,13 @@ namespace
 
 namespace project::ui
 {
-    UI::UI(GameLog* gameLog)
+    UI::UI(log::GameLog* gameLog)
         : m_config { ::nc::config::NcGetConfigReference() },
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
-          m_editNameUIElement {false, m_config.player.playerName},
-          m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) }
+          m_editNameUIElement {false, m_config.user.userName},
+          m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
+          m_isHovered { false }
     {
         SetImGuiStyle();
     }
@@ -41,13 +41,19 @@ namespace project::ui
         DrawHUD();
         m_turnPhaseUIElement.Draw();
         m_editNameUIElement.Draw();
+        m_isHovered = ImGui::IsAnyWindowHovered();
+    }
+
+    bool UI::IsHovered()
+    {
+        return m_isHovered;
     }
 
     void UI::DrawHUD()
     {
-        ImGui::SetNextWindowPos({0, (float)m_config.graphics.screenHeight - (HUD_HEIGHT + HUD_VERTICAL_FUDGE)}, ImGuiCond_Once);
-        
-        ImGui::SetNextWindowSize({(float)m_config.graphics.screenWidth - HUD_HORIZONTAL_FUDGE, HUD_HEIGHT}, ImGuiCond_Once);
+        auto dim = nc::NcGetScreenDimensions();
+        ImGui::SetNextWindowPos({0, (float)dim.Y() - HUD_HEIGHT});
+        ImGui::SetNextWindowSize({(float)dim.X(), HUD_HEIGHT});
 
         if(ImGui::Begin("Hud", nullptr, HUD_WINDOW_FLAGS))
         {
@@ -106,7 +112,7 @@ namespace project::ui
 
     void UI::DrawTurnHeader()
     {
-        ImGui::Text(m_config.player.playerName.c_str()); ImGui::SameLine();
+        ImGui::Text(m_config.user.userName.c_str()); ImGui::SameLine();
         ImGui::Text("Turn: %d", 1); ImGui::SameLine();
         ImGui::Text("Phase: Harvest");
     }
