@@ -38,9 +38,8 @@ namespace nc::engine::internal
 {
     void MainLoop();
     void NukeStateData();
-    void ClearAllStateData();
+    void ClearStateDataForSceneSwap();
     void DoSceneSwap();
-
     void FrameLogic(float dt);
     void FrameRender(float dt);
     void FixedUpdate();
@@ -395,7 +394,7 @@ void NukeStateData()
     g_Logger = nullptr;
 }
 
-void ClearAllStateData()
+void ClearStateDataForSceneSwap()
 {
     V_LOG("Clearing engine state");
     auto handles = std::vector<EntityHandle>{};
@@ -419,14 +418,14 @@ void ClearAllStateData()
 
     g_EngineSystems.transform->Clear();
     g_EngineSystems.rendering->Clear();
-    g_EngineSystems.light->Clear();   
+    g_EngineSystems.light->Clear();
 }
 
 void DoSceneSwap()
 {
     V_LOG("Swapping scene to - " + std::string(typeid(g_EngineData.swapScene).name()));
     g_EngineData.activeScene->Unload();
-    ClearAllStateData();
+    ClearStateDataForSceneSwap();
     g_EngineData.activeScene = std::move(g_EngineData.swapScene);
     g_EngineData.activeScene->Load();
 }
