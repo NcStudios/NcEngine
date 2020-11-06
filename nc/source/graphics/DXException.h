@@ -5,7 +5,7 @@
 #include <exception>
 #include <iostream>
 
-#define THROW_FAILED(hr, file, line) if ( (HRESULT)hr < 0 ) { throw DX11Exception(hr, file, line); }
+#define THROW_FAILED(hr) if ( (HRESULT)hr < 0 ) { throw DX11Exception(hr, __FILE__, __LINE__); }
 
 namespace nc::graphics
 {

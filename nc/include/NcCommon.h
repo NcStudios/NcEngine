@@ -157,7 +157,7 @@ T * nc::NcAddUserComponent(const EntityHandle handle, Args&& ... args) noexcept(
 {
     auto ptr = nc::NcGetEntity(handle);
     IF_THROW(ptr == nullptr, "NcAddUserComponent : bad handle");
-    return ptr->AddUserComponent<T>(std::forward(args)...);
+    return ptr->AddUserComponent<T>(std::forward<Args>(args)...);
 }
 
 template<class T, class>

@@ -77,7 +77,7 @@ namespace nc
 
             static Vector2 Lerp(const Vector2& lhs, const Vector2& rhs, float factor) noexcept
             { 
-                factor = math::Clamp(factor, 0, 1);
+                factor = math::Clamp(factor, 0.0f, 1.0f);
                 return Vector2(lhs.m_x + (rhs.m_x - lhs.m_x) * factor,
                                lhs.m_y + (rhs.m_y - lhs.m_y) * factor);
             }

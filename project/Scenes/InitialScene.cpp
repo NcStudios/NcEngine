@@ -6,9 +6,11 @@
 #include "graphics/Mesh.h"
 #include "CamController.h"
 #include "DebugUtils.h"
-#include "Ship.h"
+#include "GamePiece.h"
+#include "ClickHandler.h"
 
 using namespace nc;
+using namespace project;
 
 void InitialScene::Load()
 {
@@ -17,10 +19,11 @@ void InitialScene::Load()
     NcAddEngineComponent<PointLight>(lvHandle);
 
     //CamController
-    auto camHandle = NcCreateEntity({0.0f, 80.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
-    auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
-    NcRegisterMainCamera(camComponentPtr);
-    NcAddUserComponent<CamController>(camHandle);
+     auto camHandle = NcCreateEntity({0.0f, 80.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::One(), "Main Camera");
+     auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
+     NcRegisterMainCamera(camComponentPtr);
+     NcAddUserComponent<CamController>(camHandle);
+     NcAddUserComponent<ClickHandler>(camHandle);
     
     // Debug Controller
     auto debugHandle = NcCreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Debug Controller");
@@ -48,12 +51,18 @@ void InitialScene::Load()
     auto stoneHandle = NcCreateEntity({-20.00f, 0.0f, 0.0f}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * 100, "Stone Piece");
     auto stoneMesh = graphics::Mesh{"project//Models//StonePiece.fbx"};
     NcAddEngineComponent<Renderer>(stoneHandle, stoneMesh, stoneMaterial);
+    auto stoneEntity = NcGetEntity(stoneHandle);
+    auto stoneTransform = NcGetTransform(stoneEntity->Handles.transform);
+    NcAddUserComponent<GamePiece>(stoneHandle, stoneTransform);
 
     // Wood Piece
     auto woodMaterial = graphics::PBRMaterial{{"project//Textures//WoodPiece_Material_BaseColor.png", "project//Textures//WoodPiece_Material_Normal.png",  "project//Textures//WoodPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto woodHandle = NcCreateEntity({-10.00f, 0.0f, 0.0f}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * 100, "Wood Piece");
     auto woodMesh = graphics::Mesh{"project//Models//WoodPiece.fbx"};
     NcAddEngineComponent<Renderer>(woodHandle, woodMesh, woodMaterial);
+    auto woodEntity = NcGetEntity(woodHandle);
+    auto woodTransform = NcGetTransform(woodEntity->Handles.transform);
+    NcAddUserComponent<GamePiece>(woodHandle, woodTransform);
 
     // Dog Piece
     auto dogMaterial = graphics::PBRMaterial{{"project//Textures//DogPiece_Material_BaseColor.png", "project//Textures//DogPiece_Material_Normal.png",  "project//Textures//DogPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};

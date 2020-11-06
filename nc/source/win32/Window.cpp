@@ -1,15 +1,17 @@
 #include "Window.h"
 #include "NcEngine.h"
-#include "config/Config.h"
+#include "NcConfig.h"
+#include "graphics/Graphics.h"
 #include "NcDebug.h"
 #include "input/Input.h"
 #include "ui/UISystem.h"
+#include "math/Math.h"
 #include <iostream>
 
 namespace
 {
     auto WND_CLASS_STYLE_FLAGS = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    auto WND_STYLE_FLAGS = (WS_OVERLAPPEDWINDOW ^ WS_SIZEBOX) | WS_VISIBLE;
+    auto WND_STYLE_FLAGS = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
 }
 
 namespace nc
@@ -19,8 +21,9 @@ Window* Window::Instance = nullptr;
 
 Window::Window(HINSTANCE instance, const config::Config& config)
 {
-    Window::Instance = this; //is it worth doing this the other way?
-    
+    Window::Instance = this;
+    m_graphics = nullptr;
+
     m_wndClass = {};
     m_wndClass.style = WND_CLASS_STYLE_FLAGS;
     m_wndClass.lpfnWndProc = Window::WndProc;
@@ -31,19 +34,59 @@ Window::Window(HINSTANCE instance, const config::Config& config)
     {
         throw std::runtime_error("Window::Constructor - failed to register wnd class");
     }
+
+    auto nativeWidth = GetSystemMetrics(SM_CXFULLSCREEN);
+    auto nativeHeight = GetSystemMetrics(SM_CYFULLSCREEN);
+
+    if(config.graphics.useNativeResolution)
+    {
+        m_dimensions = { (unsigned)nativeWidth, (unsigned)nativeHeight };
+    }
+    else
+    {
+        m_dimensions = { config.graphics.screenWidth, config.graphics.screenHeight };
+    }
+
+    auto left = math::Clamp((nativeWidth - (int)m_dimensions.first) / 2, 0, nativeWidth);
+    auto top = math::Clamp((nativeHeight - (int)m_dimensions.second) / 2, 0, nativeHeight);
+
+    auto clientRect = RECT
+    {
+        (LONG)left,
+        (LONG)top,
+        (LONG)(left + m_dimensions.first),
+        (LONG)(top + m_dimensions.second)
+    };
+
+    if(!AdjustWindowRect(&clientRect, WND_STYLE_FLAGS, FALSE))
+    {
+        throw std::runtime_error("Failed to adjust client rect to window rect");
+    }
+
+    if(clientRect.left < 0)
+    {
+        clientRect.right += (-1 * clientRect.left);
+        clientRect.left = 0;
+    }
+
+    if(clientRect.top < 0)
+    {
+        clientRect.bottom += (-1 * clientRect.top);
+        clientRect.top = 0;
+    }
+
     m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
                              config.project.projectName.c_str(),
                              WND_STYLE_FLAGS,
-                             0, 0, config.graphics.screenWidth, config.graphics.screenHeight,
+                             clientRect.left, clientRect.top,
+                             clientRect.right - clientRect.left,
+                             clientRect.bottom - clientRect.top,
                              0, 0, instance, 0);
                              
     if(!m_hwnd)
     {
         throw std::runtime_error("Window constructor - CreateWindow failed");
     }
-
-    m_deviceContext = GetDC(m_hwnd);
-    m_windowDimensions = GetWindowDimensions();
 }
 
 Window::~Window() noexcept
@@ -56,14 +99,31 @@ HWND Window::GetHWND() const noexcept
     return m_hwnd;
 }
 
+std::pair<unsigned, unsigned> Window::GetWindowDimensions() const
+{
+    return m_dimensions;
+}
+
 void Window::BindUISystem(ui::UISystem* ui)
 {
     m_ui = ui;
 }
 
-void Window::OnWindowResize()
+void Window::BindGraphics(graphics::Graphics* graphics)
 {
-    m_windowDimensions = GetWindowDimensions();
+    m_graphics = graphics;
+}
+
+void Window::OnResize(unsigned width, unsigned height)
+{
+    if(!(m_graphics))
+    {
+        return;
+    }
+
+    m_dimensions = {width, height};
+    const auto& config = config::NcGetConfigReference();
+    m_graphics->OnResize(m_dimensions.first, m_dimensions.second, config.graphics.nearClip, config.graphics.farClip);
 }
 
 LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -77,7 +137,7 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	{
         case WM_SIZE:
         {
-            Window::Instance->OnWindowResize();
+            Window::Instance->OnResize(LOWORD(lParam), HIWORD(lParam));
             break;
         }
         case WM_CLOSE:
@@ -142,22 +202,4 @@ void Window::ProcessSystemMessages()
         DispatchMessage(&message);
     }
 }
-
-std::pair<int, int> Window::GetWindowDimensions() const noexcept
-{
-    RECT windowRect;
-    std::pair<int, int> dimensions;
-    if(GetWindowRect(m_hwnd, &windowRect))
-    {
-        dimensions.first = windowRect.right - windowRect.left;
-        dimensions.second = windowRect.bottom - windowRect.top;
-    }
-    else
-    {
-        auto err = GetLastError();
-        std::cerr << "Failed to retrieve window rect with error: " << err << std::endl;
-    }
-    return dimensions;
-}
-
 } // end namespace nc

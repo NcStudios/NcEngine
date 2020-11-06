@@ -2,9 +2,7 @@
 #include "NcCamera.h"
 #include "input/Input.h"
 #include "NcUI.h"
-
-//for testing
-#include "NcLog.h"
+#include "NcScreen.h"
 
 using namespace nc;
 
@@ -32,9 +30,6 @@ void CamController::FrameUpdate(float dt)
         return;
     }
 
-    std::string posString = std::to_string(input::MouseX);
-    log::NcLogToGame(posString);
-
     Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
     m_mainCameraTransform->Translate(camTransl, Space::World);
 }
@@ -48,12 +43,13 @@ Vector3 CamController::GetCameraPanMovement()
 {
     auto xPan = 0.0f;
     auto zPan = 0.0f;
+    auto dim = nc::NcGetScreenDimensions();
 
     if(input::MouseX < EDGE_PAN_WIDTH)
     {
         xPan = -1.0;
     }
-    else if(input::MouseX > m_config.graphics.screenWidth - EDGE_PAN_WIDTH)
+    else if(input::MouseX > dim.first - EDGE_PAN_WIDTH)
     {
         xPan = 1.0;
     }
@@ -61,7 +57,7 @@ Vector3 CamController::GetCameraPanMovement()
     {
         zPan = 1.0;
     }
-    else if(input::MouseY > m_config.graphics.screenHeight - EDGE_PAN_WIDTH - HUD_HEIGHT)
+    else if(input::MouseY > dim.second - EDGE_PAN_WIDTH - HUD_HEIGHT)
     {
         zPan = -1.0;
     }

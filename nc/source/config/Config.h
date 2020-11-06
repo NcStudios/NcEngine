@@ -18,9 +18,13 @@ namespace nc::config
         
         struct
         {
+            bool useNativeResolution;
+            bool launchInFullscreen;
             unsigned int screenWidth;
             unsigned int screenHeight;
             unsigned int targetFPS;
+            double nearClip;
+            double farClip;
             double frameUpdateInterval;
             std::string shadersPath;
         } graphics;

@@ -1,6 +1,5 @@
 #pragma once
 #include "win32/NCWin32.h"
-#include <wrl/client.h>
 #include <d3d11.h>
 #include <stdint.h>
 #include "directx/math/DirectXMath.h"
@@ -19,7 +18,7 @@ namespace nc
             friend ::nc::ui::UISystem;
 
             public:
-                Graphics(HWND hwnd, float screenWidth, float screenHeight);
+                Graphics(HWND hwnd, float width, float height, float nearZ, float farZ, bool fullscreen);
                 ~Graphics();
                 Graphics(const Graphics&) = delete;
                 Graphics(Graphics&&) = delete;
@@ -30,8 +29,12 @@ namespace nc
                 DirectX::XMMATRIX GetProjection() const noexcept;
 
                 void SetCamera(DirectX::FXMMATRIX cam) noexcept;
-                void SetProjection(DirectX::FXMMATRIX proj) noexcept;
+                void SetProjection(float width, float height, float nearZ, float farZ) noexcept;
 
+                void ResizeTarget(float width, float height);
+                void OnResize(float width, float height, float nearZ, float farZ);
+                void ToggleFullscreen();
+                
                 void StartFrame();
                 void DrawIndexed(UINT count);
                 void EndFrame();
@@ -41,7 +44,13 @@ namespace nc
                 #endif
 
             private:
-                float m_screenWidth, m_screenHeight;
+                ID3D11Device* m_device = nullptr;
+                ID3D11DeviceContext* m_context = nullptr;
+                IDXGISwapChain* m_swapChain = nullptr;
+                ID3D11RenderTargetView* m_renderTarget = nullptr;
+                ID3D11DepthStencilView* m_dsv = nullptr;
+
+                bool m_isFullscreen;
                 DirectX::XMMATRIX m_camera;
                 DirectX::XMMATRIX m_projection;
 
@@ -52,15 +61,9 @@ namespace nc
                 void CreateDeviceAndSwapchain(HWND hwnd);
                 void CreateRasterizerState();
                 void CreateRenderTargetViewFromBackBuffer();
-                void CreateDepthStencilView();
+                void CreateDepthStencilView(float width, float height);
                 void BindDepthStencilView();
-                void ConfigureViewport();
-
-                Microsoft::WRL::ComPtr<ID3D11Device> m_device = nullptr;
-                Microsoft::WRL::ComPtr<IDXGISwapChain> m_swapChain = nullptr;
-                Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_context = nullptr;
-                Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTarget = nullptr;
-                Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_dsv = nullptr;
+                void ConfigureViewport(float width, float height);
         };
     } //end namespace graphics
 } //end namespace nc

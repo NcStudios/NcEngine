@@ -14,7 +14,9 @@
 #include "NcDebug.h"
 #include "NcEngine.h"
 #include "NcLog.h"
+#include "NcPhysics.h"
 #include "NcScene.h"
+#include "NcScreen.h"
 #include "NcUI.h"
 
 #include <iostream>
@@ -70,10 +72,19 @@ void nc::engine::NcInitializeEngine(HINSTANCE hInstance)
     auto config = config::detail::Load();
     g_Logger = std::make_unique<log::Logger>(config.project.logFilePath);
     g_WindowInstance = std::make_unique<Window>(hInstance, config);
-    auto dimensions = g_WindowInstance->GetWindowDimensions();
     auto hwnd = g_WindowInstance->GetHWND();
-    g_EngineSystems = internal::EngineSystems{ dimensions.first, dimensions.second, hwnd };
+    auto dim = g_WindowInstance->GetWindowDimensions();
+    g_EngineSystems = internal::EngineSystems
+    {
+        hwnd,
+        (float)dim.first,
+        (float)dim.second,
+        (float)config.graphics.nearClip,
+        (float)config.graphics.farClip,
+        config.graphics.launchInFullscreen
+    };
     g_EngineData = internal::EngineData{ std::move(config) };
+    g_WindowInstance->BindGraphics(g_EngineSystems.rendering->GetGraphics());
     g_WindowInstance->BindUISystem(g_EngineSystems.ui.get());
 
     V_LOG("Engine initialized");
@@ -108,6 +119,11 @@ void nc::scene::NcChangeScene(std::unique_ptr<scene::Scene>&& scene)
     V_LOG("Setting swap scene to - " + std::string(typeid(scene).name()));
     g_EngineData.isSceneSwapScheduled = true;
     g_EngineData.swapScene = std::move(scene);
+}
+
+std::pair<unsigned, unsigned> nc::NcGetScreenDimensions()
+{
+    return g_WindowInstance->GetWindowDimensions();
 }
 
 const config::Config& nc::config::NcGetConfigReference()
@@ -167,6 +183,27 @@ bool nc::ui::NcIsUIHovered()
         throw std::runtime_error("NcIsUIHovered - no project UI registered");
     }
     return g_EngineSystems.ui->IsProjectUIHovered();
+}
+
+void nc::physics::NcRegisterClickable(nc::physics::IClickable* clickable)
+{
+    g_EngineSystems.physics->RegisterClickable(clickable);
+}
+
+void nc::physics::NcUnregisterClickable(nc::physics::IClickable* clickable)
+{
+    g_EngineSystems.physics->UnregisterClickable(clickable);
+}
+
+void nc::physics::NcRaycastToIClickables(nc::physics::LayerMask mask)
+{
+    g_EngineSystems.physics->RaycastToIClickables
+    (
+        g_EngineData.mainCameraTransform->CamGetMatrix(),
+        g_EngineSystems.rendering->GetGraphics()->GetProjection(),
+        g_WindowInstance->GetWindowDimensions(),
+        mask
+    );
 }
 
 EntityHandle nc::NcCreateEntity()
@@ -307,6 +344,16 @@ void MainLoop()
 
     while(g_EngineData.isRunning)
     {
+        if(input::GetKey(input::KeyCode::R))
+        {
+            g_EngineSystems.rendering->GetGraphics()->ResizeTarget(500, 500);
+        }
+
+        if(input::GetKey(input::KeyCode::F))
+        {
+            g_EngineSystems.rendering->GetGraphics()->ToggleFullscreen();
+        }
+
         ncTime.UpdateTime();
         g_WindowInstance->ProcessSystemMessages();
 

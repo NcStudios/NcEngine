@@ -5,6 +5,7 @@
 namespace nc
 {
     namespace config { struct Config; }
+    namespace graphics { class Graphics; }
     namespace ui { class UISystem; }
 
     class Window
@@ -20,11 +21,12 @@ namespace nc
             Window& operator=(Window&& other) = delete;
 
             HWND GetHWND() const noexcept;
-            std::pair<int, int> GetWindowDimensions() const noexcept;
+            std::pair<unsigned, unsigned> GetWindowDimensions() const;
 
+            void BindGraphics(graphics::Graphics* graphics);
             void BindUISystem(ui::UISystem* ui);
 
-            void OnWindowResize();
+            void OnResize(unsigned width, unsigned height);
             void ProcessSystemMessages();
 
             static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -32,10 +34,11 @@ namespace nc
         private:
             HWND m_hwnd;
             WNDCLASS m_wndClass;
-            HDC m_deviceContext;
             HINSTANCE m_hInstance;
-            std::pair<int, int> m_windowDimensions; 
+            graphics::Graphics* m_graphics;
             ui::UISystem* m_ui;
+
+            std::pair<unsigned, unsigned> m_dimensions;
     };
 
 } //end namespace nc

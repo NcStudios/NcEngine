@@ -5,6 +5,7 @@
 #include "TurnPhaseUIElement.h"
 #include "UIStyle.h"
 #include "project/source/log/GameLog.h"
+#include "NcScreen.h"
 
 namespace
 {
@@ -13,8 +14,6 @@ namespace
                                       ImGuiWindowFlags_NoTitleBar |
                                       ImGuiWindowFlags_NoResize;
     constexpr auto HUD_HEIGHT = 200u;
-    constexpr auto HUD_HORIZONTAL_FUDGE = 16u;
-    constexpr auto HUD_VERTICAL_FUDGE = 39u;
     const auto RESOURCE_ICON_SIZE = ImVec2{16, 16};
     const auto PLAYER_PANEL_SIZE = ImVec2{220, 100};
     const auto LOG_PANEL_SIZE = ImVec2{400, 150};
@@ -52,8 +51,9 @@ namespace project::ui
 
     void UI::DrawHUD()
     {
-        ImGui::SetNextWindowPos({0, (float)m_config.graphics.screenHeight - (HUD_HEIGHT + HUD_VERTICAL_FUDGE)}, ImGuiCond_Once);
-        ImGui::SetNextWindowSize({(float)m_config.graphics.screenWidth - HUD_HORIZONTAL_FUDGE, HUD_HEIGHT}, ImGuiCond_Once);
+        auto dim = nc::NcGetScreenDimensions();
+        ImGui::SetNextWindowPos({0, (float)dim.second - HUD_HEIGHT});
+        ImGui::SetNextWindowSize({(float)dim.first, HUD_HEIGHT});
 
         if(ImGui::Begin("Hud", nullptr, HUD_WINDOW_FLAGS))
         {
