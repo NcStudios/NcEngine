@@ -8,8 +8,8 @@ using namespace nc;
 
 namespace
 {
-    const float CAM_ZOOM_SPEED = 2.5f;
-    const float CAM_PAN_SPEED = 70.0f;
+    const float CAM_ZOOM_SPEED = 0.25f;
+    const float CAM_PAN_SPEED = 1.0f;
     const unsigned EDGE_PAN_WIDTH = 180;
     const unsigned HUD_HEIGHT = 200;
 }
