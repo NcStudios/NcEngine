@@ -14,14 +14,12 @@ namespace nc::graphics
     class ResourceGroup 
     {
         public:
-
             template<class T>
             T * QueryGraphicsResource() noexcept;
             void BindGraphicsResources() const;
             void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
 
         private:
-
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
     };
 
