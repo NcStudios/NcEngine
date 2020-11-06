@@ -6,6 +6,7 @@
 #include "graphics/Mesh.h"
 #include "CamController.h"
 #include "DebugUtils.h"
+#include "source/Prefabs.h"
 #include "GamePiece.h"
 #include "ClickHandler.h"
 
@@ -38,17 +39,9 @@ void InitialScene::Load()
     auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
     NcAddEngineComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
 
-    // Coal Piece
-    auto coalMaterial = graphics::PBRMaterial{{"project//Textures//CoalPiece_Material_BaseColor.png", "project//Textures//CoalPiece_Material_Normal.png",  "project//Textures//CoalPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto coalHandle = NcCreateEntity({0.2f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Coal Piece");
-    auto coalMesh = graphics::Mesh{"project//Models//CoalPiece.fbx"};
-    NcAddEngineComponent<Renderer>(coalHandle, coalMesh, coalMaterial);
-
-    // Ruby Piece
-    auto rubyMaterial = graphics::PBRMaterial{{"project//Textures//RubyPiece_Material_BaseColor.png", "project//Textures//RubyPiece_Material_Normal.png",  "project//Textures//RubyPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto rubyHandle = NcCreateEntity({0.4f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Ruby Piece");
-    auto rubyMesh = graphics::Mesh{"project//Models//RubyPiece.fbx"};
-    NcAddEngineComponent<Renderer>(rubyHandle, rubyMesh, rubyMaterial);
+    // Pieces
+    prefabs::CreateCoalPiece({0.2f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Coal Piece 1");
+    prefabs::CreateRubyPiece({0.4f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Ruby Piece 1");
 
     // Stone Piece
     auto stoneMaterial = graphics::PBRMaterial{{"project//Textures//StonePiece_Material_BaseColor.png", "project//Textures//StonePiece_Material_Normal.png",  "project//Textures//StonePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
