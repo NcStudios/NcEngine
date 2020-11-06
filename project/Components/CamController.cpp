@@ -1,16 +1,15 @@
 #include "CamController.h"
 #include "NcCamera.h"
 #include "input/Input.h"
-
-//for testing
-#include "NcLog.h"
+#include "NcUI.h"
+#include "NcScreen.h"
 
 using namespace nc;
 
 namespace
 {
-    const float CAM_ZOOM_SPEED = 0.25f;
-    const float CAM_PAN_SPEED = 1.0f;
+    const float CAM_ZOOM_SPEED = 0.2f;
+    const float CAM_PAN_SPEED = 4.0f;
     const unsigned EDGE_PAN_WIDTH = 180;
     const unsigned HUD_HEIGHT = 200;
 }
@@ -26,8 +25,10 @@ void CamController::FrameUpdate(float dt)
         m_mainCameraTransform = NcGetMainCameraTransform();
     }
 
-    std::string posString = std::to_string(input::MouseX);
-    log::NcLogToGame(posString);
+    if (ui::NcIsUIHovered())
+    {
+        return;
+    }
 
     Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
     m_mainCameraTransform->Translate(camTransl, Space::World);
@@ -42,17 +43,13 @@ Vector3 CamController::GetCameraPanMovement()
 {
     auto xPan = 0.0f;
     auto zPan = 0.0f;
-
-    if(input::MouseY > m_config.graphics.screenHeight - HUD_HEIGHT)
-    {
-        return Vector3::Zero();
-    }
+    auto dim = nc::NcGetScreenDimensions();
 
     if(input::MouseX < EDGE_PAN_WIDTH)
     {
         xPan = -1.0;
     }
-    else if(input::MouseX > m_config.graphics.screenWidth - EDGE_PAN_WIDTH)
+    else if(input::MouseX > dim.X() - EDGE_PAN_WIDTH)
     {
         xPan = 1.0;
     }
@@ -60,7 +57,7 @@ Vector3 CamController::GetCameraPanMovement()
     {
         zPan = 1.0;
     }
-    else if(input::MouseY > m_config.graphics.screenHeight - EDGE_PAN_WIDTH - HUD_HEIGHT)
+    else if(input::MouseY > dim.Y() - EDGE_PAN_WIDTH - HUD_HEIGHT)
     {
         zPan = -1.0;
     }

@@ -2,14 +2,14 @@
 
 #include <deque>
 
-#include "log/ILog.h"
+#include "log/IGameLog.h"
 
-namespace project
+namespace project::log
 {
-    class GameLog : public nc::log::ILog
+    class GameLog : public nc::log::IGameLog
     {
         public:
-            void AddItem(std::string item) override;
+            void Log(std::string item) override;
             const std::deque<std::string>& GetItems() const;
 
         private:

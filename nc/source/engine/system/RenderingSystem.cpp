@@ -7,11 +7,10 @@
 namespace nc::engine::system
 {
 
-RenderingSystem::RenderingSystem(int initialWidth, int initialHeight, HWND hwnd)
-    : m_graphics(std::make_unique<graphics::Graphics>(hwnd, initialWidth, initialHeight))
+RenderingSystem::RenderingSystem(HWND hwnd, float width, float height, float nearZ, float farZ, bool fullscreen)
+    : m_graphics(std::make_unique<graphics::Graphics>(hwnd, width, height, nearZ, farZ, fullscreen))
 {
     graphics::d3dresource::GraphicsResourceManager::SetGraphics(m_graphics.get());
-    m_graphics->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, (float)initialHeight / (float)initialWidth, 0.5f, 400.0f));
 }
 
 RenderingSystem::~RenderingSystem() = default;

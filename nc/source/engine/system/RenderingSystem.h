@@ -17,7 +17,7 @@ namespace nc::engine::system
     class RenderingSystem : public ComponentSystem<Renderer>
     {
         public:
-            RenderingSystem(int initialWidth, int initialHeight, HWND hwnd);
+            RenderingSystem(HWND hwnd, float width, float height, float nearZ, float farZ, bool fullscreen);
             ~RenderingSystem();
             RenderingSystem(const RenderingSystem&) = delete;
             RenderingSystem(RenderingSystem&&) = delete;

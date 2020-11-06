@@ -12,12 +12,11 @@ namespace nc::ui
             m_editor{ graphics },
             #endif
             m_projectUI{ nullptr }
-
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
-        ImGui_ImplDX11_Init(graphics->m_device.Get(), graphics->m_context.Get());
+        ImGui_ImplDX11_Init(graphics->m_device, graphics->m_context);
     }
 
     UISystem::~UISystem()
@@ -35,6 +34,11 @@ namespace nc::ui
     void UISystem::BindProjectUI(IUI* ui)
     {
         m_projectUI = ui;
+    }
+
+    bool UISystem::IsProjectUIHovered() const
+    {
+        return m_projectUI->IsHovered();
     }
 
     void UISystem::FrameBegin()

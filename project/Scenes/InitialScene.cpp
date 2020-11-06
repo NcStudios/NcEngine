@@ -6,10 +6,12 @@
 #include "graphics/Mesh.h"
 #include "CamController.h"
 #include "DebugUtils.h"
-#include "Ship.h"
 #include "source/Prefabs.h"
+#include "GamePiece.h"
+#include "ClickHandler.h"
 
 using namespace nc;
+using namespace project;
 
 void InitialScene::Load()
 {
@@ -22,6 +24,7 @@ void InitialScene::Load()
     auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
     NcRegisterMainCamera(camComponentPtr);
     NcAddUserComponent<CamController>(camHandle);
+    NcAddUserComponent<ClickHandler>(camHandle);
     
     // Debug Controller
     auto debugHandle = NcCreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Debug Controller");
@@ -45,12 +48,18 @@ void InitialScene::Load()
     auto stoneHandle = NcCreateEntity({0.6f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stone Piece");
     auto stoneMesh = graphics::Mesh{"project//Models//StonePiece.fbx"};
     NcAddEngineComponent<Renderer>(stoneHandle, stoneMesh, stoneMaterial);
+    auto stoneEntity = NcGetEntity(stoneHandle);
+    auto stoneTransform = NcGetTransform(stoneEntity->Handles.transform);
+    NcAddUserComponent<GamePiece>(stoneHandle, stoneTransform);
 
     // Wood Piece
     auto woodMaterial = graphics::PBRMaterial{{"project//Textures//WoodPiece_Material_BaseColor.png", "project//Textures//WoodPiece_Material_Normal.png",  "project//Textures//WoodPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto woodHandle = NcCreateEntity({0.8f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Wood Piece");
     auto woodMesh = graphics::Mesh{"project//Models//WoodPiece.fbx"};
     NcAddEngineComponent<Renderer>(woodHandle, woodMesh, woodMaterial);
+    auto woodEntity = NcGetEntity(woodHandle);
+    auto woodTransform = NcGetTransform(woodEntity->Handles.transform);
+    NcAddUserComponent<GamePiece>(woodHandle, woodTransform);
 
     // Dog Piece
     auto dogMaterial = graphics::PBRMaterial{{"project//Textures//DogPiece_Material_BaseColor.png", "project//Textures//DogPiece_Material_Normal.png",  "project//Textures//DogPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};

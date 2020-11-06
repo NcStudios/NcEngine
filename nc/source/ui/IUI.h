@@ -6,5 +6,6 @@ namespace nc::ui
     {
         public:
             virtual void Draw() = 0;
+            virtual bool IsHovered() = 0;
     };
 }
