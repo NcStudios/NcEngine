@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <limits>
 
 namespace nc::physics
 {
@@ -26,13 +27,16 @@ namespace nc::physics
         m_clickableComponents.pop_back();
     }
 
-    void PhysicsSystem::RaycastToIClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
+    IClickable* PhysicsSystem::RaycastToClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
     {
         auto worldMatrix = DirectX::XMMatrixIdentity();
         auto unit = Vector3(1,1,1).GetNormalized().GetXMFloat3();
         auto unit_v = DirectX::XMLoadFloat3(&unit);
         unit_v = DirectX::XMVector3Transform(unit_v, viewMatrix);
         DirectX::XMStoreFloat3(&unit, unit_v);
+
+        IClickable* out = nullptr;
+        float smallestZ = std::numeric_limits<float>::max();
 
         for(auto& clickable : m_clickableComponents)
         {
@@ -52,8 +56,15 @@ namespace nc::physics
                                                          projectionMatrix, viewMatrix, worldMatrix);
             DirectX::XMStoreFloat3(&screenPos, screenPos_v);
 
+            //continue if there is a closer hit
+            auto zDist = abs(unit.z - worldPos.z);
+            if(zDist > smallestZ)
+            {
+                continue;
+            }
+
             //scale bounding box by camera zoom amount
-            auto screenSpaceRadius = clickable->boundingBoxRadius / abs(unit.z - worldPos.z);
+            auto screenSpaceRadius = clickable->boundingBoxRadius / zDist;
             auto top = screenPos.y - screenSpaceRadius;
             auto bot = screenPos.y + screenSpaceRadius;
             auto left = screenPos.x - screenSpaceRadius;
@@ -64,8 +75,11 @@ namespace nc::physics
                input::MouseY > top &&
                input::MouseY < bot)
             {
-                clickable->OnClick();
+                out = clickable;
+                smallestZ = zDist;
             }
         }
+
+        return out;
     }
 } //end namespace nc::physics

@@ -126,7 +126,7 @@ void Graphics::CreateDeviceAndSwapchain(HWND hwnd)
         DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,  //ScanlineOrdering
         DXGI_MODE_SCALING_UNSPECIFIED },       //Scaling
         { 1, 0 },                              //struct SampleDesc {Count,Quality}
-        DXGI_USAGE_RENDER_TARGET_OUTPUT, 1,    //BufferUsage, BufferCount
+        DXGI_USAGE_RENDER_TARGET_OUTPUT, 2,    //BufferUsage, BufferCount
         hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD,  //OutputWindow, Windowed, SwapEffect,
         DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH //Flags (Allows full-screen mode)
     };

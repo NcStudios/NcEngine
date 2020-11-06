@@ -194,9 +194,9 @@ void nc::physics::NcUnregisterClickable(nc::physics::IClickable* clickable)
     g_EngineSystems.physics->UnregisterClickable(clickable);
 }
 
-void nc::physics::NcRaycastToClickables(nc::physics::LayerMask mask)
+nc::physics::IClickable* nc::physics::NcRaycastToClickables(nc::physics::LayerMask mask)
 {
-    g_EngineSystems.physics->RaycastToIClickables
+    return g_EngineSystems.physics->RaycastToClickables
     (
         g_EngineData.mainCameraTransform->CamGetMatrix(),
         g_EngineSystems.rendering->GetGraphics()->GetProjection(),
