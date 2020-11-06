@@ -21,7 +21,7 @@ namespace nc::physics
         public:
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove);
-            void RaycastToIClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask);
+            IClickable* RaycastToClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask);
 
         private:
             std::vector<nc::physics::IClickable*> m_clickableComponents;
