@@ -4,7 +4,7 @@
 namespace project
 {
     GamePiece::GamePiece(nc::Transform* transform)
-        : nc::physics::IClickable(transform, 20.0f),
+        : nc::physics::IClickable(transform, 40.0f),
           m_isRegisteredAsClickable{ true },
           m_entityTag{}
     {
