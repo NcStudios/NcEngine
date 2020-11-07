@@ -19,7 +19,6 @@ There are scripts located in the 'tools' directory for basic building. Assuming 
 
 Considerations:
 * The cmake.bat script will build libraries for external dependencies if they do not exist(e.g. the first time it is run). It will **not** rebuild them if changes are made to their source files. If rebuilding is necessary, either manually run tools/build_external_libs.bat or simply delete the libs from external/lib before running cmake.
-* The default method for automatically adding project source files to the target (file glob) does not detect when files are added or deleted. CMake must be run again when such changes are made. This behavior is not surprising but may catch newer CMake users off guard.
 
 ## Macros
 ---------
@@ -30,6 +29,10 @@ Considerations:
 #### NC_EDITOR_ENABLED
     Default = true
     Flag used by both CMake and NcEngine specifying whether to include the debug editor in the final executable. Setting this to false at the time CMake is run will exclude the imgui lib and any source files related to the debug editor. Anything relying on those files should therefore be wrapped in #ifdef checks on this value.
+
+#### VERBOSE_LOGGING_ENABLED
+    Default = true
+    Flag used to enable extra logging of internal engine operations to the diagnostics file specified in config.ini.
 
 ## Directory Structure
 ----------------------
@@ -60,17 +63,20 @@ Various settings can be controlled through the .ini files located in project/con
     * As a human-readable section tag enclosed in square brackets
 * Extraneous whitespace and blank lines should be avoided.
 
-#### Project.ini defaults
+#### config.ini defaults
+    [project]
     project_name=MyProjectName
-
-#### Graphics.ini defaults
-    [Resolution]
-    screen_width=1500
-    screen_height=1200
-    [Frame]
-    target_fps=60
-    [Shaders]
-    shaders_path=project\shaders\compiled\
-    
-### Physics.ini defaults
+    log_file_path=Diagnostics.log
+    [user]
+    user_name=Player
+    [physics]
     fixed_update_interval=0.2
+    [graphics]
+    use_native_resolution=0
+    launch_fullscreen=0
+    screen_width=1200
+    screen_height=1200
+    target_fps=60
+    near_clip=0.5
+    far_clip=400.0
+    shaders_path=project\shaders\compiled\
