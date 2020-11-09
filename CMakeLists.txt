@@ -98,6 +98,7 @@ target_link_libraries(${EXE_NAME}
         ${EXTERNAL_LIB_DIR}/windowscodecs.lib
         ${EXTERNAL_LIB_DIR}/libassimp.dll.a
         ${WIN32_LINK_FLAGS}
+        Winmm.lib
 )
 
 #SUBDIRS
