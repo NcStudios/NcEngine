@@ -1,5 +1,5 @@
 #include "GamePiece.h"
-#include "NcLog.h"
+#include "project/source/log/GameLog.h"
 
 namespace project
 {
@@ -26,6 +26,6 @@ namespace project
         {
             m_entityTag = nc::NcGetEntity(m_parentHandle)->Tag;
         }
-        nc::log::NcLogToGame("Clicked: " + m_entityTag);
+        project::log::GameLog::Log("Clicked: " + m_entityTag);
     }
 }

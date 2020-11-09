@@ -1,19 +1,45 @@
 #include "PhysicsSystem.h"
 #include "input/Input.h"
 #include "component/Transform.h"
-
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
 
 namespace nc::physics
 {
+    PhysicsSystem* PhysicsSystem::m_instance = nullptr;
+
+    PhysicsSystem::PhysicsSystem()
+    {
+        PhysicsSystem::m_instance = this;
+    }
+
+    PhysicsSystem::~PhysicsSystem()
+    {
+        PhysicsSystem::m_instance = nullptr;
+    }
+
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)
+    {
+        PhysicsSystem::m_instance->RegisterClickable_(toAdd);
+    }
+
+    void PhysicsSystem::UnregisterClickable(IClickable* toRemove)
+    {
+        PhysicsSystem::m_instance->UnregisterClickable_(toRemove);
+    }
+
+    IClickable* PhysicsSystem::RaycastToClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
+    {
+        return PhysicsSystem::m_instance->RaycastToClickables_(viewMatrix, projectionMatrix, windowDimensions, mask);
+    }
+
+    void PhysicsSystem::RegisterClickable_(IClickable* toAdd)
     {
         m_clickableComponents.push_back(toAdd);
     }
 
-    void PhysicsSystem::UnregisterClickable(IClickable* toRemove)
+    void PhysicsSystem::UnregisterClickable_(IClickable* toRemove)
     {
         auto beg = std::begin(m_clickableComponents);
         auto end = std::end(m_clickableComponents);
@@ -27,7 +53,7 @@ namespace nc::physics
         m_clickableComponents.pop_back();
     }
 
-    IClickable* PhysicsSystem::RaycastToClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
+    IClickable* PhysicsSystem::RaycastToClickables_(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
     {
         auto worldMatrix = DirectX::XMMatrixIdentity();
         auto unit = Vector3(1,1,1).GetNormalized().GetXMFloat3();

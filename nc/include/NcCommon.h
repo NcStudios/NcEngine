@@ -1,5 +1,5 @@
 #pragma once
-#include "entity/Entity.h"
+#include "ecs/Entity.h"
 #include "component/Transform.h"
 #include "NcDebug.h"
 
@@ -24,7 +24,7 @@ namespace nc
      * @param tag Name for entity (no validation for unique tags).
      * @return EntityHandle for the new Entity.
      */
-    EntityHandle NcCreateEntity(const Vector3& pos, const Vector3& rot, const Vector3& scale, const std::string& tag);
+    EntityHandle NcCreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag);
 
     /**
      * Get ptr to an Entity
@@ -36,7 +36,7 @@ namespace nc
      * Get first active Entity matching tag.
      * @return Non-owning ptr on success, nullptr on failure.
      */
-    Entity* NcGetEntity(const std::string& tag); //finds first active entity with specified tag, returns nullptr if not found
+    Entity* NcGetEntity(std::string tag); //finds first active entity with specified tag, returns nullptr if not found
 
     /**
      * Mark Entity for destruction.
@@ -147,9 +147,9 @@ namespace nc
 template<class T, class>
 bool nc::NcHasUserComponent(const EntityHandle handle) noexcept(false)
 {
-    auto hnd = nc::NcGetEntity(handle);
-    IF_THROW(hnd == nullptr, "NcHasUserComponent : bad handle");
-    return hnd->HasUserComponent<T>();
+    auto ptr = nc::NcGetEntity(handle);
+    IF_THROW(ptr == nullptr, "NcHasUserComponent : bad handle");
+    return ptr->HasUserComponent<T>();
 }
 
 template<class T, class, class ... Args>
@@ -163,15 +163,15 @@ T * nc::NcAddUserComponent(const EntityHandle handle, Args&& ... args) noexcept(
 template<class T, class>
 bool nc::NcRemoveUserComponent(const EntityHandle handle) noexcept(false)
 {
-    auto hnd = nc::NcGetEntity(handle);
-    IF_THROW(hnd == nullptr, "NcRemoveUserComponent : bad handle");
-    return hnd->RemoveUserComponent<T>();
+    auto ptr = nc::NcGetEntity(handle);
+    IF_THROW(ptr == nullptr, "NcRemoveUserComponent : bad handle");
+    return ptr->RemoveUserComponent<T>();
 }
 
 template<class T, class>
 T * nc::NcGetUserComponent(const EntityHandle handle) noexcept(false)
 {
-    auto hnd = nc::NcGetEntity(handle);
-    IF_THROW(hnd == nullptr, "NcGetUserComponent : bad handle");
-    return hnd->GetUserComponent<T>();
+    auto ptr = nc::NcGetEntity(handle);
+    IF_THROW(ptr == nullptr, "NcGetUserComponent : bad handle");
+    return ptr->GetUserComponent<T>();
 }

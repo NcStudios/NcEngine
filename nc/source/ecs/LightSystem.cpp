@@ -3,7 +3,7 @@
 #include "graphics/Graphics.h"
 #include "component/Transform.h"
 
-namespace nc::engine::system
+namespace nc::ecs
 {
     LightSystem::LightSystem() {}
 
@@ -11,7 +11,7 @@ namespace nc::engine::system
 
     void LightSystem::BindLights()
     {
-        auto camT = NcGetMainCameraTransform();
+        auto camT = camera::NcGetMainCameraTransform();
         auto camMatrixXM = camT->CamGetMatrix();
 
         ComponentSystem<PointLight>::ForEach([&camMatrixXM](auto & light)

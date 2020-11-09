@@ -20,14 +20,16 @@ namespace nc
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-                void BindProjectUI(IUI* ui);
-                bool IsProjectUIHovered() const;
+                static void BindProjectUI(IUI* ui);
+                static bool IsProjectUIHovered();
 
                 void FrameBegin();
                 void Frame(float* dt, float frameLogicTime, std::unordered_map<nc::EntityHandle, nc::Entity>& activeEntities);
                 void FrameEnd();
 
             private:
+                static UISystem* m_instance;
+
                 #ifdef NC_EDITOR_ENABLED
                 Editor m_editor;
                 #endif

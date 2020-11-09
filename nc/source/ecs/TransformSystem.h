@@ -2,7 +2,7 @@
 #include "ComponentSystem.h"
 #include "component/Transform.h"
 
-namespace nc::engine::system
+namespace nc::ecs
 {
     class TransformSystem : public ComponentSystem<Transform>
     {
@@ -13,8 +13,5 @@ namespace nc::engine::system
             TransformSystem& operator=(TransformSystem&&) = default;
             TransformSystem(const TransformSystem&) = delete;
             TransformSystem& operator=(const TransformSystem&) = delete;
-        
-        private:
-
     };
 }

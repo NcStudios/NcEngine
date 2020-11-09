@@ -1,12 +1,11 @@
 #include "Window.h"
-#include "NcEngine.h"
+#include "engine/Engine.h"
 #include "NcConfig.h"
 #include "graphics/Graphics.h"
 #include "NcDebug.h"
 #include "input/Input.h"
 #include "ui/UISystem.h"
 #include "math/Math.h"
-#include <iostream>
 
 namespace
 {
@@ -19,9 +18,10 @@ namespace nc
 
 Window* Window::Instance = nullptr;
 
-Window::Window(HINSTANCE instance, const config::Config& config)
+Window::Window(HINSTANCE instance, engine::Engine* engine, const config::Config& config)
 {
     Window::Instance = this;
+    m_engine = engine;
     m_graphics = nullptr;
 
     m_wndClass = {};
@@ -142,7 +142,7 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         }
         case WM_CLOSE:
         {
-            engine::NcShutdownEngine();
+            Window::Instance->m_engine->Shutdown();
             break;
         }
         case WM_DESTROY:

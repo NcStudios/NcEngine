@@ -1,8 +1,8 @@
 #include "Entity.h"
 #include "NcCommon.h"
 
-namespace nc{
-
+namespace nc
+{
 Entity::Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag) noexcept
     : Handle{ handle }, 
       Tag{ tag },

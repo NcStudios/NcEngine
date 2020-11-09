@@ -4,7 +4,7 @@
 #include "component/PointLight.h"
 #include "component/Transform.h"
 
-namespace nc::engine::system
+namespace nc::ecs
 {
 
 RenderingSystem::RenderingSystem(HWND hwnd, float width, float height, float nearZ, float farZ, bool fullscreen)
@@ -17,7 +17,7 @@ RenderingSystem::~RenderingSystem() = default;
 
 void RenderingSystem::FrameBegin()
 {
-    auto camT = NcGetMainCameraTransform();
+    auto camT = camera::NcGetMainCameraTransform();
     auto camMatrixXM = camT->CamGetMatrix();
     m_graphics->StartFrame();
     m_graphics->SetCamera(camMatrixXM);

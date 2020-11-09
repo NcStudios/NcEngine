@@ -1,10 +1,11 @@
 #pragma once
-#include "NcWin32.h"
+#include "win32/NcWin32.h"
 #include "math/Vector2.h"
 
 namespace nc
 {
     namespace config { struct Config; }
+    namespace engine { class Engine; }
     namespace graphics { class Graphics; }
     namespace ui { class UISystem; }
 
@@ -13,7 +14,7 @@ namespace nc
         public:
             static Window* Instance;
 
-            Window(HINSTANCE instance, const config::Config& config);
+            Window(HINSTANCE instance, engine::Engine* engine, const config::Config& config);
             ~Window() noexcept;
             Window(const Window& other) = delete;
             Window(Window&& other) = delete;
@@ -35,6 +36,7 @@ namespace nc
             HWND m_hwnd;
             WNDCLASS m_wndClass;
             HINSTANCE m_hInstance;
+            engine::Engine* m_engine;
             graphics::Graphics* m_graphics;
             ui::UISystem* m_ui;
 

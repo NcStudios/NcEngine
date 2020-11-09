@@ -5,6 +5,15 @@ namespace nc::config
 {
     struct Config
     {
+        Config();
+        ~Config();
+
+        static const Config& Get();
+        static void SetUserName(std::string name);
+
+        void Load() noexcept(false);
+        void Save() noexcept(false);
+
         struct
         {
             std::string userName;
@@ -33,11 +42,8 @@ namespace nc::config
         {
             double fixedUpdateInterval;
         } physics;
-    };
 
-    namespace detail
-    {
-        Config Load() noexcept(false);
-        void Save(const nc::config::Config& config) noexcept(false);
-    }
+        private:
+            static Config* m_instance;
+    };
 }

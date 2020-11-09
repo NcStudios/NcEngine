@@ -1,18 +1,22 @@
 #pragma once
-
 #include <deque>
-
-#include "log/IGameLog.h"
+#include <string>
 
 namespace project::log
 {
-    class GameLog : public nc::log::IGameLog
+    class GameLog
     {
         public:
-            void Log(std::string item) override;
-            const std::deque<std::string>& GetItems() const;
+            GameLog();
+            ~GameLog();
+
+            static void Log(std::string item) ;
+            static const std::deque<std::string>& GetItems();
+
+            void Log_(std::string item);
 
         private:
+            static GameLog* m_instance;
             std::deque<std::string> m_items;
             unsigned m_itemCount = 5;
     };

@@ -9,9 +9,12 @@ namespace nc::log
         public:
             Logger(std::string path);
             ~Logger();
-            void Log(std::string);
+            static void Log(std::string);
         
         private:
+            void Log_(std::string);
+
+            static Logger* m_instance;
             std::ofstream m_file;
     };
 }

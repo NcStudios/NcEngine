@@ -114,9 +114,40 @@ bool ValidateConfig(const nc::config::Config& config)
 }
 } //end anonymous namespace
 
-namespace nc::config::detail
+namespace nc::config
 {
-Config Load()
+Config* Config::m_instance = nullptr;
+
+Config::Config()
+{
+    Config::m_instance = this;
+    Load();
+}
+
+Config::~Config()
+{
+    Config::m_instance = nullptr;
+}
+
+const Config& Config::Get()
+{
+    if(!Config::m_instance)
+    {
+        throw std::runtime_error("Attempt to get uninitialized config");
+    }
+    return *Config::m_instance;
+}
+
+void Config::SetUserName(std::string name)
+{
+    if(!Config::m_instance)
+    {
+        throw std::runtime_error("Attempt to modify uninitialized config");
+    }
+    Config::m_instance->user.userName = std::move(name);
+}
+
+void Config::Load()
 {
     std::ifstream inFile;
     inFile.open(CONFIG_PATH);
@@ -125,7 +156,6 @@ Config Load()
         throw std::runtime_error("Loading config - failed to open file");
     }
 
-    Config out{};
     std::string line{}, key{}, value{};
     while(!inFile.eof())
     {
@@ -137,22 +167,21 @@ Config Load()
         std::getline(inFile, line, '\n');
         if (ParseLine(line, key, value))
         {
-            MapKeyValueToConfig(key, value, out);
+            MapKeyValueToConfig(key, value, *this);
         }
     }
 
     inFile.close();
     
-    if (!ValidateConfig(out))
+    if (!ValidateConfig(*this))
     {
         throw std::runtime_error("Loading config - failed to validate config");
     }
-    return out;
 }
 
-void Save(const nc::config::Config& config)
+void Config::Save()
 {
-    if (!ValidateConfig(config))
+    if (!ValidateConfig(*this))
     {
         throw std::runtime_error("Saving config - failed to validate config");
     }
@@ -165,22 +194,22 @@ void Save(const nc::config::Config& config)
     }
 
     outFile << "[project]\n"
-            << PROJECT_NAME_KEY << INI_KEY_VALUE_DELIM << config.project.projectName << '\n'
-            << LOG_FILE_PATH_KEY << INI_KEY_VALUE_DELIM << config.project.logFilePath << '\n'
+            << PROJECT_NAME_KEY << INI_KEY_VALUE_DELIM << project.projectName << '\n'
+            << LOG_FILE_PATH_KEY << INI_KEY_VALUE_DELIM << project.logFilePath << '\n'
             << "[user]\n"
-            << USER_NAME_KEY << INI_KEY_VALUE_DELIM << config.user.userName << '\n'
+            << USER_NAME_KEY << INI_KEY_VALUE_DELIM << user.userName << '\n'
             << "[physics]\n"
-            << FIXED_UPDATE_INTERVAL_KEY << INI_KEY_VALUE_DELIM << config.physics.fixedUpdateInterval << '\n'
+            << FIXED_UPDATE_INTERVAL_KEY << INI_KEY_VALUE_DELIM << physics.fixedUpdateInterval << '\n'
             << "[graphics]\n"
-            << USE_NATIVE_RESOLUTION_KEY << INI_KEY_VALUE_DELIM << config.graphics.useNativeResolution << '\n'
-            << LAUNCH_IN_FULLSCREEN_KEY << INI_KEY_VALUE_DELIM << config.graphics.launchInFullscreen << '\n'
-            << SCREEN_WIDTH_KEY << INI_KEY_VALUE_DELIM << config.graphics.screenWidth << '\n'
-            << SCREEN_HEIGHT_KEY << INI_KEY_VALUE_DELIM << config.graphics.screenHeight << '\n'
-            << TARGET_FPS_KEY << INI_KEY_VALUE_DELIM << config.graphics.targetFPS << '\n'
-            << NEAR_CLIP_KEY << INI_KEY_VALUE_DELIM << config.graphics.nearClip << '\n'
-            << FAR_CLIP_KEY << INI_KEY_VALUE_DELIM << config.graphics.farClip << '\n'
-            << SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << config.graphics.shadersPath;
+            << USE_NATIVE_RESOLUTION_KEY << INI_KEY_VALUE_DELIM << graphics.useNativeResolution << '\n'
+            << LAUNCH_IN_FULLSCREEN_KEY << INI_KEY_VALUE_DELIM << graphics.launchInFullscreen << '\n'
+            << SCREEN_WIDTH_KEY << INI_KEY_VALUE_DELIM << graphics.screenWidth << '\n'
+            << SCREEN_HEIGHT_KEY << INI_KEY_VALUE_DELIM << graphics.screenHeight << '\n'
+            << TARGET_FPS_KEY << INI_KEY_VALUE_DELIM << graphics.targetFPS << '\n'
+            << NEAR_CLIP_KEY << INI_KEY_VALUE_DELIM << graphics.nearClip << '\n'
+            << FAR_CLIP_KEY << INI_KEY_VALUE_DELIM << graphics.farClip << '\n'
+            << SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << graphics.shadersPath;
 
     outFile.close();
 }
-} // end namespace nc::config::detail 
+} // end namespace nc::config 

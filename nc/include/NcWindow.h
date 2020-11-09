@@ -4,5 +4,5 @@
 
 namespace nc
 {
-    Vector2 NcGetScreenDimensions();
+    Vector2 NcGetWindowDimensions();
 }

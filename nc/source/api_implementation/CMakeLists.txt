@@ -1,0 +1,11 @@
+target_sources(${EXE_NAME}
+    PRIVATE
+        ${ROOT_DIR}/nc/source/api_implementation/NcCamera.cpp
+        ${ROOT_DIR}/nc/source/api_implementation/NcCommon.cpp
+        ${ROOT_DIR}/nc/source/api_implementation/NcConfig.cpp
+        ${ROOT_DIR}/nc/source/api_implementation/NcLog.cpp
+        ${ROOT_DIR}/nc/source/api_implementation/NcPhysics.cpp
+        ${ROOT_DIR}/nc/source/api_implementation/NcScene.cpp
+        ${ROOT_DIR}/nc/source/api_implementation/NcUI.cpp
+        ${ROOT_DIR}/nc/source/api_implementation/NcWindow.cpp
+)

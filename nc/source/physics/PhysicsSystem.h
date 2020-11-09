@@ -19,11 +19,19 @@ namespace nc::physics
     class PhysicsSystem
     {
         public:
-            void RegisterClickable(IClickable* toAdd);
-            void UnregisterClickable(IClickable* toRemove);
-            IClickable* RaycastToClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask);
+            PhysicsSystem();
+            ~PhysicsSystem();
+
+            static void RegisterClickable(IClickable* toAdd);
+            static void UnregisterClickable(IClickable* toRemove);
+            static IClickable* RaycastToClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask);
+
+            void RegisterClickable_(IClickable* toAdd);
+            void UnregisterClickable_(IClickable* toRemove);
+            IClickable* RaycastToClickables_(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectMatrix, Vector2 windowDimensions, LayerMask mask);
 
         private:
+            static PhysicsSystem* m_instance;
             std::vector<nc::physics::IClickable*> m_clickableComponents;
     };
 } //end namespace nc::physics

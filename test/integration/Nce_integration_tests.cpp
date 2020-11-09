@@ -5,7 +5,7 @@
 
 /** stubbed */
 #include "graphics/Graphics.h"
-#include "win32/Window.h"
+#include "window/Window.h"
 #include "engine/system/RenderingSystem.h"
 #include "engine/system/ComponentSystem.h"
 #include "component/Renderer.h"

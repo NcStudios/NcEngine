@@ -1,10 +1,10 @@
 #pragma once
 #include "component/Camera.h"
 
-namespace nc
-{
-    class Transform;
+namespace nc { class Transform; }
 
+namespace nc::camera
+{
     /**
      * Sets the camera that NcGetMainCameraTransform()
      * refers to.

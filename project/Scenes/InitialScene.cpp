@@ -24,7 +24,7 @@ void InitialScene::Load()
     //CamController
     auto camHandle = NcCreateEntity({0.0f, 5.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
     auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
-    NcRegisterMainCamera(camComponentPtr);
+    camera::NcRegisterMainCamera(camComponentPtr);
     NcAddUserComponent<CamController>(camHandle);
     NcAddUserComponent<ClickHandler>(camHandle);
     
