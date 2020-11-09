@@ -36,6 +36,7 @@ namespace prefab
     struct Donkey;
     struct Dwarf;
     struct Grain;
+    struct PlayerBoard;
     struct Ruby;
     struct Sheep;
     struct Stable;
