@@ -7,6 +7,8 @@
 #include "project/source/log/GameLog.h"
 #include "NcWindow.h"
 
+#include <MMSystem.h>
+
 namespace
 {
     constexpr auto HUD_WINDOW_FLAGS = ImGuiWindowFlags_MenuBar |
@@ -106,7 +108,36 @@ namespace project::ui
                 }
                 ImGui::EndMenu();
             }
+            if(ImGui::BeginMenu("Soundboard"))
+            {
+                if(ImGui::MenuItem("·Tiny Dinky Daffy"))
+                {
+                    PlaySound(TEXT("project/Sounds/dumpTruckDriver.wav"), NULL, SND_ASYNC);
+                }
+                if(ImGui::MenuItem("·He admit it!"))
+                {
+                    PlaySound(TEXT("project/Sounds/ohMaiGod.wav"), NULL, SND_ASYNC);
+                }
+                if(ImGui::MenuItem("·Flush me J"))
+                {
+                    PlaySound(TEXT("project/Sounds/flushMeJay.wav"), NULL, SND_ASYNC);
+                }
+                if(ImGui::MenuItem("·Sloppy mud pie!"))
+                {
+                    PlaySound(TEXT("project/Sounds/sloppyMudPie.wav"), NULL, SND_ASYNC);
+                }                                
+                if(ImGui::MenuItem("·Basshunter Dota"))
+                {
+                    PlaySound(TEXT("project/Sounds/dotaSong.wav"), NULL, SND_ASYNC);
+                }   
+                if(ImGui::MenuItem("·Jesus Christ in Richmond Park"))
+                {
+                    PlaySound(TEXT("project/Sounds/fenton.wav"), NULL, SND_ASYNC);
+                }   
+                ImGui::EndMenu();                
+            }
             ImGui::EndMenuBar();
+            
         }
     }
 

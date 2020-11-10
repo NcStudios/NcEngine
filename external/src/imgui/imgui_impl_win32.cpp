@@ -10,7 +10,7 @@
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
-#include "source/win32/NCWin32.h"
+#include "source/win32/NcWin32.h"
 #include <tchar.h>
 
 

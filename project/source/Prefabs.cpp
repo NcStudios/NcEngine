@@ -19,6 +19,7 @@ namespace mesh
     auto Donkey = graphics::Mesh{};
     auto Dwarf = graphics::Mesh{};
     auto Grain = graphics::Mesh{};
+    auto PlayerBoard = graphics::Mesh{};
     auto Ruby = graphics::Mesh{};
     auto Sheep = graphics::Mesh{};
     auto Stable = graphics::Mesh{};
@@ -41,6 +42,7 @@ namespace material
     auto Donkey = graphics::PBRMaterial{};
     auto Dwarf = graphics::PBRMaterial{};
     auto Grain = graphics::PBRMaterial{};
+    auto PlayerBoard = graphics::PBRMaterial{};
     auto Ruby = graphics::PBRMaterial{};
     auto Sheep = graphics::PBRMaterial{};
     auto Stable = graphics::PBRMaterial{};
@@ -116,6 +118,7 @@ void InitializeResources()
     mesh::Vegetable = graphics::Mesh{"project//Models//VegetablePiece.fbx"};
     mesh::Wood = graphics::Mesh{"project//Models//WoodPiece.fbx"};
     mesh::FurnishingTile = graphics::Mesh{"project/Models/FurnishingTile.fbx"};
+    mesh::PlayerBoard = graphics::Mesh{"project/Models/PlayerBoard.fbx"};
 
     material::Boar = graphics::PBRMaterial{{"project//Textures//BoarPiece_Material_BaseColor.png", "project//Textures//BoarPiece_Material_Normal.png",  "project//Textures//BoarPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     material::Cattle = graphics::PBRMaterial{{"project//Textures//CattlePiece_Material_BaseColor.png", "project//Textures//CattlePiece_Material_Normal.png",  "project//Textures//CattlePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
@@ -182,6 +185,7 @@ void InitializeResources()
     material::FurnishingTileWorkingCave = graphics::PBRMaterial{{"project//Textures//FurnishingTiles//FT_WorkingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"}};
     material::FurnishingTileWorkRoom = graphics::PBRMaterial{{"project//Textures//FurnishingTiles//FT_WorkRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"}};
     material::FurnishingTileWritingChamber = graphics::PBRMaterial{{"project//Textures//FurnishingTiles//FT_WritingChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"}};
+    material::PlayerBoard = graphics::PBRMaterial{{"project//Textures//PlayerBoard_DefaultMaterial_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"}};
 }
 
 template<> EntityHandle Create<Boar>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
@@ -334,6 +338,13 @@ template<> EntityHandle Create<Wood>(Vector3 position, Vector3 rotation, Vector3
     ECS::AddComponent<Renderer>(handle, mesh::Wood, material::Wood);
     auto transform = ECS::GetComponent<Transform>(handle);
     ECS::AddComponent<project::GamePiece>(handle, transform);
+    return handle;
+}
+
+template<> EntityHandle Create<PlayerBoard>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+{
+    auto handle = NcCreateEntity(position, rotation, scale, tag);
+    NcAddEngineComponent<Renderer>(handle, mesh::PlayerBoard, material::PlayerBoard);
     return handle;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////

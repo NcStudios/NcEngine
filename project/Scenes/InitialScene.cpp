@@ -133,6 +133,8 @@ void InitialScene::Load()
     auto dwarfDiscHandle7 = ECS::CreateEntity({0.6f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 7");
     ECS::AddComponent<Renderer>(dwarfDiscHandle7, dwarfDiscMesh, dwarfDiscMaterial7);
 
+    // Player Board
+    prefab::Create<prefab::PlayerBoard>({3.2f * scaleFactor, 0.0f, 0.3f * scaleFactor}, {1.5708f, 1.5708f, 0.0f}, Vector3::One() * scaleFactor * 0.1f, "PLayerBoard Piece");
 
     // Furnishing Tiles
     prefab::Create<prefab::FurnishingTileAdditionalDwelling>({0.4f * scaleFactor, 0.0f, 1.0f * scaleFactor}, {1.5708f, 1.5708f, 0.0f}, Vector3::One() * scaleFactor * 2, "FT Additional Dwelling Piece");
