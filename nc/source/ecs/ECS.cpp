@@ -86,8 +86,6 @@ template<> Renderer* ECS::AddComponent<Renderer>(EntityHandle handle, graphics::
     return impl->m_renderingSystem->GetPointerTo(rendererHandle);
 }
 
-
-
 template<> bool ECS::RemoveComponent<PointLight>(EntityHandle handle)
 {
     auto entity = GetEntity(handle);

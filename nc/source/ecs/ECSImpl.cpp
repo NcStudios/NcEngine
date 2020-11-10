@@ -8,10 +8,10 @@ namespace nc::ecs
 {
 ECSImpl::ECSImpl(LightSystem* light, RenderingSystem* rend, TransformSystem* trans)
     : m_active{},
-        m_toDestroy{},
-        m_lightSystem{ light },
-        m_renderingSystem{ rend },
-        m_transformSystem{ trans }
+      m_toDestroy{},
+      m_lightSystem{ light },
+      m_renderingSystem{ rend },
+      m_transformSystem{ trans }
 {
 }
 
@@ -64,7 +64,7 @@ std::unordered_map<EntityHandle, Entity> & ECSImpl::GetMapContainingEntity(const
     if (checkAll && (m_toDestroy.count(handle) > 0) ) //only check toDestroy if checkAll flag is set
         return m_toDestroy;
 
-    throw std::runtime_error("Engine::GetmapContainingEntity() - Entity not found.");
+    throw std::runtime_error("Entity not found.");
 }
 
 std::unordered_map<EntityHandle, Entity> & ECSImpl::GetActiveEntities() noexcept
