@@ -11,7 +11,7 @@ namespace nc
     namespace graphics { class Graphics; }
     namespace ecs
     {
-        class ECS;
+        class ECSImpl;
         class LightSystem;
         class RenderingSystem;
         class TransformSystem;
@@ -37,19 +37,14 @@ class EngineImpl
         ~EngineImpl();
         void MainLoop();
         void Shutdown();
-        void ClearECSState();
+        void ClearState();
         void DoSceneSwap();
         void FrameLogic(float dt);
         void FrameRender(float dt);
-        void FixedUpdate();
         void FrameCleanup();
-        void SendFrameUpdateToEntities(float dt);
-        void SendFixedUpdateToEntities();
-        void SendOnDestroyToEntities();
-
-        config::Config& GetConfig();
 
     private:
+
         config::Config m_config;
         float m_frameDeltaTimeFactor;
         std::unique_ptr<log::Logger> m_logger;
@@ -58,7 +53,7 @@ class EngineImpl
         std::unique_ptr<ecs::RenderingSystem> m_rendering;
         std::unique_ptr<ecs::LightSystem> m_light;
         std::unique_ptr<physics::PhysicsSystem> m_physics;
-        std::unique_ptr<ecs::ECS> m_ecs;
+        std::unique_ptr<ecs::ECSImpl> m_ecs;
         std::unique_ptr<ui::UISystem> m_uiSystem;
         std::unique_ptr<scene::SceneManager> m_sceneManager;
         std::unique_ptr<camera::MainCamera> m_mainCamera;

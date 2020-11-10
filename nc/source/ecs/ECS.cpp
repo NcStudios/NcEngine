@@ -1,200 +1,139 @@
 #include "ECS.h"
-#include "LightSystem.h"
-#include "RenderingSystem.h"
-#include "TransformSystem.h"
+#include "ecs/ECSImpl.h"
+#include "ecs/LightSystem.h"
+#include "ecs/RenderingSystem.h"
+#include "ecs/TransformSystem.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
 
-namespace nc::ecs
+namespace nc
 {
-    ECS* ECS::m_instance = nullptr;
+ecs::ECSImpl* ECS::m_impl = nullptr;
 
-    ECS::ECS(LightSystem* light, RenderingSystem* rend, TransformSystem* trans)
-        : m_active{},
-          m_toDestroy{},
-          m_lightSystem{ light },
-          m_renderingSystem{ rend },
-          m_transformSystem{ trans }
-    {
-        ECS::m_instance = this;
-    }
+void ECS::RegisterImpl(ecs::ECSImpl* impl)
+{
+    m_impl = impl;
+}
 
-    ECS::~ECS()
-    {
-        ECS::m_instance = nullptr;
-    }
+EntityHandle ECS::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag)
+{
+    auto impl = ECS::m_impl;
+    auto entityHandle = impl->m_handleManager.GenerateNewHandle();
+    auto transHandle = impl->m_transformSystem->Add(entityHandle, pos, rot, scale);
+    impl->m_active.emplace(entityHandle, Entity{entityHandle, transHandle, std::move(tag)} );
+    return entityHandle;
+}
 
-    RenderingSystem* ECS::GetRenderingSystem()
-    {
-        return ECS::m_instance->m_renderingSystem;
-    }
+bool ECS::DestroyEntity(EntityHandle handle)
+{
+    auto impl = ECS::m_impl;
+    if (!impl->DoesEntityExist(handle))
+        return false;
+    auto& containingMap = impl->GetMapContainingEntity(handle);
+    impl->GetToDestroyEntities().emplace(handle, std::move(containingMap.at(handle)));
+    containingMap.erase(handle);
+    return true;
+}
 
-    EntityHandle ECS::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag)
-    {
-        auto es = ECS::m_instance;
-        auto entityHandle = es->handleManager.GenerateNewHandle();
-        auto transHandle = es->m_transformSystem->Add(entityHandle, pos, rot, scale);
-        es->m_active.emplace(entityHandle, Entity{entityHandle, transHandle, std::move(tag)} );
-        return entityHandle;
-    }
-
-    bool ECS::DestroyEntity(EntityHandle handle)
-    {
-        auto es = ECS::m_instance;
-        if (!es->DoesEntityExist(handle))
-            return false;
-        auto& containingMap = es->GetMapContainingEntity(handle);
-        es->GetToDestroyEntities().emplace(handle, std::move(containingMap.at(handle)));
-        containingMap.erase(handle);
-        return true;
-    }
-
-    Entity * ECS::GetEntity(EntityHandle handle)
-    {
-        auto es = ECS::m_instance;
-        if (!es->DoesEntityExist(handle))
-            return nullptr;
-
-        auto& containingMap = es->GetMapContainingEntity(handle);
-        return &containingMap.at(handle); 
-    }
-
-    Entity * ECS::GetEntity(std::string tag)
-    {
-        auto es = ECS::m_instance;
-        for(auto& pair : es->m_active)
-        {
-            if(tag == pair.second.Tag)
-            {
-                return &pair.second;
-            }
-        }
+Entity * ECS::GetEntity(EntityHandle handle)
+{
+    auto impl = ECS::m_impl;
+    if (!impl->DoesEntityExist(handle))
         return nullptr;
-    }
 
-    Transform* ECS::GetTransformFromComponentHandle(ComponentHandle transformHandle)
+    auto& containingMap = impl->GetMapContainingEntity(handle);
+    return &containingMap.at(handle); 
+}
+
+Entity * ECS::GetEntity(std::string tag)
+{
+    auto impl = ECS::m_impl;
+    for(auto& pair : impl->m_active)
     {
-        auto ts = ECS::m_instance->m_transformSystem;
-        auto exists = ts->Contains(transformHandle);
-        IF_THROW(!exists, "Bad handle");
-        return ts->GetPointerTo(transformHandle);
+        if(tag == pair.second.Tag)
+        {
+            return &pair.second;
+        }
     }
-    
-    Transform* ECS::GetTransformFromEntityHandle(EntityHandle entityHandle)
-    {
-        auto entity = GetEntity(entityHandle);
-        IF_THROW(!entity, "Bad handle");
-        return ECS::m_instance->m_transformSystem->GetPointerTo(entity->Handles.transform);
-    }
+    return nullptr;
+}
+
+template<> PointLight* ECS::AddComponent<PointLight>(EntityHandle handle)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+
+    auto impl = ECS::m_impl;
+    IF_THROW(impl->m_lightSystem->Contains(entity->Handles.pointLight), "Adding point light - entity already has a point light");
+
+    auto lightHandle = impl->m_lightSystem->Add(handle);
+    entity->Handles.pointLight = lightHandle;
+    auto lightPtr = impl->m_lightSystem->GetPointerTo(lightHandle);
+    lightPtr->Set({0.0f, 0.0f, 0.0f});
+    return lightPtr;
+}
+
+template<> Renderer* ECS::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+
+    auto impl = ECS::m_impl;
+    IF_THROW(impl->m_renderingSystem->Contains(entity->Handles.renderer), "Adding renderer - entity already has a renderer");
+
+    auto rendererHandle = impl->m_renderingSystem->Add(handle, mesh, material);
+    entity->Handles.renderer = rendererHandle;
+    return impl->m_renderingSystem->GetPointerTo(rendererHandle);
+}
+
+
+
+template<> bool ECS::RemoveComponent<PointLight>(EntityHandle handle)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+    return ECS::m_impl->m_lightSystem->Remove(entity->Handles.pointLight);
+}
+
+template<> bool ECS::RemoveComponent<Renderer>(EntityHandle handle)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+    return ECS::m_impl->m_renderingSystem->Remove(entity->Handles.renderer);
+}
+
+template<> PointLight* ECS::GetComponent<PointLight>(EntityHandle handle)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+    return ECS::m_impl->m_lightSystem->GetPointerTo(entity->Handles.pointLight);
+}
+
+template<> Renderer* ECS::GetComponent<Renderer>(EntityHandle handle)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+    return ECS::m_impl->m_renderingSystem->GetPointerTo(entity->Handles.renderer);
+}
+
+template<> Transform* ECS::GetComponent<Transform>(EntityHandle handle)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+    return ECS::m_impl->m_transformSystem->GetPointerTo(entity->Handles.transform);
+}
 
     template<> bool ECS::HasComponent<PointLight>(EntityHandle handle)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-        return ECS::m_instance->m_lightSystem->Contains(entity->Handles.pointLight);
-    }
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+    return ECS::m_impl->m_lightSystem->Contains(entity->Handles.pointLight);
+}
 
-    template<> bool ECS::HasComponent<Renderer>(EntityHandle handle)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-        return ECS::m_instance->m_renderingSystem->Contains(entity->Handles.renderer);
-    }
-
-    template<> bool ECS::RemoveComponent<PointLight>(EntityHandle handle)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-        return ECS::m_instance->m_lightSystem->Remove(entity->Handles.pointLight);
-    }
-
-    template<> bool ECS::RemoveComponent<Renderer>(EntityHandle handle)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-        return ECS::m_instance->m_renderingSystem->Remove(entity->Handles.renderer);
-    }
-
-    template<> PointLight* ECS::GetComponent<PointLight>(EntityHandle handle)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-        return ECS::m_instance->m_lightSystem->GetPointerTo(entity->Handles.pointLight);
-    }
-
-    template<> Renderer* ECS::GetComponent<Renderer>(EntityHandle handle)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-        return ECS::m_instance->m_renderingSystem->GetPointerTo(entity->Handles.renderer);
-    }
-
-    PointLight* ECS::AddPointLight(EntityHandle handle)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-        IF_THROW(ECS::m_instance->m_lightSystem->Contains(entity->Handles.pointLight), "Adding point light - entity already has a point light");
-
-        auto lightHandle = ECS::m_instance->m_lightSystem->Add(handle);
-        entity->Handles.pointLight = lightHandle;
-        auto lightPtr = ECS::m_instance->m_lightSystem->GetPointerTo(lightHandle);
-        lightPtr->Set({0.0f, 0.0f, 0.0f});
-        return lightPtr;
-    }
-
-    Renderer* ECS::AddRenderer(EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material)
-    {
-        auto entity = GetEntity(handle);
-        IF_THROW(!entity, "Bad handle");
-
-        IF_THROW(ECS::m_instance->m_renderingSystem->Contains(entity->Handles.renderer), "Adding renderer - entity already has a renderer");
-
-        auto rendererHandle = ECS::m_instance->m_renderingSystem->Add(handle, mesh, material);
-        entity->Handles.renderer = rendererHandle;
-        return ECS::m_instance->m_renderingSystem->GetPointerTo(rendererHandle);
-    }
-
-    bool ECS::DoesEntityExist(const EntityHandle handle) noexcept
-    {
-        return m_active.count(handle) > 0;
-    }
-
-    std::unordered_map<EntityHandle, Entity> & ECS::GetMapContainingEntity(const EntityHandle handle, bool checkAll) noexcept(false)
-    {
-        if (m_active.count(handle) > 0)
-            return m_active;
-
-        if (checkAll && (m_toDestroy.count(handle) > 0) ) //only check toDestroy if checkAll flag is set
-            return m_toDestroy;
-
-        throw std::runtime_error("Engine::GetmapContainingEntity() - Entity not found.");
-    }
-
-    std::unordered_map<EntityHandle, Entity> & ECS::GetActiveEntities() noexcept
-    {
-        return m_active;
-    }
-
-    std::unordered_map<EntityHandle, Entity> & ECS::GetToDestroyEntities() noexcept
-    {
-        return m_toDestroy;
-    }
-
-    Entity * ECS::GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false)
-    {
-        return &GetMapContainingEntity(handle, true).at(handle);
-    }
-
-    void ECS::ClearSystems()
-    {
-        m_active.clear();
-        m_toDestroy.clear();
-        handleManager.Reset();
-        m_transformSystem->Clear();
-    }
-
-    void ECS::RemoveTransform(ComponentHandle handle)
-    {
-        m_transformSystem->Remove(handle);
-    }
+template<> bool ECS::HasComponent<Renderer>(EntityHandle handle)
+{
+    auto entity = GetEntity(handle);
+    IF_THROW(!entity, "Bad handle");
+    return ECS::m_impl->m_renderingSystem->Contains(entity->Handles.renderer);
+}
 }

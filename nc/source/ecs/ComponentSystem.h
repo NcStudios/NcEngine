@@ -40,7 +40,7 @@ class ComponentSystem
         T * GetPointerTo(const ComponentHandle handle);
 
         template<class Func>
-        void ForEach(Func func);        
+        void ForEach(Func func);
 
         void Clear();
 

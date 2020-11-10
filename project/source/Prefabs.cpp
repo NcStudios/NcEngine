@@ -186,490 +186,490 @@ void InitializeResources()
 
 template<> EntityHandle Create<Boar>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Boar, material::Boar);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Boar, material::Boar);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Cattle>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Cattle, material::Cattle);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Cattle, material::Cattle);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Coal>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Coal, material::Coal);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Coal, material::Coal);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<CoinOne>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Disc, material::CoinOne);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Disc, material::CoinOne);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<CoinTwo>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Disc, material::CoinTwo);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Disc, material::CoinTwo);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<CoinTen>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Disc, material::CoinTen);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Disc, material::CoinTen);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Dog>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Dog, material::Dog);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Dog, material::Dog);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Donkey>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Donkey, material::Donkey);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Donkey, material::Donkey);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Dwarf>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Disc, material::Dwarf);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Disc, material::Dwarf);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Grain>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Grain, material::Grain);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Grain, material::Grain);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Ruby>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Ruby, material::Ruby);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Ruby, material::Ruby);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Sheep>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Sheep, material::Sheep);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Sheep, material::Sheep);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Stable>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Stable, material::Stable);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Stable, material::Stable);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<StartingPlayerPiece>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::StartingPlayerPiece, material::StartingPlayerPiece);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::StartingPlayerPiece, material::StartingPlayerPiece);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Stone>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Stone, material::Stone);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Stone, material::Stone);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Vegetable>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Vegetable, material::Vegetable);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Vegetable, material::Vegetable);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create<Wood>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::Wood, material::Wood);
-    auto transform = NcGetTransform(NcGetEntity(handle)->Handles.transform);
-    NcAddUserComponent<project::GamePiece>(handle, transform);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::Wood, material::Wood);
+    auto transform = ECS::GetComponent<Transform>(handle);
+    ECS::AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 template<> EntityHandle Create<FurnishingTileAdditionalDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileAdditionalDwelling);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileAdditionalDwelling);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileCoupleDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCoupleDwelling);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCoupleDwelling);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDwelling);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDwelling);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileBeerParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBeerParlor);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBeerParlor);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileBlacksmithingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmithingParlor);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmithingParlor);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileBlacksmith>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmith);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmith);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileBreakfastRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreakfastRoom);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreakfastRoom);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileBreedingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreedingCave);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreedingCave);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileBroomChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBroomChamber);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBroomChamber);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileBuilder>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBuilder);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBuilder);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileCarpenter>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCarpenter);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCarpenter);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileCookingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCookingCave);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCookingCave);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileCuddleRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCuddleRoom);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCuddleRoom);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileDogSchool>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDogSchool);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDogSchool);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileFodderChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFodderChamber);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFodderChamber);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileFoodChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFoodChamber);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFoodChamber);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileGuestRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileGuestRoom);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileGuestRoom);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileHuntingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileHuntingParlor);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileHuntingParlor);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileMainStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMainStorage);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMainStorage);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileMilkingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMilkingParlor);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMilkingParlor);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileMiner>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiner);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiner);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileMiningCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiningCave);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiningCave);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileMixedDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMixedDwelling);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMixedDwelling);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileOfficeRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOfficeRoom);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOfficeRoom);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileOreStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOreStorage);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOreStorage);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTilePeacefulCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePeacefulCave);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePeacefulCave);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTilePrayerChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePrayerChamber);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePrayerChamber);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileQuarry>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileQuarry);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileQuarry);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileRubySupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileRubySupplier);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileRubySupplier);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileSeam>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSeam);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSeam);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileSimpleDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileSimpleDwelling2>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling2);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling2);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileSlaughterCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSlaughterCave);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSlaughterCave);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileSparePartStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSparePartStorage);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSparePartStorage);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileStateParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStateParlor);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStateParlor);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileStoneCarver>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneCarver);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneCarver);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileStoneStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneStorage);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneStorage);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileStoneSupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneSupplier);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneSupplier);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileStubbleRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStubbleRoom);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStubbleRoom);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileSupplierStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSupplierStorage);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSupplierStorage);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileTrader>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTrader);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTrader);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileTreasureChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTreasureChamber);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTreasureChamber);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileWeaponStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeaponStorage);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeaponStorage);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileWeavingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeavingParlor);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeavingParlor);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileWoodSupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWoodSupplier);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWoodSupplier);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileWorkingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkingCave);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkingCave);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileWorkRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkRoom);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkRoom);
     return handle;
 }
 
 template<> EntityHandle Create<FurnishingTileWritingChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWritingChamber);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWritingChamber);
     return handle;
 }
 } //end namespace prefab

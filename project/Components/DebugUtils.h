@@ -1,5 +1,5 @@
 #pragma once
-#include "NcCommon.h"
+#include "component/Component.h"
 #include "scenes/InitialScene.h"
 #include <memory>
 

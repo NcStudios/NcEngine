@@ -1,5 +1,5 @@
 #pragma once
-#include <NcCommon.h>
+#include <ECS.h>
 
 namespace prefab
 {

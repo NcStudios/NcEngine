@@ -1,5 +1,4 @@
 #include "Entity.h"
-#include "NcCommon.h"
 
 namespace nc
 {
@@ -80,6 +79,5 @@ void Entity::SendOnCollisionExit() noexcept
         comp->OnCollisionExit();
     }
 }
-
 } //end namespace nc
 

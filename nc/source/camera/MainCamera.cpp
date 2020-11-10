@@ -1,6 +1,6 @@
 #include "MainCamera.h"
 #include "component/Camera.h"
-#include "NcCommon.h"
+#include "ECS.h"
 
 namespace nc::camera
 {
@@ -24,9 +24,7 @@ namespace nc::camera
 
     void MainCamera::Register(Camera* camera)
     {
-        auto handle = camera->GetParentHandle();
-        auto entity = NcGetEntity(handle);
-        MainCamera::m_instance->m_transform = NcGetTransform(entity->Handles.transform);
+        MainCamera::m_instance->m_transform = ECS::GetComponent<Transform>(camera->GetParentHandle());
     }
 
     void MainCamera::ClearTransform()

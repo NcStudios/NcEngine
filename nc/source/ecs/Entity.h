@@ -8,7 +8,6 @@
 
 namespace nc
 {
-    //class Component; 
     class Transform;
 
     class Entity

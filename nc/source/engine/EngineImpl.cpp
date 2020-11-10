@@ -1,10 +1,10 @@
 #include "EngineImpl.h"
-
 #include "camera/MainCamera.h"
 #include "config/Config.h"
 #include "graphics/Graphics.h"
 #include "input/Input.h"
-#include "ecs/ECS.h"
+#include "ECS.h"
+#include "ecs/ECSImpl.h"
 #include "ecs/RenderingSystem.h"
 #include "ecs/LightSystem.h"
 #include "ecs/TransformSystem.h"
@@ -38,8 +38,8 @@ EngineImpl::EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine)
         m_config.graphics.launchInFullscreen
     );
     m_light = std::make_unique<ecs::LightSystem>();
-    m_physics = std::make_unique<physics::PhysicsSystem>();
-    m_ecs = std::make_unique<ecs::ECS>(m_light.get(), m_rendering.get(), m_transform.get());
+    m_physics = std::make_unique<physics::PhysicsSystem>(m_rendering->GetGraphics());
+    m_ecs = std::make_unique<ecs::ECSImpl>(m_light.get(), m_rendering.get(), m_transform.get());
     m_uiSystem = std::make_unique<ui::UISystem>(hwnd, m_rendering->GetGraphics());
     m_sceneManager = std::make_unique<scene::SceneManager>(std::make_unique<InitialScene>());
     m_mainCamera = std::make_unique<camera::MainCamera>();
@@ -49,6 +49,7 @@ EngineImpl::EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine)
 
     m_window->BindGraphics(m_rendering->GetGraphics());
     m_window->BindUISystem(m_uiSystem.get());
+    ECS::RegisterImpl(m_ecs.get());
 
     V_LOG("Engine initialized");
 }
@@ -66,15 +67,8 @@ void EngineImpl::MainLoop()
 
     while(isRunning)
     {
-        if(input::GetKey(input::KeyCode::R))
-        {
-            m_rendering->GetGraphics()->ResizeTarget(500, 500);
-        }
-
-        if(input::GetKey(input::KeyCode::F))
-        {
-            m_rendering->GetGraphics()->ToggleFullscreen();
-        }
+        if(input::GetKey(input::KeyCode::R)) { m_rendering->GetGraphics()->ResizeTarget(500, 500); }
+        if(input::GetKey(input::KeyCode::F)) { m_rendering->GetGraphics()->ToggleFullscreen(); }
 
         ncTime.UpdateTime();
         m_window->ProcessSystemMessages();
@@ -86,7 +80,7 @@ void EngineImpl::MainLoop()
          */
         if (time::Time::FixedDeltaTime > m_config.physics.fixedUpdateInterval)
         {
-            FixedUpdate();
+            m_ecs->SendFixedUpdate();
             ncTime.ResetFixedDeltaTime();
         }
 
@@ -102,7 +96,7 @@ void EngineImpl::MainLoop()
         FrameRender(dt);
         FrameCleanup();
         ncTime.ResetFrameDeltaTime();
-    } //end main loop
+    }
 
     Shutdown();
 }
@@ -111,41 +105,29 @@ void EngineImpl::Shutdown()
 {
     V_LOG("Shutdown EngineImpl");
     m_config.Save();
-    ClearECSState();
+    ClearState();
 }
 
-void EngineImpl::ClearECSState()
+void EngineImpl::ClearState()
 {
     V_LOG("Clearing engine state");
-    auto handles = std::vector<EntityHandle>{};
-    for(const auto& pair : m_ecs->GetActiveEntities())
-    {
-        handles.emplace_back(pair.first);
-    }
-    for(const auto handle : handles)
-    {
-        NcDestroyEntity(handle);
-    }
-    SendOnDestroyToEntities();
-    
-    m_ecs->ClearSystems();
+    m_ecs->ClearState();
     m_mainCamera->ClearTransform();
-    m_rendering->Clear();
-    m_light->Clear();
+    // SceneManager state is never cleared
 }
 
 void EngineImpl::DoSceneSwap()
 {
     V_LOG("Swapping scene");
     m_sceneManager->UnloadActiveScene();
-    ClearECSState();
+    ClearState();
     m_sceneManager->DoSceneChange();
     m_sceneManager->LoadActiveScene();
 }
 
 void EngineImpl::FrameLogic(float dt)
 {
-    SendFrameUpdateToEntities(dt);
+    m_ecs->SendFrameUpdate(dt);
 }
 
 void EngineImpl::FrameRender(float dt)
@@ -160,59 +142,13 @@ void EngineImpl::FrameRender(float dt)
     m_rendering->FrameEnd();
 }
 
-void EngineImpl::FixedUpdate()
-{
-    SendFixedUpdateToEntities();
-}
-
 void EngineImpl::FrameCleanup()
 {
-    SendOnDestroyToEntities();
+    m_ecs->SendOnDestroy();
     if(m_sceneManager->IsSceneChangeScheduled())
     {
         DoSceneSwap();
     }
     input::Flush();
-}
-
-void EngineImpl::SendFrameUpdateToEntities(float dt)
-{
-    for(auto & pair : m_ecs->GetActiveEntities())
-    {
-        pair.second.SendFrameUpdate(dt);
-    }
-}
-
-void EngineImpl::SendFixedUpdateToEntities()
-{
-    for(auto & pair : m_ecs->GetActiveEntities())
-    {
-        pair.second.SendFixedUpdate();
-    }
-}
-
-void EngineImpl::SendOnDestroyToEntities()
-{
-    auto & toDestroy = m_ecs->GetToDestroyEntities();
-    for(auto & pair : toDestroy)
-    {
-        Entity* entityPtr = m_ecs->GetEntityPtrFromAnyMap(pair.second.Handle);
-        if (entityPtr == nullptr)
-        {
-            continue;
-        }
-
-        pair.second.SendOnDestroy();
-        const auto& handles = entityPtr->Handles;
-        m_ecs->RemoveTransform(handles.transform);
-        m_rendering->Remove(handles.renderer);
-        m_light->Remove(handles.pointLight);
-    }
-    toDestroy.clear();
-}
-
-config::Config& EngineImpl::GetConfig()
-{
-    return m_config;
 }
 } // end namespace nc::engine

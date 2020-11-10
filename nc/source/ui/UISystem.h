@@ -1,10 +1,11 @@
 #pragma once
-#include <unordered_map>
 
-#include "NcCommon.h"
 #include "win32/NCWinDef.h"
 #include "IUI.h"
 #include "Editor.h"
+#include "ecs/Entity.h"
+
+#include <unordered_map>
 
 namespace nc
 {

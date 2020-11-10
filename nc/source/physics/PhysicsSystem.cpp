@@ -1,6 +1,10 @@
 #include "PhysicsSystem.h"
 #include "input/Input.h"
 #include "component/Transform.h"
+#include "window/Window.h"
+#include "graphics/Graphics.h"
+#include "camera/MainCamera.h"
+
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
@@ -9,7 +13,9 @@ namespace nc::physics
 {
     PhysicsSystem* PhysicsSystem::m_instance = nullptr;
 
-    PhysicsSystem::PhysicsSystem()
+    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics)
+        : m_clickableComponents{},
+          m_graphics{ graphics }
     {
         PhysicsSystem::m_instance = this;
     }
@@ -29,9 +35,9 @@ namespace nc::physics
         PhysicsSystem::m_instance->UnregisterClickable_(toRemove);
     }
 
-    IClickable* PhysicsSystem::RaycastToClickables(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
+    IClickable* PhysicsSystem::RaycastToClickables(LayerMask mask)
     {
-        return PhysicsSystem::m_instance->RaycastToClickables_(viewMatrix, projectionMatrix, windowDimensions, mask);
+        return PhysicsSystem::m_instance->RaycastToClickables_(mask);
     }
 
     void PhysicsSystem::RegisterClickable_(IClickable* toAdd)
@@ -53,8 +59,11 @@ namespace nc::physics
         m_clickableComponents.pop_back();
     }
 
-    IClickable* PhysicsSystem::RaycastToClickables_(DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix, Vector2 windowDimensions, LayerMask mask)
+    IClickable* PhysicsSystem::RaycastToClickables_(LayerMask mask)
     {
+        auto windowDimensions = Window::Instance->GetWindowDimensions();
+        auto viewMatrix = camera::MainCamera::GetTransform()->CamGetMatrix();
+        auto projectionMatrix = m_graphics->GetProjection();
         auto worldMatrix = DirectX::XMMatrixIdentity();
         auto unit = Vector3(1,1,1).GetNormalized().GetXMFloat3();
         auto unit_v = DirectX::XMLoadFloat3(&unit);
