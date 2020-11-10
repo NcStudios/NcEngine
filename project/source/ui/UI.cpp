@@ -7,8 +7,6 @@
 #include "project/source/log/GameLog.h"
 #include "NcScreen.h"
 
-#include <MMSystem.h>
-
 namespace
 {
     constexpr auto HUD_WINDOW_FLAGS = ImGuiWindowFlags_MenuBar |
@@ -28,6 +26,7 @@ namespace project::ui
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
           m_editNameUIElement {false, m_config.user.userName},
+          m_soundboardUIElement {false},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
           m_isHovered { false }
     {
@@ -43,6 +42,7 @@ namespace project::ui
         DrawHUD();
         m_turnPhaseUIElement.Draw();
         m_editNameUIElement.Draw();
+        m_soundboardUIElement.Draw();
         m_isHovered = ImGui::IsAnyWindowHovered();
     }
 
@@ -100,44 +100,19 @@ namespace project::ui
                 }
                 ImGui::EndMenu();
             }
-            if(ImGui::BeginMenu("Helpers"))
+            if(ImGui::BeginMenu("Windows"))
             {
+                if(ImGui::MenuItem("Soundboard"))
+                {
+                    m_soundboardUIElement.ToggleOpen();
+                }
                 if(ImGui::MenuItem("Turn Phases"))
                 {
                     m_turnPhaseUIElement.ToggleOpen();
                 }
                 ImGui::EndMenu();
             }
-            if(ImGui::BeginMenu("Soundboard"))
-            {
-                if(ImGui::MenuItem("·Tiny Dinky Daffy"))
-                {
-                    PlaySound(TEXT("project/Sounds/dumpTruckDriver.wav"), NULL, SND_ASYNC);
-                }
-                if(ImGui::MenuItem("·He admit it!"))
-                {
-                    PlaySound(TEXT("project/Sounds/ohMaiGod.wav"), NULL, SND_ASYNC);
-                }
-                if(ImGui::MenuItem("·Flush me J"))
-                {
-                    PlaySound(TEXT("project/Sounds/flushMeJay.wav"), NULL, SND_ASYNC);
-                }
-                if(ImGui::MenuItem("·Sloppy mud pie!"))
-                {
-                    PlaySound(TEXT("project/Sounds/sloppyMudPie.wav"), NULL, SND_ASYNC);
-                }                                
-                if(ImGui::MenuItem("·Basshunter Dota"))
-                {
-                    PlaySound(TEXT("project/Sounds/dotaSong.wav"), NULL, SND_ASYNC);
-                }   
-                if(ImGui::MenuItem("·Jesus Christ in Richmond Park"))
-                {
-                    PlaySound(TEXT("project/Sounds/fenton.wav"), NULL, SND_ASYNC);
-                }   
-                ImGui::EndMenu();                
-            }
             ImGui::EndMenuBar();
-            
         }
     }
 

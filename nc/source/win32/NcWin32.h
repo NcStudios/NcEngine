@@ -66,9 +66,9 @@
 #ifndef NOSERVICE
 #define NOSERVICE
 #endif
-#ifndef NOSOUND
-#define NOSOUND
-#endif
+//#ifndef NOSOUND // used by SoundboardUIElement
+//#define NOSOUND
+//#endif
 #ifndef NOTEXTMETRIC
 #define NOTEXTMETRIC
 #endif
