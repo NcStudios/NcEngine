@@ -92,14 +92,6 @@ namespace project::ui
                 }
                 ImGui::EndMenu();
             }
-            if(ImGui::BeginMenu("Log"))
-            {
-                if(ImGui::MenuItem("View"))
-                {
-                    m_logUIElement.ToggleOpen();
-                }
-                ImGui::EndMenu();
-            }
             if(ImGui::BeginMenu("Windows"))
             {
                 if(ImGui::MenuItem("Soundboard"))
@@ -110,6 +102,10 @@ namespace project::ui
                 {
                     m_turnPhaseUIElement.ToggleOpen();
                 }
+                ImGui::EndMenu();
+            }
+            if(ImGui::BeginMenu("Log"))
+            {
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
