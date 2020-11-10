@@ -6,5 +6,4 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/nc/source/api_implementation/NcPhysics.cpp
         ${ROOT_DIR}/nc/source/api_implementation/NcScene.cpp
         ${ROOT_DIR}/nc/source/api_implementation/NcUI.cpp
-        ${ROOT_DIR}/nc/source/api_implementation/NcWindow.cpp
 )

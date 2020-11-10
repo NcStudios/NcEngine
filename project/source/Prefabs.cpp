@@ -343,11 +343,11 @@ template<> EntityHandle Create<Wood>(Vector3 position, Vector3 rotation, Vector3
 
 template<> EntityHandle Create<PlayerBoard>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
-    auto handle = NcCreateEntity(position, rotation, scale, tag);
-    NcAddEngineComponent<Renderer>(handle, mesh::PlayerBoard, material::PlayerBoard);
+    auto handle = ECS::CreateEntity(position, rotation, scale, tag);
+    ECS::AddComponent<Renderer>(handle, mesh::PlayerBoard, material::PlayerBoard);
     return handle;
 }
-///////////////////////////////////////////////////////////////////////////////////////////////
+
 template<> EntityHandle Create<FurnishingTileAdditionalDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = ECS::CreateEntity(position, rotation, scale, tag);

@@ -1,7 +1,7 @@
 #include "PhysicsSystem.h"
 #include "input/Input.h"
 #include "component/Transform.h"
-#include "window/Window.h"
+#include "Window.h"
 #include "graphics/Graphics.h"
 #include "camera/MainCamera.h"
 
@@ -61,7 +61,7 @@ namespace nc::physics
 
     IClickable* PhysicsSystem::RaycastToClickables_(LayerMask mask)
     {
-        auto windowDimensions = Window::Instance->GetWindowDimensions();
+        auto windowDimensions = Window::GetDimensions();
         auto viewMatrix = camera::MainCamera::GetTransform()->CamGetMatrix();
         auto projectionMatrix = m_graphics->GetProjection();
         auto worldMatrix = DirectX::XMMatrixIdentity();

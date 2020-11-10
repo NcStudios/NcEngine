@@ -14,7 +14,8 @@
 #include "scenes/InitialScene.h"
 #include "time/NcTime.h"
 #include "ui/UISystem.h"
-#include "window/Window.h"
+#include "Window.h"
+#include "window/WindowImpl.h"
 
 #include <iostream>
 
@@ -26,9 +27,9 @@ EngineImpl::EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine)
     m_config.Load();
     m_frameDeltaTimeFactor = 1.0f;
     m_logger = std::make_unique<log::Logger>(m_config.project.logFilePath);
-    m_window = std::make_unique<Window>(hInstance, topLevelEngine, m_config);
+    m_window = std::make_unique<window::WindowImpl>(hInstance, topLevelEngine, m_config);
     m_transform = std::make_unique<ecs::TransformSystem>();
-    auto dim = m_window->GetWindowDimensions();
+    auto dim = m_window->GetDimensions();
     auto hwnd = m_window->GetHWND();
     m_rendering = std::make_unique<ecs::RenderingSystem>
     (
@@ -49,6 +50,7 @@ EngineImpl::EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine)
 
     m_window->BindGraphics(m_rendering->GetGraphics());
     m_window->BindUISystem(m_uiSystem.get());
+    Window::RegisterImpl(m_window.get());
     ECS::RegisterImpl(m_ecs.get());
 
     V_LOG("Engine initialized");

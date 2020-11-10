@@ -5,7 +5,7 @@
 #include "TurnPhaseUIElement.h"
 #include "UIStyle.h"
 #include "project/source/log/GameLog.h"
-#include "NcWindow.h"
+#include "Window.h"
 
 #include <MMSystem.h>
 
@@ -53,7 +53,7 @@ namespace project::ui
 
     void UI::DrawHUD()
     {
-        auto dim = nc::NcGetWindowDimensions();
+        auto dim = nc::Window::GetDimensions();
         ImGui::SetNextWindowPos({0, (float)dim.Y() - HUD_HEIGHT});
         ImGui::SetNextWindowSize({(float)dim.X(), HUD_HEIGHT});
 

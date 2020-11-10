@@ -21,7 +21,7 @@ namespace nc
     namespace scene { class SceneManager; }
     namespace time { class Timer; }
     namespace ui { class UISystem; }
-    class Window;
+    namespace window { class WindowImpl; }
 }
 
 namespace nc::engine
@@ -48,7 +48,7 @@ class EngineImpl
         config::Config m_config;
         float m_frameDeltaTimeFactor;
         std::unique_ptr<log::Logger> m_logger;
-        std::unique_ptr<Window> m_window;
+        std::unique_ptr<window::WindowImpl> m_window;
         std::unique_ptr<ecs::TransformSystem> m_transform;
         std::unique_ptr<ecs::RenderingSystem> m_rendering;
         std::unique_ptr<ecs::LightSystem> m_light;
