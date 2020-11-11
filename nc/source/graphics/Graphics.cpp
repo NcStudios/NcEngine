@@ -127,7 +127,7 @@ void Graphics::CreateDeviceAndSwapchain(HWND hwnd)
         DXGI_FORMAT_B8G8R8A8_UNORM,            //Format
         DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,  //ScanlineOrdering
         DXGI_MODE_SCALING_UNSPECIFIED },       //Scaling
-        { 1, 0 },                              //struct SampleDesc {Count,Quality}
+        { 4, 0 },                              //struct SampleDesc {Count,Quality}
         DXGI_USAGE_RENDER_TARGET_OUTPUT, 2,    //BufferUsage, BufferCount
         hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD,  //OutputWindow, Windowed, SwapEffect,
         DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH //Flags (Allows full-screen mode)
@@ -154,7 +154,7 @@ void Graphics::CreateRasterizerState()
         0.0f,             //SlopeScaledDepthBias
         TRUE,             //DepthClipEnable
         FALSE,            //ScissorEnable
-        FALSE,            //MultisampleEnable
+        TRUE,            //MultisampleEnable
         FALSE             //AntialiasedLineEnable
     };
     m_device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
@@ -191,7 +191,7 @@ void Graphics::CreateDepthStencilView(float width, float height)
         (unsigned int)height,     //Height
         1u, 1u,                   //MipLevels, ArraySize
         DXGI_FORMAT_D32_FLOAT,    //Format
-        { 1u, 0u },               //SampleDesc {Count, Quality}
+        { 4u, 0u },               //SampleDesc {Count, Quality}
         D3D11_USAGE_DEFAULT,      //Usage
         D3D11_BIND_DEPTH_STENCIL, //BindFlags
         0u, 0u                    //CPUFlags, MiscFlags
@@ -201,7 +201,7 @@ void Graphics::CreateDepthStencilView(float width, float height)
     //create depth stencil texture view
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
     dsvDesc.Format                        = DXGI_FORMAT_D32_FLOAT;
-    dsvDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2D;
+    dsvDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2DMS;
     dsvDesc.Texture2D.MipSlice            = 0u;
     THROW_FAILED(m_device->CreateDepthStencilView(depthStencilTexture, &dsvDesc, &m_dsv));
     depthStencilTexture->Release();
