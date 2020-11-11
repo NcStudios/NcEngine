@@ -146,7 +146,11 @@ void EngineImpl::FrameRender()
         renderer.Update(gfx);
     });
 
+    #ifdef NC_EDITOR_ENABLED
     m_uiSystem->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_ecs->GetActiveEntities());
+    #else
+    m_uiSystem->Frame();
+    #endif
     m_uiSystem->FrameEnd();
     m_graphics->FrameEnd();
 }
