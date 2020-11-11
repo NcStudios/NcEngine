@@ -13,6 +13,7 @@ namespace nc::config
 
         void Load() noexcept(false);
         void Save() noexcept(false);
+        bool Validate();
 
         struct
         {
@@ -45,5 +46,6 @@ namespace nc::config
 
         private:
             static Config* m_instance;
+            void MapKeyValue(const std::string& key, const std::string& value);
     };
 }

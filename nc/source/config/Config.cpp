@@ -40,78 +40,6 @@ bool ParseLine(const std::string& line, std::string& key, std::string& value)
     value = line.substr(delimIndex + 1);
     return true;
 }
-
-void MapKeyValueToConfig(const std::string& key, const std::string& value, nc::config::Config& out)
-{
-    if (key == PROJECT_NAME_KEY)
-    {
-        out.project.projectName = value;
-    }
-    else if (key == LOG_FILE_PATH_KEY)
-    {
-        out.project.logFilePath = value;
-    }
-    else if (key == USER_NAME_KEY)
-    {
-        out.user.userName = value;
-    }
-    else if (key == FIXED_UPDATE_INTERVAL_KEY)
-    {
-        out.physics.fixedUpdateInterval = std::stod(value);
-    }
-    else if (key == USE_NATIVE_RESOLUTION_KEY)
-    {
-        out.graphics.useNativeResolution = std::stoi(value);
-    }
-    else if (key == LAUNCH_IN_FULLSCREEN_KEY)
-    {
-        out.graphics.launchInFullscreen = std::stoi(value);
-    }
-    else if (key == SCREEN_WIDTH_KEY)
-    {
-        out.graphics.screenWidth = std::stoi(value);
-    }
-    else if (key == SCREEN_HEIGHT_KEY)
-    {
-        out.graphics.screenHeight = std::stoi(value);
-    }
-    else if (key == TARGET_FPS_KEY)
-    {
-        out.graphics.targetFPS = std::stoi(value);
-        out.graphics.frameUpdateInterval = 1.0 / static_cast<double>(out.graphics.targetFPS);
-    }
-    else if (key == NEAR_CLIP_KEY)
-    {
-        out.graphics.nearClip = std::stod(value);
-    }
-    else if (key == FAR_CLIP_KEY)
-    {
-        out.graphics.farClip = std::stod(value);
-    }
-    else if (key == SHADERS_PATH_KEY)
-    {
-        out.graphics.shadersPath = value;
-    }
-    else
-    {
-        throw std::runtime_error("ConfigReader::map - unknown key");
-    }
-};
-
-bool ValidateConfig(const nc::config::Config& config)
-{
-    return { (config.user.userName != "") &&
-             (config.project.projectName != "") &&
-             (config.project.logFilePath != "") &&
-             (config.physics.fixedUpdateInterval > 0.0f) &&
-             (config.graphics.screenWidth != 0) &&
-             (config.graphics.screenHeight != 0) &&
-             (config.graphics.targetFPS != 0) &&
-             (config.graphics.frameUpdateInterval > 0.0f) &&
-             (config.graphics.nearClip > 0.0f) &&
-             (config.graphics.farClip > 0.0f) &&
-             (config.graphics.shadersPath != "")};
-}
 } //end anonymous namespace
 
 namespace nc::config
@@ -167,13 +95,13 @@ void Config::Load()
         std::getline(inFile, line, '\n');
         if (ParseLine(line, key, value))
         {
-            MapKeyValueToConfig(key, value, *this);
+            MapKeyValue(key, value);
         }
     }
 
     inFile.close();
     
-    if (!ValidateConfig(*this))
+    if (!Validate())
     {
         throw std::runtime_error("Loading config - failed to validate config");
     }
@@ -181,7 +109,7 @@ void Config::Load()
 
 void Config::Save()
 {
-    if (!ValidateConfig(*this))
+    if (!Validate())
     {
         throw std::runtime_error("Saving config - failed to validate config");
     }
@@ -212,4 +140,76 @@ void Config::Save()
 
     outFile.close();
 }
+
+bool Config::Validate()
+{
+    return { (user.userName != "") &&
+             (project.projectName != "") &&
+             (project.logFilePath != "") &&
+             (physics.fixedUpdateInterval > 0.0f) &&
+             (graphics.screenWidth != 0) &&
+             (graphics.screenHeight != 0) &&
+             (graphics.targetFPS != 0) &&
+             (graphics.frameUpdateInterval > 0.0f) &&
+             (graphics.nearClip > 0.0f) &&
+             (graphics.farClip > 0.0f) &&
+             (graphics.shadersPath != "")};
+}
+
+void Config::MapKeyValue(const std::string& key, const std::string& value)
+{
+    if (key == PROJECT_NAME_KEY)
+    {
+        project.projectName = value;
+    }
+    else if (key == LOG_FILE_PATH_KEY)
+    {
+        project.logFilePath = value;
+    }
+    else if (key == USER_NAME_KEY)
+    {
+        user.userName = value;
+    }
+    else if (key == FIXED_UPDATE_INTERVAL_KEY)
+    {
+        physics.fixedUpdateInterval = std::stod(value);
+    }
+    else if (key == USE_NATIVE_RESOLUTION_KEY)
+    {
+        graphics.useNativeResolution = std::stoi(value);
+    }
+    else if (key == LAUNCH_IN_FULLSCREEN_KEY)
+    {
+        graphics.launchInFullscreen = std::stoi(value);
+    }
+    else if (key == SCREEN_WIDTH_KEY)
+    {
+        graphics.screenWidth = std::stoi(value);
+    }
+    else if (key == SCREEN_HEIGHT_KEY)
+    {
+        graphics.screenHeight = std::stoi(value);
+    }
+    else if (key == TARGET_FPS_KEY)
+    {
+        graphics.targetFPS = std::stoi(value);
+        graphics.frameUpdateInterval = 1.0 / static_cast<double>(graphics.targetFPS);
+    }
+    else if (key == NEAR_CLIP_KEY)
+    {
+        graphics.nearClip = std::stod(value);
+    }
+    else if (key == FAR_CLIP_KEY)
+    {
+        graphics.farClip = std::stod(value);
+    }
+    else if (key == SHADERS_PATH_KEY)
+    {
+        graphics.shadersPath = value;
+    }
+    else
+    {
+        throw std::runtime_error("ConfigReader::map - unknown key");
+    }
+};
 } // end namespace nc::config 
