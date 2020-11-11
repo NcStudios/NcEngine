@@ -1,7 +1,7 @@
 #pragma once
 
-#include "directx/math/DirectXMath.h"
-#include <d3d11.h>
+#include "ResourceGroup.h"
+
 #include <string>
 #include <vector>
 
@@ -13,28 +13,6 @@ namespace nc::graphics
         class GraphicsResource;
         class IndexBuffer;
     }
-}
-
-namespace nc::graphics
-{
-    struct Vertex
-    {
-        DirectX::XMFLOAT3 pos;
-        DirectX::XMFLOAT3 normal;
-        DirectX::XMFLOAT2 uvs;
-        DirectX::XMFLOAT3 tangent;
-        DirectX::XMFLOAT3 bitangent;
-    };
-
-    struct MeshData
-    {
-        std::string                           Name;
-        std::string                           MeshPath;
-        D3D_PRIMITIVE_TOPOLOGY                PrimitiveTopology;
-        std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDesc;
-        std::vector<Vertex>                   Vertices;
-        std::vector<uint16_t>                 Indices;
-    };
 
     class Mesh : public ResourceGroup
     {
@@ -46,9 +24,8 @@ namespace nc::graphics
             Mesh& operator=(Mesh&& other) = default;
             Mesh& operator=(const Mesh& other) = default;
             ~Mesh() = default;
-            MeshData ParseMesh(std::string meshPath);
-
+        
         private:
-            void InitializeGraphicsPipeline(MeshData meshData);
+            void AddBufferResources(std::string meshPath);
     };
 }

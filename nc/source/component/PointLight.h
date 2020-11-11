@@ -8,7 +8,7 @@ namespace nc::graphics { class Graphics; }
 
 namespace nc
 {
-    //class Transform;
+    class Transform;
 
     class PointLight : public Component
     {

@@ -18,6 +18,10 @@ Entity::Entity(Entity&& other)
 {
 }
 
+Entity::~Entity()
+{
+}
+
 Entity& Entity::operator=(Entity&& other)
 {
     Handle = std::exchange(other.Handle, NullHandle);

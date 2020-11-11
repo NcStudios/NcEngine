@@ -1,10 +1,11 @@
 #pragma once
 
+#include "component/Component.h"
+#include "component/EngineComponentGroup.h"
+
 #include <vector>
 #include <memory>
 #include <string>
-#include "component/Component.h"
-#include "component/EngineComponentGroup.h"
 
 namespace nc
 {
@@ -18,7 +19,7 @@ namespace nc
             Entity& operator=(const Entity&) = delete;
             Entity(Entity&& other);
             Entity& operator=(Entity&& other);
-            ~Entity() = default;
+            ~Entity();
 
             mutable EntityHandle Handle;
             mutable std::string Tag;

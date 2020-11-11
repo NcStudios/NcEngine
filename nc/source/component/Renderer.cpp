@@ -29,6 +29,10 @@ namespace nc
         m_model = std::move(other.m_model);
     }
 
+    Renderer::~Renderer()
+    {
+    }
+
     Renderer& Renderer::operator=(Renderer&& other)
     {
         m_handle = other.GetHandle();

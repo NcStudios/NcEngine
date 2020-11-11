@@ -6,7 +6,13 @@
 
 #include <memory>
 
-namespace nc::graphics { class Model; class Mesh; class Material; class Graphics; class PBRMaterial;}
+namespace nc::graphics
+{
+    class Graphics;
+    class Material;
+    class Mesh;
+    class Model;
+    class PBRMaterial;}
 
 namespace nc
 {
@@ -21,7 +27,7 @@ namespace nc
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&);
-            ~Renderer() = default;
+            ~Renderer();
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;

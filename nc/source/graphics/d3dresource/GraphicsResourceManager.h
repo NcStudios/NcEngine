@@ -35,6 +35,12 @@ namespace nc::graphics::d3dresource
                 return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
 
+            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            static bool Exists(Params&&...p)
+            {
+                return Get().Exists_<T>(std::forward<Params>(p)...);
+            }
+
             static uint32_t AssignId()
             {
                 return Get().m_resourceId++;
@@ -68,6 +74,18 @@ namespace nc::graphics::d3dresource
                     return res;
                 }
                 return i->second;
+            }
+
+            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            bool Exists_(Params&&...p)
+            {
+                const auto key = T::GetUID(std::forward<Params>(p)...);
+                const auto i = m_resources.find(key);
+                if(i == m_resources.end())
+                {
+                    return false;
+                }
+                return true;
             }
 
             void DisplayResources_(bool* open)

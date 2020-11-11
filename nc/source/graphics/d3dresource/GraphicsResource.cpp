@@ -1,5 +1,6 @@
 #include "GraphicsResource.h"
 #include "graphics/Graphics.h"
+#include "graphics/Model.h"
 #include "graphics/WICTextureLoader.h"
 #include "directx/math/DirectXMath.h"
 #include "component/Transform.h"
@@ -248,7 +249,7 @@ namespace nc::graphics::d3dresource
 
 
 
-    Topology::Topology( D3D11_PRIMITIVE_TOPOLOGY type)
+    Topology::Topology(D3D11_PRIMITIVE_TOPOLOGY type)
         : m_type(type)
     {
     }
