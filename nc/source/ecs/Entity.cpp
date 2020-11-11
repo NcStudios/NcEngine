@@ -1,8 +1,7 @@
 #include "Entity.h"
-#include "NcCommon.h"
 
-namespace nc{
-
+namespace nc
+{
 Entity::Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag) noexcept
     : Handle{ handle }, 
       Tag{ tag },
@@ -80,6 +79,5 @@ void Entity::SendOnCollisionExit() noexcept
         comp->OnCollisionExit();
     }
 }
-
 } //end namespace nc
 

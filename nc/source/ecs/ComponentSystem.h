@@ -11,14 +11,14 @@
 
 namespace nc::engine
 {
+    struct ComponentIndexPair
+    {
+        uint32_t indexInPoolCollection;
+        uint32_t indexInPool;
+    };
+}
 
-struct ComponentIndexPair
-{
-    uint32_t indexInPoolCollection;
-    uint32_t indexInPool;
-};
-
-namespace system
+namespace nc::ecs
 {
 
 template<class T>
@@ -40,19 +40,19 @@ class ComponentSystem
         T * GetPointerTo(const ComponentHandle handle);
 
         template<class Func>
-        void ForEach(Func func);        
+        void ForEach(Func func);
 
         void Clear();
 
     protected:
-        ComponentIndexPair GetIndexPairFromHandle(const ComponentHandle handle) const;
-        void MapHandleToIndexPair(const ComponentHandle handle, const ComponentIndexPair targetIndex);
-        ComponentIndexPair AllocateNew(T ** newItemOut);
+        engine::ComponentIndexPair GetIndexPairFromHandle(const ComponentHandle handle) const;
+        void MapHandleToIndexPair(const ComponentHandle handle, const engine::ComponentIndexPair targetIndex);
+        engine::ComponentIndexPair AllocateNew(T ** newItemOut);
 
     private:
         uint32_t m_poolSize;
-        std::vector<alloc::PoolArray<T>> m_poolArrays;
-        std::unordered_map<ComponentHandle, ComponentIndexPair> m_indexMap;
+        std::vector<engine::alloc::PoolArray<T>> m_poolArrays;
+        std::unordered_map<ComponentHandle, engine::ComponentIndexPair> m_indexMap;
         HandleManager<ComponentHandle> m_handleManager;      
 };
 
@@ -61,7 +61,7 @@ ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize)
     : m_poolSize{ reserveSize },
         m_poolArrays {}
 {
-    m_poolArrays.emplace_back(alloc::PoolArray<T>(m_poolSize));
+    m_poolArrays.emplace_back(engine::alloc::PoolArray<T>(m_poolSize));
 }
 
 template<class T>
@@ -69,7 +69,7 @@ void ComponentSystem<T>::Clear()
 {
     m_poolArrays.clear();
     m_poolArrays.shrink_to_fit();
-    m_poolArrays.emplace_back(alloc::PoolArray<T>(m_poolSize));
+    m_poolArrays.emplace_back(engine::alloc::PoolArray<T>(m_poolSize));
     m_indexMap.clear();
     m_handleManager.Reset();
 }
@@ -85,7 +85,7 @@ void ComponentSystem<T>::ForEach(Func func)
 }
 
 template<class T>
-ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
+engine::ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
 {
     for(uint32_t i = 0; i < m_poolArrays.size(); ++i)
     {
@@ -96,7 +96,7 @@ ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
         }
     }
 
-    m_poolArrays.push_back(alloc::PoolArray<T>(m_poolSize));
+    m_poolArrays.push_back(engine::alloc::PoolArray<T>(m_poolSize));
     uint32_t poolIndex = m_poolArrays.size() - 1;
     uint32_t freePos = m_poolArrays.back().Alloc(newItemOut);
     return { poolIndex, freePos };
@@ -151,7 +151,7 @@ T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
         return nullptr;
     }
 
-    ComponentIndexPair pair = GetIndexPairFromHandle(handle);
+    engine::ComponentIndexPair pair = GetIndexPairFromHandle(handle);
     return m_poolArrays[pair.indexInPoolCollection].GetPtrTo(pair.indexInPool);
 }
 
@@ -162,7 +162,7 @@ ComponentHandle ComponentSystem<T>::GetCurrentHandle()
 }
 
 template<class T>
-ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(const ComponentHandle handle) const
+engine::ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(const ComponentHandle handle) const
 {
     if (!Contains(handle))
     {
@@ -172,13 +172,11 @@ ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(const ComponentHan
 }
 
 template<class T>
-void ComponentSystem<T>::MapHandleToIndexPair(const ComponentHandle handle, const ComponentIndexPair pair)
+void ComponentSystem<T>::MapHandleToIndexPair(const ComponentHandle handle, const engine::ComponentIndexPair pair)
 {
     if (!Contains(handle))
     {
         m_indexMap.emplace(handle, pair);
     }
 }
-
-} //end namespace system 
-} //end namespace nc::engine
+} // end namespace nc::ecs

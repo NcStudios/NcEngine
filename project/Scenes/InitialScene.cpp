@@ -1,4 +1,5 @@
 #include "InitialScene.h"
+#include "Ecs.h"
 #include "NcCamera.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
@@ -18,28 +19,28 @@ void InitialScene::Load()
     prefab::InitializeResources();
 
     // Light
-    auto lvHandle = NcCreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
-    NcAddEngineComponent<PointLight>(lvHandle);
+    auto lvHandle = Ecs::CreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+    Ecs::AddComponent<PointLight>(lvHandle);
 
     //CamController
-    auto camHandle = NcCreateEntity({0.0f, 5.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
-    auto camComponentPtr = NcAddUserComponent<Camera>(camHandle);
-    NcRegisterMainCamera(camComponentPtr);
-    NcAddUserComponent<CamController>(camHandle);
-    NcAddUserComponent<ClickHandler>(camHandle);
+    auto camHandle = Ecs::CreateEntity({0.0f, 5.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
+    auto camComponentPtr = Ecs::AddComponent<Camera>(camHandle);
+    camera::NcRegisterMainCamera(camComponentPtr);
+    Ecs::AddComponent<CamController>(camHandle);
+    Ecs::AddComponent<ClickHandler>(camHandle);
     
     // Debug Controller
-    auto debugHandle = NcCreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Debug Controller");
-    NcAddUserComponent<SceneReset>(debugHandle);
-    NcAddUserComponent<Timer>(debugHandle);
+    auto debugHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Debug Controller");
+    Ecs::AddComponent<SceneReset>(debugHandle);
+    Ecs::AddComponent<Timer>(debugHandle);
 
     const auto scaleFactor = 2;
 
     // Table
     auto tableMaterial = graphics::PBRMaterial{{"project//Textures//DiningRoomTable_Material_BaseColor.png", "project//Textures//DiningRoomTable_Material_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto tableHandle = NcCreateEntity({2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, {1.5708f, 0.0f, 1.5708f}, Vector3::One() * 7.5, "Table Piece");
+    auto tableHandle = Ecs::CreateEntity({2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, {1.5708f, 0.0f, 1.5708f}, Vector3::One() * 7.5, "Table Piece");
     auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
-    NcAddEngineComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
+    Ecs::AddComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
 
     // Pieces
     prefab::Create<prefab::Boar>({0.2f * scaleFactor, 0.0f, 0.2f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Boar Piece");
@@ -62,75 +63,75 @@ void InitialScene::Load()
 
     // Stable Piece 1
     auto stableMaterial1 = graphics::PBRMaterial{{"project//Textures//PlayerRed.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto stableHandle1 = NcCreateEntity({0.2f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
+    auto stableHandle1 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     auto stableMesh = graphics::Mesh{"project//Models//StablePiece.fbx"};
-    NcAddEngineComponent<Renderer>(stableHandle1, stableMesh, stableMaterial1);
+    Ecs::AddComponent<Renderer>(stableHandle1, stableMesh, stableMaterial1);
 
     // Stable Piece 2
     auto stableMaterial2 = graphics::PBRMaterial{{"project//Textures//PlayerOrange.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto stableHandle2 = NcCreateEntity({0.4f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
-    NcAddEngineComponent<Renderer>(stableHandle2, stableMesh, stableMaterial2);
+    auto stableHandle2 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
+    Ecs::AddComponent<Renderer>(stableHandle2, stableMesh, stableMaterial2);
 
     // Stable Piece 3
     auto stableMaterial3 = graphics::PBRMaterial{{"project//Textures//PlayerYellow.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto stableHandle3 = NcCreateEntity({0.6f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
-    NcAddEngineComponent<Renderer>(stableHandle3, stableMesh, stableMaterial3);
+    auto stableHandle3 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
+    Ecs::AddComponent<Renderer>(stableHandle3, stableMesh, stableMaterial3);
 
     // Stable Piece 4
     auto stableMaterial4 = graphics::PBRMaterial{{"project//Textures//PlayerGreen.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto stableHandle4 = NcCreateEntity({0.8f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
-    NcAddEngineComponent<Renderer>(stableHandle4, stableMesh, stableMaterial4);
+    auto stableHandle4 = Ecs::CreateEntity({0.8f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
+    Ecs::AddComponent<Renderer>(stableHandle4, stableMesh, stableMaterial4);
 
     // Stable Piece 5
     auto stableMaterial5 = graphics::PBRMaterial{{"project//Textures//PlayerTeal.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto stableHandle5 = NcCreateEntity({1.0f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
-    NcAddEngineComponent<Renderer>(stableHandle5, stableMesh, stableMaterial5);
+    auto stableHandle5 = Ecs::CreateEntity({1.0f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
+    Ecs::AddComponent<Renderer>(stableHandle5, stableMesh, stableMaterial5);
 
     // Stable Piece 6
     auto stableMaterial6 = graphics::PBRMaterial{{"project//Textures//PlayerBlue.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto stableHandle6 = NcCreateEntity({0.2f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
-    NcAddEngineComponent<Renderer>(stableHandle6, stableMesh, stableMaterial6);
+    auto stableHandle6 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
+    Ecs::AddComponent<Renderer>(stableHandle6, stableMesh, stableMaterial6);
 
     // Stable Piece 7
     auto stableMaterial7 = graphics::PBRMaterial{{"project//Textures//PlayerPurple.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto stableHandle7 = NcCreateEntity({0.4f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
-    NcAddEngineComponent<Renderer>(stableHandle7, stableMesh, stableMaterial7);
+    auto stableHandle7 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
+    Ecs::AddComponent<Renderer>(stableHandle7, stableMesh, stableMaterial7);
 
     // Dwarf Disc Piece 1
     auto dwarfDiscMaterial1 = graphics::PBRMaterial{{"project//Textures//PlayerRed.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto dwarfDiscHandle1 = NcCreateEntity({0.6f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 1");
+    auto dwarfDiscHandle1 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 1");
     auto dwarfDiscMesh = graphics::Mesh{"project//Models//Disc.fbx"};
-    NcAddEngineComponent<Renderer>(dwarfDiscHandle1, dwarfDiscMesh, dwarfDiscMaterial1);
+    Ecs::AddComponent<Renderer>(dwarfDiscHandle1, dwarfDiscMesh, dwarfDiscMaterial1);
 
     // DwarfDisc Piece 2
     auto dwarfDiscMaterial2 = graphics::PBRMaterial{{"project//Textures//PlayerOrange.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto dwarfDiscHandle2 = NcCreateEntity({0.8f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 2");
-    NcAddEngineComponent<Renderer>(dwarfDiscHandle2, dwarfDiscMesh, dwarfDiscMaterial2);
+    auto dwarfDiscHandle2 = Ecs::CreateEntity({0.8f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 2");
+    Ecs::AddComponent<Renderer>(dwarfDiscHandle2, dwarfDiscMesh, dwarfDiscMaterial2);
 
     // DwarfDisc Piece 3
     auto dwarfDiscMaterial3 = graphics::PBRMaterial{{"project//Textures//PlayerYellow.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto dwarfDiscHandle3 = NcCreateEntity({1.0f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 3");
-    NcAddEngineComponent<Renderer>(dwarfDiscHandle3, dwarfDiscMesh, dwarfDiscMaterial3);
+    auto dwarfDiscHandle3 = Ecs::CreateEntity({1.0f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 3");
+    Ecs::AddComponent<Renderer>(dwarfDiscHandle3, dwarfDiscMesh, dwarfDiscMaterial3);
 
     // DwarfDisc Piece 4
     auto dwarfDiscMaterial4 = graphics::PBRMaterial{{"project//Textures//PlayerGreen.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto dwarfDiscHandle4 = NcCreateEntity({0.0f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 4");
-    NcAddEngineComponent<Renderer>(dwarfDiscHandle4, dwarfDiscMesh, dwarfDiscMaterial4);
+    auto dwarfDiscHandle4 = Ecs::CreateEntity({0.0f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 4");
+    Ecs::AddComponent<Renderer>(dwarfDiscHandle4, dwarfDiscMesh, dwarfDiscMaterial4);
 
     // DwarfDisc Piece 5
     auto dwarfDiscMaterial5 = graphics::PBRMaterial{{"project//Textures//PlayerTeal.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto dwarfDiscHandle5 = NcCreateEntity({0.2f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 5");
-    NcAddEngineComponent<Renderer>(dwarfDiscHandle5, dwarfDiscMesh, dwarfDiscMaterial5);
+    auto dwarfDiscHandle5 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 5");
+    Ecs::AddComponent<Renderer>(dwarfDiscHandle5, dwarfDiscMesh, dwarfDiscMaterial5);
 
     // DwarfDisc Piece 6
     auto dwarfDiscMaterial6 = graphics::PBRMaterial{{"project//Textures//PlayerBlue.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto dwarfDiscHandle6 = NcCreateEntity({0.4f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 6");
-    NcAddEngineComponent<Renderer>(dwarfDiscHandle6, dwarfDiscMesh, dwarfDiscMaterial6);
+    auto dwarfDiscHandle6 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 6");
+    Ecs::AddComponent<Renderer>(dwarfDiscHandle6, dwarfDiscMesh, dwarfDiscMaterial6);
 
     // DwarfDisc Piece 7
     auto dwarfDiscMaterial7 = graphics::PBRMaterial{{"project//Textures//PlayerPurple.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto dwarfDiscHandle7 = NcCreateEntity({0.6f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 7");
-    NcAddEngineComponent<Renderer>(dwarfDiscHandle7, dwarfDiscMesh, dwarfDiscMaterial7);
+    auto dwarfDiscHandle7 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 7");
+    Ecs::AddComponent<Renderer>(dwarfDiscHandle7, dwarfDiscMesh, dwarfDiscMaterial7);
 
     // Player Board
     prefab::Create<prefab::PlayerBoard>({3.2f * scaleFactor, 0.0f, 0.3f * scaleFactor}, {1.5708f, 1.5708f, 0.0f}, Vector3::One() * scaleFactor * 0.1f, "PLayerBoard Piece");

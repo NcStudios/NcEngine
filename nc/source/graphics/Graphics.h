@@ -35,9 +35,9 @@ namespace nc
                 void OnResize(float width, float height, float nearZ, float farZ);
                 void ToggleFullscreen();
                 
-                void StartFrame();
+                void FrameBegin();
                 void DrawIndexed(UINT count);
-                void EndFrame();
+                void FrameEnd();
 
                 #ifdef NC_EDITOR_ENABLED
                 uint32_t GetDrawCallCount() const;

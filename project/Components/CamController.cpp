@@ -2,7 +2,7 @@
 #include "NcCamera.h"
 #include "input/Input.h"
 #include "NcUI.h"
-#include "NcScreen.h"
+#include "Window.h"
 
 using namespace nc;
 
@@ -22,7 +22,7 @@ void CamController::FrameUpdate(float dt)
 {
     if (!m_mainCameraTransform)
     {
-        m_mainCameraTransform = NcGetMainCameraTransform();
+        m_mainCameraTransform = camera::NcGetMainCameraTransform();
     }
 
     if (ui::NcIsUIHovered())
@@ -43,7 +43,7 @@ Vector3 CamController::GetCameraPanMovement()
 {
     auto xPan = 0.0f;
     auto zPan = 0.0f;
-    auto dim = nc::NcGetScreenDimensions();
+    auto dim = nc::Window::GetDimensions();
 
     if(input::MouseX < EDGE_PAN_WIDTH)
     {

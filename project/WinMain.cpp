@@ -1,11 +1,11 @@
 #include "win32/NcWin32.h"
 #include "config/Config.h"
 #include "NcDebug.h"
-#include "NcEngine.h"
 #include "NcLog.h"
 #include "NcUI.h"
 #include "project/source/ui/UI.h"
 #include "project/source/log/GameLog.h"
+#include "engine/Engine.h"
 
 #include <iostream>
 
@@ -15,32 +15,37 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     (void)commandLine;
     (void)showCommand;
 
+    std::unique_ptr<nc::engine::Engine> engine = nullptr;
+
     try
     {
-        nc::engine::NcInitializeEngine(instance);
+        engine = std::make_unique<nc::engine::Engine>(instance);
         project::log::GameLog gameLog;
-        nc::log::NcRegisterGameLog(&gameLog);
         project::ui::UI projectUI(&gameLog);
         nc::ui::NcRegisterUI(&projectUI);
-        nc::engine::NcStartEngine();
+        engine->Start();
     }
     catch(const std::runtime_error& e)
     {
         std::cerr << "Fatal error:\n" << e.what();
         nc::log::NcLogToDiagnostics(e.what());
-        nc::engine::NcShutdownEngine(true);
+        if(engine)
+            engine->Shutdown(true);
     }
     catch(std::exception& e)
     {
         std::cerr << "Exception: \n" << e.what();
         nc::log::NcLogToDiagnostics(e.what());
-        nc::engine::NcShutdownEngine(true);
+        if(engine)
+            engine->Shutdown(true);
+
     }
     catch(...)
     {
         std::cerr << "WinMain.cpp - unkown exception caught\n";
         nc::log::NcLogToDiagnostics("WinMain.cpp - unkown exception");
-        nc::engine::NcShutdownEngine(true);
+        if(engine)
+            engine->Shutdown(true);
     }
 
     std::cout << "WinMain - Exiting\n";

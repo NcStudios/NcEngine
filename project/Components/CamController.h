@@ -1,5 +1,5 @@
 #pragma once
-#include "NcCommon.h"
+#include "component/Transform.h"
 #include "NcConfig.h"
 #include "math/Vector2.h"
 

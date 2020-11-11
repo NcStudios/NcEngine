@@ -1,16 +1,15 @@
-target_sources(${EXE_NAME} 
-    PRIVATE
-        ${ROOT_DIR}/nc/source/entity/Entity.cpp
-)
-
+add_subdirectory(api_implementation)
+add_subdirectory(camera)
 add_subdirectory(component)
 add_subdirectory(config)
+add_subdirectory(ecs)
 add_subdirectory(engine)
 add_subdirectory(graphics)
 add_subdirectory(input)
 add_subdirectory(log)
 add_subdirectory(math)
 add_subdirectory(physics)
+add_subdirectory(scene)
 add_subdirectory(time)
 add_subdirectory(ui)
-add_subdirectory(win32)
+add_subdirectory(window)

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nc::engine::system
+namespace nc::ecs
 {
 template<class T>
 class HandleManager

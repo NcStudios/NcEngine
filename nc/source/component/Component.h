@@ -42,4 +42,7 @@ namespace nc
 #endif
     };
 
+    class EngineComponent : public Component {};
+    class UserComponent : public Component {};
+
 } //end namespace nc

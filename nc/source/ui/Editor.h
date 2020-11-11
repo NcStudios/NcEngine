@@ -1,7 +1,7 @@
 #ifdef NC_EDITOR_ENABLED
 #pragma once
 
-#include "entity/Entity.h"
+#include "ecs/Entity.h"
 
 #include <optional>
 #include <unordered_map>

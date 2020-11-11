@@ -1,10 +1,11 @@
 #pragma once
-#include <unordered_map>
 
-#include "NcCommon.h"
 #include "win32/NCWinDef.h"
 #include "IUI.h"
 #include "Editor.h"
+#include "ecs/Entity.h"
+
+#include <unordered_map>
 
 namespace nc
 {
@@ -20,14 +21,22 @@ namespace nc
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-                void BindProjectUI(IUI* ui);
-                bool IsProjectUIHovered() const;
+                static void BindProjectUI(IUI* ui);
+                static bool IsProjectUIHovered();
 
                 void FrameBegin();
+
+                #ifdef NC_EDITOR_ENABLED
                 void Frame(float* dt, float frameLogicTime, std::unordered_map<nc::EntityHandle, nc::Entity>& activeEntities);
+                #else
+                void Frame();
+                #endif
+                
                 void FrameEnd();
 
             private:
+                static UISystem* m_instance;
+
                 #ifdef NC_EDITOR_ENABLED
                 Editor m_editor;
                 #endif

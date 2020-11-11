@@ -1,6 +1,8 @@
 #pragma once
-#include "NcCommon.h"
+#include "component/Component.h"
 #include "NcPhysics.h"
+
+#include <string>
 
 namespace project
 {
