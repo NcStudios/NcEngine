@@ -9,7 +9,6 @@
 namespace nc::graphics
 {
     class Graphics;
-    class Material;
     class Mesh;
     class Model;
     class PBRMaterial;}
