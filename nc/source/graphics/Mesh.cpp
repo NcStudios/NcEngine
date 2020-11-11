@@ -64,7 +64,7 @@ namespace nc::graphics
 
         // Load vertex and normal data
         meshData.Vertices.reserve(pMesh -> mNumVertices);
-        for (unsigned int i = 0; i < pMesh->mNumVertices; i++)
+        for (size_t i = 0; i < pMesh->mNumVertices; i++)
         {
             meshData.Vertices.push_back( {
                 *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mVertices[i]),
@@ -76,9 +76,8 @@ namespace nc::graphics
         }
 
         // Load index data
-        std::vector<unsigned short> indices;
         meshData.Indices.reserve(pMesh -> mNumFaces * 3); // Multiply by 3 because we told assimp to triangulate (aiProcess_Triangulate). Each face has 3 indices
-        for (unsigned int i = 0; i < pMesh->mNumFaces; i++)
+        for (size_t i = 0; i < pMesh->mNumFaces; i++)
         {
             const auto& face = pMesh->mFaces[i];
             assert(face.mNumIndices == 3);
