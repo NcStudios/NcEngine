@@ -25,7 +25,13 @@ namespace nc
                 static bool IsProjectUIHovered();
 
                 void FrameBegin();
+
+                #ifdef NC_EDITOR_ENABLED
                 void Frame(float* dt, float frameLogicTime, std::unordered_map<nc::EntityHandle, nc::Entity>& activeEntities);
+                #else
+                void Frame();
+                #endif
+                
                 void FrameEnd();
 
             private:

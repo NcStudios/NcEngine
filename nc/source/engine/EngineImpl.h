@@ -40,7 +40,7 @@ class EngineImpl
         void ClearState();
         void DoSceneSwap();
         void FrameLogic(float dt);
-        void FrameRender(float dt);
+        void FrameRender();
         void FrameCleanup();
 
     private:
@@ -49,9 +49,7 @@ class EngineImpl
         float m_frameDeltaTimeFactor;
         std::unique_ptr<log::Logger> m_logger;
         std::unique_ptr<window::WindowImpl> m_window;
-        std::unique_ptr<ecs::TransformSystem> m_transform;
-        std::unique_ptr<ecs::RenderingSystem> m_rendering;
-        std::unique_ptr<ecs::LightSystem> m_light;
+        std::unique_ptr<graphics::Graphics> m_graphics;
         std::unique_ptr<physics::PhysicsSystem> m_physics;
         std::unique_ptr<ecs::ECSImpl> m_ecs;
         std::unique_ptr<ui::UISystem> m_uiSystem;

@@ -1,18 +1,30 @@
 #include "ECSImpl.h"
 #include "ECS.h"
-#include "LightSystem.h"
-#include "RenderingSystem.h"
-#include "TransformSystem.h"
 
 namespace nc::ecs
 {
-ECSImpl::ECSImpl(LightSystem* light, RenderingSystem* rend, TransformSystem* trans)
+ECSImpl::ECSImpl()
     : m_active{},
       m_toDestroy{},
-      m_lightSystem{ light },
-      m_renderingSystem{ rend },
-      m_transformSystem{ trans }
+      m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>() },
+      m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>() },
+      m_transformSystem{ std::make_unique<ComponentSystem<Transform>>() }
 {
+}
+
+template<> ComponentSystem<PointLight>* ECSImpl::GetSystem<PointLight>()
+{
+    return m_lightSystem.get();
+}
+
+template<> ComponentSystem<Renderer>* ECSImpl::GetSystem<Renderer>()
+{
+    return m_rendererSystem.get();
+}
+
+template<> ComponentSystem<Transform>* ECSImpl::GetSystem<Transform>()
+{
+    return m_transformSystem.get();
 }
 
 void ECSImpl::SendFrameUpdate(float dt)
@@ -44,7 +56,7 @@ void ECSImpl::SendOnDestroy()
         pair.second.SendOnDestroy();
         const auto& handles = entityPtr->Handles;
         m_transformSystem->Remove(handles.transform);
-        m_renderingSystem->Remove(handles.renderer);
+        m_rendererSystem->Remove(handles.renderer);
         m_lightSystem->Remove(handles.pointLight);
     }
     m_toDestroy.clear();
@@ -94,7 +106,7 @@ void ECSImpl::ClearState()
     m_toDestroy.clear();
     m_handleManager.Reset();
     m_transformSystem->Clear();
-    m_renderingSystem->Clear();
+    m_rendererSystem->Clear();
     m_lightSystem->Clear();
 }
 } // end namespace nc::ecs

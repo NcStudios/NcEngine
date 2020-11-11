@@ -56,6 +56,7 @@ namespace nc::ui
         ImGui::NewFrame();
     }
 
+    #ifdef NC_EDITOR_ENABLED
     void UISystem::Frame(float* dt, float frameLogicTime, std::unordered_map<::nc::EntityHandle, ::nc::Entity>& activeEntities)
     {
         m_editor.Frame(dt, frameLogicTime, activeEntities);
@@ -64,6 +65,15 @@ namespace nc::ui
             m_projectUI->Draw();
         }
     }
+    #else
+    void UISystem::Frame()
+    {
+        if(m_projectUI)
+        {
+            m_projectUI->Draw();
+        }
+    }
+    #endif
 
     void UISystem::FrameEnd()
     {

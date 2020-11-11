@@ -17,6 +17,7 @@ namespace nc::camera
             static Transform* GetTransform();
             static void Register(Camera* camera);
 
+            Transform* GetTransform_();
             void ClearTransform();
 
         private:

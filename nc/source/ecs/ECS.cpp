@@ -1,8 +1,5 @@
 #include "ECS.h"
 #include "ecs/ECSImpl.h"
-#include "ecs/LightSystem.h"
-#include "ecs/RenderingSystem.h"
-#include "ecs/TransformSystem.h"
 #include "component/Renderer.h"
 #include "component/PointLight.h"
 
@@ -79,11 +76,11 @@ template<> Renderer* ECS::AddComponent<Renderer>(EntityHandle handle, graphics::
     IF_THROW(!entity, "Bad handle");
 
     auto impl = ECS::m_impl;
-    IF_THROW(impl->m_renderingSystem->Contains(entity->Handles.renderer), "Adding renderer - entity already has a renderer");
+    IF_THROW(impl->m_rendererSystem->Contains(entity->Handles.renderer), "Adding renderer - entity already has a renderer");
 
-    auto rendererHandle = impl->m_renderingSystem->Add(handle, mesh, material);
+    auto rendererHandle = impl->m_rendererSystem->Add(handle, mesh, material);
     entity->Handles.renderer = rendererHandle;
-    return impl->m_renderingSystem->GetPointerTo(rendererHandle);
+    return impl->m_rendererSystem->GetPointerTo(rendererHandle);
 }
 
 template<> bool ECS::RemoveComponent<PointLight>(EntityHandle handle)
@@ -97,7 +94,7 @@ template<> bool ECS::RemoveComponent<Renderer>(EntityHandle handle)
 {
     auto entity = GetEntity(handle);
     IF_THROW(!entity, "Bad handle");
-    return ECS::m_impl->m_renderingSystem->Remove(entity->Handles.renderer);
+    return ECS::m_impl->m_rendererSystem->Remove(entity->Handles.renderer);
 }
 
 template<> PointLight* ECS::GetComponent<PointLight>(EntityHandle handle)
@@ -111,7 +108,7 @@ template<> Renderer* ECS::GetComponent<Renderer>(EntityHandle handle)
 {
     auto entity = GetEntity(handle);
     IF_THROW(!entity, "Bad handle");
-    return ECS::m_impl->m_renderingSystem->GetPointerTo(entity->Handles.renderer);
+    return ECS::m_impl->m_rendererSystem->GetPointerTo(entity->Handles.renderer);
 }
 
 template<> Transform* ECS::GetComponent<Transform>(EntityHandle handle)
@@ -132,6 +129,6 @@ template<> bool ECS::HasComponent<Renderer>(EntityHandle handle)
 {
     auto entity = GetEntity(handle);
     IF_THROW(!entity, "Bad handle");
-    return ECS::m_impl->m_renderingSystem->Contains(entity->Handles.renderer);
+    return ECS::m_impl->m_rendererSystem->Contains(entity->Handles.renderer);
 }
 }

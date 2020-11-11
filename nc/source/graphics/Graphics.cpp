@@ -1,5 +1,6 @@
 #include "Graphics.h"
 #include "DXException.h"
+#include "d3dresource/GraphicsResourceManager.h"
 
 namespace
 {
@@ -18,6 +19,7 @@ Graphics::Graphics(HWND hwnd, float width, float height, float nearZ, float farZ
       m_camera{},
       m_projection{}
 {  
+    d3dresource::GraphicsResourceManager::SetGraphics(this);
     CreateDeviceAndSwapchain(hwnd);
     CreateRasterizerState();
     CreateRenderTargetViewFromBackBuffer();
@@ -92,7 +94,7 @@ void Graphics::OnResize(float width, float height, float nearZ, float farZ)
     SetProjection(width, height, nearZ, farZ);
 }
 
-void Graphics::StartFrame()
+void Graphics::FrameBegin()
 {
     #ifdef NC_EDITOR_ENABLED
     m_drawCallCount = 0u;
@@ -109,7 +111,7 @@ void Graphics::DrawIndexed(UINT count)
     m_context->DrawIndexed(count, 0u, 0u);
 }
 
-void Graphics::EndFrame()
+void Graphics::FrameEnd()
 {
     THROW_FAILED(m_swapChain->Present(1u, 0u));
 }

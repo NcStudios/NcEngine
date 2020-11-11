@@ -27,6 +27,11 @@ namespace nc::camera
         MainCamera::m_instance->m_transform = ECS::GetComponent<Transform>(camera->GetParentHandle());
     }
 
+    Transform* MainCamera::GetTransform_()
+    {
+        return m_transform;
+    }
+
     void MainCamera::ClearTransform()
     {
         m_transform = nullptr;

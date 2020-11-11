@@ -5,9 +5,6 @@
 #include "input/Input.h"
 #include "ECS.h"
 #include "ecs/ECSImpl.h"
-#include "ecs/RenderingSystem.h"
-#include "ecs/LightSystem.h"
-#include "ecs/TransformSystem.h"
 #include "NcDebug.h"
 #include "physics/PhysicsSystem.h"
 #include "scene/SceneManager.h"
@@ -28,27 +25,25 @@ EngineImpl::EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine)
     m_frameDeltaTimeFactor = 1.0f;
     m_logger = std::make_unique<log::Logger>(m_config.project.logFilePath);
     m_window = std::make_unique<window::WindowImpl>(hInstance, topLevelEngine, m_config);
-    m_transform = std::make_unique<ecs::TransformSystem>();
     auto dim = m_window->GetDimensions();
     auto hwnd = m_window->GetHWND();
-    m_rendering = std::make_unique<ecs::RenderingSystem>
+    m_graphics = std::make_unique<graphics::Graphics>
     (
         hwnd, dim.X(), dim.Y(),
         m_config.graphics.nearClip,
         m_config.graphics.farClip,
         m_config.graphics.launchInFullscreen
     );
-    m_light = std::make_unique<ecs::LightSystem>();
-    m_physics = std::make_unique<physics::PhysicsSystem>(m_rendering->GetGraphics());
-    m_ecs = std::make_unique<ecs::ECSImpl>(m_light.get(), m_rendering.get(), m_transform.get());
-    m_uiSystem = std::make_unique<ui::UISystem>(hwnd, m_rendering->GetGraphics());
+    m_physics = std::make_unique<physics::PhysicsSystem>(m_graphics.get());
+    m_ecs = std::make_unique<ecs::ECSImpl>();
+    m_uiSystem = std::make_unique<ui::UISystem>(hwnd, m_graphics.get());
     m_sceneManager = std::make_unique<scene::SceneManager>(std::make_unique<InitialScene>());
     m_mainCamera = std::make_unique<camera::MainCamera>();
     #ifdef NC_EDITOR_ENABLED
     m_frameLogicTimer = std::make_unique<nc::time::Timer>();
     #endif
 
-    m_window->BindGraphics(m_rendering->GetGraphics());
+    m_window->BindGraphics(m_graphics.get());
     m_window->BindUISystem(m_uiSystem.get());
     Window::RegisterImpl(m_window.get());
     ECS::RegisterImpl(m_ecs.get());
@@ -69,8 +64,8 @@ void EngineImpl::MainLoop()
 
     while(isRunning)
     {
-        if(input::GetKey(input::KeyCode::R)) { m_rendering->GetGraphics()->ResizeTarget(500, 500); }
-        if(input::GetKey(input::KeyCode::F)) { m_rendering->GetGraphics()->ToggleFullscreen(); }
+        if(input::GetKey(input::KeyCode::R)) { m_graphics.get()->ResizeTarget(500, 500); }
+        if(input::GetKey(input::KeyCode::F)) { m_graphics.get()->ToggleFullscreen(); }
 
         ncTime.UpdateTime();
         m_window->ProcessSystemMessages();
@@ -95,7 +90,7 @@ void EngineImpl::MainLoop()
         #ifdef NC_EDITOR_ENABLED
         m_frameLogicTimer->Stop();
         #endif
-        FrameRender(dt);
+        FrameRender();
         FrameCleanup();
         ncTime.ResetFrameDeltaTime();
     }
@@ -132,16 +127,28 @@ void EngineImpl::FrameLogic(float dt)
     m_ecs->SendFrameUpdate(dt);
 }
 
-void EngineImpl::FrameRender(float dt)
+void EngineImpl::FrameRender()
 {
-    (void)dt;
     m_uiSystem->FrameBegin();
-    m_rendering->FrameBegin();
-    m_light->BindLights();
-    m_rendering->Frame();
+    m_graphics->FrameBegin();
+
+    auto camMatrix = m_mainCamera->GetTransform_()->CamGetMatrix();
+    m_graphics->SetCamera(camMatrix);
+    
+    m_ecs->GetSystem<PointLight>()->ForEach([&camMatrix](auto& light)
+    {
+        light.Bind(camMatrix);
+    });
+
+    auto gfx = m_graphics.get();
+    m_ecs->GetSystem<Renderer>()->ForEach([gfx](auto& renderer)
+    {
+        renderer.Update(gfx);
+    });
+
     m_uiSystem->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_ecs->GetActiveEntities());
     m_uiSystem->FrameEnd();
-    m_rendering->FrameEnd();
+    m_graphics->FrameEnd();
 }
 
 void EngineImpl::FrameCleanup()
