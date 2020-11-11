@@ -1,7 +1,7 @@
 #include "PointLight.h"
 #include "graphics/Graphics.h"
 #include "NcDebug.h"
-#include "ECS.h"
+#include "Ecs.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
@@ -82,7 +82,7 @@ namespace nc
     {
         if (!m_transform)
         {
-            m_transform = ECS::GetComponent<Transform>(m_parentHandle);
+            m_transform = Ecs::GetComponent<Transform>(m_parentHandle);
         }
         IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
         

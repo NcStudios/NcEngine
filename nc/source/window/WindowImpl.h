@@ -5,11 +5,13 @@
 
 namespace nc
 {
-namespace config { struct Config; }
-namespace engine { class Engine; }
-namespace graphics { class Graphics; }
-namespace ui { class UISystem; }
-namespace window
+    namespace config { struct Config; }
+    namespace engine { class Engine; }
+    namespace graphics { class Graphics; }
+    namespace ui { class UISystem; }
+}
+
+namespace nc::window
 {
     class WindowImpl
     {
@@ -42,4 +44,4 @@ namespace window
             ui::UISystem* m_ui;
             Vector2 m_dimensions;
     };
-}} // end namespace nc::window
+} // end namespace nc::window

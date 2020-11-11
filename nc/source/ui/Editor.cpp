@@ -1,7 +1,7 @@
 #ifdef NC_EDITOR_ENABLED
 #include "Editor.h"
 #include "imgui/imgui.h"
-#include "ECS.h"
+#include "Ecs.h"
 #include "graphics/Graphics.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "component/PointLight.h"
@@ -125,20 +125,20 @@ namespace nc::ui
         ImGui::PushItemWidth(spacing);
             ImGui::Text("Entity");
             ImGui::Indent();
-                ImGui::Text("Tag:    ");  ImGui::SameLine();  ImGui::Text(nc::ECS::GetEntity(handle)->Tag.c_str());
+                ImGui::Text("Tag:    ");  ImGui::SameLine();  ImGui::Text(nc::Ecs::GetEntity(handle)->Tag.c_str());
                 ImGui::Text("Handle: ");  ImGui::SameLine();  ImGui::Text(handle_s.c_str());
             ImGui::Unindent();
         ImGui::PopItemWidth();  ImGui::Separator();
 
-        nc::ECS::GetComponent<nc::Transform>(handle)->EditorGuiElement();
+        nc::Ecs::GetComponent<nc::Transform>(handle)->EditorGuiElement();
 
-        nc::Renderer* rend = nc::ECS::GetComponent<nc::Renderer>(handle);
+        nc::Renderer* rend = nc::Ecs::GetComponent<nc::Renderer>(handle);
         if(rend) { rend->EditorGuiElement(); }
 
-        nc::PointLight* light = nc::ECS::GetComponent<PointLight>(handle);
+        nc::PointLight* light = nc::Ecs::GetComponent<PointLight>(handle);
         if(light) { light->EditorGuiElement(); }
 
-        for(const auto& comp : nc::ECS::GetEntity(handle)->GetUserComponents())
+        for(const auto& comp : nc::Ecs::GetEntity(handle)->GetUserComponents())
         {
             comp->EditorGuiElement();
         }

@@ -179,4 +179,4 @@ void ComponentSystem<T>::MapHandleToIndexPair(const ComponentHandle handle, cons
         m_indexMap.emplace(handle, pair);
     }
 }
-} //end namespace nc::ecs
+} // end namespace nc::ecs

@@ -10,20 +10,20 @@
 
 namespace nc
 {
-    class ECS;
+    class Ecs;
     class PointLight;
     class Renderer;
 namespace ecs
 {
-    class ECSImpl
+    class EcsImpl
     {
         template<class T>
         using is_component_t = typename std::enable_if_t<std::is_base_of_v<Component, T>>;
         using EntityMap = std::unordered_map<EntityHandle, Entity>;
-        friend class ::nc::ECS;
+        friend class ::nc::Ecs;
 
         public:
-            ECSImpl();
+            EcsImpl();
 
             template<class T, class = is_component_t<T>>
             ComponentSystem<T>* GetSystem();

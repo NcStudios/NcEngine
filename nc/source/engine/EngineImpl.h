@@ -9,9 +9,10 @@ namespace nc
 {
     namespace camera { class MainCamera; }
     namespace graphics { class Graphics; }
+    namespace engine { class Engine; }
     namespace ecs
     {
-        class ECSImpl;
+        class EcsImpl;
         class LightSystem;
         class RenderingSystem;
         class TransformSystem;
@@ -26,37 +27,35 @@ namespace nc
 
 namespace nc::engine
 {
-class Engine;
+    class EngineImpl
+    {
+        public:
+            bool isRunning;
 
-class EngineImpl
-{
-    public:
-        bool isRunning;
+            EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine);
+            ~EngineImpl();
+            void MainLoop();
+            void Shutdown();
+            void ClearState();
+            void DoSceneSwap();
+            void FrameLogic(float dt);
+            void FrameRender();
+            void FrameCleanup();
 
-        EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine);
-        ~EngineImpl();
-        void MainLoop();
-        void Shutdown();
-        void ClearState();
-        void DoSceneSwap();
-        void FrameLogic(float dt);
-        void FrameRender();
-        void FrameCleanup();
+        private:
 
-    private:
-
-        config::Config m_config;
-        float m_frameDeltaTimeFactor;
-        std::unique_ptr<log::Logger> m_logger;
-        std::unique_ptr<window::WindowImpl> m_window;
-        std::unique_ptr<graphics::Graphics> m_graphics;
-        std::unique_ptr<physics::PhysicsSystem> m_physics;
-        std::unique_ptr<ecs::ECSImpl> m_ecs;
-        std::unique_ptr<ui::UISystem> m_uiSystem;
-        std::unique_ptr<scene::SceneManager> m_sceneManager;
-        std::unique_ptr<camera::MainCamera> m_mainCamera;
-        #ifdef NC_EDITOR_ENABLED
-        std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
-        #endif
-};
+            config::Config m_config;
+            float m_frameDeltaTimeFactor;
+            std::unique_ptr<log::Logger> m_logger;
+            std::unique_ptr<window::WindowImpl> m_window;
+            std::unique_ptr<graphics::Graphics> m_graphics;
+            std::unique_ptr<physics::PhysicsSystem> m_physics;
+            std::unique_ptr<ecs::EcsImpl> m_ecs;
+            std::unique_ptr<ui::UISystem> m_uiSystem;
+            std::unique_ptr<scene::SceneManager> m_sceneManager;
+            std::unique_ptr<camera::MainCamera> m_mainCamera;
+            #ifdef NC_EDITOR_ENABLED
+            std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
+            #endif
+    };
 } // end namespace nc::engine

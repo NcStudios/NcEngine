@@ -1,9 +1,9 @@
-#include "ECSImpl.h"
-#include "ECS.h"
+#include "EcsImpl.h"
+#include "Ecs.h"
 
 namespace nc::ecs
 {
-ECSImpl::ECSImpl()
+EcsImpl::EcsImpl()
     : m_active{},
       m_toDestroy{},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>() },
@@ -12,22 +12,22 @@ ECSImpl::ECSImpl()
 {
 }
 
-template<> ComponentSystem<PointLight>* ECSImpl::GetSystem<PointLight>()
+template<> ComponentSystem<PointLight>* EcsImpl::GetSystem<PointLight>()
 {
     return m_lightSystem.get();
 }
 
-template<> ComponentSystem<Renderer>* ECSImpl::GetSystem<Renderer>()
+template<> ComponentSystem<Renderer>* EcsImpl::GetSystem<Renderer>()
 {
     return m_rendererSystem.get();
 }
 
-template<> ComponentSystem<Transform>* ECSImpl::GetSystem<Transform>()
+template<> ComponentSystem<Transform>* EcsImpl::GetSystem<Transform>()
 {
     return m_transformSystem.get();
 }
 
-void ECSImpl::SendFrameUpdate(float dt)
+void EcsImpl::SendFrameUpdate(float dt)
 {
     for(auto& pair : m_active)
     {
@@ -35,7 +35,7 @@ void ECSImpl::SendFrameUpdate(float dt)
     }
 }
 
-void ECSImpl::SendFixedUpdate()
+void EcsImpl::SendFixedUpdate()
 {
     for(auto& pair : m_active)
     {
@@ -43,7 +43,7 @@ void ECSImpl::SendFixedUpdate()
     }
 }
 
-void ECSImpl::SendOnDestroy()
+void EcsImpl::SendOnDestroy()
 {
     for(auto & pair : m_toDestroy)
     {
@@ -63,12 +63,12 @@ void ECSImpl::SendOnDestroy()
 }
 
 
-bool ECSImpl::DoesEntityExist(const EntityHandle handle) noexcept
+bool EcsImpl::DoesEntityExist(const EntityHandle handle) noexcept
 {
     return m_active.count(handle) > 0;
 }
 
-std::unordered_map<EntityHandle, Entity> & ECSImpl::GetMapContainingEntity(const EntityHandle handle, bool checkAll) noexcept(false)
+std::unordered_map<EntityHandle, Entity> & EcsImpl::GetMapContainingEntity(const EntityHandle handle, bool checkAll) noexcept(false)
 {
     if (m_active.count(handle) > 0)
         return m_active;
@@ -79,26 +79,26 @@ std::unordered_map<EntityHandle, Entity> & ECSImpl::GetMapContainingEntity(const
     throw std::runtime_error("Entity not found.");
 }
 
-std::unordered_map<EntityHandle, Entity> & ECSImpl::GetActiveEntities() noexcept
+std::unordered_map<EntityHandle, Entity> & EcsImpl::GetActiveEntities() noexcept
 {
     return m_active;
 }
 
-std::unordered_map<EntityHandle, Entity> & ECSImpl::GetToDestroyEntities() noexcept
+std::unordered_map<EntityHandle, Entity> & EcsImpl::GetToDestroyEntities() noexcept
 {
     return m_toDestroy;
 }
 
-Entity * ECSImpl::GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false)
+Entity * EcsImpl::GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false)
 {
     return &GetMapContainingEntity(handle, true).at(handle);
 }
 
-void ECSImpl::ClearState()
+void EcsImpl::ClearState()
 {
     for(const auto& pair : m_active)
     {
-        ECS::DestroyEntity(pair.first);
+        Ecs::DestroyEntity(pair.first);
     }
 
     SendOnDestroy();
