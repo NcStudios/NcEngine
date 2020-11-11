@@ -3,7 +3,6 @@
 #include "GraphicsResourceManager.h"
 #include "graphics/DXException.h"
 #include "graphics/Vertex.h"
-//#include "graphics/Model.h" //for Vertex
 
 #include <vector>
 #include <d3d11.h>
@@ -14,11 +13,10 @@
 
 namespace nc::graphics
 {
-    class  Graphics;
+    class Graphics;
     class Model;
 }
 namespace DirectX { struct XMMATRIX; }
-
 
 /* Base wrapper for d3d11 resource */
 namespace nc::graphics::d3dresource

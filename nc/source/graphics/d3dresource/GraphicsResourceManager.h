@@ -18,6 +18,9 @@ namespace nc::graphics::d3dresource
     
     class GraphicsResourceManager
     {
+        template<class T>
+        using is_resource_t = typename std::enable_if_t<std::is_base_of_v<GraphicsResource, T>>;
+
         public:
             static void SetGraphics(Graphics * gfx)
             {
@@ -29,13 +32,13 @@ namespace nc::graphics::d3dresource
                 return Get().m_graphics;
             }
 
-            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            template<class T, class = is_resource_t<T>, typename...Params>
             static std::shared_ptr<GraphicsResource> Acquire(Params&&...p)
             {
                 return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
 
-            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            template<class T, class = is_resource_t<T>, typename...Params>
             static bool Exists(Params&&...p)
             {
                 return Get().Exists_<T>(std::forward<Params>(p)...);
@@ -62,7 +65,7 @@ namespace nc::graphics::d3dresource
                 return instance;
             }
 
-            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            template<class T, class = is_resource_t<T>, typename...Params>
             std::shared_ptr<GraphicsResource> Acquire_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
@@ -76,7 +79,7 @@ namespace nc::graphics::d3dresource
                 return i->second;
             }
 
-            template<class T, class = typename std::enable_if<std::is_base_of<GraphicsResource, T>::value>::type, typename...Params>
+            template<class T, class = is_resource_t<T>, typename...Params>
             bool Exists_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
