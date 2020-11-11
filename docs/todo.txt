@@ -34,8 +34,6 @@ LOW PRIORITY
 -display draw calls and tris/verts
 -fix naming of user components in gui
 -main window/main menu dilemma
--meshes are loaded even if v/i buffers already exist(in Model constructor)
-        -note: the 'shared' buffers are ultimately used, but file reading happens for each instance regardless
 -camera needs parameters for fov/clipping planes
 -Entity (and other places) - many public methods could be private if Engine was friend
 -make generating new user types easier/quicker (untility prog?)
