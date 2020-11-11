@@ -1,11 +1,13 @@
 #pragma once
-#include <memory>
 
 #include "NcConfig.h"
 #include "nc/source/ui/IUI.h"
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"
 #include "EditNameUIElement.h"
+#include "SoundboardUIElement.h"
+
+#include <memory>
 
 namespace nc::graphics::d3dresource
 {
@@ -29,6 +31,7 @@ namespace project::ui
             LogUIElement m_logUIElement;
             TurnPhaseUIElement m_turnPhaseUIElement;
             EditNameUIElement m_editNameUIElement;
+            SoundboardUIElement m_soundboardUIElement;
             std::unique_ptr<nc::graphics::d3dresource::Texture> m_texture;
             bool m_isHovered;
 

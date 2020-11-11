@@ -1,9 +1,7 @@
 ***********
 IN PROGRESS
 ***********
--build issues
-    -gtest must be dl'd manually
-    -model (obj) files are ignored by git
+
 
 ***********
 BUGS
@@ -11,7 +9,6 @@ BUGS
 -Component::Initialize() is called after constructor runs meaning handle/entity data
     is not available at the time of constructor invocation
 -rotations are still strange sometimes(also need world/local options)
--fix window scaling so changes are made to Window, Graphics, and buffer sizes
 -don't believe gfx resources are ever unloaded
 - PBRMaterial.cpp GraphicsResource wont bind two consecutive same textures because the index won't increment if the first same resources has been added.
 
@@ -26,13 +23,12 @@ TO ADD
     -improve point light components and how they relate to entities
     -support for multiple lights
     -additional light types (directional/spot)
--config files
-    -additional values: initial scene name
 -rendering improvements
     -way to mark things static so batching is possible
     -add frustrum and occlusion culling
 
 LOW PRIORITY
+-gtest must be dl'd manually
 -unused params are marked (void)param for now, many of these can be removed,
     but some are there for uniformity (ex: Aquire passes gfx* to resource constructor always)
 -display draw calls and tris/verts
@@ -44,7 +40,6 @@ LOW PRIORITY
 -Entity (and other places) - many public methods could be private if Engine was friend
 -make generating new user types easier/quicker (untility prog?)
 -save changes in debug mode
--certain win/dx3d types aren't forward declared(HWND), can they be?
 -all d3d "slots" are passed at uint literals, look into what exactly
     is needed here - can we use an enum for these so there is some 
     semantic meaning tied to the values passed?

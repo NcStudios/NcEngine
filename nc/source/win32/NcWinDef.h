@@ -12,9 +12,9 @@
 #ifndef NOGDICAPMASKS
 #define NOGDICAPMASKS
 #endif
-#ifndef NOSYSMETRICS
-#define NOSYSMETRICS
-#endif
+//#ifndef NOSYSMETRICS // used by window to get native resolution
+//#define NOSYSMETRICS
+//#endif
 #ifndef NOMENUS
 #define NOMENUS
 #endif
@@ -66,9 +66,9 @@
 #ifndef NOSERVICE
 #define NOSERVICE
 #endif
-#ifndef NOSOUND
-#define NOSOUND
-#endif
+//#ifndef NOSOUND // used by SoundboardUIElement
+//#define NOSOUND
+//#endif
 #ifndef NOTEXTMETRIC
 #define NOTEXTMETRIC
 #endif
