@@ -4,8 +4,8 @@ namespace nc::scene
 {
     SceneManager* SceneManager::m_instance = nullptr;
 
-    SceneManager::SceneManager(std::unique_ptr<Scene> initialScene)
-        : m_activeScene{ std::move(initialScene) },
+    SceneManager::SceneManager()
+        : m_activeScene{ nullptr },
           m_swapScene{ nullptr },
           m_isSceneChangeScheduled{ false }
     {

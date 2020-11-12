@@ -1,16 +1,12 @@
 #pragma once
 
-#include <string>
-#include <memory>
-#include <vector>
-
 #include "ResourceGroup.h"
 #include "directx/math/DirectXMath.h"
 
+#include <string>
+
 namespace nc::graphics
 {
-    namespace d3dresource { class GraphicsResource; }
-
     namespace detail 
     {
         const std::string DefaultTexturePath = "nc\\graphics\\DefaultTexture.png";
@@ -29,13 +25,11 @@ namespace nc::graphics
     class PBRMaterial : public ResourceGroup
     {
         public: 
-
             PBRMaterial() = default;
             PBRMaterial(const std::vector<std::string>& texturePaths);
             MaterialProperties properties;
 
         private:
-
             void InitializeGraphicsPipeline(const std::vector<std::string>& texturePaths);
     };
 }

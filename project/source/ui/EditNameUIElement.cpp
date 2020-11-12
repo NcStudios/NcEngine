@@ -3,10 +3,10 @@
 
 namespace project::ui
 {
-    EditNameUIElement::EditNameUIElement(bool startOpen, std::string initialName)
+    EditNameUIElement::EditNameUIElement(bool startOpen)
         : UIElement(startOpen)
     {
-        initialName.copy(m_buffer, m_bufferSize);
+        m_buffer[0] = '\0';
     }
 
     void EditNameUIElement::Draw()
@@ -15,11 +15,12 @@ namespace project::ui
 
         if(ImGui::Begin("Edit Player Name", &(this->isOpen)))
         {
-            ImGui::InputText("Enter Name" , m_buffer, m_bufferSize);
+            ImGui::InputText("" , m_buffer, m_bufferSize);
             
             if(ImGui::Button("Save"))
             {
                 nc::config::NcSetUserName(m_buffer);
+                isOpen = false;
             }
         }
         ImGui::End();

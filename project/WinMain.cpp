@@ -1,11 +1,8 @@
 #include "win32/NcWin32.h"
-#include "config/Config.h"
 #include "NcDebug.h"
 #include "NcLog.h"
-#include "NcUI.h"
-#include "project/source/ui/UI.h"
-#include "project/source/log/GameLog.h"
 #include "engine/Engine.h"
+#include "project/scenes/MenuScene.h"
 
 #include <iostream>
 
@@ -20,10 +17,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     try
     {
         engine = std::make_unique<nc::engine::Engine>(instance);
-        project::log::GameLog gameLog;
-        project::ui::UI projectUI(&gameLog);
-        nc::ui::NcRegisterUI(&projectUI);
-        engine->Start();
+        engine->Start(std::make_unique<MenuScene>());
     }
     catch(const std::runtime_error& e)
     {

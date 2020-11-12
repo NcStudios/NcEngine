@@ -1,11 +1,12 @@
 #include "Prefabs.h"
-#include "graphics/Graphics.h"
-#include "graphics/Model.h"
-#include "graphics/Mesh.h"
-#include "component/Renderer.h"
 #include "project/components/GamePiece.h"
 
 using namespace nc;
+
+namespace
+{
+    bool isInitialized = false;
+}
 
 namespace prefab
 {
@@ -103,6 +104,12 @@ namespace material
 
 void InitializeResources()
 {
+    if(isInitialized)
+    {
+        return;
+    }
+    isInitialized = true;
+    
     mesh::Boar = graphics::Mesh{"project//Models//BoarPiece.fbx"};
     mesh::Cattle = graphics::Mesh{"project//Models//CattlePiece.fbx"};
     mesh::Coal = graphics::Mesh{"project//Models//CoalPiece.fbx"};

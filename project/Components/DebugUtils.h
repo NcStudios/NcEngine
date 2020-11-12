@@ -1,6 +1,5 @@
 #pragma once
 #include "component/Component.h"
-#include "scenes/InitialScene.h"
 #include <memory>
 
 class SceneReset : public nc::Component

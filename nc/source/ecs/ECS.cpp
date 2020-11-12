@@ -1,7 +1,5 @@
 #include "Ecs.h"
 #include "Ecs/EcsImpl.h"
-#include "component/Renderer.h"
-#include "component/PointLight.h"
 
 namespace nc
 {
@@ -10,6 +8,11 @@ namespace nc
     void Ecs::RegisterImpl(ecs::EcsImpl* impl)
     {
         m_impl = impl;
+    }
+
+    EntityHandle Ecs::CreateEntity(std::string tag)
+    {
+        return Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), std::move(tag));
     }
 
     EntityHandle Ecs::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag)

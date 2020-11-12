@@ -3,7 +3,6 @@
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"
-#include "UIStyle.h"
 #include "project/source/log/GameLog.h"
 #include "Window.h"
 
@@ -25,12 +24,11 @@ namespace project::ui
         : m_config { ::nc::config::NcGetConfigReference() },
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
-          m_editNameUIElement {false, m_config.user.userName},
+          m_editNameUIElement {false},
           m_soundboardUIElement {false},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
           m_isHovered { false }
     {
-        SetImGuiStyle();
     }
 
     UI::~UI()

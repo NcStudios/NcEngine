@@ -1,6 +1,9 @@
 #include "DebugUtils.h"
 #include "input/Input.h"
 #include "NcScene.h"
+#include "scenes/MenuScene.h"
+#include "scenes/GameScene.h"
+
 #include <chrono>
 #include <iostream>
 
@@ -11,7 +14,11 @@ void SceneReset::FrameUpdate(float dt)
     (void)dt;
     if (GetKeyDown(KeyCode::F1))
     {
-        nc::scene::NcChangeScene(std::make_unique<InitialScene>());
+        nc::scene::NcChangeScene(std::make_unique<MenuScene>());
+    }
+    if (GetKeyDown(KeyCode::F2))
+    {
+        nc::scene::NcChangeScene(std::make_unique<GameScene>());
     }
 }
 

@@ -3,8 +3,6 @@
 #include "Graphics.h"
 #include "component/Transform.h"
 #include "d3dresource/GraphicsResourceManager.h"
-#include "ResourceGroup.h"
-#include <string>
 
 namespace nc::graphics
 {

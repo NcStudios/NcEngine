@@ -1,6 +1,7 @@
 #pragma once
 
 #include "win32/HInstanceForwardDecl.h"
+#include "scene/Scene.h"
 
 #include <memory>
 
@@ -13,7 +14,7 @@ namespace nc::engine
         public:
             Engine(HINSTANCE hInstance);
             ~Engine();
-            void Start();
+            void Start(std::unique_ptr<scene::Scene> initialScene);
             void Shutdown(bool forceImmediate = false);
 
         private:

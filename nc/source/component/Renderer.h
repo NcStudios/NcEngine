@@ -1,17 +1,14 @@
 #pragma once
 
-#include <memory>
 #include "Component.h"
-#include "directx/math/DirectXMath.h"
-
-#include <memory>
+#include "graphics/Mesh.h"
+#include "graphics/PBRMaterial.h"
 
 namespace nc::graphics
 {
     class Graphics;
-    class Mesh;
     class Model;
-    class PBRMaterial;}
+}
 
 namespace nc
 {
