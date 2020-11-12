@@ -20,5 +20,7 @@ namespace project::ui
             const nc::config::Config& m_config;
             bool m_isHovered;
             EditNameUIElement m_editNameElement;
+            static const unsigned m_ipBufferSize = 16u;
+            char m_ipBuffer[m_ipBufferSize];
     };
 }

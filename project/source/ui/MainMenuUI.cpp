@@ -4,16 +4,18 @@
 #include "UIStyle.h"
 #include "NcScene.h"
 #include "project/scenes/GameScene.h"
+#include "nc/source/config/Version.h"
 
 namespace
 {
-    constexpr auto UI_FLAGS = ImGuiWindowFlags_MenuBar |
-                              ImGuiWindowFlags_NoCollapse |
+    constexpr auto UI_FLAGS = ImGuiWindowFlags_NoCollapse |
                               ImGuiWindowFlags_NoTitleBar |
                               ImGuiWindowFlags_NoResize;
 
     const auto BUTTON_SIZE = ImVec2{200, 64};
-    const auto UI_SIZE = ImVec2{220, 500};
+    const auto SMALL_BUTTON_SIZE = ImVec2{96, 20};
+    const auto LIST_BOX_SIZE = ImVec2{200, 64};
+    const auto UI_SIZE = ImVec2{218, 450};
 }
 
 namespace project::ui
@@ -23,6 +25,7 @@ namespace project::ui
           m_isHovered{false},
           m_editNameElement{false}
     {
+        m_ipBuffer[0] = '\0';
         SetImGuiStyle();
     }
 
@@ -39,20 +42,48 @@ namespace project::ui
         if(ImGui::Begin("Caverna", nullptr, UI_FLAGS))
         {
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Text("Caverna");
+
+            ImGui::Text("Caverna       version");
+            ImGui::SameLine();
+            ImGui::Text(NC_PROJECT_VERSION);
+
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
             ImGui::Text("Player Name:");
-            ImGui::Text(m_config.user.userName.c_str());
             ImGui::SameLine();
-            if (ImGui::Button("Edit", {40, 18}))
+            ImGui::Text(m_config.user.userName.c_str());
+            ImGui::Spacing();
+            if(ImGui::Button("Edit", {40, 18}))
             {
                 m_editNameElement.ToggleOpen();
             }
 
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            if (ImGui::Button("Load Demo Scene", BUTTON_SIZE))
+            ImGui::Separator();
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+            ImGui::Text("Server IPs");
+            ImGui::Spacing();
+            ImGui::ListBoxHeader("", LIST_BOX_SIZE);
+            ImGui::ListBoxFooter();
+
+            ImGui::Button("Add", SMALL_BUTTON_SIZE);
+            ImGui::SameLine();
+            ImGui::Button("Delete", SMALL_BUTTON_SIZE);
+
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+            if(ImGui::Button("Connect to server", BUTTON_SIZE))
+            {
+            }
+
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+            if(ImGui::Button("Load Demo Scene", BUTTON_SIZE))
             {
                 nc::scene::NcChangeScene(std::make_unique<GameScene>());
             }
