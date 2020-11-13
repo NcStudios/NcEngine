@@ -188,6 +188,7 @@ void GameScene::Load()
  
 void GameScene::Unload()
 {
+    ui::NcRegisterUI(nullptr);
     m_ui = nullptr;
     m_log = nullptr;
 }

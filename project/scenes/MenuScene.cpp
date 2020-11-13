@@ -55,4 +55,5 @@ void MenuScene::Load()
 void MenuScene::Unload()
 {
     m_ui = nullptr;
+    ui::NcRegisterUI(nullptr);
 }
