@@ -1,5 +1,5 @@
-#include "graphics\d3dresource\GraphicsResourceManager.h"
 #include "graphics\Mesh.h"
+#include "graphics\d3dresource\GraphicsResourceManager.h"
 #include "NcConfig.h"
 #include "NcDebug.h"
 #include "Vertex.h"
@@ -7,7 +7,6 @@
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
 #include <assimp\postprocess.h>
-#include <vector>
 
 const char separator = 
 #ifdef _WIN32

@@ -8,7 +8,6 @@
 #include "NcDebug.h"
 #include "physics/PhysicsSystem.h"
 #include "scene/SceneManager.h"
-#include "scenes/InitialScene.h"
 #include "time/NcTime.h"
 #include "ui/UISystem.h"
 #include "Window.h"
@@ -37,7 +36,7 @@ namespace nc::engine
         m_physics = std::make_unique<physics::PhysicsSystem>(m_graphics.get());
         m_ecs = std::make_unique<ecs::EcsImpl>();
         m_uiSystem = std::make_unique<ui::UISystem>(hwnd, m_graphics.get());
-        m_sceneManager = std::make_unique<scene::SceneManager>(std::make_unique<InitialScene>());
+        m_sceneManager = std::make_unique<scene::SceneManager>();
         m_mainCamera = std::make_unique<camera::MainCamera>();
         #ifdef NC_EDITOR_ENABLED
         m_frameLogicTimer = std::make_unique<nc::time::Timer>();
@@ -55,10 +54,12 @@ namespace nc::engine
     {
     }
 
-    void EngineImpl::MainLoop()
+    void EngineImpl::MainLoop(std::unique_ptr<scene::Scene> initialScene)
     {
         V_LOG("Starting engine loop");
         time::Time ncTime;
+        m_sceneManager->QueueSceneChange_(std::move(initialScene));
+        m_sceneManager->DoSceneChange();
         m_sceneManager->LoadActiveScene();
         isRunning = true;
 

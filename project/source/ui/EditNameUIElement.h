@@ -8,11 +8,11 @@ namespace project::ui
     class EditNameUIElement : public UIElement
     {
         public:
-            EditNameUIElement(bool startOpen, std::string initialName);
+            EditNameUIElement(bool startOpen);
             void Draw() override;
         
         private:
-            static const unsigned m_bufferSize = 1024;
+            static const unsigned m_bufferSize = 64;
             char m_buffer[m_bufferSize];
     };
 }

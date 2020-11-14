@@ -19,7 +19,11 @@ namespace nc
     }
     namespace log { class Logger; }
     namespace physics { class PhysicsSystem; }
-    namespace scene { class SceneManager; }
+    namespace scene
+    {
+        class Scene;
+        class SceneManager;
+    }
     namespace time { class Timer; }
     namespace ui { class UISystem; }
     namespace window { class WindowImpl; }
@@ -34,7 +38,7 @@ namespace nc::engine
 
             EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine);
             ~EngineImpl();
-            void MainLoop();
+            void MainLoop(std::unique_ptr<scene::Scene> initialScene);
             void Shutdown();
             void ClearState();
             void DoSceneSwap();

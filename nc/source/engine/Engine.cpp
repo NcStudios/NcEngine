@@ -14,10 +14,10 @@ Engine::~Engine()
 {
 }
 
-void Engine::Start()
+void Engine::Start(std::unique_ptr<scene::Scene> initialScene)
 {
     V_LOG("Starting engine");
-    m_impl->MainLoop();
+    m_impl->MainLoop(std::move(initialScene));
 }
 
 void Engine::Shutdown(bool forceImmediate)

@@ -3,7 +3,6 @@
 #include "ResourceGroup.h"
 
 #include <string>
-#include <vector>
 
 namespace nc::graphics
 {

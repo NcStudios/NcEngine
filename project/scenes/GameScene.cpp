@@ -1,10 +1,7 @@
-#include "InitialScene.h"
+#include "GameScene.h"
 #include "Ecs.h"
 #include "NcCamera.h"
-#include "component/Renderer.h"
-#include "component/PointLight.h"
-#include "graphics/Model.h"
-#include "graphics/Mesh.h"
+#include "NcUI.h"
 #include "CamController.h"
 #include "DebugUtils.h"
 #include "source/Prefabs.h"
@@ -14,9 +11,11 @@
 using namespace nc;
 using namespace project;
 
-void InitialScene::Load()
+void GameScene::Load()
 {
-    prefab::InitializeResources();
+    m_log = std::make_unique<project::log::GameLog>();
+    m_ui = std::make_unique<project::ui::UI>(m_log.get());
+    nc::ui::NcRegisterUI(m_ui.get());
 
     // Light
     auto lvHandle = Ecs::CreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
@@ -187,7 +186,9 @@ void InitialScene::Load()
     prefab::Create<prefab::FurnishingTileWritingChamber>({3.2f * scaleFactor, 0.0f, 2.6f * scaleFactor}, {1.5708f, 1.5708f, 0.0f}, Vector3::One() * scaleFactor * 2, "WritingChamber Piece");
 }
  
-void InitialScene::Unload()
+void GameScene::Unload()
 {
-    
+    ui::NcRegisterUI(nullptr);
+    m_ui = nullptr;
+    m_log = nullptr;
 }
