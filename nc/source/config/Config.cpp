@@ -8,10 +8,9 @@
 
 namespace
 {
-    const auto CONFIG_PATH = std::string{"project/config/config.ini"};
+    const auto CONFIG_PATH = std::string{"nc/source/config/config.ini"};
     const auto PROJECT_NAME_KEY = std::string{"project_name"};
     const auto LOG_FILE_PATH_KEY = std::string{"log_file_path"};
-    const auto USER_NAME_KEY = std::string{"user_name"};
     const auto FIXED_UPDATE_INTERVAL_KEY = std::string{"fixed_update_interval"};
     const auto USE_NATIVE_RESOLUTION_KEY = std::string{"use_native_resolution"};
     const auto LAUNCH_IN_FULLSCREEN_KEY = std::string{"launch_fullscreen"};
@@ -31,10 +30,6 @@ namespace
         else if (key == LOG_FILE_PATH_KEY)
         {
             out.project.logFilePath = value;
-        }
-        else if (key == USER_NAME_KEY)
-        {
-            out.user.userName = value;
         }
         else if (key == FIXED_UPDATE_INTERVAL_KEY)
         {
@@ -109,8 +104,6 @@ void Config::Save()
     outFile << "[project]\n"
             << PROJECT_NAME_KEY << INI_KEY_VALUE_DELIM << project.projectName << '\n'
             << LOG_FILE_PATH_KEY << INI_KEY_VALUE_DELIM << project.logFilePath << '\n'
-            << "[user]\n"
-            << USER_NAME_KEY << INI_KEY_VALUE_DELIM << user.userName << '\n'
             << "[physics]\n"
             << FIXED_UPDATE_INTERVAL_KEY << INI_KEY_VALUE_DELIM << physics.fixedUpdateInterval << '\n'
             << "[graphics]\n"
@@ -128,8 +121,7 @@ void Config::Save()
 
 bool Config::Validate()
 {
-    return { (user.userName != "") &&
-             (project.projectName != "") &&
+    return { (project.projectName != "") &&
              (project.logFilePath != "") &&
              (physics.fixedUpdateInterval > 0.0f) &&
              (graphics.screenWidth != 0) &&

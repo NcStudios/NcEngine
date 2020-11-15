@@ -21,13 +21,11 @@ namespace nc::engine
             void Shutdown(bool forceImmediate = false);
 
             static const config::Config& GetConfig();
-            static void SetUserName(std::string name);
 
         private:
             std::unique_ptr<EngineImpl> m_impl;
             
             friend class ApiBinder;
             static std::function<const config::Config&()> GetConfig_;
-            static std::function<void(std::string)> SetUserName_;
     };
 }

@@ -2,6 +2,7 @@
 #include "Ecs.h"
 #include "MainCamera.h"
 #include "UI.h"
+#include "config/ProjectConfig.h"
 #include "DebugComponents.h"
 #include "CamController.h"
 #include "project/components/CubeRotator.h"
@@ -14,7 +15,10 @@ using namespace nc;
 
 void MenuScene::Load()
 {
-    m_ui = std::make_unique<project::ui::MainMenuUI>();
+    project::config::ProjectConfig projectConfig;
+    projectConfig.Load();
+
+    m_ui = std::make_unique<project::ui::MainMenuUI>(projectConfig);
     ui::UI::Set(m_ui.get());
 
     prefab::InitializeResources();

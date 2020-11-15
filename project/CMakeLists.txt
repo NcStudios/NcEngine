@@ -10,4 +10,5 @@ target_sources(${EXE_NAME}
         ${USER_UI_SOURCE}
 )
 
+add_subdirectory(config)
 add_subdirectory(source)

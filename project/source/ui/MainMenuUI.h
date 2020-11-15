@@ -5,6 +5,7 @@
 #include "EditNameUIElement.h"
 #include "AddServerSelectableUIElement.h"
 #include "ServerSelectable.h"
+#include "config/ProjectConfig.h"
 
 #include <memory>
 #include <vector>
@@ -14,15 +15,17 @@ namespace project::ui
     class MainMenuUI : public nc::ui::IUI
     {
         public:
-            MainMenuUI();
+            MainMenuUI(config::ProjectConfig projectConfig);
             ~MainMenuUI();
             void Draw() override;
             bool IsHovered() override;
 
         private:
             void AddServer(ServerSelectable server);
-            
-            const nc::config::Config& m_config;
+            void EditName(std::string);
+
+            //const nc::config::Config& m_config;
+            config::ProjectConfig m_projectConfig;
             bool m_isHovered;
             std::vector<ServerSelectable> m_servers;
             EditNameUIElement m_editNameElement;

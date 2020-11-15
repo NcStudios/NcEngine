@@ -2,6 +2,7 @@
 #include "Ecs.h"
 #include "MainCamera.h"
 #include "UI.h"
+#include "config/ProjectConfig.h"
 #include "CamController.h"
 #include "DebugComponents.h"
 #include "source/Prefabs.h"
@@ -13,8 +14,11 @@ using namespace project;
 
 void GameScene::Load()
 {
+    project::config::ProjectConfig projectConfig;
+    projectConfig.Load();
+
     m_log = std::make_unique<project::log::GameLog>();
-    m_hud = std::make_unique<project::ui::Hud>(m_log.get());
+    m_hud = std::make_unique<project::ui::Hud>(m_log.get(), projectConfig);
     nc::ui::UI::Set(m_hud.get());
 
     // Light

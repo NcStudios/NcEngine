@@ -3,8 +3,9 @@
 
 namespace project::ui
 {
-    EditNameUIElement::EditNameUIElement(bool startOpen)
-        : UIElement(startOpen)
+    EditNameUIElement::EditNameUIElement(bool startOpen, std::function<void(std::string)> callback)
+        : UIElement(startOpen),
+          EditNameCallback{ callback }
     {
         m_buffer[0] = '\0';
     }
@@ -19,8 +20,8 @@ namespace project::ui
             
             if(ImGui::Button("Save"))
             {
-                nc::engine::Engine::SetUserName(m_buffer);
                 isOpen = false;
+                EditNameCallback(std::string{m_buffer});
             }
         }
         ImGui::End();

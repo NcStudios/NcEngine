@@ -54,11 +54,12 @@ namespace
 
 namespace project::ui
 {
-    MainMenuUI::MainMenuUI()
-        : m_config{nc::engine::Engine::GetConfig()},
+    MainMenuUI::MainMenuUI(config::ProjectConfig projectConfig)
+        : //m_config{nc::engine::Engine::GetConfig()},
+          m_projectConfig{ std::move(projectConfig) },
           m_isHovered{false},
           m_servers{},
-          m_editNameElement{false},
+          m_editNameElement{false, std::bind(this->EditName, this, std::placeholders::_1)},
           m_addServerElement{false, std::bind(this->AddServer, this, std::placeholders::_1)}
     {
         m_ipBuffer[0] = '\0';
@@ -88,7 +89,7 @@ namespace project::ui
 
             ImGui::Text("Player Name:");
             ImGui::SameLine();
-            ImGui::Text(m_config.user.userName.c_str());
+            ImGui::Text(m_projectConfig.userName.c_str());
             ImGui::Spacing();
             if(ImGui::Button("Edit", {40, 18}))
             {
@@ -142,5 +143,11 @@ namespace project::ui
     void MainMenuUI::AddServer(ServerSelectable server)
     {
         m_servers.push_back(server);
+    }
+
+    void MainMenuUI::EditName(std::string name)
+    {
+        m_projectConfig.userName = std::move(name);
+        m_projectConfig.Save();
     }
 }

@@ -20,11 +20,11 @@ namespace
 
 namespace project::ui
 {
-    Hud::Hud(log::GameLog* gameLog)
-        : m_config { ::nc::engine::Engine::GetConfig() },
+    Hud::Hud(log::GameLog* gameLog, config::ProjectConfig projectConfig)
+        : //m_config { ::nc::engine::Engine::GetConfig() },
+          m_projectConfig{ std::move(projectConfig) },
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
-          m_editNameUIElement {false},
           m_soundboardUIElement {false},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
           m_isHovered { false }
@@ -39,7 +39,6 @@ namespace project::ui
     {
         DrawHUD();
         m_turnPhaseUIElement.Draw();
-        m_editNameUIElement.Draw();
         m_soundboardUIElement.Draw();
         m_isHovered = ImGui::IsAnyWindowHovered();
     }
@@ -84,10 +83,6 @@ namespace project::ui
         {
             if(ImGui::BeginMenu("Player"))
             {
-                if(ImGui::MenuItem("Edit Name"))
-                {
-                    m_editNameUIElement.ToggleOpen();
-                }
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Windows"))
@@ -112,7 +107,7 @@ namespace project::ui
 
     void Hud::DrawTurnHeader()
     {
-        ImGui::Text(m_config.user.userName.c_str()); ImGui::SameLine();
+        ImGui::Text(m_projectConfig.userName.c_str()); ImGui::SameLine();
         ImGui::Text("Turn: %d", 1); ImGui::SameLine();
         ImGui::Text("Phase: Harvest");
     }

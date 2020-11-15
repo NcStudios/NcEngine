@@ -3,32 +3,13 @@
 #include <fstream>
 #include <string>
 
-namespace
+namespace nc::config
 {
     const auto INI_SKIP_CHARS = std::string{";#["};
     const auto INI_KEY_VALUE_DELIM = '=';
 
-    bool ParseLine(const std::string& line, std::string& key, std::string& value)
-    {
-        if (INI_SKIP_CHARS.find(line[0]) != INI_SKIP_CHARS.npos)
-        {
-            return false;
-        }
+    bool ParseLine(const std::string& line, std::string& key, std::string& value);
 
-        auto delimIndex = line.find(INI_KEY_VALUE_DELIM);
-        if (delimIndex == line.npos)
-        {
-            return false;
-        }
-
-        key = line.substr(0, delimIndex);
-        value = line.substr(delimIndex + 1);
-        return true;
-    }
-}
-
-namespace nc::config
-{
     template<class Config_t,
              class MapKeyValueFunc_t,
              class = std::enable_if_t<std::is_invocable_v<MapKeyValueFunc_t,

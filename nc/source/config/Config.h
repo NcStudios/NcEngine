@@ -11,11 +11,6 @@ namespace nc::config
 
         struct
         {
-            std::string userName;
-        } user;
-
-        struct
-        {
             std::string projectName;
             std::string logFilePath;
         } project;
