@@ -5,6 +5,7 @@ namespace nc
     namespace camera { class MainCameraImpl; }
     namespace debug { class LogImpl; }
     namespace engine { class EngineImpl; }
+    namespace physics { class PhysicsSystem; }
     namespace scene { class SceneManagerImpl; }
     namespace ui { class UIImpl; }
     namespace window { class WindowImpl; }
@@ -20,6 +21,7 @@ namespace nc::engine
                              camera::MainCameraImpl* camera,
                              debug::LogImpl* log,
                              ui::UIImpl* ui,
-                             EngineImpl* engineImpl);
+                             EngineImpl* engineImpl,
+                             physics::PhysicsSystem* physics);
     };
 }

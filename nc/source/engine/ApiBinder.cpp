@@ -4,6 +4,7 @@
 #include "DebugUtils.h"
 #include "Engine.h"
 #include "MainCamera.h"
+#include "Physics.h"
 #include "SceneManager.h"
 #include "UI.h"
 #include "Window.h"
@@ -12,6 +13,7 @@
 #include "engine/EngineImpl.h"
 #include "camera/MainCameraImpl.h"
 #include "debug/LogImpl.h"
+#include "physics/PhysicsSystem.h"
 #include "scene/SceneManagerImpl.h"
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
@@ -25,7 +27,8 @@ namespace nc::engine
                          camera::MainCameraImpl* camera,
                          debug::LogImpl* log,
                          ui::UIImpl* ui,
-                         EngineImpl* engineImpl)
+                         EngineImpl* engineImpl,
+                         physics::PhysicsSystem* physics)
     {
         nc::Window::GetDimensions_ = std::bind(window->GetDimensions, window);
         nc::scene::SceneManager::ChangeScene_ = std::bind(sceneManager->QueueSceneChange, sceneManager, std::placeholders::_1);
@@ -35,5 +38,8 @@ namespace nc::engine
         nc::ui::UI::Set_ = std::bind(ui->BindProjectUI, ui, std::placeholders::_1);
         nc::ui::UI::IsHovered_ = std::bind(ui->IsProjectUIHovered, ui);
         nc::engine::Engine::GetConfig_ = std::bind(engineImpl->GetConfig, engineImpl);
+        nc::physics::Physics::RegisterClickable_ = std::bind(physics->RegisterClickable, physics, std::placeholders::_1);
+        nc::physics::Physics::UnregisterClickable_ = std::bind(physics->UnregisterClickable, physics, std::placeholders::_1);
+        nc::physics::Physics::RaycastToClickables_ = std::bind(physics->RaycastToClickables, physics, std::placeholders::_1);
     }
 }

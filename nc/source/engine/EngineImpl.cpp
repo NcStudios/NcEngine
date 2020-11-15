@@ -191,7 +191,8 @@ namespace nc::engine
                         m_mainCamera.get(),
                         m_log.get(),
                         m_ui.get(),
-                        this);
+                        this,
+                        m_physics.get());
 
         Ecs::RegisterImpl(m_ecs.get());
     }
