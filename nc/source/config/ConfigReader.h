@@ -18,7 +18,7 @@ namespace
         auto delimIndex = line.find(INI_KEY_VALUE_DELIM);
         if (delimIndex == line.npos)
         {
-            throw std::runtime_error("ParseLine - invalid syntax in config file");
+            return false;
         }
 
         key = line.substr(0, delimIndex);
@@ -29,7 +29,9 @@ namespace
 
 namespace nc::config
 {
-    template<class Config_t, class MapKeyValueFunc_t>
+    template<class Config_t,
+             class MapKeyValueFunc_t,
+             class = std::enable_if_t<std::is_invocable_v<MapKeyValueFunc_t, std::string, std::string, Config_t&>>>
     void Read(std::string filePath, MapKeyValueFunc_t mapFunc, Config_t& out)
     {
         std::ifstream inFile;

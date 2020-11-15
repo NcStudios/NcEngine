@@ -5,6 +5,7 @@
 #include "SceneManager.h"
 #include "project/scenes/GameScene.h"
 #include "nc/source/config/Version.h"
+#include "nc/source/config/ConfigReader.h"
 
 #include <fstream>
 #include <functional>
@@ -20,64 +21,34 @@ namespace
     const auto LIST_BOX_SIZE = ImVec2{200, 64};
     const auto UI_SIZE = ImVec2{218, 450};
 
-    const auto INI_SKIP_CHARS = std::string{";#["};
-    const auto INI_KEY_VALUE_DELIM = '=';
+    const auto SERVER_PATH = std::string{"project/config/servers.ini"};
 
-    bool ParseLine(const std::string& line, std::string& key, std::string& value)
+    void MapKeyValue(std::string key, std::string value, std::vector<project::ui::ServerSelectable>& out)
     {
-        if (INI_SKIP_CHARS.find(line[0]) != INI_SKIP_CHARS.npos)
-        {
-            return false;
-        }
-
-        auto delimIndex = line.find(INI_KEY_VALUE_DELIM);
-        if (delimIndex == line.npos)
-        {
-            return false;
-        }
-
-        key = line.substr(0, delimIndex);
-        value = line.substr(delimIndex + 1);
-        return true;
-    }
-
-    std::vector<project::ui::ServerSelectable> ReadServerRecords()
-    {
-        std::ifstream inFile;
-        inFile.open("project/config/servers.ini");
-        if(!inFile.is_open())
-        {
-            throw std::runtime_error("Could not open server record file");
-        }
-
-        std::vector<project::ui::ServerSelectable> out;
-        std::string line{}, name{}, ip{};
-        while(!inFile.eof())
-        {
-            if(inFile.fail())
-            {
-                throw std::runtime_error("Loading config - ifstream failure");
-            }
-
-            std::getline(inFile, line, '\n');
-            if (ParseLine(line, name, ip))
-            {
-                out.push_back( {name, ip, false} );
-            }
-        }
-
-        return out;
+        out.push_back(project::ui::ServerSelectable{std::move(key), std::move(value)});
     }
 
     void WriteServerRecords(const std::vector<project::ui::ServerSelectable>& records)
     {
         std::ofstream outFile;
-        outFile.open("project/config/servers.ini");
+        outFile.open(SERVER_PATH);
         for(auto& record : records)
         {
             outFile << record.name << '=' << record.ip << '\n';
         }
         outFile.close();
+    }
+
+    void UISpacing()
+    {
+        ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+    }
+
+    void UISpacingWithSeparator()
+    {
+        ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
     }
 }
 
@@ -86,12 +57,13 @@ namespace project::ui
     MainMenuUI::MainMenuUI()
         : m_config{nc::engine::Engine::GetConfig()},
           m_isHovered{false},
-          m_servers{ReadServerRecords()},
+          m_servers{},
           m_editNameElement{false},
           m_addServerElement{false, std::bind(this->AddServer, this, std::placeholders::_1)}
     {
         m_ipBuffer[0] = '\0';
         SetImGuiStyle();
+        nc::config::Read(SERVER_PATH, MapKeyValue, m_servers);
     }
 
     MainMenuUI::~MainMenuUI()
@@ -107,15 +79,12 @@ namespace project::ui
 
         if(ImGui::Begin("Caverna", nullptr, UI_FLAGS))
         {
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
+            UISpacing();
             ImGui::Text("Caverna       version");
             ImGui::SameLine();
             ImGui::Text(NC_PROJECT_VERSION);
 
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            UISpacingWithSeparator();
 
             ImGui::Text("Player Name:");
             ImGui::SameLine();
@@ -126,13 +95,10 @@ namespace project::ui
                 m_editNameElement.ToggleOpen();
             }
 
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            UISpacingWithSeparator();
 
             ImGui::Text("Server IPs");
             ImGui::Spacing();
-
             ImGui::ListBoxHeader("", LIST_BOX_SIZE);
             for(auto& record : m_servers)
             {
@@ -140,23 +106,22 @@ namespace project::ui
                 record.isSelected = ImGui::Selectable(name.c_str(), record.isSelected);
             }
             ImGui::ListBoxFooter();
-
             if(ImGui::Button("Add", SMALL_BUTTON_SIZE))
             {
                 m_addServerElement.ToggleOpen();
             }
             ImGui::SameLine();
-            ImGui::Button("Delete", SMALL_BUTTON_SIZE);
-
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
-            if(ImGui::Button("Connect to server", BUTTON_SIZE))
+            if(ImGui::Button("Delete", SMALL_BUTTON_SIZE))
             {
+                // not implemented
+            }
+            UISpacing();
+            if(ImGui::Button("Connect to server", BUTTON_SIZE))
+            { 
+                // not implemented
             }
 
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            UISpacingWithSeparator();
 
             if(ImGui::Button("Load Demo Scene", BUTTON_SIZE))
             {
