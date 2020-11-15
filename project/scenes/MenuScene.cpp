@@ -56,4 +56,5 @@ void MenuScene::Unload()
 {
     nc::ui::UI::Set(nullptr);
     m_ui = nullptr;
+    ui::NcRegisterUI(nullptr);
 }
