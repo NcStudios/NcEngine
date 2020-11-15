@@ -1,7 +1,6 @@
 #include "WindowImpl.h"
 #include "Engine.h"
 #include "Engine.h"
-#include "graphics/Graphics.h"
 #include "DebugUtils.h"
 #include "input/Input.h"
 #include "math/Math.h"
@@ -24,7 +23,6 @@ namespace nc::window
         EngineShutdownCallback = engineShutdownFunc;
         GraphicsOnResizeCallback = nullptr;
         UIWndMessageCallback = nullptr;
-        //m_graphics = nullptr;
 
         m_wndClass = {};
         m_wndClass.style = WND_CLASS_STYLE_FLAGS;
@@ -105,11 +103,6 @@ namespace nc::window
     {
         return m_dimensions;
     }
-
-    // void WindowImpl::BindGraphics(graphics::Graphics* graphics)
-    // {
-    //     m_graphics = graphics;
-    // }
 
     void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback)
     {

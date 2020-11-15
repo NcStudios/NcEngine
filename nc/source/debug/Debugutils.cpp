@@ -6,6 +6,7 @@ namespace nc::debug
 
     void Log::LogToDiagnostics(std::string item)
     {
+        IF_THROW(!Log::LogToDiagnostics_, "Log::LogToDiagnostics_ is not bound");
         Log::LogToDiagnostics_(std::move(item));
     }
 }

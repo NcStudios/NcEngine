@@ -19,13 +19,14 @@ Engine::~Engine()
 void Engine::Start(std::unique_ptr<scene::Scene> initialScene)
 {
     V_LOG("Starting engine");
+    IF_THROW(!m_impl, "Engine::m_impl is not bound");
     m_impl->MainLoop(std::move(initialScene));
 }
 
 void Engine::Shutdown(bool forceImmediate)
 {
     V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
-
+    IF_THROW(!m_impl, "Engine::m_impl is not bound");
     if (forceImmediate)
     {
         m_impl->Shutdown();
@@ -38,6 +39,7 @@ void Engine::Shutdown(bool forceImmediate)
 
 const config::Config& Engine::GetConfig()
 {
+    IF_THROW(!Engine::GetConfig_, "Engine::GetConfig_ is not bound");
     return Engine::GetConfig_();
 }
 

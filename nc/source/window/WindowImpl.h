@@ -29,7 +29,6 @@ namespace nc::window
             HWND GetHWND() const noexcept;
             Vector2 GetDimensions() const;
 
-            //void BindGraphics(graphics::Graphics* graphics);
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback);
             void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback);
 
@@ -43,7 +42,6 @@ namespace nc::window
             HWND m_hwnd;
             WNDCLASS m_wndClass;
             HINSTANCE m_hInstance;
-            graphics::Graphics* m_graphics;
             Vector2 m_dimensions;
 
             std::function<void(bool)> EngineShutdownCallback;

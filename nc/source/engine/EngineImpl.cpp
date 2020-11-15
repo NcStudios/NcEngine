@@ -3,19 +3,16 @@
 #include "config/Config.h"
 #include "graphics/Graphics.h"
 #include "input/Input.h"
-
-#include "physics/PhysicsSystem.h"
 #include "time/NcTime.h"
-#include "ui/UIImpl.h"
-
-#include "Ecs.h"
-#include "ecs/EcsImpl.h"
-
 #include "ApiBinder.h"
 #include "camera/MainCameraImpl.h"
 #include "debug/LogImpl.h"
 #include "scene/SceneManagerImpl.h"
+#include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
+#include "Ecs.h"
+#include "ecs/EcsImpl.h"
+#include "physics/PhysicsSystem.h"
 
 #include <iostream>
 
