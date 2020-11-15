@@ -3,12 +3,13 @@
 #include "win32/NcWin32.h"
 #include "math/Vector2.h"
 
+#include <functional>
+
 namespace nc
 {
     namespace config { struct Config; }
     namespace engine { class Engine; }
     namespace graphics { class Graphics; }
-    namespace ui { class UISystem; }
 }
 
 namespace nc::window
@@ -16,7 +17,9 @@ namespace nc::window
     class WindowImpl
     {
         public:
-            WindowImpl(HINSTANCE instance, engine::Engine* engine, const config::Config& config);
+            WindowImpl(HINSTANCE instance,
+                       const config::Config& config,
+                       std::function<void(bool)> engineShutdownCallback);
             ~WindowImpl() noexcept;
             WindowImpl(const WindowImpl& other) = delete;
             WindowImpl(WindowImpl&& other) = delete;
@@ -26,8 +29,9 @@ namespace nc::window
             HWND GetHWND() const noexcept;
             Vector2 GetDimensions() const;
 
-            void BindGraphics(graphics::Graphics* graphics);
-            void BindUISystem(ui::UISystem* ui);
+            //void BindGraphics(graphics::Graphics* graphics);
+            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback);
+            void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback);
 
             void OnResize(float width, float height);
             void ProcessSystemMessages();
@@ -39,9 +43,11 @@ namespace nc::window
             HWND m_hwnd;
             WNDCLASS m_wndClass;
             HINSTANCE m_hInstance;
-            engine::Engine* m_engine;
             graphics::Graphics* m_graphics;
-            ui::UISystem* m_ui;
             Vector2 m_dimensions;
+
+            std::function<void(bool)> EngineShutdownCallback;
+            std::function<void(float,float,float,float)> GraphicsOnResizeCallback;
+            std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> UIWndMessageCallback;
     };
 } // end namespace nc::window

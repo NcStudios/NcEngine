@@ -6,14 +6,8 @@ namespace nc::config
     struct Config
     {
         Config();
-        ~Config();
 
-        static const Config& Get();
-        static void SetUserName(std::string name);
-
-        void Load() noexcept(false);
         void Save() noexcept(false);
-        bool Validate();
 
         struct
         {
@@ -45,7 +39,6 @@ namespace nc::config
         } physics;
 
         private:
-            static Config* m_instance;
-            void MapKeyValue(const std::string& key, const std::string& value);
+            bool Validate();
     };
 }

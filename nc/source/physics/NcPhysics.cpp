@@ -1,5 +1,5 @@
 #include "NcPhysics.h"
-#include "physics/PhysicsSystem.h"
+#include "PhysicsSystem.h"
 
 namespace nc::physics
 {

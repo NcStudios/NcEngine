@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "LogImpl.h"
 
 #include <chrono>
 #include <ctime>
@@ -13,14 +13,10 @@ namespace
     }
 }
 
-namespace nc::log
+namespace nc::debug
 {
-    Logger* Logger::m_instance = nullptr;
-
-    Logger::Logger(std::string path)
+    LogImpl::LogImpl(std::string path)
     {
-        Logger::m_instance = this;
-
         m_file.open(path);
         if(!m_file.is_open())
         {
@@ -29,19 +25,13 @@ namespace nc::log
         m_file << "Log started: " << GetTime();
     }
 
-    Logger::~Logger()
+    LogImpl::~LogImpl()
     {
         m_file << "Log finished: " << GetTime();
         m_file.close();
-        Logger::m_instance = nullptr;
     }
 
-    void Logger::Log(std::string item)
-    {
-        Logger::m_instance->Log_(std::move(item));
-    }
-
-    void Logger::Log_(std::string item)
+    void LogImpl::LogToDiagnostics(std::string item)
     {
         m_file << item << '\n';
     }

@@ -1,9 +1,9 @@
 #include "GameScene.h"
 #include "Ecs.h"
-#include "NcCamera.h"
-#include "NcUI.h"
+#include "MainCamera.h"
+#include "UI.h"
 #include "CamController.h"
-#include "DebugUtils.h"
+#include "DebugComponents.h"
 #include "source/Prefabs.h"
 #include "GamePiece.h"
 #include "ClickHandler.h"
@@ -14,8 +14,8 @@ using namespace project;
 void GameScene::Load()
 {
     m_log = std::make_unique<project::log::GameLog>();
-    m_ui = std::make_unique<project::ui::UI>(m_log.get());
-    nc::ui::NcRegisterUI(m_ui.get());
+    m_hud = std::make_unique<project::ui::Hud>(m_log.get());
+    nc::ui::UI::Set(m_hud.get());
 
     // Light
     auto lvHandle = Ecs::CreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
@@ -24,7 +24,7 @@ void GameScene::Load()
     //CamController
     auto camHandle = Ecs::CreateEntity({0.0f, 5.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
     auto camComponentPtr = Ecs::AddComponent<Camera>(camHandle);
-    camera::NcRegisterMainCamera(camComponentPtr);
+    camera::MainCamera::Set(camComponentPtr);
     Ecs::AddComponent<CamController>(camHandle);
     Ecs::AddComponent<ClickHandler>(camHandle);
     
@@ -188,6 +188,7 @@ void GameScene::Load()
  
 void GameScene::Unload()
 {
-    m_ui = nullptr;
+    nc::ui::UI::Set(nullptr);
+    m_hud = nullptr;
     m_log = nullptr;
 }

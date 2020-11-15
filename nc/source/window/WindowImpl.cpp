@@ -1,10 +1,9 @@
 #include "WindowImpl.h"
-#include "engine/Engine.h"
-#include "NcConfig.h"
+#include "Engine.h"
+#include "Engine.h"
 #include "graphics/Graphics.h"
-#include "NcDebug.h"
+#include "DebugUtils.h"
 #include "input/Input.h"
-#include "ui/UISystem.h"
 #include "math/Math.h"
 
 namespace
@@ -17,11 +16,15 @@ namespace nc::window
 {
     WindowImpl* WindowImpl::m_instance = nullptr;
 
-    WindowImpl::WindowImpl(HINSTANCE instance, engine::Engine* engine, const config::Config& config)
+    WindowImpl::WindowImpl(HINSTANCE instance,
+                           const config::Config& config,
+                           std::function<void(bool)> engineShutdownFunc)
     {
         WindowImpl::m_instance = this;
-        m_engine = engine;
-        m_graphics = nullptr;
+        EngineShutdownCallback = engineShutdownFunc;
+        GraphicsOnResizeCallback = nullptr;
+        UIWndMessageCallback = nullptr;
+        //m_graphics = nullptr;
 
         m_wndClass = {};
         m_wndClass.style = WND_CLASS_STYLE_FLAGS;
@@ -103,31 +106,37 @@ namespace nc::window
         return m_dimensions;
     }
 
-    void WindowImpl::BindUISystem(ui::UISystem* ui)
+    // void WindowImpl::BindGraphics(graphics::Graphics* graphics)
+    // {
+    //     m_graphics = graphics;
+    // }
+
+    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback)
     {
-        m_ui = ui;
+        GraphicsOnResizeCallback = callback;
     }
 
-    void WindowImpl::BindGraphics(graphics::Graphics* graphics)
+    void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback)
     {
-        m_graphics = graphics;
+        UIWndMessageCallback = callback;
     }
 
     void WindowImpl::OnResize(float width, float height)
     {
-        if(!(m_graphics))
+        if(!(GraphicsOnResizeCallback))
         {
             return;
         }
 
         m_dimensions = {width, height};
-        const auto& config = config::NcGetConfigReference();
-        m_graphics->OnResize(m_dimensions.X(), m_dimensions.Y(), config.graphics.nearClip, config.graphics.farClip);
+        const auto& config = engine::Engine::GetConfig();
+        GraphicsOnResizeCallback(m_dimensions.X(), m_dimensions.Y(), config.graphics.nearClip, config.graphics.farClip);
     }
 
     LRESULT CALLBACK WindowImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        if(WindowImpl::m_instance->m_ui->WndProc(hwnd, message, wParam, lParam))
+        if(WindowImpl::m_instance->UIWndMessageCallback &&
+           WindowImpl::m_instance->UIWndMessageCallback(hwnd, message, wParam, lParam))
         {
             return true;
         }
@@ -141,7 +150,7 @@ namespace nc::window
             }
             case WM_CLOSE:
             {
-                WindowImpl::m_instance->m_engine->Shutdown();
+                WindowImpl::m_instance->EngineShutdownCallback(false);
                 break;
             }
             case WM_DESTROY:

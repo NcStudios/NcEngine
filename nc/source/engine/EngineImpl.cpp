@@ -1,29 +1,32 @@
 #include "EngineImpl.h"
-#include "camera/MainCamera.h"
+#include "DebugUtils.h"
 #include "config/Config.h"
 #include "graphics/Graphics.h"
 #include "input/Input.h"
+
+#include "physics/PhysicsSystem.h"
+#include "time/NcTime.h"
+#include "ui/UIImpl.h"
+
 #include "Ecs.h"
 #include "ecs/EcsImpl.h"
-#include "NcDebug.h"
-#include "physics/PhysicsSystem.h"
-#include "scene/SceneManager.h"
-#include "time/NcTime.h"
-#include "ui/UISystem.h"
-#include "Window.h"
+
+#include "ApiBinder.h"
+#include "camera/MainCameraImpl.h"
+#include "debug/LogImpl.h"
+#include "scene/SceneManagerImpl.h"
 #include "window/WindowImpl.h"
 
 #include <iostream>
 
 namespace nc::engine
 {
-    EngineImpl::EngineImpl(HINSTANCE hInstance, Engine* topLevelEngine)
+    EngineImpl::EngineImpl(HINSTANCE hInstance, std::function<void(bool)> engineShutdownCallback)
     {
         isRunning = false;
-        m_config.Load();
         m_frameDeltaTimeFactor = 1.0f;
-        m_logger = std::make_unique<log::Logger>(m_config.project.logFilePath);
-        m_window = std::make_unique<window::WindowImpl>(hInstance, topLevelEngine, m_config);
+        m_log = std::make_unique<debug::LogImpl>(m_config.project.logFilePath);
+        m_window = std::make_unique<window::WindowImpl>(hInstance, m_config, engineShutdownCallback);
         auto dim = m_window->GetDimensions();
         auto hwnd = m_window->GetHWND();
         m_graphics = std::make_unique<graphics::Graphics>
@@ -35,18 +38,14 @@ namespace nc::engine
         );
         m_physics = std::make_unique<physics::PhysicsSystem>(m_graphics.get());
         m_ecs = std::make_unique<ecs::EcsImpl>();
-        m_uiSystem = std::make_unique<ui::UISystem>(hwnd, m_graphics.get());
-        m_sceneManager = std::make_unique<scene::SceneManager>();
-        m_mainCamera = std::make_unique<camera::MainCamera>();
+        m_ui = std::make_unique<ui::UIImpl>(hwnd, m_graphics.get());
+        m_sceneManager = std::make_unique<scene::SceneManagerImpl>();
+        m_mainCamera = std::make_unique<camera::MainCameraImpl>();
         #ifdef NC_EDITOR_ENABLED
         m_frameLogicTimer = std::make_unique<nc::time::Timer>();
         #endif
 
-        m_window->BindGraphics(m_graphics.get());
-        m_window->BindUISystem(m_uiSystem.get());
-        Window::RegisterImpl(m_window.get());
-        Ecs::RegisterImpl(m_ecs.get());
-
+        SetBindings();
         V_LOG("Engine initialized");
     }
 
@@ -58,7 +57,7 @@ namespace nc::engine
     {
         V_LOG("Starting engine loop");
         time::Time ncTime;
-        m_sceneManager->QueueSceneChange_(std::move(initialScene));
+        m_sceneManager->QueueSceneChange(std::move(initialScene));
         m_sceneManager->DoSceneChange();
         m_sceneManager->LoadActiveScene();
         isRunning = true;
@@ -130,10 +129,10 @@ namespace nc::engine
 
     void EngineImpl::FrameRender()
     {
-        m_uiSystem->FrameBegin();
+        m_ui->FrameBegin();
         m_graphics->FrameBegin();
 
-        auto camMatrix = m_mainCamera->GetTransform_()->CamGetMatrix();
+        auto camMatrix = m_mainCamera->GetTransform()->CamGetMatrix();
         m_graphics->SetCamera(camMatrix);
         
         m_ecs->GetSystem<PointLight>()->ForEach([&camMatrix](auto& light)
@@ -148,11 +147,11 @@ namespace nc::engine
         });
 
         #ifdef NC_EDITOR_ENABLED
-        m_uiSystem->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_ecs->GetActiveEntities());
+        m_ui->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_ecs->GetActiveEntities());
         #else
-        m_uiSystem->Frame();
+        m_ui->Frame();
         #endif
-        m_uiSystem->FrameEnd();
+        m_ui->FrameEnd();
         m_graphics->FrameEnd();
     }
 
@@ -164,5 +163,36 @@ namespace nc::engine
             DoSceneSwap();
         }
         input::Flush();
+    }
+
+    const config::Config& EngineImpl::GetConfig()
+    {
+        return m_config;
+    }
+
+    void EngineImpl::SetBindings()
+    {
+        m_window->BindGraphicsOnResizeCallback(std::bind(m_graphics->OnResize,
+                                                         m_graphics.get(),
+                                                         std::placeholders::_1,
+                                                         std::placeholders::_2,
+                                                         std::placeholders::_3,
+                                                         std::placeholders::_4));
+
+        m_window->BindUICallback(std::bind(m_ui->WndProc,
+                                           m_ui.get(),
+                                           std::placeholders::_1,
+                                           std::placeholders::_2,
+                                           std::placeholders::_3,
+                                           std::placeholders::_4));
+
+        ApiBinder::Bind(m_window.get(),
+                        m_sceneManager.get(),
+                        m_mainCamera.get(),
+                        m_log.get(),
+                        m_ui.get(),
+                        this);
+
+        Ecs::RegisterImpl(m_ecs.get());
     }
 } // end namespace nc::engine

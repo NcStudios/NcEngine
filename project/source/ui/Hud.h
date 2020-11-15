@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NcConfig.h"
+#include "Engine.h"
 #include "nc/source/ui/IUI.h"
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"
@@ -18,11 +18,11 @@ namespace project::log { class GameLog; }
 
 namespace project::ui
 {
-    class UI : public nc::ui::IUI
+    class Hud : public nc::ui::IUI
     {
         public:
-            UI(log::GameLog* gameLog);
-            ~UI();
+            Hud(log::GameLog* gameLog);
+            ~Hud();
             void Draw() override;
             bool IsHovered() override;
 

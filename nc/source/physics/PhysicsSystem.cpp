@@ -3,7 +3,7 @@
 #include "component/Transform.h"
 #include "Window.h"
 #include "graphics/Graphics.h"
-#include "camera/MainCamera.h"
+#include "MainCamera.h"
 
 #include <algorithm>
 #include <stdexcept>

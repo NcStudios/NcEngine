@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nc/source/ui/IUI.h"
-#include "NcConfig.h"
+#include "Engine.h"
 #include "EditNameUIElement.h"
 #include "AddServerSelectableUIElement.h"
 #include "ServerSelectable.h"
@@ -20,6 +20,8 @@ namespace project::ui
             bool IsHovered() override;
 
         private:
+            void AddServer(ServerSelectable server);
+            
             const nc::config::Config& m_config;
             bool m_isHovered;
             std::vector<ServerSelectable> m_servers;

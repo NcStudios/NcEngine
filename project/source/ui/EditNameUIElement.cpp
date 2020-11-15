@@ -1,5 +1,5 @@
 #include "EditNameUIElement.h"
-#include "NcConfig.h"
+#include "Engine.h"
 
 namespace project::ui
 {
@@ -19,7 +19,7 @@ namespace project::ui
             
             if(ImGui::Button("Save"))
             {
-                nc::config::NcSetUserName(m_buffer);
+                nc::engine::Engine::SetUserName(m_buffer);
                 isOpen = false;
             }
         }

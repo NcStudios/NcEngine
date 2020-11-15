@@ -1,13 +1,15 @@
 #include "Engine.h"
 #include "EngineImpl.h"
-#include "NcDebug.h"
+#include "DebugUtils.h"
 
 namespace nc::engine
 {
+    std::function<const config::Config&()> Engine::GetConfig_ = nullptr;
+    std::function<void(std::string)> Engine::SetUserName_ = nullptr;
+
 Engine::Engine(HINSTANCE hInstance)
-    : m_impl{ std::make_unique<EngineImpl>(hInstance, this) }
+    : m_impl{ std::make_unique<EngineImpl>(hInstance, std::bind(this->Shutdown, this, std::placeholders::_1)) }
 {
-    V_LOG("Creating engine");
 }
 
 Engine::~Engine()
@@ -32,5 +34,15 @@ void Engine::Shutdown(bool forceImmediate)
     {
         m_impl->isRunning = false;
     }
+}
+
+const config::Config& Engine::GetConfig()
+{
+    return Engine::GetConfig_();
+}
+
+void Engine::SetUserName(std::string name)
+{
+    Engine::SetUserName_(std::move(name));
 }
 }// end namespace nc::engine

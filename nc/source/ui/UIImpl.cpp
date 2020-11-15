@@ -1,4 +1,4 @@
-#include "UISystem.h"
+#include "UIImpl.h"
 #include "graphics/Graphics.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
@@ -6,50 +6,46 @@
 
 namespace nc::ui
 {
-    UISystem* UISystem::m_instance = nullptr;
-
-    UISystem::UISystem(HWND hwnd, ::nc::graphics::Graphics * graphics)
+    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics * graphics)
         : 
             #ifdef NC_EDITOR_ENABLED
             m_editor{ graphics },
             #endif
             m_projectUI{ nullptr }
     {
-        UISystem::m_instance = this;
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
         ImGui_ImplDX11_Init(graphics->m_device, graphics->m_context);
     }
 
-    UISystem::~UISystem()
+    UIImpl::~UIImpl()
     {
-        UISystem::m_instance = nullptr;
         ImGui_ImplWin32_Shutdown();
         ImGui_ImplDX11_Shutdown();
         ImGui::DestroyContext();
     }
 
-    LRESULT UISystem::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT UIImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         return ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam);
     }
 
-    void UISystem::BindProjectUI(IUI* ui)
+    void UIImpl::BindProjectUI(IUI* ui)
     {
-        UISystem::m_instance->m_projectUI = ui;
+        m_projectUI = ui;
     }
 
-    bool UISystem::IsProjectUIHovered()
+    bool UIImpl::IsProjectUIHovered()
     {
-        if (!UISystem::m_instance->m_projectUI)
+        if (!m_projectUI)
         {
             throw std::runtime_error("No project UI registered");
         }
-        return UISystem::m_instance->m_projectUI->IsHovered();
+        return m_projectUI->IsHovered();
     }
 
-    void UISystem::FrameBegin()
+    void UIImpl::FrameBegin()
     {
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
@@ -57,7 +53,7 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UISystem::Frame(float* dt, float frameLogicTime, std::unordered_map<::nc::EntityHandle, ::nc::Entity>& activeEntities)
+    void UIImpl::Frame(float* dt, float frameLogicTime, std::unordered_map<::nc::EntityHandle, ::nc::Entity>& activeEntities)
     {
         m_editor.Frame(dt, frameLogicTime, activeEntities);
         if(m_projectUI)
@@ -66,7 +62,7 @@ namespace nc::ui
         }
     }
     #else
-    void UISystem::Frame()
+    void UIImpl::Frame()
     {
         if(m_projectUI)
         {
@@ -75,7 +71,7 @@ namespace nc::ui
     }
     #endif
 
-    void UISystem::FrameEnd()
+    void UIImpl::FrameEnd()
     {
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

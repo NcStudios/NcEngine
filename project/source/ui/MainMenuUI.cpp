@@ -2,11 +2,12 @@
 #include "imgui/imgui.h"
 #include "Window.h"
 #include "UIStyle.h"
-#include "NcScene.h"
+#include "SceneManager.h"
 #include "project/scenes/GameScene.h"
 #include "nc/source/config/Version.h"
 
 #include <fstream>
+#include <functional>
 
 namespace
 {
@@ -83,11 +84,11 @@ namespace
 namespace project::ui
 {
     MainMenuUI::MainMenuUI()
-        : m_config{nc::config::NcGetConfigReference()},
+        : m_config{nc::engine::Engine::GetConfig()},
           m_isHovered{false},
           m_servers{ReadServerRecords()},
           m_editNameElement{false},
-          m_addServerElement{false, m_servers}
+          m_addServerElement{false, std::bind(this->AddServer, this, std::placeholders::_1)}
     {
         m_ipBuffer[0] = '\0';
         SetImGuiStyle();
@@ -159,7 +160,7 @@ namespace project::ui
 
             if(ImGui::Button("Load Demo Scene", BUTTON_SIZE))
             {
-                nc::scene::NcChangeScene(std::make_unique<GameScene>());
+                nc::scene::SceneManager::ChangeScene(std::make_unique<GameScene>());
             }
         }
         ImGui::End();
@@ -171,5 +172,10 @@ namespace project::ui
     bool MainMenuUI::IsHovered()
     {
         return m_isHovered;
+    }
+
+    void MainMenuUI::AddServer(ServerSelectable server)
+    {
+        m_servers.push_back(server);
     }
 }

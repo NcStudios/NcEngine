@@ -3,7 +3,7 @@
 #include "NcCommonTypes.h"
 #include "HandleManager.h"
 #include "engine/alloc/PoolArray.h"
-#include "NcDebug.h"
+#include "DebugUtils.h"
 
 #include <vector>
 #include <unordered_map>

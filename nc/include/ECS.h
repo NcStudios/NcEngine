@@ -4,7 +4,7 @@
 #include "component/PointLight.h"
 #include "component/Renderer.h"
 #include "component/Transform.h"
-#include "NcDebug.h"
+#include "DebugUtils.h"
 
 #include <string>
 
