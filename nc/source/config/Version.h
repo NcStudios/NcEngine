@@ -1,0 +1,6 @@
+#pragma once
+
+#define NC_PROJECT_VERSION "0.1.0"
+#define NC_PROJECT_VERSION_MAJOR "0"
+#define NC_PROJECT_VERISION_MINOR "1"
+#define NC_PROJECT_VERSION_PATCH "0"

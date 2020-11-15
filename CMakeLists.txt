@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project("NC Engine" LANGUAGES CXX)
+project("NC Engine" VERSION "0.1.0" LANGUAGES CXX)
 
 if(NOT EXISTS ${PROJECT_SOURCE_DIR}/build)
     file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/build)
@@ -45,6 +45,11 @@ endif()
 
 ### TARGET GAME.EXE ###
 add_executable(${EXE_NAME})
+
+#Propogate version
+configure_file(${ROOT_DIR}/nc/source/config/Version.h.in
+               ${ROOT_DIR}/nc/source/config/Version.h
+)
 
 #Properties
 set_target_properties(${EXE_NAME}
