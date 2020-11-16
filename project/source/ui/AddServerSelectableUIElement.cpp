@@ -10,7 +10,7 @@ namespace
 namespace project::ui
 {
     AddServerSelectableUIElement::AddServerSelectableUIElement(bool startOpen, ImVec2 dimensions, std::function<void(ServerSelectable)> callback)
-        : nc::ui::IUIElementCentered(startOpen, dimensions),
+        : nc::ui::IUIFixedElement(startOpen, nc::ui::UIPosition::Center, dimensions),
           AddServerCallback{callback}
     {
         m_nameBuffer[0] = '\0';
@@ -21,7 +21,7 @@ namespace project::ui
     {
         if(!isOpen) return;
 
-        nc::ui::IUIElementCentered::PositionElement();
+        nc::ui::IUIFixedElement::PositionElement();
 
         if(ImGui::Begin("Add Server", &(this->isOpen)))
         {

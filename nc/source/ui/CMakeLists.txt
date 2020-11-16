@@ -4,4 +4,5 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/nc/source/ui/IUIElement.cpp
         ${ROOT_DIR}/nc/source/ui/UI.cpp
         ${ROOT_DIR}/nc/source/ui/UIImpl.cpp
+        ${ROOT_DIR}/nc/source/ui/UIPosition.cpp
 )

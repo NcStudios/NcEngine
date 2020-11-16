@@ -1,12 +1,11 @@
 #include "IUIElement.h"
-#include "UI.h"
 #include "Window.h"
-
 
 namespace nc::ui
 {
-    IUIElementCentered::IUIElementCentered(bool startOpen, ImVec2 dimensions)
+    IUIFixedElement::IUIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions)
         : IUIElement(startOpen),
+          m_position{ position },
           m_screenDimensions { Window::GetDimensions() },
           m_elementDimensions{ dimensions }
     {
@@ -14,29 +13,25 @@ namespace nc::ui
         Window::RegisterOnResizeReceiver(this);
     }
 
-    IUIElementCentered::~IUIElementCentered()
+    IUIFixedElement::~IUIFixedElement()
     {
         Window::UnregisterOnResizeReceiver(this);
     }
 
-    void IUIElementCentered::OnResize(Vector2 dimensions)
+    void IUIFixedElement::OnResize(Vector2 dimensions)
     {
         m_screenDimensions = {dimensions.X(), dimensions.Y()};
         CalculateTopLeftPosition();
     }
 
-    void IUIElementCentered::PositionElement()
+    void IUIFixedElement::PositionElement()
     {
         ImGui::SetNextWindowPos(m_topLeftPosition);
         ImGui::SetNextWindowSize(m_elementDimensions);
     }
 
-    void IUIElementCentered::CalculateTopLeftPosition()
+    void IUIFixedElement::CalculateTopLeftPosition()
     {
-        m_topLeftPosition =
-        {
-            (m_screenDimensions.X() - m_elementDimensions.x) / 2.0f,
-            (m_screenDimensions.Y() - m_elementDimensions.y) / 2.0f
-        };
+        m_topLeftPosition = utils::GetTopLeftCoords( m_position, {m_screenDimensions.X(), m_screenDimensions.Y()}, m_elementDimensions);
     }
 }

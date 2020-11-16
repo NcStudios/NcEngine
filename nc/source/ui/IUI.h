@@ -4,24 +4,32 @@
 
 namespace nc::ui
 {
-    class IUI : public IUIElement
+    /** @note For internal use only. Derived classes should 
+     * inherit from  IUI or IUIFixed. */
+    class IUIBase
+    {
+        public:
+            virtual ~IUIBase() = default;
+            virtual void Draw() = 0;
+            virtual bool IsHovered() = 0;
+    };
+
+    class IUI : public IUIBase, public IUIElement
     {
         public:
             IUI()
                 : IUIElement(true)
-            {}
-
-            virtual bool IsHovered() = 0;
-    };
-
-    class IUIPositioned : public IUIElementCentered
-    {
-        public:
-            IUIPositioned(ImVec2 dimensions)
-                : IUIElementCentered(true, dimensions)
             {
             }
 
-            virtual bool IsHovered() = 0; 
+    };
+
+    class IUIFixed : public IUIBase, public IUIFixedElement
+    {
+        public:
+            IUIFixed(UIPosition position, ImVec2 dimensions)
+                : IUIFixedElement(true, position, dimensions)
+            {
+            }
     };
 }

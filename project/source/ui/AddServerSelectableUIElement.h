@@ -8,7 +8,7 @@
 
 namespace project::ui
 {
-    class AddServerSelectableUIElement : public nc::ui::IUIElementCentered
+    class AddServerSelectableUIElement : public nc::ui::IUIFixedElement
     {
         public:
             AddServerSelectableUIElement(bool startOpen, ImVec2 dimensions, std::function<void(ServerSelectable)> callback);

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "imgui/imgui.h"
+#include "UIPosition.h"
 #include "window/IOnResizeReceiver.h"
 #include "math/Vector2.h"
+#include "imgui/imgui.h"
 
 namespace nc::ui
 {
@@ -26,15 +27,17 @@ namespace nc::ui
             bool isOpen;
     };
 
-    class IUIElementCentered : public IUIElement, public window::IOnResizeReceiver
+    class IUIFixedElement : public IUIElement, public window::IOnResizeReceiver
     {
         public:
-            IUIElementCentered(bool startOpen, ImVec2 dimensions);
-            ~IUIElementCentered();
+            IUIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions);
+            ~IUIFixedElement();
 
             virtual void OnResize(nc::Vector2 dimensions);
         
         protected:
+            UIPosition m_position;
+            /** @todo Once Vector2.ToImVec2() is implemented, this can be easily changed to ImVec2 */
             Vector2 m_screenDimensions;
             ImVec2 m_elementDimensions;
             ImVec2 m_topLeftPosition;

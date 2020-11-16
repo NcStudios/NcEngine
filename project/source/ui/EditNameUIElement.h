@@ -7,7 +7,7 @@
 
 namespace project::ui
 {
-    class EditNameUIElement : public nc::ui::IUIElementCentered
+    class EditNameUIElement : public nc::ui::IUIFixedElement
     {
         public:
             EditNameUIElement(bool startOpen, ImVec2 dimensions, std::function<void(std::string)> callback);
