@@ -4,12 +4,14 @@
 #include "math/Vector2.h"
 
 #include <functional>
+#include <vector>
 
 namespace nc
 {
     namespace config { struct Config; }
     namespace engine { class Engine; }
     namespace graphics { class Graphics; }
+    namespace window { class IOnResizeReceiver; }
 }
 
 namespace nc::window
@@ -32,13 +34,17 @@ namespace nc::window
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback);
             void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback);
 
+            void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
+            void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void OnResize(float width, float height);
+
             void ProcessSystemMessages();
 
             static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
         private:
             static WindowImpl* m_instance;
+            std::vector<IOnResizeReceiver*> m_onResizeReceivers;
             HWND m_hwnd;
             WNDCLASS m_wndClass;
             HINSTANCE m_hInstance;

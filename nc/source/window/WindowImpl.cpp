@@ -1,9 +1,12 @@
 #include "WindowImpl.h"
+#include "IOnResizeReceiver.h"
 #include "Engine.h"
 #include "Engine.h"
 #include "DebugUtils.h"
 #include "input/Input.h"
 #include "math/Math.h"
+
+#include <algorithm>
 
 namespace
 {
@@ -18,6 +21,7 @@ namespace nc::window
     WindowImpl::WindowImpl(HINSTANCE instance,
                            const config::Config& config,
                            std::function<void(bool)> engineShutdownFunc)
+        : m_onResizeReceivers{}
     {
         WindowImpl::m_instance = this;
         EngineShutdownCallback = engineShutdownFunc;
@@ -114,6 +118,23 @@ namespace nc::window
         UIWndMessageCallback = callback;
     }
 
+    void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
+    {
+        m_onResizeReceivers.push_back(receiver);
+    }
+
+    void WindowImpl::UnregisterOnResizeReceiver(IOnResizeReceiver* receiver)
+    {
+        auto pos = std::find(m_onResizeReceivers.begin(), m_onResizeReceivers.end(), receiver);
+        if(pos == m_onResizeReceivers.end())
+        {
+            throw std::runtime_error("Attempt to unregister an unregistered IOnResizeReceiver");
+        }
+
+        *pos = m_onResizeReceivers.back();
+        m_onResizeReceivers.pop_back();
+    }
+
     void WindowImpl::OnResize(float width, float height)
     {
         if(!(GraphicsOnResizeCallback))
@@ -124,6 +145,10 @@ namespace nc::window
         m_dimensions = {width, height};
         const auto& config = engine::Engine::GetConfig();
         GraphicsOnResizeCallback(m_dimensions.X(), m_dimensions.Y(), config.graphics.nearClip, config.graphics.farClip);
+        for(auto receiver : m_onResizeReceivers)
+        {
+            receiver->OnResize(m_dimensions);
+        }
     }
 
     LRESULT CALLBACK WindowImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

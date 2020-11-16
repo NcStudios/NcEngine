@@ -1,6 +1,7 @@
 #include "MainMenuUI.h"
 #include "imgui/imgui.h"
 #include "Window.h"
+#include "UI.h"
 #include "UIStyle.h"
 #include "SceneManager.h"
 #include "project/scenes/GameScene.h"
@@ -20,6 +21,8 @@ namespace
     const auto SMALL_BUTTON_SIZE = ImVec2{96, 20};
     const auto LIST_BOX_SIZE = ImVec2{200, 64};
     const auto UI_SIZE = ImVec2{218, 450};
+    const auto ADD_SERVER_ELEMENT_SIZE = ImVec2{300, 100};
+    const auto EDIT_NAME_ELEMENT_SIZE = ImVec2{300, 100};
 
     const auto SERVER_PATH = std::string{"project/config/servers.ini"};
 
@@ -55,27 +58,29 @@ namespace
 namespace project::ui
 {
     MainMenuUI::MainMenuUI(config::ProjectConfig projectConfig)
-        : //m_config{nc::engine::Engine::GetConfig()},
-          m_projectConfig{ std::move(projectConfig) },
+        : m_projectConfig{ std::move(projectConfig) },
+          m_screenDimensions{ nc::Window::GetDimensions() },
           m_isHovered{false},
           m_servers{},
-          m_editNameElement{false, std::bind(this->EditName, this, std::placeholders::_1)},
-          m_addServerElement{false, std::bind(this->AddServer, this, std::placeholders::_1)}
+          m_editNameElement{false, EDIT_NAME_ELEMENT_SIZE, std::bind(this->EditName, this, std::placeholders::_1)},
+          m_addServerElement{false, ADD_SERVER_ELEMENT_SIZE, std::bind(this->AddServer, this, std::placeholders::_1)}
     {
         m_ipBuffer[0] = '\0';
         SetImGuiStyle();
         nc::config::Read(SERVER_PATH, MapKeyValue, m_servers);
+        nc::Window::RegisterOnResizeReceiver(this);
     }
 
     MainMenuUI::~MainMenuUI()
     {
+        nc::Window::UnregisterOnResizeReceiver(this);
         WriteServerRecords(m_servers);
     }
 
     void MainMenuUI::Draw()
     {
-        auto dim = nc::Window::GetDimensions();
-        ImGui::SetNextWindowPos( { (dim.X() - UI_SIZE.x) / 2, (dim.Y() - UI_SIZE.y) / 2 } );
+        auto pos = nc::ui::Utils::GetTopLeftToCenterElement(m_screenDimensions, {UI_SIZE.x, UI_SIZE.y});
+        ImGui::SetNextWindowPos({pos.X(), pos.Y()});
         ImGui::SetNextWindowSize(UI_SIZE);
 
         if(ImGui::Begin("Caverna", nullptr, UI_FLAGS))
@@ -138,6 +143,11 @@ namespace project::ui
     bool MainMenuUI::IsHovered()
     {
         return m_isHovered;
+    }
+
+    void MainMenuUI::OnResize(nc::Vector2 dimensions)
+    {
+        m_screenDimensions = dimensions;
     }
 
     void MainMenuUI::AddServer(ServerSelectable server)

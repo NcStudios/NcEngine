@@ -12,6 +12,8 @@ namespace project::ui
             {
             }
 
+            virtual ~UIElement() = default;
+
             void ToggleOpen()
             {
                 isOpen = !isOpen;

@@ -1,16 +1,17 @@
 #pragma once
 
-#include "UIElement.h"
+#include "UIElementCentered.h"
 
 #include <functional>
 #include <string>
 
 namespace project::ui
 {
-    class EditNameUIElement : public UIElement
+    class EditNameUIElement : public UIElementCentered
     {
         public:
-            EditNameUIElement(bool startOpen, std::function<void(std::string)> callback);
+            EditNameUIElement(bool startOpen, ImVec2 dimensions, std::function<void(std::string)> callback);
+
             void Draw() override;
         
         private:
