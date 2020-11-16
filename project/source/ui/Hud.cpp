@@ -21,8 +21,7 @@ namespace
 namespace project::ui
 {
     Hud::Hud(log::GameLog* gameLog, config::ProjectConfig projectConfig)
-        : //m_config { ::nc::engine::Engine::GetConfig() },
-          m_projectConfig{ std::move(projectConfig) },
+        : m_projectConfig{ std::move(projectConfig) },
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
           m_soundboardUIElement {false},
