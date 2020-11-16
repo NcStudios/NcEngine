@@ -1,34 +1,34 @@
 include(GoogleTest)
 
-### PoolArray Functional Tests ###
-add_executable(PoolArray_tests
-    ${ROOT_DIR}/test/integration/PoolArray_tests.cpp
+### Pool Functional Tests ###
+add_executable(Pool_tests
+    ${ROOT_DIR}/test/integration/Pool_tests.cpp
 )
 
-target_include_directories(PoolArray_tests
+target_include_directories(Pool_tests
     PRIVATE
         ${NC_INCLUDE_DIRS}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
 if(DEBUG_BUILD)
-  target_compile_options(PoolArray_tests
+  target_compile_options(Pool_tests
       PUBLIC
           ${GCC_DEBUG_FLAGS}
   )
 endif()
 
-target_compile_options(PoolArray_tests
+target_compile_options(Pool_tests
     PUBLIC
         ${GCC_WARNING_FLAGS}
 )
 
-target_link_libraries(PoolArray_tests
+target_link_libraries(Pool_tests
     PRIVATE
         gtest
 )
 
-add_test(PoolArray_tests PoolArray_tests)
+add_test(Pool_tests Pool_tests)
 
 #### Nce Functional Tests ###
 add_executable(Nce_integration_tests 

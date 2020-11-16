@@ -2,7 +2,7 @@
 
 #include "NcCommonTypes.h"
 #include "HandleManager.h"
-#include "engine/alloc/PoolArray.h"
+#include "engine/alloc/Pool.h"
 #include "NcDebug.h"
 
 #include <vector>
@@ -25,7 +25,7 @@ template<class T>
 class ComponentSystem
 {
     public:
-        ComponentSystem(const uint32_t reserveSize = 100u);
+        ComponentSystem(const uint32_t reserveSize = 100u, bool isReserveSizeMaxSize = false);
         virtual ~ComponentSystem() = default;
         
         ComponentHandle GetCurrentHandle();
@@ -50,26 +50,28 @@ class ComponentSystem
         engine::ComponentIndexPair AllocateNew(T ** newItemOut);
 
     private:
+        bool m_isReserveSizeMaxSize;
         uint32_t m_poolSize;
-        std::vector<engine::alloc::PoolArray<T>> m_poolArrays;
+        std::vector<engine::alloc::Pool<T>> m_poolArray;
         std::unordered_map<ComponentHandle, engine::ComponentIndexPair> m_indexMap;
         HandleManager<ComponentHandle> m_handleManager;      
 };
 
 template<class T>
-ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize)
+ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize, bool isReserveSizeMaxSize)
     : m_poolSize{ reserveSize },
-        m_poolArrays {}
+      m_poolArray {}
 {
-    m_poolArrays.emplace_back(engine::alloc::PoolArray<T>(m_poolSize));
+    m_poolArray.emplace_back(engine::alloc::Pool<T>(m_poolSize));
+    m_isReserveSizeMaxSize = isReserveSizeMaxSize;
 }
 
 template<class T>
 void ComponentSystem<T>::Clear()
 {
-    m_poolArrays.clear();
-    m_poolArrays.shrink_to_fit();
-    m_poolArrays.emplace_back(engine::alloc::PoolArray<T>(m_poolSize));
+    m_poolArray.clear();
+    m_poolArray.shrink_to_fit();
+    m_poolArray.emplace_back(engine::alloc::Pool<T>(m_poolSize));
     m_indexMap.clear();
     m_handleManager.Reset();
 }
@@ -78,7 +80,7 @@ template<class T>
 template<class Func>
 void ComponentSystem<T>::ForEach(Func func)
 {
-    for(auto & pool : m_poolArrays)
+    for(auto & pool : m_poolArray)
     {
         pool.ForEach(func);
     }
@@ -87,18 +89,24 @@ void ComponentSystem<T>::ForEach(Func func)
 template<class T>
 engine::ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
 {
-    for(uint32_t i = 0; i < m_poolArrays.size(); ++i)
+    for(uint32_t i = 0; i < m_poolArray.size(); ++i)
     {
-        if (!m_poolArrays[i].IsFull())
+        if (!m_poolArray[i].IsFull())
         {
-            auto freePos = m_poolArrays[i].Alloc(newItemOut);
+            auto freePos = m_poolArray[i].Alloc(newItemOut);
             return { i, freePos };
         }
     }
 
-    m_poolArrays.push_back(engine::alloc::PoolArray<T>(m_poolSize));
-    uint32_t poolIndex = m_poolArrays.size() - 1;
-    uint32_t freePos = m_poolArrays.back().Alloc(newItemOut);
+    // The first pool in the pool array is full, and we have set a hard limit on total items.
+    if (m_isReserveSizeMaxSize)
+    {
+        throw std::runtime_error("ComponentSystem::AllocateNew - Pool is at max capacity and an additional item add was attempted.");
+    }
+
+    m_poolArray.push_back(engine::alloc::Pool<T>(m_poolSize));
+    uint32_t poolIndex = m_poolArray.size() - 1;
+    uint32_t freePos = m_poolArray.back().Alloc(newItemOut);
     return { poolIndex, freePos };
 }
 
@@ -125,7 +133,7 @@ bool ComponentSystem<T>::Remove(const ComponentHandle handle)
     }
 
     auto removePair = GetIndexPairFromHandle(handle);
-    auto & owningPool = m_poolArrays[removePair.indexInPoolCollection];
+    auto & owningPool = m_poolArray[removePair.indexInPoolCollection];
     owningPool.GetPtrTo(removePair.indexInPool)->SetMemoryState(MemoryState::Invalid);
     owningPool.Free(removePair.indexInPool);
 
@@ -152,7 +160,7 @@ T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
     }
 
     engine::ComponentIndexPair pair = GetIndexPairFromHandle(handle);
-    return m_poolArrays[pair.indexInPoolCollection].GetPtrTo(pair.indexInPool);
+    return m_poolArray[pair.indexInPoolCollection].GetPtrTo(pair.indexInPool);
 }
 
 template<class T>

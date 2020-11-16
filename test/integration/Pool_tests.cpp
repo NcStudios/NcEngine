@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "engine/alloc/PoolArray.h"
+#include "engine/alloc/Pool.h"
 
 using namespace nc::engine::alloc;
 
@@ -11,9 +11,9 @@ struct Mock
 };
 
 
-TEST(PoolArray, IsFull_PoolFull_ReturnsTrue)
+TEST(Pool, IsFull_PoolFull_ReturnsTrue)
 {
-    PoolArray<Mock> allocator(1);
+    Pool<Mock> allocator(1);
     Mock * mock = nullptr;
     auto pos = allocator.Alloc(&mock);
     auto actual = allocator.IsFull();
@@ -21,9 +21,9 @@ TEST(PoolArray, IsFull_PoolFull_ReturnsTrue)
     allocator.Free(pos);
 }
 
-TEST(PoolArray, IsFull_AfterFree_ReturnsFalse)
+TEST(Pool, IsFull_AfterFree_ReturnsFalse)
 {
-    PoolArray<Mock> allocator(1);
+    Pool<Mock> allocator(1);
     Mock * mock = nullptr;
     auto pos = allocator.Alloc(&mock);
     allocator.Free(pos);
@@ -31,18 +31,18 @@ TEST(PoolArray, IsFull_AfterFree_ReturnsFalse)
     EXPECT_EQ(actual, false);
 }
 
-TEST(PoolArray, Alloc_PoolFull_Throws)
+TEST(Pool, Alloc_PoolFull_Throws)
 {
-    PoolArray<Mock> allocator(1);
+    Pool<Mock> allocator(1);
     Mock * mock = nullptr;
     auto pos = allocator.Alloc(&mock);
     EXPECT_THROW(allocator.Alloc(&mock), std::runtime_error);
     allocator.Free(pos);
 }
 
-TEST(PoolArray, GetPtrTo_GoodArgs_GetsPtr)
+TEST(Pool, GetPtrTo_GoodArgs_GetsPtr)
 {
-    PoolArray<Mock> allocator(1);
+    Pool<Mock> allocator(1);
     Mock * mock = nullptr;
     auto pos = allocator.Alloc(&mock);
     *mock = Mock{ 1, nc::MemoryState::Valid };
@@ -52,9 +52,9 @@ TEST(PoolArray, GetPtrTo_GoodArgs_GetsPtr)
     allocator.Free(pos);
 }
 
-TEST(PoolArray, GetPtrTo_BadArgs_Throws)
+TEST(Pool, GetPtrTo_BadArgs_Throws)
 {
-    PoolArray<Mock> allocator(1);
+    Pool<Mock> allocator(1);
     EXPECT_THROW(allocator.GetPtrTo(1u), std::runtime_error);
 }
 

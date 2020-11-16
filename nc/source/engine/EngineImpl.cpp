@@ -7,6 +7,7 @@
 #include "ecs/EcsImpl.h"
 #include "NcDebug.h"
 #include "physics/PhysicsSystem.h"
+#include "component/PointLightManager.h"
 #include "scene/SceneManager.h"
 #include "time/NcTime.h"
 #include "ui/UISystem.h"
@@ -36,6 +37,7 @@ namespace nc::engine
         m_physics = std::make_unique<physics::PhysicsSystem>(m_graphics.get());
         m_ecs = std::make_unique<ecs::EcsImpl>();
         m_uiSystem = std::make_unique<ui::UISystem>(hwnd, m_graphics.get());
+        m_pointLightManager = std::make_unique<PointLightManager>();
         m_sceneManager = std::make_unique<scene::SceneManager>();
         m_mainCamera = std::make_unique<camera::MainCamera>();
         #ifdef NC_EDITOR_ENABLED
@@ -136,10 +138,12 @@ namespace nc::engine
         auto camMatrix = m_mainCamera->GetTransform_()->CamGetMatrix();
         m_graphics->SetCamera(camMatrix);
         
-        m_ecs->GetSystem<PointLight>()->ForEach([&camMatrix](auto& light)
+        auto pointLightManager = m_pointLightManager.get();
+        m_ecs->GetSystem<PointLight>()->ForEach([&camMatrix, pointLightManager](auto& light)
         {
-            light.Bind(camMatrix);
+            pointLightManager->AddPointLight(light, camMatrix);
         });
+        m_pointLightManager->Bind();
 
         auto gfx = m_graphics.get();
         m_ecs->GetSystem<Renderer>()->ForEach([gfx](auto& renderer)

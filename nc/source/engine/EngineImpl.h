@@ -27,6 +27,7 @@ namespace nc
     namespace time { class Timer; }
     namespace ui { class UISystem; }
     namespace window { class WindowImpl; }
+    class PointLightManager;
 }
 
 namespace nc::engine
@@ -56,6 +57,7 @@ namespace nc::engine
             std::unique_ptr<physics::PhysicsSystem> m_physics;
             std::unique_ptr<ecs::EcsImpl> m_ecs;
             std::unique_ptr<ui::UISystem> m_uiSystem;
+            std::unique_ptr<PointLightManager> m_pointLightManager;
             std::unique_ptr<scene::SceneManager> m_sceneManager;
             std::unique_ptr<camera::MainCamera> m_mainCamera;
             #ifdef NC_EDITOR_ENABLED

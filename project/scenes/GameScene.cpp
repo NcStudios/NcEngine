@@ -18,8 +18,16 @@ void GameScene::Load()
     nc::ui::NcRegisterUI(m_ui.get());
 
     // Light
-    auto lvHandle = Ecs::CreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+    auto lvHandle = Ecs::CreateEntity({-2.4f, 12.1f, 0.0f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
     Ecs::AddComponent<PointLight>(lvHandle);
+
+    // Light
+    auto lvHandle2 = Ecs::CreateEntity({12.1f, 14.5f, 7.3f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+    Ecs::AddComponent<PointLight>(lvHandle2);
+
+    // Light
+    auto lvHandle3 = Ecs::CreateEntity({4.1f, 14.5f, 3.3f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+    Ecs::AddComponent<PointLight>(lvHandle3);
 
     //CamController
     auto camHandle = Ecs::CreateEntity({0.0f, 5.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
@@ -36,7 +44,7 @@ void GameScene::Load()
     const auto scaleFactor = 2;
 
     // Table
-    auto tableMaterial = graphics::PBRMaterial{{"project//Textures//DiningRoomTable_Material_BaseColor.png", "project//Textures//DiningRoomTable_Material_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    auto tableMaterial = graphics::PBRMaterial{{"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto tableHandle = Ecs::CreateEntity({2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, {1.5708f, 0.0f, 1.5708f}, Vector3::One() * 7.5, "Table Piece");
     auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
     Ecs::AddComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
@@ -188,7 +196,7 @@ void GameScene::Load()
  
 void GameScene::Unload()
 {
-    ui::NcRegisterUI(nullptr);
+    nc::ui::NcRegisterUI(nullptr);
     m_ui = nullptr;
     m_log = nullptr;
 }
