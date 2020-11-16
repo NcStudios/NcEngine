@@ -1,7 +1,6 @@
 #pragma once
 
-#include "UIElementCentered.h"
-#include "window/IOnResizeReceiver.h"
+#include "ui/IUIElement.h"
 #include "math/Vector2.h"
 #include "ServerSelectable.h"
 
@@ -9,7 +8,7 @@
 
 namespace project::ui
 {
-    class AddServerSelectableUIElement : public UIElementCentered
+    class AddServerSelectableUIElement : public nc::ui::IUIElementCentered
     {
         public:
             AddServerSelectableUIElement(bool startOpen, ImVec2 dimensions, std::function<void(ServerSelectable)> callback);

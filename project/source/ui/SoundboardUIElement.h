@@ -1,10 +1,10 @@
 #pragma once
 
-#include "UIElement.h"
+#include "ui/IUIElement.h"
 
 namespace project::ui
 {
-    class SoundboardUIElement : public UIElement
+    class SoundboardUIElement : public nc::ui::IUIElement
     {
         public:
             SoundboardUIElement(bool startOpen);

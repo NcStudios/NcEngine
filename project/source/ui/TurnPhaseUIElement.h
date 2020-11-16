@@ -1,10 +1,10 @@
 #pragma once
 
-#include "UIElement.h"
+#include "ui/IUIElement.h"
 
 namespace project::ui
 {
-    class TurnPhaseUIElement : public UIElement
+    class TurnPhaseUIElement : public nc::ui::IUIElement
     {
         public:
             TurnPhaseUIElement(bool startOpen);

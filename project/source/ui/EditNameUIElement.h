@@ -1,13 +1,13 @@
 #pragma once
 
-#include "UIElementCentered.h"
+#include "ui/IUIElement.h"
 
 #include <functional>
 #include <string>
 
 namespace project::ui
 {
-    class EditNameUIElement : public UIElementCentered
+    class EditNameUIElement : public nc::ui::IUIElementCentered
     {
         public:
             EditNameUIElement(bool startOpen, ImVec2 dimensions, std::function<void(std::string)> callback);

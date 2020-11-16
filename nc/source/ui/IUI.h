@@ -1,11 +1,27 @@
 #pragma once
 
+#include "IUIElement.h"
+
 namespace nc::ui
 {
-    class IUI
+    class IUI : public IUIElement
     {
         public:
-            virtual void Draw() = 0;
+            IUI()
+                : IUIElement(true)
+            {}
+
             virtual bool IsHovered() = 0;
+    };
+
+    class IUIPositioned : public IUIElementCentered
+    {
+        public:
+            IUIPositioned(ImVec2 dimensions)
+                : IUIElementCentered(true, dimensions)
+            {
+            }
+
+            virtual bool IsHovered() = 0; 
     };
 }

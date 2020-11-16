@@ -7,5 +7,4 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/project/source/ui/MainMenuUI.cpp
         ${ROOT_DIR}/project/source/ui/TurnPhaseUIElement.cpp
         ${ROOT_DIR}/project/source/ui/SoundboardUIElement.cpp
-        ${ROOT_DIR}/project/source/ui/UIElementCentered.cpp
 )

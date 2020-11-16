@@ -17,7 +17,7 @@ namespace
 namespace project::ui
 {
     SoundboardUIElement::SoundboardUIElement(bool startOpen)
-        : UIElement(startOpen)
+        : nc::ui::IUIElement(startOpen)
     {
     }
 
