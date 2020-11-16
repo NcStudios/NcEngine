@@ -1,7 +1,7 @@
 #include "CamController.h"
-#include "NcCamera.h"
+#include "MainCamera.h"
 #include "input/Input.h"
-#include "NcUI.h"
+#include "UI.h"
 #include "Window.h"
 
 using namespace nc;
@@ -15,17 +15,17 @@ namespace
 }
 
 CamController::CamController()
-    : m_config{ config::NcGetConfigReference() }
+    : m_config{ engine::Engine::GetConfig() }
 {}
 
 void CamController::FrameUpdate(float dt)
 {
     if (!m_mainCameraTransform)
     {
-        m_mainCameraTransform = camera::NcGetMainCameraTransform();
+        m_mainCameraTransform = camera::MainCamera::GetTransform();
     }
 
-    if (ui::NcIsUIHovered())
+    if (ui::UI::IsHovered())
     {
         return;
     }

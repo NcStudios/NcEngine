@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NcConfig.h"
+#include "Engine.h"
 #include "nc/source/ui/IUI.h"
+#include "config/ProjectConfig.h"
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"
-#include "EditNameUIElement.h"
 #include "SoundboardUIElement.h"
 
 #include <memory>
@@ -18,19 +18,19 @@ namespace project::log { class GameLog; }
 
 namespace project::ui
 {
-    class UI : public nc::ui::IUI
+    class Hud : public nc::ui::IUI
     {
         public:
-            UI(log::GameLog* gameLog);
-            ~UI();
+            Hud(log::GameLog* gameLog, config::ProjectConfig projectConfig);
+            ~Hud();
             void Draw() override;
             bool IsHovered() override;
 
         private:
-            const ::nc::config::Config& m_config;
+            //const ::nc::config::Config& m_config;
+            config::ProjectConfig m_projectConfig;
             LogUIElement m_logUIElement;
             TurnPhaseUIElement m_turnPhaseUIElement;
-            EditNameUIElement m_editNameUIElement;
             SoundboardUIElement m_soundboardUIElement;
             std::unique_ptr<nc::graphics::d3dresource::Texture> m_texture;
             bool m_isHovered;
@@ -40,6 +40,5 @@ namespace project::ui
             void DrawTurnHeader();
             void DrawResources();
             void DrawResource(nc::graphics::d3dresource::Texture* texture, unsigned count, const char* label);
-
     };
 } //end namespace project::ui

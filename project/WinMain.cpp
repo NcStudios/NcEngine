@@ -1,7 +1,6 @@
 #include "win32/NcWin32.h"
-#include "NcDebug.h"
-#include "NcLog.h"
-#include "engine/Engine.h"
+#include "DebugUtils.h"
+#include "Engine.h"
 #include "project/scenes/MenuScene.h"
 
 #include <iostream>
@@ -22,14 +21,14 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     catch(const std::runtime_error& e)
     {
         std::cerr << "Fatal error:\n" << e.what();
-        nc::log::NcLogToDiagnostics(e.what());
+        nc::debug::Log::LogToDiagnostics(e.what());
         if(engine)
             engine->Shutdown(true);
     }
     catch(std::exception& e)
     {
         std::cerr << "Exception: \n" << e.what();
-        nc::log::NcLogToDiagnostics(e.what());
+        nc::debug::Log::LogToDiagnostics(e.what());
         if(engine)
             engine->Shutdown(true);
 
@@ -37,7 +36,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     catch(...)
     {
         std::cerr << "WinMain.cpp - unkown exception caught\n";
-        nc::log::NcLogToDiagnostics("WinMain.cpp - unkown exception");
+        nc::debug::Log::LogToDiagnostics("WinMain.cpp - unkown exception");
         if(engine)
             engine->Shutdown(true);
     }

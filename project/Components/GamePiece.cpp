@@ -9,7 +9,7 @@ namespace project
           m_isRegisteredAsClickable{ true },
           m_entityTag{}
     {
-        nc::physics::NcRegisterClickable(this);
+        nc::physics::Physics::RegisterClickable(this);
         layers |= nc::physics::Layer::GamePiece;
     }
 
@@ -17,7 +17,7 @@ namespace project
     {
         if(m_isRegisteredAsClickable)
         {
-            nc::physics::NcUnregisterClickable(this);
+            nc::physics::Physics::UnregisterClickable(this);
         }
     }
 

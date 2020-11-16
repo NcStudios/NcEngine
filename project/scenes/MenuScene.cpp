@@ -1,8 +1,9 @@
 #include "MenuScene.h"
 #include "Ecs.h"
-#include "NcCamera.h"
-#include "NcUI.h"
-#include "DebugUtils.h"
+#include "MainCamera.h"
+#include "UI.h"
+#include "config/ProjectConfig.h"
+#include "DebugComponents.h"
 #include "CamController.h"
 #include "project/components/CubeRotator.h"
 #include "source/Prefabs.h"
@@ -14,8 +15,11 @@ using namespace nc;
 
 void MenuScene::Load()
 {
-    m_ui = std::make_unique<project::ui::MainMenuUI>();
-    ui::NcRegisterUI(m_ui.get());
+    project::config::ProjectConfig projectConfig;
+    projectConfig.Load();
+
+    m_ui = std::make_unique<project::ui::MainMenuUI>(projectConfig);
+    ui::UI::Set(m_ui.get());
 
     prefab::InitializeResources();
     
@@ -26,7 +30,7 @@ void MenuScene::Load()
     // CamController
     auto camHandle = Ecs::CreateEntity("Main Camera");
     auto camComponentPtr = Ecs::AddComponent<Camera>(camHandle);
-    camera::NcRegisterMainCamera(camComponentPtr);
+    camera::MainCamera::Set(camComponentPtr);
     
     // Debug Controller
     auto debugHandle = Ecs::CreateEntity("Debug Controller");
@@ -54,6 +58,6 @@ void MenuScene::Load()
 
 void MenuScene::Unload()
 {
+    nc::ui::UI::Set(nullptr);
     m_ui = nullptr;
-    ui::NcRegisterUI(nullptr);
 }

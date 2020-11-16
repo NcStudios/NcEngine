@@ -1,5 +1,5 @@
 #include "PBRMaterial.h"
-#include "NcConfig.h"
+#include "Engine.h"
 #include "config/Config.h"
 #include "d3dresource/GraphicsResourceManager.h"
 
@@ -26,7 +26,7 @@ namespace nc::graphics
             PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Texture>(texturePathRef, shaderIndex++));
         }
 
-        const auto defaultShaderPath = nc::config::NcGetConfigReference().graphics.shadersPath;
+        const auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
         PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "pbrpixelshader.cso"));
         PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Sampler>(SAMPLER_TAG));
         PBRMaterial::AddGraphicsResource(PixelConstantBuffer<MaterialProperties>::AcquireUnique(properties, 1u));

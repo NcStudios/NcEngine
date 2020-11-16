@@ -1,4 +1,4 @@
-#include "UI.h"
+#include "Hud.h"
 #include "imgui/imgui.h"
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "LogUIElement.h"
@@ -20,36 +20,34 @@ namespace
 
 namespace project::ui
 {
-    UI::UI(log::GameLog* gameLog)
-        : m_config { ::nc::config::NcGetConfigReference() },
+    Hud::Hud(log::GameLog* gameLog, config::ProjectConfig projectConfig)
+        : m_projectConfig{ std::move(projectConfig) },
           m_logUIElement {true, gameLog},
           m_turnPhaseUIElement {false},
-          m_editNameUIElement {false},
           m_soundboardUIElement {false},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
           m_isHovered { false }
     {
     }
 
-    UI::~UI()
+    Hud::~Hud()
     {
     }
 
-    void UI::Draw()
+    void Hud::Draw()
     {
         DrawHUD();
         m_turnPhaseUIElement.Draw();
-        m_editNameUIElement.Draw();
         m_soundboardUIElement.Draw();
         m_isHovered = ImGui::IsAnyWindowHovered();
     }
 
-    bool UI::IsHovered()
+    bool Hud::IsHovered()
     {
         return m_isHovered;
     }
 
-    void UI::DrawHUD()
+    void Hud::DrawHUD()
     {
         auto dim = nc::Window::GetDimensions();
         ImGui::SetNextWindowPos({0, (float)dim.Y() - HUD_HEIGHT});
@@ -78,16 +76,12 @@ namespace project::ui
         ImGui::End();
     }
 
-    void UI::DrawMenu()
+    void Hud::DrawMenu()
     {
         if(ImGui::BeginMenuBar())
         {
             if(ImGui::BeginMenu("Player"))
             {
-                if(ImGui::MenuItem("Edit Name"))
-                {
-                    m_editNameUIElement.ToggleOpen();
-                }
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Windows"))
@@ -110,14 +104,14 @@ namespace project::ui
         }
     }
 
-    void UI::DrawTurnHeader()
+    void Hud::DrawTurnHeader()
     {
-        ImGui::Text(m_config.user.userName.c_str()); ImGui::SameLine();
+        ImGui::Text(m_projectConfig.userName.c_str()); ImGui::SameLine();
         ImGui::Text("Turn: %d", 1); ImGui::SameLine();
         ImGui::Text("Phase: Harvest");
     }
 
-    void UI::DrawResources()
+    void Hud::DrawResources()
     {
         DrawResource(m_texture.get(), 1, "Dwarves"); ImGui::SameLine();
         DrawResource(m_texture.get(), 4, "Food"); ImGui::SameLine();
@@ -132,7 +126,7 @@ namespace project::ui
         DrawResource(m_texture.get(), 1, "Cow"); ImGui::SameLine();
     }
 
-    void UI::DrawResource(nc::graphics::d3dresource::Texture* texture, unsigned count, const char* label)
+    void Hud::DrawResource(nc::graphics::d3dresource::Texture* texture, unsigned count, const char* label)
     {
         ImGui::BeginGroup();
         ImGui::Image((void*)texture->GetShaderResourceView(), RESOURCE_ICON_SIZE);

@@ -1,6 +1,6 @@
 #pragma once
 #include "component/Component.h"
-#include "NcPhysics.h"
+#include "Physics.h"
 
 #include <string>
 

@@ -3,49 +3,31 @@
 #include "component/Transform.h"
 #include "Window.h"
 #include "graphics/Graphics.h"
-#include "camera/MainCamera.h"
+#include "MainCamera.h"
 
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
 
+namespace
+{
+    const auto FLOAT_MAX = std::numeric_limits<float>::max();
+}
+
 namespace nc::physics
 {
-    PhysicsSystem* PhysicsSystem::m_instance = nullptr;
-
     PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics)
         : m_clickableComponents{},
           m_graphics{ graphics }
     {
-        PhysicsSystem::m_instance = this;
-    }
-
-    PhysicsSystem::~PhysicsSystem()
-    {
-        PhysicsSystem::m_instance = nullptr;
     }
 
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)
     {
-        PhysicsSystem::m_instance->RegisterClickable_(toAdd);
-    }
-
-    void PhysicsSystem::UnregisterClickable(IClickable* toRemove)
-    {
-        PhysicsSystem::m_instance->UnregisterClickable_(toRemove);
-    }
-
-    IClickable* PhysicsSystem::RaycastToClickables(LayerMask mask)
-    {
-        return PhysicsSystem::m_instance->RaycastToClickables_(mask);
-    }
-
-    void PhysicsSystem::RegisterClickable_(IClickable* toAdd)
-    {
         m_clickableComponents.push_back(toAdd);
     }
 
-    void PhysicsSystem::UnregisterClickable_(IClickable* toRemove)
+    void PhysicsSystem::UnregisterClickable(IClickable* toRemove)
     {
         auto beg = std::begin(m_clickableComponents);
         auto end = std::end(m_clickableComponents);
@@ -59,7 +41,7 @@ namespace nc::physics
         m_clickableComponents.pop_back();
     }
 
-    IClickable* PhysicsSystem::RaycastToClickables_(LayerMask mask)
+    IClickable* PhysicsSystem::RaycastToClickables(LayerMask mask)
     {
         auto windowDimensions = Window::GetDimensions();
         auto viewMatrix = camera::MainCamera::GetTransform()->CamGetMatrix();
@@ -71,7 +53,7 @@ namespace nc::physics
         DirectX::XMStoreFloat3(&unit, unit_v);
 
         IClickable* out = nullptr;
-        float smallestZ = std::numeric_limits<float>::max();
+        float smallestZ = FLOAT_MAX;
 
         for(auto& clickable : m_clickableComponents)
         {
