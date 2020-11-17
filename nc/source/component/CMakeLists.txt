@@ -3,6 +3,7 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/nc/source/component/Camera.cpp
         ${ROOT_DIR}/nc/source/component/Component.cpp
         ${ROOT_DIR}/nc/source/component/PointLight.cpp
+        ${ROOT_DIR}/nc/source/component/PointLightManager.cpp
         ${ROOT_DIR}/nc/source/component/Renderer.cpp
         ${ROOT_DIR}/nc/source/component/Transform.cpp
 )

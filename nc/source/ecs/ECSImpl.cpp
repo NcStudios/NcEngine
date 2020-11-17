@@ -1,12 +1,13 @@
 #include "EcsImpl.h"
 #include "Ecs.h"
+#include "component/PointLightManager.h"
 
 namespace nc::ecs
 {
 EcsImpl::EcsImpl()
     : m_active{},
       m_toDestroy{},
-      m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>() },
+      m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS, true) },
       m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>() },
       m_transformSystem{ std::make_unique<ComponentSystem<Transform>>() }
 {

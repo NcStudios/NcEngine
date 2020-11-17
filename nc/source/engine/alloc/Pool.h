@@ -12,13 +12,13 @@ namespace nc::engine::alloc
 {
 
 template<class T>
-class PoolArray
+class Pool
 {
     public:
-        PoolArray(uint32_t maxItemCount);
-        ~PoolArray();
-        PoolArray(PoolArray&& other);
-        PoolArray & operator=(PoolArray&& other);
+        Pool(uint32_t maxItemCount);
+        ~Pool();
+        Pool(Pool&& other);
+        Pool & operator=(Pool&& other);
 
         uint32_t Alloc(T ** out);
         void Free(uint32_t pos);
@@ -37,7 +37,7 @@ class PoolArray
 
 
 template<class T>
-PoolArray<T>::PoolArray(unsigned int maxItemCount)
+Pool<T>::Pool(unsigned int maxItemCount)
     : nextFree{ 0u },
       maxItems{ maxItemCount },
       data { std::make_unique<T[]>(maxItemCount) }
@@ -45,12 +45,12 @@ PoolArray<T>::PoolArray(unsigned int maxItemCount)
 }
 
 template<class T>
-PoolArray<T>::~PoolArray()
+Pool<T>::~Pool()
 {
 }
 
 template<class T>
-PoolArray<T>::PoolArray(PoolArray&& other)
+Pool<T>::Pool(Pool&& other)
     : nextFree{ std::exchange(other.nextFree, 0u) },
       maxItems{ std::exchange(other.maxItems, 0u) },
       data{ std::move(other.data) }
@@ -58,7 +58,7 @@ PoolArray<T>::PoolArray(PoolArray&& other)
 }
 
 template<class T>
-PoolArray<T> & PoolArray<T>::operator=(PoolArray<T>&& other)
+Pool<T> & Pool<T>::operator=(Pool<T>&& other)
 {
     nextFree = std::exchange(other.nextFree, 0u);
     maxItems = std::exchange(other.maxItems, 0u);
@@ -66,11 +66,11 @@ PoolArray<T> & PoolArray<T>::operator=(PoolArray<T>&& other)
 }
 
 template<class T>
-uint32_t PoolArray<T>::Alloc(T ** out)
+uint32_t Pool<T>::Alloc(T ** out)
 {
     if (IsFull())
     {
-        throw std::runtime_error("PoolArray::Alloc - PoolArray full");
+        throw std::runtime_error("Pool::Alloc - Pool full");
     }
 
     if(!unused.empty())
@@ -86,7 +86,7 @@ uint32_t PoolArray<T>::Alloc(T ** out)
 }
 
 template<class T>
-void PoolArray<T>::Free(uint32_t pos)
+void Pool<T>::Free(uint32_t pos)
 {
     /** Not currently doing a valid memory check as GetPtrTo
      *  is called right before this and performs a check. Also,
@@ -103,25 +103,25 @@ void PoolArray<T>::Free(uint32_t pos)
 }
 
 template<class T>
-T * PoolArray<T>::GetPtrTo(uint32_t pos)
+T * Pool<T>::GetPtrTo(uint32_t pos)
 {
     if (data[pos].GetMemoryState() == MemoryState::Invalid)
     {
-        throw std::runtime_error("PoolArray::GetPtrTo - attempt to get unowned component");
+        throw std::runtime_error("Pool::GetPtrTo - attempt to get unowned component");
     }
 
     return &data[pos];
 }
 
 template<class T>
-bool PoolArray<T>::IsFull() const
+bool Pool<T>::IsFull() const
 {
     return (unused.empty() && nextFree == maxItems);
 }
 
 template<class T>
 template<class Func>
-void PoolArray<T>::ForEach(Func func)
+void Pool<T>::ForEach(Func func)
 {
     unsigned int current = 0u;
 
