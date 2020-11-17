@@ -6,11 +6,11 @@
 
 namespace nc::ui
 {
-    class IUIElement
+    class UIElement
     {
         public:
-            IUIElement(bool startOpen);
-            virtual ~IUIElement() = default;
+            UIElement(bool startOpen);
+            virtual ~UIElement() = default;
 
             void ToggleOpen();
             virtual void Draw() = 0;
@@ -18,11 +18,11 @@ namespace nc::ui
             bool isOpen;
     };
 
-    class IUIFixedElement : public IUIElement, public window::IOnResizeReceiver
+    class UIFixedElement : public UIElement, public window::IOnResizeReceiver
     {
         public:
-            IUIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions);
-            ~IUIFixedElement();
+            UIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions);
+            ~UIFixedElement();
 
             virtual void OnResize(nc::Vector2 dimensions);
         

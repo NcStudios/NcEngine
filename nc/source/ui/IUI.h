@@ -1,33 +1,33 @@
 #pragma once
 
-#include "IUIElement.h"
+#include "UIElement.h"
 
 namespace nc::ui
 {
     /** @note For internal use only. Derived classes should 
-     * inherit from  IUI or IUIFixed. */
-    class IUIBase
+     * inherit from UIFlexible or UIFixed. */
+    class IUI
     {
         public:
-            virtual ~IUIBase() = default;
+            virtual ~IUI() = default;
             virtual void Draw() = 0;
             virtual bool IsHovered() = 0;
     };
 
-    class IUI : public IUIBase, public IUIElement
+    class UIFlexible : public IUI, public UIElement
     {
         public:
-            IUI()
-                : IUIElement(true)
+            UIFlexible()
+                : UIElement(true)
             {
             }
     };
 
-    class IUIFixed : public IUIBase, public IUIFixedElement
+    class UIFixed : public IUI, public UIFixedElement
     {
         public:
-            IUIFixed(UIPosition position, ImVec2 dimensions)
-                : IUIFixedElement(true, position, dimensions)
+            UIFixed(UIPosition position, ImVec2 dimensions)
+                : UIFixedElement(true, position, dimensions)
             {
             }
     };

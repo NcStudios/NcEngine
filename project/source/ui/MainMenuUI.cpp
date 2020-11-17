@@ -52,7 +52,7 @@ namespace
 namespace project::ui
 {
     MainMenuUI::MainMenuUI(config::ProjectConfig projectConfig)
-        : IUIFixed(nc::ui::UIPosition::Center, UI_SIZE),
+        : UIFixed(nc::ui::UIPosition::Center, UI_SIZE),
 
           m_projectConfig{ std::move(projectConfig) },
           m_isHovered{false},
@@ -72,7 +72,7 @@ namespace project::ui
 
     void MainMenuUI::Draw()
     {
-        IUIFixedElement::PositionElement();
+        UIFixedElement::PositionElement();
 
         if(ImGui::Begin("Caverna", nullptr, UI_FLAGS))
         {

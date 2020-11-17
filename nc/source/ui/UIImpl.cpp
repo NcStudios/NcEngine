@@ -31,7 +31,7 @@ namespace nc::ui
         return ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam);
     }
 
-    void UIImpl::BindProjectUI(IUIBase* ui)
+    void UIImpl::BindProjectUI(IUI* ui)
     {
         m_projectUI = ui;
     }

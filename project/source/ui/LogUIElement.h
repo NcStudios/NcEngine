@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/IUIElement.h"
+#include "ui/UIElement.h"
 #include "project/source/log/GameLog.h"
 #include <deque>
 #include <string>
@@ -11,7 +11,7 @@ namespace project
     
     namespace ui
     {
-        class LogUIElement : public nc::ui::IUIElement
+        class LogUIElement : public nc::ui::UIElement
         {
             public:
                 LogUIElement(bool startOpen, log::GameLog* gameLog);
