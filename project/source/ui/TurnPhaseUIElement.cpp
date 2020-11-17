@@ -3,7 +3,7 @@
 namespace project::ui
 {
     TurnPhaseUIElement::TurnPhaseUIElement(bool startOpen)
-        : nc::ui::IUIElement(startOpen)
+        : nc::ui::UIElement(startOpen)
     {
     }
 

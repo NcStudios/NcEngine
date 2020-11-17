@@ -1,20 +1,20 @@
-#include "IUIElement.h"
+#include "UIElement.h"
 #include "Window.h"
 
 namespace nc::ui
 {
-    IUIElement::IUIElement(bool startOpen)
+    UIElement::UIElement(bool startOpen)
         : isOpen(startOpen)
     {
     }
 
-    void IUIElement::ToggleOpen()
+    void UIElement::ToggleOpen()
     {
         isOpen = !isOpen;
     }
 
-    IUIFixedElement::IUIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions)
-        : IUIElement(startOpen),
+    UIFixedElement::UIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions)
+        : UIElement(startOpen),
           m_position{ position },
           m_screenDimensions { Window::GetDimensions() },
           m_elementDimensions{ dimensions }
@@ -23,24 +23,24 @@ namespace nc::ui
         Window::RegisterOnResizeReceiver(this);
     }
 
-    IUIFixedElement::~IUIFixedElement()
+    UIFixedElement::~UIFixedElement()
     {
         Window::UnregisterOnResizeReceiver(this);
     }
 
-    void IUIFixedElement::OnResize(Vector2 dimensions)
+    void UIFixedElement::OnResize(Vector2 dimensions)
     {
         m_screenDimensions = {dimensions.X(), dimensions.Y()};
         CalculateTopLeftPosition();
     }
 
-    void IUIFixedElement::PositionElement()
+    void UIFixedElement::PositionElement()
     {
         ImGui::SetNextWindowPos(m_topLeftPosition);
         ImGui::SetNextWindowSize(m_elementDimensions);
     }
 
-    void IUIFixedElement::CalculateTopLeftPosition()
+    void UIFixedElement::CalculateTopLeftPosition()
     {
         m_topLeftPosition = utils::GetTopLeftCoords( m_position, {m_screenDimensions.X(), m_screenDimensions.Y()}, m_elementDimensions);
     }

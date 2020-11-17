@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ui/IUIElement.h"
+#include "ui/UIElement.h"
 #include "ServerSelectable.h"
 
 #include <functional>
 
 namespace project::ui
 {
-    class AddServerSelectableUIElement : public nc::ui::IUIFixedElement
+    class AddServerSelectableUIElement : public nc::ui::UIFixedElement
     {
         public:
             AddServerSelectableUIElement(bool startOpen, std::function<void(ServerSelectable)> callback);

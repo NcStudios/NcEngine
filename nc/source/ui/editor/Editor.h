@@ -12,7 +12,7 @@ namespace nc
     namespace graphics { class Graphics; }
 }
 
-namespace nc::ui
+namespace nc::ui::editor
 {
     class Editor
     {

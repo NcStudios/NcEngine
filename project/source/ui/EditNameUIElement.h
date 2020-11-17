@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ui/IUIElement.h"
+#include "ui/UIElement.h"
 
 #include <functional>
 #include <string>
 
 namespace project::ui
 {
-    class EditNameUIElement : public nc::ui::IUIFixedElement
+    class EditNameUIElement : public nc::ui::UIFixedElement
     {
         public:
             EditNameUIElement(bool startOpen, std::function<void(std::string)> callback);

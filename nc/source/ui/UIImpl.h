@@ -2,7 +2,7 @@
 
 #include "win32/NCWinDef.h"
 #include "IUI.h"
-#include "Editor.h"
+#include "editor/Editor.h"
 #include "ecs/Entity.h"
 
 #include <unordered_map>
@@ -21,7 +21,7 @@ namespace nc
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-                void BindProjectUI(IUIBase* ui);
+                void BindProjectUI(IUI* ui);
                 bool IsProjectUIHovered();
 
                 void FrameBegin();
@@ -36,10 +36,10 @@ namespace nc
 
             private:
                 #ifdef NC_EDITOR_ENABLED
-                Editor m_editor;
+                editor::Editor m_editor;
                 #endif
                 
-                IUIBase* m_projectUI;
+                IUI* m_projectUI;
         };
     } //end namespace ui
 } //end namespace nc

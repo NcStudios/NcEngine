@@ -11,7 +11,7 @@
 
 namespace project::ui
 {
-    class MainMenuUI : public nc::ui::IUIFixed
+    class MainMenuUI : public nc::ui::UIFixed
     {
         public:
             MainMenuUI(config::ProjectConfig projectConfig);
