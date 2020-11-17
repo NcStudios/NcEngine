@@ -1,3 +1,5 @@
+#include "directx/math/DirectXMath.h"
+
 #include "PointLightManager.h"
 #include "Ecs.h"
 #include "graphics/d3dresource/GraphicsResource.h"
@@ -19,13 +21,8 @@ namespace nc
     {
         pointLight.SetPositionFromCameraProjection(camMatrix);
         auto slot = PointLightManager::GetNextAvailableIndex();
-        m_pointLightsArrayConstBufData.PointLights[slot].pos = pointLight.projectedPos;
-        m_pointLightsArrayConstBufData.PointLights[slot].ambient = pointLight.m_pixelConstBufData.ambient;
-        m_pointLightsArrayConstBufData.PointLights[slot].diffuseColor = pointLight.m_pixelConstBufData.diffuseColor;
-        m_pointLightsArrayConstBufData.PointLights[slot].diffuseIntensity = pointLight.m_pixelConstBufData.diffuseIntensity;
-        m_pointLightsArrayConstBufData.PointLights[slot].attConst = pointLight.m_pixelConstBufData.attConst;
-        m_pointLightsArrayConstBufData.PointLights[slot].attLin = pointLight.m_pixelConstBufData.attLin;
-        m_pointLightsArrayConstBufData.PointLights[slot].attQuad = pointLight.m_pixelConstBufData.attQuad;
+        m_pointLightsArrayConstBufData.PointLights[slot] = pointLight.PixelConstBufData;
+        m_pointLightsArrayConstBufData.PointLights[slot].pos = pointLight.ProjectedPos;
     }
 
     void PointLightManager::Bind()

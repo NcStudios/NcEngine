@@ -28,7 +28,9 @@ namespace nc
             void EditorGuiElement() override;
             #endif
 
-            void SetPositionFromCameraProjection(DirectX::FXMMATRIX view) noexcept(false);
+            void SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view) noexcept(false);
+
+            alignas(16)DirectX::XMFLOAT3 ProjectedPos;
 
             struct PointLightPixelCBuf
             {
@@ -39,12 +41,10 @@ namespace nc
                 float attConst;
                 float attLin;
                 float attQuad;
-            } m_pixelConstBufData;
-
-            alignas(16)DirectX::XMFLOAT3 projectedPos;
+            } PixelConstBufData;
 
         private:
-
+            
             Transform * m_transform;
     };
 }

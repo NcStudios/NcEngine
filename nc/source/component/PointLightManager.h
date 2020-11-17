@@ -1,9 +1,9 @@
 #pragma once
 
 #include "PointLight.h"
-#include "directx/math/DirectXMath.h"
 
 namespace nc::graphics { class Graphics; }
+namespace DirectX { struct XMMATRIX; }
 
 namespace nc
 {

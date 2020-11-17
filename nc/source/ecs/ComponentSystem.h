@@ -60,10 +60,10 @@ class ComponentSystem
 template<class T>
 ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize, bool isReserveSizeMaxSize)
     : m_poolSize{ reserveSize },
-      m_poolArray {}
+      m_poolArray {},
+      m_isReserveSizeMaxSize { isReserveSizeMaxSize }
 {
     m_poolArray.emplace_back(engine::alloc::Pool<T>(m_poolSize));
-    m_isReserveSizeMaxSize = isReserveSizeMaxSize;
 }
 
 template<class T>
