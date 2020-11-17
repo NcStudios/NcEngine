@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ui/IUIElement.h"
-#include "math/Vector2.h"
 #include "ServerSelectable.h"
 
 #include <functional>

@@ -1,7 +1,4 @@
 #include "MainMenuUI.h"
-#include "imgui/imgui.h"
-#include "Window.h"
-#include "UI.h"
 #include "UIStyle.h"
 #include "SceneManager.h"
 #include "project/scenes/GameScene.h"
@@ -61,7 +58,6 @@ namespace project::ui
         : IUIFixed(nc::ui::UIPosition::Center, UI_SIZE),
 
           m_projectConfig{ std::move(projectConfig) },
-          //m_screenDimensions{ nc::Window::GetDimensions() },
           m_isHovered{false},
           m_servers{},
           m_editNameElement{false, EDIT_NAME_ELEMENT_SIZE, std::bind(this->EditName, this, std::placeholders::_1)},
@@ -70,21 +66,15 @@ namespace project::ui
         m_ipBuffer[0] = '\0';
         SetImGuiStyle();
         nc::config::Read(SERVER_PATH, MapKeyValue, m_servers);
-        //nc::Window::RegisterOnResizeReceiver(this);
     }
 
     MainMenuUI::~MainMenuUI()
     {
-        //nc::Window::UnregisterOnResizeReceiver(this);
         WriteServerRecords(m_servers);
     }
 
     void MainMenuUI::Draw()
     {
-        // auto pos = nc::ui::utils::GetTopLeftCoords(nc::ui::UIPosition::Center, {m_screenDimensions.X(), m_screenDimensions.Y()}, UI_SIZE);
-        // ImGui::SetNextWindowPos(pos);
-        // ImGui::SetNextWindowSize(UI_SIZE);
-
         IUIFixedElement::PositionElement();
 
         if(ImGui::Begin("Caverna", nullptr, UI_FLAGS))
@@ -148,11 +138,6 @@ namespace project::ui
     {
         return m_isHovered;
     }
-
-    // void MainMenuUI::OnResize(nc::Vector2 dimensions)
-    // {
-    //     m_screenDimensions = dimensions;
-    // }
 
     void MainMenuUI::AddServer(ServerSelectable server)
     {

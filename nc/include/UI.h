@@ -1,11 +1,9 @@
 #pragma once
 
-#include "ui/IUI.h"
-#include "math/Vector2.h"
-
 #include <functional>
 
 namespace nc::engine { class ApiBinder; }
+namespace nc::ui { class IUIBase; }
 
 namespace nc::ui
 {

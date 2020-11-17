@@ -1,5 +1,4 @@
 #include "EditNameUIElement.h"
-#include "Engine.h"
 
 namespace project::ui
 {

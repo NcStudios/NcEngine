@@ -21,7 +21,6 @@ namespace nc::ui
                 : IUIElement(true)
             {
             }
-
     };
 
     class IUIFixed : public IUIBase, public IUIFixedElement
