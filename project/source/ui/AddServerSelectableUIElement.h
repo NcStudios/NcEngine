@@ -10,7 +10,7 @@ namespace project::ui
     class AddServerSelectableUIElement : public nc::ui::IUIFixedElement
     {
         public:
-            AddServerSelectableUIElement(bool startOpen, ImVec2 dimensions, std::function<void(ServerSelectable)> callback);
+            AddServerSelectableUIElement(bool startOpen, std::function<void(ServerSelectable)> callback);
             
             void Draw() override;
 

@@ -18,9 +18,6 @@ namespace
     const auto SMALL_BUTTON_SIZE = ImVec2{96, 20};
     const auto LIST_BOX_SIZE = ImVec2{200, 64};
     const auto UI_SIZE = ImVec2{218, 450};
-    const auto ADD_SERVER_ELEMENT_SIZE = ImVec2{300, 100};
-    const auto EDIT_NAME_ELEMENT_SIZE = ImVec2{300, 100};
-
     const auto SERVER_PATH = std::string{"project/config/servers.ini"};
 
     void MapKeyValue(std::string key, std::string value, std::vector<project::ui::ServerSelectable>& out)
@@ -60,8 +57,8 @@ namespace project::ui
           m_projectConfig{ std::move(projectConfig) },
           m_isHovered{false},
           m_servers{},
-          m_editNameElement{false, EDIT_NAME_ELEMENT_SIZE, std::bind(this->EditName, this, std::placeholders::_1)},
-          m_addServerElement{false, ADD_SERVER_ELEMENT_SIZE, std::bind(this->AddServer, this, std::placeholders::_1)}
+          m_editNameElement{false, std::bind(this->EditName, this, std::placeholders::_1)},
+          m_addServerElement{false, std::bind(this->AddServer, this, std::placeholders::_1)}
     {
         m_ipBuffer[0] = '\0';
         SetImGuiStyle();

@@ -1,9 +1,14 @@
 #include "EditNameUIElement.h"
 
+namespace
+{
+    const auto ELEMENT_SIZE = ImVec2{300, 100};
+}
+
 namespace project::ui
 {
-    EditNameUIElement::EditNameUIElement(bool startOpen, ImVec2 dimensions, std::function<void(std::string)> callback)
-        : nc::ui::IUIFixedElement(startOpen, nc::ui::UIPosition::Center, dimensions),
+    EditNameUIElement::EditNameUIElement(bool startOpen, std::function<void(std::string)> callback)
+        : nc::ui::IUIFixedElement(startOpen, nc::ui::UIPosition::Center, ELEMENT_SIZE),
           EditNameCallback{ callback }
     {
         m_buffer[0] = '\0';

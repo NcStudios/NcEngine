@@ -10,7 +10,7 @@ namespace project::ui
     class EditNameUIElement : public nc::ui::IUIFixedElement
     {
         public:
-            EditNameUIElement(bool startOpen, ImVec2 dimensions, std::function<void(std::string)> callback);
+            EditNameUIElement(bool startOpen, std::function<void(std::string)> callback);
 
             void Draw() override;
         
