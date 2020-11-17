@@ -1,7 +1,6 @@
 #pragma once
 
 #include "nc/source/ui/IUI.h"
-#include "Engine.h"
 #include "EditNameUIElement.h"
 #include "AddServerSelectableUIElement.h"
 #include "ServerSelectable.h"
@@ -12,7 +11,7 @@
 
 namespace project::ui
 {
-    class MainMenuUI : public nc::ui::IUI
+    class MainMenuUI : public nc::ui::IUIFixed
     {
         public:
             MainMenuUI(config::ProjectConfig projectConfig);
@@ -24,7 +23,6 @@ namespace project::ui
             void AddServer(ServerSelectable server);
             void EditName(std::string);
 
-            //const nc::config::Config& m_config;
             config::ProjectConfig m_projectConfig;
             bool m_isHovered;
             std::vector<ServerSelectable> m_servers;

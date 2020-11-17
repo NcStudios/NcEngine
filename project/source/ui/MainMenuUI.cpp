@@ -1,6 +1,4 @@
 #include "MainMenuUI.h"
-#include "imgui/imgui.h"
-#include "Window.h"
 #include "UIStyle.h"
 #include "SceneManager.h"
 #include "project/scenes/GameScene.h"
@@ -20,7 +18,6 @@ namespace
     const auto SMALL_BUTTON_SIZE = ImVec2{96, 20};
     const auto LIST_BOX_SIZE = ImVec2{200, 64};
     const auto UI_SIZE = ImVec2{218, 450};
-
     const auto SERVER_PATH = std::string{"project/config/servers.ini"};
 
     void MapKeyValue(std::string key, std::string value, std::vector<project::ui::ServerSelectable>& out)
@@ -55,7 +52,8 @@ namespace
 namespace project::ui
 {
     MainMenuUI::MainMenuUI(config::ProjectConfig projectConfig)
-        : //m_config{nc::engine::Engine::GetConfig()},
+        : IUIFixed(nc::ui::UIPosition::Center, UI_SIZE),
+
           m_projectConfig{ std::move(projectConfig) },
           m_isHovered{false},
           m_servers{},
@@ -74,9 +72,7 @@ namespace project::ui
 
     void MainMenuUI::Draw()
     {
-        auto dim = nc::Window::GetDimensions();
-        ImGui::SetNextWindowPos( { (dim.X() - UI_SIZE.x) / 2, (dim.Y() - UI_SIZE.y) / 2 } );
-        ImGui::SetNextWindowSize(UI_SIZE);
+        IUIFixedElement::PositionElement();
 
         if(ImGui::Begin("Caverna", nullptr, UI_FLAGS))
         {

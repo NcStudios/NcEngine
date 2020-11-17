@@ -31,6 +31,8 @@ namespace nc::engine
                          physics::PhysicsSystem* physics)
     {
         nc::Window::GetDimensions_ = std::bind(window->GetDimensions, window);
+        nc::Window::RegisterOnResizeReceiver_ = std::bind(window->RegisterOnResizeReceiver, window, std::placeholders::_1);
+        nc::Window::UnregisterOnResizeReceiver_ = std::bind(window->UnregisterOnResizeReceiver, window, std::placeholders::_1);
         nc::scene::SceneManager::ChangeScene_ = std::bind(sceneManager->QueueSceneChange, sceneManager, std::placeholders::_1);
         nc::camera::MainCamera::Set_ = std::bind(camera->Set, camera, std::placeholders::_1);
         nc::camera::MainCamera::GetTransform_ = std::bind(camera->GetTransform, camera);

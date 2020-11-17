@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine.h"
 #include "nc/source/ui/IUI.h"
 #include "config/ProjectConfig.h"
 #include "LogUIElement.h"
@@ -27,7 +26,6 @@ namespace project::ui
             bool IsHovered() override;
 
         private:
-            //const ::nc::config::Config& m_config;
             config::ProjectConfig m_projectConfig;
             LogUIElement m_logUIElement;
             TurnPhaseUIElement m_turnPhaseUIElement;

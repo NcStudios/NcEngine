@@ -1,8 +1,5 @@
 #include "Hud.h"
-#include "imgui/imgui.h"
 #include "graphics/d3dresource/GraphicsResource.h"
-#include "LogUIElement.h"
-#include "TurnPhaseUIElement.h"
 #include "project/source/log/GameLog.h"
 #include "Window.h"
 

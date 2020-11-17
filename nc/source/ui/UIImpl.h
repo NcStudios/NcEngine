@@ -21,7 +21,7 @@ namespace nc
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-                void BindProjectUI(IUI* ui);
+                void BindProjectUI(IUIBase* ui);
                 bool IsProjectUIHovered();
 
                 void FrameBegin();
@@ -39,7 +39,7 @@ namespace nc
                 Editor m_editor;
                 #endif
                 
-                IUI* m_projectUI;
+                IUIBase* m_projectUI;
         };
     } //end namespace ui
 } //end namespace nc

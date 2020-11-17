@@ -1,10 +1,14 @@
 #include "EditNameUIElement.h"
-#include "Engine.h"
+
+namespace
+{
+    const auto ELEMENT_SIZE = ImVec2{300, 100};
+}
 
 namespace project::ui
 {
     EditNameUIElement::EditNameUIElement(bool startOpen, std::function<void(std::string)> callback)
-        : UIElement(startOpen),
+        : nc::ui::IUIFixedElement(startOpen, nc::ui::UIPosition::Center, ELEMENT_SIZE),
           EditNameCallback{ callback }
     {
         m_buffer[0] = '\0';
@@ -14,7 +18,9 @@ namespace project::ui
     {
         if(!isOpen) return;
 
-        if(ImGui::Begin("Edit Player Name", &(this->isOpen)))
+        nc::ui::IUIFixedElement::PositionElement();
+
+        if(ImGui::Begin("Edit Player Name", &(this->isOpen), ImGuiWindowFlags_NoResize))
         {
             ImGui::InputText("" , m_buffer, m_bufferSize);
             

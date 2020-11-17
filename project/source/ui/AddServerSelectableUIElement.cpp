@@ -1,10 +1,15 @@
 #include "AddServerSelectableUIElement.h"
 
+namespace
+{
+    const auto ELEMENT_SIZE = ImVec2{ 300, 100 };
+}
+
 namespace project::ui
 {
     AddServerSelectableUIElement::AddServerSelectableUIElement(bool startOpen, std::function<void(ServerSelectable)> callback)
-        : UIElement(startOpen),
-          m_callback{callback}
+        : nc::ui::IUIFixedElement(startOpen, nc::ui::UIPosition::Center, ELEMENT_SIZE),
+          AddServerCallback{callback}
     {
         m_nameBuffer[0] = '\0';
         m_ipBuffer[0] = '\0';
@@ -14,6 +19,8 @@ namespace project::ui
     {
         if(!isOpen) return;
 
+        nc::ui::IUIFixedElement::PositionElement();
+
         if(ImGui::Begin("Add Server", &(this->isOpen)))
         {
             ImGui::InputText("Nickname", m_nameBuffer, m_bufferSize);
@@ -22,7 +29,7 @@ namespace project::ui
             if(ImGui::Button("Add"))
             {
                 isOpen = false;
-                m_callback({std::string{m_nameBuffer}, std::string{m_ipBuffer}, false});
+                AddServerCallback({std::string{m_nameBuffer}, std::string{m_ipBuffer}, false});
             }
         }
         ImGui::End();

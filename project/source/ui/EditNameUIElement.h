@@ -1,16 +1,17 @@
 #pragma once
 
-#include "UIElement.h"
+#include "ui/IUIElement.h"
 
 #include <functional>
 #include <string>
 
 namespace project::ui
 {
-    class EditNameUIElement : public UIElement
+    class EditNameUIElement : public nc::ui::IUIFixedElement
     {
         public:
             EditNameUIElement(bool startOpen, std::function<void(std::string)> callback);
+
             void Draw() override;
         
         private:

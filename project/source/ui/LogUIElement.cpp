@@ -5,7 +5,7 @@
 namespace project::ui
 {
     LogUIElement::LogUIElement(bool startOpen, log::GameLog* gameLog)
-        : UIElement(startOpen),
+        : nc::ui::IUIElement(startOpen),
           m_gameLog{ gameLog }
     {
     }
