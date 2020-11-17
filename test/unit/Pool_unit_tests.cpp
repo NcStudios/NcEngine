@@ -10,8 +10,7 @@ struct Mock
     nc::MemoryState GetMemoryState() const { return memState; }
 };
 
-
-TEST(Pool, IsFull_PoolFull_ReturnsTrue)
+TEST(Pool_unit_tests, IsFull_PoolFull_ReturnsTrue)
 {
     Pool<Mock> allocator(1);
     Mock * mock = nullptr;
@@ -21,7 +20,7 @@ TEST(Pool, IsFull_PoolFull_ReturnsTrue)
     allocator.Free(pos);
 }
 
-TEST(Pool, IsFull_AfterFree_ReturnsFalse)
+TEST(Pool_unit_tests, IsFull_AfterFree_ReturnsFalse)
 {
     Pool<Mock> allocator(1);
     Mock * mock = nullptr;
@@ -31,7 +30,7 @@ TEST(Pool, IsFull_AfterFree_ReturnsFalse)
     EXPECT_EQ(actual, false);
 }
 
-TEST(Pool, Alloc_PoolFull_Throws)
+TEST(Pool_unit_tests, Alloc_PoolFull_Throws)
 {
     Pool<Mock> allocator(1);
     Mock * mock = nullptr;
@@ -40,19 +39,19 @@ TEST(Pool, Alloc_PoolFull_Throws)
     allocator.Free(pos);
 }
 
-TEST(Pool, GetPtrTo_GoodArgs_GetsPtr)
+TEST(Pool_unit_tests, GetPtrTo_GoodArgs_GetsPtr)
 {
     Pool<Mock> allocator(1);
     Mock * mock = nullptr;
     auto pos = allocator.Alloc(&mock);
-    *mock = Mock{ 1, nc::MemoryState::Valid };
+    *mock = Mock{1, nc::MemoryState::Valid};
     auto actual = allocator.GetPtrTo(pos);
     EXPECT_EQ(actual->val, mock->val);
-    EXPECT_EQ(actual->GetMemoryState(), nc::MemoryState::Valid);
+    EXPECT_EQ(actual->GetMemoryState(), mock->GetMemoryState());
     allocator.Free(pos);
 }
 
-TEST(Pool, GetPtrTo_BadArgs_Throws)
+TEST(Pool_unit_tests, GetPtrTo_BadArgs_Throws)
 {
     Pool<Mock> allocator(1);
     EXPECT_THROW(allocator.GetPtrTo(1u), std::runtime_error);
@@ -61,6 +60,5 @@ TEST(Pool, GetPtrTo_BadArgs_Throws)
 int main(int argc, char ** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
-    //Init();
     return RUN_ALL_TESTS();
 }
