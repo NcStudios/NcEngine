@@ -3,6 +3,7 @@
 #include "directx/math/DirectXMath.h"
 
 #include "graphics/d3dresource/GraphicsResource.h"
+#include "config/Config.h"
 
 namespace nc::graphics { class Graphics; }
 
@@ -13,6 +14,7 @@ namespace nc
     class PointLight : public Component
     {
         public:
+
             PointLight();
             ~PointLight();
             PointLight(PointLight&&);
@@ -26,10 +28,11 @@ namespace nc
             void EditorGuiElement() override;
             #endif
 
-            void Bind(DirectX::FXMMATRIX view) noexcept(false);
+            void SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view) noexcept(false);
 
-        private:
-            struct PointLightCBuf
+            alignas(16)DirectX::XMFLOAT3 ProjectedPos;
+
+            struct PointLightPixelCBuf
             {
                 alignas(16)DirectX::XMFLOAT3 pos;
                 alignas(16)DirectX::XMFLOAT3 ambient;
@@ -38,13 +41,10 @@ namespace nc
                 float attConst;
                 float attLin;
                 float attQuad;
-            } m_constBufData;
+            } PixelConstBufData;
 
-            using PixelConstBuf = graphics::d3dresource::PixelConstantBuffer<PointLightCBuf>;
-
-            /** @todo took away ptr for debug */
-            //mutable std::unique_ptr<PixelConstBuf> m_cBuf;
-            mutable PixelConstBuf m_cBuf;
+        private:
+            
             Transform * m_transform;
     };
 }
