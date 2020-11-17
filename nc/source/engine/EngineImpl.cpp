@@ -28,11 +28,11 @@ namespace nc::engine
         m_frameDeltaTimeFactor = 1.0f;
         m_log = std::make_unique<debug::LogImpl>(m_config.project.logFilePath);
         m_window = std::make_unique<window::WindowImpl>(hInstance, m_config, engineShutdownCallback);
-        auto dim = m_window->GetDimensions();
+        auto [width, height] = m_window->GetDimensions();
         auto hwnd = m_window->GetHWND();
         m_graphics = std::make_unique<graphics::Graphics>
         (
-            hwnd, dim.X(), dim.Y(),
+            hwnd, width, height,
             m_config.graphics.nearClip,
             m_config.graphics.farClip,
             m_config.graphics.launchInFullscreen

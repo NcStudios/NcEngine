@@ -43,11 +43,11 @@ namespace nc::physics
 
     IClickable* PhysicsSystem::RaycastToClickables(LayerMask mask)
     {
-        auto windowDimensions = Window::GetDimensions();
+        auto [screenWidth, screenHeight] = Window::GetDimensions();
         auto viewMatrix = camera::MainCamera::GetTransform()->CamGetMatrix();
         auto projectionMatrix = m_graphics->GetProjection();
         auto worldMatrix = DirectX::XMMatrixIdentity();
-        auto unit = Vector3(1,1,1).GetNormalized().GetXMFloat3();
+        auto unit = Vector3(1,1,1).GetNormalized().ToXMFloat3();
         auto unit_v = DirectX::XMLoadFloat3(&unit);
         unit_v = DirectX::XMVector3Transform(unit_v, viewMatrix);
         DirectX::XMStoreFloat3(&unit, unit_v);
@@ -63,12 +63,12 @@ namespace nc::physics
             }
 
             //project clickable to screen space
-            DirectX::XMFLOAT3 worldPos = clickable->parentTransform->GetPosition().GetXMFloat3();
+            DirectX::XMFLOAT3 worldPos = clickable->parentTransform->GetPosition().ToXMFloat3();
             auto screenPos = DirectX::XMFLOAT3{};
             auto worldPos_v = DirectX::XMLoadFloat3(&worldPos);
             auto screenPos_v = DirectX::XMVector3Project(worldPos_v,
                                                          0.0f, 0.0f,
-                                                         windowDimensions.X(), windowDimensions.Y(),
+                                                         screenWidth, screenHeight,
                                                          0.0f, 1.0f,
                                                          projectionMatrix, viewMatrix, worldMatrix);
             DirectX::XMStoreFloat3(&screenPos, screenPos_v);
