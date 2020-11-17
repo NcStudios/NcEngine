@@ -2,11 +2,9 @@
 
 #include "LayerMask.h"
 #include "IClickable.h"
-#include "math/Vector2.h"
 #include "directx/math/DirectXMath.h"
 
 #include <vector>
-
 
 namespace nc
 {
@@ -20,18 +18,12 @@ namespace nc::physics
     {
         public:
             PhysicsSystem(graphics::Graphics* graphics);
-            ~PhysicsSystem();
 
-            static void RegisterClickable(IClickable* toAdd);
-            static void UnregisterClickable(IClickable* toRemove);
-            static IClickable* RaycastToClickables(LayerMask mask);
-
-            void RegisterClickable_(IClickable* toAdd);
-            void UnregisterClickable_(IClickable* toRemove);
-            IClickable* RaycastToClickables_(LayerMask mask);
+            void RegisterClickable(IClickable* toAdd);
+            void UnregisterClickable(IClickable* toRemove);
+            IClickable* RaycastToClickables(LayerMask mask);
 
         private:
-            static PhysicsSystem* m_instance;
             std::vector<nc::physics::IClickable*> m_clickableComponents;
             graphics::Graphics* m_graphics;
     };

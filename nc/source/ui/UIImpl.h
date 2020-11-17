@@ -13,16 +13,16 @@ namespace nc
 
     namespace ui
     {
-        class UISystem
+        class UIImpl
         {
             public:
-                UISystem(HWND hwnd, nc::graphics::Graphics * graphics);
-                ~UISystem() noexcept;
+                UIImpl(HWND hwnd, nc::graphics::Graphics * graphics);
+                ~UIImpl() noexcept;
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-                static void BindProjectUI(IUI* ui);
-                static bool IsProjectUIHovered();
+                void BindProjectUI(IUI* ui);
+                bool IsProjectUIHovered();
 
                 void FrameBegin();
 
@@ -35,8 +35,6 @@ namespace nc
                 void FrameEnd();
 
             private:
-                static UISystem* m_instance;
-
                 #ifdef NC_EDITOR_ENABLED
                 Editor m_editor;
                 #endif

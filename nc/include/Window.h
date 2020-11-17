@@ -2,19 +2,20 @@
 #include "win32/NcWin32.h"
 #include "math/Vector2.h"
 
+#include <functional>
+
 namespace nc
 {
-    namespace window { class WindowImpl; }
+    namespace engine { class ApiBinder; }
 
     class Window
     {
         public:
-            static void RegisterImpl(window::WindowImpl* impl);
-
             static Vector2 GetDimensions();
 
         private:
-            static window::WindowImpl* m_impl;
+            friend class nc::engine::ApiBinder;
+            static std::function<Vector2()> GetDimensions_;
     };
 
 } //end namespace nc

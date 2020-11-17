@@ -1,6 +1,6 @@
 #pragma once
 #include "component/Transform.h"
-#include "NcConfig.h"
+#include "Engine.h"
 #include "math/Vector2.h"
 
 class CamController : public nc::Component

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NcCommonTypes.h"
-#include "NCDebug.h"
+#include "DebugUtils.h"
 
 #include <memory>
 #include <vector>

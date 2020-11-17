@@ -3,7 +3,7 @@
 #include "NcCommonTypes.h"
 #include "HandleManager.h"
 #include "engine/alloc/Pool.h"
-#include "NcDebug.h"
+#include "DebugUtils.h"
 
 #include <vector>
 #include <unordered_map>
@@ -59,9 +59,9 @@ class ComponentSystem
 
 template<class T>
 ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize, bool isReserveSizeMaxSize)
-    : m_poolSize{ reserveSize },
+    : m_isReserveSizeMaxSize { isReserveSizeMaxSize },
+      m_poolSize{ reserveSize },
       m_poolArray {},
-      m_isReserveSizeMaxSize { isReserveSizeMaxSize }
 {
     m_poolArray.emplace_back(engine::alloc::Pool<T>(m_poolSize));
 }

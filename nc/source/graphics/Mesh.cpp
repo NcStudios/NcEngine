@@ -1,7 +1,7 @@
 #include "graphics\Mesh.h"
 #include "graphics\d3dresource\GraphicsResourceManager.h"
-#include "NcConfig.h"
-#include "NcDebug.h"
+#include "Engine.h"
+#include "DebugUtils.h"
 #include "Vertex.h"
 
 #include <assimp\Importer.hpp>
@@ -93,7 +93,7 @@ namespace nc::graphics
 
     Mesh::Mesh(std::string meshPath)
     {
-        auto defaultShaderPath = nc::config::NcGetConfigReference().graphics.shadersPath;
+        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
         auto pvs = GraphicsResourceManager::Acquire<VertexShader>(std::move(defaultShaderPath) + "pbrvertexshader.cso");
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         AddGraphicsResource(std::move(pvs));
