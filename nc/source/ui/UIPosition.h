@@ -8,15 +8,15 @@ namespace nc::ui
 {
     enum class UIPosition
     {
-        Center,
         TopLeft,
         TopCenter,
         TopRight,
+        LeftCenter,
+        Center,
+        RightCenter,
         BottomLeft,
         BottomCenter,
-        BottomRight,
-        LeftCenter,
-        RightCenter
+        BottomRight
     };
 
     namespace utils

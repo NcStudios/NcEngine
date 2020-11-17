@@ -7,11 +7,6 @@ namespace nc::ui::utils
     {
         switch(position)
         {
-            case UIPosition::Center:
-            {
-                return { (screenDimensions.x - elementDimensions.x) / 2.0f,
-                         (screenDimensions.y - elementDimensions.y) / 2.0f };
-            }
             case UIPosition::TopLeft:
             {
                 return { 0.0f, 0.0f };
@@ -23,6 +18,20 @@ namespace nc::ui::utils
             case UIPosition::TopRight:
             {
                 return { screenDimensions.x - elementDimensions.x, 0.0f };
+            }
+            case UIPosition::LeftCenter:
+            {
+                return { 0.0f, (screenDimensions.y - elementDimensions.y) / 2.0f };
+            }
+            case UIPosition::Center:
+            {
+                return { (screenDimensions.x - elementDimensions.x) / 2.0f,
+                         (screenDimensions.y - elementDimensions.y) / 2.0f };
+            }
+            case UIPosition::RightCenter:
+            {
+                return {  screenDimensions.x - elementDimensions.x,
+                         (screenDimensions.y - elementDimensions.y) / 2.0f };
             }
             case UIPosition::BottomLeft:
             {
@@ -37,15 +46,6 @@ namespace nc::ui::utils
             {
                 return { screenDimensions.x - elementDimensions.x,
                          screenDimensions.y - elementDimensions.y };
-            }
-            case UIPosition::LeftCenter:
-            {
-                return { 0.0f, (screenDimensions.y - elementDimensions.y) / 2.0f };
-            }
-            case UIPosition::RightCenter:
-            {
-                return {  screenDimensions.x - elementDimensions.x,
-                         (screenDimensions.y - elementDimensions.y) / 2.0f };
             }
             default:
                 throw std::runtime_error("Invalid UIPosition");
