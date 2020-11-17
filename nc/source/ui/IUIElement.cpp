@@ -3,6 +3,16 @@
 
 namespace nc::ui
 {
+    IUIElement::IUIElement(bool startOpen)
+        : isOpen(startOpen)
+    {
+    }
+
+    void IUIElement::ToggleOpen()
+    {
+        isOpen = !isOpen;
+    }
+
     IUIFixedElement::IUIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions)
         : IUIElement(startOpen),
           m_position{ position },

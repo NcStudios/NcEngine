@@ -9,18 +9,10 @@ namespace nc::ui
     class IUIElement
     {
         public:
-            IUIElement(bool startOpen)
-                : isOpen(startOpen)
-            {
-            }
-
+            IUIElement(bool startOpen);
             virtual ~IUIElement() = default;
 
-            void ToggleOpen()
-            {
-                isOpen = !isOpen;
-            }
-
+            void ToggleOpen();
             virtual void Draw() = 0;
             
             bool isOpen;
