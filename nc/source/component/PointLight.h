@@ -3,7 +3,7 @@
 #include "directx/math/DirectXMath.h"
 
 #include "graphics/d3dresource/GraphicsResource.h"
-#include "NcConfig.h"
+#include "config/Config.h"
 
 namespace nc::graphics { class Graphics; }
 

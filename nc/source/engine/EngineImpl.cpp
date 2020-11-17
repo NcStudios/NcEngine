@@ -14,9 +14,7 @@
 #include "ecs/EcsImpl.h"
 #include "physics/PhysicsSystem.h"
 #include "component/PointLightManager.h"
-#include "scene/SceneManager.h"
 #include "time/NcTime.h"
-#include "ui/UISystem.h"
 #include "Window.h"
 #include "window/WindowImpl.h"
 
