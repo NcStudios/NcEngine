@@ -1,26 +1,31 @@
 #pragma once
 #include "Math.h"
+#include "Vector2.h"
 
 namespace DirectX { struct XMFLOAT3; }
 
 namespace nc
 {
-    struct Vector2;
-
     struct Vector3
     {
         float x;
         float y;
         float z;
 
-        Vector3() noexcept;
-        Vector3(float x, float y, float z) noexcept;
-        Vector3(const Vector3& other) noexcept;
-        Vector3(Vector3&& other) noexcept;
-        Vector3(float x, Vector2 yz) noexcept;
-        Vector3(Vector2 xy, float z) noexcept;
-        Vector3& operator=(const Vector3& other) noexcept;
-        Vector3& operator=(Vector3&& other) noexcept;
+        Vector3() = default;
+        Vector3(const Vector3& vec) = default;
+        Vector3(Vector3&& other) = default;
+        Vector3& operator=(const Vector3& other) = default;
+        Vector3& operator=(Vector3&& other) = default;
+
+        constexpr Vector3(float x, float y, float z) noexcept
+            : x{x}, y{y}, z{z} {}
+
+        constexpr Vector3(float x_, Vector2 yz) noexcept
+            : x{x_}, y{yz.x}, z{yz.y} {}
+
+        constexpr Vector3(Vector2 xy, float z_) noexcept
+            : x{xy.x}, y{xy.y}, z{z_} {}
 
         Vector3(const DirectX::XMFLOAT3& xm) noexcept;
         Vector3(DirectX::XMFLOAT3&& xm) noexcept;
@@ -33,10 +38,14 @@ namespace nc
         inline void InvertZ() noexcept { z *= -1.0f; }
 
         inline float Magnitude() const noexcept
-            { return sqrt( (x * x) + (y * y) + (z * z) ); }
+        {
+            return sqrt( (x * x) + (y * y) + (z * z) );
+        }
 
         inline float SquareMagnitude() const noexcept
-            { return SquareMagnitude(*this); }
+        {
+            return SquareMagnitude(*this);
+        }
 
         inline Vector3 GetNormalized() const noexcept
         {
@@ -47,24 +56,32 @@ namespace nc
         inline void Normalize() noexcept
         {
             if(float mag = Magnitude(); mag != 0)
-                { x /= mag, y /= mag, z /= mag; }
+            {
+                x /= mag;
+                y /= mag;
+                z /= mag;
+            }
         }
 
         inline void TranslateBy(const Vector3& vec) noexcept
-            { x += vec.x, y += vec.y, z += vec.z; }
+        {
+            x += vec.x;
+            y += vec.y;
+            z += vec.z;
+        }
 
-        static Vector3 Zero()  noexcept { return Vector3( 0, 0, 0); }
-        static Vector3 One()   noexcept { return Vector3( 1, 1, 1); }
-        static Vector3 Up()    noexcept { return Vector3( 0, 1, 0); }
-        static Vector3 Down()  noexcept { return Vector3( 0,-1, 0); }
-        static Vector3 Left()  noexcept { return Vector3(-1, 0, 0); }
-        static Vector3 Right() noexcept { return Vector3( 1, 0, 0); }
-        static Vector3 Front() noexcept { return Vector3( 0, 0, 1); }
-        static Vector3 Back()  noexcept { return Vector3( 0, 0,-1); }
+        static Vector3 Zero()  noexcept { return Vector3{ 0, 0, 0}; }
+        static Vector3 One()   noexcept { return Vector3{ 1, 1, 1}; }
+        static Vector3 Up()    noexcept { return Vector3{ 0, 1, 0}; }
+        static Vector3 Down()  noexcept { return Vector3{ 0,-1, 0}; }
+        static Vector3 Left()  noexcept { return Vector3{-1, 0, 0}; }
+        static Vector3 Right() noexcept { return Vector3{ 1, 0, 0}; }
+        static Vector3 Front() noexcept { return Vector3{ 0, 0, 1}; }
+        static Vector3 Back()  noexcept { return Vector3{ 0, 0,-1}; }
 
         static float SquareMagnitude(const Vector3& vec) noexcept
         {
-            return ( (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z) );
+            return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
         }
     };
 
@@ -72,19 +89,19 @@ namespace nc
      * Operators *
      * ***********/
     inline Vector3 operator +(const Vector3& lhs, const Vector3& rhs)
-        { return Vector3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z); }
+        { return Vector3{lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z}; }
 
     inline Vector3 operator -(const Vector3& lhs, const Vector3& rhs)
-        { return Vector3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z); }
+        { return Vector3{lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z}; }
 
-    inline Vector3 operator *(const Vector3& vec, const double scalar)
-        { return Vector3(vec.x * scalar, vec.y * scalar, vec.z * scalar); }
+    inline Vector3 operator *(const Vector3& vec, float scalar)
+        { return Vector3{vec.x * scalar, vec.y * scalar, vec.z * scalar}; }
     
-    inline Vector3 operator *(const double scalar, const Vector3& vec)
-        { return Vector3(vec.x * scalar, vec.y * scalar, vec.z * scalar); }
+    inline Vector3 operator *(float scalar, const Vector3& vec)
+        { return Vector3{vec.x * scalar, vec.y * scalar, vec.z * scalar}; }
 
-    inline Vector3 operator /(const Vector3& vec, const double scalar)
-        { return Vector3(vec.x / scalar, vec.y / scalar, vec.z / scalar); }
+    inline Vector3 operator /(const Vector3& vec, float scalar)
+        { return Vector3{vec.x / scalar, vec.y / scalar, vec.z / scalar}; }
 
     inline bool operator ==(const Vector3& lhs, const Vector3& rhs)
         { return Vector3::SquareMagnitude(lhs - rhs) <= math::EPSILON; }
