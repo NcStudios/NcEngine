@@ -8,7 +8,7 @@ namespace
 namespace project::ui
 {
     EditNameUIElement::EditNameUIElement(bool startOpen, std::function<void(std::string)> callback)
-        : nc::ui::IUIFixedElement(startOpen, nc::ui::UIPosition::Center, ELEMENT_SIZE),
+        : nc::ui::UIFixedElement(startOpen, nc::ui::UIPosition::Center, ELEMENT_SIZE),
           EditNameCallback{ callback }
     {
         m_buffer[0] = '\0';
@@ -18,7 +18,7 @@ namespace project::ui
     {
         if(!isOpen) return;
 
-        nc::ui::IUIFixedElement::PositionElement();
+        nc::ui::UIFixedElement::PositionElement();
 
         if(ImGui::Begin("Edit Player Name", &(this->isOpen), ImGuiWindowFlags_NoResize))
         {

@@ -51,15 +51,15 @@ namespace nc::window
             m_dimensions = { (float)config.graphics.screenWidth, (float)config.graphics.screenHeight };
         }
 
-        auto left = math::Clamp(((int)nativeWidth - (int)m_dimensions.X()) / 2, 0, nativeWidth);
-        auto top = math::Clamp(((int)nativeHeight - (int)m_dimensions.Y()) / 2, 0, nativeHeight);
+        auto left = math::Clamp(((int)nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
+        auto top = math::Clamp(((int)nativeHeight - (int)m_dimensions.y) / 2, 0, nativeHeight);
 
         auto clientRect = RECT
         {
             (LONG)left,
             (LONG)top,
-            (LONG)(left + m_dimensions.X()),
-            (LONG)(top + m_dimensions.Y())
+            (LONG)(left + m_dimensions.x),
+            (LONG)(top + m_dimensions.y)
         };
 
         if(!AdjustWindowRect(&clientRect, WND_STYLE_FLAGS, FALSE))
@@ -144,7 +144,7 @@ namespace nc::window
 
         m_dimensions = {width, height};
         const auto& config = engine::Engine::GetConfig();
-        GraphicsOnResizeCallback(m_dimensions.X(), m_dimensions.Y(), config.graphics.nearClip, config.graphics.farClip);
+        GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, config.graphics.nearClip, config.graphics.farClip);
         for(auto receiver : m_onResizeReceivers)
         {
             receiver->OnResize(m_dimensions);

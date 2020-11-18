@@ -1,4 +1,5 @@
 #include "Hud.h"
+#include "Window.h"
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "project/source/log/GameLog.h"
 #include "Window.h"
@@ -23,12 +24,15 @@ namespace project::ui
           m_turnPhaseUIElement {false},
           m_soundboardUIElement {false},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
-          m_isHovered { false }
+          m_isHovered { false },
+          m_windowDimensions { nc::Window::GetDimensions() }
     {
+        nc::Window::RegisterOnResizeReceiver(this);
     }
 
     Hud::~Hud()
     {
+        nc::Window::UnregisterOnResizeReceiver(this);
     }
 
     void Hud::Draw()
@@ -44,11 +48,15 @@ namespace project::ui
         return m_isHovered;
     }
 
+    void Hud::OnResize(nc::Vector2 dimensions)
+    {
+        m_windowDimensions = dimensions;
+    }
+
     void Hud::DrawHUD()
     {
-        auto dim = nc::Window::GetDimensions();
-        ImGui::SetNextWindowPos({0, (float)dim.Y() - HUD_HEIGHT});
-        ImGui::SetNextWindowSize({(float)dim.X(), HUD_HEIGHT});
+        ImGui::SetNextWindowPos({0, m_windowDimensions.y - HUD_HEIGHT});
+        ImGui::SetNextWindowSize({m_windowDimensions.x, HUD_HEIGHT});
 
         if(ImGui::Begin("Hud", nullptr, HUD_WINDOW_FLAGS))
         {

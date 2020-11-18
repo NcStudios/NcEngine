@@ -25,19 +25,19 @@ namespace nc
             inline Vector3 GetPosition() const noexcept { return m_position; }
             inline Vector3 GetRotation() const noexcept { return m_rotation; }
             inline Vector3 GetScale() const noexcept { return m_scale; }
-            inline float PosX() const noexcept { return m_position.X(); }
-            inline float PosY() const noexcept { return m_position.Y(); }
-            inline float PosZ() const noexcept { return m_position.Z(); }
-            inline float SclX() const noexcept { return m_rotation.X(); }
-            inline float SclY() const noexcept { return m_rotation.Y(); }
-            inline float SclZ() const noexcept { return m_rotation.Z(); }
-            inline float RotX() const noexcept { return m_rotation.X(); }
-            inline float RotY() const noexcept { return m_rotation.Y(); }
-            inline float RotZ() const noexcept { return m_rotation.Z(); }
+            inline float PosX() const noexcept { return m_position.x; }
+            inline float PosY() const noexcept { return m_position.y; }
+            inline float PosZ() const noexcept { return m_position.z; }
+            inline float SclX() const noexcept { return m_rotation.x; }
+            inline float SclY() const noexcept { return m_rotation.y; }
+            inline float SclZ() const noexcept { return m_rotation.z; }
+            inline float RotX() const noexcept { return m_rotation.x; }
+            inline float RotY() const noexcept { return m_rotation.y; }
+            inline float RotZ() const noexcept { return m_rotation.z; }
             /* Rotation Alternatives */
-            inline float Pitch() const noexcept { return m_rotation.m_x; }
-            inline float Yaw() const noexcept { return m_rotation.m_y; }
-            inline float Roll() const noexcept { return m_rotation.m_z; }
+            inline float Pitch() const noexcept { return m_rotation.x; }
+            inline float Yaw() const noexcept { return m_rotation.y; }
+            inline float Roll() const noexcept { return m_rotation.z; }
 
             DirectX::XMMATRIX GetMatrixXM() const;
             DirectX::XMMATRIX CamGetMatrix() const;

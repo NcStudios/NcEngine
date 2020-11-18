@@ -84,7 +84,7 @@ namespace nc
         }
         IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
         
-        PixelConstBufData.pos = m_transform->GetPosition().GetXMFloat3();
+        PixelConstBufData.pos = m_transform->GetPosition().ToXMFloat3();
         const auto pos = DirectX::XMLoadFloat3(&PixelConstBufData.pos);
         DirectX::XMStoreFloat3(&ProjectedPos, DirectX::XMVector3Transform(pos, view));
     }
