@@ -65,7 +65,7 @@ float3 CalculatePointLight(LightBuffer light, VSOut vertexOutput, float3 albedo,
     const float3 viewCamToFrag = normalize(vertexOutput.viewPosition);
     const float3 specular = att * light.diffuseColor * roughness.rrr * light.diffuseIntensity * pow( max(0.0f, dot(-r, viewCamToFrag) ), specularPower);
 
-    return float4(saturate((diffuse/1.5f + light.ambient) * albedoTex.Sample(splr, vertexOutput.uv).rgb * color + specular), 1.0f);
+    return float4(saturate((diffuse + (light.ambient / 1.5)) * albedoTex.Sample(splr, vertexOutput.uv).rgb * color + specular), 1.0f);
 }
 
 float4 main(VSOut vertexOutput) : SV_Target

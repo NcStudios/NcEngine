@@ -25,9 +25,9 @@ void MenuScene::Load()
     prefab::InitializeResources();
     
     // Light
-    auto lvHandle = Ecs::CreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+    auto lvHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Point Light");
     auto pointLight = Ecs::AddComponent<PointLight>(lvHandle);
-    pointLight->Set(pointLight->PixelConstBufData.pos, 0.5f, {0.3f, 0.3f, 0.3f}, pointLight->PixelConstBufData.diffuseColor, 7.00f, 0.00f, 0.06f, 0.00f);
+    pointLight->Set(pointLight->PixelConstBufData.pos, 0.5f, {0.443f, 0.412f, 0.412f}, {0.4751f, 0.525f, 1.0f}, 3.56f, 0.00f, 0.05f, 0.00f);
     Ecs::AddComponent<project::MouseFollower>(lvHandle);
 
 
