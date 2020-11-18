@@ -6,6 +6,7 @@
 #include "DebugComponents.h"
 #include "CamController.h"
 #include "project/components/CubeRotator.h"
+#include "project/components/MouseFollower.h"
 #include "source/Prefabs.h"
 
 #include <cstdlib>
@@ -25,7 +26,10 @@ void MenuScene::Load()
     
     // Light
     auto lvHandle = Ecs::CreateEntity({-33.9f, 10.3f, -2.4f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
-    Ecs::AddComponent<PointLight>(lvHandle);
+    auto pointLight = Ecs::AddComponent<PointLight>(lvHandle);
+    pointLight->Set(pointLight->PixelConstBufData.pos, 0.5f, {0.3f, 0.3f, 0.3f}, pointLight->PixelConstBufData.diffuseColor, 7.00f, 0.00f, 0.06f, 0.00f);
+    Ecs::AddComponent<project::MouseFollower>(lvHandle);
+
 
     // CamController
     auto camHandle = Ecs::CreateEntity("Main Camera");
@@ -37,8 +41,8 @@ void MenuScene::Load()
     Ecs::AddComponent<SceneReset>(debugHandle);
     Ecs::AddComponent<Timer>(debugHandle);
 
-    auto ncMaterial = graphics::PBRMaterial{{"project//Textures//nc_logo.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"}};
-    auto ncMesh = graphics::Mesh{"project//Models//cube.fbx"};
+    auto ncMaterial = graphics::PBRMaterial{{"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    auto ncMesh = graphics::Mesh{"project//Models//Logo3d.fbx"};
     std::srand(std::time(0));
     int posRange = 30;
     int rotRange = 90;
@@ -50,7 +54,7 @@ void MenuScene::Load()
         auto xRot = (float)(rand() % rotRange);
         auto yRot = (float)(rand() % rotRange);
         auto zRot = (float)(rand() % rotRange);
-        auto ncHandle = Ecs::CreateEntity({xPos, yPos, zPos}, {xRot, yRot, zRot}, {1.0f, 1.0f, 1.0f}, "nc");
+        auto ncHandle = Ecs::CreateEntity({xPos, yPos, zPos}, {xRot, yRot, zRot}, {0.75f, 0.75f, 0.75f}, "nc");
         Ecs::AddComponent<Renderer>(ncHandle, ncMesh, ncMaterial);
         Ecs::AddComponent<project::CubeRotator>(ncHandle);
     }

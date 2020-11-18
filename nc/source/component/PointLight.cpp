@@ -35,16 +35,16 @@ namespace nc
         return *this;
     }
 
-    void PointLight::Set(DirectX::XMFLOAT3 pos, float radius)
+    void PointLight::Set(DirectX::XMFLOAT3 pos, float radius, DirectX::XMFLOAT3 ambient, DirectX::XMFLOAT3 diffuseColor, float diffuseIntensity, float attConst, float attLin, float attQuad)
     {
         (void)radius; //currently unused
         PixelConstBufData.pos              = pos;
-        PixelConstBufData.ambient          = {0.65f, 0.65f, 0.65f};
-        PixelConstBufData.diffuseColor     = {1.0f, 1.0f, 1.0f};
-        PixelConstBufData.diffuseIntensity = 0.9f;
-        PixelConstBufData.attConst         = 2.61f;
-        PixelConstBufData.attLin           = 0.1819f;
-        PixelConstBufData.attQuad          = 0.0000001f;
+        PixelConstBufData.ambient          = ambient;
+        PixelConstBufData.diffuseColor     = diffuseColor;
+        PixelConstBufData.diffuseIntensity = diffuseIntensity;
+        PixelConstBufData.attConst         = attConst;
+        PixelConstBufData.attLin           = attLin;
+        PixelConstBufData.attQuad          = attQuad;
     }
 
     #ifdef NC_EDITOR_ENABLED
