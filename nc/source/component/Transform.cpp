@@ -28,21 +28,21 @@ namespace nc
             ImGui::Spacing();  ImGui::Separator();  ImGui::Text("Transform");
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Position");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat( "##xpos", &m_position.m_x, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat( "##ypos", &m_position.m_y, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat( "##zpos", &m_position.m_z,  -80.0f, 80.0f, "%.1f", dragSpeed);
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat( "##xpos", &m_position.x, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat( "##ypos", &m_position.y, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat( "##zpos", &m_position.z,  -80.0f, 80.0f, "%.1f", dragSpeed);
             ImGui::EndGroup();
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Rotation");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##xrot", &m_rotation.m_x, -180.0f, 180.0f);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##yrot", &m_rotation.m_y, -180.0f, 180.0f);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##zrot", &m_rotation.m_z, -180.0f, 180.0f);
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##xrot", &m_rotation.x, -180.0f, 180.0f);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##yrot", &m_rotation.y, -180.0f, 180.0f);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##zrot", &m_rotation.z, -180.0f, 180.0f);
             ImGui::EndGroup();
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Scale");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##xscale", &m_scale.m_x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##yscale", &m_scale.m_y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##zscale", &m_scale.m_z, 0.01f, 100.0f, "%.1f", dragSpeed);
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##xscale", &m_scale.x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##yscale", &m_scale.y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##zscale", &m_scale.z, 0.01f, 100.0f, "%.1f", dragSpeed);
             ImGui::EndGroup();
             ImGui::Separator();
         ImGui::PopItemWidth();
@@ -52,8 +52,8 @@ namespace nc
     DirectX::XMMATRIX Transform::GetMatrixXM() const
     {
         auto v_rot = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
-        auto v_scl = DirectX::XMMatrixScaling(m_scale.X(), m_scale.Y(), m_scale.Z());
-        auto v_trn = DirectX::XMMatrixTranslation(m_position.X(), m_position.Y(), m_position.Z());
+        auto v_scl = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+        auto v_trn = DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 
         return v_rot * v_scl * v_trn;
     }
@@ -65,7 +65,7 @@ namespace nc
 
         const xmv forwardBaseVec = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
         const xmv v_lookVector   = XMVector3Transform(forwardBaseVec, DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll()));
-        xmf3      camPosition    = m_position.GetXMFloat3();
+        xmf3      camPosition    = m_position.ToXMFloat3();
         const xmv v_camPosition  = XMLoadFloat3(&camPosition);
         const xmv v_camTarget    = v_camPosition + v_lookVector;
 
@@ -80,7 +80,7 @@ namespace nc
             return;
         }
 
-        auto trans       = translation.GetXMFloat3();
+        auto trans       = translation.ToXMFloat3();
         auto v_trans     = DirectX::XMLoadFloat3(&trans);
         auto v_rotMatrix = DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll());
         XMStoreFloat3(&trans, DirectX::XMVector3Transform(v_trans, v_rotMatrix));
@@ -91,9 +91,9 @@ namespace nc
     {
         m_rotation = Vector3
         {
-            (float)math::WrapAngle(m_rotation.X() + xAngle * speed),
-            (float)math::WrapAngle(m_rotation.Y() + yAngle * speed),
-            (float)math::WrapAngle(m_rotation.Z() + zAngle * speed)
+            (float)math::WrapAngle(m_rotation.x + xAngle * speed),
+            (float)math::WrapAngle(m_rotation.y + yAngle * speed),
+            (float)math::WrapAngle(m_rotation.z + zAngle * speed)
         };
     }
 
@@ -101,9 +101,9 @@ namespace nc
     {
         m_rotation = Vector3
         {
-            (float)math::Clamp(m_rotation.X() + xAngle * speed, min, max),
-            (float)math::Clamp(m_rotation.Y() + yAngle * speed, min, max),
-            (float)math::Clamp(m_rotation.Z() + zAngle * speed, min, max)
+            (float)math::Clamp(m_rotation.x + xAngle * speed, min, max),
+            (float)math::Clamp(m_rotation.y + yAngle * speed, min, max),
+            (float)math::Clamp(m_rotation.z + zAngle * speed, min, max)
         };
     }
 }

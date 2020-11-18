@@ -16,7 +16,7 @@ namespace nc::ui
     UIFixedElement::UIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions)
         : UIElement(startOpen),
           m_position{ position },
-          m_screenDimensions { Window::GetDimensions() },
+          m_screenDimensions { Window::GetDimensions().ToImVec2() },
           m_elementDimensions{ dimensions }
     {
         CalculateTopLeftPosition();
@@ -30,7 +30,7 @@ namespace nc::ui
 
     void UIFixedElement::OnResize(Vector2 dimensions)
     {
-        m_screenDimensions = {dimensions.X(), dimensions.Y()};
+        m_screenDimensions = dimensions.ToImVec2();
         CalculateTopLeftPosition();
     }
 
@@ -42,6 +42,6 @@ namespace nc::ui
 
     void UIFixedElement::CalculateTopLeftPosition()
     {
-        m_topLeftPosition = utils::GetTopLeftCoords( m_position, {m_screenDimensions.X(), m_screenDimensions.Y()}, m_elementDimensions);
+        m_topLeftPosition = utils::GetTopLeftCoords( m_position, m_screenDimensions, m_elementDimensions);
     }
 }

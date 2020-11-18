@@ -43,13 +43,13 @@ Vector3 CamController::GetCameraPanMovement()
 {
     auto xPan = 0.0f;
     auto zPan = 0.0f;
-    auto dim = nc::Window::GetDimensions();
+    auto [screenWidth, screenHeight] = nc::Window::GetDimensions();
 
     if(input::MouseX < EDGE_PAN_WIDTH)
     {
         xPan = -1.0;
     }
-    else if(input::MouseX > dim.X() - EDGE_PAN_WIDTH)
+    else if(input::MouseX > screenWidth - EDGE_PAN_WIDTH)
     {
         xPan = 1.0;
     }
@@ -57,7 +57,7 @@ Vector3 CamController::GetCameraPanMovement()
     {
         zPan = 1.0;
     }
-    else if(input::MouseY > dim.Y() - EDGE_PAN_WIDTH - HUD_HEIGHT)
+    else if(input::MouseY > screenHeight - EDGE_PAN_WIDTH - HUD_HEIGHT)
     {
         zPan = -1.0;
     }
