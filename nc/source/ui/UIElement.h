@@ -31,7 +31,6 @@ namespace nc::ui
 
         private:
             UIPosition m_position;
-            /** @todo Once Vector2.ToImVec2() is implemented, this can be easily changed to ImVec2 */
             ImVec2 m_screenDimensions;
             ImVec2 m_elementDimensions;
             ImVec2 m_topLeftPosition;
