@@ -1,3 +1,4 @@
-#add_subdirectory(unit)
+include(GoogleTest)
 
 add_subdirectory(integration)
+add_subdirectory(unit)

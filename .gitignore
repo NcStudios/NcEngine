@@ -26,3 +26,5 @@ imgui.ini
 
 #log
 *.log
+
+!gen.exe

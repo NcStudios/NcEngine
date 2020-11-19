@@ -25,7 +25,6 @@ namespace nc
             mutable std::string Tag;
             EngineComponentHandleGroup Handles;
             
-            //could make engine a friend and make these private
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
@@ -56,7 +55,6 @@ namespace nc
             std::vector<std::unique_ptr<Component>> m_userComponents;
     };
 
-    //template definitions
     template<class T, class>
     bool Entity::HasUserComponent() const noexcept
     {
@@ -95,7 +93,7 @@ namespace nc
                 return true;
             }
         }
-        return false;        
+        return false;
     }
 
     template<class T, class>
@@ -108,7 +106,6 @@ namespace nc
                 return dynamic_cast<T*>(item.get());
         }
 
-        return nullptr; //doesn't have component
+        return nullptr;
     }
-
 } //end namespace nc
