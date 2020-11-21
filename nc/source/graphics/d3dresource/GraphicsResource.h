@@ -138,6 +138,23 @@ namespace nc::graphics::d3dresource
     };
 }
 
+/* Blender */
+namespace nc::graphics::d3dresource
+{
+    class Blender : public GraphicsResource
+    {
+        public:
+            Blender(const std::string& tag);
+            void Bind() noexcept override;
+            static std::string GetUID(const std::string& tag) noexcept;
+
+        private:
+            const std::string m_tag;
+            Microsoft::WRL::ComPtr<ID3D11BlendState> m_blender;
+            bool m_isBlending;
+    };
+}
+
 /* Texture */
 namespace nc::graphics::d3dresource
 {

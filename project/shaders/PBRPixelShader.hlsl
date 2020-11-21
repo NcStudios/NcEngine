@@ -47,7 +47,7 @@ struct VSOut
     float3 bitangent : BITANGENT;
 };
 
-float3 CalculatePointLight(LightBuffer light, VSOut vertexOutput, float3 albedo, float3 metallic, float3 roughness, float3 normal)
+float3 CalculatePointLight(LightBuffer light, VSOut vertexOutput, float4 albedo, float4 metallic, float4 roughness, float4 normal)
 {
     const float3 vToL = light.lightPos - vertexOutput.viewPosition;
     const float distToL = length(vToL);
@@ -65,16 +65,16 @@ float3 CalculatePointLight(LightBuffer light, VSOut vertexOutput, float3 albedo,
     const float3 viewCamToFrag = normalize(vertexOutput.viewPosition);
     const float3 specular = att * light.diffuseColor * roughness.rrr * light.diffuseIntensity * pow( max(0.0f, dot(-r, viewCamToFrag) ), specularPower);
 
-    return float4(saturate((diffuse + (light.ambient / 1.5)) * albedoTex.Sample(splr, vertexOutput.uv).rgb * color + specular), 1.0f);
+    return float4(saturate((diffuse + (light.ambient / 1.5)) * albedo.rgb * color + specular), 1.0f);
 }
 
 float4 main(VSOut vertexOutput) : SV_Target
 {
     // Get sampled value per pixel for each map
-    float3 albedo = albedoTex.Sample(splr, vertexOutput.uv).rgb;
-    float3 metallic = metallicTex.Sample(splr, vertexOutput.uv).rgb;
-    float3 roughness = roughnessTex.Sample(splr, vertexOutput.uv).rgb;
-    float3 normal = normalTex.Sample(splr, vertexOutput.uv).rgb;
+    float4 albedo = albedoTex.Sample(splr, vertexOutput.uv);
+    float4 metallic = metallicTex.Sample(splr, vertexOutput.uv);
+    float4 roughness = roughnessTex.Sample(splr, vertexOutput.uv);
+    float4 normal = normalTex.Sample(splr, vertexOutput.uv);
 
     // Build the transform rotation into tangent space
     const float3x3 tanToView =  float3x3 ( normalize(vertexOutput.tangent),
@@ -94,5 +94,5 @@ float4 main(VSOut vertexOutput) : SV_Target
         result += CalculatePointLight(pointLights[i], vertexOutput, albedo, metallic, roughness, normal);
     }
 
-    return float4(result, 1.0f);
+    return float4(result, albedo.a);
 }

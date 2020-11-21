@@ -41,6 +41,35 @@ namespace nc::graphics::d3dresource
         GetContext()->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
     }
 
+    Blender::Blender(const std::string& tag)
+        : m_tag(tag)
+    {
+        D3D11_BLEND_DESC blendDesc = {};
+        auto& blenderRenderTarget = blendDesc.RenderTarget[0];
+        if (m_isBlending)
+        {
+            blenderRenderTarget.BlendEnable = TRUE;
+            blenderRenderTarget.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+            blenderRenderTarget.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+            blenderRenderTarget.BlendOp = D3D11_BLEND_OP_ADD;
+            blenderRenderTarget.SrcBlendAlpha = D3D11_BLEND_ZERO;
+            blenderRenderTarget.DestBlendAlpha = D3D11_BLEND_ZERO;
+            blenderRenderTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+            blenderRenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        }
+        else
+        {
+            blenderRenderTarget.BlendEnable = FALSE;
+            blenderRenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        }
+        THROW_FAILED(GetDevice()->CreateBlendState(&blendDesc, &m_blender));
+    }
+
+    void Blender::Bind() noexcept
+    {
+        GetContext()->OMSetBlendState(m_blender.Get(), nullptr, 0xFFFFFFFFu);
+    }
+
     VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag)
         : m_stride(sizeof(Vertex)), m_tag(tag)
     {
@@ -267,6 +296,11 @@ namespace nc::graphics::d3dresource
     std::string Sampler::GetUID(const std::string& tag) noexcept
     {
         return typeid(Sampler).name() + tag;
+    }
+
+    std::string Blender::GetUID(const std::string& tag) noexcept
+    {
+        return typeid(Blender).name() + tag;
     }
 
     std::string VertexBuffer::GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept

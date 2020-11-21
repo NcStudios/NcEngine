@@ -6,6 +6,7 @@
 namespace
 {
     const std::string SAMPLER_TAG = "texture_sampler_resource";
+    const std::string BLENDER_TAG = "texture_blender_resource";
 }
 
 namespace nc::graphics
@@ -28,6 +29,7 @@ namespace nc::graphics
 
         const auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
         PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "pbrpixelshader.cso"));
+        PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
         PBRMaterial::AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Sampler>(SAMPLER_TAG));
         PBRMaterial::AddGraphicsResource(PixelConstantBuffer<MaterialProperties>::AcquireUnique(properties, 1u));
     }
