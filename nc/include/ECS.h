@@ -23,8 +23,8 @@ namespace nc
             static EntityHandle CreateEntity(std::string tag);
             static EntityHandle CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag);
             static bool DestroyEntity(EntityHandle handle);
-            static Entity* GetEntity(EntityHandle handle);
-            static Entity* GetEntity(std::string tag);
+            [[nodiscard]] static Entity* GetEntity(EntityHandle handle);
+            [[nodiscard]] static Entity* GetEntity(std::string tag);
 
             template<class T, class = is_component_t<T>, class ...Args>
             static T* AddComponent(EntityHandle handle, Args&& ... args);
@@ -33,10 +33,10 @@ namespace nc
             static bool RemoveComponent(EntityHandle handle);
             
             template<class T, class = is_component_t<T>>
-            static T* GetComponent(EntityHandle handle);
+            [[nodiscard]] static T* GetComponent(EntityHandle handle);
             
             template<class T, class = is_component_t<T>>
-            static bool HasComponent(EntityHandle handle);
+            [[nodiscard]] static bool HasComponent(EntityHandle handle);
 
         private:
             static ecs::EcsImpl* m_impl;

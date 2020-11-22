@@ -20,7 +20,7 @@ namespace nc::engine
             void Start(std::unique_ptr<scene::Scene> initialScene);
             void Shutdown(bool forceImmediate = false);
 
-            static const config::Config& GetConfig();
+            [[nodiscard]] static const config::Config& GetConfig();
 
         private:
             std::unique_ptr<EngineImpl> m_impl;
