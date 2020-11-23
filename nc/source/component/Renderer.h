@@ -2,7 +2,7 @@
 
 #include "Component.h"
 #include "graphics/Mesh.h"
-#include "graphics/PBRMaterial.h"
+#include "graphics/materials/Material.h"
 
 namespace nc::graphics
 {
@@ -18,7 +18,7 @@ namespace nc
     {
         public:
             Renderer();
-            Renderer(graphics::Mesh& mesh, graphics::PBRMaterial& material);
+            Renderer(graphics::Mesh& mesh, graphics::Material& material);
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;
@@ -31,8 +31,8 @@ namespace nc
             #endif
 
             void SetMesh(graphics::Mesh& mesh);
-            void SetMaterial(graphics::PBRMaterial& material);
-            void Update(graphics::Graphics * gfx);
+            void SetMaterial(graphics::Material& material);
+            void Update(graphics::FrameManager& frame);
 
         private:
             std::unique_ptr<graphics::Model> m_model;

@@ -3,7 +3,7 @@
 
 namespace nc::graphics
 {
-    void ResourceGroup::BindGraphicsResources() const
+    void ResourceGroup::Bind() const
     {
         for(auto& res : m_resources)
         {

@@ -8,6 +8,7 @@
 #include "source/Prefabs.h"
 #include "GamePiece.h"
 #include "ClickHandler.h"
+#include "graphics/materials/PBRMaterial.h"
 
 using namespace nc;
 using namespace project;
@@ -48,7 +49,7 @@ void GameScene::Load()
     const auto scaleFactor = 2;
 
     // Table
-    auto tableMaterial = graphics::PBRMaterial{{"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material tableMaterial = graphics::PBRMaterial{{"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto tableHandle = Ecs::CreateEntity({2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, {1.5708f, 0.0f, 1.5708f}, Vector3::One() * 7.5, "Table Piece");
     auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
     Ecs::AddComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
@@ -73,74 +74,74 @@ void GameScene::Load()
     prefab::Create<prefab::Wood>({0.8f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Wood Piece");
 
     // Stable Piece 1
-    auto stableMaterial1 = graphics::PBRMaterial{{"project//Textures//PlayerRed.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material stableMaterial1 = graphics::PBRMaterial{{"project//Textures//PlayerRed.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto stableHandle1 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     auto stableMesh = graphics::Mesh{"project//Models//StablePiece.fbx"};
     Ecs::AddComponent<Renderer>(stableHandle1, stableMesh, stableMaterial1);
 
     // Stable Piece 2
-    auto stableMaterial2 = graphics::PBRMaterial{{"project//Textures//PlayerOrange.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material stableMaterial2 = graphics::PBRMaterial{{"project//Textures//PlayerOrange.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto stableHandle2 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle2, stableMesh, stableMaterial2);
 
     // Stable Piece 3
-    auto stableMaterial3 = graphics::PBRMaterial{{"project//Textures//PlayerYellow.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material stableMaterial3 = graphics::PBRMaterial{{"project//Textures//PlayerYellow.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto stableHandle3 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle3, stableMesh, stableMaterial3);
 
     // Stable Piece 4
-    auto stableMaterial4 = graphics::PBRMaterial{{"project//Textures//PlayerGreen.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material stableMaterial4 = graphics::PBRMaterial{{"project//Textures//PlayerGreen.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto stableHandle4 = Ecs::CreateEntity({0.8f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle4, stableMesh, stableMaterial4);
 
     // Stable Piece 5
-    auto stableMaterial5 = graphics::PBRMaterial{{"project//Textures//PlayerTeal.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material stableMaterial5 = graphics::PBRMaterial{{"project//Textures//PlayerTeal.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto stableHandle5 = Ecs::CreateEntity({1.0f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle5, stableMesh, stableMaterial5);
 
     // Stable Piece 6
-    auto stableMaterial6 = graphics::PBRMaterial{{"project//Textures//PlayerBlue.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material stableMaterial6 = graphics::PBRMaterial{{"project//Textures//PlayerBlue.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto stableHandle6 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle6, stableMesh, stableMaterial6);
 
     // Stable Piece 7
-    auto stableMaterial7 = graphics::PBRMaterial{{"project//Textures//PlayerPurple.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material stableMaterial7 = graphics::PBRMaterial{{"project//Textures//PlayerPurple.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto stableHandle7 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle7, stableMesh, stableMaterial7);
 
     // Dwarf Disc Piece 1
-    auto dwarfDiscMaterial1 = graphics::PBRMaterial{{"project//Textures//PlayerRed.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material dwarfDiscMaterial1 = graphics::PBRMaterial{{"project//Textures//PlayerRed.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto dwarfDiscHandle1 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 1");
     auto dwarfDiscMesh = graphics::Mesh{"project//Models//Disc.fbx"};
     Ecs::AddComponent<Renderer>(dwarfDiscHandle1, dwarfDiscMesh, dwarfDiscMaterial1);
 
     // DwarfDisc Piece 2
-    auto dwarfDiscMaterial2 = graphics::PBRMaterial{{"project//Textures//PlayerOrange.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material dwarfDiscMaterial2 = graphics::PBRMaterial{{"project//Textures//PlayerOrange.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto dwarfDiscHandle2 = Ecs::CreateEntity({0.8f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 2");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle2, dwarfDiscMesh, dwarfDiscMaterial2);
 
     // DwarfDisc Piece 3
-    auto dwarfDiscMaterial3 = graphics::PBRMaterial{{"project//Textures//PlayerYellow.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material dwarfDiscMaterial3 = graphics::PBRMaterial{{"project//Textures//PlayerYellow.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto dwarfDiscHandle3 = Ecs::CreateEntity({1.0f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 3");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle3, dwarfDiscMesh, dwarfDiscMaterial3);
 
     // DwarfDisc Piece 4
-    auto dwarfDiscMaterial4 = graphics::PBRMaterial{{"project//Textures//PlayerGreen.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material dwarfDiscMaterial4 = graphics::PBRMaterial{{"project//Textures//PlayerGreen.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto dwarfDiscHandle4 = Ecs::CreateEntity({0.0f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 4");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle4, dwarfDiscMesh, dwarfDiscMaterial4);
 
     // DwarfDisc Piece 5
-    auto dwarfDiscMaterial5 = graphics::PBRMaterial{{"project//Textures//PlayerTeal.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material dwarfDiscMaterial5 = graphics::PBRMaterial{{"project//Textures//PlayerTeal.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto dwarfDiscHandle5 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 5");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle5, dwarfDiscMesh, dwarfDiscMaterial5);
 
     // DwarfDisc Piece 6
-    auto dwarfDiscMaterial6 = graphics::PBRMaterial{{"project//Textures//PlayerBlue.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material dwarfDiscMaterial6 = graphics::PBRMaterial{{"project//Textures//PlayerBlue.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto dwarfDiscHandle6 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 6");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle6, dwarfDiscMesh, dwarfDiscMaterial6);
 
     // DwarfDisc Piece 7
-    auto dwarfDiscMaterial7 = graphics::PBRMaterial{{"project//Textures//PlayerPurple.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material dwarfDiscMaterial7 = graphics::PBRMaterial{{"project//Textures//PlayerPurple.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto dwarfDiscHandle7 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 7");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle7, dwarfDiscMesh, dwarfDiscMaterial7);
 

@@ -25,15 +25,6 @@ namespace
 
     constexpr auto DefaultPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    const auto DefaultInputElementDesc = std::vector<D3D11_INPUT_ELEMENT_DESC>
-    {
-        { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "Normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TexCoord", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "Tangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "Bitangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
     bool HasValidMeshExtension(const std::string& path) 
     {
         std::size_t periodPosition = path.rfind('.');
@@ -93,17 +84,14 @@ namespace nc::graphics
 
     Mesh::Mesh(std::string meshPath)
     {
-        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
-        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(std::move(defaultShaderPath) + "pbrvertexshader.cso");
-        auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
-        AddGraphicsResource(std::move(pvs));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout> (meshPath, DefaultInputElementDesc, pvsbc));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology> (DefaultPrimitiveTopology));
         AddBufferResources(std::move(meshPath));
     }
 
     void Mesh::AddBufferResources(std::string meshPath)
     {
+        // Topology does not depend on parsing the mesh
+        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology> (DefaultPrimitiveTopology));
+
         auto vertexBuffer = std::vector<Vertex>{};
         auto indexBuffer = std::vector<uint16_t>{};
 

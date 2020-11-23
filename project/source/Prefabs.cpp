@@ -1,5 +1,6 @@
 #include "Prefabs.h"
 #include "project/components/GamePiece.h"
+#include "graphics/materials/PBRMaterial.h"
 
 using namespace nc;
 
@@ -33,73 +34,73 @@ namespace mesh
 
 namespace material
 {
-    auto Boar = graphics::PBRMaterial{};
-    auto Cattle = graphics::PBRMaterial{};
-    auto Coal = graphics::PBRMaterial{};
-    auto CoinOne = graphics::PBRMaterial{};
-    auto CoinTen = graphics::PBRMaterial{};
-    auto CoinTwo = graphics::PBRMaterial{};
-    auto Dog = graphics::PBRMaterial{};
-    auto Donkey = graphics::PBRMaterial{};
-    auto Dwarf = graphics::PBRMaterial{};
-    auto Grain = graphics::PBRMaterial{};
-    auto PlayerBoard = graphics::PBRMaterial{};
-    auto Ruby = graphics::PBRMaterial{};
-    auto Sheep = graphics::PBRMaterial{};
-    auto Stable = graphics::PBRMaterial{};
-    auto StartingPlayerPiece = graphics::PBRMaterial{};
-    auto Stone = graphics::PBRMaterial{};
-    auto Vegetable = graphics::PBRMaterial{};
-    auto Wood = graphics::PBRMaterial{};
+    graphics::Material Boar = graphics::PBRMaterial{};
+    graphics::Material Cattle = graphics::PBRMaterial{};
+    graphics::Material Coal = graphics::PBRMaterial{};
+    graphics::Material CoinOne = graphics::PBRMaterial{};
+    graphics::Material CoinTen = graphics::PBRMaterial{};
+    graphics::Material CoinTwo = graphics::PBRMaterial{};
+    graphics::Material Dog = graphics::PBRMaterial{};
+    graphics::Material Donkey = graphics::PBRMaterial{};
+    graphics::Material Dwarf = graphics::PBRMaterial{};
+    graphics::Material Grain = graphics::PBRMaterial{};
+    graphics::Material PlayerBoard = graphics::PBRMaterial{};
+    graphics::Material Ruby = graphics::PBRMaterial{};
+    graphics::Material Sheep = graphics::PBRMaterial{};
+    graphics::Material Stable = graphics::PBRMaterial{};
+    graphics::Material StartingPlayerPiece = graphics::PBRMaterial{};
+    graphics::Material Stone = graphics::PBRMaterial{};
+    graphics::Material Vegetable = graphics::PBRMaterial{};
+    graphics::Material Wood = graphics::PBRMaterial{};
 
-    auto FurnishingTileAdditionalDwelling = graphics::PBRMaterial{};
-    auto FurnishingTileCoupleDwelling = graphics::PBRMaterial{};
-    auto FurnishingTileDwelling = graphics::PBRMaterial{};
-    auto FurnishingTileBeerParlor = graphics::PBRMaterial{};
-    auto FurnishingTileBlacksmithingParlor = graphics::PBRMaterial{};
-    auto FurnishingTileBlacksmith = graphics::PBRMaterial{};
-    auto FurnishingTileBreakfastRoom = graphics::PBRMaterial{};
-    auto FurnishingTileBreedingCave = graphics::PBRMaterial{};
-    auto FurnishingTileBroomChamber = graphics::PBRMaterial{};
-    auto FurnishingTileBuilder = graphics::PBRMaterial{};
-    auto FurnishingTileCarpenter = graphics::PBRMaterial{};
-    auto FurnishingTileCookingCave = graphics::PBRMaterial{};
-    auto FurnishingTileCuddleRoom = graphics::PBRMaterial{};
-    auto FurnishingTileDogSchool = graphics::PBRMaterial{};
-    auto FurnishingTileFodderChamber = graphics::PBRMaterial{};
-    auto FurnishingTileFoodChamber = graphics::PBRMaterial{};
-    auto FurnishingTileGuestRoom = graphics::PBRMaterial{};
-    auto FurnishingTileHuntingParlor = graphics::PBRMaterial{};
-    auto FurnishingTileMainStorage = graphics::PBRMaterial{};
-    auto FurnishingTileMilkingParlor = graphics::PBRMaterial{};
-    auto FurnishingTileMiner = graphics::PBRMaterial{};
-    auto FurnishingTileMiningCave = graphics::PBRMaterial{};
-    auto FurnishingTileMixedDwelling = graphics::PBRMaterial{};
-    auto FurnishingTileOfficeRoom = graphics::PBRMaterial{};
-    auto FurnishingTileOreStorage = graphics::PBRMaterial{};
-    auto FurnishingTilePeacefulCave = graphics::PBRMaterial{};
-    auto FurnishingTilePrayerChamber = graphics::PBRMaterial{};
-    auto FurnishingTileQuarry = graphics::PBRMaterial{};
-    auto FurnishingTileRubySupplier = graphics::PBRMaterial{};
-    auto FurnishingTileSeam = graphics::PBRMaterial{};
-    auto FurnishingTileSimpleDwelling = graphics::PBRMaterial{};
-    auto FurnishingTileSimpleDwelling2 = graphics::PBRMaterial{};
-    auto FurnishingTileSlaughterCave = graphics::PBRMaterial{};
-    auto FurnishingTileSparePartStorage = graphics::PBRMaterial{};
-    auto FurnishingTileStateParlor = graphics::PBRMaterial{};
-    auto FurnishingTileStoneCarver = graphics::PBRMaterial{};
-    auto FurnishingTileStoneStorage = graphics::PBRMaterial{};
-    auto FurnishingTileStoneSupplier = graphics::PBRMaterial{};
-    auto FurnishingTileStubbleRoom = graphics::PBRMaterial{};
-    auto FurnishingTileSupplierStorage = graphics::PBRMaterial{};
-    auto FurnishingTileTrader = graphics::PBRMaterial{};
-    auto FurnishingTileTreasureChamber = graphics::PBRMaterial{};
-    auto FurnishingTileWeaponStorage = graphics::PBRMaterial{};
-    auto FurnishingTileWeavingParlor = graphics::PBRMaterial{};
-    auto FurnishingTileWoodSupplier = graphics::PBRMaterial{};
-    auto FurnishingTileWorkingCave = graphics::PBRMaterial{};
-    auto FurnishingTileWorkRoom = graphics::PBRMaterial{};
-    auto FurnishingTileWritingChamber = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileAdditionalDwelling = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileCoupleDwelling = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileDwelling = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileBeerParlor = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileBlacksmithingParlor = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileBlacksmith = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileBreakfastRoom = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileBreedingCave = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileBroomChamber = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileBuilder = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileCarpenter = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileCookingCave = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileCuddleRoom = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileDogSchool = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileFodderChamber = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileFoodChamber = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileGuestRoom = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileHuntingParlor = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileMainStorage = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileMilkingParlor = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileMiner = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileMiningCave = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileMixedDwelling = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileOfficeRoom = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileOreStorage = graphics::PBRMaterial{};
+    graphics::Material FurnishingTilePeacefulCave = graphics::PBRMaterial{};
+    graphics::Material FurnishingTilePrayerChamber = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileQuarry = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileRubySupplier = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileSeam = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileSimpleDwelling = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileSimpleDwelling2 = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileSlaughterCave = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileSparePartStorage = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileStateParlor = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileStoneCarver = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileStoneStorage = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileStoneSupplier = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileStubbleRoom = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileSupplierStorage = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileTrader = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileTreasureChamber = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileWeaponStorage = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileWeavingParlor = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileWoodSupplier = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileWorkingCave = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileWorkRoom = graphics::PBRMaterial{};
+    graphics::Material FurnishingTileWritingChamber = graphics::PBRMaterial{};
 }
 
 void InitializeResources()

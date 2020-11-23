@@ -122,6 +122,30 @@ namespace nc::graphics::d3dresource
     };
 }
 
+/* Stencil */
+namespace nc::graphics::d3dresource
+{
+    class Stencil : public GraphicsResource
+    {
+        public:
+            enum class Mode
+            {
+                Off,
+                Write,
+                Mask
+            };
+
+            Stencil(Mode mode);
+            void Bind() noexcept override;
+            static std::string GetUID(Mode mode) noexcept;
+
+        private:
+            const std::string m_tag;
+            Mode m_mode;
+            Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_stencil;
+    };
+}
+
 /* Sampler */
 namespace nc::graphics::d3dresource
 {

@@ -20,6 +20,64 @@ namespace nc::graphics::d3dresource
         return GraphicsResourceManager::GetGraphics()->m_device;
     }
 
+    /* Stencil */
+    auto tagFromMode = [](Stencil::Mode mode)
+    {
+        switch (mode)
+        {
+            case Stencil::Mode::Write:
+                return std::string{"Write"};
+            case Stencil::Mode::Mask:
+                return std::string{"Mask"};
+            case Stencil::Mode::Off:
+                return std::string{"Off"};
+            default:
+                throw std::runtime_error("Invalid mode specified.");
+        }
+    };
+
+    Stencil::Stencil(Mode mode)
+    : m_tag {tagFromMode(mode)},
+      m_mode {mode}
+    {
+        D3D11_DEPTH_STENCIL_DESC dsDesc = CD3D11_DEPTH_STENCIL_DESC{ CD3D11_DEFAULT{} };
+        
+        switch (m_mode)
+        {
+            case Mode::Write:
+            {
+                dsDesc.DepthEnable = FALSE;
+				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+				dsDesc.StencilEnable = TRUE;
+				dsDesc.StencilWriteMask = 0xFF;
+				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+                break;
+            }
+            case Mode::Mask:
+            {
+				dsDesc.DepthEnable = FALSE;
+				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+				dsDesc.StencilEnable = TRUE;
+				dsDesc.StencilReadMask = 0xFF;
+				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+                break;
+            }
+            case Mode::Off:
+            {
+                break;
+            }
+        }
+        THROW_FAILED(GetDevice()->CreateDepthStencilState(&dsDesc, &m_stencil));
+    }
+
+    void Stencil::Bind() noexcept
+    {
+        GetContext()->OMSetDepthStencilState(m_stencil.Get(), 1u);
+        m_stencil->Release();
+    }
+
     Sampler::Sampler(const std::string& tag)
         : m_tag(tag)
     {
@@ -293,6 +351,11 @@ namespace nc::graphics::d3dresource
     /****************
     * UID Functions *
     ****************/
+    std::string Stencil::GetUID(Stencil::Mode mode) noexcept
+    {
+        return typeid(Stencil).name() + tagFromMode(mode);
+    }
+
     std::string Sampler::GetUID(const std::string& tag) noexcept
     {
         return typeid(Sampler).name() + tag;

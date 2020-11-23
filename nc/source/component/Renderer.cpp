@@ -2,6 +2,7 @@
 #include "graphics/Graphics.h"
 #include "graphics/Model.h"
 #include "graphics/d3dresource/GraphicsResource.h"
+#include "graphics/rendergraph/FrameManager.h"
 #include "Ecs.h"
 
 #ifdef NC_EDITOR_ENABLED
@@ -16,7 +17,7 @@ namespace nc
     {
     }
     
-    Renderer::Renderer(graphics::Mesh& mesh, graphics::PBRMaterial& material)
+    Renderer::Renderer(graphics::Mesh& mesh, graphics::Material& material)
         : m_model{ std::make_unique<graphics::Model>(mesh, material) },
           m_transform{ nullptr }
     {
@@ -75,17 +76,18 @@ namespace nc
 
     void Renderer::SyncMaterialData()
     {
-        if(!m_model) return;
+        /** @todo: Reimplement once Techniques are templated **/
+        // if(!m_model) return;
 
-        using namespace nc::graphics;
-        auto pConstPS = m_model->GetMaterial()->QueryGraphicsResource<d3dresource::PixelConstantBuffer<MaterialProperties>>();
-	    assert(pConstPS != nullptr);
-	    pConstPS->Update(m_model->GetMaterial()->properties);
+        // using namespace nc::graphics;
+        // auto pConstPS = m_model->GetMaterial()->QueryGraphicsResource<d3dresource::PixelConstantBuffer<MaterialProperties>>();
+	    // assert(pConstPS != nullptr);
+	    // pConstPS->Update(m_model->GetMaterial()->properties);
     }
     
     #endif
 
-    void Renderer::Update(graphics::Graphics * gfx)
+    void Renderer::Update(graphics::FrameManager& frame)
     {
         if (!m_transform)
         {
@@ -98,7 +100,7 @@ namespace nc
         }
 
         m_model->UpdateTransformationMatrix(m_transform);
-        m_model->Draw(gfx);
+        m_model->Submit(frame);
     }
 
     void Renderer::SetMesh(graphics::Mesh& mesh)
@@ -106,7 +108,7 @@ namespace nc
         m_model->SetMesh(mesh);
     }
     
-    void Renderer::SetMaterial(graphics::PBRMaterial& material) 
+    void Renderer::SetMaterial(graphics::Material& material) 
     {
         m_model->SetMaterial(material);
     }
