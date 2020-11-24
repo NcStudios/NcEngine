@@ -1,4 +1,4 @@
-target_sources(${EXE_NAME}
+target_sources(${GAME_EXE}
     PRIVATE
         ${ROOT_DIR}/project/source/ui/AddServerSelectableUIElement.cpp
         ${ROOT_DIR}/project/source/ui/EditNameUIElement.cpp

@@ -5,12 +5,15 @@
 
 #include <memory>
 
-class MenuScene : public nc::scene::Scene
+namespace project
 {
-    public:
-        void Load() override;
-        void Unload() override;
-    
-    private:
-        std::unique_ptr<project::ui::MainMenuUI> m_ui;
-};
+    class MenuScene : public nc::scene::Scene
+    {
+        public:
+            void Load() override;
+            void Unload() override;
+        
+        private:
+            std::unique_ptr<project::ui::MainMenuUI> m_ui;
+    };
+}

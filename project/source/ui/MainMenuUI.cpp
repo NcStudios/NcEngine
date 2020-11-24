@@ -53,7 +53,6 @@ namespace project::ui
 {
     MainMenuUI::MainMenuUI(config::ProjectConfig projectConfig)
         : UIFixed(nc::ui::UIPosition::Center, UI_SIZE),
-
           m_projectConfig{ std::move(projectConfig) },
           m_isHovered{false},
           m_servers{},
@@ -114,7 +113,7 @@ namespace project::ui
             }
             UISpacing();
             if(ImGui::Button("Connect to server", BUTTON_SIZE))
-            { 
+            {
                 // not implemented
             }
 

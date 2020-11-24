@@ -61,3 +61,34 @@ target_link_libraries(Pool_unit_tests
 )
 
 add_test(Pool_unit_tests Pool_unit_tests)
+
+### PacketBuffer Tests ###
+add_executable(PacketBuffer_unit_tests
+    ${ROOT_DIR}/test/unit/PacketBuffer_unit_tests.cpp
+    ${ROOT_DIR}/nc/source/net/PacketBuffer.cpp
+)
+
+target_include_directories(PacketBuffer_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIRS}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+if(DEBUG_BUILD)
+  target_compile_options(PacketBuffer_unit_tests
+      PUBLIC
+          ${GCC_DEBUG_FLAGS}
+  )
+endif()
+
+target_compile_options(PacketBuffer_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(PacketBuffer_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(PacketBuffer_unit_tests PacketBuffer_unit_tests)

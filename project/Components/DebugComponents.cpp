@@ -14,11 +14,11 @@ void SceneReset::FrameUpdate(float dt)
     (void)dt;
     if (GetKeyDown(KeyCode::F1))
     {
-        nc::scene::SceneManager::ChangeScene(std::make_unique<MenuScene>());
+        nc::scene::SceneManager::ChangeScene(std::make_unique<project::MenuScene>());
     }
     if (GetKeyDown(KeyCode::F2))
     {
-        nc::scene::SceneManager::ChangeScene(std::make_unique<GameScene>());
+        nc::scene::SceneManager::ChangeScene(std::make_unique<project::GameScene>());
     }
 }
 

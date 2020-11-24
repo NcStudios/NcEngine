@@ -54,7 +54,7 @@ TEST(Pool_unit_tests, GetPtrTo_GoodArgs_GetsPtr)
 TEST(Pool_unit_tests, GetPtrTo_BadArgs_Throws)
 {
     Pool<Mock> allocator(1);
-    EXPECT_THROW(allocator.GetPtrTo(1u), std::runtime_error);
+    EXPECT_THROW(allocator.GetPtrTo(0u), std::runtime_error);
 }
 
 int main(int argc, char ** argv)
