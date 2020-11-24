@@ -14,7 +14,8 @@ option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" ON)
 #VARIABLES
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(EXE_NAME "app")
+set(GAME_EXE "Caverna")
+set(SERVER_EXE "CavernaServer")
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 set(GCC_WARNING_FLAGS 
     -Wall
@@ -43,8 +44,9 @@ if(NC_TESTS_ENABLED)
     enable_testing()
 endif()
 
-### TARGET GAME.EXE ###
-add_executable(${EXE_NAME})
+### TARGETS ###
+add_executable(${GAME_EXE})
+add_executable(${SERVER_EXE})
 
 #Propogate version
 configure_file(${ROOT_DIR}/nc/source/config/Version.h.in
@@ -52,7 +54,12 @@ configure_file(${ROOT_DIR}/nc/source/config/Version.h.in
 )
 
 #Properties
-set_target_properties(${EXE_NAME}
+set_target_properties(${GAME_EXE}
+    PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}
+)
+
+set_target_properties(${SERVER_EXE}
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}
 )
@@ -71,39 +78,64 @@ if(VERBOSE_LOGGING_ENABLED)
 endif()
 
 #Compile Flags
-target_compile_options(${EXE_NAME}
+target_compile_options(${GAME_EXE}
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_compile_options(${SERVER_EXE}
     PUBLIC
         ${GCC_WARNING_FLAGS}
 )
 
 if(DEBUG_BUILD)
-  target_compile_options(${EXE_NAME}
+  target_compile_options(${GAME_EXE}
       PUBLIC
           ${GCC_DEBUG_FLAGS})
+    target_compile_options(${SERVER_EXE}
+        PUBLIC
+            ${GCC_DEBUG_FLAGS})
 endif()
 
 #Include Dirs
-target_include_directories(${EXE_NAME}
+target_include_directories(${GAME_EXE}
     PRIVATE
         ${NC_INCLUDE_DIRS}
         ${PROJECT_INCLUDE_DIR}
         ${EXTERNAL_INCLUDE_DIR}
 )
 
+target_include_directories(${SERVER_EXE}
+    PRIVATE
+        ${ROOT_DIR}
+        ${PROJECT_INCLUDE_DIR}
+        ${EXTERNAL_INCLUDE_DIR}
+)
+
 #LINK OPTIONS
 if(NC_EDITOR_ENABLED)
-    target_link_libraries(${EXE_NAME}
+    target_link_libraries(${GAME_EXE}
         PRIVATE
             ${EXTERNAL_LIB_DIR}/libimgui.a
     )
 endif()
 
-target_link_libraries(${EXE_NAME}
+target_link_libraries(${GAME_EXE}
     PRIVATE
         ${EXTERNAL_LIB_DIR}/windowscodecs.lib
         ${EXTERNAL_LIB_DIR}/libassimp.dll.a
+        ${EXTERNAL_LIB_DIR}/libenet.a
         ${WIN32_LINK_FLAGS}
         Winmm.lib
+        ws2_32
+)
+
+target_link_libraries(${SERVER_EXE}
+    PRIVATE
+        ${EXTERNAL_LIB_DIR}/libenet.a
+        ${WIN32_LINK_FLAGS}
+        winmm
+        ws2_32
 )
 
 #SUBDIRS
