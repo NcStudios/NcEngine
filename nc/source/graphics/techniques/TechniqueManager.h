@@ -1,8 +1,8 @@
 #pragma once
 
-#include <graphics/techniques/Technique.h>
-#include <graphics/techniques/PhongShadingTechnique.h>
-#include <graphics/techniques/TechniqueType.h>
+#include "graphics/techniques/Technique.h"
+#include "graphics/techniques/PhongShadingTechnique.h"
+#include "graphics/techniques/TechniqueType.h"
 
 #include <unordered_map>
 #include <memory>

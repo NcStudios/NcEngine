@@ -4,15 +4,16 @@ namespace nc::graphics
 {
     class Graphics;
     class Model;
-    
+    class Step;
+
     class Job
     {
         public:
-            Job(const class Step* pStep, const class nc::graphics::Model* pModel);
+            Job(const Step* pStep, const Model* pModel);
             void Execute(Graphics* gfx) const;
 
         private:
-            const class nc::graphics::Model* m_pModel;
-            const class Step* m_pStep;
+            const Model* m_pModel;
+            const Step* m_pStep;
     };
 }

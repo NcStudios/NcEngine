@@ -5,7 +5,7 @@
 
 namespace nc::graphics
 {
-    Job::Job(const class Step* pStep, const class nc::graphics::Model* pModel)
+    Job::Job(const Step* pStep, const nc::graphics::Model* pModel)
     : m_pModel{pModel},
       m_pStep{pStep}
     {}

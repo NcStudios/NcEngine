@@ -1,13 +1,14 @@
 #pragma once
 
-#include "graphics/techniques/Technique.h"
-#include "graphics/techniques/TechniqueType.h"
 #include "graphics/techniques/TechniqueManager.h"
 
 #include <string>
 
 namespace nc::graphics
 {
+    class Technique;
+    enum class TechniqueType : uint8_t;
+
     class Material
     {
         public: 

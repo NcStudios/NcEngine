@@ -128,202 +128,202 @@ void InitializeResources()
     mesh::FurnishingTile = graphics::Mesh{"project/Models/FurnishingTile.fbx"};
     mesh::PlayerBoard = graphics::Mesh{"project/Models/PlayerBoard.fbx"};
 
-    const std::vector<std::string>& boarTextures = {"project//Textures//BoarPiece_Material_BaseColor.png", "project//Textures//BoarPiece_Material_Normal.png",  "project//Textures//BoarPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> boarTextures = {"project//Textures//BoarPiece_Material_BaseColor.png", "project//Textures//BoarPiece_Material_Normal.png",  "project//Textures//BoarPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Boar = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, boarTextures};
 
-    const std::vector<std::string>& cattleTextures = {"project//Textures//CattlePiece_Material_BaseColor.png", "project//Textures//CattlePiece_Material_Normal.png",  "project//Textures//CattlePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> cattleTextures = {"project//Textures//CattlePiece_Material_BaseColor.png", "project//Textures//CattlePiece_Material_Normal.png",  "project//Textures//CattlePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Cattle = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, cattleTextures};
 
-    const std::vector<std::string>& coalTextures = {"project//Textures//CoalPiece_Material_BaseColor.png", "project//Textures//CoalPiece_Material_Normal.png",  "project//Textures//CoalPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> coalTextures = {"project//Textures//CoalPiece_Material_BaseColor.png", "project//Textures//CoalPiece_Material_Normal.png",  "project//Textures//CoalPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Coal = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, coalTextures};
 
-    const std::vector<std::string>& coinOneTextures = {"project//Textures//OneCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> coinOneTextures = {"project//Textures//OneCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::CoinOne = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, coinOneTextures};
 
-    const std::vector<std::string>& coinTwoTextures = {"project//Textures//TwoCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> coinTwoTextures = {"project//Textures//TwoCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::CoinTwo = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, coinTwoTextures};
 
-    const std::vector<std::string>& coinTenTextures = {"project//Textures//TenCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> coinTenTextures = {"project//Textures//TenCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::CoinTen = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, coinTenTextures};
 
-    const std::vector<std::string>& dogTextures = {"project//Textures//DogPiece_Material_BaseColor.png", "project//Textures//DogPiece_Material_Normal.png",  "project//Textures//DogPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dogTextures = {"project//Textures//DogPiece_Material_BaseColor.png", "project//Textures//DogPiece_Material_Normal.png",  "project//Textures//DogPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Dog = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dogTextures};
 
-    const std::vector<std::string>& donkeyTextures = {"project//Textures//DonkeyPiece_Material_BaseColor.png", "project//Textures//DonkeyPiece_Material_Normal.png",  "project//Textures//DonkeyPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> donkeyTextures = {"project//Textures//DonkeyPiece_Material_BaseColor.png", "project//Textures//DonkeyPiece_Material_Normal.png",  "project//Textures//DonkeyPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Donkey = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, donkeyTextures};
 
-    const std::vector<std::string>& dwarfTextures = {"nc//source//graphics//DefaultTexture.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfTextures = {"nc//source//graphics//DefaultTexture.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Dwarf = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfTextures};
 
-    const std::vector<std::string>& grainTextures = {"project//Textures//GrainPiece_Material_BaseColor.png", "project//Textures//GrainPiece_Material_Normal.png",  "project//Textures//GrainPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> grainTextures = {"project//Textures//GrainPiece_Material_BaseColor.png", "project//Textures//GrainPiece_Material_Normal.png",  "project//Textures//GrainPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Grain = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, grainTextures};
     
-    const std::vector<std::string>& rubyTextures = {"project//Textures//RubyPiece_Material_BaseColor.png", "project//Textures//RubyPiece_Material_Normal.png",  "project//Textures//RubyPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> rubyTextures = {"project//Textures//RubyPiece_Material_BaseColor.png", "project//Textures//RubyPiece_Material_Normal.png",  "project//Textures//RubyPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Ruby = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, rubyTextures};
 
-    const std::vector<std::string>& sheepTextures = {"project//Textures//SheepPiece_Material_BaseColor.png", "project//Textures//SheepPiece_Material_Normal.png",  "project//Textures//SheepPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> sheepTextures = {"project//Textures//SheepPiece_Material_BaseColor.png", "project//Textures//SheepPiece_Material_Normal.png",  "project//Textures//SheepPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Sheep = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, sheepTextures};
 
-    const std::vector<std::string>& stableTextures = {"nc//source//graphics//DefaultTexture.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures = {"nc//source//graphics//DefaultTexture.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Stable = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures};
 
-    const std::vector<std::string>& startingPlayerPieceTextures = {"project//Textures//StartingPlayerPiece_Material_BaseColor.png", "project//Textures//StartingPlayerPiece_Material_Normal.png",  "project//Textures//StartingPlayerPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> startingPlayerPieceTextures = {"project//Textures//StartingPlayerPiece_Material_BaseColor.png", "project//Textures//StartingPlayerPiece_Material_Normal.png",  "project//Textures//StartingPlayerPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::StartingPlayerPiece = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, startingPlayerPieceTextures};
 
-    const std::vector<std::string>& stoneTextures = {"project//Textures//StonePiece_Material_BaseColor.png", "project//Textures//StonePiece_Material_Normal.png",  "project//Textures//StonePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stoneTextures = {"project//Textures//StonePiece_Material_BaseColor.png", "project//Textures//StonePiece_Material_Normal.png",  "project//Textures//StonePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Stone = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stoneTextures};
 
-    const std::vector<std::string>& vegetableTextures = {"project//Textures//VegetablePiece_Material_BaseColor.png", "project//Textures//VegetablePiece_Material_Normal.png",  "project//Textures//VegetablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> vegetableTextures = {"project//Textures//VegetablePiece_Material_BaseColor.png", "project//Textures//VegetablePiece_Material_Normal.png",  "project//Textures//VegetablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Vegetable = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, vegetableTextures};
 
-    const std::vector<std::string>& woodTextures = {"project//Textures//WoodPiece_Material_BaseColor.png", "project//Textures//WoodPiece_Material_Normal.png",  "project//Textures//WoodPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> woodTextures = {"project//Textures//WoodPiece_Material_BaseColor.png", "project//Textures//WoodPiece_Material_Normal.png",  "project//Textures//WoodPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     material::Wood = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, woodTextures};
 
-    const std::vector<std::string>& furnishingTileAdditionalDwellingTextures = {"project//Textures//FurnishingTiles//FT_AdditionalDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileAdditionalDwellingTextures = {"project//Textures//FurnishingTiles//FT_AdditionalDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileAdditionalDwelling = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileAdditionalDwellingTextures};
 
-    const std::vector<std::string>& furnishingTileCoupleDwellingTextures = {"project//Textures//FurnishingTiles//FT_CoupleDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileCoupleDwellingTextures = {"project//Textures//FurnishingTiles//FT_CoupleDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileCoupleDwelling = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileCoupleDwellingTextures};
 
-    const std::vector<std::string>& furnishingTileDwellingTextures = {"project//Textures//FurnishingTiles//FT_Dwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileDwellingTextures = {"project//Textures//FurnishingTiles//FT_Dwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileDwelling = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileDwellingTextures};
 
-    const std::vector<std::string>& furnishingTileBeerParlorTextures = {"project//Textures//FurnishingTiles//FT_BeerParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileBeerParlorTextures = {"project//Textures//FurnishingTiles//FT_BeerParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileBeerParlor = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileBeerParlorTextures};
 
-    const std::vector<std::string>& furnishingTileBlacksmithingParlorTextures = {"project//Textures//FurnishingTiles//FT_BlacksmithingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileBlacksmithingParlorTextures = {"project//Textures//FurnishingTiles//FT_BlacksmithingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileBlacksmithingParlor = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileBlacksmithingParlorTextures};
 
-    const std::vector<std::string>& furnishingTileBlacksmithTextures = {"project//Textures//FurnishingTiles//FT_Blacksmith_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileBlacksmithTextures = {"project//Textures//FurnishingTiles//FT_Blacksmith_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileBlacksmith = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileBlacksmithTextures};
 
-    const std::vector<std::string>& furnishingTileBreakfastRoomTextures = {"project//Textures//FurnishingTiles//FT_BreakfastRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileBreakfastRoomTextures = {"project//Textures//FurnishingTiles//FT_BreakfastRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileBreakfastRoom = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileBreakfastRoomTextures};
 
-    const std::vector<std::string>& furnishingTileBreedingCaveTextures = {"project//Textures//FurnishingTiles//FT_BreedingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileBreedingCaveTextures = {"project//Textures//FurnishingTiles//FT_BreedingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileBreedingCave = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileBreedingCaveTextures};
 
-    const std::vector<std::string>& furnishingTileBroomChamberTextures = {"project//Textures//FurnishingTiles//FT_BroomChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileBroomChamberTextures = {"project//Textures//FurnishingTiles//FT_BroomChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileBroomChamber = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileBroomChamberTextures};
 
-    const std::vector<std::string>& furnishingTileBuilderTextures = {"project//Textures//FurnishingTiles//FT_Builder_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileBuilderTextures = {"project//Textures//FurnishingTiles//FT_Builder_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileBuilder = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileBuilderTextures};
 
-    const std::vector<std::string>& furnishingTileCarpenterTextures = {"project//Textures//FurnishingTiles//FT_Carpenter_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileCarpenterTextures = {"project//Textures//FurnishingTiles//FT_Carpenter_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileCarpenter = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileCarpenterTextures};
 
-    const std::vector<std::string>& furnishingTileCookingCaveTextures = {"project//Textures//FurnishingTiles//FT_CookingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileCookingCaveTextures = {"project//Textures//FurnishingTiles//FT_CookingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileCookingCave = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileCookingCaveTextures};
 
-    const std::vector<std::string>& furnishingTileCuddleRoomTextures = {"project//Textures//FurnishingTiles//FT_CuddleRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileCuddleRoomTextures = {"project//Textures//FurnishingTiles//FT_CuddleRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileCuddleRoom = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileCuddleRoomTextures};
 
-    const std::vector<std::string>& furnishingTileDogSchoolTextures = {"project//Textures//FurnishingTiles//FT_DogSchool_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileDogSchoolTextures = {"project//Textures//FurnishingTiles//FT_DogSchool_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileDogSchool = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileDogSchoolTextures};
 
-    const std::vector<std::string>& furnishingTileFodderChamberTextures = {"project//Textures//FurnishingTiles//FT_FodderChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileFodderChamberTextures = {"project//Textures//FurnishingTiles//FT_FodderChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileFodderChamber = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileFodderChamberTextures};
 
-    const std::vector<std::string>& furnishingTileFoodChamberTextures = {"project//Textures//FurnishingTiles//FT_FoodChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileFoodChamberTextures = {"project//Textures//FurnishingTiles//FT_FoodChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileFoodChamber = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileFoodChamberTextures};
 
-    const std::vector<std::string>& furnishingTileGuestRoomTextures = {"project//Textures//FurnishingTiles//FT_GuestRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileGuestRoomTextures = {"project//Textures//FurnishingTiles//FT_GuestRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileGuestRoom = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileGuestRoomTextures};
 
-    const std::vector<std::string>& furnishingTileHuntingParlorTextures = {"project//Textures//FurnishingTiles//FT_HuntingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileHuntingParlorTextures = {"project//Textures//FurnishingTiles//FT_HuntingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileHuntingParlor = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileHuntingParlorTextures};
 
-    const std::vector<std::string>& furnishingTileMainStorageTextures = {"project//Textures//FurnishingTiles//FT_MainStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileMainStorageTextures = {"project//Textures//FurnishingTiles//FT_MainStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileMainStorage = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileMainStorageTextures};
 
-    const std::vector<std::string>& furnishingTileMilkingParlorTextures = {"project//Textures//FurnishingTiles//FT_MilkingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileMilkingParlorTextures = {"project//Textures//FurnishingTiles//FT_MilkingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileMilkingParlor = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileMilkingParlorTextures};
 
-    const std::vector<std::string>& furnishingTileMinerTextures = {"project//Textures//FurnishingTiles//FT_Miner_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileMinerTextures = {"project//Textures//FurnishingTiles//FT_Miner_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileMiner = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileMinerTextures};
 
-    const std::vector<std::string>& furnishingTileMiningCaveTextures = {"project//Textures//FurnishingTiles//FT_MiningCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileMiningCaveTextures = {"project//Textures//FurnishingTiles//FT_MiningCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileMiningCave = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileMiningCaveTextures};
 
-    const std::vector<std::string>& furnishingTileMixedDwellingTextures = {"project//Textures//FurnishingTiles//FT_MixedDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileMixedDwellingTextures = {"project//Textures//FurnishingTiles//FT_MixedDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileMixedDwelling = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileMixedDwellingTextures};
 
-    const std::vector<std::string>& furnishingTileOfficeRoomTextures = {"project//Textures//FurnishingTiles//FT_OfficeRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileOfficeRoomTextures = {"project//Textures//FurnishingTiles//FT_OfficeRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileOfficeRoom = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileOfficeRoomTextures};
 
-    const std::vector<std::string>& furnishingTileOreStorageTextures = {"project//Textures//FurnishingTiles//FT_OreStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileOreStorageTextures = {"project//Textures//FurnishingTiles//FT_OreStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileOreStorage = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileOreStorageTextures};
 
-    const std::vector<std::string>& furnishingTilePeacefulCaveTextures = {"project//Textures//FurnishingTiles//FT_PeacefulCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTilePeacefulCaveTextures = {"project//Textures//FurnishingTiles//FT_PeacefulCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTilePeacefulCave = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTilePeacefulCaveTextures};
 
-    const std::vector<std::string>& furnishingTilePrayerChamberTextures = {"project//Textures//FurnishingTiles//FT_PrayerChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTilePrayerChamberTextures = {"project//Textures//FurnishingTiles//FT_PrayerChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTilePrayerChamber = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTilePrayerChamberTextures};
 
-    const std::vector<std::string>& furnishingTileQuarryTextures = {"project//Textures//FurnishingTiles//FT_Quarry_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileQuarryTextures = {"project//Textures//FurnishingTiles//FT_Quarry_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileQuarry = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileQuarryTextures};
 
-    const std::vector<std::string>& furnishingTileRubySupplierTextures = {"project//Textures//FurnishingTiles//FT_RubySupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileRubySupplierTextures = {"project//Textures//FurnishingTiles//FT_RubySupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileRubySupplier = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileRubySupplierTextures};
 
-    const std::vector<std::string>& furnishingTileSeamTextures = {"project//Textures//FurnishingTiles//FT_Seam_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileSeamTextures = {"project//Textures//FurnishingTiles//FT_Seam_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileSeam = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileSeamTextures};
 
-    const std::vector<std::string>& furnishingTileSimpleDwellingTextures = {"project//Textures//FurnishingTiles//FT_SimpleDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileSimpleDwellingTextures = {"project//Textures//FurnishingTiles//FT_SimpleDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileSimpleDwelling = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileSimpleDwellingTextures};
 
-    const std::vector<std::string>& furnishingTileSimpleDwelling2 = {"project//Textures//FurnishingTiles//FT_SimpleDwelling2_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileSimpleDwelling2 = {"project//Textures//FurnishingTiles//FT_SimpleDwelling2_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileSimpleDwelling2 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileSimpleDwelling2};
 
-    const std::vector<std::string>& furnishingTileSlaughterCaveTextures = {"project//Textures//FurnishingTiles//FT_SlaughteringCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileSlaughterCaveTextures = {"project//Textures//FurnishingTiles//FT_SlaughteringCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileSlaughterCave = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileSlaughterCaveTextures};
 
-    const std::vector<std::string>& furnishingTileSparePartStorageTextures = {"project//Textures//FurnishingTiles//FT_SparePartStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileSparePartStorageTextures = {"project//Textures//FurnishingTiles//FT_SparePartStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileSparePartStorage = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileSparePartStorageTextures};
 
-    const std::vector<std::string>& furnishingTileStateParlorTextures = {"project//Textures//FurnishingTiles//FT_StateParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileStateParlorTextures = {"project//Textures//FurnishingTiles//FT_StateParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileStateParlor = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileStateParlorTextures};
 
-    const std::vector<std::string>& furnishingTileStoneCarverTextures = {"project//Textures//FurnishingTiles//FT_StoneCarver_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileStoneCarverTextures = {"project//Textures//FurnishingTiles//FT_StoneCarver_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileStoneCarver = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileStoneCarverTextures};
 
-    const std::vector<std::string>& furnishingTileStoneStorageTextures = {"project//Textures//FurnishingTiles//FT_StoneStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileStoneStorageTextures = {"project//Textures//FurnishingTiles//FT_StoneStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileStoneStorage = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileStoneStorageTextures};
 
-    const std::vector<std::string>& furnishingTileStoneSupplierTextures = {"project//Textures//FurnishingTiles//FT_StoneSupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileStoneSupplierTextures = {"project//Textures//FurnishingTiles//FT_StoneSupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileStoneSupplier = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileStoneSupplierTextures};
 
-    const std::vector<std::string>& furnishingTileStubbleRoomTextures = {"project//Textures//FurnishingTiles//FT_StubbleRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileStubbleRoomTextures = {"project//Textures//FurnishingTiles//FT_StubbleRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileStubbleRoom = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileStubbleRoomTextures};
 
-    const std::vector<std::string>& furnishingTileSuppliesStorageTextures = {"project//Textures//FurnishingTiles//FT_SuppliesStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileSuppliesStorageTextures = {"project//Textures//FurnishingTiles//FT_SuppliesStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileSuppliesStorage = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileSuppliesStorageTextures};
 
-    const std::vector<std::string>& furnishingTileTraderTextures = {"project//Textures//FurnishingTiles//FT_Trader_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileTraderTextures = {"project//Textures//FurnishingTiles//FT_Trader_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileTrader = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileTraderTextures};
 
-    const std::vector<std::string>& furnishingTileTreasureChamberTextures = {"project//Textures//FurnishingTiles//FT_TreasureChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileTreasureChamberTextures = {"project//Textures//FurnishingTiles//FT_TreasureChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileTreasureChamber = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileTreasureChamberTextures};
 
-    const std::vector<std::string>& furnishingTileWeaponStorageTextures = {"project//Textures//FurnishingTiles//FT_WeaponStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileWeaponStorageTextures = {"project//Textures//FurnishingTiles//FT_WeaponStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileWeaponStorage = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileWeaponStorageTextures};
 
-    const std::vector<std::string>& furnishingTileWeavingParlorTextures = {"project//Textures//FurnishingTiles//FT_WeavingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileWeavingParlorTextures = {"project//Textures//FurnishingTiles//FT_WeavingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileWeavingParlor = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileWeavingParlorTextures};
 
-    const std::vector<std::string>& furnishingTileWoodSupplierTextures = {"project//Textures//FurnishingTiles//FT_WoodSupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileWoodSupplierTextures = {"project//Textures//FurnishingTiles//FT_WoodSupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileWoodSupplier = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileWoodSupplierTextures};
 
-    const std::vector<std::string>& furnishingTileWorkingCaveTextures = {"project//Textures//FurnishingTiles//FT_WorkingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileWorkingCaveTextures = {"project//Textures//FurnishingTiles//FT_WorkingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileWorkingCave = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileWorkingCaveTextures};
 
-    const std::vector<std::string>& furnishingTileWorkRoomTextures = {"project//Textures//FurnishingTiles//FT_WorkRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileWorkRoomTextures = {"project//Textures//FurnishingTiles//FT_WorkRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileWorkRoom = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileWorkRoomTextures};
 
-    const std::vector<std::string>& furnishingTileWritingChamberTextures = {"project//Textures//FurnishingTiles//FT_WritingChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> furnishingTileWritingChamberTextures = {"project//Textures//FurnishingTiles//FT_WritingChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::FurnishingTileWritingChamber = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, furnishingTileWritingChamberTextures};
 
-    const std::vector<std::string>& playerBoardTextures = {"project//Textures//PlayerBoard_DefaultMaterial_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> playerBoardTextures = {"project//Textures//PlayerBoard_DefaultMaterial_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
     material::PlayerBoard = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, playerBoardTextures};
 }
 

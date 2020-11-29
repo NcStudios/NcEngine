@@ -50,7 +50,7 @@ void GameScene::Load()
     const auto scaleFactor = 2;
 
     // Table
-    const std::vector<std::string>& tableTextures = {"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> tableTextures = {"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material tableMaterial = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, tableTextures};
     auto tableHandle = Ecs::CreateEntity({2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, {1.5708f, 0.0f, 1.5708f}, Vector3::One() * 7.5, "Table Piece");
     auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
@@ -76,87 +76,87 @@ void GameScene::Load()
     prefab::Create<prefab::Wood>({0.8f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Wood Piece");
 
     // Stable Piece 1
-    const std::vector<std::string>& stableTextures = {"project//Textures//PlayerRed.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures = {"project//Textures//PlayerRed.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material stableMaterial = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures};
     auto stableHandle1 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     auto stableMesh = graphics::Mesh{"project//Models//StablePiece.fbx"};
     Ecs::AddComponent<Renderer>(stableHandle1, stableMesh, stableMaterial);
 
     // Stable Piece 2
-    const std::vector<std::string>& stableTextures2 = {"project//Textures//PlayerOrange.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures2 = {"project//Textures//PlayerOrange.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material stableMaterial2 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures2};
     auto stableHandle2 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle2, stableMesh, stableMaterial2);
 
     // Stable Piece 3
-    const std::vector<std::string>& stableTextures3 = {"project//Textures//PlayerYellow.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures3 = {"project//Textures//PlayerYellow.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material stableMaterial3 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures3};
     auto stableHandle3 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle3, stableMesh, stableMaterial3);
 
     // Stable Piece 4
-    const std::vector<std::string>& stableTextures4 = {"project//Textures//PlayerGreen.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures4 = {"project//Textures//PlayerGreen.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material stableMaterial4 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures4};
     auto stableHandle4 = Ecs::CreateEntity({0.8f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle4, stableMesh, stableMaterial4);
 
     // Stable Piece 5
-    const std::vector<std::string>& stableTextures5 = {"project//Textures//PlayerTeal.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures5 = {"project//Textures//PlayerTeal.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material stableMaterial5 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures5};
     auto stableHandle5 = Ecs::CreateEntity({1.0f * scaleFactor, 0.0f, 0.4f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle5, stableMesh, stableMaterial5);
 
     // Stable Piece 6
-    const std::vector<std::string>& stableTextures6 = {"project//Textures//PlayerBlue.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures6 = {"project//Textures//PlayerBlue.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material stableMaterial6 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures6};
     auto stableHandle6 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle6, stableMesh, stableMaterial6);
 
     // Stable Piece 7
-    const std::vector<std::string>& stableTextures7 = {"project//Textures//PlayerPurple.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> stableTextures7 = {"project//Textures//PlayerPurple.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material stableMaterial7 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, stableTextures7};
     auto stableHandle7 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Stable Piece");
     Ecs::AddComponent<Renderer>(stableHandle7, stableMesh, stableMaterial7);
 
     // Dwarf Disc Piece 1
-    const std::vector<std::string>& dwarfDiscTextures1 = {"project//Textures//PlayerRed.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfDiscTextures1 = {"project//Textures//PlayerRed.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material dwarfDiscMaterial1 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfDiscTextures1};
     auto dwarfDiscHandle1 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 1");
     auto dwarfDiscMesh = graphics::Mesh{"project//Models//Disc.fbx"};
     Ecs::AddComponent<Renderer>(dwarfDiscHandle1, dwarfDiscMesh, dwarfDiscMaterial1);
 
     // DwarfDisc Piece 2
-    const std::vector<std::string>& dwarfDiscTextures2 = {"project//Textures//PlayerOrange.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfDiscTextures2 = {"project//Textures//PlayerOrange.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material dwarfDiscMaterial2 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfDiscTextures2};
     auto dwarfDiscHandle2 = Ecs::CreateEntity({0.8f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 2");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle2, dwarfDiscMesh, dwarfDiscMaterial2);
 
     // DwarfDisc Piece 3
-    const std::vector<std::string>& dwarfDiscTextures3 = {"project//Textures//PlayerYellow.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfDiscTextures3 = {"project//Textures//PlayerYellow.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material dwarfDiscMaterial3 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfDiscTextures3};
     auto dwarfDiscHandle3 = Ecs::CreateEntity({1.0f * scaleFactor, 0.0f, 0.6f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 3");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle3, dwarfDiscMesh, dwarfDiscMaterial3);
 
     // DwarfDisc Piece 4
-    const std::vector<std::string>& dwarfDiscTextures4 = {"project//Textures//PlayerGreen.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfDiscTextures4 = {"project//Textures//PlayerGreen.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material dwarfDiscMaterial4 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfDiscTextures4};
     auto dwarfDiscHandle4 = Ecs::CreateEntity({0.0f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 4");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle4, dwarfDiscMesh, dwarfDiscMaterial4);
 
     // DwarfDisc Piece 5
-    const std::vector<std::string>& dwarfDiscTextures5 = {"project//Textures//PlayerTeal.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfDiscTextures5 = {"project//Textures//PlayerTeal.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material dwarfDiscMaterial5 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfDiscTextures5};
     auto dwarfDiscHandle5 = Ecs::CreateEntity({0.2f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 5");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle5, dwarfDiscMesh, dwarfDiscMaterial5);
 
     // DwarfDisc Piece 6
-    const std::vector<std::string>& dwarfDiscTextures6 = {"project//Textures//PlayerBlue.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfDiscTextures6 = {"project//Textures//PlayerBlue.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material dwarfDiscMaterial6 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfDiscTextures6};
     auto dwarfDiscHandle6 = Ecs::CreateEntity({0.4f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 6");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle6, dwarfDiscMesh, dwarfDiscMaterial6);
 
     // DwarfDisc Piece 7
-    const std::vector<std::string>& dwarfDiscTextures7 = {"project//Textures//PlayerPurple.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    const std::vector<std::string> dwarfDiscTextures7 = {"project//Textures//PlayerPurple.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
     graphics::Material dwarfDiscMaterial7 = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, dwarfDiscTextures7};
     auto dwarfDiscHandle7 = Ecs::CreateEntity({0.6f * scaleFactor, 0.0f, 0.8f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "DwarfDisc Piece 7");
     Ecs::AddComponent<Renderer>(dwarfDiscHandle7, dwarfDiscMesh, dwarfDiscMaterial7);

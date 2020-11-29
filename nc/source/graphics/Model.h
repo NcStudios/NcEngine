@@ -50,7 +50,6 @@ namespace nc::graphics
 
             Mesh m_mesh;
             Material m_material;
-            Material m_materialTest;
             DirectX::XMMATRIX m_transformationMatrix;
             const d3dresource::IndexBuffer * m_indexBuffer = nullptr;
             std::shared_ptr<d3dresource::GraphicsResource> m_transformConstantBuffer;
