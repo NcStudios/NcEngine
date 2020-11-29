@@ -25,8 +25,6 @@ cbuffer MaterialProperties : register(b1)
     float3 color;
     float specularIntensity;
     float specularPower;
-    float xTiling;
-    float yTiling;
 };
 
 cbuffer CBuf : register(b2)

@@ -13,7 +13,7 @@
 #     ${ROOT_DIR}/nc/source/engine/system/LightSystem.cpp
 #     ${ROOT_DIR}/nc/source/engine/system/CollisionSystem.cpp
 #     ${ROOT_DIR}/nc/source/graphics/Model.cpp
-#     ${ROOT_DIR}/nc/source/graphics/PBRMaterial.cpp
+#     ${ROOT_DIR}/nc/source/graphics/Material.cpp
 #     ${ROOT_DIR}/nc/source/graphics/WICTextureLoader.cpp
 #     ${ROOT_DIR}/nc/source/graphics/d3dresource/GraphicsResource.cpp
 #     ${ROOT_DIR}/nc/source/ui/UI.cpp

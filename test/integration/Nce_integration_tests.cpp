@@ -33,14 +33,14 @@ namespace nc
 
     /* Renderer stubs */
     Renderer::Renderer() = default;
-    Renderer::Renderer(graphics::Mesh& mesh, graphics::PBRMaterial& material){ (void)mesh;(void)material; }
+    Renderer::Renderer(graphics::Mesh& mesh, graphics::Material& material){ (void)mesh;(void)material; }
     Renderer::Renderer(Renderer&& o) {(void)o;}
     Renderer& Renderer::operator=(Renderer&& o){(void)o;return *this;}
     #ifdef NC_EDITOR_ENABLED
     void Renderer::EditorGuiElement() {}
     void Renderer::SyncMaterialData() {}
     #endif
-    void Renderer::SetMaterial(graphics::PBRMaterial& material) {(void)material;}
+    void Renderer::SetMaterial(graphics::Material& material) {(void)material;}
     void Renderer::SetMesh(graphics::Mesh& mesh) {(void)mesh;}
     void Renderer::Update(graphics::Graphics * gfx){(void)gfx;}
 

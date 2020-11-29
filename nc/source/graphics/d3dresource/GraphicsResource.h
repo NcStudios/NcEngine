@@ -277,7 +277,6 @@ namespace nc::graphics::d3dresource
             {
                 DirectX::XMMATRIX modelView;
                 DirectX::XMMATRIX model;
-                DirectX::XMFLOAT2 tiling;
             };
             void UpdateBindImplementation(const Transforms& transforms) noexcept;
             Transforms GetTransforms() noexcept;

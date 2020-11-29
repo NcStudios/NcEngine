@@ -26,6 +26,7 @@ TO ADD
 -rendering improvements
     -way to mark things static so batching is possible
     -add frustrum and occlusion culling
+-Figure out the best way to edit the material properties or properties of the technique in the editor
 
 LOW PRIORITY
 -gtest must be dl'd manually

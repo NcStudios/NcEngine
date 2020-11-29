@@ -4,6 +4,11 @@
 
 #include <vector>
 
+namespace detail 
+{
+    const std::string DefaultTexturePath = "nc\\graphics\\DefaultTexture.png";
+}
+
 namespace nc::graphics
 {
     class Model;

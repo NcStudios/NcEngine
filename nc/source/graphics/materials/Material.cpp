@@ -1,22 +1,19 @@
 #include "Material.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/Model.h"
+#include "graphics/techniques/TechniqueManager.h"
 #include "Engine.h"
 #include "config/Config.h"
 
-
 namespace nc::graphics
 {
-    void Material::Submit(FrameManager& frame, const Model& model) noexcept
+    Material::Material(const std::vector<std::string>& texturePaths, TechniqueType technique)
     {
-        for (const auto& technique : m_techniques)
-        {
-            technique.Submit(frame, model);
-        }
+        m_technique = TechniqueManager::GetTechnique(technique, texturePaths);
     }
 
-    void Material::AddTechnique(const Technique& technique) noexcept
+    void Material::Submit(FrameManager& frame, const Model& model) noexcept
     {
-        m_techniques.push_back(std::move(technique));
+        m_technique->Submit(frame, model);
     }
 }

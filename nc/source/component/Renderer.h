@@ -27,7 +27,6 @@ namespace nc
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
-            void SyncMaterialData();
             #endif
 
             void SetMesh(graphics::Mesh& mesh);

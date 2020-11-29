@@ -276,13 +276,11 @@ namespace nc::graphics::d3dresource
     {
         const auto gfx = GraphicsResourceManager::GetGraphics();
         const auto modelView = m_parent.GetTransformXM() * gfx->GetCamera();
-        const auto materialProperties = m_parent.GetMaterial()->properties;
 
         return
         {
             DirectX::XMMatrixTranspose(modelView),
-            DirectX::XMMatrixTranspose(modelView * gfx->GetProjection()),
-            DirectX::XMFLOAT2 { materialProperties.xTiling, materialProperties.yTiling }
+            DirectX::XMMatrixTranspose(modelView * gfx->GetProjection())
         };
     }
 

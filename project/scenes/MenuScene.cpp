@@ -8,7 +8,7 @@
 #include "project/components/CubeRotator.h"
 #include "project/components/MouseFollower.h"
 #include "source/Prefabs.h"
-#include "graphics/materials/PBRMaterial.h"
+#include "graphics/materials/Material.h"
 
 #include <cstdlib>
 #include <ctime>
@@ -42,7 +42,7 @@ void MenuScene::Load()
     Ecs::AddComponent<SceneReset>(debugHandle);
     Ecs::AddComponent<Timer>(debugHandle);
 
-    graphics::Material ncMaterial = graphics::PBRMaterial{{"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    graphics::Material ncMaterial = graphics::Material{{"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
     auto ncMesh = graphics::Mesh{"project//Models//Logo3d.fbx"};
     std::srand(std::time(0));
     int posRange = 30;
