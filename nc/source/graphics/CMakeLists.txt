@@ -6,6 +6,7 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/nc/source/graphics/Mesh.cpp
         ${ROOT_DIR}/nc/source/graphics/WICTextureLoader.cpp
         ${ROOT_DIR}/nc/source/graphics/materials/Material.cpp
+        ${ROOT_DIR}/nc/source/graphics/techniques/Technique.cpp
         ${ROOT_DIR}/nc/source/graphics/techniques/PhongShadingTechnique.cpp
         ${ROOT_DIR}/nc/source/graphics/techniques/TechniqueManager.cpp
         ${ROOT_DIR}/nc/source/graphics/ResourceGroup.cpp
@@ -13,5 +14,4 @@ target_sources(${EXE_NAME}
         ${ROOT_DIR}/nc/source/graphics/rendergraph/Job.cpp
         ${ROOT_DIR}/nc/source/graphics/rendergraph/Pass.cpp
         ${ROOT_DIR}/nc/source/graphics/rendergraph/Step.cpp
-        ${ROOT_DIR}/nc/source/graphics/rendergraph/Technique.cpp
 )

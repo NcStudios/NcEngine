@@ -1,7 +1,8 @@
 #pragma once
 
-#include "graphics/rendergraph/Technique.h"
+#include "graphics/techniques/Technique.h"
 #include "graphics/techniques/TechniqueType.h"
+#include "graphics/techniques/TechniqueManager.h"
 
 #include <string>
 
@@ -11,7 +12,9 @@ namespace nc::graphics
     {
         public: 
             Material() = default;
-            Material(const std::vector<std::string>& texturePaths, TechniqueType type = TechniqueType::PhongShadingTechnique);
+
+            template<class ... Args>
+            explicit Material(TechniqueType type, Args&& ... args);
             void SetTechnique(const Technique* technique) noexcept;
             void Submit(class FrameManager& frame, const Model& model) noexcept;
             
@@ -19,4 +22,11 @@ namespace nc::graphics
             Technique* m_technique;
 
     };
+
+    template<class ... Args>
+    Material::Material(TechniqueType type, Args&& ... args)
+    {
+        m_technique = TechniqueManager::GetTechnique(type, std::forward<Args>(args)...);
+    }
+
 }

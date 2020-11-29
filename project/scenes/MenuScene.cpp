@@ -42,7 +42,8 @@ void MenuScene::Load()
     Ecs::AddComponent<SceneReset>(debugHandle);
     Ecs::AddComponent<Timer>(debugHandle);
 
-    graphics::Material ncMaterial = graphics::Material{{"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
+    const std::vector<std::string>& ncTextures = {"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
+    graphics::Material ncMaterial = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, ncTextures};
     auto ncMesh = graphics::Mesh{"project//Models//Logo3d.fbx"};
     std::srand(std::time(0));
     int posRange = 30;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/rendergraph/Technique.h"
+#include "graphics/techniques/Technique.h"
 #include "graphics/techniques/TechniqueType.h"
 #include "graphics/materials/MaterialProperties.h"
 
