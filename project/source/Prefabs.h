@@ -83,7 +83,7 @@ namespace prefab
     struct FurnishingTileStoneStorage;
     struct FurnishingTileStoneSupplier;
     struct FurnishingTileStubbleRoom;
-    struct FurnishingTileSupplierStorage;
+    struct FurnishingTileSuppliesStorage;
     struct FurnishingTileTrader;
     struct FurnishingTileTreasureChamber;
     struct FurnishingTileWeaponStorage;

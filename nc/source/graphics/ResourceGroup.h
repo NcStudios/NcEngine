@@ -16,10 +16,10 @@ namespace nc::graphics
         public:
             template<class T>
             T * QueryGraphicsResource() noexcept;
-            void BindGraphicsResources() const;
+            void Bind() const;
             void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
 
-        private:
+        protected:
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
     };
 
