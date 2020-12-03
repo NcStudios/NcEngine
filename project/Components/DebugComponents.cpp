@@ -2,7 +2,7 @@
 #include "input/Input.h"
 #include "SceneManager.h"
 #include "scenes/MenuScene.h"
-#include "scenes/GameScene.h"
+#include "scenes/DemoScene.h"
 
 #include <chrono>
 #include <iostream>
@@ -18,7 +18,7 @@ void SceneReset::FrameUpdate(float dt)
     }
     if (GetKeyDown(KeyCode::F2))
     {
-        nc::scene::SceneManager::ChangeScene(std::make_unique<project::GameScene>());
+        nc::scene::SceneManager::ChangeScene(std::make_unique<project::DemoScene>());
     }
 }
 

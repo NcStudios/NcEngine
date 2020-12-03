@@ -135,7 +135,7 @@ namespace project::ui
 
                 if(selectedPos != m_servers.end())
                 {
-                    nc::scene::SceneManager::ChangeScene(std::make_unique<DemoScene>(std::move(selectedPos->ip)));
+                    nc::scene::SceneManager::ChangeScene(std::make_unique<GameScene>(selectedPos->ip));
                 }
             }
 
@@ -143,7 +143,7 @@ namespace project::ui
 
             if(ImGui::Button("Load Demo Scene", BUTTON_SIZE))
             {
-                nc::scene::SceneManager::ChangeScene(std::make_unique<GameScene>());
+                nc::scene::SceneManager::ChangeScene(std::make_unique<DemoScene>());
             }
         }
         ImGui::End();

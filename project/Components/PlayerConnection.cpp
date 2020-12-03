@@ -13,7 +13,6 @@ namespace project
           m_playerName{std::move(name)}
     {
         m_client.Connect(m_playerName);
-        //m_client.Connect("192.168.0.16", m_playerName);
     }
 
     void PlayerConnection::FrameUpdate(float dt)
