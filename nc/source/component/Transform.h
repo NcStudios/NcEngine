@@ -12,7 +12,7 @@ namespace nc
         Local
     };
 
-    class Transform : public Component
+    class Transform final : public Component
     {
         public:
             Transform() noexcept;

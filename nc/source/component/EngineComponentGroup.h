@@ -9,8 +9,9 @@ namespace nc
      */
     struct EngineComponentHandleGroup
     {
-        ComponentHandle transform =  NullHandle;
-        ComponentHandle renderer  =  NullHandle;
+        ComponentHandle transform = NullHandle;
+        ComponentHandle renderer = NullHandle;
         ComponentHandle pointLight = NullHandle;
+        ComponentHandle networkDispatcher = NullHandle;
     };
 } //end namespace::nc

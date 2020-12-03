@@ -1,6 +1,7 @@
 #include "MainMenuUI.h"
 #include "UIStyle.h"
 #include "SceneManager.h"
+#include "project/scenes/DemoScene.h"
 #include "project/scenes/GameScene.h"
 #include "nc/source/config/Version.h"
 #include "nc/source/config/ConfigReader.h"
@@ -95,13 +96,23 @@ namespace project::ui
 
             ImGui::Text("Server IPs");
             ImGui::Spacing();
-            ImGui::ListBoxHeader("", LIST_BOX_SIZE);
-            for(auto& record : m_servers)
+            if(ImGui::ListBoxHeader("###ServerListBox", LIST_BOX_SIZE))
             {
-                auto name = record.name + std::string{" - "} + record.ip;
-                record.isSelected = ImGui::Selectable(name.c_str(), record.isSelected);
+                for(auto& record : m_servers)
+                {
+                    auto name = record.name + std::string{" - "} + record.ip;
+                    if(ImGui::Selectable(name.c_str(), record.isSelected))
+                    {
+                        for(auto& record : m_servers)
+                        {
+                            record.isSelected = false;
+                        }
+                        record.isSelected = true;
+                    }
+                }
+                ImGui::ListBoxFooter();
             }
-            ImGui::ListBoxFooter();
+
             if(ImGui::Button("Add", SMALL_BUTTON_SIZE))
             {
                 m_addServerElement.ToggleOpen();
@@ -109,12 +120,23 @@ namespace project::ui
             ImGui::SameLine();
             if(ImGui::Button("Delete", SMALL_BUTTON_SIZE))
             {
-                // not implemented
+                m_servers.erase(std::remove_if(m_servers.begin(), m_servers.end(), [](const ServerSelectable& server)
+                {
+                    return server.isSelected;
+                }), m_servers.end());
             }
             UISpacing();
             if(ImGui::Button("Connect to server", BUTTON_SIZE))
             {
-                // not implemented
+                auto selectedPos = std::find_if(m_servers.begin(), m_servers.end(), [](const ServerSelectable& server)
+                {
+                    return server.isSelected;
+                });
+
+                if(selectedPos != m_servers.end())
+                {
+                    nc::scene::SceneManager::ChangeScene(std::make_unique<DemoScene>(std::move(selectedPos->ip)));
+                }
             }
 
             UISpacingWithSeparator();

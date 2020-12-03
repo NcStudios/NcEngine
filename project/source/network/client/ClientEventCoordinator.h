@@ -1,22 +1,23 @@
 #pragma once
 
-#include "../Packet.h"
+#include "nc/source/net/NetworkDetails.h"
+
+#include <functional>
+#include <unordered_map>
 
 struct _ENetEvent;
 typedef _ENetEvent ENetEvent;
 
 namespace project::network
 {
+    class NetworkPrefabManager;
+
     class ClientEventCoordinator
     {
         public:
+            ClientEventCoordinator(NetworkPrefabManager* networkEntityManager);
             void Dispatch(ENetEvent* event);
-
         private:
-            template<PacketType packet_t>
-            void HandleEvent(ENetEvent* event);
+            std::unordered_map<nc::net::PacketType, std::function<void(ENetEvent*)>> m_dispatchTable;
     };
-
-    template<>
-    void ClientEventCoordinator::HandleEvent<PacketType::Test>(ENetEvent* event);
 }

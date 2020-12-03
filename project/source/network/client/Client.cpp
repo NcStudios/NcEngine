@@ -1,20 +1,26 @@
 #include "Client.h"
-#include "../NetworkDetails.h"
+#include "DebugUtils.h"
+#include "Network.h"
 #include "../Packet.h"
 
+#include <functional>
 #include <iostream>
 #include <memory>
 
 namespace project::network
 {
-    Client::Client()
+    Client::Client(std::string serverIP)
+        : m_server{ nullptr },
+          m_networkPrefabManager{},
+          m_coordinator{&m_networkPrefabManager},
+          m_serverIP{std::move(serverIP)}
     {
-        m_server = nullptr;
-        host = enet_host_create(nullptr, 1, nc::net::CHANNEL_LIMIT, 0, 0);
+        host = enet_host_create(nullptr, 1, nc::net::ChannelLimit, 0, 0);
         if(!host)
         {
             throw std::runtime_error("Failed to create client");
         }
+        nc::net::Network::BindServerCommandCallback(std::bind(SendToServer, this, std::placeholders::_1));
     }
 
     Client::~Client()
@@ -41,11 +47,18 @@ namespace project::network
         enet_peer_send(peer, (enet_uint8)channel, packet);
     }
 
-    bool Client::Connect(const char* hostAddress, std::string& playerName)
+    void Client::SendToServer(nc::net::PacketBuffer data)
+    {
+        IF_THROW(!m_server, "Client::SendToServer - m_server is not set");
+        ENetPacket* packet = enet_packet_create(data.data, data.size, ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send(m_server, (enet_uint8)nc::net::Channel::Reliable, packet);
+    }
+
+    bool Client::Connect(std::string& playerName)
     {
         ENetEvent event;
         ENetPeer* peer;
-        enet_address_set_host(&address, hostAddress);
+        enet_address_set_host(&address, m_serverIP.c_str());
         address.port = 1234;
 
         peer = enet_host_connect(host, &address, 2, 0);

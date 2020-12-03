@@ -1,18 +1,18 @@
 #include "Server.h"
-#include "../NetworkDetails.h"
 #include "../Packet.h"
 
 #include <iostream>
+#include <functional>
 
 namespace project::network
 {
     Server::Server()
         : m_connections{},
-          m_coordinator{&m_connections}
+          m_coordinator{&m_connections, std::bind(this->Send, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)}
     {
         address.host = ENET_HOST_ANY;
         address.port = 1234;
-        host = enet_host_create(&address, MAX_CLIENTS, nc::net::CHANNEL_LIMIT, 0, 0);
+        host = enet_host_create(&address, nc::net::MaxClients, nc::net::ChannelLimit, 0, 0);
         if(!host)
         {
             throw std::runtime_error("Failed to create host");
@@ -33,7 +33,6 @@ namespace project::network
             {
                 case ENET_EVENT_TYPE_RECEIVE:
                 {
-                    std::cout << "on event receive\n";
                     m_coordinator.Dispatch(&event);
                     enet_packet_destroy(event.packet);
                     break;
@@ -76,8 +75,6 @@ namespace project::network
                   << "    Port: " << event->peer->address.port << '\n';
 
         m_connections.NewConnectionRequest(event->peer);
-        PacketTest packet(15, 15.5f, "test", true);
-        Send(packet.ToPacketBuffer(), nc::net::Channel::Reliable, event->peer);
     }
 
     void Server::OnEventDisconnect(ENetEvent* event)

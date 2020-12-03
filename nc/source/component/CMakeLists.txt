@@ -2,6 +2,7 @@ target_sources(${GAME_EXE}
     PRIVATE
         ${ROOT_DIR}/nc/source/component/Camera.cpp
         ${ROOT_DIR}/nc/source/component/Component.cpp
+        ${ROOT_DIR}/nc/source/component/NetworkDispatcher.cpp
         ${ROOT_DIR}/nc/source/component/PointLight.cpp
         ${ROOT_DIR}/nc/source/component/PointLightManager.cpp
         ${ROOT_DIR}/nc/source/component/Renderer.cpp

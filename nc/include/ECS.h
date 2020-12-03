@@ -2,6 +2,7 @@
 
 #include "ecs/Entity.h"
 #include "component/PointLight.h"
+#include "component/NetworkDispatcher.h"
 #include "component/Renderer.h"
 #include "component/Transform.h"
 #include "DebugUtils.h"
@@ -51,6 +52,11 @@ namespace nc
     template<> bool Ecs::RemoveComponent<Renderer>(EntityHandle handle);
     template<> Renderer* Ecs::GetComponent<Renderer>(EntityHandle handle);
     template<> bool Ecs::HasComponent<Renderer>(EntityHandle handle);
+
+    template<> NetworkDispatcher* Ecs::AddComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> NetworkDispatcher* Ecs::GetComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> bool Ecs::HasComponent<NetworkDispatcher>(EntityHandle handle);
 
     template<> Transform* Ecs::GetComponent<Transform>(EntityHandle handle);
 

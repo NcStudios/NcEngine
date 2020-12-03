@@ -4,6 +4,7 @@
 #include "DebugUtils.h"
 #include "Engine.h"
 #include "MainCamera.h"
+#include "Network.h"
 #include "Physics.h"
 #include "SceneManager.h"
 #include "UI.h"

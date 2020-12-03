@@ -53,8 +53,8 @@ namespace project::ui
         colors[ImGuiCol_Button]                = COLOR_GRAY;
         colors[ImGuiCol_ButtonHovered]         = COLOR_GRAY_LIGHT;
         colors[ImGuiCol_ButtonActive]          = COLOR_TRANS_GRAY_ALT;
-        colors[ImGuiCol_Header]                = COLOR_GRAY;
-        colors[ImGuiCol_HeaderHovered]         = COLOR_GRAY;
+        colors[ImGuiCol_Header]                = COLOR_GRAY_LIGHT;
+        colors[ImGuiCol_HeaderHovered]         = COLOR_GRAY_LIGHTEST;
         colors[ImGuiCol_HeaderActive]          = COLOR_TRANS_GRAY_ALT;
         colors[ImGuiCol_Separator]             = COLOR_ACCENT;
         colors[ImGuiCol_SeparatorHovered]      = COLOR_ACCENT_LIGHT;

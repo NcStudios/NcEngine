@@ -1,20 +1,13 @@
 #pragma once
 
 #include "enet/enet.h"
+#include "NetworkDetails.h"
 #include "PacketBuffer.h"
 
 #include <stdexcept>
 
 namespace nc::net
 {
-    const auto CHANNEL_LIMIT = 2u;
-
-    enum class Channel : uint8_t
-    {
-        Reliable = 0u,
-        Unreliable = 1u
-    };
-
     class Endpoint
     {
         public:

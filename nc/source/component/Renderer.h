@@ -14,7 +14,7 @@ namespace nc
 {
     class Transform;
 
-    class Renderer : public Component
+    class Renderer final: public Component
     {
         public:
             Renderer();

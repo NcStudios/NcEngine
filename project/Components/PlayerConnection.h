@@ -10,7 +10,7 @@ namespace project
     class PlayerConnection : public nc::Component
     {
         public:
-            PlayerConnection(std::string playerName);
+            PlayerConnection(std::string serverIP, std::string playerName);
             void FrameUpdate(float dt) override;
 
         private:

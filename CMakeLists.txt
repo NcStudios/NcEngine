@@ -12,7 +12,7 @@ option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" ON)
 
 #VARIABLES
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(GAME_EXE "Caverna")
 set(SERVER_EXE "CavernaServer")

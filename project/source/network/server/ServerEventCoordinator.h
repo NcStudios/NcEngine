@@ -1,9 +1,17 @@
 #pragma once
 
-#include "../Packet.h"
+#include "nc/source/net/NetworkDetails.h"
+
+#include <functional>
+#include <unordered_map>
 
 struct _ENetEvent;
 typedef _ENetEvent ENetEvent;
+
+struct _ENetPeer;
+typedef _ENetPeer ENetPeer;
+
+namespace nc::net { struct PacketBuffer; }
 
 namespace project::network
 {
@@ -12,17 +20,12 @@ namespace project::network
     class ServerEventCoordinator
     {
         public:
-            ServerEventCoordinator(ServerConnectionManager* connectionManager);
+            ServerEventCoordinator(ServerConnectionManager* connectionManager, 
+                                   std::function<void(nc::net::PacketBuffer data, nc::net::Channel channel, ENetPeer* peer)> sendCallback);
 
             void Dispatch(ENetEvent* eventPacket);
-
+        
         private:
-            ServerConnectionManager* m_connections;
-
-            template<PacketType packet_t>
-            void HandleEvent(ENetEvent* packet);
+            std::unordered_map<nc::net::PacketType, std::function<void(ENetEvent*)>> m_dispatchTable;
     };
-
-    template<>
-    void ServerEventCoordinator::HandleEvent<PacketType::ClientSendName>(ENetEvent* event);
 }
