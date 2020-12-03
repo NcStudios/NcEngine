@@ -30,13 +30,13 @@ namespace nc::graphics::d3dresource
                 return Get().m_graphics;
             }
 
-            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
+            template<std::derived_from<GraphicsResource> T, typename...Params>
             static std::shared_ptr<GraphicsResource> Acquire(Params&&...p)
             {
                 return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
 
-            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
+            template<std::derived_from<GraphicsResource> T, typename...Params>
             static bool Exists(Params&&...p)
             {
                 return Get().Exists_<T>(std::forward<Params>(p)...);
@@ -63,7 +63,7 @@ namespace nc::graphics::d3dresource
                 return instance;
             }
 
-            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
+            template<std::derived_from<GraphicsResource> T, typename...Params>
             std::shared_ptr<GraphicsResource> Acquire_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
@@ -77,7 +77,7 @@ namespace nc::graphics::d3dresource
                 return i->second;
             }
 
-            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
+            template<std::derived_from<GraphicsResource> T, typename...Params>
             bool Exists_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);

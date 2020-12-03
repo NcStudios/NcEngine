@@ -33,16 +33,16 @@ namespace nc
             void SendOnCollisionStay() noexcept;
             void SendOnCollisionExit() noexcept;
 
-            template<class T> requires std::derived_from<T, Component>
+            template<std::derived_from<Component> T>
             bool HasUserComponent() const noexcept;
 
-            template<class T, class ... Args> requires std::derived_from<T, Component>
+            template<std::derived_from<Component> T, class ... Args>
             T * AddUserComponent(Args&& ... args) noexcept;
 
-            template<class T> requires std::derived_from<T, Component>
+            template<std::derived_from<Component> T>
             bool RemoveUserComponent() noexcept;
 
-            template<class T> requires std::derived_from<T, Component>
+            template<std::derived_from<Component> T>
             T * GetUserComponent() const noexcept; 
 
             const std::vector<std::unique_ptr<Component>> & GetUserComponents() const noexcept;
@@ -51,7 +51,7 @@ namespace nc
             std::vector<std::unique_ptr<Component>> m_userComponents;
     };
 
-    template<class T> requires std::derived_from<T, Component>
+    template<std::derived_from<Component> T>
     bool Entity::HasUserComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));
@@ -63,7 +63,7 @@ namespace nc
         return false;
     }
 
-    template<class T, class ... Args> requires std::derived_from<T, Component>
+    template<std::derived_from<Component> T, class ... Args>
     T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
         if (HasUserComponent<T>())
@@ -76,7 +76,7 @@ namespace nc
         return dynamic_cast<T*>(ptr);
     }
 
-    template<class T> requires std::derived_from<T, Component>
+    template<std::derived_from<Component> T>
     bool Entity::RemoveUserComponent() noexcept
     {
         const std::type_info &targetType(typeid(T));
@@ -92,7 +92,7 @@ namespace nc
         return false;
     }
 
-    template<class T> requires std::derived_from<T, Component>
+    template<std::derived_from<Component> T>
     T * Entity::GetUserComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));
