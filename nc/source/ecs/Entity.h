@@ -3,9 +3,10 @@
 #include "component/Component.h"
 #include "component/EngineComponentGroup.h"
 
-#include <vector>
+#include <concepts>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace nc
 {
@@ -32,21 +33,16 @@ namespace nc
             void SendOnCollisionStay() noexcept;
             void SendOnCollisionExit() noexcept;
 
-            template<class T, 
-                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            template<class T> requires std::derived_from<T, Component>
             bool HasUserComponent() const noexcept;
 
-            template<class T,
-                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type,
-                     class ... Args>
+            template<class T, class ... Args> requires std::derived_from<T, Component>
             T * AddUserComponent(Args&& ... args) noexcept;
 
-            template<class T,
-                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            template<class T> requires std::derived_from<T, Component>
             bool RemoveUserComponent() noexcept;
 
-            template<class T,
-                     class = typename std::enable_if<std::is_base_of<Component, T>::value>::type>
+            template<class T> requires std::derived_from<T, Component>
             T * GetUserComponent() const noexcept; 
 
             const std::vector<std::unique_ptr<Component>> & GetUserComponents() const noexcept;
@@ -55,7 +51,7 @@ namespace nc
             std::vector<std::unique_ptr<Component>> m_userComponents;
     };
 
-    template<class T, class>
+    template<class T> requires std::derived_from<T, Component>
     bool Entity::HasUserComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));
@@ -67,7 +63,7 @@ namespace nc
         return false;
     }
 
-    template<class T, class, class ... Args>
+    template<class T, class ... Args> requires std::derived_from<T, Component>
     T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
         if (HasUserComponent<T>())
@@ -80,7 +76,7 @@ namespace nc
         return dynamic_cast<T*>(ptr);
     }
 
-    template<class T, class>
+    template<class T> requires std::derived_from<T, Component>
     bool Entity::RemoveUserComponent() noexcept
     {
         const std::type_info &targetType(typeid(T));
@@ -96,7 +92,7 @@ namespace nc
         return false;
     }
 
-    template<class T, class>
+    template<class T> requires std::derived_from<T, Component>
     T * Entity::GetUserComponent() const noexcept
     {
         const std::type_info &targetType(typeid(T));

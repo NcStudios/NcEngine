@@ -2,6 +2,7 @@
 
 #include "GraphicsResource.h"
 
+#include <concepts>
 #include <iostream>
 #include <memory>
 #include <unordered_map>
@@ -18,9 +19,6 @@ namespace nc::graphics::d3dresource
     
     class GraphicsResourceManager
     {
-        template<class T>
-        using is_resource_t = typename std::enable_if_t<std::is_base_of_v<GraphicsResource, T>>;
-
         public:
             static void SetGraphics(Graphics * gfx)
             {
@@ -32,13 +30,13 @@ namespace nc::graphics::d3dresource
                 return Get().m_graphics;
             }
 
-            template<class T, class = is_resource_t<T>, typename...Params>
+            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
             static std::shared_ptr<GraphicsResource> Acquire(Params&&...p)
             {
                 return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
 
-            template<class T, class = is_resource_t<T>, typename...Params>
+            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
             static bool Exists(Params&&...p)
             {
                 return Get().Exists_<T>(std::forward<Params>(p)...);
@@ -65,7 +63,7 @@ namespace nc::graphics::d3dresource
                 return instance;
             }
 
-            template<class T, class = is_resource_t<T>, typename...Params>
+            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
             std::shared_ptr<GraphicsResource> Acquire_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
@@ -79,7 +77,7 @@ namespace nc::graphics::d3dresource
                 return i->second;
             }
 
-            template<class T, class = is_resource_t<T>, typename...Params>
+            template<class T, typename...Params> requires std::derived_from<T, GraphicsResource>
             bool Exists_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
