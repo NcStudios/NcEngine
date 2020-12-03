@@ -2,7 +2,6 @@ cbuffer CBuf
 {
     matrix modelView;
     matrix modelViewProj;
-    float2 tiling;
 };
 
 struct VSIn
@@ -32,6 +31,6 @@ VSOut main(VSIn input)
     output.tangent = mul(input.tangent, (float3x3)modelView);
     output.bitangent = mul(input.bitangent, (float3x3)modelView);
     output.position = mul(float4(input.position, 1.0f), modelViewProj); 
-    output.uv = float2(input.uv.x * tiling.x, input.uv.y * tiling.y);
+    output.uv = float2(input.uv.x, input.uv.y);
     return output;
 }

@@ -5,6 +5,13 @@ target_sources(${GAME_EXE}
         ${ROOT_DIR}/nc/source/graphics/d3dresource/GraphicsResource.cpp
         ${ROOT_DIR}/nc/source/graphics/Mesh.cpp
         ${ROOT_DIR}/nc/source/graphics/WICTextureLoader.cpp
-        ${ROOT_DIR}/nc/source/graphics/PBRMaterial.cpp
+        ${ROOT_DIR}/nc/source/graphics/materials/Material.cpp
+        ${ROOT_DIR}/nc/source/graphics/techniques/Technique.cpp
+        ${ROOT_DIR}/nc/source/graphics/techniques/PhongShadingTechnique.cpp
+        ${ROOT_DIR}/nc/source/graphics/techniques/TechniqueManager.cpp
         ${ROOT_DIR}/nc/source/graphics/ResourceGroup.cpp
+        ${ROOT_DIR}/nc/source/graphics/rendergraph/FrameManager.cpp
+        ${ROOT_DIR}/nc/source/graphics/rendergraph/Job.cpp
+        ${ROOT_DIR}/nc/source/graphics/rendergraph/Pass.cpp
+        ${ROOT_DIR}/nc/source/graphics/rendergraph/Step.cpp
 )

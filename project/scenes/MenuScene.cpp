@@ -8,6 +8,7 @@
 #include "project/components/CubeRotator.h"
 #include "project/components/MouseFollower.h"
 #include "source/Prefabs.h"
+#include "graphics/materials/Material.h"
 
 #include <cstdlib>
 #include <ctime>
@@ -42,23 +43,23 @@ namespace project
         Ecs::AddComponent<SceneReset>(debugHandle);
         Ecs::AddComponent<Timer>(debugHandle);
 
-        auto ncMaterial = graphics::PBRMaterial{{"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"}};
-        auto ncMesh = graphics::Mesh{"project//Models//Logo3d.fbx"};
-        std::srand(std::time(0));
-        int posRange = 30;
-        int rotRange = 90;
-        for(unsigned i = 0; i < 40; ++i)
-        {
-            auto xPos = (float)(rand() % posRange) - (posRange / 2);
-            auto yPos = (float)(rand() % posRange) - (posRange / 2);
-            auto zPos = (float)(rand() % posRange) + (posRange / 2);
-            auto xRot = (float)(rand() % rotRange);
-            auto yRot = (float)(rand() % rotRange);
-            auto zRot = (float)(rand() % rotRange);
-            auto ncHandle = Ecs::CreateEntity({xPos, yPos, zPos}, {xRot, yRot, zRot}, {0.75f, 0.75f, 0.75f}, "nc");
-            Ecs::AddComponent<Renderer>(ncHandle, ncMesh, ncMaterial);
-            Ecs::AddComponent<project::CubeRotator>(ncHandle);
-        }
+    const std::vector<std::string> ncTextures = std::vector<std::string>({"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"});
+    graphics::Material ncMaterial = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, ncTextures};
+    auto ncMesh = graphics::Mesh{"project//Models//Logo3d.fbx"};
+    std::srand(std::time(0));
+    int posRange = 30;
+    int rotRange = 90;
+    for(unsigned i = 0; i < 40; ++i)
+    {
+        auto xPos = (float)(rand() % posRange) - (posRange / 2);
+        auto yPos = (float)(rand() % posRange) - (posRange / 2);
+        auto zPos = (float)(rand() % posRange) + (posRange / 2);
+        auto xRot = (float)(rand() % rotRange);
+        auto yRot = (float)(rand() % rotRange);
+        auto zRot = (float)(rand() % rotRange);
+        auto ncHandle = Ecs::CreateEntity({xPos, yPos, zPos}, {xRot, yRot, zRot}, {0.75f, 0.75f, 0.75f}, "nc");
+        Ecs::AddComponent<Renderer>(ncHandle, ncMesh, ncMaterial);
+        Ecs::AddComponent<project::CubeRotator>(ncHandle);
     }
 
     void MenuScene::Unload()

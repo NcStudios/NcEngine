@@ -48,7 +48,7 @@ namespace nc
     template<> PointLight* Ecs::GetComponent<PointLight>(EntityHandle handle);
     template<> bool Ecs::HasComponent<PointLight>(EntityHandle handle);
 
-    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material);
+    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh& mesh, graphics::Material& material);
     template<> bool Ecs::RemoveComponent<Renderer>(EntityHandle handle);
     template<> Renderer* Ecs::GetComponent<Renderer>(EntityHandle handle);
     template<> bool Ecs::HasComponent<Renderer>(EntityHandle handle);

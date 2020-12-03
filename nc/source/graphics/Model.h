@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PBRMaterial.h"
+#include "materials/Material.h"
 #include "Mesh.h"
 
 #include <vector>
@@ -18,6 +18,7 @@ namespace nc::graphics
     namespace d3dresource
     {
         class GraphicsResource;
+        class TransformConstBufferVertexPixel;
         class IndexBuffer;
     }
 }
@@ -31,28 +32,26 @@ namespace nc::graphics
         /** @todo Can we pass material by ptr? */
             Model();
             Model(const Mesh&);
-            Model(const Mesh& mesh, const PBRMaterial& material);
+            Model(const Mesh& mesh, const Material& material);
 
-            void SetMaterial(const PBRMaterial& material) noexcept;
+            void SetMaterial(const Material& material) noexcept;
             void SetMesh(const Mesh& mesh) noexcept;
 
-            void Draw(Graphics* gfx) const noexcept;
+            uint32_t GetIndexCount() const noexcept;
+            void Submit(class FrameManager& frame) noexcept;
+            void Bind() const;
 
             void UpdateTransformationMatrix(Transform* transform) noexcept;
             DirectX::XMMATRIX GetTransformXM() const noexcept;
-            PBRMaterial * GetMaterial() noexcept;
-
-        protected:
-            void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
+            Material * GetMaterial() noexcept;
 
         private:
             void InitializeGraphicsPipeline();
 
             Mesh m_mesh;
-            PBRMaterial m_material;
-            PBRMaterial m_materialTest;
+            Material m_material;
             DirectX::XMMATRIX m_transformationMatrix;
             const d3dresource::IndexBuffer * m_indexBuffer = nullptr;
-            std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
+            std::shared_ptr<d3dresource::GraphicsResource> m_transformConstantBuffer;
     };
 }

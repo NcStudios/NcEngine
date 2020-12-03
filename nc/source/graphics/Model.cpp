@@ -1,8 +1,8 @@
 #include "Model.h"
-#include "PBRMaterial.h"
-#include "Graphics.h"
 #include "component/Transform.h"
 #include "d3dresource/GraphicsResourceManager.h"
+#include "Graphics.h"
+#include "materials/Material.h"
 
 namespace nc::graphics
 {
@@ -10,7 +10,7 @@ namespace nc::graphics
     {
     }
 
-    Model::Model(const Mesh& mesh, const PBRMaterial& material)
+    Model::Model(const Mesh& mesh, const Material& material)
         : m_mesh(mesh), m_material(material)
     {
         InitializeGraphicsPipeline();
@@ -20,11 +20,11 @@ namespace nc::graphics
     {
         using namespace nc::graphics::d3dresource;
         auto bufferId = std::to_string(GraphicsResourceManager::AssignId());
-        AddGraphicsResource(TransformConstBufferVertexPixel::AcquireUnique(bufferId, *this, 0u, 2u));
+        m_transformConstantBuffer = TransformConstBufferVertexPixel::AcquireUnique(bufferId, *this, 0u, 2u);
         m_indexBuffer = m_mesh.QueryGraphicsResource<d3dresource::IndexBuffer>();
     }
 
-    void Model::SetMaterial(const PBRMaterial& material) noexcept
+    void Model::SetMaterial(const Material& material) noexcept
     {
         m_material = material;
         // TODO: Set material
@@ -35,16 +35,20 @@ namespace nc::graphics
         m_mesh = mesh;
     }
 
-    void Model::Draw(Graphics* gfx) const noexcept
+    void Model::Submit(FrameManager& frame) noexcept
     {
-        m_material.BindGraphicsResources();
-        m_mesh.BindGraphicsResources();
+        m_material.Submit(frame, *this);
+    }
 
-        for(auto& res : m_resources)
-        {
-            res->Bind();
-        }
-        gfx->DrawIndexed(m_indexBuffer->GetCount());
+    void Model::Bind() const
+    {
+        m_mesh.Bind();
+        m_transformConstantBuffer->Bind();
+    }
+
+    uint32_t Model::GetIndexCount() const noexcept
+    {
+        return m_indexBuffer->GetCount();
     }
 
     void Model::UpdateTransformationMatrix(Transform* transform) noexcept
@@ -57,18 +61,8 @@ namespace nc::graphics
         return m_transformationMatrix;
     }
 
-    PBRMaterial* Model::GetMaterial() noexcept
+    Material* Model::GetMaterial() noexcept
     {
         return &m_material;
-    }
-
-    void Model::AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res)
-    {
-        if(typeid(*res) == typeid(d3dresource::IndexBuffer))
-        {
-            assert("Binding multiple index buffers is not allowed" && m_indexBuffer == nullptr);
-            m_indexBuffer = &static_cast<d3dresource::IndexBuffer&>(*res);
-        }
-        m_resources.push_back(std::move(res));
     }
 }

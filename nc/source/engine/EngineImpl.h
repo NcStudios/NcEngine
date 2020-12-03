@@ -10,7 +10,11 @@ namespace nc
 {
     namespace camera { class MainCameraImpl; }
     namespace debug { class LogImpl; }
-    namespace graphics { class Graphics; }
+    namespace graphics 
+    { 
+        class Graphics;
+        class FrameManager;
+    }
     namespace engine { class Engine; }
     namespace ecs
     {
@@ -60,6 +64,7 @@ namespace nc::engine
             std::unique_ptr<ui::UIImpl> m_ui;
             std::unique_ptr<PointLightManager> m_pointLightManager;
             std::unique_ptr<scene::SceneManagerImpl> m_sceneManager;
+            std::unique_ptr<graphics::FrameManager> m_frameManager;
             std::unique_ptr<camera::MainCameraImpl> m_mainCamera;
             #ifdef NC_EDITOR_ENABLED
             std::unique_ptr<nc::time::Timer> m_frameLogicTimer;

@@ -173,16 +173,6 @@ void Graphics::CreateRenderTargetViewFromBackBuffer()
 
 void Graphics::CreateDepthStencilView(float width, float height) 
 {
-    //depth stencil state
-    ID3D11DepthStencilState*  depthStencilState;
-    D3D11_DEPTH_STENCIL_DESC depthStencilStateDesc = {};
-    depthStencilStateDesc.DepthEnable              = TRUE;
-    depthStencilStateDesc.DepthWriteMask           = D3D11_DEPTH_WRITE_MASK_ALL;
-    depthStencilStateDesc.DepthFunc                = D3D11_COMPARISON_LESS;
-    THROW_FAILED(m_device->CreateDepthStencilState(&depthStencilStateDesc, &depthStencilState));
-    m_context->OMSetDepthStencilState(depthStencilState, 1u);
-    depthStencilState->Release();
-
     //depth stencil texture
     ID3D11Texture2D* depthStencilTexture;
     auto depthTextDesc = D3D11_TEXTURE2D_DESC

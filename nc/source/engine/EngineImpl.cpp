@@ -17,6 +17,7 @@
 #include "time/NcTime.h"
 #include "Window.h"
 #include "window/WindowImpl.h"
+#include "graphics/rendergraph/FrameManager.h"
 
 #include <iostream>
 
@@ -43,6 +44,7 @@ namespace nc::engine
         m_ui = std::make_unique<ui::UIImpl>(hwnd, m_graphics.get());
         m_sceneManager = std::make_unique<scene::SceneManagerImpl>();
         m_mainCamera = std::make_unique<camera::MainCameraImpl>();
+        m_frameManager = std::make_unique<graphics::FrameManager>();
         #ifdef NC_EDITOR_ENABLED
         m_frameLogicTimer = std::make_unique<nc::time::Timer>();
         #endif
@@ -144,11 +146,13 @@ namespace nc::engine
         });
         m_pointLightManager->Bind();
 
-        auto gfx = m_graphics.get();
-        m_ecs->GetSystem<Renderer>()->ForEach([gfx](auto& renderer)
+        auto frameManager = m_frameManager.get();
+        m_frameManager->Reset();
+        m_ecs->GetSystem<Renderer>()->ForEach([frameManager](auto& renderer)
         {
-            renderer.Update(gfx);
+            renderer.Update(*frameManager);
         });
+        m_frameManager->Execute(m_graphics.get());
 
         #ifdef NC_EDITOR_ENABLED
         m_ui->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_ecs->GetActiveEntities());

@@ -73,7 +73,7 @@ namespace nc
         return lightPtr;
     }
 
-    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh& mesh, graphics::PBRMaterial& material)
+    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh& mesh, graphics::Material& material)
     {
         auto entity = GetEntity(handle);
         IF_THROW(!entity, "Bad handle");

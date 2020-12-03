@@ -122,6 +122,30 @@ namespace nc::graphics::d3dresource
     };
 }
 
+/* Stencil */
+namespace nc::graphics::d3dresource
+{
+    class Stencil : public GraphicsResource
+    {
+        public:
+            enum class Mode
+            {
+                Off,
+                Write,
+                Mask
+            };
+
+            Stencil(Mode mode);
+            void Bind() noexcept override;
+            static std::string GetUID(Mode mode) noexcept;
+
+        private:
+            const std::string m_tag;
+            Mode m_mode;
+            Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_stencil;
+    };
+}
+
 /* Sampler */
 namespace nc::graphics::d3dresource
 {
@@ -135,6 +159,23 @@ namespace nc::graphics::d3dresource
         private:
             const std::string m_tag;
             Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
+    };
+}
+
+/* Blender */
+namespace nc::graphics::d3dresource
+{
+    class Blender : public GraphicsResource
+    {
+        public:
+            Blender(const std::string& tag);
+            void Bind() noexcept override;
+            static std::string GetUID(const std::string& tag) noexcept;
+
+        private:
+            const std::string m_tag;
+            Microsoft::WRL::ComPtr<ID3D11BlendState> m_blender;
+            bool m_isBlending;
     };
 }
 
@@ -236,7 +277,6 @@ namespace nc::graphics::d3dresource
             {
                 DirectX::XMMATRIX modelView;
                 DirectX::XMMATRIX model;
-                DirectX::XMFLOAT2 tiling;
             };
             void UpdateBindImplementation(const Transforms& transforms) noexcept;
             Transforms GetTransforms() noexcept;

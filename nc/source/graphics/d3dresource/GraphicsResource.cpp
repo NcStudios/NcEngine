@@ -20,6 +20,64 @@ namespace nc::graphics::d3dresource
         return GraphicsResourceManager::GetGraphics()->m_device;
     }
 
+    /* Stencil */
+    auto tagFromMode = [](Stencil::Mode mode)
+    {
+        switch (mode)
+        {
+            case Stencil::Mode::Write:
+                return std::string{"Write"};
+            case Stencil::Mode::Mask:
+                return std::string{"Mask"};
+            case Stencil::Mode::Off:
+                return std::string{"Off"};
+            default:
+                throw std::runtime_error("Invalid mode specified.");
+        }
+    };
+
+    Stencil::Stencil(Mode mode)
+    : m_tag {tagFromMode(mode)},
+      m_mode {mode}
+    {
+        D3D11_DEPTH_STENCIL_DESC dsDesc = CD3D11_DEPTH_STENCIL_DESC{ CD3D11_DEFAULT{} };
+        
+        switch (m_mode)
+        {
+            case Mode::Write:
+            {
+                dsDesc.DepthEnable = FALSE;
+				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+				dsDesc.StencilEnable = TRUE;
+				dsDesc.StencilWriteMask = 0xFF;
+				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+                break;
+            }
+            case Mode::Mask:
+            {
+				dsDesc.DepthEnable = FALSE;
+				dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+				dsDesc.StencilEnable = TRUE;
+				dsDesc.StencilReadMask = 0xFF;
+				dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+				dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+                break;
+            }
+            case Mode::Off:
+            {
+                break;
+            }
+        }
+        THROW_FAILED(GetDevice()->CreateDepthStencilState(&dsDesc, &m_stencil));
+    }
+
+    void Stencil::Bind() noexcept
+    {
+        GetContext()->OMSetDepthStencilState(m_stencil.Get(), 1u);
+        m_stencil->Release();
+    }
+
     Sampler::Sampler(const std::string& tag)
         : m_tag(tag)
     {
@@ -39,6 +97,35 @@ namespace nc::graphics::d3dresource
     void Sampler::Bind() noexcept
     {
         GetContext()->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
+    }
+
+    Blender::Blender(const std::string& tag)
+        : m_tag(tag)
+    {
+        D3D11_BLEND_DESC blendDesc = {};
+        auto& blenderRenderTarget = blendDesc.RenderTarget[0];
+        if (m_isBlending)
+        {
+            blenderRenderTarget.BlendEnable = TRUE;
+            blenderRenderTarget.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+            blenderRenderTarget.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+            blenderRenderTarget.BlendOp = D3D11_BLEND_OP_ADD;
+            blenderRenderTarget.SrcBlendAlpha = D3D11_BLEND_ZERO;
+            blenderRenderTarget.DestBlendAlpha = D3D11_BLEND_ZERO;
+            blenderRenderTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+            blenderRenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        }
+        else
+        {
+            blenderRenderTarget.BlendEnable = FALSE;
+            blenderRenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        }
+        THROW_FAILED(GetDevice()->CreateBlendState(&blendDesc, &m_blender));
+    }
+
+    void Blender::Bind() noexcept
+    {
+        GetContext()->OMSetBlendState(m_blender.Get(), nullptr, 0xFFFFFFFFu);
     }
 
     VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag)
@@ -189,13 +276,11 @@ namespace nc::graphics::d3dresource
     {
         const auto gfx = GraphicsResourceManager::GetGraphics();
         const auto modelView = m_parent.GetTransformXM() * gfx->GetCamera();
-        const auto materialProperties = m_parent.GetMaterial()->properties;
 
         return
         {
             DirectX::XMMatrixTranspose(modelView),
-            DirectX::XMMatrixTranspose(modelView * gfx->GetProjection()),
-            DirectX::XMFLOAT2 { materialProperties.xTiling, materialProperties.yTiling }
+            DirectX::XMMatrixTranspose(modelView * gfx->GetProjection())
         };
     }
 
@@ -264,9 +349,19 @@ namespace nc::graphics::d3dresource
     /****************
     * UID Functions *
     ****************/
+    std::string Stencil::GetUID(Stencil::Mode mode) noexcept
+    {
+        return typeid(Stencil).name() + tagFromMode(mode);
+    }
+
     std::string Sampler::GetUID(const std::string& tag) noexcept
     {
         return typeid(Sampler).name() + tag;
+    }
+
+    std::string Blender::GetUID(const std::string& tag) noexcept
+    {
+        return typeid(Blender).name() + tag;
     }
 
     std::string VertexBuffer::GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept
