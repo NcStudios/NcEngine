@@ -1,6 +1,8 @@
 #include "Prefabs.h"
+#include "component/NetworkDispatcher.h"
 #include "project/components/GamePiece.h"
 #include "graphics/materials/Material.h"
+#include "project/source/network/Packet.h"
 
 using namespace nc;
 
@@ -9,7 +11,7 @@ namespace
     bool isInitialized = false;
 }
 
-namespace prefab
+namespace project::prefab
 {
 namespace mesh
 {
@@ -30,7 +32,7 @@ namespace mesh
     auto Vegetable = graphics::Mesh{};
     auto Wood = graphics::Mesh{};
     auto FurnishingTile = graphics::Mesh{};
-}
+} // end namespace mesh
 
 namespace material
 {
@@ -101,7 +103,7 @@ namespace material
     graphics::Material FurnishingTileWorkingCave = graphics::Material{};
     graphics::Material FurnishingTileWorkRoom = graphics::Material{};
     graphics::Material FurnishingTileWritingChamber = graphics::Material{};
-}
+} // end namespace material
 
 void InitializeResources()
 {
@@ -327,16 +329,23 @@ void InitializeResources()
     material::PlayerBoard = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, playerBoardTextures};
 }
 
-template<> EntityHandle Create<Boar>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+
+
+template<Resource Resource_t>
+EntityHandle Create_(Vector3, Vector3, Vector3, std::string);
+
+template<> EntityHandle Create_<Resource::Boar>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Boar, material::Boar);
     auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto gamePiece = Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto dispatcher = Ecs::AddComponent<NetworkDispatcher>(handle);
+    dispatcher->AddHandler(nc::net::PacketType::TestNetworkDispatcher, std::bind(gamePiece->NetworkDispatchTest, gamePiece, std::placeholders::_1));
     return handle;
 }
 
-template<> EntityHandle Create<Cattle>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<project::prefab::Resource::Cattle>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Cattle, material::Cattle);
@@ -345,7 +354,7 @@ template<> EntityHandle Create<Cattle>(Vector3 position, Vector3 rotation, Vecto
     return handle;
 }
 
-template<> EntityHandle Create<Coal>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<project::prefab::Resource::Coal>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Coal, material::Coal);
@@ -354,7 +363,7 @@ template<> EntityHandle Create<Coal>(Vector3 position, Vector3 rotation, Vector3
     return handle;
 }
 
-template<> EntityHandle Create<CoinOne>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::CoinOne>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::CoinOne);
@@ -363,7 +372,7 @@ template<> EntityHandle Create<CoinOne>(Vector3 position, Vector3 rotation, Vect
     return handle;
 }
 
-template<> EntityHandle Create<CoinTwo>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::CoinTwo>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::CoinTwo);
@@ -372,7 +381,7 @@ template<> EntityHandle Create<CoinTwo>(Vector3 position, Vector3 rotation, Vect
     return handle;
 }
 
-template<> EntityHandle Create<CoinTen>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::CoinTen>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::CoinTen);
@@ -381,7 +390,7 @@ template<> EntityHandle Create<CoinTen>(Vector3 position, Vector3 rotation, Vect
     return handle;
 }
 
-template<> EntityHandle Create<Dog>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Dog>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Dog, material::Dog);
@@ -390,7 +399,7 @@ template<> EntityHandle Create<Dog>(Vector3 position, Vector3 rotation, Vector3 
     return handle;
 }
 
-template<> EntityHandle Create<Donkey>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Donkey>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Donkey, material::Donkey);
@@ -399,7 +408,7 @@ template<> EntityHandle Create<Donkey>(Vector3 position, Vector3 rotation, Vecto
     return handle;
 }
 
-template<> EntityHandle Create<Dwarf>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Dwarf>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::Dwarf);
@@ -408,7 +417,7 @@ template<> EntityHandle Create<Dwarf>(Vector3 position, Vector3 rotation, Vector
     return handle;
 }
 
-template<> EntityHandle Create<Grain>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Grain>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Grain, material::Grain);
@@ -417,7 +426,7 @@ template<> EntityHandle Create<Grain>(Vector3 position, Vector3 rotation, Vector
     return handle;
 }
 
-template<> EntityHandle Create<Ruby>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Ruby>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Ruby, material::Ruby);
@@ -426,7 +435,7 @@ template<> EntityHandle Create<Ruby>(Vector3 position, Vector3 rotation, Vector3
     return handle;
 }
 
-template<> EntityHandle Create<Sheep>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Sheep>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Sheep, material::Sheep);
@@ -435,7 +444,7 @@ template<> EntityHandle Create<Sheep>(Vector3 position, Vector3 rotation, Vector
     return handle;
 }
 
-template<> EntityHandle Create<Stable>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Stable>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Stable, material::Stable);
@@ -444,7 +453,7 @@ template<> EntityHandle Create<Stable>(Vector3 position, Vector3 rotation, Vecto
     return handle;
 }
 
-template<> EntityHandle Create<StartingPlayerPiece>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::StartingPlayerPiece>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::StartingPlayerPiece, material::StartingPlayerPiece);
@@ -453,7 +462,7 @@ template<> EntityHandle Create<StartingPlayerPiece>(Vector3 position, Vector3 ro
     return handle;
 }
 
-template<> EntityHandle Create<Stone>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Stone>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Stone, material::Stone);
@@ -462,7 +471,7 @@ template<> EntityHandle Create<Stone>(Vector3 position, Vector3 rotation, Vector
     return handle;
 }
 
-template<> EntityHandle Create<Vegetable>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Vegetable>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Vegetable, material::Vegetable);
@@ -471,7 +480,7 @@ template<> EntityHandle Create<Vegetable>(Vector3 position, Vector3 rotation, Ve
     return handle;
 }
 
-template<> EntityHandle Create<Wood>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Wood>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::Wood, material::Wood);
@@ -480,346 +489,425 @@ template<> EntityHandle Create<Wood>(Vector3 position, Vector3 rotation, Vector3
     return handle;
 }
 
-template<> EntityHandle Create<PlayerBoard>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::PlayerBoard>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::PlayerBoard, material::PlayerBoard);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileAdditionalDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileAdditionalDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileAdditionalDwelling);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileCoupleDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileCoupleDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCoupleDwelling);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDwelling);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileBeerParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileBeerParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBeerParlor);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileBlacksmithingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileBlacksmithingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmithingParlor);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileBlacksmith>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileBlacksmith>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmith);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileBreakfastRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileBreakfastRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreakfastRoom);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileBreedingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileBreedingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreedingCave);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileBroomChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileBroomChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBroomChamber);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileBuilder>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileBuilder>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBuilder);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileCarpenter>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileCarpenter>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCarpenter);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileCookingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileCookingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCookingCave);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileCuddleRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileCuddleRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCuddleRoom);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileDogSchool>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileDogSchool>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDogSchool);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileFodderChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileFodderChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFodderChamber);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileFoodChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileFoodChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFoodChamber);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileGuestRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileGuestRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileGuestRoom);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileHuntingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileHuntingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileHuntingParlor);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileMainStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileMainStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMainStorage);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileMilkingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileMilkingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMilkingParlor);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileMiner>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileMiner>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiner);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileMiningCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileMiningCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiningCave);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileMixedDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileMixedDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMixedDwelling);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileOfficeRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileOfficeRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOfficeRoom);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileOreStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileOreStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOreStorage);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTilePeacefulCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTilePeacefulCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePeacefulCave);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTilePrayerChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTilePrayerChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePrayerChamber);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileQuarry>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileQuarry>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileQuarry);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileRubySupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileRubySupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileRubySupplier);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileSeam>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileSeam>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSeam);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileSimpleDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileSimpleDwelling>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileSimpleDwelling2>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileSimpleDwelling2>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling2);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileSlaughterCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileSlaughterCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSlaughterCave);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileSparePartStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileSparePartStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSparePartStorage);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileStateParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileStateParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStateParlor);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileStoneCarver>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileStoneCarver>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneCarver);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileStoneStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileStoneStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneStorage);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileStoneSupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileStoneSupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneSupplier);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileStubbleRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileStubbleRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStubbleRoom);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileSuppliesStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileSuppliesStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSuppliesStorage);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileTrader>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileTrader>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTrader);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileTreasureChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileTreasureChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTreasureChamber);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileWeaponStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileWeaponStorage>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeaponStorage);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileWeavingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileWeavingParlor>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeavingParlor);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileWoodSupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileWoodSupplier>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWoodSupplier);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileWorkingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileWorkingCave>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkingCave);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileWorkRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileWorkRoom>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkRoom);
     return handle;
 }
 
-template<> EntityHandle Create<FurnishingTileWritingChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::FurnishingTileWritingChamber>(Vector3 position, Vector3 rotation, Vector3 scale, std::string tag)
 {
     auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
     Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWritingChamber);
     return handle;
 }
-} //end namespace prefab
+
+
+
+using CreateFunc_t = EntityHandle(*)(Vector3, Vector3, Vector3, std::string);
+
+const auto dispatch = std::unordered_map<project::prefab::Resource, CreateFunc_t>
+{
+    std::pair{Resource::Boar, Create_<Resource::Boar>},
+    std::pair{Resource::Cattle, Create_<Resource::Cattle>},
+    std::pair{Resource::Coal, Create_<Resource::Coal>},
+    std::pair{Resource::CoinOne, Create_<Resource::CoinOne>},
+    std::pair{Resource::CoinTwo, Create_<Resource::CoinTwo>},
+    std::pair{Resource::CoinTen, Create_<Resource::CoinTen>},
+    std::pair{Resource::Dog, Create_<Resource::Dog>},
+    std::pair{Resource::Donkey, Create_<Resource::Donkey>},
+    std::pair{Resource::Dwarf, Create_<Resource::Dwarf>},
+    std::pair{Resource::Grain, Create_<Resource::Grain>},
+    std::pair{Resource::PlayerBoard, Create_<Resource::PlayerBoard>},
+    std::pair{Resource::Ruby, Create_<Resource::Ruby>},
+    std::pair{Resource::Sheep, Create_<Resource::Sheep>},
+    std::pair{Resource::Stable, Create_<Resource::Stable>},
+    std::pair{Resource::StartingPlayerPiece, Create_<Resource::StartingPlayerPiece>},
+    std::pair{Resource::Stone, Create_<Resource::Stone>},
+    std::pair{Resource::Vegetable, Create_<Resource::Vegetable>},
+    std::pair{Resource::Wood, Create_<Resource::Wood>},
+    std::pair{Resource::FurnishingTileAdditionalDwelling, Create_<Resource::FurnishingTileAdditionalDwelling>},
+    std::pair{Resource::FurnishingTileCoupleDwelling, Create_<Resource::FurnishingTileCoupleDwelling>},
+    std::pair{Resource::FurnishingTileDwelling, Create_<Resource::FurnishingTileDwelling>},
+    std::pair{Resource::FurnishingTileBeerParlor, Create_<Resource::FurnishingTileBeerParlor>},
+    std::pair{Resource::FurnishingTileBlacksmithingParlor, Create_<Resource::FurnishingTileBlacksmithingParlor>},
+    std::pair{Resource::FurnishingTileBlacksmith, Create_<Resource::FurnishingTileBlacksmith>},
+    std::pair{Resource::FurnishingTileBreakfastRoom, Create_<Resource::FurnishingTileBreakfastRoom>},
+    std::pair{Resource::FurnishingTileBreedingCave, Create_<Resource::FurnishingTileBreedingCave>},
+    std::pair{Resource::FurnishingTileBroomChamber, Create_<Resource::FurnishingTileBroomChamber>},
+    std::pair{Resource::FurnishingTileBuilder, Create_<Resource::FurnishingTileBuilder>},
+    std::pair{Resource::FurnishingTileCarpenter, Create_<Resource::FurnishingTileCarpenter>},
+    std::pair{Resource::FurnishingTileCookingCave, Create_<Resource::FurnishingTileCookingCave>},
+    std::pair{Resource::FurnishingTileCuddleRoom, Create_<Resource::FurnishingTileCuddleRoom>},
+    std::pair{Resource::FurnishingTileDogSchool, Create_<Resource::FurnishingTileDogSchool>},
+    std::pair{Resource::FurnishingTileFodderChamber, Create_<Resource::FurnishingTileFodderChamber>},
+    std::pair{Resource::FurnishingTileFoodChamber, Create_<Resource::FurnishingTileFoodChamber>},
+    std::pair{Resource::FurnishingTileGuestRoom, Create_<Resource::FurnishingTileGuestRoom>},
+    std::pair{Resource::FurnishingTileHuntingParlor, Create_<Resource::FurnishingTileHuntingParlor>},
+    std::pair{Resource::FurnishingTileMainStorage, Create_<Resource::FurnishingTileMainStorage>},
+    std::pair{Resource::FurnishingTileMilkingParlor, Create_<Resource::FurnishingTileMilkingParlor>},
+    std::pair{Resource::FurnishingTileMiner, Create_<Resource::FurnishingTileMiner>},
+    std::pair{Resource::FurnishingTileMiningCave, Create_<Resource::FurnishingTileMiningCave>},
+    std::pair{Resource::FurnishingTileMixedDwelling, Create_<Resource::FurnishingTileMixedDwelling>},
+    std::pair{Resource::FurnishingTileOfficeRoom, Create_<Resource::FurnishingTileOfficeRoom>},
+    std::pair{Resource::FurnishingTileOreStorage, Create_<Resource::FurnishingTileOreStorage>},
+    std::pair{Resource::FurnishingTilePeacefulCave, Create_<Resource::FurnishingTilePeacefulCave>},
+    std::pair{Resource::FurnishingTilePrayerChamber, Create_<Resource::FurnishingTilePrayerChamber>},
+    std::pair{Resource::FurnishingTileQuarry, Create_<Resource::FurnishingTileQuarry>},
+    std::pair{Resource::FurnishingTileRubySupplier, Create_<Resource::FurnishingTileRubySupplier>},
+    std::pair{Resource::FurnishingTileSeam, Create_<Resource::FurnishingTileSeam>},
+    std::pair{Resource::FurnishingTileSimpleDwelling, Create_<Resource::FurnishingTileSimpleDwelling>},
+    std::pair{Resource::FurnishingTileSimpleDwelling2, Create_<Resource::FurnishingTileSimpleDwelling2>},
+    std::pair{Resource::FurnishingTileSlaughterCave, Create_<Resource::FurnishingTileSlaughterCave>},
+    std::pair{Resource::FurnishingTileSparePartStorage, Create_<Resource::FurnishingTileSparePartStorage>},
+    std::pair{Resource::FurnishingTileStateParlor, Create_<Resource::FurnishingTileStateParlor>},
+    std::pair{Resource::FurnishingTileStoneCarver, Create_<Resource::FurnishingTileStoneCarver>},
+    std::pair{Resource::FurnishingTileStoneStorage, Create_<Resource::FurnishingTileStoneStorage>},
+    std::pair{Resource::FurnishingTileStoneSupplier, Create_<Resource::FurnishingTileStoneSupplier>},
+    std::pair{Resource::FurnishingTileStubbleRoom, Create_<Resource::FurnishingTileStubbleRoom>},
+    std::pair{Resource::FurnishingTileSuppliesStorage, Create_<Resource::FurnishingTileSuppliesStorage>},
+    std::pair{Resource::FurnishingTileTrader, Create_<Resource::FurnishingTileTrader>},
+    std::pair{Resource::FurnishingTileTreasureChamber, Create_<Resource::FurnishingTileTreasureChamber>},
+    std::pair{Resource::FurnishingTileWeaponStorage, Create_<Resource::FurnishingTileWeaponStorage>},
+    std::pair{Resource::FurnishingTileWeavingParlor, Create_<Resource::FurnishingTileWeavingParlor>},
+    std::pair{Resource::FurnishingTileWoodSupplier, Create_<Resource::FurnishingTileWoodSupplier>},
+    std::pair{Resource::FurnishingTileWorkingCave, Create_<Resource::FurnishingTileWorkingCave>},
+    std::pair{Resource::FurnishingTileWorkRoom, Create_<Resource::FurnishingTileWorkRoom>},
+    std::pair{Resource::FurnishingTileWritingChamber, Create_<Resource::FurnishingTileWritingChamber>}
+};
+
+nc::EntityHandle Create(Resource resource, nc::Vector3 position, nc::Vector3 rotation, nc::Vector3 scale, std::string tag)
+{
+    return dispatch.at(resource)(position, rotation, scale, std::move(tag));
+}
+} // end namespace project::prefab

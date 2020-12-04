@@ -3,7 +3,7 @@
 
 namespace nc
 {
-    class Camera : public Component
+    class Camera final: public Component
     {
         public:
             Camera();

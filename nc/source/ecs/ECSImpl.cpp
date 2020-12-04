@@ -9,7 +9,8 @@ EcsImpl::EcsImpl()
       m_toDestroy{},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS, true) },
       m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>() },
-      m_transformSystem{ std::make_unique<ComponentSystem<Transform>>() }
+      m_transformSystem{ std::make_unique<ComponentSystem<Transform>>() },
+      m_networkDispatcherSystem{ std::make_unique<ComponentSystem<NetworkDispatcher>>() }
 {
 }
 
@@ -26,6 +27,11 @@ template<> ComponentSystem<Renderer>* EcsImpl::GetSystem<Renderer>()
 template<> ComponentSystem<Transform>* EcsImpl::GetSystem<Transform>()
 {
     return m_transformSystem.get();
+}
+
+template<> ComponentSystem<NetworkDispatcher>* EcsImpl::GetSystem<NetworkDispatcher>()
+{
+    return m_networkDispatcherSystem.get();
 }
 
 void EcsImpl::SendFrameUpdate(float dt)
@@ -109,5 +115,6 @@ void EcsImpl::ClearState()
     m_transformSystem->Clear();
     m_rendererSystem->Clear();
     m_lightSystem->Clear();
+    m_networkDispatcherSystem->Clear();
 }
 } // end namespace nc::ecs

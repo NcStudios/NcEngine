@@ -16,7 +16,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     try
     {
         engine = std::make_unique<nc::engine::Engine>(instance);
-        engine->Start(std::make_unique<MenuScene>());
+        engine->Start(std::make_unique<project::MenuScene>());
     }
     catch(const std::runtime_error& e)
     {

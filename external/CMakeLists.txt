@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
-project("External Libs" LANGUAGES CXX)
+project("External Libs" LANGUAGES CXX C)
 
 if(${PROJECT_SOURCE_DIR} EQUAL ${PROJECT_BINARY_DIR})
     message(FATAL_ERROR "Don't be fool, out-of-source build with your tool.")
 endif()
 
 #VARIABLES
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
@@ -48,3 +48,5 @@ target_link_libraries(imgui
     PRIVATE
         "-ld3dcompiler_47"
 )
+
+add_subdirectory(src/enet)

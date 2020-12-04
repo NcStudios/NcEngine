@@ -1,4 +1,4 @@
-target_sources(${EXE_NAME} 
+target_sources(${GAME_EXE} 
     PRIVATE
         ${ROOT_DIR}/nc/source/graphics/Graphics.cpp
         ${ROOT_DIR}/nc/source/graphics/Model.cpp

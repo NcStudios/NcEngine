@@ -15,7 +15,8 @@ namespace nc::camera
     {
         public:
             static void Set(Camera* camera);
-            static Transform* GetTransform();
+
+            [[nodiscard]] static Transform* GetTransform();
 
         private:
             friend class ::nc::engine::ApiBinder;

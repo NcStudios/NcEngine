@@ -86,6 +86,19 @@ namespace nc
         return impl->m_rendererSystem->GetPointerTo(rendererHandle);
     }
 
+    template<> NetworkDispatcher* Ecs::AddComponent<NetworkDispatcher>(EntityHandle handle)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+
+        auto impl = Ecs::m_impl;
+        IF_THROW(impl->m_networkDispatcherSystem->Contains(entity->Handles.networkDispatcher), "Adding NetworkDispatcher - entity already has a a NetworkDispatcher");
+
+        auto dispatcherHandle = impl->m_networkDispatcherSystem->Add(handle);
+        entity->Handles.networkDispatcher = dispatcherHandle;
+        return impl->m_networkDispatcherSystem->GetPointerTo(dispatcherHandle);
+    }
+
     template<> bool Ecs::RemoveComponent<PointLight>(EntityHandle handle)
     {
         auto entity = GetEntity(handle);
@@ -98,6 +111,13 @@ namespace nc
         auto entity = GetEntity(handle);
         IF_THROW(!entity, "Bad handle");
         return Ecs::m_impl->m_rendererSystem->Remove(entity->Handles.renderer);
+    }
+
+    template<> bool Ecs::RemoveComponent<NetworkDispatcher>(EntityHandle handle)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        return Ecs::m_impl->m_networkDispatcherSystem->Remove(entity->Handles.networkDispatcher);
     }
 
     template<> PointLight* Ecs::GetComponent<PointLight>(EntityHandle handle)
@@ -121,6 +141,13 @@ namespace nc
         return Ecs::m_impl->m_transformSystem->GetPointerTo(entity->Handles.transform);
     }
 
+    template<> NetworkDispatcher* Ecs::GetComponent<NetworkDispatcher>(EntityHandle handle)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        return Ecs::m_impl->m_networkDispatcherSystem->GetPointerTo(entity->Handles.networkDispatcher);
+    }
+
     template<> bool Ecs::HasComponent<PointLight>(EntityHandle handle)
     {
         auto entity = GetEntity(handle);
@@ -133,5 +160,12 @@ namespace nc
         auto entity = GetEntity(handle);
         IF_THROW(!entity, "Bad handle");
         return Ecs::m_impl->m_rendererSystem->Contains(entity->Handles.renderer);
+    }
+
+    template<> bool Ecs::HasComponent<NetworkDispatcher>(EntityHandle handle)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        return Ecs::m_impl->m_networkDispatcherSystem->Contains(entity->Handles.networkDispatcher);
     }
 }

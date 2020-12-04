@@ -2,6 +2,7 @@
 
 #include "ecs/Entity.h"
 #include "component/PointLight.h"
+#include "component/NetworkDispatcher.h"
 #include "component/Renderer.h"
 #include "component/Transform.h"
 #include "DebugUtils.h"
@@ -23,8 +24,8 @@ namespace nc
             static EntityHandle CreateEntity(std::string tag);
             static EntityHandle CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag);
             static bool DestroyEntity(EntityHandle handle);
-            static Entity* GetEntity(EntityHandle handle);
-            static Entity* GetEntity(std::string tag);
+            [[nodiscard]] static Entity* GetEntity(EntityHandle handle);
+            [[nodiscard]] static Entity* GetEntity(std::string tag);
 
             template<class T, class = is_component_t<T>, class ...Args>
             static T* AddComponent(EntityHandle handle, Args&& ... args);
@@ -33,10 +34,10 @@ namespace nc
             static bool RemoveComponent(EntityHandle handle);
             
             template<class T, class = is_component_t<T>>
-            static T* GetComponent(EntityHandle handle);
+            [[nodiscard]] static T* GetComponent(EntityHandle handle);
             
             template<class T, class = is_component_t<T>>
-            static bool HasComponent(EntityHandle handle);
+            [[nodiscard]] static bool HasComponent(EntityHandle handle);
 
         private:
             static ecs::EcsImpl* m_impl;
@@ -51,6 +52,11 @@ namespace nc
     template<> bool Ecs::RemoveComponent<Renderer>(EntityHandle handle);
     template<> Renderer* Ecs::GetComponent<Renderer>(EntityHandle handle);
     template<> bool Ecs::HasComponent<Renderer>(EntityHandle handle);
+
+    template<> NetworkDispatcher* Ecs::AddComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> NetworkDispatcher* Ecs::GetComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> bool Ecs::HasComponent<NetworkDispatcher>(EntityHandle handle);
 
     template<> Transform* Ecs::GetComponent<Transform>(EntityHandle handle);
 

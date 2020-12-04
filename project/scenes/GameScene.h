@@ -5,14 +5,20 @@
 #include "project/source/ui/Hud.h"
 
 #include <memory>
+#include <string>
 
-class GameScene : public nc::scene::Scene
+namespace project
 {
-    public:
-        void Load() override;
-        void Unload() override;
+    class GameScene : public nc::scene::Scene
+    {
+        public:
+            GameScene(std::string serverIP);
+            void Load() override;
+            void Unload() override;
 
-    private:
-        std::unique_ptr<project::ui::Hud> m_hud;
-        std::unique_ptr<project::log::GameLog> m_log;
-};
+        private:
+            std::unique_ptr<project::ui::Hud> m_hud;
+            std::unique_ptr<project::log::GameLog> m_log;
+            std::string m_serverIP;
+    };
+}

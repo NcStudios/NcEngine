@@ -29,4 +29,10 @@ namespace project
         }
         project::log::GameLog::Log("Clicked: " + m_entityTag);
     }
+
+    void GamePiece::NetworkDispatchTest(uint8_t* data)
+    {
+        (void)data;
+        project::log::GameLog::Log("NetworkDispatchTest()");
+    }
 }

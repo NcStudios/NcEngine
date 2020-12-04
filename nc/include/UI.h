@@ -11,7 +11,8 @@ namespace nc::ui
     {
         public:
             static void Set(IUI* ui);
-            static bool IsHovered();
+
+            [[nodiscard]] static bool IsHovered();
 
         private:
             friend class nc::engine::ApiBinder;

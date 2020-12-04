@@ -12,7 +12,7 @@ namespace nc
     class Window
     {
         public:
-            static Vector2 GetDimensions();
+            [[nodiscard]] static Vector2 GetDimensions();
 
             static void RegisterOnResizeReceiver(window::IOnResizeReceiver* receiver);
             static void UnregisterOnResizeReceiver(window::IOnResizeReceiver* receiver);

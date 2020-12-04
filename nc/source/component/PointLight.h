@@ -11,7 +11,7 @@ namespace nc
 {
     class Transform;
 
-    class PointLight : public Component
+    class PointLight final: public Component
     {
         public:
 

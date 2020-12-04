@@ -14,7 +14,7 @@ namespace nc::physics
         public:
             static void RegisterClickable(IClickable* clickable);
             static void UnregisterClickable(IClickable* clickable);
-            static IClickable* RaycastToClickables(LayerMask mask = LAYER_MASK_ALL);
+            [[nodiscard]] static IClickable* RaycastToClickables(LayerMask mask = LAYER_MASK_ALL);
 
         private:
             friend nc::engine::ApiBinder;

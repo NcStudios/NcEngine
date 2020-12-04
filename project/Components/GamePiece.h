@@ -12,6 +12,8 @@ namespace project
             GamePiece(nc::Transform* transform);
             ~GamePiece();
             void OnClick() override;
+
+            void NetworkDispatchTest(uint8_t* data);
         
         private:
             bool m_isRegisteredAsClickable;

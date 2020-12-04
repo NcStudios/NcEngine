@@ -11,8 +11,10 @@
 namespace nc
 {
     class Ecs;
+    class NetworkDispatcher;
     class PointLight;
     class Renderer;
+
 namespace ecs
 {
     class EcsImpl
@@ -47,5 +49,6 @@ namespace ecs
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
+            std::unique_ptr<ComponentSystem<NetworkDispatcher>> m_networkDispatcherSystem;
     };
 }} // end namespace nc::ecs

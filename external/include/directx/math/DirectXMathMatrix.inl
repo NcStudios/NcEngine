@@ -1021,6 +1021,10 @@ inline bool XM_CALLCONV XMMatrixDecompose
 
     if(pfScales[b] < XM3_DECOMP_EPSILON)
     {
+        #ifdef __GNUC__
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+        #endif
         size_t aa, bb, cc;
         float fAbsX, fAbsY, fAbsZ;
 
@@ -1031,6 +1035,9 @@ inline bool XM_CALLCONV XMMatrixDecompose
         XM3RANKDECOMPOSE(aa, bb, cc, fAbsX, fAbsY, fAbsZ)
 
         ppvBasis[b][0] = XMVector3Cross(ppvBasis[a][0],pvCanonicalBasis[cc][0]);
+        #ifdef __GNUC__
+        #pragma GCC diagnostic pop
+        #endif
     }
 
     ppvBasis[b][0] = XMVector3Normalize(ppvBasis[b][0]);
