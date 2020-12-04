@@ -5,6 +5,7 @@
 #include "project/source/network/Packet.h"
 
 using namespace nc;
+using namespace project::network;
 
 namespace project
 {
@@ -22,20 +23,26 @@ namespace project
 
         if(input::GetKeyDown(input::KeyCode::Space))
         {
-            network::PacketSpawnPrefab packet(project::prefab::Resource::Boar, nc::net::NullNetworkHandle, 0.4f, 0.0f, 0.4f, 1.57f, 0, 0);
-            nc::net::Network::ServerCommand(packet.ToPacketBuffer());
+            Packet::SpawnPrefab packet
+            {
+                .resource = project::prefab::Resource::Boar,
+                .networkHandle = net::NullNetworkHandle,
+                .posX = 0.4f, .posY = 0.0f, .posZ = 0.4f,
+                .rotX = 1.57f, .rotY = 0.0f, .rotZ = 0.0f
+            };
+            net::Network::ServerCommand(ToPacketBuffer(&packet));
         }
 
         if(input::GetKeyDown(input::KeyCode::P))
         {
-            network::PacketTestNetworkDispatcher packet(1u, 0u);
-            nc::net::Network::ServerCommand(packet.ToPacketBuffer());
+            Packet::TestNetworkDispatcher packet{.networkHandle = 1u, .value = 0u};
+            net::Network::ServerCommand(ToPacketBuffer(&packet));
         }
 
         if(input::GetKeyDown(input::KeyCode::D))
         {
-            network::PacketDestroyPrefab packet(1u);
-            nc::net::Network::ServerCommand(packet.ToPacketBuffer());
+            Packet::DestroyPrefab packet{.networkHandle = 1u};
+            net::Network::ServerCommand(ToPacketBuffer(&packet));
         }
     }
 }

@@ -8,7 +8,7 @@ namespace nc::net
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, bool in)
     {
         out[offset] = static_cast<uint8_t>(in);
-        return offset + sizeof(bool);
+        return offset + sizeof(in);
     }
 
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, uint8_t in)
@@ -26,7 +26,7 @@ namespace nc::net
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, float in)
     {
         std::memcpy(out + offset, &in, sizeof(in));
-        return offset + sizeof(float);
+        return offset + sizeof(in);
     }
 
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, const char* in)
@@ -36,33 +36,33 @@ namespace nc::net
         return offset + length;
     }
 
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, bool* out)
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, bool* out)
     {
         *out = static_cast<bool>(in[offset]);
         return offset + sizeof(bool);
     }
 
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, uint8_t* out)
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, uint8_t* out)
     {
         *out = in[offset];
         return offset + sizeof(uint8_t);
     }
 
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, uint32_t* out)
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, uint32_t* out)
     {
         std::memcpy(out, in + offset, sizeof(uint32_t));
         return offset + sizeof(uint32_t);
     }
 
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, float* out)
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, float* out)
     {
         std::memcpy(out, in + offset, sizeof(float));
         return offset + sizeof(float);
     }
 
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, std::string* out)
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, std::string* out)
     {
-        *out = std::string{reinterpret_cast<char*>(in + offset)};
+        *out = std::string{reinterpret_cast<const char*>(in + offset)};
         return offset + out->size() + 1u;
     }
 }

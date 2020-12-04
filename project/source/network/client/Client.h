@@ -14,8 +14,8 @@ namespace project::network
             ~Client();
 
             void Poll(uint32_t timeout = 0u) override;
-            void Send(nc::net::PacketBuffer data, nc::net::Channel channel, ENetPeer* peer) override;
-            void SendToServer(nc::net::PacketBuffer data);
+            void Send(const nc::net::PacketBuffer& data, nc::net::Channel channel, ENetPeer* peer) override;
+            void SendToServer(const nc::net::PacketBuffer& data);
 
             bool Connect(std::string& playerName);
 

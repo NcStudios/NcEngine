@@ -37,6 +37,36 @@ namespace nc::net
     };
 }
 
+namespace project::network::Packet
+{
+    struct ClientSendName
+    {
+        const static nc::net::PacketType packetType = nc::net::PacketType::ClientSendName;
+        std::string name;
+    };
+
+    struct SpawnPrefab
+    {
+        const static nc::net::PacketType eventType = nc::net::PacketType::SpawnPrefab;
+        prefab::Resource resource;
+        nc::net::NetworkHandle networkHandle;
+        float posX, posY, posZ, rotX, rotY, rotZ;
+    };
+
+    struct DestroyPrefab
+    {
+        const static nc::net::PacketType eventType = nc::net::PacketType::DestroyPrefab;
+        nc::net::NetworkHandle networkHandle;
+    };
+
+    struct TestNetworkDispatcher
+    {
+        const static nc::net::PacketType packetType = nc::net::PacketType::TestNetworkDispatcher;
+        uint32_t networkHandle;
+        float value;
+    };
+} // end namespace project::network::Packet
+
 namespace project::network
 {
     inline nc::net::PacketType GetPacketTypeFromBuffer(uint8_t* data)
@@ -55,46 +85,13 @@ namespace project::network
                  *reinterpret_cast<nc::net::NetworkHandle*>(data + nc::net::PacketTypeSize) };
     }
 
-    struct PacketClientSendName
-    {
-        PacketClientSendName(std::string v1);
-        PacketClientSendName(uint8_t* data);
-        nc::net::PacketBuffer ToPacketBuffer();
+    nc::net::PacketBuffer ToPacketBuffer(const Packet::ClientSendName* in);
+    nc::net::PacketBuffer ToPacketBuffer(const Packet::SpawnPrefab* in);
+    nc::net::PacketBuffer ToPacketBuffer(const Packet::DestroyPrefab* in);
+    nc::net::PacketBuffer ToPacketBuffer(const Packet::TestNetworkDispatcher* in);
 
-        const static nc::net::PacketType packetType = nc::net::PacketType::ClientSendName;
-        std::string name;
-    };
-
-    struct PacketSpawnPrefab
-    {
-        PacketSpawnPrefab(prefab::Resource resource, nc::net::NetworkHandle handle, float posX, float posY, float poxZ, float rotX, float rotY, float rotZ);
-        PacketSpawnPrefab(uint8_t* data);
-        nc::net::PacketBuffer ToPacketBuffer();
-
-        const static nc::net::PacketType eventType = nc::net::PacketType::SpawnPrefab;
-        prefab::Resource resource;
-        nc::net::NetworkHandle networkHandle;
-        float posX, posY, posZ, rotX, rotY, rotZ;
-    };
-
-    struct PacketDestroyPrefab
-    {
-        PacketDestroyPrefab(nc::net::NetworkHandle handle);
-        PacketDestroyPrefab(uint8_t* data);
-        nc::net::PacketBuffer ToPacketBuffer();
-
-        const static nc::net::PacketType eventType = nc::net::PacketType::DestroyPrefab;
-        nc::net::NetworkHandle networkHandle;
-    };
-
-    struct PacketTestNetworkDispatcher
-    {
-        PacketTestNetworkDispatcher(uint32_t networkHandle, float value);
-        PacketTestNetworkDispatcher(uint8_t* data);
-
-        nc::net::PacketBuffer ToPacketBuffer();
-        const static nc::net::PacketType packetType = nc::net::PacketType::TestNetworkDispatcher;
-        uint32_t networkHandle;
-        float value;
-    };
-}
+    void FromByteArray(const uint8_t* in, Packet::ClientSendName* out);
+    void FromByteArray(const uint8_t* in, Packet::SpawnPrefab* out);
+    void FromByteArray(const uint8_t* in, Packet::DestroyPrefab* out);
+    void FromByteArray(const uint8_t* in, Packet::TestNetworkDispatcher* out);
+} // end namespace project::network

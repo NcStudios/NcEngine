@@ -55,7 +55,7 @@ namespace project::network
         }
     }
 
-    void Server::Send(nc::net::PacketBuffer data, nc::net::Channel channel, ENetPeer* peer)
+    void Server::Send(const nc::net::PacketBuffer& data, nc::net::Channel channel, ENetPeer* peer)
     {
         if(!peer)
         {

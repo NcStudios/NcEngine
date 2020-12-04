@@ -41,13 +41,13 @@ namespace project::network
         }
     }
 
-    void Client::Send(nc::net::PacketBuffer data, nc::net::Channel channel, ENetPeer* peer)
+    void Client::Send(const nc::net::PacketBuffer& data, nc::net::Channel channel, ENetPeer* peer)
     {
         ENetPacket* packet = enet_packet_create(data.data, data.size, ENET_PACKET_FLAG_RELIABLE);
         enet_peer_send(peer, (enet_uint8)channel, packet);
     }
 
-    void Client::SendToServer(nc::net::PacketBuffer data)
+    void Client::SendToServer(const nc::net::PacketBuffer& data)
     {
         IF_THROW(!m_server, "Client::SendToServer - m_server is not set");
         ENetPacket* packet = enet_packet_create(data.data, data.size, ENET_PACKET_FLAG_RELIABLE);
@@ -72,8 +72,8 @@ namespace project::network
         {
             std::cout << "Connected to server\n";
             m_server = peer;
-            PacketClientSendName packet(playerName);
-            Send(packet.ToPacketBuffer(), nc::net::Channel::Reliable, m_server);
+            Packet::ClientSendName packet{.name = playerName};
+            Send(ToPacketBuffer(&packet), nc::net::Channel::Reliable, m_server);
             return true;
         }
         else

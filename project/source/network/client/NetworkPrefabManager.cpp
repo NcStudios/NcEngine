@@ -4,14 +4,11 @@
 #include "../Packet.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace project::network
 {
-    void NetworkPrefabManager::Spawn(PacketSpawnPrefab& packet)
+    void NetworkPrefabManager::Spawn(Packet::SpawnPrefab& packet)
     {
-        std::cout << "SpawnNetworkPrefab\n";
-
         auto entityHandle = project::prefab::Create(packet.resource);
         auto dispatcher = nc::Ecs::GetComponent<nc::NetworkDispatcher>(entityHandle);
         IF_THROW(!dispatcher, "NetworkPrefabManager::Spawn - Entity does not have a NetworkDispatcher");
@@ -21,12 +18,6 @@ namespace project::network
         m_data.entityHandles.push_back(entityHandle);
         m_data.networkHandles.push_back(packet.networkHandle);
         m_data.dispatchers.push_back(dispatcher);
-
-        std::cout << "    EntityHandle:  " << entityHandle << '\n'
-                  << "    NetworkHandle: " << packet.networkHandle << '\n'
-                  << "    Resource:      " << (int)packet.resource << '\n';
-
-        //++m_nextHandle;
     }
     
     void NetworkPrefabManager::Destroy(nc::net::NetworkHandle networkHandle)
