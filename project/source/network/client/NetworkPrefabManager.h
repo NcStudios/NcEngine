@@ -9,12 +9,12 @@ namespace nc { class NetworkDispatcher; }
 namespace project::prefab { enum class Resource : uint32_t; }
 namespace project::network
 {
-    struct PacketSpawnPrefab;
+    namespace Packet { struct SpawnPrefab; }
 
     class NetworkPrefabManager
     {
         public:
-            void Spawn(PacketSpawnPrefab& packet);
+            void Spawn(Packet::SpawnPrefab& packet);
             void Destroy(nc::net::NetworkHandle networkHandle);
             [[nodiscard]] bool Exists(nc::net::NetworkHandle networkHandle) const;
             [[nodiscard]] nc::NetworkDispatcher* GetDispatcher(nc::net::NetworkHandle networkHandle);
@@ -27,7 +27,5 @@ namespace project::network
                 std::vector<nc::net::NetworkHandle> networkHandles;
                 std::vector<nc::NetworkDispatcher*> dispatchers;
             } m_data;
-
-            //uint32_t m_nextHandle = 0u;
     };
 }

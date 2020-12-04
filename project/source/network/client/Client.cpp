@@ -72,8 +72,8 @@ namespace project::network
         {
             std::cout << "Connected to server\n";
             m_server = peer;
-            PacketClientSendName packet(playerName);
-            Send(packet.ToPacketBuffer(), nc::net::Channel::Reliable, m_server);
+            Packet::ClientSendName packet{.name = playerName};
+            Send(ToPacketBuffer(&packet), nc::net::Channel::Reliable, m_server);
             return true;
         }
         else

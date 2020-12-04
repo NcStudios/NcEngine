@@ -1,5 +1,6 @@
 #include "ServerEventCoordinator.h"
 #include "ServerConnectionManager.h"
+#include "nc/source/net/PacketBuffer.h"
 #include "../Packet.h"
 #include "enet/enet.h"
 
@@ -15,7 +16,8 @@ namespace project::network
             {
                 PacketType::ClientSendName, [connectionManager](ENetEvent* event)
                 {
-                    PacketClientSendName packet(event->packet->data + PacketTypeSize);
+                    Packet::ClientSendName packet;
+                    FromByteArray(event->packet->data + PacketTypeSize, &packet);
                     connectionManager->FinalizeConnection(event->peer, packet.name);
                 }
             },
@@ -23,23 +25,26 @@ namespace project::network
                 PacketType::SpawnPrefab, [sendCallback](ENetEvent* event)
                 {
                     static NetworkHandle nextFreeHandle = 1u;
-                    PacketSpawnPrefab packet(event->packet->data + PacketTypeSize);
+                    Packet::SpawnPrefab packet;
+                    FromByteArray(event->packet->data + PacketTypeSize, &packet);
                     packet.networkHandle = nextFreeHandle++;
-                    sendCallback(packet.ToPacketBuffer(), Channel::Reliable, nullptr);
+                    sendCallback(ToPacketBuffer(&packet), Channel::Reliable, nullptr);
                 }
             },
             {
                 PacketType::DestroyPrefab, [sendCallback](ENetEvent* event)
                 {
-                    PacketDestroyPrefab packet(event->packet->data + PacketTypeSize);
-                    sendCallback(packet.ToPacketBuffer(), Channel::Reliable, nullptr);
+                    Packet::DestroyPrefab packet;
+                    FromByteArray(event->packet->data + PacketTypeSize, &packet);
+                    sendCallback(ToPacketBuffer(&packet), Channel::Reliable, nullptr);
                 }
             },
             {
                 PacketType::TestNetworkDispatcher, [sendCallback](ENetEvent* event)
                 {
-                    PacketTestNetworkDispatcher packet(event->packet->data + PacketTypeSize);
-                    sendCallback(packet.ToPacketBuffer(), Channel::Reliable, nullptr);
+                    Packet::TestNetworkDispatcher packet;
+                    FromByteArray(event->packet->data + PacketTypeSize, &packet);
+                    sendCallback(ToPacketBuffer(&packet), Channel::Reliable, nullptr);
                 }
             }
         };

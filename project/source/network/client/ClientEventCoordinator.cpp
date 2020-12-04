@@ -16,7 +16,8 @@ namespace project::network
             {
                 PacketType::SpawnPrefab, [networkPrefabManager](ENetEvent* event)
                 {
-                    PacketSpawnPrefab packet(event->packet->data + PacketTypeSize);
+                    Packet::SpawnPrefab packet;
+                    FromByteArray(event->packet->data + PacketTypeSize, &packet);
                     IF_THROW(!networkPrefabManager, "ClientEventCoordinator::HandleSpawnPrefab - networkPrefabManager is not set");
                     networkPrefabManager->Spawn(packet);
                 }
@@ -24,7 +25,8 @@ namespace project::network
             {
                 PacketType::DestroyPrefab, [networkPrefabManager](ENetEvent* event)
                 {
-                    PacketDestroyPrefab packet(event->packet->data + PacketTypeSize);
+                    Packet::DestroyPrefab packet;
+                    FromByteArray(event->packet->data + PacketTypeSize, &packet);
                     networkPrefabManager->Destroy(packet.networkHandle);
                 }
             },

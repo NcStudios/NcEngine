@@ -20,7 +20,7 @@ namespace nc::net
     }
 
     template<class T, class ... Args>
-    size_t ReadBuffer(uint8_t* const in, size_t offset, T first, Args ... args)
+    size_t ReadBuffer(const uint8_t* const in, size_t offset, T first, Args ... args)
     {
         auto newOffset = ReadBuffer(in, offset, first);
         return ReadBuffer(in, newOffset, args...);
@@ -32,9 +32,9 @@ namespace nc::net
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, float in);
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, const char* in);
 
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, bool* out);
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, uint8_t* out);
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, uint32_t* out);
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, float* out);
-    template<> size_t ReadBuffer(uint8_t* const in, size_t offset, std::string* out);
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, bool* out);
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, uint8_t* out);
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, uint32_t* out);
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, float* out);
+    template<> size_t ReadBuffer(const uint8_t* const in, size_t offset, std::string* out);
 } // end namespace nc::net

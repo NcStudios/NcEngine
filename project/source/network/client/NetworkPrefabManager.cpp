@@ -8,7 +8,7 @@
 
 namespace project::network
 {
-    void NetworkPrefabManager::Spawn(PacketSpawnPrefab& packet)
+    void NetworkPrefabManager::Spawn(Packet::SpawnPrefab& packet)
     {
         std::cout << "SpawnNetworkPrefab\n";
 
@@ -25,8 +25,6 @@ namespace project::network
         std::cout << "    EntityHandle:  " << entityHandle << '\n'
                   << "    NetworkHandle: " << packet.networkHandle << '\n'
                   << "    Resource:      " << (int)packet.resource << '\n';
-
-        //++m_nextHandle;
     }
     
     void NetworkPrefabManager::Destroy(nc::net::NetworkHandle networkHandle)
