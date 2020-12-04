@@ -1,7 +1,9 @@
 #pragma once
 
+#include <concepts>
 #include <stdint.h>
 #include <string>
+#include <type_traits>
 
 namespace nc::net
 {
@@ -12,14 +14,27 @@ namespace nc::net
         uint8_t data[bufferSize];
     };
 
-    template<class T, class ... Args>
+    namespace detail
+    {
+        template<class T>
+        concept Writable = std::integral<T> ||
+                           std::floating_point<T> ||
+                           std::same_as<T, const char*>;
+
+        template<class T>
+        concept Readable = Writable<std::remove_pointer_t<T>> &&
+                           !std::same_as<T, const char*> ||
+                           std::same_as<T, std::string*>;
+    }
+
+    template<detail::Writable T, class ... Args>
     size_t WriteBuffer(uint8_t* out, size_t offset, T first, Args ... args)
     {
         auto newOffset = WriteBuffer(out, offset, first);
         return WriteBuffer(out, newOffset, args...);
     }
 
-    template<class T, class ... Args>
+    template<detail::Readable T, class ... Args>
     size_t ReadBuffer(const uint8_t* const in, size_t offset, T first, Args ... args)
     {
         auto newOffset = ReadBuffer(in, offset, first);

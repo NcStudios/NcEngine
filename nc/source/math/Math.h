@@ -1,4 +1,6 @@
 #pragma once
+
+#include <concepts>
 #include <cmath>
 #include <limits> //numeric_limits::epsilon
 
@@ -9,14 +11,14 @@ namespace nc::math
     const double PI_DOUBLE = atan(1)*4;
     const float  PI_FLOAT  = PI_DOUBLE;
 
-    template<class T> inline T Min(T a, T b) noexcept { return a < b ? a : b; }
-    template<class T> inline T Max(T a, T b) noexcept { return a > b ? a : b; }
+    template<std::totally_ordered T> inline T Min(T a, T b) noexcept { return a < b ? a : b; }
+    template<std::totally_ordered T> inline T Max(T a, T b) noexcept { return a > b ? a : b; }
 
     inline double Ceiling(double val)     noexcept { return (int)(val + 1); }
     inline double Floor  (double val)     noexcept { return (int) val; }
     inline double Round  (double val)     noexcept { return (int)(val + 0.5); }
 
-    template<class T> inline T Clamp(T val, T min, T max) noexcept
+    template<std::totally_ordered T> inline T Clamp(T val, T min, T max) noexcept
     {
         if(val < min)
             val = min;

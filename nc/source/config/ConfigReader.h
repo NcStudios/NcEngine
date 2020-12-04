@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <fstream>
 #include <string>
 
@@ -10,12 +11,7 @@ namespace nc::config
 
     bool ParseLine(const std::string& line, std::string& key, std::string& value);
 
-    template<class Config_t,
-             class MapKeyValueFunc_t,
-             class = std::enable_if_t<std::is_invocable_v<MapKeyValueFunc_t,
-                                                          std::string,
-                                                          std::string,
-                                                          Config_t&>>>
+    template<class Config_t, std::invocable<std::string, std::string, Config_t&> MapKeyValueFunc_t>
     void Read(std::string filePath, MapKeyValueFunc_t mapFunc, Config_t& out)
     {
         std::ifstream inFile;
