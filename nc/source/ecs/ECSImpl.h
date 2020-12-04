@@ -25,7 +25,7 @@ namespace ecs
         public:
             EcsImpl();
 
-            template<class T> requires std::derived_from<T, Component>
+            template<std::derived_from<Component> T>
             ComponentSystem<T>* GetSystem();
 
             void SendFrameUpdate(float dt);
