@@ -8,7 +8,7 @@ namespace nc::net
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, bool in)
     {
         out[offset] = static_cast<uint8_t>(in);
-        return offset + sizeof(bool);
+        return offset + sizeof(in);
     }
 
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, uint8_t in)
@@ -26,7 +26,7 @@ namespace nc::net
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, float in)
     {
         std::memcpy(out + offset, &in, sizeof(in));
-        return offset + sizeof(float);
+        return offset + sizeof(in);
     }
 
     template<> size_t WriteBuffer(uint8_t* out, size_t offset, const char* in)

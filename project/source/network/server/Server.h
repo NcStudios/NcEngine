@@ -14,7 +14,7 @@ namespace project::network
             ~Server();
 
             void Poll(uint32_t timeout = 0u) override;
-            void Send(nc::net::PacketBuffer data, nc::net::Channel channel, ENetPeer* peer) override;
+            void Send(const nc::net::PacketBuffer& data, nc::net::Channel channel, ENetPeer* peer) override;
 
         protected:
             void OnEventConnect(ENetEvent* event);

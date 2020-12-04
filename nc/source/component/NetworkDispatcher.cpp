@@ -6,15 +6,14 @@ namespace nc
 {
     void NetworkDispatcher::Dispatch(net::PacketType packetType, uint8_t* data)
     {
-        auto pos = m_dispatchTable.find(packetType);
-        if(pos == m_dispatchTable.end())
+        try
         {
-            throw std::runtime_error("NetworkDispatcher::Dispatch - Unknonwn packet type");
+            m_dispatchTable.at(packetType)(data);
         }
-        pos->second(data);
-        
-        //can probably just do:
-        //m_dispatchTable.at[packetType]();
+        catch(std::out_of_range& e)
+        {
+            throw std::runtime_error("NetworkDispatcher::Dispatch - Unknown packet type");
+        }
     }
 
     void NetworkDispatcher::AddHandler(net::PacketType packetType, std::function<void(uint8_t* data)> func)

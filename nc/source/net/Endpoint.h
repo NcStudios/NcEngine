@@ -15,7 +15,7 @@ namespace nc::net
             virtual ~Endpoint() { enet_deinitialize(); }
 
             virtual void Poll(uint32_t timeout = 0u) = 0;
-            virtual void Send(PacketBuffer data, Channel channel, ENetPeer* peer) = 0;
+            virtual void Send(const PacketBuffer& data, Channel channel, ENetPeer* peer) = 0;
         
         protected:
             ENetHost* host;

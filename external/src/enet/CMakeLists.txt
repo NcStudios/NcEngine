@@ -70,14 +70,14 @@ set(INCLUDE_FILES
 
 add_library(enet STATIC
     ${INCLUDE_FILES}
-    callbacks.cpp
-    compress.cpp
-    host.cpp
-    list.cpp
-    packet.cpp
-    peer.cpp
-    protocol.cpp
-    win32.cpp
+    callbacks.c
+    compress.c
+    host.c
+    list.c
+    packet.c
+    peer.c
+    protocol.c
+    win32.c
 )
 
 # if (MINGW)
