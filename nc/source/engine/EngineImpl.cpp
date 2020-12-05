@@ -173,7 +173,7 @@ namespace nc::engine
         input::Flush();
     }
 
-    const config::Config& EngineImpl::GetConfig()
+    const config::Config& EngineImpl::GetConfig() const
     {
         return m_config;
     }

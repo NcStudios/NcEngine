@@ -51,7 +51,7 @@ namespace nc::engine
             void FrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();
-            const config::Config& GetConfig();
+            const config::Config& GetConfig() const;
 
         private:
             config::Config m_config;

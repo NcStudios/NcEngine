@@ -7,7 +7,7 @@ namespace nc::config
     {
         Config();
 
-        void Save() noexcept(false);
+        void Save() const;
 
         struct
         {
@@ -34,6 +34,6 @@ namespace nc::config
         } physics;
 
         private:
-            bool Validate();
+            bool Validate() const;
     };
 }
