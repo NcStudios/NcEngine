@@ -1,8 +1,10 @@
 #pragma once
 
+#include <concepts>
+
 namespace nc::ecs
 {
-template<class T>
+template<std::integral T>
 class HandleManager
 {
     private:

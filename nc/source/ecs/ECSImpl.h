@@ -19,15 +19,13 @@ namespace ecs
 {
     class EcsImpl
     {
-        template<class T>
-        using is_component_t = typename std::enable_if_t<std::is_base_of_v<Component, T>>;
         using EntityMap = std::unordered_map<EntityHandle, Entity>;
         friend class ::nc::Ecs;
 
         public:
             EcsImpl();
 
-            template<class T, class = is_component_t<T>>
+            template<std::derived_from<Component> T>
             ComponentSystem<T>* GetSystem();
 
             void SendFrameUpdate(float dt);

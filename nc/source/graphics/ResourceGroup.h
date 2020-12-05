@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
+#include <concepts>
 #include <memory>
+#include <vector>
 
 namespace nc::graphics
 {
@@ -14,7 +15,7 @@ namespace nc::graphics
     class ResourceGroup 
     {
         public:
-            template<class T>
+            template<std::derived_from<d3dresource::GraphicsResource> T>
             T * QueryGraphicsResource() noexcept;
             void Bind() const;
             void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
@@ -23,7 +24,7 @@ namespace nc::graphics
             std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
     };
 
-    template<class T>
+    template<std::derived_from<d3dresource::GraphicsResource> T>
     T* ResourceGroup::QueryGraphicsResource() noexcept
     {
         for(auto& res : m_resources)
