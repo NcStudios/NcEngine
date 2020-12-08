@@ -12,13 +12,6 @@ target_include_directories(Entity_unit_tests
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
-if(DEBUG_BUILD)
-  target_compile_options(Entity_unit_tests
-      PUBLIC
-          ${GCC_DEBUG_FLAGS}
-  )
-endif()
-
 target_compile_options(Entity_unit_tests
     PUBLIC
         ${GCC_WARNING_FLAGS}
@@ -43,13 +36,6 @@ target_include_directories(Pool_unit_tests
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
-if(DEBUG_BUILD)
-  target_compile_options(Pool_unit_tests
-      PUBLIC
-          ${GCC_DEBUG_FLAGS}
-  )
-endif()
-
 target_compile_options(Pool_unit_tests
     PUBLIC
         ${GCC_WARNING_FLAGS}
@@ -73,13 +59,6 @@ target_include_directories(PacketBuffer_unit_tests
         ${NC_INCLUDE_DIRS}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
-
-if(DEBUG_BUILD)
-  target_compile_options(PacketBuffer_unit_tests
-      PUBLIC
-          ${GCC_DEBUG_FLAGS}
-  )
-endif()
 
 target_compile_options(PacketBuffer_unit_tests
     PUBLIC

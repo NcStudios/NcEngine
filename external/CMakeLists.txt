@@ -16,7 +16,6 @@ set(GCC_WARNING_FLAGS
     -Wextra
     -Wfatal-errors
     -Wno-cast-function-type)
-set(GCC_DEBUG_FLAGS "-g")
 
 set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/include)
 set(NC_COMMON_INCLUDE_DIR  ${ROOT_DIR}/../nc)

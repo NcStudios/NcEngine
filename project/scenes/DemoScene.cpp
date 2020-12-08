@@ -57,7 +57,7 @@ namespace project
         auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
         Ecs::AddComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
 
-        // Piece(
+        // Piece
         prefab::Create(prefab::Resource::Boar, {0.2f * scaleFactor, 0.0f, 0.2f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Boar Piece");
         prefab::Create(prefab::Resource::Cattle, {0.4f * scaleFactor, 0.0f, 0.2f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Cattle Piece");
         prefab::Create(prefab::Resource::Coal, {0.2f * scaleFactor, 0.0f, 0.0f * scaleFactor}, {1.5708f, 0.0f, 0.0f}, Vector3::One() * scaleFactor, "Coal Piece");    

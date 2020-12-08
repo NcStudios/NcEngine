@@ -7,7 +7,6 @@ if(NOT EXISTS ${PROJECT_SOURCE_DIR}/build)
 endif()
 
 #OPTIONS
-option(DEBUG_BUILD "" ON)
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" ON)
 
@@ -21,8 +20,8 @@ set(GCC_WARNING_FLAGS
     -Wall
     -Wextra
     -Wfatal-errors
-    -Wno-cast-function-type)
-set(GCC_DEBUG_FLAGS "-g")
+    -Wno-cast-function-type
+)
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47")
 set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/external/include)
 set(PROJECT_INCLUDE_DIR
@@ -69,8 +68,8 @@ if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()
 
-if(DEBUG_BUILD)
-    add_definitions(-DDEBUG_BUILD)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DNC_DEBUG_BUILD)
 endif()
 
 if(VERBOSE_LOGGING_ENABLED)
@@ -88,15 +87,6 @@ target_compile_options(${SERVER_EXE}
         ${GCC_WARNING_FLAGS}
 )
 
-if(DEBUG_BUILD)
-  target_compile_options(${GAME_EXE}
-      PUBLIC
-          ${GCC_DEBUG_FLAGS})
-    target_compile_options(${SERVER_EXE}
-        PUBLIC
-            ${GCC_DEBUG_FLAGS})
-endif()
-
 #Include Dirs
 target_include_directories(${GAME_EXE}
     PRIVATE
@@ -113,12 +103,12 @@ target_include_directories(${SERVER_EXE}
 )
 
 #LINK OPTIONS
-if(NC_EDITOR_ENABLED)
-    target_link_libraries(${GAME_EXE}
-        PRIVATE
-            ${EXTERNAL_LIB_DIR}/libimgui.a
-    )
-endif()
+#note - Normally only need to link dear imgui in debug builds.
+#For now it is always linkes as Caverna game code also uses it.
+target_link_libraries(${GAME_EXE}
+    PRIVATE
+        ${EXTERNAL_LIB_DIR}/libimgui.a
+)
 
 target_link_libraries(${GAME_EXE}
     PRIVATE

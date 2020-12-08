@@ -19,7 +19,7 @@ namespace nc::debug
     };
 }
 
-#ifdef DEBUG_BUILD
+#ifdef NC_DEBUG_BUILD
     namespace nc::debug
     {
         inline void IfThrow_(bool expr, const char* msg)
