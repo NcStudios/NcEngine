@@ -1,4 +1,13 @@
 # The "configure" step.
+
+cmake_minimum_required(VERSION 3.10)
+project("ENet" LANGUAGES C)
+
+set(LIB_NAME "enet-${CMAKE_BUILD_TYPE}")
+set(EXTERNAL_LIB_DIR ${PROJECT_SOURCE_DIR}/../../lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${EXTERNAL_LIB_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${EXTERNAL_LIB_DIR})
+
 include(CheckFunctionExists)
 include(CheckStructHasMember)
 include(CheckTypeSize)
@@ -51,9 +60,9 @@ if(HAS_SOCKLEN_T)
     add_definitions(-DHAS_SOCKLEN_T=1)
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/../../include)
 
-set(INCLUDE_FILES_PREFIX ${ROOT_DIR}/include/enet)
+set(INCLUDE_FILES_PREFIX ${PROJECT_SOURCE_DIR}/../../include/enet)
 set(INCLUDE_FILES
     ${INCLUDE_FILES_PREFIX}/callbacks.h
     ${INCLUDE_FILES_PREFIX}/enet.h
@@ -65,10 +74,7 @@ set(INCLUDE_FILES
     ${INCLUDE_FILES_PREFIX}/win32.h
 )
 
-# source_group(include FILES ${INCLUDE_FILES})
-# source_group(source FILES ${SOURCE_FILES})
-
-add_library(enet STATIC
+add_library(${LIB_NAME} STATIC
     ${INCLUDE_FILES}
     callbacks.c
     compress.c
@@ -79,7 +85,3 @@ add_library(enet STATIC
     protocol.c
     win32.c
 )
-
-# if (MINGW)
-#     target_link_libraries(enet winmm ws2_32)
-# endif()

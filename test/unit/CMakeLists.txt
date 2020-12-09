@@ -20,7 +20,7 @@ target_compile_options(Entity_unit_tests
 target_link_libraries(Entity_unit_tests
     PRIVATE
         gtest
-        ${EXTERNAL_LIB_DIR}/libimgui.a
+        ${EXTERNAL_LIB_DIR}/${LIB_IMGUI}
 )
 
 add_test(Entity_unit_tests Entity_unit_tests)
