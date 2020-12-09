@@ -69,7 +69,6 @@ void EcsImpl::SendOnDestroy()
     m_toDestroy.clear();
 }
 
-
 bool EcsImpl::DoesEntityExist(const EntityHandle handle) const noexcept
 {
     return m_active.count(handle) > 0;
