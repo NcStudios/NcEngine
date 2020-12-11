@@ -1,4 +1,4 @@
-target_sources(${GAME_EXE}
+target_sources(${ENGINE_LIB}
     PRIVATE
         ${ROOT_DIR}/nc/source/time/NcTime.cpp
 )

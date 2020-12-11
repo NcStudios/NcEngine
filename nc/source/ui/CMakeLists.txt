@@ -1,4 +1,4 @@
-target_sources(${GAME_EXE}
+target_sources(${ENGINE_LIB}
     PRIVATE
         ${ROOT_DIR}/nc/source/ui/UIElement.cpp
         ${ROOT_DIR}/nc/source/ui/UI.cpp
