@@ -100,7 +100,9 @@ namespace nc::graphics::d3dresource
     }
 
     Blender::Blender(const std::string& tag)
-        : m_tag(tag)
+        : m_tag{tag},
+          m_blender{nullptr},
+          m_isBlending{false}
     {
         D3D11_BLEND_DESC blendDesc = {};
         auto& blenderRenderTarget = blendDesc.RenderTarget[0];

@@ -32,7 +32,7 @@ namespace ecs
             void SendFixedUpdate();
             void SendOnDestroy();
 
-            bool DoesEntityExist(const EntityHandle handle) noexcept;
+            bool DoesEntityExist(const EntityHandle handle) const noexcept;
             Entity * GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false);
             EntityMap & GetMapContainingEntity(const EntityHandle handle, bool checkAll = false) noexcept(false);
             EntityMap & GetActiveEntities() noexcept;

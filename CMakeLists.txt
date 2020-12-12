@@ -7,9 +7,10 @@ if(NOT EXISTS ${PROJECT_SOURCE_DIR}/build)
 endif()
 
 #OPTIONS
-option(DEBUG_BUILD "" ON)
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
-option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" ON)
+option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
+option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
+option(SANITIZE_UB "Use undefined behavior santizer" OFF)
 
 #VARIABLES
 set(CMAKE_CXX_STANDARD 20)
@@ -21,8 +22,8 @@ set(GCC_WARNING_FLAGS
     -Wall
     -Wextra
     -Wfatal-errors
-    -Wno-cast-function-type)
-set(GCC_DEBUG_FLAGS "-g")
+    -Wno-cast-function-type
+)
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47")
 set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/external/include)
 set(PROJECT_INCLUDE_DIR
@@ -37,8 +38,11 @@ set(NC_INCLUDE_DIRS
     ${ROOT_DIR}/nc/include
     ${ROOT_DIR}/nc/source
 )
+
 set(EXTERNAL_SOURCE_DIR ${ROOT_DIR}/external/src)
 set(EXTERNAL_LIB_DIR ${ROOT_DIR}/external/lib)
+set(LIB_IMGUI "libimgui-${CMAKE_BUILD_TYPE}.a")
+set(LIB_ENET "libenet-${CMAKE_BUILD_TYPE}.a")
 
 if(NC_TESTS_ENABLED)
     enable_testing()
@@ -69,8 +73,8 @@ if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()
 
-if(DEBUG_BUILD)
-    add_definitions(-DDEBUG_BUILD)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DNC_DEBUG_BUILD)
 endif()
 
 if(VERBOSE_LOGGING_ENABLED)
@@ -88,13 +92,24 @@ target_compile_options(${SERVER_EXE}
         ${GCC_WARNING_FLAGS}
 )
 
-if(DEBUG_BUILD)
-  target_compile_options(${GAME_EXE}
-      PUBLIC
-          ${GCC_DEBUG_FLAGS})
+if(SANITIZE_UB)
+    target_compile_options(${GAME_EXE}
+        PUBLIC
+            -fsanitize=undefined
+            -fsanitize-undefined-trap-on-error
+    )
     target_compile_options(${SERVER_EXE}
         PUBLIC
-            ${GCC_DEBUG_FLAGS})
+            -fsanitize=undefined
+            -fsanitize-undefined-trap-on-error
+    )
+endif()
+
+if(PROFILING_ENABLED)
+    target_compile_options(${GAME_EXE}
+        PUBLIC
+            -pg
+    )
 endif()
 
 #Include Dirs
@@ -113,26 +128,33 @@ target_include_directories(${SERVER_EXE}
 )
 
 #LINK OPTIONS
-if(NC_EDITOR_ENABLED)
-    target_link_libraries(${GAME_EXE}
-        PRIVATE
-            ${EXTERNAL_LIB_DIR}/libimgui.a
-    )
-endif()
+#note - Normally only need to link dear imgui in debug builds.
+#For now it is always linkes as Caverna game code also uses it.
+target_link_libraries(${GAME_EXE}
+    PRIVATE
+        ${EXTERNAL_LIB_DIR}/${LIB_IMGUI}
+)
 
 target_link_libraries(${GAME_EXE}
     PRIVATE
         ${EXTERNAL_LIB_DIR}/windowscodecs.lib
         ${EXTERNAL_LIB_DIR}/libassimp.dll.a
-        ${EXTERNAL_LIB_DIR}/libenet.a
+        ${EXTERNAL_LIB_DIR}/${LIB_ENET}
         ${WIN32_LINK_FLAGS}
         Winmm.lib
         ws2_32
 )
 
+if(PROFILING_ENABLED)
+    target_link_options(${GAME_EXE}
+        PUBLIC
+            -pg
+    )
+endif()
+
 target_link_libraries(${SERVER_EXE}
     PRIVATE
-        ${EXTERNAL_LIB_DIR}/libenet.a
+        ${EXTERNAL_LIB_DIR}/${LIB_ENET}
         ${WIN32_LINK_FLAGS}
         winmm
         ws2_32

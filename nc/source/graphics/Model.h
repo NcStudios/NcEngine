@@ -28,8 +28,6 @@ namespace nc::graphics
     class Model 
     {
         public:
-        
-        /** @todo Can we pass material by ptr? */
             Model();
             Model(const Mesh&);
             Model(const Mesh& mesh, const Material& material);
@@ -38,7 +36,7 @@ namespace nc::graphics
             void SetMesh(const Mesh& mesh) noexcept;
 
             uint32_t GetIndexCount() const noexcept;
-            void Submit(class FrameManager& frame) noexcept;
+            void Submit(class FrameManager& frame) const noexcept;
             void Bind() const;
 
             void UpdateTransformationMatrix(Transform* transform) noexcept;

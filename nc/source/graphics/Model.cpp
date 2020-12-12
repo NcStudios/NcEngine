@@ -35,7 +35,7 @@ namespace nc::graphics
         m_mesh = mesh;
     }
 
-    void Model::Submit(FrameManager& frame) noexcept
+    void Model::Submit(FrameManager& frame) const noexcept
     {
         m_material.Submit(frame, *this);
     }

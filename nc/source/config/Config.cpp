@@ -87,7 +87,7 @@ Config::Config()
     }
 }
 
-void Config::Save()
+void Config::Save() const
 {
     if (!Validate())
     {
@@ -119,7 +119,7 @@ void Config::Save()
     outFile.close();
 }
 
-bool Config::Validate()
+bool Config::Validate() const
 {
     return { (project.projectName != "") &&
              (project.logFilePath != "") &&

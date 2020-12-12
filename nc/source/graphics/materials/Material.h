@@ -17,7 +17,7 @@ namespace nc::graphics
             template<class ... Args>
             explicit Material(TechniqueType type, Args&& ... args);
             void SetTechnique(const Technique* technique) noexcept;
-            void Submit(class FrameManager& frame, const Model& model) noexcept;
+            void Submit(class FrameManager& frame, const Model& model) const noexcept;
             
         private:
             Technique* m_technique;
