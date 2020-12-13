@@ -9,7 +9,7 @@ endif()
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
-option(SANITIZE_UB "Use undefined behavior santizer" OFF)
+option(SANITIZE_UB "Use undefined behavior sanitizer" OFF)
 
 #Variables
 set(CMAKE_CXX_STANDARD 20)

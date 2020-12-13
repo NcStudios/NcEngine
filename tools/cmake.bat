@@ -42,7 +42,7 @@ set CONFIGURATION="%~2"
 :Run
     call "%~dp0\jobs\build_external_libs.bat" %CONFIGURATION%
 
-    set BUILD_DIR=%~dp0\..\build\%TARGET%\%CONFIGURATION%
+    set BUILD_DIR=%~dp0\..\..\build\%TARGET%\%CONFIGURATION%
     if not exist %BUILD_DIR% mkdir %BUILD_DIR%
     cd %BUILD_DIR%
 

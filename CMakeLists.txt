@@ -35,10 +35,6 @@ set(EXTERNAL_LIB_DIR ${ROOT_DIR}/external/lib)
 set(LIB_IMGUI "libimgui-${CMAKE_BUILD_TYPE}.a")
 set(LIB_ENET "libenet-${CMAKE_BUILD_TYPE}.a")
 
-if(NC_TESTS_ENABLED)
-    enable_testing()
-endif()
-
 #Propogate version
 configure_file(${ROOT_DIR}/nc/source/config/Version.h.in
                ${ROOT_DIR}/nc/source/config/Version.h
@@ -103,9 +99,10 @@ if(PROFILING_ENABLED)
 endif()
 
 #SUBDIRS
-add_subdirectory(nc/source)
+add_subdirectory(source)
 
 if(NC_TESTS_ENABLED)
-  add_subdirectory(external/src/gtest)
-  add_subdirectory(test)
+    enable_testing()
+    add_subdirectory(external/src/gtest)
+    add_subdirectory(test)
 endif()
