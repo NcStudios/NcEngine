@@ -1,7 +1,7 @@
 #include "Hud.h"
 #include "Window.h"
 #include "graphics/d3dresource/GraphicsResource.h"
-#include "project/source/log/GameLog.h"
+#include "source/log/GameLog.h"
 #include "Window.h"
 
 namespace

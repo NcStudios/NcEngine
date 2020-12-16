@@ -1,10 +1,10 @@
 #include "MainMenuUI.h"
 #include "UIStyle.h"
 #include "SceneManager.h"
-#include "project/scenes/DemoScene.h"
-#include "project/scenes/GameScene.h"
-#include "nc/source/config/Version.h"
-#include "nc/source/config/ConfigReader.h"
+#include "scenes/DemoScene.h"
+#include "scenes/GameScene.h"
+#include "config/Version.h"
+#include "config/ConfigReader.h"
 
 #include <fstream>
 #include <functional>

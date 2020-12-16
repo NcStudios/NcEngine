@@ -1,8 +1,8 @@
 #pragma once
 
-#include "scene/Scene.h"
-#include "project/source/log/GameLog.h"
-#include "project/source/ui/Hud.h"
+#include "nc/source/scene/Scene.h"
+#include "source/log/GameLog.h"
+#include "source/ui/Hud.h"
 
 #include <memory>
 #include <string>

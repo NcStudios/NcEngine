@@ -1,7 +1,7 @@
 #pragma once
 
-#include "scene/Scene.h"
-#include "project/source/ui/MainMenuUI.h"
+#include "nc/source/scene/Scene.h"
+#include "source/ui/MainMenuUI.h"
 
 #include <memory>
 

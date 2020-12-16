@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project("Caverna" LANGUAGES CXX)
 
 if(${PROJECT_SOURCE_DIR} EQUAL ${PROJECT_BINARY_DIR})
-    message(FATAL_ERROR "Don't be fool, out-of-source build with your tool.")
+    message(FATAL_ERROR "Don't be a fool, out-of-source build with your tool.")
 endif()
 
 #Options
@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(GAME_EXE "Caverna")
 set(SERVER_EXE "CavernaServer")
-set(ROOT_DIR "${PROJECT_SOURCE_DIR}/..")
+set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 set(GCC_WARNING_FLAGS 
     -Wall
     -Wextra
@@ -24,24 +24,18 @@ set(GCC_WARNING_FLAGS
     -Wno-cast-function-type
 )
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
-set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/external/include)
-set(PROJECT_INCLUDE_DIR
-    ${ROOT_DIR}/project
-    ${ROOT_DIR}/project/components
-    ${ROOT_DIR}/project/models
-    ${ROOT_DIR}/project/scenes
-    ${ROOT_DIR}/project/settings
-)
+set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/../nc/external/include)
+set(PROJECT_INCLUDE_DIR ${ROOT_DIR})
 set(NC_INCLUDE_DIRS
-    ${ROOT_DIR}
-    ${ROOT_DIR}/nc
-    ${ROOT_DIR}/nc/include
-    ${ROOT_DIR}/nc/source
+    ${ROOT_DIR}/..
+    ${ROOT_DIR}/../nc/include
+    ${ROOT_DIR}/../nc/source
 )
 
-set(EXTERNAL_LIB_DIR ${ROOT_DIR}/external/lib)
-set(LIB_IMGUI "libimgui-${CMAKE_BUILD_TYPE}.a")
-set(LIB_ENET "libenet-${CMAKE_BUILD_TYPE}.a")
+set(LIB_DIR ${ROOT_DIR}/../nc/lib)
+set(ENGINE_LIB "libNcEngine-${CMAKE_BUILD_TYPE}.a")
+set(IMGUI_LIB "libimgui-${CMAKE_BUILD_TYPE}.a")
+set(ENET_LIB "libenet-${CMAKE_BUILD_TYPE}.a")
 
 add_executable(${GAME_EXE})
 add_executable(${SERVER_EXE})
@@ -49,12 +43,12 @@ add_executable(${SERVER_EXE})
 #Properties
 set_target_properties(${GAME_EXE}
     PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}/..
 )
 
 set_target_properties(${SERVER_EXE}
     PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}/..
 )
 
 #Definitions
@@ -80,7 +74,7 @@ target_include_directories(${GAME_EXE}
 
 target_include_directories(${SERVER_EXE}
     PRIVATE
-        ${ROOT_DIR}
+        ${NC_INCLUDE_DIRS}
         ${PROJECT_INCLUDE_DIR}
         ${EXTERNAL_INCLUDE_DIR}
 )
@@ -109,16 +103,20 @@ if(PROFILING_ENABLED)
         PUBLIC
             -pg
     )
+    target_compile_options(${SERVER_EXE}
+        PUBLIC
+            -pg
+    )
 endif()
 
 #Link Options
 target_link_libraries(${GAME_EXE}
     PRIVATE
-        ${ROOT_DIR}/nc/lib/libNcEngine-${CMAKE_BUILD_TYPE}.a
-        ${EXTERNAL_LIB_DIR}/${LIB_IMGUI}
-        ${EXTERNAL_LIB_DIR}/windowscodecs.lib
-        ${EXTERNAL_LIB_DIR}/libassimp.dll.a
-        ${EXTERNAL_LIB_DIR}/${LIB_ENET}
+        ${LIB_DIR}/${ENGINE_LIB}
+        ${LIB_DIR}/${IMGUI_LIB}
+        ${LIB_DIR}/windowscodecs.lib
+        ${LIB_DIR}/libassimp.dll.a
+        ${LIB_DIR}/${ENET_LIB}
         ${WIN32_LINK_FLAGS}
 )
 
@@ -127,23 +125,27 @@ if(PROFILING_ENABLED)
         PUBLIC
             -pg
     )
+    target_link_options(${SERVER_EXE}
+        PUBLIC
+            -pg
+    )
 endif()
 
 target_link_libraries(${SERVER_EXE}
     PRIVATE
-        ${ROOT_DIR}/nc/lib/libNcEngine-${CMAKE_BUILD_TYPE}.a
-        ${EXTERNAL_LIB_DIR}/${LIB_ENET}
+        ${LIB_DIR}/${ENGINE_LIB}
+        ${LIB_DIR}/${ENET_LIB}
         ${WIN32_LINK_FLAGS}
 )
 
 #Sources
-file(GLOB USER_COMPONENT_SOURCE ${ROOT_DIR}/project/components/*.cpp)
-file(GLOB USER_SCENE_SOURCE ${ROOT_DIR}/project/scenes/*.cpp)
-file(GLOB USER_UI_SOURCE ${ROOT_DIR}/project/ui/*.cpp)
+file(GLOB USER_COMPONENT_SOURCE ${ROOT_DIR}/components/*.cpp)
+file(GLOB USER_SCENE_SOURCE ${ROOT_DIR}/scenes/*.cpp)
+file(GLOB USER_UI_SOURCE ${ROOT_DIR}/ui/*.cpp)
 
 target_sources(${GAME_EXE}
     PRIVATE
-        ${ROOT_DIR}/project/CavernaMain.cpp
+        ${ROOT_DIR}/CavernaMain.cpp
         ${USER_COMPONENT_SOURCE}
         ${USER_SCENE_SOURCE}
         ${USER_UI_SOURCE}
@@ -151,7 +153,7 @@ target_sources(${GAME_EXE}
 
 target_sources(${SERVER_EXE}
     PRIVATE
-        ${ROOT_DIR}/project/ServerMain.cpp)
+        ${ROOT_DIR}/ServerMain.cpp)
 
 add_subdirectory(config)
 add_subdirectory(source)

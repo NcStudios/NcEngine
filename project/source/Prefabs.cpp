@@ -1,8 +1,8 @@
 #include "Prefabs.h"
 #include "component/NetworkDispatcher.h"
-#include "project/components/GamePiece.h"
+#include "components/GamePiece.h"
 #include "graphics/materials/Material.h"
-#include "project/source/network/Packet.h"
+#include "source/network/Packet.h"
 
 using namespace nc;
 

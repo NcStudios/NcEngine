@@ -1,6 +1,6 @@
 #pragma once
 
-#include "source/net/PacketBuffer.h"
+#include "net/PacketBuffer.h"
 
 #include <functional>
 

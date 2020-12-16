@@ -6,7 +6,7 @@ set CONFIGURATION="%~2"
 :CheckTarget
     if %TARGET%=="Engine" (
         echo Building Engine with %CONFIGURATION% Configuration
-        set SOURCE_DIR="%~dp0\.."
+        set SOURCE_DIR="%~dp0\..\nc"
         goto CheckConfiguration
     )
     if %TARGET%=="Project" (
@@ -40,9 +40,7 @@ set CONFIGURATION="%~2"
     EXIT
 
 :Run
-    call "%~dp0\jobs\build_external_libs.bat" %CONFIGURATION%
-
-    set BUILD_DIR=%~dp0\..\..\build\%TARGET%\%CONFIGURATION%
+    set BUILD_DIR=%~dp0\..\build\%TARGET%\%CONFIGURATION%
     if not exist %BUILD_DIR% mkdir %BUILD_DIR%
     cd %BUILD_DIR%
 

@@ -1,4 +1,4 @@
 target_sources(${ENGINE_LIB}
     PRIVATE
-        ${ROOT_DIR}/nc/source/time/NcTime.cpp
+        ${ROOT_DIR}/source/time/NcTime.cpp
 )

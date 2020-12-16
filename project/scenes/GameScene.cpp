@@ -3,12 +3,12 @@
 #include "MainCamera.h"
 #include "UI.h"
 #include "config/ProjectConfig.h"
-#include "CamController.h"
-#include "DebugComponents.h"
+#include "components/CamController.h"
+#include "components/DebugComponents.h"
 #include "source/Prefabs.h"
-#include "GamePiece.h"
-#include "ClickHandler.h"
-#include "PlayerConnection.h"
+#include "components/GamePiece.h"
+#include "components/ClickHandler.h"
+#include "components/PlayerConnection.h"
 
 using namespace nc;
 
