@@ -1,56 +1,47 @@
 @echo off
 
-if "%~1"=="" (
-    echo Error: No configuration specified
-    EXIT
-)
+set TARGET="%~1"
+set CONFIGURATION="%~2"
 
-call "%~dp0\jobs\build_external_libs.bat" %1
-
-if not exist "%~dp0\..\build" (
-    mkdir "%~dp0\..\build"
-)
-
-cd "%~dp0\..\build"
-
-if "%~1"=="Release" (
-    echo Using Release Configuration
-    if not exist "Release" (
-        mkdir "Release"
+:CheckTarget
+    if %TARGET%=="Engine" (
+        echo Building Engine with %CONFIGURATION% Configuration
+        set SOURCE_DIR="%~dp0\..\nc"
+        goto CheckConfiguration
     )
-    cd "Release"
-    cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" "%~dp0\.."
-    EXIT
-)
-
-if "%~1"=="Release-Profile" (
-    echo Using Release Configuration with Profiling
-    if not exist "Release-Profile" (
-        mkdir "Release-Profile"
+    if %TARGET%=="Project" (
+        echo Building Project with %CONFIGURATION% Configuration
+        set SOURCE_DIR="%~dp0\..\project"
+        goto CheckConfiguration
     )
-    cd "Release-Profile"
-    cmake -DCMAKE_BUILD_TYPE=Release -DPROFILING_ENABLED=ON -G "Ninja" "%~dp0\.."
-    EXIT
-)
 
-if "%~1"=="Debug" (
-    echo Using Debug Configuration
-    if not exist "Debug" (
-        mkdir "Debug"
+    echo Error: Invalid Target - %TARGET%
+    EXIT
+
+:CheckConfiguration
+    if %CONFIGURATION%=="Debug" (
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Debug -DNC_EDITOR_ENABLED=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON
+        goto Run
     )
-    cd "Debug"
-    cmake -DCMAKE_BUILD_TYPE=Debug -DNC_EDITOR_ENABLED=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON -G "Ninja" "%~dp0\.."
-    EXIT
-)
-
-if "%~1"=="Debug-SanitizeUB" (
-    echo Using Debug Configuration with Undefined Behavior Sanitizer
-    if not exist "Debug-SanitizeUB" (
-        mkdir "Debug-SanitizeUB"
+    if %CONFIGURATION%=="Debug-SanitizeUB" (
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Debug -DNC_EDITOR_ENABLED=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON -DSANITIZE_UB=ON
+        goto Run
     )
-    cd "Debug-SanitizeUB"
-    cmake -DCMAKE_BUILD_TYPE=Debug -DNC_EDITOR_ENABLED=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON -DSANITIZE_UB=ON -G "Ninja" "%~dp0\.."
-    EXIT
-)
+    if %CONFIGURATION%=="Release" (
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release
+        goto Run
+    )
+    if %CONFIGURATION%=="Release-Profile" (
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DPROFILING_ENABLED=ON
+        goto Run
+    )
 
-echo Error: Unknown build configuration
+    echo Error: Invalid Configuration - %CONFIGURATION%
+    EXIT
+
+:Run
+    set BUILD_DIR=%~dp0\..\build\%TARGET%\%CONFIGURATION%
+    if not exist %BUILD_DIR% mkdir %BUILD_DIR%
+    cd %BUILD_DIR%
+
+    cmake %DEFINITIONS% -G "Ninja" %SOURCE_DIR%

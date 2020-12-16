@@ -1,10 +1,10 @@
-target_sources(${GAME_EXE}
+target_sources(${ENGINE_LIB}
     PRIVATE
-        ${ROOT_DIR}/nc/source/component/Camera.cpp
-        ${ROOT_DIR}/nc/source/component/Component.cpp
-        ${ROOT_DIR}/nc/source/component/NetworkDispatcher.cpp
-        ${ROOT_DIR}/nc/source/component/PointLight.cpp
-        ${ROOT_DIR}/nc/source/component/PointLightManager.cpp
-        ${ROOT_DIR}/nc/source/component/Renderer.cpp
-        ${ROOT_DIR}/nc/source/component/Transform.cpp
+        ${ROOT_DIR}/source/component/Camera.cpp
+        ${ROOT_DIR}/source/component/Component.cpp
+        ${ROOT_DIR}/source/component/NetworkDispatcher.cpp
+        ${ROOT_DIR}/source/component/PointLight.cpp
+        ${ROOT_DIR}/source/component/PointLightManager.cpp
+        ${ROOT_DIR}/source/component/Renderer.cpp
+        ${ROOT_DIR}/source/component/Transform.cpp
 )

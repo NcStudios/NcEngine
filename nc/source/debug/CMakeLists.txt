@@ -1,5 +1,5 @@
-target_sources(${GAME_EXE}
+target_sources(${ENGINE_LIB}
     PRIVATE
-        ${ROOT_DIR}/nc/source/debug/DebugUtils.cpp
-        ${ROOT_DIR}/nc/source/debug/LogImpl.cpp
+        ${ROOT_DIR}/source/debug/DebugUtils.cpp
+        ${ROOT_DIR}/source/debug/LogImpl.cpp
 )

@@ -1,7 +1,7 @@
-#include "win32/NcWin32.h"
+#include "nc/source/win32/NcWin32.h"
 #include "DebugUtils.h"
 #include "Engine.h"
-#include "project/scenes/MenuScene.h"
+#include "scenes/MenuScene.h"
 
 #include <iostream>
 

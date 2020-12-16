@@ -1,5 +1,5 @@
 #include "ProjectConfig.h"
-#include "config/ConfigReader.h"
+#include "nc/source/config/ConfigReader.h"
 
 #include <fstream>
 

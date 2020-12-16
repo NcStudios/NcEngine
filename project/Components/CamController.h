@@ -1,7 +1,7 @@
 #pragma once
-#include "component/Transform.h"
+#include "nc/source/component/Transform.h"
 #include "Engine.h"
-#include "math/Vector2.h"
+#include "nc/source/math/Vector2.h"
 
 class CamController : public nc::Component
 {

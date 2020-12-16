@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Component.h"
+#include "nc/source/component/Component.h"
 #include "source/network/client/Client.h"
 
 #include <string>

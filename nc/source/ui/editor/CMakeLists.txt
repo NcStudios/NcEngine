@@ -1,4 +1,4 @@
-target_sources(${GAME_EXE}
+target_sources(${ENGINE_LIB}
     PRIVATE
-        ${ROOT_DIR}/nc/source/ui/editor/Editor.cpp
+        ${ROOT_DIR}/source/ui/editor/Editor.cpp
 )

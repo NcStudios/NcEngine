@@ -1,5 +1,5 @@
 #include "GamePiece.h"
-#include "project/source/log/GameLog.h"
+#include "source/log/GameLog.h"
 #include "Ecs.h"
 
 namespace project

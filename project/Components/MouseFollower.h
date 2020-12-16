@@ -1,6 +1,5 @@
 #pragma once
-#include "component/Component.h"
-#include "component/Transform.h"
+#include "nc/source/component/Transform.h"
 #include "window/IOnResizeReceiver.h"
 
 namespace project
