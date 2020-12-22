@@ -13,6 +13,6 @@ namespace nc::graphics
 
     void ResourceGroup::AddGraphicsResource(d3dresource::GraphicsResource* res)
     {
-        m_resources.push_back(std::move(res));
+        m_resources.push_back(res);
     }
 }
