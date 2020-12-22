@@ -20,18 +20,18 @@ namespace nc::graphics::d3dresource
     class GraphicsResourceManager
     {
         public:
-            static void SetGraphics(Graphics * gfx)
+            static void SetGraphics(Graphics* gfx)
             {
                 Get().m_graphics = gfx;
             }
 
-            static Graphics * GetGraphics()
+            static Graphics* GetGraphics()
             {
                 return Get().m_graphics;
             }
 
             template<std::derived_from<GraphicsResource> T, typename...Params>
-            static std::shared_ptr<GraphicsResource> Acquire(Params&&...p)
+            static GraphicsResource* Acquire(Params&&...p)
             {
                 return Get().Acquire_<T>(std::forward<Params>(p)...);
             }
@@ -53,7 +53,7 @@ namespace nc::graphics::d3dresource
             }
 
         private:
-            std::unordered_map<std::string, std::shared_ptr<GraphicsResource>> m_resources;
+            std::unordered_map<std::string, std::unique_ptr<GraphicsResource>> m_resources;
             Graphics * m_graphics = nullptr;
             uint32_t m_resourceId;
 
@@ -64,17 +64,16 @@ namespace nc::graphics::d3dresource
             }
 
             template<std::derived_from<GraphicsResource> T, typename...Params>
-            std::shared_ptr<GraphicsResource> Acquire_(Params&&...p)
+            GraphicsResource* Acquire_(Params&&...p)
             {
                 const auto key = T::GetUID(std::forward<Params>(p)...);
                 const auto i = m_resources.find(key);
                 if(i == m_resources.end())
                 {
-                    auto res = std::make_shared<T>(std::forward<Params>(p)...);
-                    m_resources[key] = res;
-                    return res;
+                    m_resources[key] = std::make_unique<T>(std::forward<Params>(p)...);
+                    return m_resources[key].get();
                 }
-                return i->second;
+                return i->second.get();
             }
 
             template<std::derived_from<GraphicsResource> T, typename...Params>

@@ -11,7 +11,10 @@ namespace nc::graphics
     }
 
     Model::Model(const Mesh& mesh, const Material& material)
-        : m_mesh(mesh), m_material(material)
+        : m_mesh{mesh},
+          m_material{material},
+          m_indexBuffer{nullptr},
+          m_transformConstantBuffer{nullptr}
     {
         InitializeGraphicsPipeline();
     }
@@ -20,7 +23,7 @@ namespace nc::graphics
     {
         using namespace nc::graphics::d3dresource;
         auto bufferId = std::to_string(GraphicsResourceManager::AssignId());
-        m_transformConstantBuffer = TransformConstBufferVertexPixel::AcquireUnique(bufferId, *this, 0u, 2u);
+        m_transformConstantBuffer = std::make_unique<TransformConstBufferVertexPixel>(bufferId, *this, 0u, 2u);
         m_indexBuffer = m_mesh.QueryGraphicsResource<d3dresource::IndexBuffer>();
     }
 

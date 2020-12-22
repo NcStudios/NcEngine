@@ -83,7 +83,6 @@ namespace nc::graphics::d3dresource
             using ConstantBuffer<T>::ConstantBuffer;
             void Bind() noexcept override;
             static std::string GetUID(const T& consts, UINT slot) noexcept;
-            static std::shared_ptr<GraphicsResource> AcquireUnique(const T& consts, UINT slot);      
     };
 }
 
@@ -266,12 +265,6 @@ namespace nc::graphics::d3dresource
             void Bind() noexcept override;
             static std::string GetUID(const std::string& tag) noexcept; //, const Model& parent, UINT slot) noexcept;
 
-            //should test if these need to be unique
-            static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, Model & parent, UINT slot)
-            {
-                return std::make_shared<TransformConstBufferVertex>(tag, parent, slot);
-            }
-
         protected:
             struct Transforms
             {
@@ -293,12 +286,6 @@ namespace nc::graphics::d3dresource
             TransformConstBufferVertexPixel(const std::string& tag, Model& parent, UINT slotVertex = 0u, UINT slotPixel = 2u);
             void Bind() noexcept override;
             static std::string GetUID(const std::string& tag) noexcept; //, const Model& parent, UINT slot) noexcept;
-
-            //should test if these need to be unique
-            static std::shared_ptr<GraphicsResource> AcquireUnique(const std::string& tag, Model & parent, UINT slotVertex, UINT slotPixel)
-            {
-                return std::make_shared<TransformConstBufferVertexPixel>(tag, parent, slotVertex, slotPixel);
-            }
 
         protected:
             void UpdateBindImplementation(const Transforms& transforms) noexcept;
@@ -418,12 +405,6 @@ namespace nc::graphics::d3dresource
     void PixelConstantBuffer<T>::Bind() noexcept
     {
         GetContext()->PSSetConstantBuffers(m_slot, 1u, m_constantBuffer.GetAddressOf());
-    }
-
-    template<class T>
-    std::shared_ptr<GraphicsResource> PixelConstantBuffer<T>::AcquireUnique(const T& consts, UINT slot)
-    {
-        return std::make_shared<PixelConstantBuffer<T>>(consts, slot);
     }
 
     template<class T>

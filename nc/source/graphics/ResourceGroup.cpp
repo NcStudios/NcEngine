@@ -11,7 +11,7 @@ namespace nc::graphics
         }
     }
 
-    void ResourceGroup::AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res)
+    void ResourceGroup::AddGraphicsResource(d3dresource::GraphicsResource* res)
     {
         m_resources.push_back(std::move(res));
     }

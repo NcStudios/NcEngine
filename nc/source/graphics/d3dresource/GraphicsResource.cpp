@@ -253,6 +253,8 @@ namespace nc::graphics::d3dresource
         GetContext()->PSSetShader(m_pixelShader.Get(),nullptr,0u);
     }
 
+    std::unique_ptr<VertexConstantBuffer<TransformConstBufferVertex::Transforms>> TransformConstBufferVertex::m_vcbuf = nullptr;
+
     TransformConstBufferVertex::TransformConstBufferVertex(const std::string& tag, Model & parent, UINT slot)
         : m_parent( parent )
     {
@@ -286,10 +288,10 @@ namespace nc::graphics::d3dresource
         };
     }
 
-    std::unique_ptr<VertexConstantBuffer<TransformConstBufferVertex::Transforms>> TransformConstBufferVertex::m_vcbuf;
+    std::unique_ptr<PixelConstantBuffer<TransformConstBufferVertex::Transforms>> TransformConstBufferVertexPixel::m_pcbuf = nullptr;
 
     TransformConstBufferVertexPixel::TransformConstBufferVertexPixel(const std::string& tag, Model & parent, UINT slotVertex, UINT slotPixel)
-    : TransformConstBufferVertex(tag, parent, slotVertex)
+        : TransformConstBufferVertex(tag, parent, slotVertex)
     {
         (void)tag;
         if(!m_pcbuf)
@@ -310,8 +312,6 @@ namespace nc::graphics::d3dresource
         m_pcbuf->Update(transforms);
         m_pcbuf->Bind();
     }
-
-    std::unique_ptr<PixelConstantBuffer<TransformConstBufferVertex::Transforms>> TransformConstBufferVertexPixel::m_pcbuf;
 
     InputLayout::InputLayout(const std::string& tag,
                              const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
