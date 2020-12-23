@@ -1,7 +1,6 @@
 ***********
 IN PROGRESS
 ***********
-GfxResManager can probably use unique_ptr and return *
 
 ***********
 BUGS

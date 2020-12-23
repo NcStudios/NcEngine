@@ -18,10 +18,10 @@ namespace nc::graphics
             template<std::derived_from<d3dresource::GraphicsResource> T>
             T * QueryGraphicsResource() noexcept;
             void Bind() const;
-            void AddGraphicsResource(std::shared_ptr<d3dresource::GraphicsResource> res);
+            void AddGraphicsResource(d3dresource::GraphicsResource* res);
 
         protected:
-            std::vector<std::shared_ptr<d3dresource::GraphicsResource>> m_resources;
+            std::vector<d3dresource::GraphicsResource*> m_resources;
     };
 
     template<std::derived_from<d3dresource::GraphicsResource> T>
@@ -29,7 +29,7 @@ namespace nc::graphics
     {
         for(auto& res : m_resources)
         {
-            if(auto pt = dynamic_cast<T*>(res.get()))
+            if(auto pt = dynamic_cast<T*>(res))
             {
                 return pt;
             }

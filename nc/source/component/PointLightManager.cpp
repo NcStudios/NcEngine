@@ -8,6 +8,13 @@ namespace nc
 {
     const uint32_t PointLightManager::MAX_POINT_LIGHTS;
 
+    PointLightManager::PointLightManager()
+        : m_currentIndex{0u},
+          m_pointLightsArrayConstBufData{},
+          m_constantBuffer{std::make_unique<graphics::d3dresource::PixelConstantBuffer<PointLightsArrayCBuf>>(m_pointLightsArrayConstBufData, 0u)}
+    {
+    }
+
     uint32_t PointLightManager::GetNextAvailableIndex()
     {
         if (m_currentIndex == MAX_POINT_LIGHTS)
@@ -27,9 +34,7 @@ namespace nc
 
     void PointLightManager::Bind()
     {
-        using namespace nc::graphics::d3dresource;
-
-        auto pointLightArray = PixelConstantBuffer<PointLightsArrayCBuf>::AcquireUnique(PointLightManager::m_pointLightsArrayConstBufData, 0u);
-        pointLightArray->Bind();
+        m_constantBuffer->Update(m_pointLightsArrayConstBufData);
+        m_constantBuffer->Bind();
     }
 }

@@ -46,7 +46,8 @@ namespace nc::graphics
             single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "pbrpixelshader.cso"));
             single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
             single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::Sampler>(SAMPLER_TAG));
-            single.AddGraphicsResource(PixelConstantBuffer<MaterialProperties>::AcquireUnique(materialProperties, 1u));
+            m_materialPropertiesBuffer = std::make_unique<PixelConstantBuffer<MaterialProperties>>(materialProperties, 1u);
+            single.AddGraphicsResource(m_materialPropertiesBuffer.get());
         }
         AddStep(std::move(single));
     }
