@@ -17,7 +17,6 @@ TO ADD
 ***********
 -add global search to api - GlobalGetComponent
 -update physics to 3d
--support for multiple cameras
 -lights
     -improve point light components and how they relate to entities
     -support for multiple lights
@@ -35,8 +34,6 @@ LOW PRIORITY
 -fix naming of user components in gui
 -main window/main menu dilemma
 -camera needs parameters for fov/clipping planes
--Entity (and other places) - many public methods could be private if Engine was friend
--make generating new user types easier/quicker (untility prog?)
 -save changes in debug mode
 -all d3d "slots" are passed at uint literals, look into what exactly
     is needed here - can we use an enum for these so there is some 
