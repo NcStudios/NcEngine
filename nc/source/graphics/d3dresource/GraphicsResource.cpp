@@ -1,6 +1,5 @@
 #include "GraphicsResource.h"
 #include "graphics/Graphics.h"
-#include "graphics/Model.h"
 #include "graphics/WICTextureLoader.h"
 #include "directx/math/DirectXMath.h"
 #include "component/Transform.h"
@@ -20,7 +19,9 @@ namespace nc::graphics::d3dresource
         return GraphicsResourceManager::GetGraphics()->m_device;
     }
 
-    /* Stencil */
+    /**********
+    * Stencil *
+    ***********/
     auto tagFromMode = [](Stencil::Mode mode)
     {
         switch (mode)
@@ -78,6 +79,14 @@ namespace nc::graphics::d3dresource
         m_stencil->Release();
     }
 
+    std::string Stencil::GetUID(Stencil::Mode mode) noexcept
+    {
+        return typeid(Stencil).name() + tagFromMode(mode);
+    }
+
+    /**********
+    * Sampler *
+    ***********/
     Sampler::Sampler(const std::string& tag)
         : m_tag(tag)
     {
@@ -99,6 +108,14 @@ namespace nc::graphics::d3dresource
         GetContext()->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
     }
 
+    std::string Sampler::GetUID(const std::string& tag) noexcept
+    {
+        return typeid(Sampler).name() + tag;
+    }
+
+    /**********
+    * Blender *
+    ***********/
     Blender::Blender(const std::string& tag)
         : m_tag{tag},
           m_blender{nullptr},
@@ -130,57 +147,14 @@ namespace nc::graphics::d3dresource
         GetContext()->OMSetBlendState(m_blender.Get(), nullptr, 0xFFFFFFFFu);
     }
 
-    VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag)
-        : m_stride(sizeof(Vertex)), m_tag(tag)
+    std::string Blender::GetUID(const std::string& tag) noexcept
     {
-        auto bd = D3D11_BUFFER_DESC
-        {
-            UINT(m_stride * vertices.size()), //ByteWidth
-            D3D11_USAGE_DEFAULT,              //Usage
-            D3D11_BIND_VERTEX_BUFFER,         //BindFlags
-            0u, 0u, m_stride                  //CPUAccessFlags, MiscFlags, StructureByteStride
-        };
-        auto sd = D3D11_SUBRESOURCE_DATA
-        {
-            vertices.data(), 0u, 0u //pSysMem, SysMemPitch, SysMemSlicePitch
-        };
-        THROW_FAILED(GetDevice()->CreateBuffer(&bd,&sd,&m_vertexBuffer));
+        return typeid(Blender).name() + tag;
     }
 
-
-    void VertexBuffer::Bind() noexcept
-    {
-        const UINT offset = 0u;
-        GetContext()->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &offset);
-    }
-
-    IndexBuffer::IndexBuffer(const std::vector<uint16_t>& indices, std::string& tag)
-        : m_count((UINT)indices.size()), m_tag(tag)
-    {
-        D3D11_BUFFER_DESC ibd      = {};
-        ibd.BindFlags              = D3D11_BIND_INDEX_BUFFER;
-        ibd.Usage                  = D3D11_USAGE_DEFAULT;
-        ibd.CPUAccessFlags         = 0u;
-        ibd.MiscFlags              = 0u;
-        ibd.ByteWidth              = UINT(m_count * sizeof(uint16_t));
-        ibd.StructureByteStride    = sizeof(uint16_t);
-
-        D3D11_SUBRESOURCE_DATA isd = {};
-        isd.pSysMem                = indices.data();
-
-        THROW_FAILED(GetDevice()->CreateBuffer(&ibd, &isd, &m_indexBuffer));
-    }
-
-    void IndexBuffer::Bind() noexcept
-    {
-        GetContext()->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-    }
-
-    UINT IndexBuffer::GetCount() const noexcept
-    {
-        return m_count;
-    }
-
+    /**********
+    * Texture *
+    ***********/
     Texture::Texture(const std::string& path, uint32_t shaderIndex) 
         : m_path(path), m_shaderIndex(shaderIndex)
     {
@@ -203,206 +177,6 @@ namespace nc::graphics::d3dresource
     ID3D11ShaderResourceView* Texture::GetShaderResourceView()
     {
         return m_textureView.Get();
-    }
-
-    VertexShader::VertexShader(const std::string& path)
-        : m_path(path)
-    {
-        std::wstring w_path;
-        w_path.assign(path.begin(), path.end());
-        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob));
-        
-        THROW_FAILED
-        (
-            GetDevice()->CreateVertexShader(m_bytecodeBlob->GetBufferPointer(),
-                                            m_bytecodeBlob->GetBufferSize(),
-                                            nullptr, &m_vertexShader)
-        );
-    }
-
-    void VertexShader::Bind() noexcept
-    {
-        GetContext()->VSSetShader(m_vertexShader.Get(),nullptr,0u);
-    }
-
-    ID3DBlob* VertexShader::GetBytecode() const noexcept
-    {
-        return m_bytecodeBlob.Get();
-    }
-
-    PixelShader::PixelShader(const std::string& path )
-        : m_path(path)
-    {
-        // Read the shader code into a blob
-        Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-        std::wstring w_path;
-        w_path.assign(path.begin(), path.end());
-        THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob));
-
-        // Create the shader
-        THROW_FAILED
-        (
-            GetDevice()->CreatePixelShader( m_bytecodeBlob->GetBufferPointer(),
-                                            m_bytecodeBlob->GetBufferSize(),
-                                            nullptr, &m_pixelShader)
-        );
-    }
-
-    void PixelShader::Bind() noexcept
-    {
-        GetContext()->PSSetShader(m_pixelShader.Get(),nullptr,0u);
-    }
-
-    std::unique_ptr<VertexConstantBuffer<TransformConstBufferVertex::Transforms>> TransformConstBufferVertex::m_vcbuf = nullptr;
-
-    TransformConstBufferVertex::TransformConstBufferVertex(const std::string& tag, Model & parent, UINT slot)
-        : m_parent( parent )
-    {
-        (void)tag;
-        if(!m_vcbuf)
-        {
-            m_vcbuf = std::make_unique<VertexConstantBuffer<Transforms>>(slot);
-        }
-    }
-
-    void TransformConstBufferVertex::Bind() noexcept
-    {
-        UpdateBindImplementation(GetTransforms());
-    }
-
-    void TransformConstBufferVertex::UpdateBindImplementation(const Transforms& transforms) noexcept
-    {
-        m_vcbuf->Update(transforms);
-        m_vcbuf->Bind();
-    }
-
-    TransformConstBufferVertex::Transforms TransformConstBufferVertex::GetTransforms() noexcept
-    {
-        const auto gfx = GraphicsResourceManager::GetGraphics();
-        const auto modelView = m_parent.GetTransformXM() * gfx->GetCamera();
-
-        return
-        {
-            DirectX::XMMatrixTranspose(modelView),
-            DirectX::XMMatrixTranspose(modelView * gfx->GetProjection())
-        };
-    }
-
-    std::unique_ptr<PixelConstantBuffer<TransformConstBufferVertex::Transforms>> TransformConstBufferVertexPixel::m_pcbuf = nullptr;
-
-    TransformConstBufferVertexPixel::TransformConstBufferVertexPixel(const std::string& tag, Model & parent, UINT slotVertex, UINT slotPixel)
-        : TransformConstBufferVertex(tag, parent, slotVertex)
-    {
-        (void)tag;
-        if(!m_pcbuf)
-        {
-            m_pcbuf = std::make_unique<PixelConstantBuffer<Transforms>>(slotPixel);
-        }
-    }
-
-    void TransformConstBufferVertexPixel::Bind() noexcept
-    {
-        const auto transforms = GetTransforms();
-        TransformConstBufferVertex::UpdateBindImplementation(transforms);
-        UpdateBindImplementation(transforms);
-    }
-
-    void TransformConstBufferVertexPixel::UpdateBindImplementation(const Transforms& transforms) noexcept
-    {
-        m_pcbuf->Update(transforms);
-        m_pcbuf->Bind();
-    }
-
-    InputLayout::InputLayout(const std::string& tag,
-                             const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
-                             ID3DBlob* vertexShaderBytecode )
-    {
-        (void)tag;
-        
-        THROW_FAILED
-        (
-            GetDevice()->CreateInputLayout(layout.data(),
-                                                   (UINT)layout.size(),
-                                                   vertexShaderBytecode->GetBufferPointer(),
-                                                   vertexShaderBytecode->GetBufferSize(),
-                                                   &m_inputLayout)
-        );
-    }
-
-    void InputLayout::Bind() noexcept
-    {
-        GetContext()->IASetInputLayout(m_inputLayout.Get());
-    }
-
-
-
-    Topology::Topology(D3D11_PRIMITIVE_TOPOLOGY type)
-        : m_type(type)
-    {
-    }
-
-    void Topology::Bind() noexcept
-    {
-        GetContext()->IASetPrimitiveTopology(m_type);
-    }
-
-
-
-    /****************
-    * UID Functions *
-    ****************/
-    std::string Stencil::GetUID(Stencil::Mode mode) noexcept
-    {
-        return typeid(Stencil).name() + tagFromMode(mode);
-    }
-
-    std::string Sampler::GetUID(const std::string& tag) noexcept
-    {
-        return typeid(Sampler).name() + tag;
-    }
-
-    std::string Blender::GetUID(const std::string& tag) noexcept
-    {
-        return typeid(Blender).name() + tag;
-    }
-
-    std::string VertexBuffer::GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept
-    {
-        (void)vertices;
-        return typeid(VertexBuffer).name() + tag;
-    }
-
-    std::string IndexBuffer::GetUID(const std::vector<uint16_t>& indices, std::string& tag) noexcept
-    {
-        (void)indices;
-        return typeid(IndexBuffer).name() + tag;
-    }
-
-    std::string VertexShader::GetUID(const std::string& path) noexcept
-    {
-        return typeid(VertexShader).name() + path;
-    }
-
-    std::string PixelShader::GetUID(const std::string& path) noexcept
-    {
-        return typeid(PixelShader).name() + path;
-    }
-
-    std::string TransformConstBufferVertex::GetUID(const std::string& tag) noexcept
-    {
-        return typeid(TransformConstBufferVertex).name() + tag;
-    }
-
-    std::string InputLayout::GetUID(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode) noexcept
-    {
-        (void)layout;
-        (void)vertexShaderByteCode;
-        return typeid(InputLayout).name() + tag;
-    }
-
-    std::string Topology::GetUID(D3D11_PRIMITIVE_TOPOLOGY topology) noexcept
-    {
-        return typeid(Topology).name() + std::to_string(topology);
     }
 
     std::string Texture::GetUID(const std::string& path, uint32_t shaderIndex) noexcept

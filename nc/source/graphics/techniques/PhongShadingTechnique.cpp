@@ -2,6 +2,9 @@
 #include "TechniqueType.h"
 #include "graphics/materials/MaterialProperties.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "graphics/d3dresource/ShaderResources.h"
+#include "graphics/d3dresource/MeshResources.h"
+#include "graphics/d3dresource/ConstantBufferResources.h"
 #include "Engine.h"
 
 using namespace nc::graphics::d3dresource;

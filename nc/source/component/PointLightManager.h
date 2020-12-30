@@ -2,6 +2,8 @@
 
 #include "PointLight.h"
 
+#include <memory>
+
 namespace nc::graphics
 {
     class Graphics;
@@ -11,6 +13,7 @@ namespace nc::graphics
         class PixelConstantBuffer;
     }
 }
+
 namespace DirectX { struct XMMATRIX; }
 
 namespace nc
@@ -23,6 +26,7 @@ namespace nc
             static const uint32_t MAX_POINT_LIGHTS = 4u;
 
             PointLightManager();
+            ~PointLightManager();
             uint32_t GetNextAvailableIndex();
             void AddPointLight(PointLight& pointLight, const DirectX::XMMATRIX& camMatrix);
             void Bind();

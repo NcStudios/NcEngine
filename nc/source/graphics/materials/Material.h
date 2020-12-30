@@ -12,7 +12,8 @@ namespace nc::graphics
     class Material
     {
         public: 
-            Material() = default;
+            Material();
+            ~Material();
 
             template<class ... Args>
             explicit Material(TechniqueType type, Args&& ... args);

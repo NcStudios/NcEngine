@@ -7,6 +7,9 @@
 
 namespace nc::graphics
 {
+    Material::Material() = default;
+    Material::~Material() = default;
+
     void Material::Submit(FrameManager& frame, const Model& model) const noexcept
     {
         m_technique->Submit(frame, model);

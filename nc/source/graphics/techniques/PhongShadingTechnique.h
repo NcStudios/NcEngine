@@ -3,6 +3,7 @@
 #include "graphics/techniques/Technique.h"
 #include "graphics/techniques/TechniqueType.h"
 #include "graphics/materials/MaterialProperties.h"
+#include "graphics/d3dresource/ConstantBufferResources.h"
 
 #include <string>
 #include <vector>
