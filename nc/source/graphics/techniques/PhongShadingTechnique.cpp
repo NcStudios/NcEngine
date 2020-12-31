@@ -7,6 +7,10 @@
 #include "graphics/d3dresource/ConstantBufferResources.h"
 #include "Engine.h"
 
+#ifdef NC_EDITOR_ENABLED
+#include "imgui/imgui.h"
+#endif
+
 using namespace nc::graphics::d3dresource;
 
 namespace
@@ -27,6 +31,7 @@ namespace
 namespace nc::graphics
 {
     PhongShadingTechnique::PhongShadingTechnique(const std::vector<std::string>& texturePaths, MaterialProperties materialProperties)
+    : m_materialProperties {materialProperties}
     {
         auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
 
@@ -54,6 +59,35 @@ namespace nc::graphics
         }
         AddStep(std::move(single));
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    void PhongShadingTechnique::EditorGuiElement()
+    {
+        const float dragSpeed = 1.0f;
+        ImGui::SameLine();
+        ImGui::Text("(Phong Shading)");
+        ImGui::PushItemWidth(80.0f);
+            ImGui::Spacing();
+            ImGui::Indent();
+                ImGui::Text("Material Color"); ImGui::SameLine(); bool mcDirty = ImGui::ColorEdit3("##mc", &(m_materialProperties.color.x), ImGuiColorEditFlags_NoInputs);
+                ImGui::Text("Specular");
+                ImGui::Indent();
+                ImGui::Text("Intensity"); ImGui::SameLine(); bool siDirty = ImGui::SliderFloat("##si", &(m_materialProperties.specularIntensity), 0.05f, 4.0f, "%.2f", dragSpeed);
+                ImGui::Text("Power    "); ImGui::SameLine(); bool spDirty = ImGui::SliderFloat("##sp", &(m_materialProperties.specularPower), 0.5f, 13.0f, "%.2f", dragSpeed);
+                ImGui::Unindent();
+                ImGui::Text("Tiling X"); ImGui::SameLine(); bool txDirty = ImGui::SliderFloat("##tx", &(m_materialProperties.xTiling), 0.001f, 100.0f, "%.2f", dragSpeed);
+                ImGui::Text("Tiling Y"); ImGui::SameLine(); bool tyDirty = ImGui::SliderFloat("##ty", &(m_materialProperties.yTiling), 0.001f, 100.0f, "%.2f", dragSpeed);
+            ImGui::Unindent();
+        ImGui::PopItemWidth();
+
+        if(mcDirty || siDirty || spDirty || txDirty || tyDirty)
+        {
+            m_materialPropertiesBuffer->Update(m_materialProperties);
+
+        }
+    }
+    
+    #endif
 
     size_t PhongShadingTechnique::GetUID(TechniqueType type, const std::vector<std::string>& texturePaths) noexcept
     {

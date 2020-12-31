@@ -25,6 +25,8 @@ cbuffer MaterialProperties : register(b1)
     float3 color;
     float specularIntensity;
     float specularPower;
+    float xTiling;
+    float yTiling;
 };
 
 cbuffer CBuf : register(b2)
@@ -68,6 +70,9 @@ float3 CalculatePointLight(LightBuffer light, VSOut vertexOutput, float4 albedo,
 
 float4 main(VSOut vertexOutput) : SV_Target
 {
+    vertexOutput.uv.x *= xTiling;
+    vertexOutput.uv.y *= yTiling;
+
     // Get sampled value per pixel for each map
     float4 albedo = albedoTex.Sample(splr, vertexOutput.uv);
     float4 metallic = metallicTex.Sample(splr, vertexOutput.uv);

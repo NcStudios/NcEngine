@@ -14,4 +14,12 @@ namespace nc::graphics
     {
         m_technique->Submit(frame, model);
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    void Material::EditorGuiElement()
+    {
+        m_technique->EditorGuiElement();
+    }
+    #endif
+            
 }

@@ -50,6 +50,7 @@ namespace nc
             ImGui::Spacing();
             ImGui::Separator();
                 ImGui::Text("Renderer");
+                m_model->GetMaterial()->EditorGuiElement();
             ImGui::Separator();
         ImGui::PopItemWidth();
     }

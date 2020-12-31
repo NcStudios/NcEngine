@@ -22,7 +22,12 @@ namespace nc::graphics
             PhongShadingTechnique(const std::vector<std::string>& texturePaths, MaterialProperties materialProperties = {});
             static size_t GetUID(TechniqueType type, const std::vector<std::string>& texturePaths) noexcept;
 
+            #ifdef NC_EDITOR_ENABLED
+            void EditorGuiElement() override;
+            #endif
+            
         private:
+            MaterialProperties m_materialProperties;
             std::unique_ptr<d3dresource::PixelConstantBuffer<MaterialProperties>> m_materialPropertiesBuffer;
     };
 }

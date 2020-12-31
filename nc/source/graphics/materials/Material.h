@@ -18,6 +18,11 @@ namespace nc::graphics
             template<class ... Args>
             explicit Material(TechniqueType type, Args&& ... args);
             void SetTechnique(const Technique* technique) noexcept;
+            
+            #ifdef NC_EDITOR_ENABLED
+            void EditorGuiElement();
+            #endif
+            
             void Submit(class FrameManager& frame, const Model& model) const noexcept;
             
         private:
