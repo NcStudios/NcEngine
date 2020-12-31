@@ -18,7 +18,7 @@ namespace nc
     {
         public:
             Renderer();
-            Renderer(graphics::Mesh& mesh, graphics::Material& material);
+            Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh& mesh, graphics::Material& material) noexcept;
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&);
             Renderer& operator=(const Renderer&) = delete;

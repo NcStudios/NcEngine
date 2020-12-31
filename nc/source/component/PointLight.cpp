@@ -9,9 +9,9 @@
 
 namespace nc
 {
-
-    PointLight::PointLight()
-        : m_transform{ nullptr }
+    PointLight::PointLight(ComponentHandle handle, EntityHandle parentHandle) noexcept
+        : Component(handle, parentHandle),
+          m_transform{ Ecs::GetComponent<Transform>(m_parentHandle) }
     {
         PixelConstBufData.pos              = {0,0,0};
         PixelConstBufData.ambient          = {0.65f, 0.65f, 0.65f};
@@ -20,19 +20,6 @@ namespace nc
         PixelConstBufData.attConst         = 2.61f;
         PixelConstBufData.attLin           = 0.1819f;
         PixelConstBufData.attQuad          = 0.0000001f;
-    }
-
-    PointLight::~PointLight() = default;
-    
-    PointLight::PointLight(PointLight&& other)
-        : PixelConstBufData { other.PixelConstBufData }
-    {
-    }
-
-    PointLight & PointLight::operator=(PointLight&& other)
-    {
-        PixelConstBufData = other.PixelConstBufData;
-        return *this;
     }
 
     void PointLight::Set(DirectX::XMFLOAT3 pos, float radius, DirectX::XMFLOAT3 ambient, DirectX::XMFLOAT3 diffuseColor, float diffuseIntensity, float attConst, float attLin, float attQuad)
@@ -78,10 +65,6 @@ namespace nc
 
     void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view) noexcept(false)
     {
-        if (!m_transform)
-        {
-            m_transform = Ecs::GetComponent<Transform>(m_parentHandle);
-        }
         IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
         
         PixelConstBufData.pos = m_transform->GetPosition().ToXMFloat3();

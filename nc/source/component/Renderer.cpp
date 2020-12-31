@@ -11,35 +11,16 @@
 
 namespace nc
 {
-    Renderer::Renderer()
-        : m_model{ nullptr },
-          m_transform{ nullptr }
-    {
-    }
-    
-    Renderer::Renderer(graphics::Mesh& mesh, graphics::Material& material)
-        : m_model{ std::make_unique<graphics::Model>(mesh, material) },
-          m_transform{ nullptr }
-    {
-    }
+    Renderer::Renderer() = default;
+    Renderer::~Renderer() = default;
+    Renderer::Renderer(Renderer&&) = default;
+    Renderer& Renderer::operator=(Renderer&&) = default;
 
-    Renderer::Renderer(Renderer&& other)
+    Renderer::Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh& mesh, graphics::Material& material) noexcept
+        : Component(handle, parentHandle),
+          m_model{ std::make_unique<graphics::Model>(mesh, material) },
+          m_transform{ Ecs::GetComponent<Transform>(m_parentHandle) }
     {
-        m_handle = other.GetHandle();
-        m_parentHandle = other.GetParentHandle();
-        m_model = std::move(other.m_model);
-    }
-
-    Renderer::~Renderer()
-    {
-    }
-
-    Renderer& Renderer::operator=(Renderer&& other)
-    {
-        m_handle = other.GetHandle();
-        m_parentHandle = other.GetParentHandle();
-        m_model = std::move(other.m_model);
-        return *this;
     }
 
     #ifdef NC_EDITOR_ENABLED
@@ -56,16 +37,7 @@ namespace nc
     
     void Renderer::Update(graphics::FrameManager& frame)
     {
-        if (!m_transform)
-        {
-            m_transform = Ecs::GetComponent<Transform>(m_parentHandle);
-        }
-
-        if (!m_transform)
-        {
-            throw std::runtime_error("Renderer::Update - bad trans ptr");
-        }
-
+        IF_THROW(!m_transform, "Renderer::Update - Bad Transform Ptr");
         m_model->UpdateTransformationMatrix(m_transform);
         m_model->Submit(frame);
     }

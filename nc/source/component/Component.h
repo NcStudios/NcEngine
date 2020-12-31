@@ -3,46 +3,45 @@
 
 namespace nc
 {
+    namespace engine::alloc { template<class T> class Pool; }
+
     class Component
     {
         public:
             Component() = default;
-            Component(const Component&) = default;
-            Component(Component&&) = default;
-            Component& operator=(const Component&) = default;
-            Component& operator=(Component&&) = default;
+            Component(const Component&) = delete;
             virtual ~Component() = default;
+            Component(Component&&) = default;
+            Component& operator=(const Component&) = delete;
+            Component& operator=(Component&&) = default;
+            Component(ComponentHandle handle, EntityHandle parentHandle) noexcept
+                : m_handle{handle}, m_parentHandle{parentHandle}, m_memoryState{MemoryState::Valid}
+            {
+            }
 
-            /**
-             * Called by owning Entity after construction.
-             */
-            void Register(const ComponentHandle componentHandle, const EntityHandle parentHandle) noexcept;
+            ComponentHandle GetHandle() const noexcept { return m_handle; }
+            EntityHandle GetParentHandle() noexcept { return m_parentHandle; }
 
-            ComponentHandle GetHandle() const noexcept;
-            EntityHandle GetParentHandle() noexcept;
+            // MemoryState GetMemoryState() const { return m_memoryState; }
+            // void SetMemoryState(MemoryState state) { m_memoryState = state; }
 
-            MemoryState GetMemoryState() const;
-            void SetMemoryState(const MemoryState state);
-
-            virtual void FrameUpdate(float dt);
-            virtual void FixedUpdate();
-            virtual void OnDestroy();
-            virtual void OnCollisionEnter(const EntityHandle other);
-            virtual void OnCollisionStay();
-            virtual void OnCollisionExit();
+            virtual void FrameUpdate(float dt) { (void) dt; }
+            virtual void FixedUpdate() {}
+            virtual void OnDestroy() {}
+            virtual void OnCollisionEnter(EntityHandle other) { (void)other; }
+            virtual void OnCollisionStay() {};
+            virtual void OnCollisionExit() {};
         
+            #ifdef NC_EDITOR_ENABLED
+            virtual void EditorGuiElement();
+            #endif
+
         protected:
             ComponentHandle m_handle = NullHandle;
             EntityHandle m_parentHandle = NullHandle;
-            MemoryState m_memoryState;
-
-#ifdef NC_EDITOR_ENABLED
-        public:
-            virtual void EditorGuiElement();
-#endif
+        
+        private:
+            template<class T> friend class engine::alloc::Pool;
+            MemoryState m_memoryState = MemoryState::Invalid;
     };
-
-    class EngineComponent : public Component {};
-    class UserComponent : public Component {};
-
 } //end namespace nc

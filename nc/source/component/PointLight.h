@@ -14,11 +14,11 @@ namespace nc
     class PointLight final: public Component
     {
         public:
-
-            PointLight();
-            ~PointLight();
-            PointLight(PointLight&&);
-            PointLight& operator=(PointLight&&);
+            PointLight(ComponentHandle handle, EntityHandle parentHandle) noexcept;
+            PointLight() = default;
+            ~PointLight() = default;
+            PointLight(PointLight&&) = default;
+            PointLight& operator=(PointLight&&) = default;
             PointLight(const PointLight&) = delete;
             PointLight& operator=(const PointLight&) = delete;
 

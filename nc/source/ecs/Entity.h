@@ -66,14 +66,14 @@ namespace nc
     template<std::derived_from<Component> T, class ... Args>
     T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
+        /** @todo user components dont use handles at all */
+
         if (HasUserComponent<T>())
         {
             return nullptr;
         }
-        m_userComponents.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
-        Component * ptr = m_userComponents.back().get();
-        ptr->Register(0, Handle);
-        return dynamic_cast<T*>(ptr);
+        m_userComponents.emplace_back(std::make_unique<T>(NullHandle, Handle, std::forward<Args>(args)...));
+        return dynamic_cast<T*>(m_userComponents.back().get());
     }
 
     template<std::derived_from<Component> T>

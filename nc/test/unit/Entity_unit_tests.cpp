@@ -3,8 +3,21 @@
 
 using namespace nc;
 
-struct Mock : Component {};
-struct Mock2 : Component {};
+struct Mock : Component
+{
+    Mock() = default;
+    Mock(ComponentHandle handle, EntityHandle parentHandle)
+        : Component(handle, parentHandle)
+    {}
+};
+
+struct Mock2 : Component
+{
+    Mock2() = default;
+    Mock2(ComponentHandle handle, EntityHandle parentHandle)
+        : Component(handle, parentHandle)
+    {}
+};
 
 TEST(Entity_unit_tests, AddUserComponent_ReturnsNonNull)
 {

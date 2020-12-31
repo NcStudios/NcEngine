@@ -6,10 +6,6 @@
 
 namespace nc::graphics
 {
-    Model::Model()
-    {
-    }
-
     Model::Model(const Mesh& mesh, const Material& material)
         : m_mesh{mesh},
           m_material{material},

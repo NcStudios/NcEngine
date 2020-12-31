@@ -44,17 +44,16 @@ class ComponentSystem
 
         void Clear();
 
-    protected:
+    private:
         engine::ComponentIndexPair GetIndexPairFromHandle(const ComponentHandle handle) const;
         void MapHandleToIndexPair(const ComponentHandle handle, const engine::ComponentIndexPair targetIndex);
         engine::ComponentIndexPair AllocateNew(T ** newItemOut);
 
-    private:
         bool m_isReserveSizeMaxSize;
         uint32_t m_poolSize;
         std::vector<engine::alloc::Pool<T>> m_poolArray;
         std::unordered_map<ComponentHandle, engine::ComponentIndexPair> m_indexMap;
-        HandleManager<ComponentHandle> m_handleManager;      
+        HandleManager<ComponentHandle> m_handleManager;
 };
 
 template<class T>
@@ -116,10 +115,8 @@ ComponentHandle ComponentSystem<T>::Add(const EntityHandle parentHandle, Args&& 
 {
     T * component = nullptr;
     auto indexPair = AllocateNew(&component);
-    *component = T((args)...);
-    component->SetMemoryState(MemoryState::Valid);
     auto handle = m_handleManager.GenerateNewHandle();
-    component->Register(handle, parentHandle);
+    *component = T(handle, parentHandle, (args)...);
     MapHandleToIndexPair(handle, indexPair);
     return handle;
 }
@@ -134,7 +131,6 @@ bool ComponentSystem<T>::Remove(const ComponentHandle handle)
 
     auto removePair = GetIndexPairFromHandle(handle);
     auto & owningPool = m_poolArray[removePair.indexInPoolCollection];
-    owningPool.GetPtrTo(removePair.indexInPool)->SetMemoryState(MemoryState::Invalid);
     owningPool.Free(removePair.indexInPool);
 
     if (m_indexMap.erase(handle) != 1)

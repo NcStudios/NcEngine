@@ -9,7 +9,7 @@ namespace project
     class GamePiece : public nc::Component, public nc::physics::IClickable
     {
         public:
-            GamePiece(nc::Transform* transform);
+            GamePiece(nc::ComponentHandle handle, nc::EntityHandle parentHandle, nc::Transform* transform);
             ~GamePiece();
             void OnClick() override;
 

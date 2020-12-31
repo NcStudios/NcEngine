@@ -6,8 +6,7 @@ using namespace nc::engine::alloc;
 struct Mock
 {
     int val = 0;
-    nc::MemoryState memState = nc::MemoryState::Invalid;
-    nc::MemoryState GetMemoryState() const { return memState; }
+    nc::MemoryState m_memoryState = nc::MemoryState::Invalid;
 };
 
 TEST(Pool_unit_tests, IsFull_PoolFull_ReturnsTrue)
@@ -47,7 +46,7 @@ TEST(Pool_unit_tests, GetPtrTo_GoodArgs_GetsPtr)
     *mock = Mock{1, nc::MemoryState::Valid};
     auto actual = allocator.GetPtrTo(pos);
     EXPECT_EQ(actual->val, mock->val);
-    EXPECT_EQ(actual->GetMemoryState(), mock->GetMemoryState());
+    EXPECT_EQ(actual->m_memoryState, mock->m_memoryState);
     allocator.Free(pos);
 }
 

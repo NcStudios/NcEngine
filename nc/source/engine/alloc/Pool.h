@@ -88,10 +88,12 @@ uint32_t Pool<T>::Alloc(T ** out)
 template<class T>
 void Pool<T>::Free(uint32_t pos)
 {
-    /** Not currently doing a valid memory check as GetPtrTo
-     *  is called right before this and performs a check. Also,
-     *  the mem state is set to invalid in that call so the 
-     *  standard if state==invalid check fails. */
+    if (data[pos].m_memoryState == MemoryState::Invalid)
+    {
+        throw std::runtime_error("Pool::GetPtrTo - attempt to get unowned component");
+    }
+
+    data[pos].m_memoryState = MemoryState::Invalid;
 
     if (nextFree - 1 == pos)
     {
@@ -105,7 +107,7 @@ void Pool<T>::Free(uint32_t pos)
 template<class T>
 T * Pool<T>::GetPtrTo(uint32_t pos)
 {
-    if (data[pos].GetMemoryState() == MemoryState::Invalid)
+    if (data[pos].m_memoryState == MemoryState::Invalid)
     {
         throw std::runtime_error("Pool::GetPtrTo - attempt to get unowned component");
     }
@@ -127,7 +129,7 @@ void Pool<T>::ForEach(Func func)
 
     while(current < nextFree)
     {
-        if (data[current].GetMemoryState() == MemoryState::Invalid)
+        if (data[current].m_memoryState == MemoryState::Invalid)
         {
             ++current; continue;
         }

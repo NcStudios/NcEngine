@@ -4,6 +4,11 @@
 
 namespace nc
 {
+    NetworkDispatcher::NetworkDispatcher(ComponentHandle handle, EntityHandle parentHandle) noexcept
+        : Component(handle, parentHandle)
+    {
+    }
+
     void NetworkDispatcher::Dispatch(net::PacketType packetType, uint8_t* data)
     {
         try

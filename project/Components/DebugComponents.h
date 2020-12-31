@@ -7,13 +7,14 @@
 class SceneReset : public nc::Component
 {
     public:
-        SceneReset() = default;
+        SceneReset(nc::ComponentHandle handle, nc::EntityHandle parentHandle);
         void FrameUpdate(float dt);
 };
 
 class Timer : public nc::Component
 {
     public:
+        Timer(nc::ComponentHandle handle, nc::EntityHandle parentHandle);
         void FrameUpdate(float dt) override;
 
     private:
