@@ -24,6 +24,7 @@ namespace project
 
         m_ui = std::make_unique<project::ui::MainMenuUI>(projectConfig);
         nc::ui::UI::Set(m_ui.get());
+        auto materialProperties = graphics::MaterialProperties{};
 
         prefab::InitializeResources();
 
@@ -44,7 +45,7 @@ namespace project
         Ecs::AddComponent<Timer>(debugHandle);
 
         const std::vector<std::string> ncTextures = std::vector<std::string>({"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"});
-        graphics::Material ncMaterial = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, ncTextures};
+        graphics::Material ncMaterial =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(ncTextures, materialProperties);
         auto ncMesh = graphics::Mesh{"project//Models//Logo3d.fbx"};
         std::srand(std::time(0));
         int posRange = 30;

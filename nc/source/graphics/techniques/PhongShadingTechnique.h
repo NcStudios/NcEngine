@@ -20,7 +20,7 @@ namespace nc::graphics
     {
         public:
             PhongShadingTechnique(const std::vector<std::string>& texturePaths, MaterialProperties materialProperties = {});
-            static size_t GetUID(TechniqueType type, const std::vector<std::string>& texturePaths) noexcept;
+            static size_t GetUID(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties) noexcept;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;

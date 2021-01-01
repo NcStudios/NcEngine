@@ -11,6 +11,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/materials/Material.cpp
         ${ROOT_DIR}/source/graphics/techniques/Technique.cpp
         ${ROOT_DIR}/source/graphics/techniques/PhongShadingTechnique.cpp
+        ${ROOT_DIR}/source/graphics/techniques/WireframeTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/TechniqueManager.cpp
         ${ROOT_DIR}/source/graphics/ResourceGroup.cpp
         ${ROOT_DIR}/source/graphics/rendergraph/FrameManager.cpp

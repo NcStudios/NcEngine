@@ -60,6 +60,31 @@ namespace nc::graphics::d3dresource
     };
 }
 
+/*************
+ * Rasterizer
+ * ***********/
+namespace nc::graphics::d3dresource
+{
+    class Rasterizer : public GraphicsResource
+    {
+        public:
+            enum class Mode
+            {
+                Solid,
+                Wireframe
+            };
+        
+            Rasterizer(Mode mode);
+            void Bind() noexcept override;
+            static std::string GetUID(Mode mode) noexcept;
+    
+        private:
+            const std::string m_tag;
+            Mode m_mode;
+            Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizer;
+    };
+}
+
 /**********
 * Sampler *
 ***********/

@@ -21,7 +21,6 @@ Graphics::Graphics(HWND hwnd, float width, float height, float nearZ, float farZ
 {  
     d3dresource::GraphicsResourceManager::SetGraphics(this);
     CreateDeviceAndSwapchain(hwnd);
-    CreateRasterizerState();
     CreateRenderTargetViewFromBackBuffer();
     CreateDepthStencilView(width, height);
     BindDepthStencilView();
@@ -139,28 +138,6 @@ void Graphics::CreateDeviceAndSwapchain(HWND hwnd)
                                       D3D11_SDK_VERSION, &sd, &m_swapChain,
                                       &m_device, nullptr, &m_context)
     );
-}
-
-void Graphics::CreateRasterizerState()
-{
-    ID3D11RasterizerState* rasterizerState = nullptr;
-    auto rasterizerDesc = D3D11_RASTERIZER_DESC 
-    {
-        D3D11_FILL_SOLID, //FillMode
-        D3D11_CULL_BACK,  //CullMode
-        FALSE,            //FrontCounterClockwise
-        0,                //DepthBias
-        0.0f,             //DepthBiasClamp
-        0.0f,             //SlopeScaledDepthBias
-        TRUE,             //DepthClipEnable
-        FALSE,            //ScissorEnable
-        TRUE,            //MultisampleEnable
-        FALSE             //AntialiasedLineEnable
-    };
-    m_device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
-    m_context->RSSetState(rasterizerState);
-
-    rasterizerState->Release();
 }
 
 void Graphics::CreateRenderTargetViewFromBackBuffer()

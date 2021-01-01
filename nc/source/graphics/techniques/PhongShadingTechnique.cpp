@@ -37,6 +37,9 @@ namespace nc::graphics
 
         Step single(0);
         {
+            single.AddGraphicsResource(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
+            single.AddGraphicsResource(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Solid));
+
             // Add Textures
             uint32_t shaderIndex = 0;
             for (const auto& texturePathRef : texturePaths) 
@@ -45,13 +48,13 @@ namespace nc::graphics
             }
 
             // Add vertex shader
-            auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "pbrvertexshader.cso");
+            auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "phongvertexshader.cso");
             auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
             single.AddGraphicsResource(std::move(pvs));
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout>("pbrvertexshader", PhongInputElementDesc, pvsbc));
+            single.AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout>("phongvertexshader", PhongInputElementDesc, pvsbc));
 
             // Add pixel shader
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "pbrpixelshader.cso"));
+            single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "phongpixelshader.cso"));
             single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
             single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::Sampler>(SAMPLER_TAG));
             m_materialPropertiesBuffer = std::make_unique<PixelConstantBuffer<MaterialProperties>>(materialProperties, 1u);
@@ -89,13 +92,15 @@ namespace nc::graphics
     
     #endif
 
-    size_t PhongShadingTechnique::GetUID(TechniqueType type, const std::vector<std::string>& texturePaths) noexcept
+    size_t PhongShadingTechnique::GetUID(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties) noexcept
     {
-        auto hash = std::to_string((uint8_t)type);
+        auto hash = std::to_string((uint8_t)TechniqueType::PhongShadingTechnique);
         for (const auto& texturePathRef : texturePaths) 
         {
             hash += texturePathRef;
         }
+
+        hash += std::to_string(materialProperties.color.x);
         return std::hash<std::string>{}(hash);
     }
 

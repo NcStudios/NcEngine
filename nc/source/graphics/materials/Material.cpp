@@ -7,12 +7,25 @@
 
 namespace nc::graphics
 {
-    Material::Material() = default;
-    Material::~Material() = default;
-
     void Material::Submit(FrameManager& frame, const Model& model) const noexcept
     {
         m_technique->Submit(frame, model);
+    }
+
+    template<>
+    Material Material::CreateMaterial<nc::graphics::TechniqueType::PhongShadingTechnique>(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties)
+    {
+        auto material = Material();
+        material.m_technique = TechniqueManager::GetTechnique<PhongShadingTechnique>(texturePaths, materialProperties);
+        return material;
+    }
+
+    template<>
+    Material Material::CreateMaterial<nc::graphics::TechniqueType::WireframeTechnique>()
+    {
+        auto material = Material();
+        material.m_technique = TechniqueManager::GetTechnique<WireframeTechnique>();
+        return material;
     }
 
     #ifdef NC_EDITOR_ENABLED

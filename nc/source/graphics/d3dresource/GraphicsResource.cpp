@@ -22,7 +22,7 @@ namespace nc::graphics::d3dresource
     /**********
     * Stencil *
     ***********/
-    auto tagFromMode = [](Stencil::Mode mode)
+    auto stencilTagFromMode = [](Stencil::Mode mode)
     {
         switch (mode)
         {
@@ -38,7 +38,7 @@ namespace nc::graphics::d3dresource
     };
 
     Stencil::Stencil(Mode mode)
-    : m_tag {tagFromMode(mode)},
+    : m_tag {stencilTagFromMode(mode)},
       m_mode {mode}
     {
         D3D11_DEPTH_STENCIL_DESC dsDesc = CD3D11_DEPTH_STENCIL_DESC{ CD3D11_DEFAULT{} };
@@ -81,7 +81,74 @@ namespace nc::graphics::d3dresource
 
     std::string Stencil::GetUID(Stencil::Mode mode) noexcept
     {
-        return typeid(Stencil).name() + tagFromMode(mode);
+        return typeid(Stencil).name() + stencilTagFromMode(mode);
+    }
+
+    /*************
+     * Rasterizer
+     * ***********/
+    auto rasterizerTagFromMode = [](Rasterizer::Mode mode)
+    {
+        switch (mode)
+        {
+            case Rasterizer::Mode::Wireframe:
+                return std::string{"Wireframe"};
+            case Rasterizer::Mode::Solid:
+                return std::string{"Solid"};
+            default:
+                throw std::runtime_error("Invalid mode specified.");
+        }
+    };
+
+    Rasterizer::Rasterizer(Mode mode)
+    : m_tag {rasterizerTagFromMode(mode)},
+      m_mode {mode}
+    {
+        D3D11_RASTERIZER_DESC rasterizerDesc = CD3D11_RASTERIZER_DESC { CD3D11_DEFAULT{} };
+
+        switch (m_mode)
+        {
+            case Mode::Solid:
+            {
+                rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+                rasterizerDesc.CullMode  = D3D11_CULL_BACK;
+                rasterizerDesc.FrontCounterClockwise = FALSE;
+                rasterizerDesc.DepthBias = 0;
+                rasterizerDesc.DepthBiasClamp = 0.0f;
+                rasterizerDesc.SlopeScaledDepthBias = 0.0f;
+                rasterizerDesc.DepthClipEnable = TRUE;
+                rasterizerDesc.ScissorEnable = FALSE;
+                rasterizerDesc.MultisampleEnable = TRUE;
+                rasterizerDesc.AntialiasedLineEnable = FALSE;
+                break;
+            }
+            case Mode::Wireframe:
+            {
+				rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+                rasterizerDesc.CullMode  = D3D11_CULL_BACK;
+                rasterizerDesc.FrontCounterClockwise = FALSE;
+                rasterizerDesc.DepthBias = 0;
+                rasterizerDesc.DepthBiasClamp = 0.0f;
+                rasterizerDesc.SlopeScaledDepthBias = 0.0f;
+                rasterizerDesc.DepthClipEnable = TRUE;
+                rasterizerDesc.ScissorEnable = FALSE;
+                rasterizerDesc.MultisampleEnable = TRUE;
+                rasterizerDesc.AntialiasedLineEnable = FALSE;
+                break;
+            }
+        }
+        THROW_FAILED(GetDevice()->CreateRasterizerState(&rasterizerDesc, &m_rasterizer));
+    }
+
+    void Rasterizer::Bind() noexcept
+    {
+        GetContext()->RSSetState(m_rasterizer.Get());
+        m_rasterizer->Release();
+    }
+
+    std::string Rasterizer::GetUID(Rasterizer::Mode mode) noexcept
+    {
+        return typeid(Rasterizer).name() + rasterizerTagFromMode(mode);
     }
 
     /**********
