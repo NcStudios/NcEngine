@@ -1,5 +1,6 @@
 #include "graphics\Mesh.h"
 #include "graphics\d3dresource\GraphicsResourceManager.h"
+#include "graphics\d3dresource\MeshResources.h"
 #include "Engine.h"
 #include "DebugUtils.h"
 #include "Vertex.h"

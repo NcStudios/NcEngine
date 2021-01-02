@@ -1,22 +1,26 @@
 #pragma once
 
-#include "graphics/techniques/TechniqueManager.h"
+#include "graphics/techniques/TechniqueType.h"
+#include "MaterialProperties.h"
 
 #include <string>
+#include <vector>
 
 namespace nc::graphics
 {
+    class Model;
     class Technique;
-    enum class TechniqueType : uint8_t;
 
     class Material
     {
         public: 
-            Material() = default;
+            template<TechniqueType T, class ...Args>
+            static Material CreateMaterial(Args&& ... args);
 
-            template<class ... Args>
-            explicit Material(TechniqueType type, Args&& ... args);
-            void SetTechnique(const Technique* technique) noexcept;
+            #ifdef NC_EDITOR_ENABLED
+            void EditorGuiElement();
+            #endif
+            
             void Submit(class FrameManager& frame, const Model& model) const noexcept;
             
         private:
@@ -24,10 +28,10 @@ namespace nc::graphics
 
     };
 
-    template<class ... Args>
-    Material::Material(TechniqueType type, Args&& ... args)
-    {
-        m_technique = TechniqueManager::GetTechnique(type, std::forward<Args>(args)...);
-    }
+    template<>
+    Material Material::CreateMaterial<nc::graphics::TechniqueType::PhongShadingTechnique>(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties);
 
+    template<>
+    Material Material::CreateMaterial<nc::graphics::TechniqueType::WireframeTechnique>();
+  
 }

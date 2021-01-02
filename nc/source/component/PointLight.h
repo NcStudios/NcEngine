@@ -1,8 +1,6 @@
 #pragma once
 #include "Component.h"
 #include "directx/math/DirectXMath.h"
-
-#include "graphics/d3dresource/GraphicsResource.h"
 #include "config/Config.h"
 
 namespace nc::graphics { class Graphics; }

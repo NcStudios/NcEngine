@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphics/techniques/Technique.h"
-#include "graphics/techniques/PhongShadingTechnique.h"
 #include "graphics/techniques/TechniqueType.h"
 
 #include <unordered_map>
@@ -13,26 +12,26 @@ namespace nc::graphics
     class TechniqueManager
     {
         public:
-            template<class ... Args>
-            static Technique* GetTechnique(TechniqueType type, Args&& ... args);
+            template<std::derived_from<Technique> T, class ...Args>
+            static Technique* GetTechnique(Args&& ... args);
 
         private:
-            template<class ... Args>
-            static size_t GetUID(TechniqueType type, Args&& ... args);
+            template<std::derived_from<Technique> T, class ...Args>
+            static size_t GetUID(Args&& ... args);
             
-            template<class ... Args>
-            static std::unique_ptr<Technique> AddTechnique(TechniqueType type, Args&& ... args);
+            template<std::derived_from<Technique> T, class ...Args>
+            static std::unique_ptr<Technique> AddTechnique(Args&& ... args);
             static std::unordered_map<size_t, std::unique_ptr<Technique>> m_techniqueMap;
     };
 
-    template<class ... Args>
-    Technique* TechniqueManager::GetTechnique(TechniqueType type, Args&& ... args)
+    template<std::derived_from<Technique> T, class ...Args>
+    Technique* TechniqueManager::GetTechnique(Args&& ... args)
     {
-        auto uid = GetUID(type, std::forward<Args>(args)...);
+        auto uid = GetUID<T>(std::forward<Args>(args)...);
         auto technique = m_techniqueMap.find(uid);
         if (technique == m_techniqueMap.end())
         {
-            m_techniqueMap.emplace(uid, AddTechnique(type,std::forward<Args>(args)...));
+            m_techniqueMap.emplace(uid, AddTechnique<T>(std::forward<Args>(args)...));
             return m_techniqueMap.at(uid).get();
         }
         else
@@ -41,27 +40,15 @@ namespace nc::graphics
         }
     }
 
-    template<class ... Args>
-    std::unique_ptr<Technique> TechniqueManager::AddTechnique(TechniqueType type, Args&& ... args)
+    template<std::derived_from<Technique> T, class ...Args>
+    std::unique_ptr<Technique> TechniqueManager::AddTechnique(Args&& ... args)
     {
-        switch (type)
-        {
-            case TechniqueType::PhongShadingTechnique:
-                return std::make_unique<PhongShadingTechnique>(std::forward<Args>(args)...);
-            default:
-                throw std::runtime_error("Tried to create a technique with a TechniqueType that does not exist.");
-        }
+        return std::make_unique<T>(std::forward<Args>(args)...);
     }
 
-    template<class ... Args>
-    size_t TechniqueManager::GetUID(TechniqueType type, Args&& ... args)
+    template<std::derived_from<Technique> T, class ...Args>
+    size_t TechniqueManager::GetUID(Args&& ... args)
     {
-        switch (type)
-        {
-            case TechniqueType::PhongShadingTechnique:
-                return PhongShadingTechnique::GetUID(type, std::forward<Args>(args)...);
-            default:
-                throw std::runtime_error("Tried to get the UID of a TechniqueType that does not exist.");
-        }
+        return T::GetUID(std::forward<Args>(args)...);
     }
 }
