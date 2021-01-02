@@ -15,10 +15,8 @@ namespace nc
     {
         public:
             PointLight(ComponentHandle handle, EntityHandle parentHandle) noexcept;
-            PointLight() = default;
-            ~PointLight() = default;
-            PointLight(PointLight&&) = default;
-            PointLight& operator=(PointLight&&) = default;
+            PointLight(PointLight&&) = delete;
+            PointLight& operator=(PointLight&&) = delete;
             PointLight(const PointLight&) = delete;
             PointLight& operator=(const PointLight&) = delete;
 
@@ -44,7 +42,6 @@ namespace nc
             } PixelConstBufData;
 
         private:
-            
             Transform * m_transform;
     };
 }

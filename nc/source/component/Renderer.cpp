@@ -11,10 +11,7 @@
 
 namespace nc
 {
-    Renderer::Renderer() = default;
     Renderer::~Renderer() = default;
-    Renderer::Renderer(Renderer&&) = default;
-    Renderer& Renderer::operator=(Renderer&&) = default;
 
     Renderer::Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh& mesh, graphics::Material& material) noexcept
         : Component(handle, parentHandle),

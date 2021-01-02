@@ -2,6 +2,8 @@
 IN PROGRESS
 ***********
 
+Material ctor takes technique; then Material::CreateMaterial can use rvo and do return Material{GetTechnique...}
+
 ***********
 BUGS
 ***********

@@ -47,7 +47,7 @@ class ComponentSystem
     private:
         engine::ComponentIndexPair GetIndexPairFromHandle(const ComponentHandle handle) const;
         void MapHandleToIndexPair(const ComponentHandle handle, const engine::ComponentIndexPair targetIndex);
-        engine::ComponentIndexPair AllocateNew(T ** newItemOut);
+        void AddPool();
 
         bool m_isReserveSizeMaxSize;
         uint32_t m_poolSize;
@@ -86,38 +86,24 @@ void ComponentSystem<T>::ForEach(Func func)
 }
 
 template<class T>
-engine::ComponentIndexPair ComponentSystem<T>::AllocateNew(T ** newItemOut)
-{
-    for(uint32_t i = 0; i < m_poolArray.size(); ++i)
-    {
-        if (!m_poolArray[i].IsFull())
-        {
-            auto freePos = m_poolArray[i].Alloc(newItemOut);
-            return { i, freePos };
-        }
-    }
-
-    // The first pool in the pool array is full, and we have set a hard limit on total items.
-    if (m_isReserveSizeMaxSize)
-    {
-        throw std::runtime_error("ComponentSystem::AllocateNew - Pool is at max capacity and an additional item add was attempted.");
-    }
-
-    m_poolArray.push_back(engine::alloc::Pool<T>(m_poolSize));
-    uint32_t poolIndex = m_poolArray.size() - 1;
-    uint32_t freePos = m_poolArray.back().Alloc(newItemOut);
-    return { poolIndex, freePos };
-}
-
-template<class T>
 template<class ... Args>
-ComponentHandle ComponentSystem<T>::Add(const EntityHandle parentHandle, Args&& ... args)
+ComponentHandle ComponentSystem<T>::Add(EntityHandle parentHandle, Args&& ... args)
 {
-    T * component = nullptr;
-    auto indexPair = AllocateNew(&component);
+    auto pool = std::find_if_not(m_poolArray.begin(), m_poolArray.end(), [](auto& pool)
+    {
+        return pool.IsFull();
+    });
+
+    if(pool == m_poolArray.end())
+    {
+        AddPool();
+        pool = m_poolArray.end() - 1;
+    }
+
     auto handle = m_handleManager.GenerateNewHandle();
-    *component = T(handle, parentHandle, (args)...);
-    MapHandleToIndexPair(handle, indexPair);
+    uint32_t posInPool = pool->Alloc(handle, parentHandle, std::forward<Args>(args)...);
+    uint32_t poolIndex = pool - m_poolArray.begin();
+    MapHandleToIndexPair(handle, {poolIndex, posInPool});
     return handle;
 }
 
@@ -182,5 +168,16 @@ void ComponentSystem<T>::MapHandleToIndexPair(const ComponentHandle handle, cons
     {
         m_indexMap.emplace(handle, pair);
     }
+}
+
+template<class T>
+void ComponentSystem<T>::AddPool()
+{
+    if (m_isReserveSizeMaxSize)
+    {
+        throw std::runtime_error("ComponentSystem::AllocateNew - Pool is at max capacity and an additional item add was attempted.");
+    }
+
+    m_poolArray.push_back(engine::alloc::Pool<T>(m_poolSize));
 }
 } // end namespace nc::ecs

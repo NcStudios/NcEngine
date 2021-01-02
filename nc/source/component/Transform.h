@@ -16,12 +16,10 @@ namespace nc
     {
         public:
             Transform(ComponentHandle handle, EntityHandle parentHandle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
-            Transform() = default;
-            ~Transform() = default;
             Transform(const Transform&) = delete;
-            Transform(Transform&&) = default;
+            Transform(Transform&&) = delete;
             Transform& operator=(const Transform&) = delete;
-            Transform& operator=(Transform&&) = default;
+            Transform& operator=(Transform&&) = delete;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;

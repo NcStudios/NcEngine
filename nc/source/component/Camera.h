@@ -11,6 +11,5 @@ namespace nc
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
-
     };
 }
