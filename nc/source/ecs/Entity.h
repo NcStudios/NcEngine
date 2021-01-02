@@ -66,8 +66,6 @@ namespace nc
     template<std::derived_from<Component> T, class ... Args>
     T * Entity::AddUserComponent(Args&& ... args) noexcept
     {
-        /** @todo user components dont use handles at all */
-
         if (HasUserComponent<T>())
         {
             return nullptr;

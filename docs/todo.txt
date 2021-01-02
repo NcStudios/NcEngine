@@ -3,6 +3,7 @@ IN PROGRESS
 ***********
 
 Material ctor takes technique; then Material::CreateMaterial can use rvo and do return Material{GetTechnique...}
+user components dont use handles at all
 
 ***********
 BUGS
