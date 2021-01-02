@@ -8,12 +8,15 @@
 
 namespace nc::graphics
 {
+    class FrameManager;
     class Model;
     class Technique;
 
     class Material
     {
-        public: 
+        public:
+            Material(Technique* technique);
+
             template<TechniqueType T, class ...Args>
             static Material CreateMaterial(Args&& ... args);
 
@@ -25,7 +28,6 @@ namespace nc::graphics
             
         private:
             Technique* m_technique;
-
     };
 
     template<>
@@ -33,5 +35,4 @@ namespace nc::graphics
 
     template<>
     Material Material::CreateMaterial<nc::graphics::TechniqueType::WireframeTechnique>();
-  
 }

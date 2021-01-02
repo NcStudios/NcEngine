@@ -2,14 +2,12 @@
 IN PROGRESS
 ***********
 
-Material ctor takes technique; then Material::CreateMaterial can use rvo and do return Material{GetTechnique...}
+Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 user components dont use handles at all
 
 ***********
 BUGS
 ***********
--Component::Initialize() is called after constructor runs meaning handle/entity data
-    is not available at the time of constructor invocation
 -rotations are still strange sometimes(also need world/local options)
 -don't believe gfx resources are ever unloaded
 - PBRMaterial.cpp GraphicsResource wont bind two consecutive same textures because the index won't increment if the first same resources has been added.
