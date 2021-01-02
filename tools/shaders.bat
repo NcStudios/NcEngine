@@ -1,6 +1,4 @@
-tools\fxc /T vs_5_0 /Fo %~dp0\..\project\shaders\compiled\vertexshader.cso %~dp0\..\project\shaders\VertexShader.hlsl
-tools\fxc /T ps_5_0 /Fo %~dp0\..\project\shaders\compiled\pixelshader.cso %~dp0\..\project\shaders\PixelShader.hlsl
-tools\fxc /T vs_5_0 /Fo %~dp0\..\project\shaders\compiled\litvertexshader.cso %~dp0\..\project\shaders\LitVertex.hlsl
-tools\fxc /T ps_5_0 /Fo %~dp0\..\project\shaders\compiled\litpixelshader.cso %~dp0\..\project\shaders\LitPixel.hlsl
-tools\fxc /T ps_5_0 /Fo %~dp0\..\project\shaders\compiled\pbrpixelshader.cso %~dp0\..\project\shaders\PBRPixelShader.hlsl
-tools\fxc /T vs_5_0 /Fo %~dp0\..\project\shaders\compiled\pbrvertexshader.cso %~dp0\..\project\shaders\PBRVertexShader.hlsl
+tools\fxc /T ps_5_0 /Fo %~dp0\..\project\shaders\compiled\phongpixelshader.cso %~dp0\..\project\shaders\PhongPixelShader.hlsl
+tools\fxc /T vs_5_0 /Fo %~dp0\..\project\shaders\compiled\phongvertexshader.cso %~dp0\..\project\shaders\PhongVertexShader.hlsl
+tools\fxc /T ps_5_0 /Fo %~dp0\..\project\shaders\compiled\wireframepixelshader.cso %~dp0\..\project\shaders\WireframePixelShader.hlsl
+tools\fxc /T vs_5_0 /Fo %~dp0\..\project\shaders\compiled\wireframevertexshader.cso %~dp0\..\project\shaders\WireframeVertexShader.hlsl

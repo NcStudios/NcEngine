@@ -17,8 +17,10 @@ namespace nc::graphics
     void FrameManager::Execute(Graphics* gfx) const
     {
         // PBR Shading Pass
-        GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off)->Bind();
-        m_passes[0].Execute(gfx);
+       m_passes[0].Execute(gfx);
+
+        // Wireframe Pass
+        m_passes[1].Execute(gfx);
     }
 
     void FrameManager::Reset() noexcept

@@ -2,11 +2,13 @@
 
 #include "PointLightManager.h"
 #include "Ecs.h"
-#include "graphics/d3dresource/GraphicsResource.h"
+#include "graphics/d3dresource/ConstantBufferResources.h"
 
 namespace nc
 {
     const uint32_t PointLightManager::MAX_POINT_LIGHTS;
+
+    PointLightManager::~PointLightManager() = default;
 
     PointLightManager::PointLightManager()
         : m_currentIndex{0u},

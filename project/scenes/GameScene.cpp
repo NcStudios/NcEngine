@@ -27,6 +27,7 @@ namespace project
         m_log = std::make_unique<project::log::GameLog>();
         m_hud = std::make_unique<project::ui::Hud>(m_log.get(), projectConfig);
         nc::ui::UI::Set(m_hud.get());
+        auto materialProperties = graphics::MaterialProperties{};
 
         // Player Network Instance
         auto playerHandle = Ecs::CreateEntity("Player");
@@ -60,7 +61,7 @@ namespace project
 
         // Table
         const std::vector<std::string> tableTextures = {"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-        graphics::Material tableMaterial = graphics::Material{graphics::TechniqueType::PhongShadingTechnique, tableTextures};
+        graphics::Material tableMaterial =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(tableTextures, materialProperties);
         auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
         auto tableHandle = Ecs::CreateEntity({2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, {1.5708f, 0.0f, 1.5708f}, Vector3::One() * 7.5, "Table Piece");
         Ecs::AddComponent<Renderer>(tableHandle, tableMesh, tableMaterial);

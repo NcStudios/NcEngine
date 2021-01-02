@@ -59,7 +59,6 @@ namespace nc
                 #endif
 
                 void CreateDeviceAndSwapchain(HWND hwnd);
-                void CreateRasterizerState();
                 void CreateRenderTargetViewFromBackBuffer();
                 void CreateDepthStencilView(float width, float height);
                 void BindDepthStencilView();

@@ -1,6 +1,8 @@
 #include "Model.h"
 #include "component/Transform.h"
 #include "d3dresource/GraphicsResourceManager.h"
+#include "d3dresource/MeshResources.h"
+#include "d3dresource/ConstantBufferResources.h"
 #include "Graphics.h"
 #include "materials/Material.h"
 
