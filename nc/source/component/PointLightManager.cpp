@@ -2,7 +2,6 @@
 
 #include "PointLightManager.h"
 #include "Ecs.h"
-#include "graphics/d3dresource/GraphicsResource.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
 
 namespace nc

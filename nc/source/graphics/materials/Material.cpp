@@ -1,7 +1,10 @@
 #include "Material.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "graphics/d3dresource/ConstantBufferResources.h"
 #include "graphics/Model.h"
 #include "graphics/techniques/TechniqueManager.h"
+#include "graphics/techniques/PhongShadingTechnique.h"
+#include "graphics/techniques/WireframeTechnique.h"
 #include "Engine.h"
 #include "config/Config.h"
 

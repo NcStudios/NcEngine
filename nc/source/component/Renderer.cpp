@@ -1,7 +1,6 @@
 #include "Renderer.h"
 #include "graphics/Graphics.h"
 #include "graphics/Model.h"
-#include "graphics/d3dresource/GraphicsResource.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
 #include "graphics/rendergraph/FrameManager.h"
 #include "Ecs.h"
