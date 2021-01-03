@@ -28,7 +28,8 @@ namespace nc::graphics
     class Model 
     {
         public:
-            Model();
+            Model() = default;
+            ~Model() = default;
             Model(const Mesh&);
             Model(const Mesh& mesh, const Material& material);
 

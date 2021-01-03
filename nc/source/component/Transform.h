@@ -15,8 +15,11 @@ namespace nc
     class Transform final : public Component
     {
         public:
-            Transform() noexcept;
-            Transform(const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
+            Transform(ComponentHandle handle, EntityHandle parentHandle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
+            Transform(const Transform&) = delete;
+            Transform(Transform&&) = delete;
+            Transform& operator=(const Transform&) = delete;
+            Transform& operator=(Transform&&) = delete;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;

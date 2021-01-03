@@ -2,31 +2,30 @@
 #include "source/log/GameLog.h"
 #include "Ecs.h"
 
+using namespace nc;
+
 namespace project
 {
-    GamePiece::GamePiece(nc::Transform* transform)
-        : nc::physics::IClickable(transform, 40.0f),
+    GamePiece::GamePiece(ComponentHandle handle, EntityHandle parentHandle, nc::Transform* transform)
+        : Component(handle, parentHandle),
+          physics::IClickable(transform, 40.0f),
           m_isRegisteredAsClickable{ true },
-          m_entityTag{}
+          m_entityTag{Ecs::GetEntity(m_parentHandle)->Tag}
     {
-        nc::physics::Physics::RegisterClickable(this);
-        layers |= nc::physics::Layer::GamePiece;
+        physics::Physics::RegisterClickable(this);
+        layers |= physics::Layer::GamePiece;
     }
 
     GamePiece::~GamePiece()
     {
         if(m_isRegisteredAsClickable)
         {
-            nc::physics::Physics::UnregisterClickable(this);
+            physics::Physics::UnregisterClickable(this);
         }
     }
 
     void GamePiece::OnClick()
     {
-        if(m_entityTag == "")
-        {
-            m_entityTag = nc::Ecs::GetEntity(m_parentHandle)->Tag;
-        }
         project::log::GameLog::Log("Clicked: " + m_entityTag);
     }
 

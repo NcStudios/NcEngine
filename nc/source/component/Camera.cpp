@@ -8,8 +8,10 @@
 
 namespace nc
 {
-    Camera::Camera()
-    {}
+    Camera::Camera(ComponentHandle handle, EntityHandle parentHandle) noexcept
+        : Component(handle, parentHandle)
+    {
+    }
 
     #ifdef NC_EDITOR_ENABLED
     void Camera::EditorGuiElement()

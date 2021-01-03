@@ -7,7 +7,13 @@
 #include <chrono>
 #include <iostream>
 
+using namespace nc;
 using namespace nc::input;
+
+SceneReset::SceneReset(ComponentHandle handle, EntityHandle parentHandle)
+    : Component(handle, parentHandle)
+{
+}
 
 void SceneReset::FrameUpdate(float dt)
 {
@@ -20,6 +26,11 @@ void SceneReset::FrameUpdate(float dt)
     {
         nc::scene::SceneManager::ChangeScene(std::make_unique<project::DemoScene>());
     }
+}
+
+Timer::Timer(ComponentHandle handle, EntityHandle parentHandle)
+    : Component(handle, parentHandle)
+{
 }
 
 void Timer::FrameUpdate(float dt)

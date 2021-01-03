@@ -8,9 +8,10 @@ using namespace nc;
 
 namespace project
 {
-    MouseFollower::MouseFollower()
-    : m_screenDimensions { Window::GetDimensions() },
-      m_transform { nullptr },
+    MouseFollower::MouseFollower(ComponentHandle handle, EntityHandle parentHandle)
+    : Component(handle, parentHandle),
+      m_screenDimensions { Window::GetDimensions() },
+      m_transform { Ecs::GetComponent<nc::Transform>(m_parentHandle) },
       m_zDepth { 0.0f },
       m_zRatio { 0.0f }
     {
@@ -31,9 +32,6 @@ namespace project
 
     void MouseFollower::FrameUpdate(float dt)
     {
-        if(!m_transform)
-            m_transform = Ecs::GetComponent<nc::Transform>(m_parentHandle);
-
         m_zDepth += (float)input::MouseWheel() * dt * 2.0f;
         m_zRatio = m_viewPortDist / m_zDepth;
         auto worldX = input::MouseX - m_screenDimensions.x / 2;

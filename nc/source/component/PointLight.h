@@ -12,11 +12,9 @@ namespace nc
     class PointLight final: public Component
     {
         public:
-
-            PointLight();
-            ~PointLight();
-            PointLight(PointLight&&);
-            PointLight& operator=(PointLight&&);
+            PointLight(ComponentHandle handle, EntityHandle parentHandle) noexcept;
+            PointLight(PointLight&&) = delete;
+            PointLight& operator=(PointLight&&) = delete;
             PointLight(const PointLight&) = delete;
             PointLight& operator=(const PointLight&) = delete;
 
@@ -42,7 +40,6 @@ namespace nc
             } PixelConstBufData;
 
         private:
-            
             Transform * m_transform;
     };
 }

@@ -6,11 +6,11 @@
 class CamController : public nc::Component
 {
     public:
-        CamController();
+        CamController(nc::ComponentHandle handle, nc::EntityHandle parentHandle);
         void FrameUpdate(float dt) override;
 
     private:
-        nc::Transform * m_mainCameraTransform = nullptr;
+        nc::Transform * m_mainCameraTransform;
         const nc::config::Config& m_config;
 
         nc::Vector3 GetCameraZoomMovement();

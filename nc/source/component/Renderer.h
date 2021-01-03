@@ -17,13 +17,12 @@ namespace nc
     class Renderer final: public Component
     {
         public:
-            Renderer();
-            Renderer(graphics::Mesh& mesh, graphics::Material& material);
-            Renderer(const Renderer&) = delete;
-            Renderer(Renderer&&);
-            Renderer& operator=(const Renderer&) = delete;
-            Renderer& operator=(Renderer&&);
+            Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh& mesh, graphics::Material& material) noexcept;
             ~Renderer();
+            Renderer(const Renderer&) = delete;
+            Renderer(Renderer&&) = delete;
+            Renderer& operator=(const Renderer&) = delete;
+            Renderer& operator=(Renderer&&) = delete;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;

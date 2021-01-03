@@ -7,7 +7,7 @@ namespace project
     class MouseFollower : public nc::Component, public nc::window::IOnResizeReceiver
     {
         public:
-            MouseFollower();
+            MouseFollower(nc::ComponentHandle handle, nc::EntityHandle parentHandle);
             ~MouseFollower();
             void FrameUpdate(float dt) override;
             void OnResize(nc::Vector2 screenDimensions) override;

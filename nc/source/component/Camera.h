@@ -6,11 +6,10 @@ namespace nc
     class Camera final: public Component
     {
         public:
-            Camera();
+            Camera(ComponentHandle handle, EntityHandle parentHandle) noexcept;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
-
     };
 }

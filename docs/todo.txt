@@ -2,11 +2,12 @@
 IN PROGRESS
 ***********
 
+Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
+user components dont use handles at all
+
 ***********
 BUGS
 ***********
--Component::Initialize() is called after constructor runs meaning handle/entity data
-    is not available at the time of constructor invocation
 -rotations are still strange sometimes(also need world/local options)
 -don't believe gfx resources are ever unloaded
 - PBRMaterial.cpp GraphicsResource wont bind two consecutive same textures because the index won't increment if the first same resources has been added.
@@ -17,7 +18,6 @@ TO ADD
 ***********
 -add global search to api - GlobalGetComponent
 -update physics to 3d
--support for multiple cameras
 -lights
     -improve point light components and how they relate to entities
     -support for multiple lights
@@ -35,8 +35,6 @@ LOW PRIORITY
 -fix naming of user components in gui
 -main window/main menu dilemma
 -camera needs parameters for fov/clipping planes
--Entity (and other places) - many public methods could be private if Engine was friend
--make generating new user types easier/quicker (untility prog?)
 -save changes in debug mode
 -all d3d "slots" are passed at uint literals, look into what exactly
     is needed here - can we use an enum for these so there is some 
