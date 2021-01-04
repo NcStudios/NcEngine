@@ -73,7 +73,7 @@ namespace nc
         return lightPtr;
     }
 
-    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh& mesh, graphics::Material& material)
+    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material)
     {
         auto entity = GetEntity(handle);
         IF_THROW(!entity, "Bad handle");
@@ -81,7 +81,7 @@ namespace nc
         auto impl = Ecs::m_impl;
         IF_THROW(impl->m_rendererSystem->Contains(entity->Handles.renderer), "Adding renderer - entity already has a renderer");
 
-        auto rendererHandle = impl->m_rendererSystem->Add(handle, mesh, material);
+        auto rendererHandle = impl->m_rendererSystem->Add(handle, std::move(mesh), std::move(material));
         entity->Handles.renderer = rendererHandle;
         return impl->m_rendererSystem->GetPointerTo(rendererHandle);
     }
@@ -97,6 +97,17 @@ namespace nc
         auto dispatcherHandle = impl->m_networkDispatcherSystem->Add(handle);
         entity->Handles.networkDispatcher = dispatcherHandle;
         return impl->m_networkDispatcherSystem->GetPointerTo(dispatcherHandle);
+    }
+
+    template<> Collider* Ecs::AddComponent<Collider>(EntityHandle handle, Vector3 scale)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        auto impl = Ecs::m_impl;
+        IF_THROW(impl->m_colliderSystem->Contains(entity->Handles.collider), "Adding Collider - entity already has a a Collider");
+        auto colliderHandle = impl->m_colliderSystem->Add(handle, scale);
+        entity->Handles.collider = colliderHandle;
+        return impl->m_colliderSystem->GetPointerTo(colliderHandle);
     }
 
     template<> bool Ecs::RemoveComponent<PointLight>(EntityHandle handle)
@@ -118,6 +129,13 @@ namespace nc
         auto entity = GetEntity(handle);
         IF_THROW(!entity, "Bad handle");
         return Ecs::m_impl->m_networkDispatcherSystem->Remove(entity->Handles.networkDispatcher);
+    }
+
+    template<> bool Ecs::RemoveComponent<Collider>(EntityHandle handle)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        return Ecs::m_impl->m_colliderSystem->Remove(entity->Handles.collider);
     }
 
     template<> PointLight* Ecs::GetComponent<PointLight>(EntityHandle handle)
@@ -148,6 +166,13 @@ namespace nc
         return Ecs::m_impl->m_networkDispatcherSystem->GetPointerTo(entity->Handles.networkDispatcher);
     }
 
+    template<> Collider* Ecs::GetComponent<Collider>(EntityHandle handle)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        return Ecs::m_impl->m_colliderSystem->GetPointerTo(entity->Handles.collider);
+    }
+
     template<> bool Ecs::HasComponent<PointLight>(EntityHandle handle)
     {
         auto entity = GetEntity(handle);
@@ -167,5 +192,12 @@ namespace nc
         auto entity = GetEntity(handle);
         IF_THROW(!entity, "Bad handle");
         return Ecs::m_impl->m_networkDispatcherSystem->Contains(entity->Handles.networkDispatcher);
+    }
+
+    template<> bool Ecs::HasComponent<Collider>(EntityHandle handle)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        return Ecs::m_impl->m_colliderSystem->Contains(entity->Handles.collider);
     }
 }

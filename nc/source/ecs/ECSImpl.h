@@ -11,6 +11,7 @@
 namespace nc
 {
     class Ecs;
+    class Collider;
     class NetworkDispatcher;
     class PointLight;
     class Renderer;
@@ -44,6 +45,7 @@ namespace ecs
             HandleManager<EntityHandle> m_handleManager;
             EntityMap m_active;
             EntityMap m_toDestroy;
+            std::unique_ptr<ComponentSystem<Collider>> m_colliderSystem;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;

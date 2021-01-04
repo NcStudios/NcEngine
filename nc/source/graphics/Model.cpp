@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    Model::Model(const Mesh& mesh, const Material& material)
+    Model::Model(Mesh&& mesh, Material&& material)
         : m_mesh{mesh},
           m_material{material},
           m_indexBuffer{nullptr},
@@ -55,6 +55,15 @@ namespace nc::graphics
     void Model::UpdateTransformationMatrix(Transform* transform) noexcept
     {
         m_transformationMatrix = transform->GetMatrixXM();
+    }
+
+    void Model::UpdateTransformationMatrixHack(Transform* transform, const Vector3& scale) noexcept
+    {
+        auto v_rot = DirectX::XMMatrixRotationRollPitchYaw(transform->Pitch(), transform->Yaw(), transform->Roll());
+        auto v_scl = DirectX::XMMatrixScaling(transform->SclX(), transform->SclY(), transform->SclZ());
+        auto v_trn = DirectX::XMMatrixTranslation(transform->PosX(), transform->PosY(), transform->PosZ());
+        auto v_scl2 = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+        m_transformationMatrix = v_scl * v_scl2 * v_rot * v_trn;
     }
 
     DirectX::XMMATRIX Model::GetTransformXM() const noexcept

@@ -4,6 +4,8 @@
 #include "Ecs.h"
 #include "graphics/Graphics.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "component/Collider.h"
+#include "component/NetworkDispatcher.h"
 #include "component/PointLight.h"
 #include "component/Renderer.h"
 #include "input/Input.h"
@@ -132,8 +134,14 @@ namespace nc::ui::editor
 
         nc::Ecs::GetComponent<nc::Transform>(handle)->EditorGuiElement();
 
+        nc::NetworkDispatcher* disp = nc::Ecs::GetComponent<nc::NetworkDispatcher>(handle);
+        if(disp) { disp->EditorGuiElement(); }
+
         nc::Renderer* rend = nc::Ecs::GetComponent<nc::Renderer>(handle);
         if(rend) { rend->EditorGuiElement(); }
+
+        nc::Collider* col = nc::Ecs::GetComponent<nc::Collider>(handle);
+        if(col) { col->EditorGuiElement(); }
 
         nc::PointLight* light = nc::Ecs::GetComponent<PointLight>(handle);
         if(light) { light->EditorGuiElement(); }

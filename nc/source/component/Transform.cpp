@@ -26,21 +26,21 @@ namespace nc
             ImGui::Spacing();  ImGui::Separator();  ImGui::Text("Transform");
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Position");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat( "##xpos", &m_position.x, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat( "##ypos", &m_position.y, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat( "##zpos", &m_position.z,  -80.0f, 80.0f, "%.1f", dragSpeed);
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat( "##transformxpos", &m_position.x, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat( "##transformypos", &m_position.y, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat( "##transformzpos", &m_position.z,  -80.0f, 80.0f, "%.1f", dragSpeed);
             ImGui::EndGroup();
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Rotation");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##xrot", &m_rotation.x, -180.0f, 180.0f);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##yrot", &m_rotation.y, -180.0f, 180.0f);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##zrot", &m_rotation.z, -180.0f, 180.0f);
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##transformxrot", &m_rotation.x, -180.0f, 180.0f);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##transformyrot", &m_rotation.y, -180.0f, 180.0f);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##transformzrot", &m_rotation.z, -180.0f, 180.0f);
             ImGui::EndGroup();
             ImGui::BeginGroup();
                 ImGui::Indent();    ImGui::Text("Scale");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##xscale", &m_scale.x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##yscale", &m_scale.y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##zscale", &m_scale.z, 0.01f, 100.0f, "%.1f", dragSpeed);
+                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##transformxscale", &m_scale.x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##transformyscale", &m_scale.y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##transformzscale", &m_scale.z, 0.01f, 100.0f, "%.1f", dragSpeed);
             ImGui::EndGroup();
             ImGui::Separator();
         ImGui::PopItemWidth();
@@ -53,7 +53,7 @@ namespace nc
         auto v_scl = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
         auto v_trn = DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 
-        return v_rot * v_scl * v_trn;
+        return v_scl * v_rot * v_trn;
     }
 
     DirectX::XMMATRIX Transform::CamGetMatrix() const

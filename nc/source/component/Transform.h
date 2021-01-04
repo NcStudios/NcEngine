@@ -31,12 +31,12 @@ namespace nc
             inline float PosX() const noexcept { return m_position.x; }
             inline float PosY() const noexcept { return m_position.y; }
             inline float PosZ() const noexcept { return m_position.z; }
-            inline float SclX() const noexcept { return m_rotation.x; }
-            inline float SclY() const noexcept { return m_rotation.y; }
-            inline float SclZ() const noexcept { return m_rotation.z; }
             inline float RotX() const noexcept { return m_rotation.x; }
             inline float RotY() const noexcept { return m_rotation.y; }
             inline float RotZ() const noexcept { return m_rotation.z; }
+            inline float SclX() const noexcept { return m_scale.x; }
+            inline float SclY() const noexcept { return m_scale.y; }
+            inline float SclZ() const noexcept { return m_scale.z; }
             /* Rotation Alternatives */
             inline float Pitch() const noexcept { return m_rotation.x; }
             inline float Yaw() const noexcept { return m_rotation.y; }

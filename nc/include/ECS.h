@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ecs/Entity.h"
+#include "component/Collider.h"
 #include "component/PointLight.h"
 #include "component/NetworkDispatcher.h"
 #include "component/Renderer.h"
@@ -26,7 +27,7 @@ namespace nc
             [[nodiscard]] static Entity* GetEntity(std::string tag);
 
             template<std::derived_from<Component> T, class ...Args>
-            static T* AddComponent(EntityHandle handle, Args&& ... args);
+            static T* AddComponent(EntityHandle handle, Args ... args);
             
             template<std::derived_from<Component> T>
             static bool RemoveComponent(EntityHandle handle);
@@ -46,7 +47,7 @@ namespace nc
     template<> PointLight* Ecs::GetComponent<PointLight>(EntityHandle handle);
     template<> bool Ecs::HasComponent<PointLight>(EntityHandle handle);
 
-    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh& mesh, graphics::Material& material);
+    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
     template<> bool Ecs::RemoveComponent<Renderer>(EntityHandle handle);
     template<> Renderer* Ecs::GetComponent<Renderer>(EntityHandle handle);
     template<> bool Ecs::HasComponent<Renderer>(EntityHandle handle);
@@ -58,8 +59,13 @@ namespace nc
 
     template<> Transform* Ecs::GetComponent<Transform>(EntityHandle handle);
 
+    template<> Collider* Ecs::AddComponent<Collider>(EntityHandle handle, Vector3 scale);
+    template<> Collider* Ecs::GetComponent<Collider>(EntityHandle handle);
+    template<> bool Ecs::HasComponent<Collider>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<Collider>(EntityHandle handle);
+
     template<std::derived_from<Component> T, class ... Args>
-    T * Ecs::AddComponent(const EntityHandle handle, Args&& ... args)
+    T * Ecs::AddComponent(const EntityHandle handle, Args ... args)
     {
         auto ptr = GetEntity(handle);
         IF_THROW(ptr == nullptr, "Bad handle");

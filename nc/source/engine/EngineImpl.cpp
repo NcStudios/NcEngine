@@ -19,8 +19,6 @@
 #include "window/WindowImpl.h"
 #include "graphics/rendergraph/FrameManager.h"
 
-#include <iostream>
-
 namespace nc::engine
 {
     EngineImpl::EngineImpl(HINSTANCE hInstance, std::function<void(bool)> engineShutdownCallback)
@@ -138,7 +136,7 @@ namespace nc::engine
 
         auto camMatrix = m_mainCamera->GetTransform()->CamGetMatrix();
         m_graphics->SetCamera(camMatrix);
-        
+
         auto pointLightManager = m_pointLightManager.get();
         m_ecs->GetSystem<PointLight>()->ForEach([&camMatrix, pointLightManager](auto& light)
         {
@@ -148,10 +146,17 @@ namespace nc::engine
 
         auto frameManager = m_frameManager.get();
         m_frameManager->Reset();
+
         m_ecs->GetSystem<Renderer>()->ForEach([frameManager](auto& renderer)
         {
             renderer.Update(*frameManager);
         });
+
+        m_ecs->GetSystem<Collider>()->ForEach([frameManager](auto& collider)
+        {
+            collider.Update(*frameManager);
+        });
+
         m_frameManager->Execute(m_graphics.get());
 
         #ifdef NC_EDITOR_ENABLED
