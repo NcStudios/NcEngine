@@ -29,6 +29,7 @@ set(GCC_WARNING_FLAGS
     -Wno-cast-function-type
 )
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
+set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 
 set(ENGINE_LIB "NcEngine-${CMAKE_BUILD_TYPE}")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
@@ -40,6 +41,8 @@ configure_file(${ROOT_DIR}/source/config/Version.h.in
 )
 
 #Definitions
+add_definitions(${WIN32_DEFINITIONS})
+
 if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()
