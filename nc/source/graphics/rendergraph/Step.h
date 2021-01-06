@@ -9,7 +9,9 @@ namespace nc::graphics
     class Step : public ResourceGroup
     {
         public:
-            Step(size_t targetPass);
+            explicit Step(size_t pass)
+                : targetPass{pass}
+            {}
 
             size_t targetPass; /** @todo: Replace with enum or do templating **/
     };
