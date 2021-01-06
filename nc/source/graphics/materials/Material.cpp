@@ -14,7 +14,7 @@ namespace nc::graphics
         : m_technique{technique}
     {}
 
-    void Material::Submit(FrameManager& frame, const Model& model) const noexcept
+    void Material::Submit(FrameManager& frame, const Model* model) const noexcept
     {
         m_technique->Submit(frame, model);
     }
@@ -37,5 +37,4 @@ namespace nc::graphics
         m_technique->EditorGuiElement();
     }
     #endif
-            
 }

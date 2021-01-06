@@ -152,6 +152,7 @@ namespace nc::engine
         {
             renderer.Update(*frameManager);
         });
+
         m_frameManager->Execute(m_graphics.get());
 
         #ifdef NC_EDITOR_ENABLED
