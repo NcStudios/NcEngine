@@ -145,7 +145,6 @@ namespace nc::engine
         m_pointLightManager->Bind();
 
         auto frameManager = m_frameManager.get();
-        m_frameManager->Reset();
 
         m_ecs->GetSystem<Renderer>()->ForEach([frameManager](auto& renderer)
         {
@@ -164,6 +163,7 @@ namespace nc::engine
         #else
         m_ui->Frame();
         #endif
+
         m_ui->FrameEnd();
         m_graphics->FrameEnd();
     }
@@ -176,6 +176,7 @@ namespace nc::engine
             DoSceneSwap();
         }
         input::Flush();
+        m_frameManager->Reset();
     }
 
     const config::Config& EngineImpl::GetConfig() const
