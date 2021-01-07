@@ -1,14 +1,16 @@
 #include "FrameManager.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/d3dresource/GraphicsResource.h"
+#include "graphics/techniques/PhongShadingTechnique.h"
+#include "graphics/techniques/WireframeTechnique.h"
 
 using namespace nc::graphics::d3dresource;
 
 namespace nc::graphics
 {
-    void FrameManager::Accept(Job job, size_t targetPass) noexcept
+    void FrameManager::Accept(size_t targetPass, Job&& job) noexcept
     {
-        m_passes[targetPass].Accept(job);
+        m_passes[targetPass].Accept(std::forward<Job&&>(job));
     }
 
     /** @todo: Replace the body of this function (and eventually the entire class) with a loop
@@ -17,9 +19,11 @@ namespace nc::graphics
     void FrameManager::Execute(Graphics* gfx) const
     {
         // PBR Shading Pass
+       PhongShadingTechnique::BindCommonResources();
        m_passes[0].Execute(gfx);
 
         // Wireframe Pass
+        WireframeTechnique::BindCommonResources();
         m_passes[1].Execute(gfx);
     }
 

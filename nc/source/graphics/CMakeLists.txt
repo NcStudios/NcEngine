@@ -17,5 +17,4 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/rendergraph/FrameManager.cpp
         ${ROOT_DIR}/source/graphics/rendergraph/Job.cpp
         ${ROOT_DIR}/source/graphics/rendergraph/Pass.cpp
-        ${ROOT_DIR}/source/graphics/rendergraph/Step.cpp
 )

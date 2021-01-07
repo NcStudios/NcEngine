@@ -3,9 +3,9 @@
 
 namespace nc::graphics
 {
-    void Pass::Accept(Job job) noexcept
+    void Pass::Accept(Job&& job) noexcept
     {
-        m_jobs.push_back(job);
+        m_jobs.push_back(std::forward<Job&&>(job));
     }
 
     void Pass::Execute(Graphics* gfx) const

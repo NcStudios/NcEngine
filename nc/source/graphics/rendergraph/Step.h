@@ -9,10 +9,10 @@ namespace nc::graphics
     class Step : public ResourceGroup
     {
         public:
-            Step(size_t targetPass);
-            void Submit(class FrameManager& frame, const nc::graphics::Model& model) const noexcept;
+            explicit Step(size_t pass)
+                : targetPass{pass}
+            {}
 
-        private:
-            size_t m_targetPass; /** @todo: Replace with enum or do templating **/
+            size_t targetPass; /** @todo: Replace with enum or do templating **/
     };
 }

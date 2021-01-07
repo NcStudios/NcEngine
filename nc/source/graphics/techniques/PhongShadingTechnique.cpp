@@ -30,16 +30,15 @@ namespace
 
 namespace nc::graphics
 {
-    PhongShadingTechnique::PhongShadingTechnique(const std::vector<std::string>& texturePaths, MaterialProperties materialProperties)
-    : m_materialProperties {materialProperties}
-    {
-        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
+    std::vector<GraphicsResource*> PhongShadingTechnique::m_commonResources = {};
 
+    PhongShadingTechnique::PhongShadingTechnique(const std::vector<std::string>& texturePaths, MaterialProperties materialProperties)
+        : m_materialProperties {materialProperties}
+    {
+        PhongShadingTechnique::InitializeCommonResources();
+        
         Step single(0);
         {
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Solid));
-
             // Add Textures
             uint32_t shaderIndex = 0;
             for (const auto& texturePathRef : texturePaths) 
@@ -47,16 +46,6 @@ namespace nc::graphics
                 single.AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Texture>(texturePathRef, shaderIndex++));
             }
 
-            // Add vertex shader
-            auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "phongvertexshader.cso");
-            auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
-            single.AddGraphicsResource(std::move(pvs));
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout>("phongvertexshader", PhongInputElementDesc, pvsbc));
-
-            // Add pixel shader
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "phongpixelshader.cso"));
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::Sampler>(SAMPLER_TAG));
             m_materialPropertiesBuffer = std::make_unique<PixelConstantBuffer<MaterialProperties>>(materialProperties, 1u);
             single.AddGraphicsResource(m_materialPropertiesBuffer.get());
         }
@@ -103,5 +92,40 @@ namespace nc::graphics
         hash += std::to_string(materialProperties.color.x);
         return std::hash<std::string>{}(hash);
     }
+
+    void PhongShadingTechnique::InitializeCommonResources()
+    {
+        static bool isInitialized = false;
+        if(isInitialized)
+        {
+            return;
+        }
+
+        isInitialized = true;
+
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Solid));
+
+        // Add vertex shader
+        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
+        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "phongvertexshader.cso");
+        auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
+        PhongShadingTechnique::m_commonResources.push_back(std::move(pvs));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<InputLayout>("phongvertexshader", PhongInputElementDesc, pvsbc));
+
+        // Add pixel shader
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "phongpixelshader.cso"));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::Sampler>(SAMPLER_TAG));
+    }
+
+    void PhongShadingTechnique::BindCommonResources()
+    {
+        for(const auto& res : PhongShadingTechnique::m_commonResources)
+        {
+            res->Bind();
+        }
+    }
+
 
 }
