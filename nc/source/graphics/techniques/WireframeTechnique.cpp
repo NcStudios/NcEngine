@@ -24,24 +24,15 @@ namespace
 
 namespace nc::graphics
 {
+    std::vector<d3dresource::GraphicsResource*> WireframeTechnique::m_commonResources = {};
+
     WireframeTechnique::WireframeTechnique()
     {
-        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
+        WireframeTechnique::InitializeCommonResources();
 
         Step single(1);
         {
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
             single.AddGraphicsResource(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Wireframe));
-
-            // Add vertex shader
-            auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "wireframevertexshader.cso");
-            auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
-            single.AddGraphicsResource(std::move(pvs));
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<InputLayout>("wireframevertexshader", WireframeInputElementDesc, pvsbc));
-
-            // Add pixel shader
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "wireframepixelshader.cso"));
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
         }
         AddStep(std::move(single));
     }
@@ -56,7 +47,37 @@ namespace nc::graphics
     void WireframeTechnique::EditorGuiElement()
     {
     }
-    
     #endif
 
+    void WireframeTechnique::InitializeCommonResources()
+    {
+        static bool isInitialized = false;
+        if(isInitialized)
+        {
+            return;
+        }
+
+        isInitialized = true;
+
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
+
+        // Add vertex shader
+        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
+        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "wireframevertexshader.cso");
+        auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
+        WireframeTechnique::m_commonResources.push_back(std::move(pvs));
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<InputLayout>("wireframevertexshader", WireframeInputElementDesc, pvsbc));
+
+        // Add pixel shader
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "wireframepixelshader.cso"));
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
+    }
+
+    void WireframeTechnique::BindCommonResources()
+    {
+        for(const auto& res : WireframeTechnique::m_commonResources)
+        {
+            res->Bind();
+        }
+    }
 }

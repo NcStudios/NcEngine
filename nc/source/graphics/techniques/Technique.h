@@ -11,12 +11,15 @@ namespace detail
 
 namespace nc::graphics
 {
+    class FrameManager;
     class Model;
+    
     class Technique
     {
         public:
             virtual ~Technique() = default;
-            void Submit(class FrameManager& frame, const nc::graphics::Model& model) const noexcept;
+            void Submit(class FrameManager& frame, const nc::graphics::Model* model) const noexcept;
+            
             void AddStep(Step step) noexcept;
             void Enable(bool isEnabled);
 

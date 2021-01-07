@@ -24,7 +24,7 @@ namespace nc::graphics
             void EditorGuiElement();
             #endif
             
-            void Submit(class FrameManager& frame, const Model& model) const noexcept;
+            void Submit(class FrameManager& frame, const Model* model) const noexcept;
             
         private:
             Technique* m_technique;

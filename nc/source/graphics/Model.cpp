@@ -38,7 +38,7 @@ namespace nc::graphics
 
     void Model::Submit(FrameManager& frame) const noexcept
     {
-        m_material.Submit(frame, *this);
+        m_material.Submit(frame, this);
     }
 
     void Model::Bind() const

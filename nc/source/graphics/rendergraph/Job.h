@@ -13,7 +13,7 @@ namespace nc::graphics
             void Execute(Graphics* gfx) const;
 
         private:
-            const Model* m_pModel;
             const Step* m_pStep;
+            const Model* m_pModel;
     };
 }
