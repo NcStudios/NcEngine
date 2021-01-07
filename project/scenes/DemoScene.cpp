@@ -48,6 +48,12 @@ namespace project
         Ecs::AddComponent<SceneReset>(debugHandle);
         Ecs::AddComponent<Timer>(debugHandle);
 
+        auto scale = Vector3::One() * 0.1f;
+
+        auto boarHandle = prefab::Create(prefab::Resource::Boar, Vector3::One(), Vector3::Zero(), Vector3::One() * 2, "Boar");
+        Ecs::AddComponent<Collider>(boarHandle, scale);
+
+
         const auto scaleFactor = 2;
         auto materialProperties = graphics::MaterialProperties{};
         // Table

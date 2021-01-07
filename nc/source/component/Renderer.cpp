@@ -13,9 +13,9 @@ namespace nc
 {
     Renderer::~Renderer() = default;
 
-    Renderer::Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh& mesh, graphics::Material& material) noexcept
+    Renderer::Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh mesh, graphics::Material material) noexcept
         : Component(handle, parentHandle),
-          m_model{ std::make_unique<graphics::Model>(mesh, material) },
+          m_model{ std::make_unique<graphics::Model>(std::move(mesh), std::move(material)) },
           m_transform{ Ecs::GetComponent<Transform>(m_parentHandle) }
     {
     }
@@ -36,16 +36,16 @@ namespace nc
     void Renderer::Update(graphics::FrameManager& frame)
     {
         IF_THROW(!m_transform, "Renderer::Update - Bad Transform Ptr");
-        m_model->UpdateTransformationMatrix(m_transform);
+        m_model->UpdateTransformationMatrix(m_transform->GetTransformationMatrix());
         m_model->Submit(frame);
     }
 
-    void Renderer::SetMesh(graphics::Mesh& mesh)
+    void Renderer::SetMesh(const graphics::Mesh& mesh)
     {
         m_model->SetMesh(mesh);
     }
     
-    void Renderer::SetMaterial(graphics::Material& material) 
+    void Renderer::SetMaterial(const graphics::Material& material) 
     {
         m_model->SetMaterial(material);
     }

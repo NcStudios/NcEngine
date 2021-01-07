@@ -19,8 +19,6 @@
 #include "window/WindowImpl.h"
 #include "graphics/rendergraph/FrameManager.h"
 
-#include <iostream>
-
 namespace nc::engine
 {
     EngineImpl::EngineImpl(HINSTANCE hInstance, std::function<void(bool)> engineShutdownCallback)
@@ -136,21 +134,26 @@ namespace nc::engine
         m_ui->FrameBegin();
         m_graphics->FrameBegin();
 
-        auto camMatrix = m_mainCamera->GetTransform()->CamGetMatrix();
-        m_graphics->SetCamera(camMatrix);
-        
+        auto camViewMatrix = m_mainCamera->GetTransform()->GetViewMatrix();
+        m_graphics->SetViewMatrix(camViewMatrix);
+
         auto pointLightManager = m_pointLightManager.get();
-        m_ecs->GetSystem<PointLight>()->ForEach([&camMatrix, pointLightManager](auto& light)
+        m_ecs->GetSystem<PointLight>()->ForEach([&camViewMatrix, pointLightManager](auto& light)
         {
-            pointLightManager->AddPointLight(light, camMatrix);
+            pointLightManager->AddPointLight(light, camViewMatrix);
         });
         m_pointLightManager->Bind();
 
         auto frameManager = m_frameManager.get();
-        m_frameManager->Reset();
+
         m_ecs->GetSystem<Renderer>()->ForEach([frameManager](auto& renderer)
         {
             renderer.Update(*frameManager);
+        });
+
+        m_ecs->GetSystem<Collider>()->ForEach([frameManager](auto& collider)
+        {
+            collider.Update(*frameManager);
         });
 
         m_frameManager->Execute(m_graphics.get());
@@ -160,6 +163,7 @@ namespace nc::engine
         #else
         m_ui->Frame();
         #endif
+
         m_ui->FrameEnd();
         m_graphics->FrameEnd();
     }
@@ -172,6 +176,7 @@ namespace nc::engine
             DoSceneSwap();
         }
         input::Flush();
+        m_frameManager->Reset();
     }
 
     const config::Config& EngineImpl::GetConfig() const

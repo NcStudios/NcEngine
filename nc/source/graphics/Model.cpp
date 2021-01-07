@@ -1,14 +1,11 @@
 #include "Model.h"
-#include "component/Transform.h"
 #include "d3dresource/GraphicsResourceManager.h"
 #include "d3dresource/MeshResources.h"
 #include "d3dresource/ConstantBufferResources.h"
-#include "Graphics.h"
-#include "materials/Material.h"
 
 namespace nc::graphics
 {
-    Model::Model(const Mesh& mesh, const Material& material)
+    Model::Model(Mesh&& mesh, Material&& material)
         : m_mesh{mesh},
           m_material{material},
           m_indexBuffer{nullptr},
@@ -52,9 +49,9 @@ namespace nc::graphics
         return m_indexBuffer->GetCount();
     }
 
-    void Model::UpdateTransformationMatrix(Transform* transform) noexcept
+    void Model::UpdateTransformationMatrix(DirectX::XMMATRIX matrix) noexcept
     {
-        m_transformationMatrix = transform->GetMatrixXM();
+        m_transformationMatrix = matrix;
     }
 
     DirectX::XMMATRIX Model::GetTransformXM() const noexcept

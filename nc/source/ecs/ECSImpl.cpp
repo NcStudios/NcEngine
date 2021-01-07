@@ -7,11 +7,17 @@ namespace nc::ecs
 EcsImpl::EcsImpl()
     : m_active{},
       m_toDestroy{},
+      m_colliderSystem{ std::make_unique<ComponentSystem<Collider>>() },
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS, true) },
       m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>() },
       m_transformSystem{ std::make_unique<ComponentSystem<Transform>>() },
       m_networkDispatcherSystem{ std::make_unique<ComponentSystem<NetworkDispatcher>>() }
 {
+}
+
+template<> ComponentSystem<Collider>* EcsImpl::GetSystem<Collider>()
+{
+    return m_colliderSystem.get();
 }
 
 template<> ComponentSystem<PointLight>* EcsImpl::GetSystem<PointLight>()
@@ -111,6 +117,7 @@ void EcsImpl::ClearState()
     m_active.clear();
     m_toDestroy.clear();
     m_handleManager.Reset();
+    m_colliderSystem->Clear();
     m_transformSystem->Clear();
     m_rendererSystem->Clear();
     m_lightSystem->Clear();

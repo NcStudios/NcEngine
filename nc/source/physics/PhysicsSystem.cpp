@@ -44,8 +44,8 @@ namespace nc::physics
     IClickable* PhysicsSystem::RaycastToClickables(LayerMask mask)
     {
         auto [screenWidth, screenHeight] = Window::GetDimensions();
-        auto viewMatrix = camera::MainCamera::GetTransform()->CamGetMatrix();
-        auto projectionMatrix = m_graphics->GetProjection();
+        auto viewMatrix = camera::MainCamera::GetTransform()->GetViewMatrix();
+        auto projectionMatrix = m_graphics->GetProjectionMatrix();
         auto worldMatrix = DirectX::XMMatrixIdentity();
         auto unit = Vector3(1,1,1).GetNormalized().ToXMFloat3();
         auto unit_v = DirectX::XMLoadFloat3(&unit);

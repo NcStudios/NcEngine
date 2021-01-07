@@ -17,7 +17,7 @@ namespace nc
     class Renderer final: public Component
     {
         public:
-            Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh& mesh, graphics::Material& material) noexcept;
+            Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh mesh, graphics::Material material) noexcept;
             ~Renderer();
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&) = delete;
@@ -28,8 +28,8 @@ namespace nc
             void EditorGuiElement() override;
             #endif
 
-            void SetMesh(graphics::Mesh& mesh);
-            void SetMaterial(graphics::Material& material);
+            void SetMesh(const graphics::Mesh& mesh);
+            void SetMaterial(const graphics::Material& material);
             void Update(graphics::FrameManager& frame);
 
         private:

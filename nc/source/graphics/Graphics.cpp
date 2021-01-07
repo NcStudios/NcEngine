@@ -16,8 +16,8 @@ Graphics::Graphics(HWND hwnd, float width, float height, float nearZ, float farZ
       m_renderTarget{ nullptr },
       m_dsv{ nullptr },
       m_isFullscreen {fullscreen},
-      m_camera{},
-      m_projection{}
+      m_viewMatrix{},
+      m_projectionMatrix{}
 {  
     d3dresource::GraphicsResourceManager::SetGraphics(this);
     CreateDeviceAndSwapchain(hwnd);
@@ -25,7 +25,7 @@ Graphics::Graphics(HWND hwnd, float width, float height, float nearZ, float farZ
     CreateDepthStencilView(width, height);
     BindDepthStencilView();
     ConfigureViewport(width, height);
-    SetProjection(width, height, nearZ, farZ);
+    SetProjectionMatrix(width, height, nearZ, farZ);
 
     m_swapChain->SetFullscreenState(m_isFullscreen, nullptr);
 }
@@ -40,24 +40,24 @@ Graphics::~Graphics()
     m_device->Release();
 }
 
-DirectX::XMMATRIX Graphics::GetCamera() const noexcept
+DirectX::XMMATRIX Graphics::GetViewMatrix() const noexcept
 {
-    return m_camera;
+    return m_viewMatrix;
 }
 
-DirectX::XMMATRIX Graphics::GetProjection() const noexcept
+DirectX::XMMATRIX Graphics::GetProjectionMatrix() const noexcept
 {
-    return m_projection;
+    return m_projectionMatrix;
 }
 
-void Graphics::SetCamera(DirectX::FXMMATRIX cam) noexcept
+void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
 {
-    m_camera = cam;
+    m_viewMatrix = cam;
 }
 
-void Graphics::SetProjection(float width, float height, float nearZ, float farZ) noexcept
+void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
 {
-    m_projection = DirectX::XMMatrixPerspectiveLH(1.0f, height / width, nearZ, farZ);
+    m_projectionMatrix = DirectX::XMMatrixPerspectiveLH(1.0f, height / width, nearZ, farZ);
 }
 
 void Graphics::ToggleFullscreen()
@@ -90,7 +90,7 @@ void Graphics::OnResize(float width, float height, float nearZ, float farZ)
     CreateDepthStencilView(width, height);
     BindDepthStencilView();
     ConfigureViewport(width, height);
-    SetProjection(width, height, nearZ, farZ);
+    SetProjectionMatrix(width, height, nearZ, farZ);
 }
 
 void Graphics::FrameBegin()

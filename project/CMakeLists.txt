@@ -24,6 +24,7 @@ set(GCC_WARNING_FLAGS
     -Wno-cast-function-type
 )
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
+set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/../nc/external/include)
 set(PROJECT_INCLUDE_DIR ${ROOT_DIR})
 set(NC_INCLUDE_DIRS
@@ -52,6 +53,8 @@ set_target_properties(${SERVER_EXE}
 )
 
 #Definitions
+add_definitions(${WIN32_DEFINITIONS})
+
 if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()

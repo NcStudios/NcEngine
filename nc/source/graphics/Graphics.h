@@ -25,11 +25,11 @@ namespace nc
                 Graphics& operator=(const Graphics&) = delete;
                 Graphics& operator=(Graphics&&) = delete;
 
-                DirectX::XMMATRIX GetCamera() const noexcept;
-                DirectX::XMMATRIX GetProjection() const noexcept;
+                DirectX::XMMATRIX GetViewMatrix() const noexcept;
+                DirectX::XMMATRIX GetProjectionMatrix() const noexcept;
 
-                void SetCamera(DirectX::FXMMATRIX cam) noexcept;
-                void SetProjection(float width, float height, float nearZ, float farZ) noexcept;
+                void SetViewMatrix(DirectX::FXMMATRIX cam) noexcept;
+                void SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept;
 
                 void ResizeTarget(float width, float height);
                 void OnResize(float width, float height, float nearZ, float farZ);
@@ -51,8 +51,8 @@ namespace nc
                 ID3D11DepthStencilView* m_dsv;
 
                 bool m_isFullscreen;
-                DirectX::XMMATRIX m_camera;
-                DirectX::XMMATRIX m_projection;
+                DirectX::XMMATRIX m_viewMatrix;
+                DirectX::XMMATRIX m_projectionMatrix;
 
                 #ifdef NC_EDITOR_ENABLED
                 uint32_t m_drawCallCount = 0;

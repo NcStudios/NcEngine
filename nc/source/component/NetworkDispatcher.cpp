@@ -2,6 +2,10 @@
 
 #include <stdexcept>
 
+#ifdef NC_EDITOR_ENABLED
+#include "imgui/imgui.h"
+#endif
+
 namespace nc
 {
     NetworkDispatcher::NetworkDispatcher(ComponentHandle handle, EntityHandle parentHandle) noexcept
@@ -25,4 +29,21 @@ namespace nc
     {
         m_dispatchTable[packetType] = func;
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    void NetworkDispatcher::EditorGuiElement()
+    {
+        std::string str = std::to_string(m_handle);
+
+        ImGui::PushItemWidth(80.0f);
+            ImGui::Spacing();
+            ImGui::Separator();
+                ImGui::Text("NetworkDispatcher");
+                ImGui::Indent();
+                    ImGui::Text("ID: ");  ImGui::SameLine();  ImGui::Text(str.c_str());
+                ImGui::Unindent();
+            ImGui::Separator();
+        ImGui::PopItemWidth();
+    }
+    #endif
 }
