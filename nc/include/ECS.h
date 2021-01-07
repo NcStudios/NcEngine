@@ -43,19 +43,19 @@ namespace nc
     };
 
     template<> PointLight* Ecs::AddComponent<PointLight>(EntityHandle handle);
-    template<> bool Ecs::RemoveComponent<PointLight>(EntityHandle handle);
     template<> PointLight* Ecs::GetComponent<PointLight>(EntityHandle handle);
     template<> bool Ecs::HasComponent<PointLight>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<PointLight>(EntityHandle handle);
 
     template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
-    template<> bool Ecs::RemoveComponent<Renderer>(EntityHandle handle);
     template<> Renderer* Ecs::GetComponent<Renderer>(EntityHandle handle);
     template<> bool Ecs::HasComponent<Renderer>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<Renderer>(EntityHandle handle);
 
     template<> NetworkDispatcher* Ecs::AddComponent<NetworkDispatcher>(EntityHandle handle);
-    template<> bool Ecs::RemoveComponent<NetworkDispatcher>(EntityHandle handle);
     template<> NetworkDispatcher* Ecs::GetComponent<NetworkDispatcher>(EntityHandle handle);
     template<> bool Ecs::HasComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<NetworkDispatcher>(EntityHandle handle);
 
     template<> Transform* Ecs::GetComponent<Transform>(EntityHandle handle);
 
