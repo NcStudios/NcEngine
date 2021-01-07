@@ -13,12 +13,12 @@ namespace nc::graphics::d3dresource
     TransformConstBufferVertexPixel::Transforms TransformConstBufferVertexPixel::GetTransforms() noexcept
     {
         const auto gfx = GraphicsResourceManager::GetGraphics();
-        const auto modelView = m_parent.GetTransformXM() * gfx->GetCamera();
+        const auto modelView = m_parent.GetTransformXM() * gfx->GetViewMatrix();
 
         return
         {
             DirectX::XMMatrixTranspose(modelView),
-            DirectX::XMMatrixTranspose(modelView * gfx->GetProjection())
+            DirectX::XMMatrixTranspose(modelView * gfx->GetProjectionMatrix())
         };
     }
 

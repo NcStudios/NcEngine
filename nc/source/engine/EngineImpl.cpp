@@ -134,13 +134,13 @@ namespace nc::engine
         m_ui->FrameBegin();
         m_graphics->FrameBegin();
 
-        auto camMatrix = m_mainCamera->GetTransform()->CamGetMatrix();
-        m_graphics->SetCamera(camMatrix);
+        auto camViewMatrix = m_mainCamera->GetTransform()->GetViewMatrix();
+        m_graphics->SetViewMatrix(camViewMatrix);
 
         auto pointLightManager = m_pointLightManager.get();
-        m_ecs->GetSystem<PointLight>()->ForEach([&camMatrix, pointLightManager](auto& light)
+        m_ecs->GetSystem<PointLight>()->ForEach([&camViewMatrix, pointLightManager](auto& light)
         {
-            pointLightManager->AddPointLight(light, camMatrix);
+            pointLightManager->AddPointLight(light, camViewMatrix);
         });
         m_pointLightManager->Bind();
 

@@ -10,21 +10,10 @@
 #include <d3d11.h>
 #include "directx/math/DirectXMath.h"
 
-namespace nc
+namespace nc::graphics::d3dresource
 {
-    class Transform;
-    class Vector3;
-    namespace graphics
-    {
-        class Graphics;
-        class Mesh;
-        namespace d3dresource
-        {
-            class GraphicsResource;
-            class TransformConstBufferVertexPixel;
-            class IndexBuffer;
-        }
-    }
+    class TransformConstBufferVertexPixel;
+    class IndexBuffer;
 }
 
 namespace nc::graphics
@@ -41,10 +30,9 @@ namespace nc::graphics
             void Submit(class FrameManager& frame) const noexcept;
             void Bind() const;
 
-            void UpdateTransformationMatrix(Transform* transform) noexcept;
-            void UpdateTransformationMatrixHack(Transform* transform, const Vector3& scale) noexcept;
+            void UpdateTransformationMatrix(DirectX::XMMATRIX matrix) noexcept;
             DirectX::XMMATRIX GetTransformXM() const noexcept;
-            Material * GetMaterial() noexcept;
+            Material* GetMaterial() noexcept;
 
         private:
             void InitializeGraphicsPipeline();

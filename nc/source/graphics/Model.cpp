@@ -1,10 +1,7 @@
 #include "Model.h"
-#include "component/Transform.h"
 #include "d3dresource/GraphicsResourceManager.h"
 #include "d3dresource/MeshResources.h"
 #include "d3dresource/ConstantBufferResources.h"
-#include "Graphics.h"
-#include "materials/Material.h"
 
 namespace nc::graphics
 {
@@ -52,18 +49,9 @@ namespace nc::graphics
         return m_indexBuffer->GetCount();
     }
 
-    void Model::UpdateTransformationMatrix(Transform* transform) noexcept
+    void Model::UpdateTransformationMatrix(DirectX::XMMATRIX matrix) noexcept
     {
-        m_transformationMatrix = transform->GetMatrixXM();
-    }
-
-    void Model::UpdateTransformationMatrixHack(Transform* transform, const Vector3& scale) noexcept
-    {
-        auto v_rot = DirectX::XMMatrixRotationRollPitchYaw(transform->Pitch(), transform->Yaw(), transform->Roll());
-        auto v_scl = DirectX::XMMatrixScaling(transform->SclX(), transform->SclY(), transform->SclZ());
-        auto v_trn = DirectX::XMMatrixTranslation(transform->PosX(), transform->PosY(), transform->PosZ());
-        auto v_scl2 = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-        m_transformationMatrix = v_scl * v_scl2 * v_rot * v_trn;
+        m_transformationMatrix = matrix;
     }
 
     DirectX::XMMATRIX Model::GetTransformXM() const noexcept

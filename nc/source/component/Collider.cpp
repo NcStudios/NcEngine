@@ -26,7 +26,7 @@ namespace nc
     void Collider::Update(graphics::FrameManager& frame)
     {
         IF_THROW(!m_transform, "Collider::Update - Bad Transform Ptr");
-        m_model.UpdateTransformationMatrixHack(m_transform, m_scale);
+        m_model.UpdateTransformationMatrix(m_transform->GetTransformationMatrixEx(m_scale));
         m_model.Submit(frame);
     }
 

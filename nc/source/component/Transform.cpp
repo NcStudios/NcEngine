@@ -47,14 +47,22 @@ namespace nc
     }
     #endif
     
-    DirectX::XMMATRIX Transform::GetMatrixXM() const
+    DirectX::XMMATRIX Transform::GetTransformationMatrix() const
     {
         return DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) *
                DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll()) *
                DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
     }
 
-    DirectX::XMMATRIX Transform::CamGetMatrix() const
+    DirectX::XMMATRIX Transform::GetTransformationMatrixEx(Vector3 additionalScale) const
+    {
+        return DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) *
+               DirectX::XMMatrixScaling(additionalScale.x, additionalScale.y, additionalScale.z) *
+               DirectX::XMMatrixRotationRollPitchYaw(Pitch(), Yaw(), Roll()) *
+               DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+    }
+
+    DirectX::XMMATRIX Transform::GetViewMatrix() const
     {
         using xmf3 = DirectX::XMFLOAT3;
         using xmv  = DirectX::XMVECTOR;
