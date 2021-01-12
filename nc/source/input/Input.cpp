@@ -1,4 +1,6 @@
 #include "Input.h"
+
+#include <algorithm>
 #include <windowsx.h>
 
 namespace nc::input{
@@ -30,8 +32,6 @@ int32_t MouseWheel()
 
 void AddToQueue(VKCode vkCode, LPARAM lParam)
 {
-    //how often is this called unnecessarily?
-
     bool WasDown = ((lParam & (1 << 30)) != 0);
     bool IsDown  = ((lParam & (1 << 31)) == 0);
     
@@ -86,28 +86,18 @@ Vector2 GetAxis()
 
 bool GetKeyDown(KeyCode keyCode)
 {
-    for(auto item : downKeys)
+    return downKeys.cend() != std::find_if(downKeys.cbegin(), downKeys.cend(), [keyCode](auto& item)
     {
-        if (item.keyCode == (VKCode)keyCode)
-        {
-            return true;
-        }
-    }
-
-    return false;
+        return item.keyCode == static_cast<VKCode>(keyCode);
+    });
 }
 
 bool GetKeyUp(KeyCode keyCode)
 {
-    for(auto item : upKeys)
+    return upKeys.cend() != std::find_if(upKeys.cbegin(), upKeys.cend(), [keyCode](auto& item)
     {
-        if (item.keyCode == (VKCode)keyCode)
-        {
-            return true;
-        }
-    }
-
-    return false;
+        return item.keyCode == static_cast<VKCode>(keyCode);
+    });
 }
 
 bool GetKey(KeyCode keyCode)
