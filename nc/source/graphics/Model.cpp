@@ -49,12 +49,12 @@ namespace nc::graphics
         return m_indexBuffer->GetCount();
     }
 
-    void Model::UpdateTransformationMatrix(DirectX::XMMATRIX matrix) noexcept
+    void Model::SetTransformationMatrix(DirectX::FXMMATRIX matrix) noexcept
     {
         m_transformationMatrix = matrix;
     }
 
-    DirectX::XMMATRIX Model::GetTransformXM() const noexcept
+    DirectX::XMMATRIX Model::GetTransformationMatrix() const noexcept
     {
         return m_transformationMatrix;
     }
