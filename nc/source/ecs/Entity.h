@@ -18,9 +18,9 @@ namespace nc
             Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag = "") noexcept;
             Entity(const Entity& other) = delete;
             Entity& operator=(const Entity&) = delete;
-            Entity(Entity&& other);
-            Entity& operator=(Entity&& other);
-            ~Entity();
+            Entity(Entity&& other) = default;
+            Entity& operator=(Entity&& other) = default;
+            ~Entity() = default;
 
             mutable EntityHandle Handle;
             mutable std::string Tag;

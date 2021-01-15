@@ -10,27 +10,6 @@ Entity::Entity(const EntityHandle handle, const ComponentHandle transformHandle,
 {
 }
 
-Entity::Entity(Entity&& other)
-    : Handle { other.Handle },
-      Tag { std::move(other.Tag) },
-      Handles {std::exchange(other.Handles, {}) },
-      m_userComponents { std::move(other.m_userComponents) }
-{
-}
-
-Entity::~Entity()
-{
-}
-
-Entity& Entity::operator=(Entity&& other)
-{
-    Handle = std::exchange(other.Handle, NullHandle);
-    Tag = std::move(other.Tag);
-    Handles = std::exchange(other.Handles, {});
-    m_userComponents = std::move(other.m_userComponents);
-    return *this;
-}
-
 const std::vector<std::unique_ptr<Component>> & Entity::GetUserComponents() const noexcept
 {
     return m_userComponents;
