@@ -8,8 +8,8 @@
 
 namespace nc
 {
-    Transform::Transform(ComponentHandle handle, EntityHandle parentHandle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept
-        : Component(handle, parentHandle),
+    Transform::Transform(EntityHandle handle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept
+        : Component(handle),
           m_position { pos },
           m_rotation { rot },
           m_scale { scl }

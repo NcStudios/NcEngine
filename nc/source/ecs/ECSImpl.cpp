@@ -67,10 +67,10 @@ void EcsImpl::SendOnDestroy()
         }
 
         pair.second.SendOnDestroy();
-        const auto& handles = entityPtr->Handles;
-        m_transformSystem->Remove(handles.transform);
-        m_rendererSystem->Remove(handles.renderer);
-        m_lightSystem->Remove(handles.pointLight);
+        //const auto& handles = entityPtr->Handles;
+        m_transformSystem->Remove(pair.first);
+        m_rendererSystem->Remove(pair.first);
+        m_lightSystem->Remove(pair.first);
     }
     m_toDestroy.clear();
 }

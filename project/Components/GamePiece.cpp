@@ -6,11 +6,11 @@ using namespace nc;
 
 namespace project
 {
-    GamePiece::GamePiece(ComponentHandle handle, EntityHandle parentHandle, nc::Transform* transform)
-        : Component(handle, parentHandle),
+    GamePiece::GamePiece(EntityHandle handle, nc::Transform* transform)
+        : Component(handle),
           physics::IClickable(transform, 40.0f),
           m_isRegisteredAsClickable{ true },
-          m_entityTag{Ecs::GetEntity(m_parentHandle)->Tag}
+          m_entityTag{Ecs::GetEntity(handle)->Tag}
     {
         physics::Physics::RegisterClickable(this);
         layers |= physics::Layer::GamePiece;

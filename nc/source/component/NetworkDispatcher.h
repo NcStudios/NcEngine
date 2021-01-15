@@ -13,7 +13,7 @@ namespace nc
         public:
             net::NetworkHandle networkHandle;
 
-            NetworkDispatcher(ComponentHandle handle, EntityHandle parentHandle) noexcept;
+            NetworkDispatcher(EntityHandle handle) noexcept;
             NetworkDispatcher(const NetworkDispatcher&) = delete;
             NetworkDispatcher(NetworkDispatcher&&) = delete;
             NetworkDispatcher& operator=(const NetworkDispatcher&) = delete;

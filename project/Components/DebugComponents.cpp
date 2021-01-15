@@ -10,8 +10,8 @@
 using namespace nc;
 using namespace nc::input;
 
-SceneReset::SceneReset(ComponentHandle handle, EntityHandle parentHandle)
-    : Component(handle, parentHandle)
+SceneReset::SceneReset(EntityHandle handle)
+    : Component(handle)
 {
 }
 
@@ -28,8 +28,8 @@ void SceneReset::FrameUpdate(float dt)
     }
 }
 
-Timer::Timer(ComponentHandle handle, EntityHandle parentHandle)
-    : Component(handle, parentHandle)
+Timer::Timer(EntityHandle handle)
+    : Component(handle)
 {
 }
 

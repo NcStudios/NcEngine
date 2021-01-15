@@ -9,9 +9,9 @@
 
 namespace nc
 {
-    PointLight::PointLight(ComponentHandle handle, EntityHandle parentHandle) noexcept
-        : Component(handle, parentHandle),
-          m_transform{ Ecs::GetComponent<Transform>(m_parentHandle) }
+    PointLight::PointLight(EntityHandle handle) noexcept
+        : Component(handle),
+          m_transform{ Ecs::GetComponent<Transform>(handle) }
     {
         PixelConstBufData.pos              = {0,0,0};
         PixelConstBufData.ambient          = {0.65f, 0.65f, 0.65f};
