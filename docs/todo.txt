@@ -4,6 +4,7 @@ IN PROGRESS
 
 Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 user components dont use handles at all
+EngineComponentGroup handles are not set to NullHandle upon removing engine component
 
 ***********
 BUGS

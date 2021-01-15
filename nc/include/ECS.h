@@ -59,10 +59,15 @@ namespace nc
 
     template<> Transform* Ecs::GetComponent<Transform>(EntityHandle handle);
 
-    template<> Collider* Ecs::AddComponent<Collider>(EntityHandle handle, Vector3 scale);
-    template<> Collider* Ecs::GetComponent<Collider>(EntityHandle handle);
-    template<> bool Ecs::HasComponent<Collider>(EntityHandle handle);
-    template<> bool Ecs::RemoveComponent<Collider>(EntityHandle handle);
+    template<> BoxCollider* Ecs::AddComponent<BoxCollider>(EntityHandle handle, Vector3 scale);
+    template<> BoxCollider* Ecs::GetComponent<BoxCollider>(EntityHandle handle);
+    template<> bool Ecs::HasComponent<BoxCollider>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<BoxCollider>(EntityHandle handle);
+
+    template<> SphereCollider* Ecs::AddComponent<SphereCollider>(EntityHandle handle, Vector3 scale);
+    template<> SphereCollider* Ecs::GetComponent<SphereCollider>(EntityHandle handle);
+    template<> bool Ecs::HasComponent<SphereCollider>(EntityHandle handle);
+    template<> bool Ecs::RemoveComponent<SphereCollider>(EntityHandle handle);
 
     template<std::derived_from<Component> T, class ... Args>
     T * Ecs::AddComponent(const EntityHandle handle, Args ... args)

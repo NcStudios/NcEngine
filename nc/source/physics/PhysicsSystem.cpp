@@ -5,6 +5,11 @@
 #include "graphics/Graphics.h"
 #include "MainCamera.h"
 
+#include "directx/math/DirectXMath.h"
+#include "directx/math/DirectXCollision.h"
+#include "component/Collider.h"
+#include <iostream>
+
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
@@ -20,6 +25,27 @@ namespace nc::physics
         : m_clickableComponents{},
           m_graphics{ graphics }
     {
+    }
+
+    void PhysicsSystem::CheckCollisions(std::vector<Collider*> colliders)
+    {
+        DirectX::BoundingOrientedBox unit, a, b;
+        const auto count = colliders.size();
+
+        for(size_t i = 0u; i < count; ++i)
+        {
+            unit.Transform(a, colliders[i]->GetTransformationMatrix());
+
+            for(size_t j = i + 1; j < count; ++j)
+            {
+                unit.Transform(b, colliders[j]->GetTransformationMatrix());
+                std::cout << "Result: " << i << ", " << j << " | ";
+                if(a.Intersects(b))
+                    std::cout << "Intersection\n";
+                else
+                    std::cout << "No Intersection\n";
+            }
+        }
     }
 
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)

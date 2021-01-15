@@ -54,7 +54,7 @@ namespace nc::graphics
         m_transformationMatrix = matrix;
     }
 
-    DirectX::XMMATRIX Model::GetTransformationMatrix() const noexcept
+    DirectX::FXMMATRIX Model::GetTransformationMatrix() const noexcept
     {
         return m_transformationMatrix;
     }

@@ -79,6 +79,13 @@ namespace nc::engine
              */
             if (time::Time::FixedDeltaTime > m_config.physics.fixedUpdateInterval)
             {
+                /** @todo This is a temporary solution. Maybe make iterators for ComponentSystem? */
+                std::vector<Collider*> colliders;
+                m_ecs->GetSystem<Collider>()->ForEach([&colliders](auto& col)
+                {
+                    colliders.push_back(&col);
+                });
+                m_physics->CheckCollisions(colliders);
                 m_ecs->SendFixedUpdate();
                 ncTime.ResetFixedDeltaTime();
             }

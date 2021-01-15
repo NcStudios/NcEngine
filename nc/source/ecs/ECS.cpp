@@ -92,19 +92,30 @@ namespace nc
         IF_THROW(!entity, "Bad handle");
 
         auto impl = Ecs::m_impl;
-        IF_THROW(impl->m_networkDispatcherSystem->Contains(entity->Handles.networkDispatcher), "Adding NetworkDispatcher - entity already has a a NetworkDispatcher");
+        IF_THROW(impl->m_networkDispatcherSystem->Contains(entity->Handles.networkDispatcher), "Adding NetworkDispatcher - entity already has a NetworkDispatcher");
 
         auto dispatcherHandle = impl->m_networkDispatcherSystem->Add(handle);
         entity->Handles.networkDispatcher = dispatcherHandle;
         return impl->m_networkDispatcherSystem->GetPointerTo(dispatcherHandle);
     }
 
-    template<> Collider* Ecs::AddComponent<Collider>(EntityHandle handle, Vector3 scale)
+    template<> BoxCollider* Ecs::AddComponent<BoxCollider>(EntityHandle handle, Vector3 scale)
     {
         auto entity = GetEntity(handle);
         IF_THROW(!entity, "Bad handle");
         auto impl = Ecs::m_impl;
-        IF_THROW(impl->m_colliderSystem->Contains(entity->Handles.collider), "Adding Collider - entity already has a a Collider");
+        IF_THROW(impl->m_colliderSystem->Contains(entity->Handles.collider), "Adding BoxCollider - entity already has a Collider");
+        auto colliderHandle = impl->m_colliderSystem->Add(handle, scale);
+        entity->Handles.collider = colliderHandle;
+        return impl->m_colliderSystem->GetPointerTo(colliderHandle);
+    }
+
+    template<> SphereCollider* Ecs::AddComponent<SphereCollider>(EntityHandle handle, Vector3 scale)
+    {
+        auto entity = GetEntity(handle);
+        IF_THROW(!entity, "Bad handle");
+        auto impl = Ecs::m_impl;
+        IF_THROW(impl->m_colliderSystem->Contains(entity->Handles.collider), "Adding SphereCollider - entity already has a Collider");
         auto colliderHandle = impl->m_colliderSystem->Add(handle, scale);
         entity->Handles.collider = colliderHandle;
         return impl->m_colliderSystem->GetPointerTo(colliderHandle);

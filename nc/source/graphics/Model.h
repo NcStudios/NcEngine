@@ -32,7 +32,7 @@ namespace nc::graphics
             void Bind() const;
 
             void SetTransformationMatrix(DirectX::FXMMATRIX matrix) noexcept;
-            DirectX::XMMATRIX GetTransformationMatrix() const noexcept;
+            DirectX::FXMMATRIX GetTransformationMatrix() const noexcept;
             Material* GetMaterial() noexcept;
 
         private:
