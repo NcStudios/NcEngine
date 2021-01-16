@@ -1,32 +1,20 @@
 #pragma once
 
-#include <concepts>
+#include "EntityHandle.h"
 
 namespace nc::ecs
 {
-template<std::integral T>
-class HandleManager
-{
-    private:
-        T m_current;
-    public:
-        HandleManager() : m_current(1)
-        {
-        }
+    class HandleManager
+    {
+        static const EntityHandle::Handle_t initialHandle = 1u;
 
-        T GenerateNewHandle()
-        {
-            return m_current++;
-        }
-
-        T GetCurrent() const
-        {
-            return m_current;
-        }
-
-        void Reset()
-        {
-            m_current = 1;
-        }
-};
+        public:
+            HandleManager() : m_current{initialHandle} {}
+            EntityHandle GenerateNewHandle() {return EntityHandle{m_current++}; }
+            EntityHandle GetCurrent() const { return EntityHandle{m_current}; }
+            void Reset() { m_current = initialHandle; }
+        
+        private:
+            EntityHandle::Handle_t m_current;
+    };
 }

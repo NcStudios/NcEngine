@@ -15,7 +15,7 @@ namespace nc
     class Transform final : public Component
     {
         public:
-            Transform(ComponentHandle handle, EntityHandle parentHandle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
+            Transform(EntityHandle handle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
             Transform(const Transform&) = delete;
             Transform(Transform&&) = delete;
             Transform& operator=(const Transform&) = delete;

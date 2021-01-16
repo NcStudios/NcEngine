@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NcCommonTypes.h"
+#include "EntityHandle.h"
 #include "DebugUtils.h"
 
 #include <algorithm>
@@ -20,7 +20,7 @@ namespace nc::engine::alloc
             Pool(uint32_t maxItemCount);
 
             template<class ... Args>
-            uint32_t Alloc(Args&& ...args);
+            uint32_t Alloc(T** out, Args&& ...args);
 
             void Free(uint32_t pos);
             T * GetPtrTo(uint32_t pos);
@@ -50,7 +50,7 @@ namespace nc::engine::alloc
 
     template<class T>
     template<class ... Args>
-    uint32_t Pool<T>::Alloc(Args&& ...args)
+    uint32_t Pool<T>::Alloc(T** out, Args&& ...args)
     {
         IF_THROW(IsFull(), "Pool::Alloc - Pool full");
 
@@ -66,8 +66,8 @@ namespace nc::engine::alloc
             gaps.pop_back();
         }
 
-        T* component = reinterpret_cast<T*>(&data[freePos]);
-        component = new(component) T(std::forward<Args>(args)...);
+        *out = reinterpret_cast<T*>(&data[freePos]);
+        *out = new(*out) T(std::forward<Args>(args)...);
         return freePos;
     }
 

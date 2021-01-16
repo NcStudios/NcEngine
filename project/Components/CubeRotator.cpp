@@ -5,9 +5,9 @@ using namespace nc;
 
 namespace project
 {
-    CubeRotator::CubeRotator(ComponentHandle handle, EntityHandle parentHandle)
-        : Component(handle, parentHandle),
-          m_transform{Ecs::GetComponent<Transform>(m_parentHandle)}
+    CubeRotator::CubeRotator(EntityHandle handle)
+        : Component(handle),
+          m_transform{Ecs::GetComponent<Transform>(handle)}
     {
     }
 

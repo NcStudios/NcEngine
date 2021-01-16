@@ -8,10 +8,10 @@ using namespace nc;
 
 namespace project
 {
-    MouseFollower::MouseFollower(ComponentHandle handle, EntityHandle parentHandle)
-    : Component(handle, parentHandle),
+    MouseFollower::MouseFollower(EntityHandle handle)
+    : Component(handle),
       m_screenDimensions { Window::GetDimensions() },
-      m_transform { Ecs::GetComponent<nc::Transform>(m_parentHandle) },
+      m_transform { Ecs::GetComponent<nc::Transform>(handle) },
       m_zDepth { 0.0f },
       m_zRatio { 0.0f }
     {

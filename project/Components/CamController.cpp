@@ -14,8 +14,8 @@ namespace
     const unsigned HUD_HEIGHT = 200;
 }
 
-CamController::CamController(ComponentHandle handle, EntityHandle parentHandle)
-    : Component(handle, parentHandle),
+CamController::CamController(EntityHandle handle)
+    : Component(handle),
       m_mainCameraTransform{nullptr},
       m_config{ engine::Engine::GetConfig() }
 {}

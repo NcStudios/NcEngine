@@ -53,7 +53,7 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, float frameLogicTime, std::unordered_map<::nc::EntityHandle, ::nc::Entity>& activeEntities)
+    void UIImpl::Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities)
     {
         m_editor.Frame(dt, frameLogicTime, activeEntities);
         if(m_projectUI)

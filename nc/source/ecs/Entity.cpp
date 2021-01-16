@@ -2,33 +2,11 @@
 
 namespace nc
 {
-Entity::Entity(const EntityHandle handle, const ComponentHandle transformHandle, const std::string& tag) noexcept
+Entity::Entity(const EntityHandle handle, const std::string& tag) noexcept
     : Handle{ handle }, 
       Tag{ tag },
-      Handles{ transformHandle, NullHandle, NullHandle },
       m_userComponents{ }
 {
-}
-
-Entity::Entity(Entity&& other)
-    : Handle { other.Handle },
-      Tag { std::move(other.Tag) },
-      Handles {std::exchange(other.Handles, {}) },
-      m_userComponents { std::move(other.m_userComponents) }
-{
-}
-
-Entity::~Entity()
-{
-}
-
-Entity& Entity::operator=(Entity&& other)
-{
-    Handle = std::exchange(other.Handle, NullHandle);
-    Tag = std::move(other.Tag);
-    Handles = std::exchange(other.Handles, {});
-    m_userComponents = std::move(other.m_userComponents);
-    return *this;
 }
 
 const std::vector<std::unique_ptr<Component>> & Entity::GetUserComponents() const noexcept
