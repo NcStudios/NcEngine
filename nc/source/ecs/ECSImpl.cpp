@@ -2,11 +2,16 @@
 #include "Ecs.h"
 #include "component/PointLightManager.h"
 
+namespace
+{
+    constexpr size_t InitialBucketSize = 10u;
+}
+
 namespace nc::ecs
 {
 EcsImpl::EcsImpl()
-    : m_active{},
-      m_toDestroy{},
+    : m_active{InitialBucketSize, EntityHandle::Hash()},
+      m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_colliderSystem{ std::make_unique<ComponentSystem<Collider>>() },
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS, true) },
       m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>() },
@@ -80,7 +85,7 @@ bool EcsImpl::DoesEntityExist(const EntityHandle handle) const noexcept
     return m_active.count(handle) > 0;
 }
 
-std::unordered_map<EntityHandle, Entity> & EcsImpl::GetMapContainingEntity(const EntityHandle handle, bool checkAll) noexcept(false)
+EntityMap& EcsImpl::GetMapContainingEntity(const EntityHandle handle, bool checkAll) noexcept(false)
 {
     if (m_active.count(handle) > 0)
         return m_active;
@@ -91,17 +96,17 @@ std::unordered_map<EntityHandle, Entity> & EcsImpl::GetMapContainingEntity(const
     throw std::runtime_error("Entity not found.");
 }
 
-std::unordered_map<EntityHandle, Entity> & EcsImpl::GetActiveEntities() noexcept
+EntityMap& EcsImpl::GetActiveEntities() noexcept
 {
     return m_active;
 }
 
-std::unordered_map<EntityHandle, Entity> & EcsImpl::GetToDestroyEntities() noexcept
+EntityMap& EcsImpl::GetToDestroyEntities() noexcept
 {
     return m_toDestroy;
 }
 
-Entity * EcsImpl::GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false)
+Entity* EcsImpl::GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false)
 {
     return &GetMapContainingEntity(handle, true).at(handle);
 }

@@ -4,6 +4,7 @@
 #include "IUI.h"
 #include "editor/Editor.h"
 #include "ecs/Entity.h"
+#include "ecs/EntityMap.h"
 
 #include <unordered_map>
 
@@ -27,7 +28,7 @@ namespace nc
                 void FrameBegin();
 
                 #ifdef NC_EDITOR_ENABLED
-                void Frame(float* dt, float frameLogicTime, std::unordered_map<nc::EntityHandle, nc::Entity>& activeEntities);
+                void Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities);
                 #else
                 void Frame();
                 #endif

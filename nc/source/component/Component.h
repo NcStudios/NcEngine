@@ -1,5 +1,5 @@
 #pragma once
-#include "NcCommonTypes.h"
+#include "EntityHandle.h"
 
 namespace nc
 {

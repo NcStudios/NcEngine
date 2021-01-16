@@ -5,7 +5,6 @@ namespace nc
 Entity::Entity(const EntityHandle handle, const std::string& tag) noexcept
     : Handle{ handle }, 
       Tag{ tag },
-      //Handles{ transformHandle, NullHandle, NullHandle },
       m_userComponents{ }
 {
 }

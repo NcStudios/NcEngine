@@ -2,6 +2,7 @@
 #pragma once
 
 #include "ecs/Entity.h"
+#include "ecs/EntityMap.h"
 
 #include <optional>
 #include <unordered_map>
@@ -21,7 +22,7 @@ namespace nc::ui::editor
 
             Editor(nc::graphics::Graphics * graphics);
 
-            void Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities);
+            void Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities);
 
             void ToggleGui() noexcept;
             void EnableGui() noexcept;
@@ -38,7 +39,7 @@ namespace nc::ui::editor
 
             void DrawMenu();
             void DrawTimingControl(float* speed, float frameLogicTime, uint32_t drawCallCount, bool* open);
-            void DrawEntityGraphControl(std::unordered_map<EntityHandle, Entity>& entities);
+            void DrawEntityGraphControl(ecs::EntityMap& entities);
             void DrawInspectorControl(nc::EntityHandle handle);
     };
 }

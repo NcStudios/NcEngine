@@ -5,13 +5,13 @@
 using namespace nc;
 using namespace nc::ecs;
 
-EntityHandle TestParentHandle1 = 1u;
-EntityHandle TestParentHandle2 = 2u;
-EntityHandle TestParentHandle3 = 3u;
+EntityHandle TestParentHandle1{1u};
+EntityHandle TestParentHandle2{2u};
+EntityHandle TestParentHandle3{3u};
+EntityHandle TestBadHandle{10u};
 int TestVal1 = 5;
 int TestVal2 = 6;
 int TestVal3 = 7;
-EntityHandle TestBadHandle = 10u;
 
 struct Fake : public Component
 {

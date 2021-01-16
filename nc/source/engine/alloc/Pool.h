@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NcCommonTypes.h"
+#include "EntityHandle.h"
 #include "DebugUtils.h"
 
 #include <algorithm>

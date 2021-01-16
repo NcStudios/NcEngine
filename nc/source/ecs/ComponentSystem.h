@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NcCommonTypes.h"
+#include "EntityHandle.h"
 #include "engine/alloc/Pool.h"
 #include "DebugUtils.h"
 
@@ -42,14 +42,15 @@ class ComponentSystem
         bool m_isReserveSizeMaxSize;
         uint32_t m_poolSize;
         std::vector<engine::alloc::Pool<T>> m_poolArray;
-        std::unordered_map<EntityHandle, engine::ComponentIndexPair> m_indexMap;
+        std::unordered_map<EntityHandle, engine::ComponentIndexPair, EntityHandle::Hash> m_indexMap;
 };
 
 template<class T>
 ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize, bool isReserveSizeMaxSize)
     : m_isReserveSizeMaxSize { isReserveSizeMaxSize },
       m_poolSize{ reserveSize },
-      m_poolArray {}
+      m_poolArray {},
+      m_indexMap{10u, EntityHandle::Hash()}
 {
     m_poolArray.emplace_back(engine::alloc::Pool<T>(m_poolSize));
 }
