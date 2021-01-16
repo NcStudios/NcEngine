@@ -72,7 +72,6 @@ void EcsImpl::SendOnDestroy()
         }
 
         pair.second.SendOnDestroy();
-        //const auto& handles = entityPtr->Handles;
         m_transformSystem->Remove(pair.first);
         m_rendererSystem->Remove(pair.first);
         m_lightSystem->Remove(pair.first);
