@@ -25,26 +25,27 @@ namespace project
         nc::ui::UI::Set(m_hud.get());
 
         // Light
-        auto lvHandle = Ecs::CreateEntity({-2.4f, 12.1f, 0.0f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+        auto lvHandle = Ecs::CreateEntity({-2.4f, 12.1f, 0.0f}, Vector3::Zero(), Vector3::One(), "Point Light");
         Ecs::AddComponent<PointLight>(lvHandle);
 
         // Light
-        auto lvHandle2 = Ecs::CreateEntity({12.1f, 14.5f, 7.3f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+        auto lvHandle2 = Ecs::CreateEntity({12.1f, 14.5f, 7.3f}, Vector3::Zero(), Vector3::One(), "Point Light");
         Ecs::AddComponent<PointLight>(lvHandle2);
 
         // Light
-        auto lvHandle3 = Ecs::CreateEntity({4.1f, 14.5f, 3.3f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
+        auto lvHandle3 = Ecs::CreateEntity({4.1f, 14.5f, 3.3f}, Vector3::Zero(), Vector3::One(), "Point Light");
         Ecs::AddComponent<PointLight>(lvHandle3);
 
         //CamController
-        auto camHandle = Ecs::CreateEntity({0.0f, 5.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
+        //auto camHandle = Ecs::CreateEntity({0.0f, 1.0f, 10.0f}, {30.0f, 30.0f, 30.0f}, Vector3::Zero(), "Main Camera");
+        auto camHandle = Ecs::CreateEntity({0.0f, 0.0f, -10.0f}, Vector3::Zero(), Vector3::One(), "Main Camera");
         auto camComponentPtr = Ecs::AddComponent<Camera>(camHandle);
         camera::MainCamera::Set(camComponentPtr);
         Ecs::AddComponent<CamController>(camHandle);
         Ecs::AddComponent<ClickHandler>(camHandle);
 
         // Debug Controller
-        auto debugHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Debug Controller");
+        auto debugHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), "Debug Controller");
         Ecs::AddComponent<SceneReset>(debugHandle);
         Ecs::AddComponent<Timer>(debugHandle);
 

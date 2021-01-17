@@ -1,6 +1,8 @@
 #pragma once
 #include "Math.h"
 
+#include "directx/math/DirectXMath.h"
+
 namespace nc
 {
     struct Vector4
@@ -15,6 +17,9 @@ namespace nc
         Vector4(Vector4&& vec) = default;
         Vector4& operator=(const Vector4& vec) = default;
         Vector4& operator=(Vector4&& vec) = default;
+
+        Vector4(const DirectX::XMFLOAT4& vec) noexcept
+            : x(vec.x), y(vec.y), z(vec.z), w(vec.w) {}
 
         constexpr Vector4(float x, float y, float z, float w) noexcept
             : x(x), y(y), z(z), w(w) {}

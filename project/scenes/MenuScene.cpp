@@ -29,7 +29,7 @@ namespace project
         prefab::InitializeResources();
 
         // Light
-        auto lvHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Point Light");
+        auto lvHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), "Point Light");
         auto pointLight = Ecs::AddComponent<PointLight>(lvHandle);
         pointLight->Set(pointLight->PixelConstBufData.pos, 0.5f, {0.443f, 0.412f, 0.412f}, {0.4751f, 0.525f, 1.0f}, 3.56f, 0.00f, 0.05f, 0.00f);
         Ecs::AddComponent<project::MouseFollower>(lvHandle);
@@ -38,6 +38,7 @@ namespace project
         auto camHandle = Ecs::CreateEntity("Main Camera");
         auto camComponentPtr = Ecs::AddComponent<Camera>(camHandle);
         camera::MainCamera::Set(camComponentPtr);
+        Ecs::AddComponent<CamController>(camHandle);
         
         // Debug Controller
         auto debugHandle = Ecs::CreateEntity("Debug Controller");

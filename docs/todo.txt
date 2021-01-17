@@ -3,6 +3,11 @@ IN PROGRESS
 ***********
 
 Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
+assert that Transform scale is never 0 as it causes problems with the matrix(also scale of 0 doesn't make sense)
+vectors
+    double check operators (does Vector3::operator==() work?)
+    need tests
+    Vector4 needs cpp so DXMath isn't included in header
 
 ***********
 BUGS
