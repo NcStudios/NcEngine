@@ -48,7 +48,9 @@ namespace nc
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        return Quaternion::FromXMVector(rot_v);
+        DirectX::XMFLOAT4 quat;
+        DirectX::XMStoreFloat4(&quat, rot_v);
+        return Quaternion{quat};
     }
 
     Vector3 Transform::GetScale() const
@@ -102,7 +104,7 @@ namespace nc
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
 
         return DirectX::XMMatrixScalingFromVector(scl_v) *
-               additionalScale.ToXMScalingMatrix() *
+               ToScaleMatrix(additionalScale) *
                DirectX::XMMatrixRotationQuaternion(rot_v) *
                DirectX::XMMatrixTranslationFromVector(pos_v);
     }
@@ -119,27 +121,27 @@ namespace nc
     {
         IF_THROW(quat == Quaternion::Zero(), "Transform::Set - Invalid quaternion(Quaternion::Zero)");
         IF_THROW(scale == Vector3::Zero(), "Transform::Set - Invalid scale(Vector3::Zero)");
-        m_matrix = scale.ToXMScalingMatrix() * quat.ToXMMatrix() * pos.ToXMTranslationMatrix();
+        m_matrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
     }
 
     void Transform::Set(const Vector3& pos, const Vector3& angles, const Vector3& scale)
     {
-        IF_THROW(scale == Vector3::Zero(), "Ecs::CreateEntity - Invalid scale(Vector3::Zero)");
-        m_matrix = scale.ToXMScalingMatrix() * angles.ToXMRotationMatrix() * pos.ToXMTranslationMatrix();
+        IF_THROW(scale == Vector3::Zero(), "Transform::Set - Invalid scale(Vector3::Zero)");
+        m_matrix = ToScaleMatrix(scale) * ToRotMatrix(angles) * ToTransMatrix(pos);
     }
 
     void Transform::SetPosition(const Vector3& pos)
     {
-        m_matrix.r[3] = DirectX::XMVectorSet(pos.x, pos.y, pos.z, 0.0f);
+        m_matrix.r[3] = ToXMVector(pos);
     }
 
     void Transform::SetRotation(const Quaternion& quat)
     {
-        IF_THROW(quat == Vector3::Zero(), "Ecs::SetRotation - Invalid quaternion(Quaternion::Zero)");
+        IF_THROW(quat == Quaternion::Zero(), "Transform::SetRotation - Invalid quaternion(Quaternion::Zero)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         m_matrix = DirectX::XMMatrixScalingFromVector(scl_v) *
-                   quat.ToXMMatrix() *
+                   ToRotMatrix(quat) *
                    DirectX::XMMatrixTranslationFromVector(pos_v);
     }
 
@@ -148,16 +150,16 @@ namespace nc
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         m_matrix = DirectX::XMMatrixScalingFromVector(scl_v) *
-                   DirectX::XMMatrixRotationRollPitchYaw(angles.x, angles.y, angles.z) *
+                   ToRotMatrix(angles) *
                    DirectX::XMMatrixTranslationFromVector(pos_v);
     }
 
     void Transform::SetScale(const Vector3& scale)
     {
-        IF_THROW(scale == Vector3::Zero(), "Ecs::SetScale - Invalid scale(Vector3::Zero)");
+        IF_THROW(scale == Vector3::Zero(), "Transform::SetScale - Invalid scale(Vector3::Zero)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        m_matrix = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
+        m_matrix = ToScaleMatrix(scale) *
                    DirectX::XMMatrixRotationQuaternion(rot_v) *
                    DirectX::XMMatrixTranslationFromVector(pos_v);
     }
@@ -166,16 +168,14 @@ namespace nc
     {
         if(space == Space::World)
         {
-            m_matrix = m_matrix * DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
+            m_matrix = m_matrix * ToTransMatrix(translation);
             return;
         }
 
         DirectX::XMVECTOR pos_v, rot_v, scl_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         auto rot_m = DirectX::XMMatrixRotationQuaternion(rot_v);
-        auto trans_v = DirectX::XMVectorSet(translation.x, translation.y, translation.z, 0.0f);
-        trans_v = DirectX::XMVector3Transform(trans_v, rot_m);
-        pos_v = pos_v + trans_v;
+        pos_v += DirectX::XMVector3Transform(ToXMVector(translation), rot_m);
         m_matrix = DirectX::XMMatrixScalingFromVector(scl_v) *
                    rot_m *
                    DirectX::XMMatrixTranslationFromVector(pos_v);
@@ -185,15 +185,7 @@ namespace nc
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        rot_v = DirectX::XMQuaternionMultiply
-        (
-            rot_v,
-            DirectX::XMQuaternionRotationAxis
-            (
-                DirectX::XMVectorSet(axis.x, axis.y, axis.z, 0.0f),
-                radians
-            )
-        );
+        rot_v = DirectX::XMQuaternionMultiply(rot_v, DirectX::XMQuaternionRotationAxis(ToXMVector(axis), radians));
         m_matrix = ComposeMatrix(scl_v, rot_v, pos_v);
     }
 
@@ -202,7 +194,7 @@ namespace nc
         IF_THROW(quat == Quaternion::Zero(), "Transform::Rotate - Invalid quaternion(Quaternion::Zero)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        rot_v = DirectX::XMQuaternionMultiply(rot_v, quat.ToXMVector());
+        rot_v = DirectX::XMQuaternionMultiply(rot_v, ToXMVector(quat));
         m_matrix = ComposeMatrix(scl_v, rot_v, pos_v);
     }
 }

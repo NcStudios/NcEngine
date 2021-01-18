@@ -1,4 +1,5 @@
 #include "Quaternion.h"
+#include "directx/math/DirectXMath.h"
 
 namespace nc
 {
@@ -34,5 +35,15 @@ namespace nc
         DirectX::XMFLOAT4 xmf4;
         DirectX::XMStoreFloat4(&xmf4, quat_v);
         return Quaternion{xmf4};
+    }
+
+    bool operator==(const Quaternion& lhs, const Quaternion& rhs)
+    {
+        //need to consider error
+        return (math::FloatEqual(lhs.x, rhs.x) &&
+                math::FloatEqual(lhs.y, rhs.y) &&
+                math::FloatEqual(lhs.z, rhs.z) &&
+                math::FloatEqual(lhs.w, rhs.w));
+        //return ((lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z) && (lhs.w == rhs.w));
     }
 }

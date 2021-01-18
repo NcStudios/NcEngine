@@ -99,7 +99,8 @@ namespace nc
         { return Vector3{vec.x / scalar, vec.y / scalar, vec.z / scalar}; }
 
     inline bool operator ==(const Vector3& lhs, const Vector3& rhs)
-        { return Vector3::SquareMagnitude(lhs - rhs) <= math::EPSILON; }
+        { return (math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y) && math::FloatEqual(lhs.z, rhs.z)); }
+        //{ return Vector3::SquareMagnitude(lhs - rhs) <= math::FloatEpsilon; }
 
     inline bool operator !=(const Vector3& lhs, const Vector3& rhs)
         { return !(lhs == rhs); }

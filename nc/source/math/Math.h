@@ -1,15 +1,36 @@
 #pragma once
 
+#include <cstdint>
+#include <cstring>
 #include <concepts>
 #include <cmath>
 #include <limits> //numeric_limits::epsilon
 
+#include <iostream>
+
 namespace nc::math
 {
-    const double EPSILON = std::numeric_limits<float>::epsilon();
+    const auto FloatEpsilon = std::numeric_limits<float>::epsilon();
+    const auto DoubleEpsilon = std::numeric_limits<double>::epsilon();
 
     const double PI_DOUBLE = atan(1)*4;
     const float  PI_FLOAT  = PI_DOUBLE;
+
+    inline bool FloatEqual(float a, float b, float maxDiff = 0.00001f, float maxRelDiff = FloatEpsilon) noexcept
+    {
+        auto diff = fabs(a - b);
+        if(diff <= maxDiff)
+            return true;
+
+        auto aAbs = fabs(a);
+        auto bAbs = fabs(b);
+        auto max = (aAbs > bAbs) ? aAbs : bAbs;
+
+        if(diff <= max * maxRelDiff)
+            return true;
+        
+        return false;
+    }
 
     template<std::totally_ordered T> inline T Min(T a, T b) noexcept { return a < b ? a : b; }
     template<std::totally_ordered T> inline T Max(T a, T b) noexcept { return a > b ? a : b; }

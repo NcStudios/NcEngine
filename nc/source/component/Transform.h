@@ -25,7 +25,6 @@ namespace nc
     {
         public:
             Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale) noexcept;
-            //Transform(EntityHandle handle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
             Transform(const Transform&) = delete;
             Transform(Transform&&) = delete;
             Transform& operator=(const Transform&) = delete;

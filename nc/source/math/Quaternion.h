@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Vector3.h"
-#include "directx/math/DirectXMath.h"
+
+namespace DirectX { struct XMFLOAT4; }
 
 namespace nc
 {
@@ -28,4 +29,6 @@ namespace nc
         static Quaternion FromEulerAngles(const Vector3& angles);
         static Quaternion FromEulerAngles(float x, float y, float z);
     };
+
+    bool operator==(const Quaternion& lhs, const Quaternion& rhs);
 }
