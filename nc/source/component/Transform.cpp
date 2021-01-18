@@ -1,6 +1,5 @@
 #include "Transform.h"
 #include "DebugUtils.h"
-#include "directx/math/DirectXMath.h"
 #include <limits>
 
 #ifdef NC_EDITOR_ENABLED
@@ -66,30 +65,48 @@ namespace nc
     void Transform::EditorGuiElement()
     {
         const float itemWidth = 80.0f;
-        //const float dragSpeed = 1.0f;
+        const float dragSpeed = 0.3f;
+
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
+        DirectX::XMFLOAT3 scl;
+        DirectX::XMFLOAT4 rot;
+        DirectX::XMFLOAT3 pos;
+        DirectX::XMStoreFloat3(&scl, scl_v);
+        DirectX::XMStoreFloat4(&rot, rot_v);
+        DirectX::XMStoreFloat3(&pos, pos_v);
 
         ImGui::PushItemWidth(itemWidth);
             ImGui::Spacing();  ImGui::Separator();  ImGui::Text("Transform");
-            // ImGui::BeginGroup();
-            //     ImGui::Indent();    ImGui::Text("Position");
-            //     ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat( "##transformxpos", &m_position.x, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-            //     ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat( "##transformypos", &m_position.y, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-            //     ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat( "##transformzpos", &m_position.z,  -80.0f, 80.0f, "%.1f", dragSpeed);
-            // ImGui::EndGroup();
+            ImGui::BeginGroup();
+                ImGui::Indent();    ImGui::Text("Position");
+                ImGui::Text("X:");  ImGui::SameLine();
+                    auto xPosRes = ImGui::SliderFloat( "##transformxpos", &pos.x, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Y:");  ImGui::SameLine();
+                    auto yPosRes = ImGui::SliderFloat( "##transformypos", &pos.y, -80.0f, 80.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+                ImGui::Text("Z:");  ImGui::SameLine();
+                    auto zPosRes = ImGui::SliderFloat( "##transformzpos", &pos.z,  -80.0f, 80.0f, "%.1f", dragSpeed);
+            ImGui::EndGroup();
             // ImGui::BeginGroup();
             //     ImGui::Indent();    ImGui::Text("Rotation");
-            //     ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##transformxrot", &m_rotation.x, -180.0f, 180.0f);  ImGui::SameLine();
-            //     ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##transformyrot", &m_rotation.y, -180.0f, 180.0f);  ImGui::SameLine();
-            //     ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##transformzrot", &m_rotation.z, -180.0f, 180.0f);
+            //     ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderAngle("##transformxrot", &rot.x, -180.0f, 180.0f);  ImGui::SameLine();
+            //     ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderAngle("##transformyrot", &rot.y, -180.0f, 180.0f);  ImGui::SameLine();
+            //     ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderAngle("##transformzrot", &rot.z, -180.0f, 180.0f);  ImGui::SameLine();
+            //     ImGui::Text("W:");  ImGui::SameLine();  ImGui::SliderAngle("##transformwrot", &rot.w, -180.0f, 180.0f);
             // ImGui::EndGroup();
             // ImGui::BeginGroup();
             //     ImGui::Indent();    ImGui::Text("Scale");
-            //     ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##transformxscale", &m_scale.x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-            //     ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##transformyscale", &m_scale.y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-            //     ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##transformzscale", &m_scale.z, 0.01f, 100.0f, "%.1f", dragSpeed);
+            //     ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##transformxscale", &scl.x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+            //     ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##transformyscale", &scl.y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
+            //     ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##transformzscale", &scl.z, 0.01f, 100.0f, "%.1f", dragSpeed);
             // ImGui::EndGroup();
             ImGui::Separator();
         ImGui::PopItemWidth();
+
+        if(xPosRes || yPosRes || zPosRes)
+        {
+            m_matrix = ComposeMatrix({scl}, {rot}, {pos});
+        }
     }
     #endif
     
@@ -181,20 +198,20 @@ namespace nc
                    DirectX::XMMatrixTranslationFromVector(pos_v);
     }
 
-    void Transform::Rotate(Vector3 axis, float radians)
-    {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        rot_v = DirectX::XMQuaternionMultiply(rot_v, DirectX::XMQuaternionRotationAxis(ToXMVector(axis), radians));
-        m_matrix = ComposeMatrix(scl_v, rot_v, pos_v);
-    }
-
     void Transform::Rotate(const Quaternion& quat)
     {
         IF_THROW(quat == Quaternion::Zero(), "Transform::Rotate - Invalid quaternion(Quaternion::Zero)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         rot_v = DirectX::XMQuaternionMultiply(rot_v, ToXMVector(quat));
+        m_matrix = ComposeMatrix(scl_v, rot_v, pos_v);
+    }
+
+    void Transform::Rotate(Vector3 axis, float radians)
+    {
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
+        rot_v = DirectX::XMQuaternionMultiply(rot_v, DirectX::XMQuaternionRotationAxis(ToXMVector(axis), radians));
         m_matrix = ComposeMatrix(scl_v, rot_v, pos_v);
     }
 }

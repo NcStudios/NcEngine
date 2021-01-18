@@ -11,14 +11,13 @@ namespace nc
         : x{xmf4.x}, y{xmf4.y}, z{xmf4.z}, w{xmf4.w}
     {}
 
-    AxisAngle Quaternion::ToAxisAngle() const noexcept
+    void Quaternion::ToAxisAngle(Vector3* axisOut, float* angleOut) const noexcept
     {
         DirectX::XMVECTOR axis_v;
-        float angle;
-        DirectX::XMQuaternionToAxisAngle(&axis_v, &angle, DirectX::XMVectorSet(x, y, z, w));
+        DirectX::XMQuaternionToAxisAngle(&axis_v, angleOut, DirectX::XMVectorSet(x, y, z, w));
         DirectX::XMFLOAT3 axis;
         DirectX::XMStoreFloat3(&axis, axis_v);
-        return AxisAngle{Vector3{axis}, angle};
+        *axisOut = axis;
     }
 
     Quaternion Quaternion::FromEulerAngles(const Vector3& angles)
@@ -37,13 +36,12 @@ namespace nc
         return Quaternion{xmf4};
     }
 
-    bool operator==(const Quaternion& lhs, const Quaternion& rhs)
+    Quaternion Quaternion::FromAxisAngle(const Vector3& axis, float angle)
     {
-        //need to consider error
-        return (math::FloatEqual(lhs.x, rhs.x) &&
-                math::FloatEqual(lhs.y, rhs.y) &&
-                math::FloatEqual(lhs.z, rhs.z) &&
-                math::FloatEqual(lhs.w, rhs.w));
-        //return ((lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z) && (lhs.w == rhs.w));
+        auto axis_v = DirectX::XMVectorSet(axis.x, axis.y, axis.z, 0.0f);
+        auto quat_v = DirectX::XMQuaternionRotationAxis(axis_v, angle);
+        DirectX::XMFLOAT4 quat;
+        DirectX::XMStoreFloat4(&quat, quat_v);
+        return Quaternion{quat};
     }
 }

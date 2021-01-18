@@ -100,7 +100,6 @@ namespace nc
 
     inline bool operator ==(const Vector3& lhs, const Vector3& rhs)
         { return (math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y) && math::FloatEqual(lhs.z, rhs.z)); }
-        //{ return Vector3::SquareMagnitude(lhs - rhs) <= math::FloatEpsilon; }
 
     inline bool operator !=(const Vector3& lhs, const Vector3& rhs)
         { return !(lhs == rhs); }

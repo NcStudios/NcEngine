@@ -126,15 +126,10 @@ TEST(Transform_unit_tests, Rotate_AxisAngleOverload_OnlyModifiesTranslationMatri
     auto expectedAxis = Vector3::Up();
     auto expectedAngle = 2.2f; 
     t.Rotate(expectedAxis, expectedAngle);
+    auto actualQuat = t.GetRotation();
+    auto expectedQuat = Quaternion::FromAxisAngle(expectedAxis, expectedAngle);
     EXPECT_EQ(t.GetPosition(), TestPos1);
-    auto actualAxisAngle = t.GetRotation().ToAxisAngle();
-    EXPECT_NEAR(actualAxisAngle.angle, expectedAngle, 0.001f);
-    //EXPECT_EQ(actualAxisAngle.axis, expectedAxis);
-
-    EXPECT_NEAR(actualAxisAngle.axis.x, expectedAxis.x, 0.001f);
-    EXPECT_NEAR(actualAxisAngle.axis.y, expectedAxis.y, 0.001f);
-    EXPECT_NEAR(actualAxisAngle.axis.z, expectedAxis.z, 0.001f);
-
+    EXPECT_EQ(actualQuat, expectedQuat);
     EXPECT_EQ(t.GetScale(), TestScale1);
 }
 

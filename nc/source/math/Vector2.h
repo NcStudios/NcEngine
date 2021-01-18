@@ -105,7 +105,7 @@ namespace nc
         { return Vector2(vec.x / scalar, vec.y / scalar); }
 
     inline bool operator ==(const Vector2& lhs, const Vector2& rhs)
-        { return Vector2::SquareMagnitude(lhs - rhs) <= math::FloatEpsilon; }
+        { return math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y); }
 
     inline bool operator !=(const Vector2& lhs, const Vector2& rhs)
         { return !(lhs == rhs); }

@@ -4,21 +4,12 @@
 #include "math/Quaternion.h"
 #include "directx/math/DirectXMath.h"
 
-namespace DirectX { struct XMMATRIX; }
-
 namespace nc
 {
     enum class Space : uint8_t
     {
         World,
         Local
-    };
-
-    struct DecomposedMatrix
-    {
-        DirectX::XMFLOAT4 rotation;
-        DirectX::XMFLOAT3 position;
-        DirectX::XMFLOAT3 scale;
     };
 
     class Transform final : public Component
@@ -29,10 +20,6 @@ namespace nc
             Transform(Transform&&) = delete;
             Transform& operator=(const Transform&) = delete;
             Transform& operator=(Transform&&) = delete;
-
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
 
             Vector3 GetPosition() const;
             Quaternion GetRotation() const;
@@ -53,6 +40,10 @@ namespace nc
             void Rotate(const Quaternion& quat);
             void Rotate(Vector3 axis, float radians);
 
+            #ifdef NC_EDITOR_ENABLED
+            void EditorGuiElement() override;
+            #endif
+            
         private:
             DirectX::XMMATRIX m_matrix;
     };
