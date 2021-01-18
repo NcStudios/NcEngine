@@ -1,6 +1,11 @@
 #include "Ecs.h"
 #include "Ecs/EcsImpl.h"
 
+namespace
+{
+    const auto DefaultEntityTag = "Entity";
+}
+
 namespace nc
 {
     ecs::EcsImpl* Ecs::m_impl = nullptr;
@@ -10,14 +15,20 @@ namespace nc
         m_impl = impl;
     }
 
-    EntityHandle Ecs::CreateEntity(std::string tag)
+    EntityHandle Ecs::CreateEntity()
     {
-        return Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::One(), std::move(tag));
+        return Ecs::CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), DefaultEntityTag);
     }
 
-    EntityHandle Ecs::CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag)
+    EntityHandle Ecs::CreateEntity(std::string tag)
+    {
+        return Ecs::CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), std::move(tag));
+    }
+
+    EntityHandle Ecs::CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag)
     {
         IF_THROW(scale == Vector3::Zero(), "Ecs::CreateEntity - scale cannot be Vector3::Zero");
+        IF_THROW(rot == Quaternion::Zero(), "Ecs::CreateEntity - Invalid quaternion");
         auto impl = Ecs::m_impl;
         auto entityHandle = impl->m_handleManager.GenerateNewHandle();
         impl->m_transformSystem->Add(entityHandle, pos, rot, scale);

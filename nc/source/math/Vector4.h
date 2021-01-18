@@ -1,7 +1,7 @@
 #pragma once
 #include "Math.h"
 
-#include "directx/math/DirectXMath.h"
+namespace DirectX { struct XMFLOAT4; }
 
 namespace nc
 {
@@ -12,17 +12,15 @@ namespace nc
         float z;
         float w;
 
-        Vector4() = default;
-        Vector4(const Vector4& vec) = default;
-        Vector4(Vector4&& vec) = default;
-        Vector4& operator=(const Vector4& vec) = default;
-        Vector4& operator=(Vector4&& vec) = default;
-
-        Vector4(const DirectX::XMFLOAT4& vec) noexcept
-            : x(vec.x), y(vec.y), z(vec.z), w(vec.w) {}
+        constexpr Vector4() noexcept
+            : x{0.0f}, y{0.0f}, z{0.0f}, w{0.0f} {}
 
         constexpr Vector4(float x, float y, float z, float w) noexcept
-            : x(x), y(y), z(z), w(w) {}
+            : x{x}, y{y}, z{z}, w{w} {}
+
+        Vector4(const DirectX::XMFLOAT4& xm) noexcept;
+        Vector4(DirectX::XMFLOAT4&& xm) noexcept;
+        DirectX::XMFLOAT4 ToXMFloat4() const noexcept;
 
         inline void InvertX() noexcept { x *= -1.0f; }
         inline void InvertY() noexcept { y *= -1.0f; }

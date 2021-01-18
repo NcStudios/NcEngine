@@ -10,14 +10,11 @@ namespace nc
         float x;
         float y;
 
-        Vector2() = default;
-        Vector2(const Vector2& vec) = default;
-        Vector2(Vector2&& vec) = default;
-        Vector2& operator=(const Vector2& other) = default;
-        Vector2& operator=(Vector2&& other) = default;
+        constexpr Vector2() noexcept
+            : x{0.0f}, y{0.0f} {}
 
-        constexpr Vector2(float x, float y) noexcept 
-            : x{x}, y{y} {}
+        constexpr Vector2(float X, float Y) noexcept 
+            : x{X}, y{Y} {}
 
         Vector2(const ImVec2& vec) noexcept;
         Vector2(ImVec2&& vec) noexcept;

@@ -1,7 +1,7 @@
 #pragma once
 #include "component/Component.h"
 #include "math/Vector3.h"
-#include "math/Vector4.h"
+#include "math/Quaternion.h"
 #include "directx/math/DirectXMath.h"
 
 namespace DirectX { struct XMMATRIX; }
@@ -24,7 +24,8 @@ namespace nc
     class Transform final : public Component
     {
         public:
-            Transform(EntityHandle handle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
+            Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale) noexcept;
+            //Transform(EntityHandle handle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;
             Transform(const Transform&) = delete;
             Transform(Transform&&) = delete;
             Transform& operator=(const Transform&) = delete;
@@ -34,23 +35,23 @@ namespace nc
             void EditorGuiElement() override;
             #endif
 
-            DirectX::XMMATRIX ComposeMatrix(const DecomposedMatrix& vectors) const;
-            DecomposedMatrix DecomposeMatrix() const;
-
             Vector3 GetPosition() const;
-            Vector4 GetRotation() const;
+            Quaternion GetRotation() const;
             Vector3 GetScale() const;
 
             DirectX::XMMATRIX GetTransformationMatrix() const;
             DirectX::XMMATRIX GetTransformationMatrixEx(Vector3 additionalScale) const;
             DirectX::XMMATRIX GetViewMatrix() const;
 
-            void Set(const Vector3& pos, const Vector3& rot, const Vector3& scale) noexcept;
-            void SetPosition(const Vector3& pos) noexcept;
-            void SetRotation(const Vector3& rot) noexcept;
-            void SetScale(const Vector3& scale) noexcept;
+            void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
+            void Set(const Vector3& pos, const Vector3& angles, const Vector3& scale);
+            void SetPosition(const Vector3& pos);
+            void SetRotation(const Quaternion& quat);
+            void SetRotation(const Vector3& angles);
+            void SetScale(const Vector3& scale);
 
-            void Translate(Vector3 vec, Space space = Space::Local) noexcept;
+            void Translate(Vector3 vec, Space space = Space::Local);
+            void Rotate(const Quaternion& quat);
             void Rotate(Vector3 axis, float radians);
 
         private:

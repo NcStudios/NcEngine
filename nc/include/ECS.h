@@ -20,8 +20,9 @@ namespace nc
         public:
             static void RegisterImpl(ecs::EcsImpl* impl);
 
+            static EntityHandle CreateEntity();
             static EntityHandle CreateEntity(std::string tag);
-            static EntityHandle CreateEntity(Vector3 pos, Vector3 rot, Vector3 scale, std::string tag);
+            static EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag);
             static bool DestroyEntity(EntityHandle handle);
             [[nodiscard]] static Entity* GetEntity(EntityHandle handle);
             [[nodiscard]] static Entity* GetEntity(std::string tag);

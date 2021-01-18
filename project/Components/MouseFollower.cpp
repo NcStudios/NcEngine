@@ -34,7 +34,7 @@ namespace project
     {
         m_zDepth += (float)input::MouseWheel() * dt * 2.0f;
         m_zRatio = m_viewPortDist / m_zDepth;
-        auto worldX = input::MouseX - m_screenDimensions.x / 2;
+        auto worldX = input::MouseX + m_screenDimensions.x / 2;
         auto worldY = input::MouseY + m_screenDimensions.y / 2;
         m_transform->SetPosition({worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
     }
