@@ -10,16 +10,13 @@ namespace nc
     {
         float x, y, z, w;
 
-        Quaternion(float X, float Y, float Z, float W) noexcept
-            : x{X}, y{Y}, z{Z}, w{W} {}
-
-        Quaternion(const DirectX::XMFLOAT4& xmf4) noexcept;
-        Quaternion(DirectX::XMFLOAT4&& xmf4) noexcept;
+        Quaternion(float X, float Y, float Z, float W);
+        Quaternion(const DirectX::XMFLOAT4& xmf4);
+        Quaternion(DirectX::XMFLOAT4&& xmf4);
 
         void ToAxisAngle(Vector3* axisOut, float* angleOut) const noexcept;
 
         static Quaternion Identity() { return Quaternion{0.0f, 0.0f, 0.0f, 1.0f}; }
-        static Quaternion Zero() { return Quaternion{0.0f, 0.0f, 0.0f, 0.0f}; } //invalid state, only use for error checking
         static Quaternion FromEulerAngles(const Vector3& angles);
         static Quaternion FromEulerAngles(float x, float y, float z);
         static Quaternion FromAxisAngle(const Vector3& axis, float angle);

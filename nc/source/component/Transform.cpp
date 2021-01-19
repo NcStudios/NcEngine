@@ -136,7 +136,6 @@ namespace nc
 
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
     {
-        IF_THROW(quat == Quaternion::Zero(), "Transform::Set - Invalid quaternion(Quaternion::Zero)");
         IF_THROW(scale == Vector3::Zero(), "Transform::Set - Invalid scale(Vector3::Zero)");
         m_matrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
     }
@@ -154,7 +153,6 @@ namespace nc
 
     void Transform::SetRotation(const Quaternion& quat)
     {
-        IF_THROW(quat == Quaternion::Zero(), "Transform::SetRotation - Invalid quaternion(Quaternion::Zero)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         m_matrix = DirectX::XMMatrixScalingFromVector(scl_v) *
@@ -200,7 +198,6 @@ namespace nc
 
     void Transform::Rotate(const Quaternion& quat)
     {
-        IF_THROW(quat == Quaternion::Zero(), "Transform::Rotate - Invalid quaternion(Quaternion::Zero)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         rot_v = DirectX::XMQuaternionMultiply(rot_v, ToXMVector(quat));

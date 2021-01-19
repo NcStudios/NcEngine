@@ -36,8 +36,8 @@ namespace nc::math
         return (modTwoPi > std::numbers::pi ? (modTwoPi - 2.0L * std::numbers::pi) : modTwoPi);
     }
 
-    constexpr double DegreeToRadian(double degrees) noexcept { return degrees * std::numbers::pi / 180.0; }
-    constexpr double RadianToDegree(double radians) noexcept { return radians * 180.0 / std::numbers::pi; }
+    constexpr double DegreesToRadians(double degrees) noexcept { return degrees * std::numbers::pi / 180.0; }
+    constexpr double RadiansToDegrees(double radians) noexcept { return radians * 180.0 / std::numbers::pi; }
 
     constexpr bool FloatEqual(float a, float b, float maxAbsDiff = 0.00001f, float maxRelDiff = FloatEpsilon) noexcept
     {

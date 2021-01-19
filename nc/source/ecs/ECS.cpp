@@ -28,7 +28,6 @@ namespace nc
     EntityHandle Ecs::CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag)
     {
         IF_THROW(scale == Vector3::Zero(), "Ecs::CreateEntity - scale cannot be Vector3::Zero");
-        IF_THROW(rot == Quaternion::Zero(), "Ecs::CreateEntity - Invalid quaternion");
         auto impl = Ecs::m_impl;
         auto entityHandle = impl->m_handleManager.GenerateNewHandle();
         impl->m_transformSystem->Add(entityHandle, pos, rot, scale);

@@ -1,15 +1,38 @@
 #include "Quaternion.h"
 #include "directx/math/DirectXMath.h"
+#include "DebugUtils.h"
 
 namespace nc
 {
-    Quaternion::Quaternion(const DirectX::XMFLOAT4& xmf4) noexcept
-        : x{xmf4.x}, y{xmf4.y}, z{xmf4.z}, w{xmf4.w}
-    {}
+    Quaternion::Quaternion(float X, float Y, float Z, float W)
+            : x{X}, y{Y}, z{Z}, w{W}
+    {
+        IF_THROW
+        (
+            (x == 0.0f) && (y == 0.0f) && (z == 0.0f) && (w == 0.0f),
+            "Quaternion - Cannot initialize all components with 0"
+        );
+    }
 
-    Quaternion::Quaternion(DirectX::XMFLOAT4&& xmf4) noexcept
+    Quaternion::Quaternion(const DirectX::XMFLOAT4& xmf4)
         : x{xmf4.x}, y{xmf4.y}, z{xmf4.z}, w{xmf4.w}
-    {}
+    {
+        IF_THROW
+        (
+            (x == 0.0f) && (y == 0.0f) && (z == 0.0f) && (w == 0.0f),
+            "Quaternion - Cannot initialize all components with 0"
+        );
+    }
+
+    Quaternion::Quaternion(DirectX::XMFLOAT4&& xmf4)
+        : x{xmf4.x}, y{xmf4.y}, z{xmf4.z}, w{xmf4.w}
+    {
+        IF_THROW
+        (
+            (x == 0.0f) && (y == 0.0f) && (z == 0.0f) && (w == 0.0f),
+            "Quaternion - Cannot initialize all components with 0"
+        );
+    }
 
     void Quaternion::ToAxisAngle(Vector3* axisOut, float* angleOut) const noexcept
     {
