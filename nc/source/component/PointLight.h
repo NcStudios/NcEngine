@@ -12,7 +12,7 @@ namespace nc
     class PointLight final: public Component
     {
         public:
-            PointLight(ComponentHandle handle, EntityHandle parentHandle) noexcept;
+            PointLight(EntityHandle handle) noexcept;
             PointLight(PointLight&&) = delete;
             PointLight& operator=(PointLight&&) = delete;
             PointLight(const PointLight&) = delete;

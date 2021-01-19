@@ -1,12 +1,12 @@
 #pragma once
 
-#include "NcCommonTypes.h"
+#include "EntityHandle.h"
 #include "ecs/Entity.h"
+#include "ecs/EntityMap.h"
 #include "ecs/ComponentSystem.h"
 #include "HandleManager.h"
 
 #include <memory>
-#include <unordered_map>
 
 namespace nc
 {
@@ -20,7 +20,6 @@ namespace ecs
 {
     class EcsImpl
     {
-        using EntityMap = std::unordered_map<EntityHandle, Entity>;
         friend class ::nc::Ecs;
 
         public:
@@ -34,15 +33,15 @@ namespace ecs
             void SendOnDestroy();
 
             bool DoesEntityExist(const EntityHandle handle) const noexcept;
-            Entity * GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false);
-            EntityMap & GetMapContainingEntity(const EntityHandle handle, bool checkAll = false) noexcept(false);
-            EntityMap & GetActiveEntities() noexcept;
-            EntityMap & GetToDestroyEntities() noexcept;
+            Entity* GetEntityPtrFromAnyMap(const EntityHandle handle) noexcept(false);
+            EntityMap& GetMapContainingEntity(const EntityHandle handle, bool checkAll = false) noexcept(false);
+            EntityMap& GetActiveEntities() noexcept;
+            EntityMap& GetToDestroyEntities() noexcept;
 
             void ClearState();
 
         private:
-            HandleManager<EntityHandle> m_handleManager;
+            HandleManager m_handleManager;
             EntityMap m_active;
             EntityMap m_toDestroy;
             std::unique_ptr<ComponentSystem<Collider>> m_colliderSystem;

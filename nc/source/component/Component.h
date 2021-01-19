@@ -1,13 +1,13 @@
 #pragma once
-#include "NcCommonTypes.h"
+#include "EntityHandle.h"
 
 namespace nc
 {
     class Component
     {
         public:
-            Component(ComponentHandle handle, EntityHandle parentHandle) noexcept
-                : m_handle{handle}, m_parentHandle{parentHandle}
+            Component(EntityHandle handle) noexcept
+                : m_parentHandle{handle}
             {}
             virtual ~Component() = default;
             Component(const Component&) = delete;
@@ -15,7 +15,6 @@ namespace nc
             Component& operator=(const Component&) = delete;
             Component& operator=(Component&&) = delete;
 
-            ComponentHandle GetHandle() const noexcept { return m_handle; }
             EntityHandle GetParentHandle() noexcept { return m_parentHandle; }
 
             virtual void FrameUpdate(float dt) { (void) dt; }
@@ -30,7 +29,6 @@ namespace nc
             #endif
 
         protected:
-            ComponentHandle m_handle = NullHandle;
-            EntityHandle m_parentHandle = NullHandle;
+            EntityHandle m_parentHandle;
     };
 } //end namespace nc

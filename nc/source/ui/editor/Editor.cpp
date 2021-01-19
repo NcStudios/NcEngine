@@ -21,7 +21,7 @@ namespace nc::ui::editor
     {
     }
 
-    void Editor::Frame(float* dt, float frameLogicTime, std::unordered_map<EntityHandle, Entity>& activeEntities)
+    void Editor::Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities)
     {
         if(input::GetKeyUp(input::KeyCode::Tilde)) ToggleGui();
         if(!m_isGuiActive) return;
@@ -88,23 +88,24 @@ namespace nc::ui::editor
         ImGui::End();
     }
 
-    void Editor::DrawEntityGraphControl(std::unordered_map<EntityHandle, Entity>& entities)
+    void Editor::DrawEntityGraphControl(ecs::EntityMap& entities)
     {
         if(ImGui::Begin("Entities", &m_openState_EntityGraph))
         {
             for(auto& pair : entities)
             {
-                const bool selected = *SelectedEntityIndex == pair.first;
-                std::string id = pair.second.Tag + "##" + std::to_string(pair.first); //create unique labels
+                const auto handleValue = static_cast<unsigned int>(pair.first);
+                const bool selected = *SelectedEntityIndex == handleValue;
+                std::string id = pair.second.Tag + "##" + std::to_string(handleValue); //create unique labels
                 if(ImGui::Selectable(id.c_str(), selected))
                 {
-                    if(SelectedEntityIndex == pair.first)
+                    if(SelectedEntityIndex == handleValue)
                     {
                         SelectedEntityIndex.reset();
                     }
                     else
                     {
-                        SelectedEntityIndex = pair.first;
+                        SelectedEntityIndex = handleValue;
                     }
                 }
                 ImGui::Spacing();
@@ -119,10 +120,10 @@ namespace nc::ui::editor
 
     void Editor::DrawInspectorControl(nc::EntityHandle handle)
     {   
-        std::string handle_s = std::to_string(handle);
+        std::string handle_s = std::to_string(static_cast<unsigned int>(handle));
         const float spacing = 60.0f;
 
-        ImGui::Spacing(); 
+        ImGui::Spacing();
         ImGui::Separator();  ImGui::Separator();  ImGui::Separator();
         ImGui::PushItemWidth(spacing);
             ImGui::Text("Entity");

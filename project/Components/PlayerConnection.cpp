@@ -9,8 +9,8 @@ using namespace project::network;
 
 namespace project
 {
-    PlayerConnection::PlayerConnection(ComponentHandle handle, EntityHandle parentHandle, std::string serverIP, std::string name)
-        : Component(handle, parentHandle),
+    PlayerConnection::PlayerConnection(EntityHandle handle, std::string serverIP, std::string name)
+        : Component(handle),
           m_client{std::move(serverIP)},
           m_playerName{std::move(name)}
     {
