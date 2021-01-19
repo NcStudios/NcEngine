@@ -14,6 +14,7 @@ namespace nc
         Quaternion(const DirectX::XMFLOAT4& xmf4);
         Quaternion(DirectX::XMFLOAT4&& xmf4);
 
+        Vector3 ToEulerAngles() const noexcept;
         void ToAxisAngle(Vector3* axisOut, float* angleOut) const noexcept;
 
         static Quaternion Identity() { return Quaternion{0.0f, 0.0f, 0.0f, 1.0f}; }
