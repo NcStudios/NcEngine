@@ -13,6 +13,7 @@ namespace nc
     namespace graphics 
     { 
         class Graphics;
+        class Graphics2;
         class FrameManager;
     }
     namespace engine { class Engine; }
@@ -59,6 +60,7 @@ namespace nc::engine
             float m_frameDeltaTimeFactor;
             std::unique_ptr<window::WindowImpl> m_window;
             std::unique_ptr<graphics::Graphics> m_graphics;
+            std::unique_ptr<graphics::Graphics2> m_graphics2;
             std::unique_ptr<physics::PhysicsSystem> m_physics;
             std::unique_ptr<ecs::EcsImpl> m_ecs;
             std::unique_ptr<ui::UIImpl> m_ui;

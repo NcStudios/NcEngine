@@ -1,6 +1,7 @@
 target_sources(${ENGINE_LIB} 
     PRIVATE
         ${ROOT_DIR}/source/graphics/Graphics.cpp
+        ${ROOT_DIR}/source/graphics/Graphics2.cpp
         ${ROOT_DIR}/source/graphics/Model.cpp
         ${ROOT_DIR}/source/graphics/d3dresource/GraphicsResource.cpp
         ${ROOT_DIR}/source/graphics/d3dresource/ShaderResources.cpp

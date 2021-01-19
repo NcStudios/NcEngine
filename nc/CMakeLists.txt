@@ -35,7 +35,7 @@ set(ENGINE_LIB "NcEngine-${CMAKE_BUILD_TYPE}")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
 
-#Propogate version
+#Propagate version
 configure_file(${ROOT_DIR}/source/config/Version.h.in
                ${ROOT_DIR}/source/config/Version.h
 )
@@ -69,6 +69,11 @@ target_compile_options(${ENGINE_LIB}
     PRIVATE
         ${GCC_WARNING_FLAGS}
 )
+
+find_package(Vulkan REQUIRED)
+
+#Link libraries
+target_link_libraries(${ENGINE_LIB} Vulkan::Vulkan)
 
 if(SANITIZE_UB)
     target_compile_options(${ENGINE_LIB}

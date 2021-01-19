@@ -2,6 +2,7 @@
 #include "DebugUtils.h"
 #include "config/Config.h"
 #include "graphics/Graphics.h"
+#include "graphics/Graphics2.h"
 #include "input/Input.h"
 #include "time/NcTime.h"
 #include "ApiBinder.h"
@@ -43,6 +44,7 @@ namespace nc::engine
         m_sceneManager = std::make_unique<scene::SceneManagerImpl>();
         m_mainCamera = std::make_unique<camera::MainCameraImpl>();
         m_frameManager = std::make_unique<graphics::FrameManager>();
+        m_graphics2 = std::make_unique<graphics::Graphics2>();
         #ifdef NC_EDITOR_ENABLED
         m_frameLogicTimer = std::make_unique<nc::time::Timer>();
         #endif

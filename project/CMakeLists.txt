@@ -112,6 +112,8 @@ if(PROFILING_ENABLED)
     )
 endif()
 
+find_package(Vulkan REQUIRED)
+
 #Link Options
 target_link_libraries(${GAME_EXE}
     PRIVATE
@@ -121,6 +123,7 @@ target_link_libraries(${GAME_EXE}
         ${LIB_DIR}/libassimp.dll.a
         ${LIB_DIR}/${ENET_LIB}
         ${WIN32_LINK_FLAGS}
+        Vulkan::Vulkan
 )
 
 if(PROFILING_ENABLED)
@@ -139,6 +142,7 @@ target_link_libraries(${SERVER_EXE}
         ${LIB_DIR}/${ENGINE_LIB}
         ${LIB_DIR}/${ENET_LIB}
         ${WIN32_LINK_FLAGS}
+        Vulkan::Vulkan
 )
 
 #Sources
