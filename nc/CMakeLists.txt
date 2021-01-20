@@ -73,7 +73,12 @@ target_compile_options(${ENGINE_LIB}
 find_package(Vulkan REQUIRED)
 
 #Link libraries
-target_link_libraries(${ENGINE_LIB} Vulkan::Vulkan)
+target_link_libraries(${ENGINE_LIB} 
+    Vulkan::Vulkan
+    ${LIB_DIR}/glfw3.dll
+    ${LIB_DIR}/libglfw3dll.a
+    ${LIB_DIR}/libglfw3.a
+    )
 
 if(SANITIZE_UB)
     target_compile_options(${ENGINE_LIB}

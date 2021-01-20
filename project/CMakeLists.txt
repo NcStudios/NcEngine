@@ -124,6 +124,9 @@ target_link_libraries(${GAME_EXE}
         ${LIB_DIR}/${ENET_LIB}
         ${WIN32_LINK_FLAGS}
         Vulkan::Vulkan
+        ${LIB_DIR}/glfw3.dll
+        ${LIB_DIR}/libglfw3dll.a
+        ${LIB_DIR}/libglfw3.a
 )
 
 if(PROFILING_ENABLED)
@@ -143,6 +146,9 @@ target_link_libraries(${SERVER_EXE}
         ${LIB_DIR}/${ENET_LIB}
         ${WIN32_LINK_FLAGS}
         Vulkan::Vulkan
+        ${LIB_DIR}/glfw3.dll
+        ${LIB_DIR}/libglfw3dll.a
+        ${LIB_DIR}/libglfw3.a
 )
 
 #Sources

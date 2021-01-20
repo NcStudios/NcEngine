@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
+#include "vulkan\Instance.h"
 
 namespace nc::graphics
 {
@@ -10,7 +10,6 @@ namespace nc::graphics
             Graphics2();
 
         private:
-            void InitializeVulkan();
-            vk::UniqueInstance m_vulkan;
+            vk::UniqueInstance m_instance;
     };
 }
