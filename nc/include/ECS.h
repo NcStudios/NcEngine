@@ -26,16 +26,16 @@ namespace nc
             [[nodiscard]] static Entity* GetEntity(EntityHandle handle);
             [[nodiscard]] static Entity* GetEntity(std::string tag);
 
-            template<std::derived_from<Component> T, class ...Args>
+            template<std::derived_from<ComponentBase> T, class ...Args>
             static T* AddComponent(EntityHandle handle, Args ... args);
             
-            template<std::derived_from<Component> T>
+            template<std::derived_from<ComponentBase> T>
             static bool RemoveComponent(EntityHandle handle);
             
-            template<std::derived_from<Component> T>
+            template<std::derived_from<ComponentBase> T>
             [[nodiscard]] static T* GetComponent(EntityHandle handle);
             
-            template<std::derived_from<Component> T>
+            template<std::derived_from<ComponentBase> T>
             [[nodiscard]] static bool HasComponent(EntityHandle handle);
 
         private:
@@ -64,7 +64,7 @@ namespace nc
     template<> bool Ecs::HasComponent<Collider>(EntityHandle handle);
     template<> bool Ecs::RemoveComponent<Collider>(EntityHandle handle);
 
-    template<std::derived_from<Component> T, class ... Args>
+    template<std::derived_from<ComponentBase> T, class ... Args>
     T * Ecs::AddComponent(const EntityHandle handle, Args ... args)
     {
         auto ptr = GetEntity(handle);
@@ -72,7 +72,7 @@ namespace nc
         return ptr->AddUserComponent<T>(std::forward<Args>(args)...);
     }
 
-    template<std::derived_from<Component> T>
+    template<std::derived_from<ComponentBase> T>
     bool Ecs::RemoveComponent(const EntityHandle handle)
     {
         auto ptr = GetEntity(handle);
@@ -80,7 +80,7 @@ namespace nc
         return ptr->RemoveUserComponent<T>();
     }
 
-    template<std::derived_from<Component> T>
+    template<std::derived_from<ComponentBase> T>
     T * Ecs::GetComponent(const EntityHandle handle)
     {
         auto ptr = GetEntity(handle);
@@ -88,7 +88,7 @@ namespace nc
         return ptr->GetUserComponent<T>();
     }
 
-    template<std::derived_from<Component> T>
+    template<std::derived_from<ComponentBase> T>
     bool Ecs::HasComponent(const EntityHandle handle)
     {
         auto ptr = GetEntity(handle);

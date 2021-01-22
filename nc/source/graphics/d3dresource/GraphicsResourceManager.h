@@ -70,8 +70,10 @@ namespace nc::graphics::d3dresource
                 const auto i = m_resources.find(key);
                 if(i == m_resources.end())
                 {
-                    m_resources[key] = std::make_unique<T>(std::forward<Params>(p)...);
-                    return m_resources[key].get();
+                    auto [it, result] = m_resources.emplace(key, std::make_unique<T>(std::forward<Params>(p)...));
+                    if(!result)
+                        throw std::runtime_error("GraphicsResourceManager::Acquire_ - failed to emplace ");
+                    return it->second.get();
                 }
                 return i->second.get();
             }

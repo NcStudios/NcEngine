@@ -14,7 +14,7 @@ namespace nc
 {
     class Transform;
 
-    class Renderer final: public Component
+    class Renderer final: public ComponentBase
     {
         public:
             Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept;

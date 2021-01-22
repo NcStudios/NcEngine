@@ -12,7 +12,7 @@ namespace nc
         Local
     };
 
-    class Transform final : public Component
+    class Transform final : public ComponentBase
     {
         public:
             Transform(EntityHandle handle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept;

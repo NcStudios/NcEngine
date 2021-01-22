@@ -6,7 +6,7 @@
 
 namespace nc
 {
-    class Collider : public Component
+    class Collider final : public ComponentBase
     {
         public:
             Collider(EntityHandle handle, Vector3 scale);

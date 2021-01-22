@@ -3,32 +3,39 @@
 
 namespace nc
 {
-    class Component
+    class ComponentBase
     {
         public:
-            Component(EntityHandle handle) noexcept
-                : m_parentHandle{handle}
-            {}
-            virtual ~Component() = default;
-            Component(const Component&) = delete;
-            Component(Component&&) = delete;
-            Component& operator=(const Component&) = delete;
-            Component& operator=(Component&&) = delete;
+            ComponentBase(EntityHandle handle) noexcept
+                : m_parentHandle{handle} {}
 
-            EntityHandle GetParentHandle() noexcept { return m_parentHandle; }
+            virtual ~ComponentBase() = default;
+            ComponentBase(const ComponentBase&) = delete;
+            ComponentBase(ComponentBase&&) = delete;
+            ComponentBase& operator=(const ComponentBase&) = delete;
+            ComponentBase& operator=(ComponentBase&&) = delete;
 
-            virtual void FrameUpdate(float dt) { (void) dt; }
-            virtual void FixedUpdate() {}
-            virtual void OnDestroy() {}
-            virtual void OnCollisionEnter(EntityHandle other) { (void)other; }
-            virtual void OnCollisionStay() {};
-            virtual void OnCollisionExit() {};
-        
+            EntityHandle GetParentHandle() const noexcept { return m_parentHandle; }
+
             #ifdef NC_EDITOR_ENABLED
             virtual void EditorGuiElement();
             #endif
 
-        protected:
+        private:
             EntityHandle m_parentHandle;
+    };
+
+    class Component : public ComponentBase
+    {
+        public:
+            Component(EntityHandle handle) noexcept
+                : ComponentBase{handle} {}
+
+            virtual void FrameUpdate(float) {}
+            virtual void FixedUpdate() {}
+            virtual void OnDestroy() {}
+            virtual void OnCollisionEnter(EntityHandle) {}
+            virtual void OnCollisionStay() {};
+            virtual void OnCollisionExit() {};
     };
 } //end namespace nc

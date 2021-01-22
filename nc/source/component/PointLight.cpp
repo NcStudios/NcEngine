@@ -10,7 +10,7 @@
 namespace nc
 {
     PointLight::PointLight(EntityHandle handle) noexcept
-        : Component(handle),
+        : ComponentBase(handle),
           m_transform{ Ecs::GetComponent<Transform>(handle) }
     {
         PixelConstBufData.pos              = {0,0,0};
