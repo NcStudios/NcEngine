@@ -9,7 +9,7 @@
 namespace nc
 {
     NetworkDispatcher::NetworkDispatcher(EntityHandle handle) noexcept
-        : Component(handle)
+        : ComponentBase(handle)
     {
     }
 

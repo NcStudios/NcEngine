@@ -21,8 +21,8 @@ namespace nc
             Entity& operator=(Entity&& other) = default;
             ~Entity() = default;
 
-            mutable EntityHandle Handle;
-            mutable std::string Tag;
+            const EntityHandle Handle;
+            const std::string Tag;
             
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;

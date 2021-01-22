@@ -9,7 +9,7 @@ namespace nc
 {
     class Transform;
 
-    class PointLight final: public Component
+    class PointLight final: public ComponentBase
     {
         public:
             PointLight(EntityHandle handle) noexcept;

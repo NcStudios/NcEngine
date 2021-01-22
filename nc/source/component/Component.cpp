@@ -4,12 +4,10 @@
 #include "imgui/imgui.h"
 #endif
 
-#include <string>
-
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
-    void Component::EditorGuiElement()
+    void ComponentBase::EditorGuiElement()
     {
         ImGui::PushItemWidth(60.0f);
             ImGui::Spacing();

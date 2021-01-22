@@ -8,7 +8,7 @@
 
 namespace nc
 {
-    class NetworkDispatcher final : public Component
+    class NetworkDispatcher final : public ComponentBase
     {
         public:
             net::NetworkHandle networkHandle;

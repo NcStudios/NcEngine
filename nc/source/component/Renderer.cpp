@@ -14,7 +14,7 @@ namespace nc
     Renderer::~Renderer() = default;
 
     Renderer::Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept
-        : Component(handle),
+        : ComponentBase(handle),
           m_model{ std::make_unique<graphics::Model>(std::move(mesh), std::move(material)) },
           m_transform{ Ecs::GetComponent<Transform>(handle) }
     {

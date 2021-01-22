@@ -28,7 +28,7 @@ namespace
 namespace nc
 {
     Transform::Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale) noexcept
-        : Component(handle),
+        : ComponentBase(handle),
           m_matrix{ComposeMatrix(scale, rot, pos)}
     {}
 
