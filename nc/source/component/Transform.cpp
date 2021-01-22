@@ -9,7 +9,7 @@
 namespace nc
 {
     Transform::Transform(EntityHandle handle, const Vector3& pos, const Vector3& rot, const Vector3& scl) noexcept
-        : Component(handle),
+        : ComponentBase(handle),
           m_position { pos },
           m_rotation { rot },
           m_scale { scl }

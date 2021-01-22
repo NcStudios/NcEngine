@@ -15,7 +15,7 @@ namespace
 namespace nc
 {
     Collider::Collider(EntityHandle handle, Vector3 scale)
-        : Component(handle),
+        : ComponentBase(handle),
           m_transform{Ecs::GetComponent<Transform>(handle)},
           m_scale{scale},
           m_model{ColliderMesh, GetColliderMaterial()}
