@@ -15,13 +15,13 @@ namespace nc
             ComponentBase& operator=(const ComponentBase&) = delete;
             ComponentBase& operator=(ComponentBase&&) = delete;
 
-            EntityHandle GetParentHandle() noexcept { return m_parentHandle; }
+            EntityHandle GetParentHandle() const noexcept { return m_parentHandle; }
 
             #ifdef NC_EDITOR_ENABLED
             virtual void EditorGuiElement();
             #endif
 
-        protected:
+        private:
             EntityHandle m_parentHandle;
     };
 
