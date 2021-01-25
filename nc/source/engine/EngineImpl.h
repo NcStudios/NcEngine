@@ -66,9 +66,6 @@ namespace nc::engine
             std::unique_ptr<scene::SceneManagerImpl> m_sceneManager;
             std::unique_ptr<graphics::FrameManager> m_frameManager;
             std::unique_ptr<camera::MainCameraImpl> m_mainCamera;
-            #ifdef NC_EDITOR_ENABLED
-            std::unique_ptr<nc::time::Timer> m_frameLogicTimer;
-            #endif
 
             void SetBindings();
     };

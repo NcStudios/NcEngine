@@ -3,7 +3,7 @@
 #include <limits>
 
 #ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
+#include "ui/editor/Widgets.h"
 #endif
 
 namespace
@@ -11,7 +11,7 @@ namespace
     using namespace DirectX;
     using namespace nc;
 
-    XMVECTOR ToXMVector(const Vector3& v)           { return XMVectorSet(v.x, v.y, v.z, 0.0f); }
+    XMVECTOR ToXMVector(const Vector3& v)           { return XMVectorSet(v.x, v.y, v.z, 1.0f); }
     XMVECTOR ToXMVector(const Quaternion& q)        { return XMVectorSet(q.x, q.y, q.z, q.w); }
     XMMATRIX ToTransMatrix(const Vector3& v)        { return XMMatrixTranslation(v.x, v.y, v.z); }
     XMMATRIX ToScaleMatrix(const Vector3& v)        { return XMMatrixScaling(v.x, v.y, v.z); }
@@ -63,67 +63,28 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void Transform::EditorGuiElement()
     {
-        const float itemWidth = 80.0f;
-        const float dragSpeed = 1.0f;
-
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        DirectX::XMFLOAT3 scl;
-        //DirectX::XMFLOAT4 rot;
-        DirectX::XMFLOAT3 pos;
+        DirectX::XMFLOAT3 scl, pos;
+        DirectX::XMFLOAT4 rot;
         DirectX::XMStoreFloat3(&scl, scl_v);
-        //DirectX::XMStoreFloat4(&rot, rot_v);
+        DirectX::XMStoreFloat4(&rot, rot_v);
         DirectX::XMStoreFloat3(&pos, pos_v);
 
-        //auto angles = Quaternion{rot}.ToEulerAngles();
+        auto angles = Quaternion{rot}.ToEulerAngles();
 
-        ImGui::PushItemWidth(itemWidth);
-            ImGui::Spacing();  ImGui::Separator();  ImGui::Text("Transform");
-            ImGui::BeginGroup();
-                ImGui::Indent();    ImGui::Text("Position");
-                ImGui::Text("X:");  ImGui::SameLine();
-                    auto xPosRes = ImGui::SliderFloat( "##transformxpos", &pos.x, -50.0f, 50.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();
-                    auto yPosRes = ImGui::SliderFloat( "##transformypos", &pos.y, -50.0f, 50.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();
-                    auto zPosRes = ImGui::SliderFloat( "##transformzpos", &pos.z,  -50.0f, 50.0f, "%.1f", dragSpeed);
-            ImGui::EndGroup();
-            // ImGui::BeginGroup();
-            //     ImGui::Indent();    ImGui::Text("Rotation");
-            //     ImGui::Text("X:");  ImGui::SameLine();
-            //         auto xRotRes = ImGui::SliderAngle("##transformxrot", &angles.x, -180.0f, 180.0f);  ImGui::SameLine();
-            //     ImGui::Text("Y:");  ImGui::SameLine();
-            //         auto yRotRes = ImGui::SliderAngle("##transformyrot", &angles.y, -180.0f, 180.0f);  ImGui::SameLine();
-            //     ImGui::Text("Z:");  ImGui::SameLine();
-            //         auto zRotRes = ImGui::SliderAngle("##transformzrot", &angles.z, -180.0f, 180.0f);  ImGui::SameLine();
-            // ImGui::EndGroup();
-            ImGui::BeginGroup();
-                ImGui::Indent();    ImGui::Text("Scale");
-                ImGui::Text("X:");  ImGui::SameLine();
-                    auto xSclRes = ImGui::SliderFloat("##transformxscale", &scl.x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();
-                    auto ySclRes = ImGui::SliderFloat("##transformyscale", &scl.y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();
-                    auto zSclRes = ImGui::SliderFloat("##transformzscale", &scl.z, 0.01f, 100.0f, "%.1f", dragSpeed);
-            ImGui::EndGroup();
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("Transform");
+        ui::editor::xyzWidgetHeader("   ");
+        auto posResult = ui::editor::xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z);
+        auto rotResult = ui::editor::xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
+        auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
 
-        if(xPosRes || yPosRes || zPosRes)
-        {
+        if(posResult)
             SetPosition(Vector3{pos});
-            //m_matrix = ComposeMatrix(Vector3{scl}, Quaternion::FromEulerAngles(angles), Vector3{pos});
-        }
-
-        // if(xRotRes || yRotRes || zRotRes)
-        // {
-        //     SetRotation(angles);
-        // }
-
-        if(xSclRes || ySclRes || zSclRes)
-        {
+        if(rotResult)
+            SetRotation(angles);
+        if(sclResult)
             SetScale(Vector3{scl});
-        }
     }
     #endif
     

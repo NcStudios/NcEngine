@@ -23,13 +23,8 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void Renderer::EditorGuiElement()
     {
-        ImGui::PushItemWidth(80.0f);
-            ImGui::Spacing();
-            ImGui::Separator();
-                ImGui::Text("Renderer");
-                m_model->GetMaterial()->EditorGuiElement();
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("Renderer");
+        m_model->GetMaterial()->EditorGuiElement();
     }
     #endif
     

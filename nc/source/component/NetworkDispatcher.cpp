@@ -33,12 +33,7 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void NetworkDispatcher::EditorGuiElement()
     {
-        ImGui::PushItemWidth(80.0f);
-            ImGui::Spacing();
-            ImGui::Separator();
-                ImGui::Text("NetworkDispatcher");
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("NetworkDispatcher");
     }
     #endif
 }

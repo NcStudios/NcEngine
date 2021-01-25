@@ -7,11 +7,11 @@
 #include <memory>
 #include <unordered_map>
 
-#ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
-#endif
-
 namespace nc::graphics { class Graphics; }
+
+#ifdef NC_EDITOR_ENABLED
+namespace nc::ui::editor { class Editor; }
+#endif
 
 namespace nc::graphics::d3dresource
 {
@@ -19,6 +19,10 @@ namespace nc::graphics::d3dresource
     
     class GraphicsResourceManager
     {
+        #ifdef NC_EDITOR_ENABLED
+        friend class ui::editor::Editor;
+        #endif
+
         public:
             static void SetGraphics(Graphics* gfx)
             {
@@ -45,11 +49,6 @@ namespace nc::graphics::d3dresource
             static uint32_t AssignId()
             {
                 return Get().m_resourceId++;
-            }
-
-            static void DisplayResources(bool* open)
-            {
-                Get().DisplayResources_(open);
             }
 
         private:
@@ -88,21 +87,6 @@ namespace nc::graphics::d3dresource
                     return false;
                 }
                 return true;
-            }
-
-            void DisplayResources_(bool* open)
-            {
-                if( !(*open) ) 
-                    return;
-
-                #ifdef NC_EDITOR_ENABLED
-                ImGui::Begin("Graphics Resources", open, ImGuiWindowFlags_NoBackground);
-                for(auto& res : m_resources)
-                {
-                    ImGui::Text(res.first.c_str());
-                }
-                ImGui::End();
-                #endif
             }
     };
 }

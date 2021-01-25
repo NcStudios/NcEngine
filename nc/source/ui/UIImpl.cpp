@@ -53,9 +53,9 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities)
+    void UIImpl::Frame(float* dt, ecs::EntityMap& activeEntities)
     {
-        m_editor.Frame(dt, frameLogicTime, activeEntities);
+        m_editor.Frame(dt, activeEntities);
         if(m_projectUI)
         {
             m_projectUI->Draw();

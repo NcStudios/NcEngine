@@ -28,7 +28,7 @@ namespace nc
                 void FrameBegin();
 
                 #ifdef NC_EDITOR_ENABLED
-                void Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities);
+                void Frame(float* dt, ecs::EntityMap& activeEntities);
                 #else
                 void Frame();
                 #endif
