@@ -7,17 +7,11 @@
 
 namespace nc
 {
-    struct ColliderData
-    {
-        Transform* transform;
-        Vector3 scale;
-        graphics::Model model;
-    };
-
-    class ColliderBase : public Component
+    class Collider : public Component
     {
         public:
-            ColliderBase(ComponentHandle handle, EntityHandle parentHandle, Vector3 scale, graphics::Model model);
+            Collider(ComponentHandle handle, EntityHandle parentHandle, Vector3 scale);
+            ~Collider();
             void Update(graphics::FrameManager& frame);
             DirectX::FXMMATRIX GetTransformationMatrix() const;
 
@@ -26,20 +20,8 @@ namespace nc
             #endif
 
         protected:
-            ColliderData m_data;
-    };
-
-    class BoxCollider : public ColliderBase
-    {
-        public:
-            BoxCollider(ComponentHandle handle, EntityHandle parentHandle, Vector3 scale);
-            ~BoxCollider();
-    };
-
-    class SphereCollider : public ColliderBase
-    {
-        public:
-            SphereCollider(ComponentHandle handle, EntityHandle parentHandle, Vector3 scale);
-            ~SphereCollider();
+            Transform* m_transform;
+            Vector3 m_scale;
+            graphics::Model m_model;;
     };
 }
