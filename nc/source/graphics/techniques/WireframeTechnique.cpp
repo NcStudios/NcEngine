@@ -6,6 +6,10 @@
 #include "graphics/d3dresource/ConstantBufferResources.h"
 #include "Engine.h"
 
+#ifdef NC_EDITOR_ENABLED
+#include "imgui/imgui.h"
+#endif
+
 using namespace nc::graphics::d3dresource;
 
 namespace
@@ -46,6 +50,8 @@ namespace nc::graphics
     #ifdef NC_EDITOR_ENABLED
     void WireframeTechnique::EditorGuiElement()
     {
+        ImGui::SameLine();
+        ImGui::Text("(Wireframe)");
     }
     #endif
 

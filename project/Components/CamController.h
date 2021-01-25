@@ -15,4 +15,5 @@ class CamController : public nc::Component
 
         nc::Vector3 GetCameraZoomMovement();
         nc::Vector3 GetCameraPanMovement();
+        void GetCameraRotation();
 };

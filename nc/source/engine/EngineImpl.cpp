@@ -43,9 +43,6 @@ namespace nc::engine
         m_sceneManager = std::make_unique<scene::SceneManagerImpl>();
         m_mainCamera = std::make_unique<camera::MainCameraImpl>();
         m_frameManager = std::make_unique<graphics::FrameManager>();
-        #ifdef NC_EDITOR_ENABLED
-        m_frameLogicTimer = std::make_unique<nc::time::Timer>();
-        #endif
 
         SetBindings();
         V_LOG("Engine initialized");
@@ -84,14 +81,7 @@ namespace nc::engine
             }
 
             auto dt = time::Time::FrameDeltaTime * m_frameDeltaTimeFactor;
-
-            #ifdef NC_EDITOR_ENABLED
-            m_frameLogicTimer->Start();
-            #endif
             FrameLogic(dt);
-            #ifdef NC_EDITOR_ENABLED
-            m_frameLogicTimer->Stop();
-            #endif
             FrameRender();
             FrameCleanup();
             ncTime.ResetFrameDeltaTime();
@@ -159,7 +149,7 @@ namespace nc::engine
         m_frameManager->Execute(m_graphics.get());
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui->Frame(&m_frameDeltaTimeFactor, m_frameLogicTimer->Value(), m_ecs->GetActiveEntities());
+        m_ui->Frame(&m_frameDeltaTimeFactor, m_ecs->GetActiveEntities());
         #else
         m_ui->Frame();
         #endif

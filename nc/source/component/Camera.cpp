@@ -16,12 +16,7 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void Camera::EditorGuiElement()
     {
-        ImGui::PushItemWidth(60.0f);
-            ImGui::Spacing();
-            ImGui::Separator();
-                ImGui::Text("Camera");
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("Camera");
     }
     #endif
 }

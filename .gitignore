@@ -27,4 +27,7 @@ imgui.ini
 #log
 *.log
 
+#gprof analysis
+analysis.txt
+
 !gen.exe

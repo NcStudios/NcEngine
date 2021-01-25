@@ -18,29 +18,26 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            std::optional<unsigned int> SelectedEntityIndex;
-
             Editor(nc::graphics::Graphics * graphics);
 
-            void Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities);
-
+            void Frame(float* dt, ecs::EntityMap& activeEntities);
             void ToggleGui() noexcept;
             void EnableGui() noexcept;
             void DisableGui() noexcept;
             bool IsGuiActive() const noexcept;
 
         private:
+            nc::graphics::Graphics * m_graphics;
             bool m_isGuiActive;
-            bool m_openState_EntityGraph       = true;
-            bool m_openState_FramerateData     = true;
-            bool m_openState_GraphicsResources = true;
-            bool m_openState_ProjectSettings   = false;
-            nc::graphics::Graphics * m_graphics = nullptr;
+            bool m_openState_UtilitiesPanel;
+            bool m_openState_GraphicsResources;
 
             void DrawMenu();
-            void DrawTimingControl(float* speed, float frameLogicTime, uint32_t drawCallCount, bool* open);
-            void DrawEntityGraphControl(ecs::EntityMap& entities);
-            void DrawInspectorControl(nc::EntityHandle handle);
+            void DrawSceneGraphPanel(ecs::EntityMap& entities);
+            void DrawUtilitiesPanel(float* dtMult);
+            void DrawGraphicsResourcePanel();
+            void DrawTimingControl(float* dtMult);
+            void DrawEntityControl(nc::EntityHandle handle);
     };
 }
 #endif

@@ -4,7 +4,6 @@
 #include "UI.h"
 #include "config/ProjectConfig.h"
 #include "components/DebugComponents.h"
-#include "components/CamController.h"
 #include "project/components/CubeRotator.h"
 #include "project/components/MouseFollower.h"
 #include "source/Prefabs.h"
@@ -29,7 +28,7 @@ namespace project
         prefab::InitializeResources();
 
         // Light
-        auto lvHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Point Light");
+        auto lvHandle = Ecs::CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Point Light");
         auto pointLight = Ecs::AddComponent<PointLight>(lvHandle);
         pointLight->Set(pointLight->PixelConstBufData.pos, 0.5f, {0.443f, 0.412f, 0.412f}, {0.4751f, 0.525f, 1.0f}, 3.56f, 0.00f, 0.05f, 0.00f);
         Ecs::AddComponent<project::MouseFollower>(lvHandle);
@@ -58,7 +57,7 @@ namespace project
             auto xRot = (float)(rand() % rotRange);
             auto yRot = (float)(rand() % rotRange);
             auto zRot = (float)(rand() % rotRange);
-            auto ncHandle = Ecs::CreateEntity({xPos, yPos, zPos}, {xRot, yRot, zRot}, {0.75f, 0.75f, 0.75f}, "nc");
+            auto ncHandle = Ecs::CreateEntity({xPos, yPos, zPos}, Quaternion::FromEulerAngles(xRot, yRot, zRot), {0.75f, 0.75f, 0.75f}, "nc");
             Ecs::AddComponent<Renderer>(ncHandle, ncMesh, ncMaterial);
             Ecs::AddComponent<project::CubeRotator>(ncHandle);
         }
