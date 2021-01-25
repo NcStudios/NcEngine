@@ -14,10 +14,10 @@ namespace nc
 {
     class Transform;
 
-    class Renderer final: public Component
+    class Renderer final: public ComponentBase
     {
         public:
-            Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh mesh, graphics::Material material) noexcept;
+            Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept;
             ~Renderer();
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&) = delete;

@@ -4,14 +4,14 @@
 #include "Ecs.h"
 
 #ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
+#include "ui/editor/Widgets.h"
 #endif
 
 namespace nc
 {
-    PointLight::PointLight(ComponentHandle handle, EntityHandle parentHandle) noexcept
-        : Component(handle, parentHandle),
-          m_transform{ Ecs::GetComponent<Transform>(m_parentHandle) }
+    PointLight::PointLight(EntityHandle handle) noexcept
+        : ComponentBase(handle),
+          m_transform{ Ecs::GetComponent<Transform>(handle) }
     {
         PixelConstBufData.pos              = {0,0,0};
         PixelConstBufData.ambient          = {0.65f, 0.65f, 0.65f};
@@ -37,29 +37,23 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void PointLight::EditorGuiElement()
     {
-        const float itemWidth = 80.0f;
         const float dragSpeed = 1.0f;
 
-        ImGui::PushItemWidth(itemWidth);    ImGui::Spacing();   ImGui::Separator();
-            ImGui::Text("Point Light");
+        ImGui::Text("Point Light");
+        ImGui::Indent();
+            ImGui::Text("Ambient    ");
             ImGui::Indent();
-                ImGui::Text("Ambient    ");
-                ImGui::Indent();
                 ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##ambcolor", &PixelConstBufData.ambient.x, ImGuiColorEditFlags_NoInputs);
-                ImGui::Unindent();
-                ImGui::Text("Diffuse    ");
-                ImGui::Indent();  
-                ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##difcolor", &PixelConstBufData.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
-                ImGui::Text("Intensity  ");   ImGui::SameLine();  ImGui::SliderFloat( "##diffuseintensity", &PixelConstBufData.diffuseIntensity, 0.01f, 5.0f, "%.2f", dragSpeed);
-                ImGui::Unindent();
-                ImGui::Text("Attenuation");
-                ImGui::Indent();
-                ImGui::Text("Constant   ");   ImGui::SameLine();  ImGui::SliderFloat("##attconst", &PixelConstBufData.attConst, 0.001f, 1.0f, "%.2f", dragSpeed);
-                ImGui::Text("Linear     ");   ImGui::SameLine();  ImGui::SliderFloat("##attlin", &PixelConstBufData.attLin, 0.001f,  1.0f, "%.2f", dragSpeed);
-                ImGui::Text("Quadratic  ");   ImGui::SameLine();  ImGui::SliderFloat("##attquad", &PixelConstBufData.attQuad, 0.001f, 1.0f, "%.2f", dragSpeed);
-                ImGui::Unindent();
             ImGui::Unindent();
-        ImGui::Separator();  ImGui::PopItemWidth();
+            ImGui::Text("Diffuse    ");
+            ImGui::Indent();  
+                ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##difcolor", &PixelConstBufData.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
+                ui::editor::floatWidget("Intensity ", "##diffuseintensity", &PixelConstBufData.diffuseIntensity, dragSpeed, 0.01f, 5.0f, "%.1f");
+            ImGui::Unindent();
+            ImGui::Text("Attenuation");
+                ui::editor::columnHeaderWidget("", "Const", "Lin", "Quad");
+                ui::editor::xyzWidget("", "att", &PixelConstBufData.attConst, &PixelConstBufData.attLin, &PixelConstBufData.attQuad, 0.01f, 1.0f);
+        ImGui::Unindent();
     }
     #endif
 

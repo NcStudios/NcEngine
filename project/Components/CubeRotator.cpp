@@ -5,14 +5,14 @@ using namespace nc;
 
 namespace project
 {
-    CubeRotator::CubeRotator(ComponentHandle handle, EntityHandle parentHandle)
-        : Component(handle, parentHandle),
-          m_transform{Ecs::GetComponent<Transform>(m_parentHandle)}
+    CubeRotator::CubeRotator(EntityHandle handle)
+        : Component(handle),
+          m_transform{Ecs::GetComponent<Transform>(handle)}
     {
     }
 
     void CubeRotator::FrameUpdate(float dt)
     {
-        m_transform->Rotate(0.1f, 0.1f, 0.1f, dt);
+        m_transform->Rotate({0.0f, 1.0f, 0.0f}, 0.1f * dt);
     }
 }

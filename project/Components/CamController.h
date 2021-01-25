@@ -6,7 +6,7 @@
 class CamController : public nc::Component
 {
     public:
-        CamController(nc::ComponentHandle handle, nc::EntityHandle parentHandle);
+        CamController(nc::EntityHandle handle);
         void FrameUpdate(float dt) override;
 
     private:
@@ -15,4 +15,5 @@ class CamController : public nc::Component
 
         nc::Vector3 GetCameraZoomMovement();
         nc::Vector3 GetCameraPanMovement();
+        void GetCameraRotation();
 };

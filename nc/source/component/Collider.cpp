@@ -3,7 +3,7 @@
 #include "graphics/d3dresource/ConstantBufferResources.h"
 
 #ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
+#include "ui/editor/Widgets.h"
 #endif
 
 namespace
@@ -19,9 +19,9 @@ namespace
 
 namespace nc
 {
-    Collider::Collider(ComponentHandle handle, EntityHandle parentHandle, Vector3 scale)
-        : Component(handle, parentHandle),
-          m_transform{Ecs::GetComponent<Transform>(parentHandle)},
+    Collider::Collider(EntityHandle handle, Vector3 scale)
+        : ComponentBase(handle),
+          m_transform{Ecs::GetComponent<Transform>(handle)},
           m_scale{scale},
           m_model{CreateBoxModel()}
     {}
@@ -44,19 +44,9 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void Collider::EditorGuiElement()
     {
-        const float itemWidth = 80.0f;
-        const float dragSpeed = 1.0f;
-
-        ImGui::PushItemWidth(itemWidth);
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Text("Collider");
-            ImGui::BeginGroup();
-                ImGui::Indent();    ImGui::Text("Scale");
-                ImGui::Text("X:");  ImGui::SameLine();  ImGui::SliderFloat("##colliderxscale", &m_scale.x, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Y:");  ImGui::SameLine();  ImGui::SliderFloat("##collideryscale", &m_scale.y, 0.01f, 100.0f, "%.1f", dragSpeed);  ImGui::SameLine();
-                ImGui::Text("Z:");  ImGui::SameLine();  ImGui::SliderFloat("##colliderzscale", &m_scale.z, 0.01f, 100.0f, "%.1f", dragSpeed);
-            ImGui::EndGroup();
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("Collider");
+        ui::editor::xyzWidgetHeader("     ");
+        ui::editor::xyzWidget("Scale", "colliderscale", &m_scale.x, &m_scale.y, &m_scale.z, 0.01f, 100.0f);
     }
     #endif
 }

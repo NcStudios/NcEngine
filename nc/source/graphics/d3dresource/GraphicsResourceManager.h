@@ -7,11 +7,11 @@
 #include <memory>
 #include <unordered_map>
 
-#ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
-#endif
-
 namespace nc::graphics { class Graphics; }
+
+#ifdef NC_EDITOR_ENABLED
+namespace nc::ui::editor { class Editor; }
+#endif
 
 namespace nc::graphics::d3dresource
 {
@@ -19,6 +19,10 @@ namespace nc::graphics::d3dresource
     
     class GraphicsResourceManager
     {
+        #ifdef NC_EDITOR_ENABLED
+        friend class ui::editor::Editor;
+        #endif
+
         public:
             static void SetGraphics(Graphics* gfx)
             {
@@ -47,11 +51,6 @@ namespace nc::graphics::d3dresource
                 return Get().m_resourceId++;
             }
 
-            static void DisplayResources(bool* open)
-            {
-                Get().DisplayResources_(open);
-            }
-
         private:
             std::unordered_map<std::string, std::unique_ptr<GraphicsResource>> m_resources;
             Graphics * m_graphics = nullptr;
@@ -70,8 +69,10 @@ namespace nc::graphics::d3dresource
                 const auto i = m_resources.find(key);
                 if(i == m_resources.end())
                 {
-                    m_resources[key] = std::make_unique<T>(std::forward<Params>(p)...);
-                    return m_resources[key].get();
+                    auto [it, result] = m_resources.emplace(key, std::make_unique<T>(std::forward<Params>(p)...));
+                    if(!result)
+                        throw std::runtime_error("GraphicsResourceManager::Acquire_ - failed to emplace ");
+                    return it->second.get();
                 }
                 return i->second.get();
             }
@@ -86,21 +87,6 @@ namespace nc::graphics::d3dresource
                     return false;
                 }
                 return true;
-            }
-
-            void DisplayResources_(bool* open)
-            {
-                if( !(*open) ) 
-                    return;
-
-                #ifdef NC_EDITOR_ENABLED
-                ImGui::Begin("Graphics Resources", open, ImGuiWindowFlags_NoBackground);
-                for(auto& res : m_resources)
-                {
-                    ImGui::Text(res.first.c_str());
-                }
-                ImGui::End();
-                #endif
             }
     };
 }

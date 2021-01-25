@@ -10,12 +10,14 @@ namespace
 {
     const float CAM_ZOOM_SPEED = 0.2f;
     const float CAM_PAN_SPEED = 4.0f;
-    const unsigned EDGE_PAN_WIDTH = 180;
+    const unsigned EDGE_PAN_WIDTH = 50;
     const unsigned HUD_HEIGHT = 200;
+
+    const float CamRotateSpeed = 0.1f;
 }
 
-CamController::CamController(ComponentHandle handle, EntityHandle parentHandle)
-    : Component(handle, parentHandle),
+CamController::CamController(EntityHandle handle)
+    : Component(handle),
       m_mainCameraTransform{nullptr},
       m_config{ engine::Engine::GetConfig() }
 {}
@@ -33,7 +35,22 @@ void CamController::FrameUpdate(float dt)
     }
 
     Vector3 camTransl = dt * (GetCameraZoomMovement() + GetCameraPanMovement());
-    m_mainCameraTransform->Translate(camTransl, Space::World);
+    m_mainCameraTransform->Translate(camTransl, Space::Local);
+
+    GetCameraRotation();
+}
+
+void CamController::GetCameraRotation()
+{
+    if(input::GetKey(input::KeyCode::X))
+    {
+        m_mainCameraTransform->Rotate(Vector3::Right(), CamRotateSpeed);
+    }
+
+    if(input::GetKey(input::KeyCode::Y))
+    {
+        m_mainCameraTransform->Rotate(Vector3::Up(), CamRotateSpeed);
+    }
 }
 
 Vector3 CamController::GetCameraZoomMovement()

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "NcCommonTypes.h"
-#include "HandleManager.h"
+#include "EntityHandle.h"
 #include "engine/alloc/Pool.h"
 #include "DebugUtils.h"
 
@@ -27,40 +26,31 @@ class ComponentSystem
     public:
         ComponentSystem(const uint32_t reserveSize = 100u, bool isReserveSizeMaxSize = false);
         virtual ~ComponentSystem() = default;
-        
-        ComponentHandle GetCurrentHandle();
 
-        template<class ... Args>
-        ComponentHandle Add(const EntityHandle parentHandle, Args&& ... args);
-
-        bool Remove(const ComponentHandle handle);
-
-        bool Contains(const ComponentHandle handle) const;
-
-        T * GetPointerTo(const ComponentHandle handle);
-
-        template<class Func>
-        void ForEach(Func func);
-
+        template<class ... Args> T* Add(EntityHandle parentHandle, Args&& ... args);
+        bool Remove(EntityHandle parentHandle);
+        bool Contains(EntityHandle parentHandle) const;
+        T* GetPointerTo(EntityHandle parentHandle);
+        template<class Func> void ForEach(Func func);
         void Clear();
 
     private:
-        engine::ComponentIndexPair GetIndexPairFromHandle(const ComponentHandle handle) const;
-        void MapHandleToIndexPair(const ComponentHandle handle, const engine::ComponentIndexPair targetIndex);
+        engine::ComponentIndexPair GetIndexPairFromHandle(EntityHandle parentHandle) const;
+        void MapHandleToIndexPair(EntityHandle parentHandle, engine::ComponentIndexPair targetIndex);
         void AddPool();
 
         bool m_isReserveSizeMaxSize;
         uint32_t m_poolSize;
         std::vector<engine::alloc::Pool<T>> m_poolArray;
-        std::unordered_map<ComponentHandle, engine::ComponentIndexPair> m_indexMap;
-        HandleManager<ComponentHandle> m_handleManager;
+        std::unordered_map<EntityHandle, engine::ComponentIndexPair, EntityHandle::Hash> m_indexMap;
 };
 
 template<class T>
 ComponentSystem<T>::ComponentSystem(const uint32_t reserveSize, bool isReserveSizeMaxSize)
     : m_isReserveSizeMaxSize { isReserveSizeMaxSize },
       m_poolSize{ reserveSize },
-      m_poolArray {}
+      m_poolArray {},
+      m_indexMap{10u, EntityHandle::Hash()}
 {
     m_poolArray.emplace_back(engine::alloc::Pool<T>(m_poolSize));
 }
@@ -72,7 +62,6 @@ void ComponentSystem<T>::Clear()
     m_poolArray.shrink_to_fit();
     m_poolArray.emplace_back(engine::alloc::Pool<T>(m_poolSize));
     m_indexMap.clear();
-    m_handleManager.Reset();
 }
 
 template<class T>
@@ -87,7 +76,7 @@ void ComponentSystem<T>::ForEach(Func func)
 
 template<class T>
 template<class ... Args>
-ComponentHandle ComponentSystem<T>::Add(EntityHandle parentHandle, Args&& ... args)
+T* ComponentSystem<T>::Add(EntityHandle parentHandle, Args&& ... args)
 {
     auto pool = std::find_if_not(m_poolArray.begin(), m_poolArray.end(), [](auto& pool)
     {
@@ -100,15 +89,15 @@ ComponentHandle ComponentSystem<T>::Add(EntityHandle parentHandle, Args&& ... ar
         pool = m_poolArray.end() - 1;
     }
 
-    auto handle = m_handleManager.GenerateNewHandle();
-    uint32_t posInPool = pool->Alloc(handle, parentHandle, std::forward<Args>(args)...);
+    T* component = nullptr;
+    uint32_t posInPool = pool->Alloc(&component, parentHandle, std::forward<Args>(args)...);
     uint32_t poolIndex = pool - m_poolArray.begin();
-    MapHandleToIndexPair(handle, {poolIndex, posInPool});
-    return handle;
+    MapHandleToIndexPair(parentHandle, {poolIndex, posInPool});
+    return component;
 }
 
 template<class T>
-bool ComponentSystem<T>::Remove(const ComponentHandle handle)
+bool ComponentSystem<T>::Remove(EntityHandle handle)
 {
     if (!Contains(handle))
     {
@@ -128,13 +117,13 @@ bool ComponentSystem<T>::Remove(const ComponentHandle handle)
 }
 
 template<class T>
-bool ComponentSystem<T>::Contains(const ComponentHandle handle) const
+bool ComponentSystem<T>::Contains(EntityHandle handle) const
 {
     return m_indexMap.count(handle) > 0;
 }
 
 template<class T>
-T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
+T* ComponentSystem<T>::GetPointerTo(EntityHandle handle)
 {
     if (!Contains(handle))
     {
@@ -146,13 +135,7 @@ T* ComponentSystem<T>::GetPointerTo(const ComponentHandle handle)
 }
 
 template<class T>
-ComponentHandle ComponentSystem<T>::GetCurrentHandle()
-{
-    return m_handleManager.GetCurrent();
-}
-
-template<class T>
-engine::ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(const ComponentHandle handle) const
+engine::ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(EntityHandle handle) const
 {
     if (!Contains(handle))
     {
@@ -162,7 +145,7 @@ engine::ComponentIndexPair ComponentSystem<T>::GetIndexPairFromHandle(const Comp
 }
 
 template<class T>
-void ComponentSystem<T>::MapHandleToIndexPair(const ComponentHandle handle, const engine::ComponentIndexPair pair)
+void ComponentSystem<T>::MapHandleToIndexPair(EntityHandle handle, engine::ComponentIndexPair pair)
 {
     if (!Contains(handle))
     {

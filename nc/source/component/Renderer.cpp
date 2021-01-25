@@ -13,23 +13,18 @@ namespace nc
 {
     Renderer::~Renderer() = default;
 
-    Renderer::Renderer(ComponentHandle handle, EntityHandle parentHandle, graphics::Mesh mesh, graphics::Material material) noexcept
-        : Component(handle, parentHandle),
+    Renderer::Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept
+        : ComponentBase(handle),
           m_model{ std::make_unique<graphics::Model>(std::move(mesh), std::move(material)) },
-          m_transform{ Ecs::GetComponent<Transform>(m_parentHandle) }
+          m_transform{ Ecs::GetComponent<Transform>(handle) }
     {
     }
 
     #ifdef NC_EDITOR_ENABLED
     void Renderer::EditorGuiElement()
     {
-        ImGui::PushItemWidth(80.0f);
-            ImGui::Spacing();
-            ImGui::Separator();
-                ImGui::Text("Renderer");
-                m_model->GetMaterial()->EditorGuiElement();
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("Renderer");
+        m_model->GetMaterial()->EditorGuiElement();
     }
     #endif
     

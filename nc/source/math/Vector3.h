@@ -8,30 +8,39 @@ namespace nc
 {
     struct Vector3
     {
-        float x;
-        float y;
-        float z;
+        float x, y, z;
 
-        Vector3() = default;
-        Vector3(const Vector3& vec) = default;
-        Vector3(Vector3&& other) = default;
-        Vector3& operator=(const Vector3& other) = default;
-        Vector3& operator=(Vector3&& other) = default;
+        constexpr Vector3() noexcept
+            : x{0.0f}, y{0.0f}, z{0.0f} {}
 
-        constexpr Vector3(float x, float y, float z) noexcept
-            : x{x}, y{y}, z{z} {}
+        constexpr Vector3(float X, float Y, float Z) noexcept
+            : x{X}, y{Y}, z{Z} {}
 
-        constexpr Vector3(float x_, Vector2 yz) noexcept
-            : x{x_}, y{yz.x}, z{yz.y} {}
+        constexpr Vector3(float X, Vector2 YZ) noexcept
+            : x{X}, y{YZ.x}, z{YZ.y} {}
 
-        constexpr Vector3(Vector2 xy, float z_) noexcept
-            : x{xy.x}, y{xy.y}, z{z_} {}
+        constexpr Vector3(Vector2 XY, float Z) noexcept
+            : x{XY.x}, y{XY.y}, z{Z} {}
 
         Vector3(const DirectX::XMFLOAT3& xm) noexcept;
         Vector3(DirectX::XMFLOAT3&& xm) noexcept;
         Vector3& operator=(const DirectX::XMFLOAT3& xm) noexcept;
         Vector3& operator=(DirectX::XMFLOAT3&& xm) noexcept;
         DirectX::XMFLOAT3 ToXMFloat3() const noexcept;
+
+        static Vector3 Zero()  noexcept { return Vector3{ 0, 0, 0}; }
+        static Vector3 One()   noexcept { return Vector3{ 1, 1, 1}; }
+        static Vector3 Up()    noexcept { return Vector3{ 0, 1, 0}; }
+        static Vector3 Down()  noexcept { return Vector3{ 0,-1, 0}; }
+        static Vector3 Left()  noexcept { return Vector3{-1, 0, 0}; }
+        static Vector3 Right() noexcept { return Vector3{ 1, 0, 0}; }
+        static Vector3 Front() noexcept { return Vector3{ 0, 0, 1}; }
+        static Vector3 Back()  noexcept { return Vector3{ 0, 0,-1}; }
+
+        static float SquareMagnitude(const Vector3& vec) noexcept
+        {
+            return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
+        }
 
         inline void InvertX() noexcept { x *= -1.0f; }
         inline void InvertY() noexcept { y *= -1.0f; }
@@ -69,20 +78,6 @@ namespace nc
             y += vec.y;
             z += vec.z;
         }
-
-        static Vector3 Zero()  noexcept { return Vector3{ 0, 0, 0}; }
-        static Vector3 One()   noexcept { return Vector3{ 1, 1, 1}; }
-        static Vector3 Up()    noexcept { return Vector3{ 0, 1, 0}; }
-        static Vector3 Down()  noexcept { return Vector3{ 0,-1, 0}; }
-        static Vector3 Left()  noexcept { return Vector3{-1, 0, 0}; }
-        static Vector3 Right() noexcept { return Vector3{ 1, 0, 0}; }
-        static Vector3 Front() noexcept { return Vector3{ 0, 0, 1}; }
-        static Vector3 Back()  noexcept { return Vector3{ 0, 0,-1}; }
-
-        static float SquareMagnitude(const Vector3& vec) noexcept
-        {
-            return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
-        }
     };
 
     /*************
@@ -104,7 +99,7 @@ namespace nc
         { return Vector3{vec.x / scalar, vec.y / scalar, vec.z / scalar}; }
 
     inline bool operator ==(const Vector3& lhs, const Vector3& rhs)
-        { return Vector3::SquareMagnitude(lhs - rhs) <= math::EPSILON; }
+        { return (math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y) && math::FloatEqual(lhs.z, rhs.z)); }
 
     inline bool operator !=(const Vector3& lhs, const Vector3& rhs)
         { return !(lhs == rhs); }

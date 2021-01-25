@@ -6,8 +6,8 @@ using namespace nc;
 
 namespace project
 {
-    ClickHandler::ClickHandler(ComponentHandle handle, EntityHandle parentHandle)
-        : Component(handle, parentHandle)
+    ClickHandler::ClickHandler(EntityHandle handle)
+        : Component(handle)
     {
     }
 

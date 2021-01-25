@@ -20,14 +20,16 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
     }
     catch(const std::runtime_error& e)
     {
-        std::cerr << "Fatal error:\n" << e.what();
+        std::cerr << "std::runtime_error:\n" << e.what() << '\n';
+        nc::debug::Log::LogToDiagnostics("std::runtime_error:");
         nc::debug::Log::LogToDiagnostics(e.what());
         if(engine)
             engine->Shutdown(true);
     }
     catch(std::exception& e)
     {
-        std::cerr << "Exception: \n" << e.what();
+        std::cerr << "std::exception: \n" << e.what() << '\n';
+        nc::debug::Log::LogToDiagnostics("std::exception:");
         nc::debug::Log::LogToDiagnostics(e.what());
         if(engine)
             engine->Shutdown(true);
