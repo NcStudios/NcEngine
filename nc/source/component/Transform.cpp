@@ -11,13 +11,14 @@ namespace
     using namespace DirectX;
     using namespace nc;
 
-    XMVECTOR ToXMVector(const Vector3& v)           { return XMVectorSet(v.x, v.y, v.z, 1.0f); }
-    XMVECTOR ToXMVector(const Quaternion& q)        { return XMVectorSet(q.x, q.y, q.z, q.w); }
-    XMMATRIX ToTransMatrix(const Vector3& v)        { return XMMatrixTranslation(v.x, v.y, v.z); }
-    XMMATRIX ToScaleMatrix(const Vector3& v)        { return XMMatrixScaling(v.x, v.y, v.z); }
-    XMMATRIX ToRotMatrix(const Vector3& v)          { return XMMatrixRotationRollPitchYaw(v.x, v.y, v.z); }
-    XMMATRIX ToRotMatrix(const Quaternion& q)       { return XMMatrixRotationQuaternion(ToXMVector(q)); }
-    XMMATRIX ToRotMatrix(const Vector3& a, float r) { return XMMatrixRotationAxis(ToXMVector(a), r); }
+    XMVECTOR ToXMVector(const Vector3& v)            { return XMVectorSet(v.x, v.y, v.z, 0.0f); }
+    XMVECTOR ToXMVectorHomogeneous(const Vector3& v) { return XMVectorSet(v.x, v.y, v.z, 1.0f); }
+    XMVECTOR ToXMVector(const Quaternion& q)         { return XMVectorSet(q.x, q.y, q.z, q.w); }
+    XMMATRIX ToTransMatrix(const Vector3& v)         { return XMMatrixTranslation(v.x, v.y, v.z); }
+    XMMATRIX ToScaleMatrix(const Vector3& v)         { return XMMatrixScaling(v.x, v.y, v.z); }
+    XMMATRIX ToRotMatrix(const Vector3& v)           { return XMMatrixRotationRollPitchYaw(v.x, v.y, v.z); }
+    XMMATRIX ToRotMatrix(const Quaternion& q)        { return XMMatrixRotationQuaternion(ToXMVector(q)); }
+    XMMATRIX ToRotMatrix(const Vector3& a, float r)  { return XMMatrixRotationAxis(ToXMVector(a), r); }
 
     XMMATRIX ComposeMatrix(const Vector3& scale, const Quaternion& rot, const Vector3& pos)
     {
@@ -121,7 +122,7 @@ namespace nc
 
     void Transform::SetPosition(const Vector3& pos)
     {
-        m_matrix.r[3] = ToXMVector(pos);
+        m_matrix.r[3] = ToXMVectorHomogeneous(pos);
     }
 
     void Transform::SetRotation(const Quaternion& quat)
@@ -160,6 +161,7 @@ namespace nc
             DirectX::XMVECTOR pos_v, rot_v, scl_v;
             DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
             trans_v = DirectX::XMVector3Transform(trans_v, DirectX::XMMatrixRotationQuaternion(rot_v));
+            trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
         }
         m_matrix.r[3] += trans_v;
     }

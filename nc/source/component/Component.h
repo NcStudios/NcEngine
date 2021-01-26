@@ -3,6 +3,8 @@
 
 namespace nc
 {
+    class Entity;
+
     class ComponentBase
     {
         public:
@@ -34,8 +36,8 @@ namespace nc
             virtual void FrameUpdate(float) {}
             virtual void FixedUpdate() {}
             virtual void OnDestroy() {}
-            virtual void OnCollisionEnter(EntityHandle) {}
-            virtual void OnCollisionStay() {};
-            virtual void OnCollisionExit() {};
+            virtual void OnCollisionEnter(Entity*) {}
+            virtual void OnCollisionStay(Entity*) {};
+            virtual void OnCollisionExit(Entity*) {};
     };
 } //end namespace nc

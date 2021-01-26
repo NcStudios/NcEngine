@@ -20,6 +20,8 @@ namespace nc::physics
         public:
             PhysicsSystem(graphics::Graphics* graphics);
 
+            void ClearState();
+
             void CheckCollisions(std::vector<Collider*> colliders);
 
             void RegisterClickable(IClickable* toAdd);

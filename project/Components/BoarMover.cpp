@@ -2,6 +2,8 @@
 #include "input/Input.h"
 #include "Ecs.h"
 
+#include <iostream>
+
 using namespace nc;
 
 namespace
@@ -11,8 +13,8 @@ namespace
 
 namespace project
 {
-    BoarMover::BoarMover(ComponentHandle handle, EntityHandle parentHandle)
-        : Component(handle, parentHandle),
+    BoarMover::BoarMover(EntityHandle parentHandle)
+        : Component(parentHandle),
           m_transform{Ecs::GetComponent<Transform>(parentHandle)}
     {}
 
@@ -49,5 +51,20 @@ namespace project
         {
             m_transform->Translate(Vector3::Down() * Factor);
         }
+    }
+
+    void BoarMover::OnCollisionEnter(Entity*)
+    {
+        std::cout << "collision enter\n";
+    }
+
+    void BoarMover::OnCollisionStay(Entity*)
+    {
+        std::cout << "collision stay\n";
+    }
+
+    void BoarMover::OnCollisionExit(Entity*)
+    {
+        std::cout << "collision exit\n";
     }
 }

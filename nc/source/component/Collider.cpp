@@ -4,6 +4,7 @@
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
+#include <charconv>
 #endif
 
 namespace
@@ -23,14 +24,15 @@ namespace nc
         : ComponentBase(handle),
           m_transform{Ecs::GetComponent<Transform>(handle)},
           m_scale{scale},
-          m_model{CreateBoxModel()}
+          m_model{CreateBoxModel()},
+          m_currentCollisions{}
     {}
 
     Collider::~Collider() = default;
 
     void Collider::Update(graphics::FrameManager& frame)
     {
-        IF_THROW(!m_data.transform, "ColliderBase::Update - Bad Transform Ptr");
+        IF_THROW(!m_transform, "ColliderBase::Update - Bad Transform Ptr");
         m_model.SetTransformationMatrix(m_transform->GetTransformationMatrixEx(m_scale));
         m_model.Submit(frame);
     }
@@ -40,6 +42,40 @@ namespace nc
         return m_model.GetTransformationMatrix();
     }
 
+    void Collider::UpdateCollisions(std::vector<Collider*> collisions)
+    {
+        auto entity = Ecs::GetEntity(GetParentHandle());
+
+        for(auto prevCollision : collisions)
+        {
+            auto pos = std::find(collisions.begin(), collisions.end(), prevCollision);
+            auto otherEntity = Ecs::GetEntity(prevCollision->GetParentHandle());
+
+            if(pos == collisions.end())
+            {
+                entity->SendOnCollisionExit(otherEntity);
+                otherEntity->SendOnCollisionExit(entity);
+            }
+            else
+            {
+                entity->SendOnCollisionStay(otherEntity);
+                otherEntity->SendOnCollisionStay(entity);
+            }
+        }
+
+        for(auto newCollision : collisions)
+        {
+            auto pos = std::find(m_currentCollisions.begin(), m_currentCollisions.end(), newCollision);
+            if(pos == m_currentCollisions.end())
+            {
+                auto otherEntity = Ecs::GetEntity(newCollision->GetParentHandle());
+                entity->SendOnCollisionEnter(otherEntity);
+                otherEntity->SendOnCollisionEnter(entity);
+            }
+        }
+
+        m_currentCollisions = std::move(collisions);
+    }
 
     #ifdef NC_EDITOR_ENABLED
     void Collider::EditorGuiElement()
@@ -47,6 +83,20 @@ namespace nc
         ImGui::Text("Collider");
         ui::editor::xyzWidgetHeader("     ");
         ui::editor::xyzWidget("Scale", "colliderscale", &m_scale.x, &m_scale.y, &m_scale.z, 0.01f, 100.0f);
+        if(ImGui::CollapsingHeader("Current Collisions"))
+        {
+            std::array<char, 8> buf;
+
+            for(auto c : m_currentCollisions)
+            {
+                std::to_chars(buf.data(), buf.data() + buf.size(), static_cast<unsigned>(c->GetParentHandle()));
+                ImGui::Indent();
+                ImGui::Text("EntityHandle");
+                ImGui::SameLine();
+                ImGui::Text(buf.data());
+                ImGui::Unindent();
+            }
+        }
     }
     #endif
 }

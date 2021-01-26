@@ -4,11 +4,11 @@
 #include "Window.h"
 #include "graphics/Graphics.h"
 #include "MainCamera.h"
+#include "Ecs.h"
 
 #include "directx/math/DirectXMath.h"
 #include "directx/math/DirectXCollision.h"
 #include "component/Collider.h"
-#include <iostream>
 
 #include <algorithm>
 #include <stdexcept>
@@ -27,6 +27,11 @@ namespace nc::physics
     {
     }
 
+    void PhysicsSystem::ClearState()
+    {
+        m_clickableComponents.clear();
+    }
+
     void PhysicsSystem::CheckCollisions(std::vector<Collider*> colliders)
     {
         DirectX::BoundingOrientedBox unit, a, b;
@@ -35,16 +40,18 @@ namespace nc::physics
         for(size_t i = 0u; i < count; ++i)
         {
             unit.Transform(a, colliders[i]->GetTransformationMatrix());
+            std::vector<Collider*> collidingWithA;
 
             for(size_t j = i + 1; j < count; ++j)
             {
                 unit.Transform(b, colliders[j]->GetTransformationMatrix());
-                std::cout << "Result: " << i << ", " << j << " | ";
                 if(a.Intersects(b))
-                    std::cout << "Intersection\n";
-                else
-                    std::cout << "No Intersection\n";
+                {
+                    collidingWithA.push_back(colliders[j]);
+                }
             }
+
+            colliders[i]->UpdateCollisions(std::move(collidingWithA));
         }
     }
 

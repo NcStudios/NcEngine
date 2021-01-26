@@ -108,6 +108,7 @@ namespace nc::engine
     {
         V_LOG("Clearing engine state");
         m_ecs->ClearState();
+        m_physics->ClearState();
         m_mainCamera->ClearTransform();
         // SceneManager state is never cleared
     }

@@ -18,9 +18,12 @@ namespace nc
             void EditorGuiElement() override;
             #endif
 
+            void UpdateCollisions(std::vector<Collider*> collisions);
+
         protected:
             Transform* m_transform;
             Vector3 m_scale;
-            graphics::Model m_model;;
+            graphics::Model m_model;
+            std::vector<Collider*> m_currentCollisions;
     };
 }

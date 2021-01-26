@@ -51,7 +51,7 @@ namespace project
         Ecs::AddComponent<Collider>(boarHandle, scale);
         Ecs::AddComponent<project::BoarMover>(boarHandle);
 
-        auto boar2Handle = prefab::Create(prefab::Resource::Boar, Vector3::One(), Vector3::Zero(), Vector3::One() * 2, "Boar2");
+        auto boar2Handle = prefab::Create(prefab::Resource::Boar, Vector3::One(), Quaternion::Identity(), Vector3::One() * 2, "Boar2");
         Ecs::AddComponent<Collider>(boar2Handle, scale);
 
         const auto scaleFactor = 2;

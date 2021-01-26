@@ -8,8 +8,11 @@ namespace project
     class BoarMover : public nc::Component
     {
         public:
-            BoarMover(nc::ComponentHandle handle, nc::EntityHandle parentHandle);
+            BoarMover(nc::EntityHandle parentHandle);
             void FrameUpdate(float dt) override;
+            void OnCollisionEnter(nc::Entity* other) override;
+            void OnCollisionExit(nc::Entity* other) override;
+            void OnCollisionStay(nc::Entity* other) override;
 
         private:
             nc::Transform* m_transform;
