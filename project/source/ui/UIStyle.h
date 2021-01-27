@@ -76,5 +76,7 @@ namespace project::ui
         colors[ImGuiCol_NavWindowingHighlight] = COLOR_TRANS_WHITE;
         colors[ImGuiCol_NavWindowingDimBg]     = COLOR_TRANS_GRAY_LIGHT;
         colors[ImGuiCol_ModalWindowDimBg]      = COLOR_TRANS_GRAY_LIGHT_ALT;
+        colors[ImGuiCol_PlotHistogram]         = COLOR_ACCENT_DARK;
+        colors[ImGuiCol_PlotHistogramHovered]  = COLOR_ACCENT;
     }
 } //end namespace nc::ui

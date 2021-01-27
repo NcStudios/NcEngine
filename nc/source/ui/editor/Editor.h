@@ -4,9 +4,6 @@
 #include "ecs/Entity.h"
 #include "ecs/EntityMap.h"
 
-#include <optional>
-#include <unordered_map>
-
 namespace nc 
 {
     class Transform;
@@ -18,7 +15,7 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            Editor(nc::graphics::Graphics * graphics);
+            Editor(graphics::Graphics * graphics);
 
             void Frame(float* dt, ecs::EntityMap& activeEntities);
             void ToggleGui() noexcept;
@@ -33,11 +30,6 @@ namespace nc::ui::editor
             bool m_openState_GraphicsResources;
 
             void DrawMenu();
-            void DrawSceneGraphPanel(ecs::EntityMap& entities);
-            void DrawUtilitiesPanel(float* dtMult);
-            void DrawGraphicsResourcePanel();
-            void DrawTimingControl(float* dtMult);
-            void DrawEntityControl(nc::EntityHandle handle);
     };
 }
 #endif
