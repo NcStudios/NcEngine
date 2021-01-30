@@ -8,13 +8,15 @@
 
 namespace nc::ui::editor::controls
 {
+    const auto TitleBarHeight = 40.0f;
     const auto DefaultItemWidth = 60.0f;
+    const auto SceneGraphPanelWidth = 300;
+    const auto UtilitiesPanelHeight = 350;
+    const auto GraphSize = ImVec2{128, 32};
     const auto Padding = 4.0f;
-    const auto PanelSize = ImVec2{300, 0};
-    const auto SubPanelWidth = PanelSize.x - Padding * 4.0f;
 
-    inline void SceneGraphPanel(ecs::EntityMap& entities);
-    inline void UtilitiesPanel(float* dtMult, unsigned drawCallCount);
+    inline void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight);
+    inline void UtilitiesPanel(float* dtMult, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void GraphicsResourcePanel();
     inline void Entity(EntityHandle handle);
     inline void Component(ComponentBase* comp);
@@ -24,9 +26,11 @@ namespace nc::ui::editor::controls
     /**
      * Scene Graph Controls
      */
-    void SceneGraphPanel(ecs::EntityMap& entities)
+    void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight)
     {
-        if(ImGui::BeginChild("ScenePanel", PanelSize, true))
+        ImGui::SetNextWindowPos({Padding, TitleBarHeight});
+
+        if(ImGui::BeginChild("ScenePanel", {SceneGraphPanelWidth, windowHeight - TitleBarHeight}, true))
         {
             static ImGuiTextFilter filter;
             ImGui::Text("Scene Graph");
@@ -61,30 +65,21 @@ namespace nc::ui::editor::controls
             ImGui::Text("Handle %d", static_cast<unsigned>(handle));
         ImGui::Unindent();
 
-        controls::Component(nc::Ecs::GetComponent<nc::Transform>(handle));
-
-        nc::NetworkDispatcher* disp = nc::Ecs::GetComponent<nc::NetworkDispatcher>(handle);
-        if(disp) { controls::Component(disp); }
-
-        nc::Renderer* rend = nc::Ecs::GetComponent<nc::Renderer>(handle);
-        if(rend) { controls::Component(rend); }
-
-        nc::Collider* col = nc::Ecs::GetComponent<nc::Collider>(handle);
-        if(col) { controls::Component(col); }
-
-        nc::PointLight* light = nc::Ecs::GetComponent<PointLight>(handle);
-        if(light) { controls::Component(light); }
-
-        for(const auto& comp : nc::Ecs::GetEntity(handle)->GetUserComponents())
-        {
+        controls::Component(Ecs::GetComponent<Transform>(handle));
+        controls::Component(Ecs::GetComponent<NetworkDispatcher>(handle));
+        controls::Component(Ecs::GetComponent<Renderer>(handle));
+        controls::Component(Ecs::GetComponent<Collider>(handle));
+        controls::Component(Ecs::GetComponent<PointLight>(handle));
+        for(const auto& comp : Ecs::GetEntity(handle)->GetUserComponents())
             controls::Component(comp.get());
-        }
 
         ImGui::Separator();
     }
 
     void Component(ComponentBase* comp)
     {
+        if(!comp)
+            return;
         ImGui::Separator();
         ImGui::BeginGroup();
             ImGui::Indent();
@@ -97,28 +92,47 @@ namespace nc::ui::editor::controls
     /**
      * Utilities Controls
      */
-    void UtilitiesPanel(float* dtMult, unsigned drawCallCount)
+        template<class Func, class ... Args>
+    void WrapTabItem(const char* label, Func func, Args&& ... args)
     {
-        if(ImGui::BeginChild("UtilityPanel", PanelSize, true))
+        if(ImGui::BeginTabItem(label))
         {
-            ImGui::Text("Utilities");
-            ImGui::Separator();
-            ImGui::Separator();
-            ImGui::Spacing();
-            if(ImGui::CollapsingHeader("Frame Data"))
+            if(ImGui::BeginChild("", {0,0}, true))
+                func(std::forward<Args>(args)...);
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+    }
+
+    void UtilitiesPanel(float* dtMult, unsigned drawCallCount, float windowWidth, float windowHeight)
+    {
+        static auto initColumnWidth = false;
+        const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
+        auto panelWidth = windowWidth - xPos;
+        ImGui::SetNextWindowPos({xPos, windowHeight - UtilitiesPanelHeight});
+
+        if(ImGui::BeginChild("UtilitiesPanel", {panelWidth, UtilitiesPanelHeight}, true))
+        {
+            ImGui::Columns(2);
+            if(!initColumnWidth)
             {
-                FrameData(dtMult, drawCallCount);
-                ImGui::Separator();
+                ImGui::SetColumnWidth(-1, 0.85 * panelWidth);
+                initColumnWidth = true;
             }
-            if(ImGui::CollapsingHeader("Profiling"))
+            if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
-                Profiler();
-                ImGui::Separator();
+                WrapTabItem("Profiler", Profiler);
+                WrapTabItem("Gfx Resources", GraphicsResourcePanel);
+                ImGui::EndTabBar();
             }
-            if(ImGui::CollapsingHeader("ImGui Style Options"))
+
+            ImGui::NextColumn();
+            if(ImGui::BeginTabBar("UtilitiesRightTabBar"))
             {
-                ImGui::ShowStyleEditor();
-                ImGui::Separator();
+                WrapTabItem("Frame Data", FrameData, dtMult, drawCallCount);
+                WrapTabItem("UI Style", ImGui::ShowStyleEditor, nullptr);
+                WrapTabItem("UI Metrics", ImGui::ShowMetricsWindow, nullptr);
+                ImGui::EndTabBar();
             }
         }
         ImGui::EndChild();
@@ -126,16 +140,12 @@ namespace nc::ui::editor::controls
 
     void FrameData(float* dtMult, unsigned drawCallCount)
     {
-        ImGui::BeginGroup();
-        ImGui::Indent();
-            float frameRate = ImGui::GetIO().Framerate;
-            ImGui::SetNextItemWidth(DefaultItemWidth);
-            ImGui::DragFloat("dtX", dtMult, 0.1f, 0.0f, 5.0f, "%.1f");
-            ImGui::Text("%.1f fps", frameRate);
-            ImGui::Text("%.1f ms/frame", 1000.0f / frameRate);
-            ImGui::Text("%u Draw Calls", drawCallCount);
-        ImGui::Unindent();
-        ImGui::EndGroup();
+        float frameRate = ImGui::GetIO().Framerate;
+        ImGui::SetNextItemWidth(DefaultItemWidth);
+        ImGui::DragFloat("dtX", dtMult, 0.1f, 0.0f, 5.0f, "%.1f");
+        ImGui::Text("%.1f fps", frameRate);
+        ImGui::Text("%.1f ms/frame", 1000.0f / frameRate);
+        ImGui::Text("%u Draw Calls", drawCallCount);
     }
 
     void Profiler()
@@ -145,59 +155,58 @@ namespace nc::ui::editor::controls
         static ImGuiTextFilter textFilter;
         static int filterSelection = 0u;
 
-        ImGui::BeginGroup();
-        ImGui::Indent();
-            ImGui::RadioButton("All", &filterSelection, static_cast<int>(Filter::All));
-            ImGui::SameLine();
-            ImGui::RadioButton("Engine", &filterSelection, static_cast<int>(Filter::Engine));
-            ImGui::SameLine();
-            ImGui::RadioButton("User", &filterSelection, static_cast<int>(Filter::User));
-            textFilter.Draw("Search##telemetry", 128.0f);
-            ImGui::Separator();
-            const auto profileFilter = static_cast<Filter>(filterSelection);
+        textFilter.Draw("Search##telemetry", 128.0f);
 
+        for(auto v : {Filter::All, Filter::Engine, Filter::User})
+        {
+            ImGui::SameLine();
+            ImGui::RadioButton(ToCString(v), &filterSelection, static_cast<int>(v));
+        }
+
+        ImGui::Separator();
+
+        if(ImGui::BeginChild("Profiler##child"))
+        {
+            const auto filterGroup = static_cast<Filter>(filterSelection);
             for(auto& [id, data] : nc::debug::profile::GetData())
             {
                 if(!textFilter.PassFilter(data.functionName.c_str()))
                     continue;
                 
-                if((profileFilter != Filter::All) && (profileFilter != data.filter))
+                if((filterGroup != Filter::All) && (filterGroup != data.filter))
                     continue;
 
                 ImGui::PushID(id);
                 if(ImGui::CollapsingHeader(data.functionName.c_str()))
                 {
-                    data.UpdateHistory();
-                    auto [avgCalls, avgTime] = data.GetAverages();
+                    debug::profile::UpdateHistory(&data);
+                    auto [avgCalls, avgTime] = debug::profile::ComputeAverages(&data);
                     ImGui::Indent();
-                        ImGui::Text("       Avg. Calls: %.1f", avgCalls);
-                        ImGui::PlotHistogram("##calls", data.callHistory.data(), data.historySize, 0, nullptr, 0.0f, 100.0f);
-                        ImGui::Text("       Avg. Time: %.1f", avgTime);
-                        ImGui::PlotHistogram("##time", data.timeHistory.data(), data.historySize, 0, nullptr, 0.0f, 20.0f);
+                        ImGui::Text("   Calls: %.1f", avgCalls);
+                        ImGui::SameLine();
+                        ImGui::PlotHistogram("##calls", data.callHistory.data(), data.historySize, 0, nullptr, 0.0f, 100.0f, GraphSize);
+                        ImGui::SameLine();
+                        ImGui::Text("   Time: %.1f", avgTime);
+                        ImGui::SameLine();
+                        ImGui::PlotHistogram("##time", data.timeHistory.data(), data.historySize, 0, nullptr, 0.0f, 20.0f, GraphSize);
                     ImGui::Unindent();
                 }
                 ImGui::PopID();
-                data.Reset();
+                debug::profile::Reset(&data);
             }
-        ImGui::Unindent();
-        ImGui::EndGroup();
+        }
+        ImGui::EndChild();
     }
 
     void GraphicsResourcePanel()
     {
         static ImGuiTextFilter filter;
-
-        if(ImGui::BeginChild("GraphicsResourcePanel", {500, 200}, true, ImGuiWindowFlags_HorizontalScrollbar))
+        filter.Draw("##gfxFilterId", 128.0f);
+        for(auto& [id, res] : graphics::d3dresource::GraphicsResourceManager::Get().m_resources)
         {
-            ImGui::Text("Graphics Resources");
-            filter.Draw("##gfxFilterId", 128.0f);
-            for(auto& [id, res] : graphics::d3dresource::GraphicsResourceManager::Get().m_resources)
-            {
-                if(filter.PassFilter(id.c_str()))
-                    ImGui::Text(id.c_str());
-            }
+            if(filter.PassFilter(id.c_str()))
+                ImGui::Text(id.c_str());
         }
-        ImGui::EndChild();
     }
 } // end namespace nc::ui::editor
 #endif

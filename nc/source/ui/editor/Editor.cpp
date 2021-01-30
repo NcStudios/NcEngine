@@ -7,57 +7,49 @@
 
 namespace
 {
-    const auto TitleBarHeight = 40.0f;
-    const auto MainWindowFlags = ImGuiWindowFlags_NoBackground |
+    constexpr auto MainWindowFlags = ImGuiWindowFlags_NoBackground |
                                  ImGuiWindowFlags_MenuBar |
                                  ImGuiWindowFlags_NoResize |
                                  ImGuiWindowFlags_NoScrollbar |
                                  ImGuiWindowFlags_NoMove;
+    
+    namespace hotkey
+    {
+        constexpr auto Editor = nc::input::KeyCode::Tilde;
+        constexpr auto Utilities = nc::input::KeyCode::F1;
+    }
 }
 
 namespace nc::ui::editor
 {
     Editor::Editor(graphics::Graphics * graphics)
         : m_graphics{graphics},
-          m_isGuiActive{false},
-          m_openState_UtilitiesPanel{true},
-          m_openState_GraphicsResources{false}
+          m_openState_Editor{false},
+          m_openState_UtilitiesPanel{true}
     {
     }
 
     void Editor::Frame(float* dt, ecs::EntityMap& activeEntities)
     {
-        if(input::GetKeyUp(input::KeyCode::Tilde))
-            ToggleGui();
-        if(!m_isGuiActive)
-            return;
+        if(input::GetKeyDown(hotkey::Editor))
+            m_openState_Editor = !m_openState_Editor;
 
-        auto [width, height] = Window::GetDimensions();
+        if(!m_openState_Editor)
+            return;
+        
+        if(input::GetKeyDown(hotkey::Utilities))
+            m_openState_UtilitiesPanel = !m_openState_UtilitiesPanel;
+
         if(ImGui::Begin("NcEngine Editor", nullptr, MainWindowFlags))
         {
             DrawMenu();
-            ImGui::SetNextWindowPos({controls::Padding, TitleBarHeight});
-            controls::SceneGraphPanel(activeEntities);
-
-            if(m_openState_GraphicsResources)
-            {
-                ImGui::SameLine();
-                controls::GraphicsResourcePanel();
-            }
-
+            auto [width, height] = Window::GetDimensions();
+            controls::SceneGraphPanel(activeEntities, height);
             if(m_openState_UtilitiesPanel)
-            {
-                ImGui::SameLine(width - controls::PanelSize.x - controls::Padding);
-                controls::UtilitiesPanel(dt, m_graphics->GetDrawCallCount());
-            }
+                controls::UtilitiesPanel(dt, m_graphics->GetDrawCallCount(), width, height);
         }
         ImGui::End();
     }
-
-    void Editor::ToggleGui() noexcept { m_isGuiActive = !m_isGuiActive; }
-    void Editor::EnableGui() noexcept { m_isGuiActive = true; }
-    void Editor::DisableGui() noexcept { m_isGuiActive = false; }
-    bool Editor::IsGuiActive() const noexcept { return m_isGuiActive; }
 
     void Editor::DrawMenu()
     {
@@ -65,8 +57,7 @@ namespace nc::ui::editor
         {
             if(ImGui::BeginMenu("Window"))
             {
-                ImGui::MenuItem("Utilities",     "F...", &m_openState_UtilitiesPanel);
-                ImGui::MenuItem("Graphics Resources", "F...", &m_openState_GraphicsResources);
+                ImGui::MenuItem("Utilities",     "F1", &m_openState_UtilitiesPanel);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();

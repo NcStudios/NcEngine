@@ -63,17 +63,16 @@ namespace nc::graphics
             ImGui::Text("Material Color"); ImGui::SameLine(); bool mcDirty = ImGui::ColorEdit3("##mc", &(m_materialProperties.color.x), ImGuiColorEditFlags_NoInputs);
             ImGui::Text("Specular");
             ImGui::Indent();
-                bool siDirty = ui::editor::floatWidget("Intensity", "##specintensity", &m_materialProperties.specularIntensity, dragSpeed,  0.05f, 4.0f, "%.2f");
-                bool spDirty = ui::editor::floatWidget("Power    ", "##specpower", &m_materialProperties.specularPower, dragSpeed,  0.5f, 13.0f, "%.2f");
+                bool siDirty = ui::editor::floatWidget("Intensity", "specintensity", &m_materialProperties.specularIntensity, dragSpeed,  0.05f, 4.0f, "%.2f");
+                bool spDirty = ui::editor::floatWidget("Power    ", "specpower", &m_materialProperties.specularPower, dragSpeed,  0.5f, 13.0f, "%.2f");
             ImGui::Unindent();
-            bool txDirty = ui::editor::floatWidget("X Tiling", "##tx", &m_materialProperties.xTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
-            bool tyDirty = ui::editor::floatWidget("Y Tiling", "##ty", &m_materialProperties.yTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
+            bool txDirty = ui::editor::floatWidget("X Tiling", "tilex", &m_materialProperties.xTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
+            bool tyDirty = ui::editor::floatWidget("Y Tiling", "tiley", &m_materialProperties.yTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
         ImGui::Unindent();
 
         if(mcDirty || siDirty || spDirty || txDirty || tyDirty)
         {
             m_materialPropertiesBuffer->Update(m_materialProperties);
-
         }
     }
     

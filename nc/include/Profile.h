@@ -10,22 +10,22 @@ namespace nc::debug::profile
     };
 }
 
-#ifndef NC_EDITOR_ENABLED
+#ifdef NC_EDITOR_ENABLED
+/** @todo use std::source_location when mingw catches up to gcc 11 and add optional override for
+* function names (can return same name for different funcs)*/
+#define NC_PROFILE_BEGIN(filter); static const auto NC_FUNCTION_ID = nc::debug::profile::Register(__PRETTY_FUNCTION__, filter); \
+                                  nc::debug::profile::Push(NC_FUNCTION_ID);
+#define NC_PROFILE_END(); nc::debug::profile::Pop();
+#else
 #define NC_PROFILE_BEGIN(filter);
 #define NC_PROFILE_END();
-#else
+#endif
+
+#ifdef NC_EDITOR_ENABLED
 #include "time/NcTime.h"
 #include <array>
-#include <experimental/source_location>
 #include <string>
 #include <unordered_map>
-
-#define NC_PROFILE_BEGIN(filter); \
-    static constexpr auto NC_FUNCTION_NAME = std::experimental::fundamentals_v2::source_location::current().function_name(); \
-    static const auto NC_FUNCTION_ID = nc::debug::profile::Register(NC_FUNCTION_NAME, filter); \
-    nc::debug::profile::Push(NC_FUNCTION_ID);
-
-#define NC_PROFILE_END(); nc::debug::profile::Pop();
 
 namespace nc::debug::profile
 {
@@ -38,14 +38,15 @@ namespace nc::debug::profile
     void Push(FuncId id);
     void Pop();
     ProfileData& GetData();
+    void UpdateHistory(FunctionMetrics* metrics);
+    void Reset(FunctionMetrics* metrics);
+    std::tuple<float, float> ComputeAverages(FunctionMetrics const* metrics);
+    const char* ToCString(Filter filter);
+
 
     struct FunctionMetrics
     {
         FunctionMetrics(std::string name, Filter profileFilter);
-
-        void UpdateHistory();
-        std::tuple<float, float> GetAverages() const;
-        void Reset();
 
         static constexpr unsigned historySize = 64u;
         std::string functionName;

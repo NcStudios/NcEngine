@@ -16,6 +16,21 @@ namespace nc::debug::profile
         std::vector<FuncId> openProfiles{};
     }
 
+    const char* ToCString(Filter filter)
+    {
+        switch(filter)
+        {
+            case Filter::All:
+                return "All";
+            case Filter::Engine:
+                return "Engine";
+            case Filter::User:
+                return "User";
+            default:
+                throw std::runtime_error("ToCString - Unkown Filter value");
+        }
+    }
+
     FunctionMetrics::FunctionMetrics(std::string name, Filter profileFilter)
         : functionName{std::move(name)},
           callHistory{historySize},
@@ -28,26 +43,27 @@ namespace nc::debug::profile
     {
     }
 
-    void FunctionMetrics::UpdateHistory()
+    void UpdateHistory(FunctionMetrics* metrics)
     {
-        std::shift_left(callHistory.begin(), callHistory.end(), 1);
-        callHistory.back() = static_cast<float>(callCount);
+        std::shift_left(metrics->callHistory.begin(), metrics->callHistory.end(), 1);
+        metrics->callHistory.back() = static_cast<float>(metrics->callCount);
 
-        std::shift_left(timeHistory.begin(), timeHistory.end(), 1);
-        timeHistory.back() = execTime / 1000000.0f;
+        std::shift_left(metrics->timeHistory.begin(), metrics->timeHistory.end(), 1);
+        metrics->timeHistory.back() = metrics->execTime / 1000000.0f;
     }
 
-    std::tuple<float, float> FunctionMetrics::GetAverages() const
+    void Reset(FunctionMetrics* metrics)
     {
-        auto callSum = std::accumulate(callHistory.begin(), callHistory.end(), 0.0f);
-        auto timeSum = std::accumulate(timeHistory.begin(), timeHistory.end(), 0.0f);
-        return { callSum / static_cast<float>(historySize),  timeSum / static_cast<float>(historySize) };
+        metrics->callCount = 0u;
+        metrics->execTime = 0.0f;
     }
 
-    void FunctionMetrics::Reset()
+    std::tuple<float, float> ComputeAverages(FunctionMetrics const* metrics)
     {
-        callCount = 0u;
-        execTime = 0.0f;
+        auto callSum = std::accumulate(metrics->callHistory.begin(), metrics->callHistory.end(), 0.0f);
+        auto timeSum = std::accumulate(metrics->timeHistory.begin(), metrics->timeHistory.end(), 0.0f);
+        const auto historySize = static_cast<float>(metrics->historySize);
+        return { callSum / historySize,  timeSum / historySize };
     }
 
     FuncId Register(const char* name, Filter filter)
@@ -63,18 +79,35 @@ namespace nc::debug::profile
     void Push(FuncId id)
     {
         internal::openProfiles.push_back(id);
-        auto& data = internal::data.at(id);
-        ++data.callCount;
-        data.timer.Start();
+        try
+        {
+            auto& data = internal::data.at(id);
+            ++data.callCount;
+            data.timer.Start();
+        }
+        catch(...)
+        {
+            std::throw_with_nested(std::runtime_error("profile::Push - invalid FuncId"));
+        }
     }
 
     void Pop()
     {
+        if(internal::openProfiles.empty())
+            throw std::runtime_error("profile::Pop - Push/Pop mismatch");
+
         auto mostRecent = internal::openProfiles.back();
         internal::openProfiles.pop_back();
-        auto& data = internal::data.at(mostRecent);
-        data.timer.Stop();
-        data.execTime += data.timer.Value();
+        try
+        {
+            auto& data = internal::data.at(mostRecent);
+            data.timer.Stop();
+            data.execTime += data.timer.Value();
+        }
+        catch(const std::exception& e)
+        {
+            std::throw_with_nested(std::runtime_error("profile::Pop - invalid FuncId"));
+        }
     }
 
     ProfileData& GetData()
