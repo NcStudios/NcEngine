@@ -1,6 +1,6 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
-#include "Profile.h"
+#include "Profiler.h"
 #include "Ecs.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "imgui/imgui.h"
@@ -42,12 +42,11 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityList"))
             {
-                auto uidScope = 0u;
                 for(auto& [handle, entity] : entities)
                 {
                     if(!filter.PassFilter(entity.Tag.c_str()))
                         continue;
-                    ImGui::PushID(++uidScope);
+                    ImGui::PushID(static_cast<unsigned>(handle));
                     if(ImGui::CollapsingHeader(entity.Tag.c_str()))
                         controls::Entity(handle);
                     ImGui::PopID();
@@ -150,7 +149,7 @@ namespace nc::ui::editor::controls
 
     void Profiler()
     {
-        using nc::debug::profile::Filter;
+        using nc::debug::profiler::Filter;
 
         static ImGuiTextFilter textFilter;
         static int filterSelection = 0u;
@@ -168,7 +167,7 @@ namespace nc::ui::editor::controls
         if(ImGui::BeginChild("Profiler##child"))
         {
             const auto filterGroup = static_cast<Filter>(filterSelection);
-            for(auto& [id, data] : nc::debug::profile::GetData())
+            for(auto& [id, data] : nc::debug::profiler::GetData())
             {
                 if(!textFilter.PassFilter(data.functionName.c_str()))
                     continue;
@@ -179,8 +178,8 @@ namespace nc::ui::editor::controls
                 ImGui::PushID(id);
                 if(ImGui::CollapsingHeader(data.functionName.c_str()))
                 {
-                    debug::profile::UpdateHistory(&data);
-                    auto [avgCalls, avgTime] = debug::profile::ComputeAverages(&data);
+                    debug::profiler::UpdateHistory(&data);
+                    auto [avgCalls, avgTime] = debug::profiler::ComputeAverages(&data);
                     ImGui::Indent();
                         ImGui::Text("   Calls: %.1f", avgCalls);
                         ImGui::SameLine();
@@ -192,7 +191,7 @@ namespace nc::ui::editor::controls
                     ImGui::Unindent();
                 }
                 ImGui::PopID();
-                debug::profile::Reset(&data);
+                debug::profiler::Reset(&data);
             }
         }
         ImGui::EndChild();

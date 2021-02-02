@@ -1,13 +1,13 @@
 #ifdef NC_EDITOR_ENABLED
 
-#include "Profile.h"
+#include "Profiler.h"
 
 #include <algorithm>
 #include <numeric>
 #include <stdexcept>
 #include <vector>
 
-namespace nc::debug::profile
+namespace nc::debug::profiler
 {
     namespace internal
     {
@@ -85,7 +85,7 @@ namespace nc::debug::profile
             ++data.callCount;
             data.timer.Start();
         }
-        catch(...)
+        catch(const std::exception& e)
         {
             std::throw_with_nested(std::runtime_error("profile::Push - invalid FuncId"));
         }

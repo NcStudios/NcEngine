@@ -1,6 +1,6 @@
 #pragma once
 
-namespace nc::debug::profile
+namespace nc::debug::profiler
 {
     enum class Filter : unsigned
     {
@@ -13,9 +13,9 @@ namespace nc::debug::profile
 #ifdef NC_EDITOR_ENABLED
 /** @todo use std::source_location when mingw catches up to gcc 11 and add optional override for
 * function names (can return same name for different funcs)*/
-#define NC_PROFILE_BEGIN(filter); static const auto NC_FUNCTION_ID = nc::debug::profile::Register(__PRETTY_FUNCTION__, filter); \
-                                  nc::debug::profile::Push(NC_FUNCTION_ID);
-#define NC_PROFILE_END(); nc::debug::profile::Pop();
+#define NC_PROFILE_BEGIN(filter); static const auto NC_FUNCTION_ID = nc::debug::profiler::Register(__PRETTY_FUNCTION__, filter); \
+                                  nc::debug::profiler::Push(NC_FUNCTION_ID);
+#define NC_PROFILE_END(); nc::debug::profiler::Pop();
 #else
 #define NC_PROFILE_BEGIN(filter);
 #define NC_PROFILE_END();
@@ -27,7 +27,7 @@ namespace nc::debug::profile
 #include <string>
 #include <unordered_map>
 
-namespace nc::debug::profile
+namespace nc::debug::profiler
 {
     struct FunctionMetrics;
 

@@ -3,7 +3,7 @@
 #include "EntityHandle.h"
 #include "engine/alloc/Pool.h"
 #include "DebugUtils.h"
-#include "Profile.h"
+#include "Profiler.h"
 
 #include <vector>
 #include <unordered_map>
@@ -69,7 +69,7 @@ template<class T>
 template<class Func>
 void ComponentSystem<T>::ForEach(Func func)
 {
-    NC_PROFILE_BEGIN(debug::profile::Filter::Engine);
+    NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
     for(auto & pool : m_poolArray)
     {
         pool.ForEach(func);

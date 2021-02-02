@@ -1,6 +1,6 @@
 #include "EngineImpl.h"
 #include "DebugUtils.h"
-#include "Profile.h"
+#include "Profiler.h"
 #include "config/Config.h"
 #include "graphics/Graphics.h"
 #include "input/Input.h"
@@ -64,7 +64,7 @@ namespace nc::engine
 
         while(isRunning)
         {
-            NC_PROFILE_BEGIN(debug::profile::Filter::Engine);
+            NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
             if(input::GetKey(input::KeyCode::R)) { m_graphics.get()->ResizeTarget(500, 500); }
             if(input::GetKey(input::KeyCode::F)) { m_graphics.get()->ToggleFullscreen(); }
 
@@ -119,14 +119,14 @@ namespace nc::engine
 
     void EngineImpl::FrameLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profile::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
         m_ecs->SendFrameUpdate(dt);
         NC_PROFILE_END();
     }
 
     void EngineImpl::FrameRender()
     {
-        NC_PROFILE_BEGIN(debug::profile::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
         m_ui->FrameBegin();
         m_graphics->FrameBegin();
 
