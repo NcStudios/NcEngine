@@ -10,7 +10,7 @@
 namespace nc::graphics { class Graphics; }
 
 #ifdef NC_EDITOR_ENABLED
-namespace nc::ui::editor { class Editor; }
+namespace nc::ui::editor::controls { void GraphicsResourcePanel(); }
 #endif
 
 namespace nc::graphics::d3dresource
@@ -20,7 +20,7 @@ namespace nc::graphics::d3dresource
     class GraphicsResourceManager
     {
         #ifdef NC_EDITOR_ENABLED
-        friend class ui::editor::Editor;
+        friend void ui::editor::controls::GraphicsResourcePanel();
         #endif
 
         public:

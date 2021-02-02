@@ -5,12 +5,23 @@
 
 #include <iostream>
 
-int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLine, int showCommand)
+void LogException(const std::exception& e)
 {
-    (void)prevInstance;
-    (void)commandLine;
-    (void)showCommand;
+    std::cerr << "Exception: " << e.what() << '\n';
+    nc::debug::Log::LogToDiagnostics("**Exception**");
+    nc::debug::Log::LogToDiagnostics(e.what());
+    try
+    {
+        std::rethrow_if_nested(e);
+    }
+    catch(const std::exception& e)
+    {
+        LogException(e);
+    }
+}
 
+int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
+{
     std::unique_ptr<nc::engine::Engine> engine = nullptr;
 
     try
@@ -18,22 +29,11 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR commandLi
         engine = std::make_unique<nc::engine::Engine>(instance);
         engine->Start(std::make_unique<project::MenuScene>());
     }
-    catch(const std::runtime_error& e)
-    {
-        std::cerr << "std::runtime_error:\n" << e.what() << '\n';
-        nc::debug::Log::LogToDiagnostics("std::runtime_error:");
-        nc::debug::Log::LogToDiagnostics(e.what());
-        if(engine)
-            engine->Shutdown(true);
-    }
     catch(std::exception& e)
     {
-        std::cerr << "std::exception: \n" << e.what() << '\n';
-        nc::debug::Log::LogToDiagnostics("std::exception:");
-        nc::debug::Log::LogToDiagnostics(e.what());
+        LogException(e);
         if(engine)
             engine->Shutdown(true);
-
     }
     catch(...)
     {

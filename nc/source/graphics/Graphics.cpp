@@ -40,12 +40,12 @@ Graphics::~Graphics()
     m_device->Release();
 }
 
-DirectX::XMMATRIX Graphics::GetViewMatrix() const noexcept
+DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
 {
     return m_viewMatrix;
 }
 
-DirectX::XMMATRIX Graphics::GetProjectionMatrix() const noexcept
+DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
 {
     return m_projectionMatrix;
 }

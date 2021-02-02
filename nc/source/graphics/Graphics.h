@@ -25,8 +25,8 @@ namespace nc
                 Graphics& operator=(const Graphics&) = delete;
                 Graphics& operator=(Graphics&&) = delete;
 
-                DirectX::XMMATRIX GetViewMatrix() const noexcept;
-                DirectX::XMMATRIX GetProjectionMatrix() const noexcept;
+                DirectX::FXMMATRIX GetViewMatrix() const noexcept;
+                DirectX::FXMMATRIX GetProjectionMatrix() const noexcept;
 
                 void SetViewMatrix(DirectX::FXMMATRIX cam) noexcept;
                 void SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept;

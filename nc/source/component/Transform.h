@@ -25,7 +25,7 @@ namespace nc
             Quaternion GetRotation() const;
             Vector3 GetScale() const;
 
-            DirectX::XMMATRIX GetTransformationMatrix() const;
+            DirectX::FXMMATRIX GetTransformationMatrix() const;
             DirectX::XMMATRIX GetTransformationMatrixEx(Vector3 additionalScale) const;
             DirectX::XMMATRIX GetViewMatrix() const;
 

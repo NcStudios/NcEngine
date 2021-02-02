@@ -88,7 +88,7 @@ namespace nc
     }
     #endif
     
-    DirectX::XMMATRIX Transform::GetTransformationMatrix() const
+    DirectX::FXMMATRIX Transform::GetTransformationMatrix() const
     {
         return m_matrix;
     }

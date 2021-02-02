@@ -30,8 +30,8 @@ namespace nc::graphics
             void Submit(class FrameManager& frame) const noexcept;
             void Bind() const;
 
-            void UpdateTransformationMatrix(DirectX::XMMATRIX matrix) noexcept;
-            DirectX::XMMATRIX GetTransformXM() const noexcept;
+            void UpdateTransformationMatrix(DirectX::FXMMATRIX matrix) noexcept;
+            DirectX::FXMMATRIX GetTransformXM() const noexcept;
             Material* GetMaterial() noexcept;
 
         private:
