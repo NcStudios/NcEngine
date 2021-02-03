@@ -18,10 +18,10 @@ const char separator =
 namespace
 {
     constexpr auto AssimpFlags = aiProcess_Triangulate |
-                                  aiProcess_JoinIdenticalVertices |
-                                  aiProcess_ConvertToLeftHanded |
-                                  aiProcess_GenNormals |
-                                  aiProcess_CalcTangentSpace;
+                                 aiProcess_JoinIdenticalVertices |
+                                 aiProcess_ConvertToLeftHanded |
+                                 aiProcess_GenNormals |
+                                 aiProcess_CalcTangentSpace;
 
     constexpr auto DefaultPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
@@ -31,46 +31,57 @@ namespace
         const std::string fileExtension = path.substr(periodPosition+1);
 
         if (fileExtension.compare("fbx") == 0 || fileExtension.compare("FBX") == 0)
-        {
             return true;
-        }
         if (fileExtension.compare("obj") == 0 || fileExtension.compare("OBJ") == 0)
-        {
             return true;
-        }
         return false;
     }
 
     void ParseMesh(std::string meshPath, std::vector<nc::graphics::Vertex>& vBuffOut, std::vector<uint16_t>& iBuffOut)
     {
         if (!HasValidMeshExtension(meshPath))
-        {
             throw std::runtime_error("Invalid mesh file extension");
-        }
 
         Assimp::Importer imp;
         const auto pModel = imp.ReadFile(meshPath, AssimpFlags);
         const auto pMesh = pModel->mMeshes[0];
 
         // Load vertex and normal data
+        vBuffOut.clear();
         vBuffOut.reserve(pMesh -> mNumVertices);
-        for (size_t i = 0; i < pMesh->mNumVertices; i++)
+        for (size_t i = 0u; i < pMesh->mNumVertices; ++i)
         {
-            vBuffOut.push_back( {
-                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mVertices[i]),
-                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mNormals[i]),
-                *reinterpret_cast<DirectX::XMFLOAT2*>(&pMesh->mTextureCoords[0][i]),
-                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mTangents[i]),
-                *reinterpret_cast<DirectX::XMFLOAT3*>(&pMesh->mBitangents[i])
-            } );
+            /** @todo There is a bit of a hidden dependency here. Neither Assimp nor the file formats
+             *  we use require everything we need to be present. Throwing seems fine for the time being,
+             *  but there is room for future improvement here. */
+            IF_THROW
+            (
+                !pMesh->mNormals || !pMesh->mTextureCoords || !pMesh->pTangents || !pMesh->mBitangents,
+                "ParseMesh - Mesh file does not contain all required data to populate Vertex"
+            );
+            const auto& [vX, vY, vZ] = pMesh->mVertices[i];
+            const auto& [normX, normY, normZ] = pMesh->mNormals[i];
+            const auto& [texX, texY, unused] = pMesh->mTextureCoords[0][i];
+            const auto& [tanX, tanY, tanZ] = pMesh->mTangents[i];
+            const auto& [bitX, bitY, bitZ] = pMesh->mBitangents[i];
+
+            vBuffOut.emplace_back
+            (
+                nc::Vector3{vX, vY, vZ},
+                nc::Vector3{normX, normY, normZ},
+                nc::Vector2{texX, texY},
+                nc::Vector3{tanX, tanY, tanZ},
+                nc::Vector3{bitX, bitY, bitZ}
+            );
         }
 
         // Load index data
+        iBuffOut.clear();
         iBuffOut.reserve(pMesh -> mNumFaces * 3); // Multiply by 3 because we told assimp to triangulate (aiProcess_Triangulate). Each face has 3 indices
-        for (size_t i = 0; i < pMesh->mNumFaces; i++)
+        for (size_t i = 0u; i < pMesh->mNumFaces; ++i)
         {
             const auto& face = pMesh->mFaces[i];
-            assert(face.mNumIndices == 3);
+            IF_THROW(face.mNumIndices != 3, "ParseMesh - Mesh indices are invalid");
             iBuffOut.push_back(face.mIndices[0]);
             iBuffOut.push_back(face.mIndices[1]);
             iBuffOut.push_back(face.mIndices[2]);

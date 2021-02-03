@@ -36,8 +36,12 @@ namespace nc::math
         return val;
     }
 
-    template<std::floating_point T>
-    constexpr T Lerp(T a, T b, T factor) noexcept { return a + (b - a) * factor; }
+    template<class T, std::floating_point U>
+        requires requires (T t, U u) { t + t; t - t; t * u; }
+    constexpr T Lerp(T from, T to, U factor) noexcept
+    {
+        return from + (to - from) * Clamp(factor, 0.0f, 1.0f);
+    }
 
     template<std::floating_point T>
     constexpr T WrapAngle(T theta) noexcept

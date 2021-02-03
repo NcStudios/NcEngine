@@ -2,8 +2,6 @@
 
 #include "Vector3.h"
 
-namespace DirectX { struct XMFLOAT4; }
-
 namespace nc
 {
     struct Quaternion
@@ -11,8 +9,6 @@ namespace nc
         float x, y, z, w;
 
         Quaternion(float X, float Y, float Z, float W);
-        Quaternion(const DirectX::XMFLOAT4& xmf4);
-        Quaternion(DirectX::XMFLOAT4&& xmf4);
 
         Vector3 ToEulerAngles() const noexcept;
         void ToAxisAngle(Vector3* axisOut, float* angleOut) const noexcept;

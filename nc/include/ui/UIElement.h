@@ -2,7 +2,7 @@
 
 #include "UIPosition.h"
 #include "Window.h"
-#include "imgui/imgui.h"
+//#include "imgui/imgui.h"
 
 namespace nc::ui
 {
@@ -21,19 +21,19 @@ namespace nc::ui
     class UIFixedElement : public UIElement, public window::IOnResizeReceiver
     {
         public:
-            UIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions);
+            UIFixedElement(bool startOpen, UIPosition position, Vector2 dimensions);
             ~UIFixedElement();
 
-            virtual void OnResize(nc::Vector2 dimensions);
+            virtual void OnResize(Vector2 dimensions);
         
         protected:
             void PositionElement();
 
         private:
             UIPosition m_position;
-            ImVec2 m_screenDimensions;
-            ImVec2 m_elementDimensions;
-            ImVec2 m_topLeftPosition;
+            Vector2 m_screenDimensions;
+            Vector2 m_elementDimensions;
+            Vector2 m_topLeftPosition;
 
             void CalculateTopLeftPosition();
     };

@@ -1,6 +1,6 @@
 #pragma once
 
-struct ImVec2;
+#include "math/Vector2.h"
 
 namespace nc::ui
 {
@@ -19,6 +19,6 @@ namespace nc::ui
 
     namespace utils
     {
-        ImVec2 GetTopLeftCoords(UIPosition position, const ImVec2& screenDimensions, const ImVec2& elementDimensions);
+        Vector2 GetTopLeftCoords(UIPosition position, const Vector2& screenDimensions, const Vector2& elementDimensions);
     }
 }

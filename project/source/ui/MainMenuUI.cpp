@@ -18,7 +18,7 @@ namespace
     const auto BUTTON_SIZE = ImVec2{200, 64};
     const auto SMALL_BUTTON_SIZE = ImVec2{96, 20};
     const auto LIST_BOX_SIZE = ImVec2{200, 64};
-    const auto UI_SIZE = ImVec2{218, 450};
+    const auto UI_SIZE = nc::Vector2{218, 450};
     const auto SERVER_PATH = std::string{"project/config/servers.ini"};
 
     void MapKeyValue(std::string key, std::string value, std::vector<project::ui::ServerSelectable>& out)

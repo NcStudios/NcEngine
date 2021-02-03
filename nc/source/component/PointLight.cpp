@@ -13,16 +13,16 @@ namespace nc
         : ComponentBase(handle),
           m_transform{ GetComponent<Transform>(handle) }
     {
-        PixelConstBufData.pos              = {0,0,0};
-        PixelConstBufData.ambient          = {0.65f, 0.65f, 0.65f};
-        PixelConstBufData.diffuseColor     = {1.0f, 1.0f, 1.0f};
+        PixelConstBufData.pos              = Vector3::Zero();
+        PixelConstBufData.ambient          = Vector3::Splat(0.65f);
+        PixelConstBufData.diffuseColor     = Vector3::Splat(1.0f);
         PixelConstBufData.diffuseIntensity = 0.9f;
         PixelConstBufData.attConst         = 2.61f;
         PixelConstBufData.attLin           = 0.1819f;
         PixelConstBufData.attQuad          = 0.0000001f;
     }
 
-    void PointLight::Set(DirectX::XMFLOAT3 pos, float radius, DirectX::XMFLOAT3 ambient, DirectX::XMFLOAT3 diffuseColor, float diffuseIntensity, float attConst, float attLin, float attQuad)
+    void PointLight::Set(Vector3 pos, float radius, Vector3 ambient, Vector3 diffuseColor, float diffuseIntensity, float attConst, float attLin, float attQuad)
     {
         (void)radius; //currently unused
         PixelConstBufData.pos              = pos;
@@ -61,9 +61,9 @@ namespace nc
     {
         IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
         
-        PixelConstBufData.pos = m_transform->GetPosition().ToXMFloat3();
-        const auto pos = DirectX::XMLoadFloat3(&PixelConstBufData.pos);
-        DirectX::XMStoreFloat3(&ProjectedPos, DirectX::XMVector3Transform(pos, view));
+        PixelConstBufData.pos = m_transform->GetPosition();
+        const auto pos_v = DirectX::XMLoadVector3(&PixelConstBufData.pos);
+        DirectX::XMStoreVector3(&ProjectedPos, DirectX::XMVector3Transform(pos_v, view));
     }
 
 }
