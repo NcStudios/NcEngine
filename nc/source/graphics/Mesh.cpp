@@ -56,7 +56,7 @@ namespace
              *  but there is room for future improvement here. */
             IF_THROW
             (
-                !pMesh->mNormals || !pMesh->mTextureCoords || !pMesh->pTangents || !pMesh->mBitangents,
+                !pMesh->mNormals || !pMesh->mTextureCoords || !pMesh->mTangents || !pMesh->mBitangents,
                 "ParseMesh - Mesh file does not contain all required data to populate Vertex"
             );
             const auto& [vX, vY, vZ] = pMesh->mVertices[i];
