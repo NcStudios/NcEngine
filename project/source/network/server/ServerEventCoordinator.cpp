@@ -1,6 +1,6 @@
 #include "ServerEventCoordinator.h"
 #include "ServerConnectionManager.h"
-#include "nc/source/net/PacketBuffer.h"
+#include "net/PacketBuffer.h"
 #include "../Packet.h"
 #include "enet/enet.h"
 

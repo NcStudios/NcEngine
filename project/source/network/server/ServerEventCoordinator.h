@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc/source/net/NetworkDetails.h"
+#include "net/NetworkDetails.h"
 
 #include <functional>
 #include <unordered_map>

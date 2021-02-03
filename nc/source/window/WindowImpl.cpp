@@ -1,9 +1,9 @@
 #include "WindowImpl.h"
-#include "IOnResizeReceiver.h"
-#include "Engine.h"
-#include "Engine.h"
+#include "Window.h"
+#include "config/Config.h"
+#include "Core.h"
 #include "DebugUtils.h"
-#include "input/Input.h"
+#include "input/InputInternal.h"
 #include "math/Math.h"
 
 #include <algorithm>
@@ -12,21 +12,39 @@ namespace
 {
     auto WND_CLASS_STYLE_FLAGS = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     auto WND_STYLE_FLAGS = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+    nc::window::WindowImpl* g_instance = nullptr;
 }
 
 namespace nc::window
 {
-    WindowImpl* WindowImpl::m_instance = nullptr;
+    /* Api Function Implementation */
+    Vector2 GetDimensions()
+    {
+        IF_THROW(!g_instance, "window::GetDimensions - g_instance is not set");
+        return g_instance->GetDimensions();
+    }
 
-    WindowImpl::WindowImpl(HINSTANCE instance,
-                           const config::Config& config,
-                           std::function<void(bool)> engineShutdownFunc)
+    void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
+    {
+        IF_THROW(!g_instance, "window::RegisterOnResizeReceiver - g_instance is not set");
+        g_instance->RegisterOnResizeReceiver(receiver);
+    }
+
+    void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver)
+    {
+        IF_THROW(!g_instance, "window::UnregisterOnResizeReceiver - g_instance is not set");
+        g_instance->UnregisterOnResizeReceiver(receiver);
+    }
+
+    /* WindowImpl */
+    WindowImpl::WindowImpl(HINSTANCE instance)
         : m_onResizeReceivers{}
     {
-        WindowImpl::m_instance = this;
-        EngineShutdownCallback = engineShutdownFunc;
+        g_instance = this;
         GraphicsOnResizeCallback = nullptr;
         UIWndMessageCallback = nullptr;
+
+        const auto& config = config::Get();
 
         m_wndClass = {};
         m_wndClass.style = WND_CLASS_STYLE_FLAGS;
@@ -44,11 +62,11 @@ namespace nc::window
 
         if(config.graphics.useNativeResolution)
         {
-            m_dimensions = { (float)nativeWidth, (float)nativeHeight };
+            m_dimensions = Vector2{ (float)nativeWidth, (float)nativeHeight };
         }
         else
         {
-            m_dimensions = { (float)config.graphics.screenWidth, (float)config.graphics.screenHeight };
+            m_dimensions = Vector2{ (float)config.graphics.screenWidth, (float)config.graphics.screenHeight };
         }
 
         auto left = math::Clamp(((int)nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
@@ -142,8 +160,8 @@ namespace nc::window
             return;
         }
 
-        m_dimensions = {width, height};
-        const auto& config = engine::Engine::GetConfig();
+        m_dimensions = Vector2{width, height};
+        const auto& config = config::Get();
         GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, config.graphics.nearClip, config.graphics.farClip);
         for(auto receiver : m_onResizeReceivers)
         {
@@ -153,8 +171,8 @@ namespace nc::window
 
     LRESULT CALLBACK WindowImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        if(WindowImpl::m_instance->UIWndMessageCallback &&
-           WindowImpl::m_instance->UIWndMessageCallback(hwnd, message, wParam, lParam))
+        if(g_instance->UIWndMessageCallback &&
+           g_instance->UIWndMessageCallback(hwnd, message, wParam, lParam))
         {
             return true;
         }
@@ -163,12 +181,12 @@ namespace nc::window
         {
             case WM_SIZE:
             {
-                WindowImpl::m_instance->OnResize(LOWORD(lParam), HIWORD(lParam));
+                g_instance->OnResize(LOWORD(lParam), HIWORD(lParam));
                 break;
             }
             case WM_CLOSE:
             {
-                WindowImpl::m_instance->EngineShutdownCallback(false);
+                core::Quit(false);
                 break;
             }
             case WM_DESTROY:

@@ -1,9 +1,7 @@
-#include "Quaternion.h"
+#include "math/Quaternion.h"
 #include "directx/math/DirectXMath.h"
 #include "DebugUtils.h"
 
-
-#include "Vector4.h"
 
 namespace nc
 {

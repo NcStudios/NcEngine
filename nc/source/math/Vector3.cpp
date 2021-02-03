@@ -1,4 +1,4 @@
-#include "Vector3.h"
+#include "math/Vector3.h"
 #include "directx/math/DirectXMath.h"
 
 namespace nc

@@ -3,16 +3,16 @@
 
 namespace nc::net
 {
-    std::function<void(const PacketBuffer&)> Network::ServerCommandCallback = nullptr;
+    std::function<void(const PacketBuffer&)> g_SendHandler = nullptr;
 
-    void Network::BindServerCommandCallback(std::function<void(const PacketBuffer&)> callback)
+    void BindServerCommandSendHandler(std::function<void(const PacketBuffer&)> callback)
     {
-        Network::ServerCommandCallback = callback;
+        g_SendHandler = callback;
     }
 
-    void Network::ServerCommand(const PacketBuffer& buffer)
+    void ServerCommand(const PacketBuffer& buffer)
     {
-        IF_THROW(!Network::ServerCommandCallback, "Network::ServerCommandCallback is not set");
-        Network::ServerCommandCallback(buffer);
+        IF_THROW(!g_SendHandler, "net::ServerCommandHandler is not set");
+        g_SendHandler(buffer);
     }
 }

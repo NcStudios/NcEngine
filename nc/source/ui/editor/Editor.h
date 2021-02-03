@@ -1,7 +1,7 @@
 #ifdef NC_EDITOR_ENABLED
 #pragma once
 
-#include "ecs/Entity.h"
+#include "Entity.h"
 #include "ecs/EntityMap.h"
 
 namespace nc 

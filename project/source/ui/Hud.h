@@ -1,7 +1,7 @@
 #pragma once
 
-#include "nc/source/ui/IUI.h"
-#include "nc/source/window/IOnResizeReceiver.h"
+#include "ui/IUI.h"
+#include "Window.h"
 #include "config/ProjectConfig.h"
 #include "LogUIElement.h"
 #include "TurnPhaseUIElement.h"

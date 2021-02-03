@@ -1,5 +1,5 @@
 #include "ClickHandler.h"
-#include "input/Input.h"
+#include "Input.h"
 #include "Physics.h"
 
 using namespace nc;
@@ -17,7 +17,7 @@ namespace project
 
         if(nc::input::GetKeyDown(input::KeyCode::LeftButton))
         {
-            auto hit = physics::Physics::RaycastToClickables(physics::Layer::GamePiece);
+            auto hit = physics::RaycastToClickables(physics::Layer::GamePiece);
             if(hit)
             {
                 hit->OnClick();

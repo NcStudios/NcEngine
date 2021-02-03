@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EntityHandle.h"
-#include "nc/source/net/NetworkDetails.h"
+#include "net/NetworkDetails.h"
 
 #include <vector>
 

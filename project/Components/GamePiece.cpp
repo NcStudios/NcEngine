@@ -10,9 +10,9 @@ namespace project
         : Component(handle),
           physics::IClickable(transform, 40.0f),
           m_isRegisteredAsClickable{ true },
-          m_entityTag{Ecs::GetEntity(handle)->Tag}
+          m_entityTag{GetEntity(handle)->Tag}
     {
-        physics::Physics::RegisterClickable(this);
+        physics::RegisterClickable(this);
         layers |= physics::Layer::GamePiece;
     }
 
@@ -20,7 +20,7 @@ namespace project
     {
         if(m_isRegisteredAsClickable)
         {
-            physics::Physics::UnregisterClickable(this);
+            physics::UnregisterClickable(this);
         }
     }
 

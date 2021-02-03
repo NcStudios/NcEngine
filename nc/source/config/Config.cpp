@@ -1,9 +1,11 @@
-#include "Config.h"
-#include "ConfigReader.h"
+#include "config/Config.h"
+#include "config/ConfigReader.h"
+#include "ConfigInternal.h"
 #include "DebugUtils.h"
 
 #include <fstream>
 #include <limits>
+#include <memory>
 #include <type_traits>
 
 namespace
@@ -70,66 +72,72 @@ namespace
         }
         else
         {
-            throw std::runtime_error("ConfigReader::map - unknown key");
+            throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
         }
     };
 } //end anonymous namespace
 
 namespace nc::config
 {
-Config::Config()
-{
-    nc::config::Read(CONFIG_PATH, MapKeyValue, *this);
-    
-    if(!Validate())
-    {
-        throw std::runtime_error("Failed to validate config");
-    }
-}
+    std::unique_ptr<Config> g_instance = nullptr;
 
-void Config::Save() const
-{
-    if (!Validate())
+    /* Api function implementation */
+    const Config& Get()
     {
-        throw std::runtime_error("Saving config - failed to validate config");
+        IF_THROW(!g_instance, "config::Get - No config loaded");
+        return *g_instance;
     }
 
-    std::ofstream outFile;
-    outFile.open(CONFIG_PATH);
-    if(!outFile.is_open())
+    /* Internal function implementation */
+    void Load()
     {
-        throw std::runtime_error("Saving config - failed to open file");
+        g_instance = std::make_unique<Config>();
+        nc::config::Read(CONFIG_PATH, MapKeyValue, *g_instance);
+        if(!Validate())
+            throw std::runtime_error("config::Load - Failed to validate config");
     }
 
-    outFile << "[project]\n"
-            << PROJECT_NAME_KEY << INI_KEY_VALUE_DELIM << project.projectName << '\n'
-            << LOG_FILE_PATH_KEY << INI_KEY_VALUE_DELIM << project.logFilePath << '\n'
-            << "[physics]\n"
-            << FIXED_UPDATE_INTERVAL_KEY << INI_KEY_VALUE_DELIM << physics.fixedUpdateInterval << '\n'
-            << "[graphics]\n"
-            << USE_NATIVE_RESOLUTION_KEY << INI_KEY_VALUE_DELIM << graphics.useNativeResolution << '\n'
-            << LAUNCH_IN_FULLSCREEN_KEY << INI_KEY_VALUE_DELIM << graphics.launchInFullscreen << '\n'
-            << SCREEN_WIDTH_KEY << INI_KEY_VALUE_DELIM << graphics.screenWidth << '\n'
-            << SCREEN_HEIGHT_KEY << INI_KEY_VALUE_DELIM << graphics.screenHeight << '\n'
-            << TARGET_FPS_KEY << INI_KEY_VALUE_DELIM << graphics.targetFPS << '\n'
-            << NEAR_CLIP_KEY << INI_KEY_VALUE_DELIM << graphics.nearClip << '\n'
-            << FAR_CLIP_KEY << INI_KEY_VALUE_DELIM << graphics.farClip << '\n'
-            << SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << graphics.shadersPath;
+    void Save()
+    {
+        IF_THROW(!g_instance, "config::Save - No config loaded");
+        if (!Validate())
+            throw std::runtime_error("config::Save - failed to validate config");
 
-    outFile.close();
-}
+        std::ofstream outFile;
+        outFile.open(CONFIG_PATH);
+        if(!outFile.is_open())
+            throw std::runtime_error("config::Save - failed to open file");
 
-bool Config::Validate() const
-{
-    return { (project.projectName != "") &&
-             (project.logFilePath != "") &&
-             (physics.fixedUpdateInterval > 0.0f) &&
-             (graphics.screenWidth != 0) &&
-             (graphics.screenHeight != 0) &&
-             (graphics.targetFPS != 0) &&
-             (graphics.frameUpdateInterval > 0.0f) &&
-             (graphics.nearClip > 0.0f) &&
-             (graphics.farClip > 0.0f) &&
-             (graphics.shadersPath != "")};
-}
+        outFile << "[project]\n"
+                << PROJECT_NAME_KEY << INI_KEY_VALUE_DELIM << g_instance->project.projectName << '\n'
+                << LOG_FILE_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->project.logFilePath << '\n'
+                << "[physics]\n"
+                << FIXED_UPDATE_INTERVAL_KEY << INI_KEY_VALUE_DELIM << g_instance->physics.fixedUpdateInterval << '\n'
+                << "[graphics]\n"
+                << USE_NATIVE_RESOLUTION_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.useNativeResolution << '\n'
+                << LAUNCH_IN_FULLSCREEN_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.launchInFullscreen << '\n'
+                << SCREEN_WIDTH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.screenWidth << '\n'
+                << SCREEN_HEIGHT_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.screenHeight << '\n'
+                << TARGET_FPS_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.targetFPS << '\n'
+                << NEAR_CLIP_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.nearClip << '\n'
+                << FAR_CLIP_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.farClip << '\n'
+                << SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.shadersPath;
+
+        outFile.close();
+    }
+
+    bool Validate()
+    {
+        IF_THROW(!g_instance, "config::Validate - No config loaded");
+        return { (g_instance->project.projectName != "") &&
+                 (g_instance->project.logFilePath != "") &&
+                 (g_instance->physics.fixedUpdateInterval > 0.0f) &&
+                 (g_instance->graphics.screenWidth != 0) &&
+                 (g_instance->graphics.screenHeight != 0) &&
+                 (g_instance->graphics.targetFPS != 0) &&
+                 (g_instance->graphics.frameUpdateInterval > 0.0f) &&
+                 (g_instance->graphics.nearClip > 0.0f) &&
+                 (g_instance->graphics.farClip > 0.0f) &&
+                 (g_instance->graphics.shadersPath != "")};
+    }
 } // end namespace nc::config 

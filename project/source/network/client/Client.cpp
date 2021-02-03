@@ -20,7 +20,7 @@ namespace project::network
         {
             throw std::runtime_error("Failed to create client");
         }
-        nc::net::Network::BindServerCommandCallback(std::bind(SendToServer, this, std::placeholders::_1));
+        nc::net::BindServerCommandSendHandler(std::bind(SendToServer, this, std::placeholders::_1));
     }
 
     Client::~Client()

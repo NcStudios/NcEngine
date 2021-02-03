@@ -1,4 +1,4 @@
-#include "ResourceGroup.h"
+#include "graphics/ResourceGroup.h"
 #include "d3dresource/GraphicsResource.h"
 
 namespace nc::graphics

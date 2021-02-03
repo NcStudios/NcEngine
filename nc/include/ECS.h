@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/Entity.h"
+#include "Entity.h"
 #include "component/Collider.h"
 #include "component/PointLight.h"
 #include "component/NetworkDispatcher.h"
@@ -13,60 +13,51 @@
 
 namespace nc
 {
-    namespace ecs { class EcsImpl; }
+    EntityHandle CreateEntity();
+    EntityHandle CreateEntity(std::string tag);
+    EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag); // scale must be nonzero
+    bool DestroyEntity(EntityHandle handle);
+    [[nodiscard]] Entity* GetEntity(EntityHandle handle);
+    [[nodiscard]] Entity* GetEntity(const std::string& tag);
 
-    class Ecs
-    {
-        public:
-            static void RegisterImpl(ecs::EcsImpl* impl);
+    template<std::derived_from<ComponentBase> T, class ...Args>
+    T* AddComponent(EntityHandle handle, Args ... args);
+    
+    template<std::derived_from<ComponentBase> T>
+    bool RemoveComponent(EntityHandle handle);
+    
+    template<std::derived_from<ComponentBase> T>
+    [[nodiscard]] T* GetComponent(EntityHandle handle);
+    
+    template<std::derived_from<ComponentBase> T>
+    [[nodiscard]] bool HasComponent(EntityHandle handle);
 
-            static EntityHandle CreateEntity();
-            static EntityHandle CreateEntity(std::string tag);
-            static EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag);
-            static bool DestroyEntity(EntityHandle handle);
-            [[nodiscard]] static Entity* GetEntity(EntityHandle handle);
-            [[nodiscard]] static Entity* GetEntity(std::string tag);
+    /** Specializations for engine components */
+    template<> PointLight* AddComponent<PointLight>(EntityHandle handle);
+    template<> PointLight* GetComponent<PointLight>(EntityHandle handle);
+    template<> bool HasComponent<PointLight>(EntityHandle handle);
+    template<> bool RemoveComponent<PointLight>(EntityHandle handle);
 
-            template<std::derived_from<ComponentBase> T, class ...Args>
-            static T* AddComponent(EntityHandle handle, Args ... args);
-            
-            template<std::derived_from<ComponentBase> T>
-            static bool RemoveComponent(EntityHandle handle);
-            
-            template<std::derived_from<ComponentBase> T>
-            [[nodiscard]] static T* GetComponent(EntityHandle handle);
-            
-            template<std::derived_from<ComponentBase> T>
-            [[nodiscard]] static bool HasComponent(EntityHandle handle);
+    template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
+    template<> Renderer* GetComponent<Renderer>(EntityHandle handle);
+    template<> bool HasComponent<Renderer>(EntityHandle handle);
+    template<> bool RemoveComponent<Renderer>(EntityHandle handle);
 
-        private:
-            static ecs::EcsImpl* m_impl;
-    };
+    template<> NetworkDispatcher* AddComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> NetworkDispatcher* GetComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> bool HasComponent<NetworkDispatcher>(EntityHandle handle);
+    template<> bool RemoveComponent<NetworkDispatcher>(EntityHandle handle);
 
-    template<> PointLight* Ecs::AddComponent<PointLight>(EntityHandle handle);
-    template<> PointLight* Ecs::GetComponent<PointLight>(EntityHandle handle);
-    template<> bool Ecs::HasComponent<PointLight>(EntityHandle handle);
-    template<> bool Ecs::RemoveComponent<PointLight>(EntityHandle handle);
+    template<> Transform* GetComponent<Transform>(EntityHandle handle);
 
-    template<> Renderer* Ecs::AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
-    template<> Renderer* Ecs::GetComponent<Renderer>(EntityHandle handle);
-    template<> bool Ecs::HasComponent<Renderer>(EntityHandle handle);
-    template<> bool Ecs::RemoveComponent<Renderer>(EntityHandle handle);
+    template<> Collider* AddComponent<Collider>(EntityHandle handle, Vector3 scale);
+    template<> Collider* GetComponent<Collider>(EntityHandle handle);
+    template<> bool HasComponent<Collider>(EntityHandle handle);
+    template<> bool RemoveComponent<Collider>(EntityHandle handle);
 
-    template<> NetworkDispatcher* Ecs::AddComponent<NetworkDispatcher>(EntityHandle handle);
-    template<> NetworkDispatcher* Ecs::GetComponent<NetworkDispatcher>(EntityHandle handle);
-    template<> bool Ecs::HasComponent<NetworkDispatcher>(EntityHandle handle);
-    template<> bool Ecs::RemoveComponent<NetworkDispatcher>(EntityHandle handle);
-
-    template<> Transform* Ecs::GetComponent<Transform>(EntityHandle handle);
-
-    template<> Collider* Ecs::AddComponent<Collider>(EntityHandle handle, Vector3 scale);
-    template<> Collider* Ecs::GetComponent<Collider>(EntityHandle handle);
-    template<> bool Ecs::HasComponent<Collider>(EntityHandle handle);
-    template<> bool Ecs::RemoveComponent<Collider>(EntityHandle handle);
-
+    /** Template definitions for custom componenets */
     template<std::derived_from<ComponentBase> T, class ... Args>
-    T * Ecs::AddComponent(const EntityHandle handle, Args ... args)
+    T * AddComponent(const EntityHandle handle, Args ... args)
     {
         auto ptr = GetEntity(handle);
         IF_THROW(ptr == nullptr, "Bad handle");
@@ -74,7 +65,7 @@ namespace nc
     }
 
     template<std::derived_from<ComponentBase> T>
-    bool Ecs::RemoveComponent(const EntityHandle handle)
+    bool RemoveComponent(const EntityHandle handle)
     {
         auto ptr = GetEntity(handle);
         IF_THROW(ptr == nullptr, "Bad handle");
@@ -82,7 +73,7 @@ namespace nc
     }
 
     template<std::derived_from<ComponentBase> T>
-    T * Ecs::GetComponent(const EntityHandle handle)
+    T * GetComponent(const EntityHandle handle)
     {
         auto ptr = GetEntity(handle);
         IF_THROW(ptr == nullptr, "Bad handle");
@@ -90,10 +81,17 @@ namespace nc
     }
 
     template<std::derived_from<ComponentBase> T>
-    bool Ecs::HasComponent(const EntityHandle handle)
+    bool HasComponent(const EntityHandle handle)
     {
         auto ptr = GetEntity(handle);
         IF_THROW(ptr == nullptr, "Bad handle");
         return ptr->HasUserComponent<T>();
+    }
+
+    /** Internal use */
+    namespace ecs { class EntityComponentSystem; }
+    namespace internal
+    {
+        void RegisterEcs(ecs::EntityComponentSystem* impl);
     }
 } // end namespace nc

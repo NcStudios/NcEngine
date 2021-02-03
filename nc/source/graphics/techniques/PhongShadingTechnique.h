@@ -1,8 +1,7 @@
 #pragma once
 
 #include "graphics/techniques/Technique.h"
-#include "graphics/techniques/TechniqueType.h"
-#include "graphics/materials/MaterialProperties.h"
+#include "graphics/MaterialProperties.h"
 
 #include <string>
 #include <vector>

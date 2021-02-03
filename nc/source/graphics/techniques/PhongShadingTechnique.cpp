@@ -1,11 +1,11 @@
 #include "PhongShadingTechnique.h"
-#include "TechniqueType.h"
-#include "graphics/materials/MaterialProperties.h"
+#include "graphics/TechniqueType.h"
+#include "graphics/MaterialProperties.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/d3dresource/ShaderResources.h"
 #include "graphics/d3dresource/MeshResources.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
-#include "Engine.h"
+#include "config/Config.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -80,7 +80,7 @@ namespace nc::graphics
 
     size_t PhongShadingTechnique::GetUID(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties) noexcept
     {
-        auto hash = std::to_string((uint8_t)TechniqueType::PhongShadingTechnique);
+        auto hash = std::to_string((uint8_t)TechniqueType::PhongShading);
         for (const auto& texturePathRef : texturePaths) 
         {
             hash += texturePathRef;
@@ -104,7 +104,7 @@ namespace nc::graphics
         PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Solid));
 
         // Add vertex shader
-        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
+        auto defaultShaderPath = nc::config::Get().graphics.shadersPath;
         auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "phongvertexshader.cso");
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         PhongShadingTechnique::m_commonResources.push_back(std::move(pvs));

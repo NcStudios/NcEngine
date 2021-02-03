@@ -1,25 +1,15 @@
 #pragma once
 
-#include "physics/LayerMask.h"
 #include "physics/IClickable.h"
-
-#include <functional>
-
-namespace nc::engine { class ApiBinder; }
 
 namespace nc::physics
 {
-    class Physics
-    {
-        public:
-            static void RegisterClickable(IClickable* clickable);
-            static void UnregisterClickable(IClickable* clickable);
-            [[nodiscard]] static IClickable* RaycastToClickables(LayerMask mask = LAYER_MASK_ALL);
+    /** Raycast from the main camera to mouse position against IClickables in the
+     *  layers specified by mask. Returns the first hit or nullptr on failure. */
+    [[nodiscard]] IClickable* RaycastToClickables(LayerMask mask = LAYER_MASK_ALL);
 
-        private:
-            friend nc::engine::ApiBinder;
-            static std::function<void(IClickable*)> RegisterClickable_;
-            static std::function<void(IClickable*)> UnregisterClickable_;
-            static std::function<IClickable*(LayerMask)> RaycastToClickables_;
-    };
+    /** Include objects in RaycastToClickables checks. Objects must be unregistered
+     *  before they are destroyed. */
+    void RegisterClickable(IClickable* clickable);
+    void UnregisterClickable(IClickable* clickable);
 }
