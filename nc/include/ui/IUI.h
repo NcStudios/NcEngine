@@ -26,7 +26,7 @@ namespace nc::ui
     class UIFixed : public IUI, public UIFixedElement
     {
         public:
-            UIFixed(UIPosition position, ImVec2 dimensions)
+            UIFixed(UIPosition position, Vector2 dimensions)
                 : UIFixedElement(true, position, dimensions)
             {
             }

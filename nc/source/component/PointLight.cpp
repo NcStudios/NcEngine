@@ -11,27 +11,15 @@ namespace nc
 {
     PointLight::PointLight(EntityHandle handle) noexcept
         : ComponentBase(handle),
+          PixelConstBufData{},
+          ProjectedPos{},
           m_transform{ GetComponent<Transform>(handle) }
     {
-        PixelConstBufData.pos              = {0,0,0};
-        PixelConstBufData.ambient          = {0.65f, 0.65f, 0.65f};
-        PixelConstBufData.diffuseColor     = {1.0f, 1.0f, 1.0f};
-        PixelConstBufData.diffuseIntensity = 0.9f;
-        PixelConstBufData.attConst         = 2.61f;
-        PixelConstBufData.attLin           = 0.1819f;
-        PixelConstBufData.attQuad          = 0.0000001f;
     }
 
-    void PointLight::Set(DirectX::XMFLOAT3 pos, float radius, DirectX::XMFLOAT3 ambient, DirectX::XMFLOAT3 diffuseColor, float diffuseIntensity, float attConst, float attLin, float attQuad)
+    void PointLight::Set(const PointLight::Properties& lightProperties)
     {
-        (void)radius; //currently unused
-        PixelConstBufData.pos              = pos;
-        PixelConstBufData.ambient          = ambient;
-        PixelConstBufData.diffuseColor     = diffuseColor;
-        PixelConstBufData.diffuseIntensity = diffuseIntensity;
-        PixelConstBufData.attConst         = attConst;
-        PixelConstBufData.attLin           = attLin;
-        PixelConstBufData.attQuad          = attQuad;
+        PixelConstBufData = lightProperties;
     }
 
     #ifdef NC_EDITOR_ENABLED
@@ -57,13 +45,13 @@ namespace nc
     }
     #endif
 
-    void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view) noexcept(false)
+    void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view)
     {
         IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
         
-        PixelConstBufData.pos = m_transform->GetPosition().ToXMFloat3();
-        const auto pos = DirectX::XMLoadFloat3(&PixelConstBufData.pos);
-        DirectX::XMStoreFloat3(&ProjectedPos, DirectX::XMVector3Transform(pos, view));
+        PixelConstBufData.pos = m_transform->GetPosition();
+        const auto pos_v = DirectX::XMLoadVector3(&PixelConstBufData.pos);
+        DirectX::XMStoreVector3(&ProjectedPos, DirectX::XMVector3Transform(pos_v, view));
     }
 
 }

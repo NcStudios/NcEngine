@@ -1,8 +1,5 @@
 #pragma once
 #include "Math.h"
-#include "Vector2.h"
-
-namespace DirectX { struct XMFLOAT3; }
 
 namespace nc
 {
@@ -10,15 +7,8 @@ namespace nc
     {
         float x, y, z;
 
-        constexpr explicit Vector3() noexcept : x{0.0f}, y{0.0f}, z{0.0f} {}
+        constexpr Vector3() noexcept : x{0.0f}, y{0.0f}, z{0.0f} {}
         constexpr explicit Vector3(float X, float Y, float Z) noexcept : x{X}, y{Y}, z{Z} {}
-        constexpr explicit Vector3(float X, Vector2 YZ) noexcept : x{X}, y{YZ.x}, z{YZ.y} {}
-        constexpr explicit Vector3(Vector2 XY, float Z) noexcept : x{XY.x}, y{XY.y}, z{Z} {}
-        Vector3(const DirectX::XMFLOAT3& xm) noexcept;
-        Vector3(DirectX::XMFLOAT3&& xm) noexcept;
-        Vector3& operator=(const DirectX::XMFLOAT3& xm) noexcept;
-        Vector3& operator=(DirectX::XMFLOAT3&& xm) noexcept;
-        DirectX::XMFLOAT3 ToXMFloat3() const noexcept;
 
         static constexpr Vector3 Splat(float v) noexcept { return Vector3{v, v, v}; }
         static constexpr Vector3 Zero()  noexcept { return Vector3{ 0, 0, 0}; }
@@ -31,26 +21,54 @@ namespace nc
         static constexpr Vector3 Back()  noexcept { return Vector3{ 0, 0,-1}; }
     };
 
-    constexpr Vector3 operator +(const Vector3& lhs, const Vector3& rhs)
-        { return Vector3{lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z}; }
+    constexpr bool operator ==(const Vector3& lhs, const Vector3& rhs) noexcept;
+    constexpr bool operator !=(const Vector3& lhs, const Vector3& rhs) noexcept;
+    constexpr Vector3 operator +(const Vector3& lhs, const Vector3& rhs) noexcept;
+    constexpr Vector3 operator -(const Vector3& lhs, const Vector3& rhs) noexcept;
+    constexpr Vector3 operator *(const Vector3& vec, float scalar) noexcept;
+    constexpr Vector3 operator *(float scalar, const Vector3& vec) noexcept;
+    constexpr Vector3 operator /(const Vector3& vec, float scalar) noexcept;
+    constexpr float SquareMagnitude(const Vector3& vec) noexcept;
+    constexpr float Magnitude(const Vector3& vec) noexcept;
+    constexpr Vector3 Normalize(const Vector3& vec) noexcept;
+    constexpr Vector3 Lerp(const Vector3& lhs, const Vector3& rhs, float factor) noexcept;
+    constexpr float Dot(const Vector3& lhs, const Vector3& rhs) noexcept;
+    constexpr float Distance(const Vector3& lhs, const Vector3& rhs) noexcept;
 
-    constexpr Vector3 operator -(const Vector3& lhs, const Vector3& rhs)
-        { return Vector3{lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z}; }
+    constexpr bool operator ==(const Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        return math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y) && math::FloatEqual(lhs.z, rhs.z);
+    }
 
-    constexpr Vector3 operator *(const Vector3& vec, float scalar)
-        { return Vector3{vec.x * scalar, vec.y * scalar, vec.z * scalar}; }
+    constexpr bool operator !=(const Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
+    constexpr Vector3 operator +(const Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        return Vector3{lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z};
+    }
+
+    constexpr Vector3 operator -(const Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        return Vector3{lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z};
+    }
+
+    constexpr Vector3 operator *(const Vector3& vec, float scalar) noexcept
+    {
+        return Vector3{vec.x * scalar, vec.y * scalar, vec.z * scalar};
+    }
     
-    constexpr Vector3 operator *(float scalar, const Vector3& vec)
-        { return Vector3{vec.x * scalar, vec.y * scalar, vec.z * scalar}; }
+    constexpr Vector3 operator *(float scalar, const Vector3& vec) noexcept
+    {
+        return vec * scalar;
+    }
 
-    constexpr Vector3 operator /(const Vector3& vec, float scalar)
-        { return Vector3{vec.x / scalar, vec.y / scalar, vec.z / scalar}; }
-
-    constexpr bool operator ==(const Vector3& lhs, const Vector3& rhs)
-        { return math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y) && math::FloatEqual(lhs.z, rhs.z); }
-
-    constexpr bool operator !=(const Vector3& lhs, const Vector3& rhs)
-        { return !(lhs == rhs); }
+    constexpr Vector3 operator /(const Vector3& vec, float scalar) noexcept
+    {
+        return Vector3{vec.x / scalar, vec.y / scalar, vec.z / scalar};
+    }
 
     constexpr float SquareMagnitude(const Vector3& vec) noexcept
     {
@@ -65,5 +83,23 @@ namespace nc
     constexpr Vector3 Normalize(const Vector3& vec) noexcept
     {
         return vec == Vector3::Zero() ? Vector3::Zero() : vec / Magnitude(vec);
+    }
+
+    constexpr Vector3 Lerp(const Vector3& lhs, const Vector3& rhs, float factor) noexcept
+    {
+        return math::Lerp(lhs, rhs, factor);
+    }
+
+    constexpr float Dot(const Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z + rhs.z;
+    }
+
+    constexpr float Distance(const Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        float x = lhs.x - rhs.x;
+        float y = lhs.y - rhs.y;
+        float z = lhs.z - rhs.z;
+        return std::sqrt(x * x + y * y + z * z);
     }
 } // end namespace nc

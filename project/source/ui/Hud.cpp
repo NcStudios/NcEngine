@@ -2,7 +2,7 @@
 #include "Window.h"
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "source/log/GameLog.h"
-#include "Window.h"
+#include "imgui/imgui.h"
 
 namespace
 {

@@ -109,7 +109,6 @@ add_executable(Transform_unit_tests
     ${ROOT_DIR}/source/component/Component.cpp
     ${ROOT_DIR}/source/component/Transform.cpp
     ${ROOT_DIR}/source/math/Quaternion.cpp
-    ${ROOT_DIR}/source/math/Vector3.cpp
 )
 
 target_include_directories(Transform_unit_tests

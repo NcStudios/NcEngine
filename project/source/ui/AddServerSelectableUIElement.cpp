@@ -1,8 +1,9 @@
 #include "AddServerSelectableUIElement.h"
+#include "imgui/imgui.h"
 
 namespace
 {
-    const auto ELEMENT_SIZE = ImVec2{ 300, 100 };
+    const auto ELEMENT_SIZE = nc::Vector2{ 300, 100 };
 }
 
 namespace project::ui

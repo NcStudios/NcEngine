@@ -1,8 +1,6 @@
 #pragma once
 #include "Math.h"
 
-struct ImVec2;
-
 namespace nc
 {
     struct Vector2
@@ -11,11 +9,6 @@ namespace nc
 
         constexpr explicit Vector2() noexcept : x{0.0f}, y{0.0f} {}
         constexpr explicit Vector2(float X, float Y) noexcept : x{X}, y{Y} {}
-        Vector2(const ImVec2& vec) noexcept;
-        Vector2(ImVec2&& vec) noexcept;
-        Vector2& operator=(const ImVec2& vec) noexcept;
-        Vector2& operator=(ImVec2&& vec) noexcept;
-        ImVec2 ToImVec2() noexcept;
 
         static constexpr Vector2 Splat(float v) noexcept { return Vector2{v, v}; }
         static constexpr Vector2 Zero()  noexcept { return Vector2{ 0, 0}; }
@@ -26,24 +19,54 @@ namespace nc
         static constexpr Vector2 Right() noexcept { return Vector2{ 0, 1}; }
     };
 
-    constexpr Vector2 operator +(const Vector2& lhs, const Vector2& rhs)
-        { return Vector2(lhs.x + rhs.x, lhs.y + rhs.y); }
+    constexpr bool operator ==(const Vector2& lhs, const Vector2& rhs) noexcept;
+    constexpr bool operator !=(const Vector2& lhs, const Vector2& rhs) noexcept;
+    constexpr Vector2 operator +(const Vector2& lhs, const Vector2& rhs) noexcept;
+    constexpr Vector2 operator -(const Vector2& lhs, const Vector2& rhs) noexcept;
+    constexpr Vector2 operator *(const Vector2& vec, float scalar) noexcept;
+    constexpr Vector2 operator *(float scalar, const Vector2& vec) noexcept;
+    constexpr Vector2 operator /(const Vector2& vec, float scalar) noexcept;
+    constexpr float SquareMagnitude(const Vector2& vec) noexcept;
+    constexpr float Magnitude(const Vector2& vec) noexcept;
+    constexpr Vector2 Normalize(const Vector2& vec) noexcept;
+    constexpr Vector2 Lerp(const Vector2& lhs, const Vector2& rhs, float factor) noexcept;
+    constexpr float Dot(const Vector2& lhs, const Vector2& rhs) noexcept;
+    constexpr float Distance(const Vector2& lhs, const Vector2& rhs) noexcept;
 
-    constexpr Vector2 operator -(const Vector2& lhs, const Vector2& rhs)
-        { return Vector2(lhs.x - rhs.x, lhs.y - rhs.y); }
+    constexpr bool operator ==(const Vector2& lhs, const Vector2& rhs) noexcept
+    {
+        return math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y);
+    }
 
-    constexpr Vector2 operator *(const Vector2& vec, float scalar)
-        { return Vector2(vec.x * scalar, vec.y * scalar); }
+    constexpr bool operator !=(const Vector2& lhs, const Vector2& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
 
-    constexpr Vector2 operator /(const Vector2& vec, float scalar)
-        { return Vector2(vec.x / scalar, vec.y / scalar); }
+    constexpr Vector2 operator +(const Vector2& lhs, const Vector2& rhs) noexcept
+    {
+        return Vector2(lhs.x + rhs.x, lhs.y + rhs.y);
+    }
 
-    constexpr bool operator ==(const Vector2& lhs, const Vector2& rhs)
-        { return math::FloatEqual(lhs.x, rhs.x) && math::FloatEqual(lhs.y, rhs.y); }
+    constexpr Vector2 operator -(const Vector2& lhs, const Vector2& rhs) noexcept
+    {
+        return Vector2(lhs.x - rhs.x, lhs.y - rhs.y);
+    }
 
-    constexpr bool operator !=(const Vector2& lhs, const Vector2& rhs)
-        { return !(lhs == rhs); }
+    constexpr Vector2 operator *(const Vector2& vec, float scalar) noexcept
+    {
+        return Vector2(vec.x * scalar, vec.y * scalar);
+    }
 
+    constexpr Vector2 operator *(float scalar, const Vector2& vec) noexcept
+    {
+        return vec * scalar;
+    }
+
+    constexpr Vector2 operator /(const Vector2& vec, float scalar) noexcept
+    {
+        return Vector2(vec.x / scalar, vec.y / scalar);
+    }
 
     constexpr float SquareMagnitude(const Vector2& vec) noexcept
     {
@@ -60,10 +83,9 @@ namespace nc
         return vec == Vector2::Zero() ? Vector2::Zero() : vec / Magnitude(vec);
     }
 
-    constexpr Vector2 Lerp(const Vector2& lhs, const Vector2& rhs, float factor) noexcept
+    constexpr Vector2 Lerp(const Vector2& from, const Vector2& to, float factor) noexcept
     { 
-        factor = math::Clamp(factor, 0.0f, 1.0f);
-        return Vector2{math::Lerp(lhs.x, rhs.x, factor), math::Lerp(lhs.y, rhs.y, factor)};
+        return math::Lerp(from, to, factor);
     }
 
     constexpr float Dot(const Vector2& lhs, const Vector2& rhs) noexcept
@@ -77,5 +99,4 @@ namespace nc
         float y = lhs.y - rhs.y;
         return sqrt(x * x + y * y);
     }
-
 } // end namespace nc

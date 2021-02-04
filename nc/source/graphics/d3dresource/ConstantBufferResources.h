@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GraphicsResource.h"
+#include "directx/math/DirectXMath.h"
 
 /* Constant Buffers */
 namespace nc::graphics::d3dresource
