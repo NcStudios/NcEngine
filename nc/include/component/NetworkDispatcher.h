@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component.h"
-#include "net/NetworkDetails.h"
+#include "network/NetworkDetails.h"
 
 #include <functional>
 #include <unordered_map>

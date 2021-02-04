@@ -1,4 +1,4 @@
-#include "net/PacketBuffer.h"
+#include "network/PacketBuffer.h"
 
 #include <cstring>
 #include <stdexcept>

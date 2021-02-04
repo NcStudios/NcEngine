@@ -1,7 +1,7 @@
 #pragma once
 
-#include "net/NetworkDetails.h"
-#include "net/PacketBuffer.h"
+#include "network/NetworkDetails.h"
+#include "network/PacketBuffer.h"
 
 #include <stdint.h>
 #include <string>
