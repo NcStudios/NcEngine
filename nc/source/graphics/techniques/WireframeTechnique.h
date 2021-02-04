@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphics/techniques/Technique.h"
-#include "graphics/techniques/TechniqueType.h"
 
 #include <string>
 #include <vector>

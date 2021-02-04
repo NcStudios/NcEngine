@@ -1,48 +1,29 @@
-#include "nc/source/win32/NcWin32.h"
-#include "DebugUtils.h"
-#include "Engine.h"
+#include "platform/win32/NcWin32.h"
+#include "Core.h"
+#include "debug/Utils.h"
 #include "scenes/MenuScene.h"
 
 #include <iostream>
 
-void LogException(const std::exception& e)
-{
-    std::cerr << "Exception: " << e.what() << '\n';
-    nc::debug::Log::LogToDiagnostics("**Exception**");
-    nc::debug::Log::LogToDiagnostics(e.what());
-    try
-    {
-        std::rethrow_if_nested(e);
-    }
-    catch(const std::exception& e)
-    {
-        LogException(e);
-    }
-}
-
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 {
-    std::unique_ptr<nc::engine::Engine> engine = nullptr;
-
     try
     {
-        engine = std::make_unique<nc::engine::Engine>(instance);
-        engine->Start(std::make_unique<project::MenuScene>());
+        nc::core::Initialize(instance);
+        nc::core::Start(std::make_unique<project::MenuScene>());
     }
     catch(std::exception& e)
     {
-        LogException(e);
-        if(engine)
-            engine->Shutdown(true);
+        nc::debug::LogException(e);
+        nc::core::Quit(true);
     }
     catch(...)
     {
         std::cerr << "WinMain.cpp - unkown exception caught\n";
-        nc::debug::Log::LogToDiagnostics("WinMain.cpp - unkown exception");
-        if(engine)
-            engine->Shutdown(true);
+        nc::debug::LogToDiagnostics("WinMain.cpp - unkown exception");
+        nc::core::Quit(true);
     }
 
-    std::cout << "WinMain - Exiting\n";
+    nc::core::Shutdown();
 	return 0;
 }

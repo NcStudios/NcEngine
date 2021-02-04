@@ -8,7 +8,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/d3dresource/ConstantBufferResources.cpp
         ${ROOT_DIR}/source/graphics/Mesh.cpp
         ${ROOT_DIR}/source/graphics/WICTextureLoader.cpp
-        ${ROOT_DIR}/source/graphics/materials/Material.cpp
+        ${ROOT_DIR}/source/graphics/Material.cpp
         ${ROOT_DIR}/source/graphics/techniques/Technique.cpp
         ${ROOT_DIR}/source/graphics/techniques/PhongShadingTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/WireframeTechnique.cpp

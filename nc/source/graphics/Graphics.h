@@ -1,5 +1,7 @@
 #pragma once
-#include "win32/NCWin32.h"
+#include "platform/win32/NCWin32.h"
+#include "math/Vector2.h"
+
 #include <d3d11.h>
 #include <stdint.h>
 #include "directx/math/DirectXMath.h"
@@ -18,7 +20,7 @@ namespace nc
             friend ::nc::ui::UIImpl;
 
             public:
-                Graphics(HWND hwnd, float width, float height, float nearZ, float farZ, bool fullscreen);
+                Graphics(HWND hwnd, Vector2 dimensions);
                 ~Graphics();
                 Graphics(const Graphics&) = delete;
                 Graphics(Graphics&&) = delete;

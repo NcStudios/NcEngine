@@ -1,6 +1,6 @@
-#include "PointLight.h"
+#include "component/PointLight.h"
 #include "graphics/Graphics.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "Ecs.h"
 
 #ifdef NC_EDITOR_ENABLED
@@ -11,7 +11,7 @@ namespace nc
 {
     PointLight::PointLight(EntityHandle handle) noexcept
         : ComponentBase(handle),
-          m_transform{ Ecs::GetComponent<Transform>(handle) }
+          m_transform{ GetComponent<Transform>(handle) }
     {
         PixelConstBufData.pos              = {0,0,0};
         PixelConstBufData.ambient          = {0.65f, 0.65f, 0.65f};

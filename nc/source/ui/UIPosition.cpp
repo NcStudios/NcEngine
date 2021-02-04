@@ -1,5 +1,7 @@
-#include "UIPosition.h"
+#include "ui/UIPosition.h"
 #include "imgui/imgui.h"
+
+#include <stdexcept>
 
 namespace nc::ui::utils
 {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "win32/NCWinDef.h"
-#include "IUI.h"
+#include "platform/win32/NCWinDef.h"
+#include "ui/IUI.h"
 #include "editor/Editor.h"
-#include "ecs/Entity.h"
+#include "Entity.h"
 #include "ecs/EntityMap.h"
 
 #include <unordered_map>

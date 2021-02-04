@@ -1,22 +1,13 @@
 #pragma once
 
-#include <functional>
-
-namespace nc::engine { class ApiBinder; }
-namespace nc::ui { class IUI; }
+#include "ui/IUI.h"
 
 namespace nc::ui
 {
-    class UI
-    {
-        public:
-            static void Set(IUI* ui);
+    /** Set an IUI to receive Draw() callbacks each frame. Pass
+     *  nullptr to unregister the ui. */
+    void Set(IUI* ui);
 
-            [[nodiscard]] static bool IsHovered();
-
-        private:
-            friend class nc::engine::ApiBinder;
-            static std::function<void(IUI*)> Set_;
-            static std::function<bool()> IsHovered_;
-    };
+    /** Same as calling IsHovered() directly on the registered IUI. */
+    [[nodiscard]] bool IsHovered();
 }

@@ -7,12 +7,12 @@ namespace project
 {
     CubeRotator::CubeRotator(EntityHandle handle)
         : Component(handle),
-          m_transform{Ecs::GetComponent<Transform>(handle)}
+          m_transform{GetComponent<Transform>(handle)}
     {
     }
 
     void CubeRotator::FrameUpdate(float dt)
     {
-        m_transform->Rotate({0.0f, 1.0f, 0.0f}, 0.1f * dt);
+        m_transform->Rotate(Vector3::Up(), 0.1f * dt);
     }
 }

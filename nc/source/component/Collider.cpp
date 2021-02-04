@@ -9,14 +9,14 @@
 namespace
 {
     const auto ColliderMesh = std::string{"project/Models/cube.fbx"};
-    auto GetColliderMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::WireframeTechnique>;
+    auto GetColliderMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
 }
 
 namespace nc
 {
     Collider::Collider(EntityHandle handle, Vector3 scale)
         : ComponentBase(handle),
-          m_transform{Ecs::GetComponent<Transform>(handle)},
+          m_transform{GetComponent<Transform>(handle)},
           m_scale{scale},
           m_model{ColliderMesh, GetColliderMaterial()}
     {}

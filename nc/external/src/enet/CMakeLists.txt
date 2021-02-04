@@ -78,7 +78,7 @@ add_library(${ENET_LIB}
 target_include_directories(${ENET_LIB}
     PRIVATE
         ${ROOT_DIR}/external/include
-        ${NC_SOURCE_DIR}
+        ${NC_INCLUDE_DIR}
 )
 
 set_target_properties(${ENET_LIB}

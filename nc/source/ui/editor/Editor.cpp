@@ -2,7 +2,7 @@
 #include "Editor.h"
 #include "EditorControls.h"
 #include "graphics/Graphics.h"
-#include "input/Input.h"
+#include "Input.h"
 #include "Window.h"
 
 namespace
@@ -43,7 +43,7 @@ namespace nc::ui::editor
         if(ImGui::Begin("NcEngine Editor", nullptr, MainWindowFlags))
         {
             DrawMenu();
-            auto [width, height] = Window::GetDimensions();
+            auto [width, height] = window::GetDimensions();
             controls::SceneGraphPanel(activeEntities, height);
             if(m_openState_UtilitiesPanel)
                 controls::UtilitiesPanel(dt, m_graphics->GetDrawCallCount(), width, height);

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "LayerMask.h"
-#include "IClickable.h"
+#include "physics/IClickable.h"
 #include "directx/math/DirectXMath.h"
 
 #include <vector>

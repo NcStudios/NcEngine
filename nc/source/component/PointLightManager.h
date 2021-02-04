@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PointLight.h"
+#include "component/PointLight.h"
 
 #include <memory>
 

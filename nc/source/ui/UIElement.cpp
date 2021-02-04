@@ -1,4 +1,4 @@
-#include "UIElement.h"
+#include "ui/UIElement.h"
 #include "Window.h"
 
 namespace nc::ui
@@ -16,16 +16,16 @@ namespace nc::ui
     UIFixedElement::UIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions)
         : UIElement(startOpen),
           m_position{ position },
-          m_screenDimensions { Window::GetDimensions().ToImVec2() },
+          m_screenDimensions { window::GetDimensions().ToImVec2() },
           m_elementDimensions{ dimensions }
     {
         CalculateTopLeftPosition();
-        Window::RegisterOnResizeReceiver(this);
+        window::RegisterOnResizeReceiver(this);
     }
 
     UIFixedElement::~UIFixedElement()
     {
-        Window::UnregisterOnResizeReceiver(this);
+        window::UnregisterOnResizeReceiver(this);
     }
 
     void UIFixedElement::OnResize(Vector2 dimensions)

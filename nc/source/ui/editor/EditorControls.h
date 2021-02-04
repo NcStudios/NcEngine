@@ -1,10 +1,9 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
-#include "Profiler.h"
+#include "debug/Profiler.h"
 #include "Ecs.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "imgui/imgui.h"
-
 
 namespace nc::ui::editor::controls
 {
@@ -64,13 +63,13 @@ namespace nc::ui::editor::controls
             ImGui::Text("Handle %d", static_cast<unsigned>(handle));
         ImGui::Unindent();
 
-        controls::Component(Ecs::GetComponent<Transform>(handle));
-        controls::Component(Ecs::GetComponent<NetworkDispatcher>(handle));
-        controls::Component(Ecs::GetComponent<Renderer>(handle));
-        controls::Component(Ecs::GetComponent<Collider>(handle));
-        controls::Component(Ecs::GetComponent<PointLight>(handle));
-        for(const auto& comp : Ecs::GetEntity(handle)->GetUserComponents())
-            controls::Component(comp.get());
+        controls::Component(GetComponent<Transform>(handle));
+        controls::Component(GetComponent<NetworkDispatcher>(handle));
+        controls::Component(GetComponent<Renderer>(handle));
+        controls::Component(GetComponent<Collider>(handle));
+        controls::Component(GetComponent<PointLight>(handle));
+        for(const auto& comp : GetEntity(handle)->GetUserComponents())
+            controls::Component(comp);
 
         ImGui::Separator();
     }

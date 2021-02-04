@@ -1,5 +1,5 @@
 #pragma once
-#include "nc/source/net/Endpoint.h"
+#include "network/Endpoint.h"
 #include "ServerEventCoordinator.h"
 #include "ServerConnectionManager.h"
 

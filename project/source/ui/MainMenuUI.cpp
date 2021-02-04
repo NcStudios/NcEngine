@@ -1,6 +1,6 @@
 #include "MainMenuUI.h"
 #include "UIStyle.h"
-#include "SceneManager.h"
+#include "Scene.h"
 #include "scenes/DemoScene.h"
 #include "scenes/GameScene.h"
 #include "config/Version.h"
@@ -135,7 +135,7 @@ namespace project::ui
 
                 if(selectedPos != m_servers.end())
                 {
-                    nc::scene::SceneManager::ChangeScene(std::make_unique<GameScene>(selectedPos->ip));
+                    nc::scene::Change(std::make_unique<GameScene>(selectedPos->ip));
                 }
             }
 
@@ -143,7 +143,7 @@ namespace project::ui
 
             if(ImGui::Button("Load Demo Scene", BUTTON_SIZE))
             {
-                nc::scene::SceneManager::ChangeScene(std::make_unique<DemoScene>());
+                nc::scene::Change(std::make_unique<DemoScene>());
             }
         }
         ImGui::End();

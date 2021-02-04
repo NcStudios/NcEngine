@@ -1,6 +1,6 @@
 #ifdef NC_EDITOR_ENABLED
 
-#include "Profiler.h"
+#include "debug/Profiler.h"
 
 #include <algorithm>
 #include <numeric>
@@ -71,7 +71,7 @@ namespace nc::debug::profiler
         auto [it, result] = internal::data.emplace(internal::currentId, FunctionMetrics{name, filter});
 
         if(!result)
-            throw std::runtime_error("profile::Register - Failed to emplace FunctionMetrics");
+            throw std::runtime_error("profiler::Register - Failed to emplace FunctionMetrics");
 
         return internal::currentId++;
     }
@@ -87,14 +87,14 @@ namespace nc::debug::profiler
         }
         catch(const std::exception& e)
         {
-            std::throw_with_nested(std::runtime_error("profile::Push - invalid FuncId"));
+            std::throw_with_nested(std::runtime_error("profiler::Push - invalid FuncId"));
         }
     }
 
     void Pop()
     {
         if(internal::openProfiles.empty())
-            throw std::runtime_error("profile::Pop - Push/Pop mismatch");
+            throw std::runtime_error("profiler::Pop - Push/Pop mismatch");
 
         auto mostRecent = internal::openProfiles.back();
         internal::openProfiles.pop_back();
@@ -106,7 +106,7 @@ namespace nc::debug::profiler
         }
         catch(const std::exception& e)
         {
-            std::throw_with_nested(std::runtime_error("profile::Pop - invalid FuncId"));
+            std::throw_with_nested(std::runtime_error("profiler::Pop - invalid FuncId"));
         }
     }
 

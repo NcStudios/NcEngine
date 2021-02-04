@@ -1,13 +1,12 @@
-#include "graphics\Mesh.h"
-#include "graphics\d3dresource\GraphicsResourceManager.h"
-#include "graphics\d3dresource\MeshResources.h"
-#include "Engine.h"
-#include "DebugUtils.h"
+#include "graphics/Mesh.h"
+#include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "graphics/d3dresource/MeshResources.h"
+#include "debug/Utils.h"
 #include "Vertex.h"
 
-#include <assimp\Importer.hpp>
-#include <assimp\scene.h>
-#include <assimp\postprocess.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 const char separator = 
 #ifdef _WIN32
