@@ -43,7 +43,7 @@ namespace nc
             template<std::derived_from<Component> T>
             bool RemoveUserComponent() noexcept;
 
-            const std::vector<std::unique_ptr<Component>>& GetUserComponents() const noexcept;
+            std::vector<Component*> GetUserComponents() const noexcept;
         
         private:
             std::vector<std::unique_ptr<Component>> m_userComponents;

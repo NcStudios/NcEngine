@@ -1,4 +1,5 @@
 #include "MainCamera.h"
+#include "MainCameraInternal.h"
 #include "Ecs.h"
 
 namespace

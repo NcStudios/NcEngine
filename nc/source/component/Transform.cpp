@@ -1,5 +1,5 @@
 #include "component/Transform.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include <limits>
 
 #ifdef NC_EDITOR_ENABLED

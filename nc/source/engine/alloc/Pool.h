@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EntityHandle.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 
 #include <algorithm>
 #include <memory>

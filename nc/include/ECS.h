@@ -6,7 +6,7 @@
 #include "component/NetworkDispatcher.h"
 #include "component/Renderer.h"
 #include "component/Transform.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 
 #include <concepts>
 #include <string>

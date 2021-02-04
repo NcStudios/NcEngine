@@ -1,6 +1,6 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
-#include "Profiler.h"
+#include "debug/Profiler.h"
 #include "Ecs.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "imgui/imgui.h"
@@ -69,7 +69,7 @@ namespace nc::ui::editor::controls
         controls::Component(GetComponent<Collider>(handle));
         controls::Component(GetComponent<PointLight>(handle));
         for(const auto& comp : GetEntity(handle)->GetUserComponents())
-            controls::Component(comp.get());
+            controls::Component(comp);
 
         ImGui::Separator();
     }

@@ -2,8 +2,8 @@
 
 #include "EntityHandle.h"
 #include "engine/alloc/Pool.h"
-#include "DebugUtils.h"
-#include "Profiler.h"
+#include "debug/Utils.h"
+#include "debug/Profiler.h"
 
 #include <vector>
 #include <unordered_map>

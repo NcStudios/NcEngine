@@ -1,6 +1,6 @@
 #ifdef NC_EDITOR_ENABLED
 
-#include "Profiler.h"
+#include "debug/Profiler.h"
 
 #include <algorithm>
 #include <numeric>

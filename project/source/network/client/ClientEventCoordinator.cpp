@@ -1,6 +1,6 @@
 #include "ClientEventCoordinator.h"
 #include "NetworkPrefabManager.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "component/NetworkDispatcher.h"
 #include "enet/enet.h"
 #include "../Packet.h"

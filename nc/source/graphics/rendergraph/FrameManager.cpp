@@ -3,7 +3,7 @@
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "graphics/techniques/PhongShadingTechnique.h"
 #include "graphics/techniques/WireframeTechnique.h"
-#include "Profiler.h"
+#include "debug/Profiler.h"
 
 using namespace nc::graphics::d3dresource;
 

@@ -1,6 +1,6 @@
 #include "math/Quaternion.h"
 #include "directx/math/DirectXMath.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 
 
 namespace nc

@@ -1,6 +1,6 @@
 #include "SceneSystem.h"
 #include "Scene.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 
 namespace
 {

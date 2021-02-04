@@ -81,7 +81,7 @@ add_test(Pool_unit_tests Pool_unit_tests)
 ### PacketBuffer Tests ###
 add_executable(PacketBuffer_unit_tests
     ${ROOT_DIR}/test/unit/PacketBuffer_unit_tests.cpp
-    ${ROOT_DIR}/source/net/PacketBuffer.cpp
+    ${ROOT_DIR}/source/network/PacketBuffer.cpp
 )
 
 target_include_directories(PacketBuffer_unit_tests
