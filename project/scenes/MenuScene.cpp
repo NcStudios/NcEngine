@@ -30,7 +30,17 @@ namespace project
         // Light
         auto lvHandle = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Point Light");
         auto pointLight = AddComponent<PointLight>(lvHandle);
-        pointLight->Set(pointLight->PixelConstBufData.pos, 0.5f, Vector3{0.443f, 0.412f, 0.412f}, Vector3{0.4751f, 0.525f, 1.0f}, 3.56f, 0.00f, 0.05f, 0.00f);
+        auto lightProperties = PointLight::Properties
+        {
+            .pos = Vector3::Zero(),
+            .ambient = Vector3{0.443f, 0.412f, 0.412f},
+            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
+            .diffuseIntensity = 3.56,
+            .attConst = 0.0f,
+            .attLin = 0.05f,
+            .attQuad = 0.0f
+        };
+        pointLight->Set(lightProperties);
         AddComponent<project::MouseFollower>(lvHandle);
 
         // CamController

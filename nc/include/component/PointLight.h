@@ -12,32 +12,31 @@ namespace nc
     class PointLight final: public ComponentBase
     {
         public:
+            struct Properties
+            {
+                alignas(16)Vector3 pos = Vector3::Zero();
+                alignas(16)Vector3 ambient = Vector3::Splat(0.65f);
+                alignas(16)Vector3 diffuseColor = Vector3::One();
+                float diffuseIntensity = 0.9f;
+                float attConst = 2.61f;
+                float attLin = 0.1819f;
+                float attQuad = 0.0000001f;
+            } PixelConstBufData;
+
+            alignas(16)Vector3 ProjectedPos;
+
             PointLight(EntityHandle handle) noexcept;
             PointLight(PointLight&&) = delete;
             PointLight& operator=(PointLight&&) = delete;
             PointLight(const PointLight&) = delete;
             PointLight& operator=(const PointLight&) = delete;
 
-            void Set(Vector3 pos,  float radius = 0.5f, Vector3 ambient = Vector3{0.65f, 0.65f, 0.65f}, Vector3 diffuseColor = Vector3{1.0f, 1.0f, 1.0f}, float diffuseIntensity = 0.9f, float attConst = 2.61f, float attLin = 0.1819f, float attQuad =  0.0000001f);
+            void Set(const PointLight::Properties& lightProperties);
+            void SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view);
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
-
-            void SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view) noexcept(false);
-
-            alignas(16)Vector3 ProjectedPos;
-
-            struct PointLightPixelCBuf
-            {
-                alignas(16)Vector3 pos;
-                alignas(16)Vector3 ambient;
-                alignas(16)Vector3 diffuseColor;
-                float diffuseIntensity;
-                float attConst;
-                float attLin;
-                float attQuad;
-            } PixelConstBufData;
 
         private:
             Transform * m_transform;

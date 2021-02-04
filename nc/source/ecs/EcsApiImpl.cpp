@@ -51,7 +51,6 @@ namespace nc
         IF_THROW(internal::g_impl->GetSystem<PointLight>()->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
 
         auto lightPtr = internal::g_impl->GetSystem<PointLight>()->Add(handle);
-        lightPtr->Set(Vector3::Zero());
         return lightPtr;
     }
 

@@ -2,7 +2,7 @@
 IN PROGRESS
 ***********
 
--dxmath works directly on Vector3 and Quaternion
+-PointLight ctor should be able to take PointLight::Properties
 
 GfxResMan should try to get rid of strings as keys
 Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
