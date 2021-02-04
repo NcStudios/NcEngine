@@ -1,5 +1,5 @@
 #include "BoarMover.h"
-#include "input/Input.h"
+#include "Input.h"
 #include "Ecs.h"
 
 #include <iostream>
@@ -15,7 +15,7 @@ namespace project
 {
     BoarMover::BoarMover(EntityHandle parentHandle)
         : Component(parentHandle),
-          m_transform{Ecs::GetComponent<Transform>(parentHandle)}
+          m_transform{GetComponent<Transform>(parentHandle)}
     {}
 
     void BoarMover::FrameUpdate(float dt)
