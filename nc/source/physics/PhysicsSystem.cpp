@@ -1,6 +1,6 @@
 #include "PhysicsSystem.h"
 #include "Physics.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "Input.h"
 #include "component/Transform.h"
 #include "Window.h"

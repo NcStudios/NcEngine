@@ -1,5 +1,5 @@
 #include "Network.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 
 namespace nc::net
 {

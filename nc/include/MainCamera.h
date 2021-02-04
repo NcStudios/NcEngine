@@ -11,7 +11,4 @@ namespace nc::camera
 
     /** Get the transform of the current main camera */
     [[nodiscard]] Transform* GetMainCameraTransform();
-
-    /** @note used internally - move somewhere else? */
-    void ClearMainCamera();
 }

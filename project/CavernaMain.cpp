@@ -1,6 +1,6 @@
 #include "platform/win32/NcWin32.h"
 #include "Core.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "scenes/MenuScene.h"
 
 #include <iostream>

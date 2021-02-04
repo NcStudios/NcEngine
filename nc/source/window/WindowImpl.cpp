@@ -2,7 +2,7 @@
 #include "Window.h"
 #include "config/Config.h"
 #include "Core.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "input/InputInternal.h"
 #include "math/Math.h"
 

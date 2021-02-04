@@ -1,6 +1,6 @@
 #include "UIImpl.h"
 #include "UI.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "graphics/Graphics.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"

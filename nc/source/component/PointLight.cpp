@@ -1,6 +1,6 @@
 #include "component/PointLight.h"
 #include "graphics/Graphics.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "Ecs.h"
 
 #ifdef NC_EDITOR_ENABLED

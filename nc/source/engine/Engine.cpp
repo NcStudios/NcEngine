@@ -1,15 +1,14 @@
 #include "Engine.h"
 #include "Core.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
+#include "debug/Profiler.h"
 #include "MainCamera.h"
-#include "Profiler.h"
+#include "camera/MainCameraInternal.h"
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
 #include "time/NcTime.h"
 #include "time/NcTime.h"
-
-//only needed for RegisterImpl - can remove?
 #include "Ecs.h"
 
 namespace nc::core

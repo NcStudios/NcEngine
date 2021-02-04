@@ -1,7 +1,7 @@
 #include "config/Config.h"
 #include "config/ConfigReader.h"
 #include "ConfigInternal.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 
 #include <fstream>
 #include <limits>

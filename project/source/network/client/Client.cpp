@@ -1,5 +1,5 @@
 #include "Client.h"
-#include "DebugUtils.h"
+#include "debug/Utils.h"
 #include "Network.h"
 #include "../Packet.h"
 
