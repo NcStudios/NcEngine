@@ -2,7 +2,6 @@
 
 #include "UIPosition.h"
 #include "Window.h"
-//#include "imgui/imgui.h"
 
 namespace nc::ui
 {
