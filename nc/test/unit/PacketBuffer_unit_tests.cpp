@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "net/PacketBuffer.h"
+#include "network/PacketBuffer.h"
 
 #include <stdint.h>
 #include <cstring>

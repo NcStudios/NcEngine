@@ -1,21 +1,29 @@
 #include "MainCamera.h"
-#include "DebugUtils.h"
+#include "MainCameraInternal.h"
+#include "Ecs.h"
+
+namespace
+{
+    nc::Transform* g_mainCameraTransform = nullptr;
+}
 
 namespace nc::camera
 {
-    std::function<void(Camera*)> MainCamera::Set_ = nullptr;
-    std::function<Transform*()> MainCamera::GetTransform_ = nullptr;
-
-    void MainCamera::Set(Camera* camera)
+    /* Api Function Implementation */
+    void SetMainCamera(Camera* camera)
     {
         V_LOG("Setting main camera");
-        IF_THROW(!MainCamera::Set_, "MainCamera::Set_ is not bound");
-        MainCamera::Set_(camera);
+        g_mainCameraTransform = GetComponent<Transform>(camera->GetParentHandle());
+    }
+
+    void ClearMainCamera()
+    {
+        g_mainCameraTransform = nullptr;
     }
     
-    Transform* MainCamera::GetTransform()
+    Transform* GetMainCameraTransform()
     {
-        IF_THROW(!MainCamera::GetTransform_, "MainCamera::GetTransform_ is not bound");
-        return MainCamera::GetTransform_();
+        IF_THROW(!g_mainCameraTransform, "camera::GetMainCameraTransform - No camera is set");
+        return g_mainCameraTransform;
     }
 }

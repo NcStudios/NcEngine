@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PointLight.h"
+#include "component/PointLight.h"
 
 #include <memory>
 
@@ -36,7 +36,7 @@ namespace nc
 
             struct PointLightsArrayCBuf
             {
-               PointLight::PointLightPixelCBuf PointLights[MAX_POINT_LIGHTS]; 
+               PointLight::Properties PointLights[MAX_POINT_LIGHTS]; 
             } m_pointLightsArrayConstBufData;
 
             std::unique_ptr<graphics::d3dresource::PixelConstantBuffer<PointLightsArrayCBuf>> m_constantBuffer;

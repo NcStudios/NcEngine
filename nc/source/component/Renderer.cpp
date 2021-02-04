@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "component/Renderer.h"
 #include "graphics/Graphics.h"
 #include "graphics/Model.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
@@ -16,7 +16,7 @@ namespace nc
     Renderer::Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept
         : ComponentBase(handle),
           m_model{ std::make_unique<graphics::Model>(std::move(mesh), std::move(material)) },
-          m_transform{ Ecs::GetComponent<Transform>(handle) }
+          m_transform{ GetComponent<Transform>(handle) }
     {
     }
 

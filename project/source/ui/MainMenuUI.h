@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc/source/ui/IUI.h"
+#include "ui/IUI.h"
 #include "EditNameUIElement.h"
 #include "AddServerSelectableUIElement.h"
 #include "ServerSelectable.h"

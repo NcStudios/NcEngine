@@ -1,8 +1,7 @@
 #pragma once
 
-#include "LayerMask.h"
-#include "IClickable.h"
 #include "component/Collider.h"
+#include "physics/IClickable.h"
 #include "directx/math/DirectXMath.h"
 
 #include <vector>

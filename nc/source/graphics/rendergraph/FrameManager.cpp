@@ -3,6 +3,7 @@
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "graphics/techniques/PhongShadingTechnique.h"
 #include "graphics/techniques/WireframeTechnique.h"
+#include "debug/Profiler.h"
 
 using namespace nc::graphics::d3dresource;
 
@@ -18,6 +19,7 @@ namespace nc::graphics
      **/
     void FrameManager::Execute(Graphics* gfx) const
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
         // PBR Shading Pass
        PhongShadingTechnique::BindCommonResources();
        m_passes[0].Execute(gfx);
@@ -25,6 +27,7 @@ namespace nc::graphics
         // Wireframe Pass
         WireframeTechnique::BindCommonResources();
         m_passes[1].Execute(gfx);
+        NC_PROFILE_END();
     }
 
     void FrameManager::Reset() noexcept

@@ -1,4 +1,4 @@
-#include "NetworkDispatcher.h"
+#include "component/NetworkDispatcher.h"
 
 #include <stdexcept>
 

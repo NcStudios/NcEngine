@@ -2,7 +2,7 @@
 #include "Window.h"
 #include "graphics/d3dresource/GraphicsResource.h"
 #include "source/log/GameLog.h"
-#include "Window.h"
+#include "imgui/imgui.h"
 
 namespace
 {
@@ -25,14 +25,14 @@ namespace project::ui
           m_soundboardUIElement {false},
           m_texture { std::make_unique<nc::graphics::d3dresource::Texture>("project/Textures/icon.bmp", 0) },
           m_isHovered { false },
-          m_windowDimensions { nc::Window::GetDimensions() }
+          m_windowDimensions { nc::window::GetDimensions() }
     {
-        nc::Window::RegisterOnResizeReceiver(this);
+        nc::window::RegisterOnResizeReceiver(this);
     }
 
     Hud::~Hud()
     {
-        nc::Window::UnregisterOnResizeReceiver(this);
+        nc::window::UnregisterOnResizeReceiver(this);
     }
 
     void Hud::Draw()

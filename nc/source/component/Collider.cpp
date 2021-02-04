@@ -10,7 +10,7 @@
 namespace
 {
     const auto CubeMeshPath = std::string{"project/Models/cube.fbx"};
-    auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::WireframeTechnique>;
+    auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
 
     auto CreateBoxModel()
     {
@@ -22,7 +22,7 @@ namespace nc
 {
     Collider::Collider(EntityHandle handle, Vector3 scale)
         : ComponentBase(handle),
-          m_transform{Ecs::GetComponent<Transform>(handle)},
+          m_transform{GetComponent<Transform>(handle)},
           m_scale{scale},
           m_model{CreateBoxModel()},
           m_currentCollisions{}
@@ -44,12 +44,12 @@ namespace nc
 
     void Collider::UpdateCollisions(std::vector<Collider*> collisions)
     {
-        auto entity = Ecs::GetEntity(GetParentHandle());
+        auto entity = GetEntity(GetParentHandle());
 
         for(auto prevCollision : collisions)
         {
             auto pos = std::find(collisions.begin(), collisions.end(), prevCollision);
-            auto otherEntity = Ecs::GetEntity(prevCollision->GetParentHandle());
+            auto otherEntity = GetEntity(prevCollision->GetParentHandle());
 
             if(pos == collisions.end())
             {
@@ -68,7 +68,7 @@ namespace nc
             auto pos = std::find(m_currentCollisions.begin(), m_currentCollisions.end(), newCollision);
             if(pos == m_currentCollisions.end())
             {
-                auto otherEntity = Ecs::GetEntity(newCollision->GetParentHandle());
+                auto otherEntity = GetEntity(newCollision->GetParentHandle());
                 entity->SendOnCollisionEnter(otherEntity);
                 otherEntity->SendOnCollisionEnter(entity);
             }

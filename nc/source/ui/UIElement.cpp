@@ -1,5 +1,6 @@
-#include "UIElement.h"
+#include "ui/UIElement.h"
 #include "Window.h"
+#include "imgui/imgui.h"
 
 namespace nc::ui
 {
@@ -13,31 +14,31 @@ namespace nc::ui
         isOpen = !isOpen;
     }
 
-    UIFixedElement::UIFixedElement(bool startOpen, UIPosition position, ImVec2 dimensions)
+    UIFixedElement::UIFixedElement(bool startOpen, UIPosition position, Vector2 dimensions)
         : UIElement(startOpen),
           m_position{ position },
-          m_screenDimensions { Window::GetDimensions().ToImVec2() },
+          m_screenDimensions { window::GetDimensions() },
           m_elementDimensions{ dimensions }
     {
         CalculateTopLeftPosition();
-        Window::RegisterOnResizeReceiver(this);
+        window::RegisterOnResizeReceiver(this);
     }
 
     UIFixedElement::~UIFixedElement()
     {
-        Window::UnregisterOnResizeReceiver(this);
+        window::UnregisterOnResizeReceiver(this);
     }
 
     void UIFixedElement::OnResize(Vector2 dimensions)
     {
-        m_screenDimensions = dimensions.ToImVec2();
+        m_screenDimensions = dimensions;
         CalculateTopLeftPosition();
     }
 
     void UIFixedElement::PositionElement()
     {
-        ImGui::SetNextWindowPos(m_topLeftPosition);
-        ImGui::SetNextWindowSize(m_elementDimensions);
+        ImGui::SetNextWindowPos({m_topLeftPosition.x, m_topLeftPosition.y});
+        ImGui::SetNextWindowSize({m_elementDimensions.x, m_elementDimensions.y});
     }
 
     void UIFixedElement::CalculateTopLeftPosition()

@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "component/Camera.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"

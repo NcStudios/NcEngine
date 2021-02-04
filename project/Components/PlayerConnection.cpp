@@ -1,6 +1,6 @@
 #include "PlayerConnection.h"
 #include "Network.h"
-#include "input/Input.h"
+#include "Input.h"
 #include "project/source/Prefabs.h"
 #include "project/source/network/Packet.h"
 
@@ -31,19 +31,19 @@ namespace project
                 .posX = 0.4f, .posY = 0.0f, .posZ = 0.4f,
                 .rotX = 1.57f, .rotY = 0.0f, .rotZ = 0.0f
             };
-            net::Network::ServerCommand(ToPacketBuffer(&packet));
+            net::ServerCommand(ToPacketBuffer(&packet));
         }
 
         if(input::GetKeyDown(input::KeyCode::P))
         {
             Packet::TestNetworkDispatcher packet{.networkHandle = 1u, .value = 0u};
-            net::Network::ServerCommand(ToPacketBuffer(&packet));
+            net::ServerCommand(ToPacketBuffer(&packet));
         }
 
         if(input::GetKeyDown(input::KeyCode::D))
         {
             Packet::DestroyPrefab packet{.networkHandle = 1u};
-            net::Network::ServerCommand(ToPacketBuffer(&packet));
+            net::ServerCommand(ToPacketBuffer(&packet));
         }
     }
 }

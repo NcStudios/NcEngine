@@ -2,8 +2,6 @@
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
 
-#include <cstring>
-
 namespace nc::ui::editor
 {
     const float defaultItemWidth = 50.0f;
@@ -20,10 +18,13 @@ namespace nc::ui::editor
 
     inline bool floatWidget(const char* label, const char* id, float* item, float dragSpeed = 0.1f, float min = 0.1f, float max = 10.0f, const char* fmt = "%.1f")
     {
+        ImGui::PushID(id);
         ImGui::Text(label);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(defaultItemWidth);
-        return ImGui::DragFloat(id, item, dragSpeed, min, max, fmt);
+        auto result = ImGui::DragFloat("", item, dragSpeed, min, max, fmt);
+        ImGui::PopID();
+        return result;
     };
 
     inline void textBlockWidget(const char* label, ImVec2 size, ImVec4 bgColor, ImVec4 textColor)
@@ -41,43 +42,29 @@ namespace nc::ui::editor
         const ImVec2 buttonSize{defaultItemWidth, 0};
 
         ImGui::BeginGroup();
-            ImGui::PushItemWidth(defaultItemWidth);
-            ImGui::Indent();
-
-            ImGui::Text(frontPadding);
-            ImGui::SameLine();
-
+        ImGui::PushItemWidth(defaultItemWidth);
+        ImGui::Indent();
+            ImGui::Text(frontPadding); ImGui::SameLine();
             textBlockWidget("X##widgetHeader", buttonSize, color::Clear, color::Red);   ImGui::SameLine();
             textBlockWidget("Y##widgetHeader", buttonSize, color::Clear, color::Green); ImGui::SameLine();
             textBlockWidget("Z##widgetHeader", buttonSize, color::Clear, color::Blue);
-
-            ImGui::PopItemWidth();
+        ImGui::PopItemWidth();
         ImGui::EndGroup();
     }
 
-    inline bool xyzWidget(const char* groupLabel, const char* idSuffix, float* x, float* y, float* z = nullptr, float min = -50.0f, float max = 50.0f)
+    inline bool xyzWidget(const char* groupLabel, const char* id, float* x, float* y, float* z, float min = -50.0f, float max = 50.0f)
     {
-        char buffer[128] = "###float3Widget";
-        std::strcat(buffer, idSuffix);
-
+        ImGui::PushID(id);
         ImGui::PushItemWidth(defaultItemWidth);
         ImGui::BeginGroup();
             ImGui::Indent();
             ImGui::Text(groupLabel); ImGui::SameLine();
-
-            auto xResult = ImGui::DragFloat(buffer, x, 0.1f, min, max, "%.1f"); ImGui::SameLine();
-
-            std::strcat(buffer, "x");
-            auto yResult = ImGui::DragFloat(buffer, y, 0.1f, min, max, "%.1f"); ImGui::SameLine();
-
-            auto zResult = false;
-            if(z)
-            {
-                std::strcat(buffer, "x");
-                zResult = ImGui::DragFloat(buffer, z, 0.1f, min, max, "%.1f");
-            }
+            auto xResult = floatWidget("", "x", x, 0.1f, min, max, "%.1f"); ImGui::SameLine();
+            auto yResult = floatWidget("", "y", y, 0.1f, min, max, "%.1f"); ImGui::SameLine();
+            auto zResult = floatWidget("", "z", z, 0.1f, min, max, "%.1f");
         ImGui::EndGroup();
         ImGui::PopItemWidth();
+        ImGui::PopID();
 
         return xResult || yResult || zResult;
     };
@@ -87,18 +74,14 @@ namespace nc::ui::editor
         const ImVec2 buttonSize{defaultItemWidth, 0};
 
         ImGui::BeginGroup();
-            ImGui::PushItemWidth(defaultItemWidth);
-            ImGui::Indent();
-
-            ImGui::Text(frontPadding);
-            ImGui::SameLine();
-
+        ImGui::PushItemWidth(defaultItemWidth);
+        ImGui::Indent();
+            ImGui::Text(frontPadding); ImGui::SameLine();
             textBlockWidget(label1, buttonSize, color::Clear, color::White); ImGui::SameLine();
             textBlockWidget(label2, buttonSize, color::Clear, color::White); ImGui::SameLine();
             if(label3)
                 textBlockWidget(label3, buttonSize, color::Clear, color::White);
-
-            ImGui::PopItemWidth();
+        ImGui::PopItemWidth();
         ImGui::EndGroup();
     }
 }

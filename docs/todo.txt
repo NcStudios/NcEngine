@@ -2,6 +2,8 @@
 IN PROGRESS
 ***********
 
+-PointLight ctor should be able to take PointLight::Properties
+
 GfxResMan should try to get rid of strings as keys
 Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 
@@ -16,6 +18,8 @@ BUGS
 ***********
 TO ADD
 ***********
+-<source_location> added in gcc 11; when mingw gets it change from <experimental/source_location>
+
 -add global search to api - GlobalGetComponent
 -update physics to 3d
 -lights

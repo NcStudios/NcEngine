@@ -1,7 +1,7 @@
 #include "Prefabs.h"
 #include "component/NetworkDispatcher.h"
 #include "components/GamePiece.h"
-#include "graphics/materials/Material.h"
+#include "graphics/Material.h"
 #include "source/network/Packet.h"
 
 using namespace nc;
@@ -133,201 +133,201 @@ void InitializeResources()
     mesh::PlayerBoard = graphics::Mesh{"project/Models/PlayerBoard.fbx"};
 
     const std::vector<std::string> boarTextures = {"project//Textures//BoarPiece_Material_BaseColor.png", "project//Textures//BoarPiece_Material_Normal.png",  "project//Textures//BoarPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Boar =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(boarTextures, materialProperties);
+    material::Boar =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(boarTextures, materialProperties);
 
     const std::vector<std::string> cattleTextures = {"project//Textures//CattlePiece_Material_BaseColor.png", "project//Textures//CattlePiece_Material_Normal.png",  "project//Textures//CattlePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Cattle =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(cattleTextures, materialProperties);
+    material::Cattle =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cattleTextures, materialProperties);
 
     const std::vector<std::string> coalTextures = {"project//Textures//CoalPiece_Material_BaseColor.png", "project//Textures//CoalPiece_Material_Normal.png",  "project//Textures//CoalPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Coal =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(coalTextures, materialProperties);
+    material::Coal =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(coalTextures, materialProperties);
 
     const std::vector<std::string> coinOneTextures = {"project//Textures//OneCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::CoinOne =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(coinOneTextures, materialProperties);
+    material::CoinOne =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(coinOneTextures, materialProperties);
 
     const std::vector<std::string> coinTwoTextures = {"project//Textures//TwoCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::CoinTwo =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(coinTwoTextures, materialProperties);
+    material::CoinTwo =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(coinTwoTextures, materialProperties);
 
     const std::vector<std::string> coinTenTextures = {"project//Textures//TenCoinPiece_Material_BaseColor.png", "project//Textures//CoinPiece_Material_Normal.png",  "project//Textures//CoinPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::CoinTen =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(coinTenTextures, materialProperties);
+    material::CoinTen =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(coinTenTextures, materialProperties);
 
     const std::vector<std::string> dogTextures = {"project//Textures//DogPiece_Material_BaseColor.png", "project//Textures//DogPiece_Material_Normal.png",  "project//Textures//DogPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Dog =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(dogTextures, materialProperties);
+    material::Dog =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(dogTextures, materialProperties);
 
     const std::vector<std::string> donkeyTextures = {"project//Textures//DonkeyPiece_Material_BaseColor.png", "project//Textures//DonkeyPiece_Material_Normal.png",  "project//Textures//DonkeyPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Donkey =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(donkeyTextures, materialProperties);
+    material::Donkey =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(donkeyTextures, materialProperties);
 
     const std::vector<std::string> dwarfTextures = {"nc//source//graphics//DefaultTexture.png", "project//Textures//DwarfDisc_Material_Normal.png",  "project//Textures//DwarfDisc_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Dwarf =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(dwarfTextures, materialProperties);
+    material::Dwarf =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(dwarfTextures, materialProperties);
 
     const std::vector<std::string> grainTextures = {"project//Textures//GrainPiece_Material_BaseColor.png", "project//Textures//GrainPiece_Material_Normal.png",  "project//Textures//GrainPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Grain =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(grainTextures, materialProperties);
+    material::Grain =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(grainTextures, materialProperties);
     
     const std::vector<std::string> rubyTextures = {"project//Textures//RubyPiece_Material_BaseColor.png", "project//Textures//RubyPiece_Material_Normal.png",  "project//Textures//RubyPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Ruby =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(rubyTextures, materialProperties);
+    material::Ruby =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(rubyTextures, materialProperties);
 
     const std::vector<std::string> sheepTextures = {"project//Textures//SheepPiece_Material_BaseColor.png", "project//Textures//SheepPiece_Material_Normal.png",  "project//Textures//SheepPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Sheep =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(sheepTextures, materialProperties);
+    material::Sheep =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(sheepTextures, materialProperties);
 
     const std::vector<std::string> stableTextures = {"nc//source//graphics//DefaultTexture.png", "project//Textures//StablePiece_Material_Normal.png",  "project//Textures//StablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Stable =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(stableTextures, materialProperties);
+    material::Stable =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(stableTextures, materialProperties);
 
     const std::vector<std::string> startingPlayerPieceTextures = {"project//Textures//StartingPlayerPiece_Material_BaseColor.png", "project//Textures//StartingPlayerPiece_Material_Normal.png",  "project//Textures//StartingPlayerPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::StartingPlayerPiece =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(startingPlayerPieceTextures, materialProperties);
+    material::StartingPlayerPiece =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(startingPlayerPieceTextures, materialProperties);
 
     const std::vector<std::string> stoneTextures = {"project//Textures//StonePiece_Material_BaseColor.png", "project//Textures//StonePiece_Material_Normal.png",  "project//Textures//StonePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Stone =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(stoneTextures, materialProperties);
+    material::Stone =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(stoneTextures, materialProperties);
 
     const std::vector<std::string> vegetableTextures = {"project//Textures//VegetablePiece_Material_BaseColor.png", "project//Textures//VegetablePiece_Material_Normal.png",  "project//Textures//VegetablePiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Vegetable =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(vegetableTextures, materialProperties);
+    material::Vegetable =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(vegetableTextures, materialProperties);
 
     const std::vector<std::string> woodTextures = {"project//Textures//WoodPiece_Material_BaseColor.png", "project//Textures//WoodPiece_Material_Normal.png",  "project//Textures//WoodPiece_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-    material::Wood =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(woodTextures, materialProperties);
+    material::Wood =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(woodTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileAdditionalDwellingTextures = {"project//Textures//FurnishingTiles//FT_AdditionalDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileAdditionalDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileAdditionalDwellingTextures, materialProperties);
+    material::FurnishingTileAdditionalDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileAdditionalDwellingTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileCoupleDwellingTextures = {"project//Textures//FurnishingTiles//FT_CoupleDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileCoupleDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileCoupleDwellingTextures, materialProperties);
+    material::FurnishingTileCoupleDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileCoupleDwellingTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileDwellingTextures = {"project//Textures//FurnishingTiles//FT_Dwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileDwellingTextures, materialProperties);
+    material::FurnishingTileDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileDwellingTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileBeerParlorTextures = {"project//Textures//FurnishingTiles//FT_BeerParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileBeerParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileBeerParlorTextures, materialProperties);
+    material::FurnishingTileBeerParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileBeerParlorTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileBlacksmithingParlorTextures = {"project//Textures//FurnishingTiles//FT_BlacksmithingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileBlacksmithingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileBlacksmithingParlorTextures, materialProperties);
+    material::FurnishingTileBlacksmithingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileBlacksmithingParlorTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileBlacksmithTextures = {"project//Textures//FurnishingTiles//FT_Blacksmith_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileBlacksmith =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileBlacksmithTextures, materialProperties);
+    material::FurnishingTileBlacksmith =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileBlacksmithTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileBreakfastRoomTextures = {"project//Textures//FurnishingTiles//FT_BreakfastRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileBreakfastRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileBreakfastRoomTextures, materialProperties);
+    material::FurnishingTileBreakfastRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileBreakfastRoomTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileBreedingCaveTextures = {"project//Textures//FurnishingTiles//FT_BreedingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileBreedingCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileBreedingCaveTextures, materialProperties);
+    material::FurnishingTileBreedingCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileBreedingCaveTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileBroomChamberTextures = {"project//Textures//FurnishingTiles//FT_BroomChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileBroomChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileBroomChamberTextures, materialProperties);
+    material::FurnishingTileBroomChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileBroomChamberTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileBuilderTextures = {"project//Textures//FurnishingTiles//FT_Builder_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileBuilder =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileBuilderTextures, materialProperties);
+    material::FurnishingTileBuilder =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileBuilderTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileCarpenterTextures = {"project//Textures//FurnishingTiles//FT_Carpenter_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileCarpenter =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileCarpenterTextures, materialProperties);
+    material::FurnishingTileCarpenter =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileCarpenterTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileCookingCaveTextures = {"project//Textures//FurnishingTiles//FT_CookingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileCookingCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileCookingCaveTextures, materialProperties);
+    material::FurnishingTileCookingCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileCookingCaveTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileCuddleRoomTextures = {"project//Textures//FurnishingTiles//FT_CuddleRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileCuddleRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileCuddleRoomTextures, materialProperties);
+    material::FurnishingTileCuddleRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileCuddleRoomTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileDogSchoolTextures = {"project//Textures//FurnishingTiles//FT_DogSchool_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileDogSchool =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileDogSchoolTextures, materialProperties);
+    material::FurnishingTileDogSchool =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileDogSchoolTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileFodderChamberTextures = {"project//Textures//FurnishingTiles//FT_FodderChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileFodderChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileFodderChamberTextures, materialProperties);
+    material::FurnishingTileFodderChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileFodderChamberTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileFoodChamberTextures = {"project//Textures//FurnishingTiles//FT_FoodChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileFoodChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileFoodChamberTextures, materialProperties);
+    material::FurnishingTileFoodChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileFoodChamberTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileGuestRoomTextures = {"project//Textures//FurnishingTiles//FT_GuestRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileGuestRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileGuestRoomTextures, materialProperties);
+    material::FurnishingTileGuestRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileGuestRoomTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileHuntingParlorTextures = {"project//Textures//FurnishingTiles//FT_HuntingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileHuntingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileHuntingParlorTextures, materialProperties);
+    material::FurnishingTileHuntingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileHuntingParlorTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileMainStorageTextures = {"project//Textures//FurnishingTiles//FT_MainStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileMainStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileMainStorageTextures, materialProperties);
+    material::FurnishingTileMainStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileMainStorageTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileMilkingParlorTextures = {"project//Textures//FurnishingTiles//FT_MilkingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileMilkingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileMilkingParlorTextures, materialProperties);
+    material::FurnishingTileMilkingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileMilkingParlorTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileMinerTextures = {"project//Textures//FurnishingTiles//FT_Miner_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileMiner =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileMinerTextures, materialProperties);
+    material::FurnishingTileMiner =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileMinerTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileMiningCaveTextures = {"project//Textures//FurnishingTiles//FT_MiningCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileMiningCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileMiningCaveTextures, materialProperties);
+    material::FurnishingTileMiningCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileMiningCaveTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileMixedDwellingTextures = {"project//Textures//FurnishingTiles//FT_MixedDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileMixedDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileMixedDwellingTextures, materialProperties);
+    material::FurnishingTileMixedDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileMixedDwellingTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileOfficeRoomTextures = {"project//Textures//FurnishingTiles//FT_OfficeRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileOfficeRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileOfficeRoomTextures, materialProperties);
+    material::FurnishingTileOfficeRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileOfficeRoomTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileOreStorageTextures = {"project//Textures//FurnishingTiles//FT_OreStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileOreStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileOreStorageTextures, materialProperties);
+    material::FurnishingTileOreStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileOreStorageTextures, materialProperties);
 
     const std::vector<std::string> furnishingTilePeacefulCaveTextures = {"project//Textures//FurnishingTiles//FT_PeacefulCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTilePeacefulCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTilePeacefulCaveTextures, materialProperties);
+    material::FurnishingTilePeacefulCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTilePeacefulCaveTextures, materialProperties);
 
     const std::vector<std::string> furnishingTilePrayerChamberTextures = {"project//Textures//FurnishingTiles//FT_PrayerChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTilePrayerChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTilePrayerChamberTextures, materialProperties);
+    material::FurnishingTilePrayerChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTilePrayerChamberTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileQuarryTextures = {"project//Textures//FurnishingTiles//FT_Quarry_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileQuarry =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileQuarryTextures, materialProperties);
+    material::FurnishingTileQuarry =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileQuarryTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileRubySupplierTextures = {"project//Textures//FurnishingTiles//FT_RubySupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileRubySupplier =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileRubySupplierTextures, materialProperties);
+    material::FurnishingTileRubySupplier =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileRubySupplierTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileSeamTextures = {"project//Textures//FurnishingTiles//FT_Seam_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileSeam =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileSeamTextures, materialProperties);
+    material::FurnishingTileSeam =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileSeamTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileSimpleDwellingTextures = {"project//Textures//FurnishingTiles//FT_SimpleDwelling_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileSimpleDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileSimpleDwellingTextures, materialProperties);
+    material::FurnishingTileSimpleDwelling =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileSimpleDwellingTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileSimpleDwelling2 = {"project//Textures//FurnishingTiles//FT_SimpleDwelling2_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileSimpleDwelling2 =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileSimpleDwelling2, materialProperties);
+    material::FurnishingTileSimpleDwelling2 =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileSimpleDwelling2, materialProperties);
 
     const std::vector<std::string> furnishingTileSlaughterCaveTextures = {"project//Textures//FurnishingTiles//FT_SlaughteringCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileSlaughterCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileSlaughterCaveTextures, materialProperties);
+    material::FurnishingTileSlaughterCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileSlaughterCaveTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileSparePartStorageTextures = {"project//Textures//FurnishingTiles//FT_SparePartStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileSparePartStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileSparePartStorageTextures, materialProperties);
+    material::FurnishingTileSparePartStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileSparePartStorageTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileStateParlorTextures = {"project//Textures//FurnishingTiles//FT_StateParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileStateParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileStateParlorTextures, materialProperties);
+    material::FurnishingTileStateParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileStateParlorTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileStoneCarverTextures = {"project//Textures//FurnishingTiles//FT_StoneCarver_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileStoneCarver =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileStoneCarverTextures, materialProperties);
+    material::FurnishingTileStoneCarver =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileStoneCarverTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileStoneStorageTextures = {"project//Textures//FurnishingTiles//FT_StoneStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileStoneStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileStoneStorageTextures, materialProperties);
+    material::FurnishingTileStoneStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileStoneStorageTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileStoneSupplierTextures = {"project//Textures//FurnishingTiles//FT_StoneSupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileStoneSupplier =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileStoneSupplierTextures, materialProperties);
+    material::FurnishingTileStoneSupplier =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileStoneSupplierTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileStubbleRoomTextures = {"project//Textures//FurnishingTiles//FT_StubbleRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileStubbleRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileStubbleRoomTextures, materialProperties);
+    material::FurnishingTileStubbleRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileStubbleRoomTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileSuppliesStorageTextures = {"project//Textures//FurnishingTiles//FT_SuppliesStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileSuppliesStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileSuppliesStorageTextures, materialProperties);
+    material::FurnishingTileSuppliesStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileSuppliesStorageTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileTraderTextures = {"project//Textures//FurnishingTiles//FT_Trader_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileTrader =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileTraderTextures, materialProperties);
+    material::FurnishingTileTrader =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileTraderTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileTreasureChamberTextures = {"project//Textures//FurnishingTiles//FT_TreasureChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileTreasureChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileTreasureChamberTextures, materialProperties);
+    material::FurnishingTileTreasureChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileTreasureChamberTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileWeaponStorageTextures = {"project//Textures//FurnishingTiles//FT_WeaponStorage_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileWeaponStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileWeaponStorageTextures, materialProperties);
+    material::FurnishingTileWeaponStorage =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileWeaponStorageTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileWeavingParlorTextures = {"project//Textures//FurnishingTiles//FT_WeavingParlor_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileWeavingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileWeavingParlorTextures, materialProperties);
+    material::FurnishingTileWeavingParlor =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileWeavingParlorTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileWoodSupplierTextures = {"project//Textures//FurnishingTiles//FT_WoodSupplier_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileWoodSupplier =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileWoodSupplierTextures, materialProperties);
+    material::FurnishingTileWoodSupplier =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileWoodSupplierTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileWorkingCaveTextures = {"project//Textures//FurnishingTiles//FT_WorkingCave_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileWorkingCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileWorkingCaveTextures, materialProperties);
+    material::FurnishingTileWorkingCave =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileWorkingCaveTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileWorkRoomTextures = {"project//Textures//FurnishingTiles//FT_WorkRoom_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileWorkRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileWorkRoomTextures, materialProperties);
+    material::FurnishingTileWorkRoom =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileWorkRoomTextures, materialProperties);
 
     const std::vector<std::string> furnishingTileWritingChamberTextures = {"project//Textures//FurnishingTiles//FT_WritingChamber_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png", "nc//source//graphics//DefaultTexture.png", "nc//source//graphics//DefaultTexture.png"};
-    material::FurnishingTileWritingChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(furnishingTileWritingChamberTextures, materialProperties);
+    material::FurnishingTileWritingChamber =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(furnishingTileWritingChamberTextures, materialProperties);
 
-    material::PlayerBoard =graphics::Material::CreateMaterial<graphics::TechniqueType::WireframeTechnique>();
+    material::PlayerBoard =graphics::Material::CreateMaterial<graphics::TechniqueType::Wireframe>();
 }
 
 template<Resource Resource_t>
@@ -335,499 +335,499 @@ EntityHandle Create_(Vector3, Quaternion, Vector3, std::string);
 
 template<> EntityHandle Create_<Resource::Boar>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Boar, material::Boar);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    auto gamePiece = Ecs::AddComponent<project::GamePiece>(handle, transform);
-    auto dispatcher = Ecs::AddComponent<NetworkDispatcher>(handle);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Boar, material::Boar);
+    auto transform = GetComponent<Transform>(handle);
+    auto gamePiece = AddComponent<project::GamePiece>(handle, transform);
+    auto dispatcher = AddComponent<NetworkDispatcher>(handle);
     dispatcher->AddHandler(nc::net::PacketType::TestNetworkDispatcher, std::bind(gamePiece->NetworkDispatchTest, gamePiece, std::placeholders::_1));
     return handle;
 }
 
 template<> EntityHandle Create_<project::prefab::Resource::Cattle>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Cattle, material::Cattle);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Cattle, material::Cattle);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<project::prefab::Resource::Coal>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Coal, material::Coal);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Coal, material::Coal);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::CoinOne>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::CoinOne);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Disc, material::CoinOne);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::CoinTwo>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::CoinTwo);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Disc, material::CoinTwo);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::CoinTen>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::CoinTen);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Disc, material::CoinTen);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Dog>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Dog, material::Dog);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Dog, material::Dog);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Donkey>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Donkey, material::Donkey);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Donkey, material::Donkey);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Dwarf>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Disc, material::Dwarf);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Disc, material::Dwarf);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Grain>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Grain, material::Grain);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Grain, material::Grain);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Ruby>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Ruby, material::Ruby);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Ruby, material::Ruby);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Sheep>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Sheep, material::Sheep);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Sheep, material::Sheep);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Stable>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Stable, material::Stable);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Stable, material::Stable);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::StartingPlayerPiece>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::StartingPlayerPiece, material::StartingPlayerPiece);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::StartingPlayerPiece, material::StartingPlayerPiece);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Stone>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Stone, material::Stone);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Stone, material::Stone);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Vegetable>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Vegetable, material::Vegetable);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Vegetable, material::Vegetable);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::Wood>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::Wood, material::Wood);
-    auto transform = Ecs::GetComponent<Transform>(handle);
-    Ecs::AddComponent<project::GamePiece>(handle, transform);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Wood, material::Wood);
+    auto transform = GetComponent<Transform>(handle);
+    AddComponent<project::GamePiece>(handle, transform);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::PlayerBoard>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::PlayerBoard, material::PlayerBoard);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::PlayerBoard, material::PlayerBoard);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileAdditionalDwelling>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileAdditionalDwelling);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileAdditionalDwelling);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileCoupleDwelling>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCoupleDwelling);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCoupleDwelling);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileDwelling>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDwelling);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDwelling);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileBeerParlor>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBeerParlor);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBeerParlor);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileBlacksmithingParlor>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmithingParlor);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmithingParlor);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileBlacksmith>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmith);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBlacksmith);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileBreakfastRoom>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreakfastRoom);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreakfastRoom);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileBreedingCave>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreedingCave);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBreedingCave);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileBroomChamber>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBroomChamber);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBroomChamber);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileBuilder>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBuilder);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileBuilder);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileCarpenter>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCarpenter);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCarpenter);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileCookingCave>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCookingCave);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCookingCave);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileCuddleRoom>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCuddleRoom);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileCuddleRoom);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileDogSchool>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDogSchool);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileDogSchool);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileFodderChamber>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFodderChamber);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFodderChamber);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileFoodChamber>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFoodChamber);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileFoodChamber);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileGuestRoom>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileGuestRoom);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileGuestRoom);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileHuntingParlor>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileHuntingParlor);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileHuntingParlor);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileMainStorage>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMainStorage);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMainStorage);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileMilkingParlor>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMilkingParlor);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMilkingParlor);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileMiner>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiner);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiner);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileMiningCave>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiningCave);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMiningCave);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileMixedDwelling>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMixedDwelling);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileMixedDwelling);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileOfficeRoom>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOfficeRoom);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOfficeRoom);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileOreStorage>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOreStorage);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileOreStorage);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTilePeacefulCave>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePeacefulCave);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePeacefulCave);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTilePrayerChamber>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePrayerChamber);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTilePrayerChamber);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileQuarry>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileQuarry);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileQuarry);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileRubySupplier>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileRubySupplier);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileRubySupplier);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileSeam>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSeam);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSeam);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileSimpleDwelling>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileSimpleDwelling2>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling2);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSimpleDwelling2);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileSlaughterCave>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSlaughterCave);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSlaughterCave);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileSparePartStorage>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSparePartStorage);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSparePartStorage);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileStateParlor>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStateParlor);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStateParlor);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileStoneCarver>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneCarver);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneCarver);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileStoneStorage>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneStorage);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneStorage);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileStoneSupplier>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneSupplier);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStoneSupplier);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileStubbleRoom>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStubbleRoom);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileStubbleRoom);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileSuppliesStorage>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSuppliesStorage);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileSuppliesStorage);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileTrader>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTrader);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTrader);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileTreasureChamber>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTreasureChamber);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileTreasureChamber);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileWeaponStorage>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeaponStorage);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeaponStorage);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileWeavingParlor>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeavingParlor);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWeavingParlor);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileWoodSupplier>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWoodSupplier);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWoodSupplier);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileWorkingCave>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkingCave);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkingCave);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileWorkRoom>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkRoom);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWorkRoom);
     return handle;
 }
 
 template<> EntityHandle Create_<Resource::FurnishingTileWritingChamber>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
-    auto handle = Ecs::CreateEntity(position, rotation, scale, tag);
-    Ecs::AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWritingChamber);
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::FurnishingTile, material::FurnishingTileWritingChamber);
     return handle;
 }
 

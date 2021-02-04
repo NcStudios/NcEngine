@@ -1,11 +1,11 @@
 #include "PhongShadingTechnique.h"
-#include "TechniqueType.h"
-#include "graphics/materials/MaterialProperties.h"
+#include "graphics/TechniqueType.h"
+#include "graphics/MaterialProperties.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/d3dresource/ShaderResources.h"
 #include "graphics/d3dresource/MeshResources.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
-#include "Engine.h"
+#include "config/Config.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -63,17 +63,16 @@ namespace nc::graphics
             ImGui::Text("Material Color"); ImGui::SameLine(); bool mcDirty = ImGui::ColorEdit3("##mc", &(m_materialProperties.color.x), ImGuiColorEditFlags_NoInputs);
             ImGui::Text("Specular");
             ImGui::Indent();
-                bool siDirty = ui::editor::floatWidget("Intensity", "##specintensity", &m_materialProperties.specularIntensity, dragSpeed,  0.05f, 4.0f, "%.2f");
-                bool spDirty = ui::editor::floatWidget("Power    ", "##specpower", &m_materialProperties.specularPower, dragSpeed,  0.5f, 13.0f, "%.2f");
+                bool siDirty = ui::editor::floatWidget("Intensity", "specintensity", &m_materialProperties.specularIntensity, dragSpeed,  0.05f, 4.0f, "%.2f");
+                bool spDirty = ui::editor::floatWidget("Power    ", "specpower", &m_materialProperties.specularPower, dragSpeed,  0.5f, 13.0f, "%.2f");
             ImGui::Unindent();
-            bool txDirty = ui::editor::floatWidget("X Tiling", "##tx", &m_materialProperties.xTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
-            bool tyDirty = ui::editor::floatWidget("Y Tiling", "##ty", &m_materialProperties.yTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
+            bool txDirty = ui::editor::floatWidget("X Tiling", "tilex", &m_materialProperties.xTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
+            bool tyDirty = ui::editor::floatWidget("Y Tiling", "tiley", &m_materialProperties.yTiling, dragSpeed, 0.001f, 100.0f, "%.2f");
         ImGui::Unindent();
 
         if(mcDirty || siDirty || spDirty || txDirty || tyDirty)
         {
             m_materialPropertiesBuffer->Update(m_materialProperties);
-
         }
     }
     
@@ -81,7 +80,7 @@ namespace nc::graphics
 
     size_t PhongShadingTechnique::GetUID(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties) noexcept
     {
-        auto hash = std::to_string((uint8_t)TechniqueType::PhongShadingTechnique);
+        auto hash = std::to_string((uint8_t)TechniqueType::PhongShading);
         for (const auto& texturePathRef : texturePaths) 
         {
             hash += texturePathRef;
@@ -105,7 +104,7 @@ namespace nc::graphics
         PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Solid));
 
         // Add vertex shader
-        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
+        auto defaultShaderPath = nc::config::Get().graphics.shadersPath;
         auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "phongvertexshader.cso");
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         PhongShadingTechnique::m_commonResources.push_back(std::move(pvs));

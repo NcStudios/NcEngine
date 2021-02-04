@@ -1,5 +1,5 @@
 #pragma once
-#include "nc/source/component/Transform.h"
+#include "component/Transform.h"
 
 namespace project
 {

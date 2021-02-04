@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc/source/component/Component.h"
+#include "component/Component.h"
 
 #include <memory>
 

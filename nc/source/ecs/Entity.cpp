@@ -1,5 +1,7 @@
 #include "Entity.h"
 
+#include <algorithm>
+
 namespace nc
 {
 Entity::Entity(const EntityHandle handle, const std::string& tag) noexcept
@@ -9,9 +11,14 @@ Entity::Entity(const EntityHandle handle, const std::string& tag) noexcept
 {
 }
 
-const std::vector<std::unique_ptr<Component>> & Entity::GetUserComponents() const noexcept
+std::vector<Component*> Entity::GetUserComponents() const noexcept
 {
-    return m_userComponents;
+    std::vector<Component*> out(m_userComponents.size());
+    std::transform(m_userComponents.cbegin(), m_userComponents.cend(), out.begin(), [](const auto& ptr)
+    {
+        return ptr.get();
+    });
+    return out;
 }
 
 void Entity::SendFrameUpdate(float dt) noexcept
