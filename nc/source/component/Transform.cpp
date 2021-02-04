@@ -161,6 +161,7 @@ namespace nc
             DirectX::XMVECTOR pos_v, rot_v, scl_v;
             DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
             trans_v = DirectX::XMVector3Transform(trans_v, DirectX::XMMatrixRotationQuaternion(rot_v));
+            trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
         }
         m_matrix.r[3] += trans_v;
     }
