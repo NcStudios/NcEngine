@@ -13,7 +13,6 @@ namespace nc::scene
             
             void QueueSceneChange(std::unique_ptr<Scene>&& swapScene);
             bool IsSceneChangeScheduled() const;
-            void LoadActiveScene();
             void UnloadActiveScene();
             void DoSceneChange();
 

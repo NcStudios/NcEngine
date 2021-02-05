@@ -34,9 +34,10 @@ namespace nc::graphics
     {
         WireframeTechnique::InitializeCommonResources();
 
+        /** @note A step is required w/ the curring setup, even if it does no work. 
+         *  I'm leaving it for now as it isn't clear how vulkan will change this. */
         Step single(1);
         {
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Wireframe));
         }
         AddStep(std::move(single));
     }
@@ -65,6 +66,7 @@ namespace nc::graphics
 
         isInitialized = true;
 
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Wireframe));
         WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
 
         // Add vertex shader

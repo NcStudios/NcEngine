@@ -48,10 +48,11 @@ namespace project
         auto scale = Vector3::One() * 0.1f;
         auto boarHandle = prefab::Create(prefab::Resource::Boar, Vector3::One(), Quaternion::Identity(), Vector3::One() * 2, "Boar");
         AddComponent<Collider>(boarHandle, scale);
-        AddComponent<project::BoarMover>(boarHandle);
+        AddComponent<project::BoarMover>(boarHandle, true);
 
         auto boar2Handle = prefab::Create(prefab::Resource::Boar, Vector3::One(), Quaternion::Identity(), Vector3::One() * 2, "Boar2");
         AddComponent<Collider>(boar2Handle, scale);
+        AddComponent<project::BoarMover>(boar2Handle, false);
 
         const auto scaleFactor = 2;
         auto materialProperties = graphics::MaterialProperties{};

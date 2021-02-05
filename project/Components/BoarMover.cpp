@@ -13,13 +13,17 @@ namespace
 
 namespace project
 {
-    BoarMover::BoarMover(EntityHandle parentHandle)
+    BoarMover::BoarMover(EntityHandle parentHandle, bool update)
         : Component(parentHandle),
-          m_transform{GetComponent<Transform>(parentHandle)}
+          m_transform{GetComponent<Transform>(parentHandle)},
+          m_useInput{update}
     {}
 
     void BoarMover::FrameUpdate(float dt)
     {
+        if(!m_useInput)
+            return;
+
         float Factor = FACTOR * dt;
         
         if(input::GetKeyDown(input::KeyCode::W))

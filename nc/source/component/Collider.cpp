@@ -4,8 +4,6 @@
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
-#include <charconv>
-#endif
 
 namespace
 {
@@ -17,86 +15,64 @@ namespace
         return nc::graphics::Model{ {CubeMeshPath}, CreateMaterial() };
     }
 }
+#endif
 
 namespace nc
 {
+    #ifdef NC_EDITOR_ENABLED
     Collider::Collider(EntityHandle handle, Vector3 scale)
         : ComponentBase(handle),
-          m_transform{GetComponent<Transform>(handle)},
+          m_colliderMatrix{},
+          m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
           m_scale{scale},
           m_model{CreateBoxModel()},
-          m_currentCollisions{}
-    {}
+          m_selectedInEditor{false}
+    {
+    }
+    #else
+    Collider::Collider(EntityHandle handle, Vector3 scale)
+        : ComponentBase(handle),
+          m_colliderMatrix{},
+          m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
+          m_scale{scale}
+    {
+    }
+    #endif
 
     Collider::~Collider() = default;
 
-    void Collider::Update(graphics::FrameManager& frame)
+    void Collider::UpdateTransformationMatrix()
     {
-        IF_THROW(!m_transform, "ColliderBase::Update - Bad Transform Ptr");
-        m_model.SetTransformationMatrix(m_transform->GetTransformationMatrixEx(m_scale));
-        m_model.Submit(frame);
+        IF_THROW(m_scale == Vector3::Zero(), "Collider::UpdateTransformationMatrix - Scale cannot be zero");
+        m_colliderMatrix = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) * m_transformMatrix;
     }
 
     DirectX::FXMMATRIX Collider::GetTransformationMatrix() const
     {
-        return m_model.GetTransformationMatrix();
-    }
-
-    void Collider::UpdateCollisions(std::vector<Collider*> collisions)
-    {
-        auto entity = GetEntity(GetParentHandle());
-
-        for(auto prevCollision : collisions)
-        {
-            auto pos = std::find(collisions.begin(), collisions.end(), prevCollision);
-            auto otherEntity = GetEntity(prevCollision->GetParentHandle());
-
-            if(pos == collisions.end())
-            {
-                entity->SendOnCollisionExit(otherEntity);
-                otherEntity->SendOnCollisionExit(entity);
-            }
-            else
-            {
-                entity->SendOnCollisionStay(otherEntity);
-                otherEntity->SendOnCollisionStay(entity);
-            }
-        }
-
-        for(auto newCollision : collisions)
-        {
-            auto pos = std::find(m_currentCollisions.begin(), m_currentCollisions.end(), newCollision);
-            if(pos == m_currentCollisions.end())
-            {
-                auto otherEntity = GetEntity(newCollision->GetParentHandle());
-                entity->SendOnCollisionEnter(otherEntity);
-                otherEntity->SendOnCollisionEnter(entity);
-            }
-        }
-
-        m_currentCollisions = std::move(collisions);
+        return m_colliderMatrix;
     }
 
     #ifdef NC_EDITOR_ENABLED
+    void Collider::UpdateModel(graphics::FrameManager& frame)
+    {
+        // Expire to false to avoid state management in editor (it sets this to true as needed)
+        if(!std::exchange(m_selectedInEditor, false))
+            return;
+
+        m_model.SetTransformationMatrix(m_colliderMatrix);
+        m_model.Submit(frame);
+    }
+
     void Collider::EditorGuiElement()
     {
         ImGui::Text("Collider");
         ui::editor::xyzWidgetHeader("     ");
         ui::editor::xyzWidget("Scale", "colliderscale", &m_scale.x, &m_scale.y, &m_scale.z, 0.01f, 100.0f);
-        if(ImGui::CollapsingHeader("Current Collisions"))
-        {
-            std::array<char, 8> buf;
+    }
 
-            for(auto c : m_currentCollisions)
-            {
-                std::to_chars(buf.data(), buf.data() + buf.size(), static_cast<unsigned>(c->GetParentHandle()));
-                ImGui::Indent();
-                ImGui::Text("EntityHandle");
-                ImGui::SameLine();
-                ImGui::Text(buf.data());
-                ImGui::Unindent();
-            }
-        }
+    void Collider::SetEditorSelection(bool state)
+    {
+        m_selectedInEditor = state;
     }
     #endif
 }

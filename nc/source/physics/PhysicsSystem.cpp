@@ -1,5 +1,6 @@
 #include "PhysicsSystem.h"
 #include "Physics.h"
+#include "CollisionDetection.inl"
 #include "debug/Utils.h"
 #include "Input.h"
 #include "component/Transform.h"
@@ -56,27 +57,9 @@ namespace nc::physics
         m_clickableComponents.clear();
     }
 
-    void PhysicsSystem::CheckCollisions(std::vector<Collider*> colliders)
+    void PhysicsSystem::DoPhysicsStep(const std::vector<Collider*>& colliders)
     {
-        DirectX::BoundingOrientedBox unit, a, b;
-        const auto count = colliders.size();
-
-        for(size_t i = 0u; i < count; ++i)
-        {
-            unit.Transform(a, colliders[i]->GetTransformationMatrix());
-            std::vector<Collider*> collidingWithA;
-
-            for(size_t j = i + 1; j < count; ++j)
-            {
-                unit.Transform(b, colliders[j]->GetTransformationMatrix());
-                if(a.Intersects(b))
-                {
-                    collidingWithA.push_back(colliders[j]);
-                }
-            }
-
-            colliders[i]->UpdateCollisions(std::move(collidingWithA));
-        }
+        DoCollisionStep(colliders);
     }
 
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)

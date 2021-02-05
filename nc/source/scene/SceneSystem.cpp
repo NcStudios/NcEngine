@@ -37,15 +37,6 @@ namespace nc::scene
         return m_isSceneChangeScheduled;
     }
 
-    void SceneSystem::LoadActiveScene()
-    {
-        if(!m_activeScene)
-        {
-            throw std::runtime_error("Attempt to load null scene");
-        }
-        m_activeScene->Load();
-    }
-
     void SceneSystem::UnloadActiveScene()
     {
         if(!m_activeScene)
@@ -65,5 +56,6 @@ namespace nc::scene
         m_activeScene = std::move(m_swapScene);
         m_swapScene = nullptr;
         m_isSceneChangeScheduled = false;
+        m_activeScene->Load();
     }
 }

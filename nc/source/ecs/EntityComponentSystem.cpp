@@ -6,6 +6,7 @@
 #include "component/PointLight.h"
 #include "component/PointLightManager.h"
 #include "component/Renderer.h"
+#include "component/Transform.h"
 
 namespace
 {

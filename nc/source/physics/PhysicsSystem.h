@@ -21,7 +21,7 @@ namespace nc::physics
 
             void ClearState();
 
-            void CheckCollisions(std::vector<Collider*> colliders);
+            void DoPhysicsStep(const std::vector<Collider*>& colliders);
 
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove);

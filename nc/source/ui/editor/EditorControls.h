@@ -66,7 +66,12 @@ namespace nc::ui::editor::controls
         controls::Component(GetComponent<Transform>(handle));
         controls::Component(GetComponent<NetworkDispatcher>(handle));
         controls::Component(GetComponent<Renderer>(handle));
-        controls::Component(GetComponent<Collider>(handle));
+        if(auto col = GetComponent<Collider>(handle); col)
+        {
+            // collider model doesn't update/submit unless we tell it to
+            col->SetEditorSelection(true);
+            controls::Component(col);
+        }
         controls::Component(GetComponent<PointLight>(handle));
         for(const auto& comp : GetEntity(handle)->GetUserComponents())
             controls::Component(comp);
