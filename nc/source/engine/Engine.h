@@ -6,6 +6,7 @@
 #include "physics/PhysicsSystem.h"
 #include "component/PointLightManager.h"
 #include "scene/SceneSystem.h"
+#include "time/NcTime.h"
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
 
@@ -21,11 +22,6 @@ namespace nc::core
             void DisableRunningFlag();
             void MainLoop(std::unique_ptr<scene::Scene> initialScene);
             void Shutdown();
-            void ClearState();
-            void DoSceneSwap();
-            void FrameLogic(float dt);
-            void FrameRender();
-            void FrameCleanup();
 
         private:
             bool m_isRunning;
@@ -38,7 +34,14 @@ namespace nc::core
             PointLightManager m_pointLightManager;
             scene::SceneSystem m_sceneSystem;
             graphics::FrameManager m_frameManager;
+            time::Time m_time;
 
+            void ClearState();
+            void DoSceneSwap();
+            void FixedStepLogic();
+            void FrameLogic(float dt);
+            void FrameRender();
+            void FrameCleanup();
             void SetBindings();
     };
 } // end namespace nc::engine

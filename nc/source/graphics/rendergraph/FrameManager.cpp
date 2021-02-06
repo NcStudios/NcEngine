@@ -21,8 +21,8 @@ namespace nc::graphics
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
         // PBR Shading Pass
-       PhongShadingTechnique::BindCommonResources();
-       m_passes[0].Execute(gfx);
+        PhongShadingTechnique::BindCommonResources();
+        m_passes[0].Execute(gfx);
 
         // Wireframe Pass
         WireframeTechnique::BindCommonResources();

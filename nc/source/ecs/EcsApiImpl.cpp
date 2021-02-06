@@ -73,6 +73,7 @@ namespace nc
     template<> Collider* AddComponent<Collider>(EntityHandle handle, Vector3 scale)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<Collider> - Bad handle");
+        IF_THROW(scale == Vector3::Zero(), "AddComponent<Collider> - Scale cannot be Vector3::Zero");
         IF_THROW(internal::g_impl->GetSystem<Collider>()->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
 
         return internal::g_impl->GetSystem<Collider>()->Add(handle, scale);

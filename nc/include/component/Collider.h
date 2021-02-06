@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Transform.h"
+#include "component/Component.h"
 #include "math/Vector3.h"
 #include "graphics/Model.h"
 
@@ -11,15 +11,24 @@ namespace nc
         public:
             Collider(EntityHandle handle, Vector3 scale);
             ~Collider();
-            void Update(graphics::FrameManager& frame);
+
+            void UpdateTransformationMatrix();
+            DirectX::FXMMATRIX GetTransformationMatrix() const;
 
             #ifdef NC_EDITOR_ENABLED
+            void UpdateWidget(graphics::FrameManager& frame);
             void EditorGuiElement() override;
+            void SetEditorSelection(bool state);
             #endif
 
-        private:
-            Transform* m_transform;
+        protected:
+            DirectX::XMMATRIX m_colliderMatrix;
+            DirectX::FXMMATRIX m_transformMatrix;
             Vector3 m_scale;
-            graphics::Model m_model;
+
+            #ifdef NC_EDITOR_ENABLED
+            graphics::Model m_widgetModel;
+            bool m_selectedInEditor;
+            #endif
     };
 }

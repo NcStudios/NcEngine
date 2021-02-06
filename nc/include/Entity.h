@@ -27,9 +27,9 @@ namespace nc
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;
-            void SendOnCollisionEnter(const EntityHandle other) noexcept;
-            void SendOnCollisionStay() noexcept;
-            void SendOnCollisionExit() noexcept;
+            void SendOnCollisionEnter(Entity* other) noexcept;
+            void SendOnCollisionStay(Entity* other) noexcept;
+            void SendOnCollisionExit(Entity* other) noexcept;
 
             template<std::derived_from<Component> T, class ... Args>
             T * AddUserComponent(Args&& ... args) noexcept;

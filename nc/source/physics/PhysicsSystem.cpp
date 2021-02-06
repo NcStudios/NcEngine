@@ -1,11 +1,12 @@
 #include "PhysicsSystem.h"
 #include "Physics.h"
+#include "CollisionDetection.inl"
 #include "debug/Utils.h"
 #include "Input.h"
-#include "component/Transform.h"
 #include "Window.h"
 #include "graphics/Graphics.h"
 #include "MainCamera.h"
+#include "Ecs.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -44,6 +45,16 @@ namespace nc::physics
           m_graphics{ graphics }
     {
         impl = this;
+    }
+
+    void PhysicsSystem::ClearState()
+    {
+        m_clickableComponents.clear();
+    }
+
+    void PhysicsSystem::DoPhysicsStep(const std::vector<Collider*>& colliders)
+    {
+        DoCollisionStep(colliders);
     }
 
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)

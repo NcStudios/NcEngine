@@ -7,8 +7,6 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
-#include "time/NcTime.h"
-#include "time/NcTime.h"
 #include "Ecs.h"
 
 namespace nc::core
@@ -63,7 +61,8 @@ namespace nc::core
           m_ui{ m_window.GetHWND(), &m_graphics },
           m_pointLightManager{},
           m_sceneSystem{},
-          m_frameManager{}
+          m_frameManager{},
+          m_time{}
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -81,36 +80,26 @@ namespace nc::core
     void Engine::MainLoop(std::unique_ptr<scene::Scene> initialScene)
     {
         V_LOG("Starting engine loop");
-        time::Time ncTime;
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange();
-        m_sceneSystem.LoadActiveScene();
         auto fixedUpdateInterval = config::Get().physics.fixedUpdateInterval;
         m_isRunning = true;
 
         while(m_isRunning)
         {
             NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
-
-            ncTime.UpdateTime();
+            m_time.UpdateTime();
             m_window.ProcessSystemMessages();
 
-            /** @note Change this so physics 'simulates' running at a fixed interval.
-             * It may need to run multiple times in a row in cases where FrameUpdate()
-             * runs slowly and execution doesn't return back to physics in time for the 
-             * next interval.
-             */
             if (time::Time::FixedDeltaTime > fixedUpdateInterval)
             {
-                m_ecs.SendFixedUpdate();
-                ncTime.ResetFixedDeltaTime();
+                FixedStepLogic();
             }
 
             auto dt = time::Time::FrameDeltaTime * m_frameDeltaTimeFactor;
             FrameLogic(dt);
             FrameRender();
             FrameCleanup();
-            ncTime.ResetFrameDeltaTime();
             NC_PROFILE_END();
         }
 
@@ -137,7 +126,24 @@ namespace nc::core
         m_sceneSystem.UnloadActiveScene();
         ClearState();
         m_sceneSystem.DoSceneChange();
-        m_sceneSystem.LoadActiveScene();
+    }
+
+    void Engine::FixedStepLogic()
+    {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        /** @todo Temp solution or not? TBD - This isn't the worst considering
+         * we have to iterate once before collision checking anyways to update
+         * matrices. Iterators would generally be nice though... */
+        std::vector<Collider*> colliders;
+        m_ecs.GetSystem<Collider>()->ForEach([&colliders](auto& col)
+        {
+            col.UpdateTransformationMatrix();
+            colliders.push_back(&col);
+        });
+        m_physics.DoPhysicsStep(colliders);
+        m_ecs.SendFixedUpdate();
+        m_time.ResetFixedDeltaTime();
+        NC_PROFILE_END();
     }
 
     void Engine::FrameLogic(float dt)
@@ -170,10 +176,12 @@ namespace nc::core
             renderer.Update(frameManager);
         });
 
+        #ifdef NC_EDITOR_ENABLED
         m_ecs.GetSystem<Collider>()->ForEach([&frameManager](auto& collider)
         {
-            collider.Update(frameManager);
+            collider.UpdateWidget(frameManager);
         });
+        #endif
 
         m_frameManager.Execute(&m_graphics);
 
@@ -197,6 +205,7 @@ namespace nc::core
         }
         input::Flush();
         m_frameManager.Reset();
+        m_time.ResetFrameDeltaTime();
     }
 
     void Engine::SetBindings()

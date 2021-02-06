@@ -45,7 +45,7 @@ void Entity::SendOnDestroy() noexcept
     }
 }
 
-void Entity::SendOnCollisionEnter(const EntityHandle other) noexcept
+void Entity::SendOnCollisionEnter(Entity* other) noexcept
 {
     for(auto& comp : m_userComponents)
     {
@@ -53,19 +53,19 @@ void Entity::SendOnCollisionEnter(const EntityHandle other) noexcept
     }
 }
 
-void Entity::SendOnCollisionStay() noexcept
+void Entity::SendOnCollisionStay(Entity* other) noexcept
 {
     for(auto& comp : m_userComponents)
     {
-        comp->OnCollisionStay();
+        comp->OnCollisionStay(other);
     }
 }
 
-void Entity::SendOnCollisionExit() noexcept
+void Entity::SendOnCollisionExit(Entity* other) noexcept
 {
     for(auto& comp : m_userComponents)
     {
-        comp->OnCollisionExit();
+        comp->OnCollisionExit(other);
     }
 }
 } //end namespace nc

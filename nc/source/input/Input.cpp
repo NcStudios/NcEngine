@@ -1,3 +1,4 @@
+#include "Input.h"
 #include "InputInternal.h"
 
 #include <algorithm>
@@ -67,42 +68,41 @@ namespace nc::input
         return (GetAsyncKeyState((KeyCode_t)keyCode) & (1 << 15)) == 0 ? false : true;
     }
 
-void SetMouseWheel(WPARAM wParam, LPARAM)
-{
-    g_state.mouseWheel = GET_WHEEL_DELTA_WPARAM(wParam);
-}
-
-void ResetMouseState()
-{
-    g_state.mouseWheel = 0;
-}
-
-void AddToQueue(KeyCode_t keyCode, LPARAM lParam)
-{
-    bool WasDown = ((lParam & (1 << 30)) != 0);
-    bool IsDown  = ((lParam & (1 << 31)) == 0);
-    
-    if (WasDown && !IsDown)
+    void SetMouseWheel(WPARAM wParam, LPARAM)
     {
-        g_state.upKeys.emplace_back(keyCode, lParam);
+        g_state.mouseWheel = GET_WHEEL_DELTA_WPARAM(wParam);
     }
-    else if (IsDown)
+
+    void ResetMouseState()
     {
-        g_state.downKeys.emplace_back(keyCode, lParam);
+        g_state.mouseWheel = 0;
     }
-}
 
-void Flush()
-{
-    g_state.downKeys.clear();
-    g_state.upKeys.clear();
-    ResetMouseState();
-}
+    void AddToQueue(KeyCode_t keyCode, LPARAM lParam)
+    {
+        bool WasDown = ((lParam & (1 << 30)) != 0);
+        bool IsDown  = ((lParam & (1 << 31)) == 0);
+        
+        if (WasDown && !IsDown)
+        {
+            g_state.upKeys.emplace_back(keyCode, lParam);
+        }
+        else if (IsDown)
+        {
+            g_state.downKeys.emplace_back(keyCode, lParam);
+        }
+    }
 
-void UpdateMousePosition(LPARAM lParam)
-{
-    g_state.mouseX = GET_X_LPARAM(lParam); // extracted values can be negative so HI/LO WORD doesn't work
-    g_state.mouseY = GET_Y_LPARAM(lParam);
-}
+    void Flush()
+    {
+        g_state.downKeys.clear();
+        g_state.upKeys.clear();
+        ResetMouseState();
+    }
 
+    void UpdateMousePosition(LPARAM lParam)
+    {
+        g_state.mouseX = GET_X_LPARAM(lParam); // extracted values can be negative so HI/LO WORD doesn't work
+        g_state.mouseY = GET_Y_LPARAM(lParam);
+    }
 } //end namespace nc::input
