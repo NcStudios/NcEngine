@@ -3,7 +3,7 @@
 #include "MainCamera.h"
 #include "UI.h"
 #include "config/ProjectConfig.h"
-#include "components/CamController.h"
+#include "components/EdgePanCamera.h"
 #include "components/DebugComponents.h"
 #include "source/Prefabs.h"
 #include "components/GamePiece.h"
@@ -27,7 +27,6 @@ namespace project
         m_log = std::make_unique<project::log::GameLog>();
         m_hud = std::make_unique<project::ui::Hud>(m_log.get(), projectConfig);
         nc::ui::Set(m_hud.get());
-        auto materialProperties = graphics::MaterialProperties{};
 
         // Player Network Instance
         auto playerHandle = CreateEntity("Player");
@@ -36,20 +35,16 @@ namespace project
         // Light
         auto lvHandle = CreateEntity(Vector3{-2.4f, 12.1f, 0.0f}, Quaternion::Identity(), Vector3::One(), "Point Light");
         AddComponent<PointLight>(lvHandle);
-
-        // Light
         auto lvHandle2 = CreateEntity(Vector3{12.1f, 14.5f, 7.3f}, Quaternion::Identity(), Vector3::One(), "Point Light");
         AddComponent<PointLight>(lvHandle2);
-
-        // Light
         auto lvHandle3 = CreateEntity(Vector3{4.1f, 14.5f, 3.3f}, Quaternion::Identity(), Vector3::One(), "Point Light");
         AddComponent<PointLight>(lvHandle3);
 
-        //CamController
+        //Camera
         auto camHandle = CreateEntity(Vector3{0.0f, 5.0f, 0.0f}, Quaternion::FromEulerAngles(1.3f, 0.0f, 0.0f), Vector3::One(), "Main Camera");
         auto camComponentPtr = AddComponent<Camera>(camHandle);
         camera::SetMainCamera(camComponentPtr);
-        AddComponent<CamController>(camHandle);
+        AddComponent<EdgePanCamera>(camHandle);
         AddComponent<ClickHandler>(camHandle);
         
         // Debug Controller
@@ -57,14 +52,8 @@ namespace project
         AddComponent<SceneReset>(debugHandle);
         AddComponent<Timer>(debugHandle);
 
-        const auto scaleFactor = 2;
-
         // Table
-        const std::vector<std::string> tableTextures = {"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-        graphics::Material tableMaterial =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(tableTextures, materialProperties);
-        auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
-        auto tableHandle = CreateEntity(Vector3{2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::One() * 7.5, "Table Piece");
-        AddComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
+        prefab::Create(prefab::Resource::Table, Vector3{4.0f, -0.4f, 3.0f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::Splat(7.5f), "Table");
     }
     
     void GameScene::Unload()

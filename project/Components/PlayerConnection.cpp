@@ -26,7 +26,7 @@ namespace project
         {
             Packet::SpawnPrefab packet
             {
-                .resource = project::prefab::Resource::Boar,
+                .resource = project::prefab::Resource::Token,
                 .networkHandle = net::NullNetworkHandle,
                 .posX = 0.4f, .posY = 0.0f, .posZ = 0.4f,
                 .rotX = 1.57f, .rotY = 0.0f, .rotZ = 0.0f
