@@ -3,15 +3,10 @@
 #include "CollisionDetection.inl"
 #include "debug/Utils.h"
 #include "Input.h"
-#include "component/Transform.h"
 #include "Window.h"
 #include "graphics/Graphics.h"
 #include "MainCamera.h"
 #include "Ecs.h"
-
-#include "directx/math/DirectXMath.h"
-#include "directx/math/DirectXCollision.h"
-#include "component/Collider.h"
 
 #include <algorithm>
 #include <stdexcept>

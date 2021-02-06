@@ -16,7 +16,7 @@ namespace nc
             DirectX::FXMMATRIX GetTransformationMatrix() const;
 
             #ifdef NC_EDITOR_ENABLED
-            void UpdateModel(graphics::FrameManager& frame);
+            void UpdateWidget(graphics::FrameManager& frame);
             void EditorGuiElement() override;
             void SetEditorSelection(bool state);
             #endif
@@ -27,7 +27,7 @@ namespace nc
             Vector3 m_scale;
 
             #ifdef NC_EDITOR_ENABLED
-            graphics::Model m_model;
+            graphics::Model m_widgetModel;
             bool m_selectedInEditor;
             #endif
     };
