@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc/source/scene/Scene.h"
+#include "Scene.h"
 #include "source/log/GameLog.h"
 #include "source/ui/Hud.h"
 

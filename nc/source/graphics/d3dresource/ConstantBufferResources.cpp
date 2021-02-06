@@ -13,7 +13,7 @@ namespace nc::graphics::d3dresource
     TransformConstBufferVertexPixel::Transforms TransformConstBufferVertexPixel::GetTransforms() noexcept
     {
         const auto gfx = GraphicsResourceManager::GetGraphics();
-        const auto modelView = m_parent.GetTransformXM() * gfx->GetViewMatrix();
+        const auto modelView = m_parent.GetTransformationMatrix() * gfx->GetViewMatrix();
 
         return
         {

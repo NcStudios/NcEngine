@@ -2,6 +2,12 @@
 IN PROGRESS
 ***********
 
+-PointLight ctor should be able to take PointLight::Properties
+-Using Vector3::Zero for scale is invalid, does having and of x,y,z == 0 result in an invalid state? 
+-#ifdef editor stuff is getting out of hand; restore sanity
+-profiling only works well on per frame stuff; it is hard to get meaningful data about physics w/o syncing fixed/frame rates
+
+GfxResMan should try to get rid of strings as keys
 Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 
 ***********
@@ -15,6 +21,8 @@ BUGS
 ***********
 TO ADD
 ***********
+-<source_location> added in gcc 11; when mingw gets it change from <experimental/source_location>
+
 -add global search to api - GlobalGetComponent
 -update physics to 3d
 -lights

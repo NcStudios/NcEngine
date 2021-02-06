@@ -1,7 +1,7 @@
 #pragma once
 
-#include "LayerMask.h"
-#include "IClickable.h"
+#include "component/Collider.h"
+#include "physics/IClickable.h"
 #include "directx/math/DirectXMath.h"
 
 #include <vector>
@@ -22,6 +22,8 @@ namespace nc::physics
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove);
             IClickable* RaycastToClickables(LayerMask mask);
+            void DoPhysicsStep(const std::vector<Collider*>& colliders);
+            void ClearState();
 
         private:
             std::vector<nc::physics::IClickable*> m_clickableComponents;

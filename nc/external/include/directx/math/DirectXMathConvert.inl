@@ -515,6 +515,34 @@ inline XMVECTOR XM_CALLCONV XMLoadFloat3
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
+inline XMVECTOR XMLoadVector3
+(
+    const nc::Vector3* pSource
+)
+{
+    assert(pSource);
+#if defined(_XM_NO_INTRINSICS_)
+    XMVECTOR V;
+    V.vector4_f32[0] = pSource->x;
+    V.vector4_f32[1] = pSource->y;
+    V.vector4_f32[2] = pSource->z;
+    V.vector4_f32[3] = 0.f;
+    return V;
+#elif defined(_XM_ARM_NEON_INTRINSICS_)
+    float32x2_t x = vld1_f32( reinterpret_cast<const float*>(pSource) );
+    float32x2_t zero = vdup_n_f32(0);
+    float32x2_t y = vld1_lane_f32( reinterpret_cast<const float*>(pSource)+2, zero, 0 );
+    return vcombine_f32( x, y );
+#elif defined(_XM_SSE_INTRINSICS_)
+    __m128 x = _mm_load_ss( &pSource->x );
+    __m128 y = _mm_load_ss( &pSource->y );
+    __m128 z = _mm_load_ss( &pSource->z );
+    __m128 xy = _mm_unpacklo_ps( x, y );
+    return _mm_movelh_ps( xy, z );
+#endif
+}
+
+_Use_decl_annotations_
 inline XMVECTOR XM_CALLCONV XMLoadFloat3A
 (
     const XMFLOAT3A* pSource
@@ -1537,6 +1565,32 @@ inline void XM_CALLCONV XMStoreFloat3
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
+inline void XMStoreVector3
+(
+    nc::Vector3* pDestination,
+    FXMVECTOR V
+)
+{
+    assert(pDestination);
+#if defined(_XM_NO_INTRINSICS_)
+    pDestination->x = V.vector4_f32[0];
+    pDestination->y = V.vector4_f32[1];
+    pDestination->z = V.vector4_f32[2];
+#elif defined(_XM_ARM_NEON_INTRINSICS_)
+    float32x2_t VL = vget_low_f32(V);
+    vst1_f32( reinterpret_cast<float*>(pDestination), VL );
+    vst1q_lane_f32( reinterpret_cast<float*>(pDestination)+2, V, 2 );
+#elif defined(_XM_SSE_INTRINSICS_)
+    XMVECTOR T1 = XM_PERMUTE_PS(V,_MM_SHUFFLE(1,1,1,1));
+    XMVECTOR T2 = XM_PERMUTE_PS(V,_MM_SHUFFLE(2,2,2,2));
+    _mm_store_ss( &pDestination->x, V );
+    _mm_store_ss( &pDestination->y, T1 );
+    _mm_store_ss( &pDestination->z, T2 );
+#endif
+}
+
+//------------------------------------------------------------------------------
+_Use_decl_annotations_
 inline void XM_CALLCONV XMStoreFloat3A
 (
     XMFLOAT3A*   pDestination,
@@ -1704,6 +1758,28 @@ inline void XM_CALLCONV XMStoreFloat4
     _mm_storeu_ps( &pDestination->x, V );
 #endif
 }
+
+//------------------------------------------------------------------------------
+_Use_decl_annotations_
+inline void XMStoreQuaternion
+(
+    nc::Quaternion* pDestination,
+    FXMVECTOR V
+)
+{
+    assert(pDestination);
+#if defined(_XM_NO_INTRINSICS_)
+    pDestination->x = V.vector4_f32[0];
+    pDestination->y = V.vector4_f32[1];
+    pDestination->z = V.vector4_f32[2];
+    pDestination->w = V.vector4_f32[3];
+#elif defined(_XM_ARM_NEON_INTRINSICS_)
+    vst1q_f32( reinterpret_cast<float*>(pDestination), V );
+#elif defined(_XM_SSE_INTRINSICS_)
+    _mm_storeu_ps( &pDestination->x, V );
+#endif
+}
+
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_

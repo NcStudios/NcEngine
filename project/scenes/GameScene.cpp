@@ -3,7 +3,7 @@
 #include "MainCamera.h"
 #include "UI.h"
 #include "config/ProjectConfig.h"
-#include "components/CamController.h"
+#include "components/EdgePanCamera.h"
 #include "components/DebugComponents.h"
 #include "source/Prefabs.h"
 #include "components/GamePiece.h"
@@ -26,50 +26,39 @@ namespace project
 
         m_log = std::make_unique<project::log::GameLog>();
         m_hud = std::make_unique<project::ui::Hud>(m_log.get(), projectConfig);
-        nc::ui::UI::Set(m_hud.get());
-        auto materialProperties = graphics::MaterialProperties{};
+        nc::ui::Set(m_hud.get());
 
         // Player Network Instance
-        auto playerHandle = Ecs::CreateEntity("Player");
-        Ecs::AddComponent<project::PlayerConnection>(playerHandle, m_serverIP, projectConfig.userName);
+        auto playerHandle = CreateEntity("Player");
+        AddComponent<project::PlayerConnection>(playerHandle, m_serverIP, projectConfig.userName);
 
         // Light
-        auto lvHandle = Ecs::CreateEntity({-2.4f, 12.1f, 0.0f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
-        Ecs::AddComponent<PointLight>(lvHandle);
+        auto lvHandle = CreateEntity(Vector3{-2.4f, 12.1f, 0.0f}, Quaternion::Identity(), Vector3::One(), "Point Light");
+        AddComponent<PointLight>(lvHandle);
+        auto lvHandle2 = CreateEntity(Vector3{12.1f, 14.5f, 7.3f}, Quaternion::Identity(), Vector3::One(), "Point Light");
+        AddComponent<PointLight>(lvHandle2);
+        auto lvHandle3 = CreateEntity(Vector3{4.1f, 14.5f, 3.3f}, Quaternion::Identity(), Vector3::One(), "Point Light");
+        AddComponent<PointLight>(lvHandle3);
 
-        // Light
-        auto lvHandle2 = Ecs::CreateEntity({12.1f, 14.5f, 7.3f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
-        Ecs::AddComponent<PointLight>(lvHandle2);
-
-        // Light
-        auto lvHandle3 = Ecs::CreateEntity({4.1f, 14.5f, 3.3f}, Vector3::Zero(), Vector3::Zero(), "Point Light");
-        Ecs::AddComponent<PointLight>(lvHandle3);
-
-        //CamController
-        auto camHandle = Ecs::CreateEntity({0.0f, 5.0f, 0.0f}, {1.3f, 0.0f, 0.0f}, Vector3::Zero(), "Main Camera");
-        auto camComponentPtr = Ecs::AddComponent<Camera>(camHandle);
-        camera::MainCamera::Set(camComponentPtr);
-        Ecs::AddComponent<CamController>(camHandle);
-        Ecs::AddComponent<ClickHandler>(camHandle);
+        //Camera
+        auto camHandle = CreateEntity(Vector3{0.0f, 5.0f, 0.0f}, Quaternion::FromEulerAngles(1.3f, 0.0f, 0.0f), Vector3::One(), "Main Camera");
+        auto camComponentPtr = AddComponent<Camera>(camHandle);
+        camera::SetMainCamera(camComponentPtr);
+        AddComponent<EdgePanCamera>(camHandle);
+        AddComponent<ClickHandler>(camHandle);
         
         // Debug Controller
-        auto debugHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Debug Controller");
-        Ecs::AddComponent<SceneReset>(debugHandle);
-        Ecs::AddComponent<Timer>(debugHandle);
-
-        const auto scaleFactor = 2;
+        auto debugHandle = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Debug Controller");
+        AddComponent<SceneReset>(debugHandle);
+        AddComponent<Timer>(debugHandle);
 
         // Table
-        const std::vector<std::string> tableTextures = {"project//Textures//DiningRoomTable_Material_BaseColor.png", "nc//source//graphics//DefaultTexture_Normal.png",  "project//Textures//DiningRoomTable_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"};
-        graphics::Material tableMaterial =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(tableTextures, materialProperties);
-        auto tableMesh = graphics::Mesh{"project//Models//DiningRoomTable.fbx"};
-        auto tableHandle = Ecs::CreateEntity({2.0f  * scaleFactor, -0.4f, 1.5f * scaleFactor}, {1.5708f, 0.0f, 1.5708f}, Vector3::One() * 7.5, "Table Piece");
-        Ecs::AddComponent<Renderer>(tableHandle, tableMesh, tableMaterial);
+        prefab::Create(prefab::Resource::Table, Vector3{4.0f, -0.4f, 3.0f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::Splat(7.5f), "Table");
     }
     
     void GameScene::Unload()
     {
-        nc::ui::UI::Set(nullptr);
+        nc::ui::Set(nullptr);
         m_hud = nullptr;
         m_log = nullptr;
     }

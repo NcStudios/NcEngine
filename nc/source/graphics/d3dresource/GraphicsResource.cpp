@@ -39,7 +39,8 @@ namespace nc::graphics::d3dresource
 
     Stencil::Stencil(Mode mode)
     : m_tag {stencilTagFromMode(mode)},
-      m_mode {mode}
+      m_mode {mode},
+      m_stencil{nullptr}
     {
         D3D11_DEPTH_STENCIL_DESC dsDesc = CD3D11_DEPTH_STENCIL_DESC{ CD3D11_DEFAULT{} };
         
@@ -76,7 +77,6 @@ namespace nc::graphics::d3dresource
     void Stencil::Bind() noexcept
     {
         GetContext()->OMSetDepthStencilState(m_stencil.Get(), 1u);
-        m_stencil->Release();
     }
 
     std::string Stencil::GetUID(Stencil::Mode mode) noexcept
@@ -102,7 +102,8 @@ namespace nc::graphics::d3dresource
 
     Rasterizer::Rasterizer(Mode mode)
     : m_tag {rasterizerTagFromMode(mode)},
-      m_mode {mode}
+      m_mode {mode},
+      m_rasterizer{nullptr}
     {
         D3D11_RASTERIZER_DESC rasterizerDesc = CD3D11_RASTERIZER_DESC { CD3D11_DEFAULT{} };
 
@@ -143,7 +144,6 @@ namespace nc::graphics::d3dresource
     void Rasterizer::Bind() noexcept
     {
         GetContext()->RSSetState(m_rasterizer.Get());
-        m_rasterizer->Release();
     }
 
     std::string Rasterizer::GetUID(Rasterizer::Mode mode) noexcept
@@ -155,7 +155,8 @@ namespace nc::graphics::d3dresource
     * Sampler *
     ***********/
     Sampler::Sampler(const std::string& tag)
-        : m_tag(tag)
+        : m_tag{tag},
+          m_sampler{nullptr}
     {
         D3D11_SAMPLER_DESC samplerDesc = {};
         samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -223,7 +224,10 @@ namespace nc::graphics::d3dresource
     * Texture *
     ***********/
     Texture::Texture(const std::string& path, uint32_t shaderIndex) 
-        : m_path(path), m_shaderIndex(shaderIndex)
+        : m_textureView{nullptr},
+          m_texture{nullptr},
+          m_path{path},
+          m_shaderIndex{shaderIndex}
     {
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());

@@ -1,51 +1,52 @@
-#include "UIPosition.h"
-#include "imgui/imgui.h"
+#include "ui/UIPosition.h"
+
+#include <stdexcept>
 
 namespace nc::ui::utils
 {
-    ImVec2 GetTopLeftCoords(UIPosition position, const ImVec2& screenDimensions, const ImVec2& elementDimensions)
+    Vector2 GetTopLeftCoords(UIPosition position, const Vector2& screenDimensions, const Vector2& elementDimensions)
     {
         switch(position)
         {
             case UIPosition::TopLeft:
             {
-                return { 0.0f, 0.0f };
+                return Vector2{ 0.0f, 0.0f };
             }
             case UIPosition::TopCenter:
             {
-                return { (screenDimensions.x - elementDimensions.x) / 2.0f, 0.0f };
+                return Vector2{ (screenDimensions.x - elementDimensions.x) / 2.0f, 0.0f };
             }
             case UIPosition::TopRight:
             {
-                return { screenDimensions.x - elementDimensions.x, 0.0f };
+                return Vector2{ screenDimensions.x - elementDimensions.x, 0.0f };
             }
             case UIPosition::LeftCenter:
             {
-                return { 0.0f, (screenDimensions.y - elementDimensions.y) / 2.0f };
+                return Vector2{ 0.0f, (screenDimensions.y - elementDimensions.y) / 2.0f };
             }
             case UIPosition::Center:
             {
-                return { (screenDimensions.x - elementDimensions.x) / 2.0f,
-                         (screenDimensions.y - elementDimensions.y) / 2.0f };
+                return Vector2{ (screenDimensions.x - elementDimensions.x) / 2.0f,
+                                (screenDimensions.y - elementDimensions.y) / 2.0f };
             }
             case UIPosition::RightCenter:
             {
-                return {  screenDimensions.x - elementDimensions.x,
-                         (screenDimensions.y - elementDimensions.y) / 2.0f };
+                return Vector2{ screenDimensions.x - elementDimensions.x,
+                                (screenDimensions.y - elementDimensions.y) / 2.0f };
             }
             case UIPosition::BottomLeft:
             {
-                return { 0.0f, screenDimensions.y - elementDimensions.y };
+                return Vector2{ 0.0f, screenDimensions.y - elementDimensions.y };
             }
             case UIPosition::BottomCenter:
             {
-                return { (screenDimensions.x - elementDimensions.x) / 2.0f,
-                          screenDimensions.y - elementDimensions.y };
+                return Vector2{ (screenDimensions.x - elementDimensions.x) / 2.0f,
+                                 screenDimensions.y - elementDimensions.y };
             }
             case UIPosition::BottomRight:
             {
-                return { screenDimensions.x - elementDimensions.x,
-                         screenDimensions.y - elementDimensions.y };
+                return Vector2{ screenDimensions.x - elementDimensions.x,
+                                screenDimensions.y - elementDimensions.y };
             }
             default:
                 throw std::runtime_error("Invalid UIPosition");

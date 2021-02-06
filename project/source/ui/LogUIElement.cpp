@@ -1,6 +1,7 @@
 #include "LogUIElement.h"
 #include "project/source/log/GameLog.h"
-#include "input/Input.h"
+#include "Input.h"
+#include "imgui/imgui.h"
 
 namespace project::ui
 {

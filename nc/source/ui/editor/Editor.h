@@ -1,11 +1,8 @@
 #ifdef NC_EDITOR_ENABLED
 #pragma once
 
-#include "ecs/Entity.h"
+#include "Entity.h"
 #include "ecs/EntityMap.h"
-
-#include <optional>
-#include <unordered_map>
 
 namespace nc 
 {
@@ -18,29 +15,15 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            std::optional<unsigned int> SelectedEntityIndex;
-
-            Editor(nc::graphics::Graphics * graphics);
-
-            void Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities);
-
-            void ToggleGui() noexcept;
-            void EnableGui() noexcept;
-            void DisableGui() noexcept;
-            bool IsGuiActive() const noexcept;
+            Editor(graphics::Graphics * graphics);
+            void Frame(float* dt, ecs::EntityMap& activeEntities);
 
         private:
-            bool m_isGuiActive;
-            bool m_openState_EntityGraph       = true;
-            bool m_openState_FramerateData     = true;
-            bool m_openState_GraphicsResources = true;
-            bool m_openState_ProjectSettings   = false;
-            nc::graphics::Graphics * m_graphics = nullptr;
+            nc::graphics::Graphics * m_graphics;
+            bool m_openState_Editor;
+            bool m_openState_UtilitiesPanel;
 
             void DrawMenu();
-            void DrawTimingControl(float* speed, float frameLogicTime, uint32_t drawCallCount, bool* open);
-            void DrawEntityGraphControl(ecs::EntityMap& entities);
-            void DrawInspectorControl(nc::EntityHandle handle);
     };
 }
 #endif

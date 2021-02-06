@@ -1,22 +1,15 @@
-#include "Component.h"
+#include "component/Component.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
 #endif
 
-#include <string>
-
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
-    void Component::EditorGuiElement()
+    void ComponentBase::EditorGuiElement()
     {
-        ImGui::PushItemWidth(60.0f);
-            ImGui::Spacing();
-            ImGui::Separator();
-                ImGui::Text("User Component");
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("User Component");
     }
     #endif
 } //end namespace nc

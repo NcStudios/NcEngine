@@ -1,9 +1,9 @@
 #pragma once
 
-#include "win32/NCWinDef.h"
-#include "IUI.h"
+#include "platform/win32/NCWinDef.h"
+#include "ui/IUI.h"
 #include "editor/Editor.h"
-#include "ecs/Entity.h"
+#include "Entity.h"
 #include "ecs/EntityMap.h"
 
 #include <unordered_map>
@@ -28,7 +28,7 @@ namespace nc
                 void FrameBegin();
 
                 #ifdef NC_EDITOR_ENABLED
-                void Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities);
+                void Frame(float* dt, ecs::EntityMap& activeEntities);
                 #else
                 void Frame();
                 #endif

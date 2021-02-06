@@ -1,4 +1,4 @@
-#include "NetworkDispatcher.h"
+#include "component/NetworkDispatcher.h"
 
 #include <stdexcept>
 
@@ -9,7 +9,7 @@
 namespace nc
 {
     NetworkDispatcher::NetworkDispatcher(EntityHandle handle) noexcept
-        : Component(handle)
+        : ComponentBase(handle)
     {
     }
 
@@ -33,12 +33,7 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     void NetworkDispatcher::EditorGuiElement()
     {
-        ImGui::PushItemWidth(80.0f);
-            ImGui::Spacing();
-            ImGui::Separator();
-                ImGui::Text("NetworkDispatcher");
-            ImGui::Separator();
-        ImGui::PopItemWidth();
+        ImGui::Text("NetworkDispatcher");
     }
     #endif
 }

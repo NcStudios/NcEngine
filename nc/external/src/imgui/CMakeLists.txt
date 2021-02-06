@@ -12,7 +12,7 @@ add_library(${IMGUI_LIB}
 
 target_include_directories(${IMGUI_LIB}
     PRIVATE
-        ${NC_SOURCE_DIR}
+        ${NC_INCLUDE_DIR}
         ${EXTERNAL_INCLUDE_DIR}
 )
 

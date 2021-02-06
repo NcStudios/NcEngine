@@ -13,10 +13,10 @@ int TestVal1 = 5;
 int TestVal2 = 6;
 int TestVal3 = 7;
 
-struct Fake : public Component
+struct Fake : public ComponentBase
 {
     Fake(EntityHandle handle, int in)
-        : Component(handle),
+        : ComponentBase(handle),
           val{in}
     {}
 

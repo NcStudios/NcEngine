@@ -37,7 +37,7 @@ set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
 
 #Propagate version
 configure_file(${ROOT_DIR}/source/config/Version.h.in
-               ${ROOT_DIR}/source/config/Version.h
+               ${ROOT_DIR}/include/config/Version.h
 )
 
 #Definitions

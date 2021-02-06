@@ -1,6 +1,6 @@
 #include "MainMenuUI.h"
 #include "UIStyle.h"
-#include "SceneManager.h"
+#include "Scene.h"
 #include "scenes/DemoScene.h"
 #include "scenes/GameScene.h"
 #include "config/Version.h"
@@ -18,7 +18,7 @@ namespace
     const auto BUTTON_SIZE = ImVec2{200, 64};
     const auto SMALL_BUTTON_SIZE = ImVec2{96, 20};
     const auto LIST_BOX_SIZE = ImVec2{200, 64};
-    const auto UI_SIZE = ImVec2{218, 450};
+    const auto UI_SIZE = nc::Vector2{218, 450};
     const auto SERVER_PATH = std::string{"project/config/servers.ini"};
 
     void MapKeyValue(std::string key, std::string value, std::vector<project::ui::ServerSelectable>& out)
@@ -135,7 +135,7 @@ namespace project::ui
 
                 if(selectedPos != m_servers.end())
                 {
-                    nc::scene::SceneManager::ChangeScene(std::make_unique<GameScene>(selectedPos->ip));
+                    nc::scene::Change(std::make_unique<GameScene>(selectedPos->ip));
                 }
             }
 
@@ -143,7 +143,7 @@ namespace project::ui
 
             if(ImGui::Button("Load Demo Scene", BUTTON_SIZE))
             {
-                nc::scene::SceneManager::ChangeScene(std::make_unique<DemoScene>());
+                nc::scene::Change(std::make_unique<DemoScene>());
             }
         }
         ImGui::End();

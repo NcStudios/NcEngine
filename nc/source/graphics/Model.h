@@ -1,7 +1,7 @@
 #pragma once
 
-#include "materials/Material.h"
-#include "Mesh.h"
+#include "graphics/Material.h"
+#include "graphics/Mesh.h"
 
 #include <vector>
 #include <string>
@@ -22,6 +22,7 @@ namespace nc::graphics
     {
         public:
             Model(Mesh&& mesh, Material&& material);
+            Model(Model&&) = default;
 
             void SetMaterial(const Material& material) noexcept;
             void SetMesh(const Mesh& mesh) noexcept;
@@ -30,8 +31,8 @@ namespace nc::graphics
             void Submit(class FrameManager& frame) const noexcept;
             void Bind() const;
 
-            void UpdateTransformationMatrix(DirectX::XMMATRIX matrix) noexcept;
-            DirectX::XMMATRIX GetTransformXM() const noexcept;
+            void SetTransformationMatrix(DirectX::FXMMATRIX matrix) noexcept;
+            DirectX::FXMMATRIX GetTransformationMatrix() const noexcept;
             Material* GetMaterial() noexcept;
 
         private:

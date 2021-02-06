@@ -1,17 +1,24 @@
 #include "Entity.h"
 
+#include <algorithm>
+
 namespace nc
 {
 Entity::Entity(const EntityHandle handle, const std::string& tag) noexcept
     : Handle{ handle }, 
       Tag{ tag },
-      m_userComponents{ }
+      m_userComponents{}
 {
 }
 
-const std::vector<std::unique_ptr<Component>> & Entity::GetUserComponents() const noexcept
+std::vector<Component*> Entity::GetUserComponents() const noexcept
 {
-    return m_userComponents;
+    std::vector<Component*> out(m_userComponents.size());
+    std::transform(m_userComponents.cbegin(), m_userComponents.cend(), out.begin(), [](const auto& ptr)
+    {
+        return ptr.get();
+    });
+    return out;
 }
 
 void Entity::SendFrameUpdate(float dt) noexcept
@@ -38,7 +45,7 @@ void Entity::SendOnDestroy() noexcept
     }
 }
 
-void Entity::SendOnCollisionEnter(const EntityHandle other) noexcept
+void Entity::SendOnCollisionEnter(Entity* other) noexcept
 {
     for(auto& comp : m_userComponents)
     {
@@ -46,19 +53,19 @@ void Entity::SendOnCollisionEnter(const EntityHandle other) noexcept
     }
 }
 
-void Entity::SendOnCollisionStay() noexcept
+void Entity::SendOnCollisionStay(Entity* other) noexcept
 {
     for(auto& comp : m_userComponents)
     {
-        comp->OnCollisionStay();
+        comp->OnCollisionStay(other);
     }
 }
 
-void Entity::SendOnCollisionExit() noexcept
+void Entity::SendOnCollisionExit(Entity* other) noexcept
 {
     for(auto& comp : m_userComponents)
     {
-        comp->OnCollisionExit();
+        comp->OnCollisionExit(other);
     }
 }
 } //end namespace nc

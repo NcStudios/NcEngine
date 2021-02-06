@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win32/NCWinDef.h"
+#include "platform/win32/NCWinDef.h"
 
 #include <exception>
 #include <iostream>

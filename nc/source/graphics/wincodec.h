@@ -8,7 +8,7 @@
 #include <rpcndr.h>
 
 #ifndef COM_NO_WINDOWS_H
-#include "win32/NcWin32.h"
+#include "platform/win32/NcWin32.h"
 #include <ole2.h>
 #endif
 

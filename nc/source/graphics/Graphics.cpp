@@ -1,4 +1,5 @@
 #include "Graphics.h"
+#include "config/Config.h"
 #include "DXException.h"
 #include "d3dresource/GraphicsResourceManager.h"
 
@@ -9,23 +10,26 @@ namespace
 
 namespace nc::graphics
 {
-Graphics::Graphics(HWND hwnd, float width, float height, float nearZ, float farZ, bool fullscreen)
+Graphics::Graphics(HWND hwnd, Vector2 dimensions)
     : m_device{ nullptr },
       m_context{ nullptr },
       m_swapChain{ nullptr },
       m_renderTarget{ nullptr },
       m_dsv{ nullptr },
-      m_isFullscreen {fullscreen},
+      m_isFullscreen {false},
       m_viewMatrix{},
       m_projectionMatrix{}
-{  
+{
+    auto& [width, height] = dimensions;
+    const auto& config = config::Get();
+    m_isFullscreen = config.graphics.launchInFullscreen;
     d3dresource::GraphicsResourceManager::SetGraphics(this);
     CreateDeviceAndSwapchain(hwnd);
     CreateRenderTargetViewFromBackBuffer();
     CreateDepthStencilView(width, height);
     BindDepthStencilView();
     ConfigureViewport(width, height);
-    SetProjectionMatrix(width, height, nearZ, farZ);
+    SetProjectionMatrix(width, height, config.graphics.nearClip, config.graphics.farClip);
 
     m_swapChain->SetFullscreenState(m_isFullscreen, nullptr);
 }
@@ -40,12 +44,12 @@ Graphics::~Graphics()
     m_device->Release();
 }
 
-DirectX::XMMATRIX Graphics::GetViewMatrix() const noexcept
+DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
 {
     return m_viewMatrix;
 }
 
-DirectX::XMMATRIX Graphics::GetProjectionMatrix() const noexcept
+DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
 {
     return m_projectionMatrix;
 }

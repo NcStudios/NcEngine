@@ -10,7 +10,7 @@ namespace project::network
     void NetworkPrefabManager::Spawn(Packet::SpawnPrefab& packet)
     {
         auto entityHandle = project::prefab::Create(packet.resource);
-        auto dispatcher = nc::Ecs::GetComponent<nc::NetworkDispatcher>(entityHandle);
+        auto dispatcher = nc::GetComponent<nc::NetworkDispatcher>(entityHandle);
         IF_THROW(!dispatcher, "NetworkPrefabManager::Spawn - Entity does not have a NetworkDispatcher");
         dispatcher->networkHandle = packet.networkHandle;
 
@@ -26,7 +26,7 @@ namespace project::network
         {
             if(m_data.networkHandles[i] == networkHandle)
             {
-                nc::Ecs::DestroyEntity(m_data.entityHandles[i]);
+                nc::DestroyEntity(m_data.entityHandles[i]);
                 std::swap(m_data.resources[i], m_data.resources.back());
                 m_data.resources.pop_back();
                 std::swap(m_data.entityHandles[i], m_data.entityHandles.back());

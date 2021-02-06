@@ -1,26 +1,14 @@
 #pragma once
+
 #include "component/Camera.h"
-
-#include <functional>
-
-namespace nc
-{
-    class Transform;
-    namespace engine { class ApiBinder; }
-}
+#include "component/Transform.h"
 
 namespace nc::camera
 {
-    class MainCamera
-    {
-        public:
-            static void Set(Camera* camera);
+    /** Specifies the camera to use for view and projection calculations.
+     *  A valid camera must be set during frame execution. */
+    void SetMainCamera(Camera* camera);
 
-            [[nodiscard]] static Transform* GetTransform();
-
-        private:
-            friend class ::nc::engine::ApiBinder;
-            static std::function<void(Camera*)> Set_;
-            static std::function<Transform*()> GetTransform_;
-    };
+    /** Get the transform of the current main camera */
+    [[nodiscard]] Transform* GetMainCameraTransform();
 }

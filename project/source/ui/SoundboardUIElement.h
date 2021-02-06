@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc/source/ui/UIElement.h"
+#include "ui/UIElement.h"
 
 namespace project::ui
 {

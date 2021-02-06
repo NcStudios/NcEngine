@@ -1,7 +1,7 @@
 #include "MouseFollower.h"
-#include "input/Input.h"
+#include "Input.h"
 #include "Window.h"
-#include "Engine.h"
+#include "config/Config.h"
 #include "Ecs.h"
 
 using namespace nc;
@@ -10,19 +10,19 @@ namespace project
 {
     MouseFollower::MouseFollower(EntityHandle handle)
     : Component(handle),
-      m_screenDimensions { Window::GetDimensions() },
-      m_transform { Ecs::GetComponent<nc::Transform>(handle) },
+      m_screenDimensions { window::GetDimensions() },
+      m_transform { GetComponent<nc::Transform>(handle) },
       m_zDepth { 0.0f },
       m_zRatio { 0.0f }
     {
-        const auto& config = engine::Engine::GetConfig();
+        const auto& config = config::Get();
         m_viewPortDist = config.graphics.farClip - config.graphics.nearClip;
-        Window::RegisterOnResizeReceiver(this);
+        window::RegisterOnResizeReceiver(this);
     }
 
     MouseFollower::~MouseFollower()
     {
-        Window::UnregisterOnResizeReceiver(this);
+        window::UnregisterOnResizeReceiver(this);
     }
 
     void MouseFollower::OnResize(nc::Vector2 screenDimensions)
@@ -34,8 +34,8 @@ namespace project
     {
         m_zDepth += (float)input::MouseWheel() * dt * 2.0f;
         m_zRatio = m_viewPortDist / m_zDepth;
-        auto worldX = input::MouseX - m_screenDimensions.x / 2;
-        auto worldY = input::MouseY + m_screenDimensions.y / 2;
-        m_transform->SetPosition({worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
+        auto worldX = input::MouseX() + m_screenDimensions.x / 2;
+        auto worldY = input::MouseY() + m_screenDimensions.y / 2;
+        m_transform->SetPosition(Vector3{worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
     }
 }

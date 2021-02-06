@@ -1,10 +1,14 @@
 #include "WireframeTechnique.h"
-#include "TechniqueType.h"
+#include "graphics/TechniqueType.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/d3dresource/ShaderResources.h"
 #include "graphics/d3dresource/MeshResources.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
-#include "Engine.h"
+#include "config/Config.h"
+
+#ifdef NC_EDITOR_ENABLED
+#include "imgui/imgui.h"
+#endif
 
 using namespace nc::graphics::d3dresource;
 
@@ -30,9 +34,10 @@ namespace nc::graphics
     {
         WireframeTechnique::InitializeCommonResources();
 
+        /** @note A step is required w/ the curring setup, even if it does no work. 
+         *  I'm leaving it for now as it isn't clear how vulkan will change this. */
         Step single(1);
         {
-            single.AddGraphicsResource(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Wireframe));
         }
         AddStep(std::move(single));
     }
@@ -46,6 +51,8 @@ namespace nc::graphics
     #ifdef NC_EDITOR_ENABLED
     void WireframeTechnique::EditorGuiElement()
     {
+        ImGui::SameLine();
+        ImGui::Text("(Wireframe)");
     }
     #endif
 
@@ -59,10 +66,11 @@ namespace nc::graphics
 
         isInitialized = true;
 
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Wireframe));
         WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
 
         // Add vertex shader
-        auto defaultShaderPath = nc::engine::Engine::GetConfig().graphics.shadersPath;
+        auto defaultShaderPath = nc::config::Get().graphics.shadersPath;
         auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "wireframevertexshader.cso");
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         WireframeTechnique::m_commonResources.push_back(std::move(pvs));

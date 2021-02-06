@@ -12,7 +12,7 @@ namespace nc
             explicit constexpr EntityHandle(Handle_t value) : m_value{value} {}
             explicit constexpr operator Handle_t() const { return m_value; }
             friend auto constexpr operator<=>(const EntityHandle&, const EntityHandle&) = default;
-            static constexpr EntityHandle Invalid() { return EntityHandle{m_nullValue}; }
+            static constexpr EntityHandle Invalid() { return EntityHandle{s_nullValue}; }
 
             struct Hash
             {
@@ -23,7 +23,7 @@ namespace nc
             };
 
         private:
-            static const Handle_t m_nullValue = 0u;
+            static constexpr Handle_t s_nullValue = 0u;
             Handle_t m_value;
     };
 }

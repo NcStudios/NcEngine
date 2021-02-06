@@ -1,6 +1,6 @@
 #include "DebugComponents.h"
-#include "input/Input.h"
-#include "SceneManager.h"
+#include "Input.h"
+#include "Scene.h"
 #include "scenes/MenuScene.h"
 #include "scenes/DemoScene.h"
 
@@ -18,13 +18,13 @@ SceneReset::SceneReset(EntityHandle handle)
 void SceneReset::FrameUpdate(float dt)
 {
     (void)dt;
-    if (GetKeyDown(KeyCode::F1))
+    if (GetKeyDown(KeyCode::One))
     {
-        nc::scene::SceneManager::ChangeScene(std::make_unique<project::MenuScene>());
+        nc::scene::Change(std::make_unique<project::MenuScene>());
     }
-    if (GetKeyDown(KeyCode::F2))
+    if (GetKeyDown(KeyCode::Two))
     {
-        nc::scene::SceneManager::ChangeScene(std::make_unique<project::DemoScene>());
+        nc::scene::Change(std::make_unique<project::DemoScene>());
     }
 }
 

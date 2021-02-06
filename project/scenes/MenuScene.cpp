@@ -4,14 +4,13 @@
 #include "UI.h"
 #include "config/ProjectConfig.h"
 #include "components/DebugComponents.h"
-#include "components/CamController.h"
-#include "project/components/CubeRotator.h"
+#include "project/components/ConstantRotation.h"
 #include "project/components/MouseFollower.h"
 #include "source/Prefabs.h"
-#include "graphics/materials/Material.h"
+#include "graphics/Material.h"
 
 #include <cstdlib>
-#include <ctime>
+#include <random>
 
 using namespace nc;
 
@@ -23,50 +22,54 @@ namespace project
         projectConfig.Load();
 
         m_ui = std::make_unique<project::ui::MainMenuUI>(projectConfig);
-        nc::ui::UI::Set(m_ui.get());
-        auto materialProperties = graphics::MaterialProperties{};
+        nc::ui::Set(m_ui.get());
 
         prefab::InitializeResources();
 
         // Light
-        auto lvHandle = Ecs::CreateEntity(Vector3::Zero(), Vector3::Zero(), Vector3::Zero(), "Point Light");
-        auto pointLight = Ecs::AddComponent<PointLight>(lvHandle);
-        pointLight->Set(pointLight->PixelConstBufData.pos, 0.5f, {0.443f, 0.412f, 0.412f}, {0.4751f, 0.525f, 1.0f}, 3.56f, 0.00f, 0.05f, 0.00f);
-        Ecs::AddComponent<project::MouseFollower>(lvHandle);
+        auto lvHandle = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Point Light");
+        auto pointLight = AddComponent<PointLight>(lvHandle);
+        auto lightProperties = PointLight::Properties
+        {
+            .pos = Vector3::Zero(),
+            .ambient = Vector3{0.443f, 0.412f, 0.412f},
+            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
+            .diffuseIntensity = 3.56,
+            .attConst = 0.0f,
+            .attLin = 0.05f,
+            .attQuad = 0.0f
+        };
+        pointLight->Set(lightProperties);
+        AddComponent<project::MouseFollower>(lvHandle);
 
         // CamController
-        auto camHandle = Ecs::CreateEntity("Main Camera");
-        auto camComponentPtr = Ecs::AddComponent<Camera>(camHandle);
-        camera::MainCamera::Set(camComponentPtr);
+        auto camHandle = CreateEntity("Main Camera");
+        auto camComponentPtr = AddComponent<Camera>(camHandle);
+        camera::SetMainCamera(camComponentPtr);
         
         // Debug Controller
-        auto debugHandle = Ecs::CreateEntity("Debug Controller");
-        Ecs::AddComponent<SceneReset>(debugHandle);
-        Ecs::AddComponent<Timer>(debugHandle);
+        auto debugHandle = CreateEntity("Debug Controller");
+        AddComponent<SceneReset>(debugHandle);
+        AddComponent<Timer>(debugHandle);
 
-        const std::vector<std::string> ncTextures = std::vector<std::string>({"project//Textures//Logo//Logo3d_Material_BaseColor.png", "project//Textures//Logo//Logo3d_Material_Normal.png", "project//Textures//Logo//Logo3d_Material_Roughness.png", "nc//source//graphics//DefaultTexture.png"});
-        graphics::Material ncMaterial =graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShadingTechnique>(ncTextures, materialProperties);
-        auto ncMesh = graphics::Mesh{"project//Models//Logo3d.fbx"};
-        std::srand(std::time(0));
-        int posRange = 30;
-        int rotRange = 90;
-        for(unsigned i = 0; i < 40; ++i)
+        // Worms
+        std::random_device device;
+        std::mt19937 gen(device());
+        std::uniform_real_distribution<float> randPos(-15.0f, 15.0f);
+        std::uniform_real_distribution<float> randRot(0.0f, 3.14159f);
+
+        for(size_t i = 0u; i < 40; ++i)
         {
-            auto xPos = (float)(rand() % posRange) - (posRange / 2);
-            auto yPos = (float)(rand() % posRange) - (posRange / 2);
-            auto zPos = (float)(rand() % posRange) + (posRange / 2);
-            auto xRot = (float)(rand() % rotRange);
-            auto yRot = (float)(rand() % rotRange);
-            auto zRot = (float)(rand() % rotRange);
-            auto ncHandle = Ecs::CreateEntity({xPos, yPos, zPos}, {xRot, yRot, zRot}, {0.75f, 0.75f, 0.75f}, "nc");
-            Ecs::AddComponent<Renderer>(ncHandle, ncMesh, ncMaterial);
-            Ecs::AddComponent<project::CubeRotator>(ncHandle);
+            auto pos = Vector3{randPos(gen), randPos(gen), randPos(gen) + 25.0f};
+            auto rot = Quaternion::FromEulerAngles(randRot(gen), randRot(gen), randRot(gen));
+            auto wormHandle = prefab::Create(prefab::Resource::Worm, pos, rot, Vector3::Splat(0.75f), "worm");
+            AddComponent<project::ConstantRotation>(wormHandle, Vector3{0, 1, 0}, 0.1f);
         }
     }
 
     void MenuScene::Unload()
     {
-        nc::ui::UI::Set(nullptr);
+        nc::ui::Set(nullptr);
         m_ui = nullptr;
     }
 } // end namespace project

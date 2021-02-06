@@ -1,160 +1,67 @@
 #ifdef NC_EDITOR_ENABLED
 #include "Editor.h"
-#include "imgui/imgui.h"
-#include "Ecs.h"
+#include "EditorControls.h"
 #include "graphics/Graphics.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
-#include "component/Collider.h"
-#include "component/NetworkDispatcher.h"
-#include "component/PointLight.h"
-#include "component/Renderer.h"
-#include "input/Input.h"
-#include "time/NCTime.h"
+#include "Input.h"
+#include "Window.h"
 
-#include <d3d11.h>
-#include <string>
+namespace
+{
+    constexpr auto MainWindowFlags = ImGuiWindowFlags_NoBackground |
+                                 ImGuiWindowFlags_MenuBar |
+                                 ImGuiWindowFlags_NoResize |
+                                 ImGuiWindowFlags_NoScrollbar |
+                                 ImGuiWindowFlags_NoMove;
+    
+    namespace hotkey
+    {
+        constexpr auto Editor = nc::input::KeyCode::Tilde;
+        constexpr auto Utilities = nc::input::KeyCode::F1;
+    }
+}
 
 namespace nc::ui::editor
 {
-    Editor::Editor(nc::graphics::Graphics * graphics)
-        : m_isGuiActive(false), m_graphics(graphics)
+    Editor::Editor(graphics::Graphics * graphics)
+        : m_graphics{graphics},
+          m_openState_Editor{false},
+          m_openState_UtilitiesPanel{true}
     {
     }
 
-    void Editor::Frame(float* dt, float frameLogicTime, ecs::EntityMap& activeEntities)
+    void Editor::Frame(float* dt, ecs::EntityMap& activeEntities)
     {
-        if(input::GetKeyUp(input::KeyCode::Tilde)) ToggleGui();
-        if(!m_isGuiActive) return;
+        if(input::GetKeyDown(hotkey::Editor))
+            m_openState_Editor = !m_openState_Editor;
 
-        int drawCallCount = m_graphics->GetDrawCallCount();
+        if(!m_openState_Editor)
+            return;
+        
+        if(input::GetKeyDown(hotkey::Utilities))
+            m_openState_UtilitiesPanel = !m_openState_UtilitiesPanel;
 
-        DrawMenu();
-        DrawTimingControl(dt, frameLogicTime, drawCallCount, &m_openState_FramerateData);
-
-        graphics::d3dresource::GraphicsResourceManager::DisplayResources(&m_openState_GraphicsResources);
-
-        DrawEntityGraphControl(activeEntities);
+        if(ImGui::Begin("NcEngine Editor", nullptr, MainWindowFlags))
+        {
+            DrawMenu();
+            auto [width, height] = window::GetDimensions();
+            controls::SceneGraphPanel(activeEntities, height);
+            if(m_openState_UtilitiesPanel)
+                controls::UtilitiesPanel(dt, m_graphics->GetDrawCallCount(), width, height);
+        }
+        ImGui::End();
     }
-
-    void Editor::ToggleGui()         noexcept { m_isGuiActive = !m_isGuiActive; }
-    void Editor::EnableGui()         noexcept { m_isGuiActive = true; }
-    void Editor::DisableGui()        noexcept { m_isGuiActive = false; }
-    bool Editor::IsGuiActive() const noexcept { return m_isGuiActive; }
-
 
     void Editor::DrawMenu()
     {
-        static auto mainBlankFlags = ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar;
-        if(ImGui::Begin("NC Engine", nullptr, mainBlankFlags))
+        if(ImGui::BeginMenuBar())
         {
-            if(ImGui::BeginMainMenuBar())
+            if(ImGui::BeginMenu("Window"))
             {
-                if(ImGui::BeginMenu("File"))
-                {
-                    ImGui::EndMenu();
-                }
-                if(ImGui::BeginMenu("Edit"))
-                {
-                    ImGui::EndMenu();
-                }
-                if(ImGui::BeginMenu("Window"))
-                {
-                    ImGui::MenuItem("Entity Graph",       "F...", &m_openState_EntityGraph);
-                    ImGui::MenuItem("Framerate Data",     "F...", &m_openState_FramerateData);
-                    ImGui::MenuItem("Graphics Resources", "F...", &m_openState_GraphicsResources);
-                    ImGui::MenuItem("Project Settings",   "F...", &m_openState_ProjectSettings);
-                    ImGui::EndMenu();
-                }
-                ImGui::EndMainMenuBar();
+                ImGui::MenuItem("Utilities",     "F1", &m_openState_UtilitiesPanel);
+                ImGui::EndMenu();
             }
+            ImGui::EndMenuBar();
         }
-        ImGui::End();
-    }
-
-    void Editor::DrawTimingControl(float* speed, float frameLogicTime, uint32_t drawCallCount, bool* open)
-    {
-        if(!(*open)) return;
-
-        (void)frameLogicTime;
-
-        if(ImGui::Begin("Timing Data", open))
-        {
-            float frameRate = ImGui::GetIO().Framerate;
-            ImGui::DragFloat("dtX", speed, 0.75f, 0.0f, 5.0f, "%.05f");
-            ImGui::Text("%.2f fps", frameRate);
-            ImGui::Text("%.2f ms/frame", 1000.0f / frameRate);
-            ImGui::Text("%u Draw Calls", drawCallCount);
-        }
-        ImGui::End();
-    }
-
-    void Editor::DrawEntityGraphControl(ecs::EntityMap& entities)
-    {
-        if(ImGui::Begin("Entities", &m_openState_EntityGraph))
-        {
-            for(auto& pair : entities)
-            {
-                const auto handleValue = static_cast<unsigned int>(pair.first);
-                const bool selected = *SelectedEntityIndex == handleValue;
-                std::string id = pair.second.Tag + "##" + std::to_string(handleValue); //create unique labels
-                if(ImGui::Selectable(id.c_str(), selected))
-                {
-                    if(SelectedEntityIndex == handleValue)
-                    {
-                        SelectedEntityIndex.reset();
-                    }
-                    else
-                    {
-                        SelectedEntityIndex = handleValue;
-                    }
-                }
-                ImGui::Spacing();
-                if(selected && SelectedEntityIndex.has_value())
-                {
-                    DrawInspectorControl(pair.first);
-                }
-            }
-        }
-        ImGui::End();
-    }
-
-    void Editor::DrawInspectorControl(nc::EntityHandle handle)
-    {   
-        std::string handle_s = std::to_string(static_cast<unsigned int>(handle));
-        const float spacing = 60.0f;
-
-        ImGui::Spacing();
-        ImGui::Separator();  ImGui::Separator();  ImGui::Separator();
-        ImGui::PushItemWidth(spacing);
-            ImGui::Text("Entity");
-            ImGui::Indent();
-                ImGui::Text("Tag:    ");  ImGui::SameLine();  ImGui::Text(nc::Ecs::GetEntity(handle)->Tag.c_str());
-                ImGui::Text("Handle: ");  ImGui::SameLine();  ImGui::Text(handle_s.c_str());
-            ImGui::Unindent();
-        ImGui::PopItemWidth();  ImGui::Separator();
-
-        nc::Ecs::GetComponent<nc::Transform>(handle)->EditorGuiElement();
-
-        nc::NetworkDispatcher* disp = nc::Ecs::GetComponent<nc::NetworkDispatcher>(handle);
-        if(disp) { disp->EditorGuiElement(); }
-
-        nc::Renderer* rend = nc::Ecs::GetComponent<nc::Renderer>(handle);
-        if(rend) { rend->EditorGuiElement(); }
-
-        nc::Collider* col = nc::Ecs::GetComponent<nc::Collider>(handle);
-        if(col) { col->EditorGuiElement(); }
-
-        nc::PointLight* light = nc::Ecs::GetComponent<PointLight>(handle);
-        if(light) { light->EditorGuiElement(); }
-
-        for(const auto& comp : nc::Ecs::GetEntity(handle)->GetUserComponents())
-        {
-            comp->EditorGuiElement();
-        }
-
-        ImGui::Separator();
-        ImGui::Separator();
-        ImGui::Spacing();
     }
 }
 #endif

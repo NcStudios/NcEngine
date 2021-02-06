@@ -1,4 +1,4 @@
-#include "nc/source/config/Version.h"
+#include "config/Version.h"
 
 #include "source/network/server/Server.h"
 
