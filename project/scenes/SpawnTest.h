@@ -3,15 +3,18 @@
 #include "Scene.h"
 #include "scenes/SceneHelper.h"
 
+#include <memory>
+#include <string>
+
 namespace project
 {
-    class DemoScene : public nc::scene::Scene
+    class SpawnTest : public nc::scene::Scene
     {
         public:
             void Load() override;
             void Unload() override;
-
-        private:
+        
+        public:
             SceneHelper m_sceneHelper;
     };
 }

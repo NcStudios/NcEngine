@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Scene.h"
-#include "source/ui/MainMenuUI.h"
-
-#include <memory>
+#include "scenes/SceneHelper.h"
 
 namespace project
 {
@@ -14,6 +12,6 @@ namespace project
             void Unload() override;
         
         private:
-            std::unique_ptr<project::ui::MainMenuUI> m_ui;
+            SceneHelper m_sceneHelper;
     };
 }

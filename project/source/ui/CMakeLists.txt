@@ -1,10 +1,4 @@
 target_sources(${GAME_EXE}
     PRIVATE
-        ${ROOT_DIR}/source/ui/AddServerSelectableUIElement.cpp
-        ${ROOT_DIR}/source/ui/EditNameUIElement.cpp
-        ${ROOT_DIR}/source/ui/Hud.cpp
-        ${ROOT_DIR}/source/ui/LogUIElement.cpp
-        ${ROOT_DIR}/source/ui/MainMenuUI.cpp
-        ${ROOT_DIR}/source/ui/TurnPhaseUIElement.cpp
-        ${ROOT_DIR}/source/ui/SoundboardUIElement.cpp
+        ${ROOT_DIR}/source/ui/SampleUI.cpp
 )

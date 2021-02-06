@@ -22,7 +22,7 @@ set(GCC_WARNING_FLAGS
     -Wfatal-errors
     -Wno-cast-function-type
 )
-set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
+set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lws2_32")
 set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/../nc/external/include)
 set(PROJECT_INCLUDE_DIR ${ROOT_DIR})
@@ -125,5 +125,4 @@ target_sources(${GAME_EXE}
         ${USER_UI_SOURCE}
 )
 
-add_subdirectory(config)
 add_subdirectory(source)

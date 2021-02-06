@@ -1,15 +1,11 @@
 #include "MenuScene.h"
 #include "Ecs.h"
 #include "MainCamera.h"
-#include "UI.h"
-#include "config/ProjectConfig.h"
-#include "components/DebugComponents.h"
 #include "project/components/ConstantRotation.h"
 #include "project/components/MouseFollower.h"
 #include "source/Prefabs.h"
 #include "graphics/Material.h"
 
-#include <cstdlib>
 #include <random>
 
 using namespace nc;
@@ -18,11 +14,7 @@ namespace project
 {
     void MenuScene::Load()
     {
-        project::config::ProjectConfig projectConfig;
-        projectConfig.Load();
-
-        m_ui = std::make_unique<project::ui::MainMenuUI>(projectConfig);
-        nc::ui::Set(m_ui.get());
+        m_sceneHelper.Setup(false);
 
         prefab::InitializeResources();
 
@@ -42,22 +34,14 @@ namespace project
         pointLight->Set(lightProperties);
         AddComponent<project::MouseFollower>(lvHandle);
 
-        // CamController
-        auto camHandle = CreateEntity("Main Camera");
-        auto camComponentPtr = AddComponent<Camera>(camHandle);
-        camera::SetMainCamera(camComponentPtr);
-        
-        // Debug Controller
-        auto debugHandle = CreateEntity("Debug Controller");
-        AddComponent<SceneReset>(debugHandle);
-        AddComponent<Timer>(debugHandle);
+        // Camera
+        camera::GetMainCameraTransform()->Set(Vector3::Zero(), Quaternion::Identity(), Vector3::One());
 
         // Worms
         std::random_device device;
         std::mt19937 gen(device());
         std::uniform_real_distribution<float> randPos(-15.0f, 15.0f);
         std::uniform_real_distribution<float> randRot(0.0f, 3.14159f);
-
         for(size_t i = 0u; i < 40; ++i)
         {
             auto pos = Vector3{randPos(gen), randPos(gen), randPos(gen) + 25.0f};
@@ -69,7 +53,6 @@ namespace project
 
     void MenuScene::Unload()
     {
-        nc::ui::Set(nullptr);
-        m_ui = nullptr;
+        m_sceneHelper.TearDown();
     }
 } // end namespace project

@@ -2,10 +2,8 @@
 #include "Ecs.h"
 #include "MainCamera.h"
 #include "UI.h"
-#include "config/ProjectConfig.h"
 #include "source/Prefabs.h"
 #include "components/EdgePanCamera.h"
-#include "components/DebugComponents.h"
 #include "components/GamePiece.h"
 #include "components/ClickHandler.h"
 #include "components/WasdController.h"
@@ -17,12 +15,7 @@ namespace project
 {
     void DemoScene::Load()
     {
-        project::config::ProjectConfig projectConfig;
-        projectConfig.Load();
-
-        m_log = std::make_unique<project::log::GameLog>();
-        m_hud = std::make_unique<project::ui::Hud>(m_log.get(), projectConfig);
-        nc::ui::Set(m_hud.get());
+        m_sceneHelper.Setup(true, false);
 
         // Lights
         auto lvHandle = CreateEntity(Vector3{-2.4f, 12.1f, 0.0f}, Quaternion::Identity(), Vector3::One(), "Point Light");
@@ -33,16 +26,9 @@ namespace project
         AddComponent<PointLight>(lvHandle3);
 
         //Camera
-        auto camHandle = CreateEntity(Vector3{0.0f, 0.0f, -10.0f}, Quaternion::Identity(), Vector3::One(), "Main Camera");
-        auto camComponentPtr = AddComponent<Camera>(camHandle);
-        camera::SetMainCamera(camComponentPtr);
+        auto camHandle = camera::GetMainCameraTransform()->GetParentHandle();
         AddComponent<EdgePanCamera>(camHandle);
         AddComponent<ClickHandler>(camHandle);
-
-        // Debug Controller
-        auto debugHandle = CreateEntity("Debug Controller");
-        AddComponent<SceneReset>(debugHandle);
-        AddComponent<Timer>(debugHandle);
 
         // Objects
         prefab::Create(prefab::Resource::Table, Vector3{4.0f, -0.4f, 3.0f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::Splat(7.5f), "Table");
@@ -61,8 +47,6 @@ namespace project
 
     void DemoScene::Unload()
     {
-        nc::ui::Set(nullptr);
-        m_hud = nullptr;
-        m_log = nullptr;
+        m_sceneHelper.TearDown();
     }
 } //end namespace project

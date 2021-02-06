@@ -22,7 +22,7 @@ namespace project::ui
     const ImVec4 COLOR_ACCENT_LIGHT         (0.000f, 0.729f, 0.000f, 1.000f);
 
 
-    void SetImGuiStyle()
+    inline void SetImGuiStyle()
     {
         auto& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
