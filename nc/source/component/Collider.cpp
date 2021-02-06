@@ -10,7 +10,7 @@ namespace
     const auto CubeMeshPath = std::string{"project/Models/cube.fbx"};
     auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
 
-    auto CreateBoxModel()
+    auto CreateWireframeBox()
     {
         return nc::graphics::Model{ {CubeMeshPath}, CreateMaterial() };
     }
@@ -25,7 +25,7 @@ namespace nc
           m_colliderMatrix{},
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
           m_scale{scale},
-          m_model{CreateBoxModel()},
+          m_widgetModel{CreateWireframeBox()},
           m_selectedInEditor{false}
     {
     }
@@ -53,14 +53,14 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Collider::UpdateModel(graphics::FrameManager& frame)
+    void Collider::UpdateWidget(graphics::FrameManager& frame)
     {
         // Expire to false to avoid state management in editor (it sets this to true as needed)
         if(!std::exchange(m_selectedInEditor, false))
             return;
 
-        m_model.SetTransformationMatrix(m_colliderMatrix);
-        m_model.Submit(frame);
+        m_widgetModel.SetTransformationMatrix(m_colliderMatrix);
+        m_widgetModel.Submit(frame);
     }
 
     void Collider::EditorGuiElement()

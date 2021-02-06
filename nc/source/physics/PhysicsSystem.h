@@ -19,13 +19,11 @@ namespace nc::physics
         public:
             PhysicsSystem(graphics::Graphics* graphics);
 
-            void ClearState();
-
-            void DoPhysicsStep(const std::vector<Collider*>& colliders);
-
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove);
             IClickable* RaycastToClickables(LayerMask mask);
+            void DoPhysicsStep(const std::vector<Collider*>& colliders);
+            void ClearState();
 
         private:
             std::vector<nc::physics::IClickable*> m_clickableComponents;

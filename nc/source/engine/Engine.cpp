@@ -179,7 +179,7 @@ namespace nc::core
         #ifdef NC_EDITOR_ENABLED
         m_ecs.GetSystem<Collider>()->ForEach([&frameManager](auto& collider)
         {
-            collider.UpdateModel(frameManager);
+            collider.UpdateWidget(frameManager);
         });
         #endif
 
