@@ -19,4 +19,5 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/rendergraph/Job.cpp
         ${ROOT_DIR}/source/graphics/rendergraph/Pass.cpp
         ${ROOT_DIR}/source/graphics/vulkan/Instance.cpp
+        ${ROOT_DIR}/source/graphics/vulkan/Device.cpp
 )

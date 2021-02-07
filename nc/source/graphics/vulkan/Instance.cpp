@@ -1,21 +1,20 @@
 #include "Instance.h"
-//#include "glfw/glfw3.h"
 
 namespace nc::graphics::vulkan
 {
-    const std::vector<const char*> Instance::m_validationLayers = { "VK_LAYER_KHRONOS_validation" };
-
-    vk::UniqueInstance Instance::Create()
+    Instance::Instance(HWND hwnd, HINSTANCE hinstance)
+    : m_instance{nullptr},
+      m_surface{nullptr}
     {
         vk::ApplicationInfo applicationInfo( "NCEngine", 1, "Vulkan.hpp", 1, VK_API_VERSION_1_2 );
         vk::InstanceCreateInfo instanceCreateInfo ( {}, &applicationInfo );
 
         EnableValidationLayers(instanceCreateInfo);
-        //SetGlobalExtensions(instanceCreateInfo);
+        SetGlobalExtensions(instanceCreateInfo);
 
         try
         {
-            return vk::createInstanceUnique(instanceCreateInfo);
+            m_instance = createInstanceUnique(instanceCreateInfo);
         }
         catch (std::exception& error)
         {
@@ -23,17 +22,28 @@ namespace nc::graphics::vulkan
             message.append(error.what());
             throw std::runtime_error(message);
         }
+
+        vk::SurfaceKHR surface;
+        vk::Win32SurfaceCreateInfoKHR surfaceCreateInfo;
+        surfaceCreateInfo.setHinstance(hinstance);
+        surfaceCreateInfo.setHwnd(hwnd);
+        if (m_instance.get().createWin32SurfaceKHR(&surfaceCreateInfo, nullptr, &surface) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Failed to get surface.");
+        }
+
+        m_surface = vk::UniqueSurfaceKHR(surface, m_instance.get());
+    } 
+
+    const vk::SurfaceKHR* Instance::GetSurface() const noexcept
+    {
+        return &(m_surface.get());
     }
 
-    // void Instance::SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo)
-    // {
-    //     uint32_t glfwExtensionCount = 0;
-    //     const char** glfwExtensions;
-
-    //     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    //     instanceCreateInfo.enabledExtensionCount = glfwExtensionCount;
-    //     instanceCreateInfo.ppEnabledExtensionNames = glfwExtensions;
-    // }
+    const vk::Instance* Instance::GetInstance() const noexcept
+    {
+        return &(m_instance.get());
+    }
 
     void Instance::EnableValidationLayers(vk::InstanceCreateInfo& instanceCreateInfo)
     {
@@ -89,5 +99,11 @@ namespace nc::graphics::vulkan
         }
 
         return true;
+    }
+
+    void Instance::SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo)
+    {
+        instanceCreateInfo.setEnabledExtensionCount(static_cast<uint32_t>(m_globalExtensions.size()));
+        instanceCreateInfo.setPpEnabledExtensionNames(m_globalExtensions.data());
     }
 }

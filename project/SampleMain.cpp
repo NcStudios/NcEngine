@@ -1,7 +1,11 @@
 #include "platform/win32/NcWin32.h"
 #include "Core.h"
 #include "debug/Utils.h"
-#include "scenes/MenuScene.h"
+#ifdef USE_VULKAN
+    #include "scenes/VulkanScene.h"
+#else
+    #include "scenes/MenuScene.h"
+#endif
 
 #include <iostream>
 
@@ -10,7 +14,11 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     try
     {
         nc::core::Initialize(instance);
+#ifdef USE_VULKAN
+        nc::core::Start(std::make_unique<project::VulkanScene>());
+#else
         nc::core::Start(std::make_unique<project::MenuScene>());
+#endif
     }
     catch(std::exception& e)
     {

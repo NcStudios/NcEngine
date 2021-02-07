@@ -22,6 +22,10 @@ Considerations:
 
 ## Macros
 ---------
+#### USE_VULKAN
+    Default = false
+    Flag used by both CMake and NcEngine specifying whether to include and run Graphics2, which is the Vulkan implementation of the graphics API. If false, DirectX is used via Graphics.
+
 #### NC_TESTS_ENABLED
     Default = false
     Flag used by cmake to enable building test executables.

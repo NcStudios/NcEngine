@@ -38,7 +38,8 @@ namespace nc::window
 
     /* WindowImpl */
     WindowImpl::WindowImpl(HINSTANCE instance)
-        : m_onResizeReceivers{}
+        : m_onResizeReceivers{},
+          m_hInstance{instance}
     {
         g_instance = this;
         GraphicsOnResizeCallback = nullptr;
@@ -119,6 +120,11 @@ namespace nc::window
     HWND WindowImpl::GetHWND() const noexcept
     {
         return m_hwnd;
+    }
+
+    HINSTANCE WindowImpl::GetHINSTANCE() const noexcept
+    {
+        return m_hInstance;
     }
 
     Vector2 WindowImpl::GetDimensions() const

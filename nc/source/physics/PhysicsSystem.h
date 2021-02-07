@@ -9,7 +9,7 @@
 namespace nc
 {
     class Transform;
-    namespace graphics { class Graphics; }
+    namespace graphics { class Graphics; class Graphics2; }
 }
 
 namespace nc::physics
@@ -17,7 +17,11 @@ namespace nc::physics
     class PhysicsSystem
     {
         public:
+            #ifdef USE_VULKAN
+            PhysicsSystem(graphics::Graphics2* graphics2);
+            #else
             PhysicsSystem(graphics::Graphics* graphics);
+            #endif
 
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove);
@@ -27,6 +31,10 @@ namespace nc::physics
 
         private:
             std::vector<nc::physics::IClickable*> m_clickableComponents;
+            #ifdef USE_VULKAN
+            graphics::Graphics2* m_graphics2;
+            #else
             graphics::Graphics* m_graphics;
+            #endif
     };
 } //end namespace nc::physics

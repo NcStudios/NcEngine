@@ -8,6 +8,7 @@ endif()
 #OPTIONS
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
+option(USE_VULKAN "Use Vulkan rather than DirectX" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior santizer" OFF)
 
@@ -45,6 +46,10 @@ add_definitions(${WIN32_DEFINITIONS})
 
 if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
+endif()
+
+if(USE_VULKAN)
+    add_definitions(-DUSE_VULKAN)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
