@@ -100,7 +100,7 @@ bool EntityComponentSystem::DoesEntityExist(const EntityHandle handle) const noe
 
 bool EntityComponentSystem::DestroyEntity(EntityHandle handle)
 {
-    if (DoesEntityExist(handle))
+    if(!DoesEntityExist(handle))
         return false;
     auto& containingMap = GetMapContainingEntity(handle);
     GetToDestroyEntities().emplace(handle, std::move(containingMap.at(handle)));

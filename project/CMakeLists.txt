@@ -25,12 +25,8 @@ set(GCC_WARNING_FLAGS
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lws2_32")
 set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/../nc/external/include)
-set(PROJECT_INCLUDE_DIR ${ROOT_DIR})
-set(NC_INCLUDE_DIRS
-    ${ROOT_DIR}/..
-    ${ROOT_DIR}/../nc/include
-    ${ROOT_DIR}/../nc/source
-)
+set(PROJECT_INCLUDE_DIR ${ROOT_DIR}/source)
+set(NC_INCLUDE_DIR ${ROOT_DIR}/../nc/include)
 
 set(LIB_DIR ${ROOT_DIR}/../nc/lib)
 set(ENGINE_LIB "libNcEngine-${CMAKE_BUILD_TYPE}.a")
@@ -68,7 +64,7 @@ endif()
 #Include Dirs
 target_include_directories(${GAME_EXE}
     PRIVATE
-        ${NC_INCLUDE_DIRS}
+        ${NC_INCLUDE_DIR}
         ${PROJECT_INCLUDE_DIR}
         ${EXTERNAL_INCLUDE_DIR}
 )
@@ -101,7 +97,7 @@ target_link_libraries(${GAME_EXE}
         ${LIB_DIR}/${IMGUI_LIB}
         ${LIB_DIR}/windowscodecs.lib
         ${LIB_DIR}/libassimp.dll.a
-        ${LIB_DIR}/${ENET_LIB}
+        #${LIB_DIR}/${ENET_LIB} no networking sample yet
         ${WIN32_LINK_FLAGS}
 )
 
@@ -112,17 +108,13 @@ if(PROFILING_ENABLED)
     )
 endif()
 
-#Sources
-file(GLOB USER_COMPONENT_SOURCE ${ROOT_DIR}/components/*.cpp)
-file(GLOB USER_SCENE_SOURCE ${ROOT_DIR}/scenes/*.cpp)
-file(GLOB USER_UI_SOURCE ${ROOT_DIR}/ui/*.cpp)
-
 target_sources(${GAME_EXE}
     PRIVATE
         ${ROOT_DIR}/SampleMain.cpp
-        ${USER_COMPONENT_SOURCE}
-        ${USER_SCENE_SOURCE}
-        ${USER_UI_SOURCE}
 )
 
-add_subdirectory(source)
+add_subdirectory(source/click_events)
+add_subdirectory(source/collision_events)
+add_subdirectory(source/shared)
+add_subdirectory(source/spawn_test)
+add_subdirectory(source/worms)

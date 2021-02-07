@@ -1,7 +1,7 @@
 #include "platform/win32/NcWin32.h"
 #include "Core.h"
 #include "debug/Utils.h"
-#include "scenes/MenuScene.h"
+#include "worms/Worms.h"
 
 #include <iostream>
 
@@ -10,7 +10,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     try
     {
         nc::core::Initialize(instance);
-        nc::core::Start(std::make_unique<project::MenuScene>());
+        nc::core::Start(std::make_unique<nc::sample::Worms>());
     }
     catch(std::exception& e)
     {
