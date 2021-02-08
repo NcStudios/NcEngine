@@ -8,6 +8,7 @@ endif()
 #OPTIONS
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
+option(USE_VULKAN "Use Vulkan rather than DirectX" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior santizer" OFF)
 
@@ -35,7 +36,7 @@ set(ENGINE_LIB "NcEngine-${CMAKE_BUILD_TYPE}")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
 
-#Propogate version
+#Propagate version
 configure_file(${ROOT_DIR}/source/config/Version.h.in
                ${ROOT_DIR}/include/config/Version.h
 )
@@ -45,6 +46,10 @@ add_definitions(${WIN32_DEFINITIONS})
 
 if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
+endif()
+
+if(USE_VULKAN)
+    add_definitions(-DUSE_VULKAN)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -69,6 +74,16 @@ target_compile_options(${ENGINE_LIB}
     PRIVATE
         ${GCC_WARNING_FLAGS}
 )
+
+find_package(Vulkan REQUIRED)
+
+#Link libraries
+target_link_libraries(${ENGINE_LIB} 
+    Vulkan::Vulkan
+    ${LIB_DIR}/glfw3.dll
+    ${LIB_DIR}/libglfw3dll.a
+    ${LIB_DIR}/libglfw3.a
+    )
 
 if(SANITIZE_UB)
     target_compile_options(${ENGINE_LIB}

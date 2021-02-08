@@ -2,7 +2,11 @@
 
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/rendergraph/FrameManager.h"
-#include "graphics/Graphics.h"
+#ifdef USE_VULKAN
+    #include "graphics/Graphics2.h"
+#else
+    #include "graphics/Graphics.h"
+#endif
 #include "physics/PhysicsSystem.h"
 #include "component/PointLightManager.h"
 #include "scene/SceneSystem.h"
@@ -27,13 +31,18 @@ namespace nc::core
             bool m_isRunning;
             float m_frameDeltaTimeFactor;
             window::WindowImpl m_window;
+        #ifdef USE_VULKAN
+            graphics::Graphics2 m_graphics2;
+            // @todo: Implement missing managers below
+        #else            
             graphics::Graphics m_graphics;
-            physics::PhysicsSystem m_physics;
-            ecs::EntityComponentSystem m_ecs;
             ui::UIImpl m_ui;
             PointLightManager m_pointLightManager;
-            scene::SceneSystem m_sceneSystem;
             graphics::FrameManager m_frameManager;
+        #endif
+            physics::PhysicsSystem m_physics;
+            ecs::EntityComponentSystem m_ecs;
+            scene::SceneSystem m_sceneSystem;
             time::Time m_time;
 
             void ClearState();

@@ -24,6 +24,7 @@ namespace nc::window
             WindowImpl& operator=(WindowImpl&& other) = delete;
 
             HWND GetHWND() const noexcept;
+            HINSTANCE GetHINSTANCE() const noexcept;
             Vector2 GetDimensions() const;
 
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback);

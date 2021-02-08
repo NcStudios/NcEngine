@@ -51,22 +51,38 @@ namespace nc::core
     }
 
     /* Engine */
+    #ifdef USE_VULKAN
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
           m_window{ hInstance },
-          m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
-          m_physics{ &m_graphics },
+          m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
+          m_physics{ &m_graphics2 },
           m_ecs{},
-          m_ui{ m_window.GetHWND(), &m_graphics },
-          m_pointLightManager{},
           m_sceneSystem{},
-          m_frameManager{},
           m_time{}
     {
         SetBindings();
         V_LOG("Engine initialized");
     }
+    #else
+    Engine::Engine(HINSTANCE hInstance)
+        : m_isRunning{ false },
+          m_frameDeltaTimeFactor{ 1.0f },
+          m_window{ hInstance },
+          m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
+          m_ui{ m_window.GetHWND(), &m_graphics },
+          m_pointLightManager{},
+          m_frameManager{},
+          m_physics{ &m_graphics },
+          m_ecs{},
+          m_sceneSystem{},
+          m_time{}
+    {
+        SetBindings();
+        V_LOG("Engine initialized");
+    }
+    #endif
 
     Engine::~Engine()
     {
@@ -155,6 +171,7 @@ namespace nc::core
 
     void Engine::FrameRender()
     {
+    #ifndef USE_VULKAN
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
         m_ui.FrameBegin();
         m_graphics.FrameBegin();
@@ -194,6 +211,7 @@ namespace nc::core
         m_ui.FrameEnd();
         m_graphics.FrameEnd();
         NC_PROFILE_END();
+    #endif
     }
 
     void Engine::FrameCleanup()
@@ -204,15 +222,23 @@ namespace nc::core
             DoSceneSwap();
         }
         input::Flush();
-        m_frameManager.Reset();
+        #ifndef USE_VULKAN
+            m_frameManager.Reset();
+        #endif
         m_time.ResetFrameDeltaTime();
     }
 
     void Engine::SetBindings()
     {
         using namespace std::placeholders;
-        m_window.BindGraphicsOnResizeCallback(std::bind(m_graphics.OnResize, &m_graphics, _1, _2, _3, _4));
-        m_window.BindUICallback(std::bind(m_ui.WndProc, &m_ui, _1, _2, _3, _4));
+
+        #ifdef USE_VULKAN
+            m_window.BindGraphicsOnResizeCallback(std::bind(m_graphics2.OnResize, &m_graphics2, _1, _2, _3, _4));
+            // No UI for us until we tackle integrating IMGUI with Vulkan
+        #else
+            m_window.BindGraphicsOnResizeCallback(std::bind(m_graphics.OnResize, &m_graphics, _1, _2, _3, _4));
+            m_window.BindUICallback(std::bind(m_ui.WndProc, &m_ui, _1, _2, _3, _4));
+        #endif
         ::nc::internal::RegisterEcs(&m_ecs);
     }
 } // end namespace nc::engine

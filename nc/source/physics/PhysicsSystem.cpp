@@ -4,7 +4,11 @@
 #include "debug/Utils.h"
 #include "Input.h"
 #include "Window.h"
-#include "graphics/Graphics.h"
+#ifdef USE_VULKAN
+    #include "graphics/Graphics2.h"
+#else
+    #include "graphics/Graphics.h"
+#endif
 #include "MainCamera.h"
 #include "Ecs.h"
 
@@ -39,6 +43,15 @@ namespace nc::physics
         return impl->RaycastToClickables(mask);
     }
 
+    #ifdef USE_VULKAN
+    /* Physics System */
+    PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics2)
+        : m_clickableComponents{},
+          m_graphics2{ graphics2 }
+    {
+        impl = this;
+    }
+    #else
     /* Physics System */
     PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics)
         : m_clickableComponents{},
@@ -46,6 +59,7 @@ namespace nc::physics
     {
         impl = this;
     }
+    #endif
 
     void PhysicsSystem::ClearState()
     {
@@ -83,7 +97,13 @@ namespace nc::physics
         DirectX::XMStoreVector3(&unit, unit_v);
 
         auto [screenWidth, screenHeight] = window::GetDimensions();
+        
+        #ifdef USE_VULKAN
+        auto projectionMatrix = m_graphics2->GetProjectionMatrix();
+        #else
         auto projectionMatrix = m_graphics->GetProjectionMatrix();
+        #endif
+
         auto worldMatrix = DirectX::XMMatrixIdentity();
         IClickable* out = nullptr;
         float smallestZ = FLOAT_MAX;
