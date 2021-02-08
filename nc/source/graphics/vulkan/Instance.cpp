@@ -1,4 +1,21 @@
 #include "Instance.h"
+#include <algorithm>
+
+namespace
+{
+    const std::vector<const char*> GlobalExtensions = { VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME };
+    const std::vector<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+
+    #ifdef NC_DEBUG_BUILD
+        const bool IsValidationLayersEnabled = true;
+    #else
+        const bool IsValidationLayersEnabled = false;
+    #endif
+
+    bool CheckValidationLayerSupport();
+    void EnableValidationLayers(vk::InstanceCreateInfo& instanceCreateInfo);
+    void SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo);
+}
 
 namespace nc::graphics::vulkan
 {
@@ -16,11 +33,9 @@ namespace nc::graphics::vulkan
         {
             m_instance = createInstanceUnique(instanceCreateInfo);
         }
-        catch (std::exception& error)
+        catch (const std::exception& error)
         {
-            std::string message = "Instance::Create - Error: ";
-            message.append(error.what());
-            throw std::runtime_error(message);
+            std::throw_with_nested(std::runtime_error("Failed to create instance."));
         }
 
         vk::SurfaceKHR surface;
@@ -44,18 +59,21 @@ namespace nc::graphics::vulkan
     {
         return &(m_instance.get());
     }
+}
 
-    void Instance::EnableValidationLayers(vk::InstanceCreateInfo& instanceCreateInfo)
+namespace 
+{
+    void EnableValidationLayers(vk::InstanceCreateInfo& instanceCreateInfo)
     {
-         if (m_enableValidationLayers)
+         if (IsValidationLayersEnabled)
         {
             if (!CheckValidationLayerSupport())
             {
                 throw std::runtime_error("Instance::EnableValidationLayers - Validation layers requested but not available.");
             }
 
-            instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
-            instanceCreateInfo.ppEnabledLayerNames = m_validationLayers.data();
+            instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
+            instanceCreateInfo.ppEnabledLayerNames = ValidationLayers.data();
         }
         else 
         {
@@ -63,47 +81,32 @@ namespace nc::graphics::vulkan
         }
     }
 
-    bool Instance::CheckValidationLayerSupport()
+    bool CheckValidationLayerSupport()
     {
         uint32_t layerCount;
-        auto layerResult = vk::enumerateInstanceLayerProperties(&layerCount, nullptr);
-        if (layerResult != vk::Result::eSuccess)
+        if (vk::enumerateInstanceLayerProperties(&layerCount, nullptr) != vk::Result::eSuccess)
         {
             return false;
         }
 
         std::vector<vk::LayerProperties> availableLayers(layerCount);
-        auto layerDataResult = vk::enumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-        if (layerDataResult != vk::Result::eSuccess)
+        if (vk::enumerateInstanceLayerProperties(&layerCount, availableLayers.data()) != vk::Result::eSuccess)
         {
             return false;
         }
 
-        for (const char* layerName : m_validationLayers)
+        return std::all_of(ValidationLayers.cbegin(), ValidationLayers.cend(), [&availableLayers](const auto& requiredLayer)
         {
-            bool layerFound = false;
-
-            for (const auto& layerProperties : availableLayers)
+            return std::any_of(availableLayers.cbegin(), availableLayers.cend(), [&requiredLayer](const auto& availableLayer)
             {
-                if (strcmp(layerName, layerProperties.layerName) == 0)
-                {
-                    layerFound = true;
-                    break;
-                }
-            }
-
-            if (!layerFound)
-            {
-                return false;
-            }
-        }
-
-        return true;
+                return strcmp(requiredLayer, availableLayer.layerName) == 0;
+            });
+        });
     }
 
-    void Instance::SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo)
+    void SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo)
     {
-        instanceCreateInfo.setEnabledExtensionCount(static_cast<uint32_t>(m_globalExtensions.size()));
-        instanceCreateInfo.setPpEnabledExtensionNames(m_globalExtensions.data());
+        instanceCreateInfo.setEnabledExtensionCount(static_cast<uint32_t>(GlobalExtensions.size()));
+        instanceCreateInfo.setPpEnabledExtensionNames(GlobalExtensions.data());
     }
 }

@@ -9,53 +9,24 @@ namespace nc::graphics::vulkan
 {
     class Instance;
 
-    static const std::vector<const char*> m_deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-
     enum class QueueFamilyType : uint8_t
     {
         GraphicsFamily,
         PresentFamily
     };
 
-    struct QueueFamilyIndices
+    class QueueFamilyIndices
     {
-        std::optional<uint32_t> graphicsFamily;
-        std::optional<uint32_t> presentFamily;
+        public:
+            QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface);
+            bool IsComplete() const;
+            bool IsSeparatePresentQueue() const;
+            uint32_t GetQueueFamilyIndex(QueueFamilyType type) const;
 
-        bool isSeparatePresentQueue;
-
-        bool IsComplete() const
-        {
-            return graphicsFamily.has_value() && presentFamily.has_value();
-        }
-
-        uint32_t GetQueueFamilyIndex(QueueFamilyType type) const
-        {
-            if (!IsComplete())
-            {
-                throw std::runtime_error("QueueFamilyIndices::GetQueueFamilyIndex() - QueueFamilies incomplete.");
-            }
-
-            switch (type)
-            {
-                case QueueFamilyType::GraphicsFamily:
-                    return graphicsFamily.value();
-                case QueueFamilyType::PresentFamily:
-                    if (isSeparatePresentQueue)
-                    {   
-                        return presentFamily.value();
-                    }
-                    return graphicsFamily.value();
-            }
-            throw std::runtime_error("QueueFamilyIndices::GetQueueFamilyIndex() - Chosen queue not present.");
-        }
-    };
-
-    struct SwapChainSupportDetails
-    {
-        vk::SurfaceCapabilitiesKHR capabilities;
-        std::vector<vk::SurfaceFormatKHR> formats;
-        std::vector<vk::PresentModeKHR> presentModes;
+        private:
+            std::optional<uint32_t> m_graphicsFamily;
+            std::optional<uint32_t> m_presentFamily;
+            bool m_isSeparatePresentQueue;
     };
 
     class Device
@@ -75,8 +46,5 @@ namespace nc::graphics::vulkan
             vk::Extent2D m_swapChainExtent;
             std::vector<vk::ImageView> m_swapChainImageViews;
             Vector2 m_dimensions;
-
-            SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface);
-            QueueFamilyIndices FindQueueFamilies(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface);
     };
 }

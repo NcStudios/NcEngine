@@ -7,14 +7,6 @@
 
 namespace nc::graphics::vulkan
 {
-    static const std::vector<const char*> m_globalExtensions = { VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME };
-    static const std::vector<const char*> m_validationLayers = { "VK_LAYER_KHRONOS_validation" };
-    #ifdef NC_DEBUG_BUILD
-        static const bool m_enableValidationLayers = true;
-    #else
-        static const bool m_enableValidationLayers = false;
-    #endif
-
     class Instance 
     {
         public:
@@ -25,9 +17,5 @@ namespace nc::graphics::vulkan
         private:
             vk::UniqueInstance m_instance;
             vk::UniqueSurfaceKHR m_surface;
-
-            bool CheckValidationLayerSupport();
-            void EnableValidationLayers(vk::InstanceCreateInfo& instanceCreateInfo);
-            void SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo);
     };
 }
