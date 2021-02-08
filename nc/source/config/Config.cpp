@@ -21,7 +21,8 @@ namespace
     const auto TARGET_FPS_KEY = std::string{"target_fps"};
     const auto NEAR_CLIP_KEY = std::string{"near_clip"};
     const auto FAR_CLIP_KEY = std::string{"far_clip"};
-    const auto SHADERS_PATH_KEY = std::string{"shaders_path"};
+    const auto D3D_SHADERS_PATH_KEY = std::string{"d3d_shaders_path"};
+    const auto VULKAN_SHADERS_PATH_KEY = std::string{"vulkan_shaders_path"};
 
     void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config& out)
     {
@@ -66,9 +67,13 @@ namespace
         {
             out.graphics.farClip = std::stod(value);
         }
-        else if (key == SHADERS_PATH_KEY)
+        else if (key == D3D_SHADERS_PATH_KEY)
         {
-            out.graphics.shadersPath = value;
+            out.graphics.d3dShadersPath = value;
+        }
+        else if (key == VULKAN_SHADERS_PATH_KEY)
+        {
+            out.graphics.vulkanShadersPath = value;
         }
         else
         {
@@ -121,7 +126,8 @@ namespace nc::config
                 << TARGET_FPS_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.targetFPS << '\n'
                 << NEAR_CLIP_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.nearClip << '\n'
                 << FAR_CLIP_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.farClip << '\n'
-                << SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.shadersPath;
+                << D3D_SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.d3dShadersPath << '\n'
+                << VULKAN_SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.vulkanShadersPath;
 
         outFile.close();
     }
@@ -138,6 +144,7 @@ namespace nc::config
                  (g_instance->graphics.frameUpdateInterval > 0.0f) &&
                  (g_instance->graphics.nearClip > 0.0f) &&
                  (g_instance->graphics.farClip > 0.0f) &&
-                 (g_instance->graphics.shadersPath != "")};
+                 (g_instance->graphics.d3dShadersPath != "") &&
+                 (g_instance->graphics.vulkanShadersPath != "")};
     }
 } // end namespace nc::config 

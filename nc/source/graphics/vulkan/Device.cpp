@@ -287,6 +287,31 @@ namespace nc::graphics::vulkan
         m_device.destroy();
     }
 
+    const vk::Device* Device::GetDevice() const noexcept
+    {
+        return &m_device;
+    }
+
+    const Vector2 Device::GetSwapChainExtentDimensions() const noexcept
+    {
+        return Vector2(m_swapChainExtent.width, m_swapChainExtent.height);
+    }
+
+    const vk::Extent2D* Device::GetSwapChainExtent() const noexcept
+    {
+        return &m_swapChainExtent;
+    }
+
+    const vk::Format* Device::GetSwapChainImageFormat() const noexcept
+    {
+        return &m_swapChainImageFormat;
+    }
+
+    const std::vector<vk::ImageView>* Device::GetSwapChainImageViews() const noexcept
+    {
+        return &m_swapChainImageViews;
+    }
+
     SwapChainSupportDetails Device::QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface)
     {
         SwapChainSupportDetails details;

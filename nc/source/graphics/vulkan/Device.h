@@ -63,6 +63,11 @@ namespace nc::graphics::vulkan
         public:
             Device(const vulkan::Instance* instance, Vector2 dimensions);
             ~Device();
+            const vk::Device* GetDevice() const noexcept;
+            const Vector2 GetSwapChainExtentDimensions() const noexcept;
+            const vk::Extent2D* GetSwapChainExtent() const noexcept;
+            const vk::Format* GetSwapChainImageFormat() const noexcept;
+            const std::vector<vk::ImageView>* GetSwapChainImageViews() const noexcept;
 
         private:
             vk::Device m_device;

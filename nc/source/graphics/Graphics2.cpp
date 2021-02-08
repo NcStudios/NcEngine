@@ -1,6 +1,8 @@
 #include "Graphics2.h"
 #include "vulkan/Device.h"
 #include "vulkan/Instance.h"
+#include "vulkan/GraphicsPipeline.h"
+#include "vulkan/RenderPass.h"
 
 namespace nc::graphics
 {
@@ -9,12 +11,16 @@ namespace nc::graphics
     Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
     : m_instance{nullptr},
       m_device{nullptr},
+      m_pipeline{nullptr},
+      m_renderPass{nullptr},
       m_isFullscreen {false},
       m_viewMatrix{},
       m_projectionMatrix{}
     {
         m_instance = std::make_unique<Instance>(hwnd, hinstance);
         m_device = std::make_unique<Device>(m_instance.get(), dimensions);
+        m_renderPass = std::make_unique<RenderPass>(m_device.get());
+        m_pipeline = std::make_unique<GraphicsPipeline>(m_device.get(), m_renderPass.get());
     }
 
     Graphics2::~Graphics2() = default;

@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-    namespace vulkan { class Instance; class Device; }
+    namespace vulkan { class Instance; class Device; class GraphicsPipeline; class RenderPass; }
 
     class Graphics2
     {
@@ -38,6 +38,8 @@ namespace nc::graphics
         private:
             std::unique_ptr<vulkan::Instance> m_instance;
             std::unique_ptr<vulkan::Device> m_device;
+            std::unique_ptr<vulkan::GraphicsPipeline> m_pipeline;
+            std::unique_ptr<vulkan::RenderPass> m_renderPass; // @todo: make vector, map, etc depending on chosen architecture. Right now just a single render pass for rendering a triangle.
             bool m_isFullscreen;
             DirectX::XMMATRIX m_viewMatrix;
             DirectX::XMMATRIX m_projectionMatrix;

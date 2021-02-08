@@ -22,7 +22,8 @@ namespace nc::config
             double nearClip;
             double farClip;
             double frameUpdateInterval;
-            std::string shadersPath;
+            std::string d3dShadersPath;
+            std::string vulkanShadersPath;
         } graphics;
 
         struct
