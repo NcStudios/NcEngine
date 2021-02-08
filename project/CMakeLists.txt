@@ -7,6 +7,7 @@ endif()
 
 #Options
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
+option(USE_VULKAN "Use Vulkan rather than DirectX" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior sanitizer" OFF)
@@ -53,6 +54,10 @@ set_target_properties(${SERVER_EXE}
 #Definitions
 add_definitions(${WIN32_DEFINITIONS})
 
+if(USE_VULKAN)
+    add_definitions(-DUSE_VULKAN)
+endif()
+
 if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()
@@ -94,6 +99,8 @@ if(PROFILING_ENABLED)
     )
 endif()
 
+find_package(Vulkan REQUIRED)
+
 #Link Options
 target_link_libraries(${GAME_EXE}
     PRIVATE
@@ -103,6 +110,10 @@ target_link_libraries(${GAME_EXE}
         ${LIB_DIR}/libassimp.dll.a
         ${LIB_DIR}/${ENET_LIB}
         ${WIN32_LINK_FLAGS}
+        Vulkan::Vulkan
+        ${LIB_DIR}/glfw3.dll
+        ${LIB_DIR}/libglfw3dll.a
+        ${LIB_DIR}/libglfw3.a
 )
 
 if(PROFILING_ENABLED)

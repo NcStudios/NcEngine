@@ -18,14 +18,18 @@ SceneReset::SceneReset(EntityHandle handle)
 void SceneReset::FrameUpdate(float dt)
 {
     (void)dt;
-    if (GetKeyDown(KeyCode::One))
-    {
-        nc::scene::Change(std::make_unique<project::MenuScene>());
-    }
-    if (GetKeyDown(KeyCode::Two))
-    {
-        nc::scene::Change(std::make_unique<project::DemoScene>());
-    }
+
+    // @todo: Remove, currently we are keeping Vulkan contained to a single dummy scene.
+    #ifndef USE_VULKAN
+        if (GetKeyDown(KeyCode::One))
+        {
+            nc::scene::Change(std::make_unique<project::MenuScene>());
+        }
+        if (GetKeyDown(KeyCode::Two))
+        {
+            nc::scene::Change(std::make_unique<project::DemoScene>());
+        }
+    #endif
 }
 
 Timer::Timer(EntityHandle handle)
