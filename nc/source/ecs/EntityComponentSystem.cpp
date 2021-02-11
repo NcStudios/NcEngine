@@ -16,7 +16,8 @@ namespace
 namespace nc::ecs
 {
 EntityComponentSystem::EntityComponentSystem()
-    : m_active{InitialBucketSize, EntityHandle::Hash()},
+    : m_handleManager{},
+      m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_colliderSystem{ std::make_unique<ComponentSystem<Collider>>() },
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS, true) },
@@ -100,6 +101,7 @@ bool EntityComponentSystem::DoesEntityExist(const EntityHandle handle) const noe
 
 bool EntityComponentSystem::DestroyEntity(EntityHandle handle)
 {
+    /** Friendly reminder - this invalidates m_active iterators */
     if(!DoesEntityExist(handle))
         return false;
     auto& containingMap = GetMapContainingEntity(handle);
@@ -157,10 +159,16 @@ Entity* EntityComponentSystem::GetEntityPtrFromAnyMap(const EntityHandle handle)
 
 void EntityComponentSystem::ClearState()
 {
-    for(const auto& pair : m_active)
+    // We cannot call DestroyEntity while iterating m_active, so copy the handles
+    std::vector<EntityHandle> handles;
+    handles.reserve(m_active.size());
+    std::transform(m_active.cbegin(), m_active.cend(), std::back_inserter(handles), [](const auto& pair)
     {
-        DestroyEntity(pair.first);
-    }
+        return pair.first;
+    });
+
+    for(const auto handle : handles)
+        DestroyEntity(handle);
 
     SendOnDestroy();
     m_active.clear();

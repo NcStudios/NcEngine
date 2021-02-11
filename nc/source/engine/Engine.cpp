@@ -132,6 +132,7 @@ namespace nc::core
     {
         V_LOG("Clearing engine state");
         m_ecs.ClearState();
+        m_physics.ClearState();
         camera::ClearMainCamera();
         // SceneSystem state is never cleared
     }
@@ -233,11 +234,11 @@ namespace nc::core
         using namespace std::placeholders;
 
         #ifdef USE_VULKAN
-            m_window.BindGraphicsOnResizeCallback(std::bind(m_graphics2.OnResize, &m_graphics2, _1, _2, _3, _4));
+            m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4));
             // No UI for us until we tackle integrating IMGUI with Vulkan
         #else
-            m_window.BindGraphicsOnResizeCallback(std::bind(m_graphics.OnResize, &m_graphics, _1, _2, _3, _4));
-            m_window.BindUICallback(std::bind(m_ui.WndProc, &m_ui, _1, _2, _3, _4));
+            m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4));
+            m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
         #endif
         ::nc::internal::RegisterEcs(&m_ecs);
     }

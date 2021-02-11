@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace nc::physics
+namespace nc::physics::collision
 {
     enum class CollisionEvent : uint8_t
     {
@@ -25,15 +25,20 @@ namespace nc::physics
         Collider* second;
     };
 
+    namespace
+    {
+        std::vector<CollisionData> previousCollisions{}; // temp until state management is decided
+    }
+
     inline void DoCollisionStep(const std::vector<Collider*>& colliders);
     inline void BuildCurrentFrameState(const std::vector<Collider*>& colliders, std::vector<CollisionData>& out);
     inline void CompareFrameStates(const std::vector<CollisionData>& previousState, const std::vector<CollisionData>& currentState);
     inline void NotifyCollisionEvent(const CollisionData& data, CollisionEvent type);
+    inline void ClearState();
     inline bool operator ==(const CollisionData& lhs, const CollisionData& rhs);
 
     inline void DoCollisionStep(const std::vector<Collider*>& colliders)
     {
-        static std::vector<CollisionData> previousCollisions{}; //can't remain static b/c engine can't clear it on scene change
         std::vector<CollisionData> currentCollisions;
         currentCollisions.reserve(previousCollisions.size());
         BuildCurrentFrameState(colliders, currentCollisions);
@@ -109,6 +114,11 @@ namespace nc::physics
             default:
                 throw std::runtime_error("NotifyCollisionEvent - Unknown CollisionEvent");
         }
+    }
+
+    inline void ClearState()
+    {
+        previousCollisions.clear();
     }
 
     inline bool operator ==(const CollisionData& lhs, const CollisionData& rhs)

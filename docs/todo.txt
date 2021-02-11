@@ -2,20 +2,24 @@
 IN PROGRESS
 ***********
 
--PointLight ctor should be able to take PointLight::Properties
--Using Vector3::Zero for scale is invalid, does having and of x,y,z == 0 result in an invalid state? 
--#ifdef editor stuff is getting out of hand; restore sanity
--profiling only works well on per frame stuff; it is hard to get meaningful data about physics w/o syncing fixed/frame rates
--ImGui::IsAnyWindowHovered() [Hud.cpp] is obsolete - change and fix error where clicking on ui returns
-    false(no window hovered)
+-update physics to 3d
+    -optimize collisions
+    -add physics body
 
-GfxResMan should try to get rid of strings as keys
-Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
+-transform::up/forward/etc needed
+    -SceneNavigationCamera should rotate around these
+
+-PointLight ctor should be able to take PointLight::Properties
+-#ifdef editor stuff is getting out of hand; restore sanity
+-Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 
 ***********
 BUGS
 ***********
--rotations are still strange sometimes(also need world/local options)
+-Phong pixel shader roughness seems backwards
+-ImGui::IsAnyWindowHovered() [Hud.cpp] is obsolete - change and fix error where clicking on ui returns
+    false(no window hovered)
+-Using Vector3::Zero for scale is invalid, does having and of x,y,z == 0 result in an invalid state?
 -don't believe gfx resources are ever unloaded
 - PBRMaterial.cpp GraphicsResource wont bind two consecutive same textures because the index won't increment if the first same resources has been added.
 
@@ -23,29 +27,17 @@ BUGS
 ***********
 TO ADD
 ***********
+-threads
+-particle systems!
+-animation
 -<source_location> added in gcc 11; when mingw gets it change from <experimental/source_location>
-
+-GfxResMan should try to get rid of strings as keys
+-profiling only works well on per frame stuff; it is hard to get meaningful data about physics w/o syncing fixed/frame rates
 -add global search to api - GlobalGetComponent
--update physics to 3d
--lights
-    -improve point light components and how they relate to entities
-    -support for multiple lights
-    -additional light types (directional/spot)
--rendering improvements
-    -way to mark things static so batching is possible
-    -add frustrum and occlusion culling
--Figure out the best way to edit the material properties or properties of the technique in the editor
 
 LOW PRIORITY
 -gtest must be dl'd manually
--unused params are marked (void)param for now, many of these can be removed,
-    but some are there for uniformity (ex: Aquire passes gfx* to resource constructor always)
 -display draw calls and tris/verts
 -fix naming of user components in gui
--main window/main menu dilemma
 -camera needs parameters for fov/clipping planes
 -save changes in debug mode
--all d3d "slots" are passed at uint literals, look into what exactly
-    is needed here - can we use an enum for these so there is some 
-    semantic meaning tied to the values passed?
-

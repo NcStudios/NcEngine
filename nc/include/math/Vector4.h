@@ -22,6 +22,7 @@ namespace nc
     constexpr Vector4 operator *(const Vector4& vec, float scalar) noexcept;
     constexpr Vector4 operator *(float scalar, const Vector4& vec) noexcept;
     constexpr Vector4 operator /(const Vector4& vec, float scalar) noexcept;
+    constexpr Vector4 HadamardProduct(const Vector4& lhs, const Vector4& rhs) noexcept;
     constexpr float SquareMagnitude(const Vector4& vec) noexcept;
     constexpr float Magnitude(const Vector4& vec) noexcept;
     constexpr Vector4 Normalize(const Vector4& vec) noexcept;
@@ -65,6 +66,11 @@ namespace nc
     constexpr Vector4 operator /(const Vector4& vec, float scalar) noexcept
     {
         return Vector4{vec.x / scalar, vec.y / scalar, vec.z / scalar, vec.w / scalar};
+    }
+
+    constexpr Vector4 HadamardProduct(const Vector4& lhs, const Vector4& rhs) noexcept
+    {
+        return Vector4{lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w};
     }
 
     constexpr float SquareMagnitude(const Vector4& vec) noexcept

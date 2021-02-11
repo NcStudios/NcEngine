@@ -219,6 +219,8 @@ namespace nc::window
 
     void WindowImpl::ProcessSystemMessages()
     {
+        using namespace nc::input;
+
         MSG message;
         while(PeekMessage(&message, 0, 0, 0, PM_REMOVE))
         {
@@ -230,21 +232,46 @@ namespace nc::window
                 }
                 case WM_MOUSEMOVE:
                 {
-                    input::UpdateMousePosition(message.lParam);
+                    UpdateMousePosition(message.lParam);
                     break;
                 }
-                case WM_LBUTTONDOWN: //need to double check w/l params for mouse button events, don't think this is working
+                case WM_LBUTTONDOWN:
+                {
+                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::LeftButton, message.lParam);
+                    break;
+                }
                 case WM_LBUTTONUP:
+                {
+                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::LeftButton, message.lParam);
+                    break;
+                }
                 case WM_MBUTTONDOWN:
+                {
+                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
+
+                    break;
+                }
                 case WM_MBUTTONUP:
+                {
+                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
+                    break;
+                }
                 case WM_RBUTTONDOWN:
+                {
+                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::RightButton, message.lParam);
+                    break;
+                }
                 case WM_RBUTTONUP:
+                {
+                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::RightButton, message.lParam);
+                    break;
+                }
                 case WM_SYSKEYDOWN:
                 case WM_SYSKEYUP:
                 case WM_KEYDOWN:
                 case WM_KEYUP:
                 {
-                    input::AddToQueue(message.wParam, message.lParam);
+                    AddKeyToQueue(message.wParam, message.lParam);
                     break;
                 }
             }
