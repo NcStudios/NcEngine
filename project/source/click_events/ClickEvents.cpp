@@ -1,10 +1,10 @@
 #include "ClickEvents.h"
 #include "Ecs.h"
 #include "MainCamera.h"
-#include "UI.h"
 #include "imgui/imgui.h"
 #include "shared/Prefabs.h"
 #include "shared/EdgePanCamera.h"
+#include "shared/spawner/Spawner.h"
 #include "Clickable.h"
 #include "ClickHandler.h"
 
@@ -40,11 +40,8 @@ namespace
             ImGui::Spacing();
             ImGui::Text("Check the log for on click events.");
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Text("Controls:");
-            ImGui::Spacing();
             ImGui::Text("-move camera by edge panning");
             ImGui::Text("-zoom with mouse wheel");
-            ImGui::Text("-rotate with x and y keys");
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
         } ImGui::EndChild();
     }
@@ -56,6 +53,12 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(true, false, Widget);
 
+        auto cameraHandle = CreateEntity(Vector3{0.0f, 6.1f, -9.5f}, Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), Vector3::One(), "Main Camera");
+        auto camera = AddComponent<EdgePanCamera>(cameraHandle);
+        camera::SetMainCamera(camera);
+        auto clickHandler = AddComponent<ClickHandler>(cameraHandle, MaskAll);
+        LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
+
         // Lights
         auto lvHandle = CreateEntity(Vector3{-2.4f, 12.1f, 0.0f}, Quaternion::Identity(), Vector3::One(), "Point Light");
         AddComponent<PointLight>(lvHandle);
@@ -64,22 +67,32 @@ namespace nc::sample
         auto lvHandle3 = CreateEntity(Vector3{4.1f, 14.5f, 3.3f}, Quaternion::Identity(), Vector3::One(), "Point Light");
         AddComponent<PointLight>(lvHandle3);
 
-        //Camera
-        auto camTransform = camera::GetMainCameraTransform();
-        camTransform->Set(Vector3{3.6f, 6.1f, -6.5f}, Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), Vector3::One());
-        auto camHandle = camTransform->GetParentHandle();
-        AddComponent<EdgePanCamera>(camHandle);
-        auto clickHandler = AddComponent<ClickHandler>(camHandle, MaskAll);
-        LayerSelectCallback = std::bind(clickHandler->SetLayer, clickHandler, std::placeholders::_1);
-
         // Objects
-        prefab::Create(prefab::Resource::Table, Vector3{4.0f, -0.4f, 3.0f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::Splat(7.5f), "Table");
+        prefab::Create(prefab::Resource::Table, Vector3{0.0f, -0.4f, 0.0f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::Splat(7.5f), "Table");
         
-        /** @todo add filtering - layer controlled in widget */
-        auto coinHandle = prefab::Create(prefab::Resource::Coin, Vector3{1.6f, 0.0f, 1.6f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 0.0f), Vector3::Splat(2.0f), "Coin");
-        AddComponent<Clickable>(coinHandle, MaskCoin);
-        auto tokenHandle = prefab::Create(prefab::Resource::Token, Vector3{2.0f, 0.0f, 0.4f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 0.0f), Vector3::Splat(2.0f), "Token1");
-        AddComponent<Clickable>(tokenHandle, MaskToken);
+        SpawnBehavior behavior
+        {
+            .rotationOffset = Vector3{math::Pi / 2.0f, 0.0f, 0.0f},
+            .positionRandomRange = Vector3{4.2f, 0.0f, 2.8f}
+        };
+        
+        auto coinExtension = [](EntityHandle handle)
+        {
+            GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
+            AddComponent<Clickable>(handle, MaskCoin);
+        };
+        auto coinSpawnerHandle = CreateEntity("Coin Spawner");
+        auto coinSpawner = AddComponent<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, coinExtension);
+        coinSpawner->Spawn(20);
+
+        auto tokenExtension = [](EntityHandle handle)
+        {
+            GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
+            AddComponent<Clickable>(handle, MaskToken);
+        };
+        auto tokenSpawnerHandle = CreateEntity("Token Spawner");
+        auto tokenSpawner = AddComponent<Spawner>(tokenSpawnerHandle, prefab::Resource::Token, behavior, tokenExtension);
+        tokenSpawner->Spawn(20);
     }
 
     void ClickEvents::Unload()

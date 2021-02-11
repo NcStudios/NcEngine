@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Ecs.h"
-#include "MainCamera.h"
 #include "UI.h"
 #include "GameLog.h"
 #include "SampleUI.h"
@@ -35,10 +34,6 @@ namespace nc::sample
 
         m_ui = std::make_unique<SampleUI>(m_log.get(), widgetCallback);
         ui::Set(m_ui.get());
-
-        auto camHandle = CreateEntity(Vector3::Back() * 10.0f, Quaternion::Identity(), Vector3::One(), "Main Camera");
-        auto camComponentPtr = AddComponent<Camera>(camHandle);
-        nc::camera::SetMainCamera(camComponentPtr);
 
         if(createLight)
         {

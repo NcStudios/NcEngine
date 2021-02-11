@@ -2,7 +2,7 @@
 #include "Ecs.h"
 #include "MainCamera.h"
 #include "shared/ConstantRotation.h"
-#include "shared/Prefabs.h"
+#include "shared/spawner/Spawner.h"
 #include "MouseFollower.h"
 
 #include <random>
@@ -11,9 +11,13 @@ namespace nc::sample
 {
     void Worms::Load()
     {
+        // Setup
         m_sceneHelper.Setup(false);
-
         prefab::InitializeResources();
+
+        // Camera
+        auto camera = AddComponent<Camera>(CreateEntity("Main Camera"));
+        camera::SetMainCamera(camera);
 
         // Light
         auto lvHandle = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Point Light");
@@ -31,21 +35,18 @@ namespace nc::sample
         pointLight->Set(lightProperties);
         AddComponent<MouseFollower>(lvHandle);
 
-        // Camera
-        camera::GetMainCameraTransform()->Set(Vector3::Zero(), Quaternion::Identity(), Vector3::One());
-
         // Worms
-        std::random_device device;
-        std::mt19937 gen(device());
-        std::uniform_real_distribution<float> randPos(-15.0f, 15.0f);
-        std::uniform_real_distribution<float> randRot(0.0f, 3.14159f);
-        for(size_t i = 0u; i < 40; ++i)
+        SpawnBehavior spawnBehavior
         {
-            auto pos = Vector3{randPos(gen), randPos(gen), randPos(gen) + 25.0f};
-            auto rot = Quaternion::FromEulerAngles(randRot(gen), randRot(gen), randRot(gen));
-            auto wormHandle = prefab::Create(prefab::Resource::Worm, pos, rot, Vector3::Splat(0.75f), "worm");
-            AddComponent<ConstantRotation>(wormHandle, Vector3{0, 1, 0}, 0.1f);
-        }
+            .positionOffset = Vector3{0.0f, 0.0f, 25.0f},
+            .positionRandomRange = Vector3::Splat(15.0f),
+            .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f),
+            .rotationAxisRandomRange = Vector3::One(),
+            .thetaRandomRange = 1.0f
+        };
+        auto spawnerHandle = CreateEntity("Spawner");
+        auto spawner = AddComponent<Spawner>(spawnerHandle, prefab::Resource::Worm, spawnBehavior);
+        spawner->Spawn(1u);
     }
 
     void Worms::Unload()

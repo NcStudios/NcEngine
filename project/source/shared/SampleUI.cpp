@@ -8,7 +8,9 @@
 #include "worms/Worms.h"
 #include "click_events/ClickEvents.h"
 #include "spawn_test/SpawnTest.h"
+#include "collision_benchmark/CollisionBenchmark.h"
 #include "collision_events/CollisionEvents.h"
+#include "rendering_benchmark/RenderingBenchmark.h"
 
 namespace
 {
@@ -43,8 +45,6 @@ namespace nc::sample
 
     void SampleUI::Draw()
     {
-        CheckInput();
-
         ImGui::SetNextWindowPos({0, m_windowDimensions.y - PanelHeight});
         ImGui::SetNextWindowSize({m_windowDimensions.x, PanelHeight});
 
@@ -52,36 +52,17 @@ namespace nc::sample
         {
             auto columnCount = m_gameLog ? 3 : 2;
             ImGui::Columns(columnCount);
-
-            if(m_widgetCallback)
-                m_widgetCallback();
-            else
-                DrawDefaultWidget();
-
+            m_widgetCallback ? m_widgetCallback() : DrawDefaultWidget();
             if(m_gameLog)
             {
                 ImGui::NextColumn();
                 DrawLog();
             }
-
             ImGui::NextColumn();
             DrawSceneList();
         } ImGui::End();
 
         m_isHovered = ImGui::IsAnyWindowHovered();
-    }
-
-    void SampleUI::CheckInput()
-    {
-        using namespace nc::input;
-        if(GetKeyDown(KeyCode::One))
-            scene::Change(std::make_unique<Worms>());
-        else if(GetKeyDown(KeyCode::Two))
-            scene::Change(std::make_unique<ClickEvents>());
-        else if(GetKeyDown(KeyCode::Three))
-            scene::Change(std::make_unique<CollisionEvents>());
-        else if(GetKeyDown(KeyCode::Four))
-            scene::Change(std::make_unique<SpawnTest>());
     }
 
     void SampleUI::DrawDefaultWidget()
@@ -101,13 +82,24 @@ namespace nc::sample
 
     void SampleUI::DrawLog()
     {
+        auto columnWidth = ImGui::GetColumnWidth();
+        static int ItemCount = GameLog::DefaultItemCount;
         ImGui::Text("Log");
+        ImGui::SameLine(columnWidth - 50);
+        if(ImGui::Button("Clear", {42, 18}))
+            m_gameLog->Clear();
+        ImGui::SameLine(columnWidth - 130);
+        ImGui::SetNextItemWidth(70);
+        if(ImGui::InputInt("##logcount", &ItemCount, 1, 5))
+        {
+            ItemCount = nc::math::Clamp(ItemCount, 0, 1000); //for sanity, since Dear ImGui doesn't deal with unsigned
+            m_gameLog->SetItemCount(ItemCount);
+        }
+
         if(ImGui::BeginChild("LogPanel", {0,0}, true))
         {
             for(auto& item : m_gameLog->GetItems())
-            {
                 ImGui::Text(item.c_str());
-            }
         } ImGui::EndChild();
     }
 
@@ -116,26 +108,28 @@ namespace nc::sample
         ImGui::Text("Scenes");
         if(ImGui::BeginChild("SceneList", {0,0}, true))
         {
-            static bool selected = false;
-            if(ImGui::Selectable("1. Worms", &selected))
+            auto buttonSize = ImVec2{ImGui::GetWindowWidth() - 20, 18};
+            if(ImGui::Button("Worms", buttonSize))
                 scene::Change(std::make_unique<Worms>());
 
-            if(ImGui::Selectable("2. Click Events", &selected))
+            if(ImGui::Button("Click Events", buttonSize))
                 scene::Change(std::make_unique<ClickEvents>());
 
-            if(ImGui::Selectable("3. Collision Events", &selected))
+            if(ImGui::Button("Collision Events", buttonSize))
                 scene::Change(std::make_unique<CollisionEvents>());
 
-            if(ImGui::Selectable("4. Spawn Test", &selected))
+            if(ImGui::Button("Spawn Test", buttonSize))
                 scene::Change(std::make_unique<SpawnTest>());
 
-            if(ImGui::Selectable("5. Rendering Benchmark", &selected))
+            if(ImGui::Button("Rendering Benchmark", buttonSize))
+                scene::Change(std::make_unique<RenderingBenchmark>());
+                
+            if(ImGui::Button("Collision Benchmark", buttonSize))
+                scene::Change(std::make_unique<CollisionBenchmark>());
+
+            if(ImGui::Button("Jare Scratch", buttonSize))
             {}
-            if(ImGui::Selectable("6. Collision Benchmark", &selected))
-            {}
-            if(ImGui::Selectable("7. Jare Scratch", &selected))
-            {}
-            if(ImGui::Selectable("8. Cal Scratch", &selected))
+            if(ImGui::Button("Cal Scratch", buttonSize))
             {}
         } ImGui::EndChild();
     }

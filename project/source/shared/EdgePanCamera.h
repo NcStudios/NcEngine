@@ -1,11 +1,12 @@
 #pragma once
 
 #include "component/Transform.h"
+#include "component/Camera.h"
 #include "math/Vector2.h"
 
 namespace nc::sample
 {
-    class EdgePanCamera : public Component
+    class EdgePanCamera : public Camera
     {
         public:
             EdgePanCamera(EntityHandle handle);

@@ -1,96 +1,87 @@
 #include "SpawnTest.h"
-#include "Ecs.h"
 #include "MainCamera.h"
-#include "shared/Prefabs.h"
-#include "shared/EdgePanCamera.h"
-#include "shared/ConstantTranslation.h"
+#include "imgui/imgui.h"
+#include "KillBox.h"
+#include "DestroyOtherOnCollision.h"
+#include "shared/spawner/FixedIntervalSpawner.h"
+#include "shared/SceneNavigationCamera.h"
 
-#include <random>
+namespace
+{
+    void Widget()
+    {
+        ImGui::Text("Spawn Test");
+        if(ImGui::BeginChild("Widget", {0,0}, true))
+        {
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            ImGui::Text("-middle mouse button + drag to pan");
+            ImGui::Text("-right mouse button + drag to look");
+            ImGui::Text("-mouse wheel to zoom");
+        } ImGui::EndChild();
+    }
+}
 
 namespace nc::sample
 {
-    class KillBox : public Component
-    {
-        public:
-            KillBox(EntityHandle handle)
-                : Component(handle)
-            {}
-
-            void OnCollisionExit(Entity* other)
-            {
-                if(other)
-                    DestroyEntity(other->Handle);
-            }
-    };
-
-    class Spawner : public Component
-    {
-        public:
-            Spawner(EntityHandle handle)
-                : Component{handle},
-                  m_device{},
-                  m_gen{m_device()},
-                  m_distribution{-10.0f, 10.0f}
-            {
-            }
-
-            void FrameUpdate(float dt) override
-            {
-                m_lastSpawnTime += dt;
-                if(m_lastSpawnTime > m_spawnRate)
-                {
-                    m_lastSpawnTime = 0.0f;
-                    auto xPos = m_distribution(m_gen);
-                    auto yPos = m_distribution(m_gen);
-                    auto zPos = m_distribution(m_gen);
-                    auto xVel = m_distribution(m_gen);
-                    auto yVel = m_distribution(m_gen);
-                    auto zVel = m_distribution(m_gen);
-
-                    auto obj = prefab::Create(prefab::Resource::Cube, Vector3{xPos, yPos, zPos}, Quaternion::Identity(), Vector3::One(), "cube");
-                    AddComponent<Collider>(obj, Vector3::One());
-                    AddComponent<ConstantTranslation>(obj, Vector3{xVel, yVel, zVel});
-                }
-            }
-        
-        private:
-            float m_spawnRate = 1.0f;
-            float m_lastSpawnTime = 0.0f;
-            std::random_device m_device;
-            std::mt19937 m_gen;
-            std::uniform_real_distribution<float> m_distribution;
-    };
-
-    // class DestroyOnCollide : public Component
-    // {
-    //     public:
-    //         DestroyOnCollide(EntityHandle handle);
-    //         void FrameUpdate(float dt) override;
-    //         void OnCollisionEnter(Entity* other) override;
-    // };
-
     void SpawnTest::Load()
     {
-        m_sceneHelper.Setup(true, true);
+        m_sceneHelper.Setup(true, false, Widget);
 
         // Camera
-        auto camT = camera::GetMainCameraTransform();
-        camT->SetPosition(Vector3{0.0f, 0.0f, -20.0f});
-        AddComponent<EdgePanCamera>(camT->GetParentHandle());
+        auto cameraHandle = CreateEntity(Vector3{0.0f, -9.0f, -100.0f}, Quaternion::Identity(), Vector3::One(), "SceneNavigationCamera");
+        auto camera = AddComponent<SceneNavigationCamera>(cameraHandle);
+        camera::SetMainCamera(camera);
 
-        auto killBox = prefab::Create(prefab::Resource::WireframeCube, Vector3::Zero(), Quaternion::Identity(), Vector3::Splat(60.0f), "KillBox");
-        //auto killBox = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::Splat(10.0f), "KillBox");
+        // Point Light
+        PointLight::Properties lightProperties
+        {
+            .ambient = Vector3::One(),
+            .diffuseIntensity = 4.5f,
+            .attConst = 1.0f,
+            .attLin = 0.0001f
+        };
+        auto lvHandle = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Point Light");
+        auto pointLight = AddComponent<PointLight>(lvHandle);
+        pointLight->Set(lightProperties);
+
+        // Collider that destroys anything leaving its bounded area
+        auto killBox = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::Splat(60.0f), "KillBox");
         AddComponent<Collider>(killBox, Vector3::One());
         AddComponent<KillBox>(killBox);
-        AddComponent<Spawner>(killBox);
 
-        float min = -40.0f;
-        float max = 40.0f;
-        prefab::Create(prefab::Resource::Cube, Vector3{0.0f, min,  0.0f}, Quaternion::Identity(), Vector3{40.0f, 1.0f, 40.0f}, "Ground");
-        prefab::Create(prefab::Resource::Cube, Vector3{0.0f, max,  0.0f}, Quaternion::Identity(), Vector3{40.0f, 1.0f, 40.0f}, "Ceiling");
-        prefab::Create(prefab::Resource::Cube, Vector3{min,  0.0f, 0.0f}, Quaternion::Identity(), Vector3{1.0f, 40.0f, 40.0f}, "Left Wall");
-        prefab::Create(prefab::Resource::Cube, Vector3{max,  0.0f, 0.0f}, Quaternion::Identity(), Vector3{1.0f, 40.0f, 40.0f}, "Right Wall");
+        // Spawner for stationary cubes
+        SpawnBehavior staticCubeBehavior
+        {
+            .positionRandomRange = Vector3::Splat(55.0f),
+            .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f),
+        };
+        auto staticCubeExtension = [](EntityHandle handle)
+        {
+            GetComponent<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
+            AddComponent<Collider>(handle, Vector3::One());
+            AddComponent<DestroyOtherOnCollision>(handle);
+        };
+        auto staticCubeSpawnerHandle = CreateEntity("Static Cube Spawner");
+        auto staticCubeSpawner = AddComponent<Spawner>(staticCubeSpawnerHandle, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);
+        staticCubeSpawner->Spawn(5);
+        staticCubeSpawner->SetPrefab(prefab::Resource::CubeRed);
+        staticCubeSpawner->Spawn(5);
 
+        // Fixed interval spawner for moving cubes
+        SpawnBehavior dynamicCubeBehavior
+        {
+            .positionRandomRange = Vector3::Splat(15.0f),
+            .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f),
+            .velocityRandomRange = Vector3::Splat(10.0f),
+            .rotationAxisRandomRange = Vector3::One(),
+            .thetaRandomRange = 2.0f
+        };
+        auto dynamicCubeExtension = [](EntityHandle handle)
+        {
+            AddComponent<Collider>(handle, Vector3::One());
+        };
+        auto dynamicCubeSpawnerHandle = CreateEntity("Dynamic Cube Spawner");
+        AddComponent<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);
     }
 
     void SpawnTest::Unload()

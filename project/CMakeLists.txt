@@ -125,8 +125,10 @@ target_sources(${GAME_EXE}
 )
 
 add_subdirectory(source/click_events)
+add_subdirectory(source/collision_benchmark)
 add_subdirectory(source/collision_events)
 add_subdirectory(source/jare_scratch)
+add_subdirectory(source/rendering_benchmark)
 add_subdirectory(source/shared)
 add_subdirectory(source/spawn_test)
 add_subdirectory(source/worms)

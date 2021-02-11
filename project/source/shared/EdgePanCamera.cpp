@@ -23,7 +23,7 @@ namespace
 namespace nc::sample
 {
     EdgePanCamera::EdgePanCamera(EntityHandle handle)
-        : Component(handle),
+        : Camera(handle),
         m_mainCameraTransform{nullptr},
         m_lastFrameZoom{0.0f}
     {}
@@ -48,11 +48,5 @@ namespace nc::sample
         m_lastFrameTranslation = translation;
         translation = translation * dt;
         m_mainCameraTransform->Translate(translation, Space::World);
-
-        if(input::GetKey(input::KeyCode::X))
-            m_mainCameraTransform->Rotate(Vector3::Right(), CamRotateSpeed);
-
-        if(input::GetKey(input::KeyCode::Y))
-            m_mainCameraTransform->Rotate(Vector3::Up(), CamRotateSpeed);
     }
 }

@@ -8,6 +8,34 @@ namespace
 
 namespace nc::sample::prefab
 {
+    std::string ToString(Resource resource)
+    {
+        switch(resource)
+        {
+            case Resource::Beeper:
+                return std::string{"Beeper"};
+            case Resource::Coin:
+                return std::string{"Coin"};
+            case Resource::Cube:
+                return std::string{"Cube"};
+            case Resource::CubeBlue:
+                return std::string{"CubeBlue"};
+            case Resource::CubeGreen:
+                return std::string{"CubeGreen"};
+            case Resource::CubeRed:
+                return std::string{"CubeRed"};
+            case Resource::Table:
+                return std::string{"Table"};
+            case Resource::Token:
+                return std::string{"Token"};
+            case Resource::WireframeCube:
+                return std::string{"WireframeCube"};
+            case Resource::Worm:
+                return std::string{"Worm"};
+        }
+        throw std::runtime_error("prefab::ToString(resource) - Unknown resource");
+    }
+
     namespace mesh
     {
         graphics::Mesh Beeper{};
@@ -23,6 +51,9 @@ namespace nc::sample::prefab
         graphics::Material Beeper{nullptr};
         graphics::Material Coin{nullptr};
         graphics::Material Cube{nullptr};
+        graphics::Material CubeBlue{nullptr};
+        graphics::Material CubeGreen{nullptr};
+        graphics::Material CubeRed{nullptr};
         graphics::Material Table{nullptr};
         graphics::Material Token{nullptr};
         graphics::Material WireframeCube{nullptr};
@@ -46,15 +77,24 @@ void InitializeResources()
 
     auto materialProperties = graphics::MaterialProperties{};
     auto textureDir = std::string{"project//Textures//"};
-    auto defaultAlbedo = std::string{"nc//source//graphics//DefaultTexture.png"};
+    auto defaultBaseColor = std::string{"nc//source//graphics//DefaultTexture.png"};
     auto defaultNormal = std::string{"nc//source//graphics//DefaultTexture_Normal.png"};
     auto defaultMetallic = std::string{"nc//source//graphics//DefaultTexture_Metallic.png"};
 
     const std::vector<std::string> beeperTextures{textureDir + "Beeper//BaseColor.png", textureDir + "Beeper//Normal.png", textureDir + "Beeper//Roughness.png", defaultMetallic};
     material::Beeper = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(beeperTextures, materialProperties);
 
-    const std::vector<std::string> cubeTextures{defaultAlbedo, defaultNormal, defaultAlbedo, defaultMetallic};
+    const std::vector<std::string> cubeTextures{defaultBaseColor, defaultNormal, defaultMetallic, defaultMetallic};
     material::Cube = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeTextures, materialProperties);
+
+    const std::vector<std::string> cubeBlueTextures{textureDir + "SolidColor//Blue.png", defaultNormal, defaultMetallic, defaultMetallic};
+    material::CubeBlue = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeBlueTextures, materialProperties);
+
+    const std::vector<std::string> cubeGreenTextures{textureDir + "SolidColor//Green.png", defaultNormal, defaultMetallic, defaultMetallic};
+    material::CubeGreen = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeGreenTextures, materialProperties);
+
+    const std::vector<std::string> cubeRedTextures{textureDir + "SolidColor//Red.png", defaultNormal, defaultMetallic, defaultMetallic};
+    material::CubeRed = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeRedTextures, materialProperties);
 
     const std::vector<std::string> coinTextures{textureDir + "Coin//BaseColor.png", textureDir + "Coin//Normal.png", textureDir + "Coin//Roughness.png", defaultMetallic};
     material::Coin = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(coinTextures, materialProperties);
@@ -95,6 +135,27 @@ template<> EntityHandle Create_<Resource::Cube>(Vector3 position, Quaternion rot
     return handle;
 }
 
+template<> EntityHandle Create_<Resource::CubeBlue>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+{
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Cube, material::CubeBlue);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::CubeGreen>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+{
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Cube, material::CubeGreen);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::CubeRed>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+{
+    auto handle = CreateEntity(position, rotation, scale, tag);
+    AddComponent<Renderer>(handle, mesh::Cube, material::CubeRed);
+    return handle;
+}
+
 template<> EntityHandle Create_<Resource::Table>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
 {
     auto handle = CreateEntity(position, rotation, scale, tag);
@@ -128,12 +189,15 @@ using CreateFunc_t = EntityHandle(*)(Vector3, Quaternion, Vector3, std::string);
 const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
 {
     std::pair{Resource::Beeper,        Create_<Resource::Beeper>},
-    std::pair{Resource::Coin,          Create_<Resource::Coin>  },
-    std::pair{Resource::Cube,          Create_<Resource::Cube>  },
-    std::pair{Resource::Table,         Create_<Resource::Table> },
-    std::pair{Resource::Token,         Create_<Resource::Token> },
-    std::pair{Resource::WireframeCube, Create_<Resource::WireframeCube> },
-    std::pair{Resource::Worm,          Create_<Resource::Worm>  }
+    std::pair{Resource::Coin,          Create_<Resource::Coin>},
+    std::pair{Resource::Cube,          Create_<Resource::Cube>},
+    std::pair{Resource::CubeBlue,      Create_<Resource::CubeBlue>},
+    std::pair{Resource::CubeGreen,     Create_<Resource::CubeGreen>},
+    std::pair{Resource::CubeRed,       Create_<Resource::CubeRed>},
+    std::pair{Resource::Table,         Create_<Resource::Table>},
+    std::pair{Resource::Token,         Create_<Resource::Token>},
+    std::pair{Resource::WireframeCube, Create_<Resource::WireframeCube>},
+    std::pair{Resource::Worm,          Create_<Resource::Worm>}
 };
 
 nc::EntityHandle Create(Resource resource, nc::Vector3 position, nc::Quaternion rotation, nc::Vector3 scale, std::string tag)
