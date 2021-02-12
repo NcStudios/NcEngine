@@ -3,11 +3,11 @@ IN PROGRESS
 ***********
 
 -update physics to 3d
+    -layers apply to collisions
+    -sphere collider
+    -need trigger type?
     -optimize collisions
     -add physics body
-
--transform::up/forward/etc needed
-    -SceneNavigationCamera should rotate around these
 
 -PointLight ctor should be able to take PointLight::Properties
 -#ifdef editor stuff is getting out of hand; restore sanity
@@ -27,6 +27,7 @@ BUGS
 ***********
 TO ADD
 ***********
+-way to lock camera pitch to 180deg range
 -threads
 -particle systems!
 -animation

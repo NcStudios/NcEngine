@@ -2,7 +2,6 @@
 #include "MainCamera.h"
 #include "imgui/imgui.h"
 #include "KillBox.h"
-#include "DestroyOtherOnCollision.h"
 #include "shared/spawner/FixedIntervalSpawner.h"
 #include "shared/SceneNavigationCamera.h"
 
@@ -59,7 +58,6 @@ namespace nc::sample
         {
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
             AddComponent<Collider>(handle, Vector3::One());
-            AddComponent<DestroyOtherOnCollision>(handle);
         };
         auto staticCubeSpawnerHandle = CreateEntity("Static Cube Spawner");
         auto staticCubeSpawner = AddComponent<Spawner>(staticCubeSpawnerHandle, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);

@@ -18,8 +18,8 @@ namespace nc::sample
             Vector2 m_lookPivot = Vector2::Zero();
             float m_zoom = 0.0f;
             float m_panDampen = 0.25f;
-            float m_lookDampen = 0.01f;
-            float m_zoomDampen = 1.2f;
+            float m_lookDampen = 0.005f;
+            float m_zoomDampen = 1.4f;
 
             void Pan(float dt);
             void Look(float dt);
@@ -65,9 +65,8 @@ namespace nc::sample
         {
             auto mouseDelta = input::MousePos() - m_lookPivot;
             auto [horizontalLook, verticalLook] = mouseDelta * m_lookDampen * dt;
-            /** @note need local space vectors here - fix in next pr */
             m_transform->Rotate(Vector3::Up(), horizontalLook);
-            m_transform->Rotate(Vector3::Right(), verticalLook);
+            m_transform->Rotate(m_transform->Right(), verticalLook);
         }
     }
 
