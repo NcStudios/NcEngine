@@ -51,8 +51,10 @@ namespace nc::sample
 {
     void ClickEvents::Load()
     {
+        // Setup
         m_sceneHelper.Setup(true, false, Widget);
 
+        // Camera
         auto cameraHandle = CreateEntity(Vector3{0.0f, 6.1f, -9.5f}, Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), Vector3::One(), "Main Camera");
         auto camera = AddComponent<EdgePanCamera>(cameraHandle);
         camera::SetMainCamera(camera);
@@ -60,16 +62,17 @@ namespace nc::sample
         LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
-        auto lvHandle = CreateEntity(Vector3{-2.4f, 12.1f, 0.0f}, Quaternion::Identity(), Vector3::One(), "Point Light");
+        auto lvHandle = CreateEntity(Vector3{-2.4f, 12.1f, 0.0f}, "Point Light");
         AddComponent<PointLight>(lvHandle);
-        auto lvHandle2 = CreateEntity(Vector3{12.1f, 14.5f, 7.3f}, Quaternion::Identity(), Vector3::One(), "Point Light");
+        auto lvHandle2 = CreateEntity(Vector3{12.1f, 14.5f, 7.3f}, "Point Light");
         AddComponent<PointLight>(lvHandle2);
-        auto lvHandle3 = CreateEntity(Vector3{4.1f, 14.5f, 3.3f}, Quaternion::Identity(), Vector3::One(), "Point Light");
+        auto lvHandle3 = CreateEntity(Vector3{4.1f, 14.5f, 3.3f}, "Point Light");
         AddComponent<PointLight>(lvHandle3);
 
-        // Objects
+        // Table
         prefab::Create(prefab::Resource::Table, Vector3{0.0f, -0.4f, 0.0f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::Splat(7.5f), "Table");
         
+        // Coin Spawner
         SpawnBehavior behavior
         {
             .rotationOffset = Vector3{math::Pi / 2.0f, 0.0f, 0.0f},
@@ -86,6 +89,7 @@ namespace nc::sample
         auto coinSpawner = AddComponent<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, coinExtension);
         coinSpawner->Spawn(20);
 
+        // Token Spawner
         auto tokenExtension = [](EntityHandle handle)
         {
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));

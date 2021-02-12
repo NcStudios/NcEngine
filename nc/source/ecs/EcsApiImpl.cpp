@@ -19,9 +19,19 @@ namespace nc
         return CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), internal::DefaultEntityTag);
     }
 
+    EntityHandle CreateEntity(Vector3 pos)
+    {
+        return CreateEntity(pos, Quaternion::Identity(), Vector3::One(), internal::DefaultEntityTag);
+    }
+
     EntityHandle CreateEntity(std::string tag)
     {
         return CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), std::move(tag));
+    }
+
+    EntityHandle CreateEntity(Vector3 pos, std::string tag)
+    {
+        return CreateEntity(pos, Quaternion::Identity(), Vector3::One(), std::move(tag));
     }
 
     EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag)
@@ -47,10 +57,15 @@ namespace nc
 
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle)
     {
+        return AddComponent<PointLight>(handle, PointLight::Properties{});
+    }
+
+    template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties)
+    {
         IF_THROW(!GetEntity(handle), "AddComponent<PointLight> - Bad handle");
         IF_THROW(internal::g_impl->GetSystem<PointLight>()->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
 
-        auto lightPtr = internal::g_impl->GetSystem<PointLight>()->Add(handle);
+        auto lightPtr = internal::g_impl->GetSystem<PointLight>()->Add(handle, properties);
         return lightPtr;
     }
 
