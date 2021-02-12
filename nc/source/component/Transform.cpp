@@ -61,34 +61,6 @@ namespace nc
         return out;
     }
 
-    #ifdef NC_EDITOR_ENABLED
-    void Transform::EditorGuiElement()
-    {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        Vector3 scl, pos;
-        auto rot = Quaternion::Identity();
-        DirectX::XMStoreVector3(&scl, scl_v);
-        DirectX::XMStoreQuaternion(&rot, rot_v);
-        DirectX::XMStoreVector3(&pos, pos_v);
-
-        auto angles = rot.ToEulerAngles();
-
-        ImGui::Text("Transform");
-        ui::editor::xyzWidgetHeader("   ");
-        auto posResult = ui::editor::xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z);
-        auto rotResult = ui::editor::xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
-        auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
-
-        if(posResult)
-            SetPosition(pos);
-        if(rotResult)
-            SetRotation(angles);
-        if(sclResult)
-            SetScale(scl);
-    }
-    #endif
-    
     DirectX::FXMMATRIX Transform::GetTransformationMatrix() const
     {
         return m_matrix;
@@ -106,6 +78,49 @@ namespace nc
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
         return DirectX::XMMatrixLookAtLH(pos_v, pos_v + look_v, DirectX::g_XMIdentityR1);
+    }
+
+    Vector3 Transform::ToLocalSpace(const Vector3& vec) const
+    {
+        auto vec_v = DirectX::XMVectorSet(vec.x, vec.y, vec.z, 0.0f);
+        auto out_v = DirectX::XMVector3Transform(vec_v, m_matrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        out_v = DirectX::XMVector3Normalize(out_v);
+        Vector3 out;
+        DirectX::XMStoreVector3(&out, out_v);
+        return out;
+    }
+
+    /** @note It is slighly faster to use dx identity globals instead of the vector
+     *  set used in ToLocalSpace, so some code is repeated in Up/Forward/Right. */
+    Vector3 Transform::Up() const
+    {
+        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR1, m_matrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        out_v = DirectX::XMVector3Normalize(out_v);
+        Vector3 out;
+        DirectX::XMStoreVector3(&out, out_v);
+        return out;
+    }
+
+    Vector3 Transform::Forward() const
+    {
+        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m_matrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        out_v = DirectX::XMVector3Normalize(out_v);
+        Vector3 out;
+        DirectX::XMStoreVector3(&out, out_v);
+        return out;
+    }
+
+    Vector3 Transform::Right() const
+    {
+        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR0, m_matrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        out_v = DirectX::XMVector3Normalize(out_v);
+        Vector3 out;
+        DirectX::XMStoreVector3(&out, out_v);
+        return out;
     }
 
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
@@ -181,4 +196,32 @@ namespace nc
         m_matrix *= ToRotMatrix(axis, radians);
         m_matrix.r[3] = pos_v;
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    void Transform::EditorGuiElement()
+    {
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
+        Vector3 scl, pos;
+        auto rot = Quaternion::Identity();
+        DirectX::XMStoreVector3(&scl, scl_v);
+        DirectX::XMStoreQuaternion(&rot, rot_v);
+        DirectX::XMStoreVector3(&pos, pos_v);
+
+        auto angles = rot.ToEulerAngles();
+
+        ImGui::Text("Transform");
+        ui::editor::xyzWidgetHeader("   ");
+        auto posResult = ui::editor::xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z);
+        auto rotResult = ui::editor::xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
+        auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
+
+        if(posResult)
+            SetPosition(pos);
+        if(rotResult)
+            SetRotation(angles);
+        if(sclResult)
+            SetScale(scl);
+    }
+    #endif
 }
