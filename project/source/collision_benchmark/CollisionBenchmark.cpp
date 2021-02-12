@@ -54,10 +54,12 @@ namespace nc::sample
             .positionRandomRange = Vector3::Splat(15.0f),
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
         };
+
         auto spawnExtension = [](EntityHandle handle)
         {
             AddComponent<Collider>(handle, Vector3::One());
         };
+        
         auto handle = CreateEntity("Spawner");
         auto spawner = AddComponent<Spawner>(handle, prefab::Resource::Cube, spawnBehavior, spawnExtension);
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);

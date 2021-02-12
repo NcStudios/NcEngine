@@ -58,6 +58,7 @@ namespace nc::sample
             .positionRandomRange = Vector3::Splat(15.0f),
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
         };
+        
         auto spawner = AddComponent<Spawner>(handle, prefab::Resource::Cube, spawnBehavior);
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);
         SpawnCallback = std::bind(Spawner::Spawn, spawner, std::placeholders::_1);

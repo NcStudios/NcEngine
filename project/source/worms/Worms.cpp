@@ -32,6 +32,7 @@ namespace nc::sample
             .attLin = 0.05f,
             .attQuad = 0.0f
         };
+        
         pointLight->Set(lightProperties);
         AddComponent<MouseFollower>(lvHandle);
 
@@ -44,6 +45,7 @@ namespace nc::sample
             .rotationAxisRandomRange = Vector3::One(),
             .thetaRandomRange = 1.0f
         };
+
         auto spawnerHandle = CreateEntity("Spawner");
         auto spawner = AddComponent<Spawner>(spawnerHandle, prefab::Resource::Worm, spawnBehavior);
         spawner->Spawn(1u);

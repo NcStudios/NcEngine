@@ -81,6 +81,7 @@ namespace nc::sample
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
             AddComponent<Clickable>(handle, MaskCoin);
         };
+
         auto coinSpawnerHandle = CreateEntity("Coin Spawner");
         auto coinSpawner = AddComponent<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, coinExtension);
         coinSpawner->Spawn(20);
@@ -90,6 +91,7 @@ namespace nc::sample
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
             AddComponent<Clickable>(handle, MaskToken);
         };
+        
         auto tokenSpawnerHandle = CreateEntity("Token Spawner");
         auto tokenSpawner = AddComponent<Spawner>(tokenSpawnerHandle, prefab::Resource::Token, behavior, tokenExtension);
         tokenSpawner->Spawn(20);
