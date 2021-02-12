@@ -1,4 +1,4 @@
-#include "Model.h"
+#include "graphics/Model.h"
 #include "d3dresource/GraphicsResourceManager.h"
 #include "d3dresource/MeshResources.h"
 #include "d3dresource/ConstantBufferResources.h"

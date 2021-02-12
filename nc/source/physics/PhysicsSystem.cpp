@@ -64,11 +64,12 @@ namespace nc::physics
     void PhysicsSystem::ClearState()
     {
         m_clickableComponents.clear();
+        collision::ClearState();
     }
 
     void PhysicsSystem::DoPhysicsStep(const std::vector<Collider*>& colliders)
     {
-        DoCollisionStep(colliders);
+        collision::DoCollisionStep(colliders);
     }
 
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)

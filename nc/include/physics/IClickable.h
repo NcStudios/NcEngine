@@ -12,7 +12,7 @@ namespace nc::physics
             IClickable(Transform* transform, float radius)
                 : parentTransform{transform},
                   boundingBoxRadius{radius},
-                  layers{LAYER_MASK_NONE}
+                  layers{LayerMaskNone}
             {
             }
 

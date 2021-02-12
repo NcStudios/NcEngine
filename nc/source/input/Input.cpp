@@ -78,7 +78,7 @@ namespace nc::input
         g_state.mouseWheel = 0;
     }
 
-    void AddToQueue(KeyCode_t keyCode, LPARAM lParam)
+    void AddKeyToQueue(KeyCode_t keyCode, LPARAM lParam)
     {
         bool WasDown = ((lParam & (1 << 30)) != 0);
         bool IsDown  = ((lParam & (1 << 31)) == 0);
@@ -91,6 +91,16 @@ namespace nc::input
         {
             g_state.downKeys.emplace_back(keyCode, lParam);
         }
+    }
+
+    void AddMouseButtonDownToQueue(KeyCode_t keyCode, LPARAM lParam)
+    {
+        g_state.downKeys.emplace_back(keyCode, lParam);
+    }
+
+    void AddMouseButtonUpToQueue(KeyCode_t keyCode, LPARAM lParam)
+    {
+        g_state.upKeys.emplace_back(keyCode, lParam);
     }
 
     void Flush()

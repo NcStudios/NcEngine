@@ -2,9 +2,9 @@
 #include "Core.h"
 #include "debug/Utils.h"
 #ifdef USE_VULKAN
-    #include "scenes/VulkanScene.h"
+    #include "jare_scratch/VulkanScene.h"
 #else
-    #include "scenes/MenuScene.h"
+    #include "worms/Worms.h"
 #endif
 
 #include <iostream>
@@ -15,9 +15,9 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     {
         nc::core::Initialize(instance);
 #ifdef USE_VULKAN
-        nc::core::Start(std::make_unique<project::VulkanScene>());
+        nc::core::Start(std::make_unique<nc::sample::VulkanScene>());
 #else
-        nc::core::Start(std::make_unique<project::MenuScene>());
+        nc::core::Start(std::make_unique<nc::sample::Worms>());
 #endif
     }
     catch(std::exception& e)

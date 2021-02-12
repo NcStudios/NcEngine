@@ -40,10 +40,12 @@ namespace nc::ui::editor
         if(input::GetKeyDown(hotkey::Utilities))
             m_openState_UtilitiesPanel = !m_openState_UtilitiesPanel;
 
+        auto [width, height] = window::GetDimensions();
+        ImGui::SetNextWindowPos({0,0});
+        ImGui::SetNextWindowSize({width, height});
         if(ImGui::Begin("NcEngine Editor", nullptr, MainWindowFlags))
         {
             DrawMenu();
-            auto [width, height] = window::GetDimensions();
             controls::SceneGraphPanel(activeEntities, height);
             if(m_openState_UtilitiesPanel)
                 controls::UtilitiesPanel(dt, m_graphics->GetDrawCallCount(), width, height);
