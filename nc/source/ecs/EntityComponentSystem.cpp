@@ -99,9 +99,9 @@ bool EntityComponentSystem::DoesEntityExist(const EntityHandle handle) const noe
     return m_active.count(handle) > 0;
 }
 
+/** Friendly reminder - this invalidates m_active iterators */
 bool EntityComponentSystem::DestroyEntity(EntityHandle handle)
 {
-    /** Friendly reminder - this invalidates m_active iterators */
     if(!DoesEntityExist(handle))
         return false;
     auto& containingMap = GetMapContainingEntity(handle);
