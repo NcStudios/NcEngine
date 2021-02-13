@@ -22,10 +22,12 @@ namespace nc::graphics::vulkan
             framebufferInfo.setHeight(device->GetSwapChainExtentDimensions().y);
             framebufferInfo.setLayers(1);
 
-            m_framebuffers.emplace_back(device->GetDevice()->createFramebufferUnique(framebufferInfo));
+            m_framebuffers[i] = std::move(device->GetDevice()->createFramebufferUnique(framebufferInfo));
         }
-
-
     }
 
+    const vk::Framebuffer* FrameBuffers::GetFrameBuffer(uint32_t index) const
+    {
+        return &(m_framebuffers.at(index).get());
+    }
 }

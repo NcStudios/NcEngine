@@ -22,4 +22,6 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/vulkan/Device.cpp
         ${ROOT_DIR}/source/graphics/vulkan/GraphicsPipeline.cpp
         ${ROOT_DIR}/source/graphics/vulkan/RenderPass.cpp
+        ${ROOT_DIR}/source/graphics/vulkan/FrameBuffers.cpp
+        ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
 )

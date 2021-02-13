@@ -185,6 +185,11 @@ namespace nc::graphics::vulkan
         device->GetDevice()->destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
+    const vk::Pipeline* GraphicsPipeline::GetPipeline() const
+    {
+         return &(m_pipeline.get());
+    }
+
     vk::ShaderModule GraphicsPipeline::CreateShaderModule(const std::vector<char>& code, const vulkan::Device* device)
     {
         vk::ShaderModuleCreateInfo createInfo{};

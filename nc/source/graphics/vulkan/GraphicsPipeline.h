@@ -10,6 +10,7 @@ namespace nc::graphics::vulkan
     {
         public:
             GraphicsPipeline(const vulkan::Device* device, const vulkan::RenderPass* renderPass); // &todo: Change from passing in a single render pass
+            const vk::Pipeline* GetPipeline() const;
 
         private:
             vk::UniquePipelineLayout m_pipelineLayout;

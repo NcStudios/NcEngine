@@ -30,6 +30,12 @@ namespace nc::graphics::vulkan
       m_swapChainImageFormat{},
       m_swapChainExtent{},
       m_swapChainImageViews{},
+      m_commandPool{},
+      m_imageRenderReadySemaphores{},
+      m_imagePresentReadySemaphores{},
+      m_framesInFlightFences{},
+      m_imagesInFlightFences{},
+      m_currentFrameIndex{0},
       m_dimensions{dimensions}
     {
         auto vkInstance = instance->GetInstance();
@@ -205,6 +211,9 @@ namespace nc::graphics::vulkan
         auto queueFamilies = QueueFamilyIndices(m_physicalDevice, vkSurface);
         uint32_t queueFamilyIndices[] = { queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily) };
 
+        m_graphicsQueue = m_device.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
+        m_presentQueue = m_device.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
+
         if (queueFamilies.IsSeparatePresentQueue())
         {
             createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
@@ -272,6 +281,38 @@ namespace nc::graphics::vulkan
                 throw std::runtime_error("Failed to create image view");
             }
         }
+
+        /****************
+         * COMMAND POOL *
+         * **************/
+        vk::CommandPoolCreateInfo poolInfo{};
+        poolInfo.setQueueFamilyIndex(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily));
+        m_commandPool = m_device.createCommandPool(poolInfo);
+
+        /*************************
+         * SEMAPHORES AND FENCES *
+         * ***********************/
+        // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
+        // the semaphores below tell the GPU when either step can begin for a single image. Vulkan will render multiple swapchain images very rapidly, so MAX_FRAMES_IN_FLIGHT here creates 
+        // a pair of semaphores for each frame up to MAX_FRAMES_IN_FLIGHT. 
+        // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MAX_FRAMES_IN_FLIGHT amount of frame-render jobs to the command queues. 
+        // The fences in framesInFlightFences (one per frame in MAX_FRAMES_PER_FLIGHT) prevent more frame-render jobs than fences from being submitted until one frame-render job completes.
+        // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
+        m_imageRenderReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_imagePresentReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_framesInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr); // To start, no frames in flight are using swapchain images, so explicitly initialize to nullptr.
+
+        vk::SemaphoreCreateInfo semaphoreInfo{};
+        vk::FenceCreateInfo fenceInfo{};
+        fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        {
+            m_imageRenderReadySemaphores[i] = m_device.createSemaphore(semaphoreInfo);
+            m_imagePresentReadySemaphores[i] = m_device.createSemaphore(semaphoreInfo);
+            m_framesInFlightFences[i] = m_device.createFence(fenceInfo);
+        }
     }
 
     Device::~Device()
@@ -282,6 +323,15 @@ namespace nc::graphics::vulkan
         }
 
         m_device.destroySwapchainKHR(m_swapChain);
+        m_device.destroyCommandPool(m_commandPool);
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        {
+            m_device.destroySemaphore(m_imageRenderReadySemaphores[i]);
+            m_device.destroySemaphore(m_imagePresentReadySemaphores[i]);
+            m_device.destroyFence(m_framesInFlightFences[i]);
+        }
+
         m_device.destroy();
     }
 
@@ -308,6 +358,88 @@ namespace nc::graphics::vulkan
     const std::vector<vk::ImageView>* Device::GetSwapChainImageViews() const noexcept
     {
         return &m_swapChainImageViews;
+    }
+
+    uint32_t Device::GetNextRenderReadyImageIndex()
+    {
+        return m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageRenderReadySemaphores[m_currentFrameIndex]).value;
+    }
+
+    const std::vector<vk::Semaphore>* Device::GetSemaphores(SemaphoreType semaphoreType) const noexcept
+    {
+        return semaphoreType == SemaphoreType::RenderReady ? &m_imageRenderReadySemaphores : &m_imagePresentReadySemaphores;
+    }
+
+    const vk::CommandPool* Device::GetCommandPool() const noexcept
+    {
+        return &m_commandPool;
+    }
+
+    const vk::Queue* Device::GetQueue(QueueFamilyType type) const noexcept
+    {
+        return type == QueueFamilyType::GraphicsFamily ? &m_graphicsQueue : &m_presentQueue;
+    }
+
+    uint32_t Device::GetFrameIndex() const noexcept
+    {
+        return m_currentFrameIndex;
+    }
+
+    const std::vector<vk::Fence>* Device::GetFences(FenceType fenceType) const noexcept
+    {
+        return fenceType == FenceType::FramesInFlight ? &m_framesInFlightFences : &m_imagesInFlightFences;
+    }
+
+    void Device::Present(uint32_t imageIndex)
+    {
+        vk::PresentInfoKHR presentInfo{};
+        presentInfo.setWaitSemaphoreCount(1);
+        presentInfo.setPWaitSemaphores(&m_imagePresentReadySemaphores[m_currentFrameIndex]); // Wait on this semaphore before presenting.
+
+        vk::SwapchainKHR swapChains[] = {m_swapChain};
+        presentInfo.setSwapchainCount(1);
+        presentInfo.setPSwapchains(swapChains); // Sets the swapchain(s) to present to
+        presentInfo.setPImageIndices(&imageIndex); //  Sets the index of the image for each swapchain.
+        presentInfo.setPResults(nullptr);
+        if (m_presentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Could not present to the swapchain.");
+        }
+    }
+
+    // Increments the frame index. Frame index is used to select which pair of semaphores we are using as each concurrent frame requires its own pair.
+    void Device::IncrementFrameIndex()
+    {
+        m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    void Device::WaitForFrameFence()
+    {
+        if (m_device.waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Could not wait for fences to complete.");
+        }
+    }
+
+    void Device::WaitForImageFence(uint32_t imageIndex)
+    {
+        if (m_imagesInFlightFences[imageIndex])
+        {
+            if (m_device.waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
+            {
+                throw std::runtime_error("Could not wait for fences to complete.");
+            }
+        }
+    }
+
+    void Device::SyncImageAndFrameFence(uint32_t imageIndex)
+    {
+        m_imagesInFlightFences[imageIndex] = m_framesInFlightFences[m_currentFrameIndex];
+    }
+
+    void Device::ResetFrameFence()
+    {
+        m_device.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
     }
 
     QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface)

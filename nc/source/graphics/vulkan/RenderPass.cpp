@@ -1,5 +1,7 @@
 #include "RenderPass.h"
 #include "Device.h"
+#include "Commands.h"
+#include "GraphicsPipeline.h"
 
 namespace nc::graphics::vulkan
 {
@@ -33,6 +35,18 @@ namespace nc::graphics::vulkan
         subpass.setColorAttachmentCount(1);
         subpass.setPColorAttachments(&colorAttachmentRef);
 
+        /************************
+         * SUBPASS DEPENDENCIES *
+         * **********************/
+        // There are two implicit subpasses before and after our explicit one defined above that take care of image layout transitions.
+        // These start as soon as the pipeline executes, but we will not yet have acquired the image, so we need to create a dependency on that.
+        vk::SubpassDependency dependency{};
+        dependency.setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
+        dependency.setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
+        dependency.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // The type of operation to wait on. (What our dependency is)
+        dependency.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // Specifies the type of operation that should do the waiting
+        dependency.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
+
         /***************
          * RENDER PASS *
          * *************/
@@ -41,6 +55,8 @@ namespace nc::graphics::vulkan
         renderPassInfo.setPAttachments(&colorAttachment);
         renderPassInfo.setSubpassCount(1);
         renderPassInfo.setPSubpasses(&subpass);
+        renderPassInfo.setDependencyCount(1);
+        renderPassInfo.setPDependencies(&dependency);
 
         m_renderPass = device->GetDevice()->createRenderPassUnique(renderPassInfo);
     }

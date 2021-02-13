@@ -3,6 +3,8 @@
 #include "vulkan/Instance.h"
 #include "vulkan/GraphicsPipeline.h"
 #include "vulkan/RenderPass.h"
+#include "vulkan/FrameBuffers.h"
+#include "vulkan/Commands.h"
 
 namespace nc::graphics
 {
@@ -13,6 +15,8 @@ namespace nc::graphics
       m_device{nullptr},
       m_pipeline{nullptr},
       m_renderPass{nullptr},
+      m_frameBuffers{nullptr},
+      m_commands{nullptr},
       m_isFullscreen {false},
       m_viewMatrix{},
       m_projectionMatrix{}
@@ -21,6 +25,11 @@ namespace nc::graphics
         m_device = std::make_unique<Device>(m_instance.get(), dimensions);
         m_renderPass = std::make_unique<RenderPass>(m_device.get());
         m_pipeline = std::make_unique<GraphicsPipeline>(m_device.get(), m_renderPass.get());
+        m_frameBuffers = std::make_unique<FrameBuffers>(m_device.get(), m_renderPass.get());
+        m_commands = std::make_unique<Commands>(m_device.get(), m_device.get()->GetSemaphores(SemaphoreType::RenderReady), m_device.get()->GetSemaphores(SemaphoreType::PresentReady), m_device.get()->GetFences(FenceType::FramesInFlight), m_device.get()->GetFences(FenceType::ImagesInFlight));
+
+        // Write the render pass to the command buffer.
+        m_commands.get()->RecordRenderPass(m_device.get(), m_renderPass.get(), m_frameBuffers.get(), m_pipeline.get());
     }
 
     Graphics2::~Graphics2() = default;
@@ -66,19 +75,37 @@ namespace nc::graphics
         // @todo
     }
 
+    void Graphics2::WaitIdle()
+    {
+        m_device.get()->GetDevice()->waitIdle();
+    }
+
     void Graphics2::FrameBegin()
     {
         // @todo
     }
 
-    void Graphics2::DrawIndexed(UINT count)
+    // Gets an image from the swap chain, executes the command buffer for that image which writes to the image.
+    // Then, returns the image written to to the swap chain for presentation.
+    // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
+    // See Device.cpp for synchronization of these calls.
+    void Graphics2::Draw()
     {
-        (void)count;
-        // @todo
+        m_device->WaitForFrameFence();
+        
+        auto imageIndex = m_device->GetNextRenderReadyImageIndex();
+
+        m_device->WaitForImageFence(imageIndex);
+        m_device->SyncImageAndFrameFence(imageIndex);
+        m_device->ResetFrameFence();
+        m_commands->SubmitCommandBuffer(m_device.get(), imageIndex);
+        m_device->Present(imageIndex);
     }
 
+    
     void Graphics2::FrameEnd()
     {
-        // @todo
+        // Used to select semaphores because we have multiple concurrent frames being rendered
+        m_device.get()->IncrementFrameIndex();
     }
 }

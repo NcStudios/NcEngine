@@ -115,6 +115,10 @@ namespace nc::core
     void Engine::Shutdown()
     {
         V_LOG("Shutdown EngineImpl");
+#ifdef USE_VULKAN
+        // Block until all rendering is complete, so we do not tear down queues with pending operations.
+        m_graphics2.WaitIdle();
+#endif
         ClearState();
     }
 
@@ -161,7 +165,9 @@ namespace nc::core
 
     void Engine::FrameRender()
     {
-    #ifndef USE_VULKAN
+#ifdef USE_VULKAN
+        m_graphics2.Draw();
+#else
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
         m_ui.FrameBegin();
         m_graphics.FrameBegin();
@@ -201,7 +207,7 @@ namespace nc::core
         m_ui.FrameEnd();
         m_graphics.FrameEnd();
         NC_PROFILE_END();
-    #endif
+#endif
     }
 
     void Engine::FrameCleanup()
