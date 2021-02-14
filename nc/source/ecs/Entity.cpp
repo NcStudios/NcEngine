@@ -5,8 +5,8 @@
 namespace nc
 {
 Entity::Entity(EntityHandle handle, std::string tag, bool isStatic) noexcept
-    : Handle{ handle }, 
-      Tag{ std::move(tag) },
+    : Handle{handle}, 
+      Tag{std::move(tag)},
       IsStatic{isStatic},
       m_userComponents{}
 {
