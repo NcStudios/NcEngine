@@ -47,10 +47,10 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(false, true, Widget);
 
-        auto camera = AddComponent<Camera>(CreateEntity("Main Camera"));
+        auto camera = AddComponent<Camera>(CreateEntity({.tag = "Main Camera"}));
         nc::camera::SetMainCamera(camera);
         
-        auto handle = CreateEntity("Spawner");
+        auto handle = CreateEntity({.tag = "Spawner"});
 
         SpawnBehavior spawnBehavior
         {

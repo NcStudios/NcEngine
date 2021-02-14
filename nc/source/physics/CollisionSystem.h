@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Ecs.h"
-#include "directx/math/DirectXCollision.h"
 #include "debug/Profiler.h"
+#include "directx/math/DirectXCollision.h"
 
 #include <cstdint>
 #include <vector>
 
-namespace nc::physics::collision
+namespace nc::physics
 {
     enum class CollisionEvent : uint8_t
     {
@@ -25,28 +25,31 @@ namespace nc::physics::collision
         Collider* second;
     };
 
-    namespace
+    bool operator ==(const CollisionData& lhs, const CollisionData& rhs);
+
+    class CollisionSystem
     {
-        std::vector<CollisionData> previousCollisions{}; // temp until state management is decided
+        public:
+            void DoCollisionStep(const std::vector<Collider*>& colliders);
+            void BuildCurrentFrameState(const std::vector<Collider*>& colliders);
+            void CompareFrameStates() const;
+            void NotifyCollisionEvent(const CollisionData& data, CollisionEvent type) const;
+            void ClearState();
+
+        private:
+            std::vector<CollisionData> m_currentCollisions;
+            std::vector<CollisionData> m_previousCollisions;
+    };
+
+    inline void CollisionSystem::DoCollisionStep(const std::vector<Collider*>& colliders)
+    {
+        BuildCurrentFrameState(colliders);
+        CompareFrameStates();
+        m_previousCollisions = std::move(m_currentCollisions);
+        m_currentCollisions.clear();
     }
 
-    inline void DoCollisionStep(const std::vector<Collider*>& colliders);
-    inline void BuildCurrentFrameState(const std::vector<Collider*>& colliders, std::vector<CollisionData>& out);
-    inline void CompareFrameStates(const std::vector<CollisionData>& previousState, const std::vector<CollisionData>& currentState);
-    inline void NotifyCollisionEvent(const CollisionData& data, CollisionEvent type);
-    inline void ClearState();
-    inline bool operator ==(const CollisionData& lhs, const CollisionData& rhs);
-
-    inline void DoCollisionStep(const std::vector<Collider*>& colliders)
-    {
-        std::vector<CollisionData> currentCollisions;
-        currentCollisions.reserve(previousCollisions.size());
-        BuildCurrentFrameState(colliders, currentCollisions);
-        CompareFrameStates(previousCollisions, currentCollisions);
-        previousCollisions = std::move(currentCollisions);
-    }
-
-    inline void BuildCurrentFrameState(const std::vector<Collider*>& colliders, std::vector<CollisionData>& out)
+    inline void CollisionSystem::BuildCurrentFrameState(const std::vector<Collider*>& colliders)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
         DirectX::BoundingOrientedBox unit, a, b;
@@ -58,18 +61,18 @@ namespace nc::physics::collision
             {
                 unit.Transform(b, colliders[j]->GetTransformationMatrix());
                 if(a.Intersects(b))
-                    out.emplace_back(colliders[i], colliders[j]);
+                    m_currentCollisions.emplace_back(colliders[i], colliders[j]);
             }
         }
         NC_PROFILE_END();
     }
     
-    inline void CompareFrameStates(const std::vector<CollisionData>& previous, const std::vector<CollisionData>& current)
+    inline void CollisionSystem::CompareFrameStates() const
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
-        auto currBeg = current.cbegin();
-        auto currEnd = current.cend();
-        for(auto& prev : previous)
+        auto currBeg = m_currentCollisions.cbegin();
+        auto currEnd = m_currentCollisions.cend();
+        for(const auto& prev : m_previousCollisions)
         {
             if(currEnd == std::find(currBeg, currEnd, prev))
                 NotifyCollisionEvent(prev, CollisionEvent::Exit);
@@ -77,9 +80,9 @@ namespace nc::physics::collision
                 NotifyCollisionEvent(prev, CollisionEvent::Stay);
         }
 
-        auto prevBeg = previous.cbegin();
-        auto prevEnd = previous.cend();
-        for(auto& curr : current)
+        auto prevBeg = m_previousCollisions.cbegin();
+        auto prevEnd = m_previousCollisions.cend();
+        for(const auto& curr : m_currentCollisions)
         {
             if(prevEnd == std::find(prevBeg, prevEnd, curr))
                 NotifyCollisionEvent(curr, CollisionEvent::Enter);
@@ -87,7 +90,7 @@ namespace nc::physics::collision
         NC_PROFILE_END();
     }
 
-    inline void NotifyCollisionEvent(const CollisionData& data, CollisionEvent type)
+    inline void CollisionSystem::NotifyCollisionEvent(const CollisionData& data, CollisionEvent type) const
     {
         auto e1 = GetEntity(data.first->GetParentHandle());
         auto e2 = GetEntity(data.second->GetParentHandle());
@@ -116,9 +119,9 @@ namespace nc::physics::collision
         }
     }
 
-    inline void ClearState()
+    inline void CollisionSystem::ClearState()
     {
-        previousCollisions.clear();
+        m_previousCollisions.clear();
     }
 
     inline bool operator ==(const CollisionData& lhs, const CollisionData& rhs)

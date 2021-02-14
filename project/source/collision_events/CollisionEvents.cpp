@@ -30,18 +30,18 @@ namespace nc::sample
         m_sceneHelper.Setup(true, true, Widget);
 
         //Camera
-        auto cameraHandle = CreateEntity(Vector3{3.6f, 6.1f, -6.5f}, Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), Vector3::One(), "Main Camera");
+        auto cameraHandle = CreateEntity({.position = Vector3{3.6f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = AddComponent<EdgePanCamera>(cameraHandle);
         camera::SetMainCamera(camera);
 
         // Objects
         auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(180.0f), 0.0f, 0.0f);
-        auto cube1 = prefab::Create(prefab::Resource::CubeBlue, Vector3{2.0f, 0.0f, 0.4f}, rot, Vector3::One());
+        auto cube1 = prefab::Create(prefab::Resource::CubeBlue, {.position = Vector3{2.0f, 0.0f, 0.4f}, .rotation = rot});
         AddComponent<Collider>(cube1, Vector3::One());
         AddComponent<WasdController>(cube1, 2.0f);
         AddComponent<CollisionLogger>(cube1);
 
-        auto cube2 = prefab::Create(prefab::Resource::CubeRed, Vector3{6.0f, 0.0f, 0.4f}, rot, Vector3::One());
+        auto cube2 = prefab::Create(prefab::Resource::CubeRed, {.position = Vector3{6.0f, 0.0f, 0.4f}, .rotation = rot});
         AddComponent<Collider>(cube2, Vector3::One());
         AddComponent<CollisionLogger>(cube2);
     }

@@ -1,6 +1,4 @@
 #include "EntityComponentSystem.h"
-#include "math/Vector3.h"
-#include "math/Quaternion.h"
 #include "component/Collider.h"
 #include "component/NetworkDispatcher.h"
 #include "component/PointLight.h"
@@ -86,11 +84,11 @@ void EntityComponentSystem::SendOnDestroy()
     m_toDestroy.clear();
 }
 
-EntityHandle EntityComponentSystem::CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag)
+EntityHandle EntityComponentSystem::CreateEntity(EntityInfo info)
 {
     auto entityHandle = m_handleManager.GenerateNewHandle();
-    m_transformSystem->Add(entityHandle, pos, rot, scale);
-    m_active.emplace(entityHandle, Entity{entityHandle, std::move(tag)} );
+    m_transformSystem->Add(entityHandle, info.position, info.rotation, info.scale);
+    m_active.emplace(entityHandle, Entity{entityHandle, std::move(info.tag), info.isStatic} );
     return entityHandle;
 }
 

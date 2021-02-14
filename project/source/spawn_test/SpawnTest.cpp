@@ -27,7 +27,7 @@ namespace nc::sample
         m_sceneHelper.Setup(true, false, Widget);
 
         // Camera
-        auto cameraHandle = CreateEntity(Vector3{0.0f, -9.0f, -100.0f}, Quaternion::Identity(), Vector3::One(), "SceneNavigationCamera");
+        auto cameraHandle = CreateEntity({.position = Vector3{0.0f, -9.0f, -100.0f}, .tag = "SceneNavigationCamera"});
         auto camera = AddComponent<SceneNavigationCamera>(cameraHandle);
         camera::SetMainCamera(camera);
 
@@ -39,12 +39,12 @@ namespace nc::sample
             .attConst = 1.0f,
             .attLin = 0.0001f
         };
-        auto lvHandle = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Point Light");
+        auto lvHandle = CreateEntity({.tag = "Point Light"});
         auto pointLight = AddComponent<PointLight>(lvHandle);
         pointLight->Set(lightProperties);
 
         // Collider that destroys anything leaving its bounded area
-        auto killBox = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::Splat(60.0f), "KillBox");
+        auto killBox = CreateEntity({.scale = Vector3::Splat(60.0f), .tag = "KillBox"});
         AddComponent<Collider>(killBox, Vector3::One());
         AddComponent<KillBox>(killBox);
 
@@ -59,7 +59,7 @@ namespace nc::sample
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
             AddComponent<Collider>(handle, Vector3::One());
         };
-        auto staticCubeSpawnerHandle = CreateEntity("Static Cube Spawner");
+        auto staticCubeSpawnerHandle = CreateEntity({.tag = "Static Cube Spawner"});
         auto staticCubeSpawner = AddComponent<Spawner>(staticCubeSpawnerHandle, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);
         staticCubeSpawner->Spawn(5);
         staticCubeSpawner->SetPrefab(prefab::Resource::CubeRed);
@@ -78,7 +78,7 @@ namespace nc::sample
         {
             AddComponent<Collider>(handle, Vector3::One());
         };
-        auto dynamicCubeSpawnerHandle = CreateEntity("Dynamic Cube Spawner");
+        auto dynamicCubeSpawnerHandle = CreateEntity({.tag = "Dynamic Cube Spawner"});
         AddComponent<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);
     }
 

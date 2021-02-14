@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityHandle.h"
+#include "entity/EntityHandle.h"
 
 namespace nc::ecs
 {

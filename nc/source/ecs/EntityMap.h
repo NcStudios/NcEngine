@@ -1,5 +1,5 @@
 #pragma once
-#include "Entity.h"
+#include "entity/Entity.h"
 #include <unordered_map>
 
 namespace nc::ecs

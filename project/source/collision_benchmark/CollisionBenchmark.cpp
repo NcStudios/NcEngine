@@ -45,7 +45,7 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(false, true, Widget);
 
-        auto camera = AddComponent<Camera>(CreateEntity("Main Camera"));
+        auto camera = AddComponent<Camera>(CreateEntity({.tag = "Main Camera"}));
         camera::SetMainCamera(camera);
 
         SpawnBehavior spawnBehavior
@@ -60,7 +60,7 @@ namespace nc::sample
             AddComponent<Collider>(handle, Vector3::One());
         };
         
-        auto handle = CreateEntity("Spawner");
+        auto handle = CreateEntity({.tag = "Spawner"});
         auto spawner = AddComponent<Spawner>(handle, prefab::Resource::Cube, spawnBehavior, spawnExtension);
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);
         SpawnCallback = std::bind(Spawner::Spawn, spawner, std::placeholders::_1);

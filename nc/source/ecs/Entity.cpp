@@ -1,12 +1,13 @@
-#include "Entity.h"
+#include "entity/Entity.h"
 
 #include <algorithm>
 
 namespace nc
 {
-Entity::Entity(const EntityHandle handle, const std::string& tag) noexcept
+Entity::Entity(EntityHandle handle, std::string tag, bool isStatic) noexcept
     : Handle{ handle }, 
-      Tag{ tag },
+      Tag{ std::move(tag) },
+      IsStatic{isStatic},
       m_userComponents{}
 {
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "entity/Entity.h"
 #include "shared/GameLog.h"
 
 namespace nc::sample

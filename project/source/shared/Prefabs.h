@@ -10,22 +10,24 @@ namespace nc::sample::prefab
 
     void InitializeResources();
 
-    EntityHandle Create(Resource resource, Vector3 position, Quaternion rotation, Vector3 scale, std::string tag);
+    EntityHandle Create(Resource resource, EntityInfo info);
 
-    inline nc::EntityHandle Create(Resource resource, Vector3 position, Quaternion rotation, Vector3 scale)
-    {
-        return Create(resource, position, rotation, scale, ToString(resource));
-    }
+    //EntityHandle Create(Resource resource, Vector3 position, Quaternion rotation, Vector3 scale, std::string tag);
 
-    inline nc::EntityHandle Create(Resource resource, std::string tag)
-    {
-        return Create(resource, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), std::move(tag));
-    }
+    // inline nc::EntityHandle Create(Resource resource, Vector3 position, Quaternion rotation, Vector3 scale)
+    // {
+    //     return Create(resource, position, rotation, scale, ToString(resource));
+    // }
 
-    inline nc::EntityHandle Create(Resource resource)
-    {
-        return Create(resource, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), ToString(resource));
-    }
+    // inline nc::EntityHandle Create(Resource resource, std::string tag)
+    // {
+    //     return Create(resource, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), std::move(tag));
+    // }
+
+    // inline nc::EntityHandle Create(Resource resource)
+    // {
+    //     return Create(resource, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), ToString(resource));
+    // }
 
     enum class Resource : uint32_t
     {
