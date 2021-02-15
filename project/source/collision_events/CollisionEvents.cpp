@@ -27,6 +27,7 @@ namespace nc::sample
 {
     void CollisionEvents::Load()
     {
+        // Setup
         m_sceneHelper.Setup(true, true, Widget);
 
         //Camera
@@ -34,7 +35,7 @@ namespace nc::sample
         auto camera = AddComponent<EdgePanCamera>(cameraHandle);
         camera::SetMainCamera(camera);
 
-        // Objects
+        // Cubes
         auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(180.0f), 0.0f, 0.0f);
         auto cube1 = prefab::Create(prefab::Resource::CubeBlue, {.position = Vector3{2.0f, 0.0f, 0.4f}, .rotation = rot});
         AddComponent<Collider>(cube1, Vector3::One());

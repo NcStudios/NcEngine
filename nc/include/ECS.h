@@ -34,6 +34,7 @@ namespace nc
     [[nodiscard]] bool HasComponent(EntityHandle handle);
 
     /** Specializations for engine components */
+    template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties);
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle);
     template<> PointLight* GetComponent<PointLight>(EntityHandle handle);
     template<> bool HasComponent<PointLight>(EntityHandle handle);

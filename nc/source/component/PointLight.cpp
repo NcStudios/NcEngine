@@ -9,9 +9,9 @@
 
 namespace nc
 {
-    PointLight::PointLight(EntityHandle handle) noexcept
+    PointLight::PointLight(EntityHandle handle, Properties properties) noexcept
         : ComponentBase(handle),
-          PixelConstBufData{},
+          PixelConstBufData{properties},
           ProjectedPos{},
           m_transform{ GetComponent<Transform>(handle) }
     {

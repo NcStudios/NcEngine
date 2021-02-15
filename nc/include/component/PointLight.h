@@ -25,7 +25,7 @@ namespace nc
 
             alignas(16)Vector3 ProjectedPos;
 
-            PointLight(EntityHandle handle) noexcept;
+            PointLight(EntityHandle handle, Properties properties) noexcept;
             PointLight(PointLight&&) = delete;
             PointLight& operator=(PointLight&&) = delete;
             PointLight(const PointLight&) = delete;

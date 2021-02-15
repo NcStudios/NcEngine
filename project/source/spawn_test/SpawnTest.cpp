@@ -24,6 +24,7 @@ namespace nc::sample
 {
     void SpawnTest::Load()
     {
+        // Setup
         m_sceneHelper.Setup(true, false, Widget);
 
         // Camera
@@ -54,11 +55,13 @@ namespace nc::sample
             .positionRandomRange = Vector3::Splat(55.0f),
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f),
         };
+
         auto staticCubeExtension = [](EntityHandle handle)
         {
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
             AddComponent<Collider>(handle, Vector3::One());
         };
+
         auto staticCubeSpawnerHandle = CreateEntity({.tag = "Static Cube Spawner"});
         auto staticCubeSpawner = AddComponent<Spawner>(staticCubeSpawnerHandle, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);
         staticCubeSpawner->Spawn(5);
@@ -74,10 +77,12 @@ namespace nc::sample
             .rotationAxisRandomRange = Vector3::One(),
             .thetaRandomRange = 2.0f
         };
+
         auto dynamicCubeExtension = [](EntityHandle handle)
         {
             AddComponent<Collider>(handle, Vector3::One());
         };
+        
         auto dynamicCubeSpawnerHandle = CreateEntity({.tag = "Dynamic Cube Spawner"});
         AddComponent<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);
     }
