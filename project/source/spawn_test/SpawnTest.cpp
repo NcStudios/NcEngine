@@ -45,7 +45,7 @@ namespace nc::sample
 
         // Collider that destroys anything leaving its bounded area
         auto killBox = CreateEntity({.scale = Vector3::Splat(60.0f), .tag = "KillBox"});
-        AddComponent<Collider>(killBox, Vector3::One());
+        AddComponent<Collider>(killBox, ColliderType::Box, Vector3::One());
         AddComponent<KillBox>(killBox);
 
         // Spawner for stationary cubes
@@ -57,7 +57,7 @@ namespace nc::sample
         auto staticCubeExtension = [](EntityHandle handle)
         {
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
-            AddComponent<Collider>(handle, Vector3::One());
+            AddComponent<Collider>(handle, ColliderType::Box, Vector3::One());
         };
         auto staticCubeSpawnerHandle = CreateEntity({.tag = "Static Cube Spawner"});
         auto staticCubeSpawner = AddComponent<Spawner>(staticCubeSpawnerHandle, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);
@@ -76,7 +76,7 @@ namespace nc::sample
         };
         auto dynamicCubeExtension = [](EntityHandle handle)
         {
-            AddComponent<Collider>(handle, Vector3::One());
+            AddComponent<Collider>(handle, ColliderType::Box, Vector3::One());
         };
         auto dynamicCubeSpawnerHandle = CreateEntity({.tag = "Dynamic Cube Spawner"});
         AddComponent<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);

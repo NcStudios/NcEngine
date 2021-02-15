@@ -7,12 +7,22 @@
 
 namespace
 {
-    const auto CubeMeshPath = std::string{"project/Models/cube.fbx"};
+    /** @todo the engine needs to have these basic shapes */
+    const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.fbx"};
+    const auto SphereMeshPath = std::string{"nc/resources/mesh/sphere.fbx"};
     auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
 
-    auto CreateWireframeBox()
+    auto CreateWireframeModel(nc::ColliderType type)
     {
-        return nc::graphics::Model{ {CubeMeshPath}, CreateMaterial() };
+        switch(type)
+        {
+            case nc::ColliderType::Box:
+                return nc::graphics::Model{ {CubeMeshPath}, CreateMaterial() };
+            case nc::ColliderType::Sphere:
+                return nc::graphics::Model{ {SphereMeshPath}, CreateMaterial() };
+            default:
+                throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
+        }
     }
 }
 #endif
@@ -20,12 +30,13 @@ namespace
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
-    Collider::Collider(EntityHandle handle, Vector3 scale)
+    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 scale)
         : ComponentBase(handle),
           m_colliderMatrix{},
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
           m_scale{scale},
-          m_widgetModel{CreateWireframeBox()},
+          m_type{type},
+          m_widgetModel{CreateWireframeModel(type)},
           m_selectedInEditor{false}
     {
     }
@@ -34,22 +45,28 @@ namespace nc
         : ComponentBase(handle),
           m_colliderMatrix{},
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
-          m_scale{scale}
+          m_scale{scale},
+          m_type{type}
     {
     }
     #endif
 
     Collider::~Collider() = default;
 
-    void Collider::UpdateTransformationMatrix()
+    ColliderType Collider::GetType() const
     {
-        IF_THROW(m_scale == Vector3::Zero(), "Collider::UpdateTransformationMatrix - Scale cannot be zero");
-        m_colliderMatrix = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) * m_transformMatrix;
+        return m_type;
     }
 
     DirectX::FXMMATRIX Collider::GetTransformationMatrix() const
     {
         return m_colliderMatrix;
+    }
+
+    void Collider::UpdateTransformationMatrix()
+    {
+        IF_THROW(m_scale == Vector3::Zero(), "Collider::UpdateTransformationMatrix - Scale cannot be zero");
+        m_colliderMatrix = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) * m_transformMatrix;
     }
 
     #ifdef NC_EDITOR_ENABLED

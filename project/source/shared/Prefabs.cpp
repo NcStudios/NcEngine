@@ -24,6 +24,8 @@ namespace nc::sample::prefab
                 return std::string{"CubeGreen"};
             case Resource::CubeRed:
                 return std::string{"CubeRed"};
+            case Resource::Sphere:
+                return std::string{"Sphere"};
             case Resource::Table:
                 return std::string{"Table"};
             case Resource::Token:
@@ -41,6 +43,7 @@ namespace nc::sample::prefab
         graphics::Mesh Beeper{};
         graphics::Mesh Coin{};
         graphics::Mesh Cube{};
+        graphics::Mesh Sphere{};
         graphics::Mesh Table{};
         graphics::Mesh Token{};
         graphics::Mesh Worm{};
@@ -50,10 +53,10 @@ namespace nc::sample::prefab
     {
         graphics::Material Beeper{nullptr};
         graphics::Material Coin{nullptr};
-        graphics::Material Cube{nullptr};
         graphics::Material CubeBlue{nullptr};
         graphics::Material CubeGreen{nullptr};
         graphics::Material CubeRed{nullptr};
+        graphics::Material Default{nullptr};
         graphics::Material Table{nullptr};
         graphics::Material Token{nullptr};
         graphics::Material WireframeCube{nullptr};
@@ -70,22 +73,20 @@ void InitializeResources()
 
     mesh::Beeper = graphics::Mesh{"project//Models//beeper.fbx"};
     mesh::Coin = graphics::Mesh{"project//Models//coin.fbx"};
-    mesh::Cube = graphics::Mesh{"project//Models//cube.fbx"};
+    mesh::Cube = graphics::Mesh{"nc//resources//mesh//cube.fbx"};
+    mesh::Sphere = graphics::Mesh{"nc//resources//mesh//sphere.fbx"};
     mesh::Table = graphics::Mesh{"project//Models//table.fbx"};
     mesh::Token = graphics::Mesh{"project//Models//token.fbx"};
     mesh::Worm = graphics::Mesh{"project//Models//worm.fbx"};
 
     auto materialProperties = graphics::MaterialProperties{};
     auto textureDir = std::string{"project//Textures//"};
-    auto defaultBaseColor = std::string{"nc//source//graphics//DefaultTexture.png"};
-    auto defaultNormal = std::string{"nc//source//graphics//DefaultTexture_Normal.png"};
-    auto defaultMetallic = std::string{"nc//source//graphics//DefaultTexture_Metallic.png"};
+    auto defaultBaseColor = std::string{"nc//resources//texture//DefaultBaseColor.png"};
+    auto defaultNormal = std::string{"nc//resources//texture//DefaultNormal.png"};
+    auto defaultMetallic = std::string{"nc//resources//texture//DefaultMetallic.png"};
 
     const std::vector<std::string> beeperTextures{textureDir + "Beeper//BaseColor.png", textureDir + "Beeper//Normal.png", textureDir + "Beeper//Roughness.png", defaultMetallic};
     material::Beeper = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(beeperTextures, materialProperties);
-
-    const std::vector<std::string> cubeTextures{defaultBaseColor, defaultNormal, defaultMetallic, defaultMetallic};
-    material::Cube = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeTextures, materialProperties);
 
     const std::vector<std::string> cubeBlueTextures{textureDir + "SolidColor//Blue.png", defaultNormal, defaultMetallic, defaultMetallic};
     material::CubeBlue = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeBlueTextures, materialProperties);
@@ -98,6 +99,9 @@ void InitializeResources()
 
     const std::vector<std::string> coinTextures{textureDir + "Coin//BaseColor.png", textureDir + "Coin//Normal.png", textureDir + "Coin//Roughness.png", defaultMetallic};
     material::Coin = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(coinTextures, materialProperties);
+
+    const std::vector<std::string> defaultTextures{defaultBaseColor, defaultNormal, defaultMetallic, defaultMetallic};
+    material::Default = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(defaultTextures, materialProperties);
 
     const std::vector<std::string> tableTextures{textureDir + "Table//BaseColor.png", textureDir + "Table//Normal.png", textureDir + "Table//Roughness.png", defaultMetallic};
     material::Table = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(tableTextures, materialProperties);
@@ -131,7 +135,7 @@ template<> EntityHandle Create_<Resource::Coin>(EntityInfo info)
 template<> EntityHandle Create_<Resource::Cube>(EntityInfo info)
 {
     auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Cube, material::Cube);
+    AddComponent<Renderer>(handle, mesh::Cube, material::Default);
     return handle;
 }
 
@@ -153,6 +157,13 @@ template<> EntityHandle Create_<Resource::CubeRed>(EntityInfo info)
 {
     auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Cube, material::CubeRed);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Sphere>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Sphere, material::Default);
     return handle;
 }
 
@@ -194,6 +205,7 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::CubeBlue,      Create_<Resource::CubeBlue>},
     std::pair{Resource::CubeGreen,     Create_<Resource::CubeGreen>},
     std::pair{Resource::CubeRed,       Create_<Resource::CubeRed>},
+    std::pair{Resource::Sphere,        Create_<Resource::Sphere>},
     std::pair{Resource::Table,         Create_<Resource::Table>},
     std::pair{Resource::Token,         Create_<Resource::Token>},
     std::pair{Resource::WireframeCube, Create_<Resource::WireframeCube>},
