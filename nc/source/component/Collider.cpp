@@ -7,7 +7,6 @@
 
 namespace
 {
-    /** @todo the engine needs to have these basic shapes */
     const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.fbx"};
     const auto SphereMeshPath = std::string{"nc/resources/mesh/sphere.fbx"};
     auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;

@@ -7,23 +7,27 @@
 namespace
 {
     using BoundingVolume = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
-    static const auto UnitBox = DirectX::BoundingOrientedBox{};
-    static const auto UnitSphere = DirectX::BoundingSphere{};
 
-    void GetBoundingVolume(const nc::Collider* collider, BoundingVolume* bound)
+    template<class T>
+    void TransformVolume(BoundingVolume& volume, const nc::Collider* collider)
+    {
+        static constexpr T unit{};
+        volume = unit;
+        unit.Transform(std::get<T>(volume), collider->GetTransformationMatrix());
+    }
+
+    void TransformVolume(BoundingVolume& volume, const nc::Collider* collider)
     {
         switch(collider->GetType())
         {
             case nc::ColliderType::Box:
             {
-                *bound = UnitBox;
-                UnitBox.Transform(std::get<DirectX::BoundingOrientedBox>(*bound), collider->GetTransformationMatrix());
+                TransformVolume<DirectX::BoundingOrientedBox>(volume, collider);
                 break;
             }
             case nc::ColliderType::Sphere:
             {
-                *bound = UnitSphere;
-                UnitSphere.Transform(std::get<DirectX::BoundingSphere>(*bound), collider->GetTransformationMatrix());
+                TransformVolume<DirectX::BoundingSphere>(volume, collider);
                 break;
             }
             default:
@@ -32,7 +36,8 @@ namespace
             }
         }
     }
-}
+} // anonymous namespace
+
 namespace nc::physics
 {
     bool operator ==(const CollisionData& lhs, const CollisionData& rhs)
@@ -56,10 +61,10 @@ namespace nc::physics
         const auto count = colliders.size();
         for(size_t first = 0u; first < count; ++first)
         {
-            GetBoundingVolume(colliders[first], &firstVolume);
+            TransformVolume(firstVolume, colliders[first]);
             for(size_t second = first + 1; second < count; ++second)
             {
-                GetBoundingVolume(colliders[second], &secondVolume);
+                TransformVolume(secondVolume, colliders[second]);
                 if(std::visit([](auto&& a , auto&& b){ return a.Intersects(b); }, firstVolume, secondVolume))
                 {
                     m_currentCollisions.emplace_back(colliders[first], colliders[second]);
@@ -125,4 +130,4 @@ namespace nc::physics
     {
         m_previousCollisions.clear();
     }
-}
+} // namespace nc::phsyics
