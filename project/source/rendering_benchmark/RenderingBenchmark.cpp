@@ -49,9 +49,9 @@ namespace nc::sample
         m_sceneHelper.Setup(false, true, Widget);
 
         // Camera
-        auto camera = AddComponent<Camera>(CreateEntity("Main Camera"));
+        auto camera = AddComponent<Camera>(CreateEntity({.tag = "Main Camera"}));
         nc::camera::SetMainCamera(camera);
-        
+
         // Spawner
         SpawnBehavior spawnBehavior
         {
@@ -60,7 +60,7 @@ namespace nc::sample
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
         };
         
-        auto handle = CreateEntity("Spawner");
+        auto handle = CreateEntity({.tag = "Spawner"});
         auto spawner = AddComponent<Spawner>(handle, prefab::Resource::Cube, spawnBehavior);
         auto fpsTracker = AddComponent<FPSTracker>(handle);
 

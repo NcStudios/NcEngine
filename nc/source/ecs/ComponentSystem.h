@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityHandle.h"
+#include "entity/EntityHandle.h"
 #include "engine/alloc/Pool.h"
 #include "debug/Utils.h"
 #include "debug/Profiler.h"

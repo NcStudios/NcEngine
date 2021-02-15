@@ -47,7 +47,7 @@ namespace nc::sample
     {
         std::generate_n(std::back_inserter(m_entities), count, [this]()
         {
-            auto handle = prefab::Create(m_resource, m_generator.Position(), Quaternion::FromEulerAngles(m_generator.Rotation()), Vector3::One());
+            auto handle = prefab::Create(m_resource, {.position = m_generator.Position(), .rotation = Quaternion::FromEulerAngles(m_generator.Rotation())});
             if(m_applyConstantVelocity)
                 AddComponent<ConstantTranslation>(handle, m_generator.Velocity());
             if(m_applyConstantRotation)

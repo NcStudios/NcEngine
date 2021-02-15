@@ -14,16 +14,17 @@ namespace nc
     class Entity
     {
         public:
-            Entity(const EntityHandle handle, const std::string& tag = "") noexcept;
+            const EntityHandle Handle;
+            const std::string Tag;
+            const bool IsStatic;
+
+            Entity(EntityHandle handle, std::string tag, bool isStatic) noexcept;
             Entity(const Entity& other) = delete;
             Entity& operator=(const Entity&) = delete;
             Entity(Entity&& other) = default;
             Entity& operator=(Entity&& other) = default;
             ~Entity() = default;
 
-            const EntityHandle Handle;
-            const std::string Tag;
-            
             void SendFrameUpdate(float dt) noexcept;
             void SendFixedUpdate() noexcept;
             void SendOnDestroy() noexcept;

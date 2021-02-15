@@ -3,7 +3,7 @@
 #include "platform/win32/NCWinDef.h"
 #include "ui/IUI.h"
 #include "editor/Editor.h"
-#include "Entity.h"
+#include "entity/Entity.h"
 #include "ecs/EntityMap.h"
 
 #include <unordered_map>

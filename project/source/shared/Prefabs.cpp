@@ -112,79 +112,79 @@ void InitializeResources()
 }
 
 template<Resource Resource_t>
-EntityHandle Create_(Vector3, Quaternion, Vector3, std::string);
+EntityHandle Create_(EntityInfo info);
 
-template<> EntityHandle Create_<Resource::Beeper>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Beeper>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Beeper, material::Beeper);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Coin>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Coin>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Coin, material::Coin);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Cube>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Cube>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Cube, material::Cube);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::CubeBlue>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::CubeBlue>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Cube, material::CubeBlue);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::CubeGreen>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::CubeGreen>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Cube, material::CubeGreen);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::CubeRed>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::CubeRed>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Cube, material::CubeRed);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Table>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Table>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Table, material::Table);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Token>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Token>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Token, material::Token);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::WireframeCube>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::WireframeCube>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Cube, material::WireframeCube);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Worm>(Vector3 position, Quaternion rotation, Vector3 scale, std::string tag)
+template<> EntityHandle Create_<Resource::Worm>(EntityInfo info)
 {
-    auto handle = CreateEntity(position, rotation, scale, tag);
+    auto handle = CreateEntity(std::move(info));
     AddComponent<Renderer>(handle, mesh::Worm, material::Worm);
     return handle;
 }
 
-using CreateFunc_t = EntityHandle(*)(Vector3, Quaternion, Vector3, std::string);
+using CreateFunc_t = EntityHandle(*)(EntityInfo info);
 
 const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
 {
@@ -200,8 +200,8 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::Worm,          Create_<Resource::Worm>}
 };
 
-nc::EntityHandle Create(Resource resource, nc::Vector3 position, nc::Quaternion rotation, nc::Vector3 scale, std::string tag)
+nc::EntityHandle Create(Resource resource, EntityInfo info)
 {
-    return dispatch.at(resource)(position, rotation, scale, std::move(tag));
+    return dispatch.at(resource)(std::move(info));
 }
 } // end namespace project::prefab

@@ -28,7 +28,7 @@ namespace nc::sample
         if(enableLog)
         {
             m_log = std::make_unique<GameLog>();
-            auto timerHandle = CreateEntity("FrameTimer");
+            auto timerHandle = CreateEntity({.tag = "FrameTimer"});
             AddComponent<FrameTimer>(timerHandle);
         }
 
@@ -37,7 +37,7 @@ namespace nc::sample
 
         if(createLight)
         {
-            auto lvHandle = CreateEntity(Vector3::Up() * 12.0f, "Point Light");
+            auto lvHandle = CreateEntity({.position = Vector3::Up() * 12.0f, .tag = "Point Light"});
             AddComponent<PointLight>(lvHandle);
         }
     }

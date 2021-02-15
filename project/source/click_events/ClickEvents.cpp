@@ -54,23 +54,26 @@ namespace nc::sample
         // Setup
         m_sceneHelper.Setup(true, false, Widget);
 
-        // Camera
-        auto cameraHandle = CreateEntity(Vector3{0.0f, 6.1f, -9.5f}, Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), Vector3::One(), "Main Camera");
+        auto cameraHandle = CreateEntity({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = AddComponent<EdgePanCamera>(cameraHandle);
         camera::SetMainCamera(camera);
         auto clickHandler = AddComponent<ClickHandler>(cameraHandle, MaskAll);
         LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
-        auto lvHandle = CreateEntity(Vector3{-2.4f, 12.1f, 0.0f}, "Point Light");
+        auto lvHandle = CreateEntity({.position = Vector3{-2.4f, 12.1f, 0.0f}, .tag = "Point Light"});
         AddComponent<PointLight>(lvHandle);
-        auto lvHandle2 = CreateEntity(Vector3{12.1f, 14.5f, 7.3f}, "Point Light");
+        auto lvHandle2 = CreateEntity({.position = Vector3{12.1f, 14.5f, 7.3f}, .tag = "Point Light"});
         AddComponent<PointLight>(lvHandle2);
-        auto lvHandle3 = CreateEntity(Vector3{4.1f, 14.5f, 3.3f}, "Point Light");
+        auto lvHandle3 = CreateEntity({.position = Vector3{4.1f, 14.5f, 3.3f}, .tag = "Point Light"});
         AddComponent<PointLight>(lvHandle3);
 
-        // Table
-        prefab::Create(prefab::Resource::Table, Vector3{0.0f, -0.4f, 0.0f}, Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), Vector3::Splat(7.5f), "Table");
+        // Objects
+        prefab::Create(prefab::Resource::Table, 
+                       {.position = Vector3{0.0f, -0.4f, 0.0f},
+                       .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
+                       .scale = Vector3::Splat(7.5f),
+                       .tag = "Table"});
         
         // Coin Spawner
         SpawnBehavior behavior
@@ -85,7 +88,7 @@ namespace nc::sample
             AddComponent<Clickable>(handle, MaskCoin);
         };
 
-        auto coinSpawnerHandle = CreateEntity("Coin Spawner");
+        auto coinSpawnerHandle = CreateEntity({.tag = "Coin Spawner"});
         auto coinSpawner = AddComponent<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, coinExtension);
         coinSpawner->Spawn(20);
 
@@ -96,7 +99,7 @@ namespace nc::sample
             AddComponent<Clickable>(handle, MaskToken);
         };
         
-        auto tokenSpawnerHandle = CreateEntity("Token Spawner");
+        auto tokenSpawnerHandle = CreateEntity({.tag = "Token Spawner"});
         auto tokenSpawner = AddComponent<Spawner>(tokenSpawnerHandle, prefab::Resource::Token, behavior, tokenExtension);
         tokenSpawner->Spawn(20);
     }

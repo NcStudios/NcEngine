@@ -16,7 +16,7 @@ namespace nc::sample
         prefab::InitializeResources();
 
         // Camera
-        auto camera = AddComponent<Camera>(CreateEntity("Main Camera"));
+        auto camera = AddComponent<Camera>(CreateEntity({.tag = "Main Camera"}));
         camera::SetMainCamera(camera);
 
         // Light
@@ -31,7 +31,7 @@ namespace nc::sample
             .attQuad = 0.0f
         };
 
-        auto lightHandle = CreateEntity("Point Light");
+        auto lightHandle = CreateEntity({.tag = "Point Light"});
         AddComponent<PointLight>(lightHandle, lightProperties);
         AddComponent<MouseFollower>(lightHandle);
 
@@ -45,7 +45,7 @@ namespace nc::sample
             .thetaRandomRange = 1.0f
         };
 
-        auto spawnerHandle = CreateEntity("Spawner");
+        auto spawnerHandle = CreateEntity({.tag = "Spawner"});
         auto spawner = AddComponent<Spawner>(spawnerHandle, prefab::Resource::Worm, spawnBehavior);
         spawner->Spawn(40u);
     }
