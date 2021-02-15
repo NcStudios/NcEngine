@@ -51,6 +51,7 @@ namespace nc::sample
 {
     void ClickEvents::Load()
     {
+        // Setup
         m_sceneHelper.Setup(true, false, Widget);
 
         auto cameraHandle = CreateEntity({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
@@ -74,6 +75,7 @@ namespace nc::sample
                        .scale = Vector3::Splat(7.5f),
                        .tag = "Table"});
         
+        // Coin Spawner
         SpawnBehavior behavior
         {
             .rotationOffset = Vector3{math::Pi / 2.0f, 0.0f, 0.0f},
@@ -90,6 +92,7 @@ namespace nc::sample
         auto coinSpawner = AddComponent<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, coinExtension);
         coinSpawner->Spawn(20);
 
+        // Token Spawner
         auto tokenExtension = [](EntityHandle handle)
         {
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));

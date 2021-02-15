@@ -20,8 +20,6 @@ namespace nc::sample
         camera::SetMainCamera(camera);
 
         // Light
-        auto lvHandle = CreateEntity({.tag = "Point Light"});
-        auto pointLight = AddComponent<PointLight>(lvHandle);
         auto lightProperties = PointLight::Properties
         {
             .pos = Vector3::Zero(),
@@ -32,11 +30,12 @@ namespace nc::sample
             .attLin = 0.05f,
             .attQuad = 0.0f
         };
-        
-        pointLight->Set(lightProperties);
-        AddComponent<MouseFollower>(lvHandle);
 
-        // Worms
+        auto lightHandle = CreateEntity({.tag = "Point Light"});
+        AddComponent<PointLight>(lightHandle, lightProperties);
+        AddComponent<MouseFollower>(lightHandle);
+
+        // Worm Spawner
         SpawnBehavior spawnBehavior
         {
             .positionOffset = Vector3{0.0f, 0.0f, 25.0f},
@@ -48,7 +47,7 @@ namespace nc::sample
 
         auto spawnerHandle = CreateEntity({.tag = "Spawner"});
         auto spawner = AddComponent<Spawner>(spawnerHandle, prefab::Resource::Worm, spawnBehavior);
-        spawner->Spawn(1u);
+        spawner->Spawn(40u);
     }
 
     void Worms::Unload()

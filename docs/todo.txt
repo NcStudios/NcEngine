@@ -9,7 +9,6 @@ IN PROGRESS
     -optimize collisions
     -add physics body
 
--PointLight ctor should be able to take PointLight::Properties
 -#ifdef editor stuff is getting out of hand; restore sanity
 -Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 
