@@ -4,6 +4,35 @@
 
 #include <variant>
 
+namespace
+{
+    using BoundingVolume = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
+    static const auto UnitBox = DirectX::BoundingOrientedBox{};
+    static const auto UnitSphere = DirectX::BoundingSphere{};
+
+    void GetBoundingVolume(const nc::Collider* collider, BoundingVolume* bound)
+    {
+        switch(collider->GetType())
+        {
+            case nc::ColliderType::Box:
+            {
+                *bound = UnitBox;
+                UnitBox.Transform(std::get<DirectX::BoundingOrientedBox>(*bound), collider->GetTransformationMatrix());
+                break;
+            }
+            case nc::ColliderType::Sphere:
+            {
+                *bound = UnitSphere;
+                UnitSphere.Transform(std::get<DirectX::BoundingSphere>(*bound), collider->GetTransformationMatrix());
+                break;
+            }
+            default:
+            {
+                throw std::runtime_error("GetBoundingVolume - Unknown ColliderType");
+            }
+        }
+    }
+}
 namespace nc::physics
 {
     bool operator ==(const CollisionData& lhs, const CollisionData& rhs)
@@ -20,110 +49,23 @@ namespace nc::physics
         m_currentCollisions.clear();
     }
 
-    using Bound_t = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
-
-    void GetBound(const Collider* collider, Bound_t* bound)
-    {
-        static const auto unitBox = DirectX::BoundingOrientedBox{};
-        static const auto unitSphere = DirectX::BoundingSphere{};
-
-        switch(collider->GetType())
-        {
-            case ColliderType::Box:
-            {
-                *bound = unitBox;
-                unitBox.Transform(std::get<DirectX::BoundingOrientedBox>(*bound), collider->GetTransformationMatrix());
-                break;
-            }
-            case ColliderType::Sphere:
-            {
-                *bound = unitSphere;
-                unitSphere.Transform(std::get<DirectX::BoundingSphere>(*bound), collider->GetTransformationMatrix());
-                break;
-            }
-        }
-    }
-
     void CollisionSystem::BuildCurrentFrameState(const std::vector<Collider*>& colliders)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
-
-        Bound_t iBound, jBound;
-
+        BoundingVolume firstVolume, secondVolume;
         const auto count = colliders.size();
-        for(size_t i = 0u; i < count; ++i)
+        for(size_t first = 0u; first < count; ++first)
         {
-            GetBound(colliders[i], &iBound);
-
-            for(size_t j = i + 1; j < count; ++j)
+            GetBoundingVolume(colliders[first], &firstVolume);
+            for(size_t second = first + 1; second < count; ++second)
             {
-                GetBound(colliders[j], &jBound);
-
-                if(std::visit([](auto&& i , auto&& j){ return i.Intersects(j); }, iBound, jBound))
+                GetBoundingVolume(colliders[second], &secondVolume);
+                if(std::visit([](auto&& a , auto&& b){ return a.Intersects(b); }, firstVolume, secondVolume))
                 {
-                    m_currentCollisions.emplace_back(colliders[i], colliders[j]);
+                    m_currentCollisions.emplace_back(colliders[first], colliders[second]);
                 }
             }
         }
-
-
-        // const auto count = colliders.size();
-        // for(size_t i = 0u; i < count; ++i)
-        // {
-        //     switch(colliders[i]->GetType())
-        //     {
-        //         case ColliderType::Box:
-        //         {
-        //             unitBox.Transform(iBox, colliders[i]->GetTransformationMatrix());
-        //             for(size_t j = i + 1; j < count; ++j)
-        //             {
-        //                 switch(colliders[j]->GetType())
-        //                 {
-        //                     case ColliderType::Box:
-        //                     {
-        //                         unitBox.Transform(jBox, colliders[j]->GetTransformationMatrix());
-        //                         if(iBox.Intersects(jBox))
-        //                             m_currentCollisions.emplace_back(colliders[i], colliders[j]);
-        //                         break;
-        //                     }
-        //                     case ColliderType::Sphere:
-        //                     {
-        //                         unitSphere.Transform(jSphere, colliders[j]->GetTransformationMatrix());
-        //                         if(iBox.Intersects(jSphere))
-        //                             m_currentCollisions.emplace_back(colliders[i], colliders[j]);
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //             break;
-        //         }
-        //         case ColliderType::Sphere:
-        //         {
-        //             unitSphere.Transform(iSphere, colliders[i]->GetTransformationMatrix());
-        //             for(size_t j = i + 1; j < count; ++j)
-        //             {
-        //                 switch(colliders[j]->GetType())
-        //                 {
-        //                     case ColliderType::Box:
-        //                     {
-        //                         unitBox.Transform(jBox, colliders[j]->GetTransformationMatrix());
-        //                         if(iSphere.Intersects(jBox))
-        //                             m_currentCollisions.emplace_back(colliders[i], colliders[j]);
-        //                         break;
-        //                     }
-        //                     case ColliderType::Sphere:
-        //                     {
-        //                         unitSphere.Transform(jSphere, colliders[j]->GetTransformationMatrix());
-        //                         if(iSphere.Intersects(jSphere))
-        //                             m_currentCollisions.emplace_back(colliders[i], colliders[j]);
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //             break;
-        //         }
-        //     }
-        // }
         NC_PROFILE_END();
     }
     
