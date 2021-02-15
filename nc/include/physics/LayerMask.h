@@ -4,13 +4,11 @@
 
 namespace nc::physics
 {
+    /** Defined layers in project code as powers of 2 however desired - enum, constants, etc. */
     using LayerMask = uint64_t;
-    constexpr LayerMask LAYER_MASK_NONE = 0u;
-    constexpr LayerMask LAYER_MASK_ALL = ~LAYER_MASK_NONE;
-
-    namespace Layer
-    {
-        const auto Ground = 1u;
-        const auto GamePiece = 2u;
-    }
+    using LayerMask32 = uint32_t;
+    constexpr LayerMask LayerMaskNone = 0u;
+    constexpr LayerMask LayerMaskAll = ~LayerMaskNone;
+    constexpr LayerMask32 LayerMask32None = 0u;
+    constexpr LayerMask32 LayerMask32All = ~LayerMask32None;
 }

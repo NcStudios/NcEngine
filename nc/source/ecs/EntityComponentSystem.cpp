@@ -1,6 +1,4 @@
 #include "EntityComponentSystem.h"
-#include "math/Vector3.h"
-#include "math/Quaternion.h"
 #include "component/Collider.h"
 #include "component/NetworkDispatcher.h"
 #include "component/PointLight.h"
@@ -16,7 +14,8 @@ namespace
 namespace nc::ecs
 {
 EntityComponentSystem::EntityComponentSystem()
-    : m_active{InitialBucketSize, EntityHandle::Hash()},
+    : m_handleManager{},
+      m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_colliderSystem{ std::make_unique<ComponentSystem<Collider>>() },
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS, true) },
@@ -85,11 +84,11 @@ void EntityComponentSystem::SendOnDestroy()
     m_toDestroy.clear();
 }
 
-EntityHandle EntityComponentSystem::CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag)
+EntityHandle EntityComponentSystem::CreateEntity(EntityInfo info)
 {
     auto entityHandle = m_handleManager.GenerateNewHandle();
-    m_transformSystem->Add(entityHandle, pos, rot, scale);
-    m_active.emplace(entityHandle, Entity{entityHandle, std::move(tag)} );
+    m_transformSystem->Add(entityHandle, info.position, info.rotation, info.scale);
+    m_active.emplace(entityHandle, Entity{entityHandle, std::move(info.tag), info.isStatic} );
     return entityHandle;
 }
 
@@ -98,9 +97,10 @@ bool EntityComponentSystem::DoesEntityExist(const EntityHandle handle) const noe
     return m_active.count(handle) > 0;
 }
 
+/** Friendly reminder - this invalidates m_active iterators */
 bool EntityComponentSystem::DestroyEntity(EntityHandle handle)
 {
-    if (DoesEntityExist(handle))
+    if(!DoesEntityExist(handle))
         return false;
     auto& containingMap = GetMapContainingEntity(handle);
     GetToDestroyEntities().emplace(handle, std::move(containingMap.at(handle)));
@@ -157,10 +157,16 @@ Entity* EntityComponentSystem::GetEntityPtrFromAnyMap(const EntityHandle handle)
 
 void EntityComponentSystem::ClearState()
 {
-    for(const auto& pair : m_active)
+    // We cannot call DestroyEntity while iterating m_active, so copy the handles
+    std::vector<EntityHandle> handles;
+    handles.reserve(m_active.size());
+    std::transform(m_active.cbegin(), m_active.cend(), std::back_inserter(handles), [](const auto& pair)
     {
-        DestroyEntity(pair.first);
-    }
+        return pair.first;
+    });
+
+    for(const auto handle : handles)
+        DestroyEntity(handle);
 
     SendOnDestroy();
     m_active.clear();

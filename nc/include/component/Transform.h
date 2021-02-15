@@ -25,10 +25,13 @@ namespace nc
             Vector3 GetPosition() const;
             Quaternion GetRotation() const;
             Vector3 GetScale() const;
-
             DirectX::FXMMATRIX GetTransformationMatrix() const;
             DirectX::XMMATRIX GetTransformationMatrixEx(Vector3 additionalScale) const;
             DirectX::XMMATRIX GetViewMatrix() const;
+            Vector3 ToLocalSpace(const Vector3& vec) const;
+            Vector3 Up() const;
+            Vector3 Forward() const;
+            Vector3 Right() const;
 
             void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
             void Set(const Vector3& pos, const Vector3& angles, const Vector3& scale);

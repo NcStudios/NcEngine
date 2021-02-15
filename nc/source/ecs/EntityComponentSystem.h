@@ -1,7 +1,8 @@
 #pragma once
 
-#include "EntityHandle.h"
-#include "Entity.h"
+#include "entity/Entity.h"
+#include "entity/EntityHandle.h"
+#include "entity/EntityInfo.h"
 #include "ecs/EntityMap.h"
 #include "ecs/ComponentSystem.h"
 #include "HandleManager.h"
@@ -31,7 +32,7 @@ namespace ecs
             void SendFixedUpdate();
             void SendOnDestroy();
 
-            EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag);
+            EntityHandle CreateEntity(EntityInfo info);
             bool DestroyEntity(EntityHandle handle);
             bool DoesEntityExist(const EntityHandle handle) const noexcept;
             Entity* GetEntity(EntityHandle handle);

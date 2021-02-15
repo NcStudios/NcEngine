@@ -3,7 +3,7 @@
 
 namespace nc
 {
-    class Camera final: public Component
+    class Camera : public Component
     {
         public:
             Camera(EntityHandle handle) noexcept;

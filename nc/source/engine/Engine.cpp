@@ -51,21 +51,13 @@ namespace nc::core
     }
 
     /* Engine */
+    #ifdef USE_VULKAN
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
           m_window{ hInstance },
-    #ifdef USE_VULKAN
-        m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-        m_physics{ &m_graphics2 },
-        // @todo: Implement missing managers below
-    #else
-        m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
-        m_physics{ &m_graphics },
-        m_ui{ m_window.GetHWND(), &m_graphics },
-        m_pointLightManager{},
-        m_frameManager{},
-    #endif
+          m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
+          m_physics{ &m_graphics2 },
           m_ecs{},
           m_sceneSystem{},
           m_time{}
@@ -73,6 +65,24 @@ namespace nc::core
         SetBindings();
         V_LOG("Engine initialized");
     }
+    #else
+    Engine::Engine(HINSTANCE hInstance)
+        : m_isRunning{ false },
+          m_frameDeltaTimeFactor{ 1.0f },
+          m_window{ hInstance },
+          m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
+          m_ui{ m_window.GetHWND(), &m_graphics },
+          m_pointLightManager{},
+          m_frameManager{},
+          m_physics{ &m_graphics },
+          m_ecs{},
+          m_sceneSystem{},
+          m_time{}
+    {
+        SetBindings();
+        V_LOG("Engine initialized");
+    }
+    #endif
 
     Engine::~Engine()
     {
@@ -126,6 +136,7 @@ namespace nc::core
     {
         V_LOG("Clearing engine state");
         m_ecs.ClearState();
+        m_physics.ClearState();
         camera::ClearMainCamera();
         // SceneSystem state is never cleared
     }
@@ -229,11 +240,11 @@ namespace nc::core
         using namespace std::placeholders;
 
         #ifdef USE_VULKAN
-            m_window.BindGraphicsOnResizeCallback(std::bind(m_graphics2.OnResize, &m_graphics2, _1, _2, _3, _4));
+            m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4));
             // No UI for us until we tackle integrating IMGUI with Vulkan
         #else
-            m_window.BindGraphicsOnResizeCallback(std::bind(m_graphics.OnResize, &m_graphics, _1, _2, _3, _4));
-            m_window.BindUICallback(std::bind(m_ui.WndProc, &m_ui, _1, _2, _3, _4));
+            m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4));
+            m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
         #endif
         ::nc::internal::RegisterEcs(&m_ecs);
     }

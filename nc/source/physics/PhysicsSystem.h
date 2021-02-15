@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Collider.h"
+#include "CollisionSystem.h"
 #include "physics/IClickable.h"
 #include "directx/math/DirectXMath.h"
 
@@ -30,6 +30,7 @@ namespace nc::physics
             void ClearState();
 
         private:
+            CollisionSystem m_collisionSystem;
             std::vector<nc::physics::IClickable*> m_clickableComponents;
             #ifdef USE_VULKAN
             graphics::Graphics2* m_graphics2;

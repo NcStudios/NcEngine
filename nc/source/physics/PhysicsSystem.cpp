@@ -1,6 +1,5 @@
 #include "PhysicsSystem.h"
 #include "Physics.h"
-#include "CollisionDetection.inl"
 #include "debug/Utils.h"
 #include "Input.h"
 #include "Window.h"
@@ -54,7 +53,8 @@ namespace nc::physics
     #else
     /* Physics System */
     PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics)
-        : m_clickableComponents{},
+        : m_collisionSystem{},
+          m_clickableComponents{},
           m_graphics{ graphics }
     {
         impl = this;
@@ -64,11 +64,12 @@ namespace nc::physics
     void PhysicsSystem::ClearState()
     {
         m_clickableComponents.clear();
+        m_collisionSystem.ClearState();
     }
 
     void PhysicsSystem::DoPhysicsStep(const std::vector<Collider*>& colliders)
     {
-        DoCollisionStep(colliders);
+        m_collisionSystem.DoCollisionStep(colliders);
     }
 
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)

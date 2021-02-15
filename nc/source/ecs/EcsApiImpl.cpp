@@ -14,20 +14,10 @@ namespace nc
         }
     }
 
-    EntityHandle CreateEntity()
+    EntityHandle CreateEntity(EntityInfo info)
     {
-        return CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), internal::DefaultEntityTag);
-    }
-
-    EntityHandle CreateEntity(std::string tag)
-    {
-        return CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), std::move(tag));
-    }
-
-    EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag)
-    {
-        IF_THROW(scale == Vector3::Zero(), "CreateEntity - scale cannot be Vector3::Zero");
-        return internal::g_impl->CreateEntity(pos, rot, scale, std::move(tag));
+        IF_THROW(info.scale == Vector3::Zero(), "CreateEntity - scale cannot be Vector3::Zero");
+        return internal::g_impl->CreateEntity(std::move(info));
     }
 
     bool DestroyEntity(EntityHandle handle)
@@ -47,10 +37,15 @@ namespace nc
 
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle)
     {
+        return AddComponent<PointLight>(handle, PointLight::Properties{});
+    }
+
+    template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties)
+    {
         IF_THROW(!GetEntity(handle), "AddComponent<PointLight> - Bad handle");
         IF_THROW(internal::g_impl->GetSystem<PointLight>()->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
 
-        auto lightPtr = internal::g_impl->GetSystem<PointLight>()->Add(handle);
+        auto lightPtr = internal::g_impl->GetSystem<PointLight>()->Add(handle, properties);
         return lightPtr;
     }
 

@@ -15,7 +15,9 @@ namespace nc::input
 
     void UpdateMousePosition(LPARAM lParam);
     void SetMouseWheel(WPARAM wParam, LPARAM);
-    void AddToQueue(KeyCode_t vkCode, LPARAM lParam);
+    void AddKeyToQueue(KeyCode_t keyCode, LPARAM lParam);
+    void AddMouseButtonDownToQueue(KeyCode_t keyCode, LPARAM lParam);
+    void AddMouseButtonUpToQueue(KeyCode_t keyCode, LPARAM lParam);
     void ResetMouseState();
     void Flush();
 }

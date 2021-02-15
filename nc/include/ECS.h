@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Entity.h"
+#include "entity/Entity.h"
+#include "entity/EntityInfo.h"
 #include "component/Collider.h"
 #include "component/PointLight.h"
 #include "component/NetworkDispatcher.h"
@@ -13,13 +14,13 @@
 
 namespace nc
 {
-    EntityHandle CreateEntity();
-    EntityHandle CreateEntity(std::string tag);
-    EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag); // scale must be nonzero
+    /** Entity Functions */
+    EntityHandle CreateEntity(EntityInfo info = EntityInfo{});
     bool DestroyEntity(EntityHandle handle);
     [[nodiscard]] Entity* GetEntity(EntityHandle handle);
     [[nodiscard]] Entity* GetEntity(const std::string& tag);
 
+    /** Component Functions */
     template<std::derived_from<ComponentBase> T, class ...Args>
     T* AddComponent(EntityHandle handle, Args ... args);
     
@@ -33,6 +34,7 @@ namespace nc
     [[nodiscard]] bool HasComponent(EntityHandle handle);
 
     /** Specializations for engine components */
+    template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties);
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle);
     template<> PointLight* GetComponent<PointLight>(EntityHandle handle);
     template<> bool HasComponent<PointLight>(EntityHandle handle);
