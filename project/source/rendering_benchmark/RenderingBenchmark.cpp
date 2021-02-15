@@ -45,13 +45,14 @@ namespace nc::sample
 {
     void RenderingBenchmark::Load()
     {
+        // Setup
         m_sceneHelper.Setup(false, true, Widget);
 
+        // Camera
         auto camera = AddComponent<Camera>(CreateEntity("Main Camera"));
         nc::camera::SetMainCamera(camera);
         
-        auto handle = CreateEntity("Spawner");
-
+        // Spawner
         SpawnBehavior spawnBehavior
         {
             .positionOffset = Vector3{0.0f, 0.0f, 35.0f},
@@ -59,12 +60,14 @@ namespace nc::sample
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
         };
         
+        auto handle = CreateEntity("Spawner");
         auto spawner = AddComponent<Spawner>(handle, prefab::Resource::Cube, spawnBehavior);
+        auto fpsTracker = AddComponent<FPSTracker>(handle);
+
+        // UI Callbacks
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);
         SpawnCallback = std::bind(Spawner::Spawn, spawner, std::placeholders::_1);
         DestroyCallback = std::bind(Spawner::Destroy, spawner, std::placeholders::_1);
-
-        auto fpsTracker = AddComponent<FPSTracker>(handle);
         GetFPSCallback = std::bind(FPSTracker::GetFPS, fpsTracker);
     }
 

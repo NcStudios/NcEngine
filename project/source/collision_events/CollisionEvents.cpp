@@ -27,14 +27,15 @@ namespace nc::sample
 {
     void CollisionEvents::Load()
     {
+        // Setup
         m_sceneHelper.Setup(true, true, Widget);
 
-        //Camera
+        // Camera
         auto cameraHandle = CreateEntity(Vector3{3.6f, 6.1f, -6.5f}, Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), Vector3::One(), "Main Camera");
         auto camera = AddComponent<EdgePanCamera>(cameraHandle);
         camera::SetMainCamera(camera);
 
-        // Objects
+        // Cubes
         auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(180.0f), 0.0f, 0.0f);
         auto cube1 = prefab::Create(prefab::Resource::CubeBlue, Vector3{2.0f, 0.0f, 0.4f}, rot, Vector3::One());
         AddComponent<Collider>(cube1, Vector3::One());

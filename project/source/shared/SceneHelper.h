@@ -37,7 +37,7 @@ namespace nc::sample
 
         if(createLight)
         {
-            auto lvHandle = CreateEntity(Vector3::Up() * 12.0f, Quaternion::Identity(), Vector3::One(), "Point Light");
+            auto lvHandle = CreateEntity(Vector3::Up() * 12.0f, "Point Light");
             AddComponent<PointLight>(lvHandle);
         }
     }

@@ -24,10 +24,11 @@ namespace nc::sample
 {
     void SpawnTest::Load()
     {
+        // Setup
         m_sceneHelper.Setup(true, false, Widget);
 
         // Camera
-        auto cameraHandle = CreateEntity(Vector3{0.0f, -9.0f, -100.0f}, Quaternion::Identity(), Vector3::One(), "SceneNavigationCamera");
+        auto cameraHandle = CreateEntity(Vector3{0.0f, -9.0f, -100.0f}, "SceneNavigationCamera");
         auto camera = AddComponent<SceneNavigationCamera>(cameraHandle);
         camera::SetMainCamera(camera);
 
@@ -39,11 +40,10 @@ namespace nc::sample
             .attConst = 1.0f,
             .attLin = 0.0001f
         };
-        auto lvHandle = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::One(), "Point Light");
-        auto pointLight = AddComponent<PointLight>(lvHandle);
-        pointLight->Set(lightProperties);
 
-        // Collider that destroys anything leaving its bounded area
+        AddComponent<PointLight>(CreateEntity("Point Light"), lightProperties);
+
+        // KillBox to destroy anything leaving its bounded area
         auto killBox = CreateEntity(Vector3::Zero(), Quaternion::Identity(), Vector3::Splat(60.0f), "KillBox");
         AddComponent<Collider>(killBox, Vector3::One());
         AddComponent<KillBox>(killBox);
@@ -54,11 +54,13 @@ namespace nc::sample
             .positionRandomRange = Vector3::Splat(55.0f),
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f),
         };
+
         auto staticCubeExtension = [](EntityHandle handle)
         {
             GetComponent<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
             AddComponent<Collider>(handle, Vector3::One());
         };
+
         auto staticCubeSpawnerHandle = CreateEntity("Static Cube Spawner");
         auto staticCubeSpawner = AddComponent<Spawner>(staticCubeSpawnerHandle, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);
         staticCubeSpawner->Spawn(5);
@@ -74,10 +76,12 @@ namespace nc::sample
             .rotationAxisRandomRange = Vector3::One(),
             .thetaRandomRange = 2.0f
         };
+
         auto dynamicCubeExtension = [](EntityHandle handle)
         {
             AddComponent<Collider>(handle, Vector3::One());
         };
+
         auto dynamicCubeSpawnerHandle = CreateEntity("Dynamic Cube Spawner");
         AddComponent<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);
     }

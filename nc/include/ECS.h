@@ -14,7 +14,9 @@
 namespace nc
 {
     EntityHandle CreateEntity();
+    EntityHandle CreateEntity(Vector3 pos);
     EntityHandle CreateEntity(std::string tag);
+    EntityHandle CreateEntity(Vector3 pos, std::string tag);
     EntityHandle CreateEntity(Vector3 pos, Quaternion rot, Vector3 scale, std::string tag); // scale must be nonzero
     bool DestroyEntity(EntityHandle handle);
     [[nodiscard]] Entity* GetEntity(EntityHandle handle);
@@ -33,6 +35,7 @@ namespace nc
     [[nodiscard]] bool HasComponent(EntityHandle handle);
 
     /** Specializations for engine components */
+    template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties);
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle);
     template<> PointLight* GetComponent<PointLight>(EntityHandle handle);
     template<> bool HasComponent<PointLight>(EntityHandle handle);
