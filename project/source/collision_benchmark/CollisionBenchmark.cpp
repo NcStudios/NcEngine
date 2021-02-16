@@ -59,7 +59,7 @@ namespace nc::sample
 
         auto spawnExtension = [](EntityHandle handle)
         {
-            AddComponent<Collider>(handle, Vector3::One());
+            AddComponent<Collider>(handle, ColliderType::Box, Vector3::One());
         };
         
         auto handle = CreateEntity({.tag = "Spawner"});

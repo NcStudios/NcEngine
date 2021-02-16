@@ -1,55 +1,55 @@
 #include "component/Collider.h"
+#include "ColliderDetail.h"
 #include "Ecs.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
-
-namespace
-{
-    const auto CubeMeshPath = std::string{"project/Models/cube.fbx"};
-    auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
-
-    auto CreateWireframeBox()
-    {
-        return nc::graphics::Model{ {CubeMeshPath}, CreateMaterial() };
-    }
-}
 #endif
 
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
-    Collider::Collider(EntityHandle handle, Vector3 scale)
+    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 scale)
         : ComponentBase(handle),
-          m_colliderMatrix{},
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
+          m_boundingVolume{collider_detail::CreateBoundingVolume(type, Vector3::Zero(), scale)}, /** @todo pass offset */
+          m_type{type},
+          m_widgetModel{collider_detail::CreateWireframeModel(type)},
           m_scale{scale},
-          m_widgetModel{CreateWireframeBox()},
           m_selectedInEditor{false}
     {
+        IF_THROW(!HasNoZeroElement(scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(type == ColliderType::Sphere && scale - scale != Vector3::Zero(), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #else
-    Collider::Collider(EntityHandle handle, Vector3 scale)
+    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 scale)
         : ComponentBase(handle),
-          m_colliderMatrix{},
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
-          m_scale{scale}
+          m_boundingVolume{collider_detail::CreateBoundingVolume(type, Vector3::Zero(), scale)}, /** @todo pass offset */
+          m_type{type}
     {
+        IF_THROW(!HasNoZeroElement(scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(type == ColliderType::Sphere && scale - scale != Vector3::Zero(), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #endif
 
     Collider::~Collider() = default;
 
-    void Collider::UpdateTransformationMatrix()
+    ColliderType Collider::GetType() const
     {
-        IF_THROW(m_scale == Vector3::Zero(), "Collider::UpdateTransformationMatrix - Scale cannot be zero");
-        m_colliderMatrix = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) * m_transformMatrix;
+        return m_type;
     }
 
-    DirectX::FXMMATRIX Collider::GetTransformationMatrix() const
+    Collider::BoundingVolume Collider::GetBoundingVolume() const
     {
-        return m_colliderMatrix;
+        return std::visit([this](auto&& volume) 
+        {
+            using Volume_t = std::remove_cvref<decltype(volume)>::type;
+            Volume_t out;
+            volume.Transform(out, m_transformMatrix);
+            return BoundingVolume{out};
+        }, *m_boundingVolume);
     }
 
     #ifdef NC_EDITOR_ENABLED
@@ -59,7 +59,9 @@ namespace nc
         if(!std::exchange(m_selectedInEditor, false))
             return;
 
-        m_widgetModel.SetTransformationMatrix(m_colliderMatrix);
+        /** @todo right multiply by offset */
+        m_widgetModel.SetTransformationMatrix(DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) * m_transformMatrix);
+
         m_widgetModel.Submit(frame);
     }
 
@@ -67,6 +69,7 @@ namespace nc
     {
         ImGui::Text("Collider");
         ui::editor::xyzWidgetHeader("     ");
+        /** @todo offset */
         ui::editor::xyzWidget("Scale", "colliderscale", &m_scale.x, &m_scale.y, &m_scale.z, 0.01f, 100.0f);
     }
 

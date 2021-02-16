@@ -12,6 +12,7 @@ namespace nc::sample::prefab
         CubeGreen,
         CubeRed,
         Coin,
+        Sphere,
         Table,
         Token,
         WireframeCube,
