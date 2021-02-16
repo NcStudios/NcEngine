@@ -37,6 +37,10 @@ namespace nc
 
             Collider(EntityHandle handle, ColliderType type, Vector3 scale);
             ~Collider();
+            Collider(const Collider&) = delete;
+            Collider(Collider&&) = delete;
+            Collider& operator=(const Collider&) = delete;
+            Collider& operator=(Collider&&) = delete;
 
             ColliderType GetType() const;
             BoundingVolume GetBoundingVolume() const;

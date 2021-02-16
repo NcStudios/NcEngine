@@ -16,7 +16,6 @@ namespace nc
 
     EntityHandle CreateEntity(EntityInfo info)
     {
-        IF_THROW(info.scale.x == 0.0f || info.scale.y == 0.0f || info.scale.z == 0.0f, "CreateEntity - Invalid scale(elements cannot be 0)");
         return internal::g_impl->CreateEntity(std::move(info));
     }
 
@@ -68,7 +67,6 @@ namespace nc
     template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderType type, Vector3 scale)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<Collider> - Bad handle");
-        IF_THROW(scale.x == 0.0f || scale.y == 0.0f || scale.z == 0.0f, "AddComponent<Collider> - Invalid scale(elements cannot be 0)");
         IF_THROW(internal::g_impl->GetSystem<Collider>()->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
         return internal::g_impl->GetSystem<Collider>()->Add(handle, type, scale);
     }
