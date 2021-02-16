@@ -1,7 +1,6 @@
 ***********
 IN PROGRESS
 ***********
-
 -update physics to 3d
     -layers apply to collisions
     -sphere collider
@@ -34,6 +33,7 @@ TO ADD
 -GfxResMan should try to get rid of strings as keys
 -profiling only works well on per frame stuff; it is hard to get meaningful data about physics w/o syncing fixed/frame rates
 -add global search to api - GlobalGetComponent
+-next vulkan PR: configure pipeline to have dynamic state for viewport and scissor rectangle so entire pipeline does not need to be recreated on swapchain resize. (Keeping code reviews "small" after second large vulkan code review)
 
 LOW PRIORITY
 -gtest must be dl'd manually

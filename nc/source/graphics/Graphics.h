@@ -34,7 +34,7 @@ namespace nc
                 void SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept;
 
                 void ResizeTarget(float width, float height);
-                void OnResize(float width, float height, float nearZ, float farZ);
+                void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
                 void ToggleFullscreen();
                 
                 void FrameBegin();

@@ -21,7 +21,9 @@ namespace
 namespace nc::graphics::vulkan
 {
     Device::Device(const vulkan::Instance* instance, Vector2 dimensions)
-    : m_device{},
+    : m_instance{instance->GetInstance()},
+      m_surface{instance->GetSurface()},
+      m_device{},
       m_physicalDevice{},
       m_graphicsQueue{},
       m_presentQueue{},
@@ -31,27 +33,55 @@ namespace nc::graphics::vulkan
       m_swapChainExtent{},
       m_swapChainImageViews{},
       m_commandPool{},
+      m_commandBuffers{},
       m_imageRenderReadySemaphores{},
       m_imagePresentReadySemaphores{},
       m_framesInFlightFences{},
       m_imagesInFlightFences{},
-      m_currentFrameIndex{0},
-      m_dimensions{dimensions}
+      m_currentFrameIndex{0}
     {
-        auto vkInstance = instance->GetInstance();
-        auto vkSurface = instance->GetSurface();
+        CreatePhysicalDevice();
+        CreateLogicalDevice();
+        CreateSwapChain(dimensions);
+        CreateCommandPool();
+        CreateSynchronizationObjects();
+    }
 
-        /*******************
-         * PHYSICAL DEVICE *
-         * *****************/
+    Device::~Device()
+    {
+        CleanupSwapChain();
+        m_device.destroyCommandPool(m_commandPool);
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        {
+            m_device.destroySemaphore(m_imageRenderReadySemaphores[i]);
+            m_device.destroySemaphore(m_imagePresentReadySemaphores[i]);
+            m_device.destroyFence(m_framesInFlightFences[i]);
+        }
+
+        m_device.destroy();
+    }
+
+    void Device::CleanupSwapChain()
+    {
+        for (auto imageView : m_swapChainImageViews)
+        {
+            m_device.destroyImageView(imageView, nullptr);
+        }
+
+        m_device.destroySwapchainKHR(m_swapChain);
+    }
+
+    void Device::CreatePhysicalDevice()
+    {
         uint32_t deviceCount = 0;
-        if (vkInstance->enumeratePhysicalDevices(&deviceCount, nullptr) != vk::Result::eSuccess)
+        if (m_instance->enumeratePhysicalDevices(&deviceCount, nullptr) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Count physical devices - Failed to find GPU that supports Vulkan.");
         }
 
         std::vector<vk::PhysicalDevice> devices(deviceCount);
-        if (vkInstance->enumeratePhysicalDevices(&deviceCount, devices.data()) != vk::Result::eSuccess)
+        if (m_instance->enumeratePhysicalDevices(&deviceCount, devices.data()) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Get physical devices - Failed to find GPU that supports Vulkan.");
         }
@@ -60,7 +90,7 @@ namespace nc::graphics::vulkan
         bool foundSuitableDevice = false;
         for (const auto& device : devices)
         {
-            auto indices = QueueFamilyIndices(device, vkSurface);
+            auto indices = QueueFamilyIndices(device, m_surface);
 
             uint32_t extensionCount;
             if (device.enumerateDeviceExtensionProperties(nullptr, &extensionCount, nullptr) != vk::Result::eSuccess)
@@ -86,7 +116,7 @@ namespace nc::graphics::vulkan
 
             if (extensionsSupported)
             {
-                auto swapChainSupportDetails = QuerySwapChainSupport(device, vkSurface);
+                auto swapChainSupportDetails = QuerySwapChainSupport(device, m_surface);
                 swapChainAdequate = !swapChainSupportDetails.formats.empty() && !swapChainSupportDetails.presentModes.empty();
             }
 
@@ -102,11 +132,11 @@ namespace nc::graphics::vulkan
         {
             throw std::runtime_error("Test physical devices for suitability - Failed to find GPU that supports Vulkan.");
         }
+    }
 
-        /******************
-         * COMMAND QUEUES *
-         * ****************/
-        auto indices = QueueFamilyIndices(m_physicalDevice, vkSurface);
+    void Device::CreateLogicalDevice()
+    {
+        auto indices = QueueFamilyIndices(m_physicalDevice, m_surface);
 
         std::set<uint32_t> uniqueQueueFamilies = {};
 
@@ -128,9 +158,6 @@ namespace nc::graphics::vulkan
             return queueCreateInfo;
         });
 
-        /******************
-         * LOGICAL DEVICE *
-         * ****************/
         vk::DeviceCreateInfo deviceCreateInfo{};
         deviceCreateInfo.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()));
         deviceCreateInfo.setPQueueCreateInfos(queueCreateInfos.data());
@@ -147,11 +174,11 @@ namespace nc::graphics::vulkan
         {
             std::throw_with_nested(std::runtime_error("Failed to create device."));
         }
+    }
 
-        /**************
-         * SWAP CHAIN *
-         * ************/
-        auto swapChainSupport = QuerySwapChainSupport(m_physicalDevice, vkSurface);
+    void Device::CreateSwapChain(Vector2 dimensions)
+    {
+        auto swapChainSupport = QuerySwapChainSupport(m_physicalDevice, m_surface);
 
         auto surfaceFormat = swapChainSupport.formats[0];
         for (const auto& availableFormat : swapChainSupport.formats)
@@ -183,8 +210,8 @@ namespace nc::graphics::vulkan
         {
             vk::Extent2D actualExtent = 
             {
-                static_cast<uint32_t>(m_dimensions.x),
-                static_cast<uint32_t>(m_dimensions.y)
+                static_cast<uint32_t>(dimensions.x),
+                static_cast<uint32_t>(dimensions.y)
             };
 
             actualExtent.width = std::max(swapChainSupport.capabilities.minImageExtent.width, std::min(swapChainSupport.capabilities.maxImageExtent.width, actualExtent.width));
@@ -200,7 +227,7 @@ namespace nc::graphics::vulkan
         }
 
         vk::SwapchainCreateInfoKHR createInfo{};
-        createInfo.setSurface(*vkSurface);
+        createInfo.setSurface(*m_surface);
         createInfo.setMinImageCount(imageCount);
         createInfo.setImageFormat(surfaceFormat.format);
         createInfo.setImageColorSpace(surfaceFormat.colorSpace);
@@ -208,7 +235,7 @@ namespace nc::graphics::vulkan
         createInfo.setImageArrayLayers(1);
         createInfo.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
 
-        auto queueFamilies = QueueFamilyIndices(m_physicalDevice, vkSurface);
+        auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
         uint32_t queueFamilyIndices[] = { queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily) };
 
         m_graphicsQueue = m_device.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
@@ -281,23 +308,24 @@ namespace nc::graphics::vulkan
                 throw std::runtime_error("Failed to create image view");
             }
         }
+    }
 
-        /****************
-         * COMMAND POOL *
-         * **************/
+    void Device::CreateCommandPool()
+    {
         vk::CommandPoolCreateInfo poolInfo{};
+        auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
         poolInfo.setQueueFamilyIndex(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily));
         m_commandPool = m_device.createCommandPool(poolInfo);
+    }
 
-        /*************************
-         * SEMAPHORES AND FENCES *
-         * ***********************/
-        // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
-        // the semaphores below tell the GPU when either step can begin for a single image. Vulkan will render multiple swapchain images very rapidly, so MAX_FRAMES_IN_FLIGHT here creates 
-        // a pair of semaphores for each frame up to MAX_FRAMES_IN_FLIGHT. 
-        // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MAX_FRAMES_IN_FLIGHT amount of frame-render jobs to the command queues. 
-        // The fences in framesInFlightFences (one per frame in MAX_FRAMES_PER_FLIGHT) prevent more frame-render jobs than fences from being submitted until one frame-render job completes.
-        // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
+    // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
+    // the semaphores below tell the GPU when either step can begin for a single image. Vulkan will render multiple swapchain images very rapidly, so MAX_FRAMES_IN_FLIGHT here creates 
+    // a pair of semaphores for each frame up to MAX_FRAMES_IN_FLIGHT. 
+    // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MAX_FRAMES_IN_FLIGHT amount of frame-render jobs to the command queues. 
+    // The fences in framesInFlightFences (one per frame in MAX_FRAMES_PER_FLIGHT) prevent more frame-render jobs than fences from being submitted until one frame-render job completes.
+    // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
+    void Device::CreateSynchronizationObjects()
+    {
         m_imageRenderReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_imagePresentReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_framesInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -313,26 +341,6 @@ namespace nc::graphics::vulkan
             m_imagePresentReadySemaphores[i] = m_device.createSemaphore(semaphoreInfo);
             m_framesInFlightFences[i] = m_device.createFence(fenceInfo);
         }
-    }
-
-    Device::~Device()
-    {
-        for (auto imageView : m_swapChainImageViews)
-        {
-            m_device.destroyImageView(imageView, nullptr);
-        }
-
-        m_device.destroySwapchainKHR(m_swapChain);
-        m_device.destroyCommandPool(m_commandPool);
-
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
-        {
-            m_device.destroySemaphore(m_imageRenderReadySemaphores[i]);
-            m_device.destroySemaphore(m_imagePresentReadySemaphores[i]);
-            m_device.destroyFence(m_framesInFlightFences[i]);
-        }
-
-        m_device.destroy();
     }
 
     const vk::Device* Device::GetDevice() const noexcept
@@ -360,9 +368,15 @@ namespace nc::graphics::vulkan
         return &m_swapChainImageViews;
     }
 
-    uint32_t Device::GetNextRenderReadyImageIndex()
+    uint32_t Device::GetNextRenderReadyImageIndex(bool& isSwapChainValid)
     {
-        return m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageRenderReadySemaphores[m_currentFrameIndex]).value;
+        auto resultAndIndex = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageRenderReadySemaphores[m_currentFrameIndex]);
+        if (resultAndIndex.result == vk::Result::eErrorOutOfDateKHR)
+        {
+            isSwapChainValid = false;
+        }
+
+        return resultAndIndex.value;
     }
 
     const std::vector<vk::Semaphore>* Device::GetSemaphores(SemaphoreType semaphoreType) const noexcept
@@ -390,7 +404,7 @@ namespace nc::graphics::vulkan
         return fenceType == FenceType::FramesInFlight ? &m_framesInFlightFences : &m_imagesInFlightFences;
     }
 
-    void Device::Present(uint32_t imageIndex)
+    void Device::Present(uint32_t imageIndex, bool& isSwapChainValid)
     {
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setWaitSemaphoreCount(1);
@@ -401,7 +415,15 @@ namespace nc::graphics::vulkan
         presentInfo.setPSwapchains(swapChains); // Sets the swapchain(s) to present to
         presentInfo.setPImageIndices(&imageIndex); //  Sets the index of the image for each swapchain.
         presentInfo.setPResults(nullptr);
-        if (m_presentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
+
+        auto result = m_presentQueue.presentKHR(&presentInfo);
+        if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
+        {
+            isSwapChainValid = false;
+            return;
+        }
+        
+        if (result != vk::Result::eSuccess)
         {
             throw std::runtime_error("Could not present to the swapchain.");
         }

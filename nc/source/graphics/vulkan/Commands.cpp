@@ -36,17 +36,11 @@ namespace nc::graphics::vulkan
             m_commandBuffers[i].begin(beginInfo);
             {
                 vk::RenderPassBeginInfo renderPassInfo{};
-                
-                // Specify the render pass and attachments.
-                renderPassInfo.setRenderPass(*renderPass->GetRenderPass());
+                renderPassInfo.setRenderPass(*renderPass->GetRenderPass()); // Specify the render pass and attachments.
                 renderPassInfo.setFramebuffer(*frameBuffers->GetFrameBuffer((uint32_t)i));
-
-                // Specify the dimensions of the render area.
-                renderPassInfo.renderArea.setOffset({0,0});
+                renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
                 renderPassInfo.renderArea.setExtent(*device->GetSwapChainExtent());
-
-                // Set clear color
-                renderPassInfo.setClearValueCount(1);
+                renderPassInfo.setClearValueCount(1); // Set clear color
                 renderPassInfo.setPClearValues(clearValues);
 
                 m_commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
