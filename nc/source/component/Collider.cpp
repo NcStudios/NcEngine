@@ -10,10 +10,10 @@
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
-    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 scale)
+    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale)
         : ComponentBase(handle),
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
-          m_boundingVolume{collider_detail::CreateBoundingVolume(type, Vector3::Zero(), scale)}, /** @todo pass offset */
+          m_boundingVolume{collider_detail::CreateBoundingVolume(type, offset, scale)},
           m_type{type},
           m_widgetModel{collider_detail::CreateWireframeModel(type)},
           m_selectedInEditor{false}
@@ -22,10 +22,10 @@ namespace nc
         IF_THROW(type == ColliderType::Sphere && scale - scale != Vector3::Zero(), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #else
-    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 scale)
+    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale)
         : ComponentBase(handle),
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
-          m_boundingVolume{collider_detail::CreateBoundingVolume(type, Vector3::Zero(), scale)}, /** @todo pass offset */
+          m_boundingVolume{collider_detail::CreateBoundingVolume(type, offset, scale)},
           m_type{type}
     {
         IF_THROW(!HasNoZeroElement(scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
