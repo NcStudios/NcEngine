@@ -35,6 +35,7 @@ namespace nc
     constexpr Vector3 Lerp(const Vector3& lhs, const Vector3& rhs, float factor) noexcept;
     constexpr float Dot(const Vector3& lhs, const Vector3& rhs) noexcept;
     constexpr float Distance(const Vector3& lhs, const Vector3& rhs) noexcept;
+    constexpr bool HasNoZeroElement(const Vector3& vec) noexcept;
 
     constexpr bool operator ==(const Vector3& lhs, const Vector3& rhs) noexcept
     {
@@ -108,4 +109,9 @@ namespace nc
         float z = lhs.z - rhs.z;
         return std::sqrt(x * x + y * y + z * z);
     }
-} // end namespace nc
+
+    constexpr bool HasNoZeroElement(const Vector3& vec) noexcept
+    {
+        return !math::FloatEqual(vec.x, 0.0f) && !math::FloatEqual(vec.y, 0.0f) && !math::FloatEqual(vec.z, 0.0f);
+    }
+} // namespace nc

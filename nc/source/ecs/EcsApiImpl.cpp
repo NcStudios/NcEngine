@@ -23,7 +23,6 @@ namespace nc
 
     EntityHandle CreateEntity(EntityInfo info)
     {
-        IF_THROW(info.scale.x == 0.0f || info.scale.y == 0.0f || info.scale.z == 0.0f, "CreateEntity - Invalid scale(elements cannot be 0)");
         return internal::g_ecsImpl->CreateEntity(std::move(info));
     }
 

@@ -18,7 +18,7 @@ namespace nc
           m_widgetModel{collider_detail::CreateWireframeModel(type)},
           m_selectedInEditor{false}
     {
-        IF_THROW(scale.x == 0.0f || scale.y == 0.0f || scale.z == 0.0f, "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(!HasNoZeroElement(scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
         IF_THROW(type == ColliderType::Sphere && scale - scale != Vector3::Zero(), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #else
@@ -28,7 +28,7 @@ namespace nc
           m_boundingVolume{collider_detail::CreateBoundingVolume(type, Vector3::Zero(), scale)}, /** @todo pass offset */
           m_type{type}
     {
-        IF_THROW(scale.x == 0.0f || scale.y == 0.0f || scale.z == 0.0f, "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(!HasNoZeroElement(scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
         IF_THROW(type == ColliderType::Sphere && scale - scale != Vector3::Zero(), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #endif
