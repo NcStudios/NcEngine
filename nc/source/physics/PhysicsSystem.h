@@ -6,10 +6,11 @@
 
 #include <vector>
 
-namespace nc
+namespace nc::graphics
 {
-    class Transform;
-    namespace graphics { class Graphics; class Graphics2; }
+    class FrameManager;
+    class Graphics;
+    class Graphics2;
 }
 
 namespace nc::physics
@@ -26,8 +27,12 @@ namespace nc::physics
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove);
             IClickable* RaycastToClickables(LayerMask mask);
-            void DoPhysicsStep(const std::vector<Collider*>& colliders);
+            void DoPhysicsStep();
             void ClearState();
+
+            #ifdef NC_EDITOR_ENABLED
+            void UpdateWidgets(graphics::FrameManager& frameManager); // hacky solution until widgets are a real thing
+            #endif
 
         private:
             CollisionSystem m_collisionSystem;

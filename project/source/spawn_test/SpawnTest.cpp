@@ -29,7 +29,7 @@ namespace nc::sample
 
         // Camera
         auto cameraHandle = CreateEntity({.position = Vector3{0.0f, -9.0f, -100.0f}, .tag = "SceneNavigationCamera"});
-        auto camera = AddComponent<SceneNavigationCamera>(cameraHandle);
+        auto camera = AddComponent<SceneNavigationCamera>(cameraHandle, 0.25f, 0.005f, 1.4f);
         camera::SetMainCamera(camera);
 
         // Point Light

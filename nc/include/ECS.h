@@ -92,8 +92,10 @@ namespace nc
 
     /** Internal use */
     namespace ecs { class EntityComponentSystem; }
+    namespace physics{ class ColliderSystem; }
     namespace internal
     {
         void RegisterEcs(ecs::EntityComponentSystem* impl);
+        void RegisterColliderSystem(physics::ColliderSystem* impl);
     }
 } // end namespace nc

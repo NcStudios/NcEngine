@@ -49,7 +49,6 @@ namespace ecs
             HandleManager m_handleManager;
             EntityMap m_active;
             EntityMap m_toDestroy;
-            std::unique_ptr<ComponentSystem<Collider>> m_colliderSystem;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;

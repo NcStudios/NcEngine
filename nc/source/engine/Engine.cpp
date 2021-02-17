@@ -148,14 +148,7 @@ namespace nc::core
     void Engine::FixedStepLogic()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
-        /** @todo Temp solution or not? TBD - We no longer have to iterate once
-         * before to update matrices. Iterators sound omega noice... */
-        std::vector<Collider*> colliders;
-        m_ecs.GetSystem<Collider>()->ForEach([&colliders](auto& col)
-        {
-            colliders.push_back(&col);
-        });
-        m_physics.DoPhysicsStep(colliders);
+        m_physics.DoPhysicsStep();
         m_ecs.SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
@@ -193,10 +186,7 @@ namespace nc::core
         });
 
         #ifdef NC_EDITOR_ENABLED
-        m_ecs.GetSystem<Collider>()->ForEach([&frameManager](auto& collider)
-        {
-            collider.UpdateWidget(frameManager);
-        });
+        m_physics.UpdateWidgets(frameManager);
         #endif
 
         m_frameManager.Execute(&m_graphics);

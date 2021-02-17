@@ -67,9 +67,9 @@ namespace nc::physics
         m_collisionSystem.ClearState();
     }
 
-    void PhysicsSystem::DoPhysicsStep(const std::vector<Collider*>& colliders)
+    void PhysicsSystem::DoPhysicsStep()
     {
-        m_collisionSystem.DoCollisionStep(colliders);
+        m_collisionSystem.DoCollisionStep();
     }
 
     void PhysicsSystem::RegisterClickable(IClickable* toAdd)
@@ -148,4 +148,11 @@ namespace nc::physics
 
         return out;
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    void PhysicsSystem::UpdateWidgets(graphics::FrameManager& frameManager)
+    {
+        m_collisionSystem.UpdateWidgets(frameManager);
+    }
+    #endif
 } //end namespace nc::physics

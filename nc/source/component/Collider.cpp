@@ -16,7 +16,6 @@ namespace nc
           m_boundingVolume{collider_detail::CreateBoundingVolume(type, Vector3::Zero(), scale)}, /** @todo pass offset */
           m_type{type},
           m_widgetModel{collider_detail::CreateWireframeModel(type)},
-          m_scale{scale},
           m_selectedInEditor{false}
     {
         IF_THROW(scale.x == 0.0f || scale.y == 0.0f || scale.z == 0.0f, "Collider::Collider - Invalid scale(elements cannot be 0)");
@@ -41,7 +40,7 @@ namespace nc
         return m_type;
     }
 
-    Collider::BoundingVolume Collider::GetBoundingVolume() const
+    Collider::BoundingVolume Collider::CalculateBoundingVolume() const
     {
         return std::visit([this](auto&& volume) 
         {
@@ -49,8 +48,31 @@ namespace nc
             Volume_t out;
             volume.Transform(out, m_transformMatrix);
             return BoundingVolume{out};
-        }, *m_boundingVolume);
+        }, m_boundingVolume);
     }
+
+    DirectX::BoundingSphere Collider::EstimateBoundingVolume() const
+    {
+        /** possible optimization: In narrow phase CalculateBoundingVolume will run this same code(for spheres).
+         *  Could maybe save the volume - would be tricky though as it only works for spheres. */
+        auto out = [this]()
+        {
+            if(m_type == ColliderType::Sphere)
+            {
+                return std::get<DirectX::BoundingSphere>(m_boundingVolume);
+            }
+            else
+            {
+                DirectX::BoundingSphere sphere;
+                DirectX::BoundingSphere::CreateFromBoundingBox(sphere, std::get<DirectX::BoundingOrientedBox>(m_boundingVolume));
+                return sphere;
+            }
+        }();
+
+        out.Transform(out, m_transformMatrix);
+        return out;
+    }
+
 
     #ifdef NC_EDITOR_ENABLED
     void Collider::UpdateWidget(graphics::FrameManager& frame)
@@ -59,11 +81,13 @@ namespace nc
         if(!std::exchange(m_selectedInEditor, false))
             return;
 
-        /** @todo right multiply by offset */
+        auto [offset, scale] = collider_detail::GetOffsetAndScaleFromVolume(m_boundingVolume, m_type);
+
         m_widgetModel.SetTransformationMatrix
         (
-            DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z) *
-            m_transformMatrix
+            DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
+            m_transformMatrix *
+            DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
 
         m_widgetModel.Submit(frame);
@@ -73,8 +97,7 @@ namespace nc
     {
         ImGui::Text("Collider");
         ui::editor::xyzWidgetHeader("     ");
-        /** @todo offset */
-        ui::editor::xyzWidget("Scale", "colliderscale", &m_scale.x, &m_scale.y, &m_scale.z, 0.01f, 100.0f);
+        /** @todo put widgets back */
     }
 
     void Collider::SetEditorSelection(bool state)
