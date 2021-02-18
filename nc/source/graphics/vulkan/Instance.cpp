@@ -50,14 +50,14 @@ namespace nc::graphics::vulkan
         m_surface = vk::UniqueSurfaceKHR(surface, m_instance.get());
     } 
 
-    const vk::SurfaceKHR* Instance::GetSurface() const noexcept
+    const vk::SurfaceKHR& Instance::GetSurface() const noexcept
     {
-        return &(m_surface.get());
+        return m_surface.get();
     }
 
-    const vk::Instance* Instance::GetInstance() const noexcept
+    const vk::Instance& Instance::GetInstance() const noexcept
     {
-        return &(m_instance.get());
+        return m_instance.get();
     }
 }
 

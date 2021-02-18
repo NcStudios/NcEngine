@@ -132,7 +132,7 @@ namespace nc::window
         return m_dimensions;
     }
 
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback)
+    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback)
     {
         GraphicsOnResizeCallback = callback;
     }
@@ -159,7 +159,7 @@ namespace nc::window
         m_onResizeReceivers.pop_back();
     }
 
-    void WindowImpl::OnResize(float width, float height)
+    void WindowImpl::OnResize(float width, float height, WPARAM windowArg)
     {
         if(!(GraphicsOnResizeCallback))
         {
@@ -168,7 +168,7 @@ namespace nc::window
 
         m_dimensions = Vector2{width, height};
         const auto& config = config::Get();
-        GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, config.graphics.nearClip, config.graphics.farClip);
+        GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, config.graphics.nearClip, config.graphics.farClip, windowArg);
         for(auto receiver : m_onResizeReceivers)
         {
             receiver->OnResize(m_dimensions);
@@ -187,7 +187,7 @@ namespace nc::window
         {
             case WM_SIZE:
             {
-                g_instance->OnResize(LOWORD(lParam), HIWORD(lParam));
+                g_instance->OnResize(LOWORD(lParam), HIWORD(lParam), wParam);
                 break;
             }
             case WM_CLOSE:
