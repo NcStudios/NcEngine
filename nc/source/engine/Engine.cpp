@@ -152,13 +152,11 @@ namespace nc::core
     void Engine::FixedStepLogic()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
-        /** @todo Temp solution or not? TBD - This isn't the worst considering
-         * we have to iterate once before collision checking anyways to update
-         * matrices. Iterators would generally be nice though... */
+        /** @todo Temp solution or not? TBD - We no longer have to iterate once
+         * before to update matrices. Iterators sound omega noice... */
         std::vector<Collider*> colliders;
         m_ecs.GetSystem<Collider>()->ForEach([&colliders](auto& col)
         {
-            col.UpdateTransformationMatrix();
             colliders.push_back(&col);
         });
         m_physics.DoPhysicsStep(colliders);

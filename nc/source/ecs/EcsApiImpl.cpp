@@ -16,7 +16,6 @@ namespace nc
 
     EntityHandle CreateEntity(EntityInfo info)
     {
-        IF_THROW(info.scale == Vector3::Zero(), "CreateEntity - scale cannot be Vector3::Zero");
         return internal::g_impl->CreateEntity(std::move(info));
     }
 
@@ -65,13 +64,11 @@ namespace nc
         return internal::g_impl->GetSystem<NetworkDispatcher>()->Add(handle);
     }
 
-    template<> Collider* AddComponent<Collider>(EntityHandle handle, Vector3 scale)
+    template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderType type, Vector3 scale)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<Collider> - Bad handle");
-        IF_THROW(scale == Vector3::Zero(), "AddComponent<Collider> - Scale cannot be Vector3::Zero");
         IF_THROW(internal::g_impl->GetSystem<Collider>()->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
-
-        return internal::g_impl->GetSystem<Collider>()->Add(handle, scale);
+        return internal::g_impl->GetSystem<Collider>()->Add(handle, type, scale);
     }
 
     template<> bool RemoveComponent<PointLight>(EntityHandle handle)

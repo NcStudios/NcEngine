@@ -21,16 +21,18 @@ namespace nc::physics
     void CollisionSystem::BuildCurrentFrameState(const std::vector<Collider*>& colliders)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
-        DirectX::BoundingOrientedBox unit, a, b;
+        Collider::BoundingVolume firstVolume, secondVolume;
         const auto count = colliders.size();
-        for(size_t i = 0u; i < count; ++i)
+        for(size_t first = 0u; first < count; ++first)
         {
-            unit.Transform(a, colliders[i]->GetTransformationMatrix());
-            for(size_t j = i + 1; j < count; ++j)
+            firstVolume = colliders[first]->GetBoundingVolume();
+            for(size_t second = first + 1; second < count; ++second)
             {
-                unit.Transform(b, colliders[j]->GetTransformationMatrix());
-                if(a.Intersects(b))
-                    m_currentCollisions.emplace_back(colliders[i], colliders[j]);
+                secondVolume = colliders[second]->GetBoundingVolume();
+                if(std::visit([](auto&& a , auto&& b){ return a.Intersects(b); }, firstVolume, secondVolume))
+                {
+                    m_currentCollisions.emplace_back(colliders[first], colliders[second]);
+                }
             }
         }
         NC_PROFILE_END();
@@ -92,4 +94,4 @@ namespace nc::physics
     {
         m_previousCollisions.clear();
     }
-}
+} // namespace nc::phsyics
