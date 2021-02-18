@@ -11,31 +11,26 @@ namespace nc::graphics
     using namespace vulkan;
 
     Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
-        : m_instance{ nullptr },
-        m_device{ nullptr },
-        m_pipeline{ nullptr },
-        m_renderPass{ nullptr },
-        m_frameBuffers{ nullptr },
-        m_commands{ nullptr },
-        m_dimensions{ dimensions },
-        m_isMinimized{ false },
-        m_isFullscreen{ false },
-        m_viewMatrix{},
-        m_projectionMatrix{}
-    {
-        m_instance = std::make_unique<Instance>(hwnd, hinstance);
-        m_device = std::make_unique<Device>(m_instance.get(), dimensions);
-        m_renderPass = std::make_unique<RenderPass>(m_device.get());
-        m_pipeline = std::make_unique<GraphicsPipeline>(m_device.get(), m_renderPass.get());
-        m_frameBuffers = std::make_unique<FrameBuffers>(m_device.get(), m_renderPass.get());
-        m_commands = std::make_unique<Commands>(m_device.get(),
+        : m_instance{ std::make_unique<Instance>(hwnd, hinstance) },
+          m_device{ std::make_unique<Device>(*m_instance, dimensions) },
+          m_renderPass{ std::make_unique<RenderPass>(*m_device) },
+          m_pipeline{ std::make_unique<GraphicsPipeline>(*m_device, *m_renderPass) },
+          m_frameBuffers{ std::make_unique<FrameBuffers>(*m_device, *m_renderPass) },
+          m_commands{ nullptr },
+          m_dimensions{ dimensions },
+          m_isMinimized{ false },
+          m_isFullscreen{ false },
+          m_viewMatrix{},
+          m_projectionMatrix{}
+    {  
+        m_commands = std::make_unique<Commands>(*m_device,
             m_device->GetSemaphores(SemaphoreType::RenderReady),
             m_device->GetSemaphores(SemaphoreType::PresentReady),
             m_device->GetFences(FenceType::FramesInFlight),
             m_device->GetFences(FenceType::ImagesInFlight));
 
         // Write the render pass to the command buffer.
-        m_commands->RecordRenderPass(m_device.get(), m_renderPass.get(), m_frameBuffers.get(), m_pipeline.get());
+        m_commands->RecordRenderPass(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline);
     }
 
     Graphics2::~Graphics2() = default;
@@ -54,15 +49,15 @@ namespace nc::graphics
 
         // Recreate swapchain and resources
         m_device->CreateSwapChain(dimensions);
-        m_renderPass = std::make_unique<RenderPass>(m_device.get());
-        m_pipeline = std::make_unique<GraphicsPipeline>(m_device.get(), m_renderPass.get());
-        m_frameBuffers = std::make_unique<FrameBuffers>(m_device.get(), m_renderPass.get());
-        m_commands = std::make_unique<Commands>(m_device.get(),
+        m_renderPass = std::make_unique<RenderPass>(*m_device);
+        m_pipeline = std::make_unique<GraphicsPipeline>(*m_device, *m_renderPass);
+        m_frameBuffers = std::make_unique<FrameBuffers>(*m_device, *m_renderPass);
+        m_commands = std::make_unique<Commands>(*m_device,
             m_device->GetSemaphores(SemaphoreType::RenderReady),
             m_device->GetSemaphores(SemaphoreType::PresentReady),
             m_device->GetFences(FenceType::FramesInFlight),
             m_device->GetFences(FenceType::ImagesInFlight));
-        m_commands->RecordRenderPass(m_device.get(), m_renderPass.get(), m_frameBuffers.get(), m_pipeline.get());
+        m_commands->RecordRenderPass(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline);
     }
 
     DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
@@ -111,7 +106,7 @@ namespace nc::graphics
 
     void Graphics2::WaitIdle()
     {
-        m_device->GetDevice()->waitIdle();
+        m_device->GetDevice().waitIdle();
     }
 
     void Graphics2::FrameBegin()
@@ -138,7 +133,7 @@ namespace nc::graphics
         m_device->WaitForImageFence(imageIndex);
         m_device->SyncImageAndFrameFence(imageIndex);
         m_device->ResetFrameFence();
-        m_commands->SubmitCommandBuffer(m_device.get(), imageIndex);
+        m_commands->SubmitCommandBuffer(*m_device, imageIndex);
     }
 
     bool Graphics2::PresentImage(uint32_t imageIndex)

@@ -14,15 +14,15 @@ namespace
         std::vector<vk::PresentModeKHR> presentModes;
     };
 
-    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface);
+    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface);
     const std::vector<const char*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 }
 
 namespace nc::graphics::vulkan
 {
-    Device::Device(const vulkan::Instance* instance, Vector2 dimensions)
-    : m_instance{instance->GetInstance()},
-      m_surface{instance->GetSurface()},
+    Device::Device(const vulkan::Instance& instance, Vector2 dimensions)
+    : m_instance{instance.GetInstance()},
+      m_surface{instance.GetSurface()},
       m_device{},
       m_physicalDevice{},
       m_graphicsQueue{},
@@ -75,13 +75,13 @@ namespace nc::graphics::vulkan
     void Device::CreatePhysicalDevice()
     {
         uint32_t deviceCount = 0;
-        if (m_instance->enumeratePhysicalDevices(&deviceCount, nullptr) != vk::Result::eSuccess)
+        if (m_instance.enumeratePhysicalDevices(&deviceCount, nullptr) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Count physical devices - Failed to find GPU that supports Vulkan.");
         }
 
         std::vector<vk::PhysicalDevice> devices(deviceCount);
-        if (m_instance->enumeratePhysicalDevices(&deviceCount, devices.data()) != vk::Result::eSuccess)
+        if (m_instance.enumeratePhysicalDevices(&deviceCount, devices.data()) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Get physical devices - Failed to find GPU that supports Vulkan.");
         }
@@ -227,7 +227,7 @@ namespace nc::graphics::vulkan
         }
 
         vk::SwapchainCreateInfoKHR createInfo{};
-        createInfo.setSurface(*m_surface);
+        createInfo.setSurface(m_surface);
         createInfo.setMinImageCount(imageCount);
         createInfo.setImageFormat(surfaceFormat.format);
         createInfo.setImageColorSpace(surfaceFormat.colorSpace);
@@ -343,9 +343,9 @@ namespace nc::graphics::vulkan
         }
     }
 
-    const vk::Device* Device::GetDevice() const noexcept
+    const vk::Device& Device::GetDevice() const noexcept
     {
-        return &m_device;
+        return m_device;
     }
 
     const Vector2 Device::GetSwapChainExtentDimensions() const noexcept
@@ -353,19 +353,19 @@ namespace nc::graphics::vulkan
         return Vector2(m_swapChainExtent.width, m_swapChainExtent.height);
     }
 
-    const vk::Extent2D* Device::GetSwapChainExtent() const noexcept
+    const vk::Extent2D& Device::GetSwapChainExtent() const noexcept
     {
-        return &m_swapChainExtent;
+        return m_swapChainExtent;
     }
 
-    const vk::Format* Device::GetSwapChainImageFormat() const noexcept
+    const vk::Format& Device::GetSwapChainImageFormat() const noexcept
     {
-        return &m_swapChainImageFormat;
+        return m_swapChainImageFormat;
     }
 
-    const std::vector<vk::ImageView>* Device::GetSwapChainImageViews() const noexcept
+    const std::vector<vk::ImageView>& Device::GetSwapChainImageViews() const noexcept
     {
-        return &m_swapChainImageViews;
+        return m_swapChainImageViews;
     }
 
     uint32_t Device::GetNextRenderReadyImageIndex(bool& isSwapChainValid)
@@ -379,19 +379,19 @@ namespace nc::graphics::vulkan
         return resultAndIndex.value;
     }
 
-    const std::vector<vk::Semaphore>* Device::GetSemaphores(SemaphoreType semaphoreType) const noexcept
+    const std::vector<vk::Semaphore>& Device::GetSemaphores(SemaphoreType semaphoreType) const noexcept
     {
-        return semaphoreType == SemaphoreType::RenderReady ? &m_imageRenderReadySemaphores : &m_imagePresentReadySemaphores;
+        return semaphoreType == SemaphoreType::RenderReady ? m_imageRenderReadySemaphores : m_imagePresentReadySemaphores;
     }
 
-    const vk::CommandPool* Device::GetCommandPool() const noexcept
+    const vk::CommandPool& Device::GetCommandPool() const noexcept
     {
-        return &m_commandPool;
+        return m_commandPool;
     }
 
-    const vk::Queue* Device::GetQueue(QueueFamilyType type) const noexcept
+    const vk::Queue& Device::GetQueue(QueueFamilyType type) const noexcept
     {
-        return type == QueueFamilyType::GraphicsFamily ? &m_graphicsQueue : &m_presentQueue;
+        return type == QueueFamilyType::GraphicsFamily ? m_graphicsQueue : m_presentQueue;
     }
 
     uint32_t Device::GetFrameIndex() const noexcept
@@ -399,9 +399,9 @@ namespace nc::graphics::vulkan
         return m_currentFrameIndex;
     }
 
-    const std::vector<vk::Fence>* Device::GetFences(FenceType fenceType) const noexcept
+    const std::vector<vk::Fence>& Device::GetFences(FenceType fenceType) const noexcept
     {
-        return fenceType == FenceType::FramesInFlight ? &m_framesInFlightFences : &m_imagesInFlightFences;
+        return fenceType == FenceType::FramesInFlight ? m_framesInFlightFences : m_imagesInFlightFences;
     }
 
     void Device::Present(uint32_t imageIndex, bool& isSwapChainValid)
@@ -464,7 +464,7 @@ namespace nc::graphics::vulkan
         m_device.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
     }
 
-    QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface)
+    QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
     {
         uint32_t queueFamilyCount = 0;
         device.getQueueFamilyProperties(&queueFamilyCount, nullptr);
@@ -476,7 +476,7 @@ namespace nc::graphics::vulkan
         for (const auto& queueFamily : queueFamilies)
         {
             vk::Bool32 presentSupport = false;
-            if (device.getSurfaceSupportKHR(i, *surface, &presentSupport) != vk::Result::eSuccess)
+            if (device.getSurfaceSupportKHR(i, surface, &presentSupport) != vk::Result::eSuccess)
             {
                 throw std::runtime_error("Could not get surface support KHR");
             }
@@ -542,16 +542,16 @@ namespace nc::graphics::vulkan
 
 namespace
 {
-    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface)
+    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
     {
         SwapChainSupportDetails details;
-        if (device.getSurfaceCapabilitiesKHR(*surface, &details.capabilities) != vk::Result::eSuccess)
+        if (device.getSurfaceCapabilitiesKHR(surface, &details.capabilities) != vk::Result::eSuccess)
         {
             throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface capabilities.");
         }
 
         uint32_t formatCount;
-        if (device.getSurfaceFormatsKHR(*surface, &formatCount, nullptr) != vk::Result::eSuccess)
+        if (device.getSurfaceFormatsKHR(surface, &formatCount, nullptr) != vk::Result::eSuccess)
         {
             throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
         }
@@ -559,14 +559,14 @@ namespace
         if (formatCount != 0)
         {
             details.formats.resize(formatCount);
-            if (device.getSurfaceFormatsKHR(*surface, &formatCount, details.formats.data()) != vk::Result::eSuccess)
+            if (device.getSurfaceFormatsKHR(surface, &formatCount, details.formats.data()) != vk::Result::eSuccess)
             {
                 throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
             }
         }
 
         uint32_t presentModeCount;
-        if (device.getSurfacePresentModesKHR(*surface, &presentModeCount, nullptr) != vk::Result::eSuccess)
+        if (device.getSurfacePresentModesKHR(surface, &presentModeCount, nullptr) != vk::Result::eSuccess)
         {
             throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
         }
@@ -574,7 +574,7 @@ namespace
         if (presentModeCount != 0)
         {
             details.presentModes.resize(presentModeCount);
-            if (device.getSurfacePresentModesKHR(*surface, &presentModeCount, details.presentModes.data()) != vk::Result::eSuccess)
+            if (device.getSurfacePresentModesKHR(surface, &presentModeCount, details.presentModes.data()) != vk::Result::eSuccess)
             {
                 throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
             }

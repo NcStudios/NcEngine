@@ -9,8 +9,8 @@ namespace nc::graphics::vulkan
     class FrameBuffers
     {
         public:
-            FrameBuffers(const Device* device, const RenderPass* renderPass);
-            const vk::Framebuffer* GetFrameBuffer(uint32_t index) const;
+            FrameBuffers(const Device& device, const RenderPass& renderPass);
+            const vk::Framebuffer& GetFrameBuffer(uint32_t index) const;
 
         private:
             std::vector<vk::UniqueFramebuffer> m_framebuffers;

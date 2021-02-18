@@ -35,7 +35,7 @@ namespace nc::graphics::vulkan
     class QueueFamilyIndices
     {
         public:
-            QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR* surface);
+            QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface);
             bool IsComplete() const;
             bool IsSeparatePresentQueue() const;
             uint32_t GetQueueFamilyIndex(QueueFamilyType type) const;
@@ -49,20 +49,20 @@ namespace nc::graphics::vulkan
     class Device
     {
         public:
-            Device(const vulkan::Instance* instance, Vector2 dimensions);
+            Device(const vulkan::Instance& instance, Vector2 dimensions);
             ~Device();
 
-            const vk::Device* GetDevice() const noexcept;
+            const vk::Device& GetDevice() const noexcept;
             const Vector2 GetSwapChainExtentDimensions() const noexcept;
-            const vk::Extent2D* GetSwapChainExtent() const noexcept;
-            const vk::Format* GetSwapChainImageFormat() const noexcept;
-            const std::vector<vk::ImageView>* GetSwapChainImageViews() const noexcept;
+            const vk::Extent2D& GetSwapChainExtent() const noexcept;
+            const vk::Format& GetSwapChainImageFormat() const noexcept;
+            const std::vector<vk::ImageView>& GetSwapChainImageViews() const noexcept;
             uint32_t GetNextRenderReadyImageIndex(bool& isSwapChainValid);
-            const std::vector<vk::Semaphore>* GetSemaphores(SemaphoreType semaphoreType) const noexcept;
-            const vk::CommandPool* GetCommandPool() const noexcept;
-            const vk::Queue* GetQueue(QueueFamilyType type) const noexcept;
+            const std::vector<vk::Semaphore>& GetSemaphores(SemaphoreType semaphoreType) const noexcept;
+            const vk::CommandPool& GetCommandPool() const noexcept;
+            const vk::Queue& GetQueue(QueueFamilyType type) const noexcept;
             uint32_t GetFrameIndex() const noexcept;
-            const std::vector<vk::Fence>* GetFences(FenceType fenceType) const noexcept;
+            const std::vector<vk::Fence>& GetFences(FenceType fenceType) const noexcept;
 
             void Present(uint32_t imageIndex, bool& isSwapChainValid);
             void IncrementFrameIndex();
@@ -80,8 +80,8 @@ namespace nc::graphics::vulkan
             void CreateCommandPool();
             void CreateSynchronizationObjects();
 
-            const vk::Instance* m_instance;
-            const vk::SurfaceKHR* m_surface;
+            const vk::Instance& m_instance;
+            const vk::SurfaceKHR& m_surface;
             vk::Device m_device;
             vk::PhysicalDevice m_physicalDevice;
             vk::Queue m_graphicsQueue;

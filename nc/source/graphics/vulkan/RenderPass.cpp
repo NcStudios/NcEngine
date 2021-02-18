@@ -6,14 +6,14 @@
 namespace nc::graphics::vulkan
 {
     // @todo: Make this class generic/customizable. This render pass applies to rendering a simple triangle.
-    RenderPass::RenderPass(const vulkan::Device* device)
+    RenderPass::RenderPass(const vulkan::Device& device)
     : m_renderPass{nullptr}
     {
         /***************************
          * COLOR BUFFER ATTACHMENT *
          * *************************/
         vk::AttachmentDescription colorAttachment{};
-        colorAttachment.setFormat(*(device->GetSwapChainImageFormat()));
+        colorAttachment.setFormat(device.GetSwapChainImageFormat());
         colorAttachment.setSamples(vk::SampleCountFlagBits::e1); // @todo Multisampling would be set here as well as in the GraphicsPipeline object.
         colorAttachment.setLoadOp(vk::AttachmentLoadOp::eClear); // Sets what to do with this frame buffer before rendering. Currently clears the framebuffer to black before a new frame.
         colorAttachment.setStoreOp(vk::AttachmentStoreOp::eStore); // Sets what to do with this frame buffer after rendering. Currently stores the contents in memory for later reading.
@@ -58,11 +58,11 @@ namespace nc::graphics::vulkan
         renderPassInfo.setDependencyCount(1);
         renderPassInfo.setPDependencies(&dependency);
 
-        m_renderPass = device->GetDevice()->createRenderPassUnique(renderPassInfo);
+        m_renderPass = device.GetDevice().createRenderPassUnique(renderPassInfo);
     }
 
-    const vk::RenderPass* RenderPass::GetRenderPass() const noexcept
+    const vk::RenderPass& RenderPass::GetRenderPass() const noexcept
     {
-        return &(m_renderPass.get());
+        return m_renderPass.get();
     }
 }

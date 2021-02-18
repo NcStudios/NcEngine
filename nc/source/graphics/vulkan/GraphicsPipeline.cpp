@@ -6,20 +6,33 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 namespace
 {
-    static std::vector<char> ReadShader(const std::string& filename)
+    std::vector<uint32_t> ReadShader(const std::string& filename)
     {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
-        if (!file.is_open())
+        if (!file.is_open() || file.tellg() == -1)
         {
             throw std::runtime_error("Failed to open file.");
         }
-        auto fileSize = (size_t)file.tellg();
-        std::vector<char> buffer(fileSize);
+        auto fileSize = static_cast<uint32_t>(file.tellg());
+        if (fileSize % 4 != 0)
+        {
+            throw std::runtime_error("The file of shader byte code was not uint32_t aligned.");
+        }
+
+        auto bufferSize = fileSize/sizeof(uint32_t);
+        std::vector<uint32_t> buffer(bufferSize);
+        auto charBuffer = reinterpret_cast<char*>(buffer.data());
         file.seekg(0);
-        file.read(buffer.data(), fileSize);
+        file.read(charBuffer, fileSize);
+        if (file.fail())
+        {
+            file.close();
+            throw std::runtime_error("The file was wonky. (failbit set)");
+        }
         file.close();
         return buffer;
     }
@@ -27,7 +40,7 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    GraphicsPipeline::GraphicsPipeline(const vulkan::Device* device, const vulkan::RenderPass* renderPass)
+    GraphicsPipeline::GraphicsPipeline(const vulkan::Device& device, const vulkan::RenderPass& renderPass)
     : m_pipelineLayout{nullptr},
       m_pipeline{nullptr}
     {
@@ -71,13 +84,13 @@ namespace nc::graphics::vulkan
         // @todo: Look into using element buffers here to resuse vertices
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.setTopology(vk::PrimitiveTopology::eTriangleList);
-        inputAssembly.setPrimitiveRestartEnable((vk::Bool32)false);
+        inputAssembly.setPrimitiveRestartEnable(static_cast<vk::Bool32>(false));
 
         /************
          * VIEWPORT *
          * **********/
         // Viewport defines the transformation from the image to the framebuffer
-        auto [width, height] = device->GetSwapChainExtentDimensions();
+        auto [width, height] = device.GetSwapChainExtentDimensions();
         vk::Viewport viewport{};
         viewport.setX(0.0f);
         viewport.setY(0.0f);
@@ -89,7 +102,7 @@ namespace nc::graphics::vulkan
         // Scissor rectangles crop the image, discarding pixels outside of the scissor rect by the rasterizer.
         vk::Rect2D scissor{};
         scissor.setOffset({0,0});
-        scissor.setExtent(*device->GetSwapChainExtent());
+        scissor.setExtent(device.GetSwapChainExtent());
 
         vk::PipelineViewportStateCreateInfo viewportState{};
         viewportState.setViewportCount(1);
@@ -101,13 +114,13 @@ namespace nc::graphics::vulkan
          * RASTERIZER *
          * ***********/
         vk::PipelineRasterizationStateCreateInfo rasterizer{};
-        rasterizer.setDepthClampEnable((vk::Bool32)false); // Set to false for shadow mapping, requires enabling a GPU feature.
-        rasterizer.setRasterizerDiscardEnable((vk::Bool32)false);
+        rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
+        rasterizer.setRasterizerDiscardEnable(static_cast<vk::Bool32>(false));
         rasterizer.setPolygonMode(vk::PolygonMode::eFill); // Set to line for wireframe, requires enabling a GPU feature.
         rasterizer.setLineWidth(1.0f); // Setting wider requires enabling the wideLines GPU feature.
         rasterizer.setCullMode(vk::CullModeFlagBits::eBack);
         rasterizer.setFrontFace(vk::FrontFace::eClockwise);
-        rasterizer.setDepthBiasEnable((vk::Bool32)false);
+        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(false));
         rasterizer.setDepthBiasConstantFactor(0.0f);
         rasterizer.setDepthBiasClamp(0.0f);
         rasterizer.setDepthBiasSlopeFactor(0.0f);
@@ -116,12 +129,12 @@ namespace nc::graphics::vulkan
          * MULTISAMPLING *
          * ***************/
         vk::PipelineMultisampleStateCreateInfo multisampling{};
-        multisampling.setSampleShadingEnable((vk::Bool32)false);
+        multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(false));
         multisampling.setRasterizationSamples(vk::SampleCountFlagBits::e1);
         multisampling.setMinSampleShading(1.0f);
         multisampling.setPSampleMask(nullptr);
-        multisampling.setAlphaToCoverageEnable((vk::Bool32)false);
-        multisampling.setAlphaToOneEnable((vk::Bool32)false);
+        multisampling.setAlphaToCoverageEnable(static_cast<vk::Bool32>(false));
+        multisampling.setAlphaToOneEnable(static_cast<vk::Bool32>(false));
 
         /*****************************
          * DEPTH AND STENCIL TESTING *
@@ -133,7 +146,7 @@ namespace nc::graphics::vulkan
          * ****************/
         vk::PipelineColorBlendAttachmentState colorBlendAttachment{};
         colorBlendAttachment.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
-        colorBlendAttachment.setBlendEnable((vk::Bool32)false);
+        colorBlendAttachment.setBlendEnable(static_cast<vk::Bool32>(false));
         colorBlendAttachment.setDstColorBlendFactor(vk::BlendFactor::eOne);
         colorBlendAttachment.setColorBlendOp(vk::BlendOp::eAdd);
         colorBlendAttachment.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
@@ -141,7 +154,7 @@ namespace nc::graphics::vulkan
         colorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
 
         vk::PipelineColorBlendStateCreateInfo colorBlending{};
-        colorBlending.setLogicOpEnable((vk::Bool32)false);
+        colorBlending.setLogicOpEnable(static_cast<vk::Bool32>(false));
         colorBlending.setLogicOp(vk::LogicOp::eCopy);
         colorBlending.setAttachmentCount(1);
         colorBlending.setPAttachments(&colorBlendAttachment);
@@ -157,7 +170,7 @@ namespace nc::graphics::vulkan
         pipelineLayoutInfo.setPushConstantRangeCount(0); 
         pipelineLayoutInfo.setPPushConstantRanges(nullptr);  
 
-        m_pipelineLayout = device->GetDevice()->createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = device.GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         /*******************
          * GRAPHICS PIPELINE *
@@ -174,29 +187,29 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(nullptr);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-        pipelineCreateInfo.setRenderPass(*renderPass->GetRenderPass()); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility
+        pipelineCreateInfo.setRenderPass(renderPass.GetRenderPass()); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = device->GetDevice()->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        m_pipeline = device.GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
 
-        device->GetDevice()->destroyShaderModule(vertexShaderModule, nullptr);
-        device->GetDevice()->destroyShaderModule(fragmentShaderModule, nullptr);
+        device.GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
+        device.GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    const vk::Pipeline* GraphicsPipeline::GetPipeline() const
+    const vk::Pipeline& GraphicsPipeline::GetPipeline() const
     {
-         return &(m_pipeline.get());
+         return m_pipeline.get();
     }
 
-    vk::ShaderModule GraphicsPipeline::CreateShaderModule(const std::vector<char>& code, const vulkan::Device* device)
+    vk::ShaderModule GraphicsPipeline::CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Device& device)
     {
         vk::ShaderModuleCreateInfo createInfo{};
-        createInfo.setCodeSize(code.size());
-        createInfo.setPCode(reinterpret_cast<const uint32_t*>(code.data()));
+        createInfo.setCodeSize(code.size()*sizeof(uint32_t));
+        createInfo.setPCode(code.data());
         vk::ShaderModule shaderModule;
-        if (device->GetDevice()->createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
+        if (device.GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Failed to create shader module.");
         }
