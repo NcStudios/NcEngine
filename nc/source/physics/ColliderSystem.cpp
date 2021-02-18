@@ -18,12 +18,12 @@ namespace nc::physics
         return m_staticColliders.get();
     }
 
-    Collider* ColliderSystem::Add(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale)
+    Collider* ColliderSystem::Add(EntityHandle handle, ColliderInfo info)
     {
         if(GetEntity(handle)->IsStatic)
-            return m_staticColliders->Add(handle, type, offset, scale);
+            return m_staticColliders->Add(handle, info);
         
-        return m_dynamicColliders->Add(handle, type, offset, scale);
+        return m_dynamicColliders->Add(handle, info);
     }
 
     bool ColliderSystem::Remove(EntityHandle handle)

@@ -68,11 +68,11 @@ namespace nc
         return internal::g_ecsImpl->GetSystem<NetworkDispatcher>()->Add(handle);
     }
 
-    template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale)
+    template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderInfo info)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<Collider> - Bad handle");
         IF_THROW(internal::g_colliderSystemImpl->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
-        return internal::g_colliderSystemImpl->Add(handle, type, offset, scale);
+        return internal::g_colliderSystemImpl->Add(handle, info);
     }
 
     template<> bool RemoveComponent<PointLight>(EntityHandle handle)

@@ -2,6 +2,7 @@
 
 #include "component/Component.h"
 #include "math/Vector3.h"
+#include "physics/LayerMask.h"
 #include "graphics/Model.h"
 #include "directx/math/DirectXCollision.h"
 
@@ -27,12 +28,20 @@ namespace nc
         Box = 0u, Sphere = 1u
     };
 
+    struct ColliderInfo
+    {
+        ColliderType type = ColliderType::Box;
+        Vector3 offset = Vector3::Zero();
+        Vector3 scale = Vector3::One();
+        physics::LayerMask mask = physics::LayerMaskAll;
+    };
+
     class Collider final : public ComponentBase
     {
         public:
             using BoundingVolume = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
 
-            Collider(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale);
+            Collider(EntityHandle handle, ColliderInfo info);
             ~Collider();
             Collider(const Collider&) = delete;
             Collider(Collider&&) = delete;
@@ -53,6 +62,7 @@ namespace nc
             DirectX::FXMMATRIX m_transformMatrix;
             BoundingVolume m_boundingVolume;
             const ColliderType m_type;
+            physics::LayerMask m_mask;
 
             #ifdef NC_EDITOR_ENABLED
             graphics::Model m_widgetModel;

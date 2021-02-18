@@ -7,29 +7,41 @@
 #include "ui/editor/Widgets.h"
 #endif
 
+#ifdef NC_DEBUG_BUILD
+namespace
+{
+    bool IsUniformScale(const nc::Vector3& scale)
+    {
+        return nc::math::FloatEqual(scale.x, scale.y) && nc::math::FloatEqual(scale.y, scale.z);
+    }
+}
+#endif
+
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
-    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale)
+    Collider::Collider(EntityHandle handle, ColliderInfo info)
         : ComponentBase(handle),
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
-          m_boundingVolume{collider_detail::CreateBoundingVolume(type, offset, scale)},
-          m_type{type},
-          m_widgetModel{collider_detail::CreateWireframeModel(type)},
+          m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
+          m_type{info.type},
+          m_mask{info.mask},
+          m_widgetModel{collider_detail::CreateWireframeModel(info.type)},
           m_selectedInEditor{false}
     {
-        IF_THROW(!HasNoZeroElement(scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
-        IF_THROW(type == ColliderType::Sphere && scale - scale != Vector3::Zero(), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
+        IF_THROW(!HasNoZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(info.type == ColliderType::Sphere && IsUniformScale(info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #else
-    Collider::Collider(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale)
+    Collider::Collider(EntityHandle handle, ColliderInfo info)
         : ComponentBase(handle),
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
-          m_boundingVolume{collider_detail::CreateBoundingVolume(type, offset, scale)},
-          m_type{type}
+          m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
+          m_type{info.type},
+          m_mask{info.mask}
     {
-        IF_THROW(!HasNoZeroElement(scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
-        IF_THROW(type == ColliderType::Sphere && scale - scale != Vector3::Zero(), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
+        IF_THROW(!HasNoZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(info.type == ColliderType::Sphere && IsUniformScale(info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #endif
 
