@@ -32,7 +32,7 @@ namespace nc
         : ComponentBase(handle),
           m_matrix{ComposeMatrix(scale, rot, pos)}
     {
-        IF_THROW(!HasNoZeroElement(scale), "Transform::Transform - Invalid scale(elements cannot be 0)");
+        IF_THROW(HasAnyZeroElement(scale), "Transform::Transform - Invalid scale(elements cannot be 0)");
     }
 
     Vector3 Transform::GetPosition() const
@@ -127,13 +127,13 @@ namespace nc
 
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
     {
-        IF_THROW(!HasNoZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
+        IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
         m_matrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
     }
 
     void Transform::Set(const Vector3& pos, const Vector3& angles, const Vector3& scale)
     {
-        IF_THROW(!HasNoZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
+        IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
         m_matrix = ToScaleMatrix(scale) * ToRotMatrix(angles) * ToTransMatrix(pos);
     }
 
@@ -162,7 +162,7 @@ namespace nc
 
     void Transform::SetScale(const Vector3& scale)
     {
-        IF_THROW(!HasNoZeroElement(scale), "Transform::SetScale - Invalid scale(elements cannot be 0)");
+        IF_THROW(HasAnyZeroElement(scale), "Transform::SetScale - Invalid scale(elements cannot be 0)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
         m_matrix = ToScaleMatrix(scale) *

@@ -12,21 +12,29 @@ namespace nc::physics
 {
     enum class CollisionEventType : uint8_t
     {
-        Enter = 0u, Stay = 1u, Exit = 2u
+        Enter, Stay, Exit
     };
 
-    /** @note Possible problem here:
-     *  Frame 1: c1 collided with -> destroyed -> c2 created at c1 address
-     *  Frame 2: c2 collision events incorrectly based on past c1 state
-     *  Solution: Can maybe keep handles, but more likely, we will want
-     *  ownership of colliders in physics somewhere. */
-    struct CollisionEvent
+    // Produced by fetch, consumed by broad detection
+    struct EstimateData
     {
-        Collider* first;
-        Collider* second;
+        DirectX::BoundingSphere volumeEstimate;
+        uint32_t index;
     };
 
-    bool operator ==(const CollisionEvent& lhs, const CollisionEvent& rhs);
+    // Produced by broad detection, consumed by narrow detection
+    struct BroadDetectEvent
+    {
+        uint32_t first;
+        uint32_t second;
+    };
+
+    // Produced by narrow detection, consumed by compare/notify
+    struct NarrowDetectEvent
+    {
+        EntityHandle::Handle_t first;
+        EntityHandle::Handle_t second;
+    };
 
     class CollisionSystem
     {
@@ -41,17 +49,18 @@ namespace nc::physics
 
         private:
             ColliderSystem m_colliderSystem;
-            std::vector<Collider*> m_dynamicColliders;
-            std::vector<Collider*> m_staticColliders;
-            std::vector<CollisionEvent> m_broadPhaseEvents;
-            std::vector<CollisionEvent> m_currentStepEvents;
-            std::vector<CollisionEvent> m_previousStepEvents;
+            std::vector<EstimateData> m_dynamicEstimates;
+            std::vector<EstimateData> m_staticEstimates;
+            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsDynamic;
+            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsStatic;
+            std::vector<NarrowDetectEvent> m_currentCollisions;
+            std::vector<NarrowDetectEvent> m_previousCollisions;
 
-            void FetchColliders();
-            void BroadPhase();
-            void NarrowPhase();
-            void CompareFrameStates() const;
-            void NotifyCollisionEvent(const CollisionEvent& data, CollisionEventType type) const;
+            void FetchEstimates();
+            void BroadDetection();
+            void NarrowDetection();
+            void CompareToPreviousStep() const;
+            void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;
             void Cleanup();
     };
-}
+} // namespace nc::physics

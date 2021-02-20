@@ -14,6 +14,8 @@ namespace nc::graphics
         InitializeGraphicsPipeline();
     }
 
+    Model::~Model() = default;
+
     void Model::InitializeGraphicsPipeline() 
     {
         using namespace nc::graphics::d3dresource;

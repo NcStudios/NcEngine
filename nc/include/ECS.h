@@ -52,7 +52,7 @@ namespace nc
 
     template<> Transform* GetComponent<Transform>(EntityHandle handle);
 
-    template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderType type, Vector3 offset, Vector3 scale);
+    template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderInfo info);
     template<> Collider* GetComponent<Collider>(EntityHandle handle);
     template<> bool HasComponent<Collider>(EntityHandle handle);
     template<> bool RemoveComponent<Collider>(EntityHandle handle);
