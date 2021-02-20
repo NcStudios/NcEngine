@@ -3,15 +3,13 @@
 namespace nc::physics
 {
     ColliderSoA::ColliderSoA(size_t maxColliders)
-        : handles{},
+        : handles(maxColliders), // braced init is ambiguous
           transforms{maxColliders},
           volumeData{maxColliders},
           types{maxColliders},
           gaps{},
           nextFree{0u}
     {
-        /** @todo fix this */
-        handles.resize(maxColliders);
     }
 
     IndexData::IndexData()
