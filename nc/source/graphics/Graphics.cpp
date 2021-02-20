@@ -83,8 +83,9 @@ void Graphics::ResizeTarget(float width, float height)
     m_swapChain->ResizeTarget(&mode);
 }
 
-void Graphics::OnResize(float width, float height, float nearZ, float farZ)
-{    
+void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+{   
+    (void)windowArg;
     m_context->OMSetRenderTargets(0,0,0);
     m_renderTarget->Release();
     m_dsv->Release();
