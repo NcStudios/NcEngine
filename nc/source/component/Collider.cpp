@@ -29,7 +29,7 @@ namespace nc
           m_widgetModel{collider_detail::CreateWireframeModel(info.type)},
           m_selectedInEditor{false}
     {
-        IF_THROW(!HasNoZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
         IF_THROW(info.type == ColliderType::Sphere && !IsUniformScale(info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #else

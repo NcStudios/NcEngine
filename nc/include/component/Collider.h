@@ -56,7 +56,7 @@ namespace nc
             void SetEditorSelection(bool state);
             #endif
 
-        protected:
+        private:
             const ColliderType m_type;
             physics::LayerMask m_mask;
 
