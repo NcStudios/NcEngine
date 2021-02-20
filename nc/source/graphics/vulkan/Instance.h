@@ -11,8 +11,8 @@ namespace nc::graphics::vulkan
     {
         public:
             Instance(HWND hwnd, HINSTANCE hinstance);
-            const vk::SurfaceKHR* GetSurface() const noexcept;
-            const vk::Instance* GetInstance() const noexcept;
+            const vk::SurfaceKHR& GetSurface() const noexcept;
+            const vk::Instance& GetInstance() const noexcept;
 
         private:
             vk::UniqueInstance m_instance;

@@ -27,12 +27,12 @@ namespace nc::window
             HINSTANCE GetHINSTANCE() const noexcept;
             Vector2 GetDimensions() const;
 
-            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float)> callback);
+            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback);
             void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback);
 
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver);
-            void OnResize(float width, float height);
+            void OnResize(float width, float height, WPARAM windowArg);
 
             void ProcessSystemMessages();
 
@@ -45,7 +45,7 @@ namespace nc::window
             HINSTANCE m_hInstance;
             Vector2 m_dimensions;
 
-            std::function<void(float,float,float,float)> GraphicsOnResizeCallback;
+            std::function<void(float,float,float,float,WPARAM)> GraphicsOnResizeCallback;
             std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> UIWndMessageCallback;
     };
 } // end namespace nc::window
