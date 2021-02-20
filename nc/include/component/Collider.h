@@ -49,8 +49,6 @@ namespace nc
             Collider& operator=(Collider&&) = delete;
 
             ColliderType GetType() const;
-            BoundingVolume CalculateBoundingVolume() const;
-            DirectX::BoundingSphere EstimateBoundingVolume() const;
 
             #ifdef NC_EDITOR_ENABLED
             void UpdateWidget(graphics::FrameManager& frame);
@@ -59,12 +57,12 @@ namespace nc
             #endif
 
         protected:
-            DirectX::FXMMATRIX m_transformMatrix;
-            BoundingVolume m_boundingVolume;
             const ColliderType m_type;
             physics::LayerMask m_mask;
 
             #ifdef NC_EDITOR_ENABLED
+            DirectX::FXMMATRIX m_transformMatrix;
+            BoundingVolume m_boundingVolume;
             graphics::Model m_widgetModel;
             bool m_selectedInEditor;
             #endif
