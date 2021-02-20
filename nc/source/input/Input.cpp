@@ -32,8 +32,8 @@ namespace nc::input
     float GetYAxis() //eventually binds inputs to axis from config file (controller/WASD/arrows)
     {
         float axis = 0.0f;
-        if (GetKey(KeyCode::W)) { axis -= 1.0; }
-        if (GetKey(KeyCode::S)) { axis += 1.0; }
+        if (GetKey(KeyCode::W)) { axis += 1.0; }
+        if (GetKey(KeyCode::S)) { axis -= 1.0; }
         return axis;
     }
 
