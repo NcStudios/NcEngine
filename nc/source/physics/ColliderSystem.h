@@ -18,9 +18,10 @@ namespace nc::physics
             ColliderSoA* GetStaticSOA();
             ColliderSoA* GetDynamicSOA();
 
+            // Wrappers around ComponentSystem methods
             Collider* Add(EntityHandle handle, ColliderInfo info);
             bool Remove(EntityHandle handle);
-            void ClearState();
+            void Clear();
 
             // Expose what doesn't need to be wrapped
             using ComponentSystem::Contains;
@@ -31,6 +32,6 @@ namespace nc::physics
             ColliderSoA m_static;
             ColliderSoA m_dynamic;
             const uint32_t m_maxColliders;
-            std::vector<IndexData> m_indexData;
+            std::vector<ColliderDataLocation> m_locations;
     };
 } // namespace nc::physics

@@ -66,7 +66,7 @@ namespace nc::physics
 
     void CollisionSystem::ClearState()
     {
-        m_colliderSystem.ClearState();
+        m_colliderSystem.Clear();
         m_estimateOverlapDynamicVsDynamic.resize(0u);
         m_estimateOverlapDynamicVsStatic.resize(0u);
         m_currentCollisions.resize(0u);

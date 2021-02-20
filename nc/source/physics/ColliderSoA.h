@@ -11,9 +11,13 @@ namespace nc::physics
     /** SoA representation of active Colliders for CollisionSystem consumption */
     struct ColliderSoA
     {
-        struct CenterExtentPair { DirectX::XMFLOAT3 center, extents; };
-
         ColliderSoA(size_t maxColliders);
+
+        struct CenterExtentPair
+        {
+            DirectX::XMFLOAT3 center;
+            DirectX::XMFLOAT3 extents;
+        };
 
         // Collider Data
         std::vector<EntityHandle::Handle_t> handles;
@@ -26,11 +30,11 @@ namespace nc::physics
         uint32_t nextFree;
     };
 
-    /** Mapping from handle to SoA index */
-    struct IndexData
+    /** Mapping from handle to SoA instance & index */
+    struct ColliderDataLocation
     {
-        IndexData();
-        IndexData(EntityHandle handle_, uint32_t index_, ColliderSoA* container_);
+        ColliderDataLocation();
+        ColliderDataLocation(EntityHandle handle_, uint32_t index_, ColliderSoA* container_);
 
         EntityHandle handle;
         uint32_t index;

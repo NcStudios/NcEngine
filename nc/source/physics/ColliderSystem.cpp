@@ -6,7 +6,7 @@ namespace nc::physics
         : m_static{maxColliders},
           m_dynamic{maxColliders},
           m_maxColliders{maxColliders},
-          m_indexData{}
+          m_locations{}
     {
     }
 
@@ -43,7 +43,7 @@ namespace nc::physics
         target.transforms[targetPos] = &GetComponent<Transform>(handle)->GetTransformationMatrix();
         target.volumeData[targetPos] = ColliderSoA::CenterExtentPair{{info.offset.x, info.offset.y, info.offset.z}, {info.scale.x / 2.0f, info.scale.y / 2.0f, info.scale.z / 2.0f}};
         target.types[targetPos] = info.type;
-        m_indexData.emplace_back(handle, targetPos, &target);
+        m_locations.emplace_back(handle, targetPos, &target);
         return ComponentSystem<Collider>::Add(handle, info);
     }
 
@@ -53,12 +53,12 @@ namespace nc::physics
             return false;
 
         /** @todo range is sorted - can do better than linear time? */
-        auto pos = std::find_if(m_indexData.cbegin(), m_indexData.cend(), [handle](auto& data)
+        auto pos = std::find_if(m_locations.cbegin(), m_locations.cend(), [handle](auto& data)
         {
             return data.handle == handle;
         });
 
-        if(pos == m_indexData.cend())
+        if(pos == m_locations.cend())
             throw std::runtime_error("ColliderSystem::Remove - ComponentSystem and SOA not synced");
 
         auto index = pos->index;
@@ -68,13 +68,13 @@ namespace nc::physics
         return true;
     }
 
-    void ColliderSystem::ClearState()
+    void ColliderSystem::Clear()
     {
         ComponentSystem::Clear();
         m_dynamic.gaps.resize(0u);
         m_dynamic.nextFree = 0u;
         m_static.gaps.resize(0u);
         m_static.nextFree = 0u;
-        m_indexData.resize(0u);
+        m_locations.resize(0u);
     }
 } // namespace nc::physics

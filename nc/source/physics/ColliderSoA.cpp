@@ -12,14 +12,14 @@ namespace nc::physics
     {
     }
 
-    IndexData::IndexData()
+    ColliderDataLocation::ColliderDataLocation()
         : handle{EntityHandle::Invalid()},
           index{0u},
           container{nullptr}
     {
     }
 
-    IndexData::IndexData(EntityHandle handle_, uint32_t index_, ColliderSoA* container_)
+    ColliderDataLocation::ColliderDataLocation(EntityHandle handle_, uint32_t index_, ColliderSoA* container_)
         : handle{handle_},
           index{index_},
           container{container_}
