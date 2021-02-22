@@ -1,15 +1,16 @@
 ***********
 IN PROGRESS
 ***********
+
+-Matrix allocator
+-try explicitly aligned matrices
+-assimp loading
+
 -update physics to 3d
     -layers apply to collisions
-    -sphere collider
     -need trigger type?
     -optimize collisions
     -add physics body
-
--#ifdef editor stuff is getting out of hand; restore sanity
--Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 
 ***********
 BUGS
@@ -25,6 +26,8 @@ BUGS
 ***********
 TO ADD
 ***********
+-#ifdef editor stuff is getting out of hand; restore sanity
+-Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 -way to lock camera pitch to 180deg range
 -threads
 -particle systems!
