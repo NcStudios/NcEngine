@@ -5,14 +5,6 @@
 using namespace nc;
 using namespace nc::ecs;
 
-EntityHandle TestParentHandle1{1u};
-EntityHandle TestParentHandle2{2u};
-EntityHandle TestParentHandle3{3u};
-EntityHandle TestBadHandle{10u};
-int TestVal1 = 5;
-int TestVal2 = 6;
-int TestVal3 = 7;
-
 struct Fake : public ComponentBase
 {
     Fake(EntityHandle handle, int in)
@@ -23,153 +15,192 @@ struct Fake : public ComponentBase
     int val;
 };
 
-TEST(ComponentSystem_unit_tests, Add_FirstAlloc_ReturnsNonNull)
+EntityHandle TestParentHandle1{1u};
+EntityHandle TestParentHandle2{2u};
+EntityHandle TestParentHandle3{3u};
+EntityHandle TestParentHandle4{4u};
+EntityHandle TestParentHandle5{5u};
+EntityHandle TestBadHandle{10u};
+int TestVal1 = 20;
+int TestVal2 = 21;
+int TestVal3 = 22;
+int TestVal4 = 23;
+int TestVal5 = 24;
+
+class ComponentSystem_unit_tests : public ::testing::Test
 {
-    ComponentSystem<Fake> system;
-    auto actual = system.Add(TestParentHandle1, TestVal1);
+    public:
+        ComponentSystem_unit_tests()
+            : fakeSystem{4u}
+        {
+        }
+
+        ~ComponentSystem_unit_tests()
+        {
+            fakeSystem.Clear();
+            nc::alloc::PoolAllocator<Fake>().release_memory_resource();
+        }
+
+        ComponentSystem<Fake> fakeSystem;
+};
+
+TEST_F(ComponentSystem_unit_tests, Add_FirstAlloc_ReturnsNonNull)
+{
+    auto actual = fakeSystem.Add(TestParentHandle1, TestVal1);
     EXPECT_NE(actual, nullptr);
+    fakeSystem.Remove(TestParentHandle1);
 }
 
-TEST(ComponentSystem_unit_tests, Add_PoolFull_ReturnsNonNull)
+TEST_F(ComponentSystem_unit_tests, Add_ConsecutiveCallsOnEmptySystem_ReturnsSequentialAddresses)
 {
-    ComponentSystem<Fake> system(1u, false);
-    system.Add(TestParentHandle1, TestVal1);
-    auto actual = system.Add(TestBadHandle, TestVal1);
-    EXPECT_NE(actual, nullptr);
+    auto first = fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto second = fakeSystem.Add(TestParentHandle2, TestVal2);
+    auto actual = second - first;
+    EXPECT_EQ(actual, 1u);
 }
 
-TEST(ComponentSystem_unit_tests, Add_PoolFullWithIsReserveSizeMaxSizeTrue_Throws)
+TEST_F(ComponentSystem_unit_tests, Add_SystemFull_Throws)
 {
-    ComponentSystem<Fake> system(1u, true);
-    system.Add(TestParentHandle1, TestVal1);
-    EXPECT_THROW(system.Add(TestBadHandle, TestVal1), std::runtime_error);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    fakeSystem.Add(TestParentHandle2, TestVal2);
+    fakeSystem.Add(TestParentHandle3, TestVal3);
+    fakeSystem.Add(TestParentHandle4, TestVal4);
+    EXPECT_THROW(fakeSystem.Add(TestParentHandle5, TestVal5), alloc::MemoryResourceBadAlloc);
 }
 
-TEST(ComponentSystem_unit_tests, Contains_GoodHandle_ReturnsTrue)
+TEST_F(ComponentSystem_unit_tests, Contains_GoodHandle_ReturnsTrue)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    auto actual = system.Contains(TestParentHandle1);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto actual = fakeSystem.Contains(TestParentHandle1);
     EXPECT_EQ(actual, true);
 }
 
-TEST(ComponentSystem_unit_tests, Contains_BadHandle_ReturnsFalse)
+TEST_F(ComponentSystem_unit_tests, Contains_BadHandle_ReturnsFalse)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    auto actual = system.Contains(TestBadHandle);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto actual = fakeSystem.Contains(TestBadHandle);
     EXPECT_EQ(actual, false);
 }
 
-TEST(ComponentSystem_unit_tests, Contains_Empty_ReturnsFalse)
+TEST_F(ComponentSystem_unit_tests, Contains_Empty_ReturnsFalse)
 {
-    ComponentSystem<Fake> system;
-    auto actual = system.Contains(TestBadHandle);
+    auto actual = fakeSystem.Contains(TestBadHandle);
     EXPECT_EQ(actual, false);
 }
 
-TEST(ComponentSystem_unit_tests, Contains_AfterClear_ReturnsFalse)
+TEST_F(ComponentSystem_unit_tests, Contains_AfterRemove_ReturnsFalse)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    system.Clear();
-    auto actual = system.Contains(TestParentHandle1);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    fakeSystem.Remove(TestParentHandle1);
+    auto actual = fakeSystem.Contains(TestParentHandle1);
     EXPECT_EQ(actual, false);
 }
 
-TEST(ComponentSystem_unit_tests, Remove_GoodHandle_ReturnsTrue)
+TEST_F(ComponentSystem_unit_tests, Contains_AfterClear_ReturnsFalse)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    auto actual = system.Remove(TestParentHandle1);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    fakeSystem.Clear();
+    auto actual = fakeSystem.Contains(TestParentHandle1);
+    EXPECT_EQ(actual, false);
+}
+
+TEST_F(ComponentSystem_unit_tests, Remove_GoodHandle_ReturnsTrue)
+{
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto actual = fakeSystem.Remove(TestParentHandle1);
     EXPECT_EQ(actual, true);
 }
 
-TEST(ComponentSystem_unit_tests, Remove_BadHandle_ReturnsFalse)
+TEST_F(ComponentSystem_unit_tests, Remove_BadHandle_ReturnsFalse)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    auto actual = system.Remove(TestBadHandle);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto actual = fakeSystem.Remove(TestBadHandle);
     EXPECT_EQ(actual, false);
 }
 
-TEST(ComponentSystem_unit_tests, Remove_Empty_ReturnsFalse)
+TEST_F(ComponentSystem_unit_tests, Remove_Empty_ReturnsFalse)
 {
-    ComponentSystem<Fake> system;
-    auto actual = system.Remove(TestBadHandle);
+    auto actual = fakeSystem.Remove(TestBadHandle);
     EXPECT_EQ(actual, false);
 }
 
-TEST(ComponentSystem_unit_tests, Remove_AfterClear_ReturnsFalse)
+TEST_F(ComponentSystem_unit_tests, Remove_AfterClear_ReturnsFalse)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    system.Clear();
-    auto actual = system.Remove(TestParentHandle1);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    fakeSystem.Clear();
+    auto actual = fakeSystem.Remove(TestParentHandle1);
     EXPECT_EQ(actual, false);
 }
 
-TEST(ComponentSystem_unit_tests, GetPointerTo_GoodHandle_EqualsPointerFromAdd)
+TEST_F(ComponentSystem_unit_tests, GetPointerTo_GoodHandle_EqualsPointerFromAdd)
 {
-    ComponentSystem<Fake> system;
-    auto expected = system.Add(TestParentHandle1, TestVal1);
-    auto actual = system.GetPointerTo(TestParentHandle1);
+    auto expected = fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto actual = fakeSystem.GetPointerTo(TestParentHandle1);
     EXPECT_EQ(actual, expected);
 }
 
-TEST(ComponentSystem_unit_tests, GetPointerTo_BadHandle_ReturnsNull)
+TEST_F(ComponentSystem_unit_tests, GetPointerTo_BadHandle_ReturnsNull)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    auto actual = system.GetPointerTo(TestBadHandle);
+    fakeSystem.Clear();
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto actual = fakeSystem.GetPointerTo(TestBadHandle);
     EXPECT_EQ(actual, nullptr);
 }
 
-TEST(ComponentSystem_unit_tests, GetPointerTo_Empty_ReturnsNull)
+TEST_F(ComponentSystem_unit_tests, GetPointerTo_Empty_ReturnsNull)
 {
-    ComponentSystem<Fake> system;
-    auto actual = system.GetPointerTo(TestBadHandle);
+    auto actual = fakeSystem.GetPointerTo(TestBadHandle);
     EXPECT_EQ(actual, nullptr);
 }
 
-TEST(ComponentSystem_unit_tests, GetPointerTo_AfterClear_ReturnsNull)
+TEST_F(ComponentSystem_unit_tests, GetPointerTo_AfterRemove_ReturnsNull)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    system.Clear();
-    auto actual = system.GetPointerTo(TestParentHandle1);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    fakeSystem.Remove(TestParentHandle1);
+    auto actual = fakeSystem.GetPointerTo(TestParentHandle1);
     EXPECT_EQ(actual, nullptr);
 }
 
-TEST(ComponentSystem_unit_tests, ForEach_ContiguousComponents_VisitsEach)
+TEST_F(ComponentSystem_unit_tests, GetPointerTo_AfterClear_ReturnsNull)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    system.Add(TestParentHandle2, TestVal2);
-    system.Add(TestParentHandle3, TestVal3);
-    auto actual = 0u;
-    system.ForEach([&actual](auto& element)
-    {
-        actual += element.val;
-    });
-    auto expected = TestVal1 + TestVal2 + TestVal3;
-    EXPECT_EQ(actual, expected);
+    fakeSystem.Add(TestParentHandle1, TestVal1);
+    fakeSystem.Clear();
+    auto actual = fakeSystem.GetPointerTo(TestParentHandle1);
+    EXPECT_EQ(actual, nullptr);
 }
 
-TEST(ComponentSystem_unit_tests, ForEach_NonContiguousComponents_SkipsGap)
+TEST_F(ComponentSystem_unit_tests, GetComponents_SequentiallyAdded_GetsAllComponents)
 {
-    ComponentSystem<Fake> system;
-    system.Add(TestParentHandle1, TestVal1);
-    system.Add(TestParentHandle2, TestVal2);
-    system.Add(TestParentHandle3, TestVal3);
-    system.Remove(TestParentHandle2);
-    auto actual = 0u;
-    system.ForEach([&actual](auto& element)
-    {
-        actual += element.val;
-    });
-    auto expected = TestVal1 + TestVal3;
-    EXPECT_EQ(actual, expected);
+    auto actualAddress1 = fakeSystem.Add(TestParentHandle1, TestVal1);
+    auto actualAddress2 = fakeSystem.Add(TestParentHandle2, TestVal2);
+    auto actualAddress3 = fakeSystem.Add(TestParentHandle3, TestVal3);
+
+    auto& fakes = fakeSystem.GetComponents();
+    auto actualSize = fakes.size();
+    EXPECT_EQ(actualSize, 3);
+
+    EXPECT_EQ(actualAddress1, fakes[0].get());
+    EXPECT_EQ(actualAddress2, fakes[1].get());
+    EXPECT_EQ(actualAddress3, fakes[2].get());
+
+    EXPECT_EQ(TestVal1, fakes[0]->val);
+    EXPECT_EQ(TestVal2, fakes[1]->val);
+    EXPECT_EQ(TestVal3, fakes[2]->val);
+}
+
+TEST_F(ComponentSystem_unit_tests, GetComponents_AddThroughFreeList_ReturnsInIncreasingOrder)
+{
+    auto actualAddress1 = fakeSystem.Add(TestParentHandle1, TestVal1);
+    fakeSystem.Add(TestParentHandle2, TestVal2);
+    auto actualAddress3 = fakeSystem.Add(TestParentHandle3, TestVal3);
+    fakeSystem.Remove(TestParentHandle2);
+    auto actualAddress4 = fakeSystem.Add(TestParentHandle4, TestVal4);
+    auto& fakes = fakeSystem.GetComponents();
+    auto actualSize = fakes.size();
+    EXPECT_EQ(actualSize, 3);
+    EXPECT_EQ(actualAddress1, fakes[0].get());
+    EXPECT_EQ(actualAddress4, fakes[1].get());
+    EXPECT_EQ(actualAddress3, fakes[2].get());
 }
 
 int main(int argc, char ** argv)

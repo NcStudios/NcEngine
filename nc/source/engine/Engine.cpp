@@ -177,22 +177,20 @@ namespace nc::core
         auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        auto pointLightManagerPtr = &m_pointLightManager;
-        m_ecs.GetSystem<PointLight>()->ForEach([&camViewMatrix, pointLightManagerPtr](auto& light)
+        for(auto& light : m_ecs.GetSystem<PointLight>()->GetComponents())
         {
-            pointLightManagerPtr->AddPointLight(light, camViewMatrix);
-        });
+            m_pointLightManager.AddPointLight(*light, camViewMatrix);
+        }
+
         m_pointLightManager.Bind();
 
-        auto& frameManager = m_frameManager;
-
-        m_ecs.GetSystem<Renderer>()->ForEach([&frameManager](auto& renderer)
+        for(auto& renderer : m_ecs.GetSystem<Renderer>()->GetComponents())
         {
-            renderer.Update(frameManager);
-        });
+            renderer->Update(m_frameManager);
+        }
 
         #ifdef NC_EDITOR_ENABLED
-        m_physics.UpdateWidgets(frameManager);
+        m_physics.UpdateWidgets(m_frameManager);
         #endif
 
         m_frameManager.Execute(&m_graphics);

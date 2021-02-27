@@ -2,7 +2,6 @@
 IN PROGRESS
 ***********
 
--Matrix allocator
 -try explicitly aligned matrices
 -assimp loading
 

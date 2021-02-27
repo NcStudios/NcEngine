@@ -44,9 +44,9 @@ namespace nc
             Collider(EntityHandle handle, ColliderInfo info);
             ~Collider();
             Collider(const Collider&) = delete;
-            Collider(Collider&&) = delete;
+            Collider(Collider&&) = default;
             Collider& operator=(const Collider&) = delete;
-            Collider& operator=(Collider&&) = delete;
+            Collider& operator=(Collider&&) = default;
 
             ColliderType GetType() const;
 

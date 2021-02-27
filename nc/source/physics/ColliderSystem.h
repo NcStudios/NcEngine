@@ -12,7 +12,7 @@ namespace nc::physics
     {
         public:
             /** @todo either make this dynamically sized or set this from config */
-            ColliderSystem(uint32_t maxColliders = 20000u);
+            ColliderSystem(uint32_t maxColliders);
             ~ColliderSystem();
 
             ColliderSoA* GetStaticSOA();
@@ -26,7 +26,7 @@ namespace nc::physics
             // Expose what doesn't need to be wrapped
             using ComponentSystem::Contains;
             using ComponentSystem::GetPointerTo;
-            using ComponentSystem::ForEach;
+            using ComponentSystem::GetComponents;
 
         private:
             ColliderSoA m_static;

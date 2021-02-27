@@ -14,11 +14,19 @@ namespace nc::config
         
         struct
         {
+            unsigned maxColliders;
+            unsigned maxNetworkDispatchers;
+            unsigned maxRenderers;
+            unsigned maxTransforms;
+        } memory;
+
+        struct
+        {
             bool useNativeResolution;
             bool launchInFullscreen;
-            unsigned int screenWidth;
-            unsigned int screenHeight;
-            unsigned int targetFPS;
+            unsigned screenWidth;
+            unsigned screenHeight;
+            unsigned targetFPS;
             double nearClip;
             double farClip;
             double frameUpdateInterval;
