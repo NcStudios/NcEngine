@@ -152,14 +152,7 @@ namespace nc::core
     void Engine::FixedStepLogic()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
-        /** @todo Temp solution or not? TBD - We no longer have to iterate once
-         * before to update matrices. Iterators sound omega noice... */
-        std::vector<Collider*> colliders;
-        m_ecs.GetSystem<Collider>()->ForEach([&colliders](auto& col)
-        {
-            colliders.push_back(&col);
-        });
-        m_physics.DoPhysicsStep(colliders);
+        m_physics.DoPhysicsStep();
         m_ecs.SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
@@ -184,25 +177,20 @@ namespace nc::core
         auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        auto pointLightManagerPtr = &m_pointLightManager;
-        m_ecs.GetSystem<PointLight>()->ForEach([&camViewMatrix, pointLightManagerPtr](auto& light)
+        for(auto& light : m_ecs.GetSystem<PointLight>()->GetComponents())
         {
-            pointLightManagerPtr->AddPointLight(light, camViewMatrix);
-        });
+            m_pointLightManager.AddPointLight(*light, camViewMatrix);
+        }
+
         m_pointLightManager.Bind();
 
-        auto& frameManager = m_frameManager;
-
-        m_ecs.GetSystem<Renderer>()->ForEach([&frameManager](auto& renderer)
+        for(auto& renderer : m_ecs.GetSystem<Renderer>()->GetComponents())
         {
-            renderer.Update(frameManager);
-        });
+            renderer->Update(m_frameManager);
+        }
 
         #ifdef NC_EDITOR_ENABLED
-        m_ecs.GetSystem<Collider>()->ForEach([&frameManager](auto& collider)
-        {
-            collider.UpdateWidget(frameManager);
-        });
+        m_physics.UpdateWidgets(m_frameManager);
         #endif
 
         m_frameManager.Execute(&m_graphics);

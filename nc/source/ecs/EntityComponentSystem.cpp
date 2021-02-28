@@ -5,6 +5,7 @@
 #include "component/PointLightManager.h"
 #include "component/Renderer.h"
 #include "component/Transform.h"
+#include "config/Config.h"
 
 namespace
 {
@@ -17,17 +18,11 @@ EntityComponentSystem::EntityComponentSystem()
     : m_handleManager{},
       m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
-      m_colliderSystem{ std::make_unique<ComponentSystem<Collider>>() },
-      m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS, true) },
-      m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>() },
-      m_transformSystem{ std::make_unique<ComponentSystem<Transform>>() },
-      m_networkDispatcherSystem{ std::make_unique<ComponentSystem<NetworkDispatcher>>() }
+      m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
+      m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>(config::Get().memory.maxRenderers) },
+      m_transformSystem{ std::make_unique<ComponentSystem<Transform>>(config::Get().memory.maxTransforms) },
+      m_networkDispatcherSystem{ std::make_unique<ComponentSystem<NetworkDispatcher>>(config::Get().memory.maxNetworkDispatchers) }
 {
-}
-
-template<> ComponentSystem<Collider>* EntityComponentSystem::GetSystem<Collider>()
-{
-    return m_colliderSystem.get();
 }
 
 template<> ComponentSystem<PointLight>* EntityComponentSystem::GetSystem<PointLight>()
@@ -172,7 +167,6 @@ void EntityComponentSystem::ClearState()
     m_active.clear();
     m_toDestroy.clear();
     m_handleManager.Reset();
-    m_colliderSystem->Clear();
     m_transformSystem->Clear();
     m_rendererSystem->Clear();
     m_lightSystem->Clear();

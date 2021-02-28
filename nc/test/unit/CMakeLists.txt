@@ -1,6 +1,29 @@
 # Gets added in debug build; removing so tests don't have to link against imgui
 remove_definitions(-DNC_EDITOR_ENABLED)
 
+### Allocator Tests ###
+add_executable(Allocator_unit_tests
+    ${ROOT_DIR}/test/unit/Allocator_unit_tests.cpp
+)
+
+target_include_directories(Allocator_unit_tests
+    PRIVATE
+        ${NC_SOURCE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(Allocator_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(Allocator_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(Allocator_unit_tests Allocator_unit_tests)
+
 ### ComponentSystem Tests ###
 add_executable(ComponentSystem_unit_tests
     ${ROOT_DIR}/test/unit/ComponentSystem_unit_tests.cpp
@@ -54,29 +77,51 @@ target_link_libraries(Entity_unit_tests
 
 add_test(Entity_unit_tests Entity_unit_tests)
 
-### Pool Tests ###
-add_executable(Pool_unit_tests
-    ${ROOT_DIR}/test/unit/Pool_unit_tests.cpp
+### MakeUnique Tests ###
+add_executable(MakeUnique_unit_tests
+    ${ROOT_DIR}/test/unit/MakeUnique_unit_tests.cpp
 )
 
-target_include_directories(Pool_unit_tests
+target_include_directories(MakeUnique_unit_tests
     PRIVATE
-        ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
-target_compile_options(Pool_unit_tests
+target_compile_options(MakeUnique_unit_tests
     PUBLIC
         ${GCC_WARNING_FLAGS}
 )
 
-target_link_libraries(Pool_unit_tests
+target_link_libraries(MakeUnique_unit_tests
     PRIVATE
         gtest
 )
 
-add_test(Pool_unit_tests Pool_unit_tests)
+add_test(MakeUnique_unit_tests MakeUnique_unit_tests)
+
+### MemoryResource Tests ###
+add_executable(MemoryResource_unit_tests
+    ${ROOT_DIR}/test/unit/MemoryResource_unit_tests.cpp
+)
+
+target_include_directories(MemoryResource_unit_tests
+    PRIVATE
+        ${NC_SOURCE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(MemoryResource_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(MemoryResource_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(MemoryResource_unit_tests MemoryResource_unit_tests)
 
 ### PacketBuffer Tests ###
 add_executable(PacketBuffer_unit_tests

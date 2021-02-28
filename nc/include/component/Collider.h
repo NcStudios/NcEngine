@@ -2,11 +2,15 @@
 
 #include "component/Component.h"
 #include "math/Vector3.h"
+#include "physics/LayerMask.h"
 #include "graphics/Model.h"
+#include "directx/math/DirectXCollision.h"
 
 #include <variant>
 
 /**  Notes on colliders:
+ * 
+ *  -Colliders on static entities do not interact with other static colliders.
  * 
  *  -Colliders cannot have scale values of 0.
  * 
@@ -17,12 +21,6 @@
  *   these parameters for debug/visualization purposes only.
 */
 
-namespace DirectX
-{
-    struct BoundingOrientedBox;
-    struct BoundingSphere;
-}
-
 namespace nc
 {
     enum class ColliderType : uint8_t
@@ -30,20 +28,27 @@ namespace nc
         Box = 0u, Sphere = 1u
     };
 
+    struct ColliderInfo
+    {
+        ColliderType type = ColliderType::Box;
+        Vector3 offset = Vector3::Zero();
+        Vector3 scale = Vector3::One();
+        physics::LayerMask mask = physics::LayerMaskAll;
+    };
+
     class Collider final : public ComponentBase
     {
         public:
             using BoundingVolume = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
 
-            Collider(EntityHandle handle, ColliderType type, Vector3 scale);
+            Collider(EntityHandle handle, ColliderInfo info);
             ~Collider();
             Collider(const Collider&) = delete;
-            Collider(Collider&&) = delete;
+            Collider(Collider&&) = default;
             Collider& operator=(const Collider&) = delete;
-            Collider& operator=(Collider&&) = delete;
+            Collider& operator=(Collider&&) = default;
 
             ColliderType GetType() const;
-            BoundingVolume GetBoundingVolume() const;
 
             #ifdef NC_EDITOR_ENABLED
             void UpdateWidget(graphics::FrameManager& frame);
@@ -51,15 +56,14 @@ namespace nc
             void SetEditorSelection(bool state);
             #endif
 
-        protected:
-            DirectX::FXMMATRIX m_transformMatrix;
-            /** @todo test performance of BoundingVolume vs unique_ptr<BoundingVolume> */
-            std::unique_ptr<BoundingVolume> m_boundingVolume;
+        private:
             const ColliderType m_type;
+            physics::LayerMask m_mask;
 
             #ifdef NC_EDITOR_ENABLED
+            DirectX::FXMMATRIX m_transformMatrix;
+            BoundingVolume m_boundingVolume;
             graphics::Model m_widgetModel;
-            Vector3 m_scale;
             bool m_selectedInEditor;
             #endif
     };

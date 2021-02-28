@@ -1,41 +1,66 @@
 #pragma once
 
 #include "Ecs.h"
+#include "ColliderSystem.h"
 
 #include <cstdint>
 #include <vector>
 
+namespace nc::graphics { class FrameManager; }
+
 namespace nc::physics
 {
-    enum class CollisionEvent : uint8_t
+    enum class CollisionEventType : uint8_t
     {
-        Enter = 0u, Stay = 1u, Exit = 2u
+        Enter, Stay, Exit
     };
 
-    /** @note Possible problem here:
-     *  Frame 1: c1 collided with -> destroyed -> c2 created at c1 address
-     *  Frame 2: c2 collision events incorrectly based on past c1 state
-     *  Solution: Can maybe keep handles, but more likely, we will want
-     *  ownership of colliders in physics somewhere. */
-    struct CollisionData
+    // Produced by fetch, consumed by broad detection
+    struct EstimateData
     {
-        Collider* first;
-        Collider* second;
+        DirectX::BoundingSphere volumeEstimate;
+        uint32_t index;
     };
 
-    bool operator ==(const CollisionData& lhs, const CollisionData& rhs);
+    // Produced by broad detection, consumed by narrow detection
+    struct BroadDetectEvent
+    {
+        uint32_t first;
+        uint32_t second;
+    };
+
+    // Produced by narrow detection, consumed by compare/notify
+    struct NarrowDetectEvent
+    {
+        EntityHandle::Handle_t first;
+        EntityHandle::Handle_t second;
+    };
 
     class CollisionSystem
     {
         public:
-            void DoCollisionStep(const std::vector<Collider*>& colliders);
-            void BuildCurrentFrameState(const std::vector<Collider*>& colliders);
-            void CompareFrameStates() const;
-            void NotifyCollisionEvent(const CollisionData& data, CollisionEvent type) const;
+            CollisionSystem();
+            void DoCollisionStep();
             void ClearState();
 
+            #ifdef NC_EDITOR_ENABLED
+            void UpdateWidgets(graphics::FrameManager& frameManager); // hacky solution until widgets are a real thing
+            #endif
+
         private:
-            std::vector<CollisionData> m_currentCollisions;
-            std::vector<CollisionData> m_previousCollisions;
+            ColliderSystem m_colliderSystem;
+            std::vector<EstimateData> m_dynamicEstimates;
+            std::vector<EstimateData> m_staticEstimates;
+            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsDynamic;
+            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsStatic;
+            std::vector<NarrowDetectEvent> m_currentCollisions;
+            std::vector<NarrowDetectEvent> m_previousCollisions;
+
+            void FetchEstimates();
+            void BroadDetection();
+            void NarrowDetection();
+            void CompareToPreviousStep() const;
+            void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;
+            void Cleanup();
     };
-}
+} // namespace nc::physics
