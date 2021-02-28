@@ -10,75 +10,78 @@
 
 namespace
 {
-    const auto CONFIG_PATH = std::string{"nc/source/config/config.ini"};
-    const auto PROJECT_NAME_KEY = std::string{"project_name"};
-    const auto LOG_FILE_PATH_KEY = std::string{"log_file_path"};
-    const auto FIXED_UPDATE_INTERVAL_KEY = std::string{"fixed_update_interval"};
-    const auto USE_NATIVE_RESOLUTION_KEY = std::string{"use_native_resolution"};
-    const auto LAUNCH_IN_FULLSCREEN_KEY = std::string{"launch_fullscreen"};
-    const auto SCREEN_WIDTH_KEY = std::string{"screen_width"};
-    const auto SCREEN_HEIGHT_KEY = std::string{"screen_height"};
-    const auto TARGET_FPS_KEY = std::string{"target_fps"};
-    const auto NEAR_CLIP_KEY = std::string{"near_clip"};
-    const auto FAR_CLIP_KEY = std::string{"far_clip"};
-    const auto D3D_SHADERS_PATH_KEY = std::string{"d3d_shaders_path"};
-    const auto VULKAN_SHADERS_PATH_KEY = std::string{"vulkan_shaders_path"};
+    const auto ConfigPath = std::string{"nc/source/config/config.ini"};
+
+    // project
+    const auto ProjectNameKey = std::string{"project_name"};
+    const auto LogFilePathKey = std::string{"log_file_path"};
+
+    // memory
+    const auto MaxCollidersKey = std::string{"max_colliders"};
+    const auto MaxNetworkDispatchersKey = std::string{"max_network_dispatchers"};
+    const auto MaxRenderersKey = std::string{"max_renderers"};
+    const auto MaxTransformsKey = std::string{"max_transforms"};
+
+    // physics
+    const auto FixedUpdateIntervalKey = std::string{"fixed_update_interval"};
+
+    // graphics
+    const auto UseNativeResolutionKey = std::string{"use_native_resolution"};
+    const auto LaunchInFullscreenKey = std::string{"launch_fullscreen"};
+    const auto ScreenWidthKey = std::string{"screen_width"};
+    const auto ScreenHeightKey = std::string{"screen_height"};
+    const auto TargetFpsKey = std::string{"target_fps"};
+    const auto NearClipKey = std::string{"near_clip"};
+    const auto FarClipKey = std::string{"far_clip"};
+    const auto D3dShadersPathKey = std::string{"d3d_shaders_path"};
+    const auto VulkanShadersPathKey = std::string{"vulkan_shaders_path"};
 
     void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config& out)
     {
-        if (key == PROJECT_NAME_KEY)
-        {
+        // project
+        if (key == ProjectNameKey)
             out.project.projectName = value;
-        }
-        else if (key == LOG_FILE_PATH_KEY)
-        {
+        else if (key == LogFilePathKey)
             out.project.logFilePath = value;
-        }
-        else if (key == FIXED_UPDATE_INTERVAL_KEY)
-        {
+        
+        // memory
+        else if(key == MaxCollidersKey)
+            out.memory.maxColliders = std::stoi(value);
+        else if(key == MaxNetworkDispatchersKey)
+            out.memory.maxNetworkDispatchers = std::stoi(value);
+        else if(key == MaxRenderersKey)
+            out.memory.maxRenderers = std::stoi(value);
+        else if(key == MaxTransformsKey)
+            out.memory.maxTransforms = std::stoi(value);
+
+        // physics
+        else if (key == FixedUpdateIntervalKey)
             out.physics.fixedUpdateInterval = std::stod(value);
-        }
-        else if (key == USE_NATIVE_RESOLUTION_KEY)
-        {
+        
+        // graphics
+        else if (key == UseNativeResolutionKey)
             out.graphics.useNativeResolution = std::stoi(value);
-        }
-        else if (key == LAUNCH_IN_FULLSCREEN_KEY)
-        {
+        else if (key == LaunchInFullscreenKey)
             out.graphics.launchInFullscreen = std::stoi(value);
-        }
-        else if (key == SCREEN_WIDTH_KEY)
-        {
+        else if (key == ScreenWidthKey)
             out.graphics.screenWidth = std::stoi(value);
-        }
-        else if (key == SCREEN_HEIGHT_KEY)
-        {
+        else if (key == ScreenHeightKey)
             out.graphics.screenHeight = std::stoi(value);
-        }
-        else if (key == TARGET_FPS_KEY)
+        else if (key == TargetFpsKey)
         {
             out.graphics.targetFPS = std::stoi(value);
             out.graphics.frameUpdateInterval = 1.0 / static_cast<double>(out.graphics.targetFPS);
         }
-        else if (key == NEAR_CLIP_KEY)
-        {
+        else if (key == NearClipKey)
             out.graphics.nearClip = std::stod(value);
-        }
-        else if (key == FAR_CLIP_KEY)
-        {
+        else if (key == FarClipKey)
             out.graphics.farClip = std::stod(value);
-        }
-        else if (key == D3D_SHADERS_PATH_KEY)
-        {
+        else if (key == D3dShadersPathKey)
             out.graphics.d3dShadersPath = value;
-        }
-        else if (key == VULKAN_SHADERS_PATH_KEY)
-        {
+        else if (key == VulkanShadersPathKey)
             out.graphics.vulkanShadersPath = value;
-        }
         else
-        {
             throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
-        }
     };
 } //end anonymous namespace
 
@@ -97,7 +100,7 @@ namespace nc::config
     void Load()
     {
         g_instance = std::make_unique<Config>();
-        nc::config::Read(CONFIG_PATH, MapKeyValue, *g_instance);
+        nc::config::Read(ConfigPath, MapKeyValue, *g_instance);
         if(!Validate())
             throw std::runtime_error("config::Load - Failed to validate config");
     }
@@ -109,25 +112,30 @@ namespace nc::config
             throw std::runtime_error("config::Save - failed to validate config");
 
         std::ofstream outFile;
-        outFile.open(CONFIG_PATH);
+        outFile.open(ConfigPath);
         if(!outFile.is_open())
             throw std::runtime_error("config::Save - failed to open file");
 
         outFile << "[project]\n"
-                << PROJECT_NAME_KEY << INI_KEY_VALUE_DELIM << g_instance->project.projectName << '\n'
-                << LOG_FILE_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->project.logFilePath << '\n'
+                << ProjectNameKey << INI_KEY_VALUE_DELIM << g_instance->project.projectName << '\n'
+                << LogFilePathKey << INI_KEY_VALUE_DELIM << g_instance->project.logFilePath << '\n'
+                << "[memory]\n"
+                << MaxCollidersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxColliders << '\n'
+                << MaxNetworkDispatchersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxNetworkDispatchers << '\n'
+                << MaxRenderersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxRenderers << '\n'
+                << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxTransforms << '\n'
                 << "[physics]\n"
-                << FIXED_UPDATE_INTERVAL_KEY << INI_KEY_VALUE_DELIM << g_instance->physics.fixedUpdateInterval << '\n'
+                << FixedUpdateIntervalKey << INI_KEY_VALUE_DELIM << g_instance->physics.fixedUpdateInterval << '\n'
                 << "[graphics]\n"
-                << USE_NATIVE_RESOLUTION_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.useNativeResolution << '\n'
-                << LAUNCH_IN_FULLSCREEN_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.launchInFullscreen << '\n'
-                << SCREEN_WIDTH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.screenWidth << '\n'
-                << SCREEN_HEIGHT_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.screenHeight << '\n'
-                << TARGET_FPS_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.targetFPS << '\n'
-                << NEAR_CLIP_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.nearClip << '\n'
-                << FAR_CLIP_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.farClip << '\n'
-                << D3D_SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.d3dShadersPath << '\n'
-                << VULKAN_SHADERS_PATH_KEY << INI_KEY_VALUE_DELIM << g_instance->graphics.vulkanShadersPath;
+                << UseNativeResolutionKey << INI_KEY_VALUE_DELIM << g_instance->graphics.useNativeResolution << '\n'
+                << LaunchInFullscreenKey << INI_KEY_VALUE_DELIM << g_instance->graphics.launchInFullscreen << '\n'
+                << ScreenWidthKey << INI_KEY_VALUE_DELIM << g_instance->graphics.screenWidth << '\n'
+                << ScreenHeightKey << INI_KEY_VALUE_DELIM << g_instance->graphics.screenHeight << '\n'
+                << TargetFpsKey << INI_KEY_VALUE_DELIM << g_instance->graphics.targetFPS << '\n'
+                << NearClipKey << INI_KEY_VALUE_DELIM << g_instance->graphics.nearClip << '\n'
+                << FarClipKey << INI_KEY_VALUE_DELIM << g_instance->graphics.farClip << '\n'
+                << D3dShadersPathKey << INI_KEY_VALUE_DELIM << g_instance->graphics.d3dShadersPath << '\n'
+                << VulkanShadersPathKey << INI_KEY_VALUE_DELIM << g_instance->graphics.vulkanShadersPath;
 
         outFile.close();
     }

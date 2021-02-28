@@ -1,4 +1,5 @@
 #include "CollisionSystem.h"
+#include "config/Config.h"
 #include "debug/Profiler.h"
 #include "directx/math/DirectXCollision.h"
 
@@ -44,7 +45,7 @@ namespace nc::physics
     }
 
     CollisionSystem::CollisionSystem()
-        : m_colliderSystem{},
+        : m_colliderSystem{config::Get().memory.maxColliders},
           m_dynamicEstimates{},
           m_staticEstimates{},
           m_estimateOverlapDynamicVsDynamic{},
@@ -219,10 +220,10 @@ namespace nc::physics
     #ifdef NC_EDITOR_ENABLED
     void CollisionSystem::UpdateWidgets(graphics::FrameManager& frameManager)
     {
-        m_colliderSystem.ForEach([&frameManager](auto& collider)
+        for(auto& collider : m_colliderSystem.GetComponents())
         {
-            collider.UpdateWidget(frameManager);
-        });
+            collider->UpdateWidget(frameManager);
+        }
     }
     #endif
 } // namespace nc::phsyics

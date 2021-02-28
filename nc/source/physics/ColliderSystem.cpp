@@ -1,9 +1,11 @@
 #include "ColliderSystem.h"
+#include "config/Config.h"
 
 namespace nc::physics
 {
     ColliderSystem::ColliderSystem(uint32_t maxColliders)
-        : m_static{maxColliders},
+        : ComponentSystem<Collider>{maxColliders},
+          m_static{maxColliders},
           m_dynamic{maxColliders},
           m_maxColliders{maxColliders},
           m_locations{}
