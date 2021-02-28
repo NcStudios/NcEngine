@@ -11,7 +11,6 @@ namespace nc::physics
     class ColliderSystem : private ecs::ComponentSystem<Collider>
     {
         public:
-            /** @todo either make this dynamically sized or set this from config */
             ColliderSystem(uint32_t maxColliders);
             ~ColliderSystem();
 

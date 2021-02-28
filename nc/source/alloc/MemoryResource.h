@@ -25,7 +25,7 @@ namespace nc::alloc
 
     /** Fixed-size, single-type buffer
      *  @note destructor/free_all will not call destructors of allocated
-     *  objects. If this is required, explicity call deallocate. */
+     *  objects. If this is required, explicitly call deallocate. */
     template<class T, class Tag = void>
     class StaticPool
     {
@@ -38,7 +38,7 @@ namespace nc::alloc
             StaticPool(const StaticPool&) = delete;
             StaticPool& operator=(const StaticPool&) = delete;
 
-            T* allocate(std::size_t n);
+            T* allocate(size_t n);
             void deallocate(T* ptr, size_t n) noexcept;
             void free_all();
 
@@ -59,7 +59,7 @@ namespace nc::alloc
     }
 
     template<class T, class Tag>
-    T* StaticPool<T, Tag>::allocate(std::size_t)
+    T* StaticPool<T, Tag>::allocate(size_t)
     {
         if(m_next >= m_maxCount)
             throw MemoryResourceBadAlloc();

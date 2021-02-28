@@ -14,9 +14,9 @@ namespace nc::alloc
     {
         public:
             using value_type = Resource::value_type;
-            using propogate_on_container_copy_assignment = std::false_type;
-            using propogate_on_container_move_assignment = std::false_type;
-            using propogate_on_container_swap = std::false_type;
+            using propagate_on_container_copy_assignment = std::false_type;
+            using propagate_on_container_move_assignment = std::false_type;
+            using propagate_on_container_swap = std::false_type;
 
             value_type* allocate(size_t n);
             void deallocate(value_type* ptr, size_t n) noexcept;

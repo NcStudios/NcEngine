@@ -68,9 +68,6 @@ namespace nc::sample
         auto lvHandle3 = CreateEntity({.position = Vector3{4.1f, 14.5f, 3.3f}, .tag = "Point Light"});
         AddComponent<PointLight>(lvHandle3);
 
-        AddComponent<PointLight>(CreateEntity());
-        AddComponent<PointLight>(CreateEntity());
-
         // Objects
         prefab::Create(prefab::Resource::Table, 
                        {.position = Vector3{0.0f, -0.4f, 0.0f},
