@@ -93,6 +93,11 @@ namespace nc::graphics
 {
     using namespace nc::graphics::d3dresource;
 
+    void LoadMesh(const std::string&)
+    {
+
+    }
+
     Mesh::Mesh(std::string meshPath)
     {
         AddBufferResources(std::move(meshPath));
@@ -101,13 +106,13 @@ namespace nc::graphics
     void Mesh::AddBufferResources(std::string meshPath)
     {
         // Topology does not depend on parsing the mesh
-        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology> (DefaultPrimitiveTopology));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>(Topology::GetUID(DefaultPrimitiveTopology), DefaultPrimitiveTopology));
 
         auto vertexBuffer = std::vector<Vertex>{};
         auto indexBuffer = std::vector<uint16_t>{};
 
-        auto vBufferExists = GraphicsResourceManager::Exists<VertexBuffer>(vertexBuffer, meshPath);
-        auto iBufferExists = GraphicsResourceManager::Exists<IndexBuffer>(indexBuffer, meshPath);
+        auto vBufferExists = GraphicsResourceManager::Exists<VertexBuffer>(VertexBuffer::GetUID(meshPath));
+        auto iBufferExists = GraphicsResourceManager::Exists<IndexBuffer>(IndexBuffer::GetUID(meshPath));
 
         if (!(vBufferExists && iBufferExists))
         {
@@ -115,7 +120,7 @@ namespace nc::graphics
         }
 
         // If the resource already exists, we can safely pass in empty buffers
-        AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(vertexBuffer, meshPath));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer>(indexBuffer, meshPath));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(VertexBuffer::GetUID(meshPath), vertexBuffer));
+        AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer>(IndexBuffer::GetUID(meshPath), indexBuffer));
     }
 } // end namespace nc::graphics

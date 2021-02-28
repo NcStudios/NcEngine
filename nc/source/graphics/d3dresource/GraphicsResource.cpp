@@ -22,7 +22,7 @@ namespace nc::graphics::d3dresource
     /**********
     * Stencil *
     ***********/
-    auto stencilTagFromMode = [](Stencil::Mode mode)
+    auto stencilTagFromMode(Stencil::Mode mode)
     {
         switch (mode)
         {
@@ -38,8 +38,7 @@ namespace nc::graphics::d3dresource
     };
 
     Stencil::Stencil(Mode mode)
-    : m_tag {stencilTagFromMode(mode)},
-      m_mode {mode},
+    : m_mode {mode},
       m_stencil{nullptr}
     {
         D3D11_DEPTH_STENCIL_DESC dsDesc = CD3D11_DEPTH_STENCIL_DESC{ CD3D11_DEFAULT{} };
@@ -101,8 +100,7 @@ namespace nc::graphics::d3dresource
     };
 
     Rasterizer::Rasterizer(Mode mode)
-    : m_tag {rasterizerTagFromMode(mode)},
-      m_mode {mode},
+    : m_mode {mode},
       m_rasterizer{nullptr}
     {
         D3D11_RASTERIZER_DESC rasterizerDesc = CD3D11_RASTERIZER_DESC { CD3D11_DEFAULT{} };
@@ -154,9 +152,8 @@ namespace nc::graphics::d3dresource
     /**********
     * Sampler *
     ***********/
-    Sampler::Sampler(const std::string& tag)
-        : m_tag{tag},
-          m_sampler{nullptr}
+    Sampler::Sampler()
+        : m_sampler{nullptr}
     {
         D3D11_SAMPLER_DESC samplerDesc = {};
         samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -184,9 +181,8 @@ namespace nc::graphics::d3dresource
     /**********
     * Blender *
     ***********/
-    Blender::Blender(const std::string& tag)
-        : m_tag{tag},
-          m_blender{nullptr},
+    Blender::Blender()
+        : m_blender{nullptr},
           m_isBlending{false}
     {
         D3D11_BLEND_DESC blendDesc = {};
@@ -226,7 +222,6 @@ namespace nc::graphics::d3dresource
     Texture::Texture(const std::string& path, uint32_t shaderIndex) 
         : m_textureView{nullptr},
           m_texture{nullptr},
-          m_path{path},
           m_shaderIndex{shaderIndex}
     {
         std::wstring w_path;
@@ -250,9 +245,8 @@ namespace nc::graphics::d3dresource
         return m_textureView.Get();
     }
 
-    std::string Texture::GetUID(const std::string& path, uint32_t shaderIndex) noexcept
+    std::string Texture::GetUID(const std::string& path) noexcept
     {
-        (void)shaderIndex;
         return typeid(Texture).name() + path;
     }
 }

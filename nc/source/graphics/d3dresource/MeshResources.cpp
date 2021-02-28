@@ -5,8 +5,9 @@ namespace nc::graphics::d3dresource
     /*****************
      * Vertex Buffer *
      *****************/
-    VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag)
-        : m_stride(sizeof(Vertex)), m_tag(tag)
+    VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices)
+        : m_stride(sizeof(Vertex)),
+          m_vertexBuffer{nullptr}
     {
         auto bd = D3D11_BUFFER_DESC
         {
@@ -29,17 +30,17 @@ namespace nc::graphics::d3dresource
         GetContext()->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &offset);
     }
 
-    std::string VertexBuffer::GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept
+    std::string VertexBuffer::GetUID(const std::string& tag) noexcept
     {
-        (void)vertices;
         return typeid(VertexBuffer).name() + tag;
     }
 
     /****************
      * Index Buffer *
      ****************/
-    IndexBuffer::IndexBuffer(const std::vector<uint16_t>& indices, std::string& tag)
-        : m_count((UINT)indices.size()), m_tag(tag)
+    IndexBuffer::IndexBuffer(const std::vector<uint16_t>& indices)
+        : m_count((UINT)indices.size()),
+          m_indexBuffer{nullptr}
     {
         D3D11_BUFFER_DESC ibd      = {};
         ibd.BindFlags              = D3D11_BIND_INDEX_BUFFER;
@@ -65,21 +66,17 @@ namespace nc::graphics::d3dresource
         return m_count;
     }
 
-    std::string IndexBuffer::GetUID(const std::vector<uint16_t>& indices, std::string& tag) noexcept
+    std::string IndexBuffer::GetUID(std::string& tag) noexcept
     {
-        (void)indices;
         return typeid(IndexBuffer).name() + tag;
     }
 
     /****************
      * Input Layout *
      ****************/
-    InputLayout::InputLayout(const std::string& tag,
-                             const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
+    InputLayout::InputLayout(const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout,
                              ID3DBlob* vertexShaderBytecode )
     {
-        (void)tag;
-        
         THROW_FAILED
         (
             GetDevice()->CreateInputLayout(layout.data(),
@@ -95,10 +92,8 @@ namespace nc::graphics::d3dresource
         GetContext()->IASetInputLayout(m_inputLayout.Get());
     }
     
-    std::string InputLayout::GetUID(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode) noexcept
+    std::string InputLayout::GetUID(const std::string& tag) noexcept
     {
-        (void)layout;
-        (void)vertexShaderByteCode;
         return typeid(InputLayout).name() + tag;
     }
 

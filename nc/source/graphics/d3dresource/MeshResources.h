@@ -10,9 +10,9 @@ namespace nc::graphics::d3dresource
     class InputLayout : public GraphicsResource
     {
         public:
-            InputLayout(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode);
+            InputLayout(const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode);
             void Bind() noexcept override;
-            static std::string GetUID(const std::string& tag, const std::vector<D3D11_INPUT_ELEMENT_DESC>& layout, ID3DBlob* vertexShaderByteCode) noexcept;
+            static std::string GetUID(const std::string& tag) noexcept;
 
         protected:
             Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
@@ -38,14 +38,13 @@ namespace nc::graphics::d3dresource
     class VertexBuffer : public GraphicsResource
     {
         public:
-            VertexBuffer(const std::vector<Vertex>& vertices, const std::string& tag);
+            VertexBuffer(const std::vector<Vertex>& vertices);
             void Bind() noexcept override;
-            static std::string GetUID(const std::vector<Vertex>& vertices, const std::string& tag) noexcept;
+            static std::string GetUID(const std::string& tag) noexcept;
             
         protected:
             UINT m_stride;
             Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-            const std::string m_tag;
     };
 
     /****************
@@ -54,14 +53,13 @@ namespace nc::graphics::d3dresource
     class IndexBuffer : public GraphicsResource
     {
         public:
-            IndexBuffer(const std::vector<uint16_t>& indices, std::string& tag);
+            IndexBuffer(const std::vector<uint16_t>& indices);
             void Bind() noexcept override;
-            static std::string GetUID(const std::vector<uint16_t>& indices, std::string& tag) noexcept;
+            static std::string GetUID(std::string& tag) noexcept;
             UINT GetCount() const noexcept;
         
         protected:
             UINT m_count;
             Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
-            const std::string m_tag;
     };
 }

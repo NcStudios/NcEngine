@@ -43,7 +43,7 @@ namespace nc::graphics
             uint32_t shaderIndex = 0;
             for (const auto& texturePathRef : texturePaths) 
             {
-                single.AddGraphicsResource(d3dresource::GraphicsResourceManager::Acquire<d3dresource::Texture>(texturePathRef, shaderIndex++));
+                single.AddGraphicsResource(GraphicsResourceManager::Acquire<Texture>(Texture::GetUID(texturePathRef), texturePathRef, shaderIndex++));
             }
 
             m_materialPropertiesBuffer = std::make_unique<PixelConstantBuffer<MaterialProperties>>(materialProperties, 1u);
@@ -100,20 +100,22 @@ namespace nc::graphics
 
         isInitialized = true;
 
-        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
-        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Solid));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Stencil>(Stencil::GetUID(Stencil::Mode::Off), Stencil::Mode::Off));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::GetUID(Rasterizer::Mode::Solid), Rasterizer::Mode::Solid));
 
         // Add vertex shader
-        auto defaultShaderPath = nc::config::Get().graphics.d3dShadersPath;
-        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "phongvertexshader.cso");
+        const auto defaultShaderPath = nc::config::Get().graphics.d3dShadersPath;
+        const auto vertexShaderPath = defaultShaderPath + "phongvertexshader.cso";
+        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(VertexShader::GetUID(vertexShaderPath), vertexShaderPath);
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         PhongShadingTechnique::m_commonResources.push_back(std::move(pvs));
-        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<InputLayout>("phongvertexshader", PhongInputElementDesc, pvsbc));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<InputLayout>(InputLayout::GetUID("phongvertexshader"), PhongInputElementDesc, pvsbc));
 
         // Add pixel shader
-        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "phongpixelshader.cso"));
-        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
-        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::Sampler>(SAMPLER_TAG));
+        const auto pixelShaderPath = defaultShaderPath + "phongpixelshader.cso";
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<PixelShader>(PixelShader::GetUID(pixelShaderPath), pixelShaderPath));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Blender>(Blender::GetUID(BLENDER_TAG)));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Sampler>(Sampler::GetUID(SAMPLER_TAG)));
     }
 
     void PhongShadingTechnique::BindCommonResources()

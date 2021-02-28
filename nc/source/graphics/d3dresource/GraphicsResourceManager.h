@@ -34,16 +34,16 @@ namespace nc::graphics::d3dresource
                 return Get().m_graphics;
             }
 
-            template<std::derived_from<GraphicsResource> T, typename...Params>
-            static GraphicsResource* Acquire(Params&&...p)
+            template<std::derived_from<GraphicsResource> T, class...Params>
+            static GraphicsResource* Acquire(const std::string& uid, Params&&...p)
             {
-                return Get().Acquire_<T>(std::forward<Params>(p)...);
+                return Get().Acquire_<T>(uid, std::forward<Params>(p)...);
             }
 
-            template<std::derived_from<GraphicsResource> T, typename...Params>
-            static bool Exists(Params&&...p)
+            template<std::derived_from<GraphicsResource> T>
+            static bool Exists(const std::string& uid)
             {
-                return Get().Exists_<T>(std::forward<Params>(p)...);
+                return Get().Exists_<T>(uid);
             }
 
             static uint32_t AssignId()
@@ -53,7 +53,7 @@ namespace nc::graphics::d3dresource
 
         private:
             std::unordered_map<std::string, std::unique_ptr<GraphicsResource>> m_resources;
-            Graphics * m_graphics = nullptr;
+            Graphics* m_graphics = nullptr;
             uint32_t m_resourceId;
 
             static GraphicsResourceManager& Get()
@@ -63,30 +63,22 @@ namespace nc::graphics::d3dresource
             }
 
             template<std::derived_from<GraphicsResource> T, typename...Params>
-            GraphicsResource* Acquire_(Params&&...p)
+            GraphicsResource* Acquire_(const std::string& uid, Params&&...p)
             {
-                const auto key = T::GetUID(std::forward<Params>(p)...);
-                const auto i = m_resources.find(key);
-                if(i == m_resources.end())
-                {
-                    auto [it, result] = m_resources.emplace(key, std::make_unique<T>(std::forward<Params>(p)...));
-                    if(!result)
-                        throw std::runtime_error("GraphicsResourceManager::Acquire_ - failed to emplace ");
+                if(const auto it = m_resources.find(uid); it != m_resources.end())
                     return it->second.get();
-                }
-                return i->second.get();
+                
+                auto [it, result] = m_resources.emplace(uid, std::make_unique<T>(std::forward<Params>(p)...));
+                if(!result)
+                    throw std::runtime_error("GraphicsResourceManager::Acquire_ - failed to emplace ");
+                
+                return it->second.get();
             }
 
-            template<std::derived_from<GraphicsResource> T, typename...Params>
-            bool Exists_(Params&&...p)
+            template<std::derived_from<GraphicsResource> T>
+            bool Exists_(const std::string& uid)
             {
-                const auto key = T::GetUID(std::forward<Params>(p)...);
-                const auto i = m_resources.find(key);
-                if(i == m_resources.end())
-                {
-                    return false;
-                }
-                return true;
+                return m_resources.end() != m_resources.find(uid);
             }
     };
 }

@@ -54,7 +54,6 @@ namespace nc::graphics::d3dresource
             static std::string GetUID(Mode mode) noexcept;
 
         private:
-            const std::string m_tag;
             Mode m_mode;
             Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_stencil;
     };
@@ -79,7 +78,6 @@ namespace nc::graphics::d3dresource
             static std::string GetUID(Mode mode) noexcept;
     
         private:
-            const std::string m_tag;
             Mode m_mode;
             Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizer;
     };
@@ -93,12 +91,11 @@ namespace nc::graphics::d3dresource
     class Sampler : public GraphicsResource
     {
         public: 
-            Sampler(const std::string& tag);
+            Sampler();
             void Bind() noexcept override;
             static std::string GetUID(const std::string& tag) noexcept;
 
         private:
-            const std::string m_tag;
             Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
     };
 }
@@ -111,12 +108,11 @@ namespace nc::graphics::d3dresource
     class Blender : public GraphicsResource
     {
         public:
-            Blender(const std::string& tag);
+            Blender();
             void Bind() noexcept override;
             static std::string GetUID(const std::string& tag) noexcept;
 
         private:
-            const std::string m_tag;
             Microsoft::WRL::ComPtr<ID3D11BlendState> m_blender;
             bool m_isBlending;
     };
@@ -132,7 +128,7 @@ namespace nc::graphics::d3dresource
         public:
             Texture(const std::string& path, uint32_t shaderIndex);
             void Bind() noexcept override;
-            static std::string GetUID(const std::string& path, uint32_t shaderIndex) noexcept;
+            static std::string GetUID(const std::string& path) noexcept;
             uint32_t GetShaderIndex() const;
         
             ID3D11ShaderResourceView* GetShaderResourceView();
@@ -140,7 +136,6 @@ namespace nc::graphics::d3dresource
         protected:
             Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureView;
             Microsoft::WRL::ComPtr<ID3D11Resource> m_texture;
-            const std::string m_path;
             uint32_t m_shaderIndex;
     };
 }

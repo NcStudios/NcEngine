@@ -13,6 +13,8 @@ namespace nc::graphics
         class IndexBuffer;
     }
 
+    void LoadMesh(const std::string& path);
+
     class Mesh : public ResourceGroup
     {
         public:

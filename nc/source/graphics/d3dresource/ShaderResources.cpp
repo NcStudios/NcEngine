@@ -8,7 +8,8 @@ namespace nc::graphics::d3dresource
      * Vertex Shader *
      *****************/
     VertexShader::VertexShader(const std::string& path)
-        : m_path(path)
+        : m_bytecodeBlob{nullptr},
+          m_vertexShader{nullptr}
     {
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
@@ -41,10 +42,9 @@ namespace nc::graphics::d3dresource
      * Pixel Shader *
      ****************/
     PixelShader::PixelShader(const std::string& path )
-        : m_path(path)
+        : m_bytecodeBlob{nullptr},
+          m_pixelShader{nullptr}
     {
-        // Read the shader code into a blob
-        Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
         std::wstring w_path;
         w_path.assign(path.begin(), path.end());
         THROW_FAILED(D3DReadFileToBlob(w_path.c_str(),&m_bytecodeBlob));
