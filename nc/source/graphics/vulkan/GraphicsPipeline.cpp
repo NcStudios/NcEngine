@@ -2,6 +2,7 @@
 #include "Device.h"
 #include "RenderPass.h"
 #include "config/Config.h"
+#include "VertexBuffer.h"
 
 #include <vector>
 #include <string>
@@ -72,11 +73,13 @@ namespace nc::graphics::vulkan
          * *********************/
         // Set up the vertex data format. Instancing would be configured here.
         // @todo: Instancing
+        auto vertexBindingDescription = vertex::GetVertexBindingDescription();
+        auto vertexAttributeDescription = vertex::GetVertexAttributeDescriptions();
         vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
-        vertexInputInfo.setVertexBindingDescriptionCount(0);
-        vertexInputInfo.setPVertexBindingDescriptions(nullptr);
-        vertexInputInfo.setVertexAttributeDescriptionCount(0);
-        vertexInputInfo.setPVertexAttributeDescriptions(nullptr);
+        vertexInputInfo.setVertexBindingDescriptionCount(1);
+        vertexInputInfo.setPVertexBindingDescriptions(&vertexBindingDescription);
+        vertexInputInfo.setVertexAttributeDescriptionCount(static_cast<uint32_t>(vertexAttributeDescription.size()));
+        vertexInputInfo.setPVertexAttributeDescriptions(vertexAttributeDescription.data());
 
         /******************
          * INPUT ASSEMBLY *

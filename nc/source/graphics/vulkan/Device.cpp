@@ -1,9 +1,14 @@
 #include "Device.h"
 #include "Instance.h"
+#include "VertexBuffer.h"
 
 #include <set>
 #include <string>
 #include <algorithm>
+
+#define VMA_IMPLEMENTATION
+#include "vulkan/vk_mem_alloc.h"
+#include "vulkan/vk_mem_alloc.hpp"
 
 namespace
 {
@@ -38,13 +43,18 @@ namespace nc::graphics::vulkan
       m_imagePresentReadySemaphores{},
       m_framesInFlightFences{},
       m_imagesInFlightFences{},
-      m_currentFrameIndex{0}
+      m_currentFrameIndex{0},
+      m_allocator{},
+      m_buffers{},
+      m_allocations{},
+      m_bufferIndex{0}
     {
         CreatePhysicalDevice();
         CreateLogicalDevice();
         CreateSwapChain(dimensions);
         CreateCommandPool();
         CreateSynchronizationObjects();
+        CreateAllocator();
     }
 
     Device::~Device()
@@ -59,6 +69,12 @@ namespace nc::graphics::vulkan
             m_device.destroyFence(m_framesInFlightFences[i]);
         }
 
+        for (uint32_t i = 0; i < m_buffers.size(); i++)
+        {
+            m_allocator.destroyBuffer(m_buffers[i], m_allocations[i]);
+        }
+
+        m_allocator.destroy();
         m_device.destroy();
     }
 
@@ -343,6 +359,55 @@ namespace nc::graphics::vulkan
         }
     }
 
+    uint32_t Device::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer)
+    {
+        if (m_buffers.find(m_bufferIndex) != m_buffers.end())
+        {
+            throw std::runtime_error("The given ID is already present in the dictionary.");
+        }
+
+        vk::BufferCreateInfo bufferInfo{};
+        bufferInfo.setSize(size);
+        bufferInfo.setUsage(usageFlags);
+
+        vma::AllocationCreateInfo allocationInfo;
+        allocationInfo.usage = isStaging ? vma::MemoryUsage::eCpuOnly : vma::MemoryUsage::eGpuOnly;
+
+        vma::Allocation allocation;
+        vk::Buffer buffer;
+        if (m_allocator.createBuffer(&bufferInfo, &allocationInfo, &buffer, &allocation, nullptr) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Error creating buffer.");
+        }
+
+        m_buffers.emplace(m_bufferIndex, buffer);
+        m_allocations.emplace(m_bufferIndex, allocation);
+        *createdBuffer = buffer;
+        return m_bufferIndex++;
+    }
+
+    void Device::DestroyBuffer(uint32_t id)
+    {
+        auto buffer = m_buffers.find(id);
+        if (buffer == m_buffers.end())
+        {
+            throw std::runtime_error("The given ID was not present in the dictionary.");
+        }
+
+        m_allocator.destroyBuffer(buffer->second, m_allocations.at(id));
+        m_buffers.erase(id);
+    }
+
+    void Device::CreateAllocator()
+    {
+        VmaAllocatorCreateInfo allocatorInfo{};
+        allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+        allocatorInfo.physicalDevice = m_physicalDevice;
+        allocatorInfo.device = m_device;
+        allocatorInfo.instance = m_instance;
+        m_allocator = vma::createAllocator(allocatorInfo);
+    }
+
     const vk::Device& Device::GetDevice() const noexcept
     {
         return m_device;
@@ -404,6 +469,11 @@ namespace nc::graphics::vulkan
         return fenceType == FenceType::FramesInFlight ? m_framesInFlightFences : m_imagesInFlightFences;
     }
 
+    const vma::Allocation& Device::GetAllocation(uint32_t bufferId) const noexcept
+    {
+        return m_allocations.at(bufferId);
+    }
+
     void Device::Present(uint32_t imageIndex, bool& isSwapChainValid)
     {
         vk::PresentInfoKHR presentInfo{};
@@ -462,6 +532,14 @@ namespace nc::graphics::vulkan
     void Device::ResetFrameFence()
     {
         m_device.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
+    }
+
+    void Device::MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size)
+    {
+        void* mappedData;
+        m_allocator.mapMemory(m_allocations.at(bufferId), &mappedData);
+        memcpy(mappedData, vertices.data(), size);
+        m_allocator.unmapMemory(m_allocations.at(bufferId));
     }
 
     QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
