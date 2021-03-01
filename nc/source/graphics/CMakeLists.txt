@@ -25,4 +25,5 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/vulkan/FrameBuffers.cpp
         ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
         ${ROOT_DIR}/source/graphics/vulkan/VertexBuffer.cpp
+        ${ROOT_DIR}/source/graphics/vulkan/IndexBuffer.cpp
 )

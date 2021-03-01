@@ -540,6 +540,14 @@ namespace nc::graphics::vulkan
         m_allocator.unmapMemory(m_buffers.at(bufferId).second);
     }
 
+    void Device::MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size)
+    {
+        void* mappedData;
+        m_allocator.mapMemory(m_buffers.at(bufferId).second, &mappedData);
+        memcpy(mappedData, indices.data(), size);
+        m_allocator.unmapMemory(m_buffers.at(bufferId).second);
+    }
+
     QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
     {
         uint32_t queueFamilyCount = 0;

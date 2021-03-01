@@ -75,6 +75,7 @@ namespace nc::graphics::vulkan
             void CleanupSwapChain();
             void DestroyBuffer(uint32_t id);
             void MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size);
+            void MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size);
             uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer);
 
         private:
