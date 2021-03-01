@@ -46,7 +46,6 @@ namespace nc::graphics::vulkan
       m_currentFrameIndex{0},
       m_allocator{},
       m_buffers{},
-      m_allocations{},
       m_bufferIndex{0}
     {
         CreatePhysicalDevice();
@@ -71,7 +70,7 @@ namespace nc::graphics::vulkan
 
         for (uint32_t i = 0; i < m_buffers.size(); i++)
         {
-            m_allocator.destroyBuffer(m_buffers[i], m_allocations[i]);
+            m_allocator.destroyBuffer(m_buffers[i].first, m_buffers[i].second);
         }
 
         m_allocator.destroy();
@@ -380,8 +379,7 @@ namespace nc::graphics::vulkan
             throw std::runtime_error("Error creating buffer.");
         }
 
-        m_buffers.emplace(m_bufferIndex, buffer);
-        m_allocations.emplace(m_bufferIndex, allocation);
+        m_buffers.emplace(m_bufferIndex, std::pair{buffer, allocation});
         *createdBuffer = buffer;
         return m_bufferIndex++;
     }
@@ -394,7 +392,7 @@ namespace nc::graphics::vulkan
             throw std::runtime_error("The given ID was not present in the dictionary.");
         }
 
-        m_allocator.destroyBuffer(buffer->second, m_allocations.at(id));
+        m_allocator.destroyBuffer(buffer->second.first, buffer->second.second);
         m_buffers.erase(id);
     }
 
@@ -469,9 +467,9 @@ namespace nc::graphics::vulkan
         return fenceType == FenceType::FramesInFlight ? m_framesInFlightFences : m_imagesInFlightFences;
     }
 
-    const vma::Allocation& Device::GetAllocation(uint32_t bufferId) const noexcept
+    const vma::Allocation& Device::GetAllocation(uint32_t bufferId) const
     {
-        return m_allocations.at(bufferId);
+        return m_buffers.at(bufferId).second;
     }
 
     void Device::Present(uint32_t imageIndex, bool& isSwapChainValid)
@@ -537,9 +535,9 @@ namespace nc::graphics::vulkan
     void Device::MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size)
     {
         void* mappedData;
-        m_allocator.mapMemory(m_allocations.at(bufferId), &mappedData);
+        m_allocator.mapMemory(m_buffers.at(bufferId).second, &mappedData);
         memcpy(mappedData, vertices.data(), size);
-        m_allocator.unmapMemory(m_allocations.at(bufferId));
+        m_allocator.unmapMemory(m_buffers.at(bufferId).second);
     }
 
     QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)

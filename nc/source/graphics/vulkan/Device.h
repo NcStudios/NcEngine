@@ -63,7 +63,7 @@ namespace nc::graphics::vulkan
             const vk::Queue& GetQueue(QueueFamilyType type) const noexcept;
             uint32_t GetFrameIndex() const noexcept;
             const std::vector<vk::Fence>& GetFences(FenceType fenceType) const noexcept;
-            const vma::Allocation& GetAllocation(uint32_t bufferId) const noexcept;
+            const vma::Allocation& GetAllocation(uint32_t bufferId) const;
 
             void Present(uint32_t imageIndex, bool& isSwapChainValid);
             void IncrementFrameIndex();
@@ -104,8 +104,7 @@ namespace nc::graphics::vulkan
             std::vector<vk::Fence> m_imagesInFlightFences; 
             uint32_t m_currentFrameIndex; // Used to select which pair of semaphores and which fence to use as each frame in MAX_FRAMES_IN_FLIGHT requires its own pair of semaphores and fence.
             vma::Allocator m_allocator;
-            std::unordered_map<uint32_t, vk::Buffer> m_buffers;
-            std::unordered_map<uint32_t, vma::Allocation> m_allocations;
+            std::unordered_map<uint32_t, std::pair<vk::Buffer, vma::Allocation>> m_buffers;
             uint32_t m_bufferIndex;
     };
 }
