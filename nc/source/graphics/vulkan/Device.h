@@ -1,9 +1,8 @@
 #pragma once
 
 #include "math/Vector2.h"
-
 #define VK_USE_PLATFORM_WIN32_KHR
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics::vulkan
 {
@@ -31,6 +30,7 @@ namespace nc::graphics::vulkan
         ImagesInFlight
     };
 
+    namespace vertex { struct Vertex; }
 
     class QueueFamilyIndices
     {
@@ -63,6 +63,7 @@ namespace nc::graphics::vulkan
             const vk::Queue& GetQueue(QueueFamilyType type) const noexcept;
             uint32_t GetFrameIndex() const noexcept;
             const std::vector<vk::Fence>& GetFences(FenceType fenceType) const noexcept;
+            const vma::Allocation& GetAllocation(uint32_t bufferId) const;
 
             void Present(uint32_t imageIndex, bool& isSwapChainValid);
             void IncrementFrameIndex();
@@ -72,6 +73,9 @@ namespace nc::graphics::vulkan
             void ResetFrameFence();
             void CreateSwapChain(Vector2 dimensions);
             void CleanupSwapChain();
+            void DestroyBuffer(uint32_t id);
+            void MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size);
+            uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer);
 
         private:
             
@@ -79,6 +83,7 @@ namespace nc::graphics::vulkan
             void CreateLogicalDevice();
             void CreateCommandPool();
             void CreateSynchronizationObjects();
+            void CreateAllocator();
 
             const vk::Instance& m_instance;
             const vk::SurfaceKHR& m_surface;
@@ -96,11 +101,10 @@ namespace nc::graphics::vulkan
             std::vector<vk::Semaphore> m_imageRenderReadySemaphores; // One per concurrent frame. (MAX_FRAMES_IN_FLIGHT). Controls when the swapchain image can be written to.
             std::vector<vk::Semaphore> m_imagePresentReadySemaphores; // One per concurrent frame. (MAX_FRAMES_IN_FLIGHT). Controls when the swapchain image can be presented back to the swapchain.
             std::vector<vk::Fence> m_framesInFlightFences; // One per concurrent frame. (MAX_FRAMES_IN_FLIGHT). Synchronizes the submission of the queues from the CPU with the completion of the queues on the GPU.
-            
-            // If MAX_FRAMES_IN_FLIGHT is higher than the number of swap chain images or GetNextRenderReadyImageIndex returns images out-of-order then it's possible that we may start rendering to a swap chain image that is already in flight. 
-            // To avoid this, we need to track for each swap chain image if a frame in flight is currently using it. 
-            // This mapping will refer to frames in flight by their fences so we'll immediately have a synchronization object to wait on before a new frame can use that image.
             std::vector<vk::Fence> m_imagesInFlightFences; 
             uint32_t m_currentFrameIndex; // Used to select which pair of semaphores and which fence to use as each frame in MAX_FRAMES_IN_FLIGHT requires its own pair of semaphores and fence.
+            vma::Allocator m_allocator;
+            std::unordered_map<uint32_t, std::pair<vk::Buffer, vma::Allocation>> m_buffers;
+            uint32_t m_bufferIndex;
     };
 }
