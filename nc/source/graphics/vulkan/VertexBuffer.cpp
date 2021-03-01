@@ -39,7 +39,7 @@ namespace nc::graphics::vulkan
       m_vertexBuffer { nullptr },
       m_stagingBufferId { 0 },
       m_stagingBuffer { nullptr },
-      m_vertices { vertices }
+      m_vertices { std::move(vertices) }
     {
         m_size = sizeof(m_vertices[0]) * m_vertices.size();
 
