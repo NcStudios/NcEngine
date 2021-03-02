@@ -4,6 +4,7 @@
 #include "FrameBuffers.h"
 #include "GraphicsPipeline.h"
 #include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 namespace nc::graphics::vulkan
 {
@@ -27,7 +28,7 @@ namespace nc::graphics::vulkan
         m_commandBuffers = device.GetDevice().allocateCommandBuffers(allocInfo);
     }
 
-    void Commands::RecordRenderCommand(const vulkan::Device& device, const vulkan::RenderPass& renderPass, const vulkan::FrameBuffers& frameBuffers, const vulkan::GraphicsPipeline& pipeline, const vulkan::VertexBuffer& vertexBuffer)
+    void Commands::RecordRenderCommand(const vulkan::Device& device, const vulkan::RenderPass& renderPass, const vulkan::FrameBuffers& frameBuffers, const vulkan::GraphicsPipeline& pipeline, const vulkan::VertexBuffer& vertexBuffer, const vulkan::IndexBuffer& indexBuffer)
     {
         const vk::ClearValue clearValues[1] = { vk::ClearColorValue(std::array<float, 4>({{0.2f, 0.2f, 0.2f, 0.2f}})) };
 
@@ -54,7 +55,8 @@ namespace nc::graphics::vulkan
                     vk::Buffer vertexBuffers[] = { vertexBuffer.GetBuffer() };
                     vk::DeviceSize offsets[] = { 0 };
                     m_commandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-                    m_commandBuffers[i].draw(static_cast<uint32_t>(vertexBuffer.GetVertices().size()), 1, 0, 0); // vertexCount, instanceCount, firstVertex, firstInstance
+                    m_commandBuffers[i].bindIndexBuffer(indexBuffer.GetBuffer(), 0, vk::IndexType::eUint32);
+                    m_commandBuffers[i].drawIndexed(static_cast<uint32_t>(indexBuffer.GetIndices().size()), 1, 0, 0, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                 }
                 m_commandBuffers[i].endRenderPass();
             }

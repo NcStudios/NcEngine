@@ -535,9 +535,19 @@ namespace nc::graphics::vulkan
     void Device::MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size)
     {
         void* mappedData;
-        m_allocator.mapMemory(m_buffers.at(bufferId).second, &mappedData);
+        auto allocation = m_buffers.at(bufferId).second;
+        m_allocator.mapMemory(allocation, &mappedData);
         memcpy(mappedData, vertices.data(), size);
-        m_allocator.unmapMemory(m_buffers.at(bufferId).second);
+        m_allocator.unmapMemory(allocation);
+    }
+
+    void Device::MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size)
+    {
+        void* mappedData;
+        auto allocation = m_buffers.at(bufferId).second;
+        m_allocator.mapMemory(allocation, &mappedData);
+        memcpy(mappedData, indices.data(), size);
+        m_allocator.unmapMemory(allocation);
     }
 
     QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
