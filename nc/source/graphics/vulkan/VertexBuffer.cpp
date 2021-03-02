@@ -47,7 +47,7 @@ namespace nc::graphics::vulkan
         m_stagingBufferId = m_device.CreateBuffer(m_size, vk::BufferUsageFlagBits::eTransferSrc, true, &m_stagingBuffer);
 
         // Map the vertices onto the staging buffer.
-        m_device.MapMemory(m_stagingBufferId, vertices, m_size);
+        m_device.MapMemory(m_stagingBufferId, m_vertices, m_size);
 
         // Create vertex buffer (lives on GPU).
         m_id = m_device.CreateBuffer(m_size, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, false, &m_vertexBuffer);
