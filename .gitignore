@@ -36,3 +36,4 @@ imgui.ini
 analysis.txt
 
 !gen.exe
+!tools/asset_builder/build.exe
