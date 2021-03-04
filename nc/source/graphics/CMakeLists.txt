@@ -1,7 +1,6 @@
 target_sources(${ENGINE_LIB} 
     PRIVATE
         ${ROOT_DIR}/source/graphics/Graphics.cpp
-        ${ROOT_DIR}/source/graphics/Graphics2.cpp
         ${ROOT_DIR}/source/graphics/Model.cpp
         ${ROOT_DIR}/source/graphics/d3dresource/GraphicsResource.cpp
         ${ROOT_DIR}/source/graphics/d3dresource/ShaderResources.cpp
@@ -18,12 +17,20 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/rendergraph/FrameManager.cpp
         ${ROOT_DIR}/source/graphics/rendergraph/Job.cpp
         ${ROOT_DIR}/source/graphics/rendergraph/Pass.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/Instance.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/Device.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/GraphicsPipeline.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/RenderPass.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/FrameBuffers.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/VertexBuffer.cpp
-        ${ROOT_DIR}/source/graphics/vulkan/IndexBuffer.cpp
+
 )
+
+if(USE_VULKAN)
+    target_sources(${ENGINE_LIB}
+        PRIVATE
+            ${ROOT_DIR}/source/graphics/Graphics2.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/Instance.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/Device.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/GraphicsPipeline.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/RenderPass.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/FrameBuffers.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/VertexBuffer.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/IndexBuffer.cpp
+    )
+endif()
