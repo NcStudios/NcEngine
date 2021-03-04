@@ -17,36 +17,36 @@ namespace
         return fileExtension.compare("nca") == 0 ? true : false;
     }
 
-    void ReadVerticesFromAsset(std::ifstream& file, size_t count, std::vector<nc::graphics::Vertex>& out)
+    void ReadVerticesFromAsset(std::ifstream* file, std::vector<nc::graphics::Vertex>* out, size_t count)
     {
         nc::Vector3 ver, nrm, tan, bit;
         nc::Vector2 tex;
 
         for(size_t i = 0; i < count; ++i)
         {
-            if(file.fail())
+            if(file->fail())
                 throw std::runtime_error("ReadVerticesFromAsset - Failure");
             
-            file >> ver.x >> ver.y >> ver.z
+            *file >> ver.x >> ver.y >> ver.z
                  >> nrm.x >> nrm.y >> nrm.z
                  >> tex.x >> tex.y
                  >> tan.x >> tan.y >> tan.z
                  >> bit.x >> bit.y >> bit.z;
 
-            out.emplace_back(ver, nrm, tex, tan, bit);
+            out->emplace_back(ver, nrm, tex, tan, bit);
         }
     }
 
-    void ReadIndicesFromAsset(std::ifstream& file, size_t count, std::vector<uint16_t>& out)
+    void ReadIndicesFromAsset(std::ifstream* file, std::vector<uint16_t>* out, size_t count)
     {
         uint16_t index;
         for(size_t i = 0; i < count; ++i)
         {
-            if(file.fail())
+            if(file->fail())
                 throw std::runtime_error("ReadIndicesFromAsset - Failure");
 
-            file >> index;
-            out.push_back(index);
+            *file >> index;
+            out->push_back(index);
         }
     }
 } // end anonymous namespace
@@ -68,7 +68,7 @@ namespace nc::graphics
         file >> vertexCount;
         std::vector<Vertex> vertices;
         vertices.reserve(vertexCount);
-        ReadVerticesFromAsset(file, vertexCount, vertices);
+        ReadVerticesFromAsset(&file, &vertices, vertexCount);
         if(!GraphicsResourceManager::Load<VertexBuffer>(VertexBuffer::GetUID(path), vertices))
             throw std::runtime_error("LoadMeshAsset - Failed to load vertex buffer resource");
 
@@ -76,12 +76,12 @@ namespace nc::graphics
         file >> indexCount;
         std::vector<uint16_t> indices;
         indices.reserve(indexCount);
-        ReadIndicesFromAsset(file, indexCount, indices);
+        ReadIndicesFromAsset(&file, &indices, indexCount);
         if(!GraphicsResourceManager::Load<IndexBuffer>(IndexBuffer::GetUID(path), indices))
             throw std::runtime_error("LoadMeshAsset - Failed to load index buffer resource");
     }
 
-    Mesh::Mesh(std::string meshPath)
+    Mesh::Mesh(const std::string& meshPath)
     {
         AddGraphicsResource(GraphicsResourceManager::AcquireOnDemand<Topology>(Topology::GetUID(DefaultPrimitiveTopology), DefaultPrimitiveTopology));
 
@@ -90,7 +90,7 @@ namespace nc::graphics
         auto iBufPtr = GraphicsResourceManager::Acquire(IndexBuffer::GetUID(meshPath));
 
         if(!vBufPtr || !iBufPtr)
-            throw std::runtime_error("Mesh::AddBufferResources - Failed to acquire resources - Are they loaded?");
+            throw std::runtime_error("Mesh::AddBufferResources - Failed to acquire resources. Are they loaded?: " + meshPath);
     
         AddGraphicsResource(vBufPtr);
         AddGraphicsResource(iBufPtr);

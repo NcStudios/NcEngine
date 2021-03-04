@@ -78,7 +78,7 @@ namespace nc::graphics
     
     #endif
 
-    size_t PhongShadingTechnique::GetUID(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties) noexcept
+    size_t PhongShadingTechnique::GetUID(const std::vector<std::string>& texturePaths, const MaterialProperties& materialProperties) noexcept
     {
         auto hash = std::to_string((uint8_t)TechniqueType::PhongShading);
         for (const auto& texturePathRef : texturePaths) 
@@ -86,6 +86,7 @@ namespace nc::graphics
             hash += texturePathRef;
         }
 
+        /** @todo what is the purpose of this? */
         hash += std::to_string(materialProperties.color.x);
         return std::hash<std::string>{}(hash);
     }

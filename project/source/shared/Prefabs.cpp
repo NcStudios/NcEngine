@@ -86,7 +86,7 @@ void InitializeResources()
     mesh::Token = graphics::Mesh{"project/assets/mesh/token.nca"};
     mesh::Worm = graphics::Mesh{"project/assets/mesh/worm.nca"};
 
-    auto materialProperties = graphics::MaterialProperties{};
+    const auto materialProperties = graphics::MaterialProperties{};
     const auto textureDir = std::string{"project//Textures//"};
     const auto defaultBaseColor = std::string{"nc//resources//texture//DefaultBaseColor.png"};
     const auto defaultNormal = std::string{"nc//resources//texture//DefaultNormal.png"};

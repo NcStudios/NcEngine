@@ -14,6 +14,7 @@ IN PROGRESS
 ***********
 BUGS
 ***********
+-Phong/Wireframe Technique::GetUID are bonkers
 -Phong pixel shader roughness seems backwards
 -ImGui::IsAnyWindowHovered() [Hud.cpp] is obsolete - change and fix error where clicking on ui returns
     false(no window hovered)

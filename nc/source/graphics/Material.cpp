@@ -19,7 +19,7 @@ namespace nc::graphics
     }
 
     template<>
-    Material Material::CreateMaterial<nc::graphics::TechniqueType::PhongShading>(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties)
+    Material Material::CreateMaterial<nc::graphics::TechniqueType::PhongShading>(const std::vector<std::string>& texturePaths, const MaterialProperties& materialProperties)
     {
         return Material{TechniqueManager::GetTechnique<PhongShadingTechnique>(texturePaths, materialProperties)};
     }

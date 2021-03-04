@@ -10,9 +10,8 @@
 #include <vector>
 
 /** The AssetBuilder is a utility to convert fbx and obj file to a simple
- *  format using AssImp. Currently, there is nothing interesting happening
- *  here. The purpose of this tool is to speed up debugging by moving calls
- *  to AssImp outside of the engine. */
+ *  format using AssImp. Currently, the only purpose of this is to speed
+ *  up debugging by moving calls to AssImp outside of the engine. */
 
 struct Config
 {
@@ -72,7 +71,6 @@ void Usage()
               << "  -h or --help            Display this information\n"
               << "  -f <file>               Read targets from <file>\n"
               << "  -o <dir>                Write assets to <dir>\n\n"
-
               << "  When using -f, <file> should be a newline-separated list of paths to\n"
               << "  meshes to parse. If the option is not used, the executable's directory\n"
               << "  will searched for \"targets.txt\". In either case the mesh paths should\n"
@@ -125,7 +123,6 @@ void CreateOutputDirectory(const std::filesystem::path& directory)
         return;
 
     std::cout << "Creating directory: " << directory << '\n';
-
     if(!std::filesystem::create_directories(directory))
         throw std::runtime_error("Failed to create output directory: " + directory.string());
 }
@@ -136,7 +133,7 @@ auto ReadTargets(const std::filesystem::path& targetsPath) -> std::vector<std::f
     if(!file.is_open())
         throw std::runtime_error("Failure opening file: " + targetsPath.string());
 
-    constexpr unsigned bufferSize = 256;
+    constexpr unsigned bufferSize = 512u;
     char buffer[bufferSize];
     std::vector<std::filesystem::path> out;
     std::cout << "Reading targets from: " << targetsPath.string() << '\n';
@@ -147,10 +144,9 @@ auto ReadTargets(const std::filesystem::path& targetsPath) -> std::vector<std::f
             throw std::runtime_error("Failure reading file: " + targetsPath.string());
         
         file.getline(buffer, bufferSize, '\n');
-        std::filesystem::path path{buffer};
+        auto& path = out.emplace_back(buffer);
         path.make_preferred();
         std::cout << "    " << path << '\n';
-        out.push_back(path);
     }
 
     file.close();

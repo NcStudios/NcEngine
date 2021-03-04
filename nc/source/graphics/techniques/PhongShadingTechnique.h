@@ -19,7 +19,7 @@ namespace nc::graphics
         public:
             PhongShadingTechnique(const std::vector<std::string>& texturePaths, MaterialProperties materialProperties = {});
             
-            static size_t GetUID(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties) noexcept;
+            static size_t GetUID(const std::vector<std::string>& texturePaths, const MaterialProperties& materialProperties) noexcept;
             static void InitializeCommonResources();
             static void BindCommonResources();
 

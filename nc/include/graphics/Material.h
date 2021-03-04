@@ -31,7 +31,7 @@ namespace nc::graphics
     };
 
     template<>
-    Material Material::CreateMaterial<TechniqueType::PhongShading>(const std::vector<std::string>& texturePaths, MaterialProperties& materialProperties);
+    Material Material::CreateMaterial<TechniqueType::PhongShading>(const std::vector<std::string>& texturePaths, const MaterialProperties& materialProperties);
 
     template<>
     Material Material::CreateMaterial<TechniqueType::Wireframe>();

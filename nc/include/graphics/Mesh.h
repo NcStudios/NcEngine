@@ -12,7 +12,7 @@ namespace nc::graphics
     {
         public:
             Mesh() = default;
-            Mesh(std::string meshPath);
+            Mesh(const std::string& meshPath);
             Mesh(const Mesh& other) = default;
             Mesh(Mesh&& other) = default;
             Mesh& operator=(Mesh&& other) = default;
