@@ -66,7 +66,7 @@ namespace nc::graphics::d3dresource
         return m_count;
     }
 
-    std::string IndexBuffer::GetUID(std::string& tag) noexcept
+    std::string IndexBuffer::GetUID(const std::string& tag) noexcept
     {
         return typeid(IndexBuffer).name() + tag;
     }

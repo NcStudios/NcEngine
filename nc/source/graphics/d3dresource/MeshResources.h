@@ -55,7 +55,7 @@ namespace nc::graphics::d3dresource
         public:
             IndexBuffer(const std::vector<uint16_t>& indices);
             void Bind() noexcept override;
-            static std::string GetUID(std::string& tag) noexcept;
+            static std::string GetUID(const std::string& tag) noexcept;
             UINT GetCount() const noexcept;
         
         protected:

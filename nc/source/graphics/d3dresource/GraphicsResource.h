@@ -26,7 +26,6 @@ namespace nc::graphics::d3dresource
         public:
             virtual ~GraphicsResource() = default;
             virtual void Bind() noexcept = 0;
-            static std::string GetUID() noexcept { return ""; }
         
         protected:
             static ID3D11DeviceContext* GetContext() noexcept;
