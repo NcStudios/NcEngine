@@ -4,87 +4,49 @@
 #include "debug/Utils.h"
 #include "Vertex.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
-const char separator = 
-#ifdef _WIN32
-    '\\';
-#else 
-    '/';
-#endif
+#include <fstream>
 
 namespace
 {
-    constexpr auto AssimpFlags = aiProcess_Triangulate |
-                                 aiProcess_JoinIdenticalVertices |
-                                 aiProcess_ConvertToLeftHanded |
-                                 aiProcess_GenNormals |
-                                 aiProcess_CalcTangentSpace;
-
     constexpr auto DefaultPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    bool HasValidMeshExtension(const std::string& path) 
+    bool HasValidAssetExtension(const std::string& path) 
     {
         std::size_t periodPosition = path.rfind('.');
         const std::string fileExtension = path.substr(periodPosition+1);
-
-        if (fileExtension.compare("fbx") == 0 || fileExtension.compare("FBX") == 0)
-            return true;
-        if (fileExtension.compare("obj") == 0 || fileExtension.compare("OBJ") == 0)
-            return true;
-        return false;
+        return fileExtension.compare("nca") == 0 ? true : false;
     }
 
-    void ParseMesh(std::string meshPath, std::vector<nc::graphics::Vertex>& vBuffOut, std::vector<uint16_t>& iBuffOut)
+    void ReadVerticesFromAsset(std::ifstream& file, size_t count, std::vector<nc::graphics::Vertex>& out)
     {
-        if (!HasValidMeshExtension(meshPath))
-            throw std::runtime_error("Invalid mesh file extension");
+        nc::Vector3 ver, nrm, tan, bit;
+        nc::Vector2 tex;
 
-        Assimp::Importer imp;
-        const auto pModel = imp.ReadFile(meshPath, AssimpFlags);
-        const auto pMesh = pModel->mMeshes[0];
-
-        // Load vertex and normal data
-        vBuffOut.clear();
-        vBuffOut.reserve(pMesh -> mNumVertices);
-        for (size_t i = 0u; i < pMesh->mNumVertices; ++i)
+        for(size_t i = 0; i < count; ++i)
         {
-            /** @todo There is a bit of a hidden dependency here. Neither Assimp nor the file formats
-             *  we use require everything we need to be present. Throwing seems fine for the time being,
-             *  but there is room for future improvement here. */
-            IF_THROW
-            (
-                !pMesh->mNormals || !pMesh->mTextureCoords || !pMesh->mTangents || !pMesh->mBitangents,
-                "ParseMesh - Mesh file does not contain all required data to populate Vertex"
-            );
-            const auto& [vX, vY, vZ] = pMesh->mVertices[i];
-            const auto& [normX, normY, normZ] = pMesh->mNormals[i];
-            const auto& [texX, texY, unused] = pMesh->mTextureCoords[0][i];
-            const auto& [tanX, tanY, tanZ] = pMesh->mTangents[i];
-            const auto& [bitX, bitY, bitZ] = pMesh->mBitangents[i];
+            if(file.fail())
+                throw std::runtime_error("ReadVerticesFromAsset - Failure");
+            
+            file >> ver.x >> ver.y >> ver.z
+                 >> nrm.x >> nrm.y >> nrm.z
+                 >> tex.x >> tex.y
+                 >> tan.x >> tan.y >> tan.z
+                 >> bit.x >> bit.y >> bit.z;
 
-            vBuffOut.emplace_back
-            (
-                nc::Vector3{vX, vY, vZ},
-                nc::Vector3{normX, normY, normZ},
-                nc::Vector2{texX, texY},
-                nc::Vector3{tanX, tanY, tanZ},
-                nc::Vector3{bitX, bitY, bitZ}
-            );
+            out.emplace_back(ver, nrm, tex, tan, bit);
         }
+    }
 
-        // Load index data
-        iBuffOut.clear();
-        iBuffOut.reserve(pMesh -> mNumFaces * 3); // Multiply by 3 because we told assimp to triangulate (aiProcess_Triangulate). Each face has 3 indices
-        for (size_t i = 0u; i < pMesh->mNumFaces; ++i)
+    void ReadIndicesFromAsset(std::ifstream& file, size_t count, std::vector<uint16_t>& out)
+    {
+        uint16_t index;
+        for(size_t i = 0; i < count; ++i)
         {
-            const auto& face = pMesh->mFaces[i];
-            IF_THROW(face.mNumIndices != 3, "ParseMesh - Mesh indices are invalid");
-            iBuffOut.push_back(face.mIndices[0]);
-            iBuffOut.push_back(face.mIndices[1]);
-            iBuffOut.push_back(face.mIndices[2]);
+            if(file.fail())
+                throw std::runtime_error("ReadIndicesFromAsset - Failure");
+
+            file >> index;
+            out.push_back(index);
         }
     }
 } // end anonymous namespace
@@ -93,34 +55,44 @@ namespace nc::graphics
 {
     using namespace nc::graphics::d3dresource;
 
-    void LoadMesh(const std::string&)
+    void LoadMeshAsset(const std::string& path)
     {
+        if(!HasValidAssetExtension(path))
+            throw std::runtime_error("LoadMeshAsset - Invalid extension: " + path);
 
+        std::ifstream file{path};
+        if(!file.is_open())
+            throw std::runtime_error("LoadMeshAsset - Could not open file: " + path);
+
+        size_t vertexCount = 0;
+        file >> vertexCount;
+        std::vector<Vertex> vertices;
+        vertices.reserve(vertexCount);
+        ReadVerticesFromAsset(file, vertexCount, vertices);
+        if(!GraphicsResourceManager::Load<VertexBuffer>(VertexBuffer::GetUID(path), vertices))
+            throw std::runtime_error("LoadMeshAsset - Failed to load vertex buffer resource");
+
+        size_t indexCount = 0;
+        file >> indexCount;
+        std::vector<uint16_t> indices;
+        indices.reserve(indexCount);
+        ReadIndicesFromAsset(file, indexCount, indices);
+        if(!GraphicsResourceManager::Load<IndexBuffer>(IndexBuffer::GetUID(path), indices))
+            throw std::runtime_error("LoadMeshAsset - Failed to load index buffer resource");
     }
 
     Mesh::Mesh(std::string meshPath)
     {
-        AddBufferResources(std::move(meshPath));
-    }
+        AddGraphicsResource(GraphicsResourceManager::AcquireOnDemand<Topology>(Topology::GetUID(DefaultPrimitiveTopology), DefaultPrimitiveTopology));
 
-    void Mesh::AddBufferResources(std::string meshPath)
-    {
-        // Topology does not depend on parsing the mesh
-        AddGraphicsResource(GraphicsResourceManager::Acquire<Topology>(Topology::GetUID(DefaultPrimitiveTopology), DefaultPrimitiveTopology));
+        // We are requiring v/i buffers to be loaded prior to creating any meshes.
+        auto vBufPtr = GraphicsResourceManager::Acquire(VertexBuffer::GetUID(meshPath));
+        auto iBufPtr = GraphicsResourceManager::Acquire(IndexBuffer::GetUID(meshPath));
 
-        auto vertexBuffer = std::vector<Vertex>{};
-        auto indexBuffer = std::vector<uint16_t>{};
-
-        auto vBufferExists = GraphicsResourceManager::Exists<VertexBuffer>(VertexBuffer::GetUID(meshPath));
-        auto iBufferExists = GraphicsResourceManager::Exists<IndexBuffer>(IndexBuffer::GetUID(meshPath));
-
-        if (!(vBufferExists && iBufferExists))
-        {
-            ParseMesh(meshPath, vertexBuffer, indexBuffer);
-        }
-
-        // If the resource already exists, we can safely pass in empty buffers
-        AddGraphicsResource(GraphicsResourceManager::Acquire<VertexBuffer>(VertexBuffer::GetUID(meshPath), vertexBuffer));
-        AddGraphicsResource(GraphicsResourceManager::Acquire<IndexBuffer>(IndexBuffer::GetUID(meshPath), indexBuffer));
+        if(!vBufPtr || !iBufPtr)
+            throw std::runtime_error("Mesh::AddBufferResources - Failed to acquire resources - Are they loaded?");
+    
+        AddGraphicsResource(vBufPtr);
+        AddGraphicsResource(iBufPtr);
     }
 } // end namespace nc::graphics

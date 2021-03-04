@@ -66,24 +66,31 @@ namespace nc::sample::prefab
 void InitializeResources()
 {
     if(isInitialized)
-    {
         return;
-    }
+
     isInitialized = true;
 
-    mesh::Beeper = graphics::Mesh{"project//Models//beeper.fbx"};
-    mesh::Coin = graphics::Mesh{"project//Models//coin.fbx"};
-    mesh::Cube = graphics::Mesh{"nc//resources//mesh//cube.fbx"};
-    mesh::Sphere = graphics::Mesh{"nc//resources//mesh//sphere.fbx"};
-    mesh::Table = graphics::Mesh{"project//Models//table.fbx"};
-    mesh::Token = graphics::Mesh{"project//Models//token.fbx"};
-    mesh::Worm = graphics::Mesh{"project//Models//worm.fbx"};
+    graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/coin.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/sphere.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/table.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/token.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/worm.nca");
+
+    mesh::Beeper = graphics::Mesh{"project/assets/mesh/beeper.nca"};
+    mesh::Coin = graphics::Mesh{"project/assets/mesh/coin.nca"};
+    mesh::Cube = graphics::Mesh{"project/assets/mesh/cube.nca"};
+    mesh::Sphere = graphics::Mesh{"project/assets/mesh/sphere.nca"};
+    mesh::Table = graphics::Mesh{"project/assets/mesh/table.nca"};
+    mesh::Token = graphics::Mesh{"project/assets/mesh/token.nca"};
+    mesh::Worm = graphics::Mesh{"project/assets/mesh/worm.nca"};
 
     auto materialProperties = graphics::MaterialProperties{};
-    auto textureDir = std::string{"project//Textures//"};
-    auto defaultBaseColor = std::string{"nc//resources//texture//DefaultBaseColor.png"};
-    auto defaultNormal = std::string{"nc//resources//texture//DefaultNormal.png"};
-    auto defaultMetallic = std::string{"nc//resources//texture//DefaultMetallic.png"};
+    const auto textureDir = std::string{"project//Textures//"};
+    const auto defaultBaseColor = std::string{"nc//resources//texture//DefaultBaseColor.png"};
+    const auto defaultNormal = std::string{"nc//resources//texture//DefaultNormal.png"};
+    const auto defaultMetallic = std::string{"nc//resources//texture//DefaultMetallic.png"};
 
     const std::vector<std::string> beeperTextures{textureDir + "Beeper//BaseColor.png", textureDir + "Beeper//Normal.png", textureDir + "Beeper//Roughness.png", defaultMetallic};
     material::Beeper = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(beeperTextures, materialProperties);

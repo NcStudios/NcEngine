@@ -21,7 +21,7 @@ namespace nc::graphics
     class Model 
     {
         public:
-            Model(Mesh&& mesh, Material&& material);
+            Model(Mesh mesh, Material material);
             Model(Model&&) = default;
             ~Model();
 

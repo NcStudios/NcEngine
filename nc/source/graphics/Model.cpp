@@ -2,12 +2,13 @@
 #include "d3dresource/GraphicsResourceManager.h"
 #include "d3dresource/MeshResources.h"
 #include "d3dresource/ConstantBufferResources.h"
+#include "debug/Utils.h"
 
 namespace nc::graphics
 {
-    Model::Model(Mesh&& mesh, Material&& material)
-        : m_mesh{mesh},
-          m_material{material},
+    Model::Model(Mesh mesh, Material material)
+        : m_mesh{std::move(mesh)},
+          m_material{std::move(material)},
           m_indexBuffer{nullptr},
           m_transformConstantBuffer{nullptr}
     {
@@ -22,6 +23,7 @@ namespace nc::graphics
         auto bufferId = std::to_string(GraphicsResourceManager::AssignId());
         m_transformConstantBuffer = std::make_unique<TransformConstBufferVertexPixel>(bufferId, *this, 0u, 2u);
         m_indexBuffer = m_mesh.QueryGraphicsResource<d3dresource::IndexBuffer>();
+        IF_THROW(!m_indexBuffer, "Model::InitializeGraphicsPipeline - No index buffer found in mesh");
     }
 
     void Model::SetMaterial(const Material& material) noexcept

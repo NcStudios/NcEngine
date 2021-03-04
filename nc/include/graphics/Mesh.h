@@ -6,14 +6,7 @@
 
 namespace nc::graphics
 {
-    class Graphics;
-    namespace d3dresource
-    {
-        class GraphicsResource;
-        class IndexBuffer;
-    }
-
-    void LoadMesh(const std::string& path);
+    void LoadMeshAsset(const std::string& path);
 
     class Mesh : public ResourceGroup
     {
@@ -25,8 +18,5 @@ namespace nc::graphics
             Mesh& operator=(Mesh&& other) = default;
             Mesh& operator=(const Mesh& other) = default;
             ~Mesh() = default;
-        
-        private:
-            void AddBufferResources(std::string meshPath);
     };
 }

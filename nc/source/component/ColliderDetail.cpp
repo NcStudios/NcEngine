@@ -6,8 +6,8 @@ namespace
     auto ToFloat3(const nc::Vector3& v) { return DirectX::XMFLOAT3{v.x, v.y, v.z}; }
 
     #ifdef NC_EDITOR_ENABLED
-    const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.fbx"};
-    const auto SphereMeshPath = std::string{"nc/resources/mesh/sphere.fbx"};
+    const auto CubeMeshPath = std::string{"project/assets/mesh/cube.nca"};
+    const auto SphereMeshPath = std::string{"project/assets/mesh/sphere.nca"};
     const auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
     #endif
 }

@@ -103,7 +103,6 @@ target_link_libraries(${GAME_EXE}
         ${LIB_DIR}/${ENGINE_LIB}
         ${LIB_DIR}/${IMGUI_LIB}
         ${LIB_DIR}/windowscodecs.lib
-        ${LIB_DIR}/libassimp.dll.a
         #${LIB_DIR}/${ENET_LIB} no networking sample yet
         ${WIN32_LINK_FLAGS}
         Vulkan::Vulkan
