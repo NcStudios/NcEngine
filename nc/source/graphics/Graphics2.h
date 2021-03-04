@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-    namespace vulkan { class Instance; class Device; class GraphicsPipeline; class RenderPass; class FrameBuffers; class Commands; }
+    namespace vulkan { class Instance; class Device; class GraphicsPipeline; class RenderPass; class FrameBuffers; class Commands; class VertexBuffer; class IndexBuffer; }
 
     class Graphics2
     {
@@ -50,6 +50,8 @@ namespace nc::graphics
             std::unique_ptr<vulkan::GraphicsPipeline> m_pipeline;
             std::unique_ptr<vulkan::FrameBuffers> m_frameBuffers;
             std::unique_ptr<vulkan::Commands> m_commands;
+            std::unique_ptr<vulkan::VertexBuffer> m_vertexBuffer; // @todo: Take from mesh, will not be a member of Graphics2
+            std::unique_ptr<vulkan::IndexBuffer> m_indexBuffer; // @todo: Take from mesh, will not be a member of Graphics2
 
             Vector2 m_dimensions;
             bool m_isMinimized;

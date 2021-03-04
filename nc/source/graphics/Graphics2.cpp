@@ -5,6 +5,8 @@
 #include "vulkan/RenderPass.h"
 #include "vulkan/FrameBuffers.h"
 #include "vulkan/Commands.h"
+#include "vulkan/VertexBuffer.h"
+#include "vulkan/IndexBuffer.h"
 
 namespace nc::graphics
 {
@@ -17,6 +19,8 @@ namespace nc::graphics
           m_pipeline{ std::make_unique<GraphicsPipeline>(*m_device, *m_renderPass) },
           m_frameBuffers{ std::make_unique<FrameBuffers>(*m_device, *m_renderPass) },
           m_commands{ nullptr },
+          m_vertexBuffer{ nullptr }, // @todo: Take from mesh, will not be created in CTOR for Graphics2
+          m_indexBuffer{ nullptr }, // @todo: Take from mesh, will not be created in CTOR for Graphics2
           m_dimensions{ dimensions },
           m_isMinimized{ false },
           m_isFullscreen{ false },
@@ -29,8 +33,30 @@ namespace nc::graphics
             m_device->GetFences(FenceType::FramesInFlight),
             m_device->GetFences(FenceType::ImagesInFlight));
 
+        // @todo: Take from mesh, will not be created in CTOR for Graphics2
+        auto vertices = std::vector<vulkan::vertex::Vertex> 
+        {
+            // Position            Color
+            { Vector2{-0.5f, -0.5f}, Vector3{1.0f, 1.0f, 1.0f} },
+            { Vector2{0.5f, -0.5f},  Vector3{0.0f, 0.0f, 0.0f} },
+            { Vector2{0.5f, 0.5f},   Vector3{0.0f, 0.0f, 0.0f} },
+            { Vector2{-0.5f, 0.5f},  Vector3{0.0f, 0.0f, 0.0f} }
+        };
+
+        // @todo: Take from mesh, will not be created in CTOR for Graphics2
+        m_vertexBuffer = std::make_unique<VertexBuffer>(*m_device, *m_commands, vertices);
+
+        // @todo: Take from mesh, will not be created in CTOR for Graphics2
+        auto indices = std::vector<uint32_t>
+        {
+            0, 1, 2, 2, 3, 0
+        };
+
+        // @todo: Take from mesh, will not be created in CTOR for Graphics2
+        m_indexBuffer = std::make_unique<IndexBuffer>(*m_device, *m_commands, indices);
+
         // Write the render pass to the command buffer.
-        m_commands->RecordRenderPass(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline);
+        m_commands->RecordRenderCommand(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline, *m_vertexBuffer, *m_indexBuffer);
     }
 
     Graphics2::~Graphics2() = default;
@@ -57,7 +83,7 @@ namespace nc::graphics
             m_device->GetSemaphores(SemaphoreType::PresentReady),
             m_device->GetFences(FenceType::FramesInFlight),
             m_device->GetFences(FenceType::ImagesInFlight));
-        m_commands->RecordRenderPass(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline);
+        m_commands->RecordRenderCommand(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline, *m_vertexBuffer, *m_indexBuffer);
     }
 
     DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
@@ -133,7 +159,7 @@ namespace nc::graphics
         m_device->WaitForImageFence(imageIndex);
         m_device->SyncImageAndFrameFence(imageIndex);
         m_device->ResetFrameFence();
-        m_commands->SubmitCommandBuffer(*m_device, imageIndex);
+        m_commands->SubmitRenderCommand(*m_device, imageIndex);
     }
 
     bool Graphics2::PresentImage(uint32_t imageIndex)

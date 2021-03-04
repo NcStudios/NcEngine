@@ -3,6 +3,8 @@
 #include "RenderPass.h"
 #include "FrameBuffers.h"
 #include "GraphicsPipeline.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 namespace nc::graphics::vulkan
 {
@@ -26,7 +28,7 @@ namespace nc::graphics::vulkan
         m_commandBuffers = device.GetDevice().allocateCommandBuffers(allocInfo);
     }
 
-    void Commands::RecordRenderPass(const vulkan::Device& device, const vulkan::RenderPass& renderPass, const vulkan::FrameBuffers& frameBuffers, const vulkan::GraphicsPipeline& pipeline)
+    void Commands::RecordRenderCommand(const vulkan::Device& device, const vulkan::RenderPass& renderPass, const vulkan::FrameBuffers& frameBuffers, const vulkan::GraphicsPipeline& pipeline, const vulkan::VertexBuffer& vertexBuffer, const vulkan::IndexBuffer& indexBuffer)
     {
         const vk::ClearValue clearValues[1] = { vk::ClearColorValue(std::array<float, 4>({{0.2f, 0.2f, 0.2f, 0.2f}})) };
 
@@ -50,7 +52,11 @@ namespace nc::graphics::vulkan
                 m_commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
                 {
                     m_commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetPipeline());
-                    m_commandBuffers[i].draw(3, 1, 0, 0); // vertexCount, instanceCount, firstVertex, firstInstance
+                    vk::Buffer vertexBuffers[] = { vertexBuffer.GetBuffer() };
+                    vk::DeviceSize offsets[] = { 0 };
+                    m_commandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
+                    m_commandBuffers[i].bindIndexBuffer(indexBuffer.GetBuffer(), 0, vk::IndexType::eUint32);
+                    m_commandBuffers[i].drawIndexed(static_cast<uint32_t>(indexBuffer.GetIndices().size()), 1, 0, 0, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                 }
                 m_commandBuffers[i].endRenderPass();
             }
@@ -58,7 +64,7 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Commands::SubmitCommandBuffer(const vulkan::Device& device, uint32_t imageIndex)
+    void Commands::SubmitRenderCommand(const vulkan::Device& device, uint32_t imageIndex)
     {
         auto currentFrameIndex = device.GetFrameIndex();
 
@@ -76,5 +82,35 @@ namespace nc::graphics::vulkan
         submitInfo.setPSignalSemaphores(signalSemaphores);
 
         device.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, m_framesInFlightFences[currentFrameIndex]);
+    }
+
+    void Commands::SubmitCopyCommandImmediate(const vulkan::Device& device, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size)
+    {
+        vk::CommandBufferAllocateInfo allocInfo{};
+        allocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
+        allocInfo.setCommandPool(device.GetCommandPool());
+        allocInfo.setCommandBufferCount(1);
+
+        auto tempCommandBuffers = device.GetDevice().allocateCommandBuffers(allocInfo);
+        auto tempCommandBuffer = tempCommandBuffers[0];
+
+        // Begin recording immediately
+        vk::CommandBufferBeginInfo beginInfo{};
+        beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        tempCommandBuffer.begin(beginInfo);
+        {
+            vk::BufferCopy copyRegion{};
+            copyRegion.setSize(size);
+            tempCommandBuffer.copyBuffer(sourceBuffer, destinationBuffer, 1, &copyRegion);
+        }
+        tempCommandBuffer.end();
+
+        // Submit the command immediately
+        vk::SubmitInfo submitInfo{};
+        submitInfo.setCommandBufferCount(1);
+        submitInfo.setPCommandBuffers(&tempCommandBuffer);
+        device.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);
+        device.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
+        device.GetDevice().freeCommandBuffers(device.GetCommandPool(), tempCommandBuffer);
     }
 }
