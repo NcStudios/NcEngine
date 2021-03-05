@@ -28,9 +28,7 @@ namespace ecs
             template<std::derived_from<ComponentBase> T>
             ComponentSystem<T>* GetSystem();
 
-            void SendFrameUpdate(float dt);
-            void SendFixedUpdate();
-            void SendOnDestroy();
+            EntityMap& GetActiveEntities() noexcept;
 
             EntityHandle CreateEntity(EntityInfo info);
             bool DestroyEntity(EntityHandle handle);
@@ -38,11 +36,9 @@ namespace ecs
             Entity* GetEntity(EntityHandle handle);
             Entity* GetEntity(const std::string& tag);
 
-            Entity* GetEntityPtrFromAnyMap(const EntityHandle handle);
-            EntityMap& GetMapContainingEntity(const EntityHandle handle, bool checkAll = false);
-            EntityMap& GetActiveEntities() noexcept;
-            EntityMap& GetToDestroyEntities() noexcept;
-
+            void SendFrameUpdate(float dt);
+            void SendFixedUpdate();
+            void SendOnDestroy();
             void ClearState();
 
         private:

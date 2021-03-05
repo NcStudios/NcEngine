@@ -127,17 +127,17 @@ namespace nc::window
         return m_hInstance;
     }
 
-    Vector2 WindowImpl::GetDimensions() const
+    Vector2 WindowImpl::GetDimensions() const noexcept
     {
         return m_dimensions;
     }
 
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback)
+    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept
     {
         GraphicsOnResizeCallback = callback;
     }
 
-    void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback)
+    void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
     {
         UIWndMessageCallback = callback;
     }

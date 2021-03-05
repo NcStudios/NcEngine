@@ -107,12 +107,12 @@ namespace nc::core
             m_time.UpdateTime();
             m_window.ProcessSystemMessages();
 
-            if (time::Time::FixedDeltaTime > fixedUpdateInterval)
+            if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
                 FixedStepLogic();
             }
 
-            auto dt = time::Time::FrameDeltaTime * m_frameDeltaTimeFactor;
+            auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             FrameLogic(dt);
             FrameRender();
             FrameCleanup();

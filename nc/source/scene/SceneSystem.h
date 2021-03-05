@@ -11,7 +11,7 @@ namespace nc::scene
         public:
             SceneSystem();
             
-            void QueueSceneChange(std::unique_ptr<Scene>&& swapScene);
+            void QueueSceneChange(std::unique_ptr<Scene> swapScene);
             bool IsSceneChangeScheduled() const;
             void UnloadActiveScene();
             void DoSceneChange();
