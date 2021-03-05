@@ -3,7 +3,6 @@ IN PROGRESS
 ***********
 
 -try explicitly aligned matrices
--assimp loading
 
 -update physics to 3d
     -layers apply to collisions
@@ -14,7 +13,6 @@ IN PROGRESS
 ***********
 BUGS
 ***********
--Phong/Wireframe Technique::GetUID are bonkers
 -Phong pixel shader roughness seems backwards
 -ImGui::IsAnyWindowHovered() [Hud.cpp] is obsolete - change and fix error where clicking on ui returns
     false(no window hovered)
@@ -26,6 +24,7 @@ BUGS
 ***********
 TO ADD
 ***********
+-Phong/Wireframe Technique::GetUID are bonkers
 -#ifdef editor stuff is getting out of hand; restore sanity
 -Mesh and Model may not need default ctors anymore - requires major changes to Prefab.cpp
 -way to lock camera pitch to 180deg range
