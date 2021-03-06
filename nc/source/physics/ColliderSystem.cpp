@@ -12,8 +12,6 @@ namespace nc::physics
     {
     }
 
-    ColliderSystem::~ColliderSystem() = default;
-
     ColliderSoA* ColliderSystem::GetStaticSOA()
     {
         return &m_static;

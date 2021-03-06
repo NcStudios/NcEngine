@@ -34,7 +34,7 @@ Graphics::Graphics(HWND hwnd, Vector2 dimensions)
     m_swapChain->SetFullscreenState(m_isFullscreen, nullptr);
 }
 
-Graphics::~Graphics() 
+Graphics::~Graphics() noexcept
 {
     m_swapChain->SetFullscreenState(FALSE, nullptr); // D3D can't close in fullscreen mode. switch to windowed mode on attempting to close
     m_renderTarget->Release();

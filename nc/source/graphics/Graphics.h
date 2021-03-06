@@ -21,7 +21,7 @@ namespace nc
 
             public:
                 Graphics(HWND hwnd, Vector2 dimensions);
-                ~Graphics();
+                ~Graphics() noexcept;
                 Graphics(const Graphics&) = delete;
                 Graphics(Graphics&&) = delete;
                 Graphics& operator=(const Graphics&) = delete;

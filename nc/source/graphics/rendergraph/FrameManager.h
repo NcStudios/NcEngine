@@ -11,7 +11,7 @@ namespace nc::graphics
     class FrameManager
     {
         public:
-            void Accept(size_t targetPass, Job&& job) noexcept;
+            void Accept(size_t targetPass, Job job) noexcept;
             void Execute(Graphics* gfx) const;
             void Reset() noexcept;
 

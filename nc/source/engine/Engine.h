@@ -22,7 +22,6 @@ namespace nc::core
     {
         public:
             Engine(HINSTANCE hInstance);
-            ~Engine();
             void DisableRunningFlag();
             void MainLoop(std::unique_ptr<scene::Scene> initialScene);
             void Shutdown();

@@ -38,7 +38,7 @@ namespace nc::sample
         window::RegisterOnResizeReceiver(this);
     }
 
-    SampleUI::~SampleUI()
+    SampleUI::~SampleUI() noexcept
     {
         window::UnregisterOnResizeReceiver(this);
     }

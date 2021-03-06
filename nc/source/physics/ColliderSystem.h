@@ -12,7 +12,6 @@ namespace nc::physics
     {
         public:
             ColliderSystem(uint32_t maxColliders);
-            ~ColliderSystem();
 
             ColliderSoA* GetStaticSOA();
             ColliderSoA* GetDynamicSOA();

@@ -26,12 +26,12 @@ namespace nc
         return PointLightManager::m_currentIndex++;
     };
 
-    void PointLightManager::AddPointLight(PointLight& pointLight, const DirectX::XMMATRIX& camMatrix)
+    void PointLightManager::AddPointLight(PointLight* pointLight, const DirectX::XMMATRIX& camMatrix)
     {
-        pointLight.SetPositionFromCameraProjection(camMatrix);
+        pointLight->SetPositionFromCameraProjection(camMatrix);
         auto slot = PointLightManager::GetNextAvailableIndex();
-        m_pointLightsArrayConstBufData.PointLights[slot] = pointLight.PixelConstBufData;
-        m_pointLightsArrayConstBufData.PointLights[slot].pos = pointLight.ProjectedPos;
+        m_pointLightsArrayConstBufData.PointLights[slot] = pointLight->PixelConstBufData;
+        m_pointLightsArrayConstBufData.PointLights[slot].pos = pointLight->ProjectedPos;
     }
 
     void PointLightManager::Bind()

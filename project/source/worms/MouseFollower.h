@@ -9,7 +9,7 @@ namespace nc::sample
     {
         public:
             MouseFollower(EntityHandle handle);
-            ~MouseFollower();
+            ~MouseFollower() noexcept;
             void FrameUpdate(float dt) override;
             void OnResize(Vector2 screenDimensions) override;
 

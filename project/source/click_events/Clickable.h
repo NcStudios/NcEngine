@@ -12,7 +12,7 @@ namespace nc::sample
     {
         public:
             Clickable(EntityHandle handle, physics::LayerMask mask);
-            ~Clickable();
+            ~Clickable() noexcept;
             void OnClick() override;
         
         private:
@@ -28,7 +28,7 @@ namespace nc::sample
         IClickable::layers = mask;
     }
 
-    inline Clickable::~Clickable()
+    inline Clickable::~Clickable() noexcept
     {
         physics::UnregisterClickable(this);
     }

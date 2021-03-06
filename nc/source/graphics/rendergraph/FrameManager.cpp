@@ -9,9 +9,9 @@ using namespace nc::graphics::d3dresource;
 
 namespace nc::graphics
 {
-    void FrameManager::Accept(size_t targetPass, Job&& job) noexcept
+    void FrameManager::Accept(size_t targetPass, Job job) noexcept
     {
-        m_passes[targetPass].Accept(std::forward<Job&&>(job));
+        m_passes[targetPass].Accept(job);
     }
 
     /** @todo: Replace the body of this function (and eventually the entire class) with a loop

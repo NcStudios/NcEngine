@@ -31,7 +31,7 @@ namespace nc::window
             void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept;
 
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
-            void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver);
+            void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
             void OnResize(float width, float height, WPARAM windowArg);
 
             void ProcessSystemMessages();

@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-    void Technique::Submit(FrameManager& frame, const nc::graphics::Model* model) const noexcept
+    void Technique::Submit(FrameManager* frame, const nc::graphics::Model* model) const noexcept
     {
         if (!m_isEnabled)
         {
@@ -15,7 +15,7 @@ namespace nc::graphics
 
         for (const auto& step : m_steps)
         {
-            frame.Accept(step.targetPass, Job{&step, model});
+            frame->Accept(step.targetPass, Job{&step, model});
         }
     }
 

@@ -11,7 +11,7 @@ namespace nc::sample
             static const unsigned DefaultItemCount = 10u; // SampleUI needs to initialize from same value
 
             GameLog();
-            ~GameLog();
+            ~GameLog() noexcept;
             void SetItemCount(unsigned count);
             void Clear();
             const std::deque<std::string>& GetItems();

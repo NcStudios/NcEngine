@@ -28,7 +28,7 @@ namespace nc
     }
     #endif
     
-    void Renderer::Update(graphics::FrameManager& frame)
+    void Renderer::Update(graphics::FrameManager* frame)
     {
         IF_THROW(!m_transform, "Renderer::Update - Bad Transform Ptr");
         m_model->SetTransformationMatrix(m_transform->GetTransformationMatrix());

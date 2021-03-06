@@ -12,7 +12,7 @@ namespace nc::sample
     {
         public:
             SampleUI(GameLog* gameLog = nullptr, std::function<void()> widgetCallback = nullptr);
-            ~SampleUI();
+            ~SampleUI() noexcept;
             void Draw() override;
             bool IsHovered() override;
             void OnResize(Vector2 dimensions) override;
