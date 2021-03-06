@@ -18,7 +18,6 @@ namespace nc::graphics::d3dresource
         protected:
             Microsoft::WRL::ComPtr<ID3DBlob> m_bytecodeBlob;
             Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-            const std::string m_path;
     };
 
     /****************
@@ -35,7 +34,5 @@ namespace nc::graphics::d3dresource
         protected:
             Microsoft::WRL::ComPtr<ID3DBlob> m_bytecodeBlob;
             Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-            unsigned int m_shaderResourceCount;
-            std::string m_path;
     };
 }

@@ -66,19 +66,21 @@ namespace nc::graphics
 
         isInitialized = true;
 
-        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Rasterizer>(Rasterizer::Mode::Wireframe));
-        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<Stencil>(Stencil::Mode::Off));
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Rasterizer>(Rasterizer::GetUID(Rasterizer::Mode::Wireframe), Rasterizer::Mode::Wireframe));
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Stencil>(Stencil::GetUID(Stencil::Mode::Off), Stencil::Mode::Off));
 
         // Add vertex shader
-        auto defaultShaderPath = nc::config::Get().graphics.d3dShadersPath;
-        auto pvs = GraphicsResourceManager::Acquire<VertexShader>(defaultShaderPath + "wireframevertexshader.cso");
+        const auto defaultShaderPath = nc::config::Get().graphics.d3dShadersPath;
+        const auto vertexShaderPath = defaultShaderPath + "wireframevertexshader.cso";
+        auto pvs = GraphicsResourceManager::AcquireOnDemand<VertexShader>(VertexShader::GetUID(vertexShaderPath), vertexShaderPath);
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
         WireframeTechnique::m_commonResources.push_back(std::move(pvs));
-        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<InputLayout>("wireframevertexshader", WireframeInputElementDesc, pvsbc));
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<InputLayout>(InputLayout::GetUID("wireframevertexshader"), WireframeInputElementDesc, pvsbc));
 
         // Add pixel shader
-        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::PixelShader>(defaultShaderPath + "wireframepixelshader.cso"));
-        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::Acquire<d3dresource::Blender>(BLENDER_TAG));
+        const auto pixelShaderPath = defaultShaderPath + "wireframepixelshader.cso";
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<PixelShader>(PixelShader::GetUID(pixelShaderPath), pixelShaderPath));
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Blender>(Blender::GetUID(BLENDER_TAG)));
     }
 
     void WireframeTechnique::BindCommonResources()

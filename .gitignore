@@ -1,4 +1,4 @@
-#standard c++ stuff
+#standard stuff
 *.obj
 *.o
 *.pch
@@ -6,6 +6,7 @@
 *.a
 *.exe
 *.out
+*.log
 
 #directories
 .vs/
@@ -13,9 +14,10 @@
 build/
 external/src/gtest/
 Testing/
-
-#cal's scratch dir
 scratch/
+
+#gprof analysis
+analysis.txt
 
 #imgui state file
 imgui.ini
@@ -29,10 +31,5 @@ imgui.ini
 !nc/lib/libglfw3.a
 !nc/lib/libglfw3dll.a
 
-#log
-*.log
-
-#gprof analysis
-analysis.txt
-
-!gen.exe
+!tools/gen.exe
+!tools/asset_builder/build.exe

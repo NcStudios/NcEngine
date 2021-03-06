@@ -24,69 +24,118 @@ namespace nc::graphics::d3dresource
         #endif
 
         public:
-            static void SetGraphics(Graphics* gfx)
-            {
-                Get().m_graphics = gfx;
-            }
+            static void SetGraphics(Graphics* gfx);
+            static Graphics* GetGraphics();
+            static uint32_t AssignId();
 
-            static Graphics* GetGraphics()
-            {
-                return Get().m_graphics;
-            }
+            /** Creates a resource of type T, forwarding Params to the constructor, and
+             *  maps it to uid. Returns whether load was succesful. */
+            template<std::derived_from<GraphicsResource> T, class...Params>
+            static bool Load(const std::string& uid, Params&&...p);
 
-            template<std::derived_from<GraphicsResource> T, typename...Params>
-            static GraphicsResource* Acquire(Params&&...p)
-            {
-                return Get().Acquire_<T>(std::forward<Params>(p)...);
-            }
+            /** @todo Unload and maybe UnloadAll */
 
-            template<std::derived_from<GraphicsResource> T, typename...Params>
-            static bool Exists(Params&&...p)
-            {
-                return Get().Exists_<T>(std::forward<Params>(p)...);
-            }
+            /** Returns whether a resource is mapped to uid. */
+            static bool IsLoaded(const std::string& uid);
 
-            static uint32_t AssignId()
-            {
-                return Get().m_resourceId++;
-            }
+            /** Returns a pointer to the resource mapped to uid, or nullptr on failure. */
+            static GraphicsResource* Acquire(const std::string& uid);
+
+            /** Returns a pointer to the resource mapped to uid. If one does not exist,
+             *  one will be loaded. */
+            template<std::derived_from<GraphicsResource> T, class...Params>
+            static GraphicsResource* AcquireOnDemand(const std::string& uid, Params&&...p);
 
         private:
             std::unordered_map<std::string, std::unique_ptr<GraphicsResource>> m_resources;
-            Graphics * m_graphics = nullptr;
+            Graphics* m_graphics = nullptr;
             uint32_t m_resourceId;
 
-            static GraphicsResourceManager& Get()
-            {
-                static GraphicsResourceManager instance;
-                return instance;
-            }
+            static GraphicsResourceManager& Get();
 
-            template<std::derived_from<GraphicsResource> T, typename...Params>
-            GraphicsResource* Acquire_(Params&&...p)
-            {
-                const auto key = T::GetUID(std::forward<Params>(p)...);
-                const auto i = m_resources.find(key);
-                if(i == m_resources.end())
-                {
-                    auto [it, result] = m_resources.emplace(key, std::make_unique<T>(std::forward<Params>(p)...));
-                    if(!result)
-                        throw std::runtime_error("GraphicsResourceManager::Acquire_ - failed to emplace ");
-                    return it->second.get();
-                }
-                return i->second.get();
-            }
+            template<std::derived_from<GraphicsResource> T, class...Params>
+            bool Load_(const std::string& uid, Params&&...p);
 
-            template<std::derived_from<GraphicsResource> T, typename...Params>
-            bool Exists_(Params&&...p)
-            {
-                const auto key = T::GetUID(std::forward<Params>(p)...);
-                const auto i = m_resources.find(key);
-                if(i == m_resources.end())
-                {
-                    return false;
-                }
-                return true;
-            }
+            bool IsLoaded_(const std::string& uid);
+
+            GraphicsResource* Acquire_(const std::string& uid);
+
+            template<std::derived_from<GraphicsResource> T, class...Params>
+            GraphicsResource* AcquireOnDemand_(const std::string& uid, Params&&...p);
     };
+
+    inline void GraphicsResourceManager::SetGraphics(Graphics* gfx)
+    {
+        Get().m_graphics = gfx;
+    }
+
+    inline Graphics* GraphicsResourceManager::GetGraphics()
+    {
+        return Get().m_graphics;
+    }
+
+    inline uint32_t GraphicsResourceManager::AssignId()
+    {
+        return Get().m_resourceId++;
+    }
+
+    inline GraphicsResourceManager& GraphicsResourceManager::Get()
+    {
+        static GraphicsResourceManager instance;
+        return instance;
+    }
+
+    template<std::derived_from<GraphicsResource> T, class...Params>
+    bool GraphicsResourceManager::Load(const std::string& uid, Params&&...p)
+    {
+        return Get().Load_<T>(uid, std::forward<Params>(p)...);
+    }
+
+    inline bool GraphicsResourceManager::IsLoaded(const std::string& uid)
+    {
+        return Get().IsLoaded_(uid);
+    }
+
+    inline GraphicsResource* GraphicsResourceManager::Acquire(const std::string& uid)
+    {
+        return Get().Acquire_(uid);
+    }
+
+    template<std::derived_from<GraphicsResource> T, class...Params>
+    GraphicsResource* GraphicsResourceManager::AcquireOnDemand(const std::string& uid, Params&&...p)
+    {
+        return Get().AcquireOnDemand_<T>(uid, std::forward<Params>(p)...);
+    }
+
+    template<std::derived_from<GraphicsResource> T, typename...Params>
+    bool GraphicsResourceManager::Load_(const std::string& uid, Params&&...p)
+    {
+        if(IsLoaded(uid))
+            return false;
+
+        auto [it, result] = m_resources.emplace(uid, std::make_unique<T>(std::forward<Params>(p)...));
+        return result;
+    }
+
+    inline bool GraphicsResourceManager::IsLoaded_(const std::string& uid)
+    {
+        return m_resources.end() != m_resources.find(uid);
+    }
+
+    inline GraphicsResource* GraphicsResourceManager::Acquire_(const std::string& uid)
+    {
+        if(const auto it = m_resources.find(uid); it != m_resources.end())
+            return it->second.get();
+        
+        return nullptr;
+    }
+
+    template<std::derived_from<GraphicsResource> T, typename...Params>
+    GraphicsResource* GraphicsResourceManager::AcquireOnDemand_(const std::string& uid, Params&&...p)
+    {
+        if(!IsLoaded_(uid))
+            Load_<T>(uid, std::forward<Params>(p)...);
+        
+        return Acquire_(uid);
+    }
 }
