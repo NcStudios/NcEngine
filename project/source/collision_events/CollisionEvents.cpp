@@ -60,6 +60,17 @@ namespace nc::sample
         auto bigSphere = prefab::Create(prefab::Resource::Sphere, {.position = Vector3::Left() * 5.0f, .scale = Vector3::Splat(3.0f), .tag = "Big Sphere"});
         AddComponent<Collider>(bigSphere, ColliderInfo{.type = ColliderType::Sphere});
         AddComponent<CollisionLogger>(bigSphere);
+
+
+        float startPos = -20.0f;
+        float spacing = 2.0f;
+
+        for(int i = 0; i < 50; ++i)
+        {
+            auto cube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{startPos + i * spacing, 0.0f, 5.0f}, .isStatic = true});
+            AddComponent<Collider>(cube, ColliderInfo{});
+            AddComponent<CollisionLogger>(cube);
+        }
     }
 
     void CollisionEvents::Unload()

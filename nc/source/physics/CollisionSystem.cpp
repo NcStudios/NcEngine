@@ -47,9 +47,8 @@ namespace nc::physics
     CollisionSystem::CollisionSystem()
         : m_colliderSystem{config::Get().memory.maxColliders},
           m_dynamicEstimates{},
-          m_staticEstimates{},
-          m_estimateOverlapDynamicVsDynamic{},
-          m_estimateOverlapDynamicVsStatic{},
+          m_broadEventsVsDynamic{},
+          m_broadEventsVsStatic{},
           m_currentCollisions{},
           m_previousCollisions{}
     {
@@ -68,8 +67,8 @@ namespace nc::physics
     void CollisionSystem::ClearState()
     {
         m_colliderSystem.Clear();
-        m_estimateOverlapDynamicVsDynamic.resize(0u);
-        m_estimateOverlapDynamicVsStatic.resize(0u);
+        m_broadEventsVsDynamic.resize(0u);
+        m_broadEventsVsStatic.resize(0u);
         m_currentCollisions.resize(0u);
         m_previousCollisions.resize(0u);
     }
@@ -77,18 +76,10 @@ namespace nc::physics
     void CollisionSystem::FetchEstimates()
     {
         auto& dynamicEstimates = m_dynamicEstimates;
-        auto dynamicData = m_colliderSystem.GetDynamicSOA();
+        auto* dynamicData = m_colliderSystem.GetDynamicSOA();
         ForEachIndex(dynamicData, [&dynamicEstimates, &dynamicData](uint32_t index)
         {
             dynamicEstimates.emplace_back(EstimateBoundingVolume(dynamicData->volumeData[index], dynamicData->transforms[index]), index);
-        });
-
-        /** @todo static boys should be in a tree, but where do we plant it? */
-        auto& staticEstimates = m_staticEstimates;
-        auto staticData = m_colliderSystem.GetStaticSOA();
-        ForEachIndex(staticData, [&staticEstimates, &staticData](uint32_t index)
-        {
-            staticEstimates.emplace_back(EstimateBoundingVolume(staticData->volumeData[index], staticData->transforms[index]), index);
         });
     }
 
@@ -100,22 +91,24 @@ namespace nc::physics
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
 
         const auto dynamicSize = m_dynamicEstimates.size();
+        auto* staticTree = m_colliderSystem.GetStaticTree();
         for(size_t i = 0u; i < dynamicSize; ++i)
         {
+            // Check vs other dynamic bodies
             for(size_t j = i + 1; j < dynamicSize; ++j)
             {
                 if(m_dynamicEstimates[i].volumeEstimate.Intersects(m_dynamicEstimates[j].volumeEstimate))
-                {
-                    m_estimateOverlapDynamicVsDynamic.emplace_back(m_dynamicEstimates[i].index, m_dynamicEstimates[j].index);
-                }
+                    m_broadEventsVsDynamic.emplace_back(m_dynamicEstimates[i].index, m_dynamicEstimates[j].index);
             }
-            /** Temporary check against statics - with a can-do attitude this can be done in log n time. */
-            for(const auto& staticPair : m_staticEstimates)
+
+            // Check vs bodies in static tree
+            for(auto* pair : staticTree->BroadCheck(m_dynamicEstimates[i].volumeEstimate))
             {
-                if(m_dynamicEstimates[i].volumeEstimate.Intersects(staticPair.volumeEstimate))
-                {
-                    m_estimateOverlapDynamicVsStatic.emplace_back(m_dynamicEstimates[i].index, staticPair.index);
-                }
+                // Because static volumes can exist in multiple tree nodes, identical intersections may be reported.
+                const auto beg = m_broadEventsVsStatic.cbegin();
+                const auto end = m_broadEventsVsStatic.cend();
+                if(end == std::find_if(beg, end, [pair](const auto& event) { return event.second->handle == pair->handle; }))
+                    m_broadEventsVsStatic.emplace_back(m_dynamicEstimates[i].index, pair);
             }
         }
 
@@ -126,30 +119,23 @@ namespace nc::physics
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
 
-        auto dynamicSystem = m_colliderSystem.GetDynamicSOA();
-        for(const auto& pair : m_estimateOverlapDynamicVsDynamic)
+        /** If a dynamic collider has broad collision with another dynamic + static we calculate its volume
+         *  twice here. How wacky does the code get if we compute it once? */
+
+        auto* dynamicSystem = m_colliderSystem.GetDynamicSOA();
+        for(const auto& [i, j] : m_broadEventsVsDynamic)
         {
-            const auto i = pair.first;
             const auto v1 = CalculateBoundingVolume(dynamicSystem->types[i], dynamicSystem->volumeData[i], dynamicSystem->transforms[i]);
-            const auto j = pair.second;
             const auto v2 = CalculateBoundingVolume(dynamicSystem->types[j], dynamicSystem->volumeData[j], dynamicSystem->transforms[j]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, v1, v2))
-            {
                 m_currentCollisions.emplace_back(dynamicSystem->handles[i], dynamicSystem->handles[j]);
-            }
         }
 
-        auto staticSystem = m_colliderSystem.GetStaticSOA();
-        for(const auto& pair : m_estimateOverlapDynamicVsStatic)
+        for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
         {
-            const auto i = pair.first;
-            const auto v1 = CalculateBoundingVolume(dynamicSystem->types[i], dynamicSystem->volumeData[i], dynamicSystem->transforms[i]);
-            const auto j = pair.second;
-            const auto v2 = CalculateBoundingVolume(staticSystem->types[j], staticSystem->volumeData[j], staticSystem->transforms[j]);
-            if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, v1, v2))
-            {
-                m_currentCollisions.emplace_back(dynamicSystem->handles[i], staticSystem->handles[j]);
-            }
+            const auto volume = CalculateBoundingVolume(dynamicSystem->types[dynamicIndex], dynamicSystem->volumeData[dynamicIndex], dynamicSystem->transforms[dynamicIndex]);
+            if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, volume, staticPair->volume))
+                m_currentCollisions.emplace_back(dynamicSystem->handles[dynamicIndex], static_cast<EntityHandle::Handle_t>(staticPair->handle));
         }
 
         NC_PROFILE_END();
@@ -212,9 +198,8 @@ namespace nc::physics
         m_previousCollisions = std::move(m_currentCollisions);
         m_currentCollisions.clear();
         m_dynamicEstimates.clear();
-        m_staticEstimates.clear();
-        m_estimateOverlapDynamicVsDynamic.clear();
-        m_estimateOverlapDynamicVsStatic.clear();
+        m_broadEventsVsDynamic.clear();
+        m_broadEventsVsStatic.clear();
     }
 
     #ifdef NC_EDITOR_ENABLED

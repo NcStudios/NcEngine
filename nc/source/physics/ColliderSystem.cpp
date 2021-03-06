@@ -5,8 +5,8 @@ namespace nc::physics
 {
     ColliderSystem::ColliderSystem(uint32_t maxColliders)
         : ComponentSystem<Collider>{maxColliders},
-          m_static{maxColliders},
-          m_dynamic{maxColliders},
+          m_dynamicSoA{maxColliders},
+          m_staticTree{},
           m_maxColliders{maxColliders},
           m_locations{}
     {
@@ -14,39 +14,58 @@ namespace nc::physics
 
     ColliderSystem::~ColliderSystem() = default;
 
-    ColliderSoA* ColliderSystem::GetStaticSOA()
+    ColliderTree* ColliderSystem::GetStaticTree()
     {
-        return &m_static;
+        return &m_staticTree;
     }
 
     ColliderSoA* ColliderSystem::GetDynamicSOA()
     {
-        return &m_dynamic;
+        return &m_dynamicSoA;
     }
 
-    Collider* ColliderSystem::Add(EntityHandle handle, ColliderInfo info)
+    Collider* ColliderSystem::AddStatic(EntityHandle handle, const ColliderInfo& info)
     {
-        auto& target = GetEntity(handle)->IsStatic ? m_static : m_dynamic;
+        // consider max colliders?
 
-        if(target.nextFree >= m_maxColliders) // throw?
+        m_staticTree.Add(handle, info);
+
+        // @todo add to m_locations?
+
+        return ComponentSystem<Collider>::Add(handle, info);
+    }
+
+    Collider* ColliderSystem::AddDynamic(EntityHandle handle, const ColliderInfo& info)
+    {
+        // this doesn't make sense, max colliders should be split across both types
+        if(m_dynamicSoA.nextFree >= m_maxColliders)
             return nullptr;
 
-        uint32_t targetPos = [&target]()
+
+        uint32_t pos = [this]()
         {
-            if(target.gaps.empty())
-                return target.nextFree++;
+            if(m_dynamicSoA.gaps.empty())
+                return m_dynamicSoA.nextFree++;
             
-            auto out = target.gaps.back();
-            target.gaps.pop_back();
+            auto out = m_dynamicSoA.gaps.back();
+            m_dynamicSoA.gaps.pop_back();
             return out;
         }();
 
-        target.handles[targetPos] = static_cast<EntityHandle::Handle_t>(handle);
-        target.transforms[targetPos] = &GetComponent<Transform>(handle)->GetTransformationMatrix();
-        target.volumeData[targetPos] = ColliderSoA::CenterExtentPair{{info.offset.x, info.offset.y, info.offset.z}, {info.scale.x / 2.0f, info.scale.y / 2.0f, info.scale.z / 2.0f}};
-        target.types[targetPos] = info.type;
-        m_locations.emplace_back(handle, targetPos, &target);
+        m_dynamicSoA.handles[pos] = static_cast<EntityHandle::Handle_t>(handle);
+        m_dynamicSoA.transforms[pos] = &GetComponent<Transform>(handle)->GetTransformationMatrix();
+        m_dynamicSoA.volumeData[pos] = ColliderSoA::CenterExtentPair{{info.offset.x, info.offset.y, info.offset.z}, {info.scale.x / 2.0f, info.scale.y / 2.0f, info.scale.z / 2.0f}};
+        m_dynamicSoA.types[pos] = info.type;
+        m_locations.emplace_back(handle, pos, &m_dynamicSoA);
         return ComponentSystem<Collider>::Add(handle, info);
+    }
+
+    Collider* ColliderSystem::Add(EntityHandle handle, const ColliderInfo& info)
+    {
+        if(GetEntity(handle)->IsStatic)
+            return AddStatic(handle, info);
+        
+        return AddDynamic(handle, info);
     }
 
     bool ColliderSystem::Remove(EntityHandle handle)
@@ -63,20 +82,31 @@ namespace nc::physics
         if(pos == m_locations.cend())
             throw std::runtime_error("ColliderSystem::Remove - ComponentSystem and SOA not synced");
 
-        auto index = pos->index;
-        auto& target = GetEntity(handle)->IsStatic ? m_static : m_dynamic;
-        target.gaps.push_back(index);
-        std::sort(target.gaps.begin(), target.gaps.end());
+        if(GetEntity(handle)->IsStatic)
+            RemoveStatic(handle);
+        else
+            RemoveDynamic(pos->index);
+        
         return true;
+    }
+
+    void ColliderSystem::RemoveStatic(EntityHandle handle)
+    {
+        m_staticTree.Remove(handle);
+    }
+
+    void ColliderSystem::RemoveDynamic(uint32_t index)
+    {
+        m_dynamicSoA.gaps.push_back(index);
+        std::sort(m_dynamicSoA.gaps.begin(), m_dynamicSoA.gaps.end());
     }
 
     void ColliderSystem::Clear()
     {
         ComponentSystem::Clear();
-        m_dynamic.gaps.resize(0u);
-        m_dynamic.nextFree = 0u;
-        m_static.gaps.resize(0u);
-        m_static.nextFree = 0u;
+        m_dynamicSoA.gaps.resize(0u);
+        m_dynamicSoA.nextFree = 0u;
+        m_staticTree.Clear();
         m_locations.resize(0u);
     }
 } // namespace nc::physics

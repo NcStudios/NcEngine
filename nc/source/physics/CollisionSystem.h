@@ -29,6 +29,14 @@ namespace nc::physics
         uint32_t second;
     };
 
+    struct BroadDetectVsStaticEvent
+    {
+        uint32_t first;
+        Subspace::HandleVolumePair* second;
+        //EntityHandle::Handle_t secondHandle;
+        //Collider::BoundingVolume* secondVolume;
+    };
+
     // Produced by narrow detection, consumed by compare/notify
     struct NarrowDetectEvent
     {
@@ -50,9 +58,8 @@ namespace nc::physics
         private:
             ColliderSystem m_colliderSystem;
             std::vector<EstimateData> m_dynamicEstimates;
-            std::vector<EstimateData> m_staticEstimates;
-            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsDynamic;
-            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsStatic;
+            std::vector<BroadDetectEvent> m_broadEventsVsDynamic;
+            std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
 
