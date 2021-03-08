@@ -1,40 +1,8 @@
 #include "CollisionSystem.h"
+#include "CollisionUtility.h"
 #include "config/Config.h"
 #include "debug/Profiler.h"
 #include "directx/math/DirectXCollision.h"
-
-namespace
-{
-    DirectX::BoundingSphere EstimateBoundingVolume(const nc::physics::ColliderSoA::CenterExtentPair& volumeData, const DirectX::XMMATRIX* transform)
-    {
-        const auto& extents = volumeData.extents;
-        const auto radius = sqrt(extents.x * extents.x + extents.y * extents.y + extents.z * extents.z);
-        DirectX::BoundingSphere out{volumeData.center, radius};
-        out.Transform(out, *transform);
-        return out;
-    }
-
-    nc::Collider::BoundingVolume CalculateBoundingVolume(nc::ColliderType type, const nc::physics::ColliderSoA::CenterExtentPair& volumeData, const DirectX::XMMATRIX* transform)
-    {
-        switch(type)
-        {
-            case nc::ColliderType::Box:
-            {
-                DirectX::BoundingOrientedBox out(volumeData.center, volumeData.extents, {0,0,0,1.0f});
-                out.Transform(out, *transform);
-                return {out};
-            }
-            case nc::ColliderType::Sphere:
-            {
-                DirectX::BoundingSphere out{volumeData.center, volumeData.extents.x};
-                out.Transform(out, *transform);
-                return {out};
-            }
-        }
-
-        throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");
-    }
-}
 
 namespace nc::physics
 {
@@ -75,12 +43,7 @@ namespace nc::physics
 
     void CollisionSystem::FetchEstimates()
     {
-        auto& dynamicEstimates = m_dynamicEstimates;
-        auto* dynamicData = m_colliderSystem.GetDynamicSOA();
-        ForEachIndex(dynamicData, [&dynamicEstimates, &dynamicData](uint32_t index)
-        {
-            dynamicEstimates.emplace_back(EstimateBoundingVolume(dynamicData->volumeData[index], dynamicData->transforms[index]), index);
-        });
+        m_colliderSystem.GetDynamicSOA()->CalculateEstimates(&m_dynamicEstimates);
     }
 
     void CollisionSystem::BroadDetection()
@@ -102,7 +65,7 @@ namespace nc::physics
             }
 
             // Check vs bodies in static tree
-            for(auto* pair : staticTree->BroadCheck(m_dynamicEstimates[i].volumeEstimate))
+            for(const auto* pair : staticTree->BroadCheck(m_dynamicEstimates[i].volumeEstimate))
             {
                 // Because static volumes can exist in multiple tree nodes, identical intersections may be reported.
                 const auto beg = m_broadEventsVsStatic.cbegin();
@@ -122,20 +85,24 @@ namespace nc::physics
         /** If a dynamic collider has broad collision with another dynamic + static we calculate its volume
          *  twice here. How wacky does the code get if we compute it once? */
 
-        auto* dynamicSystem = m_colliderSystem.GetDynamicSOA();
+        auto* dynamicSoA = m_colliderSystem.GetDynamicSOA();
+        const auto& handles = dynamicSoA->GetHandles();
+        const auto& types = dynamicSoA->GetTypes();
+        const auto& transforms = dynamicSoA->GetTransforms();
+        const auto& centerExtentPairs = dynamicSoA->GetVolumeProperties();
         for(const auto& [i, j] : m_broadEventsVsDynamic)
         {
-            const auto v1 = CalculateBoundingVolume(dynamicSystem->types[i], dynamicSystem->volumeData[i], dynamicSystem->transforms[i]);
-            const auto v2 = CalculateBoundingVolume(dynamicSystem->types[j], dynamicSystem->volumeData[j], dynamicSystem->transforms[j]);
+            const auto v1 = CalculateBoundingVolume(types[i], centerExtentPairs[i], transforms[i]);
+            const auto v2 = CalculateBoundingVolume(types[j], centerExtentPairs[j], transforms[j]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, v1, v2))
-                m_currentCollisions.emplace_back(dynamicSystem->handles[i], dynamicSystem->handles[j]);
+                m_currentCollisions.emplace_back(handles[i], handles[j]);
         }
 
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
         {
-            const auto volume = CalculateBoundingVolume(dynamicSystem->types[dynamicIndex], dynamicSystem->volumeData[dynamicIndex], dynamicSystem->transforms[dynamicIndex]);
+            const auto volume = CalculateBoundingVolume(types[dynamicIndex], centerExtentPairs[dynamicIndex], transforms[dynamicIndex]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, volume, staticPair->volume))
-                m_currentCollisions.emplace_back(dynamicSystem->handles[dynamicIndex], static_cast<EntityHandle::Handle_t>(staticPair->handle));
+                m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityHandle::Handle_t>(staticPair->handle));
         }
 
         NC_PROFILE_END();

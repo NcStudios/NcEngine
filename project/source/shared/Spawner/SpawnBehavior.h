@@ -12,7 +12,8 @@ namespace nc::sample
      *  Kinematic properties describe constant velocity and rotation around an axis. If enabled, additional
      *  components will be attached to spawned objects to handle motion.
      * 
-     *  Use Vector3::Zero() to disable options.*/
+     *  Use Vector3::Zero() to disable options. The spawnAsStaticEntity property will be ignored unless all
+     *  kinematic properties are zero. */
 
     struct SpawnBehavior
     {
@@ -26,5 +27,7 @@ namespace nc::sample
         Vector3 velocityRandomRange = Vector3::Zero();
         Vector3 rotationAxisRandomRange = Vector3::Zero();
         float thetaRandomRange = 0.0f;
+
+        bool spawnAsStaticEntity = false;
     };
 }

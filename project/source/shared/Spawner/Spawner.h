@@ -29,6 +29,7 @@ namespace nc::sample
             prefab::Resource m_resource;
             bool m_applyConstantVelocity;
             bool m_applyConstantRotation;
+            bool m_spawnStaticEntities;
     };
 
     inline Spawner::Spawner(EntityHandle handle, prefab::Resource resource, SpawnBehavior behavior, SpawnExtension extension)
@@ -39,7 +40,10 @@ namespace nc::sample
           m_resource{resource},
           m_applyConstantVelocity{Vector3::Zero() != behavior.velocityRandomRange},
           m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxisRandomRange &&
-                                  0.0f != behavior.thetaRandomRange}
+                                  0.0f != behavior.thetaRandomRange},
+          m_spawnStaticEntities{behavior.spawnAsStaticEntity &&
+                                !m_applyConstantRotation &&
+                                !m_applyConstantRotation}
     {
     }
 
@@ -47,7 +51,13 @@ namespace nc::sample
     {
         std::generate_n(std::back_inserter(m_entities), count, [this]()
         {
-            auto handle = prefab::Create(m_resource, {.position = m_generator.Position(), .rotation = Quaternion::FromEulerAngles(m_generator.Rotation())});
+            auto handle = prefab::Create(m_resource,
+            {
+                .position = m_generator.Position(),
+                .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
+                .isStatic = m_spawnStaticEntities
+            });
+
             if(m_applyConstantVelocity)
                 AddComponent<ConstantTranslation>(handle, m_generator.Velocity());
             if(m_applyConstantRotation)

@@ -29,14 +29,9 @@ namespace nc::physics
             using ComponentSystem::GetComponents;
 
         private:
-            Collider* AddStatic(EntityHandle handle, const ColliderInfo& info);
-            Collider* AddDynamic(EntityHandle handle, const ColliderInfo& info);
-            void RemoveStatic(EntityHandle handle);
-            void RemoveDynamic(uint32_t index);
-
             ColliderSoA m_dynamicSoA;
             ColliderTree m_staticTree;
             const uint32_t m_maxColliders;
-            std::vector<ColliderDataLocation> m_locations;
+            //std::vector<ColliderDataLocation> m_locations;
     };
 } // namespace nc::physics

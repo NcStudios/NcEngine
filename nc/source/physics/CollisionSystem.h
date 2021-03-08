@@ -2,6 +2,7 @@
 
 #include "Ecs.h"
 #include "ColliderSystem.h"
+#include "CollisionUtility.h"
 
 #include <cstdint>
 #include <vector>
@@ -15,29 +16,25 @@ namespace nc::physics
         Enter, Stay, Exit
     };
 
-    // Produced by fetch, consumed by broad detection
-    struct EstimateData
-    {
-        DirectX::BoundingSphere volumeEstimate;
-        uint32_t index;
-    };
-
-    // Produced by broad detection, consumed by narrow detection
-    struct BroadDetectEvent
+    /** Indices of two dynamic collider's positions in SoA.
+     *  Produced by broad detection, consumed by narrow detection. */
+    struct BroadDetectVsDynamicEvent
     {
         uint32_t first;
         uint32_t second;
     };
 
+    /** Index of dynamic collider's SoA position and pointer to static
+     *  collider tree entry. Produced by broad detection, consumed by
+     *  narrow detection. */
     struct BroadDetectVsStaticEvent
     {
         uint32_t first;
-        Subspace::HandleVolumePair* second;
-        //EntityHandle::Handle_t secondHandle;
-        //Collider::BoundingVolume* secondVolume;
+        const StaticTreeEntry* second;
     };
 
-    // Produced by narrow detection, consumed by compare/notify
+    /** EntityHandles of two colliding objects. Produced by narrow detection,
+     *  consumed by compare/notify. */
     struct NarrowDetectEvent
     {
         EntityHandle::Handle_t first;
@@ -57,8 +54,8 @@ namespace nc::physics
 
         private:
             ColliderSystem m_colliderSystem;
-            std::vector<EstimateData> m_dynamicEstimates;
-            std::vector<BroadDetectEvent> m_broadEventsVsDynamic;
+            std::vector<DynamicEstimate> m_dynamicEstimates;
+            std::vector<BroadDetectVsDynamicEvent> m_broadEventsVsDynamic;
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
