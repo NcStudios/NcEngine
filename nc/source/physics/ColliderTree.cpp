@@ -4,167 +4,107 @@
 namespace
 {
     constexpr auto initialExtents = 500.0f;
-    constexpr uint32_t SubspaceBranchCount = 8u;
-    constexpr uint32_t MaxVolumesPerPartition = 20u;
-
-    constexpr size_t WorldspacePartitionIndex = 0u;
-    constexpr size_t StaticTreeEntryIndex = 1u;
+    constexpr size_t BranchDegree = 8u;
+    constexpr size_t OctantDensityThreshold = 20u;
+    constexpr size_t LeafNodeIndex = 0u;
+    constexpr size_t InnerNodeIndex = 1u;
 }
 
 namespace nc::physics
 {
-    WorldspacePartition::WorldspacePartition(DirectX::XMFLOAT3 center, float halfSideLength)
+    Octant::Octant(DirectX::XMFLOAT3 center, float halfSideLength)
         : m_partitionBoundingVolume{center, {halfSideLength, halfSideLength, halfSideLength}},
-          m_data{std::vector<const StaticTreeEntry*>{}}
-          //m_collidersInPartition{},
-          //m_subspaces{},
-          //isLeaf{true}
+          m_data{std::vector<const StaticTreeEntry*>{}} // don't default insert!!
     {
-        std::get<StaticTreeEntryIndex>(m_data).reserve(MaxVolumesPerPartition);
-        //m_collidersInPartition.reserve(MaxVolumesPerPartition);
-        //m_subspaces.reserve(SubspaceBranchCount);
+        std::get<LeafNodeIndex>(m_data).reserve(OctantDensityThreshold);
     }
 
-    void WorldspacePartition::Add(const StaticTreeEntry* colliderData)
+    void Octant::Add(const StaticTreeEntry* newEntry)
     {
-        if(!Contains(colliderData->volume))
+        if(!Contains(newEntry->volume))
             return;
 
-        if(m_data.index() == StaticTreeEntryIndex)
+        if(auto* staticColliders = std::get_if<LeafNodeIndex>(&m_data); staticColliders)
         {
-            auto& entries = std::get<StaticTreeEntryIndex>(m_data);
-            if(entries.size() < MaxVolumesPerPartition)
+            if(staticColliders->size() < OctantDensityThreshold)
             {
-                entries.push_back(colliderData);
+                staticColliders->push_back(newEntry);
                 return;
             }
 
             Branch();
         }
 
-        AddToChildren(colliderData);
-
-        // if(isLeaf)
-        // {
-        //     if(m_collidersInPartition.size() < MaxVolumesPerPartition)
-        //     {
-        //         m_collidersInPartition.push_back(colliderData);
-        //         return;
-        //     }
-
-        //     Branch();
-        // }
-        
-        // AddToChildren(colliderData);
+        AddToChildren(newEntry);
     }
 
-    void WorldspacePartition::Branch()
+    void Octant::Branch()
     {
-        auto entriesCopy = std::get<StaticTreeEntryIndex>(m_data);
-
-
-        //isLeaf = false;
-        const auto newHalfSideLength = m_partitionBoundingVolume.Extents.x / 2.0f;
+        // calculate points for children
+        const auto newExtent = m_partitionBoundingVolume.Extents.x / 2.0f;
         const auto& [centerX, centerY, centerZ] = m_partitionBoundingVolume.Center;
-        const auto xMin = centerX - newHalfSideLength;
-        const auto xMax = centerX + newHalfSideLength;
-        const auto yMin = centerY - newHalfSideLength;
-        const auto yMax = centerY + newHalfSideLength;
-        const auto zMin = centerZ - newHalfSideLength;
-        const auto zMax = centerZ + newHalfSideLength;
+        const auto xMin = centerX - newExtent;
+        const auto xMax = centerX + newExtent;
+        const auto yMin = centerY - newExtent;
+        const auto yMax = centerY + newExtent;
+        const auto zMin = centerZ - newExtent;
+        const auto zMax = centerZ + newExtent;
 
-        m_data = std::vector<WorldspacePartition>{};
-        auto& subspaces = std::get<WorldspacePartitionIndex>(m_data);
-        subspaces.reserve(8u);
+        // pull colliders out of variant
+        auto containedColliders = std::move(std::get<LeafNodeIndex>(m_data));
+        // is vec actually moved?
 
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMin, zMin}, newHalfSideLength);
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMin, zMax}, newHalfSideLength);
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMax, zMin}, newHalfSideLength);
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMax, zMax}, newHalfSideLength);
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMin, zMin}, newHalfSideLength);
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMin, zMax}, newHalfSideLength);
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMax, zMin}, newHalfSideLength);
-        subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMax, zMax}, newHalfSideLength);
+        // replace collider data with children octants
+        m_data.emplace<InnerNodeIndex>(std::vector<Octant>
+        {
+            Octant{DirectX::XMFLOAT3{xMin, yMin, zMin}, newExtent},
+            Octant{DirectX::XMFLOAT3{xMin, yMin, zMax}, newExtent},
+            Octant{DirectX::XMFLOAT3{xMin, yMax, zMin}, newExtent},
+            Octant{DirectX::XMFLOAT3{xMin, yMax, zMax}, newExtent},
+            Octant{DirectX::XMFLOAT3{xMax, yMin, zMin}, newExtent},
+            Octant{DirectX::XMFLOAT3{xMax, yMin, zMax}, newExtent},
+            Octant{DirectX::XMFLOAT3{xMax, yMax, zMin}, newExtent},
+            Octant{DirectX::XMFLOAT3{xMax, yMax, zMax}, newExtent}
+        });
 
-        for(const auto* colliderData : entriesCopy)
-            AddToChildren(colliderData);
-
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMin, zMin}, newHalfSideLength);
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMin, zMax}, newHalfSideLength);
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMax, zMin}, newHalfSideLength);
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMin, yMax, zMax}, newHalfSideLength);
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMin, zMin}, newHalfSideLength);
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMin, zMax}, newHalfSideLength);
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMax, zMin}, newHalfSideLength);
-        // m_subspaces.emplace_back(DirectX::XMFLOAT3{xMax, yMax, zMax}, newHalfSideLength);
-
-        // for(const auto* colliderData : m_collidersInPartition)
-        //     AddToChildren(colliderData);
-
-        // m_collidersInPartition.clear();
+        // pass colliders onto children
+        for(const auto* collider : containedColliders)
+            AddToChildren(collider);
     }
 
-    void WorldspacePartition::Clear()
+    void Octant::Clear()
     {
-        m_data = std::vector<const StaticTreeEntry*>{};
-        //m_collidersInPartition.clear();
-        //m_subspaces.clear();
-        //isLeaf = true;
+        auto& entries = m_data.emplace<LeafNodeIndex>(std::vector<const StaticTreeEntry*>{});
+        entries.reserve(OctantDensityThreshold);
     }
 
-    void WorldspacePartition::BroadCheck(const DirectX::BoundingSphere& dynamicVolume, std::vector<const StaticTreeEntry*>* out) const
+    void Octant::BroadCheck(const DirectX::BoundingSphere& dynamicEstimate, std::vector<const StaticTreeEntry*>* out) const
     {
-        if(!Contains(dynamicVolume))
+        if(!Contains(dynamicEstimate))
             return;
 
-        if(m_data.index() == StaticTreeEntryIndex)
+        if(const auto* children = std::get_if<InnerNodeIndex>(&m_data); children)
         {
-            const auto& entries = std::get<StaticTreeEntryIndex>(m_data);
-            for(const auto* colliderData : entries)
-            {
-                if(std::visit([&dynamicVolume](auto&& staticVolume) { return dynamicVolume.Intersects(staticVolume); }, colliderData->volume))
-                    out->emplace_back(colliderData);
-            }
+            for(const auto& child : *children)
+                child.BroadCheck(dynamicEstimate, out);
 
             return;
         }
 
-        const auto& subspaces = std::get<WorldspacePartitionIndex>(m_data);
-        for(const auto& childSpace : subspaces)
+        for(const auto* entry : std::get<LeafNodeIndex>(m_data))
         {
-            childSpace.BroadCheck(dynamicVolume, out);
+            if(std::visit([&dynamicEstimate](auto&& staticVolume) { return dynamicEstimate.Intersects(staticVolume); }, entry->volume))
+                    out->emplace_back(entry);
         }
-
-        // if(isLeaf)
-        // {
-        //     for(const auto* colliderData : m_collidersInPartition)
-        //     {
-        //         if(std::visit([&dynamicVolume](auto&& staticVolume) { return dynamicVolume.Intersects(staticVolume); }, colliderData->volume))
-        //             out->emplace_back(colliderData);
-        //     }
-
-        //     return;
-        // }
-
-        // for(const auto& childSpace : m_subspaces)
-        // {
-        //     childSpace.BroadCheck(dynamicVolume, out);
-        // }
     }
 
-    void WorldspacePartition::AddToChildren(const StaticTreeEntry* colliderData)
+    void Octant::AddToChildren(const StaticTreeEntry* colliderData)
     {
-        for(auto& childSpace : std::get<WorldspacePartitionIndex>(m_data))
-        {
+        for(auto& childSpace : std::get<InnerNodeIndex>(m_data))
             childSpace.Add(colliderData);
-        }
-        // for(auto& childSpace : m_subspaces)
-        // {
-        //     childSpace.Add(colliderData);
-        // }
     }
 
-    bool WorldspacePartition::Contains(const Collider::BoundingVolume& other) const
+    bool Octant::Contains(const Collider::BoundingVolume& other) const
     {
         return std::visit([this](auto&& a) { return a.Intersects(m_partitionBoundingVolume); }, other);
     }

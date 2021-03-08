@@ -12,9 +12,6 @@ namespace nc::physics
     /** SoA representation of active Colliders for CollisionSystem consumption */
     class ColliderSoA
     {
-
-        /** @todo try using arrays */
-
         public:
             ColliderSoA(size_t maxColliders);
 
