@@ -32,6 +32,5 @@ namespace nc::physics
             ColliderSoA m_dynamicSoA;
             ColliderTree m_staticTree;
             const uint32_t m_maxColliders;
-            //std::vector<ColliderDataLocation> m_locations;
     };
 } // namespace nc::physics

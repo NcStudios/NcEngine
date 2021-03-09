@@ -14,7 +14,7 @@ namespace nc::physics
 {
     Octant::Octant(DirectX::XMFLOAT3 center, float halfSideLength)
         : m_partitionBoundingVolume{center, {halfSideLength, halfSideLength, halfSideLength}},
-          m_data{std::vector<const StaticTreeEntry*>{}} // don't default insert!!
+          m_data{LeafNodeDataType{}} // don't default insert!!
     {
         std::get<LeafNodeIndex>(m_data).reserve(OctantDensityThreshold);
     }
@@ -32,13 +32,13 @@ namespace nc::physics
                 return;
             }
 
-            Branch();
+            Subdivide();
         }
 
         AddToChildren(newEntry);
     }
 
-    void Octant::Branch()
+    void Octant::Subdivide()
     {
         // calculate points for children
         const auto newExtent = m_partitionBoundingVolume.Extents.x / 2.0f;
@@ -55,7 +55,7 @@ namespace nc::physics
         // is vec actually moved?
 
         // replace collider data with children octants
-        m_data.emplace<InnerNodeIndex>(std::vector<Octant>
+        m_data.emplace<InnerNodeIndex>(InnerNodeDataType
         {
             Octant{DirectX::XMFLOAT3{xMin, yMin, zMin}, newExtent},
             Octant{DirectX::XMFLOAT3{xMin, yMin, zMax}, newExtent},
@@ -74,7 +74,7 @@ namespace nc::physics
 
     void Octant::Clear()
     {
-        auto& entries = m_data.emplace<LeafNodeIndex>(std::vector<const StaticTreeEntry*>{});
+        auto& entries = m_data.emplace<LeafNodeIndex>(LeafNodeDataType{});
         entries.reserve(OctantDensityThreshold);
     }
 
