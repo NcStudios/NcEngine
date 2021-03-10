@@ -11,22 +11,22 @@ namespace nc::physics
 {
     /** Here's a thought: can dynamic colliders be in a tree too if we add them using
      *  their estimates? It would have to be built every frame, but we're already doing
-     *  n choose 2 sphere comparisons per frame. Could be something like:
-     * 
-     *  for each collider [n] compare to octants until we find a leaf [log(avgTreeHeight)]
-     *  for each leaf in tree [n / DensityThreshold] compare each unordered pair [DensityThreshold choose 2]
-     *  = n * log(height) + (n / thresh) * thresh * thresh
-     *  = n * log(height) + n * thresh^2
-     *  = n * thresh^2
+     *  a minimum of n choose 2 sphere comparisons per frame.
+     *  
+     *  Could end up with:
+     *  for each collider [n]
+     *      compare to octants until we find a leaf [log(avgTreeHeight)]
+     *  for each leaf in tree [n / DensityThreshold]
+     *      compare each unordered pair [DensityThreshold choose 2]
+     *  or: n*log(height) + (n/thresh)*thresh*thresh = n*log(height) + n*thresh^2 = n*thresh^2
      * 
      *  if we make thresh = log(n) [or maybe log(maxColliders) for easy peasy-ness]
-     *  = n * log(n) * log(n)
-     *  = n * log(n)
+     *  = n * log(n) * log(n) = n * log(n)
      **/
 
     /** @todo This may be faster if the vectors in here came from an allocator. Also,
      *  they don't have to be vectors. Array is slower because it makes the nodes too large,
-     *  but maybe ptr to array from allocator?
+     *  but maybe ptr to array from allocator? */
 
     /** ColliderTree node representing a cubic chunk of the world. Leaf nodes store
      *  data for each static collider contained within its bounding volume, while
