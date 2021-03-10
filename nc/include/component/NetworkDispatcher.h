@@ -14,6 +14,7 @@ namespace nc
             net::NetworkHandle networkHandle;
 
             NetworkDispatcher(EntityHandle handle) noexcept;
+            ~NetworkDispatcher() = default;
             NetworkDispatcher(const NetworkDispatcher&) = delete;
             NetworkDispatcher(NetworkDispatcher&&) = delete;
             NetworkDispatcher& operator=(const NetworkDispatcher&) = delete;

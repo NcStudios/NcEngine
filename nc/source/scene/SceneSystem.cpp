@@ -10,7 +10,7 @@ namespace
 namespace nc::scene
 {
     /* Api Function Implementation */
-    void Change(std::unique_ptr<scene::Scene>&& scene)
+    void Change(std::unique_ptr<scene::Scene> scene)
     {
         V_LOG("Changing scene");
         IF_THROW(!g_instance, "scene::Change - No SceneSystem instance set");
@@ -26,7 +26,7 @@ namespace nc::scene
         g_instance = this;
     }
 
-    void SceneSystem::QueueSceneChange(std::unique_ptr<Scene>&& swapScene)
+    void SceneSystem::QueueSceneChange(std::unique_ptr<Scene> swapScene)
     {
         m_swapScene = std::move(swapScene);
         m_isSceneChangeScheduled = true;

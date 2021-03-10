@@ -30,9 +30,8 @@ namespace nc::window
         g_instance->RegisterOnResizeReceiver(receiver);
     }
 
-    void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver)
+    void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept
     {
-        IF_THROW(!g_instance, "window::UnregisterOnResizeReceiver - g_instance is not set");
         g_instance->UnregisterOnResizeReceiver(receiver);
     }
 
@@ -127,17 +126,17 @@ namespace nc::window
         return m_hInstance;
     }
 
-    Vector2 WindowImpl::GetDimensions() const
+    Vector2 WindowImpl::GetDimensions() const noexcept
     {
         return m_dimensions;
     }
 
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback)
+    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept
     {
         GraphicsOnResizeCallback = callback;
     }
 
-    void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback)
+    void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
     {
         UIWndMessageCallback = callback;
     }
@@ -147,16 +146,14 @@ namespace nc::window
         m_onResizeReceivers.push_back(receiver);
     }
 
-    void WindowImpl::UnregisterOnResizeReceiver(IOnResizeReceiver* receiver)
+    void WindowImpl::UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept
     {
         auto pos = std::find(m_onResizeReceivers.begin(), m_onResizeReceivers.end(), receiver);
-        if(pos == m_onResizeReceivers.end())
+        if(pos != m_onResizeReceivers.end())
         {
-            throw std::runtime_error("Attempt to unregister an unregistered IOnResizeReceiver");
+            *pos = m_onResizeReceivers.back();
+            m_onResizeReceivers.pop_back();
         }
-
-        *pos = m_onResizeReceivers.back();
-        m_onResizeReceivers.pop_back();
     }
 
     void WindowImpl::OnResize(float width, float height, WPARAM windowArg)

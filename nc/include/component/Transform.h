@@ -17,6 +17,7 @@ namespace nc
     {
         public:
             Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale);
+            ~Transform() = default;
             Transform(const Transform&) = delete;
             Transform(Transform&&) = delete;
             Transform& operator=(const Transform&) = delete;

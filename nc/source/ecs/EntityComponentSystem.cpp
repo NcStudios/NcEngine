@@ -45,38 +45,9 @@ template<> ComponentSystem<NetworkDispatcher>* EntityComponentSystem::GetSystem<
     return m_networkDispatcherSystem.get();
 }
 
-void EntityComponentSystem::SendFrameUpdate(float dt)
+EntityMap& EntityComponentSystem::GetActiveEntities() noexcept
 {
-    for(auto& pair : m_active)
-    {
-        pair.second.SendFrameUpdate(dt);
-    }
-}
-
-void EntityComponentSystem::SendFixedUpdate()
-{
-    for(auto& pair : m_active)
-    {
-        pair.second.SendFixedUpdate();
-    }
-}
-
-void EntityComponentSystem::SendOnDestroy()
-{
-    for(auto & pair : m_toDestroy)
-    {
-        Entity* entityPtr = GetEntityPtrFromAnyMap(pair.second.Handle);
-        if (entityPtr == nullptr)
-        {
-            continue;
-        }
-
-        pair.second.SendOnDestroy();
-        m_transformSystem->Remove(pair.first);
-        m_rendererSystem->Remove(pair.first);
-        m_lightSystem->Remove(pair.first);
-    }
-    m_toDestroy.clear();
+    return m_active;
 }
 
 EntityHandle EntityComponentSystem::CreateEntity(EntityInfo info)
@@ -97,9 +68,8 @@ bool EntityComponentSystem::DestroyEntity(EntityHandle handle)
 {
     if(!DoesEntityExist(handle))
         return false;
-    auto& containingMap = GetMapContainingEntity(handle);
-    GetToDestroyEntities().emplace(handle, std::move(containingMap.at(handle)));
-    containingMap.erase(handle);
+
+    m_toDestroy.insert(m_active.extract(handle));
     return true;
 }
 
@@ -108,46 +78,48 @@ Entity* EntityComponentSystem::GetEntity(EntityHandle handle)
     if (!DoesEntityExist(handle))
         return nullptr;
 
-    auto& containingMap = GetMapContainingEntity(handle);
-    return &containingMap.at(handle); 
+    return &m_active.at(handle);
 }
 
 Entity* EntityComponentSystem::GetEntity(const std::string& tag)
 {
-    for(auto& pair : m_active)
+    for(auto& [handle, entity] : m_active)
     {
-        if(tag == pair.second.Tag)
-        {
-            return &pair.second;
-        }
+        if(tag == entity.Tag)
+            return &entity;
     }
+
     return nullptr;
 }
 
-EntityMap& EntityComponentSystem::GetMapContainingEntity(const EntityHandle handle, bool checkAll)
+void EntityComponentSystem::SendFrameUpdate(float dt)
 {
-    if (m_active.count(handle) > 0)
-        return m_active;
-
-    if (checkAll && (m_toDestroy.count(handle) > 0) ) //only check toDestroy if checkAll flag is set
-        return m_toDestroy;
-
-    throw std::runtime_error("Entity not found.");
+    for(auto& [handle, entity] : m_active)
+    {
+        entity.SendFrameUpdate(dt);
+    }
 }
 
-EntityMap& EntityComponentSystem::GetActiveEntities() noexcept
+void EntityComponentSystem::SendFixedUpdate()
 {
-    return m_active;
+    for(auto& [handle, entity] : m_active)
+    {
+        entity.SendFixedUpdate();
+    }
 }
 
-EntityMap& EntityComponentSystem::GetToDestroyEntities() noexcept
+void EntityComponentSystem::SendOnDestroy()
 {
-    return m_toDestroy;
-}
+    for(auto& [handle, entity] : m_toDestroy)
+    {
+        entity.SendOnDestroy();
+        m_transformSystem->Remove(handle);
+        m_rendererSystem->Remove(handle);
+        m_lightSystem->Remove(handle);
+        m_networkDispatcherSystem->Remove(handle);
+    }
 
-Entity* EntityComponentSystem::GetEntityPtrFromAnyMap(const EntityHandle handle)
-{
-    return &GetMapContainingEntity(handle, true).at(handle);
+    m_toDestroy.clear();
 }
 
 void EntityComponentSystem::ClearState()

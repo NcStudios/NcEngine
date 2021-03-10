@@ -17,7 +17,7 @@ namespace nc::sample
         window::RegisterOnResizeReceiver(this);
     }
 
-    MouseFollower::~MouseFollower()
+    MouseFollower::~MouseFollower() noexcept
     {
         window::UnregisterOnResizeReceiver(this);
     }

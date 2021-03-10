@@ -84,10 +84,6 @@ namespace nc::core
     }
     #endif
 
-    Engine::~Engine()
-    {
-    }
-
     void Engine::DisableRunningFlag()
     {
         m_isRunning = false;
@@ -107,12 +103,12 @@ namespace nc::core
             m_time.UpdateTime();
             m_window.ProcessSystemMessages();
 
-            if (time::Time::FixedDeltaTime > fixedUpdateInterval)
+            if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
                 FixedStepLogic();
             }
 
-            auto dt = time::Time::FrameDeltaTime * m_frameDeltaTimeFactor;
+            auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             FrameLogic(dt);
             FrameRender();
             FrameCleanup();
@@ -179,18 +175,18 @@ namespace nc::core
 
         for(auto& light : m_ecs.GetSystem<PointLight>()->GetComponents())
         {
-            m_pointLightManager.AddPointLight(*light, camViewMatrix);
+            m_pointLightManager.AddPointLight(light.get(), camViewMatrix);
         }
 
         m_pointLightManager.Bind();
 
         for(auto& renderer : m_ecs.GetSystem<Renderer>()->GetComponents())
         {
-            renderer->Update(m_frameManager);
+            renderer->Update(&m_frameManager);
         }
 
         #ifdef NC_EDITOR_ENABLED
-        m_physics.UpdateWidgets(m_frameManager);
+        m_physics.UpdateWidgets(&m_frameManager);
         #endif
 
         m_frameManager.Execute(&m_graphics);

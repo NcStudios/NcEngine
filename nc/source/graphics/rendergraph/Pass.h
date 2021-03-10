@@ -9,7 +9,7 @@ namespace nc::graphics
     class Pass
     {
         public:
-            void Accept(Job&& job) noexcept;
+            void Accept(Job job) noexcept;
             void Execute(Graphics* gfx) const;
             void Reset() noexcept;
 

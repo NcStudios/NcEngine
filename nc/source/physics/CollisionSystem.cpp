@@ -218,7 +218,7 @@ namespace nc::physics
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void CollisionSystem::UpdateWidgets(graphics::FrameManager& frameManager)
+    void CollisionSystem::UpdateWidgets(graphics::FrameManager* frameManager)
     {
         for(auto& collider : m_colliderSystem.GetComponents())
         {

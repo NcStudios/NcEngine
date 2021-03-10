@@ -28,7 +28,7 @@ namespace nc::ui
     }
 
     /* UIImpl */
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics * graphics)
+    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
         : 
             #ifdef NC_EDITOR_ENABLED
             m_editor{ graphics },
@@ -42,7 +42,7 @@ namespace nc::ui
         ImGui_ImplDX11_Init(graphics->m_device, graphics->m_context);
     }
 
-    UIImpl::~UIImpl()
+    UIImpl::~UIImpl() noexcept
     {
         ImGui_ImplWin32_Shutdown();
         ImGui_ImplDX11_Shutdown();
@@ -62,9 +62,8 @@ namespace nc::ui
     bool UIImpl::IsProjectUIHovered()
     {
         if (!m_projectUI)
-        {
-            throw std::runtime_error("No project UI registered");
-        }
+            throw std::runtime_error("UIImpl::IsProjectUIHovered - No project UI registered");
+
         return m_projectUI->IsHovered();
     }
 

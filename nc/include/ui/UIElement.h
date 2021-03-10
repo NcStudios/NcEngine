@@ -21,7 +21,7 @@ namespace nc::ui
     {
         public:
             UIFixedElement(bool startOpen, UIPosition position, Vector2 dimensions);
-            ~UIFixedElement();
+            ~UIFixedElement() noexcept;
 
             virtual void OnResize(Vector2 dimensions);
         

@@ -25,13 +25,13 @@ namespace nc::window
 
             HWND GetHWND() const noexcept;
             HINSTANCE GetHINSTANCE() const noexcept;
-            Vector2 GetDimensions() const;
+            Vector2 GetDimensions() const noexcept;
 
-            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback);
-            void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback);
+            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept;
+            void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept;
 
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
-            void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver);
+            void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
             void OnResize(float width, float height, WPARAM windowArg);
 
             void ProcessSystemMessages();

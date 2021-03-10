@@ -17,7 +17,7 @@ namespace nc
         class UIImpl
         {
             public:
-                UIImpl(HWND hwnd, nc::graphics::Graphics * graphics);
+                UIImpl(HWND hwnd, nc::graphics::Graphics* graphics);
                 ~UIImpl() noexcept;
 
                 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

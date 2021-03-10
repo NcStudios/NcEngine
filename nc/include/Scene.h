@@ -13,5 +13,5 @@ namespace nc::scene
     };
 
     /* Queue a scene to be loaded upon completion of the current frame */
-    void Change(std::unique_ptr<Scene>&& scene);
+    void Change(std::unique_ptr<Scene> scene);
 }

@@ -26,9 +26,9 @@ namespace nc
             static const uint32_t MAX_POINT_LIGHTS = 4u;
 
             PointLightManager();
-            ~PointLightManager();
+            ~PointLightManager() noexcept;
             uint32_t GetNextAvailableIndex();
-            void AddPointLight(PointLight& pointLight, const DirectX::XMMATRIX& camMatrix);
+            void AddPointLight(PointLight* pointLight, const DirectX::XMMATRIX& camMatrix);
             void Bind();
 
         private:
