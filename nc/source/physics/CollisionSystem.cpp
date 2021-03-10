@@ -43,7 +43,9 @@ namespace nc::physics
 
     void CollisionSystem::FetchEstimates()
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_colliderSystem.GetDynamicSOA()->CalculateEstimates(&m_dynamicEstimates);
+        NC_PROFILE_END();
     }
 
     void CollisionSystem::BroadDetection()
@@ -51,7 +53,7 @@ namespace nc::physics
         /** possible optimization: Sphere vs Sphere in broad phase gives the actual result, not an estimate. 
          *  Can we detect this and add it right to m_currentStepEvents? */
 
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
 
         const auto dynamicSize = m_dynamicEstimates.size();
         auto* staticTree = m_colliderSystem.GetStaticTree();
@@ -80,7 +82,7 @@ namespace nc::physics
 
     void CollisionSystem::NarrowDetection()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
 
         /** If a dynamic collider has broad collision with another dynamic + static we calculate its volume
          *  twice here. How wacky does the code get if we compute it once? */
@@ -110,7 +112,7 @@ namespace nc::physics
     
     void CollisionSystem::CompareToPreviousStep() const
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         auto currBeg = m_currentCollisions.cbegin();
         auto currEnd = m_currentCollisions.cend();
         for(const auto& prev : m_previousCollisions)

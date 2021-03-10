@@ -162,7 +162,7 @@ namespace nc::ui::editor::controls
 
         textFilter.Draw("Search##telemetry", 128.0f);
 
-        for(auto v : {Filter::All, Filter::Engine, Filter::User})
+        for(auto v : {Filter::All, Filter::Logic, Filter::Physics, Filter::Rendering, Filter::User})
         {
             ImGui::SameLine();
             ImGui::RadioButton(ToCString(v), &filterSelection, static_cast<int>(v));

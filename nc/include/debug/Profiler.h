@@ -20,8 +20,10 @@ namespace nc::debug::profiler
     enum class Filter : unsigned
     {
         All = 0u,
-        Engine = 1u,
-        User = 2u
+        Logic = 1u,
+        Physics = 2u,
+        Rendering = 3u,
+        User = 4u
     };
 }
 

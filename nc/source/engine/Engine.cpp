@@ -99,7 +99,6 @@ namespace nc::core
 
         while(m_isRunning)
         {
-            NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
             m_time.UpdateTime();
             m_window.ProcessSystemMessages();
 
@@ -112,7 +111,6 @@ namespace nc::core
             FrameLogic(dt);
             FrameRender();
             FrameCleanup();
-            NC_PROFILE_END();
         }
 
         Shutdown();
@@ -147,7 +145,7 @@ namespace nc::core
 
     void Engine::FixedStepLogic()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
         m_ecs.SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
@@ -156,7 +154,7 @@ namespace nc::core
 
     void Engine::FrameLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
         m_ecs.SendFrameUpdate(dt);
         NC_PROFILE_END();
     }
@@ -166,7 +164,7 @@ namespace nc::core
 #ifdef USE_VULKAN
         m_graphics2.Draw();
 #else
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         m_ui.FrameBegin();
         m_graphics.FrameBegin();
 
