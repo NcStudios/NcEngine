@@ -25,13 +25,13 @@ namespace nc::physics
             #endif
 
             void RegisterClickable(IClickable* toAdd);
-            void UnregisterClickable(IClickable* toRemove);
+            void UnregisterClickable(IClickable* toRemove) noexcept;
             IClickable* RaycastToClickables(LayerMask mask);
             void DoPhysicsStep();
             void ClearState();
 
             #ifdef NC_EDITOR_ENABLED
-            void UpdateWidgets(graphics::FrameManager& frameManager); // hacky solution until widgets are a real thing
+            void UpdateWidgets(graphics::FrameManager* frameManager); // hacky solution until widgets are a real thing
             #endif
 
         private:

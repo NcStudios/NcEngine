@@ -24,7 +24,7 @@ namespace nc::ui
         window::RegisterOnResizeReceiver(this);
     }
 
-    UIFixedElement::~UIFixedElement()
+    UIFixedElement::~UIFixedElement() noexcept
     {
         window::UnregisterOnResizeReceiver(this);
     }

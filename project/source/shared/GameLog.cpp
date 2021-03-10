@@ -9,7 +9,7 @@ namespace nc::sample
         GameLog::m_instance = this;
     }
 
-    GameLog::~GameLog()
+    GameLog::~GameLog() noexcept
     {
         GameLog::m_instance = nullptr;
     }

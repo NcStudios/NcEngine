@@ -42,7 +42,7 @@ namespace nc
             using BoundingVolume = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
 
             Collider(EntityHandle handle, ColliderInfo info);
-            ~Collider();
+            ~Collider() = default;
             Collider(const Collider&) = delete;
             Collider(Collider&&) = default;
             Collider& operator=(const Collider&) = delete;
@@ -51,7 +51,7 @@ namespace nc
             ColliderType GetType() const;
 
             #ifdef NC_EDITOR_ENABLED
-            void UpdateWidget(graphics::FrameManager& frame);
+            void UpdateWidget(graphics::FrameManager* frame);
             void EditorGuiElement() override;
             void SetEditorSelection(bool state);
             #endif

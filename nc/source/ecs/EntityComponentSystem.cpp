@@ -86,10 +86,9 @@ Entity* EntityComponentSystem::GetEntity(const std::string& tag)
     for(auto& [handle, entity] : m_active)
     {
         if(tag == entity.Tag)
-        {
             return &entity;
-        }
     }
+
     return nullptr;
 }
 
@@ -117,7 +116,9 @@ void EntityComponentSystem::SendOnDestroy()
         m_transformSystem->Remove(handle);
         m_rendererSystem->Remove(handle);
         m_lightSystem->Remove(handle);
+        m_networkDispatcherSystem->Remove(handle);
     }
+
     m_toDestroy.clear();
 }
 

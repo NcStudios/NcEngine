@@ -41,15 +41,13 @@ namespace nc
     }
     #endif
 
-    Collider::~Collider() = default;
-
     ColliderType Collider::GetType() const
     {
         return m_type;
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Collider::UpdateWidget(graphics::FrameManager& frame)
+    void Collider::UpdateWidget(graphics::FrameManager* frame)
     {
         // Expire to false to avoid state management in editor (it sets this to true as needed)
         if(!std::exchange(m_selectedInEditor, false))

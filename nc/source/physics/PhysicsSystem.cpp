@@ -33,9 +33,8 @@ namespace nc::physics
         impl->RegisterClickable(clickable);
     }
 
-    void UnregisterClickable(IClickable* clickable)
+    void UnregisterClickable(IClickable* clickable) noexcept
     {
-        IF_THROW(!impl, "physics::UnregisterClickable - impl is not set");
         impl->UnregisterClickable(clickable);
     }
 
@@ -80,16 +79,14 @@ namespace nc::physics
         m_clickableComponents.push_back(toAdd);
     }
 
-    void PhysicsSystem::UnregisterClickable(IClickable* toRemove)
+    void PhysicsSystem::UnregisterClickable(IClickable* toRemove) noexcept
     {
-        auto beg = std::begin(m_clickableComponents);
-        auto end = std::end(m_clickableComponents);
-        auto pos = std::find(beg, end, toRemove);
-        if(pos == end)
-            throw std::runtime_error("Attempt to unregister an unregistered IClickable");
-
-        *pos = m_clickableComponents.back();
-        m_clickableComponents.pop_back();
+        auto pos = std::find(m_clickableComponents.begin(), m_clickableComponents.end(), toRemove);
+        if(pos != m_clickableComponents.end())
+        {
+            *pos = m_clickableComponents.back();
+            m_clickableComponents.pop_back();
+        }
     }
 
     IClickable* PhysicsSystem::RaycastToClickables(LayerMask mask)
@@ -153,7 +150,7 @@ namespace nc::physics
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void PhysicsSystem::UpdateWidgets(graphics::FrameManager& frameManager)
+    void PhysicsSystem::UpdateWidgets(graphics::FrameManager* frameManager)
     {
         m_collisionSystem.UpdateWidgets(frameManager);
     }

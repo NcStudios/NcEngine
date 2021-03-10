@@ -18,7 +18,7 @@ namespace nc
     {
         public:
             Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept;
-            ~Renderer();
+            ~Renderer() noexcept;
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&) = delete;
             Renderer& operator=(const Renderer&) = delete;
@@ -30,7 +30,7 @@ namespace nc
 
             void SetMesh(const graphics::Mesh& mesh);
             void SetMaterial(const graphics::Material& material);
-            void Update(graphics::FrameManager& frame);
+            void Update(graphics::FrameManager* frame);
 
         private:
             std::unique_ptr<graphics::Model> m_model;

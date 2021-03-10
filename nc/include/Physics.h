@@ -11,5 +11,5 @@ namespace nc::physics
     /** Include objects in RaycastToClickables checks. Objects must be unregistered
      *  before they are destroyed. */
     void RegisterClickable(IClickable* clickable);
-    void UnregisterClickable(IClickable* clickable);
+    void UnregisterClickable(IClickable* clickable) noexcept;
 }

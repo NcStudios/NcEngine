@@ -10,10 +10,14 @@
 #include <d3d11.h>
 #include "directx/math/DirectXMath.h"
 
-namespace nc::graphics::d3dresource
+namespace nc::graphics
 {
-    class TransformConstBufferVertexPixel;
-    class IndexBuffer;
+    class FrameManager;
+    namespace d3dresource
+    {
+        class TransformConstBufferVertexPixel;
+        class IndexBuffer;
+    }
 }
 
 namespace nc::graphics
@@ -29,7 +33,7 @@ namespace nc::graphics
             void SetMesh(const Mesh& mesh) noexcept;
 
             uint32_t GetIndexCount() const noexcept;
-            void Submit(class FrameManager& frame) const noexcept;
+            void Submit(FrameManager* frame) const noexcept;
             void Bind() const;
 
             void SetTransformationMatrix(DirectX::FXMMATRIX matrix) noexcept;

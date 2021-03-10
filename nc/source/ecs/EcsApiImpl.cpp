@@ -28,6 +28,7 @@ namespace nc
 
     bool DestroyEntity(EntityHandle handle)
     {
+        internal::g_colliderSystemImpl->Remove(handle);
         return internal::g_ecsImpl->DestroyEntity(handle);
     }
 

@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,8 @@
 
 struct Config
 {
-    std::filesystem::path AssetTargetsPath;
+    std::optional<std::filesystem::path> SingleTargetPath;
+    std::optional<std::filesystem::path> TargetsFilePath;
     std::filesystem::path OutputDirectory;
 };
 
@@ -30,7 +32,7 @@ constexpr auto AssimpFlags = aiProcess_Triangulate |
 void Usage();
 bool ParseArgs(int argc, char** argv, Config* config);
 void CreateOutputDirectory(const std::filesystem::path& directory);
-auto ReadTargets(const std::filesystem::path& targetsPath) -> std::vector<std::filesystem::path>;
+auto ReadTargets(const Config& config) -> std::vector<std::filesystem::path>;
 bool IsValidMeshExtension(const std::filesystem::path& extension);
 auto ToAssetPath(const std::filesystem::path& meshPath, const Config& config) -> std::filesystem::path;
 void SanitizeFloat(float* value, bool* badValueDetected);
@@ -51,7 +53,7 @@ int main(int argc, char** argv)
     {
         CreateOutputDirectory(config.OutputDirectory);
         Assimp::Importer importer;
-        for(const auto& targetPath : ReadTargets(config.AssetTargetsPath))
+        for(const auto& targetPath : ReadTargets(config))
         {
             BuildAsset(&importer, targetPath, config);
         }
@@ -69,17 +71,18 @@ void Usage()
     std::cout << "Usage: build.exe [options]\n"
               << "Options:\n"
               << "  -h or --help            Display this information\n"
-              << "  -f <file>               Read targets from <file>\n"
-              << "  -o <dir>                Write assets to <dir>\n\n"
-              << "  When using -f, <file> should be a newline-separated list of paths to\n"
-              << "  meshes to parse. If the option is not used, the executable's directory\n"
-              << "  will searched for \"targets.txt\". In either case the mesh paths should\n"
-              << "  be absolute or relative to the current directory when calling build.exe.\n";
+              << "  -t <target>             Parse a single asset from <target>\n"
+              << "  -m <manifest>           Parse multiple assets from <manifest>\n"
+              << "  -o <dir>                Output assets to <dir>\n\n"
+              << "  When using -m, <manifest> should be a newline-separated list of paths to\n"
+              << "  meshes to parse. If neither -t nor -m are used, the executable's directory\n"
+              << "  will searched for a manifest named \"targets.txt\".\n\n"
+              << "  All paths should be absolute or relative to the current directory when\n"
+              << "  calling build.exe.\n";
 }
 
 bool ParseArgs(int argc, char** argv, Config* out)
 {
-    out->AssetTargetsPath = std::filesystem::path(argv[0]).replace_filename(DefaultAssetTargetFilename);
     out->OutputDirectory = std::filesystem::path("./");
 
     if(argc == 1)
@@ -97,23 +100,36 @@ bool ParseArgs(int argc, char** argv, Config* out)
         if(++current >= argc)
             return false;
 
-        if(option.compare("-f") == 0)
+        if(option.compare("-t") == 0)
         {
-            out->AssetTargetsPath = std::filesystem::path(argv[current++]);
+            out->SingleTargetPath = std::filesystem::path(argv[current++]);
+            out->SingleTargetPath.value().make_preferred();
+            continue;
+        }
+
+        if(option.compare("-m") == 0)
+        {
+            out->TargetsFilePath = std::filesystem::path(argv[current++]);
+            out->TargetsFilePath.value().make_preferred();
             continue;
         }
 
         if(option.compare("-o") == 0)
         {
             out->OutputDirectory = std::filesystem::path(argv[current++]);
+            out->OutputDirectory.make_preferred();
             continue;
         }
 
         return false;
     }
 
-    out->AssetTargetsPath.make_preferred();
-    out->OutputDirectory.make_preferred();
+    if(!out->SingleTargetPath && !out->TargetsFilePath)
+    {
+        out->TargetsFilePath = std::filesystem::path(argv[0]).replace_filename(DefaultAssetTargetFilename);
+        out->TargetsFilePath.value().make_preferred();
+    }
+
     return true;
 }
 
@@ -127,21 +143,29 @@ void CreateOutputDirectory(const std::filesystem::path& directory)
         throw std::runtime_error("Failed to create output directory: " + directory.string());
 }
 
-auto ReadTargets(const std::filesystem::path& targetsPath) -> std::vector<std::filesystem::path>
+auto ReadTargets(const Config& config) -> std::vector<std::filesystem::path>
 {
-    std::ifstream file{targetsPath};
+    std::vector<std::filesystem::path> out;
+
+    if(config.SingleTargetPath)
+        out.push_back(config.SingleTargetPath.value());
+    
+    if(!config.TargetsFilePath)
+        return out;
+
+    const auto& filePath = config.TargetsFilePath.value();
+    std::ifstream file{filePath};
     if(!file.is_open())
-        throw std::runtime_error("Failure opening file: " + targetsPath.string());
+        throw std::runtime_error("Failure opening file: " + filePath.string());
 
     constexpr unsigned bufferSize = 512u;
     char buffer[bufferSize];
-    std::vector<std::filesystem::path> out;
-    std::cout << "Reading targets from: " << targetsPath.string() << '\n';
+    std::cout << "Reading targets from: " << filePath.string() << '\n';
 
     while(!file.eof())
     {
         if(file.fail())
-            throw std::runtime_error("Failure reading file: " + targetsPath.string());
+            throw std::runtime_error("Failure reading file: " + filePath.string());
         
         file.getline(buffer, bufferSize, '\n');
         auto& path = out.emplace_back(buffer);

@@ -15,7 +15,11 @@ namespace nc::graphics
     {
         public:
             Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
-            ~Graphics2();
+            ~Graphics2() noexcept;
+            Graphics2(const Graphics2&) = delete;
+            Graphics2(Graphics2&&) = delete;
+            Graphics2& operator=(const Graphics2&) = delete;
+            Graphics2& operator=(Graphics2&&) = delete;
 
             DirectX::FXMMATRIX GetViewMatrix() const noexcept;
             DirectX::FXMMATRIX GetProjectionMatrix() const noexcept;
