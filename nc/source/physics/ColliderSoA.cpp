@@ -35,11 +35,8 @@ namespace nc::physics
 
     void ColliderSoA::Add(EntityHandle handle, const ColliderInfo& info)
     {
-        // store maxColliders?
-        // also how to balance max colliders acros SoA and tree
         if(nextFree >= handles.capacity())
             throw std::runtime_error("ColliderSoA::Add - exceeded capacity");
-
 
         uint32_t pos = [this]()
         {

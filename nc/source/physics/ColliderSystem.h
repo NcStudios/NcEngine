@@ -12,7 +12,7 @@ namespace nc::physics
     class ColliderSystem : private ecs::ComponentSystem<Collider>
     {
         public:
-            ColliderSystem(uint32_t maxColliders);
+            ColliderSystem(uint32_t maxDynamic, uint32_t maxStatic, float worldspaceExtent);
             ~ColliderSystem();
 
             ColliderTree* GetStaticTree();
@@ -31,6 +31,5 @@ namespace nc::physics
         private:
             ColliderSoA m_dynamicSoA;
             ColliderTree m_staticTree;
-            const uint32_t m_maxColliders;
     };
 } // namespace nc::physics

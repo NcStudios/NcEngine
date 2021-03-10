@@ -17,7 +17,8 @@ namespace
     const auto LogFilePathKey = std::string{"log_file_path"};
 
     // memory
-    const auto MaxCollidersKey = std::string{"max_colliders"};
+    const auto MaxDynamicCollidersKey = std::string{"max_dynamic_colliders"};
+    const auto MaxStaticCollidersKey = std::string{"max_static_colliders"};
     const auto MaxNetworkDispatchersKey = std::string{"max_network_dispatchers"};
     const auto MaxRenderersKey = std::string{"max_renderers"};
     const auto MaxTransformsKey = std::string{"max_transforms"};
@@ -45,8 +46,10 @@ namespace
             out.project.logFilePath = value;
         
         // memory
-        else if(key == MaxCollidersKey)
-            out.memory.maxColliders = std::stoi(value);
+        else if(key == MaxDynamicCollidersKey)
+            out.memory.maxDynamicColliders = std::stoi(value);
+        else if(key == MaxStaticCollidersKey)
+            out.memory.maxStaticColliders = std::stod(value);
         else if(key == MaxNetworkDispatchersKey)
             out.memory.maxNetworkDispatchers = std::stoi(value);
         else if(key == MaxRenderersKey)
@@ -120,7 +123,8 @@ namespace nc::config
                 << ProjectNameKey << INI_KEY_VALUE_DELIM << g_instance->project.projectName << '\n'
                 << LogFilePathKey << INI_KEY_VALUE_DELIM << g_instance->project.logFilePath << '\n'
                 << "[memory]\n"
-                << MaxCollidersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxColliders << '\n'
+                << MaxDynamicCollidersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxDynamicColliders << '\n'
+                << MaxStaticCollidersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxStaticColliders << '\n'
                 << MaxNetworkDispatchersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxNetworkDispatchers << '\n'
                 << MaxRenderersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxRenderers << '\n'
                 << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxTransforms << '\n'

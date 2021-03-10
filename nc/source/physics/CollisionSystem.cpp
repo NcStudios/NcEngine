@@ -12,8 +12,8 @@ namespace nc::physics
                (lhs.first == rhs.second && lhs.second == rhs.first);
     }
 
-    CollisionSystem::CollisionSystem()
-        : m_colliderSystem{config::Get().memory.maxColliders},
+    CollisionSystem::CollisionSystem(float worldspaceExtent)
+        : m_colliderSystem{config::Get().memory.maxDynamicColliders, config::Get().memory.maxStaticColliders, worldspaceExtent},
           m_dynamicEstimates{},
           m_broadEventsVsDynamic{},
           m_broadEventsVsStatic{},

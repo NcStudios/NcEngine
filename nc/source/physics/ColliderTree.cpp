@@ -3,20 +3,19 @@
 
 namespace
 {
-    constexpr auto initialExtents = 500.0f;
     constexpr size_t BranchDegree = 8u;
-    constexpr size_t OctantDensityThreshold = 20u;
+    constexpr size_t DensityThreshold = 20u;
     constexpr size_t LeafNodeIndex = 0u;
     constexpr size_t InnerNodeIndex = 1u;
 }
 
 namespace nc::physics
 {
-    Octant::Octant(DirectX::XMFLOAT3 center, float halfSideLength)
-        : m_partitionBoundingVolume{center, {halfSideLength, halfSideLength, halfSideLength}},
+    Octant::Octant(DirectX::XMFLOAT3 center, float extent)
+        : m_boundingVolume{center, {extent, extent, extent}},
           m_data{LeafNodeDataType{}} // don't default insert!!
     {
-        std::get<LeafNodeIndex>(m_data).reserve(OctantDensityThreshold);
+        std::get<LeafNodeIndex>(m_data).reserve(DensityThreshold);
     }
 
     void Octant::Add(const StaticTreeEntry* newEntry)
@@ -26,7 +25,7 @@ namespace nc::physics
 
         if(auto* staticColliders = std::get_if<LeafNodeIndex>(&m_data); staticColliders)
         {
-            if(staticColliders->size() < OctantDensityThreshold)
+            if(staticColliders->size() < DensityThreshold)
             {
                 staticColliders->push_back(newEntry);
                 return;
@@ -41,8 +40,8 @@ namespace nc::physics
     void Octant::Subdivide()
     {
         // calculate points for children
-        const auto newExtent = m_partitionBoundingVolume.Extents.x / 2.0f;
-        const auto& [centerX, centerY, centerZ] = m_partitionBoundingVolume.Center;
+        const auto newExtent = m_boundingVolume.Extents.x / 2.0f;
+        const auto& [centerX, centerY, centerZ] = m_boundingVolume.Center;
         const auto xMin = centerX - newExtent;
         const auto xMax = centerX + newExtent;
         const auto yMin = centerY - newExtent;
@@ -50,11 +49,10 @@ namespace nc::physics
         const auto zMin = centerZ - newExtent;
         const auto zMax = centerZ + newExtent;
 
-        // pull colliders out of variant
+        // copy contained colliders
         auto containedColliders = std::move(std::get<LeafNodeIndex>(m_data));
-        // is vec actually moved?
 
-        // replace collider data with children octants
+        // replace colliders with children octants
         m_data.emplace<InnerNodeIndex>(InnerNodeDataType
         {
             Octant{DirectX::XMFLOAT3{xMin, yMin, zMin}, newExtent},
@@ -75,7 +73,7 @@ namespace nc::physics
     void Octant::Clear()
     {
         auto& entries = m_data.emplace<LeafNodeIndex>(LeafNodeDataType{});
-        entries.reserve(OctantDensityThreshold);
+        entries.reserve(DensityThreshold);
     }
 
     void Octant::BroadCheck(const DirectX::BoundingSphere& dynamicEstimate, std::vector<const StaticTreeEntry*>* out) const
@@ -94,8 +92,13 @@ namespace nc::physics
         for(const auto* entry : std::get<LeafNodeIndex>(m_data))
         {
             if(std::visit([&dynamicEstimate](auto&& staticVolume) { return dynamicEstimate.Intersects(staticVolume); }, entry->volume))
-                    out->emplace_back(entry);
+                out->emplace_back(entry);
         }
+    }
+
+    float Octant::GetExtent() const noexcept
+    {
+        return m_boundingVolume.Extents.x;
     }
 
     void Octant::AddToChildren(const StaticTreeEntry* colliderData)
@@ -106,18 +109,17 @@ namespace nc::physics
 
     bool Octant::Contains(const Collider::BoundingVolume& other) const
     {
-        return std::visit([this](auto&& a) { return a.Intersects(m_partitionBoundingVolume); }, other);
+        return std::visit([this](auto&& a) { return a.Intersects(m_boundingVolume); }, other);
     }
 
-    ColliderTree::ColliderTree()
+    ColliderTree::ColliderTree(uint32_t maxStaticColliders, float worldspaceExtent)
         : m_staticEntries{},
-          m_root{{0.0f, 0.0f, 0.0f}, initialExtents}
+          m_root{{0.0f, 0.0f, 0.0f}, worldspaceExtent}
     {
-        uint32_t maxColliders = 1000000;
-        Allocator().initialize_memory_resource(maxColliders);
+        Allocator().initialize_memory_resource(maxStaticColliders);
     }
 
-    ColliderTree::~ColliderTree()
+    ColliderTree::~ColliderTree() noexcept
     {
         Allocator().release_memory_resource();
     }
@@ -131,12 +133,31 @@ namespace nc::physics
 
     void ColliderTree::Remove(EntityHandle handle)
     {
-        (void)handle;
+        auto pos = std::find_if(m_staticEntries.begin(), m_staticEntries.end(), [handle](auto& entry)
+        {
+            return handle == entry->handle;
+        });
+
+        if(pos == m_staticEntries.end())
+            throw std::runtime_error("ColliderTree::Remove - bad handle");
+        
+        *pos = std::move(m_staticEntries.back());
+        m_staticEntries.pop_back();
+        Rebuild();
+    }
+
+    void ColliderTree::Rebuild()
+    {
+        m_root.Clear();
+        m_root = Octant{{}, m_root.GetExtent()};
+        for(const auto& entry : m_staticEntries)
+            m_root.Add(entry.get());
     }
 
     void ColliderTree::Clear()
     {
         m_root.Clear();
+        m_staticEntries.clear();
         Allocator().clear_memory_resource();
     }
 

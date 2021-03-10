@@ -44,7 +44,7 @@ namespace nc::physics
     class CollisionSystem
     {
         public:
-            CollisionSystem();
+            CollisionSystem(float worldspaceExtent);
             void DoCollisionStep();
             void ClearState();
 

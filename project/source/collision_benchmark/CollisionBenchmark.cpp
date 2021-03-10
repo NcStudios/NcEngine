@@ -76,7 +76,7 @@ namespace nc::sample
         SpawnBehavior spawnBehavior
         {
             .positionOffset = Vector3{0.0f, 0.0f, 35.0f},
-            .positionRandomRange = Vector3::Splat(15.0f),
+            .positionRandomRange = Vector3::Splat(420.0f),
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
         };
 

@@ -3,11 +3,10 @@
 
 namespace nc::physics
 {
-    ColliderSystem::ColliderSystem(uint32_t maxColliders)
-        : ComponentSystem<Collider>{maxColliders},
-          m_dynamicSoA{maxColliders},
-          m_staticTree{},
-          m_maxColliders{maxColliders}
+    ColliderSystem::ColliderSystem(uint32_t maxDynamic, uint32_t maxStatic, float worldspaceExtent)
+        : ComponentSystem<Collider>{maxDynamic + maxStatic},
+          m_dynamicSoA{maxDynamic},
+          m_staticTree{maxStatic, worldspaceExtent}
     {
     }
 
@@ -25,7 +24,6 @@ namespace nc::physics
 
     Collider* ColliderSystem::Add(EntityHandle handle, const ColliderInfo& info)
     {
-        // need to handle maxColliders
         if(GetEntity(handle)->IsStatic)
             m_staticTree.Add(handle, info);
         else
