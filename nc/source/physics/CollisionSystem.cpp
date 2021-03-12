@@ -73,7 +73,7 @@ namespace nc::physics
 
     void CollisionSystem::FetchEstimates()
     {
-        m_colliderSystem.GetDynamicSOA()->CalculateEstimates(&m_dynamicEstimates);
+        m_colliderSystem.GetDynamicSoA()->CalculateEstimates(&m_dynamicEstimates);
     }
 
     void CollisionSystem::BroadDetectVsDynamic()
@@ -120,7 +120,7 @@ namespace nc::physics
 
     void CollisionSystem::NarrowDetectVsDynamic()
     {
-        auto* dynamicSoA = m_colliderSystem.GetDynamicSOA();
+        auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
         const auto& handles = dynamicSoA->GetHandles();
         const auto& volumes = dynamicSoA->GetVolumes();
         //const auto& types = dynamicSoA->GetTypes();
@@ -139,7 +139,7 @@ namespace nc::physics
 
     void CollisionSystem::NarrowDetectVsStatic()
     {
-        auto* dynamicSoA = m_colliderSystem.GetDynamicSOA();
+        auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
         const auto& handles = dynamicSoA->GetHandles();
         const auto& types = dynamicSoA->GetTypes();
         const auto& transforms = dynamicSoA->GetTransforms();

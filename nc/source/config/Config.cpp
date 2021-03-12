@@ -49,7 +49,7 @@ namespace
         else if(key == MaxDynamicCollidersKey)
             out.memory.maxDynamicColliders = std::stoi(value);
         else if(key == MaxStaticCollidersKey)
-            out.memory.maxStaticColliders = std::stod(value);
+            out.memory.maxStaticColliders = std::stoi(value);
         else if(key == MaxNetworkDispatchersKey)
             out.memory.maxNetworkDispatchers = std::stoi(value);
         else if(key == MaxRenderersKey)

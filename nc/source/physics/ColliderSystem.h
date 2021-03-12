@@ -16,7 +16,7 @@ namespace nc::physics
             ~ColliderSystem();
 
             ColliderTree* GetStaticTree();
-            ColliderSoA* GetDynamicSOA();
+            ColliderSoA* GetDynamicSoA();
 
             // Wrappers around ComponentSystem methods
             Collider* Add(EntityHandle handle, const ColliderInfo& info);
