@@ -111,8 +111,6 @@ namespace nc::job
     template<class Func, class... Args>
     auto JobSystem::Package(Func&& func, Args&&... args) -> std::packaged_task<result_t<Func(Args...)>()>
     {
-        std::cout << "package with args\n";
-
         return std::packaged_task<result_t<Func(Args...)>()>
         {
             std::bind(std::forward<Func>(func), std::forward<Args>(args)...)
