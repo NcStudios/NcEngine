@@ -58,9 +58,11 @@ namespace nc::ui::editor::controls
 
     void Entity(EntityHandle handle)
     {
+        auto* entity = GetEntity(handle);
         ImGui::Separator();
         ImGui::Indent();
             ImGui::Text("Handle %d", static_cast<unsigned>(handle));
+            ImGui::Text("Static %s", entity->IsStatic ? "True" : "False");
         ImGui::Unindent();
 
         controls::Component(GetComponent<Transform>(handle));
@@ -73,7 +75,7 @@ namespace nc::ui::editor::controls
             controls::Component(col);
         }
         controls::Component(GetComponent<PointLight>(handle));
-        for(const auto& comp : GetEntity(handle)->GetUserComponents())
+        for(const auto& comp : entity->GetUserComponents())
             controls::Component(comp);
 
         ImGui::Separator();
@@ -160,7 +162,7 @@ namespace nc::ui::editor::controls
 
         textFilter.Draw("Search##telemetry", 128.0f);
 
-        for(auto v : {Filter::All, Filter::Engine, Filter::User})
+        for(auto v : {Filter::All, Filter::Logic, Filter::Physics, Filter::Rendering, Filter::User})
         {
             ImGui::SameLine();
             ImGui::RadioButton(ToCString(v), &filterSelection, static_cast<int>(v));

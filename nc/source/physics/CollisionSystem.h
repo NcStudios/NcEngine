@@ -2,6 +2,7 @@
 
 #include "Ecs.h"
 #include "ColliderSystem.h"
+#include "CollisionUtility.h"
 
 #include <cstdint>
 #include <vector>
@@ -15,21 +16,25 @@ namespace nc::physics
         Enter, Stay, Exit
     };
 
-    // Produced by fetch, consumed by broad detection
-    struct EstimateData
-    {
-        DirectX::BoundingSphere volumeEstimate;
-        uint32_t index;
-    };
-
-    // Produced by broad detection, consumed by narrow detection
-    struct BroadDetectEvent
+    /** Indices of two dynamic collider's positions in SoA.
+     *  Produced by broad detection, consumed by narrow detection. */
+    struct BroadDetectVsDynamicEvent
     {
         uint32_t first;
         uint32_t second;
     };
 
-    // Produced by narrow detection, consumed by compare/notify
+    /** Index of dynamic collider's SoA position and pointer to static
+     *  collider tree entry. Produced by broad detection, consumed by
+     *  narrow detection. */
+    struct BroadDetectVsStaticEvent
+    {
+        uint32_t first;
+        const StaticTreeEntry* second;
+    };
+
+    /** EntityHandles of two colliding objects. Produced by narrow detection,
+     *  consumed by compare/notify. */
     struct NarrowDetectEvent
     {
         EntityHandle::Handle_t first;
@@ -39,7 +44,7 @@ namespace nc::physics
     class CollisionSystem
     {
         public:
-            CollisionSystem();
+            CollisionSystem(float worldspaceExtent);
             void DoCollisionStep();
             void ClearState();
 
@@ -49,10 +54,9 @@ namespace nc::physics
 
         private:
             ColliderSystem m_colliderSystem;
-            std::vector<EstimateData> m_dynamicEstimates;
-            std::vector<EstimateData> m_staticEstimates;
-            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsDynamic;
-            std::vector<BroadDetectEvent> m_estimateOverlapDynamicVsStatic;
+            std::vector<DynamicEstimate> m_dynamicEstimates;
+            std::vector<BroadDetectVsDynamicEvent> m_broadEventsVsDynamic;
+            std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
 

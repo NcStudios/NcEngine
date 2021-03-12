@@ -14,7 +14,8 @@ namespace nc::config
         
         struct
         {
-            unsigned maxColliders;
+            unsigned maxDynamicColliders;
+            unsigned maxStaticColliders;
             unsigned maxNetworkDispatchers;
             unsigned maxRenderers;
             unsigned maxTransforms;

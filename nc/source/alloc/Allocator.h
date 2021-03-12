@@ -22,7 +22,7 @@ namespace nc::alloc
             void deallocate(value_type* ptr, size_t n) noexcept;
             void initialize_memory_resource(size_t size);
             void clear_memory_resource();
-            void release_memory_resource();
+            void release_memory_resource() noexcept;
 
         private:
             static std::unique_ptr<Resource> m_memoryResource;
@@ -71,11 +71,8 @@ namespace nc::alloc
     }
 
     template<class Resource>
-    void FixedTypeAllocator<Resource>::release_memory_resource()
+    void FixedTypeAllocator<Resource>::release_memory_resource() noexcept
     {
-        if(!m_memoryResource)
-            throw std::runtime_error("FixedTypeAllocator::release_memory_resource - No resource initialized");
-        
         m_memoryResource = nullptr;
     }
 } // namespace nc::alloc

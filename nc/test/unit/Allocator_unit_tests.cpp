@@ -31,13 +31,6 @@ TEST_F(FixedTypeAllocator_unit_tests, InitializeMemoryResource_AlreadyInitialize
     EXPECT_THROW(allocator.initialize_memory_resource(0u), std::runtime_error);
 }
 
-TEST_F(FixedTypeAllocator_unit_tests, ReleaseMemoryResource_NotInitialized_Throws)
-{
-    allocator.release_memory_resource();
-    EXPECT_THROW(allocator.release_memory_resource(), std::runtime_error);
-    allocator.initialize_memory_resource(0u); // so fixture doesn't throw
-}
-
 TEST_F(FixedTypeAllocator_unit_tests, Allocate_ValidCall_ReturnsNonNull)
 {
     auto actual = allocator.allocate(1u);

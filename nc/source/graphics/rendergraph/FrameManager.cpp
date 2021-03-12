@@ -19,7 +19,7 @@ namespace nc::graphics
      **/
     void FrameManager::Execute(Graphics* gfx) const
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Engine);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         // PBR Shading Pass
         PhongShadingTechnique::BindCommonResources();
         m_passes[0].Execute(gfx);

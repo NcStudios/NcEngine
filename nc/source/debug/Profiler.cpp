@@ -22,8 +22,12 @@ namespace nc::debug::profiler
         {
             case Filter::All:
                 return "All";
-            case Filter::Engine:
-                return "Engine";
+            case Filter::Logic:
+                return "Logic";
+            case Filter::Physics:
+                return "Physics";
+            case Filter::Rendering:
+                return "Rendering";
             case Filter::User:
                 return "User";
             default:
