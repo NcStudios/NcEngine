@@ -69,12 +69,13 @@ namespace nc::core
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
+          m_threadPool{4},
           m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
           m_ui{ m_window.GetHWND(), &m_graphics },
           m_pointLightManager{},
           m_frameManager{},
-          m_physics{ &m_graphics },
+          m_physics{&m_graphics, &m_threadPool},
           m_ecs{},
           m_sceneSystem{},
           m_time{}

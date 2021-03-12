@@ -12,6 +12,12 @@ namespace nc::physics
         uint32_t index;
     };
 
+    struct DynamicActual
+    {
+        Collider::BoundingVolume volume;
+        uint32_t index;
+    };
+
     struct StaticTreeEntry
     {
         Collider::BoundingVolume volume;

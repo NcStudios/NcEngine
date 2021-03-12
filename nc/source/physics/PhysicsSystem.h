@@ -6,11 +6,16 @@
 
 #include <vector>
 
-namespace nc::graphics
+namespace nc
 {
-    class FrameManager;
-    class Graphics;
-    class Graphics2;
+    namespace graphics
+    {
+        class FrameManager;
+        class Graphics;
+        class Graphics2;
+    }
+
+    namespace job { class ThreadPool; }
 }
 
 namespace nc::physics
@@ -21,7 +26,7 @@ namespace nc::physics
             #ifdef USE_VULKAN
             PhysicsSystem(graphics::Graphics2* graphics2);
             #else
-            PhysicsSystem(graphics::Graphics* graphics);
+            PhysicsSystem(graphics::Graphics* graphics, job::ThreadPool* threadPool);
             #endif
 
             void RegisterClickable(IClickable* toAdd);
