@@ -54,8 +54,8 @@ namespace nc::physics
     }
     #else
     /* Physics System */
-    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, job::ThreadPool* threadPool)
-        : m_collisionSystem{WorldspaceExtent, threadPool},
+    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem)
+        : m_collisionSystem{WorldspaceExtent, jobSystem},
           m_clickableComponents{},
           m_graphics{ graphics }
     {

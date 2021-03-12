@@ -28,7 +28,7 @@ namespace nc::core
         private:
             bool m_isRunning;
             float m_frameDeltaTimeFactor;
-            job::ThreadPool m_threadPool;
+            job::JobSystem m_jobSystem;
             window::WindowImpl m_window;
         #ifdef USE_VULKAN
             graphics::Graphics2 m_graphics2;

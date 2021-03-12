@@ -5,6 +5,7 @@ namespace nc::physics
 {
     ColliderSoA::ColliderSoA(size_t maxColliders)
         : handles(maxColliders), // braced init is ambiguous
+          volumes{maxColliders},
           transforms{maxColliders},
           volumeProperties{maxColliders},
           types{maxColliders},
@@ -16,6 +17,11 @@ namespace nc::physics
     auto ColliderSoA::GetHandles() const noexcept -> const std::vector<EntityHandle::Handle_t>&
     {
         return handles;
+    }
+
+    auto ColliderSoA::GetVolumes() const noexcept -> const std::vector<Collider::BoundingVolume>&
+    {
+        return volumes;
     }
 
     auto ColliderSoA::GetTransforms() const noexcept -> const std::vector<const DirectX::XMMATRIX*>&
@@ -49,6 +55,14 @@ namespace nc::physics
         }();
 
         handles[pos] = static_cast<EntityHandle::Handle_t>(handle);
+
+        const auto properties = GetVolumePropertiesFromColliderInfo(info);
+
+        if(info.type == ColliderType::Sphere)
+            volumes[pos] = {DirectX::BoundingSphere{properties.center, properties.extents.x}}; // hoist, baby
+        else
+            volumes[pos] = {DirectX::BoundingOrientedBox{properties.center, properties.extents, {0, 0, 0, 1.0f}}};
+        
         transforms[pos] = &GetComponent<Transform>(handle)->GetTransformationMatrix();
         volumeProperties[pos] = GetVolumePropertiesFromColliderInfo(info);
         types[pos] = info.type;

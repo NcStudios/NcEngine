@@ -7,9 +7,11 @@
 #include <cstdint>
 #include <vector>
 
-namespace nc::graphics { class FrameManager; }
-
-namespace nc::job { class ThreadPool; }
+namespace nc
+{
+    namespace graphics { class FrameManager; }
+    namespace job { class JobSystem; }
+}
 
 namespace nc::physics
 {
@@ -46,7 +48,7 @@ namespace nc::physics
     class CollisionSystem
     {
         public:
-            CollisionSystem(float worldspaceExtent, job::ThreadPool* threadPool);
+            CollisionSystem(float worldspaceExtent, job::JobSystem* jobSystem);
             void DoCollisionStep();
             void ClearState();
 
@@ -62,7 +64,7 @@ namespace nc::physics
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
-            job::ThreadPool* m_threadPool;
+            job::JobSystem* m_jobSystem;
 
             void FetchEstimates();
             void BroadDetectVsDynamic();

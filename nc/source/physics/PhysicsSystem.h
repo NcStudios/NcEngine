@@ -15,7 +15,7 @@ namespace nc
         class Graphics2;
     }
 
-    namespace job { class ThreadPool; }
+    namespace job { class JobSystem; }
 }
 
 namespace nc::physics
@@ -26,7 +26,7 @@ namespace nc::physics
             #ifdef USE_VULKAN
             PhysicsSystem(graphics::Graphics2* graphics2);
             #else
-            PhysicsSystem(graphics::Graphics* graphics, job::ThreadPool* threadPool);
+            PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem);
             #endif
 
             void RegisterClickable(IClickable* toAdd);
