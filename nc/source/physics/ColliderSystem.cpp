@@ -17,7 +17,7 @@ namespace nc::physics
         return &m_staticTree;
     }
 
-    ColliderSoA* ColliderSystem::GetDynamicSOA()
+    ColliderSoA* ColliderSystem::GetDynamicSoA()
     {
         return &m_dynamicSoA;
     }

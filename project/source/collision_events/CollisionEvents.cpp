@@ -61,7 +61,6 @@ namespace nc::sample
         AddComponent<Collider>(bigSphere, ColliderInfo{.type = ColliderType::Sphere});
         AddComponent<CollisionLogger>(bigSphere);
 
-
         float startPos = -20.0f;
         float spacing = 2.0f;
 

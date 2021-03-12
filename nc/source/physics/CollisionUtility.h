@@ -30,7 +30,6 @@ namespace nc::physics
         return { {info.offset.x, info.offset.y, info.offset.z}, {info.scale.x / 2.0f, info.scale.y / 2.0f, info.scale.z / 2.0f} };
     }
 
-
     inline DirectX::BoundingSphere EstimateBoundingVolume(const VolumeProperties& volumeProperties, const DirectX::XMMATRIX* transform)
     {
         const auto& extents = volumeProperties.extents;

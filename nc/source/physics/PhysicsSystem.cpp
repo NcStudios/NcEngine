@@ -47,7 +47,8 @@ namespace nc::physics
     #ifdef USE_VULKAN
     /* Physics System */
     PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics2)
-        : m_clickableComponents{},
+        : m_collisionSystem{WorldspaceExtent},
+          m_clickableComponents{},
           m_graphics2{ graphics2 }
     {
         impl = this;
