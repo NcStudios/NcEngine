@@ -29,35 +29,20 @@ namespace nc::physics
     {
         FetchEstimates();
 
-        auto broadDynamicJobResult = m_jobSystem->Schedule([this]() { this->BroadDetectVsDynamic(); });
-        auto broadStaticJobResult = m_jobSystem->Schedule([this]() { this->BroadDetectVsStatic(); });
+        auto broadDynamicJobResult = m_jobSystem->Schedule(BroadDetectVsDynamic, this);
+        auto broadStaticJobResult = m_jobSystem->Schedule(BroadDetectVsStatic, this);
         broadDynamicJobResult.wait();
         broadStaticJobResult.wait();
         
-        auto narrowDynamicJobResult = m_jobSystem->Schedule([this]() { this->NarrowDetectVsDynamic(); });
-        auto narrowStaticJobResult = m_jobSystem->Schedule([this]() { this->NarrowDetectVsStatic(); });
+        auto narrowDynamicJobResult = m_jobSystem->Schedule(NarrowDetectVsDynamic, this);
+        auto narrowStaticJobResult = m_jobSystem->Schedule(NarrowDetectVsStatic, this);
         narrowDynamicJobResult.wait();
         broadStaticJobResult.wait();
 
-        auto findEnterAndStayJobResult = m_jobSystem->Schedule([this]() { this->FindEnterAndStayEvents(); });
-        auto findExitJobResult = m_jobSystem->Schedule([this](){ this->FindExitEvents(); });
+        auto findEnterAndStayJobResult = m_jobSystem->Schedule(FindEnterAndStayEvents, this);
+        auto findExitJobResult = m_jobSystem->Schedule(FindExitEvents, this);
         findEnterAndStayJobResult.wait();
         findExitJobResult.wait();
-
-        // auto broadDynamicJobResult = m_jobSystem->Schedule(BroadDetectVsDynamic, this);
-        // auto broadStaticJobResult = m_jobSystem->Schedule(BroadDetectVsStatic, this);
-        // broadDynamicJobResult.wait();
-        // broadStaticJobResult.wait();
-        
-        // auto narrowDynamicJobResult = m_jobSystem->Schedule(NarrowDetectVsDynamic, this);
-        // auto narrowStaticJobResult = m_jobSystem->Schedule(NarrowDetectVsStatic, this);
-        // narrowDynamicJobResult.wait();
-        // broadStaticJobResult.wait();
-
-        // auto findEnterAndStayJobResult = m_jobSystem->Schedule(FindEnterAndStayEvents, this);
-        // auto findExitJobResult = m_jobSystem->Schedule(FindExitEvents, this);
-        // findEnterAndStayJobResult.wait();
-        // findExitJobResult.wait();
         
         Cleanup();
     }
