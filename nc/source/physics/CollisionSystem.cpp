@@ -118,20 +118,21 @@ namespace nc::physics
         }, v);
     }
 
+    /** @todo Narrow detection computes the bounding volumes for each pair encountered,
+     *  potentially calculating the same volume multiple times. This could be done once
+     *  upfront. */
+
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
         const auto& handles = dynamicSoA->GetHandles();
-        const auto& volumes = dynamicSoA->GetVolumes();
-        //const auto& types = dynamicSoA->GetTypes();
+        const auto& types = dynamicSoA->GetTypes();
         const auto& transforms = dynamicSoA->GetTransforms();
-        //const auto& centerExtentPairs = dynamicSoA->GetVolumeProperties();
+        const auto& centerExtentPairs = dynamicSoA->GetVolumeProperties();
         for(const auto& [i, j] : m_broadEventsVsDynamic)
         {
-            const auto v1 = Foo(volumes[i], transforms[i]);
-            const auto v2 = Foo(volumes[j], transforms[j]);
-            //const auto v1 = CalculateBoundingVolume(types[i], centerExtentPairs[i], transforms[i]);
-            //const auto v2 = CalculateBoundingVolume(types[j], centerExtentPairs[j], transforms[j]);
+            const auto v1 = CalculateBoundingVolume(types[i], centerExtentPairs[i], transforms[i]);
+            const auto v2 = CalculateBoundingVolume(types[j], centerExtentPairs[j], transforms[j]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, v1, v2))
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
         }

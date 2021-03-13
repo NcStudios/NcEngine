@@ -59,7 +59,6 @@ namespace nc::physics
         private:
             ColliderSystem m_colliderSystem;
             std::vector<DynamicEstimate> m_dynamicEstimates;
-            std::vector<DynamicActual> m_dynamicVolumes;
             std::vector<BroadDetectVsDynamicEvent> m_broadEventsVsDynamic;
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
