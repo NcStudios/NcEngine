@@ -4,12 +4,12 @@
 
 namespace nc::graphics::vulkan
 {
-    class Device;
+    class Base;
 
     class RenderPass
     {
         public:
-            RenderPass(const vulkan::Device& device);
+            RenderPass(const vulkan::Base& base);
             const vk::RenderPass& GetRenderPass() const noexcept;
         private:
             vk::UniqueRenderPass m_renderPass;

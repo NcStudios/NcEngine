@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-    namespace vulkan { class Instance; class Device; class GraphicsPipeline; class RenderPass; class FrameBuffers; class Commands; class VertexBuffer; class IndexBuffer; }
+    namespace vulkan { class Instance; class Base; class GraphicsPipeline; class RenderPass; class FrameBuffers; class Commands; class VertexBuffer; class IndexBuffer; }
 
     class Graphics2
     {
@@ -49,7 +49,7 @@ namespace nc::graphics
             bool PresentImage(uint32_t imageIndex);
 
             std::unique_ptr<vulkan::Instance> m_instance;
-            std::unique_ptr<vulkan::Device> m_device;
+            std::unique_ptr<vulkan::Base> m_base;
             std::unique_ptr<vulkan::RenderPass> m_renderPass; // @todo: make vector, map, etc depending on chosen architecture. Right now just a single render pass for rendering a triangle.
             std::unique_ptr<vulkan::GraphicsPipeline> m_pipeline;
             std::unique_ptr<vulkan::FrameBuffers> m_frameBuffers;

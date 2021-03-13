@@ -1,5 +1,5 @@
 #include "GraphicsPipeline.h"
-#include "Device.h"
+#include "Base.h"
 #include "RenderPass.h"
 #include "config/Config.h"
 #include "VertexBuffer.h"
@@ -41,7 +41,7 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    GraphicsPipeline::GraphicsPipeline(const vulkan::Device& device, const vulkan::RenderPass& renderPass)
+    GraphicsPipeline::GraphicsPipeline(const vulkan::Base& base, const vulkan::RenderPass& renderPass)
     : m_pipelineLayout{nullptr},
       m_pipeline{nullptr}
     {
@@ -53,8 +53,8 @@ namespace nc::graphics::vulkan
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "vert.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "frag.spv");
 
-        auto vertexShaderModule = GraphicsPipeline::CreateShaderModule(vertexShaderByteCode, device);
-        auto fragmentShaderModule = GraphicsPipeline::CreateShaderModule(fragmentShaderByteCode, device);
+        auto vertexShaderModule = GraphicsPipeline::CreateShaderModule(vertexShaderByteCode, base);
+        auto fragmentShaderModule = GraphicsPipeline::CreateShaderModule(fragmentShaderByteCode, base);
 
         vk::PipelineShaderStageCreateInfo vertexShaderStageInfo{};
         vertexShaderStageInfo.setStage(vk::ShaderStageFlagBits::eVertex);
@@ -93,7 +93,7 @@ namespace nc::graphics::vulkan
          * VIEWPORT *
          * **********/
         // Viewport defines the transformation from the image to the framebuffer
-        auto [width, height] = device.GetSwapChainExtentDimensions();
+        auto [width, height] = base.GetSwapChainExtentDimensions();
         vk::Viewport viewport{};
         viewport.setX(0.0f);
         viewport.setY(0.0f);
@@ -105,7 +105,7 @@ namespace nc::graphics::vulkan
         // Scissor rectangles crop the image, discarding pixels outside of the scissor rect by the rasterizer.
         vk::Rect2D scissor{};
         scissor.setOffset({0,0});
-        scissor.setExtent(device.GetSwapChainExtent());
+        scissor.setExtent(base.GetSwapChainExtent());
 
         vk::PipelineViewportStateCreateInfo viewportState{};
         viewportState.setViewportCount(1);
@@ -173,7 +173,7 @@ namespace nc::graphics::vulkan
         pipelineLayoutInfo.setPushConstantRangeCount(0); 
         pipelineLayoutInfo.setPPushConstantRanges(nullptr);  
 
-        m_pipelineLayout = device.GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = base.GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         /*******************
          * GRAPHICS PIPELINE *
@@ -195,10 +195,10 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = device.GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        m_pipeline = base.GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
 
-        device.GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
-        device.GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+        base.GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
+        base.GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
     const vk::Pipeline& GraphicsPipeline::GetPipeline() const
@@ -206,13 +206,13 @@ namespace nc::graphics::vulkan
          return m_pipeline.get();
     }
 
-    vk::ShaderModule GraphicsPipeline::CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Device& device)
+    vk::ShaderModule GraphicsPipeline::CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base)
     {
         vk::ShaderModuleCreateInfo createInfo{};
         createInfo.setCodeSize(code.size()*sizeof(uint32_t));
         createInfo.setPCode(code.data());
         vk::ShaderModule shaderModule;
-        if (device.GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
+        if (base.GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Failed to create shader module.");
         }

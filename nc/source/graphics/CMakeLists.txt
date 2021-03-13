@@ -24,7 +24,7 @@ if(USE_VULKAN)
         PRIVATE
             ${ROOT_DIR}/source/graphics/Graphics2.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Instance.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/Device.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/Base.cpp
             ${ROOT_DIR}/source/graphics/vulkan/GraphicsPipeline.cpp
             ${ROOT_DIR}/source/graphics/vulkan/RenderPass.cpp
             ${ROOT_DIR}/source/graphics/vulkan/FrameBuffers.cpp

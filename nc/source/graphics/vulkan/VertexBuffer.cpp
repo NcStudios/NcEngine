@@ -1,5 +1,5 @@
 #include "VertexBuffer.h"
-#include "Device.h"
+#include "Base.h"
 #include "Commands.h"
 
 namespace nc::graphics::vulkan::vertex
@@ -31,8 +31,8 @@ namespace nc::graphics::vulkan::vertex
 
 namespace nc::graphics::vulkan
 {
-    VertexBuffer::VertexBuffer(Device& device, Commands& commands, std::vector<vertex::Vertex> vertices)
-    : m_device { device },
+    VertexBuffer::VertexBuffer(Base& base, Commands& commands, std::vector<vertex::Vertex> vertices)
+    : m_base { base },
       m_commands { commands },
       m_id { 0 },
       m_size { 0 },
@@ -44,13 +44,13 @@ namespace nc::graphics::vulkan
         m_size = sizeof(m_vertices[0]) * m_vertices.size();
 
         // Create staging buffer (lives on CPU).
-        m_stagingBufferId = m_device.CreateBuffer(m_size, vk::BufferUsageFlagBits::eTransferSrc, true, &m_stagingBuffer);
+        m_stagingBufferId = m_base.CreateBuffer(m_size, vk::BufferUsageFlagBits::eTransferSrc, true, &m_stagingBuffer);
 
         // Map the vertices onto the staging buffer.
-        m_device.MapMemory(m_stagingBufferId, m_vertices, m_size);
+        m_base.MapMemory(m_stagingBufferId, m_vertices, m_size);
 
         // Create vertex buffer (lives on GPU).
-        m_id = m_device.CreateBuffer(m_size, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, false, &m_vertexBuffer);
+        m_id = m_base.CreateBuffer(m_size, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, false, &m_vertexBuffer);
 
         // Copy the staging buffer into the vertex buffer.
         Bind();
@@ -59,10 +59,10 @@ namespace nc::graphics::vulkan
     void VertexBuffer::Bind()
     {
         // Copy staging into vertex.
-        m_commands.SubmitCopyCommandImmediate(m_device, m_stagingBuffer, m_vertexBuffer, m_size);
+        m_commands.SubmitCopyCommandImmediate(m_base, m_stagingBuffer, m_vertexBuffer, m_size);
 
         // Destroy the staging buffer.
-        m_device.DestroyBuffer(m_stagingBufferId);
+        m_base.DestroyBuffer(m_stagingBufferId);
     }
 
     uint32_t VertexBuffer::GetSize() const

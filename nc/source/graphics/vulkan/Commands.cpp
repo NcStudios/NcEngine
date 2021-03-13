@@ -1,5 +1,5 @@
 #include "Commands.h"
-#include "Device.h"
+#include "Base.h"
 #include "RenderPass.h"
 #include "FrameBuffers.h"
 #include "GraphicsPipeline.h"
@@ -8,7 +8,7 @@
 
 namespace nc::graphics::vulkan
 {
-    Commands::Commands(const vulkan::Device& device, 
+    Commands::Commands(const vulkan::Base& base, 
                        const std::vector<vk::Semaphore>& renderReadySemaphores, 
                        const std::vector<vk::Semaphore>& presentReadySemaphores, 
                        const std::vector<vk::Fence>& framesInFlightFences, 
@@ -20,15 +20,15 @@ namespace nc::graphics::vulkan
       m_imagesInFlightFences{imagesInFlightFences}
     {
         // Create the command buffers.
-        m_commandBuffers.resize(device.GetSwapChainImageViews().size()); // Need to have one command buffer per frame buffer, which have the same count as the image views.
+        m_commandBuffers.resize(base.GetSwapChainImageViews().size()); // Need to have one command buffer per frame buffer, which have the same count as the image views.
         vk::CommandBufferAllocateInfo allocInfo{};
-        allocInfo.setCommandPool(device.GetCommandPool());
+        allocInfo.setCommandPool(base.GetCommandPool());
         allocInfo.setLevel(vk::CommandBufferLevel::ePrimary); // Primary means the command buffer can be submitted to a queue for execution, but not called from other command buffers. Alternative is Secondary, which cant be submitted directly but can be called from other primary command buffers.
         allocInfo.setCommandBufferCount(static_cast<uint32_t>(m_commandBuffers.size()));
-        m_commandBuffers = device.GetDevice().allocateCommandBuffers(allocInfo);
+        m_commandBuffers = base.GetDevice().allocateCommandBuffers(allocInfo);
     }
 
-    void Commands::RecordRenderCommand(const vulkan::Device& device, const vulkan::RenderPass& renderPass, const vulkan::FrameBuffers& frameBuffers, const vulkan::GraphicsPipeline& pipeline, const vulkan::VertexBuffer& vertexBuffer, const vulkan::IndexBuffer& indexBuffer)
+    void Commands::RecordRenderCommand(const vulkan::Base& base, const vulkan::RenderPass& renderPass, const vulkan::FrameBuffers& frameBuffers, const vulkan::GraphicsPipeline& pipeline, const vulkan::VertexBuffer& vertexBuffer, const vulkan::IndexBuffer& indexBuffer)
     {
         const vk::ClearValue clearValues[1] = { vk::ClearColorValue(std::array<float, 4>({{0.2f, 0.2f, 0.2f, 0.2f}})) };
 
@@ -45,7 +45,7 @@ namespace nc::graphics::vulkan
                 renderPassInfo.setRenderPass(renderPass.GetRenderPass()); // Specify the render pass and attachments.
                 renderPassInfo.setFramebuffer(frameBuffers.GetFrameBuffer((uint32_t)i));
                 renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
-                renderPassInfo.renderArea.setExtent(device.GetSwapChainExtent());
+                renderPassInfo.renderArea.setExtent(base.GetSwapChainExtent());
                 renderPassInfo.setClearValueCount(1); // Set clear color
                 renderPassInfo.setPClearValues(clearValues);
 
@@ -64,9 +64,9 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Commands::SubmitRenderCommand(const vulkan::Device& device, uint32_t imageIndex)
+    void Commands::SubmitRenderCommand(const vulkan::Base& base, uint32_t imageIndex)
     {
-        auto currentFrameIndex = device.GetFrameIndex();
+        auto currentFrameIndex = base.GetFrameIndex();
 
         vk::Semaphore waitSemaphores[] = { m_renderReadySemaphores[currentFrameIndex] }; // Which semaphore to wait on before execution begins
         vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput }; // Which stage of the pipeline to wait in
@@ -81,17 +81,17 @@ namespace nc::graphics::vulkan
         submitInfo.setSignalSemaphoreCount(1);
         submitInfo.setPSignalSemaphores(signalSemaphores);
 
-        device.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, m_framesInFlightFences[currentFrameIndex]);
+        base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, m_framesInFlightFences[currentFrameIndex]);
     }
 
-    void Commands::SubmitCopyCommandImmediate(const vulkan::Device& device, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size)
+    void Commands::SubmitCopyCommandImmediate(const vulkan::Base& base, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size)
     {
         vk::CommandBufferAllocateInfo allocInfo{};
         allocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
-        allocInfo.setCommandPool(device.GetCommandPool());
+        allocInfo.setCommandPool(base.GetCommandPool());
         allocInfo.setCommandBufferCount(1);
 
-        auto tempCommandBuffers = device.GetDevice().allocateCommandBuffers(allocInfo);
+        auto tempCommandBuffers = base.GetDevice().allocateCommandBuffers(allocInfo);
         auto tempCommandBuffer = tempCommandBuffers[0];
 
         // Begin recording immediately
@@ -109,8 +109,8 @@ namespace nc::graphics::vulkan
         vk::SubmitInfo submitInfo{};
         submitInfo.setCommandBufferCount(1);
         submitInfo.setPCommandBuffers(&tempCommandBuffer);
-        device.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);
-        device.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
-        device.GetDevice().freeCommandBuffers(device.GetCommandPool(), tempCommandBuffer);
+        base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);
+        base.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
+        base.GetDevice().freeCommandBuffers(base.GetCommandPool(), tempCommandBuffer);
     }
 }

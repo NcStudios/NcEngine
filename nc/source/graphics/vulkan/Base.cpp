@@ -1,4 +1,4 @@
-#include "Device.h"
+#include "Base.h"
 #include "Instance.h"
 #include "VertexBuffer.h"
 
@@ -25,10 +25,10 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    Device::Device(const vulkan::Instance& instance, Vector2 dimensions)
+    Base::Base(const vulkan::Instance& instance, Vector2 dimensions)
     : m_instance{instance.GetInstance()},
       m_surface{instance.GetSurface()},
-      m_device{},
+      m_logicalDevice{},
       m_physicalDevice{},
       m_graphicsQueue{},
       m_presentQueue{},
@@ -56,16 +56,16 @@ namespace nc::graphics::vulkan
         CreateAllocator();
     }
 
-    Device::~Device()
+    Base::~Base()
     {
         CleanupSwapChain();
-        m_device.destroyCommandPool(m_commandPool);
+        m_logicalDevice.destroyCommandPool(m_commandPool);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
-            m_device.destroySemaphore(m_imageRenderReadySemaphores[i]);
-            m_device.destroySemaphore(m_imagePresentReadySemaphores[i]);
-            m_device.destroyFence(m_framesInFlightFences[i]);
+            m_logicalDevice.destroySemaphore(m_imageRenderReadySemaphores[i]);
+            m_logicalDevice.destroySemaphore(m_imagePresentReadySemaphores[i]);
+            m_logicalDevice.destroyFence(m_framesInFlightFences[i]);
         }
 
         for (uint32_t i = 0; i < m_buffers.size(); i++)
@@ -74,20 +74,20 @@ namespace nc::graphics::vulkan
         }
 
         m_allocator.destroy();
-        m_device.destroy();
+        m_logicalDevice.destroy();
     }
 
-    void Device::CleanupSwapChain()
+    void Base::CleanupSwapChain()
     {
         for (auto imageView : m_swapChainImageViews)
         {
-            m_device.destroyImageView(imageView, nullptr);
+            m_logicalDevice.destroyImageView(imageView, nullptr);
         }
 
-        m_device.destroySwapchainKHR(m_swapChain);
+        m_logicalDevice.destroySwapchainKHR(m_swapChain);
     }
 
-    void Device::CreatePhysicalDevice()
+    void Base::CreatePhysicalDevice()
     {
         uint32_t deviceCount = 0;
         if (m_instance.enumeratePhysicalDevices(&deviceCount, nullptr) != vk::Result::eSuccess)
@@ -110,13 +110,13 @@ namespace nc::graphics::vulkan
             uint32_t extensionCount;
             if (device.enumerateDeviceExtensionProperties(nullptr, &extensionCount, nullptr) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Device::IsPhysicalDeviceExtensionSupported() - could not enumerate device extensions.");
+                throw std::runtime_error("Base::IsPhysicalDeviceExtensionSupported() - could not enumerate device extensions.");
             }
 
             std::vector<vk::ExtensionProperties> availableExtensions(extensionCount);
             if (device.enumerateDeviceExtensionProperties(nullptr, &extensionCount, availableExtensions.data()) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Device::IsPhysicalDeviceExtensionSupported() - could not enumerate device extensions.");
+                throw std::runtime_error("Base::IsPhysicalDeviceExtensionSupported() - could not enumerate device extensions.");
             }
 
             bool extensionsSupported = std::all_of(DeviceExtensions.cbegin(), DeviceExtensions.cend(), [&availableExtensions](const auto& requiredExtension)
@@ -149,7 +149,7 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Device::CreateLogicalDevice()
+    void Base::CreateLogicalDevice()
     {
         auto indices = QueueFamilyIndices(m_physicalDevice, m_surface);
 
@@ -183,7 +183,7 @@ namespace nc::graphics::vulkan
 
         try
         {
-            m_device = m_physicalDevice.createDevice(deviceCreateInfo);
+            m_logicalDevice = m_physicalDevice.createDevice(deviceCreateInfo);
         }
         catch (const std::exception& error)
         {
@@ -191,7 +191,7 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Device::CreateSwapChain(Vector2 dimensions)
+    void Base::CreateSwapChain(Vector2 dimensions)
     {
         auto swapChainSupport = QuerySwapChainSupport(m_physicalDevice, m_surface);
 
@@ -253,8 +253,8 @@ namespace nc::graphics::vulkan
         auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
         uint32_t queueFamilyIndices[] = { queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily) };
 
-        m_graphicsQueue = m_device.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
-        m_presentQueue = m_device.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
+        m_graphicsQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
+        m_presentQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
 
         if (queueFamilies.IsSeparatePresentQueue())
         {
@@ -275,17 +275,17 @@ namespace nc::graphics::vulkan
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = nullptr;
 
-        m_swapChain = m_device.createSwapchainKHR(createInfo);
+        m_swapChain = m_logicalDevice.createSwapchainKHR(createInfo);
 
         // Set swapchain images        
         uint32_t swapChainImageCount;
-        if (m_device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
+        if (m_logicalDevice.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Error getting swapchain images count.");
         }
 
         m_swapChainImages.resize(swapChainImageCount);
-        if (m_device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
+        if (m_logicalDevice.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Error getting swapchain images.");
         }
@@ -318,19 +318,19 @@ namespace nc::graphics::vulkan
             imageViewCreateInfo.setComponents(swapChainComponents);
             imageViewCreateInfo.setSubresourceRange(swapChainSubresourceRange);
 
-            if (m_device.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
+            if (m_logicalDevice.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
             {
                 throw std::runtime_error("Failed to create image view");
             }
         }
     }
 
-    void Device::CreateCommandPool()
+    void Base::CreateCommandPool()
     {
         vk::CommandPoolCreateInfo poolInfo{};
         auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
         poolInfo.setQueueFamilyIndex(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily));
-        m_commandPool = m_device.createCommandPool(poolInfo);
+        m_commandPool = m_logicalDevice.createCommandPool(poolInfo);
     }
 
     // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
@@ -339,7 +339,7 @@ namespace nc::graphics::vulkan
     // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MAX_FRAMES_IN_FLIGHT amount of frame-render jobs to the command queues. 
     // The fences in framesInFlightFences (one per frame in MAX_FRAMES_PER_FLIGHT) prevent more frame-render jobs than fences from being submitted until one frame-render job completes.
     // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
-    void Device::CreateSynchronizationObjects()
+    void Base::CreateSynchronizationObjects()
     {
         m_imageRenderReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_imagePresentReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -352,13 +352,13 @@ namespace nc::graphics::vulkan
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
-            m_imageRenderReadySemaphores[i] = m_device.createSemaphore(semaphoreInfo);
-            m_imagePresentReadySemaphores[i] = m_device.createSemaphore(semaphoreInfo);
-            m_framesInFlightFences[i] = m_device.createFence(fenceInfo);
+            m_imageRenderReadySemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
+            m_imagePresentReadySemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
+            m_framesInFlightFences[i] = m_logicalDevice.createFence(fenceInfo);
         }
     }
 
-    uint32_t Device::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer)
+    uint32_t Base::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer)
     {
         if (m_buffers.find(m_bufferIndex) != m_buffers.end())
         {
@@ -384,7 +384,7 @@ namespace nc::graphics::vulkan
         return m_bufferIndex++;
     }
 
-    void Device::DestroyBuffer(uint32_t id)
+    void Base::DestroyBuffer(uint32_t id)
     {
         auto buffer = m_buffers.find(id);
         if (buffer == m_buffers.end())
@@ -396,44 +396,44 @@ namespace nc::graphics::vulkan
         m_buffers.erase(id);
     }
 
-    void Device::CreateAllocator()
+    void Base::CreateAllocator()
     {
         VmaAllocatorCreateInfo allocatorInfo{};
         allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
         allocatorInfo.physicalDevice = m_physicalDevice;
-        allocatorInfo.device = m_device;
+        allocatorInfo.device = m_logicalDevice;
         allocatorInfo.instance = m_instance;
         m_allocator = vma::createAllocator(allocatorInfo);
     }
 
-    const vk::Device& Device::GetDevice() const noexcept
+    const vk::Device& Base::GetDevice() const noexcept
     {
-        return m_device;
+        return m_logicalDevice;
     }
 
-    const Vector2 Device::GetSwapChainExtentDimensions() const noexcept
+    const Vector2 Base::GetSwapChainExtentDimensions() const noexcept
     {
         return Vector2(m_swapChainExtent.width, m_swapChainExtent.height);
     }
 
-    const vk::Extent2D& Device::GetSwapChainExtent() const noexcept
+    const vk::Extent2D& Base::GetSwapChainExtent() const noexcept
     {
         return m_swapChainExtent;
     }
 
-    const vk::Format& Device::GetSwapChainImageFormat() const noexcept
+    const vk::Format& Base::GetSwapChainImageFormat() const noexcept
     {
         return m_swapChainImageFormat;
     }
 
-    const std::vector<vk::ImageView>& Device::GetSwapChainImageViews() const noexcept
+    const std::vector<vk::ImageView>& Base::GetSwapChainImageViews() const noexcept
     {
         return m_swapChainImageViews;
     }
 
-    uint32_t Device::GetNextRenderReadyImageIndex(bool& isSwapChainValid)
+    uint32_t Base::GetNextRenderReadyImageIndex(bool& isSwapChainValid)
     {
-        auto resultAndIndex = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageRenderReadySemaphores[m_currentFrameIndex]);
+        auto resultAndIndex = m_logicalDevice.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageRenderReadySemaphores[m_currentFrameIndex]);
         if (resultAndIndex.result == vk::Result::eErrorOutOfDateKHR)
         {
             isSwapChainValid = false;
@@ -442,37 +442,37 @@ namespace nc::graphics::vulkan
         return resultAndIndex.value;
     }
 
-    const std::vector<vk::Semaphore>& Device::GetSemaphores(SemaphoreType semaphoreType) const noexcept
+    const std::vector<vk::Semaphore>& Base::GetSemaphores(SemaphoreType semaphoreType) const noexcept
     {
         return semaphoreType == SemaphoreType::RenderReady ? m_imageRenderReadySemaphores : m_imagePresentReadySemaphores;
     }
 
-    const vk::CommandPool& Device::GetCommandPool() const noexcept
+    const vk::CommandPool& Base::GetCommandPool() const noexcept
     {
         return m_commandPool;
     }
 
-    const vk::Queue& Device::GetQueue(QueueFamilyType type) const noexcept
+    const vk::Queue& Base::GetQueue(QueueFamilyType type) const noexcept
     {
         return type == QueueFamilyType::GraphicsFamily ? m_graphicsQueue : m_presentQueue;
     }
 
-    uint32_t Device::GetFrameIndex() const noexcept
+    uint32_t Base::GetFrameIndex() const noexcept
     {
         return m_currentFrameIndex;
     }
 
-    const std::vector<vk::Fence>& Device::GetFences(FenceType fenceType) const noexcept
+    const std::vector<vk::Fence>& Base::GetFences(FenceType fenceType) const noexcept
     {
         return fenceType == FenceType::FramesInFlight ? m_framesInFlightFences : m_imagesInFlightFences;
     }
 
-    const vma::Allocation& Device::GetAllocation(uint32_t bufferId) const
+    const vma::Allocation& Base::GetAllocation(uint32_t bufferId) const
     {
         return m_buffers.at(bufferId).second;
     }
 
-    void Device::Present(uint32_t imageIndex, bool& isSwapChainValid)
+    void Base::Present(uint32_t imageIndex, bool& isSwapChainValid)
     {
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setWaitSemaphoreCount(1);
@@ -498,41 +498,41 @@ namespace nc::graphics::vulkan
     }
 
     // Increments the frame index. Frame index is used to select which pair of semaphores we are using as each concurrent frame requires its own pair.
-    void Device::IncrementFrameIndex()
+    void Base::IncrementFrameIndex()
     {
         m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    void Device::WaitForFrameFence()
+    void Base::WaitForFrameFence()
     {
-        if (m_device.waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
+        if (m_logicalDevice.waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Could not wait for fences to complete.");
         }
     }
 
-    void Device::WaitForImageFence(uint32_t imageIndex)
+    void Base::WaitForImageFence(uint32_t imageIndex)
     {
         if (m_imagesInFlightFences[imageIndex])
         {
-            if (m_device.waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
+            if (m_logicalDevice.waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
             {
                 throw std::runtime_error("Could not wait for fences to complete.");
             }
         }
     }
 
-    void Device::SyncImageAndFrameFence(uint32_t imageIndex)
+    void Base::SyncImageAndFrameFence(uint32_t imageIndex)
     {
         m_imagesInFlightFences[imageIndex] = m_framesInFlightFences[m_currentFrameIndex];
     }
 
-    void Device::ResetFrameFence()
+    void Base::ResetFrameFence()
     {
-        m_device.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
+        m_logicalDevice.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
     }
 
-    void Device::MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size)
+    void Base::MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size)
     {
         void* mappedData;
         auto allocation = m_buffers.at(bufferId).second;
@@ -541,7 +541,7 @@ namespace nc::graphics::vulkan
         m_allocator.unmapMemory(allocation);
     }
 
-    void Device::MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size)
+    void Base::MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size)
     {
         void* mappedData;
         auto allocation = m_buffers.at(bufferId).second;

@@ -1,20 +1,20 @@
 #include "FrameBuffers.h"
-#include "Device.h"
+#include "Base.h"
 #include "RenderPass.h"
 
 namespace nc::graphics::vulkan
 {
-    FrameBuffers::FrameBuffers(const Device& device, const RenderPass& renderpass)
+    FrameBuffers::FrameBuffers(const Base& base, const RenderPass& renderpass)
     : m_framebuffers{}
     {
-        auto swapChainImageViewsCount = device.GetSwapChainImageViews().size();
+        auto swapChainImageViewsCount = base.GetSwapChainImageViews().size();
         m_framebuffers.resize(swapChainImageViewsCount);
 
         for (size_t i = 0; i < swapChainImageViewsCount; i++)
         {
-            vk::ImageView attachments[] = { device.GetSwapChainImageViews().at(i) };
+            vk::ImageView attachments[] = { base.GetSwapChainImageViews().at(i) };
 
-            auto swapChainDimensions = device.GetSwapChainExtentDimensions();
+            auto swapChainDimensions = base.GetSwapChainExtentDimensions();
 
             vk::FramebufferCreateInfo framebufferInfo{};
             framebufferInfo.setRenderPass(renderpass.GetRenderPass());
@@ -23,7 +23,7 @@ namespace nc::graphics::vulkan
             framebufferInfo.setWidth(swapChainDimensions.x);
             framebufferInfo.setHeight(swapChainDimensions.y);
             framebufferInfo.setLayers(1);
-            m_framebuffers[i] = device.GetDevice().createFramebufferUnique(framebufferInfo);
+            m_framebuffers[i] = base.GetDevice().createFramebufferUnique(framebufferInfo);
         }
     }
 

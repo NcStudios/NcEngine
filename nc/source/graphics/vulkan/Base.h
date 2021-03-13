@@ -46,11 +46,11 @@ namespace nc::graphics::vulkan
             bool m_isSeparatePresentQueue;
     };
 
-    class Device
+    class Base
     {
         public:
-            Device(const vulkan::Instance& instance, Vector2 dimensions);
-            ~Device();
+            Base(const vulkan::Instance& instance, Vector2 dimensions);
+            ~Base();
 
             const vk::Device& GetDevice() const noexcept;
             const Vector2 GetSwapChainExtentDimensions() const noexcept;
@@ -88,7 +88,7 @@ namespace nc::graphics::vulkan
 
             const vk::Instance& m_instance;
             const vk::SurfaceKHR& m_surface;
-            vk::Device m_device;
+            vk::Device m_logicalDevice;
             vk::PhysicalDevice m_physicalDevice;
             vk::Queue m_graphicsQueue;
             vk::Queue m_presentQueue;

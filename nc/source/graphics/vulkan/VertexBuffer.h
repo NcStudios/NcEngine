@@ -21,12 +21,12 @@ namespace nc::graphics::vulkan::vertex
 
 namespace nc::graphics::vulkan
 {
-    class Device; class Commands;
+    class Base; class Commands;
 
     class VertexBuffer
     {
         public:
-            VertexBuffer(Device& device, Commands& commands, std::vector<vertex::Vertex> vertices);
+            VertexBuffer(Base& base, Commands& commands, std::vector<vertex::Vertex> vertices);
             void Bind();
             uint32_t GetId() const;
             const vk::Buffer& GetBuffer() const;
@@ -34,7 +34,7 @@ namespace nc::graphics::vulkan
             const std::vector<vertex::Vertex>& GetVertices() const;
 
         private:
-            vulkan::Device& m_device;
+            vulkan::Base& m_base;
             vulkan::Commands& m_commands;
             uint32_t m_id;
             uint32_t m_size;

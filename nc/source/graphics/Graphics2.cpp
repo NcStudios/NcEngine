@@ -1,5 +1,5 @@
 #include "Graphics2.h"
-#include "vulkan/Device.h"
+#include "vulkan/Base.h"
 #include "vulkan/Instance.h"
 #include "vulkan/GraphicsPipeline.h"
 #include "vulkan/RenderPass.h"
@@ -14,10 +14,10 @@ namespace nc::graphics
 
     Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_instance{ std::make_unique<Instance>(hwnd, hinstance) },
-          m_device{ std::make_unique<Device>(*m_instance, dimensions) },
-          m_renderPass{ std::make_unique<RenderPass>(*m_device) },
-          m_pipeline{ std::make_unique<GraphicsPipeline>(*m_device, *m_renderPass) },
-          m_frameBuffers{ std::make_unique<FrameBuffers>(*m_device, *m_renderPass) },
+          m_base{ std::make_unique<Base>(*m_instance, dimensions) },
+          m_renderPass{ std::make_unique<RenderPass>(*m_base) },
+          m_pipeline{ std::make_unique<GraphicsPipeline>(*m_base, *m_renderPass) },
+          m_frameBuffers{ std::make_unique<FrameBuffers>(*m_base, *m_renderPass) },
           m_commands{ nullptr },
           m_vertexBuffer{ nullptr }, // @todo: Take from mesh, will not be created in CTOR for Graphics2
           m_indexBuffer{ nullptr }, // @todo: Take from mesh, will not be created in CTOR for Graphics2
@@ -27,11 +27,11 @@ namespace nc::graphics
           m_viewMatrix{},
           m_projectionMatrix{}
     {  
-        m_commands = std::make_unique<Commands>(*m_device,
-            m_device->GetSemaphores(SemaphoreType::RenderReady),
-            m_device->GetSemaphores(SemaphoreType::PresentReady),
-            m_device->GetFences(FenceType::FramesInFlight),
-            m_device->GetFences(FenceType::ImagesInFlight));
+        m_commands = std::make_unique<Commands>(*m_base,
+            m_base->GetSemaphores(SemaphoreType::RenderReady),
+            m_base->GetSemaphores(SemaphoreType::PresentReady),
+            m_base->GetFences(FenceType::FramesInFlight),
+            m_base->GetFences(FenceType::ImagesInFlight));
 
         // @todo: Take from mesh, will not be created in CTOR for Graphics2
         auto vertices = std::vector<vulkan::vertex::Vertex> 
@@ -44,7 +44,7 @@ namespace nc::graphics
         };
 
         // @todo: Take from mesh, will not be created in CTOR for Graphics2
-        m_vertexBuffer = std::make_unique<VertexBuffer>(*m_device, *m_commands, vertices);
+        m_vertexBuffer = std::make_unique<VertexBuffer>(*m_base, *m_commands, vertices);
 
         // @todo: Take from mesh, will not be created in CTOR for Graphics2
         auto indices = std::vector<uint32_t>
@@ -53,10 +53,10 @@ namespace nc::graphics
         };
 
         // @todo: Take from mesh, will not be created in CTOR for Graphics2
-        m_indexBuffer = std::make_unique<IndexBuffer>(*m_device, *m_commands, indices);
+        m_indexBuffer = std::make_unique<IndexBuffer>(*m_base, *m_commands, indices);
 
         // Write the render pass to the command buffer.
-        m_commands->RecordRenderCommand(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline, *m_vertexBuffer, *m_indexBuffer);
+        m_commands->RecordRenderCommand(*m_base, *m_renderPass, *m_frameBuffers, *m_pipeline, *m_vertexBuffer, *m_indexBuffer);
     }
 
     Graphics2::~Graphics2() = default;
@@ -71,19 +71,19 @@ namespace nc::graphics
         m_frameBuffers.reset();
         m_pipeline.reset(); // @todo: Set up dynamic state in pipeline for scissor rect and viewport so entire pipeline is not recreated on resize.
         m_renderPass.reset();
-        m_device->CleanupSwapChain();
+        m_base->CleanupSwapChain();
 
         // Recreate swapchain and resources
-        m_device->CreateSwapChain(dimensions);
-        m_renderPass = std::make_unique<RenderPass>(*m_device);
-        m_pipeline = std::make_unique<GraphicsPipeline>(*m_device, *m_renderPass);
-        m_frameBuffers = std::make_unique<FrameBuffers>(*m_device, *m_renderPass);
-        m_commands = std::make_unique<Commands>(*m_device,
-            m_device->GetSemaphores(SemaphoreType::RenderReady),
-            m_device->GetSemaphores(SemaphoreType::PresentReady),
-            m_device->GetFences(FenceType::FramesInFlight),
-            m_device->GetFences(FenceType::ImagesInFlight));
-        m_commands->RecordRenderCommand(*m_device, *m_renderPass, *m_frameBuffers, *m_pipeline, *m_vertexBuffer, *m_indexBuffer);
+        m_base->CreateSwapChain(dimensions);
+        m_renderPass = std::make_unique<RenderPass>(*m_base);
+        m_pipeline = std::make_unique<GraphicsPipeline>(*m_base, *m_renderPass);
+        m_frameBuffers = std::make_unique<FrameBuffers>(*m_base, *m_renderPass);
+        m_commands = std::make_unique<Commands>(*m_base,
+            m_base->GetSemaphores(SemaphoreType::RenderReady),
+            m_base->GetSemaphores(SemaphoreType::PresentReady),
+            m_base->GetFences(FenceType::FramesInFlight),
+            m_base->GetFences(FenceType::ImagesInFlight));
+        m_commands->RecordRenderCommand(*m_base, *m_renderPass, *m_frameBuffers, *m_pipeline, *m_vertexBuffer, *m_indexBuffer);
     }
 
     DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
@@ -132,7 +132,7 @@ namespace nc::graphics
 
     void Graphics2::WaitIdle()
     {
-        m_device->GetDevice().waitIdle();
+        m_base->GetDevice().waitIdle();
     }
 
     void Graphics2::FrameBegin()
@@ -142,10 +142,10 @@ namespace nc::graphics
 
     bool Graphics2::GetNextImageIndex(uint32_t& imageIndex)
     {
-        m_device->WaitForFrameFence();
+        m_base->WaitForFrameFence();
 
         bool isSwapChainValid = true;
-        imageIndex = m_device->GetNextRenderReadyImageIndex(isSwapChainValid);
+        imageIndex = m_base->GetNextRenderReadyImageIndex(isSwapChainValid);
         if (!isSwapChainValid)
         {
             RecreateSwapChain(m_dimensions);
@@ -156,16 +156,16 @@ namespace nc::graphics
 
     void Graphics2::RenderToImage(uint32_t imageIndex)
     {
-        m_device->WaitForImageFence(imageIndex);
-        m_device->SyncImageAndFrameFence(imageIndex);
-        m_device->ResetFrameFence();
-        m_commands->SubmitRenderCommand(*m_device, imageIndex);
+        m_base->WaitForImageFence(imageIndex);
+        m_base->SyncImageAndFrameFence(imageIndex);
+        m_base->ResetFrameFence();
+        m_commands->SubmitRenderCommand(*m_base, imageIndex);
     }
 
     bool Graphics2::PresentImage(uint32_t imageIndex)
     {
         bool isSwapChainValid = true;
-        m_device->Present(imageIndex, isSwapChainValid);
+        m_base->Present(imageIndex, isSwapChainValid);
 
         if (!isSwapChainValid)
         {
@@ -198,6 +198,6 @@ namespace nc::graphics
     void Graphics2::FrameEnd()
     {
         // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
-        m_device->IncrementFrameIndex();
+        m_base->IncrementFrameIndex();
     }
 }
