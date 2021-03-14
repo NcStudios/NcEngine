@@ -1,8 +1,8 @@
 #include "GraphicsPipeline.h"
 #include "Base.h"
-#include "RenderPass.h"
 #include "config/Config.h"
 #include "VertexBuffer.h"
+#include "Swapchain.h"
 
 #include <vector>
 #include <string>
@@ -41,7 +41,7 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    GraphicsPipeline::GraphicsPipeline(const vulkan::Base& base, const vulkan::RenderPass& renderPass)
+    GraphicsPipeline::GraphicsPipeline(const vulkan::Base& base, const vulkan::Swapchain& swapchain)
     : m_pipelineLayout{nullptr},
       m_pipeline{nullptr}
     {
@@ -84,34 +84,16 @@ namespace nc::graphics::vulkan
         /******************
          * INPUT ASSEMBLY *
          * ****************/
-        // @todo: Look into using element buffers here to resuse vertices
+        // @todo: Look into using element buffers here to reuse vertices
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.setTopology(vk::PrimitiveTopology::eTriangleList);
         inputAssembly.setPrimitiveRestartEnable(static_cast<vk::Bool32>(false));
 
-        /************
-         * VIEWPORT *
-         * **********/
-        // Viewport defines the transformation from the image to the framebuffer
-        auto [width, height] = base.GetSwapChainExtentDimensions();
-        vk::Viewport viewport{};
-        viewport.setX(0.0f);
-        viewport.setY(0.0f);
-        viewport.setWidth(width);
-        viewport.setHeight(height);
-        viewport.setMinDepth(0.0f);
-        viewport.setMaxDepth(1.0f);
-
-        // Scissor rectangles crop the image, discarding pixels outside of the scissor rect by the rasterizer.
-        vk::Rect2D scissor{};
-        scissor.setOffset({0,0});
-        scissor.setExtent(base.GetSwapChainExtent());
-
         vk::PipelineViewportStateCreateInfo viewportState{};
         viewportState.setViewportCount(1);
-        viewportState.setPViewports(&viewport);
+        viewportState.setPViewports(nullptr);
         viewportState.setScissorCount(1);
-        viewportState.setPScissors(&scissor);
+        viewportState.setPScissors(nullptr);
 
         /*************
          * RASTERIZER *
@@ -175,6 +157,14 @@ namespace nc::graphics::vulkan
 
         m_pipelineLayout = base.GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
+        /*****************
+         * DYNAMIC STATE *
+         * ***************/
+        std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+        vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
+        dynamicStateInfo.setDynamicStateCount(dynamicStates.size());
+        dynamicStateInfo.setDynamicStates(dynamicStates);
+
         /*******************
          * GRAPHICS PIPELINE *
          * *****************/
@@ -188,9 +178,9 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         pipelineCreateInfo.setPDepthStencilState(nullptr);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
-        pipelineCreateInfo.setPDynamicState(nullptr);
+        pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-        pipelineCreateInfo.setRenderPass(renderPass.GetRenderPass()); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility
+        pipelineCreateInfo.setRenderPass(swapchain.GetFrameBufferFillPass()); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.

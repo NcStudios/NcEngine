@@ -26,6 +26,7 @@ namespace nc::graphics::vulkan
     class VertexBuffer
     {
         public:
+
             VertexBuffer(Base& base, Commands& commands, std::vector<vertex::Vertex> vertices);
             void Bind();
             uint32_t GetId() const;
@@ -34,6 +35,7 @@ namespace nc::graphics::vulkan
             const std::vector<vertex::Vertex>& GetVertices() const;
 
         private:
+        
             vulkan::Base& m_base;
             vulkan::Commands& m_commands;
             uint32_t m_id;

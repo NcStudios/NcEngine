@@ -4,12 +4,12 @@
 
 namespace nc::graphics::vulkan
 {
-    class Base; class RenderPass;
+    class Base; class Swapchain;
 
     class GraphicsPipeline
     {
         public:
-            GraphicsPipeline(const vulkan::Base& base, const vulkan::RenderPass& renderPass); // &todo: Change from passing in a single render pass
+            GraphicsPipeline(const vulkan::Base& base, const vulkan::Swapchain& swapchain);
             const vk::Pipeline& GetPipeline() const;
 
         private:

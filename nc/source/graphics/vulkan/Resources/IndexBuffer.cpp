@@ -32,7 +32,7 @@ namespace nc::graphics::vulkan
     void IndexBuffer::Bind()
     {
         // Copy staging into vertex.
-        m_commands.SubmitCopyCommandImmediate(m_base, m_stagingBuffer, m_indexBuffer, m_size);
+        m_commands.SubmitCopyCommandImmediate(m_stagingBuffer, m_indexBuffer, m_size);
 
         // Destroy the staging buffer.
         m_base.DestroyBuffer(m_stagingBufferId);

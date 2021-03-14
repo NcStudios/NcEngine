@@ -1,5 +1,4 @@
 #include "Base.h"
-#include "Instance.h"
 #include "VertexBuffer.h"
 
 #include <set>
@@ -12,79 +11,142 @@
 
 namespace
 {
-    struct SwapChainSupportDetails
-    {
-        vk::SurfaceCapabilitiesKHR capabilities;
-        std::vector<vk::SurfaceFormatKHR> formats;
-        std::vector<vk::PresentModeKHR> presentModes;
-    };
-
-    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface);
     const std::vector<const char*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    const std::vector<const char*> GlobalExtensions = { VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME };
+    const std::vector<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+
+    #ifdef NC_DEBUG_BUILD
+        const bool IsValidationLayersEnabled = true;
+    #else
+        const bool IsValidationLayersEnabled = false;
+    #endif
+
+    bool CheckValidationLayerSupport();
+    void EnableValidationLayers(vk::InstanceCreateInfo& instanceCreateInfo);
+    void SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo);
+
+    void EnableValidationLayers(vk::InstanceCreateInfo& instanceCreateInfo)
+    {
+         if (IsValidationLayersEnabled)
+        {
+            if (!CheckValidationLayerSupport())
+            {
+                throw std::runtime_error("Instance::EnableValidationLayers - Validation layers requested but not available.");
+            }
+
+            instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
+            instanceCreateInfo.ppEnabledLayerNames = ValidationLayers.data();
+        }
+        else 
+        {
+            instanceCreateInfo.enabledLayerCount = 0;
+        }
+    }
+
+    bool CheckValidationLayerSupport()
+    {
+        uint32_t layerCount;
+        if (vk::enumerateInstanceLayerProperties(&layerCount, nullptr) != vk::Result::eSuccess)
+        {
+            return false;
+        }
+
+        std::vector<vk::LayerProperties> availableLayers(layerCount);
+        if (vk::enumerateInstanceLayerProperties(&layerCount, availableLayers.data()) != vk::Result::eSuccess)
+        {
+            return false;
+        }
+
+        return std::all_of(ValidationLayers.cbegin(), ValidationLayers.cend(), [&availableLayers](const auto& requiredLayer)
+        {
+            return std::any_of(availableLayers.cbegin(), availableLayers.cend(), [&requiredLayer](const auto& availableLayer)
+            {
+                return strcmp(requiredLayer, availableLayer.layerName) == 0;
+            });
+        });
+    }
+
+    void SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo)
+    {
+        instanceCreateInfo.setEnabledExtensionCount(static_cast<uint32_t>(GlobalExtensions.size()));
+        instanceCreateInfo.setPpEnabledExtensionNames(GlobalExtensions.data());
+    }
 }
 
 namespace nc::graphics::vulkan
 {
-    Base::Base(const vulkan::Instance& instance, Vector2 dimensions)
-    : m_instance{instance.GetInstance()},
-      m_surface{instance.GetSurface()},
+    Base::Base(HWND hwnd, HINSTANCE hinstance)
+    : m_instance{},
+      m_surface{},
       m_logicalDevice{},
       m_physicalDevice{},
       m_graphicsQueue{},
       m_presentQueue{},
-      m_swapChain{},
-      m_swapChainImages{},
-      m_swapChainImageFormat{},
-      m_swapChainExtent{},
-      m_swapChainImageViews{},
       m_commandPool{},
       m_commandBuffers{},
-      m_imageRenderReadySemaphores{},
-      m_imagePresentReadySemaphores{},
-      m_framesInFlightFences{},
-      m_imagesInFlightFences{},
-      m_currentFrameIndex{0},
       m_allocator{},
       m_buffers{},
       m_bufferIndex{0}
     {
+        CreateInstance();
+        CreateSurface(hwnd, hinstance);
         CreatePhysicalDevice();
         CreateLogicalDevice();
-        CreateSwapChain(dimensions);
+        CreateCommandQueues();
         CreateCommandPool();
-        CreateSynchronizationObjects();
         CreateAllocator();
     }
 
     Base::~Base()
     {
-        CleanupSwapChain();
-        m_logicalDevice.destroyCommandPool(m_commandPool);
+        FreeCommandBuffers();
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
-        {
-            m_logicalDevice.destroySemaphore(m_imageRenderReadySemaphores[i]);
-            m_logicalDevice.destroySemaphore(m_imagePresentReadySemaphores[i]);
-            m_logicalDevice.destroyFence(m_framesInFlightFences[i]);
-        }
+        m_logicalDevice.destroyCommandPool(m_commandPool);
 
         for (uint32_t i = 0; i < m_buffers.size(); i++)
         {
             m_allocator.destroyBuffer(m_buffers[i].first, m_buffers[i].second);
         }
 
+        m_instance.destroySurfaceKHR(m_surface);
         m_allocator.destroy();
         m_logicalDevice.destroy();
+        m_instance.destroy();
     }
 
-    void Base::CleanupSwapChain()
+    void Base::FreeCommandBuffers()
     {
-        for (auto imageView : m_swapChainImageViews)
-        {
-            m_logicalDevice.destroyImageView(imageView, nullptr);
-        }
+        m_logicalDevice.freeCommandBuffers(m_commandPool, static_cast<uint32_t>(m_commandBuffers.size()), m_commandBuffers.data());
+    }
 
-        m_logicalDevice.destroySwapchainKHR(m_swapChain);
+    void Base::CreateInstance()
+    {
+        vk::ApplicationInfo applicationInfo( "NCEngine", 1, "Vulkan.hpp", 1, VK_API_VERSION_1_2 );
+        vk::InstanceCreateInfo instanceCreateInfo ( {}, &applicationInfo );
+
+        EnableValidationLayers(instanceCreateInfo);
+        SetGlobalExtensions(instanceCreateInfo);
+
+        try
+        {
+            m_instance = createInstance(instanceCreateInfo);
+        }
+        catch (const std::exception& error)
+        {
+            std::throw_with_nested(std::runtime_error("Failed to create instance."));
+        }
+    }
+
+    void Base::CreateSurface(HWND hwnd, HINSTANCE hinstance)
+    {
+        vk::SurfaceKHR surface;
+        vk::Win32SurfaceCreateInfoKHR surfaceCreateInfo;
+        surfaceCreateInfo.setHinstance(hinstance);
+        surfaceCreateInfo.setHwnd(hwnd);
+        if (m_instance.createWin32SurfaceKHR(&surfaceCreateInfo, nullptr, &m_surface) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Failed to get surface.");
+        }
     }
 
     void Base::CreatePhysicalDevice()
@@ -149,6 +211,13 @@ namespace nc::graphics::vulkan
         }
     }
 
+    void Base::CreateCommandQueues()
+    {
+        auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
+        m_graphicsQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
+        m_presentQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
+    }
+
     void Base::CreateLogicalDevice()
     {
         auto indices = QueueFamilyIndices(m_physicalDevice, m_surface);
@@ -191,171 +260,13 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Base::CreateSwapChain(Vector2 dimensions)
-    {
-        auto swapChainSupport = QuerySwapChainSupport(m_physicalDevice, m_surface);
-
-        auto surfaceFormat = swapChainSupport.formats[0];
-        for (const auto& availableFormat : swapChainSupport.formats)
-        {
-            if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
-            {
-                surfaceFormat = availableFormat;
-                break;
-            }
-        }
-
-        auto presentMode = vk::PresentModeKHR::eFifo;
-        for (const auto& availablePresentMode : swapChainSupport.presentModes)
-        {
-            // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPresentModeKHR.html
-            if (availablePresentMode == vk::PresentModeKHR::eMailbox)
-            {
-                presentMode = availablePresentMode;
-                break;
-            }
-        }
-
-        vk::Extent2D extent;
-        if (swapChainSupport.capabilities.currentExtent.width != UINT32_MAX)
-        {
-            extent = swapChainSupport.capabilities.currentExtent;
-        }
-        else
-        {
-            vk::Extent2D actualExtent = 
-            {
-                static_cast<uint32_t>(dimensions.x),
-                static_cast<uint32_t>(dimensions.y)
-            };
-
-            actualExtent.width = std::max(swapChainSupport.capabilities.minImageExtent.width, std::min(swapChainSupport.capabilities.maxImageExtent.width, actualExtent.width));
-            actualExtent.height = std::max(swapChainSupport.capabilities.minImageExtent.height, std::min(swapChainSupport.capabilities.maxImageExtent.height, actualExtent.height));
-
-            extent = actualExtent;
-        }
-
-        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
-        {
-            imageCount = swapChainSupport.capabilities.maxImageCount;
-        }
-
-        vk::SwapchainCreateInfoKHR createInfo{};
-        createInfo.setSurface(m_surface);
-        createInfo.setMinImageCount(imageCount);
-        createInfo.setImageFormat(surfaceFormat.format);
-        createInfo.setImageColorSpace(surfaceFormat.colorSpace);
-        createInfo.setImageExtent(extent);
-        createInfo.setImageArrayLayers(1);
-        createInfo.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
-
-        auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
-        uint32_t queueFamilyIndices[] = { queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily) };
-
-        m_graphicsQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
-        m_presentQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
-
-        if (queueFamilies.IsSeparatePresentQueue())
-        {
-            createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-            createInfo.queueFamilyIndexCount = 2;
-            createInfo.pQueueFamilyIndices = queueFamilyIndices;
-        }
-        else
-        {
-            createInfo.imageSharingMode = vk::SharingMode::eExclusive;
-            createInfo.queueFamilyIndexCount = 0;
-            createInfo.pQueueFamilyIndices = nullptr;
-        }
-
-        createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-        createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
-        createInfo.presentMode = presentMode;
-        createInfo.clipped = VK_TRUE;
-        createInfo.oldSwapchain = nullptr;
-
-        m_swapChain = m_logicalDevice.createSwapchainKHR(createInfo);
-
-        // Set swapchain images        
-        uint32_t swapChainImageCount;
-        if (m_logicalDevice.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Error getting swapchain images count.");
-        }
-
-        m_swapChainImages.resize(swapChainImageCount);
-        if (m_logicalDevice.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Error getting swapchain images.");
-        }
-
-        m_swapChainImageFormat = surfaceFormat.format;
-        m_swapChainExtent = extent;
-
-        // Create image views
-        m_swapChainImageViews.resize(m_swapChainImages.size());
-
-        auto swapChainComponents = vk::ComponentMapping{};
-        swapChainComponents.setR(vk::ComponentSwizzle::eIdentity);
-        swapChainComponents.setG(vk::ComponentSwizzle::eIdentity);
-        swapChainComponents.setB(vk::ComponentSwizzle::eIdentity);
-        swapChainComponents.setA(vk::ComponentSwizzle::eIdentity);
-
-        auto swapChainSubresourceRange = vk::ImageSubresourceRange{};
-        swapChainSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-        swapChainSubresourceRange.setBaseMipLevel(0);
-        swapChainSubresourceRange.setLevelCount(1);
-        swapChainSubresourceRange.setBaseArrayLayer(0);
-        swapChainSubresourceRange.setLayerCount(1);
-
-        for (size_t i = 0; i < m_swapChainImages.size(); ++i)
-        {
-            vk::ImageViewCreateInfo imageViewCreateInfo{};
-            imageViewCreateInfo.setImage(m_swapChainImages[i]);
-            imageViewCreateInfo.setViewType(vk::ImageViewType::e2D);
-            imageViewCreateInfo.setFormat(m_swapChainImageFormat);
-            imageViewCreateInfo.setComponents(swapChainComponents);
-            imageViewCreateInfo.setSubresourceRange(swapChainSubresourceRange);
-
-            if (m_logicalDevice.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
-            {
-                throw std::runtime_error("Failed to create image view");
-            }
-        }
-    }
-
     void Base::CreateCommandPool()
     {
         vk::CommandPoolCreateInfo poolInfo{};
+        poolInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
         auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
         poolInfo.setQueueFamilyIndex(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily));
         m_commandPool = m_logicalDevice.createCommandPool(poolInfo);
-    }
-
-    // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
-    // the semaphores below tell the GPU when either step can begin for a single image. Vulkan will render multiple swapchain images very rapidly, so MAX_FRAMES_IN_FLIGHT here creates 
-    // a pair of semaphores for each frame up to MAX_FRAMES_IN_FLIGHT. 
-    // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MAX_FRAMES_IN_FLIGHT amount of frame-render jobs to the command queues. 
-    // The fences in framesInFlightFences (one per frame in MAX_FRAMES_PER_FLIGHT) prevent more frame-render jobs than fences from being submitted until one frame-render job completes.
-    // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
-    void Base::CreateSynchronizationObjects()
-    {
-        m_imageRenderReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_imagePresentReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_framesInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr); // To start, no frames in flight are using swapchain images, so explicitly initialize to nullptr.
-
-        vk::SemaphoreCreateInfo semaphoreInfo{};
-        vk::FenceCreateInfo fenceInfo{};
-        fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
-
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
-        {
-            m_imageRenderReadySemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
-            m_imagePresentReadySemaphores[i] = m_logicalDevice.createSemaphore(semaphoreInfo);
-            m_framesInFlightFences[i] = m_logicalDevice.createFence(fenceInfo);
-        }
     }
 
     uint32_t Base::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer)
@@ -411,40 +322,14 @@ namespace nc::graphics::vulkan
         return m_logicalDevice;
     }
 
-    const Vector2 Base::GetSwapChainExtentDimensions() const noexcept
+    const vk::PhysicalDevice& Base::GetPhysicalDevice() const noexcept
     {
-        return Vector2(m_swapChainExtent.width, m_swapChainExtent.height);
+        return m_physicalDevice;
     }
 
-    const vk::Extent2D& Base::GetSwapChainExtent() const noexcept
+    const vk::SurfaceKHR& Base::GetSurface() const noexcept
     {
-        return m_swapChainExtent;
-    }
-
-    const vk::Format& Base::GetSwapChainImageFormat() const noexcept
-    {
-        return m_swapChainImageFormat;
-    }
-
-    const std::vector<vk::ImageView>& Base::GetSwapChainImageViews() const noexcept
-    {
-        return m_swapChainImageViews;
-    }
-
-    uint32_t Base::GetNextRenderReadyImageIndex(bool& isSwapChainValid)
-    {
-        auto resultAndIndex = m_logicalDevice.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageRenderReadySemaphores[m_currentFrameIndex]);
-        if (resultAndIndex.result == vk::Result::eErrorOutOfDateKHR)
-        {
-            isSwapChainValid = false;
-        }
-
-        return resultAndIndex.value;
-    }
-
-    const std::vector<vk::Semaphore>& Base::GetSemaphores(SemaphoreType semaphoreType) const noexcept
-    {
-        return semaphoreType == SemaphoreType::RenderReady ? m_imageRenderReadySemaphores : m_imagePresentReadySemaphores;
+        return m_surface;
     }
 
     const vk::CommandPool& Base::GetCommandPool() const noexcept
@@ -455,81 +340,6 @@ namespace nc::graphics::vulkan
     const vk::Queue& Base::GetQueue(QueueFamilyType type) const noexcept
     {
         return type == QueueFamilyType::GraphicsFamily ? m_graphicsQueue : m_presentQueue;
-    }
-
-    uint32_t Base::GetFrameIndex() const noexcept
-    {
-        return m_currentFrameIndex;
-    }
-
-    const std::vector<vk::Fence>& Base::GetFences(FenceType fenceType) const noexcept
-    {
-        return fenceType == FenceType::FramesInFlight ? m_framesInFlightFences : m_imagesInFlightFences;
-    }
-
-    const vma::Allocation& Base::GetAllocation(uint32_t bufferId) const
-    {
-        return m_buffers.at(bufferId).second;
-    }
-
-    void Base::Present(uint32_t imageIndex, bool& isSwapChainValid)
-    {
-        vk::PresentInfoKHR presentInfo{};
-        presentInfo.setWaitSemaphoreCount(1);
-        presentInfo.setPWaitSemaphores(&m_imagePresentReadySemaphores[m_currentFrameIndex]); // Wait on this semaphore before presenting.
-
-        vk::SwapchainKHR swapChains[] = {m_swapChain};
-        presentInfo.setSwapchainCount(1);
-        presentInfo.setPSwapchains(swapChains); // Sets the swapchain(s) to present to
-        presentInfo.setPImageIndices(&imageIndex); //  Sets the index of the image for each swapchain.
-        presentInfo.setPResults(nullptr);
-
-        auto result = m_presentQueue.presentKHR(&presentInfo);
-        if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
-        {
-            isSwapChainValid = false;
-            return;
-        }
-        
-        if (result != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Could not present to the swapchain.");
-        }
-    }
-
-    // Increments the frame index. Frame index is used to select which pair of semaphores we are using as each concurrent frame requires its own pair.
-    void Base::IncrementFrameIndex()
-    {
-        m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
-    }
-
-    void Base::WaitForFrameFence()
-    {
-        if (m_logicalDevice.waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Could not wait for fences to complete.");
-        }
-    }
-
-    void Base::WaitForImageFence(uint32_t imageIndex)
-    {
-        if (m_imagesInFlightFences[imageIndex])
-        {
-            if (m_logicalDevice.waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
-            {
-                throw std::runtime_error("Could not wait for fences to complete.");
-            }
-        }
-    }
-
-    void Base::SyncImageAndFrameFence(uint32_t imageIndex)
-    {
-        m_imagesInFlightFences[imageIndex] = m_framesInFlightFences[m_currentFrameIndex];
-    }
-
-    void Base::ResetFrameFence()
-    {
-        m_logicalDevice.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
     }
 
     void Base::MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size)
@@ -548,6 +358,46 @@ namespace nc::graphics::vulkan
         m_allocator.mapMemory(allocation, &mappedData);
         memcpy(mappedData, indices.data(), size);
         m_allocator.unmapMemory(allocation);
+    }
+
+    const SwapChainSupportDetails Base::QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const
+    {
+        SwapChainSupportDetails details;
+        if (device.getSurfaceCapabilitiesKHR(surface, &details.capabilities) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface capabilities.");
+        }
+
+        uint32_t formatCount;
+        if (device.getSurfaceFormatsKHR(surface, &formatCount, nullptr) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+        }
+
+        if (formatCount != 0)
+        {
+            details.formats.resize(formatCount);
+            if (device.getSurfaceFormatsKHR(surface, &formatCount, details.formats.data()) != vk::Result::eSuccess)
+            {
+                throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+            }
+        }
+
+        uint32_t presentModeCount;
+        if (device.getSurfacePresentModesKHR(surface, &presentModeCount, nullptr) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+        }
+
+        if (presentModeCount != 0)
+        {
+            details.presentModes.resize(presentModeCount);
+            if (device.getSurfacePresentModesKHR(surface, &presentModeCount, details.presentModes.data()) != vk::Result::eSuccess)
+            {
+                throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+            }
+        } 
+        return details;
     }
 
     QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
@@ -623,48 +473,5 @@ namespace nc::graphics::vulkan
                 return m_presentFamily.value();
         }
         throw std::runtime_error("QueueFamilyIndices::GetQueueFamilyIndex() - Chosen queue not present.");
-    }
-}
-
-namespace
-{
-    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
-    {
-        SwapChainSupportDetails details;
-        if (device.getSurfaceCapabilitiesKHR(surface, &details.capabilities) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface capabilities.");
-        }
-
-        uint32_t formatCount;
-        if (device.getSurfaceFormatsKHR(surface, &formatCount, nullptr) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
-        }
-
-        if (formatCount != 0)
-        {
-            details.formats.resize(formatCount);
-            if (device.getSurfaceFormatsKHR(surface, &formatCount, details.formats.data()) != vk::Result::eSuccess)
-            {
-                throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
-            }
-        }
-
-        uint32_t presentModeCount;
-        if (device.getSurfacePresentModesKHR(surface, &presentModeCount, nullptr) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
-        }
-
-        if (presentModeCount != 0)
-        {
-            details.presentModes.resize(presentModeCount);
-            if (device.getSurfacePresentModesKHR(surface, &presentModeCount, details.presentModes.data()) != vk::Result::eSuccess)
-            {
-                throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
-            }
-        } 
-        return details;
     }
 }

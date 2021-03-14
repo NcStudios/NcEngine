@@ -2,14 +2,13 @@
 
 #include "math/Vector2.h"
 
-#define VK_USE_PLATFORM_WIN32_KHR
 #include "platform/win32/NcWin32.h"
 #include "directx/math/DirectXMath.h"
 #include <memory>
 
 namespace nc::graphics
 {
-    namespace vulkan { class Instance; class Base; class GraphicsPipeline; class RenderPass; class FrameBuffers; class Commands; class VertexBuffer; class IndexBuffer; }
+    namespace vulkan { class Base; class GraphicsPipeline; class FrameBuffers; class Commands; class VertexBuffer; class IndexBuffer; class Swapchain; }
 
     class Graphics2
     {
@@ -48,15 +47,12 @@ namespace nc::graphics
             void RenderToImage(uint32_t imageIndex);
             bool PresentImage(uint32_t imageIndex);
 
-            std::unique_ptr<vulkan::Instance> m_instance;
             std::unique_ptr<vulkan::Base> m_base;
-            std::unique_ptr<vulkan::RenderPass> m_renderPass; // @todo: make vector, map, etc depending on chosen architecture. Right now just a single render pass for rendering a triangle.
+            std::unique_ptr<vulkan::Swapchain> m_swapchain;
             std::unique_ptr<vulkan::GraphicsPipeline> m_pipeline;
-            std::unique_ptr<vulkan::FrameBuffers> m_frameBuffers;
             std::unique_ptr<vulkan::Commands> m_commands;
             std::unique_ptr<vulkan::VertexBuffer> m_vertexBuffer; // @todo: Take from mesh, will not be a member of Graphics2
             std::unique_ptr<vulkan::IndexBuffer> m_indexBuffer; // @todo: Take from mesh, will not be a member of Graphics2
-
             Vector2 m_dimensions;
             bool m_isMinimized;
             bool m_isFullscreen;
