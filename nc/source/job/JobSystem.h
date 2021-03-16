@@ -12,6 +12,11 @@
 
 namespace nc::job
 {
+    /** @todo JobSystem is created with 2 threads (Engine.cpp) because that's all we're using.
+     *  As things get more complicated, we'll have to change this. Ideally hardware_concurrency
+     *  minus other threads should do the trick, but what do we do about the potential for 
+     *  unexpected return values, and in what circumstances can they happen? */
+
     class JobSystem
     {
         template<class T>
