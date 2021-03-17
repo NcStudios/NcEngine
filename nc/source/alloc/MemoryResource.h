@@ -7,9 +7,6 @@
 #include <type_traits>
 #include <vector>
 
-
-#include <iostream>
-
 namespace nc::alloc
 {
     template<class Resource>
@@ -21,23 +18,18 @@ namespace nc::alloc
         if(g_resource<Resource>)
             throw std::runtime_error("CreateMemoryResource - Resource already exists");
         
-        //std::cerr << __PRETTY_FUNCTION__ << '\n';
-
         g_resource<Resource> = std::make_unique<Resource>(size);
     }
 
     template<class Resource>
     void DestroyMemoryResource()
     {
-        //std::cerr << __PRETTY_FUNCTION__ << '\n';
-
         g_resource<Resource> = nullptr;
     }
 
     template<class Resource>
     Resource* GetMemoryResource()
     {
-        //std::cerr << __PRETTY_FUNCTION__ << '\n';
         if(!g_resource<Resource>)
             throw std::runtime_error("GetMemoryResource - Resource not initialized");
 
