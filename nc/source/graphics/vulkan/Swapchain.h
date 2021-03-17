@@ -5,7 +5,7 @@
 
 namespace nc::graphics::vulkan
 {
-    class Base;
+    class Base; class DepthStencil;
 
     enum class SemaphoreType : uint8_t
     {
@@ -23,23 +23,23 @@ namespace nc::graphics::vulkan
     {
         public:
 
-            Swapchain(vulkan::Base* base, Vector2 dimensions);
+            Swapchain(vulkan::Base* base, const vulkan::DepthStencil& depthStencil, Vector2 dimensions);
             ~Swapchain();
 
             // Swap chain
             void Present(uint32_t imageIndex, bool& isSwapChainValid);
-            void CreateSwapChain(Vector2 dimensions);
-            void CleanupSwapChain();
-            const Vector2 GetSwapChainExtentDimensions() const noexcept;
-            const vk::Extent2D& GetSwapChainExtent() const noexcept;
-            const std::vector<vk::ImageView>& GetSwapChainImageViews() const noexcept;
-            void RecreateSwapchain(Vector2 dimensions);
+            void Create(Vector2 dimensions);
+            void Cleanup();
+            const Vector2 GetExtentDimensions() const noexcept;
+            const vk::Extent2D& GetExtent() const noexcept;
+            const vk::Format& GetFormat() const noexcept;
+            const std::vector<vk::ImageView>& GetImageViews() const noexcept;
+            void Recreate(Vector2 dimensions);
 
             // Frame buffers
             void CreateFrameBuffers();
             const vk::Framebuffer& GetFrameBuffer(uint32_t index) const;
-            const vk::RenderPass& GetFrameBufferFillPass() const noexcept;
-            void CreateFrameBufferFillPass();
+            void CreateDefaultPass();
 
             // Image synchronization
             void CreateSynchronizationObjects();
@@ -57,6 +57,7 @@ namespace nc::graphics::vulkan
             
             // External members
             vulkan::Base* m_base;
+            const vulkan::DepthStencil& m_depthStencil;
 
             // Internal members
             // Swap chain
@@ -66,7 +67,7 @@ namespace nc::graphics::vulkan
             vk::Extent2D m_swapChainExtent;
             std::vector<vk::ImageView> m_swapChainImageViews;
             std::vector<vk::Framebuffer> m_framebuffers;
-            vk::RenderPass m_frameBufferFillPass;
+            vk::RenderPass m_defaultPass;
 
             // Synchronization
             std::vector<vk::Fence> m_imagesInFlightFences;

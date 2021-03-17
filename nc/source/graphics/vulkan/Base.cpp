@@ -1,5 +1,5 @@
 #include "Base.h"
-#include "VertexBuffer.h"
+#include "resources/VertexBuffer.h"
 
 #include <set>
 #include <string>
@@ -83,10 +83,12 @@ namespace nc::graphics::vulkan
       m_graphicsQueue{},
       m_presentQueue{},
       m_commandPool{},
-      m_commandBuffers{},
       m_allocator{},
       m_buffers{},
-      m_bufferIndex{0}
+      m_images{},
+      m_depthFormat{},
+      m_bufferIndex{0},
+      m_imageIndex{0}
     {
         CreateInstance();
         CreateSurface(hwnd, hinstance);
@@ -95,17 +97,21 @@ namespace nc::graphics::vulkan
         CreateCommandQueues();
         CreateCommandPool();
         CreateAllocator();
+        QueryDepthFormatSupport();
     }
 
     Base::~Base()
     {
-        FreeCommandBuffers();
-
         m_logicalDevice.destroyCommandPool(m_commandPool);
 
         for (uint32_t i = 0; i < m_buffers.size(); i++)
         {
             m_allocator.destroyBuffer(m_buffers[i].first, m_buffers[i].second);
+        }
+        
+        for (uint32_t i = 0; i < m_images.size(); i++)
+        {
+            m_allocator.destroyImage(m_images[i].first, m_images[i].second);
         }
 
         m_instance.destroySurfaceKHR(m_surface);
@@ -114,9 +120,9 @@ namespace nc::graphics::vulkan
         m_instance.destroy();
     }
 
-    void Base::FreeCommandBuffers()
+    void Base::FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers)
     {
-        m_logicalDevice.freeCommandBuffers(m_commandPool, static_cast<uint32_t>(m_commandBuffers.size()), m_commandBuffers.data());
+        m_logicalDevice.freeCommandBuffers(m_commandPool, static_cast<uint32_t>(commandBuffers->size()), commandBuffers->data());
     }
 
     void Base::CreateInstance()
@@ -295,6 +301,39 @@ namespace nc::graphics::vulkan
         return m_bufferIndex++;
     }
 
+    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage)
+    {
+        if (m_images.find(m_imageIndex) != m_images.end())
+        {
+            throw std::runtime_error("The given ID is already present in the dictionary.");
+        }
+
+        vk::ImageCreateInfo imageInfo{};
+        imageInfo.setImageType(vk::ImageType::e2D);
+        imageInfo.setFormat(format);
+        imageInfo.setExtent( { dimensions.x, dimensions.y, 1 });
+        imageInfo.setMipLevels(1);
+        imageInfo.setArrayLayers(1);
+        imageInfo.setSamples(vk::SampleCountFlagBits::e1);
+        imageInfo.setTiling(vk::ImageTiling::eOptimal);
+        imageInfo.setUsage(usageFlags);
+
+        vma::AllocationCreateInfo allocationInfo;
+        allocationInfo.usage = vma::MemoryUsage::eGpuOnly;
+
+        vma::Allocation allocation;        
+        vk::Image image;
+        if (m_allocator.createImage(&imageInfo, &allocationInfo, &image, &allocation, nullptr) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Error creating image.");
+        }
+
+        m_images.emplace(m_imageIndex, std::pair{image, allocation});
+        *createdImage = image;
+        return m_imageIndex++;
+    }
+
+
     void Base::DestroyBuffer(uint32_t id)
     {
         auto buffer = m_buffers.find(id);
@@ -342,7 +381,7 @@ namespace nc::graphics::vulkan
         return type == QueueFamilyType::GraphicsFamily ? m_graphicsQueue : m_presentQueue;
     }
 
-    void Base::MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size)
+    void Base::MapMemory(uint32_t bufferId, std::vector<Vertex> vertices, size_t size)
     {
         void* mappedData;
         auto allocation = m_buffers.at(bufferId).second;
@@ -358,6 +397,29 @@ namespace nc::graphics::vulkan
         m_allocator.mapMemory(allocation, &mappedData);
         memcpy(mappedData, indices.data(), size);
         m_allocator.unmapMemory(allocation);
+    }
+
+    const vk::Format& Base::GetDepthFormat() const noexcept
+    {
+        return m_depthFormat;
+    }
+
+    void Base::QueryDepthFormatSupport()
+    {
+        std::vector<vk::Format> depthFormats = { vk::Format::eD32SfloatS8Uint, vk::Format::eD32Sfloat, vk::Format::eD24UnormS8Uint, vk::Format::eD16UnormS8Uint, vk::Format::eD16Unorm };
+
+        for (auto& format : depthFormats)
+		{
+			vk::FormatProperties formatProperties;
+			m_physicalDevice.getFormatProperties(format, &formatProperties);
+			// Format must support depth stencil attachment for optimal tiling
+			if (formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+			{
+				m_depthFormat = format;
+                return;
+			}
+		}
+		throw std::runtime_error("Could not find a matching depth format");
     }
 
     const SwapChainSupportDetails Base::QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const

@@ -1,32 +1,34 @@
 #include "Swapchain.h"
+#include "resources/DepthStencil.h"
 #include "Base.h"
 
 namespace nc::graphics::vulkan
 {
-    Swapchain::Swapchain(vulkan::Base* base, Vector2 dimensions)
+    Swapchain::Swapchain(vulkan::Base* base, const vulkan::DepthStencil& depthStencil, Vector2 dimensions)
     : m_base{ base },
+      m_depthStencil{ depthStencil },
       m_swapChain{},
       m_swapChainImages{},
       m_swapChainImageFormat{},
       m_swapChainExtent{},
       m_swapChainImageViews{},
       m_framebuffers{},
-      m_frameBufferFillPass{},
+      m_defaultPass{},
       m_imagesInFlightFences{},
       m_framesInFlightFences{},
       m_imageRenderReadySemaphores{},
       m_imagePresentReadySemaphores{},
       m_currentFrameIndex{0}
     {
-        CreateSwapChain(dimensions);
+        Create(dimensions);
         CreateSynchronizationObjects();
-        CreateFrameBufferFillPass();
+        CreateDefaultPass();
         CreateFrameBuffers();
     }
     
     Swapchain::~Swapchain()
     {
-        CleanupSwapChain();
+        Cleanup();
 
         auto device = m_base->GetDevice();
 
@@ -38,7 +40,7 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Swapchain::CleanupSwapChain()
+    void Swapchain::Cleanup()
     {
         auto device = m_base->GetDevice();
         for (auto frameBuffer : m_framebuffers)
@@ -46,7 +48,7 @@ namespace nc::graphics::vulkan
             device.destroyFramebuffer(frameBuffer);
         }
 
-        device.destroyRenderPass(m_frameBufferFillPass);
+        device.destroyRenderPass(m_defaultPass);
 
         for (auto imageView : m_swapChainImageViews)
         {
@@ -60,83 +62,107 @@ namespace nc::graphics::vulkan
     {
         auto swapChainImageViewsCount = m_swapChainImageViews.size();
         m_framebuffers.resize(swapChainImageViewsCount);
+        vk::ImageView attachments[2];
+
+        auto swapChainDimensions = GetExtentDimensions();
+
+        vk::FramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.setRenderPass(m_defaultPass);
+        framebufferInfo.setAttachmentCount(2);
+        framebufferInfo.setPAttachments(attachments);
+        framebufferInfo.setWidth(swapChainDimensions.x);
+        framebufferInfo.setHeight(swapChainDimensions.y);
+        framebufferInfo.setLayers(1);
+
+        attachments[1] = m_depthStencil.GetImageView();
 
         for (size_t i = 0; i < swapChainImageViewsCount; i++)
         {
-            vk::ImageView attachments[] = { m_swapChainImageViews.at(i) };
-
-            auto swapChainDimensions = GetSwapChainExtentDimensions();
-
-            vk::FramebufferCreateInfo framebufferInfo{};
-            framebufferInfo.setRenderPass(m_frameBufferFillPass);
-            framebufferInfo.setAttachmentCount(1);
-            framebufferInfo.setPAttachments(attachments);
-            framebufferInfo.setWidth(swapChainDimensions.x);
-            framebufferInfo.setHeight(swapChainDimensions.y);
-            framebufferInfo.setLayers(1);
+            attachments[0] = m_swapChainImageViews.at(i);
             m_framebuffers[i] = m_base->GetDevice().createFramebuffer(framebufferInfo);
         }
     }
 
-    void Swapchain::RecreateSwapchain(Vector2 dimensions)
+    void Swapchain::Recreate(Vector2 dimensions)
     {
-        CreateSwapChain(dimensions);
-        CreateFrameBufferFillPass();
+        Create(dimensions);
+        CreateDefaultPass();
         CreateFrameBuffers();
     }
 
-    void Swapchain::CreateFrameBufferFillPass()
+    void Swapchain::CreateDefaultPass()
     {
-         /***************************
-         * COLOR BUFFER ATTACHMENT *
-         * *************************/
-        vk::AttachmentDescription colorAttachment{};
-        colorAttachment.setFormat(m_swapChainImageFormat);
-        colorAttachment.setSamples(vk::SampleCountFlagBits::e1); // @todo Multisampling would be set here as well as in the GraphicsPipeline object.
-        colorAttachment.setLoadOp(vk::AttachmentLoadOp::eClear); // Sets what to do with this frame buffer before rendering. Currently clears the framebuffer to black before a new frame.
-        colorAttachment.setStoreOp(vk::AttachmentStoreOp::eStore); // Sets what to do with this frame buffer after rendering. Currently stores the contents in memory for later reading.
-        colorAttachment.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare); // We dont need the stencil buffer for this render, so we set to dont care.
-        colorAttachment.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare); // We dont need the stencil buffer for this render, so we set to dont care.
-        colorAttachment.setInitialLayout(vk::ImageLayout::eUndefined); // We don't care what layout the image had prior to the render pass beginning.
-        colorAttachment.setFinalLayout(vk::ImageLayout::ePresentSrcKHR); // We want the image to be ready for presentation using the swap chain after rendering.
+         std::array<vk::AttachmentDescription, 2> attachments = {};
 
-        vk::AttachmentReference colorAttachmentRef{};
-        colorAttachmentRef.setAttachment(0); // Reference the attachment by index. ***IMPORTANT*** This index is directly referenced by the shader.
-        colorAttachmentRef.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
+        // Color attachment
+        attachments[0].setFormat(GetFormat());
+        attachments[0].setSamples(vk::SampleCountFlagBits::e1);
+        attachments[0].setLoadOp(vk::AttachmentLoadOp::eClear);
+        attachments[0].setStoreOp(vk::AttachmentStoreOp::eStore);
+        attachments[0].setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+        attachments[0].setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+        attachments[0].setInitialLayout(vk::ImageLayout::eUndefined);
+        attachments[0].setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
 
-        /************
-         * SUB PASS *
-         * **********/
-        // Render passes have one or more subpasses. This pass renders content to the framebuffer for presentation.
+        // Depth attachment
+        attachments[1].setFormat(m_base->GetDepthFormat());
+        attachments[1].setSamples(vk::SampleCountFlagBits::e1);
+        attachments[1].setLoadOp(vk::AttachmentLoadOp::eClear);
+        attachments[1].setStoreOp(vk::AttachmentStoreOp::eStore);
+        attachments[1].setStencilLoadOp(vk::AttachmentLoadOp::eClear);
+        attachments[1].setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+        attachments[1].setInitialLayout(vk::ImageLayout::eUndefined);
+        attachments[1].setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+        vk::AttachmentReference colorReference = {};
+        colorReference.setAttachment(0);
+        colorReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
+
+        vk::AttachmentReference depthReference = {};
+        depthReference.setAttachment(1);
+        depthReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+        // Subpass
         vk::SubpassDescription subpass{};
         subpass.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
         subpass.setColorAttachmentCount(1);
-        subpass.setPColorAttachments(&colorAttachmentRef);
+        subpass.setPColorAttachments(&colorReference);
+        subpass.setPDepthStencilAttachment(&depthReference);
+        subpass.setInputAttachmentCount(0);
+        subpass.setPreserveAttachmentCount(0);
+        subpass.setPPreserveAttachments(nullptr);
+        subpass.setPResolveAttachments(nullptr);
 
-        /************************
-         * SUBPASS DEPENDENCIES *
-         * **********************/
-        // There are two implicit subpasses before and after our explicit one defined above that take care of image layout transitions.
-        // These start as soon as the pipeline executes, but we will not yet have acquired the image, so we need to create a dependency on that.
-        vk::SubpassDependency dependency{};
-        dependency.setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        dependency.setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        dependency.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // The type of operation to wait on. (What our dependency is)
-        dependency.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // Specifies the type of operation that should do the waiting
-        dependency.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
+        // Subpass dependencies
+        std::array<vk::SubpassDependency, 2> dependencies{};
+        dependencies[0].setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
+        dependencies[0].setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
+        dependencies[0].setSrcStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // The type of operation to wait on. (What our dependency is)
+        dependencies[0].setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // Specifies the type of operation that should do the waiting
+        dependencies[0].setSrcAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
+        dependencies[0].setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
+        dependencies[0].setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
+
+        dependencies[1].setSrcSubpass(0); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
+        dependencies[1].setDstSubpass(VK_SUBPASS_EXTERNAL); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
+        dependencies[1].setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // The type of operation to wait on. (What our dependency is)
+        dependencies[1].setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // Specifies the type of operation that should do the waiting
+        dependencies[1].setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
+        dependencies[1].setDstAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
+        dependencies[1].setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
 
         /***************
          * RENDER PASS *
          * *************/
         vk::RenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.setAttachmentCount(1);
-        renderPassInfo.setPAttachments(&colorAttachment);
+        renderPassInfo.setAttachmentCount(static_cast<uint32_t>(attachments.size()));
+        renderPassInfo.setPAttachments(attachments.data());
         renderPassInfo.setSubpassCount(1);
         renderPassInfo.setPSubpasses(&subpass);
-        renderPassInfo.setDependencyCount(1);
-        renderPassInfo.setPDependencies(&dependency);
+        renderPassInfo.setDependencyCount(static_cast<uint32_t>(dependencies.size()));
+        renderPassInfo.setPDependencies(dependencies.data());
 
-        if (m_base->GetDevice().createRenderPass(&renderPassInfo, nullptr, &m_frameBufferFillPass) != vk::Result::eSuccess)
+        if (m_base->GetDevice().createRenderPass(&renderPassInfo, nullptr, &m_defaultPass) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Could not create render pass.");
         }
@@ -198,11 +224,6 @@ namespace nc::graphics::vulkan
         }
     }
     
-    const vk::RenderPass& Swapchain::GetFrameBufferFillPass() const noexcept
-    {
-        return m_frameBufferFillPass;
-    }
-
     const std::vector<vk::Semaphore>& Swapchain::GetSemaphores(SemaphoreType semaphoreType) const noexcept
     {
         return semaphoreType == SemaphoreType::RenderReady ? m_imageRenderReadySemaphores : m_imagePresentReadySemaphores;
@@ -229,7 +250,12 @@ namespace nc::graphics::vulkan
         return m_framebuffers.at(index);
     }
 
-    void Swapchain::CreateSwapChain(Vector2 dimensions)
+    const vk::Format& Swapchain::GetFormat() const noexcept
+    {
+        return m_swapChainImageFormat;
+    }
+
+    void Swapchain::Create(Vector2 dimensions)
     {
         auto swapChainSupport = m_base->QuerySwapChainSupport(m_base->GetPhysicalDevice(), m_base->GetSurface());
 
@@ -379,17 +405,17 @@ namespace nc::graphics::vulkan
         m_base->GetDevice().resetFences(m_framesInFlightFences[m_currentFrameIndex]);
     }
 
-    const Vector2 Swapchain::GetSwapChainExtentDimensions() const noexcept
+    const Vector2 Swapchain::GetExtentDimensions() const noexcept
     {
         return Vector2(m_swapChainExtent.width, m_swapChainExtent.height);
     }
 
-    const vk::Extent2D& Swapchain::GetSwapChainExtent() const noexcept
+    const vk::Extent2D& Swapchain::GetExtent() const noexcept
     {
         return m_swapChainExtent;
     }
 
-    const std::vector<vk::ImageView>& Swapchain::GetSwapChainImageViews() const noexcept
+    const std::vector<vk::ImageView>& Swapchain::GetImageViews() const noexcept
     {
         return m_swapChainImageViews;
     }

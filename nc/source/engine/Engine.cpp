@@ -57,6 +57,7 @@ namespace nc::core
           m_frameDeltaTimeFactor{ 1.0f },
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
+          m_frameManager2{},
           m_physics{ &m_graphics2 },
           m_ecs{},
           m_sceneSystem{},
@@ -96,7 +97,12 @@ namespace nc::core
         m_sceneSystem.DoSceneChange();
         auto fixedUpdateInterval = config::Get().physics.fixedUpdateInterval;
         m_isRunning = true;
-
+        
+    #ifdef USE_VULKAN
+        m_frameManager2.RegisterModel();
+        m_frameManager2.RecordPasses();
+    #endif
+    
         while(m_isRunning)
         {
             m_time.UpdateTime();
@@ -220,6 +226,7 @@ namespace nc::core
         using namespace std::placeholders;
 
         #ifdef USE_VULKAN
+            m_graphics2.SetFrameManager(&m_frameManager2);
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4, _5));
             // No UI for us until we tackle integrating IMGUI with Vulkan
         #else

@@ -1,10 +1,12 @@
 #include "Graphics2.h"
 #include "vulkan/Base.h"
-#include "vulkan/GraphicsPipeline.h"
 #include "vulkan/Commands.h"
-#include "vulkan/VertexBuffer.h"
-#include "vulkan/IndexBuffer.h"
+#include "vulkan/resources/VertexBuffer.h"
+#include "vulkan/resources/IndexBuffer.h"
+#include "vulkan/resources/DepthStencil.h"
 #include "vulkan/Swapchain.h"
+#include "vulkan/FrameManager.h"
+#include "d3dresource/GraphicsResourceManager.h"
 
 namespace nc::graphics
 {
@@ -12,57 +14,37 @@ namespace nc::graphics
 
     Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_base{ std::make_unique<Base>(hwnd, hinstance) },
-          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
-          m_pipeline{ std::make_unique<GraphicsPipeline>(*m_base, *m_swapchain) },
-          m_commands{ std::make_unique<Commands>(*m_base, *m_swapchain) },
-          m_vertexBuffer{ nullptr }, // @todo: Take from mesh, will not be created in CTOR for Graphics2
-          m_indexBuffer{ nullptr }, // @todo: Take from mesh, will not be created in CTOR for Graphics2
+          m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
+          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+          m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
+          m_frameManager{ nullptr },
           m_dimensions{ dimensions },
           m_isMinimized{ false },
           m_isFullscreen{ false },
           m_viewMatrix{},
           m_projectionMatrix{}
-    {  
-        // @todo: Take from mesh, will not be created in CTOR for Graphics2
-        auto vertices = std::vector<vulkan::vertex::Vertex> 
-        {
-            // Position              Color
-            { Vector2{-0.5f, -0.5f}, Vector3{1.0f, 1.0f, 1.0f} },
-            { Vector2{0.5f, -0.5f},  Vector3{0.0f, 0.0f, 0.0f} },
-            { Vector2{0.5f, 0.5f},   Vector3{0.0f, 0.0f, 0.0f} },
-            { Vector2{-0.5f, 0.5f},  Vector3{0.0f, 0.0f, 0.0f} }
-        };
-
-        // @todo: Take from mesh, will not be created in CTOR for Graphics2
-        m_vertexBuffer = std::make_unique<VertexBuffer>(*m_base, *m_commands, vertices);
-
-        // @todo: Take from mesh, will not be created in CTOR for Graphics2
-        auto indices = std::vector<uint32_t>
-        {
-            0, 1, 2, 2, 3, 0
-        };
-
-        // @todo: Take from mesh, will not be created in CTOR for Graphics2
-        m_indexBuffer = std::make_unique<IndexBuffer>(*m_base, *m_commands, indices);
-
-        // Write the render pass to the command buffer.
-        m_commands->RecordRenderCommand(*m_pipeline, *m_swapchain, *m_vertexBuffer, *m_indexBuffer);
+    {
+        d3dresource::GraphicsResourceManager::SetGraphics2(this);
     }
 
     Graphics2::~Graphics2() = default;
 
-    void Graphics2::RecreateSwapChain(Vector2 dimensions)
+    void Graphics2::RecreateSwapchain(Vector2 dimensions)
     {
         // Wait for all current commands to complete execution
         WaitIdle();
 
         // Destroy all resources used by the swapchain
-        m_base->FreeCommandBuffers();
-        m_swapchain->CleanupSwapChain();
+        m_dimensions = dimensions;
+        m_commands.reset();
+        m_swapchain.reset();
+        m_depthStencil.reset();
 
         // Recreate swapchain and resources
-        m_swapchain->RecreateSwapchain(dimensions);
-        m_commands->RecordRenderCommand(*m_pipeline, *m_swapchain, *m_vertexBuffer, *m_indexBuffer);
+        m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions);
+        m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
+        m_frameManager->RecordPasses();
     }
 
     DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
@@ -73,6 +55,11 @@ namespace nc::graphics
     DirectX::FXMMATRIX Graphics2::GetProjectionMatrix() const noexcept
     {
         return m_projectionMatrix;
+    }
+
+    void Graphics2::SetFrameManager(FrameManager* frameManager)
+    {
+        m_frameManager = frameManager;
     }
 
     void Graphics2::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
@@ -114,6 +101,31 @@ namespace nc::graphics
         m_base->GetDevice().waitIdle();
     }
 
+    vulkan::Base* Graphics2::GetBasePtr()
+    {
+        return m_base.get();
+    }
+
+    const vulkan::Base& Graphics2::GetBase() const noexcept
+    {
+        return *m_base.get();
+    }
+    
+    const vulkan::Swapchain& Graphics2::GetSwapchain() const noexcept
+    {
+        return *m_swapchain.get();
+    }
+
+    vulkan::Commands* Graphics2::GetCommandsPtr()
+    {
+        return m_commands.get();
+    }
+
+    const Vector2 Graphics2::GetDimensions() const noexcept
+    {
+        return m_dimensions;
+    }
+
     void Graphics2::FrameBegin()
     {
         // @todo
@@ -127,7 +139,7 @@ namespace nc::graphics
         imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);
         if (!isSwapChainValid)
         {
-            RecreateSwapChain(m_dimensions);
+            RecreateSwapchain(m_dimensions);
             return false;
         }
         return true;
@@ -148,7 +160,7 @@ namespace nc::graphics
 
         if (!isSwapChainValid)
         {
-            RecreateSwapChain(m_dimensions);
+            RecreateSwapchain(m_dimensions);
             return false;
         }
         return true;

@@ -10,11 +10,11 @@
 namespace nc::graphics::vulkan
 {
     class Instance;
-    namespace vertex { struct Vertex; }
+    struct Vertex;
 
     // How many frames can be rendered concurrently.
     // Each frame requires its own pair of semaphores.
-    const uint32_t MAX_FRAMES_IN_FLIGHT = 3;
+    const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
     enum class QueueFamilyType : uint8_t
     {
@@ -53,14 +53,17 @@ namespace nc::graphics::vulkan
             const vk::PhysicalDevice& GetPhysicalDevice() const noexcept;
             const vk::SurfaceKHR& GetSurface() const noexcept;
             const vk::CommandPool& GetCommandPool() const noexcept;
-            void FreeCommandBuffers();
             const vk::Queue& GetQueue(QueueFamilyType type) const noexcept;
+            const vk::Format& GetDepthFormat() const noexcept;
 
             uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer);
+            uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage);
+            void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers);
             void DestroyBuffer(uint32_t id);
-            void MapMemory(uint32_t bufferId, std::vector<vertex::Vertex> vertices, size_t size);
+            void MapMemory(uint32_t bufferId, std::vector<Vertex> vertices, size_t size);
             void MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size);
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
+            void QueryDepthFormatSupport();
 
         private:
             
@@ -79,9 +82,11 @@ namespace nc::graphics::vulkan
             vk::Queue m_graphicsQueue;
             vk::Queue m_presentQueue;
             vk::CommandPool m_commandPool;
-            std::vector<vk::CommandBuffer> m_commandBuffers;
             vma::Allocator m_allocator;
             std::unordered_map<uint32_t, std::pair<vk::Buffer, vma::Allocation>> m_buffers;
+            std::unordered_map<uint32_t, std::pair<vk::Image, vma::Allocation>> m_images;
+            vk::Format m_depthFormat;
             uint32_t m_bufferIndex;
+            uint32_t m_imageIndex;
     };
 }

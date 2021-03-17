@@ -6,20 +6,22 @@
 
 namespace nc::graphics::vulkan
 {
-    class Base; class FrameBuffers; class GraphicsPipeline; class VertexBuffer; class IndexBuffer; class Swapchain;
+    class Base; class FrameBuffers; class VertexBuffer; class IndexBuffer; class Swapchain;
 
     class Commands
     {
         public:
-            Commands(const vulkan::Base& base, const vulkan::Swapchain& swapchain);
+            Commands(Base* base, const vulkan::Swapchain& swapchain);
+            ~Commands();
 
-            void RecordRenderCommand(const vulkan::GraphicsPipeline& pipeline, const vulkan::Swapchain& swapchain, const vulkan::VertexBuffer& vertexBuffer, const vulkan::IndexBuffer& indexBuffer);
+            std::vector<vk::CommandBuffer>* GetCommandBuffers();
+            void FreeCommandBuffers();
             void SubmitRenderCommand(uint32_t imageIndex);
-            void SubmitCopyCommandImmediate(const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
+            static void SubmitCopyCommandImmediate(const vulkan::Base& base, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
 
         private:
             // External members
-            const Base& m_base;
+            Base* m_base;
             const Swapchain& m_swapchain;
             const std::vector<vk::Semaphore>& m_renderReadySemaphores;
             const std::vector<vk::Semaphore>& m_presentReadySemaphores;
