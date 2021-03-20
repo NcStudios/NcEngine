@@ -2,8 +2,8 @@
 
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/rendergraph/FrameManager.h"
-#include "graphics/vulkan/FrameManager.h"
 #ifdef USE_VULKAN
+    #include "graphics/vulkan/FrameManager.h"
     #include "graphics/Graphics2.h"
 #else
     #include "graphics/Graphics.h"
