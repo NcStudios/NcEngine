@@ -3,6 +3,7 @@
 #include "config/Config.h"
 #include "debug/Profiler.h"
 #include "directx/math/DirectXCollision.h"
+#include "job/JobSystem.h"
 
 namespace nc::physics
 {
@@ -12,13 +13,14 @@ namespace nc::physics
                (lhs.first == rhs.second && lhs.second == rhs.first);
     }
 
-    CollisionSystem::CollisionSystem(float worldspaceExtent)
+    CollisionSystem::CollisionSystem(float worldspaceExtent, job::JobSystem* jobSystem)
         : m_colliderSystem{config::Get().memory.maxDynamicColliders, config::Get().memory.maxStaticColliders, worldspaceExtent},
           m_dynamicEstimates{},
           m_broadEventsVsDynamic{},
           m_broadEventsVsStatic{},
           m_currentCollisions{},
-          m_previousCollisions{}
+          m_previousCollisions{},
+          m_jobSystem{jobSystem}
     {
         internal::RegisterColliderSystem(&m_colliderSystem);
     }
@@ -26,9 +28,22 @@ namespace nc::physics
     void CollisionSystem::DoCollisionStep()
     {
         FetchEstimates();
-        BroadDetection();
-        NarrowDetection();
-        CompareToPreviousStep();
+
+        auto broadDynamicJobResult = m_jobSystem->Schedule(BroadDetectVsDynamic, this);
+        auto broadStaticJobResult = m_jobSystem->Schedule(BroadDetectVsStatic, this);
+        broadDynamicJobResult.wait();
+        broadStaticJobResult.wait();
+        
+        auto narrowDynamicJobResult = m_jobSystem->Schedule(NarrowDetectVsDynamic, this);
+        auto narrowStaticJobResult = m_jobSystem->Schedule(NarrowDetectVsStatic, this);
+        narrowDynamicJobResult.wait();
+        broadStaticJobResult.wait();
+
+        auto findEnterAndStayJobResult = m_jobSystem->Schedule(FindEnterAndStayEvents, this);
+        auto findExitJobResult = m_jobSystem->Schedule(FindExitEvents, this);
+        findEnterAndStayJobResult.wait();
+        findExitJobResult.wait();
+        
         Cleanup();
     }
 
@@ -43,20 +58,12 @@ namespace nc::physics
 
     void CollisionSystem::FetchEstimates()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_colliderSystem.GetDynamicSoA()->CalculateEstimates(&m_dynamicEstimates);
-        NC_PROFILE_END();
     }
 
-    void CollisionSystem::BroadDetection()
+    void CollisionSystem::BroadDetectVsDynamic()
     {
-        /** possible optimization: Sphere vs Sphere in broad phase gives the actual result, not an estimate. 
-         *  Can we detect this and add it right to m_currentStepEvents? */
-
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
-
         const auto dynamicSize = m_dynamicEstimates.size();
-        auto* staticTree = m_colliderSystem.GetStaticTree();
         for(size_t i = 0u; i < dynamicSize; ++i)
         {
             // Check vs other dynamic bodies
@@ -65,7 +72,15 @@ namespace nc::physics
                 if(m_dynamicEstimates[i].volumeEstimate.Intersects(m_dynamicEstimates[j].volumeEstimate))
                     m_broadEventsVsDynamic.emplace_back(m_dynamicEstimates[i].index, m_dynamicEstimates[j].index);
             }
+        }
+    }
 
+    void CollisionSystem::BroadDetectVsStatic()
+    {
+        const auto dynamicSize = m_dynamicEstimates.size();
+        auto* staticTree = m_colliderSystem.GetStaticTree();
+        for(size_t i = 0u; i < dynamicSize; ++i)
+        {
             // Check vs bodies in static tree
             for(const auto* pair : staticTree->BroadCheck(m_dynamicEstimates[i].volumeEstimate))
             {
@@ -76,17 +91,24 @@ namespace nc::physics
                     m_broadEventsVsStatic.emplace_back(m_dynamicEstimates[i].index, pair);
             }
         }
-
-        NC_PROFILE_END();
     }
 
-    void CollisionSystem::NarrowDetection()
+    Collider::BoundingVolume Foo(const Collider::BoundingVolume& v, const DirectX::XMMATRIX* t)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
+        return std::visit([t](auto&& volume)
+        {
+            typename std::remove_cvref<decltype(volume)>::type out;
+            volume.Transform(out, *t);
+            return Collider::BoundingVolume{out};
+        }, v);
+    }
 
-        /** If a dynamic collider has broad collision with another dynamic + static we calculate its volume
-         *  twice here. How wacky does the code get if we compute it once? */
+    /** @todo Narrow detection computes the bounding volumes for each pair encountered,
+     *  potentially calculating the same volume multiple times. This could be done once
+     *  upfront. */
 
+    void CollisionSystem::NarrowDetectVsDynamic()
+    {
         auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
         const auto& handles = dynamicSoA->GetHandles();
         const auto& types = dynamicSoA->GetTypes();
@@ -99,20 +121,25 @@ namespace nc::physics
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, v1, v2))
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
         }
+    }
 
+    void CollisionSystem::NarrowDetectVsStatic()
+    {
+        auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
+        const auto& handles = dynamicSoA->GetHandles();
+        const auto& types = dynamicSoA->GetTypes();
+        const auto& transforms = dynamicSoA->GetTransforms();
+        const auto& centerExtentPairs = dynamicSoA->GetVolumeProperties();
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
         {
             const auto volume = CalculateBoundingVolume(types[dynamicIndex], centerExtentPairs[dynamicIndex], transforms[dynamicIndex]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, volume, staticPair->volume))
                 m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityHandle::Handle_t>(staticPair->handle));
         }
-
-        NC_PROFILE_END();
     }
     
-    void CollisionSystem::CompareToPreviousStep() const
+    void CollisionSystem::FindEnterAndStayEvents() const
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         auto currBeg = m_currentCollisions.cbegin();
         auto currEnd = m_currentCollisions.cend();
         for(const auto& prev : m_previousCollisions)
@@ -122,7 +149,10 @@ namespace nc::physics
             else
                 NotifyCollisionEvent(prev, CollisionEventType::Stay);
         }
+    }
 
+    void CollisionSystem::FindExitEvents() const
+    {
         auto prevBeg = m_previousCollisions.cbegin();
         auto prevEnd = m_previousCollisions.cend();
         for(const auto& curr : m_currentCollisions)
@@ -130,7 +160,6 @@ namespace nc::physics
             if(prevEnd == std::find(prevBeg, prevEnd, curr))
                 NotifyCollisionEvent(curr, CollisionEventType::Enter);
         }
-        NC_PROFILE_END();
     }
 
     void CollisionSystem::NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const

@@ -7,14 +7,13 @@
 #else
     #include "graphics/Graphics.h"
 #endif
+#include "job/JobSystem.h"
 #include "physics/PhysicsSystem.h"
 #include "component/PointLightManager.h"
 #include "scene/SceneSystem.h"
 #include "time/NcTime.h"
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
-
-#include <functional>
 
 namespace nc::core
 {
@@ -29,6 +28,7 @@ namespace nc::core
         private:
             bool m_isRunning;
             float m_frameDeltaTimeFactor;
+            job::JobSystem m_jobSystem;
             window::WindowImpl m_window;
         #ifdef USE_VULKAN
             graphics::Graphics2 m_graphics2;

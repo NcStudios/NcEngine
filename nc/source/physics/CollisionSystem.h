@@ -7,7 +7,11 @@
 #include <cstdint>
 #include <vector>
 
-namespace nc::graphics { class FrameManager; }
+namespace nc
+{
+    namespace graphics { class FrameManager; }
+    namespace job { class JobSystem; }
+}
 
 namespace nc::physics
 {
@@ -41,10 +45,12 @@ namespace nc::physics
         EntityHandle::Handle_t second;
     };
 
+    /** @todo FindXXXEvents will notify immediately - do we want to delay this? */
+
     class CollisionSystem
     {
         public:
-            CollisionSystem(float worldspaceExtent);
+            CollisionSystem(float worldspaceExtent, job::JobSystem* jobSystem);
             void DoCollisionStep();
             void ClearState();
 
@@ -59,11 +65,15 @@ namespace nc::physics
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
+            job::JobSystem* m_jobSystem;
 
             void FetchEstimates();
-            void BroadDetection();
-            void NarrowDetection();
-            void CompareToPreviousStep() const;
+            void BroadDetectVsDynamic();
+            void BroadDetectVsStatic();
+            void NarrowDetectVsDynamic();
+            void NarrowDetectVsStatic();
+            void FindEnterAndStayEvents() const;
+            void FindExitEvents() const;
             void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;
             void Cleanup();
     };
