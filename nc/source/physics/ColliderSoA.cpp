@@ -5,6 +5,7 @@ namespace nc::physics
 {
     ColliderSoA::ColliderSoA(size_t maxColliders)
         : m_handles(maxColliders), // braced init is ambiguous
+          m_layers(maxColliders),
           m_transforms{maxColliders},
           m_volumeProperties{maxColliders},
           m_types{maxColliders},
@@ -16,6 +17,11 @@ namespace nc::physics
     auto ColliderSoA::GetHandles() const noexcept -> const std::vector<EntityHandle::Handle_t>&
     {
         return m_handles;
+    }
+
+    auto ColliderSoA::GetLayers() const noexcept -> const std::vector<physics::Layer>&
+    {
+        return m_layers;
     }
 
     auto ColliderSoA::GetTransforms() const noexcept -> const std::vector<const DirectX::XMMATRIX*>&
@@ -49,6 +55,7 @@ namespace nc::physics
             throw std::runtime_error("ColliderSoA::Add - exceeded capacity");
 
         m_handles[pos] = static_cast<EntityHandle::Handle_t>(handle);
+        m_layers[pos] = GetEntity(handle)->Layer;
         m_transforms[pos] = &GetComponent<Transform>(handle)->GetTransformationMatrix();
         m_volumeProperties[pos] = GetVolumePropertiesFromColliderInfo(info);
         m_types[pos] = info.type;

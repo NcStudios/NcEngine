@@ -16,6 +16,7 @@ namespace nc::physics
             ColliderSoA(size_t maxColliders);
 
             auto GetHandles() const noexcept -> const std::vector<EntityHandle::Handle_t>&;
+            auto GetLayers() const noexcept -> const std::vector<physics::Layer>&;
             auto GetTransforms() const noexcept -> const std::vector<const DirectX::XMMATRIX*>&;
             auto GetVolumeProperties() const noexcept -> const std::vector<VolumeProperties>&;
             auto GetTypes() const noexcept -> const std::vector<ColliderType>&;
@@ -29,6 +30,7 @@ namespace nc::physics
         private:
             // Collider Data
             std::vector<EntityHandle::Handle_t> m_handles;
+            std::vector<physics::Layer> m_layers;
             std::vector<const DirectX::XMMATRIX*> m_transforms;
             std::vector<VolumeProperties> m_volumeProperties;
             std::vector<ColliderType> m_types;

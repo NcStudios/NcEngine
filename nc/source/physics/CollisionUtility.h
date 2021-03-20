@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component/Collider.h"
+#include "physics/LayerMask.h"
 
 namespace nc::physics
 {
@@ -16,6 +17,7 @@ namespace nc::physics
     struct StaticTreeEntry
     {
         Collider::BoundingVolume volume;
+        physics::Layer layer;
         EntityHandle handle;
     };
 
