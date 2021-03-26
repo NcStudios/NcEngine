@@ -59,9 +59,6 @@ namespace nc::physics
     /** @todo worldspaceExtent is just a constant set in PhysicsSystem. Eventually,
      *  this should be read from somewhere. Maybe scenes? If scenes can specify this,
      *  we will also need a way to resize extents of the root upon changing scene. */
-
-    /** @todo Pass a density threshold from config rather than hardcoding it. Different
-     *  scenarios may benefit from different values. */
     
     /** @todo With omega-dense static geometry, octants can become smaller than the average
      *  mesh size. From what I can tell, static geometry computations are trivial until
@@ -73,7 +70,7 @@ namespace nc::physics
     class ColliderTree
     {
         public:
-            ColliderTree(uint32_t maxStaticColliders, float worldspaceExtent);
+            ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float worldspaceExtent);
             ~ColliderTree() noexcept;
 
             void Add(EntityHandle handle, const ColliderInfo& info);

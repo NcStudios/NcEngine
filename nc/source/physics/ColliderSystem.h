@@ -14,7 +14,7 @@ namespace nc::physics
         public:
             using DynamicColliderSoA = ecs::SoA<EntityHandle::Handle_t, const DirectX::XMMATRIX*, VolumeProperties, ColliderType>;
 
-            ColliderSystem(uint32_t maxDynamic, uint32_t maxStatic, float worldspaceExtent);
+            ColliderSystem(uint32_t maxDynamic, uint32_t maxStatic, uint32_t octreeDensityThreshold, float worldspaceExtent);
             ~ColliderSystem();
 
             ColliderTree* GetStaticTree();

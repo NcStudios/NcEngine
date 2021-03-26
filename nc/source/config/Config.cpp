@@ -25,6 +25,7 @@ namespace
 
     // physics
     const auto FixedUpdateIntervalKey = std::string{"fixed_update_interval"};
+    const auto OctreeDensityThresholdKey = std::string{"octree_density_threshold"};
 
     // graphics
     const auto UseNativeResolutionKey = std::string{"use_native_resolution"};
@@ -60,7 +61,9 @@ namespace
         // physics
         else if (key == FixedUpdateIntervalKey)
             out.physics.fixedUpdateInterval = std::stod(value);
-        
+        else if (key == OctreeDensityThresholdKey)
+            out.physics.octreeDensityThreshold = std::stoi(value);
+
         // graphics
         else if (key == UseNativeResolutionKey)
             out.graphics.useNativeResolution = std::stoi(value);
@@ -130,6 +133,7 @@ namespace nc::config
                 << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxTransforms << '\n'
                 << "[physics]\n"
                 << FixedUpdateIntervalKey << INI_KEY_VALUE_DELIM << g_instance->physics.fixedUpdateInterval << '\n'
+                << OctreeDensityThresholdKey << INI_KEY_VALUE_DELIM << g_instance->physics.octreeDensityThreshold << '\n'
                 << "[graphics]\n"
                 << UseNativeResolutionKey << INI_KEY_VALUE_DELIM << g_instance->graphics.useNativeResolution << '\n'
                 << LaunchInFullscreenKey << INI_KEY_VALUE_DELIM << g_instance->graphics.launchInFullscreen << '\n'
@@ -150,6 +154,7 @@ namespace nc::config
         return { (g_instance->project.projectName != "") &&
                  (g_instance->project.logFilePath != "") &&
                  (g_instance->physics.fixedUpdateInterval > 0.0f) &&
+                 (g_instance->physics.octreeDensityThreshold > 0u) &&
                  (g_instance->graphics.screenWidth != 0) &&
                  (g_instance->graphics.screenHeight != 0) &&
                  (g_instance->graphics.targetFPS != 0) &&

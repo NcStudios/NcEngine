@@ -38,6 +38,7 @@ namespace nc::config
         struct
         {
             double fixedUpdateInterval;
+            unsigned octreeDensityThreshold;
         } physics;
     };
 

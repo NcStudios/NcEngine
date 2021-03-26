@@ -3,8 +3,8 @@
 
 namespace
 {
+    uint32_t DensityThreshold = 20u;
     constexpr size_t BranchDegree = 8u;
-    constexpr size_t DensityThreshold = 20u;
     constexpr size_t LeafNodeIndex = 0u;
     constexpr size_t InnerNodeIndex = 1u;
 }
@@ -112,11 +112,12 @@ namespace nc::physics
         return std::visit([this](auto&& a) { return a.Intersects(m_boundingVolume); }, other);
     }
 
-    ColliderTree::ColliderTree(uint32_t maxStaticColliders, float worldspaceExtent)
+    ColliderTree::ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float worldspaceExtent)
         : m_staticEntries{},
           m_root{{0.0f, 0.0f, 0.0f}, worldspaceExtent}
     {
         Allocator::create_memory_resource(maxStaticColliders * sizeof(Allocator::value_type));
+        DensityThreshold = densityThreshold;
     }
 
     ColliderTree::~ColliderTree() noexcept
