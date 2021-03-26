@@ -30,7 +30,7 @@ namespace
             .maxStaticColliders = config.memory.maxStaticColliders,
             .octreeDensityThreshold = config.physics.octreeDensityThreshold,
             .octreeMinimumExtent = config.physics.octreeMinimumExtent,
-            .worldspaceExtent = 1000.0f /** @todo should be configurable */
+            .worldspaceExtent = config.physics.worldspaceExtent
         };
     }
 }

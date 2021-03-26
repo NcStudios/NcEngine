@@ -25,6 +25,7 @@ namespace
 
     // physics
     const auto FixedUpdateIntervalKey = std::string{"fixed_update_interval"};
+    const auto WorldspaceExtentKey = std::string{"worldspace_extent"};
     const auto OctreeDensityThresholdKey = std::string{"octree_density_threshold"};
     const auto OctreeMinimumExtentKey = std::string{"octree_minimum_extent"};
 
@@ -62,6 +63,8 @@ namespace
         // physics
         else if (key == FixedUpdateIntervalKey)
             out.physics.fixedUpdateInterval = std::stof(value);
+        else if (key == WorldspaceExtentKey)
+            out.physics.worldspaceExtent = std::stof(value);
         else if (key == OctreeDensityThresholdKey)
             out.physics.octreeDensityThreshold = std::stoi(value);
         else if (key == OctreeMinimumExtentKey)
@@ -136,6 +139,7 @@ namespace nc::config
                 << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxTransforms << '\n'
                 << "[physics]\n"
                 << FixedUpdateIntervalKey << INI_KEY_VALUE_DELIM << g_instance->physics.fixedUpdateInterval << '\n'
+                << WorldspaceExtentKey << INI_KEY_VALUE_DELIM << g_instance->physics.worldspaceExtent << '\n'
                 << OctreeDensityThresholdKey << INI_KEY_VALUE_DELIM << g_instance->physics.octreeDensityThreshold << '\n'
                 << OctreeMinimumExtentKey << INI_KEY_VALUE_DELIM << g_instance->physics.octreeMinimumExtent << '\n'
                 << "[graphics]\n"
@@ -158,6 +162,7 @@ namespace nc::config
         return { (g_instance->project.projectName != "") &&
                  (g_instance->project.logFilePath != "") &&
                  (g_instance->physics.fixedUpdateInterval > 0.0f) &&
+                 (g_instance->physics.worldspaceExtent > 0.0f) &&
                  (g_instance->physics.octreeDensityThreshold > 0u) &&
                  (g_instance->physics.octreeMinimumExtent > 0.0f) &&
                  (g_instance->graphics.screenWidth != 0) &&

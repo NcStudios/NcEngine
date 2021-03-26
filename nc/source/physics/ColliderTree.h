@@ -57,10 +57,6 @@ namespace nc::physics
     /** possible @todo Tree could toggle between quad/oct depending on config. Some
      *  games may not benefit from subdividing across 3 dimensions */
 
-    /** @todo worldspaceExtent is just a constant set in PhysicsSystem. Eventually,
-     *  this should be read from somewhere. Maybe scenes? If scenes can specify this,
-     *  we will also need a way to resize extents of the root upon changing scene. */
-
     /** An octree for static colliders. */
     class ColliderTree
     {

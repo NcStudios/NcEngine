@@ -38,6 +38,7 @@ namespace nc::config
         struct
         {
             float fixedUpdateInterval;
+            float worldspaceExtent;
             unsigned octreeDensityThreshold;
             float octreeMinimumExtent;
         } physics;
