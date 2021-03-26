@@ -56,6 +56,7 @@ namespace nc::physics
         : m_collisionSystem{info.maxDynamicColliders,
                             info.maxStaticColliders,
                             info.octreeDensityThreshold,
+                            info.octreeMinimumExtent,
                             info.worldspaceExtent,
                             info.jobSystem},
           m_clickableComponents{},

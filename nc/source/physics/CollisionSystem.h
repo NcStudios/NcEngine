@@ -51,6 +51,7 @@ namespace nc::physics
             CollisionSystem(uint32_t maxDynamicColliders,
                             uint32_t maxStaticColliders,
                             uint32_t octreeDensityThreshold,
+                            float octreeMinimumExtent,
                             float worldspaceExtent,
                             job::JobSystem* jobSystem);
 

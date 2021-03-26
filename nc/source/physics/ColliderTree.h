@@ -36,6 +36,7 @@ namespace nc::physics
         public:
             Octant(DirectX::XMFLOAT3 center, float halfSideLength);
             void Add(const StaticTreeEntry* newEntry);
+            bool AtMinimumExtent() const;
             void Subdivide();
             void Clear();
             void BroadCheck(const DirectX::BoundingSphere& dynamicEstimate, std::vector<const StaticTreeEntry*>* out) const;
@@ -59,18 +60,12 @@ namespace nc::physics
     /** @todo worldspaceExtent is just a constant set in PhysicsSystem. Eventually,
      *  this should be read from somewhere. Maybe scenes? If scenes can specify this,
      *  we will also need a way to resize extents of the root upon changing scene. */
-    
-    /** @todo With omega-dense static geometry, octants can become smaller than the average
-     *  mesh size. From what I can tell, static geometry computations are trivial until
-     *  this happens. If we could specify some minimum extent, and use the density threshold
-     *  as a preference rather than requirement, this would stop happening. Generally, scenes
-     *  won't have thousands of static things in a tiny area, but maybe it could happen? */
 
     /** An octree for static colliders. */
     class ColliderTree
     {
         public:
-            ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float worldspaceExtent);
+            ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float minimumExtent, float worldspaceExtent);
             ~ColliderTree() noexcept;
 
             void Add(EntityHandle handle, const ColliderInfo& info);

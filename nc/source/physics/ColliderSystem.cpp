@@ -3,10 +3,14 @@
 
 namespace nc::physics
 {
-    ColliderSystem::ColliderSystem(uint32_t maxDynamic, uint32_t maxStatic, uint32_t octreeDensityThreshold, float worldspaceExtent)
+    ColliderSystem::ColliderSystem(uint32_t maxDynamic,
+                                   uint32_t maxStatic,
+                                   uint32_t octreeDensityThreshold,
+                                   float octreeMinimumExtent,
+                                   float worldspaceExtent)
         : ComponentSystem<Collider>{maxDynamic + maxStatic},
           m_dynamicSoA{maxDynamic},
-          m_staticTree{maxStatic, octreeDensityThreshold, worldspaceExtent}
+          m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent}
     {
     }
 

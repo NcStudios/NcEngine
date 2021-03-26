@@ -28,17 +28,18 @@ namespace nc::config
             unsigned screenWidth;
             unsigned screenHeight;
             unsigned targetFPS;
-            double nearClip;
-            double farClip;
-            double frameUpdateInterval;
+            float nearClip;
+            float farClip;
+            float frameUpdateInterval;
             std::string d3dShadersPath;
             std::string vulkanShadersPath;
         } graphics;
 
         struct
         {
-            double fixedUpdateInterval;
+            float fixedUpdateInterval;
             unsigned octreeDensityThreshold;
+            float octreeMinimumExtent;
         } physics;
     };
 

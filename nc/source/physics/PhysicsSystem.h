@@ -31,6 +31,7 @@ namespace nc::physics
         uint32_t maxDynamicColliders;
         uint32_t maxStaticColliders;
         uint32_t octreeDensityThreshold;
+        float octreeMinimumExtent;
         float worldspaceExtent;
     };
 
