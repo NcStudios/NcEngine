@@ -129,7 +129,7 @@ namespace nc::ui::editor::controls
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
                 WrapTabItem("Profiler", Profiler);
-                WrapTabItem("Systems", [ecs]() { ComponentSystems(ecs); });
+                WrapTabItem("Systems", ComponentSystems, ecs);
                 WrapTabItem("Gfx Resources", GraphicsResourcePanel);
                 ImGui::EndTabBar();
             }
