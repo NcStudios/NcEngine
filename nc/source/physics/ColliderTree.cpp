@@ -127,7 +127,7 @@ namespace nc::physics
     void ColliderTree::Add(EntityHandle handle, const ColliderInfo& info)
     {
         auto volume = CalculateBoundingVolume(info.type, GetVolumePropertiesFromColliderInfo(info), &GetComponent<Transform>(handle)->GetTransformationMatrix());
-        m_staticEntries.push_back(alloc::make_unique<StaticTreeEntry, Allocator>(volume, handle));
+        m_staticEntries.push_back(alloc::make_unique<StaticTreeEntry, Allocator>(volume, GetEntity(handle)->Layer, handle));
         m_root.Add(m_staticEntries.back().get());
     }
 
