@@ -45,6 +45,8 @@ namespace nc::physics
         EntityHandle::Handle_t second;
     };
 
+    /** @todo FindXXXEvents will notify immediately - do we want to delay this? */
+
     class CollisionSystem
     {
         public:
@@ -70,7 +72,6 @@ namespace nc::physics
             void BroadDetectVsStatic();
             void NarrowDetectVsDynamic();
             void NarrowDetectVsStatic();
-            // may want to delay sending
             void FindEnterAndStayEvents() const;
             void FindExitEvents() const;
             void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;

@@ -101,20 +101,9 @@ namespace nc::physics
         }
     }
 
-    Collider::BoundingVolume Foo(const Collider::BoundingVolume& v, const DirectX::XMMATRIX* t)
-    {
-        return std::visit([t](auto&& volume)
-        {
-            typename std::remove_cvref<decltype(volume)>::type out;
-            volume.Transform(out, *t);
-            return Collider::BoundingVolume{out};
-        }, v);
-    }
-
     /** @todo Narrow detection computes the bounding volumes for each pair encountered,
      *  potentially calculating the same volume multiple times. This could be done once
      *  upfront. */
-
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
