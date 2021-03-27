@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component/Component.h"
+#include "physics/LayerMask.h"
 
 #include <concepts>
 #include <memory>
@@ -16,9 +17,10 @@ namespace nc
         public:
             const EntityHandle Handle;
             const std::string Tag;
+            const physics::Layer Layer;
             const bool IsStatic;
 
-            Entity(EntityHandle handle, std::string tag, bool isStatic) noexcept;
+            Entity(EntityHandle handle, std::string tag, physics::Layer layer, bool isStatic) noexcept;
             Entity(const Entity& other) = delete;
             Entity& operator=(const Entity&) = delete;
             Entity(Entity&& other) = default;
