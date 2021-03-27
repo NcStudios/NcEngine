@@ -31,8 +31,7 @@ namespace nc::sample
     SampleUI::SampleUI(GameLog* gameLog, std::function<void()> widgetCallback)
         : m_gameLog{ gameLog },
           m_widgetCallback{ widgetCallback },
-          m_windowDimensions{ window::GetDimensions() },
-          m_isHovered{ false }
+          m_windowDimensions{ window::GetDimensions() }
     {
         SetImGuiStyle();
         window::RegisterOnResizeReceiver(this);
@@ -61,8 +60,6 @@ namespace nc::sample
             ImGui::NextColumn();
             DrawSceneList();
         } ImGui::End();
-
-        m_isHovered = ImGui::IsAnyWindowHovered();
     }
 
     void SampleUI::DrawDefaultWidget()
@@ -136,7 +133,7 @@ namespace nc::sample
 
     bool SampleUI::IsHovered()
     {
-        return m_isHovered;
+        return ImGui::GetIO().WantCaptureMouse;
     }
 
     void SampleUI::OnResize(nc::Vector2 dimensions)
