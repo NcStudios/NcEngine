@@ -84,7 +84,7 @@ namespace nc::core
           m_jobSystem{2},
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_physics{ CreatePhysicsSystemInfo(&m_graphics2, &jobSystem)},
+          m_physics{ CreatePhysicsSystemInfo(&m_graphics2, &m_jobSystem)},
           m_ecs{},
           m_sceneSystem{},
           m_time{}
