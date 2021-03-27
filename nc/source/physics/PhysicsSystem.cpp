@@ -19,9 +19,6 @@ namespace
 {
     const auto FLOAT_MAX = std::numeric_limits<float>::max();
     nc::physics::PhysicsSystem* impl = nullptr;
-
-    // temp until we can load this from scenes or something
-    constexpr float WorldspaceExtent = 1000.0f;
 }
 
 namespace nc::physics
@@ -55,10 +52,15 @@ namespace nc::physics
     }
     #else
     /* Physics System */
-    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem)
-        : m_collisionSystem{WorldspaceExtent, jobSystem},
+    PhysicsSystem::PhysicsSystem(const PhysicsSystemInfo& info)
+        : m_collisionSystem{info.maxDynamicColliders,
+                            info.maxStaticColliders,
+                            info.octreeDensityThreshold,
+                            info.octreeMinimumExtent,
+                            info.worldspaceExtent,
+                            info.jobSystem},
           m_clickableComponents{},
-          m_graphics{ graphics }
+          m_graphics{info.graphics}
     {
         impl = this;
     }

@@ -9,6 +9,32 @@
 #include "input/InputInternal.h"
 #include "Ecs.h"
 
+namespace
+{
+    nc::physics::PhysicsSystemInfo CreatePhysicsSystemInfo
+    (
+    #ifdef USE_VULKAN
+    nc::graphics::Graphics2* graphics,
+    #else
+    nc::graphics::Graphics* graphics,
+    #endif
+    nc::job::JobSystem* jobSystem
+    )
+    {
+        const auto& config = nc::config::Get();
+        return nc::physics::PhysicsSystemInfo
+        {
+            .graphics = graphics,
+            .jobSystem = jobSystem,
+            .maxDynamicColliders = config.memory.maxDynamicColliders,
+            .maxStaticColliders = config.memory.maxStaticColliders,
+            .octreeDensityThreshold = config.physics.octreeDensityThreshold,
+            .octreeMinimumExtent = config.physics.octreeMinimumExtent,
+            .worldspaceExtent = config.physics.worldspaceExtent
+        };
+    }
+}
+
 namespace nc::core
 {
     /* Api Function Implementation */
@@ -55,9 +81,10 @@ namespace nc::core
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
+          m_jobSystem{2},
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_physics{ &m_graphics2 },
+          m_physics{ CreatePhysicsSystemInfo(&m_graphics2, &jobSystem)},
           m_ecs{},
           m_sceneSystem{},
           m_time{}
@@ -75,7 +102,7 @@ namespace nc::core
           m_ui{ m_window.GetHWND(), &m_graphics },
           m_pointLightManager{},
           m_frameManager{},
-          m_physics{&m_graphics, &m_jobSystem},
+          m_physics{CreatePhysicsSystemInfo(&m_graphics, &m_jobSystem)},
           m_ecs{},
           m_sceneSystem{},
           m_time{}
