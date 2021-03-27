@@ -29,7 +29,7 @@ namespace nc::ui::editor
     {
     }
 
-    void Editor::Frame(float* dt, ecs::EntityMap& activeEntities)
+    void Editor::Frame(float* dt, ecs::EntityComponentSystem* ecs)
     {
         if(input::GetKeyDown(hotkey::Editor))
             m_openState_Editor = !m_openState_Editor;
@@ -46,9 +46,9 @@ namespace nc::ui::editor
         if(ImGui::Begin("NcEngine Editor", nullptr, MainWindowFlags))
         {
             DrawMenu();
-            controls::SceneGraphPanel(activeEntities, height);
+            controls::SceneGraphPanel(ecs->GetActiveEntities(), height);
             if(m_openState_UtilitiesPanel)
-                controls::UtilitiesPanel(dt, m_graphics->GetDrawCallCount(), width, height);
+                controls::UtilitiesPanel(dt, ecs, m_graphics->GetDrawCallCount(), width, height);
         }
         ImGui::End();
     }

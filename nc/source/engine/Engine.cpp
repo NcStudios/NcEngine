@@ -218,7 +218,7 @@ namespace nc::core
         m_frameManager.Execute(&m_graphics);
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
+        m_ui.Frame(&m_frameDeltaTimeFactor, &m_ecs);
         #else
         m_ui.Frame();
         #endif

@@ -2,6 +2,7 @@
 #ifdef NC_EDITOR_ENABLED
 #include "debug/Profiler.h"
 #include "Ecs.h"
+#include "ecs/EntityComponentSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "imgui/imgui.h"
 
@@ -15,12 +16,13 @@ namespace nc::ui::editor::controls
     const auto Padding = 4.0f;
 
     inline void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight);
-    inline void UtilitiesPanel(float* dtMult, unsigned drawCallCount, float windowWidth, float windowHeight);
+    inline void UtilitiesPanel(float* dtMult, ecs::EntityComponentSystem* ecs, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void GraphicsResourcePanel();
     inline void Entity(EntityHandle handle);
     inline void Component(ComponentBase* comp);
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
+    inline void ComponentSystems(ecs::EntityComponentSystem* ecs);
 
     /**
      * Scene Graph Controls
@@ -109,7 +111,7 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void UtilitiesPanel(float* dtMult, unsigned drawCallCount, float windowWidth, float windowHeight)
+    void UtilitiesPanel(float* dtMult, ecs::EntityComponentSystem* ecs, unsigned drawCallCount, float windowWidth, float windowHeight)
     {
         static auto initColumnWidth = false;
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
@@ -127,9 +129,11 @@ namespace nc::ui::editor::controls
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
                 WrapTabItem("Profiler", Profiler);
+                WrapTabItem("Systems", [ecs]() { ComponentSystems(ecs); });
                 WrapTabItem("Gfx Resources", GraphicsResourcePanel);
                 ImGui::EndTabBar();
             }
+
 
             ImGui::NextColumn();
             if(ImGui::BeginTabBar("UtilitiesRightTabBar"))
@@ -201,6 +205,27 @@ namespace nc::ui::editor::controls
             }
         }
         ImGui::EndChild();
+    }
+
+    template<class T>
+    void ComponentSystemHeader(const char* name, ecs::EntityComponentSystem* ecs)
+    {
+        if(ImGui::CollapsingHeader(name))
+        {
+            auto* system = ecs->GetSystem<T>();
+            for(auto& component : system->GetComponents())
+            {
+                ImGui::Text("Handle: %5d  |  Address: %p", static_cast<unsigned>(component->GetParentHandle()), static_cast<void*>(component.get()));
+            }
+        }
+    }
+
+    void ComponentSystems(ecs::EntityComponentSystem* ecs)
+    {
+        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", ecs);
+        ComponentSystemHeader<PointLight>("Point Light", ecs);
+        ComponentSystemHeader<Renderer>("Renderer", ecs);
+        ComponentSystemHeader<Transform>("Transform", ecs);
     }
 
     void GraphicsResourcePanel()
