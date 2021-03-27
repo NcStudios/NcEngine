@@ -58,7 +58,15 @@ namespace nc::physics
 
     void CollisionSystem::FetchEstimates()
     {
-        m_colliderSystem.GetDynamicSoA()->CalculateEstimates(&m_dynamicEstimates);
+        const auto* soa = m_colliderSystem.GetDynamicSoA();
+        const auto properties = soa->GetSpan<VolumeProperties>();
+        const auto transforms = soa->GetSpan<const DirectX::XMMATRIX*>();
+        auto index = soa->SmartIndex();
+        while(index.Valid())
+        {
+            m_dynamicEstimates.emplace_back(EstimateBoundingVolume(properties[index], transforms[index]), index);
+            ++index;
+        }
     }
 
     void CollisionSystem::BroadDetectVsDynamic()
@@ -93,31 +101,20 @@ namespace nc::physics
         }
     }
 
-    Collider::BoundingVolume Foo(const Collider::BoundingVolume& v, const DirectX::XMMATRIX* t)
-    {
-        return std::visit([t](auto&& volume)
-        {
-            typename std::remove_cvref<decltype(volume)>::type out;
-            volume.Transform(out, *t);
-            return Collider::BoundingVolume{out};
-        }, v);
-    }
-
     /** @todo Narrow detection computes the bounding volumes for each pair encountered,
      *  potentially calculating the same volume multiple times. This could be done once
      *  upfront. */
-
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
-        const auto& handles = dynamicSoA->GetHandles();
-        const auto& types = dynamicSoA->GetTypes();
-        const auto& transforms = dynamicSoA->GetTransforms();
-        const auto& centerExtentPairs = dynamicSoA->GetVolumeProperties();
+        const auto handles = dynamicSoA->GetSpan<EntityHandle::Handle_t>();
+        const auto types = dynamicSoA->GetSpan<ColliderType>();
+        const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
+        const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
         for(const auto& [i, j] : m_broadEventsVsDynamic)
         {
-            const auto v1 = CalculateBoundingVolume(types[i], centerExtentPairs[i], transforms[i]);
-            const auto v2 = CalculateBoundingVolume(types[j], centerExtentPairs[j], transforms[j]);
+            const auto v1 = CalculateBoundingVolume(types[i], properties[i], transforms[i]);
+            const auto v2 = CalculateBoundingVolume(types[j], properties[j], transforms[j]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, v1, v2))
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
         }
@@ -126,13 +123,13 @@ namespace nc::physics
     void CollisionSystem::NarrowDetectVsStatic()
     {
         auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
-        const auto& handles = dynamicSoA->GetHandles();
-        const auto& types = dynamicSoA->GetTypes();
-        const auto& transforms = dynamicSoA->GetTransforms();
-        const auto& centerExtentPairs = dynamicSoA->GetVolumeProperties();
+        const auto handles = dynamicSoA->GetSpan<EntityHandle::Handle_t>();
+        const auto types = dynamicSoA->GetSpan<ColliderType>();
+        const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
+        const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
         {
-            const auto volume = CalculateBoundingVolume(types[dynamicIndex], centerExtentPairs[dynamicIndex], transforms[dynamicIndex]);
+            const auto volume = CalculateBoundingVolume(types[dynamicIndex], properties[dynamicIndex], transforms[dynamicIndex]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, volume, staticPair->volume))
                 m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityHandle::Handle_t>(staticPair->handle));
         }
