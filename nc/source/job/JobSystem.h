@@ -12,6 +12,11 @@
 
 namespace nc::job
 {
+    /** @todo JobSystem is created with 2 threads (Engine.cpp) because that's all we're using.
+     *  As things get more complicated, we'll have to change this. Ideally hardware_concurrency
+     *  minus other threads should do the trick, but what do we do about the potential for 
+     *  unexpected return values, and in what circumstances can they happen? */
+
     class JobSystem
     {
         template<class T>
@@ -38,51 +43,6 @@ namespace nc::job
             auto Package(Func&& func, Args&&... args) -> std::packaged_task<result_t<Func(Args...)>()>;
     };
 
-    inline JobSystem::JobSystem(size_t threadCount)
-        : m_threads{},
-          m_jobs{},
-          m_mutex{},
-          m_condition{},
-          m_run{true}
-    {
-        m_threads.reserve(threadCount);
-        std::generate_n(std::back_inserter(m_threads), threadCount, [this]()
-        {
-            return std::thread{ [this]()
-            {
-                for(;;)
-                {
-                    std::packaged_task<void()> job;
-
-                    {
-                        std::unique_lock<std::mutex> lock(m_mutex);
-                        m_condition.wait(lock, [this](){ return !m_run || !m_jobs.empty(); });
-                        if(!m_run && m_jobs.empty())
-                            return;
-
-                        job = std::move(m_jobs.front());
-                        m_jobs.pop();
-                    }
-
-                    job();
-                }
-            } };
-        });
-    }
-
-    inline JobSystem::~JobSystem()
-    {
-        {
-            std::unique_lock<std::mutex> lock{m_mutex};
-            m_run = false;
-        }
-
-        m_condition.notify_all();
-
-        for(auto& thread : m_threads)
-            thread.join();
-    }
-
     template<class Func, class... Args>
     auto JobSystem::Schedule(Func&& func, Args&&... args) -> std::future<result_t<Func(Args...)>>
     {
@@ -91,10 +51,6 @@ namespace nc::job
 
         {
             std::unique_lock<std::mutex> lock{m_mutex};
-
-            if(!m_run)
-                throw std::runtime_error("JobSystem::Schedule - Cannot Schedule if not running");
-
             m_jobs.emplace(std::move(task));
         }
 

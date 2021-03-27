@@ -40,7 +40,7 @@ namespace nc::ecs
 
             void Add(Properties&&... properties);
             template<std::equality_comparable Property> void Remove(Property toRemove);
-            template<class Property> std::span<Property> View() const;
+            template<class Property> std::span<Property> GetSpan() const;
             void Clear();
             bool IsFull() const;
             SoAIndex SmartIndex() const;
@@ -76,14 +76,14 @@ namespace nc::ecs
             return out.value();
         }();
 
-        ( (View<Properties>()[index] = properties), ... );
+        ( (GetSpan<Properties>()[index] = properties), ... );
     }
 
     template<class... Properties>
     template<std::equality_comparable Property>
     void SoA<Properties...>::Remove(Property toRemove)
     {
-        auto targetProperties = View<Property>();
+        auto targetProperties = GetSpan<Property>();
         auto index = SmartIndex();
         while(index.Valid())
         {
@@ -114,7 +114,7 @@ namespace nc::ecs
 
     template<class... Properties>
     template<class Property>
-    std::span<Property> SoA<Properties...>::View() const
+    std::span<Property> SoA<Properties...>::GetSpan() const
     {
         return std::span{std::get<std::unique_ptr<Property[]>>(m_properties).get(), m_nextFree};
     }

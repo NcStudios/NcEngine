@@ -23,7 +23,6 @@ namespace nc
     Collider::Collider(EntityHandle handle, ColliderInfo info)
         : ComponentBase(handle),
           m_type{info.type},
-          m_mask{info.mask},
           m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
           m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
           m_widgetModel{collider_detail::CreateWireframeModel(info.type)},
@@ -35,8 +34,7 @@ namespace nc
     #else
     Collider::Collider(EntityHandle handle, ColliderInfo info)
         : ComponentBase(handle),
-          m_type{info.type},
-          m_mask{info.mask}
+          m_type{info.type}
     {
     }
     #endif
