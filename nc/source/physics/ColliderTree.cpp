@@ -116,12 +116,12 @@ namespace nc::physics
         : m_staticEntries{},
           m_root{{0.0f, 0.0f, 0.0f}, worldspaceExtent}
     {
-        Allocator().initialize_memory_resource(maxStaticColliders);
+        Allocator::create_memory_resource(maxStaticColliders * sizeof(Allocator::value_type));
     }
 
     ColliderTree::~ColliderTree() noexcept
     {
-        Allocator().release_memory_resource();
+        Allocator::destroy_memory_resource();
     }
 
     void ColliderTree::Add(EntityHandle handle, const ColliderInfo& info)

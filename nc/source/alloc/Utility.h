@@ -4,20 +4,12 @@
 
 namespace nc::alloc
 {
-    /** Convenience type for single-type pool allocator. Tag parameter can be
-     *  used to differentiate pools of the same type. */
-    template<class T, class Tag = void>
-    using PoolAllocator = FixedTypeAllocator<StaticPool<T, Tag>>;
-
-    /** @note This guarantees empty base class optimization. Stateful allocators
-     *  would require a different deleter. */
     template<class Alloc>
-        requires std::is_empty_v<Alloc>
-    struct basic_deleter : private Alloc
+    struct basic_deleter
     {
         void operator()(Alloc::value_type* ptr)
         {
-            Alloc::deallocate(ptr, 1);
+            Alloc().deallocate(ptr, 1);
         }
     };
 

@@ -8,6 +8,7 @@ add_executable(Allocator_unit_tests
 
 target_include_directories(Allocator_unit_tests
     PRIVATE
+        ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
@@ -84,6 +85,7 @@ add_executable(MakeUnique_unit_tests
 
 target_include_directories(MakeUnique_unit_tests
     PRIVATE
+        ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
@@ -107,6 +109,7 @@ add_executable(MemoryResource_unit_tests
 
 target_include_directories(MemoryResource_unit_tests
     PRIVATE
+        ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )

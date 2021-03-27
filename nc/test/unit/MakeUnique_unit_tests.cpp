@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "alloc/Alloc.h"
+#include "alloc/Utility.h"
 
 unsigned AllocCount = 0u;
 unsigned DeleteCount = 0u;
@@ -52,6 +52,14 @@ TEST(MakeUnique_unit_tests, ReturnValue_OnDestruction_CallsDeleter)
     }
 
     EXPECT_EQ(DeleteCount, 1u);
+}
+
+TEST(MakeUnique_unit_tests, ReturnValue_WithBasicDeleter_HasNoSizeOverhead)
+{
+    TestInit();
+
+    auto ptr = nc::alloc::make_unique<int, TestAlloc<int>>();
+    EXPECT_EQ(sizeof(ptr), sizeof(void*));
 }
 
 int main(int argc, char ** argv)
