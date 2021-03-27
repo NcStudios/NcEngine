@@ -33,7 +33,6 @@ namespace nc
         ColliderType type = ColliderType::Box;
         Vector3 offset = Vector3::Zero();
         Vector3 scale = Vector3::One();
-        physics::LayerMask mask = physics::LayerMaskAll;
     };
 
     class Collider final : public ComponentBase
@@ -58,7 +57,6 @@ namespace nc
 
         private:
             const ColliderType m_type;
-            physics::LayerMask m_mask;
 
             #ifdef NC_EDITOR_ENABLED
             DirectX::FXMMATRIX m_transformMatrix;

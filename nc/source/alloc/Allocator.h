@@ -43,9 +43,9 @@ namespace nc::alloc
 
         public:
             using value_type = T;
-            using propogate_on_container_copy_assignment = std::true_type;
-            using propogate_on_container_move_assignment = std::true_type;
-            using propogate_on_container_swap = std::true_type;
+            using propagate_on_container_copy_assignment = std::true_type;
+            using propagate_on_container_move_assignment = std::true_type;
+            using propagate_on_container_swap = std::true_type;
             using memory_resource_type = LinearBufferResource<Tag>;
 
             template<class U>
