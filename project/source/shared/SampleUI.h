@@ -21,7 +21,6 @@ namespace nc::sample
             GameLog* m_gameLog;
             std::function<void()> m_widgetCallback;
             Vector2 m_windowDimensions;
-            bool m_isHovered;
 
             void CheckInput();
             void DrawDefaultWidget();

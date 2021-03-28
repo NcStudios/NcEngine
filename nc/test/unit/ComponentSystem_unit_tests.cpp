@@ -38,7 +38,6 @@ class ComponentSystem_unit_tests : public ::testing::Test
         ~ComponentSystem_unit_tests()
         {
             fakeSystem.Clear();
-            nc::alloc::PoolAllocator<Fake>().release_memory_resource();
         }
 
         ComponentSystem<Fake> fakeSystem;

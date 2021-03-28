@@ -1,32 +1,36 @@
 #pragma once
 
 #include "CollisionSystem.h"
-#include "physics/IClickable.h"
-#include "directx/math/DirectXMath.h"
+#include "ClickableSystem.h"
 
-#include <vector>
-
-namespace nc::graphics
+namespace nc
 {
-    class FrameManager;
-    class Graphics;
-    class Graphics2;
+    namespace graphics { class FrameManager; }
+    namespace job { class JobSystem; }
 }
 
 namespace nc::physics
 {
+    struct PhysicsSystemInfo
+    {
+        #ifdef USE_VULKAN
+        graphics::Graphics2* graphics;
+        #else
+        graphics::Graphics* graphics;
+        #endif
+        job::JobSystem* jobSystem;
+        uint32_t maxDynamicColliders;
+        uint32_t maxStaticColliders;
+        uint32_t octreeDensityThreshold;
+        float octreeMinimumExtent;
+        float worldspaceExtent;
+    };
+
     class PhysicsSystem
     {
         public:
-            #ifdef USE_VULKAN
-            PhysicsSystem(graphics::Graphics2* graphics2);
-            #else
-            PhysicsSystem(graphics::Graphics* graphics);
-            #endif
+            PhysicsSystem(const PhysicsSystemInfo& info);
 
-            void RegisterClickable(IClickable* toAdd);
-            void UnregisterClickable(IClickable* toRemove) noexcept;
-            IClickable* RaycastToClickables(LayerMask mask);
             void DoPhysicsStep();
             void ClearState();
 
@@ -36,11 +40,6 @@ namespace nc::physics
 
         private:
             CollisionSystem m_collisionSystem;
-            std::vector<nc::physics::IClickable*> m_clickableComponents;
-            #ifdef USE_VULKAN
-            graphics::Graphics2* m_graphics2;
-            #else
-            graphics::Graphics* m_graphics;
-            #endif
+            ClickableSystem m_clickableSystem;
     };
-} //end namespace nc::physics
+} // namespace nc::physics

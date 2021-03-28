@@ -21,17 +21,18 @@ struct Mock2 : Component
 
 EntityHandle TestHandle{1u};
 std::string TestTag{"Entity"};
+physics::Layer TestLayer{physics::DefaultLayer};
 
 TEST(Entity_unit_tests, AddUserComponent_ReturnsNonNull)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     auto actual = entity.AddUserComponent<Mock>();
     EXPECT_NE(actual, nullptr);
 }
 
 TEST(Entity_unit_tests, AddUserComponent_DuplicateComponent_ReturnsNull)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     entity.AddUserComponent<Mock>();
     auto actual = entity.AddUserComponent<Mock>();
     EXPECT_EQ(actual, nullptr);
@@ -39,7 +40,7 @@ TEST(Entity_unit_tests, AddUserComponent_DuplicateComponent_ReturnsNull)
 
 TEST(Entity_unit_tests, GetUserComponent_HasComponent_ReturnsNonNull)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     entity.AddUserComponent<Mock>();
     auto actual = entity.GetUserComponent<Mock>();
     EXPECT_NE(actual, nullptr);
@@ -47,14 +48,14 @@ TEST(Entity_unit_tests, GetUserComponent_HasComponent_ReturnsNonNull)
 
 TEST(Entity_unit_tests, GetUserComponent_DoesNotHaveComponent_ReturnsNull)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     auto actual = entity.GetUserComponent<Mock>();
     EXPECT_EQ(actual, nullptr);
 }
 
 TEST(Entity_unit_tests, HasUserComponent_HasComponent_ReturnsTrue)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     entity.AddUserComponent<Mock>();
     auto actual = entity.HasUserComponent<Mock>();
     EXPECT_EQ(actual, true);
@@ -62,14 +63,14 @@ TEST(Entity_unit_tests, HasUserComponent_HasComponent_ReturnsTrue)
 
 TEST(Entity_unit_tests, HasUserComponent_DoesNotHaveComponent_ReturnsFalse)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     auto actual = entity.HasUserComponent<Mock>();
     EXPECT_EQ(actual, false);
 }
 
 TEST(Entity_unit_tests, RemoveUserComponent_HasComponent_ReturnsTrue)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     entity.AddUserComponent<Mock>();
     auto actual = entity.RemoveUserComponent<Mock>();
     EXPECT_EQ(actual, true);
@@ -77,14 +78,14 @@ TEST(Entity_unit_tests, RemoveUserComponent_HasComponent_ReturnsTrue)
 
 TEST(Entity_unit_tests, RemoveUserComponent_DoesNotHaveComponent_ReturnsFalse)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     auto actual = entity.RemoveUserComponent<Mock>();
     EXPECT_EQ(actual, false);
 }
 
 TEST(Entity_unit_tests, GetUserComponents_NonEmptyCollection_HasCorrectCount)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     entity.AddUserComponent<Mock>();
     entity.AddUserComponent<Mock2>();
     const auto& vec = entity.GetUserComponents();
@@ -94,7 +95,7 @@ TEST(Entity_unit_tests, GetUserComponents_NonEmptyCollection_HasCorrectCount)
 
 TEST(Entity_unit_tests, GetUserComponents_AllComponentsRemoved_IsEmpty)
 {
-    auto entity = Entity(TestHandle, TestTag, false);
+    auto entity = Entity(TestHandle, TestTag, TestLayer, false);
     entity.AddUserComponent<Mock>();
     entity.AddUserComponent<Mock2>();
     entity.RemoveUserComponent<Mock>();

@@ -1,11 +1,41 @@
 #pragma once
 
+#include "debug/Utils.h"
+
 #include <memory>
 #include <new>
 #include <type_traits>
+#include <vector>
 
 namespace nc::alloc
 {
+    template<class Resource>
+    std::unique_ptr<Resource> g_resource = nullptr;
+
+    template<class Resource>
+    void CreateMemoryResource(size_t size)
+    {
+        if(g_resource<Resource>)
+            throw std::runtime_error("CreateMemoryResource - Resource already exists");
+        
+        g_resource<Resource> = std::make_unique<Resource>(size);
+    }
+
+    template<class Resource>
+    void DestroyMemoryResource()
+    {
+        g_resource<Resource> = nullptr;
+    }
+
+    template<class Resource>
+    Resource* GetMemoryResource()
+    {
+        if(!g_resource<Resource>)
+            throw std::runtime_error("GetMemoryResource - Resource not initialized");
+
+        return g_resource<Resource>.get();
+    }
+
     struct MemoryResourceBadAlloc : public std::bad_alloc
     {
         const char* what() const noexcept override
@@ -14,32 +44,23 @@ namespace nc::alloc
         }
     };
 
-    template<class T>
-    concept MemoryResource = requires (T t)
-    {
-        typename T::value_type;
-        { t.allocate(size_t{1u}) } -> std::same_as<typename T::value_type*>;
-        { t.deallocate(nullptr, size_t{1u}) } -> std::same_as<void>;
-        { t.free_all() } -> std::same_as<void>;
-    };
-
-    /** Fixed-size, single-type buffer
-     *  @note destructor/free_all will not call destructors of allocated
-     *  objects. If this is required, explicitly call deallocate. */
+    /** Fixed-size, single-type buffer. Allocates by first backfilling any
+     *  holes from deallocation, then continues sequentially. Size and
+     *  alignment parameters are not used. */
     template<class T, class Tag = void>
-    class StaticPool
+    class StaticPoolResource
     {
         public:
             using value_type = T;
             using storage_type = std::aligned_storage_t<sizeof(T), alignof(T)>;
 
-            StaticPool(size_t maxCount);
-            ~StaticPool() = default;
-            StaticPool(const StaticPool&) = delete;
-            StaticPool& operator=(const StaticPool&) = delete;
+            StaticPoolResource(size_t size);
+            ~StaticPoolResource() = default;
+            StaticPoolResource(const StaticPoolResource&) = delete;
+            StaticPoolResource& operator=(const StaticPoolResource&) = delete;
 
-            T* allocate(size_t n);
-            void deallocate(T* ptr, size_t n) noexcept;
+            T* allocate(size_t size, size_t alignment);
+            void deallocate(T* ptr, size_t size) noexcept;
             void free_all();
 
         private:
@@ -49,17 +70,40 @@ namespace nc::alloc
             const size_t m_maxCount;
     };
 
+    /** Fixed-size buffer for multiple types. Allocates sequentially from the
+     *  buffer and only reclaims memory upon calling free_all. Calls to deallocate
+     *  do nothing. */
+    template<class Tag = void>
+    class LinearBufferResource
+    {
+        public:
+            LinearBufferResource(size_t size);
+            ~LinearBufferResource() = default;
+            LinearBufferResource(const LinearBufferResource&) = delete;
+            LinearBufferResource& operator=(const LinearBufferResource&) = delete;
+
+            void* allocate(size_t size, size_t alignment);
+            void deallocate(void* ptr, size_t n) noexcept;
+            void free_all();
+
+        private:
+            std::unique_ptr<char[]> m_data;
+            size_t m_totalBytes;
+            size_t m_freeBytes;
+    };
+
     template<class T, class Tag>
-    StaticPool<T, Tag>::StaticPool(size_t maxCount)
-        : m_data{std::make_unique<storage_type[]>(maxCount)},
+    StaticPoolResource<T, Tag>::StaticPoolResource(size_t size)
+        : m_data{std::make_unique<storage_type[]>(size / sizeof(T))},
           m_free{},
           m_next{0u},
-          m_maxCount{maxCount}
+          m_maxCount{size / sizeof(T)}
     {
     }
 
+    /** StaticPoolResource */
     template<class T, class Tag>
-    T* StaticPool<T, Tag>::allocate(size_t)
+    T* StaticPoolResource<T, Tag>::allocate(size_t, size_t)
     {
         if(m_next >= m_maxCount)
             throw MemoryResourceBadAlloc();
@@ -78,18 +122,50 @@ namespace nc::alloc
     }
 
     template<class T, class Tag>
-    void StaticPool<T, Tag>::deallocate(T* ptr, size_t) noexcept
+    void StaticPoolResource<T, Tag>::deallocate(T* ptr, size_t) noexcept
     {
-        ptr->~T();
         auto index = ptr - reinterpret_cast<T*>(&m_data[0]);
         m_free.emplace_back(index);
     }
 
     template<class T, class Tag>
-    void StaticPool<T, Tag>::free_all()
+    void StaticPoolResource<T, Tag>::free_all()
     {
         m_free.clear();
         m_free.shrink_to_fit();
         m_next = 0u;
+    }
+
+    /** LinearBufferResource */
+    template<class Tag>
+    LinearBufferResource<Tag>::LinearBufferResource(size_t size)
+        : m_data{std::make_unique<char[]>(size)},
+          m_totalBytes{size},
+          m_freeBytes{size}
+    {
+    }
+
+    template<class Tag>
+    void* LinearBufferResource<Tag>::allocate(size_t size, size_t alignment)
+    {
+        auto current = static_cast<void*>(m_data.get() + (m_totalBytes - m_freeBytes));
+        auto alignedResult = std::align(alignment, size, current, m_freeBytes);
+
+        if(!alignedResult)
+            throw MemoryResourceBadAlloc();
+        
+        m_freeBytes -= size;
+        return alignedResult;
+    }
+
+    template<class Tag>
+    void LinearBufferResource<Tag>::deallocate(void* ptr, size_t n) noexcept
+    {
+    }
+
+    template<class Tag>
+    void LinearBufferResource<Tag>::free_all()
+    {
+        m_freeBytes = m_totalBytes;
     }
 } // namespace nc::alloc

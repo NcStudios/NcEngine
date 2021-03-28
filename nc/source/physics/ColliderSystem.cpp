@@ -3,10 +3,14 @@
 
 namespace nc::physics
 {
-    ColliderSystem::ColliderSystem(uint32_t maxDynamic, uint32_t maxStatic, float worldspaceExtent)
+    ColliderSystem::ColliderSystem(uint32_t maxDynamic,
+                                   uint32_t maxStatic,
+                                   uint32_t octreeDensityThreshold,
+                                   float octreeMinimumExtent,
+                                   float worldspaceExtent)
         : ComponentSystem<Collider>{maxDynamic + maxStatic},
           m_dynamicSoA{maxDynamic},
-          m_staticTree{maxStatic, worldspaceExtent}
+          m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent}
     {
     }
 
@@ -17,7 +21,7 @@ namespace nc::physics
         return &m_staticTree;
     }
 
-    ColliderSoA* ColliderSystem::GetDynamicSoA()
+    ColliderSystem::DynamicColliderSoA* ColliderSystem::GetDynamicSoA()
     {
         return &m_dynamicSoA;
     }
@@ -27,7 +31,15 @@ namespace nc::physics
         if(GetEntity(handle)->IsStatic)
             m_staticTree.Add(handle, info);
         else
-            m_dynamicSoA.Add(handle, info);
+        {
+            m_dynamicSoA.Add
+            (
+                static_cast<EntityHandle::Handle_t>(handle),
+                &GetComponent<Transform>(handle)->GetTransformationMatrix(),
+                GetVolumePropertiesFromColliderInfo(info),
+                ColliderType{info.type}
+            );
+        }
 
         return ComponentSystem<Collider>::Add(handle, info);
     }
@@ -40,7 +52,7 @@ namespace nc::physics
         if(GetEntity(handle)->IsStatic)
             m_staticTree.Remove(handle);
         else
-            m_dynamicSoA.Remove(handle);
+            m_dynamicSoA.Remove(static_cast<EntityHandle::Handle_t>(handle));
 
         return true;
     }

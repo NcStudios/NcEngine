@@ -1,7 +1,7 @@
 #pragma once
 
 #include "entity/EntityHandle.h"
-#include "alloc/Alloc.h"
+#include "alloc/Utility.h"
 #include "debug/Utils.h"
 #include "debug/Profiler.h"
 
@@ -18,8 +18,8 @@ namespace nc::ecs
         using ContainerType = std::vector<std::unique_ptr<T, alloc::basic_deleter<Allocator>>>;
 
         public:
-            ComponentSystem(uint32_t size);
-            virtual ~ComponentSystem() = default;
+            ComponentSystem(uint32_t count);
+            virtual ~ComponentSystem() noexcept;
 
             template<class ... Args> T* Add(EntityHandle parentHandle, Args&& ... args);
             bool Remove(EntityHandle parentHandle);
@@ -33,10 +33,16 @@ namespace nc::ecs
     };
 
     template<class T>
-    ComponentSystem<T>::ComponentSystem(uint32_t size)
+    ComponentSystem<T>::ComponentSystem(uint32_t count)
         : m_components{}
     {
-        Allocator().initialize_memory_resource(size);
+        Allocator::create_memory_resource(count * sizeof(T));
+    }
+
+    template<class T>
+    ComponentSystem<T>::~ComponentSystem() noexcept
+    {
+        Allocator::destroy_memory_resource();
     }
 
     template<class T>
@@ -61,7 +67,6 @@ namespace nc::ecs
             return nullptr;
 
         auto ptr = alloc::make_unique<T, Allocator>(handle, std::forward<Args>(args)...);
-
         auto pos = m_components.insert
         (
             std::upper_bound(m_components.begin(), m_components.end(), ptr.get(), [](T* toAdd, auto& existing) { return toAdd < existing.get(); }),

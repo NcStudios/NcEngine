@@ -2,7 +2,7 @@
 
 #include "Ecs.h"
 #include "ecs/ComponentSystem.h"
-#include "ColliderSoA.h"
+#include "ecs/SoA.h"
 #include "ColliderTree.h"
 
 namespace nc::physics
@@ -12,11 +12,18 @@ namespace nc::physics
     class ColliderSystem : private ecs::ComponentSystem<Collider>
     {
         public:
-            ColliderSystem(uint32_t maxDynamic, uint32_t maxStatic, float worldspaceExtent);
+            using DynamicColliderSoA = ecs::SoA<EntityHandle::Handle_t, const DirectX::XMMATRIX*, VolumeProperties, ColliderType>;
+
+            ColliderSystem(uint32_t maxDynamic,
+                           uint32_t maxStatic,
+                           uint32_t octreeDensityThreshold,
+                           float octreeMinimumExtent,
+                           float worldspaceExtent);
+                           
             ~ColliderSystem();
 
             ColliderTree* GetStaticTree();
-            ColliderSoA* GetDynamicSoA();
+            DynamicColliderSoA* GetDynamicSoA();
 
             // Wrappers around ComponentSystem methods
             Collider* Add(EntityHandle handle, const ColliderInfo& info);
@@ -29,7 +36,7 @@ namespace nc::physics
             using ComponentSystem::GetComponents;
 
         private:
-            ColliderSoA m_dynamicSoA;
+            DynamicColliderSoA m_dynamicSoA;
             ColliderTree m_staticTree;
     };
 } // namespace nc::physics

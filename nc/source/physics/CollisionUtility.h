@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component/Collider.h"
+#include "physics/LayerMask.h"
 
 namespace nc::physics
 {
@@ -12,9 +13,11 @@ namespace nc::physics
         uint32_t index;
     };
 
+    /** The bounding volume and handle of a static collider in the octree. */
     struct StaticTreeEntry
     {
         Collider::BoundingVolume volume;
+        physics::Layer layer;
         EntityHandle handle;
     };
 

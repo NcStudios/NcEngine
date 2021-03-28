@@ -3,8 +3,9 @@
 
 namespace
 {
+    uint32_t DensityThreshold = 20u;
+    float MinimumExtent = 5.0f;
     constexpr size_t BranchDegree = 8u;
-    constexpr size_t DensityThreshold = 20u;
     constexpr size_t LeafNodeIndex = 0u;
     constexpr size_t InnerNodeIndex = 1u;
 }
@@ -25,7 +26,7 @@ namespace nc::physics
 
         if(auto* staticColliders = std::get_if<LeafNodeIndex>(&m_data); staticColliders)
         {
-            if(staticColliders->size() < DensityThreshold)
+            if(staticColliders->size() < DensityThreshold || AtMinimumExtent())
             {
                 staticColliders->push_back(newEntry);
                 return;
@@ -35,6 +36,11 @@ namespace nc::physics
         }
 
         AddToChildren(newEntry);
+    }
+
+    bool Octant::AtMinimumExtent() const
+    {
+        return m_boundingVolume.Extents.x / 2.0f < MinimumExtent;
     }
 
     void Octant::Subdivide()
@@ -112,22 +118,24 @@ namespace nc::physics
         return std::visit([this](auto&& a) { return a.Intersects(m_boundingVolume); }, other);
     }
 
-    ColliderTree::ColliderTree(uint32_t maxStaticColliders, float worldspaceExtent)
+    ColliderTree::ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float minimumExtent, float worldspaceExtent)
         : m_staticEntries{},
           m_root{{0.0f, 0.0f, 0.0f}, worldspaceExtent}
     {
-        Allocator().initialize_memory_resource(maxStaticColliders);
+        Allocator::create_memory_resource(maxStaticColliders * sizeof(Allocator::value_type));
+        DensityThreshold = densityThreshold;
+        MinimumExtent = minimumExtent;
     }
 
     ColliderTree::~ColliderTree() noexcept
     {
-        Allocator().release_memory_resource();
+        Allocator::destroy_memory_resource();
     }
 
     void ColliderTree::Add(EntityHandle handle, const ColliderInfo& info)
     {
         auto volume = CalculateBoundingVolume(info.type, GetVolumePropertiesFromColliderInfo(info), &GetComponent<Transform>(handle)->GetTransformationMatrix());
-        m_staticEntries.push_back(alloc::make_unique<StaticTreeEntry, Allocator>(volume, handle));
+        m_staticEntries.push_back(alloc::make_unique<StaticTreeEntry, Allocator>(volume, GetEntity(handle)->Layer, handle));
         m_root.Add(m_staticEntries.back().get());
     }
 

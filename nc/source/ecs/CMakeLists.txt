@@ -3,4 +3,5 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/ecs/Entity.cpp
         ${ROOT_DIR}/source/ecs/EntityComponentSystem.cpp
         ${ROOT_DIR}/source/ecs/EcsApiImpl.cpp
+        ${ROOT_DIR}/source/ecs/SoA.cpp
 )

@@ -87,7 +87,7 @@ namespace nc::sample
         
         // Dynamic Cube Spawner
         auto dynamicSpawnerHandle = CreateEntity({.tag = "DynamicCubeSpawner"});
-        auto dynamicSpawner = AddComponent<Spawner>(dynamicSpawnerHandle, prefab::Resource::Cube, spawnBehavior, spawnExtension);
+        auto dynamicSpawner = AddComponent<Spawner>(dynamicSpawnerHandle, prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
 
         // Static Cube Spawner
         spawnBehavior.spawnAsStaticEntity = true;
