@@ -29,7 +29,7 @@ namespace nc::graphics::vulkan
             // Swap chain
             void Present(uint32_t imageIndex, bool& isSwapChainValid);
             void Create(Vector2 dimensions);
-            void Cleanup();
+            void Cleanup() noexcept;
             const Vector2 GetExtentDimensions() const noexcept;
             const vk::Extent2D& GetExtent() const noexcept;
             const vk::Format& GetFormat() const noexcept;

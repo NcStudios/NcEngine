@@ -18,7 +18,7 @@ namespace nc::graphics::vulkan
             TechniqueType GetType() const noexcept;
 
         protected:
-            ~TechniqueBase();
+            ~TechniqueBase() noexcept;
 
             // External members
             const Base& m_base;

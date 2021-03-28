@@ -104,12 +104,12 @@ namespace nc::graphics::vulkan
     {
         m_logicalDevice.destroyCommandPool(m_commandPool);
 
-        for (uint32_t i = 0; i < m_buffers.size(); i++)
+        for (uint32_t i = 0; i < m_buffers.size(); ++i)
         {
             m_allocator.destroyBuffer(m_buffers[i].first, m_buffers[i].second);
         }
         
-        for (uint32_t i = 0; i < m_images.size(); i++)
+        for (uint32_t i = 0; i < m_images.size(); ++i)
         {
             m_allocator.destroyImage(m_images[i].first, m_images[i].second);
         }

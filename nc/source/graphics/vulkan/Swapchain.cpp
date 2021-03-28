@@ -40,17 +40,17 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Swapchain::Cleanup()
+    void Swapchain::Cleanup() noexcept
     {
         auto device = m_base->GetDevice();
-        for (auto frameBuffer : m_framebuffers)
+        for (auto& frameBuffer : m_framebuffers)
         {
             device.destroyFramebuffer(frameBuffer);
         }
 
         device.destroyRenderPass(m_defaultPass);
 
-        for (auto imageView : m_swapChainImageViews)
+        for (auto& imageView : m_swapChainImageViews)
         {
            device.destroyImageView(imageView, nullptr);
         }

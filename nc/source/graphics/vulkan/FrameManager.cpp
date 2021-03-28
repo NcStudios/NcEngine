@@ -66,7 +66,7 @@ namespace nc::graphics::vulkan
                 vertices.emplace_back(vertex);
             }
         }
-        return VertexBuffer(vertices);
+        return VertexBuffer(std::move(vertices));
     }
 
     IndexBuffer FrameManager::GetIndexBuffer(TechniqueType techniqueType)
@@ -81,7 +81,7 @@ namespace nc::graphics::vulkan
             }
         }
         
-        return IndexBuffer(indices);
+        return IndexBuffer(std::move(indices));
     }
 
     Model::Model()

@@ -26,10 +26,10 @@ namespace nc::graphics::vulkan
     {
     }
 
-    TechniqueBase::~TechniqueBase()
+    TechniqueBase::~TechniqueBase() noexcept
     {
         auto base = m_base.GetDevice();
-        for (auto pass : m_renderPasses)
+        for (auto& pass : m_renderPasses)
         {
             base.destroyRenderPass(pass);
         }

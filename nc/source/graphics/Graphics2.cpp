@@ -101,7 +101,7 @@ namespace nc::graphics
         m_base->GetDevice().waitIdle();
     }
 
-    vulkan::Base* Graphics2::GetBasePtr()
+    vulkan::Base* Graphics2::GetBasePtr() const noexcept
     {
         return m_base.get();
     }
@@ -116,7 +116,7 @@ namespace nc::graphics
         return *m_swapchain.get();
     }
 
-    vulkan::Commands* Graphics2::GetCommandsPtr()
+    vulkan::Commands* Graphics2::GetCommandsPtr() const noexcept
     {
         return m_commands.get();
     }
@@ -131,12 +131,12 @@ namespace nc::graphics
         // @todo
     }
 
-    bool Graphics2::GetNextImageIndex(uint32_t& imageIndex)
+    bool Graphics2::GetNextImageIndex(uint32_t* imageIndex)
     {
         m_swapchain->WaitForFrameFence();
 
         bool isSwapChainValid = true;
-        imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);
+        *imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);
         if (!isSwapChainValid)
         {
             RecreateSwapchain(m_dimensions);
@@ -177,7 +177,7 @@ namespace nc::graphics
         uint32_t imageIndex = UINT32_MAX;
 
         // Gets the next image in the swapchain
-        if (!GetNextImageIndex(imageIndex)) return;
+        if (!GetNextImageIndex(&imageIndex)) return;
 
         // Executes the command buffer to render to the image
         RenderToImage(imageIndex);

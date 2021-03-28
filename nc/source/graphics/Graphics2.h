@@ -32,9 +32,9 @@ namespace nc::graphics
             void ToggleFullscreen();
 
             const vulkan::Base& GetBase() const noexcept;
-            vulkan::Base* GetBasePtr();
+            vulkan::Base* GetBasePtr() const noexcept;
             const vulkan::Swapchain& GetSwapchain() const noexcept;
-            vulkan::Commands* GetCommandsPtr();
+            vulkan::Commands* GetCommandsPtr() const noexcept;
             const Vector2 GetDimensions() const noexcept;
 
             // Blocks the current thread until all operations in the command queues on the device are completed. 
@@ -50,7 +50,7 @@ namespace nc::graphics
 
         private:
             void RecreateSwapchain(Vector2 dimensions);
-            bool GetNextImageIndex(uint32_t& imageIndex);
+            bool GetNextImageIndex(uint32_t* imageIndex);
             void RenderToImage(uint32_t imageIndex);
             bool PresentImage(uint32_t imageIndex);
 
