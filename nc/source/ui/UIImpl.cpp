@@ -28,12 +28,14 @@ namespace nc::ui
     }
 
     /* UIImpl */
+    #ifdef NC_EDITOR_ENABLED
+    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics, const ecs::Systems& systems)
+        : m_editor{graphics, systems},
+          m_projectUI{nullptr}
+    #else
     UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
-        : 
-            #ifdef NC_EDITOR_ENABLED
-            m_editor{ graphics },
-            #endif
-            m_projectUI{ nullptr }
+        : m_projectUI{ nullptr }
+    #endif
     {
         g_instance = this;
         IMGUI_CHECKVERSION();
@@ -75,9 +77,9 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, ecs::EntityComponentSystem* ecs)
+    void UIImpl::Frame(float* dt, ecs::EntityMap& activeEntities)
     {
-        m_editor.Frame(dt, ecs);
+        m_editor.Frame(dt, activeEntities);
         if(m_projectUI)
         {
             m_projectUI->Draw();

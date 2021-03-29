@@ -4,6 +4,7 @@
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "physics/ColliderSystem.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls
@@ -16,13 +17,13 @@ namespace nc::ui::editor::controls
     const auto Padding = 4.0f;
 
     inline void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight);
-    inline void UtilitiesPanel(float* dtMult, ecs::EntityComponentSystem* ecs, unsigned drawCallCount, float windowWidth, float windowHeight);
+    inline void UtilitiesPanel(float* dtMult, ecs::Systems* systems, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void GraphicsResourcePanel();
     inline void Entity(EntityHandle handle);
     inline void Component(ComponentBase* comp);
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
-    inline void ComponentSystems(ecs::EntityComponentSystem* ecs);
+    inline void ComponentSystems(ecs::Systems* systems);
 
     /**
      * Scene Graph Controls
@@ -111,7 +112,7 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void UtilitiesPanel(float* dtMult, ecs::EntityComponentSystem* ecs, unsigned drawCallCount, float windowWidth, float windowHeight)
+    void UtilitiesPanel(float* dtMult, ecs::Systems* systems, unsigned drawCallCount, float windowWidth, float windowHeight)
     {
         static auto initColumnWidth = false;
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
@@ -129,11 +130,10 @@ namespace nc::ui::editor::controls
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
                 WrapTabItem("Profiler", Profiler);
-                WrapTabItem("Systems", ComponentSystems, ecs);
+                WrapTabItem("Systems", ComponentSystems, systems);
                 WrapTabItem("Gfx Resources", GraphicsResourcePanel);
                 ImGui::EndTabBar();
             }
-
 
             ImGui::NextColumn();
             if(ImGui::BeginTabBar("UtilitiesRightTabBar"))
@@ -208,24 +208,34 @@ namespace nc::ui::editor::controls
     }
 
     template<class T>
-    void ComponentSystemHeader(const char* name, ecs::EntityComponentSystem* ecs)
+    void ComponentSystemHeader(const char* name, ecs::ComponentSystem<T>* system)
     {
         if(ImGui::CollapsingHeader(name))
         {
-            auto* system = ecs->GetSystem<T>();
-            for(auto& component : system->GetComponents())
+            ImGui::PushID(name);
+            ImGui::Indent();
+            auto& components = system->GetComponents();
+            ImGui::Text("Component Size:  %u", static_cast<unsigned>(sizeof(T)));
+            ImGui::Text("Copmonent Count: %u", static_cast<unsigned>(components.size()));
+            if(ImGui::CollapsingHeader("Components"))
             {
-                ImGui::Text("Handle: %5d  |  Address: %p", static_cast<unsigned>(component->GetParentHandle()), static_cast<void*>(component.get()));
+                ImGui::Indent();
+                for(auto& component : components)
+                    ImGui::Text("Handle: %5u  |  Address: %p", static_cast<unsigned>(component->GetParentHandle()), static_cast<void*>(component.get()));
+                ImGui::Unindent();
             }
+            ImGui::Unindent();
+            ImGui::PopID();
         }
     }
 
-    void ComponentSystems(ecs::EntityComponentSystem* ecs)
+    void ComponentSystems(ecs::Systems* systems)
     {
-        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", ecs);
-        ComponentSystemHeader<PointLight>("Point Light", ecs);
-        ComponentSystemHeader<Renderer>("Renderer", ecs);
-        ComponentSystemHeader<Transform>("Transform", ecs);
+        ComponentSystemHeader<Collider>("Collider", systems->collider);
+        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", systems->networkDispatcher);
+        ComponentSystemHeader<PointLight>("Point Light", systems->pointLight);
+        ComponentSystemHeader<Renderer>("Renderer", systems->renderer);
+        ComponentSystemHeader<Transform>("Transform", systems->transform);
     }
 
     void GraphicsResourcePanel()

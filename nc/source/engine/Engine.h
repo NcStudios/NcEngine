@@ -35,7 +35,6 @@ namespace nc::core
             // @todo: Implement missing managers below
         #else            
             graphics::Graphics m_graphics;
-            ui::UIImpl m_ui;
             PointLightManager m_pointLightManager;
             graphics::FrameManager m_frameManager;
         #endif
@@ -43,6 +42,10 @@ namespace nc::core
             ecs::EntityComponentSystem m_ecs;
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
+
+        #ifndef USE_VULKAN
+            ui::UIImpl m_ui;
+        #endif
 
             void ClearState();
             void DoSceneSwap();

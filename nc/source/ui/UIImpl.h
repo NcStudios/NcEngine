@@ -13,7 +13,11 @@ namespace nc::ui
     class UIImpl
     {
         public:
-            UIImpl(HWND hwnd, nc::graphics::Graphics* graphics);
+            #ifdef NC_EDITOR_ENABLED
+            UIImpl(HWND hwnd, graphics::Graphics* graphics, const ecs::Systems& systems);
+            #else
+            UIImpl(HWND hwnd, graphics::Graphics* graphics);
+            #endif
             ~UIImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -24,7 +28,7 @@ namespace nc::ui
             void FrameBegin();
 
             #ifdef NC_EDITOR_ENABLED
-            void Frame(float* dt, ecs::EntityComponentSystem* ecs);
+            void Frame(float* dt, ecs::EntityMap& activeEntities);
             #else
             void Frame();
             #endif

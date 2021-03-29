@@ -57,6 +57,8 @@ namespace nc::physics
                             float worldspaceExtent,
                             job::JobSystem* jobSystem);
 
+            ecs::ComponentSystem<Collider>* GetColliderSystem();
+
             void DoCollisionStep();
             void ClearState();
 

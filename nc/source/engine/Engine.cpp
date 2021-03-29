@@ -33,6 +33,20 @@ namespace
             .worldspaceExtent = config.physics.worldspaceExtent
         };
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    nc::ecs::Systems CreateSystemInstances(nc::ecs::EntityComponentSystem* ecs, nc::physics::PhysicsSystem* physics)
+    {
+        return nc::ecs::Systems
+        {
+            .networkDispatcher = ecs->GetSystem<nc::NetworkDispatcher>(),
+            .pointLight = ecs->GetSystem<nc::PointLight>(),
+            .renderer = ecs->GetSystem<nc::Renderer>(),
+            .transform = ecs->GetSystem<nc::Transform>(),
+            .collider = physics->GetColliderSystem()
+        };
+    }
+    #endif
 }
 
 namespace nc::core
@@ -99,13 +113,17 @@ namespace nc::core
           m_jobSystem{2},
           m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
-          m_ui{ m_window.GetHWND(), &m_graphics },
           m_pointLightManager{},
           m_frameManager{},
           m_physics{CreatePhysicsSystemInfo(&m_graphics, &m_jobSystem)},
           m_ecs{},
           m_sceneSystem{},
-          m_time{}
+          m_time{},
+          #ifdef NC_EDITOR_ENABLED
+          m_ui{m_window.GetHWND(), &m_graphics, CreateSystemInstances(&m_ecs, &m_physics)}
+          #else
+          m_ui{m_window.GetHWND(), &m_graphics}
+          #endif
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -218,7 +236,7 @@ namespace nc::core
         m_frameManager.Execute(&m_graphics);
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, &m_ecs);
+        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
         #else
         m_ui.Frame();
         #endif

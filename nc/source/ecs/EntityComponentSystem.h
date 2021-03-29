@@ -17,9 +17,20 @@ namespace nc
     class Renderer;
     class Vector3;
     class Quaternion;
+    namespace physics { class ColliderSystem; }
+}
 
-namespace ecs
+namespace nc::ecs
 {
+    struct Systems
+    {
+        ecs::ComponentSystem<NetworkDispatcher>* networkDispatcher;
+        ecs::ComponentSystem<PointLight>* pointLight;
+        ecs::ComponentSystem<Renderer>* renderer;
+        ecs::ComponentSystem<Transform>* transform;
+        ecs::ComponentSystem<Collider>* collider;
+    };
+
     class EntityComponentSystem
     {
         public:
@@ -50,4 +61,4 @@ namespace ecs
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
             std::unique_ptr<ComponentSystem<NetworkDispatcher>> m_networkDispatcherSystem;
     };
-}} // end namespace nc::ecs
+} // namespace nc::ecs

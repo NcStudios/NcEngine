@@ -15,9 +15,10 @@ namespace nc::ecs
     class ComponentSystem
     {
         using Allocator = alloc::PoolAllocator<T>;
-        using ContainerType = std::vector<std::unique_ptr<T, alloc::basic_deleter<Allocator>>>;
 
         public:
+            using ContainerType = std::vector<std::unique_ptr<T, alloc::basic_deleter<Allocator>>>;
+
             ComponentSystem(uint32_t count);
             virtual ~ComponentSystem() noexcept;
 
