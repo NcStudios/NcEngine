@@ -11,27 +11,15 @@ namespace nc
 
 namespace nc::physics
 {
-    struct PhysicsSystemInfo
-    {
-        #ifdef USE_VULKAN
-        graphics::Graphics2* graphics;
-        #else
-        graphics::Graphics* graphics;
-        #endif
-        job::JobSystem* jobSystem;
-        uint32_t maxDynamicColliders;
-        uint32_t maxStaticColliders;
-        uint32_t octreeDensityThreshold;
-        float octreeMinimumExtent;
-        float worldspaceExtent;
-    };
-
     class PhysicsSystem
     {
         public:
-            PhysicsSystem(const PhysicsSystemInfo& info);
+            #ifdef USE_VULKAN
+            PhysicsSystem(graphics::Graphics2* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
+            #else
+            PhysicsSystem(graphics::Graphics* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
+            #endif
 
-            ecs::ComponentSystem<Collider>* GetColliderSystem();
             void DoPhysicsStep();
             void ClearState();
 

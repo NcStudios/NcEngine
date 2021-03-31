@@ -38,8 +38,8 @@ namespace nc::core
             PointLightManager m_pointLightManager;
             graphics::FrameManager m_frameManager;
         #endif
-            physics::PhysicsSystem m_physics;
             ecs::EntityComponentSystem m_ecs;
+            physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
 
