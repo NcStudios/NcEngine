@@ -259,8 +259,10 @@ namespace nc::graphics::vulkan
 
                     // Bind vertex buffers (combined into one big one from frame manager) for the models
                     auto vertexBuffer = m_frameManager->GetVertexBuffer(TechniqueType::Simple);
+                    vertexBuffer->Bind();
                     auto indexBuffer = m_frameManager->GetIndexBuffer(TechniqueType::Simple);
-                    vk::Buffer vertexBuffers[] = { vertexBuffer.GetBuffer() };
+                    indexBuffer->Bind();
+                    vk::Buffer vertexBuffers[] = { vertexBuffer->GetBuffer() };
                     vk::DeviceSize offsets[] = { 0 };
                     
                     auto dimensions = graphics::d3dresource::GraphicsResourceManager::GetGraphics2()->GetDimensions();
@@ -280,9 +282,8 @@ namespace nc::graphics::vulkan
                     commandBuffers[i].setViewport(0, 1, &viewport);
                     commandBuffers[i].setScissor(0, 1, &scissor);
                     commandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-                    commandBuffers[i].bindIndexBuffer(indexBuffer.GetBuffer(), 0, vk::IndexType::eUint32);
-
-                    commandBuffers[i].drawIndexed(static_cast<uint32_t>(indexBuffer.GetIndices().size()), 1, 0, 0, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                    commandBuffers[i].bindIndexBuffer(indexBuffer->GetBuffer(), 0, vk::IndexType::eUint32);
+                    commandBuffers[i].drawIndexed(static_cast<uint32_t>(indexBuffer->GetIndices().size()), 1, 0, 0, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                 }
                 commandBuffers[i].endRenderPass();
             }

@@ -2,7 +2,6 @@
 
 #include "math/Vector2.h"
 #include "math/Vector3.h"
-#include "VulkanResource.h"
 
 #include <vector>
 #include <array>
@@ -10,27 +9,29 @@
 
 namespace nc::graphics::vulkan
 {
-    class Base; class Commands;
+    class Base;
 
-    class IndexBuffer : public VulkanResource
+    class IndexBuffer
     {
         public:
 
             IndexBuffer(std::vector<uint32_t> indices);
-            void Bind() noexcept override;
-            uint32_t GetId() const;
+            IndexBuffer(IndexBuffer&&) = default;
+            IndexBuffer& operator = (IndexBuffer&&) = default;
+            IndexBuffer& operator = (const IndexBuffer&) = delete;
+            IndexBuffer(const IndexBuffer&) = delete;
+            ~IndexBuffer();
+            
             const vk::Buffer& GetBuffer() const;
-            uint32_t GetSize() const;
+            void Bind();
             const std::vector<uint32_t>& GetIndices() const;
 
         private:
 
             vulkan::Base* m_base;
-            uint32_t m_id;
+            uint32_t m_memoryIndex;
             uint32_t m_size;
             vk::Buffer m_indexBuffer;
-            uint32_t m_stagingBufferId;
-            vk::Buffer m_stagingBuffer;
             std::vector<uint32_t> m_indices;
     };
 }

@@ -34,15 +34,16 @@ namespace nc::graphics::vulkan
             const vk::Extent2D& GetExtent() const noexcept;
             const vk::Format& GetFormat() const noexcept;
             const std::vector<vk::ImageView>& GetImageViews() const noexcept;
-            void Recreate(Vector2 dimensions);
 
             // Frame buffers
             void CreateFrameBuffers();
             const vk::Framebuffer& GetFrameBuffer(uint32_t index) const;
             void CreateDefaultPass();
+            void DestroyFrameBuffers();
 
             // Image synchronization
             void CreateSynchronizationObjects();
+            void DestroySynchronizationObjects();
             uint32_t GetNextRenderReadyImageIndex(bool& isSwapChainValid);
             uint32_t GetFrameIndex() const noexcept;
             void WaitForFrameFence();

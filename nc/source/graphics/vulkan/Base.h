@@ -60,6 +60,7 @@ namespace nc::graphics::vulkan
             uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage);
             void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers);
             void DestroyBuffer(uint32_t id);
+            void DestroyImage(uint32_t id);
             void MapMemory(uint32_t bufferId, std::vector<Vertex> vertices, size_t size);
             void MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size);
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;

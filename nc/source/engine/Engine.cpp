@@ -8,6 +8,7 @@
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
 #include "Ecs.h"
+#include "graphics/DummyModel.h" // Temporary, just to get DummyModel for testing for now
 
 namespace
 {
@@ -127,7 +128,8 @@ namespace nc::core
         m_isRunning = true;
         
     #ifdef USE_VULKAN
-        m_frameManager2.RegisterModel();
+        auto dummyModel = nc::graphics::DummyModel{}; // Temporary, to be removed
+        m_frameManager2.RegisterModel(&dummyModel); // Temporary, to be removed
         m_frameManager2.RecordPasses();
     #endif
     
@@ -196,7 +198,9 @@ namespace nc::core
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
+        m_graphics2.FrameBegin();
         m_graphics2.Draw();
+        m_graphics2.FrameEnd();
 #else
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         m_ui.FrameBegin();

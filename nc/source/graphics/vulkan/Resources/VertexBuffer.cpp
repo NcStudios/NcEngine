@@ -47,54 +47,42 @@ namespace nc::graphics::vulkan
 
     VertexBuffer::VertexBuffer(std::vector<Vertex> vertices)
     : m_base { d3dresource::GraphicsResourceManager::GetGraphics2()->GetBasePtr() },
-      m_id { 0 },
-      m_size { 0 },
+      m_memoryIndex { 0 },
+      m_size { static_cast<uint32_t>(sizeof(vertices[0]) * vertices.size()) },
       m_vertexBuffer { nullptr },
-      m_stagingBufferId { 0 },
-      m_stagingBuffer { nullptr },
-      m_vertices { std::move(vertices) }
+      m_vertices {std::move(vertices)}
     {
-        m_size = sizeof(m_vertices[0]) * m_vertices.size();
+    }
 
+    void VertexBuffer::Bind()
+    {
         // Create staging buffer (lives on CPU).
-        m_stagingBufferId = m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eTransferSrc, true, &m_stagingBuffer);
+        vk::Buffer stagingBuffer;
+        auto stagingBufferMemoryIndex =  m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eTransferSrc, true, &stagingBuffer);
 
         // Map the vertices onto the staging buffer.
-        m_base->MapMemory(m_stagingBufferId, m_vertices, m_size);
+        m_base->MapMemory(stagingBufferMemoryIndex, m_vertices, m_size);
 
         // Create vertex buffer (lives on GPU).
-        m_id = m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, false, &m_vertexBuffer);
+        m_memoryIndex = m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, false, &m_vertexBuffer);
 
-        // Copy the staging buffer into the vertex buffer.
-        Bind();
-    }
-
-    void VertexBuffer::Bind() noexcept
-    {
         // Copy staging into vertex.
-        vulkan::Commands::SubmitCopyCommandImmediate(*m_base, m_stagingBuffer, m_vertexBuffer, m_size);
+        vulkan::Commands::SubmitCopyCommandImmediate(*m_base, stagingBuffer, m_vertexBuffer, m_size);
 
         // Destroy the staging buffer.
-        m_base->DestroyBuffer(m_stagingBufferId);
+        m_base->DestroyBuffer(stagingBufferMemoryIndex);
     }
 
-    uint32_t VertexBuffer::GetSize() const
+    VertexBuffer::~VertexBuffer()
     {
-        return m_vertices.size();
+        if (m_vertexBuffer)
+        {
+            m_base->DestroyBuffer(m_memoryIndex);
+        }
     }
 
     const vk::Buffer& VertexBuffer::GetBuffer() const
     {
         return m_vertexBuffer;
-    }
-
-    uint32_t VertexBuffer::GetId() const
-    {
-        return m_id;
-    }
-
-    const std::vector<Vertex>& VertexBuffer::GetVertices() const
-    {
-        return m_vertices;
     }
 }

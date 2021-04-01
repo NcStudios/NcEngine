@@ -311,7 +311,7 @@ namespace nc::graphics::vulkan
         vk::ImageCreateInfo imageInfo{};
         imageInfo.setImageType(vk::ImageType::e2D);
         imageInfo.setFormat(format);
-        imageInfo.setExtent( { dimensions.x, dimensions.y, 1 });
+        imageInfo.setExtent( { static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y), 1 });
         imageInfo.setMipLevels(1);
         imageInfo.setArrayLayers(1);
         imageInfo.setSamples(vk::SampleCountFlagBits::e1);
@@ -333,7 +333,6 @@ namespace nc::graphics::vulkan
         return m_imageIndex++;
     }
 
-
     void Base::DestroyBuffer(uint32_t id)
     {
         auto buffer = m_buffers.find(id);
@@ -344,6 +343,18 @@ namespace nc::graphics::vulkan
 
         m_allocator.destroyBuffer(buffer->second.first, buffer->second.second);
         m_buffers.erase(id);
+    }
+
+    void Base::DestroyImage(uint32_t id)
+    {
+        auto image = m_images.find(id);
+        if (image == m_images.end())
+        {
+            throw std::runtime_error("The given ID was not present in the dictionary.");
+        }
+
+        m_allocator.destroyImage(image->second.first, image->second.second);
+        m_images.erase(id);
     }
 
     void Base::CreateAllocator()

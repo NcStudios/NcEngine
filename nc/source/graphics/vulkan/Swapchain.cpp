@@ -29,7 +29,11 @@ namespace nc::graphics::vulkan
     Swapchain::~Swapchain()
     {
         Cleanup();
+        DestroySynchronizationObjects();
+    }
 
+    void Swapchain::DestroySynchronizationObjects()
+    {
         auto device = m_base->GetDevice();
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
@@ -43,10 +47,7 @@ namespace nc::graphics::vulkan
     void Swapchain::Cleanup() noexcept
     {
         auto device = m_base->GetDevice();
-        for (auto& frameBuffer : m_framebuffers)
-        {
-            device.destroyFramebuffer(frameBuffer);
-        }
+        DestroyFrameBuffers();
 
         device.destroyRenderPass(m_defaultPass);
 
@@ -60,9 +61,9 @@ namespace nc::graphics::vulkan
 
     void Swapchain::CreateFrameBuffers()
     {
-        auto swapChainImageViewsCount = m_swapChainImageViews.size();
-        m_framebuffers.resize(swapChainImageViewsCount);
         vk::ImageView attachments[2];
+        
+        attachments[1] = m_depthStencil.GetImageView();
 
         auto swapChainDimensions = GetExtentDimensions();
 
@@ -74,20 +75,13 @@ namespace nc::graphics::vulkan
         framebufferInfo.setHeight(swapChainDimensions.y);
         framebufferInfo.setLayers(1);
 
-        attachments[1] = m_depthStencil.GetImageView();
-
+        auto swapChainImageViewsCount = m_swapChainImageViews.size();
+        m_framebuffers.resize(swapChainImageViewsCount);
         for (size_t i = 0; i < swapChainImageViewsCount; i++)
         {
             attachments[0] = m_swapChainImageViews.at(i);
             m_framebuffers[i] = m_base->GetDevice().createFramebuffer(framebufferInfo);
         }
-    }
-
-    void Swapchain::Recreate(Vector2 dimensions)
-    {
-        Create(dimensions);
-        CreateDefaultPass();
-        CreateFrameBuffers();
     }
 
     void Swapchain::CreateDefaultPass()
@@ -384,6 +378,15 @@ namespace nc::graphics::vulkan
             {
                 throw std::runtime_error("Failed to create image view");
             }
+        }
+    }
+
+    void Swapchain::DestroyFrameBuffers()
+    {
+        auto device = m_base->GetDevice();
+        for (auto& frameBuffer : m_framebuffers)
+        {
+            device.destroyFramebuffer(frameBuffer);
         }
     }
 

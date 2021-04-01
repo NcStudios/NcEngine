@@ -8,50 +8,43 @@ namespace nc::graphics::vulkan
 {
     IndexBuffer::IndexBuffer(std::vector<uint32_t> indices)
     : m_base { d3dresource::GraphicsResourceManager::GetGraphics2()->GetBasePtr() },
-      m_id { 0 },
-      m_size { 0 },
+      m_memoryIndex { 0 },
+      m_size { static_cast<uint32_t>(sizeof(uint32_t) * indices.size()) },
       m_indexBuffer { nullptr },
-      m_stagingBufferId { 0 },
-      m_stagingBuffer { nullptr },
       m_indices { std::move(indices) }
     {
-        m_size = sizeof(uint32_t) * m_indices.size();
+    }
 
+    IndexBuffer::~IndexBuffer()
+    {
+        if (m_indexBuffer)
+        {
+            m_base->DestroyBuffer(m_memoryIndex);
+        }
+    }
+
+    void IndexBuffer::Bind()
+    {
         // Create staging buffer (lives on CPU).
-        m_stagingBufferId = m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eTransferSrc, true, &m_stagingBuffer);
+        vk::Buffer stagingBuffer;
+        auto stagingBufferMemoryIndex = m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eTransferSrc, true, &stagingBuffer);
 
         // Map the vertices onto the staging buffer.
-        m_base->MapMemory(m_stagingBufferId, m_indices, m_size);
+        m_base->MapMemory(stagingBufferMemoryIndex, m_indices, m_size);
 
         // Create vertex buffer (lives on GPU).
-        m_id = m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, false, &m_indexBuffer);
+        m_memoryIndex = m_base->CreateBuffer(m_size, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, false, &m_indexBuffer);
 
-        // Copy the staging buffer into the vertex buffer.
-        Bind();
-    }
-
-    void IndexBuffer::Bind() noexcept
-    {
         // Copy staging into vertex.
-        Commands::SubmitCopyCommandImmediate(*m_base, m_stagingBuffer, m_indexBuffer, m_size);
+        Commands::SubmitCopyCommandImmediate(*m_base, stagingBuffer, m_indexBuffer, m_size);
 
         // Destroy the staging buffer.
-        m_base->DestroyBuffer(m_stagingBufferId);
-    }
-
-    uint32_t IndexBuffer::GetSize() const
-    {
-        return m_indices.size();
+        m_base->DestroyBuffer(stagingBufferMemoryIndex);
     }
 
     const vk::Buffer& IndexBuffer::GetBuffer() const
     {
         return m_indexBuffer;
-    }
-
-    uint32_t IndexBuffer::GetId() const
-    {
-        return m_id;
     }
 
     const std::vector<uint32_t>& IndexBuffer::GetIndices() const

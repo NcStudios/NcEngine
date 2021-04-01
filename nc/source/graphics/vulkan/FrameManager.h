@@ -4,6 +4,7 @@
 #include "techniques/TechniqueType.h"
 #include "resources/VertexBuffer.h"
 #include "resources/IndexBuffer.h"
+#include "graphics/DummyModel.h"
 
 #include "vulkan/vulkan.hpp"
 #include <vector>
@@ -17,24 +18,16 @@ namespace nc::graphics::vulkan
         public:
             FrameManager();
             void RecordPasses();
-            void RegisterModel();
+            void RegisterModel(DummyModel* model);
 
-            VertexBuffer GetVertexBuffer(TechniqueType techniqueType);
-            IndexBuffer GetIndexBuffer(TechniqueType techniqueType);
+            VertexBuffer* GetVertexBuffer(TechniqueType techniqueType);
+            IndexBuffer* GetIndexBuffer(TechniqueType techniqueType);
 
         private:
             std::unique_ptr<SimpleTechnique> m_simpleTechnique;
-            std::unordered_map<TechniqueType, std::vector<std::vector<Vertex>>> m_vertexBuffers;
-            std::unordered_map<TechniqueType, std::vector<std::vector<uint32_t>>> m_indexBuffers;
+            std::unordered_map<TechniqueType, std::vector<DummyModel*>> m_renderPairs;
+
+            std::unordered_map<TechniqueType, vulkan::VertexBuffer> m_vertexBuffers;
+            std::unordered_map<TechniqueType, vulkan::IndexBuffer> m_indexBuffers;
     };
-
-    class Model
-    {
-        public:
-            Model();
-            std::vector<Vertex> vertices;
-            std::vector<uint32_t> indices;
-    };
-
-
 }

@@ -2,7 +2,6 @@
 
 #include "math/Vector2.h"
 #include "math/Vector3.h"
-#include "VulkanResource.h"
 
 #include <vector>
 #include <array>
@@ -24,25 +23,26 @@ namespace nc::graphics::vulkan
         Vector3 Bitangent;
     };
 
-    class VertexBuffer : public VulkanResource
+    class VertexBuffer
     {
         public:
 
             VertexBuffer(std::vector<Vertex> vertices);
-            void Bind() noexcept override;
-            uint32_t GetId() const;
+            ~VertexBuffer();
+            VertexBuffer(VertexBuffer&&) = default;
+            VertexBuffer& operator = (VertexBuffer&&) = default;
+            VertexBuffer& operator = (const VertexBuffer&) = delete;
+            VertexBuffer(const VertexBuffer&) = delete;
+
+            void Bind();
             const vk::Buffer& GetBuffer() const;
-            uint32_t GetSize() const;
-            const std::vector<Vertex>& GetVertices() const;
 
         private:
         
             vulkan::Base* m_base;
-            uint32_t m_id;
+            uint32_t m_memoryIndex;
             uint32_t m_size;
             vk::Buffer m_vertexBuffer;
-            uint32_t m_stagingBufferId;
-            vk::Buffer m_stagingBuffer;
             std::vector<Vertex> m_vertices;
     };
 }

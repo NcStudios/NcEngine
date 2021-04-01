@@ -6,10 +6,11 @@ namespace nc::graphics::vulkan
     DepthStencil::DepthStencil(vulkan::Base* base, Vector2 dimensions)
     : m_base{base},
       m_image{},
-      m_view{}
+      m_view{},
+      m_memoryIndex{0}
     {
         auto depthFormat = base->GetDepthFormat();
-        m_base->CreateImage(depthFormat, dimensions, vk::ImageUsageFlagBits::eDepthStencilAttachment, &m_image);
+        m_memoryIndex = m_base->CreateImage(depthFormat, dimensions, vk::ImageUsageFlagBits::eDepthStencilAttachment, &m_image);
         
         vk::ImageSubresourceRange imageSubresourceRange{};
         imageSubresourceRange.setBaseMipLevel(0);
@@ -45,5 +46,6 @@ namespace nc::graphics::vulkan
     DepthStencil::~DepthStencil()
     {
         m_base->GetDevice().destroyImageView(m_view);
+        m_base->DestroyImage(m_memoryIndex);
     }
 }

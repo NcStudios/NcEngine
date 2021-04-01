@@ -23,5 +23,6 @@ namespace nc::graphics::vulkan
             // Internal members
             vk::Image m_image;
             vk::ImageView m_view;
+            uint32_t m_memoryIndex;
     };
 }

@@ -23,6 +23,7 @@ if(USE_VULKAN)
     target_sources(${ENGINE_LIB}
         PRIVATE
             ${ROOT_DIR}/source/graphics/Graphics2.cpp
+            ${ROOT_DIR}/source/graphics/DummyModel.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Base.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Swapchain.cpp
