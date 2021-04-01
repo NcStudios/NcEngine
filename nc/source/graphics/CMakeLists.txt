@@ -23,13 +23,15 @@ if(USE_VULKAN)
     target_sources(${ENGINE_LIB}
         PRIVATE
             ${ROOT_DIR}/source/graphics/Graphics2.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/Instance.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/Device.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/GraphicsPipeline.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/RenderPass.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/FrameBuffers.cpp
+            ${ROOT_DIR}/source/graphics/DummyModel.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/Base.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/VertexBuffer.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/IndexBuffer.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/Swapchain.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/FrameManager.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/resources/VertexBuffer.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/resources/IndexBuffer.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/resources/DepthStencil.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/techniques/TechniqueBase.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/techniques/SimpleTechnique.cpp
     )
 endif()

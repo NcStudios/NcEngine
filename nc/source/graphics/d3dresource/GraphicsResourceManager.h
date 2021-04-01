@@ -1,13 +1,16 @@
 #pragma once
 
 #include "GraphicsResource.h"
-
 #include <concepts>
 #include <iostream>
 #include <memory>
 #include <unordered_map>
 
-namespace nc::graphics { class Graphics; }
+namespace nc::graphics 
+{ 
+    namespace vulkan { class FrameManager; }
+    class Graphics; class Graphics2; 
+}
 
 #ifdef NC_EDITOR_ENABLED
 namespace nc::ui::editor::controls { void GraphicsResourcePanel(); }
@@ -24,6 +27,10 @@ namespace nc::graphics::d3dresource
         #endif
 
         public:
+            static void SetGraphics2(Graphics2* gfx);
+            static Graphics2* GetGraphics2();
+            static void SetFrameManager(vulkan::FrameManager* frameManager);
+            static vulkan::FrameManager* GetFrameManagerPtr();
             static void SetGraphics(Graphics* gfx);
             static Graphics* GetGraphics();
             static uint32_t AssignId();
@@ -49,6 +56,8 @@ namespace nc::graphics::d3dresource
         private:
             std::unordered_map<std::string, std::unique_ptr<GraphicsResource>> m_resources;
             Graphics* m_graphics = nullptr;
+            Graphics2* m_graphics2 = nullptr;
+            vulkan::FrameManager* m_frameManager = nullptr;
             uint32_t m_resourceId;
 
             static GraphicsResourceManager& Get();
@@ -63,6 +72,26 @@ namespace nc::graphics::d3dresource
             template<std::derived_from<GraphicsResource> T, class...Params>
             GraphicsResource* AcquireOnDemand_(const std::string& uid, Params&&...p);
     };
+
+    inline void GraphicsResourceManager::SetGraphics2(Graphics2* gfx)
+    {
+        Get().m_graphics2 = gfx;
+    }
+
+    inline Graphics2* GraphicsResourceManager::GetGraphics2()
+    {
+        return Get().m_graphics2;
+    }
+
+    inline void GraphicsResourceManager::SetFrameManager(vulkan::FrameManager* frameManager)
+    {
+        Get().m_frameManager = frameManager;
+    }
+
+    inline vulkan::FrameManager* GraphicsResourceManager::GetFrameManagerPtr()
+    {
+        return Get().m_frameManager;
+    }
 
     inline void GraphicsResourceManager::SetGraphics(Graphics* gfx)
     {
