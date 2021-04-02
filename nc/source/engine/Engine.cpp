@@ -8,7 +8,9 @@
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
 #include "Ecs.h"
+#ifdef USE_VULKAN
 #include "graphics/DummyModel.h" // Temporary, just to get DummyModel for testing for now
+#endif
 
 namespace
 {
