@@ -8,13 +8,18 @@ namespace nc::physics
                                    uint32_t octreeDensityThreshold,
                                    float octreeMinimumExtent,
                                    float worldspaceExtent)
-        : ComponentSystem<Collider>{maxDynamic + maxStatic},
+        : m_componentSystem{maxDynamic + maxStatic},
           m_dynamicSoA{maxDynamic},
           m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent}
     {
     }
 
     ColliderSystem::~ColliderSystem() = default;
+
+    ecs::ComponentSystem<Collider>* ColliderSystem::GetComponentSystem()
+    {
+        return &m_componentSystem;
+    }
 
     ColliderTree* ColliderSystem::GetStaticTree()
     {
@@ -41,12 +46,12 @@ namespace nc::physics
             );
         }
 
-        return ComponentSystem<Collider>::Add(handle, info);
+        return m_componentSystem.Add(handle, info);
     }
 
     bool ColliderSystem::Remove(EntityHandle handle)
     {
-        if(!ComponentSystem<Collider>::Remove(handle))
+        if(!m_componentSystem.Remove(handle))
             return false;
 
         if(GetEntity(handle)->IsStatic)
@@ -59,8 +64,23 @@ namespace nc::physics
 
     void ColliderSystem::Clear()
     {
-        ComponentSystem::Clear();
+        m_componentSystem.Clear();
         m_dynamicSoA.Clear();
         m_staticTree.Clear();
+    }
+
+    bool ColliderSystem::Contains(EntityHandle handle) const
+    {
+        return m_componentSystem.Contains(handle);
+    }
+
+    Collider* ColliderSystem::GetPointerTo(EntityHandle handle)
+    {
+        return m_componentSystem.GetPointerTo(handle);
+    }
+
+    auto ColliderSystem::GetComponents() -> ecs::ComponentSystem<Collider>::ContainerType&
+    {
+        return m_componentSystem.GetComponents();
     }
 } // namespace nc::physics

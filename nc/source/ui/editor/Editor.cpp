@@ -22,8 +22,9 @@ namespace
 
 namespace nc::ui::editor
 {
-    Editor::Editor(graphics::Graphics * graphics)
+    Editor::Editor(graphics::Graphics * graphics, const ecs::Systems& systems)
         : m_graphics{graphics},
+          m_componentSystems{systems},
           m_openState_Editor{false},
           m_openState_UtilitiesPanel{true}
     {
@@ -48,7 +49,7 @@ namespace nc::ui::editor
             DrawMenu();
             controls::SceneGraphPanel(activeEntities, height);
             if(m_openState_UtilitiesPanel)
-                controls::UtilitiesPanel(dt, m_graphics->GetDrawCallCount(), width, height);
+                controls::UtilitiesPanel(dt, &m_componentSystems, m_graphics->GetDrawCallCount(), width, height);
         }
         ImGui::End();
     }
