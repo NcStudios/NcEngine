@@ -9,26 +9,29 @@
 
 namespace nc::graphics::vulkan
 {
-    class Device; class Commands;
+    class Base;
 
     class IndexBuffer
     {
         public:
-            IndexBuffer(Device& device, Commands& commands, std::vector<uint32_t> indices);
-            void Bind();
-            uint32_t GetId() const;
+
+            IndexBuffer(std::vector<uint32_t> indices);
+            IndexBuffer(IndexBuffer&&) = default;
+            IndexBuffer& operator = (IndexBuffer&&) = default;
+            IndexBuffer& operator = (const IndexBuffer&) = delete;
+            IndexBuffer(const IndexBuffer&) = delete;
+            ~IndexBuffer();
+            
             const vk::Buffer& GetBuffer() const;
-            uint32_t GetSize() const;
+            void Bind();
             const std::vector<uint32_t>& GetIndices() const;
 
         private:
-            vulkan::Device& m_device;
-            vulkan::Commands& m_commands;
-            uint32_t m_id;
+
+            vulkan::Base* m_base;
+            uint32_t m_memoryIndex;
             uint32_t m_size;
             vk::Buffer m_indexBuffer;
-            uint32_t m_stagingBufferId;
-            vk::Buffer m_stagingBuffer;
             std::vector<uint32_t> m_indices;
     };
 }
