@@ -28,31 +28,34 @@ namespace nc::debug
             internal::file << "Log started: " << GetTime();
         }
 
-        void CloseLog()
+        void CloseLog() noexcept
         {
-            internal::file << "Log finished: " << GetTime();
-            internal::file.close();
+            if(internal::file.is_open())
+            {
+                internal::file << "Log finished: " << GetTime();
+                internal::file.close();
+            }
         }
     } // end namespace internal
 
-    void LogToDiagnostics(const std::string& item)
+    void LogToDiagnostics(const std::string& item) noexcept
     {
-        IF_THROW(!internal::file.is_open(), "LogToDiagnostics - No log file open");
-        internal::file << item << '\n';
+        
+        if(internal::file.is_open())
+        {
+            internal::file << item << '\n';
+            return;
+        }
+        
+        std::cerr << "LogToDiangostics - No log file open\n"
+                  << "Attempt to log:\n"
+                  << "    " << item << '\n';
     }
 
     void LogException(const std::exception& e) noexcept
     {
-        // Throwing here will prevent proper shutdown. Fallback to
-        // cerr in case of log failure.
-        std::cerr << "Exception: " << e.what() << '\n';
-        if(!internal::file.is_open())
-        {
-            std::cerr << "Error: LogException - No log file open";
-            return;
-        }
+        LogToDiagnostics(e.what());
 
-        internal::file << "**Exception**\n" << e.what() << '\n';
         try
         {
             std::rethrow_if_nested(e);

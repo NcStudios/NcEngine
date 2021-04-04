@@ -25,20 +25,21 @@ EntityComponentSystem::EntityComponentSystem()
       m_transformSystem{nullptr},
       m_networkDispatcherSystem{nullptr}
 {
-    const auto& config = config::Get();
+    const auto& memorySettings = config::GetMemorySettings();
+    const auto& physicsSettings = config::GetPhysicsSettings();
 
     m_colliderSystem = std::make_unique<ColliderSystem>
     (
-        config.memory.maxDynamicColliders,
-        config.memory.maxStaticColliders,
-        config.physics.octreeDensityThreshold,
-        config.physics.octreeMinimumExtent,
-        config.physics.worldspaceExtent
+        memorySettings.maxDynamicColliders,
+        memorySettings.maxStaticColliders,
+        physicsSettings.octreeDensityThreshold,
+        physicsSettings.octreeMinimumExtent,
+        physicsSettings.worldspaceExtent
     );
 
-    m_rendererSystem = std::make_unique<ComponentSystem<Renderer>>(config.memory.maxRenderers);
-    m_transformSystem = std::make_unique<ComponentSystem<Transform>>(config.memory.maxTransforms);
-    m_networkDispatcherSystem = std::make_unique<ComponentSystem<NetworkDispatcher>>(config.memory.maxNetworkDispatchers);
+    m_rendererSystem = std::make_unique<ComponentSystem<Renderer>>(memorySettings.maxRenderers);
+    m_transformSystem = std::make_unique<ComponentSystem<Transform>>(memorySettings.maxTransforms);
+    m_networkDispatcherSystem = std::make_unique<ComponentSystem<NetworkDispatcher>>(memorySettings.maxNetworkDispatchers);
 
     internal::RegisterEcs(this);
 }

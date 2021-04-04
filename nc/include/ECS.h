@@ -91,7 +91,7 @@ namespace nc
     }
 
     /** Internal use */
-    namespace ecs { class EntityComponentSystem; }// class ColliderSystem; }
+    namespace ecs { class EntityComponentSystem; }
     namespace internal
     {
         void RegisterEcs(ecs::EntityComponentSystem* impl);

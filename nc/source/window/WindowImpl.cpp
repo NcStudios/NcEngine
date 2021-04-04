@@ -44,13 +44,14 @@ namespace nc::window
         GraphicsOnResizeCallback = nullptr;
         UIWndMessageCallback = nullptr;
 
-        const auto& config = config::Get();
+        const auto& projectSettings = config::GetProjectSettings();
+        const auto& graphicsSettings = config::GetGraphicsSettings();
 
         m_wndClass = {};
         m_wndClass.style = WND_CLASS_STYLE_FLAGS;
         m_wndClass.lpfnWndProc = WindowImpl::WndProc;
         m_wndClass.hInstance = instance;
-        m_wndClass.lpszClassName = TEXT(config.project.projectName.c_str());
+        m_wndClass.lpszClassName = TEXT(projectSettings.projectName.c_str());
 
         if(!RegisterClass(&m_wndClass))
         {
@@ -60,13 +61,13 @@ namespace nc::window
         auto nativeWidth = GetSystemMetrics(SM_CXFULLSCREEN);
         auto nativeHeight = GetSystemMetrics(SM_CYFULLSCREEN);
 
-        if(config.graphics.useNativeResolution)
+        if(graphicsSettings.useNativeResolution)
         {
             m_dimensions = Vector2{ (float)nativeWidth, (float)nativeHeight };
         }
         else
         {
-            m_dimensions = Vector2{ (float)config.graphics.screenWidth, (float)config.graphics.screenHeight };
+            m_dimensions = Vector2{ (float)graphicsSettings.screenWidth, (float)graphicsSettings.screenHeight };
         }
 
         auto left = math::Clamp(((int)nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
@@ -98,7 +99,7 @@ namespace nc::window
         }
 
         m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
-                                config.project.projectName.c_str(),
+                                projectSettings.projectName.c_str(),
                                 WND_STYLE_FLAGS,
                                 clientRect.left, clientRect.top,
                                 clientRect.right - clientRect.left,
@@ -164,8 +165,8 @@ namespace nc::window
         }
 
         m_dimensions = Vector2{width, height};
-        const auto& config = config::Get();
-        GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, config.graphics.nearClip, config.graphics.farClip, windowArg);
+        const auto& graphicsSettings = config::GetGraphicsSettings();
+        GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, graphicsSettings.nearClip, graphicsSettings.farClip, windowArg);
         for(auto receiver : m_onResizeReceivers)
         {
             receiver->OnResize(m_dimensions);

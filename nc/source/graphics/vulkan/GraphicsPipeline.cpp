@@ -48,7 +48,7 @@ namespace nc::graphics::vulkan
         /***********
          * SHADERS *
          * *********/
-        auto defaultShaderPath = nc::config::Get().graphics.vulkanShadersPath;
+        auto defaultShaderPath = nc::config::GetGraphicsSettings().vulkanShadersPath;
 
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "vert.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "frag.spv");

@@ -14,8 +14,8 @@ namespace nc::core
     
     /** Exit the game loop after completing the current frame. If control cannot be returned to the
      *  loop(e.g. an exception), setting forceImmediate to true will force clearing state data. */
-    void Quit(bool forceImmediate = false);
+    void Quit(bool forceImmediate = false) noexcept;
     
     /** Destroy the engine instance. */
-    void Shutdown();
+    void Shutdown() noexcept;
 }

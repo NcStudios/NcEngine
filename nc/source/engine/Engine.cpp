@@ -21,7 +21,7 @@ namespace nc::core
     {
         IF_THROW(internal::impl != nullptr, "core::Initialize - Attempt to reinitialize engine");
         config::Load();
-        debug::internal::OpenLog(config::Get().project.logFilePath);
+        debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         internal::impl = std::make_unique<Engine>(hInstance);
     }
 
@@ -32,21 +32,33 @@ namespace nc::core
         internal::impl->MainLoop(std::move(initialScene));
     }
 
-    void Quit(bool forceImmediate)
+    void Quit(bool forceImmediate) noexcept
     {
         V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
-        IF_THROW(internal::impl == nullptr, "core::Quit - Engine is not initialized");
-        internal::impl->DisableRunningFlag();
-        if (forceImmediate)
+        if(internal::impl)
         {
-            internal::impl->Shutdown();
+            internal::impl->DisableRunningFlag();
+            if (forceImmediate)
+                internal::impl->Shutdown();
         }
     }
 
-    void Shutdown()
+    void Shutdown() noexcept
     {
+        if(!internal::impl)
+            return;
+
         internal::impl = nullptr;
-        config::Save();
+
+        try
+        {
+            config::Save();
+        }
+        catch(const std::runtime_error& e)
+        {
+            debug::LogException(e);
+        }
+
         debug::internal::CloseLog();
     }
 
@@ -59,7 +71,7 @@ namespace nc::core
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_ecs{},
-          m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem)},
+          m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{}
     {
@@ -100,13 +112,13 @@ namespace nc::core
         V_LOG("Starting engine loop");
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange();
-        auto fixedUpdateInterval = config::Get().physics.fixedUpdateInterval;
+        auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
 
         while(m_isRunning)
         {
             m_time.UpdateTime();
-            m_window.ProcessSystemMessages();
+            m_window.ProcessSystemMessages(); 
 
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
