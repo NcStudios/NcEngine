@@ -1,5 +1,8 @@
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
+#ifdef USE_VULKAN
+    #include "ecs/RendererSystem.h"
+#endif
 #include "physics/ColliderSystem.h"
 
 namespace nc
@@ -19,6 +22,14 @@ namespace nc
         {
             g_colliderSystemImpl = impl;
         }
+
+        #ifdef USE_VULKAN
+        ecs::RendererSystem* g_rendererSystemImpl = nullptr;
+        void RegisterRendererSystem(ecs::RendererSystem* impl)
+        {
+            g_rendererSystemImpl = impl;
+        }
+        #endif
     }
 
     EntityHandle CreateEntity(EntityInfo info)
@@ -153,4 +164,31 @@ namespace nc
         IF_THROW(!GetEntity(handle), "HasComponent<Collider> - Bad handle");
         return internal::g_colliderSystemImpl->Contains(handle);
     }
+
+    #ifdef USE_VULKAN
+    template<> Renderer2* AddComponent<Renderer2>(EntityHandle handle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
+    {
+        IF_THROW(!GetEntity(handle), "AddComponent<Renderer> - Bad handle");
+        IF_THROW(internal::g_rendererSystemImpl->Contains(handle), "AddComponent<Renderer> - entity already has a renderer");
+        return internal::g_rendererSystemImpl->Add(handle, std::move(meshUid), techniqueType);
+    }
+
+    template<> bool RemoveComponent<Renderer2>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "RemoveComponent<Renderer> - Bad handle");
+        return internal::g_rendererSystemImpl->Remove(handle);
+    }
+
+    template<> bool HasComponent<Renderer2>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "HasComponent<Renderer> - Bad handle");
+        return internal::g_rendererSystemImpl->Contains(handle);
+    }
+
+    template<> Renderer2* GetComponent<Renderer2>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "GetComponent<Renderer> - Bad handle");
+        return internal::g_rendererSystemImpl->GetPointerTo(handle);
+    }
+    #endif
 }

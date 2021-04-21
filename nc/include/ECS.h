@@ -8,7 +8,9 @@
 #include "component/Renderer.h"
 #include "component/Transform.h"
 #include "debug/Utils.h"
-
+#ifdef USE_VULKAN
+#include "component/Renderer2.h"
+#endif
 #include <concepts>
 #include <string>
 
@@ -40,6 +42,13 @@ namespace nc
     template<> bool HasComponent<PointLight>(EntityHandle handle);
     template<> bool RemoveComponent<PointLight>(EntityHandle handle);
 
+    #ifdef USE_VULKAN
+    template<> Renderer2* AddComponent<Renderer2>(EntityHandle handle, std::string meshUid, TechniqueType techniqueType);
+    template<> Renderer2* GetComponent<Renderer2>(EntityHandle handle);
+    template<> bool HasComponent<Renderer2>(EntityHandle handle);
+    template<> bool RemoveComponent<Renderer2>(EntityHandle handle);
+    #endif
+    
     template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
     template<> Renderer* GetComponent<Renderer>(EntityHandle handle);
     template<> bool HasComponent<Renderer>(EntityHandle handle);
@@ -91,11 +100,12 @@ namespace nc
     }
 
     /** Internal use */
-    namespace ecs { class EntityComponentSystem; }
+    namespace ecs { class EntityComponentSystem; class RendererSystem; }
     namespace physics{ class ColliderSystem; }
     namespace internal
     {
         void RegisterEcs(ecs::EntityComponentSystem* impl);
         void RegisterColliderSystem(physics::ColliderSystem* impl);
+        void RegisterRendererSystem(ecs::RendererSystem* impl);
     }
 } // end namespace nc

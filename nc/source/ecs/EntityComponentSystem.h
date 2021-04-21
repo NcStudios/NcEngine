@@ -4,9 +4,11 @@
 #include "entity/EntityHandle.h"
 #include "entity/EntityInfo.h"
 #include "ecs/EntityMap.h"
-#include "ecs/ComponentSystem.h"
+#include "ComponentSystem.h"
 #include "HandleManager.h"
-
+#ifdef USE_VULKAN
+#include "RendererSystem.h"
+#endif
 #include <memory>
 
 namespace nc
@@ -57,6 +59,9 @@ namespace nc::ecs
             EntityMap m_active;
             EntityMap m_toDestroy;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
+            #ifdef USE_VULKAN
+            std::unique_ptr<RendererSystem> m_rendererSystem2;
+            #endif
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
             std::unique_ptr<ComponentSystem<NetworkDispatcher>> m_networkDispatcherSystem;
