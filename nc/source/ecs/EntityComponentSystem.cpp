@@ -3,6 +3,9 @@
 #include "component/NetworkDispatcher.h"
 #include "component/PointLight.h"
 #include "component/PointLightManager.h"
+#ifdef USE_VULKAN
+#include "component/Renderer2.h"
+#endif
 #include "component/Renderer.h"
 #include "component/Transform.h"
 #include "config/Config.h"
@@ -19,6 +22,9 @@ EntityComponentSystem::EntityComponentSystem()
       m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
+      #ifdef USE_VULKAN
+      m_rendererSystem2{ std::make_unique<RendererSystem>(config::Get().memory.maxRenderers) },
+      #endif
       m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>(config::Get().memory.maxRenderers) },
       m_transformSystem{ std::make_unique<ComponentSystem<Transform>>(config::Get().memory.maxTransforms) },
       m_networkDispatcherSystem{ std::make_unique<ComponentSystem<NetworkDispatcher>>(config::Get().memory.maxNetworkDispatchers) }
@@ -29,6 +35,13 @@ template<> ComponentSystem<PointLight>* EntityComponentSystem::GetSystem<PointLi
 {
     return m_lightSystem.get();
 }
+
+#ifdef USE_VULKAN
+template<> ComponentSystem<Renderer2>* EntityComponentSystem::GetSystem<Renderer2>()
+{
+    return m_rendererSystem2->GetSystem();
+}
+#endif
 
 template<> ComponentSystem<Renderer>* EntityComponentSystem::GetSystem<Renderer>()
 {
@@ -114,6 +127,9 @@ void EntityComponentSystem::SendOnDestroy()
     {
         entity.SendOnDestroy();
         m_transformSystem->Remove(handle);
+        #ifdef USE_VULKAN
+        m_rendererSystem2->Remove(handle);
+        #endif
         m_rendererSystem->Remove(handle);
         m_lightSystem->Remove(handle);
         m_networkDispatcherSystem->Remove(handle);
@@ -140,6 +156,9 @@ void EntityComponentSystem::ClearState()
     m_toDestroy.clear();
     m_handleManager.Reset();
     m_transformSystem->Clear();
+    #ifdef USE_VULKAN
+    m_rendererSystem2->Clear();
+    #endif
     m_rendererSystem->Clear();
     m_lightSystem->Clear();
     m_networkDispatcherSystem->Clear();

@@ -4,43 +4,42 @@
 #include "ui/IUI.h"
 #include "editor/Editor.h"
 #include "entity/Entity.h"
-#include "ecs/EntityMap.h"
+#include "ecs/EntityComponentSystem.h"
 
-#include <unordered_map>
+namespace nc::graphics { class Graphics; }
 
-namespace nc
+namespace nc::ui
 {
-    namespace graphics { class Graphics; }
-
-    namespace ui
+    class UIImpl
     {
-        class UIImpl
-        {
-            public:
-                UIImpl(HWND hwnd, nc::graphics::Graphics* graphics);
-                ~UIImpl() noexcept;
+        public:
+            #ifdef NC_EDITOR_ENABLED
+            UIImpl(HWND hwnd, graphics::Graphics* graphics, const ecs::Systems& systems);
+            #else
+            UIImpl(HWND hwnd, graphics::Graphics* graphics);
+            #endif
+            ~UIImpl() noexcept;
 
-                LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+            LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-                void BindProjectUI(IUI* ui);
-                bool IsProjectUIHovered();
+            void BindProjectUI(IUI* ui);
+            bool IsProjectUIHovered();
 
-                void FrameBegin();
+            void FrameBegin();
 
-                #ifdef NC_EDITOR_ENABLED
-                void Frame(float* dt, ecs::EntityMap& activeEntities);
-                #else
-                void Frame();
-                #endif
-                
-                void FrameEnd();
+            #ifdef NC_EDITOR_ENABLED
+            void Frame(float* dt, ecs::EntityMap& activeEntities);
+            #else
+            void Frame();
+            #endif
+            
+            void FrameEnd();
 
-            private:
-                #ifdef NC_EDITOR_ENABLED
-                editor::Editor m_editor;
-                #endif
-                
-                IUI* m_projectUI;
-        };
-    } //end namespace ui
-} //end namespace nc
+        private:
+            #ifdef NC_EDITOR_ENABLED
+            editor::Editor m_editor;
+            #endif
+            
+            IUI* m_projectUI;
+    };
+} // namespace nc::ui

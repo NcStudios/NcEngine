@@ -31,6 +31,7 @@ namespace nc::physics
         public:
             PhysicsSystem(const PhysicsSystemInfo& info);
 
+            ecs::ComponentSystem<Collider>* GetColliderSystem();
             void DoPhysicsStep();
             void ClearState();
 

@@ -30,6 +30,11 @@ namespace nc::physics
         internal::RegisterColliderSystem(&m_colliderSystem);
     }
 
+    ecs::ComponentSystem<Collider>* CollisionSystem::GetColliderSystem()
+    {
+        return m_colliderSystem.GetComponentSystem();
+    }
+
     void CollisionSystem::DoCollisionStep()
     {
         FetchEstimates();

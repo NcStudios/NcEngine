@@ -2,7 +2,7 @@
 #pragma once
 
 #include "entity/Entity.h"
-#include "ecs/EntityMap.h"
+#include "ecs/EntityComponentSystem.h"
 
 namespace nc 
 {
@@ -15,11 +15,12 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            Editor(graphics::Graphics * graphics);
+            Editor(graphics::Graphics* graphics, const ecs::Systems& systems);
             void Frame(float* dt, ecs::EntityMap& activeEntities);
 
         private:
-            nc::graphics::Graphics * m_graphics;
+            nc::graphics::Graphics* m_graphics;
+            ecs::Systems m_componentSystems;
             bool m_openState_Editor;
             bool m_openState_UtilitiesPanel;
 

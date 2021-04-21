@@ -14,6 +14,11 @@ namespace nc::physics
     {
     }
 
+    ecs::ComponentSystem<Collider>* PhysicsSystem::GetColliderSystem()
+    {
+        return m_collisionSystem.GetColliderSystem();
+    }
+
     void PhysicsSystem::ClearState()
     {
         m_clickableSystem.Clear();
