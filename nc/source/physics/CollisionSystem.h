@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Ecs.h"
-#include "ColliderSystem.h"
+#include "ecs/ColliderSystem.h"
 #include "CollisionUtility.h"
 
 #include <cstdint>
@@ -34,7 +34,7 @@ namespace nc::physics
     struct BroadDetectVsStaticEvent
     {
         uint32_t first;
-        const StaticTreeEntry* second;
+        const ecs::StaticTreeEntry* second;
     };
 
     /** EntityHandles of two colliding objects. Produced by narrow detection,
@@ -50,14 +50,8 @@ namespace nc::physics
     class CollisionSystem
     {
         public:
-            CollisionSystem(uint32_t maxDynamicColliders,
-                            uint32_t maxStaticColliders,
-                            uint32_t octreeDensityThreshold,
-                            float octreeMinimumExtent,
-                            float worldspaceExtent,
-                            job::JobSystem* jobSystem);
+            CollisionSystem(ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
 
-            ecs::ComponentSystem<Collider>* GetColliderSystem();
 
             void DoCollisionStep();
             void ClearState();
@@ -67,13 +61,13 @@ namespace nc::physics
             #endif
 
         private:
-            ColliderSystem m_colliderSystem;
+            ecs::ColliderSystem* m_colliderSystem;
+            job::JobSystem* m_jobSystem;
             std::vector<DynamicEstimate> m_dynamicEstimates;
             std::vector<BroadDetectVsDynamicEvent> m_broadEventsVsDynamic;
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
-            job::JobSystem* m_jobSystem;
 
             void FetchEstimates();
             void BroadDetectVsDynamic();

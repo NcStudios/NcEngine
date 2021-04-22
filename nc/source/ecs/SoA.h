@@ -94,7 +94,7 @@ namespace nc::ecs
         }
 
         if(!index.Valid())
-            throw std::runtime_error("SoA::Remove - property doesn't exists");
+            throw std::runtime_error("SoA::Remove - property doesn't exist");
         
         m_gaps.insert(index);
     }

@@ -21,15 +21,15 @@ Graphics::Graphics(HWND hwnd, Vector2 dimensions)
       m_projectionMatrix{}
 {
     auto& [width, height] = dimensions;
-    const auto& config = config::Get();
-    m_isFullscreen = config.graphics.launchInFullscreen;
+    const auto& graphicsSettings = config::GetGraphicsSettings();
+    m_isFullscreen = graphicsSettings.launchInFullscreen;
     d3dresource::GraphicsResourceManager::SetGraphics(this);
     CreateDeviceAndSwapchain(hwnd);
     CreateRenderTargetViewFromBackBuffer();
     CreateDepthStencilView(width, height);
     BindDepthStencilView();
     ConfigureViewport(width, height);
-    SetProjectionMatrix(width, height, config.graphics.nearClip, config.graphics.farClip);
+    SetProjectionMatrix(width, height, graphicsSettings.nearClip, graphicsSettings.farClip);
 
     m_swapChain->SetFullscreenState(m_isFullscreen, nullptr);
 }

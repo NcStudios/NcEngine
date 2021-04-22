@@ -1,13 +1,13 @@
 #pragma once
 
-#include "CollisionUtility.h"
+#include "physics/CollisionUtility.h"
 #include "alloc/Utility.h"
 
 #include <memory>
 #include <vector>
 #include <variant>
 
-namespace nc::physics
+namespace nc::ecs
 {
     /** Here's a thought: can dynamic colliders be in a tree too if we add them using
      *  their estimates? It would have to be built every frame, but we're already doing
@@ -27,6 +27,14 @@ namespace nc::physics
     /** @todo This may be faster if the vectors in here came from an allocator. Also,
      *  they don't have to be vectors. Array is slower because it makes the nodes too large,
      *  but maybe ptr to array from allocator? */
+
+    /** The bounding volume and handle of a static collider in the octree. */
+    struct StaticTreeEntry
+    {
+        Collider::BoundingVolume volume;
+        physics::Layer layer;
+        EntityHandle handle;
+    };
 
     /** ColliderTree node representing a cubic chunk of the world. Leaf nodes store
      *  data for each static collider contained within its bounding volume, while
@@ -75,4 +83,4 @@ namespace nc::physics
             std::vector<std::unique_ptr<StaticTreeEntry, alloc::basic_deleter<Allocator>>> m_staticEntries;
             Octant m_root;
     };
-} // namespace nc::physics
+} // namespace nc::ecs

@@ -2,21 +2,14 @@
 
 namespace nc::physics
 {
-    /* Physics System */
-    PhysicsSystem::PhysicsSystem(const PhysicsSystemInfo& info)
-        : m_collisionSystem{info.maxDynamicColliders,
-                            info.maxStaticColliders,
-                            info.octreeDensityThreshold,
-                            info.octreeMinimumExtent,
-                            info.worldspaceExtent,
-                            info.jobSystem},
-          m_clickableSystem{info.graphics}
+    #ifdef USE_VULKAN
+    PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
+    #else
+    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
+    #endif
+        : m_collisionSystem{colliderSystem, jobSystem},
+          m_clickableSystem{graphics}
     {
-    }
-
-    ecs::ComponentSystem<Collider>* PhysicsSystem::GetColliderSystem()
-    {
-        return m_collisionSystem.GetColliderSystem();
     }
 
     void PhysicsSystem::ClearState()
