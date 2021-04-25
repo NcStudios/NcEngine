@@ -42,28 +42,26 @@ namespace nc::ui::editor
         const ImVec2 buttonSize{defaultItemWidth, 0};
 
         ImGui::BeginGroup();
-        ImGui::PushItemWidth(defaultItemWidth);
-        ImGui::Indent();
-            ImGui::Text(frontPadding); ImGui::SameLine();
-            textBlockWidget("X##widgetHeader", buttonSize, color::Clear, color::Red);   ImGui::SameLine();
-            textBlockWidget("Y##widgetHeader", buttonSize, color::Clear, color::Green); ImGui::SameLine();
+            ImGui::Indent();
+            ImGui::Text(frontPadding); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+            textBlockWidget("X##widgetHeader", buttonSize, color::Clear, color::Red); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+            textBlockWidget("Y##widgetHeader", buttonSize, color::Clear, color::Green); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
             textBlockWidget("Z##widgetHeader", buttonSize, color::Clear, color::Blue);
-        ImGui::PopItemWidth();
+            ImGui::Unindent();
         ImGui::EndGroup();
     }
 
     inline bool xyzWidget(const char* groupLabel, const char* id, float* x, float* y, float* z, float min = -50.0f, float max = 50.0f)
     {
         ImGui::PushID(id);
-        ImGui::PushItemWidth(defaultItemWidth);
         ImGui::BeginGroup();
             ImGui::Indent();
             ImGui::Text(groupLabel); ImGui::SameLine();
             auto xResult = floatWidget("", "x", x, 0.1f, min, max, "%.1f"); ImGui::SameLine();
             auto yResult = floatWidget("", "y", y, 0.1f, min, max, "%.1f"); ImGui::SameLine();
             auto zResult = floatWidget("", "z", z, 0.1f, min, max, "%.1f");
+            ImGui::Unindent();
         ImGui::EndGroup();
-        ImGui::PopItemWidth();
         ImGui::PopID();
 
         return xResult || yResult || zResult;

@@ -53,7 +53,7 @@ namespace nc::sample
         {
             auto mouseDelta = input::MousePos() - m_panPivot;
             auto [horizontalPan, verticalPan] = mouseDelta * m_panDampen * dt;
-            m_transform->Translate(Vector3{-1.0f * horizontalPan, verticalPan, 0.0f}, Space::Local);
+            m_transform->TranslateLocalSpace(Vector3{-1.0f * horizontalPan, verticalPan, 0.0f});
         }
     }
 
@@ -78,6 +78,6 @@ namespace nc::sample
         m_zoom = math::Lerp(m_zoom, (float)input::MouseWheel() * m_zoomDampen, 0.1f);
         if(math::FloatEqual(m_zoom, 0.0f))
             m_zoom = 0.0f;
-        m_transform->Translate(Vector3{0.0f, 0.0f, m_zoom * dt}, Space::Local);
+        m_transform->TranslateLocalSpace(Vector3{0.0f, 0.0f, m_zoom * dt});
     }
 }

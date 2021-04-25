@@ -40,6 +40,7 @@ namespace nc::sample
         AddComponent<Collider>(blueCube, ColliderInfo{});
         AddComponent<WasdController>(blueCube, 2.0f);
         AddComponent<CollisionLogger>(blueCube);
+        auto* blueCubeTransform = GetComponent<Transform>(blueCube);
 
         auto smallCube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{2.0f, 0.0f, 2.5f}, .tag = "Small Cube", .isStatic = true});
         AddComponent<Collider>(smallCube, ColliderInfo{});
@@ -53,7 +54,7 @@ namespace nc::sample
         AddComponent<Collider>(longBox, ColliderInfo{});
         AddComponent<CollisionLogger>(longBox);
 
-        auto smallSphere = prefab::Create(prefab::Resource::Sphere, {.position = Vector3{-2.0f, 0.0f, 2.5f}, .tag = "Small Sphere", .isStatic = true});
+        auto smallSphere = prefab::Create(prefab::Resource::Sphere, {.position = Vector3{-2.0f, 0.0f, 2.5f}, .parent = blueCubeTransform, .tag = "Small Sphere", .isStatic = true});
         AddComponent<Collider>(smallSphere, ColliderInfo{.type = ColliderType::Sphere});
         AddComponent<CollisionLogger>(smallSphere);
 

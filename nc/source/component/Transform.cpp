@@ -28,24 +28,48 @@ namespace
 
 namespace nc
 {
-    Transform::Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale)
+    Transform::Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Transform* parent)
         : ComponentBase(handle),
-          m_matrix{ComposeMatrix(scale, rot, pos)}
+          m_localMatrix{ComposeMatrix(scale, rot, pos)},
+          m_worldMatrix{m_localMatrix},
+          m_parent{parent},
+          m_children{}
     {
         IF_THROW(HasAnyZeroElement(scale), "Transform::Transform - Invalid scale(elements cannot be 0)");
+        if(m_parent)
+        {
+            m_parent->AddChild(this);
+            m_worldMatrix = m_parent->GetTransformationMatrix() * m_worldMatrix;
+        }
+    }
+
+    Vector3 Transform::GetLocalPosition() const
+    {
+        Vector3 out;
+        DirectX::XMStoreVector3(&out, m_localMatrix.r[3]);
+        return out;
     }
 
     Vector3 Transform::GetPosition() const
     {
         Vector3 out;
-        DirectX::XMStoreVector3(&out, m_matrix.r[3]);
+        DirectX::XMStoreVector3(&out, m_worldMatrix.r[3]);
+        return out;
+    }
+
+    Quaternion Transform::GetLocalRotation() const
+    {
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
+        auto out = Quaternion::Identity();
+        DirectX::XMStoreQuaternion(&out, rot_v);
         return out;
     }
 
     Quaternion Transform::GetRotation() const
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
         auto out = Quaternion::Identity();
         DirectX::XMStoreQuaternion(&out, rot_v);
         return out;
@@ -55,38 +79,36 @@ namespace nc
     {
         using namespace DirectX;
         // Fill out_v with x scale, then shift in y and z values
-        auto out_v = XMVectorSplatX(XMVector3Length(m_matrix.r[0]));
-        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(out_v, XMVector3Length(m_matrix.r[1]));
-        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0W>(out_v, XMVector3Length(m_matrix.r[2]));
+        auto out_v = XMVectorSplatX(XMVector3Length(m_worldMatrix.r[0]));
+        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(out_v, XMVector3Length(m_worldMatrix.r[1]));
+        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0W>(out_v, XMVector3Length(m_worldMatrix.r[2]));
         Vector3 out;
-        XMStoreVector3(&out, out_v);
+        DirectX::XMStoreVector3(&out, out_v);
+        return out;
+    }
+
+    Vector3 Transform::GetLocalScale() const
+    {
+        using namespace DirectX;
+        // Fill out_v with x scale, then shift in y and z values
+        auto out_v = XMVectorSplatX(XMVector3Length(m_localMatrix.r[0]));
+        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(out_v, XMVector3Length(m_localMatrix.r[1]));
+        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0W>(out_v, XMVector3Length(m_localMatrix.r[2]));
+        Vector3 out;
+        DirectX::XMStoreVector3(&out, out_v);
         return out;
     }
 
     DirectX::FXMMATRIX Transform::GetTransformationMatrix() const
     {
-        return m_matrix;
-    }
-
-    DirectX::XMMATRIX Transform::GetTransformationMatrixEx(Vector3 additionalScale) const
-    {
-        IF_THROW(additionalScale == Vector3::Zero(), "Transform::GetTransformationMatrixEx - Scale cannot be zero");
-        return ToScaleMatrix(additionalScale) * m_matrix;
-    }
-
-    DirectX::XMMATRIX Transform::GetViewMatrix() const
-    {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
-        return DirectX::XMMatrixLookAtLH(pos_v, pos_v + look_v, DirectX::g_XMIdentityR1);
+        return m_worldMatrix;
     }
 
     Vector3 Transform::ToLocalSpace(const Vector3& vec) const
     {
         auto vec_v = DirectX::XMVectorSet(vec.x, vec.y, vec.z, 0.0f);
-        auto out_v = DirectX::XMVector3Transform(vec_v, m_matrix);
-        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        auto out_v = DirectX::XMVector3Transform(vec_v, m_worldMatrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
         out_v = DirectX::XMVector3Normalize(out_v);
         Vector3 out;
         DirectX::XMStoreVector3(&out, out_v);
@@ -97,8 +119,8 @@ namespace nc
      *  set used in ToLocalSpace, so some code is repeated in Up/Forward/Right. */
     Vector3 Transform::Up() const
     {
-        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR1, m_matrix);
-        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR1, m_worldMatrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
         out_v = DirectX::XMVector3Normalize(out_v);
         Vector3 out;
         DirectX::XMStoreVector3(&out, out_v);
@@ -107,8 +129,8 @@ namespace nc
 
     Vector3 Transform::Forward() const
     {
-        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m_matrix);
-        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m_worldMatrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
         out_v = DirectX::XMVector3Normalize(out_v);
         Vector3 out;
         DirectX::XMStoreVector3(&out, out_v);
@@ -117,8 +139,8 @@ namespace nc
 
     Vector3 Transform::Right() const
     {
-        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR0, m_matrix);
-        out_v = DirectX::XMVectorSubtract(out_v, m_matrix.r[3]);
+        auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR0, m_worldMatrix);
+        out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
         out_v = DirectX::XMVector3Normalize(out_v);
         Vector3 out;
         DirectX::XMStoreVector3(&out, out_v);
@@ -128,82 +150,167 @@ namespace nc
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
     {
         IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
-        m_matrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
+        m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
     void Transform::Set(const Vector3& pos, const Vector3& angles, const Vector3& scale)
     {
         IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
-        m_matrix = ToScaleMatrix(scale) * ToRotMatrix(angles) * ToTransMatrix(pos);
+        m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(angles) * ToTransMatrix(pos);
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
     void Transform::SetPosition(const Vector3& pos)
     {
-        m_matrix.r[3] = ToXMVectorHomogeneous(pos);
+        m_localMatrix.r[3] = ToXMVectorHomogeneous(pos);
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
     void Transform::SetRotation(const Quaternion& quat)
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        m_matrix = DirectX::XMMatrixScalingFromVector(scl_v) *
-                   ToRotMatrix(quat) *
-                   DirectX::XMMatrixTranslationFromVector(pos_v);
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
+        m_localMatrix = DirectX::XMMatrixScalingFromVector(scl_v) *
+                        ToRotMatrix(quat) *
+                        DirectX::XMMatrixTranslationFromVector(pos_v);
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
     void Transform::SetRotation(const Vector3& angles)
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        m_matrix = DirectX::XMMatrixScalingFromVector(scl_v) *
-                   ToRotMatrix(angles) *
-                   DirectX::XMMatrixTranslationFromVector(pos_v);
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
+        m_localMatrix = DirectX::XMMatrixScalingFromVector(scl_v) *
+                        ToRotMatrix(angles) *
+                        DirectX::XMMatrixTranslationFromVector(pos_v);
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
     void Transform::SetScale(const Vector3& scale)
     {
         IF_THROW(HasAnyZeroElement(scale), "Transform::SetScale - Invalid scale(elements cannot be 0)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-        m_matrix = ToScaleMatrix(scale) *
-                   DirectX::XMMatrixRotationQuaternion(rot_v) *
-                   DirectX::XMMatrixTranslationFromVector(pos_v);
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
+        m_localMatrix = ToScaleMatrix(scale) *
+                        DirectX::XMMatrixRotationQuaternion(rot_v) *
+                        DirectX::XMMatrixTranslationFromVector(pos_v);
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
-    void Transform::Translate(Vector3 translation, Space space)
+    void Transform::Translate(Vector3 translation)
     {
         auto trans_v = ToXMVector(translation);
-        if(space == Space::Local)
-        {
-            DirectX::XMVECTOR pos_v, rot_v, scl_v;
-            DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
-            trans_v = DirectX::XMVector3Transform(trans_v, DirectX::XMMatrixRotationQuaternion(rot_v));
-            trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
-        }
-        m_matrix.r[3] += trans_v;
+        m_localMatrix.r[3] += trans_v;
+        UpdateWorldMatrix();
+        UpdateChildren();
+    }
+
+    void Transform::TranslateLocalSpace(Vector3 translation)
+    {
+        auto trans_v = ToXMVector(translation);
+        DirectX::XMVECTOR pos_v, rot_v, scl_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
+        trans_v = DirectX::XMVector3Transform(trans_v, DirectX::XMMatrixRotationQuaternion(rot_v));
+        trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
+        m_localMatrix.r[3] += trans_v;
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
     void Transform::Rotate(const Quaternion& quat)
     {
-        auto pos_v = m_matrix.r[3];
-        m_matrix.r[3] = DirectX::g_XMIdentityR3;
-        m_matrix *= ToRotMatrix(quat);
-        m_matrix.r[3] = pos_v;
+        auto pos_v = m_localMatrix.r[3];
+        m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
+        m_localMatrix *= ToRotMatrix(quat);
+        m_localMatrix.r[3] = pos_v;
+        UpdateWorldMatrix();
+        UpdateChildren();
     }
 
     void Transform::Rotate(Vector3 axis, float radians)
     {
-        auto pos_v = m_matrix.r[3];
-        m_matrix.r[3] = DirectX::g_XMIdentityR3;
-        m_matrix *= ToRotMatrix(axis, radians);
-        m_matrix.r[3] = pos_v;
+        auto pos_v = m_localMatrix.r[3];
+        m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
+        m_localMatrix *= ToRotMatrix(axis, radians);
+        m_localMatrix.r[3] = pos_v;
+        UpdateWorldMatrix();
+        UpdateChildren();
+    }
+
+    std::span<Transform*> Transform::GetChildren()
+    {
+        return std::span<Transform*>(m_children.data(), m_children.size());
+    }
+
+    Transform* Transform::GetRoot()
+    {
+        if(m_parent)
+            return m_parent->GetRoot();
+        
+        return this;
+    }
+
+    Transform* Transform::GetParent() const
+    {
+        return m_parent;
+    }
+
+    void Transform::SetParent(Transform* parent)
+    {
+        if(m_parent)
+            m_parent->RemoveChild(this);
+        
+        m_parent = parent;
+
+        if(m_parent)
+            m_parent->AddChild(this);
+    }
+
+    void Transform::AddChild(Transform* child)
+    {
+        m_children.push_back(child);
+    }
+
+    void Transform::RemoveChild(Transform* child)
+    {
+        auto pos = std::remove_if(m_children.begin(), m_children.end(), [child](auto& c)
+        {
+            return child == c;
+        });
+
+        IF_THROW(pos == m_children.cend(), "Transform::RemoveChild - Child does not exists");
+        m_children.erase(pos, m_children.end());
+    }
+
+    void Transform::UpdateChildren()
+    {
+        for(auto* child : m_children)
+            child->UpdateWorldMatrix();
+    }
+
+    void Transform::UpdateWorldMatrix()
+    {
+        if(m_parent)
+            m_worldMatrix = m_localMatrix * m_parent->GetTransformationMatrix();
+        else
+            m_worldMatrix = m_localMatrix;
+        
+        for(auto* child : m_children)
+            child->UpdateWorldMatrix();
     }
 
     #ifdef NC_EDITOR_ENABLED
     void Transform::EditorGuiElement()
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_matrix);
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
         Vector3 scl, pos;
         auto rot = Quaternion::Identity();
         DirectX::XMStoreVector3(&scl, scl_v);
