@@ -10,6 +10,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/WICTextureLoader.cpp
         ${ROOT_DIR}/source/graphics/Material.cpp
         ${ROOT_DIR}/source/graphics/techniques/Technique.cpp
+        ${ROOT_DIR}/source/graphics/techniques/ParticleTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/PhongShadingTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/WireframeTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/TechniqueManager.cpp

@@ -128,6 +128,7 @@ namespace nc::core
           #else
           m_ui{m_window.GetHWND(), &m_graphics}
           #endif
+          //m_particleSystem{nullptr}
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -153,6 +154,10 @@ namespace nc::core
         m_frameManager2.RecordPasses();
     #endif
     
+
+        //m_particleSystem = std::make_unique<particle::ParticleSystemInternal>(EntityHandle{0}, particle::ParticleInfo{});
+
+
         while(m_isRunning)
         {
             m_time.UpdateTime();
@@ -165,6 +170,12 @@ namespace nc::core
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             FrameLogic(dt);
+
+            //if(input::GetKeyDown(input::KeyCode::A))
+            //    m_particleSystem->Emit(10);
+
+            m_ecs.GetParticleSystemManager()->UpdateParticles(dt);
+
             FrameRender();
             FrameCleanup();
         }
@@ -244,6 +255,9 @@ namespace nc::core
         #ifdef NC_EDITOR_ENABLED
         m_physics.UpdateWidgets(&m_frameManager);
         #endif
+
+        m_ecs.GetParticleSystemManager()->RenderParticles();
+        //m_particleSystem->RenderUpdate();
 
         m_frameManager.Execute(&m_graphics);
 

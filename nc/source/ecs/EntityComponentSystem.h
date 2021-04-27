@@ -9,6 +9,9 @@
 
 #include <memory>
 
+
+#include "ParticleSystemManager.h"
+
 namespace nc
 {
     class Collider;
@@ -39,6 +42,8 @@ namespace nc::ecs
             template<std::derived_from<ComponentBase> T>
             ComponentSystem<T>* GetSystem();
 
+            ParticleSystemManager* GetParticleSystemManager();
+
             EntityMap& GetActiveEntities() noexcept;
 
             EntityHandle CreateEntity(EntityInfo info);
@@ -57,6 +62,7 @@ namespace nc::ecs
             EntityMap m_active;
             EntityMap m_toDestroy;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
+            std::unique_ptr<ParticleSystemManager> m_particleSystemManager;
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
             std::unique_ptr<ComponentSystem<NetworkDispatcher>> m_networkDispatcherSystem;

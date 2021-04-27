@@ -3,6 +3,7 @@
 #include "entity/Entity.h"
 #include "entity/EntityInfo.h"
 #include "component/Collider.h"
+#include "component/ParticleSystem.h"
 #include "component/PointLight.h"
 #include "component/NetworkDispatcher.h"
 #include "component/Renderer.h"
@@ -34,6 +35,11 @@ namespace nc
     [[nodiscard]] bool HasComponent(EntityHandle handle);
 
     /** Specializations for engine components */
+    template<> ParticleSystem* AddComponent<ParticleSystem>(EntityHandle handle, ParticleInfo info);
+    template<> ParticleSystem* GetComponent<ParticleSystem>(EntityHandle handle);
+    template<> bool HasComponent<ParticleSystem>(EntityHandle handle);
+    template<> bool RemoveComponent<ParticleSystem>(EntityHandle handle);
+
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties);
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle);
     template<> PointLight* GetComponent<PointLight>(EntityHandle handle);

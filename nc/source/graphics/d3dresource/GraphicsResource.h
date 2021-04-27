@@ -107,7 +107,7 @@ namespace nc::graphics::d3dresource
     class Blender : public GraphicsResource
     {
         public:
-            Blender();
+            Blender(bool useAlphaBlending);
             void Bind() noexcept override;
             static std::string GetUID(const std::string& tag) noexcept;
 

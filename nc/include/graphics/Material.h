@@ -35,4 +35,7 @@ namespace nc::graphics
 
     template<>
     Material Material::CreateMaterial<TechniqueType::Wireframe>();
+
+    template<>
+    Material Material::CreateMaterial<TechniqueType::Particle>();
 }
