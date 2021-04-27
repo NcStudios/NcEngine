@@ -1,7 +1,5 @@
 #include "Commands.h"
 #include "Base.h"
-#include "resources/VertexBuffer.h"
-#include "resources/IndexBuffer.h"
 #include "Swapchain.h"
 
 namespace nc::graphics::vulkan

@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    namespace vulkan { class Base; class FrameBuffers; class Commands; class VertexBuffer; class IndexBuffer; class Swapchain; class DepthStencil; class FrameManager; }
+    namespace vulkan { class Base; class Commands; class Swapchain; class DepthStencil; }
 
     class Graphics2
     {
@@ -25,7 +25,6 @@ namespace nc::graphics
 
             void SetViewMatrix(DirectX::FXMMATRIX cam) noexcept;
             void SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept;
-            void SetFrameManager(vulkan::FrameManager* frameManager);
 
             void ResizeTarget(float width, float height);
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
@@ -40,7 +39,6 @@ namespace nc::graphics
             // Blocks the current thread until all operations in the command queues on the device are completed. 
             void WaitIdle();
 
-            void FrameBegin();
             void Draw();
             void FrameEnd();
 
@@ -58,7 +56,6 @@ namespace nc::graphics
             std::unique_ptr<vulkan::DepthStencil> m_depthStencil;
             std::unique_ptr<vulkan::Swapchain> m_swapchain;
             std::unique_ptr<vulkan::Commands> m_commands;
-            vulkan::FrameManager* m_frameManager;
             Vector2 m_dimensions;
             bool m_isMinimized;
             bool m_isFullscreen;

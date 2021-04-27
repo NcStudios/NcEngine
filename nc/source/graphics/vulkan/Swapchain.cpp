@@ -1,5 +1,6 @@
 #include "Swapchain.h"
 #include "resources/DepthStencil.h"
+#include "Initializers.h"
 #include "Base.h"
 
 namespace nc::graphics::vulkan
@@ -86,68 +87,22 @@ namespace nc::graphics::vulkan
 
     void Swapchain::CreateDefaultPass()
     {
-         std::array<vk::AttachmentDescription, 2> attachments = {};
+        std::array<vk::AttachmentDescription, 2> attachments = 
+        {
+            CreateAttachmentDescription(AttachmentType::Color, GetFormat()),
+            CreateAttachmentDescription(AttachmentType::Depth, m_base->GetDepthFormat()),
+        };
 
-        // Color attachment
-        attachments[0].setFormat(GetFormat());
-        attachments[0].setSamples(vk::SampleCountFlagBits::e1);
-        attachments[0].setLoadOp(vk::AttachmentLoadOp::eClear);
-        attachments[0].setStoreOp(vk::AttachmentStoreOp::eStore);
-        attachments[0].setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-        attachments[0].setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-        attachments[0].setInitialLayout(vk::ImageLayout::eUndefined);
-        attachments[0].setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
+        vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
+        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
+        vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
 
-        // Depth attachment
-        attachments[1].setFormat(m_base->GetDepthFormat());
-        attachments[1].setSamples(vk::SampleCountFlagBits::e1);
-        attachments[1].setLoadOp(vk::AttachmentLoadOp::eClear);
-        attachments[1].setStoreOp(vk::AttachmentStoreOp::eStore);
-        attachments[1].setStencilLoadOp(vk::AttachmentLoadOp::eClear);
-        attachments[1].setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-        attachments[1].setInitialLayout(vk::ImageLayout::eUndefined);
-        attachments[1].setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+        std::array<vk::SubpassDependency, 2> dependencies =
+        { 
+            CreateSubpassDependency(AttachmentType::Color),
+            CreateSubpassDependency(AttachmentType::Depth)
+        };
 
-        vk::AttachmentReference colorReference = {};
-        colorReference.setAttachment(0);
-        colorReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
-
-        vk::AttachmentReference depthReference = {};
-        depthReference.setAttachment(1);
-        depthReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-        // Subpass
-        vk::SubpassDescription subpass{};
-        subpass.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
-        subpass.setColorAttachmentCount(1);
-        subpass.setPColorAttachments(&colorReference);
-        subpass.setPDepthStencilAttachment(&depthReference);
-        subpass.setInputAttachmentCount(0);
-        subpass.setPreserveAttachmentCount(0);
-        subpass.setPPreserveAttachments(nullptr);
-        subpass.setPResolveAttachments(nullptr);
-
-        // Subpass dependencies
-        std::array<vk::SubpassDependency, 2> dependencies{};
-        dependencies[0].setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        dependencies[0].setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        dependencies[0].setSrcStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // The type of operation to wait on. (What our dependency is)
-        dependencies[0].setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // Specifies the type of operation that should do the waiting
-        dependencies[0].setSrcAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
-        dependencies[0].setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
-        dependencies[0].setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
-
-        dependencies[1].setSrcSubpass(0); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        dependencies[1].setDstSubpass(VK_SUBPASS_EXTERNAL); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        dependencies[1].setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // The type of operation to wait on. (What our dependency is)
-        dependencies[1].setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // Specifies the type of operation that should do the waiting
-        dependencies[1].setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
-        dependencies[1].setDstAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
-        dependencies[1].setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
-
-        /***************
-         * RENDER PASS *
-         * *************/
         vk::RenderPassCreateInfo renderPassInfo{};
         renderPassInfo.setAttachmentCount(static_cast<uint32_t>(attachments.size()));
         renderPassInfo.setPAttachments(attachments.data());
@@ -390,9 +345,22 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Swapchain::WaitForFrameFence()
+    void Swapchain::WaitForFrameFence(bool waitOnPreviousFrame) const
     {
-        if (m_base->GetDevice().waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
+        uint32_t index = 0;
+        if (waitOnPreviousFrame)
+        {
+            if (m_currentFrameIndex == 0)
+            {
+                index = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+            }
+            else
+            {
+                index = m_currentFrameIndex - 1;
+            }
+        }
+
+        if (m_base->GetDevice().waitForFences(m_framesInFlightFences[index], true, UINT64_MAX) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Could not wait for fences to complete.");
         }

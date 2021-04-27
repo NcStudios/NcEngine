@@ -41,6 +41,10 @@ namespace nc::ecs
             template<std::derived_from<ComponentBase> T>
             ComponentSystem<T>* GetSystem();
 
+            #ifdef USE_VULKAN
+            RendererSystem* GetRendererSystem();
+            #endif
+
             EntityMap& GetActiveEntities() noexcept;
 
             EntityHandle CreateEntity(EntityInfo info);

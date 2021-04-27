@@ -1,24 +1,37 @@
 #include "RendererSystem.h"
 #include "ECS.h"
+#include "graphics/vulkan/Commands.h"
 
 namespace nc::ecs
 {
     RendererSystem::RendererSystem(uint32_t renderersCount)
-    : m_componentSystem{renderersCount}
+    : m_componentSystem{renderersCount},
+      m_meshManager{},
+      m_techniqueManager{}
     {
         internal::RegisterRendererSystem(this);
+        m_techniqueManager.RegisterGlobalData(m_meshManager.GetVertexBuffer(), m_meshManager.GetIndexBuffer());
     }
 
-    ComponentSystem<Renderer2>* RendererSystem::GetSystem()
+    ComponentSystem<vulkan::Renderer>* RendererSystem::GetSystem()
     {
         return &m_componentSystem;
     }
 
-    Renderer2* RendererSystem::Add(EntityHandle parentHandle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
+    void RendererSystem::RecordTechniques(graphics::vulkan::Commands* commands)
+    {
+        m_techniqueManager.RecordTechniques(commands);
+    }
+
+    vulkan::Renderer* RendererSystem::Add(EntityHandle parentHandle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
     {
         (void)meshUid;
         (void)techniqueType;
-        return m_componentSystem.Add(parentHandle);
+
+        auto mesh = m_meshManager.GetMesh(std::move(meshUid));
+        auto renderer = m_componentSystem.Add(parentHandle);
+        m_techniqueManager.RegisterRenderer(techniqueType, std::move(mesh), renderer->GetTransform());
+        return renderer;
     }
 
     bool RendererSystem::Remove(EntityHandle parentHandle)
@@ -31,18 +44,20 @@ namespace nc::ecs
         return m_componentSystem.Contains(parentHandle);
     }
 
-    Renderer2* RendererSystem::GetPointerTo(EntityHandle parentHandle)
+    vulkan::Renderer* RendererSystem::GetPointerTo(EntityHandle parentHandle)
     {
         return m_componentSystem.GetPointerTo(parentHandle);
     }
 
-    auto RendererSystem::GetComponents() -> ComponentSystem<Renderer2>::ContainerType&
+    auto RendererSystem::GetComponents() -> ComponentSystem<vulkan::Renderer>::ContainerType&
     {
         return m_componentSystem.GetComponents();
     }
 
     void RendererSystem::Clear()
     {
+        m_meshManager.Clear();
+        m_techniqueManager.Clear();
         m_componentSystem.Clear();
     }
 }

@@ -1,7 +1,8 @@
 #include "TechniqueBase.h"
+#include "component/Transform.h"
 #include "graphics/vulkan/Base.h"
 #include "graphics/vulkan/Swapchain.h"
-#include "graphics/vulkan/FrameManager.h"
+#include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/Graphics2.h"
 
@@ -14,11 +15,12 @@ using namespace nc::graphics::d3dresource;
 
 namespace nc::graphics::vulkan
 {
-    TechniqueBase::TechniqueBase(TechniqueType techniqueType, vulkan::FrameManager* frameManager)
+    TechniqueBase::TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData)
     : m_base{ GraphicsResourceManager::GetGraphics2()->GetBase() },
       m_swapchain{ GraphicsResourceManager::GetGraphics2()->GetSwapchain() },
-      m_commands{ GraphicsResourceManager::GetGraphics2()->GetCommandsPtr() },
-      m_frameManager{ frameManager },
+      m_globalData{globalData},
+      m_meshes{},
+      m_objects{},
       m_pipeline{},
       m_pipelineLayout{},
       m_descriptorSetLayout{},
@@ -38,11 +40,38 @@ namespace nc::graphics::vulkan
         base.destroyPipeline(m_pipeline);
     }
 
+    void TechniqueBase::RegisterMesh(Mesh mesh)
+    {
+        for (auto& registeredMesh : m_meshes)
+        {
+            if (registeredMesh.uid.compare(mesh.uid) == 0)
+            {
+                return;
+            }
+        }
+
+        m_meshes.push_back(mesh);
+    }
+
     TechniqueType TechniqueBase::GetType() const noexcept
     {
         return m_type;
     }
     
+    void TechniqueBase::RegisterTransform(std::string meshUid, Transform* transform)
+    {
+        for (auto& objects : m_objects)
+        {
+            if (objects.first.compare(meshUid) == 0)
+            {
+                objects.second.push_back(transform);
+                return;
+            }
+        }
+
+        m_objects.emplace(meshUid, std::vector<Transform*>{transform} );
+    }
+
     vk::ShaderModule TechniqueBase::CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base)
     {
         vk::ShaderModuleCreateInfo createInfo{};

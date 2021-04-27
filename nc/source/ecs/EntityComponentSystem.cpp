@@ -4,7 +4,7 @@
 #include "component/PointLight.h"
 #include "component/PointLightManager.h"
 #ifdef USE_VULKAN
-#include "component/Renderer2.h"
+#include "component/vulkan/Renderer.h"
 #endif
 #include "component/Renderer.h"
 #include "component/Transform.h"
@@ -37,10 +37,16 @@ template<> ComponentSystem<PointLight>* EntityComponentSystem::GetSystem<PointLi
 }
 
 #ifdef USE_VULKAN
-template<> ComponentSystem<Renderer2>* EntityComponentSystem::GetSystem<Renderer2>()
+template<> ComponentSystem<vulkan::Renderer>* EntityComponentSystem::GetSystem<vulkan::Renderer>()
 {
     return m_rendererSystem2->GetSystem();
 }
+
+RendererSystem* EntityComponentSystem::GetRendererSystem()
+{
+    return m_rendererSystem2.get();
+}
+
 #endif
 
 template<> ComponentSystem<Renderer>* EntityComponentSystem::GetSystem<Renderer>()

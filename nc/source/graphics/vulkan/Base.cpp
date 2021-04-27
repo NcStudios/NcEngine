@@ -1,5 +1,5 @@
 #include "Base.h"
-#include "resources/VertexBuffer.h"
+#include "graphics/vulkan/Mesh.h"
 
 #include <set>
 #include <string>
@@ -291,7 +291,8 @@ namespace nc::graphics::vulkan
 
         vma::Allocation allocation;
         vk::Buffer buffer;
-        if (m_allocator.createBuffer(&bufferInfo, &allocationInfo, &buffer, &allocation, nullptr) != vk::Result::eSuccess)
+        auto result = m_allocator.createBuffer(&bufferInfo, &allocationInfo, &buffer, &allocation, nullptr);
+        if (result != vk::Result::eSuccess)
         {
             throw std::runtime_error("Error creating buffer.");
         }

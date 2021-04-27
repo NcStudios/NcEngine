@@ -166,26 +166,26 @@ namespace nc
     }
 
     #ifdef USE_VULKAN
-    template<> Renderer2* AddComponent<Renderer2>(EntityHandle handle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
+    template<> vulkan::Renderer* AddComponent<vulkan::Renderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<Renderer> - Bad handle");
         IF_THROW(internal::g_rendererSystemImpl->Contains(handle), "AddComponent<Renderer> - entity already has a renderer");
         return internal::g_rendererSystemImpl->Add(handle, std::move(meshUid), techniqueType);
     }
 
-    template<> bool RemoveComponent<Renderer2>(EntityHandle handle)
+    template<> bool RemoveComponent<vulkan::Renderer>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "RemoveComponent<Renderer> - Bad handle");
         return internal::g_rendererSystemImpl->Remove(handle);
     }
 
-    template<> bool HasComponent<Renderer2>(EntityHandle handle)
+    template<> bool HasComponent<vulkan::Renderer>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "HasComponent<Renderer> - Bad handle");
         return internal::g_rendererSystemImpl->Contains(handle);
     }
 
-    template<> Renderer2* GetComponent<Renderer2>(EntityHandle handle)
+    template<> vulkan::Renderer* GetComponent<vulkan::Renderer>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "GetComponent<Renderer> - Bad handle");
         return internal::g_rendererSystemImpl->GetPointerTo(handle);

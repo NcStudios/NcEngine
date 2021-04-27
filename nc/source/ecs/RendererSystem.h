@@ -1,7 +1,12 @@
 #pragma once
 #include "ComponentSystem.h"
-#include "component/Renderer2.h"
-#include "graphics/vulkan/techniques/TechniqueType.h"
+#include "component/vulkan/Renderer.h"
+#include "graphics/vulkan/Mesh.h"
+#include "graphics/vulkan/MeshManager.h"
+#include "graphics/vulkan/TechniqueManager.h"
+#include "graphics/vulkan/TechniqueType.h"
+
+namespace nc::graphics::vulkan { class Commands; }
 
 namespace nc::ecs
 {
@@ -10,15 +15,18 @@ namespace nc::ecs
         public:
             RendererSystem(uint32_t renderersCount);
 
-            ComponentSystem<Renderer2>* GetSystem();
-            Renderer2* Add(EntityHandle parentHandle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType);
+            ComponentSystem<vulkan::Renderer>* GetSystem();
+            void RecordTechniques(nc::graphics::vulkan::Commands* commands);
+            vulkan::Renderer* Add(EntityHandle parentHandle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType);
             bool Remove(EntityHandle parentHandle);
             bool Contains(EntityHandle parentHandle) const;
-            Renderer2* GetPointerTo(EntityHandle parentHandle);
-            auto GetComponents() -> ComponentSystem<Renderer2>::ContainerType&;
+            vulkan::Renderer* GetPointerTo(EntityHandle parentHandle);
+            auto GetComponents() -> ComponentSystem<vulkan::Renderer>::ContainerType&;
             void Clear();
 
         private:
-            ComponentSystem<Renderer2> m_componentSystem;
+            ComponentSystem<vulkan::Renderer> m_componentSystem;
+            graphics::vulkan::MeshManager m_meshManager;
+            graphics::vulkan::TechniqueManager m_techniqueManager;
     };
 }

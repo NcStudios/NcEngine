@@ -8,9 +8,6 @@
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
 #include "Ecs.h"
-#ifdef USE_VULKAN
-#include "graphics/DummyModel.h" // Temporary, just to get DummyModel for testing for now
-#endif
 
 namespace
 {
@@ -101,7 +98,6 @@ namespace nc::core
           m_jobSystem{2},
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_frameManager2{},
           m_physics{ CreatePhysicsSystemInfo(&m_graphics2, &m_jobSystem)},
           m_ecs{},
           m_sceneSystem{},
@@ -147,12 +143,6 @@ namespace nc::core
         auto fixedUpdateInterval = config::Get().physics.fixedUpdateInterval;
         m_isRunning = true;
         
-    #ifdef USE_VULKAN
-        auto dummyModel = nc::graphics::DummyModel{}; // Temporary, to be removed
-        m_frameManager2.RegisterModel(&dummyModel); // Temporary, to be removed
-        m_frameManager2.RecordPasses();
-    #endif
-    
         while(m_isRunning)
         {
             m_time.UpdateTime();
@@ -218,7 +208,14 @@ namespace nc::core
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
-        m_graphics2.FrameBegin();
+        auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
+        m_graphics2.SetViewMatrix(camViewMatrix);
+
+        auto rendererSystem = m_ecs.GetRendererSystem();
+
+        // @todo: conditionally update based on changes
+        rendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
+
         m_graphics2.Draw();
         m_graphics2.FrameEnd();
 #else
@@ -278,7 +275,6 @@ namespace nc::core
         using namespace std::placeholders;
 
         #ifdef USE_VULKAN
-            m_graphics2.SetFrameManager(&m_frameManager2);
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4, _5));
             // No UI for us until we tackle integrating IMGUI with Vulkan
         #else
