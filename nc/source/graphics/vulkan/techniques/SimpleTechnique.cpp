@@ -33,9 +33,9 @@ namespace nc::graphics::vulkan
             CreateAttachmentDescription(AttachmentType::Depth, m_base.GetDepthFormat()),
         };
 
-        vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
-        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
-        vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
+        auto colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
+        auto depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
+        auto subpass = CreateSubpassDescription(colorReference, depthReference);
 
         std::array<vk::SubpassDependency, 2> dependencies =
         { 
@@ -43,7 +43,6 @@ namespace nc::graphics::vulkan
             CreateSubpassDependency(AttachmentType::Depth)
         };
 
-        // Render pass info
         vk::RenderPassCreateInfo renderPassInfo{};
         renderPassInfo.setAttachmentCount(static_cast<uint32_t>(attachments.size()));
         renderPassInfo.setPAttachments(attachments.data());
@@ -65,108 +64,22 @@ namespace nc::graphics::vulkan
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetGraphicsSettings().vulkanShadersPath;
-
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "vert.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "frag.spv");
 
         auto vertexShaderModule = SimpleTechnique::CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = SimpleTechnique::CreateShaderModule(fragmentShaderByteCode, m_base);
 
-        vk::PipelineShaderStageCreateInfo vertexShaderStageInfo{};
-        vertexShaderStageInfo.setStage(vk::ShaderStageFlagBits::eVertex);
-        vertexShaderStageInfo.setModule(vertexShaderModule);
-        vertexShaderStageInfo.setPName("main");
+        vk::PipelineShaderStageCreateInfo shaderStages[] = 
+        {
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+        };
 
-        vk::PipelineShaderStageCreateInfo fragmentShaderStageInfo{};
-        fragmentShaderStageInfo.setStage(vk::ShaderStageFlagBits::eFragment);
-        fragmentShaderStageInfo.setModule(fragmentShaderModule);
-        fragmentShaderStageInfo.setPName("main");
-
-        vk::PipelineShaderStageCreateInfo shaderStages[] = {vertexShaderStageInfo, fragmentShaderStageInfo};
-
-        // Vertex input format
-        auto vertexBindingDescription = GetVertexBindingDescription();
-        auto vertexAttributeDescription = GetVertexAttributeDescriptions();
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
-        vertexInputInfo.setVertexBindingDescriptionCount(1);
-        vertexInputInfo.setPVertexBindingDescriptions(&vertexBindingDescription);
-        vertexInputInfo.setVertexAttributeDescriptionCount(static_cast<uint32_t>(vertexAttributeDescription.size()));
-        vertexInputInfo.setPVertexAttributeDescriptions(vertexAttributeDescription.data());
-
-        // Input assembly
-        // @todo: Look into using element buffers here to reuse vertices
-        vk::PipelineInputAssemblyStateCreateInfo inputAssembly{};
-        inputAssembly.setTopology(vk::PrimitiveTopology::eTriangleList);
-        inputAssembly.setPrimitiveRestartEnable(static_cast<vk::Bool32>(false));
-
-        // Vieport
-        vk::PipelineViewportStateCreateInfo viewportState{};
-        viewportState.setViewportCount(1);
-        viewportState.setPViewports(nullptr);
-        viewportState.setScissorCount(1);
-        viewportState.setPScissors(nullptr);
-
-        // Rasterizer
-        vk::PipelineRasterizationStateCreateInfo rasterizer{};
-        rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
-        rasterizer.setRasterizerDiscardEnable(static_cast<vk::Bool32>(false));
-        rasterizer.setPolygonMode(vk::PolygonMode::eFill); // Set to line for wireframe, requires enabling a GPU feature.
-        rasterizer.setLineWidth(1.0f); // Setting wider requires enabling the wideLines GPU feature.
-        rasterizer.setCullMode(vk::CullModeFlagBits::eBack);
-        rasterizer.setFrontFace(vk::FrontFace::eClockwise);
-        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(false));
-        rasterizer.setDepthBiasConstantFactor(0.0f);
-        rasterizer.setDepthBiasClamp(0.0f);
-        rasterizer.setDepthBiasSlopeFactor(0.0f);
-
-        // Multisampling
-        vk::PipelineMultisampleStateCreateInfo multisampling{};
-        multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(false));
-        multisampling.setRasterizationSamples(vk::SampleCountFlagBits::e1);
-        multisampling.setMinSampleShading(1.0f);
-        multisampling.setPSampleMask(nullptr);
-        multisampling.setAlphaToCoverageEnable(static_cast<vk::Bool32>(false));
-        multisampling.setAlphaToOneEnable(static_cast<vk::Bool32>(false));
-
-        // Depth testing
-        vk::PipelineDepthStencilStateCreateInfo depthStencil{};
-        depthStencil.setDepthTestEnable(static_cast<vk::Bool32>(true));
-        depthStencil.setDepthWriteEnable(static_cast<vk::Bool32>(true));
-        depthStencil.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
-
-        // Color blending
-        vk::PipelineColorBlendAttachmentState colorBlendAttachment{};
-        colorBlendAttachment.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
-        colorBlendAttachment.setBlendEnable(static_cast<vk::Bool32>(false));
-        colorBlendAttachment.setDstColorBlendFactor(vk::BlendFactor::eOne);
-        colorBlendAttachment.setColorBlendOp(vk::BlendOp::eAdd);
-        colorBlendAttachment.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
-        colorBlendAttachment.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
-        colorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
-
-        vk::PipelineColorBlendStateCreateInfo colorBlending{};
-        colorBlending.setLogicOpEnable(static_cast<vk::Bool32>(false));
-        colorBlending.setLogicOp(vk::LogicOp::eCopy);
-        colorBlending.setAttachmentCount(1);
-        colorBlending.setPAttachments(&colorBlendAttachment);
-        colorBlending.setBlendConstants({0.0f, 0.0f, 0.0f, 0.0f});
-
-        vk::PushConstantRange pushConstantRange{};
-        pushConstantRange.setStageFlags(vk::ShaderStageFlagBits::eVertex);
-        pushConstantRange.setOffset(0);
-        pushConstantRange.setSize(sizeof(TransformMatrices));
-
-        // PipelineLayout
-        // Can use uniform values to bind texture samplers, buffers, etc to the shader here.
-        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(0);  
-        pipelineLayoutInfo.setPSetLayouts(nullptr);  
-        pipelineLayoutInfo.setPushConstantRangeCount(1); 
-        pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);  
-
+        auto transformPushConstantRange = CreatePushConstantRange(ShaderStage::Vertex, sizeof(TransformMatrices)); // TranformMatrices
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(transformPushConstantRange);
         m_pipelineLayout = m_base.GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
-        // Dynamic state
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
         dynamicStateInfo.setDynamicStateCount(dynamicStates.size());
@@ -176,12 +89,22 @@ namespace nc::graphics::vulkan
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
         pipelineCreateInfo.setStageCount(2); // Shader stages
         pipelineCreateInfo.setPStages(shaderStages); // Shader stages
+        auto vertexBindingDescription = GetVertexBindingDescription();
+        auto vertexAttributeDescription = GetVertexAttributeDescriptions();
+        auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
         pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
+        auto inputAssembly = CreateInputAssemblyCreateInfo();
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
+        auto viewportState = CreateViewportCreateInfo();
         pipelineCreateInfo.setPViewportState(&viewportState);
+        auto rasterizer = CreateRasterizationCreateInfo();
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
+        auto multisampling = CreateMulitsampleCreateInfo();
         pipelineCreateInfo.setPMultisampleState(&multisampling);
+        auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo();
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout);
@@ -191,7 +114,6 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
         m_pipeline = m_base.GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
-
         m_base.GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base.GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
@@ -240,8 +162,8 @@ namespace nc::graphics::vulkan
                 commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
                 {
                     commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-                    commandBuffers[i].setViewport(0, 1, &viewport);
-                    commandBuffers[i].setScissor(0, 1, &scissor);
+                    auto dimensions = m_graphics->GetDimensions();
+                    SetViewportAndScissor(&commandBuffers[i], dimensions);
 
                     vk::DeviceSize offsets[] = { 0 };
                     commandBuffers[i].bindVertexBuffers(0, 1, m_globalData.vertexBuffer, offsets);

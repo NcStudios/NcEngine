@@ -50,7 +50,6 @@ namespace nc::ecs
 
             template<std::derived_from<ComponentBase> T>
             ComponentSystem<T>* GetSystem();
-
             ColliderSystem* GetColliderSystem() const;
             ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;
             ComponentSystem<PointLight>* GetPointLightSystem() const;
