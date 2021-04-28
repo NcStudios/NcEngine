@@ -3,8 +3,8 @@
 #include "debug/Profiler.h"
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
+#include "ecs/ColliderSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
-#include "physics/ColliderSystem.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls

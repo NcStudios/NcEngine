@@ -13,14 +13,6 @@ namespace nc::physics
         uint32_t index;
     };
 
-    /** The bounding volume and handle of a static collider in the octree. */
-    struct StaticTreeEntry
-    {
-        Collider::BoundingVolume volume;
-        physics::Layer layer;
-        EntityHandle handle;
-    };
-
     /** The collider properties required for constructing bounding volumes. */
     struct VolumeProperties
     {

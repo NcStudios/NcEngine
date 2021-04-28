@@ -23,8 +23,8 @@ namespace nc::config
         return true;
     }
 
-    template<class Config_t, std::invocable<std::string, std::string, Config_t&> MapKeyValueFunc_t>
-    void Read(std::string filePath, MapKeyValueFunc_t mapFunc, Config_t& out)
+    template<class Config_t, std::invocable<std::string, std::string, Config_t*> MapKeyValueFunc_t>
+    void Read(std::string filePath, MapKeyValueFunc_t mapFunc, Config_t* out)
     {
         std::ifstream inFile;
         inFile.open(filePath);

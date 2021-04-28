@@ -1,20 +1,20 @@
 #pragma once
 
 #include "Ecs.h"
-#include "ecs/ComponentSystem.h"
-#include "ecs/SoA.h"
+#include "ComponentSystem.h"
+#include "SoA.h"
 #include "ColliderTree.h"
 
 #include <type_traits>
 
-namespace nc::physics
+namespace nc::ecs
 {
     /** Wrapper around ComponentSystem<Collider> that maintains a separate
      *  representations for internal use. */
     class ColliderSystem
     {
         public:
-            using DynamicColliderSoA = ecs::SoA<EntityHandle::Handle_t, const DirectX::XMMATRIX*, VolumeProperties, ColliderType>;
+            using DynamicColliderSoA = SoA<EntityHandle::Handle_t, const DirectX::XMMATRIX*, physics::VolumeProperties, ColliderType>;
 
             ColliderSystem(uint32_t maxDynamic,
                            uint32_t maxStatic,
@@ -30,7 +30,7 @@ namespace nc::physics
 
             // Wrappers around ComponentSystem methods
             Collider* Add(EntityHandle handle, const ColliderInfo& info);
-            bool Remove(EntityHandle handle);
+            bool Remove(EntityHandle handle, bool isStatic);
             void Clear();
             bool Contains(EntityHandle handle) const;
             Collider* GetPointerTo(EntityHandle handle);

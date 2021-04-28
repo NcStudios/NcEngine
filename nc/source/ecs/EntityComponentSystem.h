@@ -3,8 +3,9 @@
 #include "entity/Entity.h"
 #include "entity/EntityHandle.h"
 #include "entity/EntityInfo.h"
-#include "ecs/EntityMap.h"
+#include "EntityMap.h"
 #include "ComponentSystem.h"
+#include "ColliderSystem.h"
 #include "HandleManager.h"
 #ifdef USE_VULKAN
 #include "RendererSystem.h"
@@ -26,11 +27,11 @@ namespace nc::ecs
 {
     struct Systems
     {
+        ecs::ComponentSystem<Collider>* collider;
         ecs::ComponentSystem<NetworkDispatcher>* networkDispatcher;
         ecs::ComponentSystem<PointLight>* pointLight;
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;
-        ecs::ComponentSystem<Collider>* collider;
     };
 
     class EntityComponentSystem
@@ -42,9 +43,15 @@ namespace nc::ecs
             ComponentSystem<T>* GetSystem();
 
             #ifdef USE_VULKAN
-            RendererSystem* GetRendererSystem();
+            RendererSystem* GetRendererSystem2();
             #endif
 
+            ColliderSystem* GetColliderSystem() const;
+            ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;
+            ComponentSystem<PointLight>* GetPointLightSystem() const;
+            ComponentSystem<Renderer>* GetRendererSystem() const;
+            ComponentSystem<Transform>* GetTransformSystem() const;
+            Systems GetComponentSystems() const;
             EntityMap& GetActiveEntities() noexcept;
 
             EntityHandle CreateEntity(EntityInfo info);
@@ -62,6 +69,7 @@ namespace nc::ecs
             HandleManager m_handleManager;
             EntityMap m_active;
             EntityMap m_toDestroy;
+            std::unique_ptr<ColliderSystem> m_colliderSystem;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             #ifdef USE_VULKAN
             std::unique_ptr<RendererSystem> m_rendererSystem2;
