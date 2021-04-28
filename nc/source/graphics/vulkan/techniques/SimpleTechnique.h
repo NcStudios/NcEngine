@@ -1,22 +1,29 @@
 #pragma once
 
 #include "TechniqueBase.h"
-
 #include "vulkan/vulkan.hpp"
 #include <vector>
 
-namespace nc::graphics::vulkan
+namespace nc::graphics
 {
-    class Base; class Swapchain; class FrameManager;
-
-    class SimpleTechnique : public TechniqueBase
+    namespace vulkan
     {
-        public:
-            SimpleTechnique(vulkan::FrameManager* frameManager);
-            void Record();
+        class Graphics2;
+        class Base; class Swapchain; class Commands; struct GlobalData;
 
-        private:
-            void CreatePipeline();
-            void CreateRenderPasses();
-    };
+        class SimpleTechnique : public TechniqueBase
+        {
+            public:
+                SimpleTechnique(const GlobalData& globalData, nc::graphics::Graphics2* graphics);
+                ~SimpleTechnique();
+                void Record(Commands* commands) override;
+
+            private:
+                void CreateDescriptorSetLayout();
+                void CreatePipeline();
+                void CreateRenderPasses();
+
+                vk::DescriptorSetLayout m_descriptorSetLayout;
+        };
+    }
 }

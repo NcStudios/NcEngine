@@ -3,7 +3,6 @@
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/rendergraph/FrameManager.h"
 #ifdef USE_VULKAN
-    #include "graphics/vulkan/FrameManager.h"
     #include "graphics/Graphics2.h"
 #else
     #include "graphics/Graphics.h"
@@ -34,15 +33,14 @@ namespace nc::core
             window::WindowImpl m_window;
         #ifdef USE_VULKAN
             graphics::Graphics2 m_graphics2;
-            graphics::vulkan::FrameManager m_frameManager2;
             // @todo: Implement missing managers below
         #else            
             graphics::Graphics m_graphics;
             PointLightManager m_pointLightManager;
             graphics::FrameManager m_frameManager;
         #endif
-            physics::PhysicsSystem m_physics;
             ecs::EntityComponentSystem m_ecs;
+            physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
 

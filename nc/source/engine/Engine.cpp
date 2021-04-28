@@ -8,49 +8,6 @@
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
 #include "Ecs.h"
-#ifdef USE_VULKAN
-#include "graphics/DummyModel.h" // Temporary, just to get DummyModel for testing for now
-#endif
-
-namespace
-{
-    nc::physics::PhysicsSystemInfo CreatePhysicsSystemInfo
-    (
-    #ifdef USE_VULKAN
-    nc::graphics::Graphics2* graphics,
-    #else
-    nc::graphics::Graphics* graphics,
-    #endif
-    nc::job::JobSystem* jobSystem
-    )
-    {
-        const auto& config = nc::config::Get();
-        return nc::physics::PhysicsSystemInfo
-        {
-            .graphics = graphics,
-            .jobSystem = jobSystem,
-            .maxDynamicColliders = config.memory.maxDynamicColliders,
-            .maxStaticColliders = config.memory.maxStaticColliders,
-            .octreeDensityThreshold = config.physics.octreeDensityThreshold,
-            .octreeMinimumExtent = config.physics.octreeMinimumExtent,
-            .worldspaceExtent = config.physics.worldspaceExtent
-        };
-    }
-
-    #ifdef NC_EDITOR_ENABLED
-    nc::ecs::Systems CreateSystemInstances(nc::ecs::EntityComponentSystem* ecs, nc::physics::PhysicsSystem* physics)
-    {
-        return nc::ecs::Systems
-        {
-            .networkDispatcher = ecs->GetSystem<nc::NetworkDispatcher>(),
-            .pointLight = ecs->GetSystem<nc::PointLight>(),
-            .renderer = ecs->GetSystem<nc::Renderer>(),
-            .transform = ecs->GetSystem<nc::Transform>(),
-            .collider = physics->GetColliderSystem()
-        };
-    }
-    #endif
-}
 
 namespace nc::core
 {
@@ -64,7 +21,7 @@ namespace nc::core
     {
         IF_THROW(internal::impl != nullptr, "core::Initialize - Attempt to reinitialize engine");
         config::Load();
-        debug::internal::OpenLog(config::Get().project.logFilePath);
+        debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         internal::impl = std::make_unique<Engine>(hInstance);
     }
 
@@ -75,21 +32,33 @@ namespace nc::core
         internal::impl->MainLoop(std::move(initialScene));
     }
 
-    void Quit(bool forceImmediate)
+    void Quit(bool forceImmediate) noexcept
     {
         V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
-        IF_THROW(internal::impl == nullptr, "core::Quit - Engine is not initialized");
-        internal::impl->DisableRunningFlag();
-        if (forceImmediate)
+        if(internal::impl)
         {
-            internal::impl->Shutdown();
+            internal::impl->DisableRunningFlag();
+            if (forceImmediate)
+                internal::impl->Shutdown();
         }
     }
 
-    void Shutdown()
+    void Shutdown() noexcept
     {
+        if(!internal::impl)
+            return;
+
         internal::impl = nullptr;
-        config::Save();
+
+        try
+        {
+            config::Save();
+        }
+        catch(const std::runtime_error& e)
+        {
+            debug::LogException(e);
+        }
+
         debug::internal::CloseLog();
     }
 
@@ -101,9 +70,8 @@ namespace nc::core
           m_jobSystem{2},
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_frameManager2{},
-          m_physics{ CreatePhysicsSystemInfo(&m_graphics2, &m_jobSystem)},
-          m_ecs{},
+          m_ecs{&m_graphics2},
+          m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{}
     {
@@ -119,12 +87,12 @@ namespace nc::core
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
           m_pointLightManager{},
           m_frameManager{},
-          m_physics{CreatePhysicsSystemInfo(&m_graphics, &m_jobSystem)},
           m_ecs{},
+          m_physics{&m_graphics, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
           #ifdef NC_EDITOR_ENABLED
-          m_ui{m_window.GetHWND(), &m_graphics, CreateSystemInstances(&m_ecs, &m_physics)}
+          m_ui{m_window.GetHWND(), &m_graphics, m_ecs.GetComponentSystems()}
           #else
           m_ui{m_window.GetHWND(), &m_graphics}
           #endif
@@ -144,19 +112,13 @@ namespace nc::core
         V_LOG("Starting engine loop");
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange();
-        auto fixedUpdateInterval = config::Get().physics.fixedUpdateInterval;
+        auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
-    #ifdef USE_VULKAN
-        auto dummyModel = nc::graphics::DummyModel{}; // Temporary, to be removed
-        m_frameManager2.RegisterModel(&dummyModel); // Temporary, to be removed
-        m_frameManager2.RecordPasses();
-    #endif
-    
         while(m_isRunning)
         {
             m_time.UpdateTime();
-            m_window.ProcessSystemMessages();
+            m_window.ProcessSystemMessages(); 
 
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
@@ -218,7 +180,14 @@ namespace nc::core
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
-        m_graphics2.FrameBegin();
+        auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
+        m_graphics2.SetViewMatrix(camViewMatrix);
+
+        auto rendererSystem = m_ecs.GetRendererSystem2();
+
+        // @todo: conditionally update based on changes
+        rendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
+
         m_graphics2.Draw();
         m_graphics2.FrameEnd();
 #else
@@ -229,14 +198,14 @@ namespace nc::core
         auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        for(auto& light : m_ecs.GetSystem<PointLight>()->GetComponents())
+        for(auto& light : m_ecs.GetPointLightSystem()->GetComponents())
         {
             m_pointLightManager.AddPointLight(light.get(), camViewMatrix);
         }
 
         m_pointLightManager.Bind();
 
-        for(auto& renderer : m_ecs.GetSystem<Renderer>()->GetComponents())
+        for(auto& renderer : m_ecs.GetRendererSystem()->GetComponents())
         {
             renderer->Update(&m_frameManager);
         }
@@ -278,13 +247,11 @@ namespace nc::core
         using namespace std::placeholders;
 
         #ifdef USE_VULKAN
-            m_graphics2.SetFrameManager(&m_frameManager2);
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4, _5));
             // No UI for us until we tackle integrating IMGUI with Vulkan
         #else
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
             m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
         #endif
-        ::nc::internal::RegisterEcs(&m_ecs);
     }
 } // end namespace nc::engine

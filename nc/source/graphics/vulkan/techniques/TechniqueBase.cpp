@@ -1,8 +1,8 @@
 #include "TechniqueBase.h"
+#include "component/Transform.h"
 #include "graphics/vulkan/Base.h"
 #include "graphics/vulkan/Swapchain.h"
-#include "graphics/vulkan/FrameManager.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/Graphics2.h"
 
 #include <vector>
@@ -10,15 +10,15 @@
 #include <fstream>
 #include <iostream>
 
-using namespace nc::graphics::d3dresource;
-
 namespace nc::graphics::vulkan
 {
-    TechniqueBase::TechniqueBase(TechniqueType techniqueType, vulkan::FrameManager* frameManager)
-    : m_base{ GraphicsResourceManager::GetGraphics2()->GetBase() },
-      m_swapchain{ GraphicsResourceManager::GetGraphics2()->GetSwapchain() },
-      m_commands{ GraphicsResourceManager::GetGraphics2()->GetCommandsPtr() },
-      m_frameManager{ frameManager },
+    TechniqueBase::TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData, nc::graphics::Graphics2* graphics)
+    : m_graphics{ graphics },
+      m_base{ graphics->GetBase() },
+      m_swapchain{ graphics->GetSwapchain() },
+      m_globalData{ globalData },
+      m_meshes{},
+      m_objects{},
       m_pipeline{},
       m_pipelineLayout{},
       m_descriptorSetLayout{},
@@ -36,6 +36,21 @@ namespace nc::graphics::vulkan
         base.destroyDescriptorSetLayout(m_descriptorSetLayout);
         base.destroyPipelineLayout(m_pipelineLayout);
         base.destroyPipeline(m_pipeline);
+    }
+
+    void TechniqueBase::RegisterRenderer(Mesh mesh, Transform* transform)
+    {
+        for (auto& registeredMesh : m_meshes)
+        {
+            if (registeredMesh.uid.compare(mesh.uid) == 0)
+            {
+                auto& objects = m_objects.at(registeredMesh.uid);
+                objects.push_back(transform);
+                return;
+            }
+        }
+        m_meshes.push_back(mesh);
+        m_objects.emplace(mesh.uid, std::vector<Transform*>{transform} );
     }
 
     TechniqueType TechniqueBase::GetType() const noexcept

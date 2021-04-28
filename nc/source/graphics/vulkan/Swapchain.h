@@ -46,7 +46,7 @@ namespace nc::graphics::vulkan
             void DestroySynchronizationObjects();
             uint32_t GetNextRenderReadyImageIndex(bool& isSwapChainValid);
             uint32_t GetFrameIndex() const noexcept;
-            void WaitForFrameFence();
+            void WaitForFrameFence(bool waitOnPreviousFrame) const;
             void ResetFrameFence();
             void IncrementFrameIndex();
             void WaitForImageFence(uint32_t imageIndex);

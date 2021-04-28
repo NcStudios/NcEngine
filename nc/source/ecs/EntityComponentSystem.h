@@ -3,8 +3,9 @@
 #include "entity/Entity.h"
 #include "entity/EntityHandle.h"
 #include "entity/EntityInfo.h"
-#include "ecs/EntityMap.h"
+#include "EntityMap.h"
 #include "ComponentSystem.h"
+#include "ColliderSystem.h"
 #include "HandleManager.h"
 #ifdef USE_VULKAN
 #include "RendererSystem.h"
@@ -20,27 +21,42 @@ namespace nc
     class Vector3;
     class Quaternion;
     namespace physics { class ColliderSystem; }
+
+    #ifdef USE_VULKAN
+    namespace graphics { class Graphics2; }
+    #endif
 }
 
 namespace nc::ecs
 {
     struct Systems
     {
+        ecs::ComponentSystem<Collider>* collider;
         ecs::ComponentSystem<NetworkDispatcher>* networkDispatcher;
         ecs::ComponentSystem<PointLight>* pointLight;
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;
-        ecs::ComponentSystem<Collider>* collider;
     };
 
     class EntityComponentSystem
     {
         public:
+            #ifdef USE_VULKAN
+            EntityComponentSystem(nc::graphics::Graphics2* graphics);
+            RendererSystem* GetRendererSystem2();
+            #endif
+
             EntityComponentSystem();
 
             template<std::derived_from<ComponentBase> T>
             ComponentSystem<T>* GetSystem();
 
+            ColliderSystem* GetColliderSystem() const;
+            ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;
+            ComponentSystem<PointLight>* GetPointLightSystem() const;
+            ComponentSystem<Renderer>* GetRendererSystem() const;
+            ComponentSystem<Transform>* GetTransformSystem() const;
+            Systems GetComponentSystems() const;
             EntityMap& GetActiveEntities() noexcept;
 
             EntityHandle CreateEntity(EntityInfo info);
@@ -58,6 +74,7 @@ namespace nc::ecs
             HandleManager m_handleManager;
             EntityMap m_active;
             EntityMap m_toDestroy;
+            std::unique_ptr<ColliderSystem> m_colliderSystem;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             #ifdef USE_VULKAN
             std::unique_ptr<RendererSystem> m_rendererSystem2;

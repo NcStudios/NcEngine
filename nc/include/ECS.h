@@ -9,7 +9,8 @@
 #include "component/Transform.h"
 #include "debug/Utils.h"
 #ifdef USE_VULKAN
-#include "component/Renderer2.h"
+#include "component/vulkan/Renderer.h"
+#include "graphics/vulkan/TechniqueType.h"
 #endif
 #include <concepts>
 #include <string>
@@ -43,10 +44,10 @@ namespace nc
     template<> bool RemoveComponent<PointLight>(EntityHandle handle);
 
     #ifdef USE_VULKAN
-    template<> Renderer2* AddComponent<Renderer2>(EntityHandle handle, std::string meshUid, TechniqueType techniqueType);
-    template<> Renderer2* GetComponent<Renderer2>(EntityHandle handle);
-    template<> bool HasComponent<Renderer2>(EntityHandle handle);
-    template<> bool RemoveComponent<Renderer2>(EntityHandle handle);
+    template<> vulkan::Renderer* AddComponent<vulkan::Renderer>(EntityHandle handle, std::string meshUid, nc::graphics::vulkan::TechniqueType techniqueType);
+    template<> vulkan::Renderer* GetComponent<vulkan::Renderer>(EntityHandle handle);
+    template<> bool HasComponent<vulkan::Renderer>(EntityHandle handle);
+    template<> bool RemoveComponent<vulkan::Renderer>(EntityHandle handle);
     #endif
     
     template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);

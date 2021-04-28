@@ -1,84 +1,47 @@
 #include "SimpleTechnique.h"
-#include "graphics/vulkan/Base.h"
+#include "config/Config.h"
+#include "component/Transform.h"
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/Commands.h"
-#include "graphics/vulkan/resources/VertexBuffer.h"
-#include "graphics/vulkan/FrameManager.h"
-#include "graphics/vulkan/resources/VertexBuffer.h"
-#include "graphics/vulkan/techniques/TechniqueType.h"
+#include "graphics/vulkan/Initializers.h"
+#include "graphics/vulkan/TechniqueManager.h"
+#include "graphics/vulkan/MeshManager.h"
+#include "graphics/vulkan/Resources/TransformBuffer.h"
+#include "graphics/vulkan/Resources/ImmutableBuffer.h"
 #include "graphics/Graphics2.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
-#include "config/Config.h"
 
 namespace nc::graphics::vulkan
 {
-    SimpleTechnique::SimpleTechnique(vulkan::FrameManager* frameManager)
-    : TechniqueBase(TechniqueType::Simple, frameManager)
+    SimpleTechnique::SimpleTechnique(const GlobalData& globalData, nc::graphics::Graphics2* graphics)
+    : TechniqueBase(TechniqueType::Simple, globalData, graphics),
+      m_descriptorSetLayout{}
     {
         CreateRenderPasses();
         CreatePipeline();
     }
 
+    SimpleTechnique::~SimpleTechnique()
+    {
+        m_base.GetDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
+    }
+
     void SimpleTechnique::CreateRenderPasses()
     {
-        std::array<vk::AttachmentDescription, 2> attachments = {};
+        std::array<vk::AttachmentDescription, 2> attachments = 
+        {
+            CreateAttachmentDescription(AttachmentType::Color, m_swapchain.GetFormat()),
+            CreateAttachmentDescription(AttachmentType::Depth, m_base.GetDepthFormat()),
+        };
 
-        // Color attachment
-        attachments[0].setFormat(m_swapchain.GetFormat());
-        attachments[0].setSamples(vk::SampleCountFlagBits::e1);
-        attachments[0].setLoadOp(vk::AttachmentLoadOp::eClear);
-        attachments[0].setStoreOp(vk::AttachmentStoreOp::eStore);
-        attachments[0].setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-        attachments[0].setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-        attachments[0].setInitialLayout(vk::ImageLayout::eUndefined);
-        attachments[0].setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
+        vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
+        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
+        vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
 
-        // Depth attachment
-        attachments[1].setFormat(m_base.GetDepthFormat());
-        attachments[1].setSamples(vk::SampleCountFlagBits::e1);
-        attachments[1].setLoadOp(vk::AttachmentLoadOp::eClear);
-        attachments[1].setStoreOp(vk::AttachmentStoreOp::eStore);
-        attachments[1].setStencilLoadOp(vk::AttachmentLoadOp::eClear);
-        attachments[1].setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-        attachments[1].setInitialLayout(vk::ImageLayout::eUndefined);
-        attachments[1].setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-        vk::AttachmentReference colorReference = {};
-        colorReference.setAttachment(0);
-        colorReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
-
-        vk::AttachmentReference depthReference = {};
-        depthReference.setAttachment(1);
-        depthReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-        // Subpass
-        vk::SubpassDescription subpass{};
-        subpass.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
-        subpass.setColorAttachmentCount(1);
-        subpass.setPColorAttachments(&colorReference);
-        subpass.setPDepthStencilAttachment(&depthReference);
-        subpass.setInputAttachmentCount(0);
-        subpass.setPreserveAttachmentCount(0);
-        subpass.setPPreserveAttachments(nullptr);
-        subpass.setPResolveAttachments(nullptr);
-
-        // Subpass dependencies
-        std::array<vk::SubpassDependency, 2> dependencies{};
-        dependencies[0].setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        dependencies[0].setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        dependencies[0].setSrcStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // The type of operation to wait on. (What our dependency is)
-        dependencies[0].setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // Specifies the type of operation that should do the waiting
-        dependencies[0].setSrcAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
-        dependencies[0].setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
-        dependencies[0].setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
-
-        dependencies[1].setSrcSubpass(0); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        dependencies[1].setDstSubpass(VK_SUBPASS_EXTERNAL); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        dependencies[1].setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // The type of operation to wait on. (What our dependency is)
-        dependencies[1].setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // Specifies the type of operation that should do the waiting
-        dependencies[1].setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
-        dependencies[1].setDstAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
-        dependencies[1].setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
+        std::array<vk::SubpassDependency, 2> dependencies =
+        { 
+            CreateSubpassDependency(AttachmentType::Color),
+            CreateSubpassDependency(AttachmentType::Depth)
+        };
 
         // Render pass info
         vk::RenderPassCreateInfo renderPassInfo{};
@@ -101,7 +64,7 @@ namespace nc::graphics::vulkan
     void SimpleTechnique::CreatePipeline()
     {
         // Shaders
-        auto defaultShaderPath = nc::config::Get().graphics.vulkanShadersPath;
+        auto defaultShaderPath = nc::config::GetGraphicsSettings().vulkanShadersPath;
 
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "vert.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "frag.spv");
@@ -188,13 +151,18 @@ namespace nc::graphics::vulkan
         colorBlending.setPAttachments(&colorBlendAttachment);
         colorBlending.setBlendConstants({0.0f, 0.0f, 0.0f, 0.0f});
 
+        vk::PushConstantRange pushConstantRange{};
+        pushConstantRange.setStageFlags(vk::ShaderStageFlagBits::eVertex);
+        pushConstantRange.setOffset(0);
+        pushConstantRange.setSize(sizeof(TransformMatrices));
+
         // PipelineLayout
         // Can use uniform values to bind texture samplers, buffers, etc to the shader here.
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.setSetLayoutCount(0);  
         pipelineLayoutInfo.setPSetLayouts(nullptr);  
-        pipelineLayoutInfo.setPushConstantRangeCount(0); 
-        pipelineLayoutInfo.setPPushConstantRanges(nullptr);  
+        pipelineLayoutInfo.setPushConstantRangeCount(1); 
+        pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);  
 
         m_pipelineLayout = m_base.GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
@@ -228,19 +196,35 @@ namespace nc::graphics::vulkan
         m_base.GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    void SimpleTechnique::Record()
+    void SimpleTechnique::Record(Commands* commands)
     {
         vk::ClearValue clearValues[2];
 		clearValues[0].setColor(vk::ClearColorValue(std::array<float, 4>({{0.2f, 0.2f, 0.2f, 0.2f}})));
 		clearValues[1].setDepthStencil({ 1.0f, 0 });
 
-        auto& commandBuffers = *m_commands->GetCommandBuffers();
+        auto& commandBuffers = *commands->GetCommandBuffers();
+        auto& dimensions = m_graphics->GetDimensions();
+
+        vk::Viewport viewport = {};
+        viewport.setWidth(dimensions.x);
+        viewport.setHeight(dimensions.y);
+        viewport.setMinDepth(0.0f);
+        viewport.setMaxDepth(1.0f);
+
+        vk::Extent2D extent = {};
+        extent.setWidth(dimensions.x);
+        extent.setHeight(dimensions.y);
+
+        vk::Rect2D scissor = {};
+        scissor.setExtent(extent);
+        scissor.setOffset({0, 0});
 
         // Begin recording on each of the command buffers.
         for (size_t i = 0; i < commandBuffers.size(); ++i)
         {
             vk::CommandBufferBeginInfo beginInfo;
             beginInfo.setPInheritanceInfo(nullptr);
+            m_swapchain.WaitForFrameFence(true);
 
             // Begin recording commands to each command buffer.
             commandBuffers[i].begin(beginInfo);
@@ -256,34 +240,27 @@ namespace nc::graphics::vulkan
                 commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
                 {
                     commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-
-                    // Bind vertex buffers (combined into one big one from frame manager) for the models
-                    auto vertexBuffer = m_frameManager->GetVertexBuffer(TechniqueType::Simple);
-                    vertexBuffer->Bind();
-                    auto indexBuffer = m_frameManager->GetIndexBuffer(TechniqueType::Simple);
-                    indexBuffer->Bind();
-                    vk::Buffer vertexBuffers[] = { vertexBuffer->GetBuffer() };
-                    vk::DeviceSize offsets[] = { 0 };
-                    
-                    auto dimensions = graphics::d3dresource::GraphicsResourceManager::GetGraphics2()->GetDimensions();
-                    vk::Viewport viewport = {};
-                    viewport.setWidth(dimensions.x);
-                    viewport.setHeight(dimensions.y);
-                    viewport.setMinDepth(0.0f);
-                    viewport.setMaxDepth(1.0f);
-
-                    vk::Extent2D extent = {};
-                    extent.setWidth(dimensions.x);
-                    extent.setHeight(dimensions.y);
-                    vk::Rect2D scissor = {};
-                    scissor.setExtent(extent);
-                    scissor.setOffset({0, 0});
-
                     commandBuffers[i].setViewport(0, 1, &viewport);
                     commandBuffers[i].setScissor(0, 1, &scissor);
-                    commandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-                    commandBuffers[i].bindIndexBuffer(indexBuffer->GetBuffer(), 0, vk::IndexType::eUint32);
-                    commandBuffers[i].drawIndexed(static_cast<uint32_t>(indexBuffer->GetIndices().size()), 1, 0, 0, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+
+                    vk::DeviceSize offsets[] = { 0 };
+                    commandBuffers[i].bindVertexBuffers(0, 1, m_globalData.vertexBuffer, offsets);
+                    commandBuffers[i].bindIndexBuffer(*m_globalData.indexBuffer, 0, vk::IndexType::eUint32);
+
+                    for (auto& mesh : m_meshes)
+                    {
+                        const auto viewMatrix = m_graphics->GetViewMatrix();
+                        const auto projectionMatrix = m_graphics->GetProjectionMatrix();
+                        
+                        // Bind the transforms per object and draw each object
+                        for (const auto* transform : m_objects.at(mesh.uid))
+                        {
+                            auto modelViewMatrix = transform->GetTransformationMatrix() * viewMatrix;
+                            auto matrix = GetMatrices(modelViewMatrix, modelViewMatrix * projectionMatrix);
+                            commandBuffers[i].pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(TransformMatrices), &matrix);
+                            commandBuffers[i].drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                        }
+                    }
                 }
                 commandBuffers[i].endRenderPass();
             }

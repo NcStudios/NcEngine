@@ -1,12 +1,10 @@
 #include "Graphics2.h"
 #include "vulkan/Base.h"
 #include "vulkan/Commands.h"
-#include "vulkan/resources/VertexBuffer.h"
-#include "vulkan/resources/IndexBuffer.h"
 #include "vulkan/resources/DepthStencil.h"
 #include "vulkan/Swapchain.h"
-#include "vulkan/FrameManager.h"
 #include "d3dresource/GraphicsResourceManager.h"
+#include "config/Config.h"
 
 namespace nc::graphics
 {
@@ -17,14 +15,13 @@ namespace nc::graphics
           m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
-          m_frameManager{ nullptr },
           m_dimensions{ dimensions },
           m_isMinimized{ false },
           m_isFullscreen{ false },
           m_viewMatrix{},
           m_projectionMatrix{}
     {
-        d3dresource::GraphicsResourceManager::SetGraphics2(this);
+        SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
     Graphics2::~Graphics2() = default;
@@ -36,6 +33,7 @@ namespace nc::graphics
 
         // Destroy all resources used by the swapchain
         m_dimensions = dimensions;
+        m_depthStencil.reset();
         m_commands.reset();
         m_swapchain.reset();
         m_depthStencil.reset();
@@ -44,7 +42,6 @@ namespace nc::graphics
         m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
         m_swapchain = std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
-        m_frameManager->RecordPasses();
     }
 
     DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
@@ -55,11 +52,6 @@ namespace nc::graphics
     DirectX::FXMMATRIX Graphics2::GetProjectionMatrix() const noexcept
     {
         return m_projectionMatrix;
-    }
-
-    void Graphics2::SetFrameManager(FrameManager* frameManager)
-    {
-        m_frameManager = frameManager;
     }
 
     void Graphics2::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
@@ -93,6 +85,7 @@ namespace nc::graphics
         (void)farZ;
 
         m_dimensions = Vector2{ width, height };
+        SetProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
     }
 
@@ -126,14 +119,10 @@ namespace nc::graphics
         return m_dimensions;
     }
 
-    void Graphics2::FrameBegin()
-    {
-        // @todo
-    }
 
     bool Graphics2::GetNextImageIndex(uint32_t* imageIndex)
     {
-        m_swapchain->WaitForFrameFence();
+        m_swapchain->WaitForFrameFence(false);
 
         bool isSwapChainValid = true;
         *imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);

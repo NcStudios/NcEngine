@@ -10,3 +10,10 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/component/Renderer.cpp
         ${ROOT_DIR}/source/component/Transform.cpp
 )
+
+if(USE_VULKAN)
+    target_sources(${ENGINE_LIB}
+        PRIVATE 
+            ${ROOT_DIR}/source/component/vulkan/Renderer.cpp
+    )
+endif()
