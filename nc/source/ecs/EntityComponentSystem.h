@@ -50,11 +50,6 @@ namespace nc::ecs
 
             template<std::derived_from<ComponentBase> T>
             ComponentSystem<T>* GetSystem();
-
-            #ifdef USE_VULKAN
-            RendererSystem* GetRendererSystem2();
-            #endif
-            
             ColliderSystem* GetColliderSystem() const;
             ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;
             ComponentSystem<PointLight>* GetPointLightSystem() const;
