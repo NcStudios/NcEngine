@@ -12,5 +12,5 @@ namespace nc::graphics::vulkan
         DirectX::XMMATRIX model;
     };
 
-    TransformMatrices GetMatrices(Transform* transform);
+    TransformMatrices GetMatrices(DirectX::XMMATRIX modelView, DirectX::XMMATRIX modelViewProjection);
 }

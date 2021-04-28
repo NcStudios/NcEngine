@@ -1,23 +1,19 @@
 #include "SimpleTechnique.h"
-#include "component/Transform.h"
 #include "config/Config.h"
-#include "graphics/vulkan/Base.h"
+#include "component/Transform.h"
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Initializers.h"
-#include "graphics/vulkan/Mesh.h"
-#include "graphics/vulkan/TechniqueType.h"
 #include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/vulkan/MeshManager.h"
 #include "graphics/vulkan/Resources/TransformBuffer.h"
 #include "graphics/vulkan/Resources/ImmutableBuffer.h"
 #include "graphics/Graphics2.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
 
 namespace nc::graphics::vulkan
 {
-    SimpleTechnique::SimpleTechnique(const GlobalData& globalData)
-    : TechniqueBase(TechniqueType::Simple, globalData),
+    SimpleTechnique::SimpleTechnique(const GlobalData& globalData, nc::graphics::Graphics2* graphics)
+    : TechniqueBase(TechniqueType::Simple, globalData, graphics),
       m_descriptorSetLayout{}
     {
         CreateRenderPasses();
@@ -207,6 +203,21 @@ namespace nc::graphics::vulkan
 		clearValues[1].setDepthStencil({ 1.0f, 0 });
 
         auto& commandBuffers = *commands->GetCommandBuffers();
+        auto& dimensions = m_graphics->GetDimensions();
+
+        vk::Viewport viewport = {};
+        viewport.setWidth(dimensions.x);
+        viewport.setHeight(dimensions.y);
+        viewport.setMinDepth(0.0f);
+        viewport.setMaxDepth(1.0f);
+
+        vk::Extent2D extent = {};
+        extent.setWidth(dimensions.x);
+        extent.setHeight(dimensions.y);
+
+        vk::Rect2D scissor = {};
+        scissor.setExtent(extent);
+        scissor.setOffset({0, 0});
 
         // Begin recording on each of the command buffers.
         for (size_t i = 0; i < commandBuffers.size(); ++i)
@@ -229,44 +240,23 @@ namespace nc::graphics::vulkan
                 commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
                 {
                     commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-
-                    auto dimensions = graphics::d3dresource::GraphicsResourceManager::GetGraphics2()->GetDimensions();
-                    vk::Viewport viewport = {};
-                    viewport.setWidth(dimensions.x);
-                    viewport.setHeight(dimensions.y);
-                    viewport.setMinDepth(0.0f);
-                    viewport.setMaxDepth(1.0f);
-
-                    vk::Extent2D extent = {};
-                    extent.setWidth(dimensions.x);
-                    extent.setHeight(dimensions.y);
-                    vk::Rect2D scissor = {};
-                    scissor.setExtent(extent);
-                    scissor.setOffset({0, 0});
-
                     commandBuffers[i].setViewport(0, 1, &viewport);
                     commandBuffers[i].setScissor(0, 1, &scissor);
 
-                    boolean buffersBound = false;
-                    vk::Buffer vertexBuffers[1];
                     vk::DeviceSize offsets[] = { 0 };
+                    commandBuffers[i].bindVertexBuffers(0, 1, m_globalData.vertexBuffer, offsets);
+                    commandBuffers[i].bindIndexBuffer(*m_globalData.indexBuffer, 0, vk::IndexType::eUint32);
 
                     for (auto& mesh : m_meshes)
                     {
-                        // Bind the mesh data
-                        if (!buffersBound)
-                        {
-                            vertexBuffers[0] = *m_globalData.vertexBuffer;
-                            commandBuffers[i].bindVertexBuffers(0, 1, vertexBuffers, offsets);
-                            commandBuffers[i].bindIndexBuffer(*m_globalData.indexBuffer, 0, vk::IndexType::eUint32);
-                            buffersBound = true;
-                        }
-
+                        const auto viewMatrix = m_graphics->GetViewMatrix();
+                        const auto projectionMatrix = m_graphics->GetProjectionMatrix();
+                        
                         // Bind the transforms per object and draw each object
-                        auto transforms = m_objects.at(mesh.uid);
-                        for (uint32_t j = 0; j < transforms.size(); ++j)
+                        for (const auto* transform : m_objects.at(mesh.uid))
                         {
-                            auto matrix = GetMatrices(transforms[j]);
+                            auto modelViewMatrix = transform->GetTransformationMatrix() * viewMatrix;
+                            auto matrix = GetMatrices(modelViewMatrix, modelViewMatrix * projectionMatrix);
                             commandBuffers[i].pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(TransformMatrices), &matrix);
                             commandBuffers[i].drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                         }

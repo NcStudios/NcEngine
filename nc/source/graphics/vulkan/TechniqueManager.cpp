@@ -1,12 +1,14 @@
 #include "graphics/vulkan/TechniqueManager.h"
+#include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/techniques/SimpleTechnique.h"
 #include "component/Transform.h"
 
 namespace nc::graphics::vulkan
 {
-    TechniqueManager::TechniqueManager()
-    : m_techniques{},
+    TechniqueManager::TechniqueManager(nc::graphics::Graphics2* graphics)
+    : m_graphics{graphics},
+      m_techniques{},
       m_globalData{}
     {
     }
@@ -23,15 +25,13 @@ namespace nc::graphics::vulkan
         {
             if (registeredTechnique->GetType() == technique)
             {
-                registeredTechnique->RegisterMesh(mesh);
-                registeredTechnique->RegisterTransform(mesh.uid, transform);
+                registeredTechnique->RegisterRenderer(std::move(mesh), transform);
                 return;
             }
         }
 
         auto techniqueToRegister = CreateTechnique(technique);
-        techniqueToRegister->RegisterMesh(mesh);
-        techniqueToRegister->RegisterTransform(mesh.uid, transform);
+        techniqueToRegister->RegisterRenderer(std::move(mesh), transform);
         m_techniques.push_back(std::move(techniqueToRegister));
     }
 
@@ -48,12 +48,12 @@ namespace nc::graphics::vulkan
         switch (techniqueType)
         {
             case TechniqueType::Simple:
-                return std::make_unique<SimpleTechnique>(m_globalData);
+                return std::make_unique<SimpleTechnique>(m_globalData, m_graphics);
             case TechniqueType::None:
-                return std::make_unique<SimpleTechnique>(m_globalData);
+                throw std::runtime_error("Technique not implemented.");
         }
 
-        return std::make_unique<SimpleTechnique>(m_globalData);
+        throw std::runtime_error("Invalid technique chosen.");
     }
 
     void TechniqueManager::Clear()

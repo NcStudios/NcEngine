@@ -1,13 +1,14 @@
 #include "RendererSystem.h"
 #include "ECS.h"
 #include "graphics/vulkan/Commands.h"
+#include "graphics/Graphics2.h"
 
 namespace nc::ecs
 {
-    RendererSystem::RendererSystem(uint32_t renderersCount)
+    RendererSystem::RendererSystem(uint32_t renderersCount, graphics::Graphics2* graphics)
     : m_componentSystem{renderersCount},
-      m_meshManager{},
-      m_techniqueManager{}
+      m_meshManager{graphics},
+      m_techniqueManager{graphics}
     {
         internal::RegisterRendererSystem(this);
         m_techniqueManager.RegisterGlobalData(m_meshManager.GetVertexBuffer(), m_meshManager.GetIndexBuffer());
@@ -25,9 +26,6 @@ namespace nc::ecs
 
     vulkan::Renderer* RendererSystem::Add(EntityHandle parentHandle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
     {
-        (void)meshUid;
-        (void)techniqueType;
-
         auto mesh = m_meshManager.GetMesh(std::move(meshUid));
         auto renderer = m_componentSystem.Add(parentHandle);
         m_techniqueManager.RegisterRenderer(techniqueType, std::move(mesh), renderer->GetTransform());

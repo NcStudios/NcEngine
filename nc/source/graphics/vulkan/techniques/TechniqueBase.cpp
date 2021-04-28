@@ -3,7 +3,6 @@
 #include "graphics/vulkan/Base.h"
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/TechniqueManager.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/Graphics2.h"
 
 #include <vector>
@@ -11,14 +10,13 @@
 #include <fstream>
 #include <iostream>
 
-using namespace nc::graphics::d3dresource;
-
 namespace nc::graphics::vulkan
 {
-    TechniqueBase::TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData)
-    : m_base{ GraphicsResourceManager::GetGraphics2()->GetBase() },
-      m_swapchain{ GraphicsResourceManager::GetGraphics2()->GetSwapchain() },
-      m_globalData{globalData},
+    TechniqueBase::TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData, nc::graphics::Graphics2* graphics)
+    : m_graphics{ graphics },
+      m_base{ graphics->GetBase() },
+      m_swapchain{ graphics->GetSwapchain() },
+      m_globalData{ globalData },
       m_meshes{},
       m_objects{},
       m_pipeline{},
@@ -40,17 +38,19 @@ namespace nc::graphics::vulkan
         base.destroyPipeline(m_pipeline);
     }
 
-    void TechniqueBase::RegisterMesh(Mesh mesh)
+    void TechniqueBase::RegisterRenderer(Mesh mesh, Transform* transform)
     {
         for (auto& registeredMesh : m_meshes)
         {
             if (registeredMesh.uid.compare(mesh.uid) == 0)
             {
+                auto& objects = m_objects.at(registeredMesh.uid);
+                objects.push_back(transform);
                 return;
             }
         }
-
         m_meshes.push_back(mesh);
+        m_objects.emplace(mesh.uid, std::vector<Transform*>{transform} );
     }
 
     TechniqueType TechniqueBase::GetType() const noexcept
@@ -58,20 +58,6 @@ namespace nc::graphics::vulkan
         return m_type;
     }
     
-    void TechniqueBase::RegisterTransform(std::string meshUid, Transform* transform)
-    {
-        for (auto& objects : m_objects)
-        {
-            if (objects.first.compare(meshUid) == 0)
-            {
-                objects.second.push_back(transform);
-                return;
-            }
-        }
-
-        m_objects.emplace(meshUid, std::vector<Transform*>{transform} );
-    }
-
     vk::ShaderModule TechniqueBase::CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base)
     {
         vk::ShaderModuleCreateInfo createInfo{};

@@ -70,7 +70,7 @@ namespace nc::core
           m_jobSystem{2},
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_ecs{},
+          m_ecs{&m_graphics2},
           m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{}
@@ -183,7 +183,7 @@ namespace nc::core
         auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
 
-        auto rendererSystem = m_ecs.GetRendererSystem();
+        auto rendererSystem = m_ecs.GetRendererSystem2();
 
         // @todo: conditionally update based on changes
         rendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());

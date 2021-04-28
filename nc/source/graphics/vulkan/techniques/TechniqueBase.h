@@ -7,24 +7,28 @@
 #include <vector>
 
 namespace nc { class Transform; }
-namespace nc::graphics::vulkan { class Base; class Swapchain; class Commands; struct GlobalData; }
+namespace nc::graphics
+{
+    class Graphics2;
+    namespace vulkan { class Base; class Swapchain; class Commands; struct GlobalData; }
+}
 
 namespace nc::graphics::vulkan
 {
     class TechniqueBase
     {
         public:
-            TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData);
+            TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData, nc::graphics::Graphics2* graphics);
             vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base);
             static std::vector<uint32_t> ReadShader(const std::string& filename);
             TechniqueType GetType() const noexcept;
-            void RegisterMesh(Mesh mesh);
-            void RegisterTransform(std::string meshUid, Transform* transform);
+            void RegisterRenderer(Mesh mesh, Transform* transform);
 
             virtual ~TechniqueBase() noexcept;
             virtual void Record(Commands* commands) = 0;
 
         protected:
+            nc::graphics::Graphics2* m_graphics;
             const Base& m_base;
             const Swapchain& m_swapchain;
             const GlobalData& m_globalData;

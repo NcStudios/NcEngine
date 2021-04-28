@@ -1,4 +1,5 @@
 #include "graphics/vulkan/MeshManager.h"
+#include "graphics/Graphics2.h"
 #include "debug/Utils.h"
 
 #include <fstream>
@@ -92,9 +93,9 @@ namespace nc::graphics::vulkan
         return attributeDescriptions;
     }
 
-    MeshManager::MeshManager()
-    : m_vertexBuffer{std::make_unique<ImmutableBuffer<Vertex>>()},
-      m_indexBuffer{std::make_unique<ImmutableBuffer<uint32_t>>()},
+    MeshManager::MeshManager(nc::graphics::Graphics2* graphics)
+    : m_vertexBuffer{std::make_unique<ImmutableBuffer<Vertex>>(graphics)},
+      m_indexBuffer{std::make_unique<ImmutableBuffer<uint32_t>>(graphics)},
       m_vertices{},
       m_indices{},
       m_meshes{}
@@ -102,13 +103,13 @@ namespace nc::graphics::vulkan
         impl = this;
     }
 
-    void LoadMeshes(std::vector<std::string> meshPaths)
+    void LoadMeshes(const std::vector<std::string>& meshPaths)
     {
         IF_THROW(!impl, "graphics::vulkan::LoadMeshAsset - impl is not set");
         impl->LoadMeshes(meshPaths);
     }
 
-    void MeshManager::LoadMeshes(std::vector<std::string> meshPaths)
+    void MeshManager::LoadMeshes(const std::vector<std::string>& meshPaths)
     {
         for (auto& path : meshPaths)
         {
@@ -150,7 +151,7 @@ namespace nc::graphics::vulkan
         m_indexBuffer->Bind(m_indices);
     }
 
-    Mesh MeshManager::GetMesh(std::string uid)
+    Mesh MeshManager::GetMesh(const std::string& uid) const
     {
         return m_meshes.at(uid);
     }
@@ -165,7 +166,7 @@ namespace nc::graphics::vulkan
         return m_indexBuffer->GetBuffer();
     }
 
-    bool MeshManager::MeshExists(std::string uid)
+    bool MeshManager::MeshExists(const std::string& uid) const
     {
         return m_meshes.find(uid) != m_meshes.end();
     }

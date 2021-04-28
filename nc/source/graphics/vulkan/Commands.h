@@ -6,7 +6,7 @@
 
 namespace nc::graphics::vulkan
 {
-    class Base; class FrameBuffers; class VertexBuffer; class IndexBuffer; class Swapchain;
+    class Base; class Swapchain;
 
     class Commands
     {

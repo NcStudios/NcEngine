@@ -1,15 +1,10 @@
 #pragma once
 
-#include "math/Vector2.h"
-#include "math/Vector3.h"
-#include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/Base.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/Graphics2.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
 
 #include <vector>
-#include <array>
 #include "vulkan/vulkan.hpp"
 
 namespace nc::graphics::vulkan
@@ -37,7 +32,7 @@ namespace nc::graphics::vulkan
     {
         public:
 
-            ImmutableBuffer();
+            ImmutableBuffer(nc::graphics::Graphics2* graphics);
             ImmutableBuffer(ImmutableBuffer&&) = delete;
             ImmutableBuffer& operator = (ImmutableBuffer&&) = delete;
             ImmutableBuffer& operator = (const ImmutableBuffer&) = delete;
@@ -56,8 +51,8 @@ namespace nc::graphics::vulkan
     };
 
     template<typename T, IncludedUsage UsageFlag_T>
-    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer()
-    : m_base { d3dresource::GraphicsResourceManager::GetGraphics2()->GetBasePtr() },
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics2* graphics)
+    : m_base { graphics->GetBasePtr() },
       m_memoryIndex { 0 },
       m_immutableBuffer { nullptr }
     {

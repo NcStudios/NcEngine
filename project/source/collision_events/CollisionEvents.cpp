@@ -4,7 +4,7 @@
 #include "imgui/imgui.h"
 #include "shared/Prefabs.h"
 #include "shared/SceneNavigationCamera.h"
-#include "WasdController.h"
+#include "shared/WasdController.h"
 #include "CollisionLogger.h"
 
 namespace

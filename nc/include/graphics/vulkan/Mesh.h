@@ -17,7 +17,7 @@ namespace nc::graphics::vulkan
         Vector3 Bitangent;
     };
 
-    void LoadMeshes(std::vector<std::string> paths);
+    void LoadMeshes(const std::vector<std::string>& paths);
 
     struct Mesh
     {
