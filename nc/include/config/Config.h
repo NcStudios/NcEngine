@@ -4,45 +4,45 @@
 
 namespace nc::config
 {
-    struct Config
+    struct ProjectSettings
     {
-        struct
-        {
-            std::string projectName;
-            std::string logFilePath;
-        } project;
-        
-        struct
-        {
-            unsigned maxDynamicColliders;
-            unsigned maxStaticColliders;
-            unsigned maxNetworkDispatchers;
-            unsigned maxRenderers;
-            unsigned maxTransforms;
-        } memory;
-
-        struct
-        {
-            bool useNativeResolution;
-            bool launchInFullscreen;
-            unsigned screenWidth;
-            unsigned screenHeight;
-            unsigned targetFPS;
-            float nearClip;
-            float farClip;
-            float frameUpdateInterval;
-            std::string d3dShadersPath;
-            std::string vulkanShadersPath;
-        } graphics;
-
-        struct
-        {
-            float fixedUpdateInterval;
-            float worldspaceExtent;
-            unsigned octreeDensityThreshold;
-            float octreeMinimumExtent;
-        } physics;
+        std::string projectName;
+        std::string logFilePath;
     };
 
-    [[nodiscard]] const Config& Get();
+    struct MemorySettings
+    {
+        unsigned maxDynamicColliders;
+        unsigned maxStaticColliders;
+        unsigned maxNetworkDispatchers;
+        unsigned maxRenderers;
+        unsigned maxTransforms;
+    };
+
+    struct GraphicsSettings
+    {
+        bool useNativeResolution;
+        bool launchInFullscreen;
+        unsigned screenWidth;
+        unsigned screenHeight;
+        unsigned targetFPS;
+        float nearClip;
+        float farClip;
+        float frameUpdateInterval;
+        std::string d3dShadersPath;
+        std::string vulkanShadersPath;
+    };
+
+    struct PhysicsSettings
+    {
+        float fixedUpdateInterval;
+        float worldspaceExtent;
+        unsigned octreeDensityThreshold;
+        float octreeMinimumExtent;
+    };
+
+    [[nodiscard]] const ProjectSettings& GetProjectSettings();
+    [[nodiscard]] const MemorySettings& GetMemorySettings();
+    [[nodiscard]] const GraphicsSettings& GetGraphicsSettings();
+    [[nodiscard]] const PhysicsSettings& GetPhysicsSettings();
 }

@@ -10,7 +10,7 @@ namespace
     constexpr size_t InnerNodeIndex = 1u;
 }
 
-namespace nc::physics
+namespace nc::ecs
 {
     Octant::Octant(DirectX::XMFLOAT3 center, float extent)
         : m_boundingVolume{center, {extent, extent, extent}},
@@ -134,7 +134,7 @@ namespace nc::physics
 
     void ColliderTree::Add(EntityHandle handle, const ColliderInfo& info)
     {
-        auto volume = CalculateBoundingVolume(info.type, GetVolumePropertiesFromColliderInfo(info), &GetComponent<Transform>(handle)->GetTransformationMatrix());
+        auto volume = physics::CalculateBoundingVolume(info.type, physics::GetVolumePropertiesFromColliderInfo(info), &GetComponent<Transform>(handle)->GetTransformationMatrix());
         m_staticEntries.push_back(alloc::make_unique<StaticTreeEntry, Allocator>(volume, GetEntity(handle)->Layer, handle));
         m_root.Add(m_staticEntries.back().get());
     }
@@ -175,4 +175,4 @@ namespace nc::physics
         m_root.BroadCheck(volume, &out);
         return out;
     }
-}
+} // namespace nc::ecs

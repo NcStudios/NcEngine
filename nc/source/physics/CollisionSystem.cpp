@@ -13,26 +13,15 @@ namespace nc::physics
                (lhs.first == rhs.second && lhs.second == rhs.first);
     }
 
-    CollisionSystem::CollisionSystem(uint32_t maxDynamicColliders,
-                                     uint32_t maxStaticColliders,
-                                     uint32_t octreeDensityThreshold,
-                                     float octreeMinimumExtent,
-                                     float worldspaceExtent,
-                                     job::JobSystem* jobSystem)
-        : m_colliderSystem{maxDynamicColliders, maxStaticColliders, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent},
+    CollisionSystem::CollisionSystem(ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
+        : m_colliderSystem{colliderSystem},
+          m_jobSystem{jobSystem},
           m_dynamicEstimates{},
           m_broadEventsVsDynamic{},
           m_broadEventsVsStatic{},
           m_currentCollisions{},
-          m_previousCollisions{},
-          m_jobSystem{jobSystem}
+          m_previousCollisions{}
     {
-        internal::RegisterColliderSystem(&m_colliderSystem);
-    }
-
-    ecs::ComponentSystem<Collider>* CollisionSystem::GetColliderSystem()
-    {
-        return m_colliderSystem.GetComponentSystem();
     }
 
     void CollisionSystem::DoCollisionStep()
@@ -59,7 +48,6 @@ namespace nc::physics
 
     void CollisionSystem::ClearState()
     {
-        m_colliderSystem.Clear();
         m_broadEventsVsDynamic.resize(0u);
         m_broadEventsVsStatic.resize(0u);
         m_currentCollisions.resize(0u);
@@ -68,7 +56,7 @@ namespace nc::physics
 
     void CollisionSystem::FetchEstimates()
     {
-        const auto* soa = m_colliderSystem.GetDynamicSoA();
+        const auto* soa = m_colliderSystem->GetDynamicSoA();
         const auto properties = soa->GetSpan<VolumeProperties>();
         const auto transforms = soa->GetSpan<const DirectX::XMMATRIX*>();
         auto index = soa->SmartIndex();
@@ -96,7 +84,7 @@ namespace nc::physics
     void CollisionSystem::BroadDetectVsStatic()
     {
         const auto dynamicSize = m_dynamicEstimates.size();
-        auto* staticTree = m_colliderSystem.GetStaticTree();
+        auto* staticTree = m_colliderSystem->GetStaticTree();
         for(size_t i = 0u; i < dynamicSize; ++i)
         {
             // Check vs bodies in static tree
@@ -116,7 +104,7 @@ namespace nc::physics
      *  upfront. */
     void CollisionSystem::NarrowDetectVsDynamic()
     {
-        auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
+        auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
         const auto handles = dynamicSoA->GetSpan<EntityHandle::Handle_t>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
         const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
@@ -132,7 +120,7 @@ namespace nc::physics
 
     void CollisionSystem::NarrowDetectVsStatic()
     {
-        auto* dynamicSoA = m_colliderSystem.GetDynamicSoA();
+        auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
         const auto handles = dynamicSoA->GetSpan<EntityHandle::Handle_t>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
         const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
@@ -210,7 +198,7 @@ namespace nc::physics
     #ifdef NC_EDITOR_ENABLED
     void CollisionSystem::UpdateWidgets(graphics::FrameManager* frameManager)
     {
-        for(auto& collider : m_colliderSystem.GetComponents())
+        for(auto& collider : m_colliderSystem->GetComponents())
         {
             collider->UpdateWidget(frameManager);
         }

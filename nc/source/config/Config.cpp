@@ -10,6 +10,16 @@
 
 namespace
 {
+    struct Config
+    {
+        nc::config::ProjectSettings projectSettings;
+        nc::config::MemorySettings memorySettings;
+        nc::config::GraphicsSettings graphicsSettings;
+        nc::config::PhysicsSettings physicsSettings;
+    };
+
+    std::unique_ptr<Config> g_config = nullptr;
+
     const auto ConfigPath = std::string{"nc/source/config/config.ini"};
 
     // project
@@ -40,58 +50,58 @@ namespace
     const auto D3dShadersPathKey = std::string{"d3d_shaders_path"};
     const auto VulkanShadersPathKey = std::string{"vulkan_shaders_path"};
 
-    void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config& out)
+    void MapKeyValue(const std::string& key, const std::string& value, Config* out)
     {
         // project
         if (key == ProjectNameKey)
-            out.project.projectName = value;
+            out->projectSettings.projectName = value;
         else if (key == LogFilePathKey)
-            out.project.logFilePath = value;
+            out->projectSettings.logFilePath = value;
         
         // memory
         else if(key == MaxDynamicCollidersKey)
-            out.memory.maxDynamicColliders = std::stoi(value);
+            out->memorySettings.maxDynamicColliders = std::stoi(value);
         else if(key == MaxStaticCollidersKey)
-            out.memory.maxStaticColliders = std::stoi(value);
+            out->memorySettings.maxStaticColliders = std::stoi(value);
         else if(key == MaxNetworkDispatchersKey)
-            out.memory.maxNetworkDispatchers = std::stoi(value);
+            out->memorySettings.maxNetworkDispatchers = std::stoi(value);
         else if(key == MaxRenderersKey)
-            out.memory.maxRenderers = std::stoi(value);
+            out->memorySettings.maxRenderers = std::stoi(value);
         else if(key == MaxTransformsKey)
-            out.memory.maxTransforms = std::stoi(value);
+            out->memorySettings.maxTransforms = std::stoi(value);
 
         // physics
         else if (key == FixedUpdateIntervalKey)
-            out.physics.fixedUpdateInterval = std::stof(value);
+            out->physicsSettings.fixedUpdateInterval = std::stof(value);
         else if (key == WorldspaceExtentKey)
-            out.physics.worldspaceExtent = std::stof(value);
+            out->physicsSettings.worldspaceExtent = std::stof(value);
         else if (key == OctreeDensityThresholdKey)
-            out.physics.octreeDensityThreshold = std::stoi(value);
+            out->physicsSettings.octreeDensityThreshold = std::stoi(value);
         else if (key == OctreeMinimumExtentKey)
-            out.physics.octreeMinimumExtent = std::stof(value);
+            out->physicsSettings.octreeMinimumExtent = std::stof(value);
 
         // graphics
         else if (key == UseNativeResolutionKey)
-            out.graphics.useNativeResolution = std::stoi(value);
+            out->graphicsSettings.useNativeResolution = std::stoi(value);
         else if (key == LaunchInFullscreenKey)
-            out.graphics.launchInFullscreen = std::stoi(value);
+            out->graphicsSettings.launchInFullscreen = std::stoi(value);
         else if (key == ScreenWidthKey)
-            out.graphics.screenWidth = std::stoi(value);
+            out->graphicsSettings.screenWidth = std::stoi(value);
         else if (key == ScreenHeightKey)
-            out.graphics.screenHeight = std::stoi(value);
+            out->graphicsSettings.screenHeight = std::stoi(value);
         else if (key == TargetFpsKey)
         {
-            out.graphics.targetFPS = std::stoi(value);
-            out.graphics.frameUpdateInterval = 1.0 / static_cast<float>(out.graphics.targetFPS);
+            out->graphicsSettings.targetFPS = std::stoi(value);
+            out->graphicsSettings.frameUpdateInterval = 1.0 / static_cast<float>(out->graphicsSettings.targetFPS);
         }
         else if (key == NearClipKey)
-            out.graphics.nearClip = std::stof(value);
+            out->graphicsSettings.nearClip = std::stof(value);
         else if (key == FarClipKey)
-            out.graphics.farClip = std::stof(value);
+            out->graphicsSettings.farClip = std::stof(value);
         else if (key == D3dShadersPathKey)
-            out.graphics.d3dShadersPath = value;
+            out->graphicsSettings.d3dShadersPath = value;
         else if (key == VulkanShadersPathKey)
-            out.graphics.vulkanShadersPath = value;
+            out->graphicsSettings.vulkanShadersPath = value;
         else
             throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
     };
@@ -99,27 +109,43 @@ namespace
 
 namespace nc::config
 {
-    std::unique_ptr<Config> g_instance = nullptr;
-
     /* Api function implementation */
-    const Config& Get()
+    const ProjectSettings& GetProjectSettings()
     {
-        IF_THROW(!g_instance, "config::Get - No config loaded");
-        return *g_instance;
+        IF_THROW(!g_config, "config::GetProjectSettings - No config loaded");
+        return g_config->projectSettings;
+    }
+
+    const MemorySettings& GetMemorySettings()
+    {
+        IF_THROW(!g_config, "config::GetMemorySettings - No config loaded");
+        return g_config->memorySettings;
+    }
+
+    const GraphicsSettings& GetGraphicsSettings()
+    {
+        IF_THROW(!g_config, "config::GetGraphicsSettings - No config loaded");
+        return g_config->graphicsSettings;
+    }
+
+    const PhysicsSettings& GetPhysicsSettings()
+    {
+        IF_THROW(!g_config, "config::GetPhysicsSettings - No config loaded");
+        return g_config->physicsSettings;
     }
 
     /* Internal function implementation */
     void Load()
     {
-        g_instance = std::make_unique<Config>();
-        nc::config::Read(ConfigPath, MapKeyValue, *g_instance);
+        g_config = std::make_unique<Config>();
+        nc::config::Read(ConfigPath, MapKeyValue, g_config.get());
         if(!Validate())
             throw std::runtime_error("config::Load - Failed to validate config");
     }
 
     void Save()
     {
-        IF_THROW(!g_instance, "config::Save - No config loaded");
+        IF_THROW(!g_config, "config::Save - No config loaded");
         if (!Validate())
             throw std::runtime_error("config::Save - failed to validate config");
 
@@ -129,49 +155,49 @@ namespace nc::config
             throw std::runtime_error("config::Save - failed to open file");
 
         outFile << "[project]\n"
-                << ProjectNameKey << INI_KEY_VALUE_DELIM << g_instance->project.projectName << '\n'
-                << LogFilePathKey << INI_KEY_VALUE_DELIM << g_instance->project.logFilePath << '\n'
+                << ProjectNameKey << INI_KEY_VALUE_DELIM << g_config->projectSettings.projectName << '\n'
+                << LogFilePathKey << INI_KEY_VALUE_DELIM << g_config->projectSettings.logFilePath << '\n'
                 << "[memory]\n"
-                << MaxDynamicCollidersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxDynamicColliders << '\n'
-                << MaxStaticCollidersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxStaticColliders << '\n'
-                << MaxNetworkDispatchersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxNetworkDispatchers << '\n'
-                << MaxRenderersKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxRenderers << '\n'
-                << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_instance->memory.maxTransforms << '\n'
+                << MaxDynamicCollidersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxDynamicColliders << '\n'
+                << MaxStaticCollidersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxStaticColliders << '\n'
+                << MaxNetworkDispatchersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxNetworkDispatchers << '\n'
+                << MaxRenderersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxRenderers << '\n'
+                << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxTransforms << '\n'
                 << "[physics]\n"
-                << FixedUpdateIntervalKey << INI_KEY_VALUE_DELIM << g_instance->physics.fixedUpdateInterval << '\n'
-                << WorldspaceExtentKey << INI_KEY_VALUE_DELIM << g_instance->physics.worldspaceExtent << '\n'
-                << OctreeDensityThresholdKey << INI_KEY_VALUE_DELIM << g_instance->physics.octreeDensityThreshold << '\n'
-                << OctreeMinimumExtentKey << INI_KEY_VALUE_DELIM << g_instance->physics.octreeMinimumExtent << '\n'
+                << FixedUpdateIntervalKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.fixedUpdateInterval << '\n'
+                << WorldspaceExtentKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.worldspaceExtent << '\n'
+                << OctreeDensityThresholdKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.octreeDensityThreshold << '\n'
+                << OctreeMinimumExtentKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.octreeMinimumExtent << '\n'
                 << "[graphics]\n"
-                << UseNativeResolutionKey << INI_KEY_VALUE_DELIM << g_instance->graphics.useNativeResolution << '\n'
-                << LaunchInFullscreenKey << INI_KEY_VALUE_DELIM << g_instance->graphics.launchInFullscreen << '\n'
-                << ScreenWidthKey << INI_KEY_VALUE_DELIM << g_instance->graphics.screenWidth << '\n'
-                << ScreenHeightKey << INI_KEY_VALUE_DELIM << g_instance->graphics.screenHeight << '\n'
-                << TargetFpsKey << INI_KEY_VALUE_DELIM << g_instance->graphics.targetFPS << '\n'
-                << NearClipKey << INI_KEY_VALUE_DELIM << g_instance->graphics.nearClip << '\n'
-                << FarClipKey << INI_KEY_VALUE_DELIM << g_instance->graphics.farClip << '\n'
-                << D3dShadersPathKey << INI_KEY_VALUE_DELIM << g_instance->graphics.d3dShadersPath << '\n'
-                << VulkanShadersPathKey << INI_KEY_VALUE_DELIM << g_instance->graphics.vulkanShadersPath;
+                << UseNativeResolutionKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.useNativeResolution << '\n'
+                << LaunchInFullscreenKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.launchInFullscreen << '\n'
+                << ScreenWidthKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.screenWidth << '\n'
+                << ScreenHeightKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.screenHeight << '\n'
+                << TargetFpsKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.targetFPS << '\n'
+                << NearClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.nearClip << '\n'
+                << FarClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.farClip << '\n'
+                << D3dShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.d3dShadersPath << '\n'
+                << VulkanShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.vulkanShadersPath;
 
         outFile.close();
     }
 
     bool Validate()
     {
-        IF_THROW(!g_instance, "config::Validate - No config loaded");
-        return { (g_instance->project.projectName != "") &&
-                 (g_instance->project.logFilePath != "") &&
-                 (g_instance->physics.fixedUpdateInterval > 0.0f) &&
-                 (g_instance->physics.worldspaceExtent > 0.0f) &&
-                 (g_instance->physics.octreeDensityThreshold > 0u) &&
-                 (g_instance->physics.octreeMinimumExtent > 0.0f) &&
-                 (g_instance->graphics.screenWidth != 0) &&
-                 (g_instance->graphics.screenHeight != 0) &&
-                 (g_instance->graphics.targetFPS != 0) &&
-                 (g_instance->graphics.frameUpdateInterval > 0.0f) &&
-                 (g_instance->graphics.nearClip > 0.0f) &&
-                 (g_instance->graphics.farClip > 0.0f) &&
-                 (g_instance->graphics.d3dShadersPath != "") &&
-                 (g_instance->graphics.vulkanShadersPath != "")};
+        IF_THROW(!g_config, "config::Validate - No config loaded");
+        return { (g_config->projectSettings.projectName != "") &&
+                 (g_config->projectSettings.logFilePath != "") &&
+                 (g_config->physicsSettings.fixedUpdateInterval > 0.0f) &&
+                 (g_config->physicsSettings.worldspaceExtent > 0.0f) &&
+                 (g_config->physicsSettings.octreeDensityThreshold > 0u) &&
+                 (g_config->physicsSettings.octreeMinimumExtent > 0.0f) &&
+                 (g_config->graphicsSettings.screenWidth != 0) &&
+                 (g_config->graphicsSettings.screenHeight != 0) &&
+                 (g_config->graphicsSettings.targetFPS != 0) &&
+                 (g_config->graphicsSettings.frameUpdateInterval > 0.0f) &&
+                 (g_config->graphicsSettings.nearClip > 0.0f) &&
+                 (g_config->graphicsSettings.farClip > 0.0f) &&
+                 (g_config->graphicsSettings.d3dShadersPath != "") &&
+                 (g_config->graphicsSettings.vulkanShadersPath != "")};
     }
 } // end namespace nc::config 
