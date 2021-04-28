@@ -25,7 +25,7 @@ EntityComponentSystem::EntityComponentSystem()
       m_colliderSystem{nullptr},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
       #ifdef USE_VULKAN
-      m_rendererSystem2{ std::make_unique<RendererSystem>(config::Get().memory.maxRenderers) },
+      m_rendererSystem2{ std::make_unique<RendererSystem>(config::GetMemorySettings().maxRenderers) },
       #endif
       m_rendererSystem{nullptr},
       m_transformSystem{nullptr},
@@ -71,7 +71,7 @@ template<> ComponentSystem<vulkan::Renderer>* EntityComponentSystem::GetSystem<v
     return m_rendererSystem2->GetSystem();
 }
 
-RendererSystem* EntityComponentSystem::GetRendererSystem()
+RendererSystem* EntityComponentSystem::GetRendererSystem2()
 {
     return m_rendererSystem2.get();
 }

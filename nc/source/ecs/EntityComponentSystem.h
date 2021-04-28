@@ -43,7 +43,7 @@ namespace nc::ecs
             ComponentSystem<T>* GetSystem();
 
             #ifdef USE_VULKAN
-            RendererSystem* GetRendererSystem();
+            RendererSystem* GetRendererSystem2();
             #endif
             
             ColliderSystem* GetColliderSystem() const;
