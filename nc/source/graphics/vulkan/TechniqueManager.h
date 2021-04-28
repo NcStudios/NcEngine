@@ -7,7 +7,11 @@
 #include <vector>
 #include <memory>
 
-namespace nc { class Transform; }
+namespace nc 
+{ 
+    class Transform;
+    namespace graphics { class Graphics2; }
+}
 
 namespace nc::graphics::vulkan
 {
@@ -22,7 +26,7 @@ namespace nc::graphics::vulkan
     class TechniqueManager
     {
         public:
-            TechniqueManager();
+            TechniqueManager(nc::graphics::Graphics2* graphics);
             void RegisterRenderer(TechniqueType technique, Mesh mesh, Transform* transform);
             void RecordTechniques(Commands* commands);
             void RegisterGlobalData(vk::Buffer* vertexBuffer, vk::Buffer* indexBuffer);
@@ -30,6 +34,7 @@ namespace nc::graphics::vulkan
             void Clear();
 
         private:
+            Graphics2* m_graphics;
             std::vector<std::unique_ptr<TechniqueBase>> m_techniques;
             GlobalData m_globalData;
     };

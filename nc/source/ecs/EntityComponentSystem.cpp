@@ -6,6 +6,7 @@
 #include "component/PointLightManager.h"
 #ifdef USE_VULKAN
 #include "component/vulkan/Renderer.h"
+#include "graphics/Graphics2.h"
 #endif
 #include "component/Renderer.h"
 #include "component/Transform.h"
@@ -49,6 +50,38 @@ EntityComponentSystem::EntityComponentSystem()
 
     internal::RegisterEcs(this);
 }
+
+#ifdef USE_VULKAN
+EntityComponentSystem::EntityComponentSystem(nc::graphics::Graphics2* graphics)
+    : m_handleManager{},
+      m_active{InitialBucketSize, EntityHandle::Hash()},
+      m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
+      m_colliderSystem{nullptr},
+      m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
+      m_rendererSystem2{ std::make_unique<RendererSystem>(config::GetMemorySettings().maxRenderers, graphics) },
+      m_rendererSystem{nullptr},
+      m_transformSystem{nullptr},
+      m_networkDispatcherSystem{nullptr}
+{
+    const auto& memorySettings = config::GetMemorySettings();
+    const auto& physicsSettings = config::GetPhysicsSettings();
+
+    m_colliderSystem = std::make_unique<ColliderSystem>
+    (
+        memorySettings.maxDynamicColliders,
+        memorySettings.maxStaticColliders,
+        physicsSettings.octreeDensityThreshold,
+        physicsSettings.octreeMinimumExtent,
+        physicsSettings.worldspaceExtent
+    );
+
+    m_rendererSystem = std::make_unique<ComponentSystem<Renderer>>(memorySettings.maxRenderers);
+    m_transformSystem = std::make_unique<ComponentSystem<Transform>>(memorySettings.maxTransforms);
+    m_networkDispatcherSystem = std::make_unique<ComponentSystem<NetworkDispatcher>>(memorySettings.maxNetworkDispatchers);
+
+    internal::RegisterEcs(this);
+}
+#endif
 
 ColliderSystem* EntityComponentSystem::GetColliderSystem() const
 {

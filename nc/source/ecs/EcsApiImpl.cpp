@@ -1,6 +1,6 @@
 #include "Ecs.h"
-#include "ecs/EntityComponentSystem.h"
 #include "ecs/ColliderSystem.h"
+#include "ecs/EntityComponentSystem.h"
 #ifdef USE_VULKAN
     #include "ecs/RendererSystem.h"
 #endif

@@ -5,14 +5,12 @@
 
 namespace nc::graphics::vulkan
 {
-    TransformMatrices GetMatrices(Transform* transform)
+    TransformMatrices GetMatrices(DirectX::XMMATRIX modelView, DirectX::XMMATRIX modelViewProjection)
     {
-        const auto gfx = nc::graphics::d3dresource::GraphicsResourceManager::GetGraphics2();
-        const auto modelView = transform->GetTransformationMatrix() * gfx->GetViewMatrix();
         return
         {
             DirectX::XMMatrixTranspose(modelView),
-            DirectX::XMMatrixTranspose(modelView * gfx->GetProjectionMatrix())
+            DirectX::XMMatrixTranspose(modelViewProjection)
         };
     }
 }

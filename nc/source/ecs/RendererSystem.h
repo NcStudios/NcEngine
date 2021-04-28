@@ -1,19 +1,21 @@
 #pragma once
 #include "ComponentSystem.h"
 #include "component/vulkan/Renderer.h"
-#include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/MeshManager.h"
 #include "graphics/vulkan/TechniqueManager.h"
-#include "graphics/vulkan/TechniqueType.h"
 
-namespace nc::graphics::vulkan { class Commands; }
+namespace nc::graphics 
+{
+    class Graphics2;
+    namespace vulkan { class Commands; }
+}
 
 namespace nc::ecs
 {
     class RendererSystem
     {
         public:
-            RendererSystem(uint32_t renderersCount);
+            RendererSystem(uint32_t renderersCount, graphics::Graphics2* graphics);
 
             ComponentSystem<vulkan::Renderer>* GetSystem();
             void RecordTechniques(nc::graphics::vulkan::Commands* commands);

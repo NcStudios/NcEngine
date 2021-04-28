@@ -4,7 +4,7 @@
 #include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/TechniqueType.h"
 #include "shared/SceneNavigationCamera.h"
-#include "WasdController.h"
+#include "shared/WasdController.h"
 
 #include <string>
 

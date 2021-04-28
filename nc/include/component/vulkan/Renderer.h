@@ -11,8 +11,5 @@ namespace nc::vulkan
         public:
             Renderer(EntityHandle handle);
             Transform* GetTransform();
-
-        private: 
-            Transform* m_transform;
     };
 }

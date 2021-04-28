@@ -22,7 +22,6 @@ namespace nc::graphics
           m_projectionMatrix{}
     {
         SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
-        d3dresource::GraphicsResourceManager::SetGraphics2(this);
     }
 
     Graphics2::~Graphics2() = default;

@@ -4,22 +4,26 @@
 #include "vulkan/vulkan.hpp"
 #include <vector>
 
-namespace nc::graphics::vulkan
+namespace nc::graphics
 {
-    class Base; class Swapchain; class Commands; struct GlobalData;
-
-    class SimpleTechnique : public TechniqueBase
+    namespace vulkan
     {
-        public:
-            SimpleTechnique(const GlobalData& globalData);
-            ~SimpleTechnique();
-            void Record(Commands* commands) override;
+        class Graphics2;
+        class Base; class Swapchain; class Commands; struct GlobalData;
 
-        private:
-            void CreateDescriptorSetLayout();
-            void CreatePipeline();
-            void CreateRenderPasses();
+        class SimpleTechnique : public TechniqueBase
+        {
+            public:
+                SimpleTechnique(const GlobalData& globalData, nc::graphics::Graphics2* graphics);
+                ~SimpleTechnique();
+                void Record(Commands* commands) override;
 
-            vk::DescriptorSetLayout m_descriptorSetLayout;
-    };
+            private:
+                void CreateDescriptorSetLayout();
+                void CreatePipeline();
+                void CreateRenderPasses();
+
+                vk::DescriptorSetLayout m_descriptorSetLayout;
+        };
+    }
 }

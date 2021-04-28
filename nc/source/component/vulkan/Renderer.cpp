@@ -4,13 +4,12 @@
 namespace nc::vulkan
 {
     Renderer::Renderer(EntityHandle handle)
-    : Component{handle},
-      m_transform{ GetComponent<Transform>(handle) }
+    : Component{handle}
     {
     }
 
     Transform* Renderer::GetTransform()
     {
-        return m_transform;
+        return GetComponent<Transform>(GetParentHandle());
     }
 }

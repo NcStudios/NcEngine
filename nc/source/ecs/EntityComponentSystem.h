@@ -21,6 +21,10 @@ namespace nc
     class Vector3;
     class Quaternion;
     namespace physics { class ColliderSystem; }
+
+    #ifdef USE_VULKAN
+    namespace graphics { class Graphics2; }
+    #endif
 }
 
 namespace nc::ecs
@@ -37,6 +41,11 @@ namespace nc::ecs
     class EntityComponentSystem
     {
         public:
+            #ifdef USE_VULKAN
+            EntityComponentSystem(nc::graphics::Graphics2* graphics);
+            RendererSystem* GetRendererSystem2();
+            #endif
+
             EntityComponentSystem();
 
             template<std::derived_from<ComponentBase> T>
