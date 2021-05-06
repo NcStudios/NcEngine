@@ -19,16 +19,16 @@ EntityComponentSystem::EntityComponentSystem()
       m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
-      m_particleSystemManager{std::make_unique<ParticleSystemManager>(10u)},
+      m_particleEmitterSystem{std::make_unique<ParticleEmitterSystem>(10u)},
       m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>(config::Get().memory.maxRenderers) },
       m_transformSystem{ std::make_unique<ComponentSystem<Transform>>(config::Get().memory.maxTransforms) },
       m_networkDispatcherSystem{ std::make_unique<ComponentSystem<NetworkDispatcher>>(config::Get().memory.maxNetworkDispatchers) }
 {
 }
 
-ParticleSystemManager* EntityComponentSystem::GetParticleSystemManager()
+ParticleEmitterSystem* EntityComponentSystem::GetParticleEmitterSystem()
 {
-    return m_particleSystemManager.get();
+    return m_particleEmitterSystem.get();
 }
 
 template<> ComponentSystem<PointLight>* EntityComponentSystem::GetSystem<PointLight>()
@@ -123,7 +123,7 @@ void EntityComponentSystem::SendOnDestroy()
         m_rendererSystem->Remove(handle);
         m_lightSystem->Remove(handle);
         m_networkDispatcherSystem->Remove(handle);
-        m_particleSystemManager->Remove(handle);
+        m_particleEmitterSystem->Remove(handle);
     }
 
     m_toDestroy.clear();
@@ -150,6 +150,6 @@ void EntityComponentSystem::ClearState()
     m_rendererSystem->Clear();
     m_lightSystem->Clear();
     m_networkDispatcherSystem->Clear();
-    m_particleSystemManager->Clear();
+    m_particleEmitterSystem->Clear();
 }
 } // end namespace nc::ecs

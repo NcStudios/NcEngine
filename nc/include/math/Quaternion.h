@@ -8,6 +8,7 @@ namespace nc
     {
         float x, y, z, w;
 
+        Quaternion();
         Quaternion(float X, float Y, float Z, float W);
 
         Vector3 ToEulerAngles() const noexcept;

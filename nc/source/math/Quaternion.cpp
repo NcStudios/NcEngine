@@ -5,6 +5,11 @@
 
 namespace nc
 {
+    Quaternion::Quaternion()
+        : x{0.0f}, y{0.0f}, z{0.0f}, w{1.0f}
+    {
+    }
+
     Quaternion::Quaternion(float X, float Y, float Z, float W)
         : x{X}, y{Y}, z{Z}, w{W}
     {

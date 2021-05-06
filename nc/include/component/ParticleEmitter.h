@@ -10,6 +10,7 @@ namespace nc
 {
     struct ParticleInfo
     {
+        unsigned maxParticleCount = 100u;
         unsigned initialEmissionCount = 0u;
         unsigned periodicEmissionCount = 0u;
         float periodicEmissionFrequency = 0.0f;
@@ -22,25 +23,16 @@ namespace nc
         std::string particleTexturePath = "";
     };
 
-    struct Particle
-    {
-        float maxLifetime;
-        float currentLifetime;
-        Vector3 position;
-        Quaternion rotation;
-        Vector3 scale;
-    };
+    namespace particle { class EmitterState; }
 
-    namespace ecs { class ParticleSystemData; }
-
-    class ParticleSystem : public Component
+    class ParticleEmitter : public Component
     {
         public:
-            ParticleSystem(EntityHandle handle, ecs::ParticleSystemData* data);
+            ParticleEmitter(EntityHandle handle, particle::EmitterState* emitterState);
 
             void Emit(size_t count);
         
         private:
-            ecs::ParticleSystemData* m_data;
+            particle::EmitterState* m_emitterState;
     };
 } // namespace nc

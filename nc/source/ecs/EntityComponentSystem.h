@@ -5,12 +5,10 @@
 #include "entity/EntityInfo.h"
 #include "ecs/EntityMap.h"
 #include "ecs/ComponentSystem.h"
+#include "ParticleEmitterSystem.h"
 #include "HandleManager.h"
 
 #include <memory>
-
-
-#include "ParticleSystemManager.h"
 
 namespace nc
 {
@@ -42,7 +40,7 @@ namespace nc::ecs
             template<std::derived_from<ComponentBase> T>
             ComponentSystem<T>* GetSystem();
 
-            ParticleSystemManager* GetParticleSystemManager();
+            ParticleEmitterSystem* GetParticleEmitterSystem();
 
             EntityMap& GetActiveEntities() noexcept;
 
@@ -62,7 +60,7 @@ namespace nc::ecs
             EntityMap m_active;
             EntityMap m_toDestroy;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
-            std::unique_ptr<ParticleSystemManager> m_particleSystemManager;
+            std::unique_ptr<ParticleEmitterSystem> m_particleEmitterSystem;
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
             std::unique_ptr<ComponentSystem<NetworkDispatcher>> m_networkDispatcherSystem;
