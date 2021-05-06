@@ -25,9 +25,9 @@ namespace
 namespace nc::particle
 {
     EmitterState::EmitterState(EntityHandle handle, const ParticleInfo& info)
-        : Component{handle},
-          m_info{info},
-          m_soa{info.maxParticleCount}
+        : m_info{info},
+          m_soa{info.maxParticleCount},
+          m_handle{handle}
     {
         Emit(m_info.initialEmissionCount);
     }
@@ -71,8 +71,13 @@ namespace nc::particle
 
     }
 
-    auto EmitterState::GetSoA() -> ecs::SoA<float, float, Vector3, Quaternion, Vector3>*
+    auto EmitterState::GetSoA() const -> const ParticleSoA*
     {
         return &m_soa;
+    }
+
+    EntityHandle EmitterState::GetHandle() const
+    {
+        return m_handle;
     }
 } // namespace nc::particle

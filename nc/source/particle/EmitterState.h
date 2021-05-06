@@ -16,8 +16,11 @@ namespace nc::particle
         Vector3 scale;
     };
 
-    /** @todo should not be component */
-    class EmitterState : public Component
+    /** @todo Maybe the SoA should exist in ParticleEmitterSystem and contain
+     *  all of the particles. Rendering would be tricky with different ranges
+     *  requiring different textures. */
+
+    class EmitterState
     {
         public:
             using ParticleSoA = ecs::SoA<float, float, Vector3, Quaternion, Vector3>;
@@ -29,15 +32,14 @@ namespace nc::particle
 
             EmitterState(EntityHandle handle, const ParticleInfo& info);
 
-            // why is vs code complaining about this?
-            ~EmitterState() = default;
-
             void Emit(size_t count);
             void Update(float dt);
-            ParticleSoA* GetSoA();
+            const ParticleSoA* GetSoA() const;
+            EntityHandle GetHandle() const;
 
         private:
             ParticleInfo m_info;
             ParticleSoA m_soa;
+            EntityHandle m_handle;
     };
 }

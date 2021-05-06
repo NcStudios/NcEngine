@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ComponentSystem.h"
 #include "component/ParticleEmitter.h"
 #include "particle/ParticleRenderer.h"
 #include "particle/EmitterState.h"
@@ -26,7 +27,7 @@ namespace nc::ecs
 
         private:
             ecs::ComponentSystem<ParticleEmitter> m_componentSystem;
-            ecs::ComponentSystem<particle::EmitterState> m_stateComponentSystem;
+            std::vector<particle::EmitterState> m_emitterStates;
             particle::ParticleRenderer m_renderer;
     };
 } // namespace nc::ecs

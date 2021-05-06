@@ -3,8 +3,6 @@
 #include "directx/math/DirectXMath.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
 
-#include "ecs/ComponentSystem.h" // only needed to get container type
-
 namespace nc::particle
 {
     class EmitterState;
@@ -14,7 +12,7 @@ namespace nc::particle
         public:
             ParticleRenderer();
 
-            void Render(const ecs::ComponentSystem<EmitterState>::ContainerType& psData);
+            void Render(const std::vector<EmitterState>& emitterStates);
 
         private:
             void BindMatrix(DirectX::FXMMATRIX matrix);

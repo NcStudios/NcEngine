@@ -43,7 +43,7 @@ namespace nc::particle
         m_pixelCBuff->Bind();
     }
 
-    void ParticleRenderer::Render(const ecs::ComponentSystem<EmitterState>::ContainerType& emitterStates)
+    void ParticleRenderer::Render(const std::vector<EmitterState>& emitterStates)
     {
         graphics::ParticleTechnique::BindCommonResources();
 
@@ -51,12 +51,12 @@ namespace nc::particle
         auto* graphics = graphics::d3dresource::GraphicsResourceManager::GetGraphics();
         auto indexCount = 6u;
 
-        for(const auto& emitterState : emitterStates)
+        for(auto& emitterState : emitterStates)
         {
             constexpr auto pi = EmitterState::PositionsIndex;
             constexpr auto ri = EmitterState::RotationsIndex;
             constexpr auto si = EmitterState::ScalesIndex;
-            auto [index, positions, rotations, scales] = emitterState->GetSoA()->View<pi, ri, si>();
+            auto [index, positions, rotations, scales] = emitterState.GetSoA()->View<pi, ri, si>();
             
             while(index.Valid())
             {
