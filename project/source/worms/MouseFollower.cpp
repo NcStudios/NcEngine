@@ -12,8 +12,8 @@ namespace nc::sample
       m_zDepth { 0.0f },
       m_zRatio { 0.0f }
     {
-        const auto& config = config::Get();
-        m_viewPortDist = config.graphics.farClip - config.graphics.nearClip;
+        const auto& graphicsSettings = config::GetGraphicsSettings();
+        m_viewPortDist = graphicsSettings.farClip - graphicsSettings.nearClip;
         window::RegisterOnResizeReceiver(this);
     }
 

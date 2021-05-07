@@ -1,7 +1,7 @@
 #include "ColliderSystem.h"
 #include "config/Config.h"
 
-namespace nc::physics
+namespace nc::ecs
 {
     ColliderSystem::ColliderSystem(uint32_t maxDynamic,
                                    uint32_t maxStatic,
@@ -41,7 +41,7 @@ namespace nc::physics
             (
                 static_cast<EntityHandle::Handle_t>(handle),
                 &GetComponent<Transform>(handle)->GetTransformationMatrix(),
-                GetVolumePropertiesFromColliderInfo(info),
+                physics::GetVolumePropertiesFromColliderInfo(info),
                 info.type
             );
         }
@@ -49,12 +49,12 @@ namespace nc::physics
         return m_componentSystem.Add(handle, info);
     }
 
-    bool ColliderSystem::Remove(EntityHandle handle)
+    bool ColliderSystem::Remove(EntityHandle handle, bool isStatic)
     {
         if(!m_componentSystem.Remove(handle))
             return false;
 
-        if(GetEntity(handle)->IsStatic)
+        if(isStatic)
             m_staticTree.Remove(handle);
         else
             m_dynamicSoA.Remove(static_cast<EntityHandle::Handle_t>(handle));
@@ -83,4 +83,4 @@ namespace nc::physics
     {
         return m_componentSystem.GetComponents();
     }
-} // namespace nc::physics
+} // namespace nc::ecs

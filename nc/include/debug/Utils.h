@@ -6,7 +6,7 @@
 namespace nc::debug
 {
     /** Log an item to the diagnostics file specified in config.ini */
-    void LogToDiagnostics(const std::string& item);
+    void LogToDiagnostics(const std::string& item) noexcept;
 
     /** Log an exception(or exceptions if nested) to the diagnostics file 
      *  specified in config.ini. If logging is not possible, results are sent
@@ -16,7 +16,7 @@ namespace nc::debug
     namespace internal
     {
         void OpenLog(const std::string& path);
-        void CloseLog();
+        void CloseLog() noexcept;
     }
 }
 

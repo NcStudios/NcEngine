@@ -1,4 +1,5 @@
 #include "EntityComponentSystem.h"
+#include "Ecs.h"
 #include "component/Collider.h"
 #include "component/NetworkDispatcher.h"
 #include "component/PointLight.h"
@@ -18,12 +19,40 @@ EntityComponentSystem::EntityComponentSystem()
     : m_handleManager{},
       m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
+      m_colliderSystem{nullptr},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
       m_particleEmitterSystem{std::make_unique<ParticleEmitterSystem>(10u)},
-      m_rendererSystem{ std::make_unique<ComponentSystem<Renderer>>(config::Get().memory.maxRenderers) },
-      m_transformSystem{ std::make_unique<ComponentSystem<Transform>>(config::Get().memory.maxTransforms) },
-      m_networkDispatcherSystem{ std::make_unique<ComponentSystem<NetworkDispatcher>>(config::Get().memory.maxNetworkDispatchers) }
+      m_rendererSystem{nullptr},
+      m_transformSystem{nullptr},
+      m_networkDispatcherSystem{nullptr}
 {
+    const auto& memorySettings = config::GetMemorySettings();
+    const auto& physicsSettings = config::GetPhysicsSettings();
+
+    m_colliderSystem = std::make_unique<ColliderSystem>
+    (
+        memorySettings.maxDynamicColliders,
+        memorySettings.maxStaticColliders,
+        physicsSettings.octreeDensityThreshold,
+        physicsSettings.octreeMinimumExtent,
+        physicsSettings.worldspaceExtent
+    );
+
+    m_rendererSystem = std::make_unique<ComponentSystem<Renderer>>(memorySettings.maxRenderers);
+    m_transformSystem = std::make_unique<ComponentSystem<Transform>>(memorySettings.maxTransforms);
+    m_networkDispatcherSystem = std::make_unique<ComponentSystem<NetworkDispatcher>>(memorySettings.maxNetworkDispatchers);
+
+    internal::RegisterEcs(this);
+}
+
+ColliderSystem* EntityComponentSystem::GetColliderSystem() const
+{
+    return m_colliderSystem.get();
+}
+
+ComponentSystem<NetworkDispatcher>* EntityComponentSystem::GetNetworkDispatcherSystem() const
+{
+    return m_networkDispatcherSystem.get();
 }
 
 ParticleEmitterSystem* EntityComponentSystem::GetParticleEmitterSystem()
@@ -31,24 +60,31 @@ ParticleEmitterSystem* EntityComponentSystem::GetParticleEmitterSystem()
     return m_particleEmitterSystem.get();
 }
 
-template<> ComponentSystem<PointLight>* EntityComponentSystem::GetSystem<PointLight>()
+ComponentSystem<PointLight>* EntityComponentSystem::GetPointLightSystem() const
 {
     return m_lightSystem.get();
 }
 
-template<> ComponentSystem<Renderer>* EntityComponentSystem::GetSystem<Renderer>()
+ComponentSystem<Renderer>* EntityComponentSystem::GetRendererSystem() const
 {
     return m_rendererSystem.get();
 }
 
-template<> ComponentSystem<Transform>* EntityComponentSystem::GetSystem<Transform>()
+ComponentSystem<Transform>* EntityComponentSystem::GetTransformSystem() const
 {
     return m_transformSystem.get();
 }
 
-template<> ComponentSystem<NetworkDispatcher>* EntityComponentSystem::GetSystem<NetworkDispatcher>()
+Systems EntityComponentSystem::GetComponentSystems() const
 {
-    return m_networkDispatcherSystem.get();
+    return Systems
+    {
+        .collider = m_colliderSystem->GetComponentSystem(),
+        .networkDispatcher = m_networkDispatcherSystem.get(),
+        .pointLight = m_lightSystem.get(),
+        .renderer = m_rendererSystem.get(),
+        .transform = m_transformSystem.get()
+    };
 }
 
 EntityMap& EntityComponentSystem::GetActiveEntities() noexcept
@@ -119,6 +155,7 @@ void EntityComponentSystem::SendOnDestroy()
     for(auto& [handle, entity] : m_toDestroy)
     {
         entity.SendOnDestroy();
+        m_colliderSystem->Remove(handle, entity.IsStatic);
         m_transformSystem->Remove(handle);
         m_rendererSystem->Remove(handle);
         m_lightSystem->Remove(handle);
@@ -146,6 +183,7 @@ void EntityComponentSystem::ClearState()
     m_active.clear();
     m_toDestroy.clear();
     m_handleManager.Reset();
+    m_colliderSystem->Clear();
     m_transformSystem->Clear();
     m_rendererSystem->Clear();
     m_lightSystem->Clear();

@@ -105,7 +105,7 @@ namespace nc::graphics
         PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Rasterizer>(Rasterizer::GetUID(Rasterizer::Mode::Solid), Rasterizer::Mode::Solid));
 
         // Add vertex shader
-        const auto defaultShaderPath = nc::config::Get().graphics.d3dShadersPath;
+        const auto defaultShaderPath = nc::config::GetGraphicsSettings().d3dShadersPath;
         const auto vertexShaderPath = defaultShaderPath + "phongvertexshader.cso";
         auto pvs = GraphicsResourceManager::AcquireOnDemand<VertexShader>(VertexShader::GetUID(vertexShaderPath), vertexShaderPath);
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();

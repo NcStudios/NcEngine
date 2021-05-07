@@ -1,6 +1,6 @@
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
-#include "physics/ColliderSystem.h"
+#include "ecs/ColliderSystem.h"
 
 namespace nc
 {
@@ -8,16 +8,20 @@ namespace nc
     {
         const auto DefaultEntityTag = std::string{"Entity"};
         ecs::EntityComponentSystem* g_ecsImpl = nullptr;
-        physics::ColliderSystem* g_colliderSystemImpl = nullptr;
+        ecs::ColliderSystem* g_colliderSystem = nullptr;
+        ecs::ComponentSystem<NetworkDispatcher>* g_networkDispatcherSystem = nullptr;
+        ecs::ComponentSystem<PointLight>* g_pointLightSystem = nullptr;
+        ecs::ComponentSystem<Renderer>* g_rendererSystem = nullptr;
+        ecs::ComponentSystem<Transform>* g_transformSystem = nullptr;
 
         void RegisterEcs(ecs::EntityComponentSystem* impl)
         {
             g_ecsImpl = impl;
-        }
-
-        void RegisterColliderSystem(physics::ColliderSystem* impl)
-        {
-            g_colliderSystemImpl = impl;
+            g_colliderSystem = impl->GetColliderSystem();
+            g_networkDispatcherSystem = impl->GetNetworkDispatcherSystem();
+            g_pointLightSystem = impl->GetPointLightSystem();
+            g_rendererSystem = impl->GetRendererSystem();
+            g_transformSystem = impl->GetTransformSystem();
         }
     }
 
@@ -28,7 +32,6 @@ namespace nc
 
     bool DestroyEntity(EntityHandle handle)
     {
-        internal::g_colliderSystemImpl->Remove(handle);
         return internal::g_ecsImpl->DestroyEntity(handle);
     }
 
@@ -57,29 +60,29 @@ namespace nc
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<PointLight> - Bad handle");
-        IF_THROW(internal::g_ecsImpl->GetSystem<PointLight>()->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
-        return internal::g_ecsImpl->GetSystem<PointLight>()->Add(handle, properties);
+        IF_THROW(internal::g_pointLightSystem->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
+        return internal::g_pointLightSystem->Add(handle, properties);
     }
 
     template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<Renderer> - Bad handle");
-        IF_THROW(internal::g_ecsImpl->GetSystem<Renderer>()->Contains(handle), "AddComponent<Renderer> - entity already has a renderer");
-        return internal::g_ecsImpl->GetSystem<Renderer>()->Add(handle, std::move(mesh), std::move(material));
+        IF_THROW(internal::g_rendererSystem->Contains(handle), "AddComponent<Renderer> - entity already has a renderer");
+        return internal::g_rendererSystem->Add(handle, std::move(mesh), std::move(material));
     }
 
     template<> NetworkDispatcher* AddComponent<NetworkDispatcher>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<NetworkDispatcher> - Bad handle");
-        IF_THROW(internal::g_ecsImpl->GetSystem<NetworkDispatcher>()->Contains(handle), "AddComponent<NetworkDispatcher> - entity already has a a NetworkDispatcher");
-        return internal::g_ecsImpl->GetSystem<NetworkDispatcher>()->Add(handle);
+        IF_THROW(internal::g_networkDispatcherSystem->Contains(handle), "AddComponent<NetworkDispatcher> - entity already has a a NetworkDispatcher");
+        return internal::g_networkDispatcherSystem->Add(handle);
     }
 
     template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderInfo info)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<Collider> - Bad handle");
-        IF_THROW(internal::g_colliderSystemImpl->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
-        return internal::g_colliderSystemImpl->Add(handle, info);
+        IF_THROW(internal::g_colliderSystem->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
+        return internal::g_colliderSystem->Add(handle, info);
     }
 
     template<> bool RemoveComponent<ParticleEmitter>(EntityHandle handle)
@@ -91,25 +94,26 @@ namespace nc
     template<> bool RemoveComponent<PointLight>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "RemoveComponent<PointLight> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<PointLight>()->Remove(handle);
+        return internal::g_pointLightSystem->Remove(handle);
     }
 
     template<> bool RemoveComponent<Renderer>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "RemoveComponent<Renderer> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<Renderer>()->Remove(handle);
+        return internal::g_rendererSystem->Remove(handle);
     }
 
     template<> bool RemoveComponent<NetworkDispatcher>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "RemoveComponent<NetworkDispatcher> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<NetworkDispatcher>()->Remove(handle);
+        return internal::g_networkDispatcherSystem->Remove(handle);
     }
 
     template<> bool RemoveComponent<Collider>(EntityHandle handle)
     {
-        IF_THROW(!GetEntity(handle), "RemoveComponent<Collider> - Bad handle");
-        return internal::g_colliderSystemImpl->Remove(handle);
+        auto* entity = GetEntity(handle);
+        IF_THROW(!entity, "RemoveComponent<Collider> - Bad handle");
+        return internal::g_colliderSystem->Remove(handle, entity->IsStatic);
     }
 
     template<> ParticleEmitter* GetComponent<ParticleEmitter>(EntityHandle handle)
@@ -121,31 +125,31 @@ namespace nc
     template<> PointLight* GetComponent<PointLight>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "GetComponent<PointLight> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<PointLight>()->GetPointerTo(handle);
+        return internal::g_pointLightSystem->GetPointerTo(handle);
     }
 
     template<> Renderer* GetComponent<Renderer>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "GetComponent<Renderer> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<Renderer>()->GetPointerTo(handle);
+        return internal::g_rendererSystem->GetPointerTo(handle);
     }
 
     template<> Transform* GetComponent<Transform>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "GetComponent<Transform> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<Transform>()->GetPointerTo(handle);
+        return internal::g_transformSystem->GetPointerTo(handle);
     }
 
     template<> NetworkDispatcher* GetComponent<NetworkDispatcher>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "GetComponent<NetworkDispatcher> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<NetworkDispatcher>()->GetPointerTo(handle);
+        return internal::g_networkDispatcherSystem->GetPointerTo(handle);
     }
 
     template<> Collider* GetComponent<Collider>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "GetComponent<Collider> - Bad handle");
-        return internal::g_colliderSystemImpl->GetPointerTo(handle);
+        return internal::g_colliderSystem->GetPointerTo(handle);
     }
 
     template<> bool HasComponent<ParticleEmitter>(EntityHandle handle)
@@ -157,24 +161,24 @@ namespace nc
     template<> bool HasComponent<PointLight>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "HasComponent<PointLight> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<PointLight>()->Contains(handle);
+        return internal::g_pointLightSystem->Contains(handle);
     }
 
     template<> bool HasComponent<Renderer>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "HasComponent<Renderer> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<Renderer>()->Contains(handle);
+        return internal::g_rendererSystem->Contains(handle);
     }
 
     template<> bool HasComponent<NetworkDispatcher>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "HasComponent<NetworkDispatcher> - Bad handle");
-        return internal::g_ecsImpl->GetSystem<NetworkDispatcher>()->Contains(handle);
+        return internal::g_networkDispatcherSystem->Contains(handle);
     }
 
     template<> bool HasComponent<Collider>(EntityHandle handle)
     {
         IF_THROW(!GetEntity(handle), "HasComponent<Collider> - Bad handle");
-        return internal::g_colliderSystemImpl->Contains(handle);
+        return internal::g_colliderSystem->Contains(handle);
     }
 }

@@ -101,7 +101,7 @@ namespace nc::graphics::vulkan
     void SimpleTechnique::CreatePipeline()
     {
         // Shaders
-        auto defaultShaderPath = nc::config::Get().graphics.vulkanShadersPath;
+        auto defaultShaderPath = nc::config::GetGraphicsSettings().vulkanShadersPath;
 
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "vert.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "frag.spv");

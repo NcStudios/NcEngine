@@ -70,7 +70,7 @@ namespace nc::graphics
         WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Stencil>(Stencil::GetUID(Stencil::Mode::Off), Stencil::Mode::Off));
 
         // Add vertex shader
-        const auto defaultShaderPath = nc::config::Get().graphics.d3dShadersPath;
+        const auto defaultShaderPath = nc::config::GetGraphicsSettings().d3dShadersPath;
         const auto vertexShaderPath = defaultShaderPath + "wireframevertexshader.cso";
         auto pvs = GraphicsResourceManager::AcquireOnDemand<VertexShader>(VertexShader::GetUID(vertexShaderPath), vertexShaderPath);
         auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
