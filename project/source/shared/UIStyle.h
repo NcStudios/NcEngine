@@ -54,7 +54,7 @@ namespace nc::sample
         colors[ImGuiCol_Button]                = COLOR_GRAY_DARKEST;
         colors[ImGuiCol_ButtonHovered]         = COLOR_GRAY_LIGHT;
         colors[ImGuiCol_ButtonActive]          = COLOR_TRANS_GRAY_ALT;
-        colors[ImGuiCol_Header]                = COLOR_GRAY_DARK;
+        colors[ImGuiCol_Header]                = COLOR_GRAY_DARKEST;
         colors[ImGuiCol_HeaderHovered]         = COLOR_GRAY;
         colors[ImGuiCol_HeaderActive]          = COLOR_GRAY_LIGHT;
         colors[ImGuiCol_Separator]             = COLOR_TRANS_GRAY;

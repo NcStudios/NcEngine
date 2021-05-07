@@ -13,6 +13,7 @@ namespace nc
         Vector3 position = Vector3::Zero();
         Quaternion rotation = Quaternion::Identity();
         Vector3 scale = Vector3::One(); // must be nonzero
+        Transform* parent = nullptr;
         std::string tag = "Entity";
         physics::Layer layer = physics::DefaultLayer;
         bool isStatic = false;
