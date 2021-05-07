@@ -32,7 +32,7 @@ namespace nc
             Vector3 Forward() const;                            // Get the forward axis of the transform
             Vector3 Right() const;                              // Get the right axis of the transform
 
-            // All modification methods operate in local space
+            // All modification methods operate on the local matrix
             void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
             void Set(const Vector3& pos, const Vector3& angles, const Vector3& scale);
             void SetPosition(const Vector3& pos);
@@ -57,7 +57,6 @@ namespace nc
         private:
             void AddChild(Transform* child);
             void RemoveChild(Transform* child);
-            void UpdateChildren();
             void UpdateWorldMatrix();
 
             DirectX::XMMATRIX m_localMatrix;

@@ -60,7 +60,7 @@ namespace nc
     {
         auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
         auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
-        auto out_v = DirectX::XMQuaternionMultiply(lhs_v, rhs_v);
+        auto out_v = DirectX::XMQuaternionMultiply(lhs_v, rhs_v); // returns rhs_v * lhs_v
         auto out = Quaternion::Identity();
         DirectX::XMStoreQuaternion(&out, out_v);
         return out;
