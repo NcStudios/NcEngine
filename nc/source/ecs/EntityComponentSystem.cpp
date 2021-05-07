@@ -95,7 +95,7 @@ EntityMap& EntityComponentSystem::GetActiveEntities() noexcept
 EntityHandle EntityComponentSystem::CreateEntity(EntityInfo info)
 {
     auto entityHandle = m_handleManager.GenerateNewHandle();
-    m_transformSystem->Add(entityHandle, info.position, info.rotation, info.scale);
+    m_transformSystem->Add(entityHandle, info.position, info.rotation, info.scale, info.parent);
     m_active.emplace(entityHandle, Entity{entityHandle, std::move(info.tag), info.layer, info.isStatic} );
     return entityHandle;
 }

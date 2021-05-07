@@ -11,6 +11,6 @@ namespace nc::graphics
         float specularPower = 32.0f;
         float xTiling = 1.0f;
         float yTiling = 1.0f;
-        float padding[1];
+        float padding[1] = {0.0f};
     };
 }
