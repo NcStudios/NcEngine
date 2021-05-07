@@ -152,7 +152,6 @@ namespace nc
         IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
         m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::Set(const Vector3& pos, const Vector3& angles, const Vector3& scale)
@@ -160,14 +159,12 @@ namespace nc
         IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
         m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(angles) * ToTransMatrix(pos);
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::SetPosition(const Vector3& pos)
     {
         m_localMatrix.r[3] = ToXMVectorHomogeneous(pos);
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::SetRotation(const Quaternion& quat)
@@ -178,7 +175,6 @@ namespace nc
                         ToRotMatrix(quat) *
                         DirectX::XMMatrixTranslationFromVector(pos_v);
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::SetRotation(const Vector3& angles)
@@ -189,7 +185,6 @@ namespace nc
                         ToRotMatrix(angles) *
                         DirectX::XMMatrixTranslationFromVector(pos_v);
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::SetScale(const Vector3& scale)
@@ -201,7 +196,6 @@ namespace nc
                         DirectX::XMMatrixRotationQuaternion(rot_v) *
                         DirectX::XMMatrixTranslationFromVector(pos_v);
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::Translate(Vector3 translation)
@@ -209,7 +203,6 @@ namespace nc
         auto trans_v = ToXMVector(translation);
         m_localMatrix.r[3] += trans_v;
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::TranslateLocalSpace(Vector3 translation)
@@ -221,7 +214,6 @@ namespace nc
         trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
         m_localMatrix.r[3] += trans_v;
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::Rotate(const Quaternion& quat)
@@ -231,7 +223,6 @@ namespace nc
         m_localMatrix *= ToRotMatrix(quat);
         m_localMatrix.r[3] = pos_v;
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     void Transform::Rotate(Vector3 axis, float radians)
@@ -241,7 +232,6 @@ namespace nc
         m_localMatrix *= ToRotMatrix(axis, radians);
         m_localMatrix.r[3] = pos_v;
         UpdateWorldMatrix();
-        UpdateChildren();
     }
 
     std::span<Transform*> Transform::GetChildren()
@@ -287,12 +277,6 @@ namespace nc
 
         IF_THROW(pos == m_children.cend(), "Transform::RemoveChild - Child does not exists");
         m_children.erase(pos, m_children.end());
-    }
-
-    void Transform::UpdateChildren()
-    {
-        for(auto* child : m_children)
-            child->UpdateWorldMatrix();
     }
 
     void Transform::UpdateWorldMatrix()
