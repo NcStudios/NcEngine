@@ -125,23 +125,25 @@ namespace nc::core
         m_frameManager2.RecordPasses();
     #endif
     
+        auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
+
         while(m_isRunning)
         {
             m_time.UpdateTime();
             m_window.ProcessSystemMessages(); 
+
+            auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
+            auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
 
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
                 FixedStepLogic();
             }
 
-            auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             FrameLogic(dt);
-
-
-            m_ecs.GetParticleEmitterSystem()->UpdateParticles(dt);
-
+            particleUpdateJobResult.wait();
             FrameRender();
+            particleEmitterSystem->ProcessFrameEvents();
             FrameCleanup();
         }
 

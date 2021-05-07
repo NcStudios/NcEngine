@@ -23,16 +23,16 @@ namespace nc
         std::string particleTexturePath = "";
     };
 
-    namespace particle { class EmitterState; }
+    namespace ecs { class ParticleEmitterSystem; }
 
     class ParticleEmitter : public Component
     {
         public:
-            ParticleEmitter(EntityHandle handle, particle::EmitterState* emitterState);
+            ParticleEmitter(EntityHandle handle, ecs::ParticleEmitterSystem* emitterSystem);
 
             void Emit(size_t count);
         
         private:
-            particle::EmitterState* m_emitterState;
+            ecs::ParticleEmitterSystem* m_emitterSystem;
     };
 } // namespace nc

@@ -1,16 +1,17 @@
 #include "component/ParticleEmitter.h"
-#include "particle/EmitterState.h"
+#include "ecs/ParticleEmitterSystem.h"
+//#include "particle/EmitterState.h"
 
 namespace nc
 {
-    ParticleEmitter::ParticleEmitter(EntityHandle handle, particle::EmitterState* emitterState)
+    ParticleEmitter::ParticleEmitter(EntityHandle handle, ecs::ParticleEmitterSystem* emitterSystem)
         : Component{handle},
-          m_emitterState{emitterState}
+          m_emitterSystem{emitterSystem}
     {
     }
 
     void ParticleEmitter::Emit(size_t count)
     {
-        m_emitterState->Emit(count);
+        m_emitterSystem->Emit(GetParentHandle(), count);
     }
 } // namespace nc

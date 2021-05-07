@@ -40,10 +40,6 @@ namespace nc::ecs
         public:
             EntityComponentSystem();
 
-            template<std::derived_from<ComponentBase> T>
-            ComponentSystem<T>* GetSystem();
-
-
             ColliderSystem* GetColliderSystem() const;
             ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;
             ParticleEmitterSystem* GetParticleEmitterSystem();
