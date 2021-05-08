@@ -7,9 +7,9 @@ namespace nc::graphics::vulkan
     Commands::Commands(vulkan::Base* base, const vulkan::Swapchain& swapchain)
     : m_base{ base },
       m_swapchain{ swapchain },
-      m_renderReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::RenderReady) },
       m_presentReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::PresentReady)  },
       m_framesInFlightFences{ m_swapchain.GetFences(FenceType::FramesInFlight) },
+      m_renderReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::RenderReady) },
       m_imagesInFlightFences{ m_swapchain.GetFences(FenceType::ImagesInFlight) },
       m_commandBuffers{} 
     {
@@ -80,6 +80,32 @@ namespace nc::graphics::vulkan
 
         // Submit the command immediately
         vk::SubmitInfo submitInfo{};
+        submitInfo.setCommandBufferCount(1);
+        submitInfo.setPCommandBuffers(&tempCommandBuffer);
+        base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);
+        base.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
+        base.GetDevice().freeCommandBuffers(base.GetCommandPool(), tempCommandBuffer);
+    }
+
+    void Commands::SubmitCommandImmediate(const vulkan::Base& base, std::function<void(vk::CommandBuffer cmd)>&& function)
+    {
+        vk::CommandBufferAllocateInfo allocInfo{};
+        allocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
+        allocInfo.setCommandPool(base.GetCommandPool());
+        allocInfo.setCommandBufferCount(1);
+
+        auto tempCommandBuffers = base.GetDevice().allocateCommandBuffers(allocInfo);
+        auto tempCommandBuffer = tempCommandBuffers[0];
+
+        vk::CommandBufferBeginInfo beginInfo{};
+        beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        tempCommandBuffer.begin(beginInfo);
+        {
+            function(tempCommandBuffer);
+        }
+        tempCommandBuffer.end();
+
+         vk::SubmitInfo submitInfo{};
         submitInfo.setCommandBufferCount(1);
         submitInfo.setPCommandBuffers(&tempCommandBuffer);
         base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);

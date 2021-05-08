@@ -18,7 +18,8 @@ namespace nc::graphics::vulkan
     class TechniqueBase
     {
         public:
-            TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData, nc::graphics::Graphics2* graphics);
+            TechniqueBase(TechniqueType techniqueType, nc::graphics::Graphics2* graphics);
+            TechniqueBase(TechniqueType techniqueType, GlobalData* globalData, nc::graphics::Graphics2* graphics);
             vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base);
             static std::vector<uint32_t> ReadShader(const std::string& filename);
             TechniqueType GetType() const noexcept;
@@ -30,8 +31,8 @@ namespace nc::graphics::vulkan
         protected:
             nc::graphics::Graphics2* m_graphics;
             const Base& m_base;
-            const Swapchain& m_swapchain;
-            const GlobalData& m_globalData;
+            Swapchain* m_swapchain;
+            GlobalData* m_globalData;
             std::vector<Mesh> m_meshes;
             std::unordered_map<std::string, std::vector<Transform*>> m_objects;
             vk::Pipeline m_pipeline;

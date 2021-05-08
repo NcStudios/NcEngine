@@ -4,11 +4,22 @@ add_library(${IMGUI_LIB}
     STATIC
         ${IMGUI_SOURCE_DIR}/imgui_impl_dx11.cpp
         ${IMGUI_SOURCE_DIR}/imgui_impl_win32.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_impl_vulkan.cpp
         ${IMGUI_SOURCE_DIR}/imgui.cpp
         ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
         ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
         ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
 )
+
+if(USE_VULKAN)
+    find_package(Vulkan REQUIRED)
+
+    #Link libraries
+    target_link_libraries(${IMGUI_LIB} 
+        PRIVATE
+            Vulkan::Vulkan
+    )
+endif()
 
 target_include_directories(${IMGUI_LIB}
     PRIVATE

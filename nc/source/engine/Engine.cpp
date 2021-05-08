@@ -73,7 +73,13 @@ namespace nc::core
           m_ecs{ &m_graphics2 },
           m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
-          m_time{}
+          m_time{},
+          #ifdef NC_EDITOR_ENABLED
+          m_ui{m_window.GetHWND(), &m_graphics2, m_ecs.GetRendererSystem2(), m_ecs.GetComponentSystems()}
+          #else
+          m_ui{m_window.GetHWND(), &m_graphics2}
+          #endif
+
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -180,10 +186,19 @@ namespace nc::core
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
+        m_ui.FrameBegin();
         auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
 
         auto rendererSystem = m_ecs.GetRendererSystem2();
+
+        #ifdef NC_EDITOR_ENABLED
+        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
+        #else
+        m_ui.Frame();
+        #endif
+
+        m_ui.FrameEnd();
 
         // @todo: conditionally update based on changes
         rendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
@@ -248,10 +263,9 @@ namespace nc::core
 
         #ifdef USE_VULKAN
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4, _5));
-            // No UI for us until we tackle integrating IMGUI with Vulkan
         #else
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
-            m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
         #endif
+            m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
     }
 } // end namespace nc::engine

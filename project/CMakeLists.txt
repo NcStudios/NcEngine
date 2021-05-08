@@ -111,9 +111,6 @@ if(USE_VULKAN)
     target_link_libraries(${GAME_EXE}
         PRIVATE
             Vulkan::Vulkan
-            ${LIB_DIR}/glfw3.dll
-            ${LIB_DIR}/libglfw3dll.a
-            ${LIB_DIR}/libglfw3.a
     )
 endif()
 

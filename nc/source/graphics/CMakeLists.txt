@@ -24,6 +24,7 @@ if(USE_VULKAN)
         PRIVATE
             ${ROOT_DIR}/source/graphics/Graphics2.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Base.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/vma.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Swapchain.cpp
             ${ROOT_DIR}/source/graphics/vulkan/MeshManager.cpp
@@ -32,6 +33,6 @@ if(USE_VULKAN)
             ${ROOT_DIR}/source/graphics/vulkan/resources/DepthStencil.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/TransformBuffer.cpp
             ${ROOT_DIR}/source/graphics/vulkan/techniques/TechniqueBase.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/techniques/SimpleTechnique.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/techniques/PhongAndUiTechnique.cpp
     )
 endif()

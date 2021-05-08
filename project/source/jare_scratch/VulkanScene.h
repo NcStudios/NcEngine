@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include "shared/SceneHelper.h"
 
 namespace nc::sample
 {
@@ -9,5 +10,8 @@ namespace nc::sample
         public:
             void Load() override;
             void Unload() override;
+
+        private:
+            SceneHelper m_sceneHelper;
     };
 }

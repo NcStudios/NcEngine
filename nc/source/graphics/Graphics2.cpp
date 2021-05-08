@@ -104,9 +104,9 @@ namespace nc::graphics
         return *m_base.get();
     }
     
-    const vulkan::Swapchain& Graphics2::GetSwapchain() const noexcept
+    vulkan::Swapchain* Graphics2::GetSwapchainPtr() const noexcept
     {
-        return *m_swapchain.get();
+        return m_swapchain.get();
     }
 
     vulkan::Commands* Graphics2::GetCommandsPtr() const noexcept

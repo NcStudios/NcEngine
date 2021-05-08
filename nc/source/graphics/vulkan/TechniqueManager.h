@@ -34,7 +34,7 @@ namespace nc::graphics::vulkan
             void Clear();
 
         private:
-            Graphics2* m_graphics;
+            nc::graphics::Graphics2* m_graphics;
             std::vector<std::unique_ptr<TechniqueBase>> m_techniques;
             GlobalData m_globalData;
     };

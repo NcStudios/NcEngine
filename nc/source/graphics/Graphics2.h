@@ -32,7 +32,7 @@ namespace nc::graphics
 
             const vulkan::Base& GetBase() const noexcept;
             vulkan::Base* GetBasePtr() const noexcept;
-            const vulkan::Swapchain& GetSwapchain() const noexcept;
+            vulkan::Swapchain* GetSwapchainPtr() const noexcept;
             vulkan::Commands* GetCommandsPtr() const noexcept;
             const Vector2 GetDimensions() const noexcept;
 

@@ -6,7 +6,13 @@
 #include "entity/Entity.h"
 #include "ecs/EntityComponentSystem.h"
 
-namespace nc::graphics { class Graphics; }
+namespace nc::graphics 
+{ 
+    #ifdef USE_VULKAN
+    class Graphics2;
+    #endif
+    class Graphics;
+}
 
 namespace nc::ui
 {
@@ -14,10 +20,19 @@ namespace nc::ui
     {
         public:
             #ifdef NC_EDITOR_ENABLED
-            UIImpl(HWND hwnd, graphics::Graphics* graphics, const ecs::Systems& systems);
+                #ifdef USE_VULKAN
+                UIImpl(HWND hwnd, graphics::Graphics2* graphics, ecs::RendererSystem* rendererSystem, const ecs::Systems& systems);
+                #else
+                UIImpl(HWND hwnd, graphics::Graphics* graphics, const ecs::Systems& systems);
+                #endif
             #else
-            UIImpl(HWND hwnd, graphics::Graphics* graphics);
+                #ifdef USE_VULKAN
+                UIImpl(HWND hwnd, graphics::Graphics2* graphics, ecs::RendererSystem* rendererSystem);
+                #else
+                UIImpl(HWND hwnd, graphics::Graphics* graphics);
+                #endif
             #endif
+
             ~UIImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -41,5 +56,11 @@ namespace nc::ui
             #endif
             
             IUI* m_projectUI;
+            
+            #ifdef USE_VULKAN
+            graphics::Graphics2* m_graphics;
+            ecs::RendererSystem* m_rendererSystem;
+            #endif
+
     };
 } // namespace nc::ui

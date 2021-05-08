@@ -1,13 +1,10 @@
 #include "Base.h"
 #include "graphics/vulkan/Mesh.h"
+#include "graphics/vulkan/Commands.h"
 
 #include <set>
 #include <string>
 #include <algorithm>
-
-#define VMA_IMPLEMENTATION
-#include "vulkan/vk_mem_alloc.h"
-#include "vulkan/vk_mem_alloc.hpp"
 
 namespace
 {
@@ -222,6 +219,53 @@ namespace nc::graphics::vulkan
         auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
         m_graphicsQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
         m_presentQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
+    }
+
+    void Base::InitializeImgui(const vk::RenderPass& defaultPass)
+    {
+        // Create descriptor pool for IMGUI
+        vk::DescriptorPoolSize poolSizes[] =
+        {
+            { vk::DescriptorType::eSampler, 1000 },
+            { vk::DescriptorType::eCombinedImageSampler, 1000 },
+            { vk::DescriptorType::eSampledImage, 1000 },
+            { vk::DescriptorType::eStorageImage, 1000 },
+            { vk::DescriptorType::eUniformTexelBuffer, 1000 },
+            { vk::DescriptorType::eStorageTexelBuffer, 1000 },
+            { vk::DescriptorType::eUniformBuffer, 1000 },
+            { vk::DescriptorType::eStorageBuffer, 1000 },
+            { vk::DescriptorType::eUniformBufferDynamic, 1000 },
+            { vk::DescriptorType::eStorageBufferDynamic, 1000 },
+            { vk::DescriptorType::eInputAttachment, 1000 }
+        };
+
+        vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
+        descriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+        descriptorPoolInfo.setMaxSets(1000);
+        descriptorPoolInfo.setPoolSizeCount(sizeof(poolSizes));
+        descriptorPoolInfo.setPoolSizes(*poolSizes);
+
+        vk::DescriptorPool imguiPool;
+        if (m_logicalDevice.createDescriptorPool(&descriptorPoolInfo, nullptr, &imguiPool) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Could not create descriptor pool.");
+        }
+
+        ImGui_ImplVulkan_InitInfo initInfo{};
+        initInfo.Instance = m_instance;
+        initInfo.PhysicalDevice = m_physicalDevice;
+        initInfo.Device = m_logicalDevice;
+        initInfo.Queue = m_graphicsQueue;
+        initInfo.DescriptorPool = imguiPool;
+        initInfo.MinImageCount = 3;
+        initInfo.ImageCount = 3;
+
+        ImGui_ImplVulkan_Init(&initInfo, defaultPass);
+
+        Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
+        ImGui_ImplVulkan_DestroyFontUploadObjects();
+
+        // m_logicalDevice.destroyDescriptorPool(imguiPool);
     }
 
     void Base::CreateLogicalDevice()

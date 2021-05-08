@@ -3,13 +3,13 @@
 
 namespace nc::graphics::vulkan
 {
-    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format)
+    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
     {
         vk::AttachmentDescription attachmentDescription{};
         attachmentDescription.setFormat(format);
         attachmentDescription.setSamples(vk::SampleCountFlagBits::e1);
-        attachmentDescription.setLoadOp(vk::AttachmentLoadOp::eClear);
-        attachmentDescription.setStoreOp(vk::AttachmentStoreOp::eStore);
+        attachmentDescription.setLoadOp(loadOp);
+        attachmentDescription.setStoreOp(storeOp);
         attachmentDescription.setInitialLayout(vk::ImageLayout::eUndefined);
 
         switch (type)

@@ -2,14 +2,16 @@
 
 #include "math/Vector2.h"
 #include "platform/win32/NcWin32.h"
-
+#ifndef VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_PLATFORM_WIN32_KHR
-#include "vulkan/vulkan.hpp"
+#endif
 #include "vulkan/vk_mem_alloc.hpp"
+#include "imgui/imgui_impl_vulkan.h"
 
 namespace nc::graphics::vulkan
 {
     class Instance;
+    class Commands;
     struct Vertex;
 
     // How many frames can be rendered concurrently.
@@ -65,6 +67,7 @@ namespace nc::graphics::vulkan
             void MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size);
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
             void QueryDepthFormatSupport();
+            void InitializeImgui(const vk::RenderPass& defaultPass);
 
         private:
             
