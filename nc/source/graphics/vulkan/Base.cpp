@@ -85,7 +85,8 @@ namespace nc::graphics::vulkan
       m_images{},
       m_depthFormat{},
       m_bufferIndex{0},
-      m_imageIndex{0}
+      m_imageIndex{0},
+      m_imguiDescriptorPool{}
     {
         CreateInstance();
         CreateSurface(hwnd, hinstance);
@@ -99,6 +100,7 @@ namespace nc::graphics::vulkan
 
     Base::~Base()
     {
+        m_logicalDevice.destroyDescriptorPool(m_imguiDescriptorPool);
         m_logicalDevice.destroyCommandPool(m_commandPool);
 
         for (uint32_t i = 0; i < m_buffers.size(); ++i)
@@ -245,8 +247,7 @@ namespace nc::graphics::vulkan
         descriptorPoolInfo.setPoolSizeCount(sizeof(poolSizes));
         descriptorPoolInfo.setPoolSizes(*poolSizes);
 
-        vk::DescriptorPool imguiPool;
-        if (m_logicalDevice.createDescriptorPool(&descriptorPoolInfo, nullptr, &imguiPool) != vk::Result::eSuccess)
+        if (m_logicalDevice.createDescriptorPool(&descriptorPoolInfo, nullptr, &m_imguiDescriptorPool) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Could not create descriptor pool.");
         }
@@ -256,7 +257,7 @@ namespace nc::graphics::vulkan
         initInfo.PhysicalDevice = m_physicalDevice;
         initInfo.Device = m_logicalDevice;
         initInfo.Queue = m_graphicsQueue;
-        initInfo.DescriptorPool = imguiPool;
+        initInfo.DescriptorPool = m_imguiDescriptorPool;
         initInfo.MinImageCount = 3;
         initInfo.ImageCount = 3;
 
@@ -264,8 +265,6 @@ namespace nc::graphics::vulkan
 
         Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
         ImGui_ImplVulkan_DestroyFontUploadObjects();
-
-        // m_logicalDevice.destroyDescriptorPool(imguiPool);
     }
 
     void Base::CreateLogicalDevice()

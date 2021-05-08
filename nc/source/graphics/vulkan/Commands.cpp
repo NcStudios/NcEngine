@@ -7,9 +7,9 @@ namespace nc::graphics::vulkan
     Commands::Commands(vulkan::Base* base, const vulkan::Swapchain& swapchain)
     : m_base{ base },
       m_swapchain{ swapchain },
+      m_renderReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::RenderReady) },
       m_presentReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::PresentReady)  },
       m_framesInFlightFences{ m_swapchain.GetFences(FenceType::FramesInFlight) },
-      m_renderReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::RenderReady) },
       m_imagesInFlightFences{ m_swapchain.GetFences(FenceType::ImagesInFlight) },
       m_commandBuffers{} 
     {

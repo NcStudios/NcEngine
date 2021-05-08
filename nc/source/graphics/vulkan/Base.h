@@ -92,5 +92,6 @@ namespace nc::graphics::vulkan
             vk::Format m_depthFormat;
             uint32_t m_bufferIndex;
             uint32_t m_imageIndex;
+            vk::DescriptorPool m_imguiDescriptorPool;
     };
 }

@@ -6,20 +6,26 @@
 #include "d3dresource/GraphicsResourceManager.h"
 #include "config/Config.h"
 
+namespace
+{
+    constexpr std::array<float, 4> DefaultClearColor = {0.2f, 0.2f, 0.2f, 1.0f};
+}
+
 namespace nc::graphics
 {
     using namespace vulkan;
 
     Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_base{ std::make_unique<Base>(hwnd, hinstance) },
-          m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
-          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
-          m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
-          m_dimensions{ dimensions },
-          m_isMinimized{ false },
-          m_isFullscreen{ false },
-          m_viewMatrix{},
-          m_projectionMatrix{}
+        m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
+        m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+        m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
+        m_dimensions{ dimensions },
+        m_isMinimized{ false },
+        m_isFullscreen{ false },
+        m_viewMatrix{},
+        m_projectionMatrix{},
+        m_clearColor{DefaultClearColor}
     {
         SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
@@ -119,7 +125,6 @@ namespace nc::graphics
         return m_dimensions;
     }
 
-
     bool Graphics2::GetNextImageIndex(uint32_t* imageIndex)
     {
         m_swapchain->WaitForFrameFence(false);
@@ -132,6 +137,16 @@ namespace nc::graphics
             return false;
         }
         return true;
+    }
+    
+    void Graphics2::SetClearColor(std::array<float, 4> color)
+    {
+        m_clearColor = color;
+    }
+
+    const std::array<float, 4>& Graphics2::GetClearColor() const noexcept
+    {
+        return m_clearColor;
     }
 
     void Graphics2::RenderToImage(uint32_t imageIndex)

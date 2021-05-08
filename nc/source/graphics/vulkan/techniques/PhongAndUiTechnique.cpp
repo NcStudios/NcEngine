@@ -86,7 +86,7 @@ namespace nc::graphics::vulkan
     void PhongAndUiTechnique::Record(Commands* commands)
     {
         vk::ClearValue clearValues[2];
-		clearValues[0].setColor(vk::ClearColorValue(std::array<float, 4>({{0.05f, 0.05f, 0.05f, 0.2f}})));
+		clearValues[0].setColor(vk::ClearColorValue(m_graphics->GetClearColor()));
 		clearValues[1].setDepthStencil({ 1.0f, 0 });
 
         auto& commandBuffers = *commands->GetCommandBuffers();
