@@ -210,7 +210,7 @@ namespace nc::core
         m_ui.FrameBegin();
         m_graphics.FrameBegin();
 
-        auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
+        auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
         for(auto& light : m_ecs.GetPointLightSystem()->GetComponents())
@@ -263,8 +263,10 @@ namespace nc::core
 
         #ifdef USE_VULKAN
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4, _5));
+            m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics2::SetClearColor, &m_graphics, _1));
         #else
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
+            m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics::SetClearColor, &m_graphics, _1));
         #endif
             m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
     }

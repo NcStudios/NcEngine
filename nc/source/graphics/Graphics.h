@@ -2,6 +2,7 @@
 #include "platform/win32/NCWin32.h"
 #include "math/Vector2.h"
 
+#include <array>
 #include <d3d11.h>
 #include <stdint.h>
 #include "directx/math/DirectXMath.h"
@@ -36,6 +37,7 @@ namespace nc
                 void ResizeTarget(float width, float height);
                 void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
                 void ToggleFullscreen();
+                void SetClearColor(std::array<float, 4> color);
                 
                 void FrameBegin();
                 void DrawIndexed(UINT count);
@@ -51,7 +53,7 @@ namespace nc
                 IDXGISwapChain* m_swapChain;
                 ID3D11RenderTargetView* m_renderTarget;
                 ID3D11DepthStencilView* m_dsv;
-
+                std::array<float, 4> m_clearColor;
                 bool m_isFullscreen;
                 DirectX::XMMATRIX m_viewMatrix;
                 DirectX::XMMATRIX m_projectionMatrix;
