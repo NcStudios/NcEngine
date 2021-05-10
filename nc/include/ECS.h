@@ -9,7 +9,7 @@
 #include "component/Transform.h"
 #include "debug/Utils.h"
 #ifdef USE_VULKAN
-#include "component/vulkan/Renderer.h"
+#include "component/vulkan/MeshRenderer.h"
 #include "graphics/vulkan/TechniqueType.h"
 #endif
 #include <concepts>
@@ -44,10 +44,10 @@ namespace nc
     template<> bool RemoveComponent<PointLight>(EntityHandle handle);
 
     #ifdef USE_VULKAN
-    template<> vulkan::Renderer* AddComponent<vulkan::Renderer>(EntityHandle handle, std::string meshUid, nc::graphics::vulkan::TechniqueType techniqueType);
-    template<> vulkan::Renderer* GetComponent<vulkan::Renderer>(EntityHandle handle);
-    template<> bool HasComponent<vulkan::Renderer>(EntityHandle handle);
-    template<> bool RemoveComponent<vulkan::Renderer>(EntityHandle handle);
+    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, nc::graphics::vulkan::TechniqueType techniqueType);
+    template<> vulkan::MeshRenderer* GetComponent<vulkan::MeshRenderer>(EntityHandle handle);
+    template<> bool HasComponent<vulkan::MeshRenderer>(EntityHandle handle);
+    template<> bool RemoveComponent<vulkan::MeshRenderer>(EntityHandle handle);
     #endif
     
     template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
@@ -101,12 +101,13 @@ namespace nc
     }
 
     /** Internal use */
-    namespace ecs { class EntityComponentSystem; class RendererSystem; }
+    namespace ecs { class EntityComponentSystem; class RendererSystem; class MeshRendererSystem; }
     namespace physics{ class ColliderSystem; }
     namespace internal
     {
         void RegisterEcs(ecs::EntityComponentSystem* impl);
         void RegisterColliderSystem(physics::ColliderSystem* impl);
         void RegisterRendererSystem(ecs::RendererSystem* impl);
+        void RegisterMeshRendererSystem(ecs::MeshRendererSystem* impl);
     }
 } // end namespace nc

@@ -1,14 +1,14 @@
-#include "component/vulkan/Renderer.h"
+#include "component/vulkan/MeshRenderer.h"
 #include "Ecs.h"
 
 namespace nc::vulkan
 {
-    Renderer::Renderer(EntityHandle handle)
+    MeshRenderer::MeshRenderer(EntityHandle handle)
     : Component{handle}
     {
     }
 
-    Transform* Renderer::GetTransform()
+    Transform* MeshRenderer::GetTransform()
     {
         return GetComponent<Transform>(GetParentHandle());
     }

@@ -8,7 +8,7 @@
 #include "ColliderSystem.h"
 #include "HandleManager.h"
 #ifdef USE_VULKAN
-#include "RendererSystem.h"
+#include "MeshRendererSystem.h"
 #endif
 #include <memory>
 
@@ -43,7 +43,7 @@ namespace nc::ecs
         public:
             #ifdef USE_VULKAN
             EntityComponentSystem(nc::graphics::Graphics2* graphics);
-            RendererSystem* GetRendererSystem2();
+            MeshRendererSystem* GetMeshRendererSystem();
             #endif
 
             EntityComponentSystem();
@@ -76,7 +76,7 @@ namespace nc::ecs
             std::unique_ptr<ColliderSystem> m_colliderSystem;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             #ifdef USE_VULKAN
-            std::unique_ptr<RendererSystem> m_rendererSystem2;
+            std::unique_ptr<MeshRendererSystem> m_meshRendererSystem;
             #endif
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;

@@ -183,10 +183,10 @@ namespace nc::core
         auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
 
-        auto rendererSystem = m_ecs.GetRendererSystem2();
+        auto meshRendererSystem = m_ecs.GetMeshRendererSystem();
 
         // @todo: conditionally update based on changes
-        rendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
+        meshRendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
 
         m_graphics2.Draw();
         m_graphics2.FrameEnd();
