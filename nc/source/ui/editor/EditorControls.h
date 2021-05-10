@@ -9,6 +9,7 @@
 
 namespace nc::ui::editor::controls
 {
+    auto SelectedEntity = static_cast<EntityHandle::Handle_t>(EntityHandle::Invalid());
     const auto TitleBarHeight = 40.0f;
     const auto DefaultItemWidth = 60.0f;
     const auto SceneGraphPanelWidth = 300;
@@ -17,10 +18,11 @@ namespace nc::ui::editor::controls
     const auto Padding = 4.0f;
 
     inline void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight);
+    inline void SceneGraphNode(Entity* entity, Transform* transform);
+    inline void EntityPanel(EntityHandle handle);
+    inline void Component(ComponentBase* comp);
     inline void UtilitiesPanel(float* dtMult, ecs::Systems* systems, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void GraphicsResourcePanel();
-    inline void Entity(EntityHandle handle);
-    inline void Component(ComponentBase* comp);
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
     inline void ComponentSystems(ecs::Systems* systems);
@@ -31,8 +33,9 @@ namespace nc::ui::editor::controls
     void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight)
     {
         ImGui::SetNextWindowPos({Padding, TitleBarHeight});
+        auto sceneGraphHeight = windowHeight - TitleBarHeight;
 
-        if(ImGui::BeginChild("ScenePanel", {SceneGraphPanelWidth, windowHeight - TitleBarHeight}, true))
+        if(ImGui::BeginChild("ScenePanel", {SceneGraphPanelWidth, sceneGraphHeight}, true))
         {
             static ImGuiTextFilter filter;
             ImGui::Text("Scene Graph");
@@ -42,31 +45,69 @@ namespace nc::ui::editor::controls
             ImGui::Separator();
             ImGui::Spacing();
 
-            if(ImGui::BeginChild("EntityList"))
+            if(ImGui::BeginChild("EntityList", {0, sceneGraphHeight / 2}, true))
             {
                 for(auto& [handle, entity] : entities)
                 {
+                    auto* transform = GetComponent<Transform>(handle);
+                    if(transform->GetParent()) // only draw root nodes
+                        continue;
+
                     if(!filter.PassFilter(entity.Tag.c_str()))
                         continue;
-                    ImGui::PushID(static_cast<unsigned>(handle));
-                    if(ImGui::CollapsingHeader(entity.Tag.c_str()))
-                        controls::Entity(handle);
-                    ImGui::PopID();
+                    
+                    SceneGraphNode(&entity, transform);
                 }
-            }
-            ImGui::EndChild();
-        }
-        ImGui::EndChild();
+            } ImGui::EndChild();
+
+            if(ImGui::BeginChild("EntityPanel", {0,0}, true))
+            {
+                if(SelectedEntity)
+                    controls::EntityPanel(static_cast<EntityHandle>(SelectedEntity));
+
+            } ImGui::EndChild();
+
+        } ImGui::EndChild();
     }
 
-    void Entity(EntityHandle handle)
+    void SceneGraphNode(Entity* entity, Transform* transform)
+    {
+        auto handleValue = static_cast<EntityHandle::Handle_t>(entity->Handle);
+        ImGui::PushID(handleValue);
+
+        auto flags = 0;
+        if(SelectedEntity == handleValue)
+            flags = flags | ImGuiTreeNodeFlags_Framed;
+
+        auto open = ImGui::TreeNodeEx(entity->Tag.c_str(), flags);
+        if(ImGui::IsItemClicked())
+            SelectedEntity = handleValue;
+        
+        if(open)
+        {
+            for(auto* child : transform->GetChildren())
+                SceneGraphNode(GetEntity(child->GetParentHandle()), child);
+
+            ImGui::TreePop();
+        }
+
+        ImGui::PopID();
+    }
+
+    void EntityPanel(EntityHandle handle)
     {
         auto* entity = GetEntity(handle);
+
+        if(!entity) // entity may have been deleted
+        {
+            SelectedEntity = static_cast<EntityHandle::Handle_t>(EntityHandle::Invalid());
+            return;
+        }
+
         ImGui::Separator();
-        ImGui::Indent();
-            ImGui::Text("Handle %d", static_cast<unsigned>(handle));
-            ImGui::Text("Static %s", entity->IsStatic ? "True" : "False");
-        ImGui::Unindent();
+        ImGui::Text("Tag    %s", entity->Tag.c_str());
+        ImGui::Text("Handle %d", static_cast<unsigned>(handle));
+        ImGui::Text("Static %s", entity->IsStatic ? "True" : "False");
 
         controls::Component(GetComponent<Transform>(handle));
         controls::Component(GetComponent<NetworkDispatcher>(handle));
@@ -90,7 +131,6 @@ namespace nc::ui::editor::controls
             return;
         ImGui::Separator();
         ImGui::BeginGroup();
-            ImGui::Indent();
             ImGui::Spacing();
             comp->EditorGuiElement();
             ImGui::Spacing();
@@ -100,7 +140,7 @@ namespace nc::ui::editor::controls
     /**
      * Utilities Controls
      */
-        template<class Func, class ... Args>
+    template<class Func, class ... Args>
     void WrapTabItem(const char* label, Func func, Args&& ... args)
     {
         if(ImGui::BeginTabItem(label))

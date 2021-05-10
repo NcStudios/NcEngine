@@ -74,12 +74,12 @@ namespace nc::physics
     {
         auto unit = Normalize(Vector3::Splat(1.0f));
         auto unit_v = DirectX::XMLoadVector3(&unit);
-        auto viewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
+        const auto& viewMatrix = m_graphics->GetViewMatrix();
         unit_v = DirectX::XMVector3Transform(unit_v, viewMatrix);
         DirectX::XMStoreVector3(&unit, unit_v);
 
         auto [screenWidth, screenHeight] = window::GetDimensions();
-        auto projectionMatrix = m_graphics->GetProjectionMatrix();
+        const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
         auto worldMatrix = DirectX::XMMatrixIdentity();
         IClickable* out = nullptr;
         float smallestZ = std::numeric_limits<float>::max();

@@ -16,7 +16,17 @@ namespace nc::sample::prefab
         Table,
         Token,
         WireframeCube,
-        Worm
+        Worm,
+        Sun,
+        Mercury,
+        Venus,
+        Earth,
+        Mars,
+        Jupiter,
+        Saturn,
+        Uranus,
+        Neptune,
+        Pluto
     };
 
     std::string ToString(Resource resource);

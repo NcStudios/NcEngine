@@ -5,7 +5,7 @@
 
 namespace
 {
-    constexpr float CLEAR_COLOR[] = {0.2f, 0.2f, 0.2f, 1.0f};
+    constexpr std::array<float, 4> DefaultClearColor = {0.2f, 0.2f, 0.2f, 1.0f};
 }
 
 namespace nc::graphics
@@ -16,6 +16,7 @@ Graphics::Graphics(HWND hwnd, Vector2 dimensions)
       m_swapChain{ nullptr },
       m_renderTarget{ nullptr },
       m_dsv{ nullptr },
+      m_clearColor{DefaultClearColor},
       m_isFullscreen {false},
       m_viewMatrix{},
       m_projectionMatrix{}
@@ -70,6 +71,11 @@ void Graphics::ToggleFullscreen()
     m_swapChain->SetFullscreenState(m_isFullscreen, nullptr);
 }
 
+void Graphics::SetClearColor(std::array<float, 4> color)
+{
+    m_clearColor = color;
+}
+
 void Graphics::ResizeTarget(float width, float height)
 {
     auto mode = DXGI_MODE_DESC
@@ -103,7 +109,7 @@ void Graphics::FrameBegin()
     #ifdef NC_EDITOR_ENABLED
     m_drawCallCount = 0u;
     #endif
-    m_context->ClearRenderTargetView(m_renderTarget, CLEAR_COLOR);
+    m_context->ClearRenderTargetView(m_renderTarget, m_clearColor.data());
     m_context->ClearDepthStencilView(m_dsv, D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
 
