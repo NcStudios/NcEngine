@@ -23,7 +23,7 @@ namespace nc::graphics::vulkan
             vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base);
             static std::vector<uint32_t> ReadShader(const std::string& filename);
             TechniqueType GetType() const noexcept;
-            void RegisterRenderer(Mesh mesh, Transform* transform);
+            void RegisterMeshRenderer(Mesh mesh, Transform* transform);
 
             virtual ~TechniqueBase() noexcept;
             virtual void Record(Commands* commands) = 0;

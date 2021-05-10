@@ -52,7 +52,7 @@ namespace nc::graphics::vulkan
         base.destroyPipeline(m_pipeline);
     }
 
-    void TechniqueBase::RegisterRenderer(Mesh mesh, Transform* transform)
+    void TechniqueBase::RegisterMeshRenderer(Mesh mesh, Transform* transform)
     {
         for (auto& registeredMesh : m_meshes)
         {

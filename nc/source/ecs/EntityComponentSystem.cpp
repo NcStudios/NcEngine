@@ -5,7 +5,7 @@
 #include "component/PointLight.h"
 #include "component/PointLightManager.h"
 #ifdef USE_VULKAN
-#include "component/vulkan/Renderer.h"
+#include "component/vulkan/MeshRenderer.h"
 #include "graphics/Graphics2.h"
 #endif
 #include "component/Renderer.h"
@@ -55,7 +55,7 @@ EntityComponentSystem::EntityComponentSystem(nc::graphics::Graphics2* graphics)
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_colliderSystem{nullptr},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
-      m_rendererSystem2{ std::make_unique<RendererSystem>(config::GetMemorySettings().maxRenderers, graphics) },
+      m_meshRendererSystem{ std::make_unique<MeshRendererSystem>(config::GetMemorySettings().maxRenderers, graphics) },
       m_rendererSystem{nullptr},
       m_transformSystem{nullptr},
       m_networkDispatcherSystem{nullptr}
@@ -96,14 +96,10 @@ ComponentSystem<PointLight>* EntityComponentSystem::GetPointLightSystem() const
 }
 
 #ifdef USE_VULKAN
-template<> ComponentSystem<vulkan::Renderer>* EntityComponentSystem::GetSystem<vulkan::Renderer>()
-{
-    return m_rendererSystem2->GetSystem();
-}
 
-RendererSystem* EntityComponentSystem::GetRendererSystem2()
+MeshRendererSystem* EntityComponentSystem::GetMeshRendererSystem()
 {
-    return m_rendererSystem2.get();
+    return m_meshRendererSystem.get();
 }
 
 #endif
@@ -201,7 +197,7 @@ void EntityComponentSystem::SendOnDestroy()
         m_colliderSystem->Remove(handle, entity.IsStatic);
         m_transformSystem->Remove(handle);
         #ifdef USE_VULKAN
-        m_rendererSystem2->Remove(handle);
+        m_meshRendererSystem->Remove(handle);
         #endif
         m_rendererSystem->Remove(handle);
         m_lightSystem->Remove(handle);
@@ -231,7 +227,7 @@ void EntityComponentSystem::ClearState()
     m_colliderSystem->Clear();
     m_transformSystem->Clear();
     #ifdef USE_VULKAN
-    m_rendererSystem2->Clear();
+    m_meshRendererSystem->Clear();
     #endif
     m_rendererSystem->Clear();
     m_lightSystem->Clear();

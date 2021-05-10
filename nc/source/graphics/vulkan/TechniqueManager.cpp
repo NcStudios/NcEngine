@@ -19,19 +19,19 @@ namespace nc::graphics::vulkan
         m_globalData.indexBuffer = indexBuffer;
     }
 
-    void TechniqueManager::RegisterRenderer(TechniqueType technique, Mesh mesh, Transform* transform)
+    void TechniqueManager::RegisterMeshRenderer(TechniqueType technique, Mesh mesh, Transform* transform)
     {
         for (auto& registeredTechnique : m_techniques)
         {
             if (registeredTechnique->GetType() == technique)
             {
-                registeredTechnique->RegisterRenderer(std::move(mesh), transform);
+                registeredTechnique->RegisterMeshRenderer(std::move(mesh), transform);
                 return;
             }
         }
 
         auto techniqueToRegister = CreateTechnique(technique);
-        techniqueToRegister->RegisterRenderer(std::move(mesh), transform);
+        techniqueToRegister->RegisterMeshRenderer(std::move(mesh), transform);
         m_techniques.push_back(std::move(techniqueToRegister));
     }
 

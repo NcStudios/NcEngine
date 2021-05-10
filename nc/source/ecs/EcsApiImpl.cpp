@@ -2,7 +2,7 @@
 #include "ecs/ColliderSystem.h"
 #include "ecs/EntityComponentSystem.h"
 #ifdef USE_VULKAN
-    #include "ecs/RendererSystem.h"
+    #include "ecs/MeshRendererSystem.h"
 #endif
 
 namespace nc
@@ -15,6 +15,9 @@ namespace nc
         ecs::ComponentSystem<NetworkDispatcher>* g_networkDispatcherSystem = nullptr;
         ecs::ComponentSystem<PointLight>* g_pointLightSystem = nullptr;
         ecs::ComponentSystem<Renderer>* g_rendererSystem = nullptr;
+        #ifdef USE_VULKAN
+            ecs::MeshRendererSystem* g_meshRendererSystem = nullptr;
+        #endif
         ecs::ComponentSystem<Transform>* g_transformSystem = nullptr;
 
         void RegisterEcs(ecs::EntityComponentSystem* impl)
@@ -25,15 +28,10 @@ namespace nc
             g_pointLightSystem = impl->GetPointLightSystem();
             g_rendererSystem = impl->GetRendererSystem();
             g_transformSystem = impl->GetTransformSystem();
+            #ifdef USE_VULKAN
+            g_meshRendererSystem = impl->GetMeshRendererSystem();
+            #endif
         }
-
-        #ifdef USE_VULKAN
-        ecs::RendererSystem* g_rendererSystemImpl = nullptr;
-        void RegisterRendererSystem(ecs::RendererSystem* impl)
-        {
-            g_rendererSystemImpl = impl;
-        }
-        #endif
     }
 
     EntityHandle CreateEntity(EntityInfo info)
@@ -170,29 +168,29 @@ namespace nc
     }
 
     #ifdef USE_VULKAN
-    template<> vulkan::Renderer* AddComponent<vulkan::Renderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
+    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
     {
-        IF_THROW(!GetEntity(handle), "AddComponent<Renderer> - Bad handle");
-        IF_THROW(internal::g_rendererSystemImpl->Contains(handle), "AddComponent<Renderer> - entity already has a renderer");
-        return internal::g_rendererSystemImpl->Add(handle, std::move(meshUid), techniqueType);
+        IF_THROW(!GetEntity(handle), "AddComponent<MeshRenderer> - Bad handle");
+        IF_THROW(internal::g_meshRendererSystem->Contains(handle), "AddComponent<MeshRenderer> - entity already has a renderer");
+        return internal::g_meshRendererSystem->Add(handle, std::move(meshUid), techniqueType);
     }
 
-    template<> bool RemoveComponent<vulkan::Renderer>(EntityHandle handle)
+    template<> bool RemoveComponent<vulkan::MeshRenderer>(EntityHandle handle)
     {
-        IF_THROW(!GetEntity(handle), "RemoveComponent<Renderer> - Bad handle");
-        return internal::g_rendererSystemImpl->Remove(handle);
+        IF_THROW(!GetEntity(handle), "RemoveComponent<MeshRenderer> - Bad handle");
+        return internal::g_meshRendererSystem->Remove(handle);
     }
 
-    template<> bool HasComponent<vulkan::Renderer>(EntityHandle handle)
+    template<> bool HasComponent<vulkan::MeshRenderer>(EntityHandle handle)
     {
-        IF_THROW(!GetEntity(handle), "HasComponent<Renderer> - Bad handle");
-        return internal::g_rendererSystemImpl->Contains(handle);
+        IF_THROW(!GetEntity(handle), "HasComponent<MeshRenderer> - Bad handle");
+        return internal::g_meshRendererSystem->Contains(handle);
     }
 
-    template<> vulkan::Renderer* GetComponent<vulkan::Renderer>(EntityHandle handle)
+    template<> vulkan::MeshRenderer* GetComponent<vulkan::MeshRenderer>(EntityHandle handle)
     {
-        IF_THROW(!GetEntity(handle), "GetComponent<Renderer> - Bad handle");
-        return internal::g_rendererSystemImpl->GetPointerTo(handle);
+        IF_THROW(!GetEntity(handle), "GetComponent<MeshRenderer> - Bad handle");
+        return internal::g_meshRendererSystem->GetPointerTo(handle);
     }
     #endif
 }

@@ -15,7 +15,7 @@ namespace nc::graphics
         {
             public:
                 PhongAndUiTechnique(GlobalData* globalData, nc::graphics::Graphics2* graphics);
-                ~PhongAndUiTechnique();
+                ~PhongAndUiTechnique() noexcept;
                 void Record(Commands* commands) override;
 
             private:

@@ -190,7 +190,7 @@ namespace nc::core
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
 
-        auto rendererSystem = m_ecs.GetRendererSystem2();
+        auto meshRendererSystem = m_ecs.GetMeshRendererSystem();
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
@@ -201,7 +201,7 @@ namespace nc::core
         m_ui.FrameEnd();
 
         // @todo: conditionally update based on changes
-        rendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
+        meshRendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
 
         m_graphics2.Draw();
         m_graphics2.FrameEnd();

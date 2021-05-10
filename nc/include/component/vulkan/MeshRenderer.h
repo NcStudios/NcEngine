@@ -6,10 +6,9 @@ namespace nc { class Transform; }
 
 namespace nc::vulkan
 {
-    class Renderer : public Component
+    class MeshRenderer : public Component
     {
         public:
-            Renderer(EntityHandle handle);
-            Transform* GetTransform();
+            MeshRenderer(EntityHandle handle);
     };
 }

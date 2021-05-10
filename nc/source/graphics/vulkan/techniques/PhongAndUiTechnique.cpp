@@ -20,7 +20,7 @@ namespace nc::graphics::vulkan
         CreatePipeline();
     }
 
-    PhongAndUiTechnique::~PhongAndUiTechnique()
+    PhongAndUiTechnique::~PhongAndUiTechnique() noexcept
     {
         m_base.GetDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
     }
