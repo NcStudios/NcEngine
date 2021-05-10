@@ -21,7 +21,7 @@ namespace nc::ui
         public:
             #ifdef NC_EDITOR_ENABLED
                 #ifdef USE_VULKAN
-                UIImpl(HWND hwnd, graphics::Graphics2* graphics, ecs::RendererSystem* rendererSystem, const ecs::Systems& systems);
+                UIImpl(HWND hwnd, graphics::Graphics2* graphics, ecs::MeshRendererSystem* meshRendererSystem, const ecs::Systems& systems);
                 #else
                 UIImpl(HWND hwnd, graphics::Graphics* graphics, const ecs::Systems& systems);
                 #endif
@@ -59,7 +59,7 @@ namespace nc::ui
             
             #ifdef USE_VULKAN
             graphics::Graphics2* m_graphics;
-            ecs::RendererSystem* m_rendererSystem;
+            ecs::MeshRendererSystem* m_meshRendererSystem;
             #endif
 
     };

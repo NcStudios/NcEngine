@@ -75,7 +75,7 @@ namespace nc::core
           m_sceneSystem{},
           m_time{},
           #ifdef NC_EDITOR_ENABLED
-          m_ui{m_window.GetHWND(), &m_graphics2, m_ecs.GetRendererSystem2(), m_ecs.GetComponentSystems()}
+          m_ui{m_window.GetHWND(), &m_graphics2, m_ecs.GetMeshRendererSystem(), m_ecs.GetComponentSystems()}
           #else
           m_ui{m_window.GetHWND(), &m_graphics2}
           #endif
