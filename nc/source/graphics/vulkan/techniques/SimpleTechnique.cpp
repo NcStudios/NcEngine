@@ -20,7 +20,7 @@ namespace nc::graphics::vulkan
         CreatePipeline();
     }
 
-    SimpleTechnique::~SimpleTechnique()
+    SimpleTechnique::~SimpleTechnique() noexcept
     {
         m_base.GetDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
     }

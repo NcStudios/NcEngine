@@ -180,7 +180,7 @@ namespace nc::core
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
-        auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
+        auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
 
         auto meshRendererSystem = m_ecs.GetMeshRendererSystem();

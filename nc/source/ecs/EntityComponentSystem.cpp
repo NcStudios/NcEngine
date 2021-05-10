@@ -96,10 +96,6 @@ ComponentSystem<PointLight>* EntityComponentSystem::GetPointLightSystem() const
 }
 
 #ifdef USE_VULKAN
-template<> ComponentSystem<vulkan::MeshRenderer>* EntityComponentSystem::GetSystem<vulkan::MeshRenderer>()
-{
-    return m_meshRendererSystem->GetSystem();
-}
 
 MeshRendererSystem* EntityComponentSystem::GetMeshRendererSystem()
 {

@@ -10,6 +10,5 @@ namespace nc::vulkan
     {
         public:
             MeshRenderer(EntityHandle handle);
-            Transform* GetTransform();
     };
 }

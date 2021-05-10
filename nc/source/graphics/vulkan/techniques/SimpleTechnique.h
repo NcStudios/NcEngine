@@ -15,7 +15,7 @@ namespace nc::graphics
         {
             public:
                 SimpleTechnique(const GlobalData& globalData, nc::graphics::Graphics2* graphics);
-                ~SimpleTechnique();
+                ~SimpleTechnique() noexcept;
                 void Record(Commands* commands) override;
 
             private:

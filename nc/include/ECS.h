@@ -101,13 +101,9 @@ namespace nc
     }
 
     /** Internal use */
-    namespace ecs { class EntityComponentSystem; class RendererSystem; class MeshRendererSystem; }
-    namespace physics{ class ColliderSystem; }
+    namespace ecs { class EntityComponentSystem; }
     namespace internal
     {
         void RegisterEcs(ecs::EntityComponentSystem* impl);
-        void RegisterColliderSystem(physics::ColliderSystem* impl);
-        void RegisterRendererSystem(ecs::RendererSystem* impl);
-        void RegisterMeshRendererSystem(ecs::MeshRendererSystem* impl);
     }
 } // end namespace nc

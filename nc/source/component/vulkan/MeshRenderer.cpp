@@ -7,9 +7,4 @@ namespace nc::vulkan
     : Component{handle}
     {
     }
-
-    Transform* MeshRenderer::GetTransform()
-    {
-        return GetComponent<Transform>(GetParentHandle());
-    }
 }

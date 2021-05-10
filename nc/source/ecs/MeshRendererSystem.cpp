@@ -10,7 +10,6 @@ namespace nc::ecs
       m_meshManager{graphics},
       m_techniqueManager{graphics}
     {
-        internal::RegisterMeshRendererSystem(this);
         m_techniqueManager.RegisterGlobalData(m_meshManager.GetVertexBuffer(), m_meshManager.GetIndexBuffer());
     }
 
@@ -28,7 +27,7 @@ namespace nc::ecs
     {
         auto mesh = m_meshManager.GetMesh(std::move(meshUid));
         auto renderer = m_componentSystem.Add(parentHandle);
-        m_techniqueManager.RegisterRenderer(techniqueType, std::move(mesh), renderer->GetTransform());
+        m_techniqueManager.RegisterMeshRenderer(techniqueType, std::move(mesh), GetComponent<Transform>(parentHandle));
         return renderer;
     }
 
