@@ -47,6 +47,6 @@ namespace nc::sample
             translation = Vector3::Zero();
         m_lastFrameTranslation = translation;
         translation = translation * dt;
-        m_mainCameraTransform->Translate(translation, Space::World);
+        m_mainCameraTransform->Translate(translation);
     }
 }

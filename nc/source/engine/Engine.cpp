@@ -180,13 +180,13 @@ namespace nc::core
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
-        auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
+        auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
 
-        auto rendererSystem = m_ecs.GetRendererSystem2();
+        auto meshRendererSystem = m_ecs.GetMeshRendererSystem();
 
         // @todo: conditionally update based on changes
-        rendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
+        meshRendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
 
         m_graphics2.Draw();
         m_graphics2.FrameEnd();
@@ -195,7 +195,7 @@ namespace nc::core
         m_ui.FrameBegin();
         m_graphics.FrameBegin();
 
-        auto camViewMatrix = camera::GetMainCameraTransform()->GetViewMatrix();
+        auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
         for(auto& light : m_ecs.GetPointLightSystem()->GetComponents())
@@ -251,6 +251,7 @@ namespace nc::core
             // No UI for us until we tackle integrating IMGUI with Vulkan
         #else
             m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
+            m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics::SetClearColor, &m_graphics, _1));
             m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
         #endif
     }

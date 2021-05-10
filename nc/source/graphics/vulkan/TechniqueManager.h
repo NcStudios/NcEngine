@@ -27,7 +27,7 @@ namespace nc::graphics::vulkan
     {
         public:
             TechniqueManager(nc::graphics::Graphics2* graphics);
-            void RegisterRenderer(TechniqueType technique, Mesh mesh, Transform* transform);
+            void RegisterMeshRenderer(TechniqueType technique, Mesh mesh, Transform* transform);
             void RecordTechniques(Commands* commands);
             void RegisterGlobalData(vk::Buffer* vertexBuffer, vk::Buffer* indexBuffer);
             std::unique_ptr<TechniqueBase> CreateTechnique(TechniqueType techniqueType);

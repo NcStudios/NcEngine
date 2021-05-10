@@ -24,6 +24,6 @@ namespace nc::sample
 
     inline void ConstantTranslation::FrameUpdate(float dt)
     {
-        m_transform->Translate(m_velocity * dt, Space::World);
+        m_transform->Translate(m_velocity * dt);
     }
 }

@@ -34,6 +34,26 @@ namespace nc::sample::prefab
                 return std::string{"WireframeCube"};
             case Resource::Worm:
                 return std::string{"Worm"};
+            case Resource::Sun:
+                return std::string{"Sun"};
+            case Resource::Mercury:
+                return std::string{"Mercury"};
+            case Resource::Venus:
+                return std::string{"Venus"};
+            case Resource::Earth:
+                return std::string{"Earth"};
+            case Resource::Mars:
+                return std::string{"Mars"};
+            case Resource::Jupiter:
+                return std::string{"Jupiter"};
+            case Resource::Saturn:
+                return std::string{"Saturn"};
+            case Resource::Uranus:
+                return std::string{"Uranus"};
+            case Resource::Neptune:
+                return std::string{"Neptune"};
+            case Resource::Pluto:
+                return std::string{"Pluto"};
         }
         throw std::runtime_error("prefab::ToString(resource) - Unknown resource");
     }
@@ -43,6 +63,7 @@ namespace nc::sample::prefab
         graphics::Mesh Beeper{};
         graphics::Mesh Coin{};
         graphics::Mesh Cube{};
+        graphics::Mesh Planet{};
         graphics::Mesh Sphere{};
         graphics::Mesh Table{};
         graphics::Mesh Token{};
@@ -61,6 +82,16 @@ namespace nc::sample::prefab
         graphics::Material Token{nullptr};
         graphics::Material WireframeCube{nullptr};
         graphics::Material Worm{nullptr};
+        graphics::Material Sun{nullptr};
+        graphics::Material Mercury{nullptr};
+        graphics::Material Venus{nullptr};
+        graphics::Material Earth{nullptr};
+        graphics::Material Mars{nullptr};
+        graphics::Material Jupiter{nullptr};
+        graphics::Material Saturn{nullptr};
+        graphics::Material Uranus{nullptr};
+        graphics::Material Neptune{nullptr};
+        graphics::Material Pluto{nullptr};
     } // end namespace material
 
 void InitializeResources()
@@ -73,6 +104,7 @@ void InitializeResources()
     graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
     graphics::LoadMeshAsset("project/assets/mesh/coin.nca");
     graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/planet.nca");
     graphics::LoadMeshAsset("project/assets/mesh/sphere.nca");
     graphics::LoadMeshAsset("project/assets/mesh/table.nca");
     graphics::LoadMeshAsset("project/assets/mesh/token.nca");
@@ -81,6 +113,7 @@ void InitializeResources()
     mesh::Beeper = graphics::Mesh{"project/assets/mesh/beeper.nca"};
     mesh::Coin = graphics::Mesh{"project/assets/mesh/coin.nca"};
     mesh::Cube = graphics::Mesh{"project/assets/mesh/cube.nca"};
+    mesh::Planet = graphics::Mesh{"project/assets/mesh/planet.nca"};
     mesh::Sphere = graphics::Mesh{"project/assets/mesh/sphere.nca"};
     mesh::Table = graphics::Mesh{"project/assets/mesh/table.nca"};
     mesh::Token = graphics::Mesh{"project/assets/mesh/token.nca"};
@@ -120,6 +153,36 @@ void InitializeResources()
 
     const std::vector<std::string> wormTextures{textureDir + "Logo//BaseColor.png", textureDir + "Logo//Normal.png", textureDir + "Logo//Roughness.png", defaultMetallic};
     material::Worm = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(wormTextures, materialProperties);
+
+    const std::vector<std::string> sunTextures{textureDir + "Planets/Sun/BaseColor.png", textureDir + "Planets/Sun/Normal.png", textureDir + "Planets/Sun/Roughness.png", defaultMetallic};
+    material::Sun = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(sunTextures, materialProperties);
+
+    const std::vector<std::string> mercuryTextures{textureDir + "Planets/Mercury/BaseColor.png", textureDir + "Planets/Mercury/Normal.png", textureDir + "Planets/Mercury/Roughness.png", defaultMetallic};
+    material::Mercury = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(mercuryTextures, materialProperties);
+
+    const std::vector<std::string> venusTextures{textureDir + "Planets/Venus/BaseColor.png", textureDir + "Planets/Venus/Normal.png", textureDir + "Planets/Venus/Roughness.png", defaultMetallic};
+    material::Venus = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(venusTextures, materialProperties);
+
+    const std::vector<std::string> earthTextures{textureDir + "Planets/Earth/BaseColor.png", textureDir + "Planets/Earth/Normal.png", textureDir + "Planets/Earth/Roughness.png", defaultMetallic};
+    material::Earth = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(earthTextures, materialProperties);
+
+    const std::vector<std::string> marsTextures{textureDir + "Planets/Mars/BaseColor.png", textureDir + "Planets/Mars/Normal.png", textureDir + "Planets/Mars/Roughness.png", defaultMetallic};
+    material::Mars = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(marsTextures, materialProperties);
+
+    const std::vector<std::string> jupiterTextures{textureDir + "Planets/Jupiter/BaseColor.png", textureDir + "Planets/Jupiter/Normal.png", textureDir + "Planets/Jupiter/Roughness.png", defaultMetallic};
+    material::Jupiter = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(jupiterTextures, materialProperties);
+
+    const std::vector<std::string> saturnTextures{textureDir + "Planets/Saturn/BaseColor.png", textureDir + "Planets/Saturn/Normal.png", textureDir + "Planets/Saturn/Roughness.png", defaultMetallic};
+    material::Saturn = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(saturnTextures, materialProperties);
+
+    const std::vector<std::string> uranusTextures{textureDir + "Planets/Uranus/BaseColor.png", textureDir + "Planets/Uranus/Normal.png", textureDir + "Planets/Uranus/Roughness.png", defaultMetallic};
+    material::Uranus = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(uranusTextures, materialProperties);
+
+    const std::vector<std::string> neptuneTextures{textureDir + "Planets/Neptune/BaseColor.png", textureDir + "Planets/Neptune/Normal.png", textureDir + "Planets/Neptune/Roughness.png", defaultMetallic};
+    material::Neptune = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(neptuneTextures, materialProperties);
+
+    const std::vector<std::string> plutoTextures{textureDir + "Planets/Pluto/BaseColor.png", textureDir + "Planets/Pluto/Normal.png", textureDir + "Planets/Pluto/Roughness.png", defaultMetallic};
+    material::Pluto = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(plutoTextures, materialProperties);
 }
 
 template<Resource Resource_t>
@@ -202,6 +265,75 @@ template<> EntityHandle Create_<Resource::Worm>(EntityInfo info)
     return handle;
 }
 
+template<> EntityHandle Create_<Resource::Sun>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Sun);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Mercury>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Mercury);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Venus>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Venus);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Earth>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Earth);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Mars>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Mars);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Jupiter>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Jupiter);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Saturn>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Saturn);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Uranus>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Uranus);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Neptune>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Neptune);
+    return handle;
+}
+
+template<> EntityHandle Create_<Resource::Pluto>(EntityInfo info)
+{
+    auto handle = CreateEntity(std::move(info));
+    AddComponent<Renderer>(handle, mesh::Planet, material::Pluto);
+    return handle;
+}
 using CreateFunc_t = EntityHandle(*)(EntityInfo info);
 
 const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
@@ -216,7 +348,17 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::Table,         Create_<Resource::Table>},
     std::pair{Resource::Token,         Create_<Resource::Token>},
     std::pair{Resource::WireframeCube, Create_<Resource::WireframeCube>},
-    std::pair{Resource::Worm,          Create_<Resource::Worm>}
+    std::pair{Resource::Worm,          Create_<Resource::Worm>},
+    std::pair{Resource::Sun,           Create_<Resource::Sun>},
+    std::pair{Resource::Mercury,       Create_<Resource::Mercury>},
+    std::pair{Resource::Venus,         Create_<Resource::Venus>},
+    std::pair{Resource::Earth,         Create_<Resource::Earth>},
+    std::pair{Resource::Mars,          Create_<Resource::Mars>},
+    std::pair{Resource::Jupiter,       Create_<Resource::Jupiter>},
+    std::pair{Resource::Saturn,        Create_<Resource::Saturn>},
+    std::pair{Resource::Uranus,        Create_<Resource::Uranus>},
+    std::pair{Resource::Neptune,       Create_<Resource::Neptune>},
+    std::pair{Resource::Pluto,         Create_<Resource::Pluto>}
 };
 
 nc::EntityHandle Create(Resource resource, EntityInfo info)
