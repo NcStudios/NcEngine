@@ -2,6 +2,11 @@
 #include "UI.h"
 #include "debug/Utils.h"
 #include "graphics/Graphics.h"
+#ifdef USE_VULKAN
+#include "graphics/Graphics2.h"
+#include "graphics/vulkan/Swapchain.h"
+#include "imgui/imgui_impl_vulkan.h"
+#endif
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
@@ -29,25 +34,51 @@ namespace nc::ui
 
     /* UIImpl */
     #ifdef NC_EDITOR_ENABLED
+        #ifdef USE_VULKAN
+    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics2* graphics, ecs::MeshRendererSystem* meshRendererSystem, const ecs::Systems& systems)
+    : m_editor{graphics, systems},
+        m_projectUI{nullptr},
+        m_graphics{graphics},
+        m_meshRendererSystem{meshRendererSystem}
+        #else
     UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics, const ecs::Systems& systems)
-        : m_editor{graphics, systems},
-          m_projectUI{nullptr}
+    : m_editor{graphics, systems},
+        m_projectUI{nullptr}
+        #endif
     #else
+        #ifdef USE_VULKAN
+    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics2* graphics, ecs::MeshRendererSystem* meshRendererSystem)
+    : m_projectUI{ nullptr },          
+        m_graphics{graphics},
+        m_meshRendererSystem{meshRendererSystem}
+        #else
     UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
         : m_projectUI{ nullptr }
+        #endif
     #endif
     {
         g_instance = this;
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
+
+        #ifdef USE_VULKAN
+        auto& uiPassDefinition = m_graphics->GetSwapchainPtr()->GetPassDefinition();
+        m_graphics->GetBasePtr()->InitializeImgui(uiPassDefinition);
+        #else
         ImGui_ImplDX11_Init(graphics->m_device, graphics->m_context);
+        #endif
     }
 
     UIImpl::~UIImpl() noexcept
     {
-        ImGui_ImplWin32_Shutdown();
+        #ifdef USE_VULKAN
+        ImGui_ImplVulkan_Shutdown();
+        #else
         ImGui_ImplDX11_Shutdown();
+        #endif
+
+        ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
     }
 
@@ -71,7 +102,11 @@ namespace nc::ui
 
     void UIImpl::FrameBegin()
     {
+        #ifdef USE_VULKAN
+        ImGui_ImplVulkan_NewFrame();
+        #else
         ImGui_ImplDX11_NewFrame();
+        #endif
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
     }
@@ -98,6 +133,9 @@ namespace nc::ui
     void UIImpl::FrameEnd()
     {
         ImGui::Render();
+        #ifdef USE_VULKAN
+        #else
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+        #endif
     }
 } //end namespace nc::ui

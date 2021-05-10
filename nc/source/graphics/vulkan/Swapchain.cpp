@@ -23,7 +23,6 @@ namespace nc::graphics::vulkan
     {
         Create(dimensions);
         CreateSynchronizationObjects();
-        CreateDefaultPass();
         CreateFrameBuffers();
     }
     
@@ -50,8 +49,6 @@ namespace nc::graphics::vulkan
         auto device = m_base->GetDevice();
         DestroyFrameBuffers();
 
-        device.destroyRenderPass(m_defaultPass);
-
         for (auto& imageView : m_swapChainImageViews)
         {
            device.destroyImageView(imageView, nullptr);
@@ -62,6 +59,35 @@ namespace nc::graphics::vulkan
 
     void Swapchain::CreateFrameBuffers()
     {
+        std::array<vk::AttachmentDescription, 2> renderPassAttachments = 
+        {
+            CreateAttachmentDescription(AttachmentType::Color, GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
+            CreateAttachmentDescription(AttachmentType::Depth, m_base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
+        };
+
+        vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
+        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
+        vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
+
+        std::array<vk::SubpassDependency, 2> dependencies =
+        { 
+            CreateSubpassDependency(AttachmentType::Color),
+            CreateSubpassDependency(AttachmentType::Depth)
+        };
+
+        vk::RenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.setAttachmentCount(static_cast<uint32_t>(renderPassAttachments.size()));
+        renderPassInfo.setPAttachments(renderPassAttachments.data());
+        renderPassInfo.setSubpassCount(1);
+        renderPassInfo.setPSubpasses(&subpass);
+        renderPassInfo.setDependencyCount(static_cast<uint32_t>(dependencies.size()));
+        renderPassInfo.setPDependencies(dependencies.data());
+
+        if (m_base->GetDevice().createRenderPass(&renderPassInfo, nullptr, &m_defaultPass) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Could not create render pass.");
+        }
+
         vk::ImageView attachments[2];
         
         attachments[1] = m_depthStencil.GetImageView();
@@ -82,38 +108,6 @@ namespace nc::graphics::vulkan
         {
             attachments[0] = m_swapChainImageViews.at(i);
             m_framebuffers[i] = m_base->GetDevice().createFramebuffer(framebufferInfo);
-        }
-    }
-
-    void Swapchain::CreateDefaultPass()
-    {
-        std::array<vk::AttachmentDescription, 2> attachments = 
-        {
-            CreateAttachmentDescription(AttachmentType::Color, GetFormat()),
-            CreateAttachmentDescription(AttachmentType::Depth, m_base->GetDepthFormat()),
-        };
-
-        vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
-        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
-        vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
-
-        std::array<vk::SubpassDependency, 2> dependencies =
-        { 
-            CreateSubpassDependency(AttachmentType::Color),
-            CreateSubpassDependency(AttachmentType::Depth)
-        };
-
-        vk::RenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.setAttachmentCount(static_cast<uint32_t>(attachments.size()));
-        renderPassInfo.setPAttachments(attachments.data());
-        renderPassInfo.setSubpassCount(1);
-        renderPassInfo.setPSubpasses(&subpass);
-        renderPassInfo.setDependencyCount(static_cast<uint32_t>(dependencies.size()));
-        renderPassInfo.setPDependencies(dependencies.data());
-
-        if (m_base->GetDevice().createRenderPass(&renderPassInfo, nullptr, &m_defaultPass) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Could not create render pass.");
         }
     }
 
@@ -197,6 +191,11 @@ namespace nc::graphics::vulkan
     const vk::Framebuffer& Swapchain::GetFrameBuffer(uint32_t index) const
     {
         return m_framebuffers.at(index);
+    }
+
+    const vk::RenderPass& Swapchain::GetPassDefinition()
+    {
+        return m_defaultPass;
     }
 
     const vk::Format& Swapchain::GetFormat() const noexcept

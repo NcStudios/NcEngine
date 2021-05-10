@@ -18,6 +18,7 @@ namespace nc::graphics::vulkan
             void FreeCommandBuffers();
             void SubmitRenderCommand(uint32_t imageIndex);
             static void SubmitCopyCommandImmediate(const vulkan::Base& base, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
+            static void SubmitCommandImmediate(const vulkan::Base& base, std::function<void(vk::CommandBuffer cmd)>&& function);
 
         private:
             // External members

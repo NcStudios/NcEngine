@@ -38,8 +38,8 @@ namespace nc::graphics::vulkan
             // Frame buffers
             void CreateFrameBuffers();
             const vk::Framebuffer& GetFrameBuffer(uint32_t index) const;
-            void CreateDefaultPass();
             void DestroyFrameBuffers();
+            const vk::RenderPass& GetPassDefinition();
 
             // Image synchronization
             void CreateSynchronizationObjects();

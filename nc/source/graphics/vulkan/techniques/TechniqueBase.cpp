@@ -12,10 +12,24 @@
 
 namespace nc::graphics::vulkan
 {
-    TechniqueBase::TechniqueBase(TechniqueType techniqueType, const GlobalData& globalData, nc::graphics::Graphics2* graphics)
+    TechniqueBase::TechniqueBase(TechniqueType techniqueType, nc::graphics::Graphics2* graphics)
     : m_graphics{ graphics },
       m_base{ graphics->GetBase() },
-      m_swapchain{ graphics->GetSwapchain() },
+      m_swapchain{ graphics->GetSwapchainPtr() },
+      m_globalData{ nullptr },
+      m_meshes{},
+      m_objects{},
+      m_pipeline{},
+      m_pipelineLayout{},
+      m_descriptorSetLayout{},
+      m_type{ techniqueType } 
+    {
+    }
+
+    TechniqueBase::TechniqueBase(TechniqueType techniqueType, GlobalData* globalData, nc::graphics::Graphics2* graphics)
+    : m_graphics{ graphics },
+      m_base{ graphics->GetBase() },
+      m_swapchain{ graphics->GetSwapchainPtr() },
       m_globalData{ globalData },
       m_meshes{},
       m_objects{},

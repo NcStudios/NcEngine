@@ -1,7 +1,7 @@
 #include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
-#include "graphics/vulkan/techniques/SimpleTechnique.h"
+#include "graphics/vulkan/techniques/PhongAndUiTechnique.h"
 #include "component/Transform.h"
 
 namespace nc::graphics::vulkan
@@ -48,7 +48,7 @@ namespace nc::graphics::vulkan
         switch (techniqueType)
         {
             case TechniqueType::Simple:
-                return std::make_unique<SimpleTechnique>(m_globalData, m_graphics);
+                return std::make_unique<PhongAndUiTechnique>(&m_globalData, m_graphics);
             case TechniqueType::None:
                 throw std::runtime_error("Technique not implemented.");
         }

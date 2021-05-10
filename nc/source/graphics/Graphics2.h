@@ -29,12 +29,14 @@ namespace nc::graphics
             void ResizeTarget(float width, float height);
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
             void ToggleFullscreen();
+            void SetClearColor(std::array<float, 4> color);
 
             const vulkan::Base& GetBase() const noexcept;
             vulkan::Base* GetBasePtr() const noexcept;
-            const vulkan::Swapchain& GetSwapchain() const noexcept;
+            vulkan::Swapchain* GetSwapchainPtr() const noexcept;
             vulkan::Commands* GetCommandsPtr() const noexcept;
             const Vector2 GetDimensions() const noexcept;
+            const std::array<float, 4>& GetClearColor() const noexcept;
 
             // Blocks the current thread until all operations in the command queues on the device are completed. 
             void WaitIdle();
@@ -62,6 +64,7 @@ namespace nc::graphics
             bool m_isResized;
             DirectX::XMMATRIX m_viewMatrix;
             DirectX::XMMATRIX m_projectionMatrix;
+            std::array<float, 4> m_clearColor;
 
     };
 }

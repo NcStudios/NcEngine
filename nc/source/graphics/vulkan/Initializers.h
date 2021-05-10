@@ -18,7 +18,7 @@ namespace nc::graphics::vulkan
         Pixel
     };
 
-    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format);
+    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
     vk::AttachmentReference CreateAttachmentReference(AttachmentType type, uint32_t attachmentIndex);
     vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& colorReference, const vk::AttachmentReference& depthReference);
     vk::SubpassDependency CreateSubpassDependency(AttachmentType type);

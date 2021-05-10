@@ -43,10 +43,7 @@ namespace nc::core
             physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
-
-        #ifndef USE_VULKAN
             ui::UIImpl m_ui;
-        #endif
 
             void ClearState();
             void DoSceneSwap();

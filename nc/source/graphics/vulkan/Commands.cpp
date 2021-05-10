@@ -86,4 +86,30 @@ namespace nc::graphics::vulkan
         base.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
         base.GetDevice().freeCommandBuffers(base.GetCommandPool(), tempCommandBuffer);
     }
+
+    void Commands::SubmitCommandImmediate(const vulkan::Base& base, std::function<void(vk::CommandBuffer cmd)>&& function)
+    {
+        vk::CommandBufferAllocateInfo allocInfo{};
+        allocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
+        allocInfo.setCommandPool(base.GetCommandPool());
+        allocInfo.setCommandBufferCount(1);
+
+        auto tempCommandBuffers = base.GetDevice().allocateCommandBuffers(allocInfo);
+        auto tempCommandBuffer = tempCommandBuffers[0];
+
+        vk::CommandBufferBeginInfo beginInfo{};
+        beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        tempCommandBuffer.begin(beginInfo);
+        {
+            function(tempCommandBuffer);
+        }
+        tempCommandBuffer.end();
+
+         vk::SubmitInfo submitInfo{};
+        submitInfo.setCommandBufferCount(1);
+        submitInfo.setPCommandBuffers(&tempCommandBuffer);
+        base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);
+        base.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
+        base.GetDevice().freeCommandBuffers(base.GetCommandPool(), tempCommandBuffer);
+    }
 }

@@ -5,13 +5,28 @@
 #include "graphics/vulkan/TechniqueType.h"
 #include "shared/SceneNavigationCamera.h"
 #include "shared/WasdController.h"
+#include "imgui/imgui.h"
 
 #include <string>
+
+namespace
+{
+    void Widget()
+    {
+        ImGui::Text("Vulkan");
+        if(ImGui::BeginChild("Widget", {0,0}, true))
+        {
+            ImGui::Text("Vulkan scratch scene.");
+        } ImGui::EndChild();
+    }
+}
 
 namespace nc::sample
 {
     void VulkanScene::Load()
     {
+        m_sceneHelper.Setup(true, true, Widget);
+
         // Load the meshes
         const std::vector<std::string> meshPaths {"project/assets/mesh/beeper.nca", "project/assets/mesh/table.nca"};
         nc::graphics::vulkan::LoadMeshes(std::move(meshPaths));
