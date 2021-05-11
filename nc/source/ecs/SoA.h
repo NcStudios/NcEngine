@@ -12,18 +12,18 @@ namespace nc::ecs
     /** An incrementable index for sequentially accessing each valid position in an SoA. */
     class SoAIndex
     {
-        using GapIterator = std::set<uint32_t>::const_iterator;
+        using GapIterator = std::set<size_t>::const_iterator;
         
         public:
-            SoAIndex(uint32_t begin, uint32_t end, GapIterator gapBegin, GapIterator gapEnd);
+            SoAIndex(size_t begin, size_t end, GapIterator gapBegin, GapIterator gapEnd);
 
             SoAIndex& operator++();
-            operator unsigned() const;
+            operator size_t() const;
             bool Valid() const;
 
         private:
-            uint32_t m_current;
-            const uint32_t m_end;
+            size_t m_current;
+            const size_t m_end;
             GapIterator m_gapCurrent;
             const GapIterator m_gapEnd;
     };
@@ -45,7 +45,7 @@ namespace nc::ecs
         using view_type = std::tuple<SoAIndex, span_type<Indices>...>;
 
         public:
-            SoA(uint32_t maxCount);
+            SoA(size_t maxCount);
 
             void Add(Members... members);
 
@@ -66,6 +66,9 @@ namespace nc::ecs
 
             void Clear();
             bool IsFull() const;
+            size_t GetCapacity() const;
+            size_t GetSize() const;
+            size_t GetRemainingSpace() const;
             SoAIndex SmartIndex() const;
 
         private:
@@ -73,17 +76,17 @@ namespace nc::ecs
             void Assign(size_t index, First&& first, Rest&&... rest);
 
             std::tuple<std::unique_ptr<Members[]>...> m_members;
-            std::set<uint32_t> m_gaps;
-            uint32_t m_nextFree;
-            uint32_t m_size;
+            std::set<size_t> m_gaps;
+            size_t m_nextFree;
+            size_t m_capacity;
     };
 
     template<SoAMember... Members>
-    SoA<Members...>::SoA(uint32_t maxCount)
+    SoA<Members...>::SoA(size_t maxCount)
         : m_members{std::make_unique<Members[]>(maxCount)...},
           m_gaps{},
           m_nextFree{0u},
-          m_size{maxCount}
+          m_capacity{maxCount}
     {
     }
 
@@ -143,7 +146,7 @@ namespace nc::ecs
     template<SoAMember... Members>
     bool SoA<Members...>::IsFull() const
     {
-        return m_nextFree >= m_size && m_gaps.empty();
+        return m_nextFree >= m_capacity && m_gaps.empty();
     }
 
     template<SoAMember... Members>
@@ -165,6 +168,25 @@ namespace nc::ecs
     auto SoA<Members...>::View() const -> view_type<I...>
     {
         return std::tuple{SmartIndex(), GetSpanFromIndex<I>()...};
+    }
+
+    template<SoAMember... Members>
+    size_t SoA<Members...>::GetCapacity() const
+    {
+        return m_capacity;
+    }
+    
+    template<SoAMember... Members>
+    size_t SoA<Members...>::GetSize() const
+    {
+        //IF_THROW(m_gaps.size() > m_nextFree, "SoA::GetSize - Free/gaps mismatch resulting in underflow");
+        return m_nextFree - m_gaps.size();
+    }
+    
+    template<SoAMember... Members>
+    size_t SoA<Members...>::GetRemainingSpace() const
+    {
+        return m_capacity - GetSize();
     }
 
     template<SoAMember... Members>

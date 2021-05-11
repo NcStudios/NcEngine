@@ -21,6 +21,7 @@ namespace nc
     class Renderer;
     class Vector3;
     class Quaternion;
+    namespace graphics { class Graphics; }
     namespace physics { class ColliderSystem; }
 }
 
@@ -38,7 +39,11 @@ namespace nc::ecs
     class EntityComponentSystem
     {
         public:
+            #ifdef USE_VULKAN
             EntityComponentSystem();
+            #else
+            EntityComponentSystem(graphics::Graphics* graphics);
+            #endif
 
             ColliderSystem* GetColliderSystem() const;
             ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;

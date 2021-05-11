@@ -18,6 +18,8 @@ namespace nc::graphics
     class ParticleTechnique : public Technique
     {
         public:
+            static constexpr size_t ParticleMeshIndexCount = 6u;
+
             ParticleTechnique();
             
             static size_t GetUID() noexcept;

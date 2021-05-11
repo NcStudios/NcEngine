@@ -1,13 +1,28 @@
 #include "ParticleEmitterSystem.h"
+#include "graphics/Graphics.h"
+
+namespace
+{
+    auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
+    {
+        return nc::particle::GraphicsData
+        {
+            graphics->GetViewMatrix(),
+            graphics->GetProjectionMatrix(),
+            graphics
+        };
+    }
+}
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(unsigned maxCount)
+    ParticleEmitterSystem::ParticleEmitterSystem(unsigned maxCount, graphics::Graphics* graphics)
         : m_componentSystem{maxCount},
           m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
-          m_renderer{}
+          m_graphicsData{CreateParticleGraphicsData(graphics)},
+          m_renderer{graphics}
     {
     }
 
@@ -39,9 +54,10 @@ namespace nc::ecs
 
         for(auto handle : m_toRemove)
         {
-            auto beg = m_emitterStates.begin();
-            auto end = m_emitterStates.end();
-            m_emitterStates.erase(std::remove_if(beg, end, [handle](auto& state) { return state.GetHandle() == handle;}), end);
+            std::erase_if(m_emitterStates, [handle](auto& state)
+            {
+                return state.GetHandle() == handle;
+            });
         }
 
         m_toRemove.clear();
@@ -49,8 +65,6 @@ namespace nc::ecs
 
     void ParticleEmitterSystem::Emit(EntityHandle handle, size_t count)
     {
-        // more efficient? 
-
         auto pos = std::find_if(m_emitterStates.begin(), m_emitterStates.end(), [handle](auto& state)
         {
             return state.GetHandle() == handle;
@@ -72,7 +86,7 @@ namespace nc::ecs
 
     ParticleEmitter* ParticleEmitterSystem::Add(EntityHandle handle, ParticleInfo info)
     {
-        m_toAdd.emplace_back(handle, info);
+        m_toAdd.emplace_back(handle, info, &m_graphicsData);
         return m_componentSystem.Add(handle, this);
     }
 

@@ -8,21 +8,6 @@
 
 namespace nc
 {
-    struct ParticleInfo
-    {
-        unsigned maxParticleCount = 100u;
-        unsigned initialEmissionCount = 0u;
-        unsigned periodicEmissionCount = 0u;
-        float periodicEmissionFrequency = 0.0f;
-
-        float particleLifetime = 5.0f;
-        Vector3 particlePosition = Vector3::Zero();
-        Quaternion particleRotation = Quaternion::Identity();
-        Vector3 particleScale = Vector3::One();
-
-        std::string particleTexturePath = "";
-    };
-
     namespace ecs { class ParticleEmitterSystem; }
 
     class ParticleEmitter : public Component
@@ -34,5 +19,43 @@ namespace nc
         
         private:
             ecs::ParticleEmitterSystem* m_emitterSystem;
+    };
+
+    struct ParticleEmissionInfo
+    {
+        unsigned maxParticleCount = 100u;
+        unsigned initialEmissionCount = 0u;
+        unsigned periodicEmissionCount = 0u;
+        float periodicEmissionFrequency = 0.0f;
+    };
+
+    struct ParticleInitInfo
+    {
+        float lifetime = 5.0f;
+        Vector3 position = Vector3::Zero();
+        Vector3 positionRange = Vector3::Zero();
+        float rotation = 0.0f;
+        float rotationRange = 0.0f;
+        float scale = 1.0f;
+        float scaleRange = 0.0f;
+        std::string particleTexturePath = "";
+    };
+
+    struct ParticleKinematicInfo
+    {
+        Vector3 velocity = Vector3::Zero();
+        Vector3 velocityRange = Vector3::Zero();
+        float velocityOverTimeFactor = 0.5f;
+        float rotation = 0.0f;
+        float rotationRange = 0.0f;
+        float rotationOverTimeFactor = 0.5f;
+        float scaleOverTimeFactor = 0.0f;
+    };
+
+    struct ParticleInfo
+    {
+        ParticleEmissionInfo emission;
+        ParticleInitInfo init;
+        ParticleKinematicInfo kinematic;
     };
 } // namespace nc

@@ -54,6 +54,7 @@ namespace nc
 
     Quaternion Quaternion::FromAxisAngle(const Vector3& axis, float angle)
     {
+        IF_THROW(axis == Vector3::Zero(), "Quaternion::FromAxisAngle - Axis cannot be zero");
         auto axis_v = DirectX::XMVectorSet(axis.x, axis.y, axis.z, 0.0f);
         auto quat_v = DirectX::XMQuaternionRotationAxis(axis_v, angle);
         auto out = Quaternion::Identity();
@@ -66,6 +67,36 @@ namespace nc
         auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
         auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
         auto out_v = DirectX::XMQuaternionMultiply(lhs_v, rhs_v); // returns rhs_v * lhs_v
+        auto out = Quaternion::Identity();
+        DirectX::XMStoreQuaternion(&out, out_v);
+        return out;
+    }
+
+    Quaternion Difference(const Quaternion& lhs, const Quaternion& rhs)
+    {
+        auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
+        auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
+        lhs_v = DirectX::XMQuaternionConjugate(lhs_v);
+        auto out_v = DirectX::XMQuaternionMultiply(lhs_v, rhs_v);
+        auto out = Quaternion::Identity();
+        DirectX::XMStoreQuaternion(&out, out_v);
+        return out;
+    }
+
+    Quaternion Scale(const Quaternion& quat, float factor)
+    {
+        auto quat_v = DirectX::XMVectorSet(quat.x, quat.y, quat.z, quat.w);
+        auto out_v = DirectX::XMQuaternionSlerp(DirectX::g_XMIdentityR3, quat_v, factor);
+        auto out = Quaternion::Identity();
+        DirectX::XMStoreQuaternion(&out, out_v);
+        return out;
+    }
+
+    Quaternion Slerp(const Quaternion& lhs, const Quaternion& rhs, float factor)
+    {
+        auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
+        auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
+        auto out_v = DirectX::XMQuaternionSlerp(lhs_v, rhs_v, factor);
         auto out = Quaternion::Identity();
         DirectX::XMStoreQuaternion(&out, out_v);
         return out;

@@ -3,10 +3,6 @@
 #include "Ecs.h"
 #include "shared/GameLog.h"
 
-
-
-#include "Input.h"
-
 namespace nc::sample
 {
     /** Destroys anything that escapes the area bounded by the parent entity's collider. */
@@ -15,12 +11,6 @@ namespace nc::sample
         public:
             KillBox(EntityHandle handle, bool logOnDestroy = false);
             void OnCollisionExit(Entity* other) override;
-
-            void FrameUpdate(float dt) override
-            {
-                if(input::GetKeyDown(input::KeyCode::A))
-                    m_particleSystem->Emit(10u);
-            }
 
         private:
             bool m_logOnDestroy;

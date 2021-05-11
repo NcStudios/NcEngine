@@ -2,8 +2,15 @@
 
 #include "component/ParticleEmitter.h"
 #include "ecs/SoA.h"
+#include "graphics/MvpMatrices.h"
 
 #include <vector>
+
+namespace nc
+{
+    class Transform;
+    namespace graphics { class Graphics; }
+}
 
 namespace nc::particle
 {
@@ -12,25 +19,27 @@ namespace nc::particle
         float maxLifetime;
         float currentLifetime;
         Vector3 position;
-        Quaternion rotation;
-        Vector3 scale;
+        Vector3 linearVelocity;
+        float rotation;
+        float angularVelocity;
+        float scale;
     };
 
-    /** @todo Maybe the SoA should exist in ParticleEmitterSystem and contain
-     *  all of the particles. Rendering would be tricky with different ranges
-     *  requiring different textures. */
+    struct GraphicsData
+    {
+        DirectX::FXMMATRIX viewMatrix;
+        DirectX::FXMMATRIX projectionMatrix;
+        graphics::Graphics* graphics;
+    };
 
     class EmitterState
     {
         public:
-            using ParticleSoA = ecs::SoA<float, float, Vector3, Quaternion, Vector3>;
-            static constexpr size_t MaxLifetimesIndex = 0u;
-            static constexpr size_t CurrentLifetimesIndex = 1u;
-            static constexpr size_t PositionsIndex = 2u;
-            static constexpr size_t RotationsIndex = 3u;
-            static constexpr size_t ScalesIndex = 4u;
+            using ParticleSoA = ecs::SoA<Particle, graphics::MvpMatrices>;
+            static constexpr size_t ParticlesIndex = 0u;
+            static constexpr size_t MvpMatricesIndex = 1u;
 
-            EmitterState(EntityHandle handle, const ParticleInfo& info);
+            EmitterState(EntityHandle handle, const ParticleInfo& info, GraphicsData* graphicsData);
 
             void Emit(size_t count);
             void Update(float dt);
@@ -38,8 +47,13 @@ namespace nc::particle
             EntityHandle GetHandle() const;
 
         private:
-            ParticleInfo m_info;
+            void PeriodicEmission(float dt);
+            graphics::MvpMatrices ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const;
             ParticleSoA m_soa;
+            ParticleInfo m_info;
+            GraphicsData* m_graphicsData;
+            Transform* m_transform;
             EntityHandle m_handle;
+            float m_emissionCounter;
     };
 }

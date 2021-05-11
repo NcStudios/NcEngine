@@ -8,12 +8,14 @@
 #include <memory>
 #include <random>
 
+namespace nc::graphics { class Graphics; }
+
 namespace nc::ecs
 {
     class ParticleEmitterSystem
     {
         public:
-            ParticleEmitterSystem(unsigned maxCount);
+            ParticleEmitterSystem(unsigned maxCount, graphics::Graphics* graphics);
 
             /** UpdateParticles is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -38,6 +40,7 @@ namespace nc::ecs
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;
             std::vector<EntityHandle> m_toRemove;
+            particle::GraphicsData m_graphicsData;
             particle::ParticleRenderer m_renderer;
 
     };

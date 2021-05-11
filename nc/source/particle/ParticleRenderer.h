@@ -1,6 +1,6 @@
 #pragma once
 
-#include "directx/math/DirectXMath.h"
+#include "graphics/MvpMatrices.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
 
 namespace nc::particle
@@ -10,22 +10,15 @@ namespace nc::particle
     class ParticleRenderer
     {
         public:
-            ParticleRenderer();
+            ParticleRenderer(graphics::Graphics* graphics);
 
             void Render(const std::vector<EmitterState>& emitterStates);
 
         private:
-            void BindMatrix(DirectX::FXMMATRIX matrix);
+            void BindMatrices(const graphics::MvpMatrices& matrices);
 
-            struct Transforms
-            {
-                DirectX::XMMATRIX modelView;
-                DirectX::XMMATRIX model;
-            };
-
-            std::unique_ptr<graphics::d3dresource::PixelConstantBuffer<Transforms>> m_pixelCBuff;
-            std::unique_ptr<graphics::d3dresource::VertexConstantBuffer<Transforms>> m_vertexCBuff;
-            DirectX::FXMMATRIX m_viewMatrix;
-            DirectX::FXMMATRIX m_projectionMatrix;
+            graphics::Graphics* m_graphics;
+            std::unique_ptr<graphics::d3dresource::PixelConstantBuffer<graphics::MvpMatrices>> m_pixelCBuff;
+            std::unique_ptr<graphics::d3dresource::VertexConstantBuffer<graphics::MvpMatrices>> m_vertexCBuff;
     };
 }
