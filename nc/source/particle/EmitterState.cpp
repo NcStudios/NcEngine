@@ -15,6 +15,9 @@ namespace
                DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
     }
 
+    /** @todo Not quite sure where this should go - it may be worth it to extend this
+     *  a bit and expose it through the api. Random generation helpers would be
+     *  useful for game logic (sample scene spawner already duplicates this code). */
     class Random
     {
         public:
@@ -59,7 +62,7 @@ namespace
         };
     }
 
-    void ParticleKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
+    void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
     {
         auto& vel = particle->linearVelocity;
         vel = vel + vel * velOverTimeFactor;
@@ -118,7 +121,7 @@ namespace nc::particle
                 toRemove.push_back(index);
             else
             {
-                ParticleKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
+                ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
                 matrices[index] = ComputeMvp(particle, camRotation, camForward);
             }
         }

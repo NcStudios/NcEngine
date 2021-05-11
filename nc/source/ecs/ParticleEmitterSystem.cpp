@@ -1,6 +1,8 @@
 #include "ParticleEmitterSystem.h"
 #include "graphics/Graphics.h"
 
+#include <algorithm>
+
 namespace
 {
     auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
@@ -26,6 +28,11 @@ namespace nc::ecs
     {
     }
 
+    ecs::ComponentSystem<ParticleEmitter>* ParticleEmitterSystem::GetComponentSystem()
+    {
+        return &m_componentSystem;
+    }
+
     void ParticleEmitterSystem::UpdateParticles(float dt)
     {
         for(auto& state : m_emitterStates)
@@ -42,7 +49,6 @@ namespace nc::ecs
     void ParticleEmitterSystem::ProcessFrameEvents()
     {
         // Could use linear allocator for add/remove vectors 
-
         m_emitterStates.insert
         (
             m_emitterStates.cend(),
@@ -65,18 +71,16 @@ namespace nc::ecs
 
     void ParticleEmitterSystem::Emit(EntityHandle handle, size_t count)
     {
-        auto pos = std::find_if(m_emitterStates.begin(), m_emitterStates.end(), [handle](auto& state)
+        auto findPred = [handle](particle::EmitterState& state)
         {
             return state.GetHandle() == handle;
-        });
+        };
+
+        auto pos = std::ranges::find_if(m_emitterStates, findPred);
 
         if(pos == m_emitterStates.end())
         {
-            pos = std::find_if(m_toAdd.begin(), m_toAdd.end(), [handle](auto& state)
-            {
-                return state.GetHandle() == handle;
-            });
-
+            pos = std::ranges::find_if(m_toAdd, findPred);
             if(pos == m_toAdd.end())
                 throw std::runtime_error("ParticleEmitterSystem::Emit - Particle emitter does not exist");
         }

@@ -83,20 +83,20 @@ namespace nc
         return out;
     }
 
-    Quaternion Scale(const Quaternion& quat, float factor)
-    {
-        auto quat_v = DirectX::XMVectorSet(quat.x, quat.y, quat.z, quat.w);
-        auto out_v = DirectX::XMQuaternionSlerp(DirectX::g_XMIdentityR3, quat_v, factor);
-        auto out = Quaternion::Identity();
-        DirectX::XMStoreQuaternion(&out, out_v);
-        return out;
-    }
-
     Quaternion Slerp(const Quaternion& lhs, const Quaternion& rhs, float factor)
     {
         auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);
         auto rhs_v = DirectX::XMVectorSet(rhs.x, rhs.y, rhs.z, rhs.w);
         auto out_v = DirectX::XMQuaternionSlerp(lhs_v, rhs_v, factor);
+        auto out = Quaternion::Identity();
+        DirectX::XMStoreQuaternion(&out, out_v);
+        return out;
+    }
+
+    Quaternion Scale(const Quaternion& quat, float factor)
+    {
+        auto quat_v = DirectX::XMVectorSet(quat.x, quat.y, quat.z, quat.w);
+        auto out_v = DirectX::XMQuaternionSlerp(DirectX::g_XMIdentityR3, quat_v, factor);
         auto out = Quaternion::Identity();
         DirectX::XMStoreQuaternion(&out, out_v);
         return out;

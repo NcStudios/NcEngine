@@ -17,6 +17,10 @@ namespace nc
 
             void Emit(size_t count);
         
+            #ifdef NC_EDITOR_ENABLED
+            void EditorGuiElement() override;
+            #endif
+
         private:
             ecs::ParticleEmitterSystem* m_emitterSystem;
     };

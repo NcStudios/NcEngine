@@ -50,9 +50,6 @@ namespace nc::core
             ui::UIImpl m_ui;
         #endif
 
-            //particle::ParticleSystemManager m_particleSystem
-            //std::unique_ptr<particle::ParticleSystemInternal> m_particleSystem;
-
             void ClearState();
             void DoSceneSwap();
             void FixedStepLogic();

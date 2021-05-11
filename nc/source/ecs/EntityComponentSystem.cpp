@@ -91,6 +91,7 @@ Systems EntityComponentSystem::GetComponentSystems() const
     {
         .collider = m_colliderSystem->GetComponentSystem(),
         .networkDispatcher = m_networkDispatcherSystem.get(),
+        .particleEmitter = m_particleEmitterSystem->GetComponentSystem(),
         .pointLight = m_lightSystem.get(),
         .renderer = m_rendererSystem.get(),
         .transform = m_transformSystem.get()

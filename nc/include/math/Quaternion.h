@@ -24,10 +24,14 @@ namespace nc
      *  multiplied. In other words, this computes the lhs rotation followed by rhs (or the product rhs*lhs). */
     Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs);
 
+    /** Finds rotation between lhs and rhs such that result * lhs == rhs. */
     Quaternion Difference(const Quaternion& lhs, const Quaternion& rhs);
 
-    Quaternion Scale(const Quaternion& quat, float factor);
+    /** Interpolates from lhs to rhs. */
     Quaternion Slerp(const Quaternion& lhs, const Quaternion& rhs, float factor);
+
+    /** Slerp from Identity to quat. */
+    Quaternion Scale(const Quaternion& quat, float factor);
 
     inline bool operator==(const Quaternion& lhs, const Quaternion& rhs)
     {

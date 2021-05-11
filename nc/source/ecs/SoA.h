@@ -31,7 +31,7 @@ namespace nc::ecs
     template<class T>
     concept SoAMember = std::is_default_constructible_v<T> && std::is_trivially_destructible_v<T>;
 
-    /** Struct of arrays representation for any number of trivially destructible properties. */
+    /** Struct of arrays representation for any number of properties. */
     template<SoAMember... Members>
     class SoA
     {
@@ -48,7 +48,6 @@ namespace nc::ecs
             SoA(size_t maxCount);
 
             void Add(Members... members);
-
             void RemoveAtIndex(size_t index);
 
             template<SoAMember Member>
@@ -179,7 +178,6 @@ namespace nc::ecs
     template<SoAMember... Members>
     size_t SoA<Members...>::GetSize() const
     {
-        //IF_THROW(m_gaps.size() > m_nextFree, "SoA::GetSize - Free/gaps mismatch resulting in underflow");
         return m_nextFree - m_gaps.size();
     }
     

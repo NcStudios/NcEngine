@@ -5,9 +5,6 @@
 #include "particle/ParticleRenderer.h"
 #include "particle/EmitterState.h"
 
-#include <memory>
-#include <random>
-
 namespace nc::graphics { class Graphics; }
 
 namespace nc::ecs
@@ -16,6 +13,8 @@ namespace nc::ecs
     {
         public:
             ParticleEmitterSystem(unsigned maxCount, graphics::Graphics* graphics);
+
+            ecs::ComponentSystem<ParticleEmitter>* GetComponentSystem();
 
             /** UpdateParticles is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to

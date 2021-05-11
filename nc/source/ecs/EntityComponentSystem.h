@@ -3,13 +3,10 @@
 #include "entity/Entity.h"
 #include "entity/EntityHandle.h"
 #include "entity/EntityInfo.h"
-#include "EntityMap.h"
-#include "ComponentSystem.h"
-#include "ParticleEmitterSystem.h"
-#include "EntityMap.h"
-#include "ComponentSystem.h"
 #include "ColliderSystem.h"
+#include "EntityMap.h"
 #include "HandleManager.h"
+#include "ParticleEmitterSystem.h"
 
 #include <memory>
 
@@ -31,6 +28,7 @@ namespace nc::ecs
     {
         ecs::ComponentSystem<Collider>* collider;
         ecs::ComponentSystem<NetworkDispatcher>* networkDispatcher;
+        ecs::ComponentSystem<ParticleEmitter>* particleEmitter;
         ecs::ComponentSystem<PointLight>* pointLight;
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;

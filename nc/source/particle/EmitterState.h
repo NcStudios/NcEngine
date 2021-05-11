@@ -49,6 +49,7 @@ namespace nc::particle
         private:
             void PeriodicEmission(float dt);
             graphics::MvpMatrices ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const;
+            
             ParticleSoA m_soa;
             ParticleInfo m_info;
             GraphicsData* m_graphicsData;

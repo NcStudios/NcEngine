@@ -1,6 +1,9 @@
 #include "component/ParticleEmitter.h"
 #include "ecs/ParticleEmitterSystem.h"
-//#include "particle/EmitterState.h"
+
+#ifdef NC_EDITOR_ENABLED
+#include "imgui/imgui.h"
+#endif
 
 namespace nc
 {
@@ -14,4 +17,11 @@ namespace nc
     {
         m_emitterSystem->Emit(GetParentHandle(), count);
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    void ParticleEmitter::EditorGuiElement()
+    {
+        ImGui::Text("Particle Emitter");
+    }
+    #endif
 } // namespace nc
