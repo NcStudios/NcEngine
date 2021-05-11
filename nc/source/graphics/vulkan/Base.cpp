@@ -1,6 +1,7 @@
 #include "Base.h"
 #include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/Commands.h"
+#include "stb/stb_image.h"
 
 #include <set>
 #include <string>
@@ -86,7 +87,8 @@ namespace nc::graphics::vulkan
       m_depthFormat{},
       m_bufferIndex{0},
       m_imageIndex{0},
-      m_imguiDescriptorPool{}
+      m_imguiDescriptorPool{},
+      m_renderingDescriptorPool{}
     {
         CreateInstance();
         CreateSurface(hwnd, hinstance);
@@ -96,10 +98,12 @@ namespace nc::graphics::vulkan
         CreateCommandPool();
         CreateAllocator();
         QueryDepthFormatSupport();
+        CreateDescriptorPools();
     }
 
     Base::~Base()
     {
+        m_logicalDevice.destroyDescriptorPool(m_renderingDescriptorPool);
         m_logicalDevice.destroyDescriptorPool(m_imguiDescriptorPool);
         m_logicalDevice.destroyCommandPool(m_commandPool);
 
@@ -152,6 +156,11 @@ namespace nc::graphics::vulkan
         {
             throw std::runtime_error("Failed to get surface.");
         }
+    }
+
+    vk::DescriptorPool* Base::GetRenderingDescriptorPoolPtr() noexcept
+    {
+        return &m_renderingDescriptorPool;
     }
 
     void Base::CreatePhysicalDevice()
@@ -223,10 +232,10 @@ namespace nc::graphics::vulkan
         m_presentQueue = m_logicalDevice.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
     }
 
-    void Base::InitializeImgui(const vk::RenderPass& defaultPass)
+    void Base::CreateDescriptorPools()
     {
         // Create descriptor pool for IMGUI
-        vk::DescriptorPoolSize poolSizes[] =
+        vk::DescriptorPoolSize imguiPoolSizes[] =
         {
             { vk::DescriptorType::eSampler, 1000 },
             { vk::DescriptorType::eCombinedImageSampler, 1000 },
@@ -241,17 +250,36 @@ namespace nc::graphics::vulkan
             { vk::DescriptorType::eInputAttachment, 1000 }
         };
 
-        vk::DescriptorPoolCreateInfo descriptorPoolInfo = {};
-        descriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
-        descriptorPoolInfo.setMaxSets(1000);
-        descriptorPoolInfo.setPoolSizeCount(sizeof(poolSizes));
-        descriptorPoolInfo.setPoolSizes(*poolSizes);
+        vk::DescriptorPoolCreateInfo imguiDescriptorPoolInfo = {};
+        imguiDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+        imguiDescriptorPoolInfo.setMaxSets(1000);
+        imguiDescriptorPoolInfo.setPoolSizeCount(sizeof(imguiPoolSizes));
+        imguiDescriptorPoolInfo.setPoolSizes(*imguiPoolSizes);
 
-        if (m_logicalDevice.createDescriptorPool(&descriptorPoolInfo, nullptr, &m_imguiDescriptorPool) != vk::Result::eSuccess)
+        if (m_logicalDevice.createDescriptorPool(&imguiDescriptorPoolInfo, nullptr, &m_imguiDescriptorPool) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Could not create descriptor pool.");
+            throw std::runtime_error("Could not create ImGUI descriptor pool.");
         }
 
+        vk::DescriptorPoolSize renderingPoolSizes[] =
+        {
+            { vk::DescriptorType::eCombinedImageSampler, 10 }
+        };
+        
+        vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
+        renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+        renderingDescriptorPoolInfo.setMaxSets(1000);
+        renderingDescriptorPoolInfo.setPoolSizeCount(sizeof(renderingPoolSizes));
+        renderingDescriptorPoolInfo.setPoolSizes(*renderingPoolSizes);
+        
+        if (m_logicalDevice.createDescriptorPool(&renderingDescriptorPoolInfo, nullptr, &m_renderingDescriptorPool) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Could not create rendering descriptor pool.");
+        }
+    }
+
+    void Base::InitializeImgui(const vk::RenderPass& defaultPass)
+    {
         ImGui_ImplVulkan_InitInfo initInfo{};
         initInfo.Instance = m_instance;
         initInfo.PhysicalDevice = m_physicalDevice;
@@ -291,10 +319,13 @@ namespace nc::graphics::vulkan
             return queueCreateInfo;
         });
 
+        vk::PhysicalDeviceFeatures deviceFeatures{};
+        deviceFeatures.setSamplerAnisotropy(VK_TRUE);
+
         vk::DeviceCreateInfo deviceCreateInfo{};
         deviceCreateInfo.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()));
         deviceCreateInfo.setPQueueCreateInfos(queueCreateInfos.data());
-        deviceCreateInfo.setPEnabledFeatures(nullptr);
+        deviceCreateInfo.setPEnabledFeatures(&deviceFeatures);
         deviceCreateInfo.setEnabledExtensionCount(static_cast<uint32_t>(DeviceExtensions.size()));
         deviceCreateInfo.setPpEnabledExtensionNames(DeviceExtensions.data());
         deviceCreateInfo.setEnabledLayerCount(0);
@@ -375,6 +406,165 @@ namespace nc::graphics::vulkan
         m_images.emplace(m_imageIndex, std::pair{image, allocation});
         *createdImage = image;
         return m_imageIndex++;
+    }
+
+    uint32_t Base::CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage)
+    {
+        if (m_images.find(m_imageIndex) != m_images.end())
+        {
+            throw std::runtime_error("The given ID is already present in the dictionary.");
+        }
+
+        vk::DeviceSize imageSize = width * height * 4;
+        vk::Buffer stagingBuffer;
+
+        auto stagingIndex = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, true, &stagingBuffer);
+
+        void* mappedData;
+        auto allocation = m_buffers.at(stagingIndex).second;
+        m_allocator.mapMemory(allocation, &mappedData);
+        memcpy(mappedData, pixels, static_cast<size_t>(imageSize));
+        m_allocator.unmapMemory(allocation);
+
+        stbi_image_free(pixels);
+
+        vk::Image textureImage;
+        CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, &textureImage);
+
+        TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+        CopyBufferToImage(stagingBuffer, textureImage, width, height);
+        TransitionImageLayout(textureImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        DestroyBuffer(stagingIndex);
+
+        *createdImage = textureImage;
+        return ++m_imageIndex;
+    }
+
+    vk::Sampler Base::CreateTextureSampler()
+    {
+        vk::PhysicalDeviceProperties properties{};
+        m_physicalDevice.getProperties(&properties);
+
+        vk::SamplerCreateInfo samplerInfo{};
+        samplerInfo.setMagFilter(vk::Filter::eLinear);
+        samplerInfo.setMinFilter(vk::Filter::eLinear);
+        samplerInfo.setAddressModeU(vk::SamplerAddressMode::eRepeat);
+        samplerInfo.setAddressModeV(vk::SamplerAddressMode::eRepeat);
+        samplerInfo.setAddressModeW(vk::SamplerAddressMode::eRepeat);
+        samplerInfo.setAnisotropyEnable(VK_TRUE);
+        samplerInfo.setMaxAnisotropy(properties.limits.maxSamplerAnisotropy);
+        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueBlack);
+        samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
+        samplerInfo.setCompareEnable(VK_FALSE);
+        samplerInfo.setCompareOp(vk::CompareOp::eAlways);
+        samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+        samplerInfo.setMipLodBias(0.0f);
+        samplerInfo.setMinLod(0.0f);
+        samplerInfo.setMaxLod(0.0f);
+
+        vk::Sampler textureSampler;
+        if (m_logicalDevice.createSampler(&samplerInfo, nullptr, &textureSampler) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Failed to create texture sampler.");
+        }
+
+        return textureSampler;
+    }
+    
+    void Base::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
+    {
+        Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) 
+        { 
+            vk::ImageMemoryBarrier barrier{};
+            barrier.setOldLayout(oldLayout);
+            barrier.setNewLayout(newLayout);
+            barrier.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+            barrier.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+            barrier.setImage(image);
+
+            vk::ImageSubresourceRange subresourceRange{};
+            subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresourceRange.setBaseMipLevel(0);
+            subresourceRange.setLevelCount(1);
+            subresourceRange.setBaseArrayLayer(0);
+            subresourceRange.setLayerCount(1);
+
+            barrier.setSubresourceRange(subresourceRange);
+
+            vk::PipelineStageFlags sourceStage;
+            vk::PipelineStageFlags destinationStage;
+
+            if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
+            {
+                barrier.setSrcAccessMask(vk::AccessFlags());
+                barrier.setDstAccessMask(vk::AccessFlagBits::eTransferWrite);
+                sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+                destinationStage = vk::PipelineStageFlagBits::eTransfer;
+            }
+            else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+            {
+                barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
+                barrier.setDstAccessMask(vk::AccessFlagBits::eShaderRead);
+                sourceStage = vk::PipelineStageFlagBits::eTransfer;
+                destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+            }
+            else 
+            {
+                throw std::runtime_error("Unsupported layout transition.");
+            }
+
+            cmd.pipelineBarrier(sourceStage, destinationStage, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+        });
+    }
+
+    void Base::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height)
+    {
+        Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) 
+        {
+            vk::BufferImageCopy region{};
+            region.setBufferOffset(0);
+            region.setBufferRowLength(0);
+            region.setBufferImageHeight(0);
+
+            vk::ImageSubresourceLayers subresource{};
+            subresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresource.setMipLevel(0);
+            subresource.setBaseArrayLayer(0);
+            subresource.setLayerCount(1);
+
+            region.setImageSubresource(subresource);
+            region.setImageOffset({0, 0, 0});
+            region.setImageExtent({width, height, 1});
+
+            cmd.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &region);
+        });
+    }
+
+    vk::ImageView Base::CreateTextureView(const vk::Image& image)
+    {
+        vk::ImageViewCreateInfo viewInfo{};
+        viewInfo.setImage(image);
+        viewInfo.setViewType(vk::ImageViewType::e2D);
+        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
+
+        vk::ImageSubresourceRange subresourceRange{};
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+        subresourceRange.setBaseMipLevel(0);
+        subresourceRange.setLevelCount(1);
+        subresourceRange.setBaseArrayLayer(0);
+        subresourceRange.setLayerCount(1);
+
+        viewInfo.setSubresourceRange(subresourceRange);
+
+        vk::ImageView imageView;
+        
+        if (m_logicalDevice.createImageView(&viewInfo, nullptr, &imageView) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Failed to create image view");
+        }
+
+        return imageView;
     }
 
     void Base::DestroyBuffer(uint32_t id)

@@ -8,6 +8,8 @@
 #include "vulkan/vk_mem_alloc.hpp"
 #include "imgui/imgui_impl_vulkan.h"
 
+typedef unsigned char stbi_uc;
+
 namespace nc::graphics::vulkan
 {
     class Instance;
@@ -57,9 +59,14 @@ namespace nc::graphics::vulkan
             const vk::CommandPool& GetCommandPool() const noexcept;
             const vk::Queue& GetQueue(QueueFamilyType type) const noexcept;
             const vk::Format& GetDepthFormat() const noexcept;
+            vk::DescriptorPool* GetRenderingDescriptorPoolPtr() noexcept;
 
             uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer);
             uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage);
+            uint32_t CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage);
+            vk::ImageView CreateTextureView(const vk::Image& image);
+            vk::Sampler CreateTextureSampler();
+
             void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers);
             void DestroyBuffer(uint32_t id);
             void DestroyImage(uint32_t id);
@@ -68,9 +75,10 @@ namespace nc::graphics::vulkan
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
             void QueryDepthFormatSupport();
             void InitializeImgui(const vk::RenderPass& defaultPass);
+            void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+            void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
 
         private:
-            
             void CreateInstance();
             void CreateSurface(HWND hwnd, HINSTANCE hinstance);
             void CreateAllocator();
@@ -78,6 +86,7 @@ namespace nc::graphics::vulkan
             void CreateLogicalDevice();
             void CreatePhysicalDevice();
             void CreateCommandQueues();
+            void CreateDescriptorPools();
 
             vk::Instance m_instance;
             vk::SurfaceKHR m_surface;
@@ -89,9 +98,12 @@ namespace nc::graphics::vulkan
             vma::Allocator m_allocator;
             std::unordered_map<uint32_t, std::pair<vk::Buffer, vma::Allocation>> m_buffers;
             std::unordered_map<uint32_t, std::pair<vk::Image, vma::Allocation>> m_images;
+            std::unordered_map<uint32_t, std::pair<vk::Image, vma::Allocation>> m_textures;
             vk::Format m_depthFormat;
             uint32_t m_bufferIndex;
             uint32_t m_imageIndex;
+            uint32_t m_textureIndex;
             vk::DescriptorPool m_imguiDescriptorPool;
+            vk::DescriptorPool m_renderingDescriptorPool;
     };
 }

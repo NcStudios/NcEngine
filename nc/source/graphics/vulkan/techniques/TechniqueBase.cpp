@@ -14,7 +14,7 @@ namespace nc::graphics::vulkan
 {
     TechniqueBase::TechniqueBase(TechniqueType techniqueType, nc::graphics::Graphics2* graphics)
     : m_graphics{ graphics },
-      m_base{ graphics->GetBase() },
+      m_base{ graphics->GetBasePtr() },
       m_swapchain{ graphics->GetSwapchainPtr() },
       m_globalData{ nullptr },
       m_meshes{},
@@ -28,7 +28,7 @@ namespace nc::graphics::vulkan
 
     TechniqueBase::TechniqueBase(TechniqueType techniqueType, GlobalData* globalData, nc::graphics::Graphics2* graphics)
     : m_graphics{ graphics },
-      m_base{ graphics->GetBase() },
+      m_base{ graphics->GetBasePtr() },
       m_swapchain{ graphics->GetSwapchainPtr() },
       m_globalData{ globalData },
       m_meshes{},
@@ -42,7 +42,7 @@ namespace nc::graphics::vulkan
 
     TechniqueBase::~TechniqueBase() noexcept
     {
-        auto base = m_base.GetDevice();
+        auto base = m_base->GetDevice();
         for (auto& pass : m_renderPasses)
         {
             base.destroyRenderPass(pass);
@@ -52,7 +52,7 @@ namespace nc::graphics::vulkan
         base.destroyPipeline(m_pipeline);
     }
 
-    void TechniqueBase::RegisterMeshRenderer(Mesh mesh, Transform* transform)
+    void TechniqueBase::RegisterMeshRenderer(Mesh mesh, Texture texture, Transform* transform)
     {
         for (auto& registeredMesh : m_meshes)
         {
@@ -60,9 +60,12 @@ namespace nc::graphics::vulkan
             {
                 auto& objects = m_objects.at(registeredMesh.uid);
                 objects.push_back(transform);
+                m_textures.push_back(texture);
                 return;
             }
         }
+
+        m_textures.push_back(texture);
         m_meshes.push_back(mesh);
         m_objects.emplace(mesh.uid, std::vector<Transform*>{transform} );
     }
@@ -72,13 +75,13 @@ namespace nc::graphics::vulkan
         return m_type;
     }
     
-    vk::ShaderModule TechniqueBase::CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base)
+    vk::ShaderModule TechniqueBase::CreateShaderModule(const std::vector<uint32_t>& code, vulkan::Base* base)
     {
         vk::ShaderModuleCreateInfo createInfo{};
         createInfo.setCodeSize(code.size()*sizeof(uint32_t));
         createInfo.setPCode(code.data());
         vk::ShaderModule shaderModule;
-        if (base.GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
+        if (base->GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Failed to create shader module.");
         }

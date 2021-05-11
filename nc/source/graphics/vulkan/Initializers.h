@@ -32,9 +32,10 @@ namespace nc::graphics::vulkan
     vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo();
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment);
     vk::PushConstantRange CreatePushConstantRange(ShaderStage stage, size_t dataSize);
-    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, vk::DescriptorSetLayout& layout);
     vk::Viewport CreateViewport(const Vector2& dimensions);
     vk::Extent2D CreateExtent(const Vector2& dimensions);
     vk::Rect2D CreateScissor(const vk::Extent2D& extent);
     void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions);
+    vk::WriteDescriptorSet WriteDescriptorImage(vk::DescriptorType type, vk::DescriptorSet dstSet, vk::DescriptorImageInfo* imageInfo, uint32_t binding);
 }

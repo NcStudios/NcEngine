@@ -5,6 +5,7 @@
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Initializers.h"
 #include "graphics/vulkan/TechniqueManager.h"
+#include "graphics/vulkan/TextureManager.h"
 #include "graphics/vulkan/MeshManager.h"
 #include "graphics/vulkan/Resources/TransformBuffer.h"
 #include "graphics/vulkan/Resources/ImmutableBuffer.h"
@@ -14,15 +15,17 @@ namespace nc::graphics::vulkan
 {
     PhongAndUiTechnique::PhongAndUiTechnique(GlobalData* globalData, nc::graphics::Graphics2* graphics)
     : TechniqueBase(TechniqueType::Simple, globalData, graphics),
-      m_descriptorSetLayout{}
+      m_descriptorSetLayout{},
+      m_textureDescriptors{}
     {
         m_renderPasses.push_back(m_swapchain->GetPassDefinition());
+        CreateDescriptorSetLayout();
         CreatePipeline();
     }
 
     PhongAndUiTechnique::~PhongAndUiTechnique() noexcept
     {
-        m_base.GetDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
+        m_base->GetDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
     }
 
     void PhongAndUiTechnique::CreatePipeline()
@@ -42,8 +45,8 @@ namespace nc::graphics::vulkan
         };
 
         auto transformPushConstantRange = CreatePushConstantRange(ShaderStage::Vertex, sizeof(TransformMatrices)); // TranformMatrices
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(transformPushConstantRange);
-        m_pipelineLayout = m_base.GetDevice().createPipelineLayout(pipelineLayoutInfo);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(transformPushConstantRange, m_descriptorSetLayout);
+        m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
@@ -78,9 +81,41 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = m_base.GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
-        m_base.GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
-        m_base.GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+        m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
+        m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
+        m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+    }
+
+    void PhongAndUiTechnique::CreateDescriptorSetLayout()
+    {
+        vk::DescriptorSetLayoutBinding textureBind = {};
+        textureBind.setBinding(0);
+        textureBind.setDescriptorCount(1);
+        textureBind.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+        textureBind.setPImmutableSamplers(nullptr);
+        textureBind.setStageFlags(vk::ShaderStageFlagBits::eFragment);
+
+        vk::DescriptorSetLayoutCreateInfo setInfo{};
+        setInfo.setBindingCount(1);
+        setInfo.setFlags(vk::DescriptorSetLayoutCreateFlags());
+        setInfo.setPNext(nullptr);
+        setInfo.setPBindings(&textureBind);
+
+        if (m_base->GetDevice().createDescriptorSetLayout(&setInfo, nullptr, &m_descriptorSetLayout) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Failed to create descriptor set layout.");
+        }
+
+        vk::DescriptorSetAllocateInfo allocationInfo{};
+        allocationInfo.setPNext(nullptr);
+        allocationInfo.setDescriptorPool(*(m_base->GetRenderingDescriptorPoolPtr()));
+        allocationInfo.setDescriptorSetCount(1);
+        allocationInfo.setPSetLayouts(&m_descriptorSetLayout);
+
+        if (m_base->GetDevice().allocateDescriptorSets(&allocationInfo, &m_textureDescriptors) != vk::Result::eSuccess)
+        {
+            throw std::runtime_error("Failed to allocate descriptor sets.");
+        }
     }
 
     void PhongAndUiTechnique::Record(Commands* commands)
@@ -142,6 +177,8 @@ namespace nc::graphics::vulkan
                         // Bind the transforms per object and draw each object
                         for (const auto* transform : m_objects.at(mesh.uid))
                         {
+                            m_textures[0].uid
+
                             auto modelViewMatrix = transform->GetTransformationMatrix() * viewMatrix;
                             auto matrix = GetMatrices(modelViewMatrix, modelViewMatrix * projectionMatrix);
                             commandBuffers[i].pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(TransformMatrices), &matrix);

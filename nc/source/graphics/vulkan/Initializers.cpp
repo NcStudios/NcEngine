@@ -221,11 +221,11 @@ namespace nc::graphics::vulkan
         return pushConstantRange;
     }
 
-    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange)
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, vk::DescriptorSetLayout& layout)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(0);  
-        pipelineLayoutInfo.setPSetLayouts(nullptr);  
+        pipelineLayoutInfo.setSetLayoutCount(1);  
+        pipelineLayoutInfo.setPSetLayouts(&layout);  
         pipelineLayoutInfo.setPushConstantRangeCount(1); 
         pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);
         return pipelineLayoutInfo;
@@ -264,5 +264,18 @@ namespace nc::graphics::vulkan
         auto scissor = CreateScissor(extent);
         commandBuffer->setViewport(0, 1, &viewport);
         commandBuffer->setScissor(0, 1, &scissor);
+    }
+
+    vk::WriteDescriptorSet WriteDescriptorImage(vk::DescriptorType type, vk::DescriptorSet dstSet, vk::DescriptorImageInfo* imageInfo, uint32_t binding)
+    {
+        vk::WriteDescriptorSet write = {};
+        write.setPNext(nullptr);
+        write.setDstBinding(binding);
+        write.setDstSet(dstSet);
+        write.setDescriptorCount(1);
+        write.setDescriptorType(type);
+        write.setPImageInfo(imageInfo);
+
+        return write;
     }
 }

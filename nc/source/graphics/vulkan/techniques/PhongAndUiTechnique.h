@@ -22,8 +22,10 @@ namespace nc::graphics
                 void CreateDescriptorSetLayout();
                 void CreatePipeline();
                 void CreateRenderPasses();
+                void CreateDescriptorSet();
 
                 vk::DescriptorSetLayout m_descriptorSetLayout;
+                vk::DescriptorSet m_textureDescriptors;
         };
     }
 }

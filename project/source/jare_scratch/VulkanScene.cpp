@@ -2,6 +2,7 @@
 #include "Ecs.h"
 #include "MainCamera.h"
 #include "graphics/vulkan/Mesh.h"
+#include "graphics/vulkan/Texture.h"
 #include "graphics/vulkan/TechniqueType.h"
 #include "shared/SceneNavigationCamera.h"
 #include "shared/WasdController.h"
@@ -29,21 +30,29 @@ namespace nc::sample
 
         // Load the meshes
         const std::vector<std::string> meshPaths {"project/assets/mesh/beeper.nca", "project/assets/mesh/table.nca"};
-        nc::graphics::vulkan::LoadMeshes(std::move(meshPaths));
+        nc::graphics::vulkan::LoadMeshes(meshPaths);
+
+         //const std::vector<std::string> beeperTextures{textureDir + "Beeper//BaseColor.png", textureDir + "Beeper//Normal.png", textureDir + "Beeper//Roughness.png", defaultMetallic};
+        const std::string texture = "project//Textures//Beeper//BaseColor.png";// @todo: Replace with manifest location
+        nc::graphics::vulkan::LoadTexture(std::move(texture)); 
 
         // Create the entity
         auto handle = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], texture, nc::graphics::vulkan::TechniqueType::Simple);
         auto transform = GetComponent<Transform>(handle);
         transform->SetPosition(Vector3{2.0f, 1.0f, 1.0f});
 
         // Create the entity
         auto handle1 = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle1, meshPaths[0], nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle1, meshPaths[0], texture, nc::graphics::vulkan::TechniqueType::Simple);
 
         // Create the entity
         auto handle2 = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle2, meshPaths[1], nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle2, meshPaths[1], texture, nc::graphics::vulkan::TechniqueType::Simple);
+
+        // Create the entity
+        auto handle2 = CreateEntity();
+        AddComponent<vulkan::MeshRenderer>(handle2, meshPaths[1], texture, nc::graphics::vulkan::TechniqueType::Simple);
         AddComponent<WasdController>(handle2, 2.0f);
 
         // Create the entity

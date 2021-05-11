@@ -2,6 +2,7 @@
 
 #include "graphics/vulkan/TechniqueType.h"
 #include "graphics/vulkan/Mesh.h"
+#include "graphics/vulkan/Texture.h"
 #include "techniques/TechniqueBase.h"
 
 #include <vector>
@@ -27,7 +28,7 @@ namespace nc::graphics::vulkan
     {
         public:
             TechniqueManager(nc::graphics::Graphics2* graphics);
-            void RegisterMeshRenderer(TechniqueType technique, Mesh mesh, Transform* transform);
+            void RegisterMeshRenderer(TechniqueType technique, Mesh mesh, graphics::vulkan::Texture texture, Transform* transform);
             void RecordTechniques(Commands* commands);
             void RegisterGlobalData(vk::Buffer* vertexBuffer, vk::Buffer* indexBuffer);
             std::unique_ptr<TechniqueBase> CreateTechnique(TechniqueType techniqueType);

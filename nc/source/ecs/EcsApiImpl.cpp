@@ -168,7 +168,7 @@ namespace nc
     }
 
     #ifdef USE_VULKAN
-    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
+    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid,  std::string textureUid, graphics::vulkan::TechniqueType techniqueType)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<MeshRenderer> - Bad handle");
         IF_THROW(internal::g_meshRendererSystem->Contains(handle), "AddComponent<MeshRenderer> - entity already has a renderer");

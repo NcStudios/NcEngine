@@ -8,7 +8,8 @@ namespace nc::ecs
     MeshRendererSystem::MeshRendererSystem(uint32_t renderersCount, graphics::Graphics2* graphics)
     : m_componentSystem{renderersCount},
       m_meshManager{graphics},
-      m_techniqueManager{graphics}
+      m_techniqueManager{graphics},
+      m_textureManager{graphics}
     {
         m_techniqueManager.RegisterGlobalData(m_meshManager.GetVertexBuffer(), m_meshManager.GetIndexBuffer());
     }
@@ -23,11 +24,12 @@ namespace nc::ecs
         m_techniqueManager.RecordTechniques(commands);
     }
 
-    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
+    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, std::string textureUid, graphics::vulkan::TechniqueType techniqueType)
     {
         auto mesh = m_meshManager.GetMesh(std::move(meshUid));
+        auto texture = m_textureManager.GetTexture(textureUid);
         auto renderer = m_componentSystem.Add(parentHandle);
-        m_techniqueManager.RegisterMeshRenderer(techniqueType, std::move(mesh), GetComponent<Transform>(parentHandle));
+        m_techniqueManager.RegisterMeshRenderer(techniqueType, std::move(mesh),  std::move(texture), GetComponent<Transform>(parentHandle));
         return renderer;
     }
 

@@ -44,7 +44,7 @@ namespace nc
     template<> bool RemoveComponent<PointLight>(EntityHandle handle);
 
     #ifdef USE_VULKAN
-    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, nc::graphics::vulkan::TechniqueType techniqueType);
+    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, std::string textureUid, nc::graphics::vulkan::TechniqueType techniqueType);
     template<> vulkan::MeshRenderer* GetComponent<vulkan::MeshRenderer>(EntityHandle handle);
     template<> bool HasComponent<vulkan::MeshRenderer>(EntityHandle handle);
     template<> bool RemoveComponent<vulkan::MeshRenderer>(EntityHandle handle);
