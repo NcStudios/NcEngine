@@ -88,10 +88,9 @@ namespace nc::alloc
     template<class T, class U, class TTag, class UTag>
     bool operator!=(const PoolAllocator<T, TTag>& lhs, const PoolAllocator<U, UTag>& rhs) noexcept { return !(lhs == rhs); }
 
-    /** PoolAllocator */
     template<class T, class Tag>
     PoolAllocator<T, Tag>::PoolAllocator()
-        : m_memoryResource{GetMemoryResource<memory_resource_type>()}
+        : m_memoryResource{MemoryResource<memory_resource_type>::Get()}
     {
     }
 
@@ -117,19 +116,19 @@ namespace nc::alloc
     template<class T, class Tag>
     void PoolAllocator<T, Tag>::create_memory_resource(size_t size)
     {
-        nc::alloc::CreateMemoryResource<memory_resource_type>(size);
+        MemoryResource<memory_resource_type>::Create(size);
     }
 
     template<class T, class Tag>
     void PoolAllocator<T, Tag>::destroy_memory_resource()
     {
-        nc::alloc::DestroyMemoryResource<memory_resource_type>();
+        MemoryResource<memory_resource_type>::Destroy();
     }
 
     /** LinearAllocator */
     template<class T, class Tag>
     LinearAllocator<T, Tag>::LinearAllocator()
-        : m_memoryResource{GetMemoryResource<memory_resource_type>()}
+        : m_memoryResource{MemoryResource<memory_resource_type>::Get()}
     {
     }
 
@@ -173,12 +172,12 @@ namespace nc::alloc
     template<class T, class Tag>
     void LinearAllocator<T, Tag>::create_memory_resource(size_t size)
     {
-        nc::alloc::CreateMemoryResource<memory_resource_type>(size);
+        MemoryResource<memory_resource_type>::Create(size);
     }
 
     template<class T, class Tag>
     void LinearAllocator<T, Tag>::destroy_memory_resource()
     {
-        nc::alloc::DestroyMemoryResource<memory_resource_type>();
+        MemoryResource<memory_resource_type>::Destroy();
     }
 } // namespace nc::alloc

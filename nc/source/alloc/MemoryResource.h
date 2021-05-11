@@ -9,32 +9,34 @@
 
 namespace nc::alloc
 {
-    template<class Resource>
-    std::unique_ptr<Resource> g_resource = nullptr;
-
-    template<class Resource>
-    void CreateMemoryResource(size_t size)
+    template<class Resource_t>
+    class MemoryResource
     {
-        if(g_resource<Resource>)
-            throw std::runtime_error("CreateMemoryResource - Resource already exists");
-        
-        g_resource<Resource> = std::make_unique<Resource>(size);
-    }
+        public:
+            static void Create(size_t size)
+            {
+                if(m_resource)
+                    throw std::runtime_error("MemoryResource - Resource already exists");
 
-    template<class Resource>
-    void DestroyMemoryResource()
-    {
-        g_resource<Resource> = nullptr;
-    }
+                m_resource = std::make_unique<Resource_t>(size);
+            }
 
-    template<class Resource>
-    Resource* GetMemoryResource()
-    {
-        if(!g_resource<Resource>)
-            throw std::runtime_error("GetMemoryResource - Resource not initialized");
+            static void Destroy()
+            {
+                m_resource = nullptr;
+            }
 
-        return g_resource<Resource>.get();
-    }
+            static Resource_t* Get()
+            {
+                if(!m_resource)
+                    throw std::runtime_error("MemoryResource - Resource not initialized");
+
+                return m_resource.get();
+            }
+
+        private:
+            inline static std::unique_ptr<Resource_t> m_resource = nullptr;
+    };
 
     struct MemoryResourceBadAlloc : public std::bad_alloc
     {
