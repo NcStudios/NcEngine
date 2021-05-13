@@ -50,10 +50,11 @@ namespace nc::graphics::vulkan
                 throw std::runtime_error("Failed to load texture file: " + path);
             }
 
-            textures.textureBuffers.emplace_back();
-            textures.textureBuffers.back().Bind(m_graphics, pixels, width, height);
+            auto image = std::make_unique<ImmutableImage>();
+            textures.textureBuffers.push_back(std::move(image));
+            textures.textureBuffers.back()->Bind(m_graphics, pixels, width, height);
             textures.accessors.emplace(std::make_pair(path, index));
-            textures.imageInfos.push_back(CreateDescriptorImageInfo(textures.sampler, textures.textureBuffers[index].GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
+            textures.imageInfos.push_back(CreateDescriptorImageInfo(&textures.sampler.get(), textures.textureBuffers[index]->GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
             index++;
         }
 
@@ -112,7 +113,7 @@ namespace nc::graphics::vulkan
     {
         std::array<vk::WriteDescriptorSet, 2> writes;
         vk::DescriptorImageInfo samplerInfo = {};
-        samplerInfo.sampler = textures->sampler;
+        samplerInfo.sampler = textures->sampler.get();
 
         textures->imageInfos.reserve(arraySize);
 
@@ -135,10 +136,10 @@ namespace nc::graphics::vulkan
         m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(2, writes.data(), 0, nullptr);
     }
 
-    vk::DescriptorImageInfo TextureManager::CreateDescriptorImageInfo(const vk::Sampler& sampler, const vk::ImageView& imageView, vk::ImageLayout layout)
+    vk::DescriptorImageInfo TextureManager::CreateDescriptorImageInfo(vk::Sampler* sampler, const vk::ImageView& imageView, vk::ImageLayout layout)
     {
         vk::DescriptorImageInfo imageInfo = {};
-        imageInfo.setSampler(sampler);
+        imageInfo.setSampler(*sampler);
         imageInfo.setImageView(imageView);
         imageInfo.setImageLayout(layout);
         return imageInfo;

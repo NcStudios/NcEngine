@@ -13,22 +13,22 @@ namespace nc::graphics::vulkan
 {
     struct MeshesData
     {
-        ImmutableBuffer<Vertex> vertexBuffer;
-        ImmutableBuffer<uint32_t> indexBuffer;
+        std::unique_ptr<ImmutableBuffer<Vertex>> vertexBuffer;
+        std::unique_ptr<ImmutableBuffer<uint32_t>> indexBuffer;
         std::unordered_map<std::string, Mesh> accessors;
     };
 
     struct TexturesData
     {
         // Each texture is represented here
-        std::vector<vulkan::ImmutableImage> textureBuffers;
+        std::vector<std::unique_ptr<vulkan::ImmutableImage>> textureBuffers;
         std::vector<vk::DescriptorImageInfo> imageInfos;
         std::unordered_map<std::string, uint32_t> accessors;
 
         // Only need one of the below for all textures
         vk::DescriptorSet descriptorSet;
         vk::DescriptorSetLayout descriptorSetLayout;
-        vk::Sampler sampler;
+        vk::UniqueSampler sampler;
         vk::ImageLayout layout;
     };
 

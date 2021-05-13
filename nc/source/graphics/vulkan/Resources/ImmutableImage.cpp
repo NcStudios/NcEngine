@@ -12,9 +12,10 @@ namespace nc::graphics::vulkan
     ImmutableImage::ImmutableImage(ImmutableImage&& other)
     : m_base{std::exchange(other.m_base, nullptr)},
       m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
-      m_immutableImage{std::exchange(other.m_immutableImage, nullptr)},
-      m_view{std::exchange(other.m_view, nullptr)}
+      m_immutableImage{std::exchange(other.m_immutableImage, nullptr)}
     {
+        m_view = vk::UniqueImageView(other.m_view.get());
+        other.m_view.reset();
     }
 
     ImmutableImage& ImmutableImage::operator = (ImmutableImage&& other)
@@ -22,17 +23,14 @@ namespace nc::graphics::vulkan
         m_base= std::exchange(other.m_base, nullptr);
         m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
         m_immutableImage = std::exchange(other.m_immutableImage, nullptr);
-        m_view = std::exchange(other.m_view, nullptr);
+        m_view = vk::UniqueImageView(other.m_view.get());
+        other.m_view.reset();
+
         return *this;
     }
 
     ImmutableImage::~ImmutableImage()
     {
-        if (m_view)
-        {
-            m_base->GetDevice().destroyImageView(m_view);
-        }
-
         if (m_immutableImage)
         {
             m_base->DestroyImage(m_memoryIndex);
@@ -48,6 +46,6 @@ namespace nc::graphics::vulkan
 
     vk::ImageView& ImmutableImage::GetImageView() noexcept
     {
-        return m_view;
+        return m_view.get();
     }
 }

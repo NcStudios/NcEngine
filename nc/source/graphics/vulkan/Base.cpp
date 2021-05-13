@@ -369,11 +369,6 @@ namespace nc::graphics::vulkan
 
     uint32_t Base::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer)
     {
-        if (m_buffers.find(m_bufferIndex) != m_buffers.end())
-        {
-            throw std::runtime_error("The given ID is already present in the dictionary.");
-        }
-
         vk::BufferCreateInfo bufferInfo{};
         bufferInfo.setSize(size);
         bufferInfo.setUsage(usageFlags);
@@ -396,11 +391,6 @@ namespace nc::graphics::vulkan
 
     uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage)
     {
-        if (m_images.find(m_imageIndex) != m_images.end())
-        {
-            throw std::runtime_error("The given ID is already present in the dictionary.");
-        }
-
         vk::ImageCreateInfo imageInfo{};
         imageInfo.setImageType(vk::ImageType::e2D);
         imageInfo.setFormat(format);
@@ -428,26 +418,22 @@ namespace nc::graphics::vulkan
 
     uint32_t Base::CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage)
     {
-        if (m_images.find(m_imageIndex) != m_images.end())
-        {
-            throw std::runtime_error("The given ID is already present in the dictionary.");
-        }
-
         vk::DeviceSize imageSize = width * height * 4;
-        vk::Buffer stagingBuffer;
 
+        // Create staging buffer (lives on CPU)
+        vk::Buffer stagingBuffer;
         auto stagingIndex = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, true, &stagingBuffer);
 
+        // Map the pixels onto the staging buffer
         void* mappedData;
         auto allocation = m_buffers.at(stagingIndex).second;
         m_allocator.mapMemory(allocation, &mappedData);
         memcpy(mappedData, pixels, static_cast<size_t>(imageSize));
         m_allocator.unmapMemory(allocation);
-
         stbi_image_free(pixels);
 
         vk::Image textureImage;
-        CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, &textureImage);
+        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, &textureImage);
 
         TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer, textureImage, width, height);
@@ -456,10 +442,10 @@ namespace nc::graphics::vulkan
         DestroyBuffer(stagingIndex);
 
         *createdImage = textureImage;
-        return ++m_imageIndex;
+        return imageIndex;
     }
 
-    vk::Sampler Base::CreateTextureSampler()
+    vk::UniqueSampler Base::CreateTextureSampler()
     {
         vk::PhysicalDeviceProperties properties{};
         m_physicalDevice.getProperties(&properties);
@@ -481,13 +467,7 @@ namespace nc::graphics::vulkan
         samplerInfo.setMinLod(0.0f);
         samplerInfo.setMaxLod(0.0f);
 
-        vk::Sampler textureSampler;
-        if (m_logicalDevice.createSampler(&samplerInfo, nullptr, &textureSampler) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Failed to create texture sampler.");
-        }
-
-        return textureSampler;
+        return m_logicalDevice.createSamplerUnique(samplerInfo);
     }
     
     void Base::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
@@ -559,7 +539,7 @@ namespace nc::graphics::vulkan
         });
     }
 
-    vk::ImageView Base::CreateTextureView(const vk::Image& image)
+    vk::UniqueImageView Base::CreateTextureView(const vk::Image& image)
     {
         vk::ImageViewCreateInfo viewInfo{};
         viewInfo.setImage(image);
@@ -574,15 +554,7 @@ namespace nc::graphics::vulkan
         subresourceRange.setLayerCount(1);
 
         viewInfo.setSubresourceRange(subresourceRange);
-
-        vk::ImageView imageView;
-        
-        if (m_logicalDevice.createImageView(&viewInfo, nullptr, &imageView) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Failed to create image view");
-        }
-
-        return imageView;
+        return m_logicalDevice.createImageViewUnique(viewInfo);
     }
 
     void Base::DestroyBuffer(uint32_t id)
@@ -590,7 +562,7 @@ namespace nc::graphics::vulkan
         auto buffer = m_buffers.find(id);
         if (buffer == m_buffers.end())
         {
-            throw std::runtime_error("The given ID was not present in the dictionary.");
+            throw std::runtime_error("The given buffer ID was not present in the dictionary.");
         }
 
         m_allocator.destroyBuffer(buffer->second.first, buffer->second.second);
@@ -602,7 +574,7 @@ namespace nc::graphics::vulkan
         auto image = m_images.find(id);
         if (image == m_images.end())
         {
-            throw std::runtime_error("The given ID was not present in the dictionary.");
+            throw std::runtime_error("The given image ID was not present in the dictionary.");
         }
 
         m_allocator.destroyImage(image->second.first, image->second.second);

@@ -3,7 +3,7 @@
 #include "vulkan/Commands.h"
 #include "vulkan/resources/DepthStencil.h"
 #include "vulkan/Swapchain.h"
-#include "d3dresource/GraphicsResourceManager.h"
+#include "vulkan/resources/ResourceManager.h"
 #include "config/Config.h"
 
 namespace
@@ -30,7 +30,15 @@ namespace nc::graphics
         SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
-    Graphics2::~Graphics2() = default;
+    Graphics2::~Graphics2()
+    {
+        ResourceManager::Clear();
+
+        m_commands.reset();
+        m_swapchain.reset();
+        m_depthStencil.reset();
+        m_base.reset();
+    }
 
     void Graphics2::RecreateSwapchain(Vector2 dimensions)
     {

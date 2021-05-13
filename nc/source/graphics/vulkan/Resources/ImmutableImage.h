@@ -26,6 +26,6 @@ namespace nc::graphics::vulkan
             vulkan::Base* m_base;
             uint32_t m_memoryIndex;
             vk::Image m_immutableImage;
-            vk::ImageView m_view;
+            vk::UniqueImageView m_view;
     };
 }

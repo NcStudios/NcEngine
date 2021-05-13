@@ -18,6 +18,8 @@ namespace nc::graphics::vulkan
             static vk::Buffer* GetVertexBuffer();
             static vk::Buffer* GetIndexBuffer();
 
+            static void Clear();
+
         private:
             void AddTextures_(TexturesData textures);
             bool TextureExists_(const std::string& uid);
@@ -30,6 +32,9 @@ namespace nc::graphics::vulkan
             const Mesh& GetMeshAccessor_(const std::string& uid);
             vk::Buffer* GetVertexBuffer_();
             vk::Buffer* GetIndexBuffer_();
+
+            void Clear_();
+
             static ResourceManager& Get();
 
             GraphicsResources m_resources;
@@ -91,6 +96,11 @@ namespace nc::graphics::vulkan
         return Get().GetIndexBuffer_();
     }
 
+    inline void ResourceManager::Clear()
+    {
+        return Get().Clear_();
+    }
+
     inline void ResourceManager::AddTextures_(TexturesData textures)
     {
         m_resources.textures = std::move(textures);
@@ -133,11 +143,23 @@ namespace nc::graphics::vulkan
 
     inline vk::Buffer* ResourceManager::GetVertexBuffer_()
     {
-        return m_resources.meshes.vertexBuffer.GetBuffer();
+        return m_resources.meshes.vertexBuffer->GetBuffer();
     }
 
     inline vk::Buffer* ResourceManager::GetIndexBuffer_()
     {
-        return m_resources.meshes.indexBuffer.GetBuffer();
+        return m_resources.meshes.indexBuffer->GetBuffer();
+    }
+
+    inline void ResourceManager::Clear_()
+    {
+        m_resources.meshes.vertexBuffer.reset();
+        m_resources.meshes.indexBuffer.reset();
+        m_resources.meshes.accessors.clear();
+
+        m_resources.textures.textureBuffers.resize(0);
+        m_resources.textures.imageInfos.resize(0);
+        m_resources.textures.accessors.clear();
+        m_resources.textures.sampler.reset();
     }
 }

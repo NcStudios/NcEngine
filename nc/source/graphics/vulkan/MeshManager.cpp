@@ -150,13 +150,13 @@ namespace nc::graphics::vulkan
 
         MeshesData meshesData = 
         {
-            ImmutableBuffer<Vertex>(),
-            ImmutableBuffer<uint32_t>(),
+            std::make_unique<ImmutableBuffer<Vertex>>(),
+            std::make_unique<ImmutableBuffer<uint32_t>>(),
             meshes
         };
 
-        meshesData.vertexBuffer.Bind(m_graphics, allVertices);
-        meshesData.indexBuffer.Bind(m_graphics, allIndices);
+        meshesData.vertexBuffer->Bind(m_graphics, allVertices);
+        meshesData.indexBuffer->Bind(m_graphics, allIndices);
 
         ResourceManager::AddMeshes(std::move(meshesData));
     }

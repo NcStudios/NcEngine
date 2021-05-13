@@ -21,7 +21,7 @@ namespace nc::graphics
             private:
                 void CreateDescriptorSet(TexturesData* textures);
                 void WriteDescriptorImages(TexturesData* textures, uint32_t arraySize);
-                vk::DescriptorImageInfo CreateDescriptorImageInfo(const vk::Sampler& sampler, const vk::ImageView& imageView, vk::ImageLayout layout);
+                vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler* sampler, const vk::ImageView& imageView, vk::ImageLayout layout);
 
                 nc::graphics::Graphics2* m_graphics;
         };

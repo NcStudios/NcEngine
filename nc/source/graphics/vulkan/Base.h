@@ -64,8 +64,8 @@ namespace nc::graphics::vulkan
             uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer);
             uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage);
             uint32_t CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage);
-            vk::ImageView CreateTextureView(const vk::Image& image);
-            vk::Sampler CreateTextureSampler();
+            vk::UniqueImageView CreateTextureView(const vk::Image& image);
+            vk::UniqueSampler CreateTextureSampler();
 
             void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers);
             void DestroyBuffer(uint32_t id);
