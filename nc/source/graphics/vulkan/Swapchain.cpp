@@ -30,6 +30,11 @@ namespace nc::graphics::vulkan
     {
         Cleanup();
         DestroySynchronizationObjects();
+        
+        // if (m_defaultPass)
+        // {
+        //     m_base->GetDevice().destroyRenderPass(m_defaultPass);
+        // }
     }
 
     void Swapchain::DestroySynchronizationObjects()

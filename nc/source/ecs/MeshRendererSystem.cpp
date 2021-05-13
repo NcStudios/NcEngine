@@ -2,16 +2,16 @@
 #include "ECS.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/Graphics2.h"
+#include "graphics/vulkan/PhongMaterial.h"
 
 namespace nc::ecs
 {
     MeshRendererSystem::MeshRendererSystem(uint32_t renderersCount, graphics::Graphics2* graphics)
     : m_componentSystem{renderersCount},
-      m_meshManager{graphics},
       m_techniqueManager{graphics},
+      m_meshManager{graphics},
       m_textureManager{graphics}
     {
-        m_techniqueManager.RegisterGlobalData(m_meshManager.GetVertexBuffer(), m_meshManager.GetIndexBuffer());
     }
 
     ComponentSystem<vulkan::MeshRenderer>* MeshRendererSystem::GetSystem()
@@ -24,12 +24,10 @@ namespace nc::ecs
         m_techniqueManager.RecordTechniques(commands);
     }
 
-    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, std::string textureUid, graphics::vulkan::TechniqueType techniqueType)
+    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, PhongMaterial material, TechniqueType techniqueType)
     {
-        auto mesh = m_meshManager.GetMesh(std::move(meshUid));
-        auto texture = m_textureManager.GetTexture(textureUid);
-        auto renderer = m_componentSystem.Add(parentHandle);
-        m_techniqueManager.RegisterMeshRenderer(techniqueType, std::move(mesh),  std::move(texture), GetComponent<Transform>(parentHandle));
+        auto renderer = m_componentSystem.Add(parentHandle, meshUid, material, GetComponent<Transform>(parentHandle));
+        m_techniqueManager.RegisterMeshRenderer(techniqueType, renderer);
         return renderer;
     }
 
@@ -55,7 +53,6 @@ namespace nc::ecs
 
     void MeshRendererSystem::Clear()
     {
-        m_meshManager.Clear();
         m_techniqueManager.Clear();
         m_componentSystem.Clear();
     }

@@ -203,6 +203,18 @@ namespace nc::graphics::vulkan
                 });
             });
 
+            vk::PhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures{};
+            indexingFeatures.setPNext(nullptr);
+
+            vk::PhysicalDeviceFeatures2 deviceFeatures{};
+            deviceFeatures.setPNext(&indexingFeatures);
+            device.getFeatures2(&deviceFeatures);
+
+            if(!indexingFeatures.descriptorBindingPartiallyBound || !indexingFeatures.runtimeDescriptorArray)
+            {
+                continue;
+            }
+
             bool swapChainAdequate = false;
 
             if (extensionsSupported)
@@ -322,7 +334,13 @@ namespace nc::graphics::vulkan
         vk::PhysicalDeviceFeatures deviceFeatures{};
         deviceFeatures.setSamplerAnisotropy(VK_TRUE);
 
+        vk::PhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures{};
+        indexingFeatures.setPNext(nullptr);
+        indexingFeatures.setDescriptorBindingPartiallyBound(VK_TRUE);
+        indexingFeatures.setRuntimeDescriptorArray(VK_TRUE);
+
         vk::DeviceCreateInfo deviceCreateInfo{};
+        deviceCreateInfo.setPNext(&indexingFeatures);
         deviceCreateInfo.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()));
         deviceCreateInfo.setPQueueCreateInfos(queueCreateInfos.data());
         deviceCreateInfo.setPEnabledFeatures(&deviceFeatures);

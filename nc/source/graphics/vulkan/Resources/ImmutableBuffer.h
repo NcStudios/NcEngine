@@ -32,16 +32,16 @@ namespace nc::graphics::vulkan
     {
         public:
 
-            ImmutableBuffer(nc::graphics::Graphics2* graphics);
-            ImmutableBuffer(ImmutableBuffer&&) = delete;
-            ImmutableBuffer& operator = (ImmutableBuffer&&) = delete;
+            ImmutableBuffer();
+            ImmutableBuffer(ImmutableBuffer&&);
+            ImmutableBuffer& operator = (ImmutableBuffer&&);
             ImmutableBuffer& operator = (const ImmutableBuffer&) = delete;
             ImmutableBuffer(const ImmutableBuffer&) = delete;
             ~ImmutableBuffer();
             
             vk::Buffer* GetBuffer();
 
-            void Bind(const std::vector<T>& data);
+            void Bind(nc::graphics::Graphics2* graphics, const std::vector<T>& data);
 
         private:
 
@@ -51,9 +51,8 @@ namespace nc::graphics::vulkan
     };
 
     template<typename T, IncludedUsage UsageFlag_T>
-    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics2* graphics)
-    : m_base { graphics->GetBasePtr() },
-      m_memoryIndex { 0 },
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer()
+    : m_memoryIndex { 0 },
       m_immutableBuffer { nullptr }
     {
     }
@@ -68,8 +67,10 @@ namespace nc::graphics::vulkan
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
-    void ImmutableBuffer<T, UsageFlag_T>::Bind(const std::vector<T>& data)
+    void ImmutableBuffer<T, UsageFlag_T>::Bind(nc::graphics::Graphics2* graphics, const std::vector<T>& data)
     {
+        m_base = graphics->GetBasePtr();
+
         auto size = static_cast<uint32_t>(sizeof(T) * data.size());
 
         // Create staging buffer (lives on CPU).
@@ -87,6 +88,23 @@ namespace nc::graphics::vulkan
 
         // Destroy the staging buffer.
         m_base->DestroyBuffer(stagingBufferMemoryIndex);
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(ImmutableBuffer&& other)
+    : m_base{std::exchange(other.m_base, nullptr)},
+      m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
+      m_immutableBuffer{std::exchange(other.m_immutableBuffer, nullptr)}
+    {
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
+    ImmutableBuffer<T, UsageFlag_T>& ImmutableBuffer<T, UsageFlag_T>::operator = (ImmutableBuffer<T, UsageFlag_T>&& other)
+    {
+        m_base = std::exchange(other.m_base, nullptr);
+        m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
+        m_immutableBuffer = std::exchange(other.m_immutableBuffer, nullptr);
+        return *this;
     }
 
     template<typename T, IncludedUsage UsageFlag_T>

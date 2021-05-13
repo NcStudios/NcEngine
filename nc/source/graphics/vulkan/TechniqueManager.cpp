@@ -2,36 +2,30 @@
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/techniques/PhongAndUiTechnique.h"
+#include "component/vulkan/MeshRenderer.h"
 #include "component/Transform.h"
 
 namespace nc::graphics::vulkan
 {
     TechniqueManager::TechniqueManager(nc::graphics::Graphics2* graphics)
     : m_graphics{graphics},
-      m_techniques{},
-      m_globalData{}
+      m_techniques{}
     {
     }
 
-    void TechniqueManager::RegisterGlobalData(vk::Buffer* vertexBuffer, vk::Buffer* indexBuffer)
-    {
-        m_globalData.vertexBuffer = vertexBuffer;
-        m_globalData.indexBuffer = indexBuffer;
-    }
-
-    void TechniqueManager::RegisterMeshRenderer(TechniqueType technique, Mesh mesh,  graphics::vulkan::Texture texture, Transform* transform)
+    void TechniqueManager::RegisterMeshRenderer(TechniqueType technique, MeshRenderer* meshRenderer)
     {
         for (auto& registeredTechnique : m_techniques)
         {
             if (registeredTechnique->GetType() == technique)
             {
-                registeredTechnique->RegisterMeshRenderer(std::move(mesh),  std::move(texture), transform);
+                registeredTechnique->RegisterMeshRenderer(meshRenderer);
                 return;
             }
         }
 
         auto techniqueToRegister = CreateTechnique(technique);
-        techniqueToRegister->RegisterMeshRenderer(std::move(mesh),  std::move(texture), transform);
+        techniqueToRegister->RegisterMeshRenderer(meshRenderer);
         m_techniques.push_back(std::move(techniqueToRegister));
     }
 
@@ -48,7 +42,7 @@ namespace nc::graphics::vulkan
         switch (techniqueType)
         {
             case TechniqueType::Simple:
-                return std::make_unique<PhongAndUiTechnique>(&m_globalData, m_graphics);
+                return std::make_unique<PhongAndUiTechnique>(m_graphics);
             case TechniqueType::None:
                 throw std::runtime_error("Technique not implemented.");
         }

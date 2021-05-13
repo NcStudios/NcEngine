@@ -3,9 +3,12 @@
 #include "graphics/vulkan/Mesh.h"
 
 #include "vulkan/vulkan.hpp"
+#include <array>
 
 namespace nc::graphics::vulkan
 {
+    class SceneData;
+
     enum class AttachmentType : uint8_t
     {
         Color,
@@ -31,11 +34,10 @@ namespace nc::graphics::vulkan
     vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo();
     vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo();
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment);
-    vk::PushConstantRange CreatePushConstantRange(ShaderStage stage, size_t dataSize);
+    vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, size_t dataTypeSize);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, vk::DescriptorSetLayout& layout);
     vk::Viewport CreateViewport(const Vector2& dimensions);
     vk::Extent2D CreateExtent(const Vector2& dimensions);
     vk::Rect2D CreateScissor(const vk::Extent2D& extent);
-    void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions);
-    vk::WriteDescriptorSet WriteDescriptorImage(vk::DescriptorType type, vk::DescriptorSet dstSet, vk::DescriptorImageInfo* imageInfo, uint32_t binding);
+    void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions);    
 }

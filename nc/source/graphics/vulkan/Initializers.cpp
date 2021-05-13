@@ -202,20 +202,10 @@ namespace nc::graphics::vulkan
         return colorBlending;
     }
 
-    vk::PushConstantRange CreatePushConstantRange(ShaderStage stage, size_t dataTypeSize)
+    vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, size_t dataTypeSize)
     {
         vk::PushConstantRange pushConstantRange{};
-
-        switch (stage)
-        {
-            case ShaderStage::Vertex:
-                pushConstantRange.setStageFlags(vk::ShaderStageFlagBits::eVertex);
-                break;
-            case ShaderStage::Pixel:
-                pushConstantRange.setStageFlags(vk::ShaderStageFlagBits::eFragment);
-                break;
-        }
-
+        pushConstantRange.setStageFlags(stageFlags);
         pushConstantRange.setOffset(0);
         pushConstantRange.setSize(dataTypeSize);
         return pushConstantRange;
@@ -264,18 +254,5 @@ namespace nc::graphics::vulkan
         auto scissor = CreateScissor(extent);
         commandBuffer->setViewport(0, 1, &viewport);
         commandBuffer->setScissor(0, 1, &scissor);
-    }
-
-    vk::WriteDescriptorSet WriteDescriptorImage(vk::DescriptorType type, vk::DescriptorSet dstSet, vk::DescriptorImageInfo* imageInfo, uint32_t binding)
-    {
-        vk::WriteDescriptorSet write = {};
-        write.setPNext(nullptr);
-        write.setDstBinding(binding);
-        write.setDstSet(dstSet);
-        write.setDescriptorCount(1);
-        write.setDescriptorType(type);
-        write.setPImageInfo(imageInfo);
-
-        return write;
     }
 }

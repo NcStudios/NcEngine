@@ -1,25 +1,26 @@
 #include "PhongAndUiTechnique.h"
 #include "config/Config.h"
 #include "component/Transform.h"
+#include "component/vulkan/MeshRenderer.h"
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Initializers.h"
+#include "graphics/vulkan/PhongMaterial.h"
 #include "graphics/vulkan/TechniqueManager.h"
-#include "graphics/vulkan/TextureManager.h"
 #include "graphics/vulkan/MeshManager.h"
-#include "graphics/vulkan/Resources/TransformBuffer.h"
-#include "graphics/vulkan/Resources/ImmutableBuffer.h"
+#include "graphics/vulkan/resources/TransformBuffer.h"
+#include "graphics/vulkan/resources/ImmutableBuffer.h"
+#include "graphics/vulkan/resources/ResourceManager.h"
 #include "graphics/Graphics2.h"
 
 namespace nc::graphics::vulkan
 {
-    PhongAndUiTechnique::PhongAndUiTechnique(GlobalData* globalData, nc::graphics::Graphics2* graphics)
-    : TechniqueBase(TechniqueType::Simple, globalData, graphics),
+    PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics2* graphics)
+    : TechniqueBase(TechniqueType::Simple, graphics),
       m_descriptorSetLayout{},
       m_textureDescriptors{}
     {
         m_renderPasses.push_back(m_swapchain->GetPassDefinition());
-        CreateDescriptorSetLayout();
         CreatePipeline();
     }
 
@@ -44,8 +45,10 @@ namespace nc::graphics::vulkan
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        auto transformPushConstantRange = CreatePushConstantRange(ShaderStage::Vertex, sizeof(TransformMatrices)); // TranformMatrices
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(transformPushConstantRange, m_descriptorSetLayout);
+        m_descriptorSetLayout = *ResourceManager::GetDescriptorSetLayout();
+
+        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(PushConstants)); // PushConstants
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, m_descriptorSetLayout);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -84,38 +87,6 @@ namespace nc::graphics::vulkan
         m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
-    }
-
-    void PhongAndUiTechnique::CreateDescriptorSetLayout()
-    {
-        vk::DescriptorSetLayoutBinding textureBind = {};
-        textureBind.setBinding(0);
-        textureBind.setDescriptorCount(1);
-        textureBind.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
-        textureBind.setPImmutableSamplers(nullptr);
-        textureBind.setStageFlags(vk::ShaderStageFlagBits::eFragment);
-
-        vk::DescriptorSetLayoutCreateInfo setInfo{};
-        setInfo.setBindingCount(1);
-        setInfo.setFlags(vk::DescriptorSetLayoutCreateFlags());
-        setInfo.setPNext(nullptr);
-        setInfo.setPBindings(&textureBind);
-
-        if (m_base->GetDevice().createDescriptorSetLayout(&setInfo, nullptr, &m_descriptorSetLayout) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Failed to create descriptor set layout.");
-        }
-
-        vk::DescriptorSetAllocateInfo allocationInfo{};
-        allocationInfo.setPNext(nullptr);
-        allocationInfo.setDescriptorPool(*(m_base->GetRenderingDescriptorPoolPtr()));
-        allocationInfo.setDescriptorSetCount(1);
-        allocationInfo.setPSetLayouts(&m_descriptorSetLayout);
-
-        if (m_base->GetDevice().allocateDescriptorSets(&allocationInfo, &m_textureDescriptors) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Failed to allocate descriptor sets.");
-        }
     }
 
     void PhongAndUiTechnique::Record(Commands* commands)
@@ -166,23 +137,31 @@ namespace nc::graphics::vulkan
                     SetViewportAndScissor(&commandBuffers[i], dimensions);
 
                     vk::DeviceSize offsets[] = { 0 };
-                    commandBuffers[i].bindVertexBuffers(0, 1, m_globalData->vertexBuffer, offsets);
-                    commandBuffers[i].bindIndexBuffer(*m_globalData->indexBuffer, 0, vk::IndexType::eUint32);
+                    commandBuffers[i].bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
+                    commandBuffers[i].bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
+                    commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetDescriptorSet(), 0, 0);
 
-                    for (auto& mesh : m_meshes)
+                    for (auto& [meshUid, renderers] : m_meshRenderers)
                     {
                         const auto viewMatrix = m_graphics->GetViewMatrix();
                         const auto projectionMatrix = m_graphics->GetProjectionMatrix();
+                        const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
                         
-                        // Bind the transforms per object and draw each object
-                        for (const auto* transform : m_objects.at(mesh.uid))
+                        for (auto* meshRenderer : renderers)
                         {
-                            m_textures[0].uid
-
-                            auto modelViewMatrix = transform->GetTransformationMatrix() * viewMatrix;
+                            auto& material = meshRenderer->GetMaterial();
+                            auto modelViewMatrix = meshRenderer->GetTransform()->GetTransformationMatrix() * viewMatrix;
                             auto matrix = GetMatrices(modelViewMatrix, modelViewMatrix * projectionMatrix);
-                            commandBuffers[i].pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(TransformMatrices), &matrix);
-                            commandBuffers[i].drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                            
+                            auto pushConstants = PushConstants{};
+                            pushConstants.model = matrix.model;
+                            pushConstants.modelView = matrix.modelView;
+                            pushConstants.baseColorIndex = ResourceManager::GetTextureAccessor(material.baseColor);
+                            pushConstants.normalColorIndex = ResourceManager::GetTextureAccessor(material.normal);
+                            pushConstants.roughnessColorIndex = ResourceManager::GetTextureAccessor(material.roughness);
+
+                            commandBuffers[i].pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(PushConstants), &pushConstants);
+                            commandBuffers[i].drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                         }
                     }
                 }
