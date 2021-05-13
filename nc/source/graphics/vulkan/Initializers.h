@@ -24,7 +24,7 @@ namespace nc::graphics::vulkan
     vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
     vk::AttachmentReference CreateAttachmentReference(AttachmentType type, uint32_t attachmentIndex);
     vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& colorReference, const vk::AttachmentReference& depthReference);
-    vk::SubpassDependency CreateSubpassDependency(AttachmentType type);
+    vk::SubpassDependency CreateSubpassDependency();
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
     vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, const std::array<vk::VertexInputAttributeDescription, 5>& vertexAttributeDesc);
     vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo();

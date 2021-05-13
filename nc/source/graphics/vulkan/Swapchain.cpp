@@ -30,11 +30,6 @@ namespace nc::graphics::vulkan
     {
         Cleanup();
         DestroySynchronizationObjects();
-        
-        // if (m_defaultPass)
-        // {
-        //     m_base->GetDevice().destroyRenderPass(m_defaultPass);
-        // }
     }
 
     void Swapchain::DestroySynchronizationObjects()
@@ -67,26 +62,22 @@ namespace nc::graphics::vulkan
         std::array<vk::AttachmentDescription, 2> renderPassAttachments = 
         {
             CreateAttachmentDescription(AttachmentType::Color, GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
-            CreateAttachmentDescription(AttachmentType::Depth, m_base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
+            CreateAttachmentDescription(AttachmentType::Depth, m_base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare),
         };
 
         vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
         vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
         vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
 
-        std::array<vk::SubpassDependency, 2> dependencies =
-        { 
-            CreateSubpassDependency(AttachmentType::Color),
-            CreateSubpassDependency(AttachmentType::Depth)
-        };
+        vk::SubpassDependency subpassDependency = CreateSubpassDependency();
 
         vk::RenderPassCreateInfo renderPassInfo{};
         renderPassInfo.setAttachmentCount(static_cast<uint32_t>(renderPassAttachments.size()));
         renderPassInfo.setPAttachments(renderPassAttachments.data());
         renderPassInfo.setSubpassCount(1);
         renderPassInfo.setPSubpasses(&subpass);
-        renderPassInfo.setDependencyCount(static_cast<uint32_t>(dependencies.size()));
-        renderPassInfo.setPDependencies(dependencies.data());
+        renderPassInfo.setDependencyCount(1);
+        renderPassInfo.setPDependencies(&subpassDependency);
 
         if (m_base->GetDevice().createRenderPass(&renderPassInfo, nullptr, &m_defaultPass) != vk::Result::eSuccess)
         {
