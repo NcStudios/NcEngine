@@ -62,6 +62,10 @@ namespace
 
 namespace nc::sample
 {
+    #ifdef USE_VULKAN
+    void SolarSystem::Load()
+    {}
+    #else
     void SolarSystem::Load()
     {
         m_sceneHelper.Setup(false, true);
@@ -175,10 +179,43 @@ namespace nc::sample
         AddComponent<ConstantRotation>(uranus, GetComponent<Transform>(uranus)->Up(), UranusRotationSpeed);
         AddComponent<ConstantRotation>(neptune, GetComponent<Transform>(neptune)->Up(), NeptuneRotationSpeed);
         AddComponent<ConstantRotation>(pluto, GetComponent<Transform>(pluto)->Up(), PlutoRotationSpeed);
-    }
 
+        ParticleInfo particleInfo
+        {
+            .emission = 
+            {
+                .maxParticleCount = 1500u,
+                .initialEmissionCount = 1200u,
+                .periodicEmissionCount = 300u,
+                .periodicEmissionFrequency = 15.0f
+            },
+            .init =
+            {
+                .lifetime = 45.0f,
+                .positionRange = Vector3::Splat(500.0f),
+                .rotationRange = 180.0f,
+                .scale = 1.0f,
+                .scaleRange = 0.5f
+            },
+            .kinematic =
+            {
+                .rotationRange = 5.0f,
+                .rotationOverTimeFactor = 0.0f
+            }
+        };
+
+        auto starEmitter = CreateEntity({.tag = "Stars"});
+        AddComponent<ParticleEmitter>(starEmitter, particleInfo);
+    }
+#endif
+
+#ifdef USE_VULKAN
+    void SolarSystem::Unload()
+    {}
+#else
     void SolarSystem::Unload()
     {
         m_sceneHelper.TearDown();
     }
+#endif
 }

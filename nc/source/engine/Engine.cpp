@@ -67,7 +67,7 @@ namespace nc::core
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
-          m_jobSystem{2},
+          m_jobSystem{4},
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_ecs{ &m_graphics2 },
@@ -93,7 +93,7 @@ namespace nc::core
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
           m_pointLightManager{},
           m_frameManager{},
-          m_ecs{},
+          m_ecs{&m_graphics},
           m_physics{&m_graphics, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
@@ -121,19 +121,32 @@ namespace nc::core
         auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
+        #ifndef USE_VULKAN
+        auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
+        #endif
+
         while(m_isRunning)
         {
             m_time.UpdateTime();
             m_window.ProcessSystemMessages(); 
 
+            auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
+            #ifndef USE_VULKAN
+            auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
+            #endif
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
                 FixedStepLogic();
             }
 
-            auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             FrameLogic(dt);
+            #ifndef USE_VULKAN
+            particleUpdateJobResult.wait();
+            #endif
             FrameRender();
+            #ifndef USE_VULKAN
+            particleEmitterSystem->ProcessFrameEvents();
+            #endif
             FrameCleanup();
         }
 
@@ -229,6 +242,8 @@ namespace nc::core
         #ifdef NC_EDITOR_ENABLED
         m_physics.UpdateWidgets(&m_frameManager);
         #endif
+
+        m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
         m_frameManager.Execute(&m_graphics);
 

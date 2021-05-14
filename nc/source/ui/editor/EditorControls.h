@@ -115,6 +115,8 @@ namespace nc::ui::editor::controls
         controls::Component(GetComponent<Renderer>(handle));
         #ifdef USE_VULKAN
         controls::Component(GetComponent<vulkan::MeshRenderer>(handle));
+        #else
+        controls::Component(GetComponent<ParticleEmitter>(handle));
         #endif
         if(auto col = GetComponent<Collider>(handle); col)
         {
@@ -282,6 +284,8 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<Transform>("Transform", systems->transform);
         #ifdef USE_VULKAN
         ComponentSystemHeader<nc::vulkan::MeshRenderer>("Mesh Renderer", systems->meshRenderer);
+        #else
+        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", systems->particleEmitter);
         #endif
     }
 

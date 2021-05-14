@@ -80,7 +80,7 @@ namespace nc::graphics
         // Add pixel shader
         const auto pixelShaderPath = defaultShaderPath + "wireframepixelshader.cso";
         WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<PixelShader>(PixelShader::GetUID(pixelShaderPath), pixelShaderPath));
-        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Blender>(Blender::GetUID(BLENDER_TAG)));
+        WireframeTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Blender>(Blender::GetUID(BLENDER_TAG), false));
     }
 
     void WireframeTechnique::BindCommonResources()

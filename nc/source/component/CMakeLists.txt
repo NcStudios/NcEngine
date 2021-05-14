@@ -5,6 +5,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/component/ColliderDetail.cpp
         ${ROOT_DIR}/source/component/Component.cpp
         ${ROOT_DIR}/source/component/NetworkDispatcher.cpp
+        ${ROOT_DIR}/source/component/ParticleEmitter.cpp
         ${ROOT_DIR}/source/component/PointLight.cpp
         ${ROOT_DIR}/source/component/PointLightManager.cpp
         ${ROOT_DIR}/source/component/Renderer.cpp

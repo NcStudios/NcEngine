@@ -127,8 +127,10 @@ namespace nc::sample
 
             if(ImGui::Button("Jare Scratch", buttonSize))
             {}
+            #ifndef USE_VULKAN
             if(ImGui::Button("Solar System", buttonSize))
                 scene::Change(std::make_unique<SolarSystem>());
+            #endif
         } ImGui::EndChild();
     }
 

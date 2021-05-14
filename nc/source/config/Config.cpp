@@ -30,6 +30,7 @@ namespace
     const auto MaxDynamicCollidersKey = std::string{"max_dynamic_colliders"};
     const auto MaxStaticCollidersKey = std::string{"max_static_colliders"};
     const auto MaxNetworkDispatchersKey = std::string{"max_network_dispatchers"};
+    const auto MaxParticleEmittersKey = std::string{"max_particle_emitters"};
     const auto MaxRenderersKey = std::string{"max_renderers"};
     const auto MaxTransformsKey = std::string{"max_transforms"};
 
@@ -66,6 +67,8 @@ namespace
             out->memorySettings.maxStaticColliders = std::stoi(value);
         else if(key == MaxNetworkDispatchersKey)
             out->memorySettings.maxNetworkDispatchers = std::stoi(value);
+        else if(key == MaxParticleEmittersKey)
+            out->memorySettings.maxParticleEmitters = std::stoi(value);
         else if(key == MaxRenderersKey)
             out->memorySettings.maxRenderers = std::stoi(value);
         else if(key == MaxTransformsKey)
@@ -164,6 +167,7 @@ namespace nc::config
                 << MaxDynamicCollidersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxDynamicColliders << '\n'
                 << MaxStaticCollidersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxStaticColliders << '\n'
                 << MaxNetworkDispatchersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxNetworkDispatchers << '\n'
+                << MaxParticleEmittersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxParticleEmitters << '\n'
                 << MaxRenderersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxRenderers << '\n'
                 << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxTransforms << '\n'
                 << "[physics]\n"
