@@ -79,7 +79,7 @@ namespace nc::ecs
         return m_componentSystem.GetPointerTo(handle);
     }
 
-    auto ColliderSystem::GetComponents() -> ecs::ComponentSystem<Collider>::ContainerType&
+    std::span<Collider*> ColliderSystem::GetComponents()
     {
         return m_componentSystem.GetComponents();
     }

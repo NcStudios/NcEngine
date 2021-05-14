@@ -174,13 +174,13 @@ TEST_F(ComponentSystem_unit_tests, GetComponents_SequentiallyAdded_GetsAllCompon
     auto actualAddress2 = fakeSystem.Add(TestParentHandle2, TestVal2);
     auto actualAddress3 = fakeSystem.Add(TestParentHandle3, TestVal3);
 
-    auto& fakes = fakeSystem.GetComponents();
+    auto fakes = fakeSystem.GetComponents();
     auto actualSize = fakes.size();
     EXPECT_EQ(actualSize, 3);
 
-    EXPECT_EQ(actualAddress1, fakes[0].get());
-    EXPECT_EQ(actualAddress2, fakes[1].get());
-    EXPECT_EQ(actualAddress3, fakes[2].get());
+    EXPECT_EQ(actualAddress1, fakes[0]);
+    EXPECT_EQ(actualAddress2, fakes[1]);
+    EXPECT_EQ(actualAddress3, fakes[2]);
 
     EXPECT_EQ(TestVal1, fakes[0]->val);
     EXPECT_EQ(TestVal2, fakes[1]->val);
@@ -194,12 +194,12 @@ TEST_F(ComponentSystem_unit_tests, GetComponents_AddThroughFreeList_ReturnsInInc
     auto actualAddress3 = fakeSystem.Add(TestParentHandle3, TestVal3);
     fakeSystem.Remove(TestParentHandle2);
     auto actualAddress4 = fakeSystem.Add(TestParentHandle4, TestVal4);
-    auto& fakes = fakeSystem.GetComponents();
+    auto fakes = fakeSystem.GetComponents();
     auto actualSize = fakes.size();
     EXPECT_EQ(actualSize, 3);
-    EXPECT_EQ(actualAddress1, fakes[0].get());
-    EXPECT_EQ(actualAddress4, fakes[1].get());
-    EXPECT_EQ(actualAddress3, fakes[2].get());
+    EXPECT_EQ(actualAddress1, fakes[0]);
+    EXPECT_EQ(actualAddress4, fakes[1]);
+    EXPECT_EQ(actualAddress3, fakes[2]);
 }
 
 int main(int argc, char ** argv)
