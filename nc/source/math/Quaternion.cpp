@@ -52,7 +52,7 @@ namespace nc
         return out;
     }
 
-    Quaternion Quaternion::FromAxisAngle(const Vector3& axis, float angle)
+    Quaternion Quaternion::FromAxisAngle(const Vector3& axis, float radians)
     {
         IF_THROW(axis == Vector3::Zero(), "Quaternion::FromAxisAngle - Axis cannot be zero");
         auto axis_v = DirectX::XMVectorSet(axis.x, axis.y, axis.z, 0.0f);
