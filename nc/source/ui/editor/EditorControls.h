@@ -5,6 +5,7 @@
 #include "ecs/EntityComponentSystem.h"
 #include "ecs/ColliderSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "graphics/vulkan/resources/ResourceManager.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls
@@ -112,6 +113,9 @@ namespace nc::ui::editor::controls
         controls::Component(GetComponent<Transform>(handle));
         controls::Component(GetComponent<NetworkDispatcher>(handle));
         controls::Component(GetComponent<Renderer>(handle));
+        #ifdef USE_VULKAN
+        controls::Component(GetComponent<vulkan::MeshRenderer>(handle));
+        #endif
         if(auto col = GetComponent<Collider>(handle); col)
         {
             // collider model doesn't update/submit unless we tell it to
@@ -276,6 +280,9 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<PointLight>("Point Light", systems->pointLight);
         ComponentSystemHeader<Renderer>("Renderer", systems->renderer);
         ComponentSystemHeader<Transform>("Transform", systems->transform);
+        #ifdef USE_VULKAN
+        ComponentSystemHeader<nc::vulkan::MeshRenderer>("Mesh Renderer", systems->meshRenderer);
+        #endif
     }
 
     void GraphicsResourcePanel()

@@ -1,6 +1,10 @@
 #include "component/vulkan/MeshRenderer.h"
 #include "Ecs.h"
 
+#ifdef NC_EDITOR_ENABLED
+#include "ui/editor/Widgets.h"
+#endif
+
 namespace nc::vulkan
 {
     MeshRenderer::MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, Transform* transform)
@@ -25,4 +29,12 @@ namespace nc::vulkan
     {
         return m_material;
     }
+    
+    #ifdef NC_EDITOR_ENABLED
+    void MeshRenderer::EditorGuiElement()
+    {
+        ImGui::Text("Mesh Renderer");
+        m_material.EditorGuiElement();
+    }
+    #endif
 }

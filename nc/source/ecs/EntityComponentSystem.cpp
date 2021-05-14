@@ -122,7 +122,10 @@ Systems EntityComponentSystem::GetComponentSystems() const
         .networkDispatcher = m_networkDispatcherSystem.get(),
         .pointLight = m_lightSystem.get(),
         .renderer = m_rendererSystem.get(),
-        .transform = m_transformSystem.get()
+        .transform = m_transformSystem.get(),
+#ifdef USE_VULKAN
+        .meshRenderer = m_meshRendererSystem->GetSystem()
+#endif
     };
 }
 

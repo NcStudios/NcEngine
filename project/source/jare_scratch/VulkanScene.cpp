@@ -29,30 +29,32 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(true, true, Widget);
 
+        const std::string defaultTexturesPath = "project//Textures//";
+
         // Load all scene meshes
         const std::vector<std::string> meshPaths {"project/assets/mesh/beeper.nca", "project/assets/mesh/table.nca", "project/assets/mesh/planet.nca"};
         nc::graphics::vulkan::LoadMeshes(meshPaths); 
 
         // Load all scene textures
-        const std::vector<std::string> texturePaths {"project//Textures//Beeper//BaseColor.png", 
-                                                     "project//Textures//Beeper//Normal.png", 
-                                                     "project//Textures//Beeper//Roughness.png", 
-                                                     "project//Textures//Planets//Jupiter//BaseColor.png",
-                                                     "project//Textures//Planets//Jupiter//Normal.png",
-                                                     "project//Textures//Planets//Jupiter//Roughness.png",
+        const std::vector<std::string> texturePaths { defaultTexturesPath + "Beeper//BaseColor.png", 
+                                                      defaultTexturesPath + "Beeper//Normal.png", 
+                                                      defaultTexturesPath + "Beeper//Roughness.png", 
+                                                      defaultTexturesPath + "Planets//Jupiter//BaseColor.png",
+                                                      defaultTexturesPath + "Planets//Jupiter//Normal.png",
+                                                      defaultTexturesPath + "Planets//Jupiter//Roughness.png",
                                                      };
         nc::graphics::vulkan::LoadTextures(std::move(texturePaths)); 
 
         // Create the entity
         auto beeMaterial = nc::graphics::vulkan::PhongMaterial{};
-        beeMaterial.baseColor = "project//Textures//Beeper//BaseColor.png";
-        beeMaterial.normal = "project//Textures//Beeper//Normal.png";
-        beeMaterial.roughness = "project//Textures//Beeper//Roughness.png";
+        beeMaterial.baseColor = defaultTexturesPath + "Beeper//BaseColor.png";
+        beeMaterial.normal = defaultTexturesPath + "Beeper//Normal.png";
+        beeMaterial.roughness = defaultTexturesPath + "Beeper//Roughness.png";
 
         auto jupiterMaterial = nc::graphics::vulkan::PhongMaterial{};
-        jupiterMaterial.baseColor = "project//Textures//Planets//Jupiter//BaseColor.png";
-        jupiterMaterial.normal = "project//Textures//Planets//Jupiter//Normal.png";
-        jupiterMaterial.roughness = "project//Textures//Planets//Jupiter//Roughness.png";
+        jupiterMaterial.baseColor = defaultTexturesPath + "Planets//Jupiter//BaseColor.png";
+        jupiterMaterial.normal = defaultTexturesPath + "Planets//Jupiter//Normal.png";
+        jupiterMaterial.roughness = defaultTexturesPath + "Planets//Jupiter//Roughness.png";
 
         auto handle = CreateEntity();
         AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);

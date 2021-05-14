@@ -36,6 +36,9 @@ namespace nc::ecs
         ecs::ComponentSystem<PointLight>* pointLight;
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;
+#ifdef USE_VULKAN
+        ecs::ComponentSystem<MeshRenderer>* meshRenderer;
+#endif
     };
 
     class EntityComponentSystem

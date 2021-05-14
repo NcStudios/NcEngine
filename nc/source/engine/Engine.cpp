@@ -186,6 +186,7 @@ namespace nc::core
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
+        m_graphics2.FrameBegin();
         m_ui.FrameBegin();
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);

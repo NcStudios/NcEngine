@@ -162,6 +162,9 @@ namespace nc::graphics::vulkan
 
                             commandBuffers[i].pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(PushConstants), &pushConstants);
                             commandBuffers[i].drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                            #ifdef NC_EDITOR_ENABLED
+                            m_graphics->IncrementDrawCallCount();
+                            #endif
                         }
                     }
                 }
