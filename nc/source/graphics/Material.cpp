@@ -5,6 +5,7 @@
 #include "graphics/techniques/TechniqueManager.h"
 #include "graphics/techniques/PhongShadingTechnique.h"
 #include "graphics/techniques/WireframeTechnique.h"
+#include "graphics/techniques/ParticleTechnique.h"
 #include "config/Config.h"
 
 namespace nc::graphics
@@ -28,6 +29,12 @@ namespace nc::graphics
     Material Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>()
     {
         return Material{TechniqueManager::GetTechnique<WireframeTechnique>()};
+    }
+
+    template<>
+    Material Material::CreateMaterial<TechniqueType::Particle>()
+    {
+        return Material{TechniqueManager::GetTechnique<ParticleTechnique>()};
     }
 
     #ifdef NC_EDITOR_ENABLED

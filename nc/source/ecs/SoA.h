@@ -12,57 +12,85 @@ namespace nc::ecs
     /** An incrementable index for sequentially accessing each valid position in an SoA. */
     class SoAIndex
     {
-        using GapIterator = std::set<uint32_t>::const_iterator;
+        using GapIterator = std::set<size_t>::const_iterator;
         
         public:
-            SoAIndex(uint32_t begin, uint32_t end, GapIterator gapBegin, GapIterator gapEnd);
+            SoAIndex(size_t begin, size_t end, GapIterator gapBegin, GapIterator gapEnd);
 
             SoAIndex& operator++();
-            operator unsigned() const;
+            operator size_t() const;
             bool Valid() const;
 
         private:
-            uint32_t m_current;
-            const uint32_t m_end;
+            size_t m_current;
+            const size_t m_end;
             GapIterator m_gapCurrent;
             const GapIterator m_gapEnd;
     };
 
     template<class T>
-    concept TriviallyDestructible = std::is_trivially_destructible<T>::value;
+    concept SoAMember = std::is_default_constructible_v<T> && std::is_trivially_destructible_v<T>;
 
-    /** Struct of arrays representation for any number of trivially destructible properties. */
-    template<TriviallyDestructible... Properties>
+    /** Struct of arrays representation for any number of properties. */
+    template<SoAMember... Members>
     class SoA
     {
-        public:
-            SoA(uint32_t maxCount);
+        template<size_t Index>
+        using member_type = std::tuple_element<Index, std::tuple<Members...>>::type;
 
-            void Add(Properties&&... properties);
-            template<std::equality_comparable Property> void Remove(Property toRemove);
-            template<class Property> std::span<Property> GetSpan() const;
+        template<size_t Index>
+        using span_type = std::span<member_type<Index>>;
+
+        template<size_t... Indices>
+        using view_type = std::tuple<SoAIndex, span_type<Indices>...>;
+
+        public:
+            SoA(size_t maxCount);
+
+            void Add(Members... members);
+            void RemoveAtIndex(size_t index);
+
+            template<SoAMember Member>
+                requires std::equality_comparable<Member>
+            void Remove(Member toRemove);
+
+            template<class Member>
+            auto GetSpan() const -> std::span<Member>;
+            
+            template<size_t Index>
+            auto GetSpanFromIndex() const -> std::span<member_type<Index>>;
+
+            template<size_t... Indices>
+            auto View() const -> view_type<Indices...>;
+
             void Clear();
             bool IsFull() const;
+            size_t GetCapacity() const;
+            size_t GetSize() const;
+            size_t GetRemainingSpace() const;
             SoAIndex SmartIndex() const;
 
         private:
-            std::tuple<std::unique_ptr<Properties[]>...> m_properties;
-            std::set<uint32_t> m_gaps;
-            uint32_t m_nextFree;
-            uint32_t m_size;
+            template<size_t TupleIndex = 0u, SoAMember First, SoAMember... Rest>
+            void Assign(size_t index, First&& first, Rest&&... rest);
+
+            std::tuple<std::unique_ptr<Members[]>...> m_members;
+            std::set<size_t> m_gaps;
+            size_t m_nextFree;
+            size_t m_capacity;
     };
 
-    template<class... Properties>
-    SoA<Properties...>::SoA(uint32_t maxCount)
-        : m_properties{std::make_unique<Properties[]>(maxCount)...},
+    template<SoAMember... Members>
+    SoA<Members...>::SoA(size_t maxCount)
+        : m_members{std::make_unique<Members[]>(maxCount)...},
           m_gaps{},
           m_nextFree{0u},
-          m_size{maxCount}
+          m_capacity{maxCount}
     {
     }
 
-    template<class... Properties>
-    void SoA<Properties...>::Add(Properties&&... properties)
+    template<SoAMember... Members>
+    void SoA<Members...>::Add(Members... members)
     {
         if(IsFull())
             throw std::runtime_error("SoA::Add - capacity exceeded");
@@ -76,51 +104,91 @@ namespace nc::ecs
             return out.value();
         }();
 
-        ( (GetSpan<Properties>()[index] = properties), ... );
+        Assign(index, std::forward<Members>(members)...);
     }
 
-    template<class... Properties>
-    template<std::equality_comparable Property>
-    void SoA<Properties...>::Remove(Property toRemove)
+    template<SoAMember... Members>
+    void SoA<Members...>::RemoveAtIndex(size_t index)
     {
-        auto targetProperties = GetSpan<Property>();
+        // throw if doesn't exist? return false? (then other remove should be modified)
+        m_gaps.insert(index);
+    }
+
+    template<SoAMember... Members>
+    template<SoAMember Member>
+        requires std::equality_comparable<Member>
+    void SoA<Members...>::Remove(Member toRemove)
+    {
+        auto targetMembers = GetSpan<Member>();
         auto index = SmartIndex();
         while(index.Valid())
         {
-            if(targetProperties[index] == toRemove)
+            if(targetMembers[index] == toRemove)
                 break;
 
             ++index;
         }
 
         if(!index.Valid())
-            throw std::runtime_error("SoA::Remove - property doesn't exist");
+            throw std::runtime_error("SoA::Remove - member doesn't exists");
         
         m_gaps.insert(index);
     }
 
-    template<class... Properties>
-    void SoA<Properties...>::Clear()
+    template<SoAMember... Members>
+    void SoA<Members...>::Clear()
     {
         m_gaps.clear();
         m_nextFree = 0u;
     }
 
-    template<class... Properties>
-    bool SoA<Properties...>::IsFull() const
+    template<SoAMember... Members>
+    bool SoA<Members...>::IsFull() const
     {
-        return m_nextFree >= m_size && m_gaps.empty();
+        return m_nextFree >= m_capacity && m_gaps.empty();
     }
 
-    template<class... Properties>
-    template<class Property>
-    std::span<Property> SoA<Properties...>::GetSpan() const
+    template<SoAMember... Members>
+    template<class Member>
+    auto SoA<Members...>::GetSpan() const -> std::span<Member>
     {
-        return std::span{std::get<std::unique_ptr<Property[]>>(m_properties).get(), m_nextFree};
+        return std::span{std::get<std::unique_ptr<Member[]>>(m_members).get(), m_nextFree};
     }
 
-    template<class... Properties>
-    SoAIndex SoA<Properties...>::SmartIndex() const
+    template<SoAMember... Members>
+    template<size_t Index>
+    auto SoA<Members...>::GetSpanFromIndex() const -> std::span<member_type<Index>>
+    {
+        return std::span{std::get<Index>(m_members).get(), m_nextFree};
+    }
+
+    template<SoAMember... Members>
+    template<size_t... I>
+    auto SoA<Members...>::View() const -> view_type<I...>
+    {
+        return std::tuple{SmartIndex(), GetSpanFromIndex<I>()...};
+    }
+
+    template<SoAMember... Members>
+    size_t SoA<Members...>::GetCapacity() const
+    {
+        return m_capacity;
+    }
+    
+    template<SoAMember... Members>
+    size_t SoA<Members...>::GetSize() const
+    {
+        return m_nextFree - m_gaps.size();
+    }
+    
+    template<SoAMember... Members>
+    size_t SoA<Members...>::GetRemainingSpace() const
+    {
+        return m_capacity - GetSize();
+    }
+
+    template<SoAMember... Members>
+    SoAIndex SoA<Members...>::SmartIndex() const
     {
         // if the first gap is 0, find the starting index
         // and make sure begin is greater than it
@@ -133,5 +201,14 @@ namespace nc::ecs
         }
 
         return SoAIndex{index, m_nextFree, begin, end};
+    }
+
+    template<SoAMember... Members>
+    template<size_t TupleIndex, SoAMember First, SoAMember... Rest>
+    void SoA<Members...>::Assign(size_t index, First&& first, Rest&&... rest)
+    {
+        std::get<TupleIndex>(m_members)[index] = first;
+        if constexpr(sizeof...(rest) > 0u)
+            Assign<TupleIndex + 1u>(index, std::forward<Rest>(rest)...);
     }
 } // namespace nc::ecs

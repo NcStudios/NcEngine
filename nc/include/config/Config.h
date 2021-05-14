@@ -15,6 +15,7 @@ namespace nc::config
         unsigned maxDynamicColliders;
         unsigned maxStaticColliders;
         unsigned maxNetworkDispatchers;
+        unsigned maxParticleEmitters;
         unsigned maxRenderers;
         unsigned maxTransforms;
     };

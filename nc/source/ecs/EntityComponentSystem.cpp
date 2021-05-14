@@ -15,12 +15,17 @@ namespace
 
 namespace nc::ecs
 {
+#ifdef USE_VULKAN
 EntityComponentSystem::EntityComponentSystem()
+#else
+EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics)
+#endif
     : m_handleManager{},
       m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_colliderSystem{nullptr},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
+      m_particleEmitterSystem{nullptr},
       m_rendererSystem{nullptr},
       m_transformSystem{nullptr},
       m_networkDispatcherSystem{nullptr}
@@ -37,6 +42,12 @@ EntityComponentSystem::EntityComponentSystem()
         physicsSettings.worldspaceExtent
     );
 
+    #ifdef USE_VULKAN
+    m_particleEmitterSystem = std::make_unique<ParticleEmitterSystem>(memorySettings.maxParticleEmitters);
+    #else
+    m_particleEmitterSystem = std::make_unique<ParticleEmitterSystem>(memorySettings.maxParticleEmitters, graphics);
+    #endif
+
     m_rendererSystem = std::make_unique<ComponentSystem<Renderer>>(memorySettings.maxRenderers);
     m_transformSystem = std::make_unique<ComponentSystem<Transform>>(memorySettings.maxTransforms);
     m_networkDispatcherSystem = std::make_unique<ComponentSystem<NetworkDispatcher>>(memorySettings.maxNetworkDispatchers);
@@ -52,6 +63,11 @@ ColliderSystem* EntityComponentSystem::GetColliderSystem() const
 ComponentSystem<NetworkDispatcher>* EntityComponentSystem::GetNetworkDispatcherSystem() const
 {
     return m_networkDispatcherSystem.get();
+}
+
+ParticleEmitterSystem* EntityComponentSystem::GetParticleEmitterSystem()
+{
+    return m_particleEmitterSystem.get();
 }
 
 ComponentSystem<PointLight>* EntityComponentSystem::GetPointLightSystem() const
@@ -75,6 +91,7 @@ Systems EntityComponentSystem::GetComponentSystems() const
     {
         .collider = m_colliderSystem->GetComponentSystem(),
         .networkDispatcher = m_networkDispatcherSystem.get(),
+        .particleEmitter = m_particleEmitterSystem->GetComponentSystem(),
         .pointLight = m_lightSystem.get(),
         .renderer = m_rendererSystem.get(),
         .transform = m_transformSystem.get()
@@ -154,6 +171,7 @@ void EntityComponentSystem::SendOnDestroy()
         m_rendererSystem->Remove(handle);
         m_lightSystem->Remove(handle);
         m_networkDispatcherSystem->Remove(handle);
+        m_particleEmitterSystem->Remove(handle);
     }
 
     m_toDestroy.clear();
@@ -181,5 +199,6 @@ void EntityComponentSystem::ClearState()
     m_rendererSystem->Clear();
     m_lightSystem->Clear();
     m_networkDispatcherSystem->Clear();
+    m_particleEmitterSystem->Clear();
 }
 } // end namespace nc::ecs

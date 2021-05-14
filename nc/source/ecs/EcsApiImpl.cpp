@@ -45,6 +45,13 @@ namespace nc
         return internal::g_ecsImpl->GetEntity(tag);
     }
 
+    template<> ParticleEmitter* AddComponent<ParticleEmitter>(EntityHandle handle, ParticleInfo info)
+    {
+        IF_THROW(!GetEntity(handle), "AddComponent<ParticleEmitter> - Bad handle");
+        IF_THROW(internal::g_ecsImpl->GetParticleEmitterSystem()->Contains(handle), "AddComponent<ParticleEmitter> - entity already has a particle emitter");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->Add(handle, info);
+    }
+
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle)
     {
         return AddComponent<PointLight>(handle, PointLight::Properties{});
@@ -54,8 +61,7 @@ namespace nc
     {
         IF_THROW(!GetEntity(handle), "AddComponent<PointLight> - Bad handle");
         IF_THROW(internal::g_pointLightSystem->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
-        auto lightPtr = internal::g_pointLightSystem->Add(handle, properties);
-        return lightPtr;
+        return internal::g_pointLightSystem->Add(handle, properties);
     }
 
     template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material)
@@ -77,6 +83,12 @@ namespace nc
         IF_THROW(!GetEntity(handle), "AddComponent<Collider> - Bad handle");
         IF_THROW(internal::g_colliderSystem->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
         return internal::g_colliderSystem->Add(handle, info);
+    }
+
+    template<> bool RemoveComponent<ParticleEmitter>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "RemoveComponent<ParticleEmitter> - Bad handle");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->Remove(handle);
     }
 
     template<> bool RemoveComponent<PointLight>(EntityHandle handle)
@@ -102,6 +114,12 @@ namespace nc
         auto* entity = GetEntity(handle);
         IF_THROW(!entity, "RemoveComponent<Collider> - Bad handle");
         return internal::g_colliderSystem->Remove(handle, entity->IsStatic);
+    }
+
+    template<> ParticleEmitter* GetComponent<ParticleEmitter>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "GetComponent<ParticleEmitter> - Bad handle");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->GetPointerTo(handle);
     }
 
     template<> PointLight* GetComponent<PointLight>(EntityHandle handle)
@@ -132,6 +150,12 @@ namespace nc
     {
         IF_THROW(!GetEntity(handle), "GetComponent<Collider> - Bad handle");
         return internal::g_colliderSystem->GetPointerTo(handle);
+    }
+
+    template<> bool HasComponent<ParticleEmitter>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "HasComponent<ParticleEmitter> - Bad handle");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->Contains(handle);
     }
 
     template<> bool HasComponent<PointLight>(EntityHandle handle)

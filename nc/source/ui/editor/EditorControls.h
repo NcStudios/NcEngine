@@ -111,6 +111,7 @@ namespace nc::ui::editor::controls
 
         controls::Component(GetComponent<Transform>(handle));
         controls::Component(GetComponent<NetworkDispatcher>(handle));
+        controls::Component(GetComponent<ParticleEmitter>(handle));
         controls::Component(GetComponent<Renderer>(handle));
         if(auto col = GetComponent<Collider>(handle); col)
         {
@@ -273,6 +274,7 @@ namespace nc::ui::editor::controls
     {
         ComponentSystemHeader<Collider>("Collider", systems->collider);
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", systems->networkDispatcher);
+        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", systems->particleEmitter);
         ComponentSystemHeader<PointLight>("Point Light", systems->pointLight);
         ComponentSystemHeader<Renderer>("Renderer", systems->renderer);
         ComponentSystemHeader<Transform>("Transform", systems->transform);

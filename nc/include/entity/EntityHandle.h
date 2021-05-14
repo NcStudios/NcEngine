@@ -24,6 +24,6 @@ namespace nc
 
         private:
             static constexpr Handle_t s_nullValue = 0u;
-            const Handle_t m_value;
+            Handle_t m_value;
     };
 }

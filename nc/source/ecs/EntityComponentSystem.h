@@ -3,10 +3,10 @@
 #include "entity/Entity.h"
 #include "entity/EntityHandle.h"
 #include "entity/EntityInfo.h"
-#include "EntityMap.h"
-#include "ComponentSystem.h"
 #include "ColliderSystem.h"
+#include "EntityMap.h"
 #include "HandleManager.h"
+#include "ParticleEmitterSystem.h"
 
 #include <memory>
 
@@ -18,6 +18,7 @@ namespace nc
     class Renderer;
     class Vector3;
     class Quaternion;
+    namespace graphics { class Graphics; }
     namespace physics { class ColliderSystem; }
 }
 
@@ -27,6 +28,7 @@ namespace nc::ecs
     {
         ecs::ComponentSystem<Collider>* collider;
         ecs::ComponentSystem<NetworkDispatcher>* networkDispatcher;
+        ecs::ComponentSystem<ParticleEmitter>* particleEmitter;
         ecs::ComponentSystem<PointLight>* pointLight;
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;
@@ -35,10 +37,15 @@ namespace nc::ecs
     class EntityComponentSystem
     {
         public:
+            #ifdef USE_VULKAN
             EntityComponentSystem();
+            #else
+            EntityComponentSystem(graphics::Graphics* graphics);
+            #endif
 
             ColliderSystem* GetColliderSystem() const;
             ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;
+            ParticleEmitterSystem* GetParticleEmitterSystem();
             ComponentSystem<PointLight>* GetPointLightSystem() const;
             ComponentSystem<Renderer>* GetRendererSystem() const;
             ComponentSystem<Transform>* GetTransformSystem() const;
@@ -62,6 +69,7 @@ namespace nc::ecs
             EntityMap m_toDestroy;
             std::unique_ptr<ColliderSystem> m_colliderSystem;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
+            std::unique_ptr<ParticleEmitterSystem> m_particleEmitterSystem;
             std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
             std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
             std::unique_ptr<ComponentSystem<NetworkDispatcher>> m_networkDispatcherSystem;
