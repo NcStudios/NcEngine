@@ -62,32 +62,16 @@ namespace nc::graphics::vulkan
         return subpassDescription;
     }
 
-    vk::SubpassDependency CreateSubpassDependency(AttachmentType type)
+    vk::SubpassDependency CreateSubpassDependency()
     {
         vk::SubpassDependency subpassDependency;
 
-        switch (type)
-        {
-            case AttachmentType::Color:
-                subpassDependency.setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-                subpassDependency.setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-                subpassDependency.setSrcStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // The type of operation to wait on. (What our dependency is)
-                subpassDependency.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // Specifies the type of operation that should do the waiting
-                subpassDependency.setSrcAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
-                subpassDependency.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
-                subpassDependency.setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
-                break;
-
-            case AttachmentType::Depth:
-                subpassDependency.setSrcSubpass(0); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-                subpassDependency.setDstSubpass(VK_SUBPASS_EXTERNAL); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-                subpassDependency.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput); // The type of operation to wait on. (What our dependency is)
-                subpassDependency.setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe); // Specifies the type of operation that should do the waiting
-                subpassDependency.setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);  // Specifies the specific operation that should do the waiting
-                subpassDependency.setDstAccessMask(vk::AccessFlagBits::eMemoryRead);  // Specifies the specific operation that should do the waiting
-                subpassDependency.setDependencyFlags(vk::DependencyFlagBits::eByRegion);  // Specifies the specific operation that should do the waiting
-                break;
-        }
+        subpassDependency.setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
+        subpassDependency.setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
+        subpassDependency.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests); // The type of operation to wait on. (What our dependency is)
+        subpassDependency.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests); // Specifies the type of operation that should do the waiting
+        subpassDependency.setSrcAccessMask(vk::AccessFlags());  // Specifies the specific operation that should do the waiting
+        subpassDependency.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite);  // Specifies the specific operation that should do the waiting
         
         return subpassDependency;      
     }
@@ -149,7 +133,7 @@ namespace nc::graphics::vulkan
         rasterizer.setPolygonMode(vk::PolygonMode::eFill); // Set to line for wireframe, requires enabling a GPU feature.
         rasterizer.setLineWidth(1.0f); // Setting wider requires enabling the wideLines GPU feature.
         rasterizer.setCullMode(vk::CullModeFlagBits::eBack);
-        rasterizer.setFrontFace(vk::FrontFace::eClockwise);
+        rasterizer.setFrontFace(vk::FrontFace::eCounterClockwise);
         rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(false));
         rasterizer.setDepthBiasConstantFactor(0.0f);
         rasterizer.setDepthBiasClamp(0.0f);
@@ -174,7 +158,7 @@ namespace nc::graphics::vulkan
         vk::PipelineDepthStencilStateCreateInfo depthStencil{};
         depthStencil.setDepthTestEnable(static_cast<vk::Bool32>(true));
         depthStencil.setDepthWriteEnable(static_cast<vk::Bool32>(true));
-        depthStencil.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
+        depthStencil.setDepthCompareOp(vk::CompareOp::eLess);
         return depthStencil;
     }
 

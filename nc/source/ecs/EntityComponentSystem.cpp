@@ -19,43 +19,21 @@ namespace
 
 namespace nc::ecs
 {
-EntityComponentSystem::EntityComponentSystem()
-    : m_handleManager{},
-      m_active{InitialBucketSize, EntityHandle::Hash()},
-      m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
-      m_colliderSystem{nullptr},
-      m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
-      m_rendererSystem{nullptr},
-      m_transformSystem{nullptr},
-      m_networkDispatcherSystem{nullptr}
-{
-    const auto& memorySettings = config::GetMemorySettings();
-    const auto& physicsSettings = config::GetPhysicsSettings();
-
-    m_colliderSystem = std::make_unique<ColliderSystem>
-    (
-        memorySettings.maxDynamicColliders,
-        memorySettings.maxStaticColliders,
-        physicsSettings.octreeDensityThreshold,
-        physicsSettings.octreeMinimumExtent,
-        physicsSettings.worldspaceExtent
-    );
-
-    m_rendererSystem = std::make_unique<ComponentSystem<Renderer>>(memorySettings.maxRenderers);
-    m_transformSystem = std::make_unique<ComponentSystem<Transform>>(memorySettings.maxTransforms);
-    m_networkDispatcherSystem = std::make_unique<ComponentSystem<NetworkDispatcher>>(memorySettings.maxNetworkDispatchers);
-
-    internal::RegisterEcs(this);
-}
-
 #ifdef USE_VULKAN
-EntityComponentSystem::EntityComponentSystem(nc::graphics::Graphics2* graphics)
+EntityComponentSystem::EntityComponentSystem(graphics::Graphics2* graphics)
+#else
+EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics)
+#endif
     : m_handleManager{},
       m_active{InitialBucketSize, EntityHandle::Hash()},
       m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
       m_colliderSystem{nullptr},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
+      #ifdef USE_VULKAN
       m_meshRendererSystem{ std::make_unique<MeshRendererSystem>(config::GetMemorySettings().maxRenderers, graphics) },
+      #else
+      m_particleEmitterSystem{nullptr},
+      #endif
       m_rendererSystem{nullptr},
       m_transformSystem{nullptr},
       m_networkDispatcherSystem{nullptr}
@@ -72,13 +50,15 @@ EntityComponentSystem::EntityComponentSystem(nc::graphics::Graphics2* graphics)
         physicsSettings.worldspaceExtent
     );
 
+    #ifndef USE_VULKAN
+    m_particleEmitterSystem = std::make_unique<ParticleEmitterSystem>(memorySettings.maxParticleEmitters, graphics);
+    #endif
     m_rendererSystem = std::make_unique<ComponentSystem<Renderer>>(memorySettings.maxRenderers);
     m_transformSystem = std::make_unique<ComponentSystem<Transform>>(memorySettings.maxTransforms);
     m_networkDispatcherSystem = std::make_unique<ComponentSystem<NetworkDispatcher>>(memorySettings.maxNetworkDispatchers);
 
     internal::RegisterEcs(this);
 }
-#endif
 
 ColliderSystem* EntityComponentSystem::GetColliderSystem() const
 {
@@ -96,12 +76,15 @@ ComponentSystem<PointLight>* EntityComponentSystem::GetPointLightSystem() const
 }
 
 #ifdef USE_VULKAN
-
 MeshRendererSystem* EntityComponentSystem::GetMeshRendererSystem()
 {
     return m_meshRendererSystem.get();
 }
-
+#else
+ParticleEmitterSystem* EntityComponentSystem::GetParticleEmitterSystem()
+{
+    return m_particleEmitterSystem.get();
+}
 #endif
 
 ComponentSystem<Renderer>* EntityComponentSystem::GetRendererSystem() const
@@ -122,7 +105,12 @@ Systems EntityComponentSystem::GetComponentSystems() const
         .networkDispatcher = m_networkDispatcherSystem.get(),
         .pointLight = m_lightSystem.get(),
         .renderer = m_rendererSystem.get(),
-        .transform = m_transformSystem.get()
+        .transform = m_transformSystem.get(),
+#ifdef USE_VULKAN
+        .meshRenderer = m_meshRendererSystem->GetSystem()
+#else
+        .particleEmitter = m_particleEmitterSystem->GetComponentSystem(),
+#endif
     };
 }
 
@@ -198,6 +186,8 @@ void EntityComponentSystem::SendOnDestroy()
         m_transformSystem->Remove(handle);
         #ifdef USE_VULKAN
         m_meshRendererSystem->Remove(handle);
+        #else
+        m_particleEmitterSystem->Remove(handle);
         #endif
         m_rendererSystem->Remove(handle);
         m_lightSystem->Remove(handle);
@@ -228,6 +218,8 @@ void EntityComponentSystem::ClearState()
     m_transformSystem->Clear();
     #ifdef USE_VULKAN
     m_meshRendererSystem->Clear();
+    #else
+    m_particleEmitterSystem->Clear();
     #endif
     m_rendererSystem->Clear();
     m_lightSystem->Clear();

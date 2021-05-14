@@ -5,6 +5,7 @@
 #include "debug/Utils.h"
 #include "debug/Profiler.h"
 
+#include <algorithm>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -83,19 +84,18 @@ namespace nc::ecs
         if (!Contains(handle))
             return false;
 
-        auto pos = std::remove_if(m_components.begin(), m_components.end(), [handle](auto& c)
+        std::erase_if(m_components, [handle](auto& c)
         {
             return handle == c->GetParentHandle();
         });
 
-        m_components.erase(pos, m_components.end());
         return true;
     }
 
     template<class T>
     bool ComponentSystem<T>::Contains(EntityHandle handle) const
     {
-        return m_components.cend() != std::find_if(m_components.cbegin(), m_components.cend(), [handle](auto& c)
+        return m_components.cend() != std::ranges::find_if(m_components, [handle](auto& c)
         {
             return handle == c->GetParentHandle();
         });

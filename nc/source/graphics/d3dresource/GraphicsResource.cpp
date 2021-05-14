@@ -181,19 +181,20 @@ namespace nc::graphics::d3dresource
     /**********
     * Blender *
     ***********/
-    Blender::Blender()
+    Blender::Blender(bool useAlphaBlending)
         : m_blender{nullptr},
-          m_isBlending{false}
+          m_isBlending{useAlphaBlending}
     {
         D3D11_BLEND_DESC blendDesc = {};
         auto& blenderRenderTarget = blendDesc.RenderTarget[0];
         if (m_isBlending)
         {
+            blendDesc.AlphaToCoverageEnable = TRUE;
             blenderRenderTarget.BlendEnable = TRUE;
             blenderRenderTarget.SrcBlend = D3D11_BLEND_SRC_ALPHA;
             blenderRenderTarget.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
             blenderRenderTarget.BlendOp = D3D11_BLEND_OP_ADD;
-            blenderRenderTarget.SrcBlendAlpha = D3D11_BLEND_ZERO;
+            blenderRenderTarget.SrcBlendAlpha = D3D11_BLEND_ONE;
             blenderRenderTarget.DestBlendAlpha = D3D11_BLEND_ZERO;
             blenderRenderTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
             blenderRenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;

@@ -2,7 +2,7 @@
 
 namespace nc::ecs
 {
-    SoAIndex::SoAIndex(uint32_t begin, uint32_t end, GapIterator gapBegin, GapIterator gapEnd)
+    SoAIndex::SoAIndex(size_t begin, size_t end, GapIterator gapBegin, GapIterator gapEnd)
         : m_current{begin},
           m_end{end},
           m_gapCurrent{gapBegin},
@@ -10,7 +10,7 @@ namespace nc::ecs
     {
     }
 
-    SoAIndex::operator unsigned() const
+    SoAIndex::operator size_t() const
     {
         return m_current;
     }

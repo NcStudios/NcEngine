@@ -11,6 +11,8 @@
 #ifdef USE_VULKAN
 #include "component/vulkan/MeshRenderer.h"
 #include "graphics/vulkan/TechniqueType.h"
+#else
+#include "component/ParticleEmitter.h"
 #endif
 #include <concepts>
 #include <string>
@@ -37,6 +39,12 @@ namespace nc
     [[nodiscard]] bool HasComponent(EntityHandle handle);
 
     /** Specializations for engine components */
+#ifndef USE_VULKAN
+    template<> ParticleEmitter* AddComponent<ParticleEmitter>(EntityHandle handle, ParticleInfo info);
+    template<> ParticleEmitter* GetComponent<ParticleEmitter>(EntityHandle handle);
+    template<> bool HasComponent<ParticleEmitter>(EntityHandle handle);
+    template<> bool RemoveComponent<ParticleEmitter>(EntityHandle handle);
+#endif
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties);
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle);
     template<> PointLight* GetComponent<PointLight>(EntityHandle handle);
