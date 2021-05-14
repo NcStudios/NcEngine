@@ -14,11 +14,18 @@ namespace nc::sample
 
         private:
             bool m_logOnDestroy;
+            #ifndef USE_VULKAN
+            ParticleEmitter* m_particleSystem;
+            #endif
     };
 
     inline KillBox::KillBox(EntityHandle handle, bool logOnDestroy)
         : Component{handle},
           m_logOnDestroy{logOnDestroy}
+          #ifndef USE_VULKAN
+          ,
+          m_particleSystem{AddComponent<ParticleEmitter>(handle, ParticleInfo{})}
+          #endif
     {
     }
 

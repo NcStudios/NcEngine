@@ -17,6 +17,10 @@ namespace nc::vulkan
             Transform* GetTransform();
             const std::string& GetMeshUid();
             const nc::graphics::vulkan::PhongMaterial& GetMaterial();
+
+            #ifdef NC_EDITOR_ENABLED
+            void EditorGuiElement() override;
+            #endif
         
         private:
             Transform* m_transform;

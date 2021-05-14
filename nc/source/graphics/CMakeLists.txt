@@ -10,6 +10,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/WICTextureLoader.cpp
         ${ROOT_DIR}/source/graphics/Material.cpp
         ${ROOT_DIR}/source/graphics/techniques/Technique.cpp
+        ${ROOT_DIR}/source/graphics/techniques/ParticleTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/PhongShadingTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/WireframeTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/TechniqueManager.cpp
@@ -32,6 +33,7 @@ if(USE_VULKAN)
             ${ROOT_DIR}/source/graphics/vulkan/TextureManager.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Initializers.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/DepthStencil.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/resources/PhongMaterial.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/TransformBuffer.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/ImmutableImage.cpp
             ${ROOT_DIR}/source/graphics/vulkan/techniques/TechniqueBase.cpp

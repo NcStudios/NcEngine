@@ -25,7 +25,8 @@ namespace nc::graphics
         m_isFullscreen{ false },
         m_viewMatrix{},
         m_projectionMatrix{},
-        m_clearColor{DefaultClearColor}
+        m_clearColor{DefaultClearColor},
+        m_drawCallCount{0}
     {
         SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
@@ -33,11 +34,6 @@ namespace nc::graphics
     Graphics2::~Graphics2()
     {
         ResourceManager::Clear();
-
-        m_commands.reset();
-        m_swapchain.reset();
-        m_depthStencil.reset();
-        m_base.reset();
     }
 
     void Graphics2::RecreateSwapchain(Vector2 dimensions)
@@ -178,6 +174,11 @@ namespace nc::graphics
         return true;
     }
 
+    void Graphics2::FrameBegin()
+    {
+        m_drawCallCount = 0;
+    }
+
     // Gets an image from the swap chain, executes the command buffer for that image which writes to the image.
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
@@ -203,4 +204,16 @@ namespace nc::graphics
         // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
         m_swapchain->IncrementFrameIndex();
     }
+    #ifdef NC_EDITOR_ENABLED
+    void Graphics2::IncrementDrawCallCount()
+    {
+        m_drawCallCount++;
+    }
+    
+    uint32_t Graphics2::GetDrawCallCount() const
+    {
+        return m_drawCallCount;
+    }
+
+    #endif
 }
