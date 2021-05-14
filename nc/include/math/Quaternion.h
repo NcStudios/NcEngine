@@ -17,7 +17,7 @@ namespace nc
         static Quaternion Identity() { return Quaternion{0.0f, 0.0f, 0.0f, 1.0f}; }
         static Quaternion FromEulerAngles(const Vector3& angles);
         static Quaternion FromEulerAngles(float x, float y, float z);
-        static Quaternion FromAxisAngle(const Vector3& axis, float angle); // axis cannot be zero
+        static Quaternion FromAxisAngle(const Vector3& axis, float radians); // axis cannot be zero
     };
 
     /** note: For consistency with DirectXMath, the argument order is reversed from the order in which they are

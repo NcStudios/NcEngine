@@ -32,7 +32,6 @@ namespace nc::graphics
             
         private:
             static std::vector<d3dresource::GraphicsResource*> m_commonResources;
-            //MaterialProperties m_materialProperties;
             static std::unique_ptr<graphics::Mesh> m_mesh;
             static std::unique_ptr<d3dresource::PixelConstantBuffer<MaterialProperties>> m_materialPropertiesBuffer;
     };
