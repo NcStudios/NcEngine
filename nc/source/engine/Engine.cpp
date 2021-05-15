@@ -74,7 +74,7 @@ namespace nc::core
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_frameManager2{},
-          m_ecs{},
+          m_ecs{config::GetMemorySettings(), config::GetPhysicsSettings()},
           m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{}
@@ -91,7 +91,7 @@ namespace nc::core
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
           m_pointLightManager{},
           m_frameManager{},
-          m_ecs{&m_graphics},
+          m_ecs{&m_graphics, config::GetMemorySettings(), config::GetPhysicsSettings()},
           m_physics{&m_graphics, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
@@ -134,13 +134,14 @@ namespace nc::core
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
+            auto activeEntities = m_ecs.GetActiveEntities();
 
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
-                FixedStepLogic();
+                FixedStepLogic(activeEntities);
             }
 
-            FrameLogic(dt);
+            FrameLogic(activeEntities, dt);
             particleUpdateJobResult.wait();
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
@@ -163,7 +164,7 @@ namespace nc::core
     void Engine::ClearState()
     {
         V_LOG("Clearing engine state");
-        m_ecs.ClearState();
+        m_ecs.Clear();
         m_physics.ClearState();
         camera::ClearMainCamera();
         // SceneSystem state is never cleared
@@ -177,19 +178,21 @@ namespace nc::core
         m_sceneSystem.DoSceneChange();
     }
 
-    void Engine::FixedStepLogic()
+    void Engine::FixedStepLogic(std::span<Entity*> activeEntities)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
-        m_ecs.SendFixedUpdate();
+        for(auto* entity : activeEntities)
+            entity->SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
     }
 
-    void Engine::FrameLogic(float dt)
+    void Engine::FrameLogic(std::span<Entity*> activeEntities, float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-        m_ecs.SendFrameUpdate(dt);
+        for(auto* entity : activeEntities)
+            entity->SendFrameUpdate(dt);
         NC_PROFILE_END();
     }
 
@@ -241,7 +244,7 @@ namespace nc::core
 
     void Engine::FrameCleanup()
     {
-        m_ecs.SendOnDestroy();
+        m_ecs.FrameEnd();
         if(m_sceneSystem.IsSceneChangeScheduled())
         {
             DoSceneSwap();
