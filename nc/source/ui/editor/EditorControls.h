@@ -251,13 +251,19 @@ namespace nc::ui::editor::controls
     template<class T>
     void ComponentSystemHeader(const char* name, ecs::ComponentSystem<T>* system)
     {
+        constexpr auto size = static_cast<unsigned>(sizeof(T));
+        constexpr auto destruction = StoragePolicy<T>::allow_trivial_destruction::value ? "False" : "True";
+        constexpr auto sorting = StoragePolicy<T>::sort_dense_storage_by_address::value ? "True" : "False";
+
         if(ImGui::CollapsingHeader(name))
         {
             ImGui::PushID(name);
             ImGui::Indent();
             auto components = system->GetComponents();
-            ImGui::Text("Component Size:  %u", static_cast<unsigned>(sizeof(T)));
-            ImGui::Text("Copmonent Count: %u", static_cast<unsigned>(components.size()));
+            ImGui::Text("Component Size:      %u", size);
+            ImGui::Text("Copmonent Count:     %u", static_cast<unsigned>(components.size()));
+            ImGui::Text("Require Destruction: %s", destruction);
+            ImGui::Text("Sort by Address:     %s", sorting);
             if(ImGui::CollapsingHeader("Components"))
             {
                 ImGui::Indent();
