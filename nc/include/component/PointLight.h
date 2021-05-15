@@ -42,4 +42,11 @@ namespace nc
         private:
             Transform * m_transform;
     };
+
+    template<>
+    struct StoragePolicy<PointLight>
+    {
+        using allow_trivial_destruction = std::true_type;
+        using sort_dense_storage_by_address = std::true_type;
+    };
 }

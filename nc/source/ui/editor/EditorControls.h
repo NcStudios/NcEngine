@@ -255,14 +255,14 @@ namespace nc::ui::editor::controls
         {
             ImGui::PushID(name);
             ImGui::Indent();
-            auto& components = system->GetComponents();
+            auto components = system->GetComponents();
             ImGui::Text("Component Size:  %u", static_cast<unsigned>(sizeof(T)));
             ImGui::Text("Copmonent Count: %u", static_cast<unsigned>(components.size()));
             if(ImGui::CollapsingHeader("Components"))
             {
                 ImGui::Indent();
                 for(auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", static_cast<unsigned>(component->GetParentHandle()), static_cast<void*>(component.get()));
+                    ImGui::Text("Handle: %5u  |  Address: %p", static_cast<unsigned>(component->GetParentHandle()), static_cast<void*>(component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();

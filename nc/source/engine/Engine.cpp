@@ -207,14 +207,14 @@ namespace nc::core
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        for(auto& light : m_ecs.GetPointLightSystem()->GetComponents())
+        for(auto* light : m_ecs.GetPointLightSystem()->GetComponents())
         {
-            m_pointLightManager.AddPointLight(light.get(), camViewMatrix);
+            m_pointLightManager.AddPointLight(light, camViewMatrix);
         }
 
         m_pointLightManager.Bind();
 
-        for(auto& renderer : m_ecs.GetRendererSystem()->GetComponents())
+        for(auto* renderer : m_ecs.GetRendererSystem()->GetComponents())
         {
             renderer->Update(&m_frameManager);
         }

@@ -34,7 +34,7 @@ namespace nc::ecs
             void Clear();
             bool Contains(EntityHandle handle) const;
             Collider* GetPointerTo(EntityHandle handle);
-            auto GetComponents() -> ecs::ComponentSystem<Collider>::ContainerType&;
+            std::span<Collider*> GetComponents();
 
         private:
             ecs::ComponentSystem<Collider> m_componentSystem;

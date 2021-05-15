@@ -65,4 +65,16 @@ namespace nc
             bool m_selectedInEditor;
             #endif
     };
+
+    template<>
+    struct StoragePolicy<Collider>
+    {
+        #ifdef NC_EDITOR_ENABLED
+        using allow_trivial_destruction = std::false_type;
+        #else
+        using allow_trivial_destruction = std::true_type;
+        #endif
+
+        using sort_dense_storage_by_address = std::true_type;
+    };
 }

@@ -25,6 +25,13 @@ namespace nc
             ecs::ParticleEmitterSystem* m_emitterSystem;
     };
 
+    template<>
+    struct StoragePolicy<ParticleEmitter>
+    {
+        using allow_trivial_destruction = std::true_type;
+        using sort_dense_storage_by_address = std::true_type;
+    };
+
     struct ParticleEmissionInfo
     {
         unsigned maxParticleCount = 100u;
