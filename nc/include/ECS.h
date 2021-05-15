@@ -17,7 +17,8 @@ namespace nc
 {
     /** Entity Functions */
     EntityHandle CreateEntity(EntityInfo info = EntityInfo{});
-    bool DestroyEntity(EntityHandle handle);
+    void DestroyEntity(EntityHandle handle);
+    bool EntityExists(EntityHandle handle);
     [[nodiscard]] Entity* GetEntity(EntityHandle handle);
     [[nodiscard]] Entity* GetEntity(const std::string& tag);
 

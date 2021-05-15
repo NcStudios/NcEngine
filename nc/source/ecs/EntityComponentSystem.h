@@ -53,7 +53,7 @@ namespace nc::ecs
             std::span<Entity*> GetActiveEntities() noexcept;
 
             EntityHandle CreateEntity(EntityInfo info);
-            bool DestroyEntity(EntityHandle handle);
+            void DestroyEntity(EntityHandle handle);
             bool DoesEntityExist(const EntityHandle handle) const noexcept;
             Entity* GetEntity(EntityHandle handle);
             Entity* GetEntity(const std::string& tag);

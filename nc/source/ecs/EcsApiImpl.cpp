@@ -30,9 +30,14 @@ namespace nc
         return internal::g_ecsImpl->CreateEntity(std::move(info));
     }
 
-    bool DestroyEntity(EntityHandle handle)
+    void DestroyEntity(EntityHandle handle)
     {
         return internal::g_ecsImpl->DestroyEntity(handle);
+    }
+
+    bool EntityExists(EntityHandle handle)
+    {
+        return internal::g_ecsImpl->DoesEntityExist(handle);
     }
 
     Entity* GetEntity(EntityHandle handle)
