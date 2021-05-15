@@ -1,16 +1,13 @@
 #pragma once
 
 #include "Allocator.h"
+#include "component/Component.h"
 
 #include <algorithm>
 #include <span>
 
 namespace nc::alloc
 {
-    /** potential todos
-     *  -could expose iterators
-     *  -could change from sorted/unsorted based on template parameter */
-
     /** Helper base class for managing pool memory resource lifetime. */
     template<class T>
     class PoolResourceScope
@@ -26,8 +23,10 @@ namespace nc::alloc
     class PoolAdapter final : private PoolResourceScope<T>
     {
         public:
-            explicit PoolAdapter(size_t count);
+            using storage_policy = StoragePolicy<T>;
 
+            explicit PoolAdapter(size_t count);
+            
             template<class... Args>
             T* Add(Args&&... args);
 
@@ -66,8 +65,11 @@ namespace nc::alloc
     template<class T>
     void PoolAdapter<T>::Clear()
     {
-        for(auto* item : m_data)
-            m_allocator.deallocate(item, 1u);
+        if constexpr(!storage_policy::allow_trivial_destruction::value)
+        {
+            for(auto* item : m_data)
+                m_allocator.deallocate(item, 1u);
+        }
 
         m_data.clear();
         m_data.shrink_to_fit();
@@ -80,8 +82,17 @@ namespace nc::alloc
     {
         auto* ptr = m_allocator.allocate(1);
         ptr = new(ptr) T{std::forward<Args>(args)...};
-        auto pos = std::ranges::upper_bound(m_data, ptr, [](T* add, T* existing) { return add < existing; });
-        m_data.insert(pos, ptr);
+
+        if constexpr(storage_policy::sort_dense_storage_by_address::value)
+        {
+            auto pos = std::ranges::upper_bound(m_data, ptr, std::less<T*>());
+            m_data.insert(pos, ptr);
+        }
+        else
+        {
+            m_data.push_back(ptr);
+        }
+
         return ptr;
     }
 
@@ -89,14 +100,23 @@ namespace nc::alloc
     template<class Predicate>
     bool PoolAdapter<T>::RemoveIf(Predicate predicate)
     {
-        if(auto* ptr = Get(predicate))
+        auto pos = std::ranges::find_if(m_data, predicate);
+        if(pos == m_data.end())
+            return false;
+        
+        m_allocator.deallocate(*pos, 1);
+
+        if constexpr(storage_policy::sort_dense_storage_by_address::value)
         {
-            m_allocator.deallocate(ptr, 1);
-            std::erase(m_data, ptr);
-            return true;
+            std::erase(m_data, *pos);
+        }
+        else
+        {
+            std::swap(*pos, m_data.back());
+            m_data.pop_back();
         }
 
-        return false;
+        return true;
     }
 
     template<class T>
