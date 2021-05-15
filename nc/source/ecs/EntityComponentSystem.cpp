@@ -179,18 +179,13 @@ void EntityComponentSystem::SendOnDestroy()
 
 void EntityComponentSystem::ClearState()
 {
-    // We cannot call DestroyEntity while iterating m_active, so copy the handles
-    std::vector<EntityHandle> handles;
-    handles.reserve(m_active.size());
-    std::transform(m_active.cbegin(), m_active.cend(), std::back_inserter(handles), [](const auto& pair)
-    {
-        return pair.first;
-    });
+    // Don't do the full SendOnDestroy process as systems will be cleared anyway.
+    for(auto& [handle, entity] : m_active)
+        entity.SendOnDestroy();
+    
+    for(auto& [handle, entity] : m_toDestroy)
+        entity.SendOnDestroy();
 
-    for(const auto handle : handles)
-        DestroyEntity(handle);
-
-    SendOnDestroy();
     m_active.clear();
     m_toDestroy.clear();
     m_handleManager.Reset();

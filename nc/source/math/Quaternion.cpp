@@ -56,7 +56,7 @@ namespace nc
     {
         IF_THROW(axis == Vector3::Zero(), "Quaternion::FromAxisAngle - Axis cannot be zero");
         auto axis_v = DirectX::XMVectorSet(axis.x, axis.y, axis.z, 0.0f);
-        auto quat_v = DirectX::XMQuaternionRotationAxis(axis_v, angle);
+        auto quat_v = DirectX::XMQuaternionRotationAxis(axis_v, radians);
         auto out = Quaternion::Identity();
         DirectX::XMStoreQuaternion(&out, quat_v);
         return out;
