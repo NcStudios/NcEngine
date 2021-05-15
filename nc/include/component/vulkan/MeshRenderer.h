@@ -15,8 +15,8 @@ namespace nc::vulkan
         public:
             MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, Transform* transform);
             Transform* GetTransform();
-            const std::string& GetMeshUid();
-            const nc::graphics::vulkan::PhongMaterial& GetMaterial();
+            const std::string& GetMeshUid() const;
+            const nc::graphics::vulkan::PhongMaterial& GetMaterial() const;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;

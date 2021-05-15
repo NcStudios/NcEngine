@@ -24,9 +24,9 @@ namespace nc::ecs
         m_techniqueManager.RecordTechniques(commands);
     }
 
-    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, PhongMaterial material, TechniqueType techniqueType)
+    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, nc::graphics::vulkan::TechniqueType techniqueType)
     {
-        auto renderer = m_componentSystem.Add(parentHandle, meshUid, material, GetComponent<Transform>(parentHandle));
+        auto renderer = m_componentSystem.Add(parentHandle, std::move(meshUid), std::move(material), GetComponent<Transform>(parentHandle));
         m_techniqueManager.RegisterMeshRenderer(techniqueType, renderer);
         return renderer;
     }

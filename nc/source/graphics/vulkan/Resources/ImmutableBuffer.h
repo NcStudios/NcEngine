@@ -33,6 +33,7 @@ namespace nc::graphics::vulkan
         public:
 
             ImmutableBuffer();
+            ImmutableBuffer(nc::graphics::Graphics2* graphics, const std::vector<T>& data);
             ImmutableBuffer(ImmutableBuffer&&);
             ImmutableBuffer& operator = (ImmutableBuffer&&);
             ImmutableBuffer& operator = (const ImmutableBuffer&) = delete;
@@ -42,6 +43,7 @@ namespace nc::graphics::vulkan
             vk::Buffer* GetBuffer();
 
             void Bind(nc::graphics::Graphics2* graphics, const std::vector<T>& data);
+            void Clear();
 
         private:
 
@@ -55,6 +57,14 @@ namespace nc::graphics::vulkan
     : m_memoryIndex { 0 },
       m_immutableBuffer { nullptr }
     {
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics2* graphics, const std::vector<T>& data)
+    : m_memoryIndex { 0 },
+      m_immutableBuffer { nullptr }
+    {
+        Bind(graphics, data);
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
@@ -111,5 +121,17 @@ namespace nc::graphics::vulkan
     vk::Buffer* ImmutableBuffer<T, UsageFlag_T>::GetBuffer()
     {
         return &m_immutableBuffer;
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
+    void ImmutableBuffer<T, UsageFlag_T>::Clear()
+    {
+        if (m_immutableBuffer)
+        {
+            m_base->DestroyBuffer(m_memoryIndex);
+            m_immutableBuffer = nullptr;
+        }
+
+        m_base = nullptr;
     }
 }

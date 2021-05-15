@@ -50,7 +50,6 @@ namespace
     const auto FarClipKey = std::string{"far_clip"};
     const auto D3dShadersPathKey = std::string{"d3d_shaders_path"};
     const auto VulkanShadersPathKey = std::string{"vulkan_shaders_path"};
-    const auto TextureArraySize = std::string{"texture_array_size"};
 
     void MapKeyValue(const std::string& key, const std::string& value, Config* out)
     {
@@ -106,8 +105,6 @@ namespace
             out->graphicsSettings.d3dShadersPath = value;
         else if (key == VulkanShadersPathKey)
             out->graphicsSettings.vulkanShadersPath = value;
-        else if (key == TextureArraySize)
-            out->graphicsSettings.textureArraySize = std::stoi(value);
         else
             throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
     };
@@ -184,8 +181,7 @@ namespace nc::config
                 << NearClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.nearClip << '\n'
                 << FarClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.farClip << '\n'
                 << D3dShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.d3dShadersPath << '\n'
-                << VulkanShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.vulkanShadersPath << '\n'
-                << TextureArraySize << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.textureArraySize;
+                << VulkanShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.vulkanShadersPath;
 
         outFile.close();
     }
@@ -206,7 +202,6 @@ namespace nc::config
                  (g_config->graphicsSettings.nearClip > 0.0f) &&
                  (g_config->graphicsSettings.farClip > 0.0f) &&
                  (g_config->graphicsSettings.d3dShadersPath != "") &&
-                 (g_config->graphicsSettings.vulkanShadersPath != "") &&
-                 (g_config->graphicsSettings.textureArraySize >= 0u )};
+                 (g_config->graphicsSettings.vulkanShadersPath != "")};
     }
 } // end namespace nc::config 

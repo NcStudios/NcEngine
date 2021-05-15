@@ -29,32 +29,35 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(true, true, Widget);
 
-        const std::string defaultTexturesPath = "project//Textures//";
-
         // Load all scene meshes
-        const std::vector<std::string> meshPaths {"project/assets/mesh/beeper.nca", "project/assets/mesh/table.nca", "project/assets/mesh/planet.nca"};
+        const std::string defaultMeshesPath = "project/assets/mesh/";
+        const std::vector<std::string> meshPaths { defaultMeshesPath + "beeper.nca", 
+                                                   defaultMeshesPath + "table.nca", 
+                                                   defaultMeshesPath + "planet.nca"
+                                                  };
         nc::graphics::vulkan::LoadMeshes(meshPaths); 
 
         // Load all scene textures
-        const std::vector<std::string> texturePaths { defaultTexturesPath + "Beeper//BaseColor.png", 
-                                                      defaultTexturesPath + "Beeper//Normal.png", 
-                                                      defaultTexturesPath + "Beeper//Roughness.png", 
-                                                      defaultTexturesPath + "Planets//Jupiter//BaseColor.png",
-                                                      defaultTexturesPath + "Planets//Jupiter//Normal.png",
-                                                      defaultTexturesPath + "Planets//Jupiter//Roughness.png",
+        const std::string defaultTexturesPath = "project/Textures/";
+        const std::vector<std::string> texturePaths { defaultTexturesPath + "Beeper/BaseColor.png", 
+                                                      defaultTexturesPath + "Beeper/Normal.png", 
+                                                      defaultTexturesPath + "Beeper/Roughness.png", 
+                                                      defaultTexturesPath + "Planets/Jupiter/BaseColor.png",
+                                                      defaultTexturesPath + "Planets/Jupiter/Normal.png",
+                                                      defaultTexturesPath + "Planets/Jupiter/Roughness.png",
                                                      };
-        nc::graphics::vulkan::LoadTextures(std::move(texturePaths)); 
+        nc::graphics::vulkan::LoadTextures(texturePaths); 
 
         // Create the entity
         auto beeMaterial = nc::graphics::vulkan::PhongMaterial{};
-        beeMaterial.baseColor = defaultTexturesPath + "Beeper//BaseColor.png";
-        beeMaterial.normal = defaultTexturesPath + "Beeper//Normal.png";
-        beeMaterial.roughness = defaultTexturesPath + "Beeper//Roughness.png";
+        beeMaterial.baseColor = defaultTexturesPath + "Beeper/BaseColor.png";
+        beeMaterial.normal = defaultTexturesPath + "Beeper/Normal.png";
+        beeMaterial.roughness = defaultTexturesPath + "Beeper/Roughness.png";
 
         auto jupiterMaterial = nc::graphics::vulkan::PhongMaterial{};
-        jupiterMaterial.baseColor = defaultTexturesPath + "Planets//Jupiter//BaseColor.png";
-        jupiterMaterial.normal = defaultTexturesPath + "Planets//Jupiter//Normal.png";
-        jupiterMaterial.roughness = defaultTexturesPath + "Planets//Jupiter//Roughness.png";
+        jupiterMaterial.baseColor = defaultTexturesPath + "Planets/Jupiter/BaseColor.png";
+        jupiterMaterial.normal = defaultTexturesPath + "Planets/Jupiter/Normal.png";
+        jupiterMaterial.roughness = defaultTexturesPath + "Planets/Jupiter/Roughness.png";
 
         auto handle = CreateEntity();
         AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);

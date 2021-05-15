@@ -33,6 +33,7 @@ if(USE_VULKAN)
             ${ROOT_DIR}/source/graphics/vulkan/TextureManager.cpp
             ${ROOT_DIR}/source/graphics/vulkan/Initializers.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/DepthStencil.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/resources/GraphicsResources.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/PhongMaterial.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/TransformBuffer.cpp
             ${ROOT_DIR}/source/graphics/vulkan/resources/ImmutableImage.cpp

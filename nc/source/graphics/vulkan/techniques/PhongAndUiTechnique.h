@@ -25,15 +25,14 @@ namespace nc::graphics
         {
             public:
                 PhongAndUiTechnique(nc::graphics::Graphics2* graphics);
-                ~PhongAndUiTechnique() noexcept;
                 void Record(Commands* commands) override;
 
             private:
                 void CreatePipeline();
                 void CreateRenderPasses();
 
-                vk::DescriptorSetLayout m_descriptorSetLayout;
-                vk::DescriptorSet m_textureDescriptors;
+                vk::DescriptorSetLayout* m_descriptorSetLayout;
+                vk::DescriptorSet* m_textureDescriptors;
         };
     }
 }

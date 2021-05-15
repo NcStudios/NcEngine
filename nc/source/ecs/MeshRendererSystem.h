@@ -13,16 +13,14 @@ namespace nc::graphics
 
 namespace nc::ecs
 {
-    using namespace nc::graphics::vulkan;
-
     class MeshRendererSystem
     {
         public:
             MeshRendererSystem(uint32_t renderersCount, graphics::Graphics2* graphics);
 
             ComponentSystem<vulkan::MeshRenderer>* GetSystem();
-            void RecordTechniques(Commands* commands);
-            vulkan::MeshRenderer* Add(EntityHandle parentHandle, std::string meshUid, PhongMaterial material, TechniqueType techniqueType);
+            void RecordTechniques(nc::graphics::vulkan::Commands* commands);
+            vulkan::MeshRenderer* Add(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, nc::graphics::vulkan::TechniqueType techniqueType);
             bool Remove(EntityHandle parentHandle);
             bool Contains(EntityHandle parentHandle) const;
             vulkan::MeshRenderer* GetPointerTo(EntityHandle parentHandle);
@@ -31,7 +29,7 @@ namespace nc::ecs
 
         private:
             ComponentSystem<vulkan::MeshRenderer> m_componentSystem;
-            TechniqueManager m_techniqueManager;
+            nc::graphics::vulkan::TechniqueManager m_techniqueManager;
             graphics::vulkan::MeshManager m_meshManager;
             graphics::vulkan::TextureManager m_textureManager;
     };

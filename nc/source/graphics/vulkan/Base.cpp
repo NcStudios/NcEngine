@@ -80,13 +80,13 @@ namespace nc::graphics::vulkan
       m_physicalDevice{},
       m_graphicsQueue{},
       m_presentQueue{},
-      m_commandPool{},
-      m_allocator{},
-      m_buffers{},
-      m_images{},
       m_depthFormat{},
       m_bufferIndex{0},
+      m_buffers{},
       m_imageIndex{0},
+      m_images{},
+      m_allocator{},
+      m_commandPool{},
       m_imguiDescriptorPool{},
       m_renderingDescriptorPool{}
     {

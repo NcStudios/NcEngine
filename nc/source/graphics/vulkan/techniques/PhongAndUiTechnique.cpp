@@ -17,16 +17,11 @@ namespace nc::graphics::vulkan
 {
     PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics2* graphics)
     : TechniqueBase(TechniqueType::Simple, graphics),
-      m_descriptorSetLayout{},
-      m_textureDescriptors{}
+      m_descriptorSetLayout{nullptr},
+      m_textureDescriptors{nullptr}
     {
         m_renderPasses.push_back(m_swapchain->GetPassDefinition());
         CreatePipeline();
-    }
-
-    PhongAndUiTechnique::~PhongAndUiTechnique() noexcept
-    {
-        m_base->GetDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
     }
 
     void PhongAndUiTechnique::CreatePipeline()
@@ -45,10 +40,10 @@ namespace nc::graphics::vulkan
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        m_descriptorSetLayout = *ResourceManager::GetDescriptorSetLayout();
+        m_descriptorSetLayout = ResourceManager::GetDescriptorSetLayout();
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(PushConstants)); // PushConstants
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, m_descriptorSetLayout);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, *m_descriptorSetLayout);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };

@@ -32,7 +32,6 @@ namespace nc::config
         float frameUpdateInterval;
         std::string d3dShadersPath;
         std::string vulkanShadersPath;
-        unsigned textureArraySize;
     };
 
     struct PhysicsSettings

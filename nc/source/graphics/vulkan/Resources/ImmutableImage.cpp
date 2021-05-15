@@ -9,13 +9,20 @@ namespace nc::graphics::vulkan
     {
     }
 
+    ImmutableImage::ImmutableImage(nc::graphics::Graphics2* graphics, stbi_uc* pixels, uint32_t width, uint32_t height)
+    : m_memoryIndex { 0 },
+      m_immutableImage { nullptr },
+      m_view{}
+    {
+        Bind(graphics, pixels, width, height);
+    }
+
     ImmutableImage::ImmutableImage(ImmutableImage&& other)
     : m_base{std::exchange(other.m_base, nullptr)},
       m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
-      m_immutableImage{std::exchange(other.m_immutableImage, nullptr)}
+      m_immutableImage{std::exchange(other.m_immutableImage, nullptr)},
+      m_view{std::move(other.m_view)}
     {
-        m_view = vk::UniqueImageView(other.m_view.get());
-        other.m_view.reset();
     }
 
     ImmutableImage& ImmutableImage::operator = (ImmutableImage&& other)
@@ -23,18 +30,14 @@ namespace nc::graphics::vulkan
         m_base= std::exchange(other.m_base, nullptr);
         m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
         m_immutableImage = std::exchange(other.m_immutableImage, nullptr);
-        m_view = vk::UniqueImageView(other.m_view.get());
-        other.m_view.reset();
+        m_view = std::move(other.m_view);
 
         return *this;
     }
 
     ImmutableImage::~ImmutableImage()
     {
-        if (m_immutableImage)
-        {
-            m_base->DestroyImage(m_memoryIndex);
-        }
+        Clear();
     }
 
     void ImmutableImage::Bind(nc::graphics::Graphics2* graphics, stbi_uc* pixels, uint32_t width, uint32_t height)
@@ -47,5 +50,17 @@ namespace nc::graphics::vulkan
     vk::ImageView& ImmutableImage::GetImageView() noexcept
     {
         return m_view.get();
+    }
+
+    void ImmutableImage::Clear()
+    {
+        if (m_immutableImage)
+        {
+            m_base->DestroyImage(m_memoryIndex);
+            m_immutableImage = nullptr;
+        }
+
+        m_base = nullptr;
+        m_view.reset();
     }
 }

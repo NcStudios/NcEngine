@@ -14,6 +14,7 @@ namespace nc::graphics::vulkan
 {
     class Instance;
     class Commands;
+    class TexturesData;
     struct Vertex;
 
     // How many frames can be rendered concurrently.
@@ -94,15 +95,15 @@ namespace nc::graphics::vulkan
             vk::PhysicalDevice m_physicalDevice;
             vk::Queue m_graphicsQueue;
             vk::Queue m_presentQueue;
-            vk::CommandPool m_commandPool;
-            vma::Allocator m_allocator;
-            std::unordered_map<uint32_t, std::pair<vk::Buffer, vma::Allocation>> m_buffers;
-            std::unordered_map<uint32_t, std::pair<vk::Image, vma::Allocation>> m_images;
-            std::unordered_map<uint32_t, std::pair<vk::Image, vma::Allocation>> m_textures;
             vk::Format m_depthFormat;
+
+            // @todo: The below resources don't need to live here, they should be managed by some resource management class.
             uint32_t m_bufferIndex;
+            std::unordered_map<uint32_t, std::pair<vk::Buffer, vma::Allocation>> m_buffers;
             uint32_t m_imageIndex;
-            uint32_t m_textureIndex;
+            std::unordered_map<uint32_t, std::pair<vk::Image, vma::Allocation>> m_images;
+            vma::Allocator m_allocator;
+            vk::CommandPool m_commandPool;
             vk::DescriptorPool m_imguiDescriptorPool;
             vk::DescriptorPool m_renderingDescriptorPool;
     };

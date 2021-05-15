@@ -3,8 +3,6 @@
 #include "graphics/vulkan/resources/ResourceManager.h"
 #include "graphics/vulkan/resources/GraphicsResources.h"
 #include "debug/Utils.h"
-#include "config/Config.h"
-#include "config/ConfigInternal.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -31,17 +29,22 @@ namespace nc::graphics::vulkan
 
     void TextureManager::LoadTextures(const std::vector<std::string>& paths)
     {
-        TexturesData textures{};
+        auto imagesCount = paths.size();
 
-        textures.sampler = m_graphics->GetBasePtr()->CreateTextureSampler();
-        textures.layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+        std::vector<vk::DescriptorImageInfo> imageInfos = {};
+        std::vector<vulkan::ImmutableImage> images = {};
+        std::unordered_map<std::string, uint32_t> accessors = {};
 
+        auto sampler = m_graphics->GetBasePtr()->CreateTextureSampler();
+        auto layoutType = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+        int32_t width, height, numChannels;
         uint32_t index = 0;
+
+        // Parse the files into Vulkan image objects and bind them to the GPU as an array of textures.
         for (auto& path : paths)
         {
             if (ResourceManager::TextureExists(path)) continue;
-            
-            int32_t width, height, numChannels;
 
             stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
 
@@ -50,98 +53,59 @@ namespace nc::graphics::vulkan
                 throw std::runtime_error("Failed to load texture file: " + path);
             }
 
-            auto image = std::make_unique<ImmutableImage>();
-            textures.textureBuffers.push_back(std::move(image));
-            textures.textureBuffers.back()->Bind(m_graphics, pixels, width, height);
-            textures.accessors.emplace(std::make_pair(path, index));
-            textures.imageInfos.push_back(CreateDescriptorImageInfo(&textures.sampler.get(), textures.textureBuffers[index]->GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
+            images.emplace_back(m_graphics, pixels, width, height);
+            auto imageInfo = CreateDescriptorImageInfo(&sampler.get(), images[index].GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
+            imageInfos.push_back(imageInfo);
+            accessors.emplace(path, index);
             index++;
         }
 
-        CreateDescriptorSet(&textures);
-        WriteDescriptorImages(&textures, textures.accessors.size());
+        // Create and bind the descriptor set for the array of textures.
+        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings 
+        { 
+          CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment),
+          CreateDescriptorSetLayoutBinding(1, imagesCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
+        };
 
-        ResourceManager::AddTextures(std::move(textures));
-    }
+        auto layout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagBitsEXT::ePartiallyBound );
+        auto descriptorSet = CreateDescriptorSet(m_graphics, m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &layout.get());
 
-    void TextureManager::CreateDescriptorSet(TexturesData* textures)
-    {
-        vk::DescriptorSetLayoutBinding layoutBindings[2];
-        layoutBindings[0].setBinding(0);
-        layoutBindings[0].setDescriptorCount(1);
-        layoutBindings[0].setDescriptorType(vk::DescriptorType::eSampler);
-        layoutBindings[0].setPImmutableSamplers(nullptr);
-        layoutBindings[0].setStageFlags(vk::ShaderStageFlagBits::eFragment);
-
-        layoutBindings[1].setBinding(1);
-        layoutBindings[1].setDescriptorCount(textures->accessors.size());
-        layoutBindings[1].setDescriptorType(vk::DescriptorType::eSampledImage);
-        layoutBindings[1].setPImmutableSamplers(nullptr);
-        layoutBindings[1].setStageFlags(vk::ShaderStageFlagBits::eFragment);
-
-        vk::DescriptorBindingFlagsEXT bindFlag = vk::DescriptorBindingFlagBitsEXT::ePartiallyBound;
-
-        vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
-        extendedInfo.setPNext(nullptr);
-        extendedInfo.setBindingCount(2);
-        extendedInfo.setPBindingFlags(&bindFlag);
-
-        vk::DescriptorSetLayoutCreateInfo setInfo{};
-        setInfo.setBindingCount(2);
-        setInfo.setFlags(vk::DescriptorSetLayoutCreateFlags());
-        setInfo.setPNext(&extendedInfo);
-        setInfo.setPBindings(layoutBindings);
-
-        if (m_graphics->GetBasePtr()->GetDevice().createDescriptorSetLayout(&setInfo, nullptr, &(textures->descriptorSetLayout)) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Failed to create descriptor set layout.");
-        }
-
-        vk::DescriptorSetAllocateInfo allocationInfo{};
-        allocationInfo.setPNext(nullptr);
-        allocationInfo.setDescriptorPool(*(m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr()));
-        allocationInfo.setDescriptorSetCount(1);
-        allocationInfo.setPSetLayouts(&(textures->descriptorSetLayout));
-
-        if (m_graphics->GetBasePtr()->GetDevice().allocateDescriptorSets(&allocationInfo, &(textures->descriptorSet)) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Failed to allocate descriptor sets.");
-        }
-    }
-
-    void TextureManager::WriteDescriptorImages(TexturesData* textures, uint32_t arraySize)
-    {
         std::array<vk::WriteDescriptorSet, 2> writes;
         vk::DescriptorImageInfo samplerInfo = {};
-        samplerInfo.sampler = textures->sampler.get();
+        samplerInfo.sampler = sampler.get();
 
-        textures->imageInfos.reserve(arraySize);
+        imageInfos.reserve(imagesCount);
 
         writes[0].setDstBinding(0);
         writes[0].setDstArrayElement(0);
         writes[0].setDescriptorType(vk::DescriptorType::eSampler);
         writes[0].setDescriptorCount(1);
-        writes[0].setDstSet(textures->descriptorSet);
+        writes[0].setDstSet(descriptorSet.get());
         writes[0].setPBufferInfo(0);
         writes[0].setPImageInfo(&samplerInfo);
 
         writes[1].setDstBinding(1);
         writes[1].setDstArrayElement(0);
         writes[1].setDescriptorType(vk::DescriptorType::eSampledImage);
-        writes[1].setDescriptorCount(arraySize);
-        writes[1].setDstSet(textures->descriptorSet);
+        writes[1].setDescriptorCount(imagesCount);
+        writes[1].setDstSet(descriptorSet.get());
         writes[1].setPBufferInfo(0);
-        writes[1].setPImageInfo(textures->imageInfos.data());
+        writes[1].setPImageInfo(imageInfos.data());
 
         m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(2, writes.data(), 0, nullptr);
-    }
 
-    vk::DescriptorImageInfo TextureManager::CreateDescriptorImageInfo(vk::Sampler* sampler, const vk::ImageView& imageView, vk::ImageLayout layout)
-    {
-        vk::DescriptorImageInfo imageInfo = {};
-        imageInfo.setSampler(*sampler);
-        imageInfo.setImageView(imageView);
-        imageInfo.setImageLayout(layout);
-        return imageInfo;
+        // @todo: replace above with below once I figure out the bug.
+        // std::array<vk::WriteDescriptorSet, 2> writeDescriptorSets = {};
+        // { 
+        //     CreateSamplerDescriptorWrite(&sampler.get(), &descriptorSet.get(), 0),
+        //     CreateImagesDescriptorWrite(&descriptorSet.get(), &imageInfos, imagesCount, 1)
+        // };
+        // m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(2, writeDescriptorSets.data(), 0, nullptr);
+
+
+        auto texturesData = TexturesData(std::move(images), std::move(imageInfos), std::move(accessors), std::move(descriptorSet), std::move(layout), std::move(sampler), layoutType);
+
+        // Send the vulkan objects over to Resource Manager.
+        ResourceManager::LoadTextures(std::move(texturesData));
     }
 }

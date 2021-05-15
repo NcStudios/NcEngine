@@ -39,7 +39,7 @@ namespace nc::ecs
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;
 #ifdef USE_VULKAN
-        ecs::ComponentSystem<MeshRenderer>* meshRenderer;
+        ecs::ComponentSystem<nc::graphics::vulkan::MeshRenderer>* meshRenderer;
 #else
         ecs::ComponentSystem<ParticleEmitter>* particleEmitter;
 #endif

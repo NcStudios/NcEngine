@@ -13,6 +13,7 @@ namespace nc::graphics::vulkan
     {
         public:
             ImmutableImage();
+            ImmutableImage(nc::graphics::Graphics2* graphics, stbi_uc* pixels, uint32_t width, uint32_t height);
             ImmutableImage(ImmutableImage&&);
             ImmutableImage& operator = (ImmutableImage&&);
             ImmutableImage& operator = (const ImmutableImage&) = delete;
@@ -21,7 +22,8 @@ namespace nc::graphics::vulkan
 
             vk::ImageView& GetImageView() noexcept;
             void Bind(nc::graphics::Graphics2* graphics, stbi_uc* pixels, uint32_t width, uint32_t height);
-
+            void Clear();
+            
         private:
             vulkan::Base* m_base;
             uint32_t m_memoryIndex;

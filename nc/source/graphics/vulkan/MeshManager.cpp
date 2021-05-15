@@ -148,16 +148,9 @@ namespace nc::graphics::vulkan
             allIndices.insert(std::end(allIndices), std::begin(indices), std::end(indices));
         }
 
-        MeshesData meshesData = 
-        {
-            std::make_unique<ImmutableBuffer<Vertex>>(),
-            std::make_unique<ImmutableBuffer<uint32_t>>(),
-            meshes
-        };
-
-        meshesData.vertexBuffer->Bind(m_graphics, allVertices);
-        meshesData.indexBuffer->Bind(m_graphics, allIndices);
-
-        ResourceManager::AddMeshes(std::move(meshesData));
+        auto vertexBuffer = ImmutableBuffer<Vertex>(m_graphics, std::move(allVertices));
+        auto indexBuffer = ImmutableBuffer<uint32_t>(m_graphics, std::move(allIndices));
+        auto meshesData = MeshesData(std::move(vertexBuffer), std::move(indexBuffer), std::move(meshes));
+        ResourceManager::LoadMeshes(std::move(meshesData));
     }
 }

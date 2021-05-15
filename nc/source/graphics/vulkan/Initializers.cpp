@@ -1,5 +1,7 @@
 #include "Initializers.h"
+#include "graphics/vulkan/Base.h"
 #include "graphics/vulkan/MeshManager.h"
+#include "graphics/Graphics2.h"
 
 namespace nc::graphics::vulkan
 {
@@ -238,5 +240,87 @@ namespace nc::graphics::vulkan
         auto scissor = CreateScissor(extent);
         commandBuffer->setViewport(0, 1, &viewport);
         commandBuffer->setScissor(0, 1, &scissor);
+    }
+
+    vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, 
+                                                                    uint32_t descriptorCount, 
+                                                                    vk::DescriptorType type, 
+                                                                    vk::ShaderStageFlags shaderStages)
+    {
+        vk::DescriptorSetLayoutBinding layoutBinding;
+        layoutBinding.setBinding(binding);
+        layoutBinding.setDescriptorCount(descriptorCount);
+        layoutBinding.setDescriptorType(type);
+        layoutBinding.setPImmutableSamplers(nullptr);
+        layoutBinding.setStageFlags(shaderStages);
+        return layoutBinding;
+    }
+
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics2* graphics, std::vector<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
+    {
+        vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
+        extendedInfo.setPNext(nullptr);
+        extendedInfo.setBindingCount(layoutBindings.size());
+        extendedInfo.setPBindingFlags(&bindingFlags);
+
+        vk::DescriptorSetLayoutCreateInfo setInfo{};
+        setInfo.setBindingCount(layoutBindings.size());
+        setInfo.setFlags(vk::DescriptorSetLayoutCreateFlags());
+        setInfo.setPNext(&extendedInfo);
+        setInfo.setPBindings(layoutBindings.data());
+
+        return graphics->GetBasePtr()->GetDevice().createDescriptorSetLayoutUnique(setInfo);
+    }
+    
+    vk::UniqueDescriptorSet CreateDescriptorSet(Graphics2* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
+    {
+        vk::DescriptorSetAllocateInfo allocationInfo{};
+        allocationInfo.setPNext(nullptr);
+        allocationInfo.setDescriptorPool(*descriptorPool);
+        allocationInfo.setDescriptorSetCount(descriptorSetCount);
+        allocationInfo.setPSetLayouts(descriptorSetLayout);
+
+        return std::move(graphics->GetBasePtr()->GetDevice().allocateDescriptorSetsUnique(allocationInfo)[0]);
+    }
+
+    vk::WriteDescriptorSet CreateSamplerDescriptorWrite(vk::Sampler* sampler, vk::DescriptorSet* descriptorSet, uint32_t binding)
+    {
+        vk::WriteDescriptorSet write;
+        vk::DescriptorImageInfo samplerInfo = {};
+        samplerInfo.sampler = *sampler;
+
+        write.setDstBinding(binding);
+        write.setDstArrayElement(0);
+        write.setDescriptorType(vk::DescriptorType::eSampler);
+        write.setDescriptorCount(1);
+        write.setDstSet(*descriptorSet);
+        write.setPBufferInfo(0);
+        write.setPImageInfo(&samplerInfo);
+        return write;
+    }
+
+    vk::WriteDescriptorSet CreateImagesDescriptorWrite(vk::DescriptorSet* descriptorSet, std::vector<vk::DescriptorImageInfo>* imagesInfo, uint32_t imagesCount, uint32_t binding)
+    {
+        vk::WriteDescriptorSet write;
+
+        imagesInfo->reserve(imagesCount);
+
+        write.setDstBinding(binding);
+        write.setDstArrayElement(0);
+        write.setDescriptorType(vk::DescriptorType::eSampledImage);
+        write.setDescriptorCount(imagesCount);
+        write.setDstSet(*descriptorSet);
+        write.setPBufferInfo(0);
+        write.setPImageInfo(imagesInfo->data());
+        return write;
+    }
+
+    vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler* sampler, const vk::ImageView& imageView, vk::ImageLayout layout)
+    {
+        vk::DescriptorImageInfo imageInfo = {};
+        imageInfo.setSampler(*sampler);
+        imageInfo.setImageView(imageView);
+        imageInfo.setImageLayout(layout);
+        return imageInfo;
     }
 }
