@@ -30,7 +30,7 @@ namespace nc::ui::editor
     {
     }
 
-    void Editor::Frame(float* dt, ecs::EntityMap& activeEntities)
+    void Editor::Frame(float* dt, std::span<Entity*> activeEntities)
     {
         if(input::GetKeyDown(hotkey::Editor))
             m_openState_Editor = !m_openState_Editor;

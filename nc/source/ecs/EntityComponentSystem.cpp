@@ -8,11 +8,6 @@
 #include "component/Transform.h"
 #include "config/Config.h"
 
-namespace
-{
-    constexpr size_t InitialBucketSize = 10u;
-}
-
 namespace nc::ecs
 {
 #ifdef USE_VULKAN
@@ -21,8 +16,8 @@ EntityComponentSystem::EntityComponentSystem()
 EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics)
 #endif
     : m_handleManager{},
-      m_active{InitialBucketSize, EntityHandle::Hash()},
-      m_toDestroy{InitialBucketSize, EntityHandle::Hash()},
+      m_activePool{config::GetMemorySettings().maxTransforms},
+      m_toDestroy{},
       m_colliderSystem{nullptr},
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
       m_particleEmitterSystem{nullptr},
@@ -98,73 +93,63 @@ Systems EntityComponentSystem::GetComponentSystems() const
     };
 }
 
-EntityMap& EntityComponentSystem::GetActiveEntities() noexcept
+std::span<Entity*> EntityComponentSystem::GetActiveEntities() noexcept
 {
-    return m_active;
+    return m_activePool.GetActiveRange();
 }
 
 EntityHandle EntityComponentSystem::CreateEntity(EntityInfo info)
 {
     auto entityHandle = m_handleManager.GenerateNewHandle();
     m_transformSystem->Add(entityHandle, info.position, info.rotation, info.scale, info.parent);
-    m_active.emplace(entityHandle, Entity{entityHandle, std::move(info.tag), info.layer, info.isStatic} );
+    m_activePool.Add(entityHandle, std::move(info.tag), info.layer, info.isStatic);
     return entityHandle;
 }
 
 bool EntityComponentSystem::DoesEntityExist(const EntityHandle handle) const noexcept
 {
-    return m_active.count(handle) > 0;
+    return m_activePool.Contains([handle](auto* e) { return e->Handle == handle; });
 }
 
 /** Friendly reminder - this invalidates m_active iterators */
 bool EntityComponentSystem::DestroyEntity(EntityHandle handle)
 {
-    if(!DoesEntityExist(handle))
+    auto* ptr = m_activePool.Get([handle](auto* e) { return e->Handle == handle; });
+    if(!ptr)
         return false;
 
-    m_toDestroy.insert(m_active.extract(handle));
+    m_toDestroy.push_back(m_activePool.Extract([handle](auto* e) { return e->Handle == handle; }));
     return true;
 }
 
 Entity* EntityComponentSystem::GetEntity(EntityHandle handle)
 {
-    if (!DoesEntityExist(handle))
-        return nullptr;
-
-    return &m_active.at(handle);
+    return m_activePool.Get([handle](auto* e) { return e->Handle == handle; });
 }
 
 Entity* EntityComponentSystem::GetEntity(const std::string& tag)
 {
-    for(auto& [handle, entity] : m_active)
-    {
-        if(tag == entity.Tag)
-            return &entity;
-    }
+    return m_activePool.Get([&tag](auto* e) { return e->Tag == tag; });
 
-    return nullptr;
 }
 
 void EntityComponentSystem::SendFrameUpdate(float dt)
 {
-    for(auto& [handle, entity] : m_active)
-    {
-        entity.SendFrameUpdate(dt);
-    }
+    for(auto* entity : m_activePool.GetActiveRange())
+        entity->SendFrameUpdate(dt);
 }
 
 void EntityComponentSystem::SendFixedUpdate()
 {
-    for(auto& [handle, entity] : m_active)
-    {
-        entity.SendFixedUpdate();
-    }
+    for(auto* entity : m_activePool.GetActiveRange())
+        entity->SendFixedUpdate();
 }
 
 void EntityComponentSystem::SendOnDestroy()
 {
-    for(auto& [handle, entity] : m_toDestroy)
+    for(auto& entity : m_toDestroy)
     {
+        auto handle = entity.Handle;
         entity.SendOnDestroy();
         m_colliderSystem->Remove(handle, entity.IsStatic);
         m_transformSystem->Remove(handle);
@@ -180,13 +165,13 @@ void EntityComponentSystem::SendOnDestroy()
 void EntityComponentSystem::ClearState()
 {
     // Don't do the full SendOnDestroy process as systems will be cleared anyway.
-    for(auto& [handle, entity] : m_active)
-        entity.SendOnDestroy();
+    for(auto* entity : m_activePool.GetActiveRange())
+        entity->SendOnDestroy();
     
-    for(auto& [handle, entity] : m_toDestroy)
+    for(auto& entity : m_toDestroy)
         entity.SendOnDestroy();
 
-    m_active.clear();
+    m_activePool.Clear();
     m_toDestroy.clear();
     m_handleManager.Reset();
     m_colliderSystem->Clear();

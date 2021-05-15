@@ -17,7 +17,7 @@ namespace nc::ui::editor::controls
     const auto GraphSize = ImVec2{128, 32};
     const auto Padding = 4.0f;
 
-    inline void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight);
+    inline void SceneGraphPanel(std::span<Entity*> entities, float windowHeight);
     inline void SceneGraphNode(Entity* entity, Transform* transform);
     inline void EntityPanel(EntityHandle handle);
     inline void Component(ComponentBase* comp);
@@ -30,7 +30,7 @@ namespace nc::ui::editor::controls
     /**
      * Scene Graph Controls
      */
-    void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight)
+    void SceneGraphPanel(std::span<Entity*> entities, float windowHeight)
     {
         ImGui::SetNextWindowPos({Padding, TitleBarHeight});
         auto sceneGraphHeight = windowHeight - TitleBarHeight;
@@ -47,16 +47,16 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityList", {0, sceneGraphHeight / 2}, true))
             {
-                for(auto& [handle, entity] : entities)
+                for(auto* entity : entities)
                 {
-                    auto* transform = GetComponent<Transform>(handle);
+                    auto* transform = GetComponent<Transform>(entity->Handle);
                     if(transform->GetParent()) // only draw root nodes
                         continue;
 
-                    if(!filter.PassFilter(entity.Tag.c_str()))
+                    if(!filter.PassFilter(entity->Tag.c_str()))
                         continue;
                     
-                    SceneGraphNode(&entity, transform);
+                    SceneGraphNode(entity, transform);
                 }
             } ImGui::EndChild();
 

@@ -1,10 +1,10 @@
 #pragma once
 
+#include "alloc/PoolAdapter.h"
 #include "entity/Entity.h"
 #include "entity/EntityHandle.h"
 #include "entity/EntityInfo.h"
 #include "ColliderSystem.h"
-#include "EntityMap.h"
 #include "HandleManager.h"
 #include "ParticleEmitterSystem.h"
 
@@ -50,7 +50,7 @@ namespace nc::ecs
             ComponentSystem<Renderer>* GetRendererSystem() const;
             ComponentSystem<Transform>* GetTransformSystem() const;
             Systems GetComponentSystems() const;
-            EntityMap& GetActiveEntities() noexcept;
+            std::span<Entity*> GetActiveEntities() noexcept;
 
             EntityHandle CreateEntity(EntityInfo info);
             bool DestroyEntity(EntityHandle handle);
@@ -65,8 +65,8 @@ namespace nc::ecs
 
         private:
             HandleManager m_handleManager;
-            EntityMap m_active;
-            EntityMap m_toDestroy;
+            alloc::PoolAdapter<Entity> m_activePool;
+            std::vector<Entity> m_toDestroy;
             std::unique_ptr<ColliderSystem> m_colliderSystem;
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             std::unique_ptr<ParticleEmitterSystem> m_particleEmitterSystem;
