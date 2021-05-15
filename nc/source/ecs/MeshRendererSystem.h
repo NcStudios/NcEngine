@@ -3,11 +3,12 @@
 #include "component/vulkan/MeshRenderer.h"
 #include "graphics/vulkan/MeshManager.h"
 #include "graphics/vulkan/TechniqueManager.h"
+#include "graphics/vulkan/TextureManager.h"
 
 namespace nc::graphics 
 {
     class Graphics2;
-    namespace vulkan { class Commands; }
+    namespace vulkan { class Commands; struct PhongMaterial; }
 }
 
 namespace nc::ecs
@@ -19,7 +20,7 @@ namespace nc::ecs
 
             ComponentSystem<vulkan::MeshRenderer>* GetSystem();
             void RecordTechniques(nc::graphics::vulkan::Commands* commands);
-            vulkan::MeshRenderer* Add(EntityHandle parentHandle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType);
+            vulkan::MeshRenderer* Add(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, nc::graphics::vulkan::TechniqueType techniqueType);
             bool Remove(EntityHandle parentHandle);
             bool Contains(EntityHandle parentHandle) const;
             vulkan::MeshRenderer* GetPointerTo(EntityHandle parentHandle);
@@ -28,7 +29,8 @@ namespace nc::ecs
 
         private:
             ComponentSystem<vulkan::MeshRenderer> m_componentSystem;
+            nc::graphics::vulkan::TechniqueManager m_techniqueManager;
             graphics::vulkan::MeshManager m_meshManager;
-            graphics::vulkan::TechniqueManager m_techniqueManager;
+            graphics::vulkan::TextureManager m_textureManager;
     };
 }

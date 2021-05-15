@@ -41,11 +41,13 @@ namespace nc::graphics
             // Blocks the current thread until all operations in the command queues on the device are completed. 
             void WaitIdle();
 
+            void FrameBegin();
             void Draw();
             void FrameEnd();
 
     #ifdef NC_EDITOR_ENABLED
             uint32_t GetDrawCallCount() const;
+            void IncrementDrawCallCount();
     #endif
 
         private:
@@ -65,6 +67,7 @@ namespace nc::graphics
             DirectX::XMMATRIX m_viewMatrix;
             DirectX::XMMATRIX m_projectionMatrix;
             std::array<float, 4> m_clearColor;
+            uint32_t m_drawCallCount = 0;
 
     };
 }

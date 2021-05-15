@@ -54,6 +54,33 @@ namespace nc
         return internal::g_ecsImpl->GetEntity(tag);
     }
 
+#ifndef USE_VULKAN
+    template<> ParticleEmitter* AddComponent<ParticleEmitter>(EntityHandle handle, ParticleInfo info)
+    {
+        IF_THROW(!GetEntity(handle), "AddComponent<ParticleEmitter> - Bad handle");
+        IF_THROW(internal::g_ecsImpl->GetParticleEmitterSystem()->Contains(handle), "AddComponent<ParticleEmitter> - entity already has a particle emitter");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->Add(handle, info);
+    }
+
+    template<> bool RemoveComponent<ParticleEmitter>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "RemoveComponent<ParticleEmitter> - Bad handle");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->Remove(handle);
+    }
+
+    template<> ParticleEmitter* GetComponent<ParticleEmitter>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "GetComponent<ParticleEmitter> - Bad handle");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->GetPointerTo(handle);
+    }
+
+    template<> bool HasComponent<ParticleEmitter>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "HasComponent<ParticleEmitter> - Bad handle");
+        return internal::g_ecsImpl->GetParticleEmitterSystem()->Contains(handle);
+    }
+#endif
+
     template<> PointLight* AddComponent<PointLight>(EntityHandle handle)
     {
         return AddComponent<PointLight>(handle, PointLight::Properties{});
@@ -63,8 +90,7 @@ namespace nc
     {
         IF_THROW(!GetEntity(handle), "AddComponent<PointLight> - Bad handle");
         IF_THROW(internal::g_pointLightSystem->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
-        auto lightPtr = internal::g_pointLightSystem->Add(handle, properties);
-        return lightPtr;
+        return internal::g_pointLightSystem->Add(handle, properties);
     }
 
     template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material)
@@ -87,6 +113,7 @@ namespace nc
         IF_THROW(internal::g_colliderSystem->Contains(handle), "AddComponent<Collider> - entity already has a a Collider");
         return internal::g_colliderSystem->Add(handle, info);
     }
+
 
     template<> bool RemoveComponent<PointLight>(EntityHandle handle)
     {
@@ -168,11 +195,11 @@ namespace nc
     }
 
     #ifdef USE_VULKAN
-    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::TechniqueType techniqueType)
+    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::PhongMaterial material, graphics::vulkan::TechniqueType techniqueType)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<MeshRenderer> - Bad handle");
         IF_THROW(internal::g_meshRendererSystem->Contains(handle), "AddComponent<MeshRenderer> - entity already has a renderer");
-        return internal::g_meshRendererSystem->Add(handle, std::move(meshUid), techniqueType);
+        return internal::g_meshRendererSystem->Add(handle, meshUid, material, techniqueType);
     }
 
     template<> bool RemoveComponent<vulkan::MeshRenderer>(EntityHandle handle)

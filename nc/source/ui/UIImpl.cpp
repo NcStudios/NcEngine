@@ -4,6 +4,7 @@
 #include "graphics/Graphics.h"
 #ifdef USE_VULKAN
 #include "graphics/Graphics2.h"
+#include "graphics/vulkan/Base.h"
 #include "graphics/vulkan/Swapchain.h"
 #include "imgui/imgui_impl_vulkan.h"
 #endif

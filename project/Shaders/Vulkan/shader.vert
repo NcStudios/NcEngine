@@ -1,10 +1,15 @@
 #version 450
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_nonuniform_qualifier : enable
 
-layout(push_constant) uniform PushConsts
+layout(push_constant) uniform PER_OBJECT
 {
     mat4 model;
     mat4 modelView;
-} transforms;
+    int baseColorIndex;
+    int normalIndex;
+    int roughnessIndex;
+} pushConstants;
 
 layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;
@@ -21,7 +26,7 @@ out gl_PerVertex {
 
 void main() 
 {
-    outScreenPos =  vec4(inPos, 1.0) * transforms.modelView;
+    outScreenPos =  vec4(inPos, 1.0) * pushConstants.modelView;
     outLocalPos = vec4(inPos, 1.0);
 	outNormal = inNormal;
 	outUV = inUV;

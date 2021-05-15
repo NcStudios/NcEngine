@@ -42,7 +42,7 @@ namespace nc::ecs
                 static_cast<EntityHandle::Handle_t>(handle),
                 &GetComponent<Transform>(handle)->GetTransformationMatrix(),
                 physics::GetVolumePropertiesFromColliderInfo(info),
-                ColliderType{info.type}
+                info.type
             );
         }
 

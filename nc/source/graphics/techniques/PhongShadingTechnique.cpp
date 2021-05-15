@@ -115,7 +115,7 @@ namespace nc::graphics
         // Add pixel shader
         const auto pixelShaderPath = defaultShaderPath + "phongpixelshader.cso";
         PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<PixelShader>(PixelShader::GetUID(pixelShaderPath), pixelShaderPath));
-        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Blender>(Blender::GetUID(BLENDER_TAG)));
+        PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Blender>(Blender::GetUID(BLENDER_TAG), false));
         PhongShadingTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Sampler>(Sampler::GetUID(SAMPLER_TAG)));
     }
 

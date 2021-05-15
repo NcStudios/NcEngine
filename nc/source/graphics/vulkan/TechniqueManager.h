@@ -9,33 +9,26 @@
 
 namespace nc 
 { 
-    class Transform;
+    class Transform; 
     namespace graphics { class Graphics2; }
+    namespace vulkan { class MeshRenderer; }
 }
 
 namespace nc::graphics::vulkan
 {
     class Commands;    
 
-    struct GlobalData
-    {
-        vk::Buffer* vertexBuffer;
-        vk::Buffer* indexBuffer;
-    };
-
     class TechniqueManager
     {
         public:
             TechniqueManager(nc::graphics::Graphics2* graphics);
-            void RegisterMeshRenderer(TechniqueType technique, Mesh mesh, Transform* transform);
+            void RegisterMeshRenderer(TechniqueType technique, MeshRenderer* meshRenderer);
             void RecordTechniques(Commands* commands);
-            void RegisterGlobalData(vk::Buffer* vertexBuffer, vk::Buffer* indexBuffer);
             std::unique_ptr<TechniqueBase> CreateTechnique(TechniqueType techniqueType);
             void Clear();
 
         private:
             nc::graphics::Graphics2* m_graphics;
             std::vector<std::unique_ptr<TechniqueBase>> m_techniques;
-            GlobalData m_globalData;
     };
 }

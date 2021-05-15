@@ -4,6 +4,7 @@
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/Graphics2.h"
+#include "component/vulkan/MeshRenderer.h"
 
 #include <vector>
 #include <string>
@@ -14,11 +15,9 @@ namespace nc::graphics::vulkan
 {
     TechniqueBase::TechniqueBase(TechniqueType techniqueType, nc::graphics::Graphics2* graphics)
     : m_graphics{ graphics },
-      m_base{ graphics->GetBase() },
+      m_base{ graphics->GetBasePtr() },
       m_swapchain{ graphics->GetSwapchainPtr() },
-      m_globalData{ nullptr },
-      m_meshes{},
-      m_objects{},
+      m_meshRenderers{},
       m_pipeline{},
       m_pipelineLayout{},
       m_descriptorSetLayout{},
@@ -26,45 +25,34 @@ namespace nc::graphics::vulkan
     {
     }
 
-    TechniqueBase::TechniqueBase(TechniqueType techniqueType, GlobalData* globalData, nc::graphics::Graphics2* graphics)
-    : m_graphics{ graphics },
-      m_base{ graphics->GetBase() },
-      m_swapchain{ graphics->GetSwapchainPtr() },
-      m_globalData{ globalData },
-      m_meshes{},
-      m_objects{},
-      m_pipeline{},
-      m_pipelineLayout{},
-      m_descriptorSetLayout{},
-      m_type{ techniqueType } 
-    {
-    }
 
     TechniqueBase::~TechniqueBase() noexcept
     {
-        auto base = m_base.GetDevice();
+        auto base = m_base->GetDevice();
         for (auto& pass : m_renderPasses)
         {
-            base.destroyRenderPass(pass);
+            if (pass)
+            {
+                base.destroyRenderPass(pass);
+            }
         }
         base.destroyDescriptorSetLayout(m_descriptorSetLayout);
         base.destroyPipelineLayout(m_pipelineLayout);
         base.destroyPipeline(m_pipeline);
     }
 
-    void TechniqueBase::RegisterMeshRenderer(Mesh mesh, Transform* transform)
+    void TechniqueBase::RegisterMeshRenderer(MeshRenderer* meshRenderer)
     {
-        for (auto& registeredMesh : m_meshes)
+        for (auto& [meshUid, renderers] : m_meshRenderers)
         {
-            if (registeredMesh.uid.compare(mesh.uid) == 0)
+            if (meshUid.compare(meshRenderer->GetMeshUid()) == 0)
             {
-                auto& objects = m_objects.at(registeredMesh.uid);
-                objects.push_back(transform);
+                renderers.push_back(meshRenderer);
                 return;
             }
         }
-        m_meshes.push_back(mesh);
-        m_objects.emplace(mesh.uid, std::vector<Transform*>{transform} );
+
+        m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<MeshRenderer*>{meshRenderer} );
     }
 
     TechniqueType TechniqueBase::GetType() const noexcept
@@ -72,13 +60,13 @@ namespace nc::graphics::vulkan
         return m_type;
     }
     
-    vk::ShaderModule TechniqueBase::CreateShaderModule(const std::vector<uint32_t>& code, const vulkan::Base& base)
+    vk::ShaderModule TechniqueBase::CreateShaderModule(const std::vector<uint32_t>& code, vulkan::Base* base)
     {
         vk::ShaderModuleCreateInfo createInfo{};
         createInfo.setCodeSize(code.size()*sizeof(uint32_t));
         createInfo.setPCode(code.data());
         vk::ShaderModule shaderModule;
-        if (base.GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
+        if (base->GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Failed to create shader module.");
         }

@@ -32,16 +32,18 @@ namespace nc::graphics::vulkan
     {
         public:
 
-            ImmutableBuffer(nc::graphics::Graphics2* graphics);
-            ImmutableBuffer(ImmutableBuffer&&) = delete;
-            ImmutableBuffer& operator = (ImmutableBuffer&&) = delete;
+            ImmutableBuffer();
+            ImmutableBuffer(nc::graphics::Graphics2* graphics, const std::vector<T>& data);
+            ImmutableBuffer(ImmutableBuffer&&);
+            ImmutableBuffer& operator = (ImmutableBuffer&&);
             ImmutableBuffer& operator = (const ImmutableBuffer&) = delete;
             ImmutableBuffer(const ImmutableBuffer&) = delete;
             ~ImmutableBuffer();
             
             vk::Buffer* GetBuffer();
 
-            void Bind(const std::vector<T>& data);
+            void Bind(nc::graphics::Graphics2* graphics, const std::vector<T>& data);
+            void Clear();
 
         private:
 
@@ -51,11 +53,18 @@ namespace nc::graphics::vulkan
     };
 
     template<typename T, IncludedUsage UsageFlag_T>
-    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics2* graphics)
-    : m_base { graphics->GetBasePtr() },
-      m_memoryIndex { 0 },
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer()
+    : m_memoryIndex { 0 },
       m_immutableBuffer { nullptr }
     {
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics2* graphics, const std::vector<T>& data)
+    : m_memoryIndex { 0 },
+      m_immutableBuffer { nullptr }
+    {
+        Bind(graphics, data);
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
@@ -68,8 +77,10 @@ namespace nc::graphics::vulkan
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
-    void ImmutableBuffer<T, UsageFlag_T>::Bind(const std::vector<T>& data)
+    void ImmutableBuffer<T, UsageFlag_T>::Bind(nc::graphics::Graphics2* graphics, const std::vector<T>& data)
     {
+        m_base = graphics->GetBasePtr();
+
         auto size = static_cast<uint32_t>(sizeof(T) * data.size());
 
         // Create staging buffer (lives on CPU).
@@ -90,8 +101,37 @@ namespace nc::graphics::vulkan
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(ImmutableBuffer&& other)
+    : m_base{std::exchange(other.m_base, nullptr)},
+      m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
+      m_immutableBuffer{std::exchange(other.m_immutableBuffer, nullptr)}
+    {
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
+    ImmutableBuffer<T, UsageFlag_T>& ImmutableBuffer<T, UsageFlag_T>::operator = (ImmutableBuffer<T, UsageFlag_T>&& other)
+    {
+        m_base = std::exchange(other.m_base, nullptr);
+        m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
+        m_immutableBuffer = std::exchange(other.m_immutableBuffer, nullptr);
+        return *this;
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
     vk::Buffer* ImmutableBuffer<T, UsageFlag_T>::GetBuffer()
     {
         return &m_immutableBuffer;
+    }
+
+    template<typename T, IncludedUsage UsageFlag_T>
+    void ImmutableBuffer<T, UsageFlag_T>::Clear()
+    {
+        if (m_immutableBuffer)
+        {
+            m_base->DestroyBuffer(m_memoryIndex);
+            m_immutableBuffer = nullptr;
+        }
+
+        m_base = nullptr;
     }
 }

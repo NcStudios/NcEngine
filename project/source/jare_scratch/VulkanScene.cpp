@@ -2,6 +2,8 @@
 #include "Ecs.h"
 #include "MainCamera.h"
 #include "graphics/vulkan/Mesh.h"
+#include "graphics/vulkan/Texture.h"
+#include "graphics/vulkan/PhongMaterial.h"
 #include "graphics/vulkan/TechniqueType.h"
 #include "shared/SceneNavigationCamera.h"
 #include "shared/WasdController.h"
@@ -27,28 +29,53 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(true, true, Widget);
 
-        // Load the meshes
-        const std::vector<std::string> meshPaths {"project/assets/mesh/beeper.nca", "project/assets/mesh/table.nca"};
-        nc::graphics::vulkan::LoadMeshes(std::move(meshPaths));
+        // Load all scene meshes
+        const std::string defaultMeshesPath = "project/assets/mesh/";
+        const std::vector<std::string> meshPaths { defaultMeshesPath + "beeper.nca", 
+                                                   defaultMeshesPath + "table.nca", 
+                                                   defaultMeshesPath + "planet.nca"
+                                                  };
+        nc::graphics::vulkan::LoadMeshes(meshPaths); 
+
+        // Load all scene textures
+        const std::string defaultTexturesPath = "project/Textures/";
+        const std::vector<std::string> texturePaths { defaultTexturesPath + "Beeper/BaseColor.png", 
+                                                      defaultTexturesPath + "Beeper/Normal.png", 
+                                                      defaultTexturesPath + "Beeper/Roughness.png", 
+                                                      defaultTexturesPath + "Planets/Jupiter/BaseColor.png",
+                                                      defaultTexturesPath + "Planets/Jupiter/Normal.png",
+                                                      defaultTexturesPath + "Planets/Jupiter/Roughness.png",
+                                                     };
+        nc::graphics::vulkan::LoadTextures(texturePaths); 
 
         // Create the entity
+        auto beeMaterial = nc::graphics::vulkan::PhongMaterial{};
+        beeMaterial.baseColor = defaultTexturesPath + "Beeper/BaseColor.png";
+        beeMaterial.normal = defaultTexturesPath + "Beeper/Normal.png";
+        beeMaterial.roughness = defaultTexturesPath + "Beeper/Roughness.png";
+
+        auto jupiterMaterial = nc::graphics::vulkan::PhongMaterial{};
+        jupiterMaterial.baseColor = defaultTexturesPath + "Planets/Jupiter/BaseColor.png";
+        jupiterMaterial.normal = defaultTexturesPath + "Planets/Jupiter/Normal.png";
+        jupiterMaterial.roughness = defaultTexturesPath + "Planets/Jupiter/Roughness.png";
+
         auto handle = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);
         auto transform = GetComponent<Transform>(handle);
         transform->SetPosition(Vector3{2.0f, 1.0f, 1.0f});
 
         // Create the entity
-        auto handle1 = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle1, meshPaths[0], nc::graphics::vulkan::TechniqueType::Simple);
+        auto planet = CreateEntity();
+        AddComponent<vulkan::MeshRenderer>(planet, meshPaths[2], jupiterMaterial, nc::graphics::vulkan::TechniqueType::Simple);
 
         // Create the entity
         auto handle2 = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle2, meshPaths[1], nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle2, meshPaths[1], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);
         AddComponent<WasdController>(handle2, 2.0f);
 
         // Create the entity
         auto handle4 = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle4, meshPaths[0], nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle4, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);
         auto transform2 = GetComponent<Transform>(handle4);
         transform2->SetPosition(Vector3{3.0f, 1.0f, 1.0f});
         
