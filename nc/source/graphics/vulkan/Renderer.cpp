@@ -12,7 +12,9 @@ namespace nc::graphics::vulkan
 {
     Renderer::Renderer(graphics::Graphics2* graphics)
     : m_graphics{graphics},
-     m_phongAndUiTechnique{std::make_unique<PhongAndUiTechnique>(m_graphics)}
+      m_textureManager{graphics},
+      m_meshManager{graphics},
+      m_phongAndUiTechnique{nullptr}
     {
     }
 
@@ -38,9 +40,14 @@ namespace nc::graphics::vulkan
     {
         switch (techniqueType)
         {
-            case TechniqueType::PhongAndUi
+            case TechniqueType::PhongAndUi:
             {
-                m_phongAndUiTechnique.RegisterMeshRenderer(meshRenderer);
+                if (!m_phongAndUiTechnique)
+                {
+                    m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics);
+                }
+                m_phongAndUiTechnique->RegisterMeshRenderer(renderer);
+                break;
             }
         }
     }
@@ -84,6 +91,6 @@ namespace nc::graphics::vulkan
 
     void Renderer::RecordUi(vk::CommandBuffer* cmd)
     {
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }
 }

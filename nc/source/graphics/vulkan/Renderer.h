@@ -1,6 +1,8 @@
 #pragma once
 
 #include "graphics\vulkan\TechniqueType.h"
+#include "graphics\vulkan\MeshManager.h"
+#include "graphics\vulkan\TextureManager.h"
 #include "graphics\vulkan\techniques\PhongAndUiTechnique.h"
 
 #include <unordered_map>
@@ -25,6 +27,9 @@ namespace nc::graphics::vulkan
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics2* m_graphics;
+            TextureManager m_textureManager;
+            MeshManager m_meshManager;
+
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;
     };
 }

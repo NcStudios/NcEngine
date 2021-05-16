@@ -136,7 +136,6 @@ namespace nc::graphics::vulkan
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
 
         SetViewportAndScissor(cmd, dimensions);
-
     }
 
     void PhongAndUiTechnique::EndRecord(vk::CommandBuffer* cmd)

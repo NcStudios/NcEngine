@@ -25,7 +25,8 @@ namespace nc
     namespace physics { class ColliderSystem; }
 
     #ifdef USE_VULKAN
-    namespace graphics { class Graphics2; }
+    namespace vulkan { class MeshRenderer; }
+    namespace graphics { class Graphics2;}
     #endif
 }
 
@@ -39,7 +40,7 @@ namespace nc::ecs
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;
 #ifdef USE_VULKAN
-        ecs::ComponentSystem<nc::graphics::vulkan::MeshRenderer>* meshRenderer;
+        ecs::ComponentSystem<nc::vulkan::MeshRenderer>* meshRenderer;
 #else
         ecs::ComponentSystem<ParticleEmitter>* particleEmitter;
 #endif

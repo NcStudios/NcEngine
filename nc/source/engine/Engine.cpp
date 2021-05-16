@@ -83,6 +83,7 @@ namespace nc::core
           #endif
 
     {
+        m_graphics2.SetRenderer(&m_renderer);
         SetBindings();
         V_LOG("Engine initialized");
     }
@@ -123,9 +124,7 @@ namespace nc::core
         auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
-        #ifdef USE_VULKAN
-        m_graphics2.SetRenderer(&m_renderer);
-        #else
+        #ifndef USE_VULKAN
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
         #endif
 
