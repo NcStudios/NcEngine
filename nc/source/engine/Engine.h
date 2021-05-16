@@ -4,6 +4,7 @@
 #include "graphics/rendergraph/FrameManager.h"
 #ifdef USE_VULKAN
     #include "graphics/Graphics2.h"
+    #include "graphics/vulkan/Renderer.h"
 #else
     #include "graphics/Graphics.h"
 #endif
@@ -33,6 +34,7 @@ namespace nc::core
             window::WindowImpl m_window;
         #ifdef USE_VULKAN
             graphics::Graphics2 m_graphics2;
+            graphics::vulkan::Renderer m_renderer;
             // @todo: Implement missing managers below
         #else            
             graphics::Graphics m_graphics;

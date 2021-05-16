@@ -6,7 +6,6 @@
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Initializers.h"
 #include "graphics/vulkan/PhongMaterial.h"
-#include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/vulkan/MeshManager.h"
 #include "graphics/vulkan/resources/TransformBuffer.h"
 #include "graphics/vulkan/resources/ImmutableBuffer.h"
@@ -16,9 +15,7 @@
 namespace nc::graphics::vulkan
 {
     PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics2* graphics)
-    : TechniqueBase(TechniqueType::Simple, graphics),
-      m_descriptorSetLayout{nullptr},
-      m_textureDescriptors{nullptr}
+    : TechniqueBase(TechniqueType::PhongAndUi, graphics)
     {
         m_renderPasses.push_back(m_swapchain->GetPassDefinition());
         CreatePipeline();
@@ -40,10 +37,8 @@ namespace nc::graphics::vulkan
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        m_descriptorSetLayout = ResourceManager::GetDescriptorSetLayout();
-
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(PushConstants)); // PushConstants
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, *m_descriptorSetLayout);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, *ResourceManager::GetDescriptorSetLayout());
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -84,13 +79,8 @@ namespace nc::graphics::vulkan
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    void PhongAndUiTechnique::Record(Commands* commands)
+    void PhongAndUiTechnique::Setup()
     {
-        vk::ClearValue clearValues[2];
-		clearValues[0].setColor(vk::ClearColorValue(m_graphics->GetClearColor()));
-		clearValues[1].setDepthStencil({ 1.0f, 0 });
-
-        auto& commandBuffers = *commands->GetCommandBuffers();
         auto& dimensions = m_graphics->GetDimensions();
 
         vk::Viewport viewport = {};
@@ -106,69 +96,52 @@ namespace nc::graphics::vulkan
         vk::Rect2D scissor = {};
         scissor.setExtent(extent);
         scissor.setOffset({0, 0});
+    }
 
-        // Begin recording on each of the command buffers.
-        for (size_t i = 0; i < commandBuffers.size(); ++i)
-        {
-            vk::CommandBufferBeginInfo beginInfo;
-            beginInfo.setPInheritanceInfo(nullptr);
-            m_swapchain->WaitForFrameFence(true);
+    std::unordered_map<std::string, std::vector<MeshRenderer*>>* PhongAndUiTechnique::GetMeshRenderers()
+    {
+        return &m_meshRenderers;
+    }
 
-            // Begin recording commands to each command buffer.
-            commandBuffers[i].begin(beginInfo);
-            {
-                vk::RenderPassBeginInfo renderPassInfo{};
-                renderPassInfo.setRenderPass(m_renderPasses[0]); // Specify the render pass and attachments.
-                renderPassInfo.setFramebuffer(m_swapchain->GetFrameBuffer((uint32_t)i));
-                renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
-                renderPassInfo.renderArea.setExtent(m_swapchain->GetExtent());
-                renderPassInfo.setClearValueCount(2); // Set clear color
-                renderPassInfo.setPClearValues(clearValues);
+    vk::PipelineLayout* PhongAndUiTechnique::GetPipelineLayout()
+    {
+        return &m_pipelineLayout;
+    }
 
-                commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-                {
-                    commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-                    auto dimensions = m_graphics->GetDimensions();
-                    SetViewportAndScissor(&commandBuffers[i], dimensions);
+    void PhongAndUiTechnique::BeginRecord(vk::CommandBuffer* cmd, uint32_t frameBufferIndex)
+    {
+        auto dimensions = m_graphics->GetDimensions();
 
-                    vk::DeviceSize offsets[] = { 0 };
-                    commandBuffers[i].bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
-                    commandBuffers[i].bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
-                    commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetDescriptorSet(), 0, 0);
+        vk::ClearValue clearValues[2];
+		clearValues[0].setColor(vk::ClearColorValue(m_graphics->GetClearColor()));
+		clearValues[1].setDepthStencil({ 1.0f, 0 });
 
-                    for (auto& [meshUid, renderers] : m_meshRenderers)
-                    {
-                        const auto viewMatrix = m_graphics->GetViewMatrix();
-                        const auto projectionMatrix = m_graphics->GetProjectionMatrix();
-                        const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
-                        
-                        for (auto* meshRenderer : renderers)
-                        {
-                            auto& material = meshRenderer->GetMaterial();
-                            auto modelViewMatrix = meshRenderer->GetTransform()->GetTransformationMatrix() * viewMatrix;
-                            auto matrix = GetMatrices(modelViewMatrix, modelViewMatrix * projectionMatrix);
-                            
-                            auto pushConstants = PushConstants{};
-                            pushConstants.model = matrix.model;
-                            pushConstants.modelView = matrix.modelView;
-                            pushConstants.baseColorIndex = ResourceManager::GetTextureAccessor(material.baseColor);
-                            pushConstants.normalColorIndex = ResourceManager::GetTextureAccessor(material.normal);
-                            pushConstants.roughnessColorIndex = ResourceManager::GetTextureAccessor(material.roughness);
+        vk::CommandBufferBeginInfo beginInfo;
+        beginInfo.setPInheritanceInfo(nullptr);
+        m_swapchain->WaitForFrameFence(true);
 
-                            commandBuffers[i].pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(PushConstants), &pushConstants);
-                            commandBuffers[i].drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                            #ifdef NC_EDITOR_ENABLED
-                            m_graphics->IncrementDrawCallCount();
-                            #endif
-                        }
-                    }
-                }
+        // Begin recording commands to each command buffer.
+        cmd->begin(beginInfo);
 
-                ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffers[i]);
+        vk::RenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.setRenderPass(m_renderPasses[0]); // Specify the render pass and attachments.
+        renderPassInfo.setFramebuffer(m_swapchain->GetFrameBuffer(frameBufferIndex));
+        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
+        renderPassInfo.renderArea.setExtent(m_swapchain->GetExtent());
+        renderPassInfo.setClearValueCount(2); // Set clear color
+        renderPassInfo.setPClearValues(clearValues);
 
-                commandBuffers[i].endRenderPass();
-            }
-            commandBuffers[i].end();
-        }
+        // Begin render pass and bind pipeline
+        cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+
+        SetViewportAndScissor(cmd, dimensions);
+
+    }
+
+    void PhongAndUiTechnique::EndRecord(vk::CommandBuffer* cmd)
+    {
+        cmd->endRenderPass();
+        cmd->end();
     }
 }

@@ -3,6 +3,7 @@
 #include "vulkan/Commands.h"
 #include "vulkan/resources/DepthStencil.h"
 #include "vulkan/Swapchain.h"
+#include "vulkan/Renderer.h"
 #include "vulkan/resources/ResourceManager.h"
 #include "config/Config.h"
 
@@ -13,13 +14,12 @@ namespace
 
 namespace nc::graphics
 {
-    using namespace vulkan;
-
     Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
-        : m_base{ std::make_unique<Base>(hwnd, hinstance) },
-        m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
-        m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
-        m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
+        : m_base{ std::make_unique<vulkan::Base>(hwnd, hinstance) },
+        m_depthStencil{ std::make_unique<vulkan::DepthStencil>(m_base.get(), dimensions) }, 
+        m_swapchain{ std::make_unique<vulkan::Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+        m_commands{ std::make_unique<vulkan::Commands>(m_base.get(), *m_swapchain) },
+        m_renderer{ nullptr },
         m_dimensions{ dimensions },
         m_isMinimized{ false },
         m_isFullscreen{ false },
@@ -33,7 +33,7 @@ namespace nc::graphics
 
     Graphics2::~Graphics2()
     {
-        ResourceManager::Clear();
+        vulkan::ResourceManager::Clear();
     }
 
     void Graphics2::RecreateSwapchain(Vector2 dimensions)
@@ -49,9 +49,9 @@ namespace nc::graphics
         m_depthStencil.reset();
 
         // Recreate swapchain and resources
-        m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
-        m_swapchain = std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions);
-        m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
+        m_depthStencil = std::make_unique<vulkan::DepthStencil>(m_base.get(), dimensions);
+        m_swapchain = std::make_unique<vulkan::Swapchain>(m_base.get(), *m_depthStencil, dimensions);
+        m_commands = std::make_unique<vulkan::Commands>(m_base.get(), *m_swapchain);
     }
 
     DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
@@ -124,6 +124,11 @@ namespace nc::graphics
         return m_commands.get();
     }
 
+    vulkan::Renderer* Graphics2::GetRendererPtr() const noexcept
+    {
+        return m_renderer;
+    }
+
     const Vector2 Graphics2::GetDimensions() const noexcept
     {
         return m_dimensions;
@@ -146,6 +151,11 @@ namespace nc::graphics
     void Graphics2::SetClearColor(std::array<float, 4> color)
     {
         m_clearColor = color;
+    }
+
+    void Graphics2::SetRenderer(vulkan::Renderer* renderer)
+    {
+        m_renderer = renderer;
     }
 
     const std::array<float, 4>& Graphics2::GetClearColor() const noexcept

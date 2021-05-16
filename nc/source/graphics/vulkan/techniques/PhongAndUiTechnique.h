@@ -9,8 +9,7 @@ namespace nc::graphics
 {
     namespace vulkan
     {
-        class Graphics2;
-        class Base; class Swapchain; class Commands; struct GlobalData;
+        class Graphics2; class Commands;
 
         struct PushConstants
         {
@@ -25,14 +24,17 @@ namespace nc::graphics
         {
             public:
                 PhongAndUiTechnique(nc::graphics::Graphics2* graphics);
-                void Record(Commands* commands) override;
+
+                void Setup();
+                void BeginRecord(vk::CommandBuffer* cmd, uint32_t frameBufferIndex);
+                void EndRecord(vk::CommandBuffer* cmd);
+
+                std::unordered_map<std::string, std::vector<MeshRenderer*>>* GetMeshRenderers();
+                vk::PipelineLayout* GetPipelineLayout();
 
             private:
                 void CreatePipeline();
                 void CreateRenderPasses();
-
-                vk::DescriptorSetLayout* m_descriptorSetLayout;
-                vk::DescriptorSet* m_textureDescriptors;
         };
     }
 }

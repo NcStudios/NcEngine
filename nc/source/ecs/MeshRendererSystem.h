@@ -2,7 +2,6 @@
 #include "ComponentSystem.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "graphics/vulkan/MeshManager.h"
-#include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/vulkan/TextureManager.h"
 
 namespace nc::graphics 
@@ -19,7 +18,6 @@ namespace nc::ecs
             MeshRendererSystem(uint32_t renderersCount, graphics::Graphics2* graphics);
 
             ComponentSystem<vulkan::MeshRenderer>* GetSystem();
-            void RecordTechniques(nc::graphics::vulkan::Commands* commands);
             vulkan::MeshRenderer* Add(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, nc::graphics::vulkan::TechniqueType techniqueType);
             bool Remove(EntityHandle parentHandle);
             bool Contains(EntityHandle parentHandle) const;
@@ -29,8 +27,6 @@ namespace nc::ecs
 
         private:
             ComponentSystem<vulkan::MeshRenderer> m_componentSystem;
-            nc::graphics::vulkan::TechniqueManager m_techniqueManager;
-            graphics::vulkan::MeshManager m_meshManager;
-            graphics::vulkan::TextureManager m_textureManager;
+            nc::graphics::Graphics2* m_graphics;
     };
 }

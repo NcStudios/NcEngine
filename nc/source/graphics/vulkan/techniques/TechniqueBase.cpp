@@ -2,7 +2,6 @@
 #include "component/Transform.h"
 #include "graphics/vulkan/Base.h"
 #include "graphics/vulkan/Swapchain.h"
-#include "graphics/vulkan/TechniqueManager.h"
 #include "graphics/Graphics2.h"
 #include "component/vulkan/MeshRenderer.h"
 

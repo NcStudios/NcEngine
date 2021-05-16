@@ -35,7 +35,6 @@ namespace nc::graphics::vulkan
             TechniqueType GetType() const noexcept;
             void RegisterMeshRenderer(MeshRenderer* renderer);
             virtual ~TechniqueBase() noexcept;
-            virtual void Record(Commands* commands) = 0;
 
         protected:
             nc::graphics::Graphics2* m_graphics;

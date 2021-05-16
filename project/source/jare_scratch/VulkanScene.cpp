@@ -60,22 +60,22 @@ namespace nc::sample
         jupiterMaterial.roughness = defaultTexturesPath + "Planets/Jupiter/Roughness.png";
 
         auto handle = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
         auto transform = GetComponent<Transform>(handle);
         transform->SetPosition(Vector3{2.0f, 1.0f, 1.0f});
 
         // Create the entity
         auto planet = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(planet, meshPaths[2], jupiterMaterial, nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(planet, meshPaths[2], jupiterMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
 
         // Create the entity
         auto handle2 = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle2, meshPaths[1], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle2, meshPaths[1], beeMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
         AddComponent<WasdController>(handle2, 2.0f);
 
         // Create the entity
         auto handle4 = CreateEntity();
-        AddComponent<vulkan::MeshRenderer>(handle4, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::Simple);
+        AddComponent<vulkan::MeshRenderer>(handle4, meshPaths[0], beeMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
         auto transform2 = GetComponent<Transform>(handle4);
         transform2->SetPosition(Vector3{3.0f, 1.0f, 1.0f});
         
