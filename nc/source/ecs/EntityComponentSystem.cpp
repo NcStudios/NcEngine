@@ -6,6 +6,8 @@
 #include "component/PointLightManager.h"
 #ifdef USE_VULKAN
 #include "component/vulkan/MeshRenderer.h"
+#include "component/vulkan/PointLight.h"
+#include "ecs/PointLightSystem.h"
 #include "graphics/Graphics2.h"
 #endif
 #include "component/Renderer.h"
@@ -31,6 +33,7 @@ EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics)
       m_lightSystem{ std::make_unique<ComponentSystem<PointLight>>(PointLightManager::MAX_POINT_LIGHTS) },
       #ifdef USE_VULKAN
       m_meshRendererSystem{ std::make_unique<MeshRendererSystem>(config::GetMemorySettings().maxRenderers, graphics) },
+      m_pointLightSystem2{ std::make_unique<PointLightSystem>(graphics, PointLightSystem::MAX_POINT_LIGHTS) },
       #else
       m_particleEmitterSystem{nullptr},
       #endif
@@ -80,6 +83,11 @@ MeshRendererSystem* EntityComponentSystem::GetMeshRendererSystem()
 {
     return m_meshRendererSystem.get();
 }
+
+PointLightSystem* EntityComponentSystem::GetPointLightSystem2()
+{
+    return m_pointLightSystem2.get();
+}
 #else
 ParticleEmitterSystem* EntityComponentSystem::GetParticleEmitterSystem()
 {
@@ -107,9 +115,10 @@ Systems EntityComponentSystem::GetComponentSystems() const
         .renderer = m_rendererSystem.get(),
         .transform = m_transformSystem.get(),
 #ifdef USE_VULKAN
-        .meshRenderer = m_meshRendererSystem->GetSystem()
+        .meshRenderer = m_meshRendererSystem->GetSystem(),
+        .pointLight2 = m_pointLightSystem2->GetSystem()
 #else
-        .particleEmitter = m_particleEmitterSystem->GetComponentSystem(),
+        .particleEmitter = m_particleEmitterSystem->GetComponentSystem()
 #endif
     };
 }

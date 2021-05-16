@@ -1,4 +1,5 @@
 #include "GraphicsResources.h"
+#include "Initializers.h"
 
 namespace nc::graphics::vulkan
 {
@@ -87,4 +88,26 @@ namespace nc::graphics::vulkan
         m_descriptorSetLayout.reset();
         m_sampler.reset();
     }
+
+    PointLightsData::PointLightsData()
+    {
+        
+        auto descriptorLayoutBinding = CreateDescriptorSetLayoutBinding(2, )
+    }
+
+    void Add(PointLightInfo& info)
+    {
+    }
+
+    class PointLightsData
+    {
+        public:
+            PointLightsData() = default;
+            PointLightsData();
+
+            void Add(PointLightInfo& info);
+
+            vk::UniqueDescriptorSet m_descriptorSet;
+            vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
+    };
 }

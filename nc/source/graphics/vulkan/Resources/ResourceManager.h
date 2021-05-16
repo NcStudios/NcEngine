@@ -10,8 +10,8 @@ namespace nc::graphics::vulkan
             static void LoadTextures(TexturesData textures);
             static bool TextureExists(const std::string& uid);
             static uint32_t GetTextureAccessor(const std::string& uid);
-            static vk::DescriptorSet* GetDescriptorSet();
-            static vk::DescriptorSetLayout* GetDescriptorSetLayout();
+            static vk::DescriptorSet* GetTexturesDescriptorSet();
+            static vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout();
 
             static void LoadMeshes(MeshesData meshes);
             static bool MeshExists(const std::string& uid);
@@ -25,8 +25,8 @@ namespace nc::graphics::vulkan
             void LoadTextures_(TexturesData textures);
             bool TextureExists_(const std::string& uid);
             uint32_t GetTextureAccessor_(const std::string& uid);
-            vk::DescriptorSet* GetDescriptorSet_();
-            vk::DescriptorSetLayout* GetDescriptorSetLayout_();
+            vk::DescriptorSet* GetTexturesDescriptorSet_();
+            vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout_();
 
             void LoadMeshes_(MeshesData meshes);
             bool MeshExists_(const std::string& uid);       
@@ -63,14 +63,14 @@ namespace nc::graphics::vulkan
         return Get().GetTextureAccessor_(uid);
     }
 
-    inline vk::DescriptorSet* ResourceManager::GetDescriptorSet()
+    inline vk::DescriptorSet* ResourceManager::GetTexturesDescriptorSet()
     {
-        return Get().GetDescriptorSet_();
+        return Get().GetTexturesDescriptorSet_();
     }
 
-    inline vk::DescriptorSetLayout* ResourceManager::GetDescriptorSetLayout()
+    inline vk::DescriptorSetLayout* ResourceManager::GetTexturesDescriptorSetLayout()
     {
-        return Get().GetDescriptorSetLayout_();
+        return Get().GetTexturesDescriptorSetLayout_();
     }
 
     inline void ResourceManager::LoadMeshes(MeshesData meshes)
@@ -118,12 +118,12 @@ namespace nc::graphics::vulkan
         return m_textureResources.GetAccessor(uid);
     }
 
-    inline vk::DescriptorSet* ResourceManager::GetDescriptorSet_()
+    inline vk::DescriptorSet* ResourceManager::GetTexturesDescriptorSet_()
     {
         return m_textureResources.GetDescriptorSet();
     }
 
-    inline vk::DescriptorSetLayout* ResourceManager::GetDescriptorSetLayout_()
+    inline vk::DescriptorSetLayout* ResourceManager::GetTexturesDescriptorSetLayout_()
     {
         return m_textureResources.GetDescriptorLayout();;
     }

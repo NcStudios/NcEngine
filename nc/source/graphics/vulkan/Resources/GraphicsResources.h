@@ -4,6 +4,7 @@
 #include "graphics/vulkan/Resources/ImmutableBuffer.h"
 #include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/Texture.h"
+#include "component/vulkan/PointLight.h"
 
 #include <vector>
 #include <unordered_map>
@@ -60,5 +61,17 @@ namespace nc::graphics::vulkan
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             vk::UniqueSampler m_sampler;
             vk::ImageLayout m_layout;
+    };
+
+    class PointLightsData
+    {
+        public:
+            PointLightsData() = default;
+            PointLightsData();
+
+            void Add(PointLightInfo& info);
+
+            vk::UniqueDescriptorSet m_descriptorSet;
+            vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
     };
 }

@@ -13,5 +13,6 @@ if(USE_VULKAN)
     target_sources(${ENGINE_LIB}
         PRIVATE 
             ${ROOT_DIR}/source/ecs/MeshRendererSystem.cpp
+            ${ROOT_DIR}/source/ecs/PointLightSystem.cpp
     )
 endif()

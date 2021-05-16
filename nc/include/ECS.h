@@ -10,6 +10,7 @@
 #include "debug/Utils.h"
 #ifdef USE_VULKAN
 #include "component/vulkan/MeshRenderer.h"
+#include "component/vulkan/PointLight.h"
 #include "graphics/vulkan/TechniqueType.h"
 #else
 #include "component/ParticleEmitter.h"
@@ -56,6 +57,12 @@ namespace nc
     template<> vulkan::MeshRenderer* GetComponent<vulkan::MeshRenderer>(EntityHandle handle);
     template<> bool HasComponent<vulkan::MeshRenderer>(EntityHandle handle);
     template<> bool RemoveComponent<vulkan::MeshRenderer>(EntityHandle handle);
+
+    template<> vulkan::PointLight* AddComponent<vulkan::PointLight>(EntityHandle handle, vulkan::PointLightInfo info);
+    template<> vulkan::PointLight* AddComponent<vulkan::PointLight>(EntityHandle handle);
+    template<> vulkan::PointLight* GetComponent<vulkan::PointLight>(EntityHandle handle);
+    template<> bool HasComponent<vulkan::PointLight>(EntityHandle handle);
+    template<> bool RemoveComponent<vulkan::PointLight>(EntityHandle handle);
     #endif
     
     template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
