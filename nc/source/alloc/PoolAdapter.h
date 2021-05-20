@@ -39,6 +39,9 @@ namespace nc::alloc
             template<class Predicate>
             T* Get(Predicate predicate);
             
+            template<class Predicate>
+            T Extract(Predicate predicate); // throws on failure
+
             std::span<T*> GetActiveRange() noexcept;
             
             void Clear();
@@ -112,7 +115,7 @@ namespace nc::alloc
         }
         else
         {
-            std::swap(*pos, m_data.back());
+            *pos = m_data.back();
             m_data.pop_back();
         }
 
@@ -125,6 +128,30 @@ namespace nc::alloc
     {
         auto pos = std::ranges::find_if(m_data, predicate);
         return pos == m_data.end() ? nullptr : *pos;
+    }
+
+    template<class T>
+    template<class Predicate>
+    T PoolAdapter<T>::Extract(Predicate predicate)
+    {
+        auto pos = std::ranges::find_if(m_data, predicate);
+        if(pos == m_data.end())
+            throw std::runtime_error("PoolAdapter::Extract - Item does not exist");
+
+        T out{std::move(**pos)};
+        m_allocator.deallocate(*pos, 1);
+
+        if constexpr(storage_policy::sort_dense_storage_by_address::value)
+        {
+            m_data.erase(pos);
+        }
+        else
+        {
+            *pos = m_data.back();
+            m_data.pop_back();
+        }
+
+        return out;
     }
 
     template<class T>

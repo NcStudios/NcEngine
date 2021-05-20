@@ -1,11 +1,22 @@
 #pragma once
 
+#include "alloc/PoolAdapter.h"
 #include "physics/CollisionUtility.h"
-#include "alloc/Utility.h"
 
-#include <memory>
 #include <vector>
 #include <variant>
+
+namespace nc
+{
+    namespace ecs { struct StaticTreeEntry; }
+
+    template<>
+    struct StoragePolicy<ecs::StaticTreeEntry>
+    {
+        using allow_trivial_destruction = std::true_type;
+        using sort_dense_storage_by_address = std::true_type;
+    };
+}
 
 namespace nc::ecs
 {
@@ -70,7 +81,6 @@ namespace nc::ecs
     {
         public:
             ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float minimumExtent, float worldspaceExtent);
-            ~ColliderTree() noexcept;
 
             void Add(EntityHandle handle, const ColliderInfo& info);
             void Remove(EntityHandle handle);
@@ -79,8 +89,7 @@ namespace nc::ecs
             std::vector<const StaticTreeEntry*> BroadCheck(const DirectX::BoundingSphere& volume) const;
 
         private:
-            using Allocator = alloc::PoolAllocator<StaticTreeEntry>;
-            std::vector<std::unique_ptr<StaticTreeEntry, alloc::basic_deleter<Allocator>>> m_staticEntries;
+            alloc::PoolAdapter<StaticTreeEntry> m_pool;
             Octant m_root;
     };
 } // namespace nc::ecs

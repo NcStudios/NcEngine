@@ -8,15 +8,17 @@ namespace nc
     {
         const auto DefaultEntityTag = std::string{"Entity"};
         ecs::EntityComponentSystem* g_ecsImpl = nullptr;
+        ecs::EntitySystem* g_entitySystem = nullptr;
         ecs::ColliderSystem* g_colliderSystem = nullptr;
         ecs::ComponentSystem<NetworkDispatcher>* g_networkDispatcherSystem = nullptr;
         ecs::ComponentSystem<PointLight>* g_pointLightSystem = nullptr;
         ecs::ComponentSystem<Renderer>* g_rendererSystem = nullptr;
         ecs::ComponentSystem<Transform>* g_transformSystem = nullptr;
-
+        
         void RegisterEcs(ecs::EntityComponentSystem* impl)
         {
             g_ecsImpl = impl;
+            g_entitySystem = impl->GetEntitySystem();
             g_colliderSystem = impl->GetColliderSystem();
             g_networkDispatcherSystem = impl->GetNetworkDispatcherSystem();
             g_pointLightSystem = impl->GetPointLightSystem();
@@ -27,22 +29,29 @@ namespace nc
 
     EntityHandle CreateEntity(EntityInfo info)
     {
-        return internal::g_ecsImpl->CreateEntity(std::move(info));
+        auto handle = internal::g_entitySystem->Add(info);
+        internal::g_transformSystem->Add(handle, info.position, info.rotation, info.scale, info.parent);
+        return handle;
     }
 
-    bool DestroyEntity(EntityHandle handle)
+    void DestroyEntity(EntityHandle handle)
     {
-        return internal::g_ecsImpl->DestroyEntity(handle);
+        return internal::g_entitySystem->Remove(handle);
+    }
+
+    bool EntityExists(EntityHandle handle)
+    {
+        return internal::g_entitySystem->Contains(handle);
     }
 
     Entity* GetEntity(EntityHandle handle)
     {
-        return internal::g_ecsImpl->GetEntity(handle);
+        return internal::g_entitySystem->Get(handle);
     }
 
     Entity* GetEntity(const std::string& tag)
     {
-        return internal::g_ecsImpl->GetEntity(tag);
+        return internal::g_entitySystem->Get(tag);
     }
 
     template<> ParticleEmitter* AddComponent<ParticleEmitter>(EntityHandle handle, ParticleInfo info)

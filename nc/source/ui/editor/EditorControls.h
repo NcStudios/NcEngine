@@ -17,7 +17,7 @@ namespace nc::ui::editor::controls
     const auto GraphSize = ImVec2{128, 32};
     const auto Padding = 4.0f;
 
-    inline void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight);
+    inline void SceneGraphPanel(std::span<Entity*> entities, float windowHeight);
     inline void SceneGraphNode(Entity* entity, Transform* transform);
     inline void EntityPanel(EntityHandle handle);
     inline void Component(ComponentBase* comp);
@@ -30,7 +30,7 @@ namespace nc::ui::editor::controls
     /**
      * Scene Graph Controls
      */
-    void SceneGraphPanel(ecs::EntityMap& entities, float windowHeight)
+    void SceneGraphPanel(std::span<Entity*> entities, float windowHeight)
     {
         ImGui::SetNextWindowPos({Padding, TitleBarHeight});
         auto sceneGraphHeight = windowHeight - TitleBarHeight;
@@ -47,16 +47,16 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityList", {0, sceneGraphHeight / 2}, true))
             {
-                for(auto& [handle, entity] : entities)
+                for(auto* entity : entities)
                 {
-                    auto* transform = GetComponent<Transform>(handle);
+                    auto* transform = GetComponent<Transform>(entity->Handle);
                     if(transform->GetParent()) // only draw root nodes
                         continue;
 
-                    if(!filter.PassFilter(entity.Tag.c_str()))
+                    if(!filter.PassFilter(entity->Tag.c_str()))
                         continue;
                     
-                    SceneGraphNode(&entity, transform);
+                    SceneGraphNode(entity, transform);
                 }
             } ImGui::EndChild();
 
@@ -251,13 +251,19 @@ namespace nc::ui::editor::controls
     template<class T>
     void ComponentSystemHeader(const char* name, ecs::ComponentSystem<T>* system)
     {
+        constexpr auto size = static_cast<unsigned>(sizeof(T));
+        constexpr auto destruction = StoragePolicy<T>::allow_trivial_destruction::value ? "False" : "True";
+        constexpr auto sorting = StoragePolicy<T>::sort_dense_storage_by_address::value ? "True" : "False";
+
         if(ImGui::CollapsingHeader(name))
         {
             ImGui::PushID(name);
             ImGui::Indent();
             auto components = system->GetComponents();
-            ImGui::Text("Component Size:  %u", static_cast<unsigned>(sizeof(T)));
-            ImGui::Text("Copmonent Count: %u", static_cast<unsigned>(components.size()));
+            ImGui::Text("Component Size:      %u", size);
+            ImGui::Text("Copmonent Count:     %u", static_cast<unsigned>(components.size()));
+            ImGui::Text("Require Destruction: %s", destruction);
+            ImGui::Text("Sort by Address:     %s", sorting);
             if(ImGui::CollapsingHeader("Components"))
             {
                 ImGui::Indent();

@@ -119,54 +119,39 @@ namespace nc::ecs
     }
 
     ColliderTree::ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float minimumExtent, float worldspaceExtent)
-        : m_staticEntries{},
+        : m_pool{maxStaticColliders},
           m_root{{0.0f, 0.0f, 0.0f}, worldspaceExtent}
     {
-        Allocator::create_memory_resource(maxStaticColliders * sizeof(Allocator::value_type));
         DensityThreshold = densityThreshold;
         MinimumExtent = minimumExtent;
-    }
-
-    ColliderTree::~ColliderTree() noexcept
-    {
-        Allocator::destroy_memory_resource();
     }
 
     void ColliderTree::Add(EntityHandle handle, const ColliderInfo& info)
     {
         auto volume = physics::CalculateBoundingVolume(info.type, physics::GetVolumePropertiesFromColliderInfo(info), &GetComponent<Transform>(handle)->GetTransformationMatrix());
-        m_staticEntries.push_back(alloc::make_unique<StaticTreeEntry, Allocator>(volume, GetEntity(handle)->Layer, handle));
-        m_root.Add(m_staticEntries.back().get());
+        auto* entry = m_pool.Add(volume, GetEntity(handle)->Layer, handle);
+        m_root.Add(entry);
     }
 
     void ColliderTree::Remove(EntityHandle handle)
     {
-        auto pos = std::find_if(m_staticEntries.begin(), m_staticEntries.end(), [handle](auto& entry)
-        {
-            return handle == entry->handle;
-        });
-
-        if(pos == m_staticEntries.end())
-            throw std::runtime_error("ColliderTree::Remove - bad handle");
-        
-        *pos = std::move(m_staticEntries.back());
-        m_staticEntries.pop_back();
-        Rebuild();
+        if(m_pool.RemoveIf([handle](auto* e) { return e->handle == handle; }))
+            Rebuild();
     }
 
     void ColliderTree::Rebuild()
     {
         m_root.Clear();
         m_root = Octant{{}, m_root.GetExtent()};
-        for(const auto& entry : m_staticEntries)
-            m_root.Add(entry.get());
+
+        for(auto* entry : m_pool.GetActiveRange())
+            m_root.Add(entry);
     }
 
     void ColliderTree::Clear()
     {
         m_root.Clear();
-        m_staticEntries.clear();
-        Allocator().clear_memory_resource();
+        m_pool.Clear();
     }
 
     std::vector<const StaticTreeEntry*> ColliderTree::BroadCheck(const DirectX::BoundingSphere& volume) const

@@ -1,26 +1,18 @@
 #pragma once
 
-#include "entity/Entity.h"
-#include "entity/EntityHandle.h"
-#include "entity/EntityInfo.h"
+#include "EntitySystem.h"
 #include "ColliderSystem.h"
-#include "EntityMap.h"
-#include "HandleManager.h"
 #include "ParticleEmitterSystem.h"
+#include "alloc/PoolAdapter.h"
+#include "component/Collider.h"
+#include "component/NetworkDispatcher.h"
+#include "component/PointLight.h"
+#include "component/PointLightManager.h"
+#include "component/Renderer.h"
+#include "component/Transform.h"
+#include "config/Config.h"
 
-#include <memory>
-
-namespace nc
-{
-    class Collider;
-    class NetworkDispatcher;
-    class PointLight;
-    class Renderer;
-    class Vector3;
-    class Quaternion;
-    namespace graphics { class Graphics; }
-    namespace physics { class ColliderSystem; }
-}
+namespace nc::graphics { class Graphics; }
 
 namespace nc::ecs
 {
@@ -38,40 +30,33 @@ namespace nc::ecs
     {
         public:
             #ifdef USE_VULKAN
-            EntityComponentSystem();
+            EntityComponentSystem(const config::MemorySettings& memSettings,
+                                  const config::PhysicsSettings& physSettings);
             #else
-            EntityComponentSystem(graphics::Graphics* graphics);
+            EntityComponentSystem(graphics::Graphics* graphics,
+                                  const config::MemorySettings& memSettings,
+                                  const config::PhysicsSettings& physSettings);
             #endif
 
-            ColliderSystem* GetColliderSystem() const;
-            ComponentSystem<NetworkDispatcher>* GetNetworkDispatcherSystem() const;
-            ParticleEmitterSystem* GetParticleEmitterSystem();
-            ComponentSystem<PointLight>* GetPointLightSystem() const;
-            ComponentSystem<Renderer>* GetRendererSystem() const;
-            ComponentSystem<Transform>* GetTransformSystem() const;
-            Systems GetComponentSystems() const;
-            EntityMap& GetActiveEntities() noexcept;
-
-            EntityHandle CreateEntity(EntityInfo info);
-            bool DestroyEntity(EntityHandle handle);
-            bool DoesEntityExist(const EntityHandle handle) const noexcept;
-            Entity* GetEntity(EntityHandle handle);
-            Entity* GetEntity(const std::string& tag);
-
-            void SendFrameUpdate(float dt);
-            void SendFixedUpdate();
-            void SendOnDestroy();
-            void ClearState();
+            auto GetColliderSystem() noexcept { return &m_colliderSystem; }
+            auto GetNetworkDispatcherSystem() noexcept { return &m_networkDispatcherSystem; }
+            auto GetParticleEmitterSystem() noexcept { return &m_particleEmitterSystem; }
+            auto GetPointLightSystem() noexcept { return &m_lightSystem; }
+            auto GetRendererSystem()  noexcept { return &m_rendererSystem; }
+            auto GetTransformSystem() noexcept { return &m_transformSystem; }
+            auto GetEntitySystem() noexcept { return &m_entitySystem; }
+            auto GetActiveEntities() noexcept { return m_entitySystem.GetActiveEntities(); }
+            auto GetComponentSystems() noexcept -> Systems;
+            void FrameEnd();
+            void Clear();
 
         private:
-            HandleManager m_handleManager;
-            EntityMap m_active;
-            EntityMap m_toDestroy;
-            std::unique_ptr<ColliderSystem> m_colliderSystem;
-            std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
-            std::unique_ptr<ParticleEmitterSystem> m_particleEmitterSystem;
-            std::unique_ptr<ComponentSystem<Renderer>> m_rendererSystem;
-            std::unique_ptr<ComponentSystem<Transform>> m_transformSystem;
-            std::unique_ptr<ComponentSystem<NetworkDispatcher>> m_networkDispatcherSystem;
+            EntitySystem m_entitySystem;
+            ColliderSystem m_colliderSystem;
+            ComponentSystem<PointLight> m_lightSystem;
+            ParticleEmitterSystem m_particleEmitterSystem;
+            ComponentSystem<Renderer> m_rendererSystem;
+            ComponentSystem<Transform> m_transformSystem;
+            ComponentSystem<NetworkDispatcher> m_networkDispatcherSystem;
     };
 } // namespace nc::ecs
