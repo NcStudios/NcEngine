@@ -17,9 +17,9 @@ namespace nc
 
             virtual ~ComponentBase() = default;
             ComponentBase(const ComponentBase&) = delete;
-            ComponentBase(ComponentBase&&) = delete;
+            ComponentBase(ComponentBase&&) = default;
             ComponentBase& operator=(const ComponentBase&) = delete;
-            ComponentBase& operator=(ComponentBase&&) = delete;
+            ComponentBase& operator=(ComponentBase&&) = default;
 
             EntityHandle GetParentHandle() const noexcept { return m_parentHandle; }
 

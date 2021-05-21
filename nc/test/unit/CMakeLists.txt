@@ -151,6 +151,30 @@ target_link_libraries(PacketBuffer_unit_tests
 
 add_test(PacketBuffer_unit_tests PacketBuffer_unit_tests)
 
+### Registry Tests ###
+add_executable(Registry_unit_tests
+    ${ROOT_DIR}/test/unit/Registry_unit_tests.cpp
+)
+
+target_include_directories(Registry_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(Registry_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(Registry_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(Registry_unit_tests Registry_unit_tests)
+
 ### Transform Tests ###
 add_executable(Transform_unit_tests
     ${ROOT_DIR}/test/unit/Transform_unit_tests.cpp
