@@ -55,7 +55,7 @@ namespace nc::sample
             {
                 .position = m_generator.Position(),
                 .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
-                .isStatic = m_spawnStaticEntities
+                .flags = m_spawnStaticEntities
             });
 
             if(m_applyConstantVelocity)

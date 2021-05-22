@@ -41,8 +41,9 @@ namespace nc::ecs
 
     inline EntityHandle EntitySystem::Add(const EntityInfo& info)
     {
-        auto handle = m_handle.GenerateNewHandle();
-        m_activePool.Add(handle, std::move(info.tag), info.layer, info.isStatic);
+        /** @todo layer still handled old way */
+        auto handle = m_handle.GenerateNewHandle(0u, info.flags);
+        m_activePool.Add(handle, std::move(info.tag), info.layer);
         return handle;
     }
 

@@ -16,12 +16,11 @@ namespace nc::ecs
     template<std::derived_from<Component> T>
     class Registry
     {
-        using index_type = EntityHandle::Handle_t;
-        static constexpr index_type NullIndex = static_cast<index_type>(EntityHandle::Invalid());
-        static constexpr index_type ToIndex(EntityHandle h) { return static_cast<index_type>(h); }
+        using index_type = HandleTraits::index_type;
+        static constexpr index_type NullIndex = std::numeric_limits<index_type>::max();
 
         public:
-            Registry(index_type maxCount);
+            Registry(size_t maxCount);
 
             template<class... Args>
             T* Emplace(EntityHandle handle, Args&&... args);
@@ -38,7 +37,7 @@ namespace nc::ecs
     };
 
     template<std::derived_from<Component> T>
-    Registry<T>::Registry(index_type maxCount)
+    Registry<T>::Registry(size_t maxCount)
         : m_sparse(maxCount, NullIndex),
           m_dense{}
     {}
@@ -53,27 +52,27 @@ namespace nc::ecs
 
         auto& ref = m_dense.emplace_back(handle, std::forward<Args>(args)...);
         auto index = m_dense.size() - 1;
-        m_sparse.at(ToIndex(handle)) = index;
+        m_sparse.at(handle.Index()) = index;
         return &ref;
     }
 
     template<std::derived_from<Component> T>
     T* Registry<T>::Get(EntityHandle handle)
     {
-        auto denseIndex = m_sparse.at(ToIndex(handle));
+        auto denseIndex = m_sparse.at(handle.Index());
         return denseIndex == NullIndex ? nullptr : &(m_dense.at(denseIndex));
     }
 
     template<std::derived_from<Component> T>
     bool Registry<T>::Contains(EntityHandle handle)
     {
-        return m_sparse.at(ToIndex(handle)) != NullIndex;
+        return m_sparse.at(handle.Index()) != NullIndex;
     }
 
     template<std::derived_from<Component> T>
     bool Registry<T>::Remove(EntityHandle handle)
     {
-        const auto sparseIndex = ToIndex(handle);
+        const auto sparseIndex = handle.Index();
         const auto denseIndex = m_sparse.at(sparseIndex);
         if(denseIndex == NullIndex)
             return false;
@@ -84,7 +83,7 @@ namespace nc::ecs
 
         auto movedHandle = m_dense[denseIndex].GetParentHandle();
         if(movedHandle != handle)
-            m_sparse.at(ToIndex(movedHandle)) = denseIndex;
+            m_sparse.at(movedHandle.Index()) = denseIndex;
 
         return true;
     }

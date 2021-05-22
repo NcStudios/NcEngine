@@ -41,8 +41,8 @@ namespace nc::physics
      *  consumed by compare/notify. */
     struct NarrowDetectEvent
     {
-        EntityHandle::Handle_t first;
-        EntityHandle::Handle_t second;
+        HandleTraits::handle_type first;
+        HandleTraits::handle_type second;
     };
 
     /** @todo FindXXXEvents will notify immediately - do we want to delay this? */

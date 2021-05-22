@@ -1,5 +1,6 @@
 #pragma once
 
+#include "entity/EntityHandle.h"
 #include "math/Vector3.h"
 #include "math/Quaternion.h"
 #include "physics/LayerMask.h"
@@ -8,6 +9,8 @@
 
 namespace nc
 {
+
+
     struct EntityInfo
     {
         Vector3 position = Vector3::Zero();
@@ -16,6 +19,7 @@ namespace nc
         Transform* parent = nullptr;
         std::string tag = "Entity";
         physics::Layer layer = physics::DefaultLayer;
-        bool isStatic = false;
+        HandleTraits::flags_type flags = 0u;
+        //bool isStatic = false;
     };
 }

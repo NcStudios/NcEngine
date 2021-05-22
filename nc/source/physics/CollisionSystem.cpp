@@ -105,7 +105,7 @@ namespace nc::physics
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
-        const auto handles = dynamicSoA->GetSpan<EntityHandle::Handle_t>();
+        const auto handles = dynamicSoA->GetSpan<HandleTraits::handle_type>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
         const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
         const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
@@ -121,7 +121,7 @@ namespace nc::physics
     void CollisionSystem::NarrowDetectVsStatic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
-        const auto handles = dynamicSoA->GetSpan<EntityHandle::Handle_t>();
+        const auto handles = dynamicSoA->GetSpan<HandleTraits::handle_type>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
         const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
         const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
@@ -129,7 +129,7 @@ namespace nc::physics
         {
             const auto volume = CalculateBoundingVolume(types[dynamicIndex], properties[dynamicIndex], transforms[dynamicIndex]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, volume, staticPair->volume))
-                m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityHandle::Handle_t>(staticPair->handle));
+                m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<HandleTraits::handle_type>(staticPair->handle));
         }
     }
     
@@ -159,8 +159,8 @@ namespace nc::physics
 
     void CollisionSystem::NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const
     {
-        auto e1 = GetEntity(EntityHandle{data.first});
-        auto e2 = GetEntity(EntityHandle{data.second});
+        auto e1 = GetEntity(static_cast<EntityHandle>(data.first));
+        auto e2 = GetEntity(static_cast<EntityHandle>(data.second));
         switch(type)
         {
             case CollisionEventType::Enter:

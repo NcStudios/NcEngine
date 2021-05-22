@@ -122,7 +122,7 @@ namespace nc
     {
         auto* entity = GetEntity(handle);
         IF_THROW(!entity, "RemoveComponent<Collider> - Bad handle");
-        return internal::g_colliderSystem->Remove(handle, entity->IsStatic);
+        return internal::g_colliderSystem->Remove(handle);
     }
 
     template<> ParticleEmitter* GetComponent<ParticleEmitter>(EntityHandle handle)

@@ -4,11 +4,10 @@
 
 namespace nc
 {
-Entity::Entity(EntityHandle handle, std::string tag, physics::Layer layer, bool isStatic) noexcept
+Entity::Entity(EntityHandle handle, std::string tag, physics::Layer layer) noexcept
     : Handle{handle}, 
       Tag{std::move(tag)},
       Layer{layer},
-      IsStatic{isStatic},
       m_userComponents{}
 {
 }

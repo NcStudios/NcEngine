@@ -5,9 +5,13 @@
 
 using namespace nc;
 
-auto TestHandle = EntityHandle{1u};
-auto TestHandle2 = EntityHandle{2u};
-auto TestHandle3 = EntityHandle{3u};
+constexpr auto TestLayer = HandleTraits::layer_type{0u};
+constexpr auto TestVersion = HandleTraits::version_type{0u};
+constexpr auto TestFlags = EntityFlags::None;
+
+auto TestHandle = EntityHandle{1u, TestVersion, TestLayer, TestFlags};
+auto TestHandle2 = EntityHandle{2u, TestVersion, TestLayer, TestFlags};
+auto TestHandle3 = EntityHandle{3u, TestVersion, TestLayer, TestFlags};
 auto TestPos1 = Vector3{0.0f, 1.0f, 2.0f};
 auto TestPos2 = Vector3{1.5f, 1.5f, 1.5f};
 auto TestRotQuat1 = Quaternion::Identity();

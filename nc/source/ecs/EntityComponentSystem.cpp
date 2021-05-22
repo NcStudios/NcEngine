@@ -47,7 +47,7 @@ namespace nc::ecs
         m_entitySystem.CommitRemovals([this](const auto& entity)
         {
             auto handle = entity.Handle;
-            m_colliderSystem.Remove(handle, entity.IsStatic);
+            m_colliderSystem.Remove(handle);
             m_transformSystem.Remove(handle);
             m_rendererSystem.Remove(handle);
             m_lightSystem.Remove(handle);

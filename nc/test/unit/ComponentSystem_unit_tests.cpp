@@ -15,12 +15,16 @@ struct Fake : public ComponentBase
     int val;
 };
 
-EntityHandle TestParentHandle1{1u};
-EntityHandle TestParentHandle2{2u};
-EntityHandle TestParentHandle3{3u};
-EntityHandle TestParentHandle4{4u};
-EntityHandle TestParentHandle5{5u};
-EntityHandle TestBadHandle{10u};
+constexpr auto TestLayer = HandleTraits::layer_type{0u};
+constexpr auto TestVersion = HandleTraits::version_type{0u};
+constexpr auto TestFlags = EntityFlags::None;
+
+EntityHandle TestParentHandle1{1u, TestVersion, TestLayer, TestFlags};
+EntityHandle TestParentHandle2{2u, TestVersion, TestLayer, TestFlags};
+EntityHandle TestParentHandle3{3u, TestVersion, TestLayer, TestFlags};
+EntityHandle TestParentHandle4{4u, TestVersion, TestLayer, TestFlags};
+EntityHandle TestParentHandle5{5u, TestVersion, TestLayer, TestFlags};
+EntityHandle TestBadHandle{10u, TestVersion, TestLayer, TestFlags};
 int TestVal1 = 20;
 int TestVal2 = 21;
 int TestVal3 = 22;

@@ -4,11 +4,15 @@
 using namespace nc;
 using namespace nc::ecs;
 
-constexpr auto handle0 = EntityHandle{0u};
-constexpr auto handle1 = EntityHandle{1u};
-constexpr auto handle2 = EntityHandle{2u};
-constexpr auto handle3 = EntityHandle{3u};
-constexpr auto handle4 = EntityHandle{4u};
+constexpr auto TestLayer = HandleTraits::layer_type{0u};
+constexpr auto TestVersion = HandleTraits::version_type{0u};
+constexpr auto TestFlags = EntityFlags::None;
+
+constexpr auto handle0 = EntityHandle{0u, TestVersion, TestLayer, TestFlags};
+constexpr auto handle1 = EntityHandle{1u, TestVersion, TestLayer, TestFlags};
+constexpr auto handle2 = EntityHandle{2u, TestVersion, TestLayer, TestFlags};
+constexpr auto handle3 = EntityHandle{3u, TestVersion, TestLayer, TestFlags};
+constexpr auto handle4 = EntityHandle{4u, TestVersion, TestLayer, TestFlags};
 
 struct Fake : public Component
 {

@@ -9,7 +9,7 @@
 
 namespace nc::ui::editor::controls
 {
-    auto SelectedEntity = static_cast<EntityHandle::Handle_t>(EntityHandle::Invalid());
+    auto SelectedEntity = HandleTraits::null_handle;
     const auto TitleBarHeight = 40.0f;
     const auto DefaultItemWidth = 60.0f;
     const auto SceneGraphPanelWidth = 300;
@@ -62,7 +62,7 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityPanel", {0,0}, true))
             {
-                if(SelectedEntity)
+                if(SelectedEntity != HandleTraits::null_handle)
                     controls::EntityPanel(static_cast<EntityHandle>(SelectedEntity));
 
             } ImGui::EndChild();
@@ -72,7 +72,7 @@ namespace nc::ui::editor::controls
 
     void SceneGraphNode(Entity* entity, Transform* transform)
     {
-        auto handleValue = static_cast<EntityHandle::Handle_t>(entity->Handle);
+        auto handleValue = static_cast<HandleTraits::handle_type>(entity->Handle);
         ImGui::PushID(handleValue);
 
         auto flags = 0;
@@ -100,15 +100,16 @@ namespace nc::ui::editor::controls
 
         if(!entity) // entity may have been deleted
         {
-            SelectedEntity = static_cast<EntityHandle::Handle_t>(EntityHandle::Invalid());
+            SelectedEntity = HandleTraits::null_handle;
             return;
         }
 
         ImGui::Separator();
-        ImGui::Text("Tag    %s", entity->Tag.c_str());
-        ImGui::Text("Handle %d", static_cast<unsigned>(handle));
-        ImGui::Text("Static %s", entity->IsStatic ? "True" : "False");
-
+        ImGui::Text("Tag     %s", entity->Tag.c_str());
+        ImGui::Text("Handle  %d", handle.Index());
+        ImGui::Text("Version %d", handle.Version());
+        ImGui::Text("Layer   %d", handle.Layer());
+        ImGui::Text("Static  %s", handle.IsStatic() ? "True" : "False");
         controls::Component(GetComponent<Transform>(handle));
         controls::Component(GetComponent<NetworkDispatcher>(handle));
         controls::Component(GetComponent<ParticleEmitter>(handle));
@@ -268,7 +269,7 @@ namespace nc::ui::editor::controls
             {
                 ImGui::Indent();
                 for(auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", static_cast<unsigned>(component->GetParentHandle()), static_cast<void*>(component));
+                    ImGui::Text("Handle: %5u  |  Address: %p", component->GetParentHandle().IsStatic(), static_cast<void*>(component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();

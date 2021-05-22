@@ -33,13 +33,13 @@ namespace nc::ecs
 
     Collider* ColliderSystem::Add(EntityHandle handle, const ColliderInfo& info)
     {
-        if(GetEntity(handle)->IsStatic)
+        if(handle.IsStatic())
             m_staticTree.Add(handle, info);
         else
         {
             m_dynamicSoA.Add
             (
-                static_cast<EntityHandle::Handle_t>(handle),
+                static_cast<HandleTraits::handle_type>(handle),
                 &GetComponent<Transform>(handle)->GetTransformationMatrix(),
                 physics::GetVolumePropertiesFromColliderInfo(info),
                 info.type
@@ -49,15 +49,15 @@ namespace nc::ecs
         return m_componentSystem.Add(handle, info);
     }
 
-    bool ColliderSystem::Remove(EntityHandle handle, bool isStatic)
+    bool ColliderSystem::Remove(EntityHandle handle)
     {
         if(!m_componentSystem.Remove(handle))
             return false;
 
-        if(isStatic)
+        if(handle.IsStatic())
             m_staticTree.Remove(handle);
         else
-            m_dynamicSoA.Remove(static_cast<EntityHandle::Handle_t>(handle));
+            m_dynamicSoA.Remove(static_cast<HandleTraits::handle_type>(handle));
 
         return true;
     }
