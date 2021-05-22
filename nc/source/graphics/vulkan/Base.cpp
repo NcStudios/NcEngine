@@ -275,7 +275,9 @@ namespace nc::graphics::vulkan
 
         vk::DescriptorPoolSize renderingPoolSizes[] =
         {
-            { vk::DescriptorType::eCombinedImageSampler, 10 }
+            { vk::DescriptorType::eSampler, 10 },
+            { vk::DescriptorType::eSampledImage, 1000 },
+            { vk::DescriptorType::eStorageBuffer, 10 }
         };
         
         vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
@@ -305,6 +307,16 @@ namespace nc::graphics::vulkan
 
         Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
         ImGui_ImplVulkan_DestroyFontUploadObjects();
+    }
+
+    vma::Allocator* Base::GetAllocator() noexcept
+    {
+        return &m_allocator;
+    }
+
+    vma::Allocation* Base::GetBufferAllocation(uint32_t index) noexcept
+    {
+        return &(m_buffers.at(index)).second;
     }
 
     void Base::CreateLogicalDevice()
@@ -367,14 +379,14 @@ namespace nc::graphics::vulkan
         m_commandPool = m_logicalDevice.createCommandPool(poolInfo);
     }
 
-    uint32_t Base::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer)
+    uint32_t Base::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage memoryUsageType, vk::Buffer* createdBuffer)
     {
         vk::BufferCreateInfo bufferInfo{};
         bufferInfo.setSize(size);
         bufferInfo.setUsage(usageFlags);
 
         vma::AllocationCreateInfo allocationInfo;
-        allocationInfo.usage = isStaging ? vma::MemoryUsage::eCpuOnly : vma::MemoryUsage::eGpuOnly;
+        allocationInfo.usage = memoryUsageType;
 
         vma::Allocation allocation;
         vk::Buffer buffer;
@@ -422,7 +434,7 @@ namespace nc::graphics::vulkan
 
         // Create staging buffer (lives on CPU)
         vk::Buffer stagingBuffer;
-        auto stagingIndex = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, true, &stagingBuffer);
+        auto stagingIndex = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
 
         // Map the pixels onto the staging buffer
         void* mappedData;

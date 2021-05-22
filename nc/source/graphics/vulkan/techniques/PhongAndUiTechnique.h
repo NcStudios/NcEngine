@@ -7,14 +7,23 @@
 
 namespace nc::graphics
 {
+    class Graphics2;
+    
     namespace vulkan
     {
-        class Graphics2; class Commands;
+        class Commands;
 
         struct PushConstants
         {
-            DirectX::XMMATRIX modelView;
+            // N MVP matrices
+            DirectX::XMMATRIX normal;
             DirectX::XMMATRIX model;
+            DirectX::XMMATRIX viewProjection;
+
+            // Camera world position
+            Vector3 cameraPos;
+
+            // Indices into texture array
             uint32_t baseColorIndex;
             uint32_t normalColorIndex;
             uint32_t roughnessColorIndex;

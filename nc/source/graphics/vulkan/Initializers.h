@@ -44,7 +44,7 @@ namespace nc::graphics::vulkan
     vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo();
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment);
     vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, size_t dataTypeSize);
-    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, vk::DescriptorSetLayout& layout);
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, const std::vector<vk::DescriptorSetLayout>& layouts);
     
     // Screen size
     vk::Viewport CreateViewport(const Vector2& dimensions);

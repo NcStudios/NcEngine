@@ -195,6 +195,7 @@ void EntityComponentSystem::SendOnDestroy()
         m_transformSystem->Remove(handle);
         #ifdef USE_VULKAN
         m_meshRendererSystem->Remove(handle);
+        m_pointLightSystem2->Remove(handle);
         #else
         m_particleEmitterSystem->Remove(handle);
         #endif
@@ -227,6 +228,7 @@ void EntityComponentSystem::ClearState()
     m_transformSystem->Clear();
     #ifdef USE_VULKAN
     m_meshRendererSystem->Clear();
+    m_pointLightSystem2->Clear();
     #else
     m_particleEmitterSystem->Clear();
     #endif

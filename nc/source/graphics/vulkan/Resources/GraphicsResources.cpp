@@ -1,5 +1,5 @@
 #include "GraphicsResources.h"
-#include "Initializers.h"
+#include "graphics/vulkan/Initializers.h"
 
 namespace nc::graphics::vulkan
 {
@@ -89,25 +89,51 @@ namespace nc::graphics::vulkan
         m_sampler.reset();
     }
 
-    PointLightsData::PointLightsData()
+    PointLightsData::PointLightsData(nc::graphics::Graphics2* graphics, uint32_t maxPointLights)
     {
-        
-        auto descriptorLayoutBinding = CreateDescriptorSetLayoutBinding(2, )
+        auto base = graphics->GetBasePtr();
+
+        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment)};
+        m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
+        m_pointLightsArrayBuffer = WriteableBuffer<nc::vulkan::PointLightInfo>(graphics, (sizeof(nc::vulkan::PointLightInfo) * maxPointLights));
+        m_descriptorSet = CreateDescriptorSet(graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+
+		vk::DescriptorBufferInfo pointLightArrayInfo;
+		pointLightArrayInfo.buffer = *m_pointLightsArrayBuffer.GetBuffer();
+		pointLightArrayInfo.offset = 0;
+		pointLightArrayInfo.range = sizeof(nc::vulkan::PointLightInfo) * maxPointLights;
+
+        vk::WriteDescriptorSet write{};
+        write.setDstBinding(0);
+        write.setDstArrayElement(0);
+        write.setDescriptorType(vk::DescriptorType::eStorageBuffer);
+        write.setDescriptorCount(1);
+        write.setDstSet(m_descriptorSet.get());
+        write.setPBufferInfo(&pointLightArrayInfo);
+        write.setPImageInfo(0);
+
+        base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
     }
 
-    void Add(PointLightInfo& info)
+    void PointLightsData::Update(const std::vector<nc::vulkan::PointLightInfo>& pointLights)
     {
+        m_pointLightsArrayBuffer.Map(pointLights);
     }
 
-    class PointLightsData
+    vk::DescriptorSetLayout* PointLightsData::GetDescriptorLayout() noexcept
     {
-        public:
-            PointLightsData() = default;
-            PointLightsData();
+        return &m_descriptorSetLayout.get();
+    }
 
-            void Add(PointLightInfo& info);
+    vk::DescriptorSet* PointLightsData::GetDescriptorSet() noexcept
+    {
+        return &m_descriptorSet.get();
+    }
 
-            vk::UniqueDescriptorSet m_descriptorSet;
-            vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
-    };
+    void PointLightsData::Clear() noexcept
+    {
+        m_pointLightsArrayBuffer.Clear();
+        m_descriptorSet.reset();
+        m_descriptorSetLayout.reset();
+    }
 }

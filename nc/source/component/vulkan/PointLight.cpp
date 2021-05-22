@@ -1,15 +1,26 @@
-#pragma once
-
 #include "component/vulkan/PointLight.h"
-#include "directx/math/DirectXMath.h"
+#include "component/Transform.h"
+#include "Ecs.h"
+
+#ifdef NC_EDITOR_ENABLED
+#include "ui/editor/Widgets.h"
+#endif
 
 namespace nc::vulkan
 {
-    #ifdef NC_EDITOR_ENABLED
+    Attenuation GetAttenuationFromRange(float range)
+    {
+        Attenuation att = {};
+        att.constant = 1.0f;
+        att.linear = 4.5f / range;
+        att.quadratic = 75.0f / (range * range);
+        return att;
+    }
+
+    #ifdef USE_VULKAN
     void PointLight::EditorGuiElement()
     {
         const float dragSpeed = 1.0f;
-
         ImGui::Text("Point Light");
         ImGui::Indent();
             ImGui::Text("Ambient    ");
@@ -19,24 +30,30 @@ namespace nc::vulkan
             ImGui::Text("Diffuse    ");
             ImGui::Indent();  
                 ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##difcolor", &m_info.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
-                ui::editor::floatWidget("Intensity ", "##diffuseintensity", &m_info.diffuseIntensity, dragSpeed, 0.01f, 5.0f, "%.1f");
             ImGui::Unindent();
-            ImGui::Text("Attenuation");
-                ui::editor::columnHeaderWidget("", "Const", "Lin", "Quad");
-                ui::editor::xyzWidget("", "att", &m_info.attConst, &m_info.attLin, &m_info.attQuad, 0.01f, 1.0f);
+            ImGui::Text("Specular    ");
+            ImGui::Indent();  
+                ImGui::Text("Color      ");   ImGui::SameLine();  ImGui::ColorEdit3("##specularcolor", &m_info.specularColor.x, ImGuiColorEditFlags_NoInputs);
+            ImGui::Unindent();
+            ImGui::Text("Intensity");
+            ImGui::Indent();  
+                ui::editor::floatWidget("Intensity", "difintensity", &m_info.diffuseIntensity, dragSpeed,  0.0f, 600.0f, "%.2f");
+                ui::editor::floatWidget("Range", "range", &m_range, dragSpeed,  0.0f, 600.0f, "%.2f");
+            ImGui::Unindent();
         ImGui::Unindent();
     }
     #endif
 
-    PointLight::PointLight(EntityHandle parentHandle)
-    : Component{parentHandle}
-    {
-    }
-
-    PointLight::PointLight(EntityHandle parentHandle, const PointLightInfo& info)
+    PointLight::PointLight(EntityHandle parentHandle, PointLightInfo info)
     : Component{parentHandle},
-      m_info{info}
+      m_range{13},
+      m_info{info},
+      m_transform{GetComponent<Transform>(parentHandle)}
     {
+        auto attenuation = GetAttenuationFromRange(m_range);
+        m_info.attConst = attenuation.constant;
+        m_info.attLin = attenuation.linear;
+        m_info.attQuad = attenuation.quadratic;
     }
 
     const PointLightInfo& PointLight::GetInfo()
@@ -44,13 +61,26 @@ namespace nc::vulkan
         return m_info;
     }
 
-    void PointLight::Update(const PointLightInfo& info)
+    void PointLight::Update()
     {
+        auto transformPos = m_transform->GetPosition();
+        auto attenuation = GetAttenuationFromRange(m_range);
+        m_info.attConst = attenuation.constant;
+        m_info.attLin = attenuation.linear;
+        m_info.attQuad = attenuation.quadratic;
+        m_info.pos = Vector4(transformPos.x, transformPos.y, transformPos.z, 1.0);
+        m_info.isInitialized = true;
+    }
+
+    void PointLight::Set(const PointLightInfo& info)
+    {
+        m_info.pos = info.pos;
         m_info.ambient = info.ambient;
         m_info.attConst = info.attConst;
         m_info.attLin = info.attLin;
         m_info.attQuad = info.attQuad;
         m_info.diffuseColor = info.diffuseColor;
-        m_info.diffuseIntensity = info.diffuseIntensity;
+        m_info.specularColor = info.specularColor;
+        m_info.isInitialized = true;
     }
 }

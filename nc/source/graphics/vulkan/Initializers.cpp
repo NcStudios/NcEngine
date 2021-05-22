@@ -135,7 +135,7 @@ namespace nc::graphics::vulkan
         rasterizer.setPolygonMode(vk::PolygonMode::eFill); // Set to line for wireframe, requires enabling a GPU feature.
         rasterizer.setLineWidth(1.0f); // Setting wider requires enabling the wideLines GPU feature.
         rasterizer.setCullMode(vk::CullModeFlagBits::eBack);
-        rasterizer.setFrontFace(vk::FrontFace::eCounterClockwise);
+        rasterizer.setFrontFace(vk::FrontFace::eClockwise);
         rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(false));
         rasterizer.setDepthBiasConstantFactor(0.0f);
         rasterizer.setDepthBiasClamp(0.0f);
@@ -197,11 +197,11 @@ namespace nc::graphics::vulkan
         return pushConstantRange;
     }
 
-    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, vk::DescriptorSetLayout& layout)
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, const std::vector<vk::DescriptorSetLayout>& layouts)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(1);  
-        pipelineLayoutInfo.setPSetLayouts(&layout);  
+        pipelineLayoutInfo.setSetLayoutCount(layouts.size());  
+        pipelineLayoutInfo.setPSetLayouts(layouts.data());  
         pipelineLayoutInfo.setPushConstantRangeCount(1); 
         pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);
         return pipelineLayoutInfo;

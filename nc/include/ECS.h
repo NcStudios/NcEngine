@@ -59,7 +59,6 @@ namespace nc
     template<> bool RemoveComponent<vulkan::MeshRenderer>(EntityHandle handle);
 
     template<> vulkan::PointLight* AddComponent<vulkan::PointLight>(EntityHandle handle, vulkan::PointLightInfo info);
-    template<> vulkan::PointLight* AddComponent<vulkan::PointLight>(EntityHandle handle);
     template<> vulkan::PointLight* GetComponent<vulkan::PointLight>(EntityHandle handle);
     template<> bool HasComponent<vulkan::PointLight>(EntityHandle handle);
     template<> bool RemoveComponent<vulkan::PointLight>(EntityHandle handle);

@@ -85,13 +85,13 @@ namespace nc::graphics::vulkan
 
         // Create staging buffer (lives on CPU).
         vk::Buffer stagingBuffer;
-        auto stagingBufferMemoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eTransferSrc, true, &stagingBuffer);
+        auto stagingBufferMemoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
 
         // Map the data onto the staging buffer.
         m_base->MapMemory(stagingBufferMemoryIndex, data, size);
 
         // Create immutable buffer (lives on GPU).
-        m_memoryIndex = m_base->CreateBuffer(size, UsageFlag_T::usage, false, &m_immutableBuffer);
+        m_memoryIndex = m_base->CreateBuffer(size, UsageFlag_T::usage, vma::MemoryUsage::eGpuOnly, &m_immutableBuffer);
 
         // Copy staging into immutable buffer.
         Commands::SubmitCopyCommandImmediate(*m_base, stagingBuffer, m_immutableBuffer, size);

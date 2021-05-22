@@ -3,7 +3,7 @@
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Renderer.h"
-#include "graphics/vulkan/ResourceManager.h"
+#include "graphics/vulkan/resources/ResourceManager.h"
 
 namespace nc::ecs
 {
@@ -11,8 +11,10 @@ namespace nc::ecs
 
     PointLightSystem::PointLightSystem(graphics::Graphics2* graphics, uint32_t maxPointLights)
     : m_componentSystem{maxPointLights},
+      m_pointLightInfos{},
       m_graphics{graphics}
     {
+        graphics::vulkan::ResourceManager::InitializePointLights(graphics, maxPointLights);
     }
 
     ComponentSystem<vulkan::PointLight>* PointLightSystem::GetSystem()
@@ -22,20 +24,22 @@ namespace nc::ecs
 
     vulkan::PointLight* PointLightSystem::Add(EntityHandle parentHandle, vulkan::PointLightInfo info)
     {
-        auto renderer = m_componentSystem.Add(parentHandle, info);
-        ResourceManager::LoadPointLight(info);
-        m_graphics->GetRendererPtr()->RegisterMeshRenderer(techniqueType, renderer);
-
-        m_techniqueManager.RegisterMeshRenderer(techniqueType, renderer);
-        return renderer;
+        auto pointLight = m_componentSystem.Add(parentHandle, info);
+        info.isInitialized = true;
+        m_pointLightInfos.push_back(info);
+        graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
+        return pointLight;
     }
 
-    vulkan::PointLight* PointLightSystem::Add(EntityHandle parentHandle)
+    void PointLightSystem::Update()
     {
-        auto renderer = m_componentSystem.Add(parentHandle, std::move(meshUid), std::move(material), GetComponent<Transform>(parentHandle));
-        m_graphics->GetRendererPtr()->RegisterMeshRenderer(techniqueType, renderer);
-        m_techniqueManager.RegisterMeshRenderer(techniqueType, renderer);
-        return renderer;
+        m_pointLightInfos.clear();
+        for (auto& pointLight : m_componentSystem.GetComponents())
+        {
+            pointLight->Update();
+            m_pointLightInfos.push_back(pointLight->GetInfo());
+        }
+        graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
     }
 
     bool PointLightSystem::Remove(EntityHandle parentHandle)
@@ -48,19 +52,19 @@ namespace nc::ecs
         return m_componentSystem.Contains(parentHandle);
     }
 
-    vulkan::MeshRenderer* PointLightSystem::GetPointerTo(EntityHandle parentHandle)
+    vulkan::PointLight* PointLightSystem::GetPointerTo(EntityHandle parentHandle)
     {
         return m_componentSystem.GetPointerTo(parentHandle);
     }
 
-    auto PointLightSystem::GetComponents() -> ComponentSystem<vulkan::MeshRenderer>::ContainerType&
+    auto PointLightSystem::GetComponents() -> ComponentSystem<vulkan::PointLight>::ContainerType&
     {
         return m_componentSystem.GetComponents();
     }
 
     void PointLightSystem::Clear()
     {
-        m_techniqueManager.Clear();
+        m_pointLightInfos.resize(0);
         m_componentSystem.Clear();
     }
 }

@@ -6,7 +6,6 @@
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
 #include "graphics/vulkan/techniques/PhongAndUiTechnique.h"
-#include "graphics/vulkan/resources/TransformBuffer.h"
 
 namespace nc::graphics::vulkan
 {
@@ -49,6 +48,10 @@ namespace nc::graphics::vulkan
                 m_phongAndUiTechnique->RegisterMeshRenderer(renderer);
                 break;
             }
+            case TechniqueType::None:
+            {
+                break;
+            }
         }
     }
 
@@ -58,23 +61,25 @@ namespace nc::graphics::vulkan
 
         cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
         cmd->bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline, 0, 1, ResourceManager::GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
 
+        const auto viewMatrix = m_graphics->GetViewMatrix();
+        const auto projectionMatrix = m_graphics->GetProjectionMatrix();
+
+        auto pushConstants = PushConstants{};
+        pushConstants.viewProjection = viewMatrix * projectionMatrix;
+        pushConstants.cameraPos = m_graphics->GetCameraPosition();
+        
         for (auto& [meshUid, renderers] : *meshRenderers)
         {
-            const auto viewMatrix = m_graphics->GetViewMatrix();
-            const auto projectionMatrix = m_graphics->GetProjectionMatrix();
             const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
             
             for (auto* meshRenderer : renderers)
             {
                 auto& material = meshRenderer->GetMaterial();
-                auto modelViewMatrix = meshRenderer->GetTransform()->GetTransformationMatrix() * viewMatrix;
-                auto matrix = GetMatrices(modelViewMatrix, modelViewMatrix * projectionMatrix);
-                
-                auto pushConstants = PushConstants{};
-                pushConstants.model = matrix.model;
-                pushConstants.modelView = matrix.modelView;
+                pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
+                pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
                 pushConstants.baseColorIndex = ResourceManager::GetTextureAccessor(material.baseColor);
                 pushConstants.normalColorIndex = ResourceManager::GetTextureAccessor(material.normal);
                 pushConstants.roughnessColorIndex = ResourceManager::GetTextureAccessor(material.roughness);

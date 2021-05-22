@@ -204,8 +204,12 @@ namespace nc::core
 #ifdef USE_VULKAN
         m_graphics2.FrameBegin();
         m_ui.FrameBegin();
+
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
+        
+        auto cameraPos = camera::GetMainCameraTransform()->GetPosition();
+        m_graphics2.SetCameraPosition(cameraPos);
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
@@ -214,6 +218,8 @@ namespace nc::core
         #endif
 
         m_ui.FrameEnd();
+
+        m_ecs.GetPointLightSystem2()->Update();
 
         // @todo: conditionally update based on changes
         m_graphics2.GetRendererPtr()->Record(m_graphics2.GetCommandsPtr());

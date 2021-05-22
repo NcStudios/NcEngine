@@ -61,8 +61,10 @@ namespace nc::graphics::vulkan
             const vk::Queue& GetQueue(QueueFamilyType type) const noexcept;
             const vk::Format& GetDepthFormat() const noexcept;
             vk::DescriptorPool* GetRenderingDescriptorPoolPtr() noexcept;
+            vma::Allocator* GetAllocator() noexcept;
+            vma::Allocation* GetBufferAllocation(uint32_t index) noexcept;
 
-            uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, bool isStaging, vk::Buffer* createdBuffer);
+            uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage memoryUsageType, vk::Buffer* createdBuffer);
             uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage);
             uint32_t CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage);
             vk::UniqueImageView CreateTextureView(const vk::Image& image);

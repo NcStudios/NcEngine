@@ -26,6 +26,6 @@ namespace nc::sample
     inline void WasdController::FrameUpdate(float dt)
     {
         auto [leftRight, frontBack] = input::GetAxis() * m_speed * dt;
-        m_transform->TranslateLocalSpace(Vector3{leftRight, 0.0f, frontBack});
+        m_transform->Translate(Vector3{leftRight, 0.0f, frontBack});
     }
 }

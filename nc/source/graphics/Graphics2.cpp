@@ -9,7 +9,7 @@
 
 namespace
 {
-    constexpr std::array<float, 4> DefaultClearColor = {0.2f, 0.2f, 0.2f, 1.0f};
+    constexpr std::array<float, 4> DefaultClearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 }
 
 namespace nc::graphics
@@ -23,6 +23,7 @@ namespace nc::graphics
         m_dimensions{ dimensions },
         m_isMinimized{ false },
         m_isFullscreen{ false },
+        m_cameraWorldPosition{},
         m_viewMatrix{},
         m_projectionMatrix{},
         m_clearColor{DefaultClearColor},
@@ -69,9 +70,19 @@ namespace nc::graphics
         m_viewMatrix = cam;
     }
 
+    void Graphics2::SetCameraPosition(Vector3 cameraPosition)
+    {
+        m_cameraWorldPosition = cameraPosition;
+    }
+
+    const Vector3 Graphics2::GetCameraPosition() const noexcept
+    {
+        return m_cameraWorldPosition;
+    }
+
     void Graphics2::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
     {
-        m_projectionMatrix = DirectX::XMMatrixPerspectiveLH(1.0f, height / width, nearZ, farZ);
+        m_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
     }
 
     void Graphics2::ToggleFullscreen()

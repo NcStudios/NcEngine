@@ -2,15 +2,13 @@
 #include "config/Config.h"
 #include "component/Transform.h"
 #include "component/vulkan/MeshRenderer.h"
+#include "graphics/Graphics2.h"
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Initializers.h"
-#include "graphics/vulkan/PhongMaterial.h"
 #include "graphics/vulkan/MeshManager.h"
-#include "graphics/vulkan/resources/TransformBuffer.h"
 #include "graphics/vulkan/resources/ImmutableBuffer.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
-#include "graphics/Graphics2.h"
 
 namespace nc::graphics::vulkan
 {
@@ -38,7 +36,8 @@ namespace nc::graphics::vulkan
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(PushConstants)); // PushConstants
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, *ResourceManager::GetDescriptorSetLayout());
+        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout()};
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
