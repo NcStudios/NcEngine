@@ -13,12 +13,12 @@ namespace nc
     class Transform final : public ComponentBase
     {
         public:
-            Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Transform* parent);
+            Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale, EntityHandle parent);
             ~Transform() = default;
             Transform(const Transform&) = delete;
-            Transform(Transform&&) = delete;
+            Transform(Transform&&) = default;
             Transform& operator=(const Transform&) = delete;
-            Transform& operator=(Transform&&) = delete;
+            Transform& operator=(Transform&&) = default;
 
             Vector3 GetPosition() const;                        // Get world space position
             Vector3 GetLocalPosition() const;                   // Get position relative to parent
@@ -45,23 +45,25 @@ namespace nc
             void Rotate(Vector3 axis, float radians);
 
             // Hierarchy methods
-            std::span<Transform*> GetChildren(); // Get all immediate children of this transform
-            Transform* GetRoot();                // Get the root node relative to this transform
-            Transform* GetParent() const;        // Get the immediate parent of this transform - may be nullptr
-            void SetParent(Transform* parent);   // Make this transform the child of another - nullptr will detach from existing parent
+            std::span<EntityHandle> GetChildren(); // Get all immediate children of this transform
+            EntityHandle GetRoot() const;         // Get the root node relative to this transform
+            EntityHandle GetParent() const;        // Get the immediate parent of this transform - may be nullptr
+            void SetParent(EntityHandle parent);   // Make this transform the child of another - nullptr will detach from existing parent
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
             
         private:
-            void AddChild(Transform* child);
-            void RemoveChild(Transform* child);
+            void AddChild(EntityHandle child);
+            void RemoveChild(EntityHandle child);
             void UpdateWorldMatrix();
 
             DirectX::XMMATRIX m_localMatrix;
             DirectX::XMMATRIX m_worldMatrix;
-            Transform* m_parent;
-            std::vector<Transform*> m_children;
+            EntityHandle m_parent;
+            std::vector<EntityHandle> m_children;
+            //Transform* m_parent;
+            //std::vector<Transform*> m_children;
     };
 } //end namespace nc

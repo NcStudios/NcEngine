@@ -52,7 +52,6 @@ namespace nc::physics
         public:
             CollisionSystem(ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
 
-
             void DoCollisionStep();
             void ClearState();
 

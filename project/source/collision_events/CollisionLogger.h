@@ -10,9 +10,9 @@ namespace nc::sample
     {
         public:
             CollisionLogger(EntityHandle parentHandle);
-            void OnCollisionEnter(Entity* hit) override;
-            void OnCollisionStay(Entity* hit) override;
-            void OnCollisionExit(Entity* hit) override;
+            void OnCollisionEnter(EntityHandle hit) override;
+            void OnCollisionStay(EntityHandle hit) override;
+            void OnCollisionExit(EntityHandle hit) override;
     };
 
     inline CollisionLogger::CollisionLogger(EntityHandle parentHandle)
@@ -20,18 +20,36 @@ namespace nc::sample
     {
     }
 
-    inline void CollisionLogger::OnCollisionEnter(Entity* hit)
+    // inline void CollisionLogger::OnCollisionEnter(EntityHandle hit)
+    // {
+    //     GameLog::Log("Collision Enter: " + std::to_string(hit.Index()));
+    // }
+
+    // inline void CollisionLogger::OnCollisionStay(EntityHandle hit)
+    // {
+    //     GameLog::Log("Collision Stay: " + std::to_string(hit.Index()));
+    // }
+
+    // inline void CollisionLogger::OnCollisionExit(EntityHandle hit)
+    // {
+    //     GameLog::Log("Collision Exit: " + std::to_string(hit.Index()));
+    // }
+
+    inline void CollisionLogger::OnCollisionEnter(EntityHandle hit)
     {
-        GameLog::Log("Collision Enter: " + hit->Tag);
+        if(auto* other = GetEntity(hit); other)
+            GameLog::Log("Collision Enter: " + other->Tag);
     }
 
-    inline void CollisionLogger::OnCollisionStay(Entity* hit)
+    inline void CollisionLogger::OnCollisionStay(EntityHandle hit)
     {
-        GameLog::Log("Collision Stay: " + hit->Tag);
+        if(auto* other = GetEntity(hit); other)
+            GameLog::Log("Collision Stay: " + other->Tag);
     }
 
-    inline void CollisionLogger::OnCollisionExit(Entity* hit)
+    inline void CollisionLogger::OnCollisionExit(EntityHandle hit)
     {
-        GameLog::Log("Collision Exit: " + hit->Tag);
+        if(auto* other = GetEntity(hit); other)
+            GameLog::Log("Collision Exit: " + other->Tag);
     }
 }

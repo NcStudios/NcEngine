@@ -68,6 +68,11 @@ namespace nc
         }
 
         public:
+            static constexpr EntityHandle Null()
+            {
+                return EntityHandle{HandleTraits::null_handle};
+            }
+
             explicit constexpr EntityHandle(HandleTraits::index_type index,
                                             HandleTraits::version_type version,
                                             HandleTraits::layer_type layer,
@@ -89,6 +94,12 @@ namespace nc
             [[nodiscard]] constexpr bool Valid() const
             {
                 return m_handle != HandleTraits::null_handle;
+            }
+
+            // can do better
+            constexpr void SetVersion(HandleTraits::version_type version) noexcept
+            {
+                m_handle = Join(Index(), version, Layer(), Flags());
             }
 
             constexpr void Recycle(HandleTraits::layer_type layer, HandleTraits::flags_type flags) noexcept

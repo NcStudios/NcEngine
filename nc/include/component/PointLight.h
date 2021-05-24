@@ -27,8 +27,8 @@ namespace nc
 
             PointLight(EntityHandle handle, Properties properties) noexcept;
             ~PointLight() = default;
-            PointLight(PointLight&&) = delete;
-            PointLight& operator=(PointLight&&) = delete;
+            PointLight(PointLight&&) = default;
+            PointLight& operator=(PointLight&&) = default;
             PointLight(const PointLight&) = delete;
             PointLight& operator=(const PointLight&) = delete;
 
@@ -40,7 +40,7 @@ namespace nc
             #endif
 
         private:
-            Transform * m_transform;
+            //Transform * m_transform;
     };
 
     template<>

@@ -50,7 +50,7 @@ namespace nc::ui::editor::controls
                 for(auto* entity : entities)
                 {
                     auto* transform = GetComponent<Transform>(entity->Handle);
-                    if(transform->GetParent()) // only draw root nodes
+                    if(transform->GetParent().Valid()) // only draw root nodes
                         continue;
 
                     if(!filter.PassFilter(entity->Tag.c_str()))
@@ -85,8 +85,8 @@ namespace nc::ui::editor::controls
         
         if(open)
         {
-            for(auto* child : transform->GetChildren())
-                SceneGraphNode(GetEntity(child->GetParentHandle()), child);
+            for(auto child : transform->GetChildren())
+                SceneGraphNode(GetEntity(child), GetComponent<Transform>(child));
 
             ImGui::TreePop();
         }
@@ -258,9 +258,9 @@ namespace nc::ui::editor::controls
 
         if(ImGui::CollapsingHeader(name))
         {
+            auto components = system->GetComponents();
             ImGui::PushID(name);
             ImGui::Indent();
-            auto components = system->GetComponents();
             ImGui::Text("Component Size:      %u", size);
             ImGui::Text("Copmonent Count:     %u", static_cast<unsigned>(components.size()));
             ImGui::Text("Require Destruction: %s", destruction);
@@ -268,8 +268,8 @@ namespace nc::ui::editor::controls
             if(ImGui::CollapsingHeader("Components"))
             {
                 ImGui::Indent();
-                for(auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", component->GetParentHandle().IsStatic(), static_cast<void*>(component));
+                for(const auto& component : components)
+                    ImGui::Text("Handle: %5u  |  Address: %p", component.GetParentHandle().Index(), static_cast<const void*>(&component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();

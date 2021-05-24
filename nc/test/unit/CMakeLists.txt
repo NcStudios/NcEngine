@@ -161,6 +161,8 @@ target_include_directories(Registry_unit_tests
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
+        #delete
+        ${EXTERNAL_INCLUDE_DIR}
 )
 
 target_compile_options(Registry_unit_tests
@@ -178,9 +180,9 @@ add_test(Registry_unit_tests Registry_unit_tests)
 ### Transform Tests ###
 add_executable(Transform_unit_tests
     ${ROOT_DIR}/test/unit/Transform_unit_tests.cpp
-    ${ROOT_DIR}/source/component/Component.cpp
-    ${ROOT_DIR}/source/component/Transform.cpp
-    ${ROOT_DIR}/source/math/Quaternion.cpp
+    #${ROOT_DIR}/source/component/Component.cpp
+    #${ROOT_DIR}/source/component/Transform.cpp
+    #${ROOT_DIR}/source/math/Quaternion.cpp
 )
 
 target_include_directories(Transform_unit_tests

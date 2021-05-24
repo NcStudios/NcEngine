@@ -56,13 +56,13 @@ namespace nc
             #endif
 
         private:
-            const ColliderType m_type;
+            ColliderType m_type;
 
             #ifdef NC_EDITOR_ENABLED
-            DirectX::FXMMATRIX m_transformMatrix;
-            BoundingVolume m_boundingVolume;
-            graphics::Model m_widgetModel;
-            bool m_selectedInEditor;
+            //DirectX::FXMMATRIX m_transformMatrix;
+            //BoundingVolume m_boundingVolume;
+            //graphics::Model m_widgetModel;
+            //bool m_selectedInEditor;
             #endif
     };
 

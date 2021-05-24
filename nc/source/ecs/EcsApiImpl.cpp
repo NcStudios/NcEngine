@@ -36,7 +36,7 @@ namespace nc
 
     void DestroyEntity(EntityHandle handle)
     {
-        return internal::g_entitySystem->Remove(handle);
+        internal::g_entitySystem->Remove(handle);
     }
 
     bool EntityExists(EntityHandle handle)
@@ -120,8 +120,7 @@ namespace nc
 
     template<> bool RemoveComponent<Collider>(EntityHandle handle)
     {
-        auto* entity = GetEntity(handle);
-        IF_THROW(!entity, "RemoveComponent<Collider> - Bad handle");
+        IF_THROW(!GetEntity(handle), "RemoveComponent<Collider> - Bad handle");
         return internal::g_colliderSystem->Remove(handle);
     }
 

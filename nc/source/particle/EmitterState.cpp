@@ -51,7 +51,7 @@ namespace nc::particle
         : m_soa{info.emission.maxParticleCount},
           m_info{info},
           m_graphicsData{graphicsData},
-          m_transform{GetComponent<Transform>(handle)},
+          //m_transform{GetComponent<Transform>(handle)},
           m_handle{handle},
           m_emissionCounter{0.0f}
     {
@@ -60,7 +60,7 @@ namespace nc::particle
 
     void EmitterState::Emit(size_t count)
     {
-        auto parentPosition = m_transform->GetPosition();
+        auto parentPosition = GetComponent<Transform>(m_handle)->GetPosition();
         auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
         for(size_t i = 0; i < particleCount; ++i)
         {

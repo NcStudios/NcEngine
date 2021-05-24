@@ -12,8 +12,8 @@ namespace nc
     PointLight::PointLight(EntityHandle handle, Properties properties) noexcept
         : ComponentBase(handle),
           PixelConstBufData{properties},
-          ProjectedPos{},
-          m_transform{ GetComponent<Transform>(handle) }
+          ProjectedPos{}
+          //m_transform{ GetComponent<Transform>(handle) }
     {
     }
 
@@ -47,9 +47,10 @@ namespace nc
 
     void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view)
     {
-        IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
+        //IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
         
-        PixelConstBufData.pos = m_transform->GetPosition();
+        auto* transform = GetComponent<Transform>(GetParentHandle());
+        PixelConstBufData.pos = transform->GetPosition();
         const auto pos_v = DirectX::XMLoadVector3(&PixelConstBufData.pos);
         DirectX::XMStoreVector3(&ProjectedPos, DirectX::XMVector3Transform(pos_v, view));
     }

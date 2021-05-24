@@ -13,7 +13,7 @@ namespace nc::sample
             void FrameUpdate(float dt) override;
 
         private:
-            Transform* m_transform;
+            //Transform* m_transform;
             Vector2 m_panPivot = Vector2::Zero();
             Vector2 m_lookPivot = Vector2::Zero();
             float m_zoom = 0.0f;
@@ -21,14 +21,14 @@ namespace nc::sample
             float m_lookDampen = 0.005f;
             float m_zoomDampen = 1.4f;
 
-            void Pan(float dt);
-            void Look(float dt);
-            void Zoom(float dt);
+            void Pan(float dt, Transform* transform);
+            void Look(float dt, Transform* transform);
+            void Zoom(float dt, Transform* transform);
     };
 
     inline SceneNavigationCamera::SceneNavigationCamera(EntityHandle handle, float panDamp, float lookDamp, float zoomDamp)
         : Camera{handle},
-          m_transform{GetComponent<Transform>(handle)},
+          //m_transform{GetComponent<Transform>(handle)},
           m_panDampen{panDamp},
           m_lookDampen{lookDamp},
           m_zoomDampen{zoomDamp}
@@ -37,12 +37,13 @@ namespace nc::sample
 
     inline void SceneNavigationCamera::FrameUpdate(float dt)
     {
-        Pan(dt);
-        Look(dt);
-        Zoom(dt);
+        auto* transform = camera::GetMainCameraTransform();
+        Pan(dt, transform);
+        Look(dt, transform);
+        Zoom(dt, transform);
     }
 
-    inline void SceneNavigationCamera::Pan(float dt)
+    inline void SceneNavigationCamera::Pan(float dt, Transform* transform)
     {
         if(input::GetKeyDown(input::KeyCode::MiddleButton))
             m_panPivot = input::MousePos();
@@ -53,11 +54,11 @@ namespace nc::sample
         {
             auto mouseDelta = input::MousePos() - m_panPivot;
             auto [horizontalPan, verticalPan] = mouseDelta * m_panDampen * dt;
-            m_transform->TranslateLocalSpace(Vector3{-1.0f * horizontalPan, verticalPan, 0.0f});
+            transform->TranslateLocalSpace(Vector3{-1.0f * horizontalPan, verticalPan, 0.0f});
         }
     }
 
-    inline void SceneNavigationCamera::Look(float dt)
+    inline void SceneNavigationCamera::Look(float dt, Transform* transform)
     {
         if(input::GetKeyDown(input::KeyCode::RightButton))
             m_lookPivot = input::MousePos();
@@ -68,16 +69,16 @@ namespace nc::sample
         {
             auto mouseDelta = input::MousePos() - m_lookPivot;
             auto [horizontalLook, verticalLook] = mouseDelta * m_lookDampen * dt;
-            m_transform->Rotate(Vector3::Up(), horizontalLook);
-            m_transform->Rotate(m_transform->Right(), verticalLook);
+            transform->Rotate(Vector3::Up(), horizontalLook);
+            transform->Rotate(transform->Right(), verticalLook);
         }
     }
 
-    inline void SceneNavigationCamera::Zoom(float dt)
+    inline void SceneNavigationCamera::Zoom(float dt, Transform* transform)
     {
         m_zoom = math::Lerp(m_zoom, (float)input::MouseWheel() * m_zoomDampen, 0.1f);
         if(math::FloatEqual(m_zoom, 0.0f))
             m_zoom = 0.0f;
-        m_transform->TranslateLocalSpace(Vector3{0.0f, 0.0f, m_zoom * dt});
+        transform->TranslateLocalSpace(Vector3{0.0f, 0.0f, m_zoom * dt});
     }
 }

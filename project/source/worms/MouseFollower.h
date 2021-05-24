@@ -16,7 +16,7 @@ namespace nc::sample
         private:
             float m_viewPortDist;
             Vector2 m_screenDimensions;
-            Transform* m_transform;
+            //Transform* m_transform;
             float m_zDepth;
             float m_zRatio;
     };

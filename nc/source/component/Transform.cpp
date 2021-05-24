@@ -1,10 +1,12 @@
 #include "component/Transform.h"
+#include "Ecs.h"
 #include "debug/Utils.h"
-#include <limits>
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
 #endif
+
+#include <limits>
 
 namespace
 {
@@ -28,7 +30,7 @@ namespace
 
 namespace nc
 {
-    Transform::Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Transform* parent)
+    Transform::Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale, EntityHandle parent)
         : ComponentBase(handle),
           m_localMatrix{ComposeMatrix(scale, rot, pos)},
           m_worldMatrix{m_localMatrix},
@@ -36,10 +38,11 @@ namespace nc
           m_children{}
     {
         IF_THROW(HasAnyZeroElement(scale), "Transform::Transform - Invalid scale(elements cannot be 0)");
-        if(m_parent)
+        if(m_parent.Valid())
         {
-            m_parent->AddChild(this);
-            m_worldMatrix = m_parent->GetTransformationMatrix() * m_worldMatrix;
+            auto* parentTransform = GetComponent<Transform>(parent);
+            parentTransform->AddChild(handle);
+            m_worldMatrix = parentTransform->GetTransformationMatrix() * m_worldMatrix;
         }
     }
 
@@ -234,41 +237,44 @@ namespace nc
         UpdateWorldMatrix();
     }
 
-    std::span<Transform*> Transform::GetChildren()
+    std::span<EntityHandle> Transform::GetChildren()
     {
-        return std::span<Transform*>(m_children.data(), m_children.size());
+        return std::span<EntityHandle>(m_children.data(), m_children.size());
     }
 
-    Transform* Transform::GetRoot()
+    EntityHandle Transform::GetRoot() const
     {
-        if(m_parent)
-            return m_parent->GetRoot();
+        if(m_parent.Valid())
+            return GetComponent<Transform>(m_parent)->GetRoot();
+            //return m_parent->GetRoot();
         
-        return this;
+        return GetParentHandle();
     }
 
-    Transform* Transform::GetParent() const
+    EntityHandle Transform::GetParent() const
     {
         return m_parent;
     }
 
-    void Transform::SetParent(Transform* parent)
+    void Transform::SetParent(EntityHandle parent)
     {
-        if(m_parent)
-            m_parent->RemoveChild(this);
+        if(m_parent.Valid())
+            GetComponent<Transform>(m_parent)->RemoveChild(GetParentHandle());
+            //m_parent->RemoveChild(this);
         
         m_parent = parent;
 
-        if(m_parent)
-            m_parent->AddChild(this);
+        if(m_parent.Valid())
+            GetComponent<Transform>(m_parent)->AddChild(GetParentHandle());
+            //m_parent->AddChild(this);
     }
 
-    void Transform::AddChild(Transform* child)
+    void Transform::AddChild(EntityHandle child)
     {
         m_children.push_back(child);
     }
 
-    void Transform::RemoveChild(Transform* child)
+    void Transform::RemoveChild(EntityHandle child)
     {
         auto pos = std::remove_if(m_children.begin(), m_children.end(), [child](auto& c)
         {
@@ -281,13 +287,13 @@ namespace nc
 
     void Transform::UpdateWorldMatrix()
     {
-        if(m_parent)
-            m_worldMatrix = m_localMatrix * m_parent->GetTransformationMatrix();
+        if(m_parent.Valid())
+            m_worldMatrix = m_localMatrix * GetComponent<Transform>(m_parent)->GetTransformationMatrix();
         else
             m_worldMatrix = m_localMatrix;
         
-        for(auto* child : m_children)
-            child->UpdateWorldMatrix();
+        for(auto child : m_children)
+            GetComponent<Transform>(child)->UpdateWorldMatrix();
     }
 
     #ifdef NC_EDITOR_ENABLED

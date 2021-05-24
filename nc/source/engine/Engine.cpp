@@ -134,15 +134,17 @@ namespace nc::core
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
-            auto activeEntities = m_ecs.GetActiveEntities();
 
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
-                FixedStepLogic(activeEntities);
+                FixedStepLogic();
             }
 
-            FrameLogic(activeEntities, dt);
+            FrameLogic(dt);
             particleUpdateJobResult.wait();
+
+            m_ecs.FrameEnd();
+
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
             FrameCleanup();
@@ -178,20 +180,20 @@ namespace nc::core
         m_sceneSystem.DoSceneChange();
     }
 
-    void Engine::FixedStepLogic(std::span<Entity*> activeEntities)
+    void Engine::FixedStepLogic()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
-        for(auto* entity : activeEntities)
+        for(auto* entity : m_ecs.GetActiveEntities())
             entity->SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
     }
 
-    void Engine::FrameLogic(std::span<Entity*> activeEntities, float dt)
+    void Engine::FrameLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-        for(auto* entity : activeEntities)
+        for(auto* entity : m_ecs.GetActiveEntities())
             entity->SendFrameUpdate(dt);
         NC_PROFILE_END();
     }
@@ -210,16 +212,16 @@ namespace nc::core
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        for(auto* light : m_ecs.GetPointLightSystem()->GetComponents())
+        for(auto& light : m_ecs.GetPointLightSystem()->GetComponents())
         {
-            m_pointLightManager.AddPointLight(light, camViewMatrix);
+            m_pointLightManager.AddPointLight(&light, camViewMatrix);
         }
 
         m_pointLightManager.Bind();
 
-        for(auto* renderer : m_ecs.GetRendererSystem()->GetComponents())
+        for(auto& renderer : m_ecs.GetRendererSystem()->GetComponents())
         {
-            renderer->Update(&m_frameManager);
+            renderer.Update(&m_frameManager);
         }
 
         #ifdef NC_EDITOR_ENABLED
@@ -244,7 +246,7 @@ namespace nc::core
 
     void Engine::FrameCleanup()
     {
-        m_ecs.FrameEnd();
+        //m_ecs.FrameEnd();
         if(m_sceneSystem.IsSceneChangeScheduled())
         {
             DoSceneSwap();

@@ -28,42 +28,73 @@ namespace nc::ecs
             void CommitRemovals(UnaryFunc func);
 
         private:
+            bool IsActive(EntityHandle handle)
+            {
+                return m_activePool.Contains([handle](auto* e) { return e->Handle == handle; });
+            }
+
+            bool IsStaged(EntityHandle handle)
+            {
+                return m_toAddStaging.cend() != std::ranges::find_if(m_toAddStaging, [handle](const auto& e) { return e.Handle == handle; });
+            }
+
             alloc::PoolAdapter<Entity> m_activePool;
+            std::vector<Entity> m_toAddStaging;
             std::vector<Entity> m_toRemove;
             HandleManager m_handle;
     };
 
     inline EntitySystem::EntitySystem(size_t count)
         : m_activePool{count},
+          m_toAddStaging{},
           m_toRemove{}
     {
     }
 
     inline EntityHandle EntitySystem::Add(const EntityInfo& info)
     {
-        /** @todo layer still handled old way */
+        // /** @todo layer still handled old way */
+        // auto handle = m_handle.GenerateNewHandle(0u, info.flags);
+        // m_activePool.Add(handle, std::move(info.tag), info.layer);
+        // return handle;
+
         auto handle = m_handle.GenerateNewHandle(0u, info.flags);
-        m_activePool.Add(handle, std::move(info.tag), info.layer);
+        m_toAddStaging.emplace_back(handle, std::move(info.tag), info.layer);
         return handle;
     }
 
     inline void EntitySystem::Remove(EntityHandle handle)
     {
+        // what if in add staging?
         m_toRemove.push_back(m_activePool.Extract([handle](auto* e) { return e->Handle == handle; }));
     }
 
     inline bool EntitySystem::Contains(EntityHandle handle)
     {
-        return m_activePool.Contains([handle](auto* e) { return e->Handle == handle; });
+        return IsActive(handle) || IsStaged(handle);
+        //return m_activePool.Contains([handle](auto* e) { return e->Handle == handle; });
     }
 
     inline Entity* EntitySystem::Get(EntityHandle handle)
     {
-        return m_activePool.Get([handle](auto* e) { return e->Handle == handle; });
+        auto* ptr = m_activePool.Get([handle](auto* e) { return e->Handle == handle; });
+
+        if(ptr)
+            return ptr;
+
+        auto pos = std::ranges::find_if(m_toAddStaging, [handle](auto& e)
+        {
+            return e.Handle == handle;
+        });
+
+        return pos == m_toAddStaging.end() ? nullptr : &(*pos);
+
+        //return m_activePool.Get([handle](auto* e) { return e->Handle == handle; });
     }
 
     inline Entity* EntitySystem::Get(const std::string& tag)
     {
+        // to impl
         return m_activePool.Get([&tag](auto* e) { return e->Tag == tag; });
     }
 
@@ -74,6 +105,9 @@ namespace nc::ecs
 
     inline void EntitySystem::Clear()
     {
+        for(auto& entity : m_toAddStaging)
+            entity.SendOnDestroy();
+
         for(auto* entity : m_activePool.GetActiveRange())
             entity->SendOnDestroy();
 
@@ -81,6 +115,7 @@ namespace nc::ecs
             entity.SendOnDestroy();
 
         m_activePool.Clear();
+        m_toAddStaging.clear();
         m_toRemove.clear();
         m_handle.Reset();
     }
@@ -95,5 +130,12 @@ namespace nc::ecs
         }
 
         m_toRemove.clear();
+
+        for(auto& entity : m_toAddStaging)
+        {
+            m_activePool.Insert(std::move(entity));
+        }
+
+        m_toAddStaging.clear();
     }
 } // namespace nc::ecs

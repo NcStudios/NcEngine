@@ -14,7 +14,13 @@ namespace nc::ecs
     class ColliderSystem
     {
         public:
-            using DynamicColliderSoA = SoA<HandleTraits::handle_type, const DirectX::XMMATRIX*, physics::VolumeProperties, ColliderType>;
+            //using DynamicColliderSoA = SoA<HandleTraits::handle_type, const DirectX::XMMATRIX*, physics::VolumeProperties, ColliderType>;
+            using DynamicColliderSoA = SoA<HandleTraits::handle_type, DirectX::XMMATRIX, physics::VolumeProperties, ColliderType>;
+
+            static constexpr size_t HandleTypeIndex = 0u;
+            static constexpr size_t MatrixIndex = 1u;
+            static constexpr size_t VolumePropertiesIndex = 2u;
+            static constexpr size_t ColliderTypeIndex = 3u;
 
             ColliderSystem(uint32_t maxDynamic,
                            uint32_t maxStatic,
@@ -34,7 +40,7 @@ namespace nc::ecs
             void Clear();
             bool Contains(EntityHandle handle) const;
             Collider* GetPointerTo(EntityHandle handle);
-            std::span<Collider*> GetComponents();
+            std::span<Collider> GetComponents();
 
         private:
             ecs::ComponentSystem<Collider> m_componentSystem;

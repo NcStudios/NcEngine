@@ -128,7 +128,7 @@ namespace nc::ecs
 
     void ColliderTree::Add(EntityHandle handle, const ColliderInfo& info)
     {
-        auto volume = physics::CalculateBoundingVolume(info.type, physics::GetVolumePropertiesFromColliderInfo(info), &GetComponent<Transform>(handle)->GetTransformationMatrix());
+        auto volume = physics::CalculateBoundingVolume(info.type, physics::GetVolumePropertiesFromColliderInfo(info), GetComponent<Transform>(handle)->GetTransformationMatrix());
         auto* entry = m_pool.Add(volume, GetEntity(handle)->Layer, handle);
         m_root.Add(entry);
     }

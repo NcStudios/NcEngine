@@ -7,29 +7,29 @@
 #include "ui/editor/Widgets.h"
 #endif
 
-#ifdef NC_EDITOR_ENABLED
-namespace
-{
-    bool IsUniformScale(const nc::Vector3& scale)
-    {
-        return nc::math::FloatEqual(scale.x, scale.y) && nc::math::FloatEqual(scale.y, scale.z);
-    }
-}
-#endif
+// #ifdef NC_EDITOR_ENABLED
+// namespace
+// {
+//     bool IsUniformScale(const nc::Vector3& scale)
+//     {
+//         return nc::math::FloatEqual(scale.x, scale.y) && nc::math::FloatEqual(scale.y, scale.z);
+//     }
+// }
+// #endif
 
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
     Collider::Collider(EntityHandle handle, ColliderInfo info)
         : ComponentBase(handle),
-          m_type{info.type},
-          m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
-          m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
-          m_widgetModel{collider_detail::CreateWireframeModel(info.type)},
-          m_selectedInEditor{false}
+          m_type{info.type}
+          //m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
+          //m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
+          //m_widgetModel{collider_detail::CreateWireframeModel(info.type)},
+          //m_selectedInEditor{false}
     {
-        IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
-        IF_THROW(info.type == ColliderType::Sphere && !IsUniformScale(info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
+        //IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        //IF_THROW(info.type == ColliderType::Sphere && !IsUniformScale(info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #else
     Collider::Collider(EntityHandle handle, ColliderInfo info)
@@ -45,22 +45,23 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Collider::UpdateWidget(graphics::FrameManager* frame)
+    void Collider::UpdateWidget(graphics::FrameManager*)// frame)
     {
-        // Expire to false to avoid state management in editor (it sets this to true as needed)
-        if(!std::exchange(m_selectedInEditor, false))
-            return;
+        // // Expire to false to avoid state management in editor (it sets this to true as needed)
+        // if(!std::exchange(m_selectedInEditor, false))
+        //     return;
 
-        auto [offset, scale] = collider_detail::GetOffsetAndScaleFromVolume(m_boundingVolume, m_type);
+        // auto [offset, scale] = collider_detail::GetOffsetAndScaleFromVolume(m_boundingVolume, m_type);
 
-        m_widgetModel.SetTransformationMatrix
-        (
-            DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
-            m_transformMatrix *
-            DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
-        );
+        // m_widgetModel.SetTransformationMatrix
+        // (
+        //     DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
+        //     DirectX::XMMatrixIdentity() *
+        //     //m_transformMatrix *
+        //     DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
+        // );
 
-        m_widgetModel.Submit(frame);
+        // m_widgetModel.Submit(frame);
     }
 
     void Collider::EditorGuiElement()
@@ -70,9 +71,9 @@ namespace nc
         /** @todo put widgets back */
     }
 
-    void Collider::SetEditorSelection(bool state)
+    void Collider::SetEditorSelection(bool)// state)
     {
-        m_selectedInEditor = state;
+        //m_selectedInEditor = state;
     }
     #endif
 }

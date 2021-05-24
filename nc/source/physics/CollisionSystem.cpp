@@ -38,11 +38,14 @@ namespace nc::physics
         narrowDynamicJobResult.wait();
         broadStaticJobResult.wait();
 
-        auto findEnterAndStayJobResult = m_jobSystem->Schedule(FindEnterAndStayEvents, this);
-        auto findExitJobResult = m_jobSystem->Schedule(FindExitEvents, this);
-        findEnterAndStayJobResult.wait();
-        findExitJobResult.wait();
+        //auto findEnterAndStayJobResult = m_jobSystem->Schedule(FindEnterAndStayEvents, this);
+        //auto findExitJobResult = m_jobSystem->Schedule(FindExitEvents, this);
+        //findEnterAndStayJobResult.wait();
+        //findExitJobResult.wait();
         
+        FindEnterAndStayEvents();
+        FindExitEvents();
+
         Cleanup();
     }
 
@@ -57,12 +60,12 @@ namespace nc::physics
     void CollisionSystem::FetchEstimates()
     {
         const auto* soa = m_colliderSystem->GetDynamicSoA();
-        const auto properties = soa->GetSpan<VolumeProperties>();
-        const auto transforms = soa->GetSpan<const DirectX::XMMATRIX*>();
-        auto index = soa->SmartIndex();
+        auto [index, handles, matrices, properties] = soa->View<0u, 1u, 2u>();
+
         while(index.Valid())
         {
-            m_dynamicEstimates.emplace_back(EstimateBoundingVolume(properties[index], transforms[index]), index);
+            matrices[index] = GetComponent<Transform>(static_cast<EntityHandle>(handles[index]))->GetTransformationMatrix();
+            m_dynamicEstimates.emplace_back(EstimateBoundingVolume(properties[index], matrices[index]), index);
             ++index;
         }
     }
@@ -105,10 +108,12 @@ namespace nc::physics
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
+        
         const auto handles = dynamicSoA->GetSpan<HandleTraits::handle_type>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
-        const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
+        const auto transforms = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
+
         for(const auto& [i, j] : m_broadEventsVsDynamic)
         {
             const auto v1 = CalculateBoundingVolume(types[i], properties[i], transforms[i]);
@@ -123,7 +128,7 @@ namespace nc::physics
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
         const auto handles = dynamicSoA->GetSpan<HandleTraits::handle_type>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
-        const auto transforms = dynamicSoA->GetSpan<const DirectX::XMMATRIX*>();
+        const auto transforms = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
         {
@@ -159,26 +164,26 @@ namespace nc::physics
 
     void CollisionSystem::NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const
     {
-        auto e1 = GetEntity(static_cast<EntityHandle>(data.first));
-        auto e2 = GetEntity(static_cast<EntityHandle>(data.second));
+        auto h1 = static_cast<EntityHandle>(data.first);
+        auto h2 = static_cast<EntityHandle>(data.second);
         switch(type)
         {
             case CollisionEventType::Enter:
             {
-                if(e1) e1->SendOnCollisionEnter(e2);
-                if(e2) e2->SendOnCollisionEnter(e1);
+                if(auto* e1 = GetEntity(h1); e1) e1->SendOnCollisionEnter(h2);
+                if(auto* e2 = GetEntity(h2); e2) e2->SendOnCollisionEnter(h1);
                 break;
             }
             case CollisionEventType::Stay:
             {
-                if(e1) e1->SendOnCollisionStay(e2);
-                if(e2) e2->SendOnCollisionStay(e1);
+                if(auto* e1 = GetEntity(h1); e1) e1->SendOnCollisionStay(h2);
+                if(auto* e2 = GetEntity(h2); e2) e2->SendOnCollisionStay(h1);
                 break;
             }
             case CollisionEventType::Exit:
             {
-                if(e1) e1->SendOnCollisionExit(e2);
-                if(e2) e2->SendOnCollisionExit(e1);
+                if(auto* e1 = GetEntity(h1); e1) e1->SendOnCollisionExit(h2);
+                if(auto* e2 = GetEntity(h2); e2) e2->SendOnCollisionExit(h1);
                 break;
             }
             default:
@@ -200,7 +205,7 @@ namespace nc::physics
     {
         for(auto& collider : m_colliderSystem->GetComponents())
         {
-            collider->UpdateWidget(frameManager);
+            collider.UpdateWidget(frameManager);
         }
     }
     #endif

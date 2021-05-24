@@ -26,12 +26,12 @@ namespace nc
             Entity& operator=(Entity&& other) = default;
             ~Entity() = default;
 
-            void SendFrameUpdate(float dt) noexcept;
-            void SendFixedUpdate() noexcept;
-            void SendOnDestroy() noexcept;
-            void SendOnCollisionEnter(Entity* other) noexcept;
-            void SendOnCollisionStay(Entity* other) noexcept;
-            void SendOnCollisionExit(Entity* other) noexcept;
+            void SendFrameUpdate(float dt);
+            void SendFixedUpdate();
+            void SendOnDestroy();
+            void SendOnCollisionEnter(EntityHandle hit);
+            void SendOnCollisionStay(EntityHandle hit);
+            void SendOnCollisionExit(EntityHandle hit);
 
             template<std::derived_from<Component> T, class ... Args>
             T * AddUserComponent(Args&& ... args) noexcept;

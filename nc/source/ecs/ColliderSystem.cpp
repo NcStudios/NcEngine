@@ -40,7 +40,8 @@ namespace nc::ecs
             m_dynamicSoA.Add
             (
                 static_cast<HandleTraits::handle_type>(handle),
-                &GetComponent<Transform>(handle)->GetTransformationMatrix(),
+                DirectX::XMMATRIX{},
+                //&GetComponent<Transform>(handle)->GetTransformationMatrix(),
                 physics::GetVolumePropertiesFromColliderInfo(info),
                 info.type
             );
@@ -79,7 +80,7 @@ namespace nc::ecs
         return m_componentSystem.GetPointerTo(handle);
     }
 
-    std::span<Collider*> ColliderSystem::GetComponents()
+    std::span<Collider> ColliderSystem::GetComponents()
     {
         return m_componentSystem.GetComponents();
     }
