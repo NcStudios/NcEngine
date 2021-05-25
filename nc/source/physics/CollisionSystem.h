@@ -56,7 +56,7 @@ namespace nc::physics
             void ClearState();
 
             #ifdef NC_EDITOR_ENABLED
-            void UpdateWidgets(graphics::FrameManager* frameManager); // hacky solution until widgets are a real thing
+            void UpdateWidgets(std::span<Collider> colliders, graphics::FrameManager* frameManager); // hacky solution until widgets are a real thing
             #endif
 
         private:

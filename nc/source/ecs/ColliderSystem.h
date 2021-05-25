@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Ecs.h"
-#include "ComponentSystem.h"
 #include "SoA.h"
 #include "ColliderTree.h"
 
@@ -14,7 +13,6 @@ namespace nc::ecs
     class ColliderSystem
     {
         public:
-            //using DynamicColliderSoA = SoA<HandleTraits::handle_type, const DirectX::XMMATRIX*, physics::VolumeProperties, ColliderType>;
             using DynamicColliderSoA = SoA<HandleTraits::handle_type, DirectX::XMMATRIX, physics::VolumeProperties, ColliderType>;
 
             static constexpr size_t HandleTypeIndex = 0u;
@@ -30,20 +28,14 @@ namespace nc::ecs
                            
             ~ColliderSystem();
 
-            ecs::ComponentSystem<Collider>* GetComponentSystem();
             ColliderTree* GetStaticTree();
             DynamicColliderSoA* GetDynamicSoA();
 
-            // Wrappers around ComponentSystem methods
-            Collider* Add(EntityHandle handle, const ColliderInfo& info);
-            bool Remove(EntityHandle handle);
+            void Add(const Collider& collider);
+            void Remove(EntityHandle handle);
             void Clear();
-            bool Contains(EntityHandle handle) const;
-            Collider* GetPointerTo(EntityHandle handle);
-            std::span<Collider> GetComponents();
 
         private:
-            ecs::ComponentSystem<Collider> m_componentSystem;
             DynamicColliderSoA m_dynamicSoA;
             ColliderTree m_staticTree;
     };

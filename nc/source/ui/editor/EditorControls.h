@@ -21,11 +21,11 @@ namespace nc::ui::editor::controls
     inline void SceneGraphNode(Entity* entity, Transform* transform);
     inline void EntityPanel(EntityHandle handle);
     inline void Component(ComponentBase* comp);
-    inline void UtilitiesPanel(float* dtMult, ecs::Systems* systems, unsigned drawCallCount, float windowWidth, float windowHeight);
+    inline void UtilitiesPanel(float* dtMult, ecs::registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void GraphicsResourcePanel();
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
-    inline void ComponentSystems(ecs::Systems* systems);
+    inline void ComponentSystems(ecs::registry_type* registry);
 
     /**
      * Scene Graph Controls
@@ -154,7 +154,7 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void UtilitiesPanel(float* dtMult, ecs::Systems* systems, unsigned drawCallCount, float windowWidth, float windowHeight)
+    void UtilitiesPanel(float* dtMult, ecs::registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight)
     {
         static auto initColumnWidth = false;
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
@@ -172,7 +172,7 @@ namespace nc::ui::editor::controls
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
                 WrapTabItem("Profiler", Profiler);
-                WrapTabItem("Systems", ComponentSystems, systems);
+                WrapTabItem("Systems", ComponentSystems, registry);
                 WrapTabItem("Gfx Resources", GraphicsResourcePanel);
                 ImGui::EndTabBar();
             }
@@ -250,7 +250,7 @@ namespace nc::ui::editor::controls
     }
 
     template<class T>
-    void ComponentSystemHeader(const char* name, ecs::ComponentSystem<T>* system)
+    void ComponentSystemHeader(const char* name, std::span<T> components)
     {
         constexpr auto size = static_cast<unsigned>(sizeof(T));
         constexpr auto destruction = StoragePolicy<T>::allow_trivial_destruction::value ? "False" : "True";
@@ -258,7 +258,6 @@ namespace nc::ui::editor::controls
 
         if(ImGui::CollapsingHeader(name))
         {
-            auto components = system->GetComponents();
             ImGui::PushID(name);
             ImGui::Indent();
             ImGui::Text("Component Size:      %u", size);
@@ -277,14 +276,15 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void ComponentSystems(ecs::Systems* systems)
+    /** @todo this will eventually need to be generic */
+    void ComponentSystems(ecs::registry_type* registry)
     {
-        ComponentSystemHeader<Collider>("Collider", systems->collider);
-        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", systems->networkDispatcher);
-        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", systems->particleEmitter);
-        ComponentSystemHeader<PointLight>("Point Light", systems->pointLight);
-        ComponentSystemHeader<Renderer>("Renderer", systems->renderer);
-        ComponentSystemHeader<Transform>("Transform", systems->transform);
+        ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
+        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());
+        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
+        ComponentSystemHeader<PointLight>("Point Light", registry->ViewAll<PointLight>());
+        ComponentSystemHeader<Renderer>("Renderer", registry->ViewAll<Renderer>());
+        ComponentSystemHeader<Transform>("Transform", registry->ViewAll<Transform>());
     }
 
     void GraphicsResourcePanel()

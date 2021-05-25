@@ -10,51 +10,42 @@ namespace nc::ecs
                                                  const config::MemorySettings& memSettings,
                                                  const config::PhysicsSettings& physSettings)
     #endif
-        // : m_entitySystem{memSettings.maxTransforms},
-        //   m_colliderSystem{memSettings.maxDynamicColliders,
-        //                    memSettings.maxStaticColliders,
-        //                    physSettings.octreeDensityThreshold,
-        //                    physSettings.octreeMinimumExtent,
-        //                    physSettings.worldspaceExtent},
-        //   m_lightSystem{PointLightManager::MAX_POINT_LIGHTS},
-        //   #ifdef USE_VULKAN
-        //   m_particleEmitterSystem{memSettings.maxParticleEmitters},
-        //   #else
-        //   m_particleEmitterSystem{memSettings.maxParticleEmitters, graphics},
-        //   #endif
-        //   m_rendererSystem{memSettings.maxRenderers},
-        //   m_transformSystem{memSettings.maxTransforms},
-        //   m_networkDispatcherSystem{memSettings.maxNetworkDispatchers}
         : m_entitySystem{memSettings.maxTransforms},
           m_colliderSystem{memSettings.maxTransforms,
                            memSettings.maxStaticColliders,
                            physSettings.octreeDensityThreshold,
                            physSettings.octreeMinimumExtent,
                            physSettings.worldspaceExtent},
-          m_lightSystem{memSettings.maxTransforms},
           #ifdef USE_VULKAN
-          m_particleEmitterSystem{memSettings.maxTransforms},
+          m_particleEmitterSystem{},
           #else
-          m_particleEmitterSystem{memSettings.maxTransforms, graphics},
+          m_particleEmitterSystem{graphics},
           #endif
-          m_rendererSystem{memSettings.maxTransforms},
-          m_transformSystem{memSettings.maxTransforms},
-          m_networkDispatcherSystem{memSettings.maxTransforms}
+          m_registry{memSettings.maxTransforms}
     {
         internal::RegisterEcs(this);
-    }
 
-    Systems EntityComponentSystem::GetComponentSystems() noexcept
-    {
-        return Systems
-        {
-            .collider = m_colliderSystem.GetComponentSystem(),
-            .networkDispatcher = &m_networkDispatcherSystem,
-            .particleEmitter = m_particleEmitterSystem.GetComponentSystem(),
-            .pointLight = &m_lightSystem,
-            .renderer = &m_rendererSystem,
-            .transform = &m_transformSystem
-        };
+        auto* colliderSystem = &m_colliderSystem;
+        m_registry.RegisterOnAddCallback<Collider>
+        (
+            [colliderSystem](const Collider& c) { colliderSystem->Add(c); }
+        );
+
+        m_registry.RegisterOnRemoveCallback<Collider>
+        (
+            [colliderSystem](EntityHandle h) { colliderSystem->Remove(h); }
+        );
+
+        auto* particleEmitterSystem = &m_particleEmitterSystem;
+        m_registry.RegisterOnAddCallback<ParticleEmitter>
+        (
+            [particleEmitterSystem](const ParticleEmitter& pe) { particleEmitterSystem->Add(pe); }
+        );
+
+        m_registry.RegisterOnRemoveCallback<ParticleEmitter>
+        (
+            [particleEmitterSystem](EntityHandle h) { particleEmitterSystem->Remove(h); }
+        );
     }
 
     void EntityComponentSystem::FrameEnd()
@@ -62,23 +53,20 @@ namespace nc::ecs
         m_entitySystem.CommitRemovals([this](const auto& entity)
         {
             auto handle = entity.Handle;
-            m_colliderSystem.Remove(handle);
-            m_transformSystem.Remove(handle);
-            m_rendererSystem.Remove(handle);
-            m_lightSystem.Remove(handle);
-            m_networkDispatcherSystem.Remove(handle);
-            m_particleEmitterSystem.Remove(handle);
+            m_registry.RemoveComponent<Collider>(handle);
+            m_registry.RemoveComponent<NetworkDispatcher>(handle);
+            m_registry.RemoveComponent<ParticleEmitter>(handle);
+            m_registry.RemoveComponent<PointLight>(handle);
+            m_registry.RemoveComponent<Renderer>(handle);
+            m_registry.RemoveComponent<Transform>(handle);
         });
     }
 
     void EntityComponentSystem::Clear()
     {
         m_entitySystem.Clear();
+        m_registry.Clear();
         m_colliderSystem.Clear();
-        m_transformSystem.Clear();
-        m_rendererSystem.Clear();
-        m_lightSystem.Clear();
-        m_networkDispatcherSystem.Clear();
         m_particleEmitterSystem.Clear();
     }
 } // end namespace nc::ecs

@@ -10,28 +10,6 @@ namespace nc
 {
     namespace ecs { class ParticleEmitterSystem; }
 
-    class ParticleEmitter : public Component
-    {
-        public:
-            ParticleEmitter(EntityHandle handle, ecs::ParticleEmitterSystem* emitterSystem);
-
-            void Emit(size_t count);
-        
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
-
-        private:
-            ecs::ParticleEmitterSystem* m_emitterSystem;
-    };
-
-    template<>
-    struct StoragePolicy<ParticleEmitter>
-    {
-        using allow_trivial_destruction = std::true_type;
-        using sort_dense_storage_by_address = std::true_type;
-    };
-
     struct ParticleEmissionInfo
     {
         unsigned maxParticleCount = 100u;
@@ -68,5 +46,29 @@ namespace nc
         ParticleEmissionInfo emission;
         ParticleInitInfo init;
         ParticleKinematicInfo kinematic;
+    };
+
+    class ParticleEmitter : public Component
+    {
+        public:
+            ParticleEmitter(EntityHandle handle, ParticleInfo info, ecs::ParticleEmitterSystem* emitterSystem);
+
+            const ParticleInfo& GetInfo() const noexcept;
+            void Emit(size_t count);
+        
+            #ifdef NC_EDITOR_ENABLED
+            void EditorGuiElement() override;
+            #endif
+
+        private:
+            ParticleInfo m_info;
+            ecs::ParticleEmitterSystem* m_emitterSystem;
+    };
+
+    template<>
+    struct StoragePolicy<ParticleEmitter>
+    {
+        using allow_trivial_destruction = std::true_type;
+        using sort_dense_storage_by_address = std::true_type;
     };
 } // namespace nc

@@ -8,18 +8,12 @@ namespace nc::ecs
                                    uint32_t octreeDensityThreshold,
                                    float octreeMinimumExtent,
                                    float worldspaceExtent)
-        : m_componentSystem{maxDynamic + maxStatic},
-          m_dynamicSoA{maxDynamic},
+        : m_dynamicSoA{maxDynamic},
           m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent}
     {
     }
 
     ColliderSystem::~ColliderSystem() = default;
-
-    ecs::ComponentSystem<Collider>* ColliderSystem::GetComponentSystem()
-    {
-        return &m_componentSystem;
-    }
 
     ColliderTree* ColliderSystem::GetStaticTree()
     {
@@ -30,58 +24,36 @@ namespace nc::ecs
     {
         return &m_dynamicSoA;
     }
-
-    Collider* ColliderSystem::Add(EntityHandle handle, const ColliderInfo& info)
+    
+    void ColliderSystem::Add(const Collider& collider)
     {
+        auto handle = collider.GetParentHandle();
+
         if(handle.IsStatic())
-            m_staticTree.Add(handle, info);
+            m_staticTree.Add(handle, collider.GetInfo());
         else
         {
             m_dynamicSoA.Add
             (
                 static_cast<HandleTraits::handle_type>(handle),
                 DirectX::XMMATRIX{},
-                //&GetComponent<Transform>(handle)->GetTransformationMatrix(),
-                physics::GetVolumePropertiesFromColliderInfo(info),
-                info.type
+                physics::GetVolumePropertiesFromColliderInfo(collider.GetInfo()),
+                collider.GetType()
             );
         }
-
-        return m_componentSystem.Add(handle, info);
     }
 
-    bool ColliderSystem::Remove(EntityHandle handle)
+    void ColliderSystem::Remove(EntityHandle handle)
     {
-        if(!m_componentSystem.Remove(handle))
-            return false;
-
         if(handle.IsStatic())
             m_staticTree.Remove(handle);
         else
             m_dynamicSoA.Remove(static_cast<HandleTraits::handle_type>(handle));
-
-        return true;
     }
 
     void ColliderSystem::Clear()
     {
-        m_componentSystem.Clear();
         m_dynamicSoA.Clear();
         m_staticTree.Clear();
-    }
-
-    bool ColliderSystem::Contains(EntityHandle handle) const
-    {
-        return m_componentSystem.Contains(handle);
-    }
-
-    Collider* ColliderSystem::GetPointerTo(EntityHandle handle)
-    {
-        return m_componentSystem.GetPointerTo(handle);
-    }
-
-    std::span<Collider> ColliderSystem::GetComponents()
-    {
-        return m_componentSystem.GetComponents();
     }
 } // namespace nc::ecs

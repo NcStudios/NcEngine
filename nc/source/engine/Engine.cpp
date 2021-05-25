@@ -96,7 +96,7 @@ namespace nc::core
           m_sceneSystem{},
           m_time{},
           #ifdef NC_EDITOR_ENABLED
-          m_ui{m_window.GetHWND(), &m_graphics, m_ecs.GetComponentSystems()}
+          m_ui{m_window.GetHWND(), &m_graphics}
           #else
           m_ui{m_window.GetHWND(), &m_graphics}
           #endif
@@ -212,20 +212,18 @@ namespace nc::core
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        for(auto& light : m_ecs.GetPointLightSystem()->GetComponents())
-        {
+        auto* registry = m_ecs.GetRegistry();
+
+        for(auto& light : registry->ViewAll<PointLight>())
             m_pointLightManager.AddPointLight(&light, camViewMatrix);
-        }
 
         m_pointLightManager.Bind();
 
-        for(auto& renderer : m_ecs.GetRendererSystem()->GetComponents())
-        {
+        for(auto& renderer : registry->ViewAll<Renderer>())
             renderer.Update(&m_frameManager);
-        }
 
         #ifdef NC_EDITOR_ENABLED
-        m_physics.UpdateWidgets(&m_frameManager);
+        m_physics.UpdateWidgets(registry->ViewAll<Collider>(), &m_frameManager);
         #endif
 
         m_ecs.GetParticleEmitterSystem()->RenderParticles();
@@ -233,7 +231,7 @@ namespace nc::core
         m_frameManager.Execute(&m_graphics);
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
+        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities(), m_ecs.GetRegistry());
         #else
         m_ui.Frame();
         #endif

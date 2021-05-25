@@ -47,6 +47,7 @@ namespace nc
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
 
+            const ColliderInfo& GetInfo() const;
             ColliderType GetType() const;
 
             #ifdef NC_EDITOR_ENABLED
@@ -56,13 +57,13 @@ namespace nc
             #endif
 
         private:
-            ColliderType m_type;
+            ColliderInfo m_info;
 
             #ifdef NC_EDITOR_ENABLED
             //DirectX::FXMMATRIX m_transformMatrix;
-            //BoundingVolume m_boundingVolume;
-            //graphics::Model m_widgetModel;
-            //bool m_selectedInEditor;
+            BoundingVolume m_boundingVolume;
+            graphics::Model m_widgetModel;
+            bool m_selectedInEditor;
             #endif
     };
 

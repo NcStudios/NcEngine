@@ -29,8 +29,8 @@ namespace nc::ui
 
     /* UIImpl */
     #ifdef NC_EDITOR_ENABLED
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics, const ecs::Systems& systems)
-        : m_editor{graphics, systems},
+    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
+        : m_editor{graphics},
           m_projectUI{nullptr}
     #else
     UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
@@ -77,9 +77,9 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, std::span<Entity*> activeEntities)
+    void UIImpl::Frame(float* dt, std::span<Entity*> activeEntities, ecs::registry_type* registry)
     {
-        m_editor.Frame(dt, activeEntities);
+        m_editor.Frame(dt, activeEntities, registry);
         if(m_projectUI)
         {
             m_projectUI->Draw();

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ComponentSystem.h"
 #include "component/ParticleEmitter.h"
 #include "particle/ParticleRenderer.h"
 #include "particle/EmitterState.h"
@@ -12,9 +11,7 @@ namespace nc::ecs
     class ParticleEmitterSystem
     {
         public:
-            ParticleEmitterSystem(unsigned maxCount, graphics::Graphics* graphics);
-
-            ecs::ComponentSystem<ParticleEmitter>* GetComponentSystem();
+            ParticleEmitterSystem(graphics::Graphics* graphics);
 
             /** UpdateParticles is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -28,14 +25,11 @@ namespace nc::ecs
             void Emit(EntityHandle handle, size_t count);
 
             // ComponentSystem Methods
-            ParticleEmitter* Add(EntityHandle handle, ParticleInfo info);
-            bool Remove(EntityHandle handle);
-            bool Contains(EntityHandle handle) const;
-            ParticleEmitter* GetPointerTo(EntityHandle handle);
+            void Add(const ParticleEmitter& emitter);
+            void Remove(EntityHandle handle);
             void Clear();
 
         private:
-            ecs::ComponentSystem<ParticleEmitter> m_componentSystem;
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;
             std::vector<EntityHandle> m_toRemove;

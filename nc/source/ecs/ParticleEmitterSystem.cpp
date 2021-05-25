@@ -18,19 +18,13 @@ namespace
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(unsigned maxCount, graphics::Graphics* graphics)
-        : m_componentSystem{maxCount},
-          m_emitterStates{},
+    ParticleEmitterSystem::ParticleEmitterSystem(graphics::Graphics* graphics)
+        : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
           m_graphicsData{CreateParticleGraphicsData(graphics)},
           m_renderer{graphics}
     {
-    }
-
-    ecs::ComponentSystem<ParticleEmitter>* ParticleEmitterSystem::GetComponentSystem()
-    {
-        return &m_componentSystem;
     }
 
     void ParticleEmitterSystem::UpdateParticles(float dt)
@@ -88,34 +82,18 @@ namespace nc::ecs
         pos->Emit(count);
     }
 
-    ParticleEmitter* ParticleEmitterSystem::Add(EntityHandle handle, ParticleInfo info)
+    void ParticleEmitterSystem::Add(const ParticleEmitter& emitter)
     {
-        m_toAdd.emplace_back(handle, info, &m_graphicsData);
-        return m_componentSystem.Add(handle, this);
+        m_toAdd.emplace_back(emitter.GetParentHandle(), emitter.GetInfo(), &m_graphicsData);
     }
 
-    bool ParticleEmitterSystem::Remove(EntityHandle handle)
+    void ParticleEmitterSystem::Remove(EntityHandle handle)
     {
-        auto result = m_componentSystem.Remove(handle);
-        if(result)
-            m_toRemove.push_back(handle);
-
-        return result;
-    }
-
-    bool ParticleEmitterSystem::Contains(EntityHandle handle) const
-    {
-        return m_componentSystem.Contains(handle);
-    }
-
-    ParticleEmitter* ParticleEmitterSystem::GetPointerTo(EntityHandle handle)
-    {
-        return m_componentSystem.GetPointerTo(handle);
+        m_toRemove.push_back(handle);
     }
 
     void ParticleEmitterSystem::Clear()
     {
-        m_componentSystem.Clear();
         m_emitterStates.clear();
         m_emitterStates.shrink_to_fit();
         m_toAdd.clear();

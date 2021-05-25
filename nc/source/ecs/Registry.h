@@ -1,28 +1,20 @@
 #pragma once
 
-#include "component/Component.h"
 #include "entity/EntityHandle.h"
 
 #include <algorithm>
-#include <concepts>
+#include <functional>
 #include <span>
+#include <stdexcept>
 #include <vector>
-
-#include "component/ComponentView.h"
-//#include "Ecs.h"
 
 namespace nc::ecs
 {
-    // doesn't have to be component?
-    // should be moveable?
-
     template<class T>
     class UnorderedPool
     {
         public:
-            UnorderedPool()
-                : m_data{}
-            {}
+            UnorderedPool() : m_data{} {}
 
             size_t Size() const { return m_data.size(); }
 
@@ -47,95 +39,184 @@ namespace nc::ecs
             std::vector<T> m_data;
     };
 
-
-    template<std::derived_from<ComponentBase> T>
+    template<class... Ts>
     class Registry
     {
+        template<class T>
+        using storage_type = UnorderedPool<T>;
         using index_type = HandleTraits::index_type;
+        using pools_type = std::tuple<storage_type<Ts>...>;
+
         static constexpr index_type NullIndex = std::numeric_limits<index_type>::max();
+        static constexpr size_t PoolCount = sizeof...(Ts);
+
+        struct TypedSequence
+        {
+            template<class T>
+            struct TypedIndex
+            {
+                index_type value = std::numeric_limits<index_type>::max();
+            };
+
+            std::tuple<TypedIndex<Ts>...> indices;
+        };
+
+        template<class T>
+        struct Callbacks
+        {
+            using on_add_type = std::function<void(const T&)>;
+            using on_remove_type = std::function<void(EntityHandle)>;
+            on_add_type OnAdd = nullptr;
+            on_remove_type OnRemove = nullptr;
+        };
 
         public:
-            Registry(size_t maxCount);
+            Registry(size_t maxEntities);
 
-            template<class... Args>
-            T* Emplace(EntityHandle handle, Args&&... args);
+            template<class T, class... Args>
+            T* AddComponent(EntityHandle handle, Args&&... args);
 
-            bool Remove(EntityHandle handle);
-            bool Contains(EntityHandle handle) const;
-            T* Get(EntityHandle handle);
+            template<class T>
+            bool RemoveComponent(EntityHandle handle);
+
+            template<class T>
+            bool HasComponent(EntityHandle handle);
+
+            template<class T>
+            T* GetComponent(EntityHandle handle);
+
+            template<class T>
+            std::span<T> ViewAll();
+
             void Clear();
-            std::span<T> View();
+
+            template<class T>
+            void RegisterOnAddCallback(Callbacks<T>::on_add_type func)
+            {
+                std::get<Callbacks<T>>(m_callbacks).OnAdd = std::move(func);
+            }
+
+            template<class T>
+            void RegisterOnRemoveCallback(Callbacks<T>::on_remove_type func)
+            {
+                std::get<Callbacks<T>>(m_callbacks).OnRemove = std::move(func);
+            }
 
         private:
-            std::vector<index_type> m_sparse;
-            UnorderedPool<T> m_dense;
-            //std::vector<T> m_dense;
+            std::vector<TypedSequence> m_sparse;
+            pools_type m_pools;
+            std::tuple<Callbacks<Ts>...> m_callbacks;
+
+            template<class T>
+            auto GetDenseIndex(HandleTraits::index_type sparseIndex) -> HandleTraits::index_type;
+
+            template<class T>
+            void SetDenseIndex(HandleTraits::index_type sparseIndex, HandleTraits::index_type value);
+
     };
 
-    template<std::derived_from<ComponentBase> T>
-    Registry<T>::Registry(size_t maxCount)
-        : m_sparse(maxCount, NullIndex),
-          m_dense{}
+    template<class... Ts>
+    Registry<Ts...>::Registry(size_t maxEntities)
+        : m_sparse{maxEntities},
+          m_pools{storage_type<Ts>{}...}
     {}
 
-    template<std::derived_from<ComponentBase> T>
-    template<class... Args>
-    T* Registry<T>::Emplace(EntityHandle handle, Args&&... args)
+    template<class... Ts>
+    template<class T, class... Args>
+    T* Registry<Ts...>::AddComponent(EntityHandle handle, Args&&... args)
     {
-        if(Contains(handle))
-            throw std::runtime_error("Registry::Emplace - Registry already has a component for this entity");
+        if(HasComponent<T>(handle))
+            throw std::runtime_error("Registry::Emplace - Cannot add multiple components of the same type");
+        
+        auto& pool = std::get<storage_type<T>>(m_pools);
+        auto* ptr = pool.Emplace(handle, std::forward<Args>(args)...);
+        auto index = pool.Size() - 1;
 
-        auto* ptr = m_dense.Emplace(handle, std::forward<Args>(args)...);
-        auto index = m_dense.Size() - 1;
-
-        m_sparse.at(handle.Index()) = index;
+        SetDenseIndex<T>(handle.Index(), index);
+        
+        auto& cb = std::get<Callbacks<T>>(m_callbacks).OnAdd;
+        if(cb)
+            cb(*ptr);
+        
         return ptr;
     }
 
-    template<std::derived_from<ComponentBase> T>
-    T* Registry<T>::Get(EntityHandle handle)
+    template<class... Ts>
+    template<class T>
+    auto Registry<Ts...>::GetDenseIndex(HandleTraits::index_type sparseIndex) -> HandleTraits::index_type
     {
-        auto denseIndex = m_sparse.at(handle.Index());
-        return denseIndex == NullIndex ? nullptr : m_dense.Get(denseIndex);
+        auto& typeSequence = m_sparse.at(sparseIndex);
+        return std::get<typename TypedSequence::TypedIndex<T>>(typeSequence.indices).value;
     }
 
-    template<std::derived_from<ComponentBase> T>
-    bool Registry<T>::Contains(EntityHandle handle) const
+    template<class... Ts>
+    template<class T>
+    void Registry<Ts...>::SetDenseIndex(HandleTraits::index_type sparseIndex, HandleTraits::index_type value)
     {
-        return m_sparse.at(handle.Index()) != NullIndex;
+        auto& typeSequence = m_sparse.at(sparseIndex);
+        std::get<typename TypedSequence::TypedIndex<T>>(typeSequence.indices).value = value;
     }
 
-    template<std::derived_from<ComponentBase> T>
-    bool Registry<T>::Remove(EntityHandle handle)
+    template<class... Ts>
+    template<class T>
+    bool Registry<Ts...>::RemoveComponent(EntityHandle handle)
     {
-        const auto sparseIndex = handle.Index();
-        const auto denseIndex = m_sparse.at(sparseIndex);
+        auto sparseIndex = handle.Index();
+        auto denseIndex = GetDenseIndex<T>(sparseIndex);
         if(denseIndex == NullIndex)
             return false;
+        
+        auto& pool = std::get<storage_type<T>>(m_pools);
+        auto movedHandle = pool.Remove(denseIndex);
 
-        m_sparse.at(sparseIndex) = NullIndex;
-        
-        auto movedHandle = m_dense.Remove(denseIndex);
-        
         if(movedHandle != handle)
-            m_sparse.at(movedHandle.Index()) = denseIndex;
+        {
+            auto movedSparseIndex = movedHandle.Index();
+            SetDenseIndex<T>(movedSparseIndex, denseIndex);
+        }
+
+        SetDenseIndex<T>(sparseIndex, NullIndex);
+
+        auto& cb = std::get<Callbacks<T>>(m_callbacks).OnRemove;
+        if(cb)
+            cb(handle);
 
         return true;
     }
 
-    template<std::derived_from<ComponentBase> T>
-    void Registry<T>::Clear()
+    template<class... Ts>
+    template<class T>
+    bool Registry<Ts...>::HasComponent(EntityHandle handle)
     {
-        m_dense.Clear();
-        //m_dense.clear();
-        //m_dense.shrink_to_fit();
-        std::ranges::fill(m_sparse, NullIndex);
+        auto sparseIndex = handle.Index();
+        auto denseIndex = GetDenseIndex<T>(sparseIndex);
+        return denseIndex == NullIndex ? false : true;
     }
 
-    template<std::derived_from<ComponentBase> T>
-    std::span<T> Registry<T>::View()
+    template<class... Ts>
+    template<class T>
+    T* Registry<Ts...>::GetComponent(EntityHandle handle)
     {
-        return m_dense.View();
-        //return std::span<T>(m_dense);
+        auto denseIndex = GetDenseIndex<T>(handle.Index());
+        return denseIndex == NullIndex ? nullptr : std::get<storage_type<T>>(m_pools).Get(denseIndex);
     }
-} // namespace nc::ecs
+
+    template<class... Ts>
+    template<class T>
+    std::span<T> Registry<Ts...>::ViewAll()
+    {
+        auto& pool = std::get<storage_type<T>>(m_pools);
+        return pool.View();
+    }
+
+    template<class... Ts>
+    void Registry<Ts...>::Clear()
+    {
+        std::apply([](auto&&... pools)
+        {
+            (pools.Clear(), ...);
+        }, m_pools);
+
+        std::ranges::fill(m_sparse, TypedSequence{});
+    }
+}

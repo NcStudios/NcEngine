@@ -24,9 +24,9 @@ namespace nc::physics
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void PhysicsSystem::UpdateWidgets(graphics::FrameManager* frameManager)
+    void PhysicsSystem::UpdateWidgets(std::span<Collider> colliders, graphics::FrameManager* frameManager)
     {
-        m_collisionSystem.UpdateWidgets(frameManager);
+        m_collisionSystem.UpdateWidgets(colliders, frameManager);
     }
     #endif
 } // namespace nc::physics
