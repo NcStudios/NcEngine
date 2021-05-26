@@ -13,103 +13,119 @@ namespace nc
         using layer_type = uint8_t;
         using flags_type = uint8_t;
 
-        static constexpr handle_type null_handle = std::numeric_limits<handle_type>::max();
-        static constexpr size_t flags_shift = 56u;
-        static constexpr size_t layer_shift = 48u;
-        static constexpr size_t version_shift = 32u;
+        static constexpr handle_type NullHandle = std::numeric_limits<handle_type>::max();
+        static constexpr index_type NullIndex = std::numeric_limits<index_type>::max();
+        static constexpr size_t FlagsShift = 56u;
+        static constexpr size_t LayerShift = 48u;
+        static constexpr size_t VersionShift = 32u;
     };
 
     struct EntityFlags
     {
-        static constexpr HandleTraits::flags_type None = 0u;
-        static constexpr HandleTraits::flags_type Static = 1u;
+        static constexpr HandleTraits::flags_type None = 0b00000000;
+        static constexpr HandleTraits::flags_type Static = 0b00000001;
     };
-
 
     /** @todo Maybe move some of these functions so only the engine can see them. I 
      *  don't think game logic should every care about handle details. */
 
     class EntityHandle
     {
-        static constexpr auto Join(HandleTraits::index_type index,
-                                   HandleTraits::version_type version,
-                                   HandleTraits::layer_type layer,
-                                   HandleTraits::flags_type flags)
-        {
-            return (HandleTraits::handle_type)flags << HandleTraits::flags_shift |
-                   (HandleTraits::handle_type)layer << HandleTraits::layer_shift |
-                   (HandleTraits::handle_type)version << HandleTraits::version_shift |
-                   (HandleTraits::handle_type)index;
-        }
+        using handle_type = HandleTraits::handle_type;
+        using index_type = HandleTraits::index_type;
+        using version_type = HandleTraits::version_type;
+        using layer_type = HandleTraits::layer_type;
+        using flags_type = HandleTraits::flags_type;
 
         public:
-            static constexpr EntityHandle Null()
-            {
-                return EntityHandle{HandleTraits::null_handle};
-            }
-
-            explicit constexpr EntityHandle(HandleTraits::index_type index,
-                                            HandleTraits::version_type version,
-                                            HandleTraits::layer_type layer,
-                                            HandleTraits::flags_type flags)
-                : m_handle{Join(index, version, layer, flags)}
-            {
-            }
-
-            explicit constexpr EntityHandle(HandleTraits::handle_type handle)
-                : m_handle{handle}
-            {
-            }
-
-            explicit constexpr operator HandleTraits::handle_type() const
-            {
-                return m_handle;
-            }
-
-            [[nodiscard]] constexpr bool Valid() const
-            {
-                return m_handle != HandleTraits::null_handle;
-            }
-
-            // can do better
-            constexpr void SetVersion(HandleTraits::version_type version) noexcept
-            {
-                m_handle = Join(Index(), version, Layer(), Flags());
-            }
-
-            constexpr void Recycle(HandleTraits::layer_type layer, HandleTraits::flags_type flags) noexcept
-            {
-                m_handle = Join(Index(), Version() + 1u, layer, flags);
-            }
-
-            [[nodiscard]] constexpr auto Index() const noexcept -> HandleTraits::index_type
-            {
-                return static_cast<HandleTraits::index_type>(m_handle);
-            }
-
-            [[nodiscard]] constexpr auto Version() const noexcept -> HandleTraits::version_type
-            {
-                return static_cast<HandleTraits::version_type>(m_handle >> HandleTraits::version_shift);
-            }
-
-            [[nodiscard]] constexpr auto Layer() const noexcept -> HandleTraits::layer_type
-            {
-                return static_cast<HandleTraits::layer_type>(m_handle >> HandleTraits::layer_shift);
-            }
-
-            [[nodiscard]] constexpr auto Flags() const noexcept -> HandleTraits::flags_type
-            {
-                return static_cast<HandleTraits::flags_type>(m_handle >> HandleTraits::flags_shift);
-            }
-
-            [[nodiscard]] constexpr bool IsStatic() const noexcept
-            {
-                return static_cast<bool>(Flags() & EntityFlags::Static);
-            }
+            static constexpr EntityHandle Null() noexcept;
+            explicit constexpr EntityHandle(index_type index, version_type version, layer_type layer, flags_type flags) noexcept;
+            explicit constexpr EntityHandle(HandleTraits::handle_type handle) noexcept;
+            explicit constexpr operator HandleTraits::handle_type() const noexcept;
 
             friend auto constexpr operator<=>(const EntityHandle&, const EntityHandle&) = default;
+            [[nodiscard]] constexpr bool Valid() const noexcept;
+            [[nodiscard]] constexpr auto Index() const noexcept -> index_type;
+            [[nodiscard]] constexpr auto Version() const noexcept -> version_type;
+            [[nodiscard]] constexpr auto Layer() const noexcept -> layer_type;
+            [[nodiscard]] constexpr auto Flags() const noexcept -> flags_type;
+            [[nodiscard]] constexpr bool IsStatic() const noexcept;
+
+            constexpr void SetVersion(version_type version) noexcept;
+            constexpr void Recycle(layer_type layer, flags_type flags) noexcept;
 
         private:
-            HandleTraits::handle_type m_handle;
+            handle_type m_handle;
+
+            constexpr auto Join(index_type index, version_type version, layer_type layer, flags_type flags) const noexcept -> handle_type;
     };
+
+    constexpr EntityHandle EntityHandle::Null() noexcept
+    {
+        return EntityHandle{HandleTraits::NullHandle};
+    }
+
+    constexpr EntityHandle::EntityHandle(index_type index, version_type version, layer_type layer, flags_type flags) noexcept
+        : m_handle{Join(index, version, layer, flags)}
+    {
+    }
+
+    constexpr EntityHandle::EntityHandle(handle_type handle) noexcept
+        : m_handle{handle}
+    {
+    }
+
+    constexpr EntityHandle::operator handle_type() const noexcept
+    {
+        return m_handle;
+    }
+
+    constexpr bool EntityHandle::Valid() const noexcept
+    {
+        return m_handle != HandleTraits::NullHandle;
+    }
+
+    // can do better
+    constexpr void EntityHandle::SetVersion(version_type version) noexcept
+    {
+        m_handle = Join(Index(), version, Layer(), Flags());
+    }
+
+    constexpr void EntityHandle::Recycle(layer_type layer, flags_type flags) noexcept
+    {
+        m_handle = Join(Index(), Version() + 1u, layer, flags);
+    }
+
+    constexpr auto EntityHandle::Index() const noexcept -> index_type
+    {
+        return static_cast<index_type>(m_handle);
+    }
+
+    constexpr auto EntityHandle::Version() const noexcept -> version_type
+    {
+        return static_cast<version_type>(m_handle >> HandleTraits::VersionShift);
+    }
+
+    constexpr auto EntityHandle::Layer() const noexcept -> layer_type
+    {
+        return static_cast<layer_type>(m_handle >> HandleTraits::LayerShift);
+    }
+
+    constexpr auto EntityHandle::Flags() const noexcept -> flags_type
+    {
+        return static_cast<flags_type>(m_handle >> HandleTraits::FlagsShift);
+    }
+
+    constexpr bool EntityHandle::IsStatic() const noexcept
+    {
+        return static_cast<bool>(Flags() & EntityFlags::Static);
+    }
+
+    constexpr auto EntityHandle::Join(index_type index, version_type version, layer_type layer, flags_type flags) const noexcept -> handle_type
+    {
+        return (handle_type)flags   << HandleTraits::FlagsShift   |
+               (handle_type)layer   << HandleTraits::LayerShift   |
+               (handle_type)version << HandleTraits::VersionShift |
+               (handle_type)index;
+    }
 }

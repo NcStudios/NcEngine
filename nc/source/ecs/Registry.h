@@ -19,9 +19,8 @@
  *    to entity.
  * 
  *  - A packed array of the components.
- * 
+
  *  - A set of callbacks for external systems to hook into addition and removal events.
- * 
  * 
  *  Note about pointers and iteration:
  *   - Generally don't make assumptions about the ordering of components or cache pointers to them.
@@ -44,11 +43,12 @@
  *     Dependencies on destruction order of components should be avoided.
  * 
  *  @todo
+ *   - Finish re-fetching pointer?
  *   - Sorting
  *   - Buffering
  *   - Groups
  *   - Remove multiple?
- *   - Move entity exists test from Ecs to here?
+ *   - Move entity exists IF_THROWs from Ecs to here?
  *   - more unit tests
  */
 
@@ -67,14 +67,13 @@ namespace nc::ecs
     struct PerComponentStorage
     {
         using index_type = HandleTraits::index_type;
-        static constexpr index_type NullIndex = std::numeric_limits<index_type>::max();
         std::vector<index_type> sparseArray;
         std::vector<index_type> entityPool;
         std::vector<T> componentPool;
         SystemCallbacks<T> callbacks;
 
         PerComponentStorage(size_t maxEntities)
-            : sparseArray(maxEntities, NullIndex),
+            : sparseArray(maxEntities, HandleTraits::NullIndex),
               entityPool{},
               componentPool{},
               callbacks{}
@@ -82,7 +81,7 @@ namespace nc::ecs
 
         void Clear()
         {
-            std::ranges::fill(sparseArray, NullIndex);
+            std::ranges::fill(sparseArray, HandleTraits::NullIndex);
             entityPool.clear();
             entityPool.shrink_to_fit();
             componentPool.clear();
@@ -95,7 +94,6 @@ namespace nc::ecs
     {
         using storage_type = std::tuple<PerComponentStorage<Ts>...>;
         using index_type = HandleTraits::index_type;
-        static constexpr index_type NullIndex = std::numeric_limits<index_type>::max();
         static constexpr size_t PoolCount = sizeof...(Ts);
 
         public:
@@ -215,7 +213,7 @@ namespace nc::ecs
         auto sparseIndex = handle.Index();
         auto& storage = GetStorageFor<T>();
         auto poolIndex = storage.sparseArray.at(sparseIndex);
-        if(poolIndex == NullIndex)
+        if(poolIndex == HandleTraits::NullIndex)
             return false;
         
         auto& componentPool = storage.componentPool;
@@ -227,7 +225,7 @@ namespace nc::ecs
         entityPool.at(poolIndex) = movedIndex;
         entityPool.pop_back();
 
-        storage.sparseArray.at(sparseIndex) = NullIndex;
+        storage.sparseArray.at(sparseIndex) = HandleTraits::NullIndex;
 
         if(sparseIndex != movedIndex)
             storage.sparseArray.at(movedIndex) = poolIndex;
@@ -242,7 +240,7 @@ namespace nc::ecs
     template<class T>
     bool Registry<Ts...>::HasComponent(EntityHandle handle)
     {
-        return GetStorageFor<T>().sparseArray.at(handle.Index()) == NullIndex ? false : true;
+        return GetStorageFor<T>().sparseArray.at(handle.Index()) == HandleTraits::NullIndex ? false : true;
     }
 
     template<class... Ts>
@@ -251,7 +249,7 @@ namespace nc::ecs
     {
         auto& storage = GetStorageFor<T>();
         auto poolIndex = storage.sparseArray.at(handle.Index());
-        return poolIndex == NullIndex ? nullptr : &storage.componentPool.at(poolIndex);
+        return poolIndex == HandleTraits::NullIndex ? nullptr : &storage.componentPool.at(poolIndex);
     }
 
     template<class... Ts>

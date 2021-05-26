@@ -225,7 +225,7 @@ namespace nc::core
             collider.UpdateWidget(&m_frameManager);
 #endif
 
-        //m_ecs.GetParticleEmitterSystem()->RenderParticles();
+        m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
         m_frameManager.Execute(&m_graphics);
 

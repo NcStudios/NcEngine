@@ -9,7 +9,7 @@
 
 namespace nc::ui::editor::controls
 {
-    auto SelectedEntity = HandleTraits::null_handle;
+    auto SelectedEntity = HandleTraits::NullHandle;
     const auto TitleBarHeight = 40.0f;
     const auto DefaultItemWidth = 60.0f;
     const auto SceneGraphPanelWidth = 300;
@@ -62,7 +62,7 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityPanel", {0,0}, true))
             {
-                if(SelectedEntity != HandleTraits::null_handle)
+                if(SelectedEntity != HandleTraits::NullHandle)
                     controls::EntityPanel(static_cast<EntityHandle>(SelectedEntity));
 
             } ImGui::EndChild();
@@ -100,7 +100,7 @@ namespace nc::ui::editor::controls
 
         if(!entity) // entity may have been deleted
         {
-            SelectedEntity = HandleTraits::null_handle;
+            SelectedEntity = HandleTraits::NullHandle;
             return;
         }
 
