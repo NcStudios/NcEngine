@@ -34,7 +34,6 @@ namespace nc
 
         private:
             std::unique_ptr<graphics::Model> m_model;
-            //Transform * m_transform;
     };
     
 }

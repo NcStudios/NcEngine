@@ -220,11 +220,12 @@ namespace nc::core
         for(auto& renderer : registry->ViewAll<Renderer>())
             renderer.Update(&m_frameManager);
 
-        #ifdef NC_EDITOR_ENABLED
-        m_physics.UpdateWidgets(registry->ViewAll<Collider>(), &m_frameManager);
-        #endif
+#ifdef NC_EDITOR_ENABLED
+        for(auto& collider : registry->ViewAll<Collider>())
+            collider.UpdateWidget(&m_frameManager);
+#endif
 
-        m_ecs.GetParticleEmitterSystem()->RenderParticles();
+        //m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
         m_frameManager.Execute(&m_graphics);
 

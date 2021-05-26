@@ -121,6 +121,7 @@ namespace nc::ecs
         {
             entity.SendOnDestroy();
             func(entity);
+            m_handle.ReclaimHandle(entity.Handle);
         }
 
         m_toRemove.clear();

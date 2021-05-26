@@ -199,14 +199,4 @@ namespace nc::physics
         m_broadEventsVsDynamic.clear();
         m_broadEventsVsStatic.clear();
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    void CollisionSystem::UpdateWidgets(std::span<Collider> colliders, graphics::FrameManager* frameManager)
-    {
-        for(auto& collider : colliders)
-        {
-            collider.UpdateWidget(frameManager);
-        }
-    }
-    #endif
 } // namespace nc::phsyics

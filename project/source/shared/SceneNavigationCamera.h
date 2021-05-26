@@ -13,7 +13,6 @@ namespace nc::sample
             void FrameUpdate(float dt) override;
 
         private:
-            //Transform* m_transform;
             Vector2 m_panPivot = Vector2::Zero();
             Vector2 m_lookPivot = Vector2::Zero();
             float m_zoom = 0.0f;
@@ -28,7 +27,6 @@ namespace nc::sample
 
     inline SceneNavigationCamera::SceneNavigationCamera(EntityHandle handle, float panDamp, float lookDamp, float zoomDamp)
         : Camera{handle},
-          //m_transform{GetComponent<Transform>(handle)},
           m_panDampen{panDamp},
           m_lookDampen{lookDamp},
           m_zoomDampen{zoomDamp}

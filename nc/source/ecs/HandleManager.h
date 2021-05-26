@@ -26,6 +26,11 @@ namespace nc::ecs
                 return out;
             }
 
+            void ReclaimHandle(EntityHandle handle)
+            {
+                m_freeHandles.push_back(handle);
+            }
+
             void Reset()
             {
                 m_freeHandles.clear();

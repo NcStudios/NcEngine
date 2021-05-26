@@ -74,10 +74,6 @@ namespace nc
     void Collider::EditorGuiElement()
     {
         ImGui::Text("Collider");
-        ui::editor::xyzWidgetHeader("     ");
-        ui::editor::xyzWidget("offset", "xxxoffset", &m_info.offset.x, &m_info.offset.y, &m_info.offset.z);
-        ui::editor::xyzWidget("scale", "xxxscale", &m_info.scale.x, &m_info.scale.y, &m_info.scale.z);
-
         /** @todo put widgets back */
     }
 

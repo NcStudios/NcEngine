@@ -13,7 +13,6 @@ namespace nc::sample
             void FrameUpdate(float dt) override;
 
         private:
-            //Transform* m_mainCameraTransform;
             float m_lastFrameZoom;
             Vector3 m_lastFrameTranslation = Vector3::Zero();
     };

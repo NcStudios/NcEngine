@@ -6,8 +6,6 @@
 #include "ui/editor/Widgets.h"
 #endif
 
-#include <limits>
-
 namespace
 {
     using namespace DirectX;
@@ -246,7 +244,6 @@ namespace nc
     {
         if(m_parent.Valid())
             return GetComponent<Transform>(m_parent)->GetRoot();
-            //return m_parent->GetRoot();
         
         return GetParentHandle();
     }
@@ -260,13 +257,11 @@ namespace nc
     {
         if(m_parent.Valid())
             GetComponent<Transform>(m_parent)->RemoveChild(GetParentHandle());
-            //m_parent->RemoveChild(this);
         
         m_parent = parent;
 
         if(m_parent.Valid())
             GetComponent<Transform>(m_parent)->AddChild(GetParentHandle());
-            //m_parent->AddChild(this);
     }
 
     void Transform::AddChild(EntityHandle child)

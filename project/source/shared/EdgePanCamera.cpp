@@ -24,15 +24,11 @@ namespace nc::sample
 {
     EdgePanCamera::EdgePanCamera(EntityHandle handle)
         : Camera(handle),
-        //m_mainCameraTransform{nullptr},
         m_lastFrameZoom{0.0f}
     {}
 
     void EdgePanCamera::FrameUpdate(float dt)
     {
-        //if (!m_mainCameraTransform)
-        //    m_mainCameraTransform = camera::GetMainCameraTransform();
-
         if (ui::IsHovered())
             return;
 

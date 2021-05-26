@@ -20,21 +20,6 @@ namespace nc::sample
     {
     }
 
-    // inline void CollisionLogger::OnCollisionEnter(EntityHandle hit)
-    // {
-    //     GameLog::Log("Collision Enter: " + std::to_string(hit.Index()));
-    // }
-
-    // inline void CollisionLogger::OnCollisionStay(EntityHandle hit)
-    // {
-    //     GameLog::Log("Collision Stay: " + std::to_string(hit.Index()));
-    // }
-
-    // inline void CollisionLogger::OnCollisionExit(EntityHandle hit)
-    // {
-    //     GameLog::Log("Collision Exit: " + std::to_string(hit.Index()));
-    // }
-
     inline void CollisionLogger::OnCollisionEnter(EntityHandle hit)
     {
         if(auto* other = GetEntity(hit); other)

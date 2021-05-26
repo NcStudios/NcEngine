@@ -12,13 +12,11 @@ namespace nc::sample
             void FrameUpdate(float dt) override;
 
         private:
-            //Transform* m_transform;
             float m_speed;
     };
 
     inline WasdController::WasdController(EntityHandle parentHandle, float speed)
         : Component{parentHandle},
-            //m_transform{GetComponent<Transform>(parentHandle)},
             m_speed{speed}
     {
     }

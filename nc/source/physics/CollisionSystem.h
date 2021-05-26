@@ -55,10 +55,6 @@ namespace nc::physics
             void DoCollisionStep();
             void ClearState();
 
-            #ifdef NC_EDITOR_ENABLED
-            void UpdateWidgets(std::span<Collider> colliders, graphics::FrameManager* frameManager); // hacky solution until widgets are a real thing
-            #endif
-
         private:
             ecs::ColliderSystem* m_colliderSystem;
             job::JobSystem* m_jobSystem;

@@ -12,14 +12,12 @@ namespace nc::sample
             void FrameUpdate(float dt) override;
 
         private:
-            //Transform* m_transform;
             Vector3 m_axis;
             float m_radiansPerSecond;
     };
 
     inline ConstantRotation::ConstantRotation(EntityHandle handle, Vector3 axis, float radiansPerSecond)
         : Component{handle},
-          //m_transform{GetComponent<Transform>(handle)},
           m_axis{axis},
           m_radiansPerSecond{radiansPerSecond}
     {

@@ -38,9 +38,6 @@ namespace nc
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
-
-        private:
-            //Transform * m_transform;
     };
 
     template<>

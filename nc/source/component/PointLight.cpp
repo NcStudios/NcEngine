@@ -13,7 +13,6 @@ namespace nc
         : ComponentBase(handle),
           PixelConstBufData{properties},
           ProjectedPos{}
-          //m_transform{ GetComponent<Transform>(handle) }
     {
     }
 
@@ -47,8 +46,6 @@ namespace nc
 
     void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view)
     {
-        //IF_THROW(!m_transform, "PointLight::Bind - Bad Transform Ptr");
-        
         auto* transform = GetComponent<Transform>(GetParentHandle());
         PixelConstBufData.pos = transform->GetPosition();
         const auto pos_v = DirectX::XMLoadVector3(&PixelConstBufData.pos);

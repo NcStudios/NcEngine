@@ -4,7 +4,6 @@
 
 namespace
 {
-    //nc::Transform* g_mainCameraTransform = nullptr;
     nc::EntityHandle g_mainCamera = nc::EntityHandle::Null();
 }
 
@@ -15,13 +14,11 @@ namespace nc::camera
     {
         V_LOG("Setting main camera");
         g_mainCamera = camera->GetParentHandle();
-        //g_mainCameraTransform = GetComponent<Transform>(camera->GetParentHandle());
     }
 
     void ClearMainCamera()
     {
         g_mainCamera = EntityHandle::Null();
-        //g_mainCameraTransform = nullptr;
     }
 
     DirectX::XMMATRIX CalculateViewMatrix()

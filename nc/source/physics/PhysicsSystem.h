@@ -23,10 +23,6 @@ namespace nc::physics
             void DoPhysicsStep();
             void ClearState();
 
-            #ifdef NC_EDITOR_ENABLED
-            void UpdateWidgets(std::span<Collider> colliders, graphics::FrameManager* frameManager); // hacky solution until widgets are a real thing
-            #endif
-
         private:
             CollisionSystem m_collisionSystem;
             ClickableSystem m_clickableSystem;

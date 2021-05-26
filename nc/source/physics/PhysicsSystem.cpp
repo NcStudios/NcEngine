@@ -22,11 +22,4 @@ namespace nc::physics
     {
         m_collisionSystem.DoCollisionStep();
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    void PhysicsSystem::UpdateWidgets(std::span<Collider> colliders, graphics::FrameManager* frameManager)
-    {
-        m_collisionSystem.UpdateWidgets(colliders, frameManager);
-    }
-    #endif
 } // namespace nc::physics

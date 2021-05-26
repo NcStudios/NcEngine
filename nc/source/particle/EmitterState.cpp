@@ -51,7 +51,6 @@ namespace nc::particle
         : m_soa{info.emission.maxParticleCount},
           m_info{info},
           m_graphicsData{graphicsData},
-          //m_transform{GetComponent<Transform>(handle)},
           m_handle{handle},
           m_emissionCounter{0.0f}
     {

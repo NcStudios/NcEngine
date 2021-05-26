@@ -8,7 +8,6 @@ namespace nc::sample
     MouseFollower::MouseFollower(EntityHandle handle)
     : Component(handle),
       m_screenDimensions { window::GetDimensions() },
-      //m_transform { GetComponent<nc::Transform>(handle) },
       m_zDepth { 0.0f },
       m_zRatio { 0.0f }
     {

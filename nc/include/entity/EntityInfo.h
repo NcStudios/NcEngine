@@ -18,6 +18,5 @@ namespace nc
         std::string tag = "Entity";
         physics::Layer layer = physics::DefaultLayer;
         HandleTraits::flags_type flags = 0u;
-        //bool isStatic = false;
     };
 }

@@ -76,7 +76,6 @@ namespace nc::sample
         camera::SetMainCamera(camera);
 
         auto sun = prefab::Create(prefab::Resource::Sun, {.scale = Vector3::Splat(2.0f), .tag = "Sun"});
-        //auto sunTransform = GetComponent<Transform>(sun);
 
         // Planet Orbits
         auto mercuryPivot = CreateEntity({.parent = sun, .tag = "Mercury Pivot"});

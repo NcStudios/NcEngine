@@ -64,8 +64,7 @@ namespace nc::alloc
     template<class T>
     std::span<T*> PoolAdapter<T>::GetActiveRange() noexcept
     {
-        //return std::span<T*>{m_data};
-        return std::span<T*>{m_data.data(), m_data.size()};
+        return std::span<T*>{m_data};
     }
 
     template<class T>
@@ -163,7 +162,6 @@ namespace nc::alloc
 
         if constexpr(storage_policy::sort_dense_storage_by_address::value)
         {
-            //std::erase(m_data, *pos);
             m_data.erase(pos);
         }
         else
