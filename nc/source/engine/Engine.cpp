@@ -142,9 +142,7 @@ namespace nc::core
 
             FrameLogic(dt);
             particleUpdateJobResult.wait();
-
-            m_ecs.FrameEnd();
-
+            m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
             FrameCleanup();
@@ -184,7 +182,7 @@ namespace nc::core
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
-        for(auto* entity : m_ecs.GetActiveEntities())
+        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
             entity->SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
@@ -193,7 +191,7 @@ namespace nc::core
     void Engine::FrameLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-        for(auto* entity : m_ecs.GetActiveEntities())
+        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
             entity->SendFrameUpdate(dt);
         NC_PROFILE_END();
     }
@@ -231,7 +229,7 @@ namespace nc::core
         m_frameManager.Execute(&m_graphics);
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities(), m_ecs.GetRegistry());
+        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
         #else
         m_ui.Frame();
         #endif
@@ -244,7 +242,6 @@ namespace nc::core
 
     void Engine::FrameCleanup()
     {
-        //m_ecs.FrameEnd();
         if(m_sceneSystem.IsSceneChangeScheduled())
         {
             DoSceneSwap();

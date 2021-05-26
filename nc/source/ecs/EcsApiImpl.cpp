@@ -6,15 +6,14 @@ namespace nc
     namespace internal
     {
         const auto DefaultEntityTag = std::string{"Entity"};
-        ecs::EntityComponentSystem* g_ecsImpl = nullptr;
-        ecs::EntitySystem* g_entitySystem = nullptr;
         ecs::registry_type* g_registry = nullptr;
+
+        /** @todo This is needed to pass into the component. Find a way 
+         *  around that. */
         ecs::ParticleEmitterSystem* g_particleEmitterSystem = nullptr;
 
         void RegisterEcs(ecs::EntityComponentSystem* impl)
         {
-            g_ecsImpl = impl;
-            g_entitySystem = impl->GetEntitySystem();
             g_registry = impl->GetRegistry();
             g_particleEmitterSystem = impl->GetParticleEmitterSystem();
         }
@@ -22,29 +21,27 @@ namespace nc
 
     EntityHandle CreateEntity(EntityInfo info)
     {
-        auto handle = internal::g_entitySystem->Add(info);
-        internal::g_registry->AddComponent<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
-        return handle;
+        return internal::g_registry->CreateEntity(std::move(info));
     }
 
     void DestroyEntity(EntityHandle handle)
     {
-        internal::g_entitySystem->Remove(handle);
+        internal::g_registry->DestroyEntity(handle);
     }
 
     bool EntityExists(EntityHandle handle)
     {
-        return internal::g_entitySystem->Contains(handle);
+        return internal::g_registry->EntityExists(handle);
     }
 
     Entity* GetEntity(EntityHandle handle)
     {
-        return internal::g_entitySystem->Get(handle);
+        return internal::g_registry->GetEntity(handle);
     }
 
     Entity* GetEntity(const std::string& tag)
     {
-        return internal::g_entitySystem->Get(tag);
+        return internal::g_registry->GetEntity(tag);
     }
 
     template<> ParticleEmitter* AddComponent<ParticleEmitter>(EntityHandle handle, ParticleInfo info)

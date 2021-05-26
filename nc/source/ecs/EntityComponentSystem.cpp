@@ -10,8 +10,7 @@ namespace nc::ecs
                                                  const config::MemorySettings& memSettings,
                                                  const config::PhysicsSettings& physSettings)
     #endif
-        : m_entitySystem{memSettings.maxTransforms},
-          m_colliderSystem{memSettings.maxTransforms,
+        : m_colliderSystem{memSettings.maxTransforms,
                            memSettings.maxStaticColliders,
                            physSettings.octreeDensityThreshold,
                            physSettings.octreeMinimumExtent,
@@ -48,23 +47,8 @@ namespace nc::ecs
         );
     }
 
-    void EntityComponentSystem::FrameEnd()
-    {
-        m_entitySystem.CommitRemovals([this](const auto& entity)
-        {
-            auto handle = entity.Handle;
-            m_registry.RemoveComponent<Collider>(handle);
-            m_registry.RemoveComponent<NetworkDispatcher>(handle);
-            m_registry.RemoveComponent<ParticleEmitter>(handle);
-            m_registry.RemoveComponent<PointLight>(handle);
-            m_registry.RemoveComponent<Renderer>(handle);
-            m_registry.RemoveComponent<Transform>(handle);
-        });
-    }
-
     void EntityComponentSystem::Clear()
     {
-        m_entitySystem.Clear();
         m_registry.Clear();
         m_colliderSystem.Clear();
         m_particleEmitterSystem.Clear();

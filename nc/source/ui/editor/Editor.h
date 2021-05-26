@@ -16,7 +16,7 @@ namespace nc::ui::editor
     {
         public:
             Editor(graphics::Graphics* graphics);
-            void Frame(float* dt, std::span<Entity*> activeEntities, ecs::registry_type* registry);
+            void Frame(float* dt, ecs::registry_type* registry);
 
         private:
             nc::graphics::Graphics* m_graphics;

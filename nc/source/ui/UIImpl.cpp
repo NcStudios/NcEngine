@@ -77,9 +77,9 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, std::span<Entity*> activeEntities, ecs::registry_type* registry)
+    void UIImpl::Frame(float* dt, ecs::registry_type* registry)
     {
-        m_editor.Frame(dt, activeEntities, registry);
+        m_editor.Frame(dt, registry);
         if(m_projectUI)
         {
             m_projectUI->Draw();

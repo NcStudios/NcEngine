@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Registry.h"
-#include "EntitySystem.h"
 #include "ColliderSystem.h"
 #include "ParticleEmitterSystem.h"
 #include "component/Collider.h"
@@ -34,13 +33,9 @@ namespace nc::ecs
             auto GetRegistry() noexcept { return &m_registry; }
             auto GetColliderSystem() noexcept { return &m_colliderSystem; }
             auto GetParticleEmitterSystem() noexcept { return &m_particleEmitterSystem; }
-            auto GetEntitySystem() noexcept { return &m_entitySystem; }
-            auto GetActiveEntities() noexcept { return m_entitySystem.GetActiveEntities(); }
-            void FrameEnd();
             void Clear();
 
         private:
-            EntitySystem m_entitySystem;
             ColliderSystem m_colliderSystem;
             ParticleEmitterSystem m_particleEmitterSystem;
             registry_type m_registry;

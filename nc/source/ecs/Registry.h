@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entity/EntityHandle.h"
+#include "EntitySystem.h"
 
 #include <algorithm>
 #include <functional>
@@ -8,55 +9,51 @@
 #include <stdexcept>
 #include <vector>
 
-
-#include <iostream>
+/** The regsitry is a collection of entity and component state.
+ * 
+ *  State tracked per component type in the registry:
+ *  - A sparse array of indices into the pools which can be indexed with an entity index.
+ * 
+ *  - A packed array of all the entity indices associated with the component with the same
+ *    ordering as the component pool. Useful for sorting different component pools according
+ *    to entity.
+ * 
+ *  - A packed array of the components.
+ * 
+ *  - A set of callbacks for external systems to hook into addition and removal events.
+ * 
+ * 
+ *  Note about pointers and iteration:
+ *   - Generally don't make assumptions about the ordering of components or cache pointers to them.
+ *  
+ *   - Adding a component may resize the internal storage, invalidating all pointers and spans. The
+ *     ReserveHeadroom method can be used to prevent this if the maximum required capacity is known,
+ *     but note that the method itself may cause resizing.
+ * 
+ *   - Removing a component uses the 'swap and pop' idiom so pointers to the last element and end
+ *     iterators are invalidated.
+ *  
+ *  General Notes
+ *   - Newly added and destroyed entities exist in staging areas until CommitStagedChanges is called.
+ *     Staged additions are queryable with GetEntity, but they will not appear in the active set. Staged
+ *     removals are not queryable, nor do they appear in the active set, but their components are still
+ *     present in their respective pools.
+ * 
+ *   - On destruction of an entity, all components are removed in the order they appear in the
+ *     registry's template argument list. The entity is destroyed after all components are removed.
+ *     Dependencies on destruction order of components should be avoided.
+ * 
+ *  @todo
+ *   - Sorting
+ *   - Buffering
+ *   - Groups
+ *   - Remove multiple?
+ *   - Move entity exists test from Ecs to here?
+ *   - more unit tests
+ */
 
 namespace nc::ecs
 {
-    template<class T>
-    class UnorderedPool
-    {
-        public:
-            UnorderedPool() : m_data{} {}
-
-            template<class... Args>
-            auto Emplace(Args&&... args) -> T*
-            {
-                return &m_data.emplace_back(std::forward<Args>(args)...);
-            }
-
-            void Remove(HandleTraits::index_type i)
-            {
-                m_data.at(i) = std::move(m_data.back());
-                m_data.pop_back();
-                //return m_data[i].GetParentHandle();
-            }
-
-            auto Get(HandleTraits::index_type i) -> T*
-            {
-                return &m_data.at(i);
-            }
-
-            auto View() -> std::span<T>
-            {
-                return std::span{m_data};
-            }
-
-            void Clear()
-            {
-                m_data.clear();
-            }
-
-            auto Size() const -> size_t
-            {
-                return m_data.size();
-            }
-
-        private:
-            std::vector<T> m_data;
-    };
-
-    /** Callbacks allowing external systems to hook into addition and deletion events. */
     template<class T>
     struct SystemCallbacks
     {
@@ -66,71 +63,50 @@ namespace nc::ecs
         on_remove_type OnRemove = nullptr;
     };
 
-
-    template<class ValueType, class BindType>
-    struct BoundType
+    template<class T>
+    struct PerComponentStorage
     {
-        ValueType value = ValueType{};
+        using index_type = HandleTraits::index_type;
+        static constexpr index_type NullIndex = std::numeric_limits<index_type>::max();
+        std::vector<index_type> sparseArray;
+        std::vector<index_type> entityPool;
+        std::vector<T> componentPool;
+        SystemCallbacks<T> callbacks;
+
+        PerComponentStorage(size_t maxEntities)
+            : sparseArray(maxEntities, NullIndex),
+              entityPool{},
+              componentPool{},
+              callbacks{}
+        {}
+
+        void Clear()
+        {
+            std::ranges::fill(sparseArray, NullIndex);
+            entityPool.clear();
+            entityPool.shrink_to_fit();
+            componentPool.clear();
+            componentPool.shrink_to_fit();
+        }
     };
-
-    template<class BindType>
-    struct BoundType<HandleTraits::index_type, BindType>
-    {
-        HandleTraits::index_type value = std::numeric_limits<HandleTraits::index_type>::max();
-    };
-
-    /** Constructs a domain such that for each type T in Ts..., there exists exactly
-     *  one value of type ValueType associated with type T. */
-    template<typename ValueType, class... Ts>
-    struct UniquelyQuantifiedDomain
-    {
-        template<class T>
-        struct BoundValue { ValueType value = ValueType{}; };
-
-        std::tuple<BoundValue<Ts>...> domain;
-    };
-
-    // template<class... Ts>
-    // struct UniquelyQuantifiedDomain<HandleTraits::index_type, Ts...>
-    // {
-    //     template<class T>
-    //     struct BoundValue { HandleTraits::index_type value = std::numeric_limits<HandleTraits::index_type>::max(); };
-
-    //     std::tuple<BoundValue<Ts>...> domain;
-    // };
-
-    /** A cluster of indices each associated with a unique type used to index pools of their 
-     *  corresponding types. */
-    // template<std::integral I, I DefaultValue, class... Ts>
-    // struct TypedIndexPack
-    // {
-    //     template<class T>
-    //     struct TypedIndex { I value = DefaultValue; };
-
-    //     std::tuple<TypedIndex<Ts>...> indices;
-    // };
 
     template<class... Ts>
     class Registry
     {
+        using storage_type = std::tuple<PerComponentStorage<Ts>...>;
         using index_type = HandleTraits::index_type;
         static constexpr index_type NullIndex = std::numeric_limits<index_type>::max();
-        //using index_pack_type = UniquelyQuantifiedDomain<index_type, Ts...>;
-        using index_pack_type = std::tuple<BoundType<index_type, Ts>...>;
-
-        template<class T>
-        using storage_type = UnorderedPool<T>;
-        using pools_type = std::tuple<storage_type<Ts>...>;
         static constexpr size_t PoolCount = sizeof...(Ts);
-        
-        using entity_storage_type = storage_type<index_type>;
-        using entity_pools_type = UniquelyQuantifiedDomain<entity_storage_type, Ts...>;
-
-        using callbacks_type = std::tuple<SystemCallbacks<Ts>...>;
-
 
         public:
             Registry(size_t maxEntities);
+
+            auto CreateEntity(EntityInfo info) -> EntityHandle;
+            void DestroyEntity(EntityHandle handle);
+            bool EntityExists(EntityHandle handle);
+            auto GetEntity(EntityHandle handle) -> Entity*;
+            auto GetEntity(const std::string& tag) -> Entity*;
+            auto GetActiveEntities() -> std::span<Entity*>;
 
             template<class T, class... Args>
             auto AddComponent(EntityHandle handle, Args&&... args) -> T*;
@@ -147,7 +123,8 @@ namespace nc::ecs
             template<class T>
             auto ViewAll() -> std::span<T>;
 
-            void Clear();
+            template<class T>
+            void ReserveHeadroom(size_t additionalRequiredCount);
 
             template<class T>
             void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
@@ -155,79 +132,80 @@ namespace nc::ecs
             template<class T>
             void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
 
+            void CommitStagedChanges();
+            void Clear();
+
         private:
-            std::vector<index_pack_type> m_sparse;
-            pools_type m_pools;
-            entity_pools_type m_entityPools;
-            callbacks_type m_callbacks;
+            EntitySystem m_entitySystem;
+            storage_type m_storage;
 
             template<class T>
-            auto GetPoolIndex(HandleTraits::index_type sparseIndex) -> HandleTraits::index_type;
-
-            template<class T>
-            void SetPoolIndex(HandleTraits::index_type sparseIndex, HandleTraits::index_type value);
-
-            //template<class T>
-            //auto GetEntityPool() -> dense_entity_type& { return std::get<typename entity_pools_type::BoundValue<T>>(m_entityPools.domain).value; }
-
-            template<class T>
-            auto GetEntityPool() -> entity_storage_type& { return std::get<typename entity_pools_type::BoundValue<T>>(m_entityPools.domain).value; }
-
-            template<class T>
-            auto GetComponentPool() -> storage_type<T>& { return std::get<storage_type<T>>(m_pools); }
-
-            template<class T>
-            auto GetCallbacks() -> SystemCallbacks<T>& { return std::get<SystemCallbacks<T>>(m_callbacks); }
+            auto GetStorageFor() -> PerComponentStorage<T>& { return std::get<PerComponentStorage<T>>(m_storage); }
     };
 
     template<class... Ts>
     Registry<Ts...>::Registry(size_t maxEntities)
-        : m_sparse{maxEntities},
-          m_pools{storage_type<Ts>{}...},
-          m_entityPools{}
-    {}
+        : m_entitySystem{maxEntities},
+          m_storage{PerComponentStorage<Ts>{maxEntities}...}
+    {
+    }
+
+    template<class... Ts>
+    auto Registry<Ts...>::CreateEntity(EntityInfo info) -> EntityHandle
+    {
+        auto handle = m_entitySystem.Add(info);
+        AddComponent<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
+        return handle;
+    }
+
+    template<class... Ts>
+    void Registry<Ts...>::DestroyEntity(EntityHandle handle)
+    {
+        m_entitySystem.Remove(handle);
+    }
+
+    template<class... Ts>
+    bool Registry<Ts...>::EntityExists(EntityHandle handle)
+    {
+        return m_entitySystem.Contains(handle);
+    }
+
+    template<class... Ts>
+    auto Registry<Ts...>::GetEntity(EntityHandle handle) -> Entity*
+    {
+        return m_entitySystem.Get(handle);
+    }
+
+    template<class... Ts>
+    auto Registry<Ts...>::GetEntity(const std::string& tag) -> Entity*
+    {
+        return m_entitySystem.Get(tag);
+    }
+
+    template<class... Ts>
+    auto Registry<Ts...>::GetActiveEntities() -> std::span<Entity*>
+    {
+        return m_entitySystem.GetActiveEntities();
+    }
 
     template<class... Ts>
     template<class T, class... Args>
     T* Registry<Ts...>::AddComponent(EntityHandle handle, Args&&... args)
     {
         if(HasComponent<T>(handle))
-            throw std::runtime_error("Registry::Emplace - Cannot add multiple components of the same type to a single entity");
+            throw std::runtime_error("Registry::AddComponent - Cannot add multiple components of the same type to a single entity");
         
-        auto& pool = GetComponentPool<T>();
-        auto* ptr = pool.Emplace(handle, std::forward<Args>(args)...);
-        auto index = pool.Size() - 1;
+        auto sparseIndex = handle.Index();
+        auto& storage = GetStorageFor<T>();
+        auto newIndex = storage.componentPool.size();
+        auto& newComponent = storage.componentPool.emplace_back(handle, std::forward<Args>(args)...);
+        storage.entityPool.push_back(sparseIndex);
+        storage.sparseArray.at(sparseIndex) = newIndex;
 
-        SetPoolIndex<T>(handle.Index(), index);
-
-        auto& entityPool = GetEntityPool<T>();
+        if(auto& func = storage.callbacks.OnAdd; func)
+            func(newComponent);
         
-        //entityPool.push_back(handle.Index());
-        entityPool.Emplace(handle.Index());
-
-        if(auto& func = GetCallbacks<T>().OnAdd; func)
-            func(*ptr);
-        
-        return ptr;
-    }
-
-    template<class... Ts>
-    template<class T>
-    auto Registry<Ts...>::GetPoolIndex(HandleTraits::index_type sparseIndex) -> HandleTraits::index_type
-    {
-        auto& typeSequence = m_sparse.at(sparseIndex);
-        return std::get<BoundType<index_type, T>>(typeSequence).value;
-        //return std::get<typename index_pack_type::BoundValue<T>>(typeSequence.domain).value;
-    }
-
-    template<class... Ts>
-    template<class T>
-    void Registry<Ts...>::SetPoolIndex(HandleTraits::index_type sparseIndex, HandleTraits::index_type value)
-    {
-        auto& typeSequence = m_sparse.at(sparseIndex);
-        
-        std::get<BoundType<index_type, T>>(typeSequence).value = value;
-        //std::get<typename index_pack_type::BoundValue<T>>(typeSequence.domain).value = value;
+        return &newComponent;
     }
 
     template<class... Ts>
@@ -235,30 +213,26 @@ namespace nc::ecs
     bool Registry<Ts...>::RemoveComponent(EntityHandle handle)
     {
         auto sparseIndex = handle.Index();
-        auto poolIndex = GetPoolIndex<T>(sparseIndex);
+        auto& storage = GetStorageFor<T>();
+        auto poolIndex = storage.sparseArray.at(sparseIndex);
         if(poolIndex == NullIndex)
             return false;
         
-        GetComponentPool<T>().Remove(poolIndex);
+        auto& componentPool = storage.componentPool;
+        componentPool.at(poolIndex) = std::move(componentPool.back());
+        componentPool.pop_back();
 
-        SetPoolIndex<T>(sparseIndex, NullIndex);
+        auto& entityPool = storage.entityPool;
+        auto movedIndex = entityPool.back(); // need to store in case we're removing the last element
+        entityPool.at(poolIndex) = movedIndex;
+        entityPool.pop_back();
 
-        auto& entityPool = GetEntityPool<T>();
+        storage.sparseArray.at(sparseIndex) = NullIndex;
 
-        // entityPool.at(poolIndex) = entityPool.back();
-        // auto movedHandle2 = entityPool.at(poolIndex);
-        // entityPool.pop_back();
+        if(sparseIndex != movedIndex)
+            storage.sparseArray.at(movedIndex) = poolIndex;
 
-        // if(handle.Index() != movedHandle2)
-        //     SetPoolIndex<T>(movedHandle2, poolIndex);
-
-        //auto movedHandle = entityPool.View().back();
-        auto movedHandle = *entityPool.Get(entityPool.Size() - 1);
-        entityPool.Remove(poolIndex);
-        if(handle.Index() != movedHandle)
-            SetPoolIndex<T>(movedHandle, poolIndex);
-
-        if(auto& func = GetCallbacks<T>().OnRemove; func)
+        if(auto& func = storage.callbacks.OnRemove; func)
             func(handle);
 
         return true;
@@ -268,44 +242,63 @@ namespace nc::ecs
     template<class T>
     bool Registry<Ts...>::HasComponent(EntityHandle handle)
     {
-        auto poolIndex = GetPoolIndex<T>(handle.Index());
-        return poolIndex == NullIndex ? false : true;
+        return GetStorageFor<T>().sparseArray.at(handle.Index()) == NullIndex ? false : true;
     }
 
     template<class... Ts>
     template<class T>
     T* Registry<Ts...>::GetComponent(EntityHandle handle)
     {
-        auto poolIndex = GetPoolIndex<T>(handle.Index());
-        return poolIndex == NullIndex ? nullptr : GetComponentPool<T>().Get(poolIndex);
+        auto& storage = GetStorageFor<T>();
+        auto poolIndex = storage.sparseArray.at(handle.Index());
+        return poolIndex == NullIndex ? nullptr : &storage.componentPool.at(poolIndex);
     }
 
     template<class... Ts>
     template<class T>
     std::span<T> Registry<Ts...>::ViewAll()
     {
-        return GetComponentPool<T>().View();
+        return std::span<T>{GetStorageFor<T>().componentPool};
     }
 
     template<class... Ts>
-    void Registry<Ts...>::Clear()
+    template<class T>
+    void Registry<Ts...>::ReserveHeadroom(size_t additionalRequiredCount)
     {
-        std::apply([](auto&&... pools) { (pools.Clear(), ...); }, m_pools);
-        std::apply([](auto&&... boundPool) { (boundPool.value.Clear(), ...); }, m_entityPools.domain);
-        std::ranges::fill(m_sparse, index_pack_type{}); // reset all to NullIndex
+        auto& storage = GetStorageFor<T>();
+        auto requiredSize = storage.componentPool.size() + additionalRequiredCount;
+        storage.componentPool.reserve(requiredSize);
+        storage.entityPool.reserve(requiredSize);
     }
 
     template<class... Ts>
     template<class T>
     void Registry<Ts...>::RegisterOnAddCallback(typename SystemCallbacks<T>::on_add_type func)
     {
-        GetCallbacks<T>().OnAdd = std::move(func);
+        GetStorageFor<T>().callbacks.OnAdd = std::move(func);
     }
 
     template<class... Ts>
     template<class T>
     void Registry<Ts...>::RegisterOnRemoveCallback(typename SystemCallbacks<T>::on_remove_type func)
     {
-        GetCallbacks<T>().OnRemove = std::move(func);
+        GetStorageFor<T>().callbacks.OnRemove = std::move(func);
+    }
+
+    template<class... Ts>
+    void Registry<Ts...>::CommitStagedChanges()
+    {
+        m_entitySystem.CommitRemovals([this](const auto& entity)
+        {
+            auto handle = entity.Handle;
+            (RemoveComponent<Ts>(handle), ...);
+        });
+    }
+
+    template<class... Ts>
+    void Registry<Ts...>::Clear()
+    {
+        m_entitySystem.Clear();
+        std::apply([](auto&&... data) { (data.Clear(), ...); }, m_storage);
     }
 }

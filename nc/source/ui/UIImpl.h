@@ -28,7 +28,7 @@ namespace nc::ui
             void FrameBegin();
 
             #ifdef NC_EDITOR_ENABLED
-            void Frame(float* dt, std::span<Entity*> activeEntities, ecs::registry_type* registry);
+            void Frame(float* dt, ecs::registry_type* registry);
             #else
             void Frame();
             #endif
