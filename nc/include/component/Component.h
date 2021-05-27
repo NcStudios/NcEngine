@@ -60,5 +60,11 @@ namespace nc
          *  This minimizes cache misses during iteration but results
          *  in slower additions and deletions. */
         using sort_dense_storage_by_address = std::true_type;
+
+        /** Requires an OnAdd callback to be set in the registry. */
+        using requires_on_add_callback = std::false_type;
+
+        /** Requires an OnRemove callback to be set in the registry. */
+        using requires_on_remove_callback = std::false_type;
     };
 } //end namespace nc

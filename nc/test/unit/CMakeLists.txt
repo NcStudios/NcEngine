@@ -52,6 +52,30 @@ target_link_libraries(Entity_unit_tests
 
 add_test(Entity_unit_tests Entity_unit_tests)
 
+### EntityHandle Tests ###
+add_executable(EntityHandle_unit_tests
+    ${ROOT_DIR}/test/unit/EntityHandle_unit_tests.cpp
+)
+
+target_include_directories(EntityHandle_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${EXTERNAL_INCLUDE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(EntityHandle_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(EntityHandle_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(EntityHandle_unit_tests EntityHandle_unit_tests)
+
 ### MakeUnique Tests ###
 add_executable(MakeUnique_unit_tests
     ${ROOT_DIR}/test/unit/MakeUnique_unit_tests.cpp

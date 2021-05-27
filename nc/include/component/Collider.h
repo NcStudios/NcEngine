@@ -77,5 +77,7 @@ namespace nc
         #endif
 
         using sort_dense_storage_by_address = std::true_type;
+        using requires_on_add_callback = std::true_type;
+        using requires_on_remove_callback = std::true_type;
     };
 }

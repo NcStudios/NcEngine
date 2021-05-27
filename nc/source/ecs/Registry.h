@@ -12,14 +12,14 @@
 /** The regsitry is a collection of entity and component state.
  * 
  *  State tracked per component type in the registry:
- *  - A sparse array of indices into the pools which can be indexed with an entity index.
+ *  - A packed array of the components.
  * 
  *  - A packed array of all the entity indices associated with the component with the same
  *    ordering as the component pool. Useful for sorting different component pools according
  *    to entity.
  * 
- *  - A packed array of the components.
-
+ *  - A sparse array of indices into the pools which can be indexed with an entity index.
+ * 
  *  - A set of callbacks for external systems to hook into addition and removal events.
  * 
  *  Note about pointers and iteration:
@@ -33,6 +33,11 @@
  *     iterators are invalidated.
  *  
  *  General Notes
+ *   - Callbacks will only be used if specified in the StoragePolicy for a component. Attempts to 
+ *     set callbacks for types whose StoragePolicy doesn't allow this will fail to compile, while 
+ *     VerifyCallbacks can be used to check at runtime that all required callbacks are set, throwing
+ *     on failure.
+ *
  *   - Newly added and destroyed entities exist in staging areas until CommitStagedChanges is called.
  *     Staged additions are queryable with GetEntity, but they will not appear in the active set. Staged
  *     removals are not queryable, nor do they appear in the active set, but their components are still
@@ -144,6 +149,7 @@ namespace nc::ecs
             void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
 
             void CommitStagedChanges();
+            void VerifyCallbacks();
             void Clear();
 
         private:
@@ -213,9 +219,11 @@ namespace nc::ecs
         storage.entityPool.push_back(sparseIndex);
         storage.sparseArray.at(sparseIndex) = newIndex;
 
-        if(auto& func = storage.callbacks.OnAdd; func)
-            func(newComponent);
-        
+        if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
+        {
+            storage.callbacks.OnAdd(newComponent);
+        }
+
         return &newComponent;
     }
 
@@ -243,8 +251,10 @@ namespace nc::ecs
         if(sparseIndex != movedIndex)
             storage.sparseArray.at(movedIndex) = poolIndex;
 
-        if(auto& func = storage.callbacks.OnRemove; func)
-            func(handle);
+        if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
+        {
+            storage.callbacks.OnRemove(handle);
+        }
 
         return true;
     }
@@ -286,6 +296,7 @@ namespace nc::ecs
     template<class T>
     void Registry<Ts...>::RegisterOnAddCallback(typename SystemCallbacks<T>::on_add_type func)
     {
+        static_assert(StoragePolicy<T>::requires_on_add_callback::value, "Cannot register an OnAdd callback unless specified in the StoragePolicy");
         GetStorageFor<T>().callbacks.OnAdd = std::move(func);
     }
 
@@ -293,6 +304,7 @@ namespace nc::ecs
     template<class T>
     void Registry<Ts...>::RegisterOnRemoveCallback(typename SystemCallbacks<T>::on_remove_type func)
     {
+        static_assert(StoragePolicy<T>::requires_on_remove_callback::value, "Cannot register an OnRemove callback unless specified in the StoragePolicy");
         GetStorageFor<T>().callbacks.OnRemove = std::move(func);
     }
 
@@ -311,5 +323,26 @@ namespace nc::ecs
     {
         m_entitySystem.Clear();
         std::apply([](auto&&... data) { (data.Clear(), ...); }, m_storage);
+    }
+
+    template<class... Ts>
+    void Registry<Ts...>::VerifyCallbacks()
+    {
+        auto CallbackCheck = [] <class T> (const PerComponentStorage<T>& data)
+        {
+            if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
+            {
+                if(!data.callbacks.OnAdd)
+                    throw std::runtime_error("OnAdd callback required but not set\n   " + std::string{__PRETTY_FUNCTION__});
+            }
+
+            if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
+            {
+                if(!data.callbacks.OnRemove)
+                    throw std::runtime_error("OnRemove callback required but not set\n   " + std::string{__PRETTY_FUNCTION__});
+            }
+        };
+
+        std::apply([&CallbackCheck](auto&&... data) { (CallbackCheck(data), ...); }, m_storage);
     }
 }

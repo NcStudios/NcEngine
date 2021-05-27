@@ -45,6 +45,8 @@ namespace nc::ecs
         (
             [particleEmitterSystem](EntityHandle h) { particleEmitterSystem->Remove(h); }
         );
+
+        m_registry.VerifyCallbacks();
     }
 
     void EntityComponentSystem::Clear()
