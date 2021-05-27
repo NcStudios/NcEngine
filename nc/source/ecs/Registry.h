@@ -213,12 +213,11 @@ namespace nc::ecs
         if(HasComponent<T>(handle))
             throw std::runtime_error("Registry::AddComponent - Cannot add multiple components of the same type to a single entity");
         
-        auto sparseIndex = HandleUtils::Index(handle);
         auto& storage = GetStorageFor<T>();
-        auto newIndex = storage.componentPool.size();
         auto& newComponent = storage.componentPool.emplace_back(handle, std::forward<Args>(args)...);
+        auto sparseIndex = HandleUtils::Index(handle);
         storage.entityPool.push_back(sparseIndex);
-        storage.sparseArray.at(sparseIndex) = newIndex;
+        storage.sparseArray.at(sparseIndex) = storage.componentPool.size() - 1;
 
         if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
         {
@@ -314,8 +313,7 @@ namespace nc::ecs
     {
         m_entitySystem.CommitRemovals([this](const auto& entity)
         {
-            auto handle = entity.Handle;
-            (RemoveComponent<Ts>(handle), ...);
+            (RemoveComponent<Ts>(entity.Handle), ...);
         });
     }
 

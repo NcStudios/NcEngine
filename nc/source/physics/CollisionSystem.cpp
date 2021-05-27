@@ -37,11 +37,6 @@ namespace nc::physics
         auto narrowStaticJobResult = m_jobSystem->Schedule(NarrowDetectVsStatic, this);
         narrowDynamicJobResult.wait();
         broadStaticJobResult.wait();
-
-        //auto findEnterAndStayJobResult = m_jobSystem->Schedule(FindEnterAndStayEvents, this);
-        //auto findExitJobResult = m_jobSystem->Schedule(FindExitEvents, this);
-        //findEnterAndStayJobResult.wait();
-        //findExitJobResult.wait();
         
         FindEnterAndStayEvents();
         FindExitEvents();
