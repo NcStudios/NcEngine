@@ -63,7 +63,5 @@ namespace nc
             DirectX::XMMATRIX m_worldMatrix;
             EntityHandle m_parent;
             std::vector<EntityHandle> m_children;
-            //Transform* m_parent;
-            //std::vector<Transform*> m_children;
     };
 } //end namespace nc

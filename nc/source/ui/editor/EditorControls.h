@@ -106,10 +106,10 @@ namespace nc::ui::editor::controls
 
         ImGui::Separator();
         ImGui::Text("Tag     %s", entity->Tag.c_str());
-        ImGui::Text("Handle  %d", handle.Index());
-        ImGui::Text("Version %d", handle.Version());
-        ImGui::Text("Layer   %d", handle.Layer());
-        ImGui::Text("Static  %s", handle.IsStatic() ? "True" : "False");
+        ImGui::Text("Handle  %d", HandleUtils::Index(handle));
+        ImGui::Text("Version %d", HandleUtils::Version(handle));
+        ImGui::Text("Layer   %d", HandleUtils::Layer(handle));
+        ImGui::Text("Static  %s", HandleUtils::IsStatic(handle) ? "True" : "False");
         controls::Component(GetComponent<Transform>(handle));
         controls::Component(GetComponent<NetworkDispatcher>(handle));
         controls::Component(GetComponent<ParticleEmitter>(handle));
@@ -268,7 +268,7 @@ namespace nc::ui::editor::controls
             {
                 ImGui::Indent();
                 for(const auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", component.GetParentHandle().Index(), static_cast<const void*>(&component));
+                    ImGui::Text("Handle: %5u  |  Address: %p", HandleUtils::Index(component.GetParentHandle()), static_cast<const void*>(&component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();

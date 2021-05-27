@@ -1,5 +1,6 @@
 #include "ColliderSystem.h"
 #include "config/Config.h"
+#include "entity/HandleUtils.h"
 
 namespace nc::ecs
 {
@@ -29,7 +30,7 @@ namespace nc::ecs
     {
         auto handle = collider.GetParentHandle();
 
-        if(handle.IsStatic())
+        if(HandleUtils::IsStatic(handle))
             m_staticTree.Add(handle, collider.GetInfo());
         else
         {
@@ -45,7 +46,7 @@ namespace nc::ecs
 
     void ColliderSystem::Remove(EntityHandle handle)
     {
-        if(handle.IsStatic())
+        if(HandleUtils::IsStatic(handle))
             m_staticTree.Remove(handle);
         else
             m_dynamicSoA.Remove(static_cast<HandleTraits::handle_type>(handle));

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "entity/Entity.h"
+#include "entity/HandleUtils.h"
 
 using namespace nc;
 
@@ -19,7 +20,7 @@ struct Mock2 : Component
     {}
 };
 
-EntityHandle TestHandle{1u, 0u, 0u, 0u};
+EntityHandle TestHandle{HandleUtils::Join(1u, 0u, 0u, 0u)};
 std::string TestTag{"Entity"};
 physics::Layer TestLayer{physics::DefaultLayer};
 

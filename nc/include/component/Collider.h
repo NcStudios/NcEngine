@@ -60,9 +60,9 @@ namespace nc
             ColliderInfo m_info;
 
             #ifdef NC_EDITOR_ENABLED
-            //DirectX::FXMMATRIX m_transformMatrix;
             BoundingVolume m_boundingVolume;
-            graphics::Model m_widgetModel;
+            /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
+            std::unique_ptr<graphics::Model> m_widgetModel;
             bool m_selectedInEditor;
             #endif
     };

@@ -24,7 +24,7 @@ namespace nc
         : ComponentBase(handle),
           m_info{info},
           m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
-          m_widgetModel{collider_detail::CreateWireframeModel(info.type)},
+          m_widgetModel{collider_detail::CreateWireframeModelPtr(info.type)},
           m_selectedInEditor{false}
     {
         IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
@@ -35,7 +35,6 @@ namespace nc
         : ComponentBase(handle),
           m_info{info}
     {
-        IF_THROW(!g_colliderSystem, "Collider - ColliderSystem is not registered");
     }
     #endif
 
@@ -56,19 +55,17 @@ namespace nc
         if(!std::exchange(m_selectedInEditor, false))
             return;
 
-        auto [offset, scale] = collider_detail::GetOffsetAndScaleFromVolume(m_boundingVolume, m_info.type);
+        const auto& scale = m_info.scale;
+        const auto& offset = m_info.offset; 
 
-        //const auto& scale = m_info.scale;
-        //const auto& offset = m_info.offset; 
-
-        m_widgetModel.SetTransformationMatrix
+        m_widgetModel->SetTransformationMatrix
         (
             DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
             GetComponent<Transform>(GetParentHandle())->GetTransformationMatrix() *
             DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
 
-        m_widgetModel.Submit(frame);
+        m_widgetModel->Submit(frame);
     }
 
     void Collider::EditorGuiElement()

@@ -40,7 +40,6 @@ namespace nc::debug
 
     void LogToDiagnostics(const std::string& item) noexcept
     {
-        
         if(internal::file.is_open())
         {
             internal::file << item << '\n';
@@ -54,6 +53,7 @@ namespace nc::debug
 
     void LogException(const std::exception& e) noexcept
     {
+        LogToDiagnostics("***Exception***");
         LogToDiagnostics(e.what());
 
         try

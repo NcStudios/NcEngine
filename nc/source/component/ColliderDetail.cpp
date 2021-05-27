@@ -28,23 +28,17 @@ namespace nc::collider_detail
         }
     }
 
-    std::pair<Vector3, Vector3> GetOffsetAndScaleFromVolume(const Collider::BoundingVolume& volume, ColliderType type)
+    std::unique_ptr<graphics::Model> CreateWireframeModelPtr(ColliderType type)
     {
         switch(type)
         {
             case ColliderType::Box:
-            {
-                auto box = std::get<DirectX::BoundingOrientedBox>(volume);
-                return {Vector3{box.Center.x, box.Center.y, box.Center.z}, Vector3{box.Extents.x, box.Extents.y, box.Extents.z} * 2.0f};
-            }
+                return std::make_unique<graphics::Model>( graphics::Mesh{CubeMeshPath}, CreateMaterial() );
             case ColliderType::Sphere:
-            {
-                auto sphere = std::get<DirectX::BoundingSphere>(volume);
-                return {Vector3{sphere.Center.x, sphere.Center.y, sphere.Center.z}, Vector3::Splat(sphere.Radius) * 2.0f};
-            }
+                return std::make_unique<graphics::Model>( graphics::Mesh{SphereMeshPath}, CreateMaterial() );
+            default:
+                throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
         }
-
-        throw std::runtime_error("GetOffsetAndScaleFromVolume - Unknown ColliderType");
     }
     #endif
 

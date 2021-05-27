@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entity/EntityHandle.h"
+#include "entity/HandleUtils.h"
 #include "EntitySystem.h"
 
 #include <algorithm>
@@ -79,6 +79,13 @@ namespace nc::ecs
               callbacks{}
         {}
 
+        ~PerComponentStorage() = default;
+        PerComponentStorage(PerComponentStorage&&) = default;
+        PerComponentStorage& operator=(PerComponentStorage&&) = default;
+
+        PerComponentStorage(const PerComponentStorage&) = delete;
+        PerComponentStorage& operator=(const PerComponentStorage&) = delete;
+
         void Clear()
         {
             std::ranges::fill(sparseArray, HandleTraits::NullIndex);
@@ -98,6 +105,12 @@ namespace nc::ecs
 
         public:
             Registry(size_t maxEntities);
+            ~Registry() = default;
+            Registry(Registry&&) = default;
+            Registry& operator=(Registry&&) = default; 
+
+            Registry(const Registry&) = delete;
+            Registry& operator=(const Registry&) = delete;
 
             auto CreateEntity(EntityInfo info) -> EntityHandle;
             void DestroyEntity(EntityHandle handle);
@@ -193,7 +206,7 @@ namespace nc::ecs
         if(HasComponent<T>(handle))
             throw std::runtime_error("Registry::AddComponent - Cannot add multiple components of the same type to a single entity");
         
-        auto sparseIndex = handle.Index();
+        auto sparseIndex = HandleUtils::Index(handle);
         auto& storage = GetStorageFor<T>();
         auto newIndex = storage.componentPool.size();
         auto& newComponent = storage.componentPool.emplace_back(handle, std::forward<Args>(args)...);
@@ -210,7 +223,7 @@ namespace nc::ecs
     template<class T>
     bool Registry<Ts...>::RemoveComponent(EntityHandle handle)
     {
-        auto sparseIndex = handle.Index();
+        auto sparseIndex = HandleUtils::Index(handle);
         auto& storage = GetStorageFor<T>();
         auto poolIndex = storage.sparseArray.at(sparseIndex);
         if(poolIndex == HandleTraits::NullIndex)
@@ -240,7 +253,7 @@ namespace nc::ecs
     template<class T>
     bool Registry<Ts...>::HasComponent(EntityHandle handle)
     {
-        return GetStorageFor<T>().sparseArray.at(handle.Index()) == HandleTraits::NullIndex ? false : true;
+        return GetStorageFor<T>().sparseArray.at(HandleUtils::Index(handle)) == HandleTraits::NullIndex ? false : true;
     }
 
     template<class... Ts>
@@ -248,7 +261,7 @@ namespace nc::ecs
     T* Registry<Ts...>::GetComponent(EntityHandle handle)
     {
         auto& storage = GetStorageFor<T>();
-        auto poolIndex = storage.sparseArray.at(handle.Index());
+        auto poolIndex = storage.sparseArray.at(HandleUtils::Index(handle));
         return poolIndex == HandleTraits::NullIndex ? nullptr : &storage.componentPool.at(poolIndex);
     }
 

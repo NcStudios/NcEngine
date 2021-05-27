@@ -40,11 +40,11 @@ struct Fake2 : public Component
     {}
 };
 
-constexpr auto Handle1 = EntityHandle{0u, 0u, 0u, 0u};
-constexpr auto Handle2 = EntityHandle{1u, 0u, 0u, 0u};
-constexpr auto Handle3 = EntityHandle{2u, 0u, 0u, 0u};
-constexpr auto Handle4 = EntityHandle{3u, 0u, 0u, 0u};
-constexpr auto Handle5 = EntityHandle{4u, 0u, 0u, 0u};
+constexpr auto Handle1 = EntityHandle{HandleUtils::Join(0u, 0u, 0u, 0u)};
+constexpr auto Handle2 = EntityHandle{HandleUtils::Join(1u, 0u, 0u, 0u)};
+constexpr auto Handle3 = EntityHandle{HandleUtils::Join(2u, 0u, 0u, 0u)};
+constexpr auto Handle4 = EntityHandle{HandleUtils::Join(3u, 0u, 0u, 0u)};
+constexpr auto Handle5 = EntityHandle{HandleUtils::Join(4u, 0u, 0u, 0u)};
 const auto TestInfo = EntityInfo{};
 
 class Registry_unit_tests : public ::testing::Test
