@@ -55,6 +55,7 @@
  *   - Remove multiple?
  *   - Move entity exists IF_THROWs from Ecs to here?
  *   - more unit tests
+ *   - tuple_cat to combine engine/user component lists
  */
 
 namespace nc::ecs
