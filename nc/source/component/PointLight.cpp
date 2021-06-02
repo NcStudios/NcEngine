@@ -9,8 +9,8 @@
 
 namespace nc
 {
-    PointLight::PointLight(EntityHandle handle, Properties properties) noexcept
-        : ComponentBase(handle),
+    PointLight::PointLight(Entity entity, Properties properties) noexcept
+        : ComponentBase(entity),
           PixelConstBufData{properties},
           ProjectedPos{}
     {
@@ -46,10 +46,9 @@ namespace nc
 
     void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view)
     {
-        auto* transform = GetComponent<Transform>(GetParentHandle());
+        auto* transform = ActiveRegistry()->Get<Transform>(GetParentEntity());
         PixelConstBufData.pos = transform->GetPosition();
         const auto pos_v = DirectX::XMLoadVector3(&PixelConstBufData.pos);
         DirectX::XMStoreVector3(&ProjectedPos, DirectX::XMVector3Transform(pos_v, view));
     }
-
 }

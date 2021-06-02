@@ -7,10 +7,10 @@
 
 namespace nc
 {
-    ParticleEmitter::ParticleEmitter(EntityHandle handle, ParticleInfo info, ecs::ParticleEmitterSystem* emitterSystem)
-        : Component{handle},
+    ParticleEmitter::ParticleEmitter(Entity entity, ParticleInfo info)
+        : ComponentBase{entity},
           m_info{info},
-          m_emitterSystem{emitterSystem}
+          m_emitterSystem{nullptr}
     {
     }
 
@@ -21,7 +21,12 @@ namespace nc
 
     void ParticleEmitter::Emit(size_t count)
     {
-        m_emitterSystem->Emit(GetParentHandle(), count);
+        m_emitterSystem->Emit(GetParentEntity(), count);
+    }
+
+    void ParticleEmitter::RegisterSystem(ecs::ParticleEmitterSystem* system)
+    {
+        m_emitterSystem = system;
     }
 
     #ifdef NC_EDITOR_ENABLED

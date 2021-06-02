@@ -40,7 +40,7 @@ namespace nc
         public:
             using BoundingVolume = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
 
-            Collider(EntityHandle handle, ColliderInfo info);
+            Collider(Entity entity, ColliderInfo info);
             ~Collider() = default;
             Collider(const Collider&) = delete;
             Collider(Collider&&) = default;

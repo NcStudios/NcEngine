@@ -22,28 +22,28 @@ namespace nc::ecs
           #endif
           m_registry{memSettings.maxTransforms}
     {
-        internal::RegisterEcs(this);
+        internal::SetActiveRegistry(&m_registry);
 
         auto* colliderSystem = &m_colliderSystem;
         m_registry.RegisterOnAddCallback<Collider>
         (
-            [colliderSystem](const Collider& c) { colliderSystem->Add(c); }
+            [colliderSystem](const Collider& collider) { colliderSystem->Add(collider); }
         );
 
         m_registry.RegisterOnRemoveCallback<Collider>
         (
-            [colliderSystem](EntityHandle h) { colliderSystem->Remove(h); }
+            [colliderSystem](Entity entity) { colliderSystem->Remove(entity); }
         );
 
         auto* particleEmitterSystem = &m_particleEmitterSystem;
         m_registry.RegisterOnAddCallback<ParticleEmitter>
         (
-            [particleEmitterSystem](const ParticleEmitter& pe) { particleEmitterSystem->Add(pe); }
+            [particleEmitterSystem](ParticleEmitter& emitter) { particleEmitterSystem->Add(emitter); }
         );
 
         m_registry.RegisterOnRemoveCallback<ParticleEmitter>
         (
-            [particleEmitterSystem](EntityHandle h) { particleEmitterSystem->Remove(h); }
+            [particleEmitterSystem](Entity entity) { particleEmitterSystem->Remove(entity); }
         );
 
         m_registry.VerifyCallbacks();

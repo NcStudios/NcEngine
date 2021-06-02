@@ -4,10 +4,10 @@
 
 namespace nc::sample
 {
-    class FPSTracker : public Component
+    class FPSTracker : public AutoComponent
     {
         public:
-            FPSTracker(EntityHandle handle);
+            FPSTracker(Entity entity);
             void FrameUpdate(float dt) override;
             float GetFPS() const;
 
@@ -17,8 +17,8 @@ namespace nc::sample
             float m_latestFPS = 0.0f;
     };
 
-    inline FPSTracker::FPSTracker(EntityHandle handle)
-        : Component{handle}
+    inline FPSTracker::FPSTracker(Entity entity)
+        : AutoComponent{entity}
     {
     }
 

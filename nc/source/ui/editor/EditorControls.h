@@ -9,7 +9,7 @@
 
 namespace nc::ui::editor::controls
 {
-    auto SelectedEntity = HandleTraits::NullHandle;
+    auto SelectedEntity = EntityTraits::NullHandle;
     const auto TitleBarHeight = 40.0f;
     const auto DefaultItemWidth = 60.0f;
     const auto SceneGraphPanelWidth = 300;
@@ -17,20 +17,20 @@ namespace nc::ui::editor::controls
     const auto GraphSize = ImVec2{128, 32};
     const auto Padding = 4.0f;
 
-    inline void SceneGraphPanel(std::span<Entity*> entities, float windowHeight);
-    inline void SceneGraphNode(Entity* entity, Transform* transform);
-    inline void EntityPanel(EntityHandle handle);
+    inline void SceneGraphPanel(registry_type* registry, float windowHeight);
+    inline void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform);
+    inline void EntityPanel(registry_type* registry, Entity entity);
     inline void Component(ComponentBase* comp);
-    inline void UtilitiesPanel(float* dtMult, ecs::registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
+    inline void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void GraphicsResourcePanel();
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
-    inline void ComponentSystems(ecs::registry_type* registry);
+    inline void ComponentSystems(registry_type* registry);
 
     /**
      * Scene Graph Controls
      */
-    void SceneGraphPanel(std::span<Entity*> entities, float windowHeight)
+    void SceneGraphPanel(registry_type* registry, float windowHeight)
     {
         ImGui::SetNextWindowPos({Padding, TitleBarHeight});
         auto sceneGraphHeight = windowHeight - TitleBarHeight;
@@ -47,46 +47,47 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityList", {0, sceneGraphHeight / 2}, true))
             {
-                for(auto* entity : entities)
+                for(auto entity : registry->ViewAll<Entity>())
                 {
-                    auto* transform = GetComponent<Transform>(entity->Handle);
+                    auto* transform = registry->Get<Transform>(entity);
+                    auto* tag = registry->Get<Tag>(entity);
                     if(transform->GetParent().Valid()) // only draw root nodes
                         continue;
 
-                    if(!filter.PassFilter(entity->Tag.c_str()))
+                    if(!filter.PassFilter(tag->Value().data()))
                         continue;
                     
-                    SceneGraphNode(entity, transform);
+                    SceneGraphNode(registry, entity, tag, transform);
                 }
             } ImGui::EndChild();
 
             if(ImGui::BeginChild("EntityPanel", {0,0}, true))
             {
-                if(SelectedEntity != HandleTraits::NullHandle)
-                    controls::EntityPanel(static_cast<EntityHandle>(SelectedEntity));
+                if(SelectedEntity != EntityTraits::NullHandle)
+                    controls::EntityPanel(registry, static_cast<Entity>(SelectedEntity));
 
             } ImGui::EndChild();
 
         } ImGui::EndChild();
     }
 
-    void SceneGraphNode(Entity* entity, Transform* transform)
+    void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform)
     {
-        auto handleValue = static_cast<HandleTraits::handle_type>(entity->Handle);
+        auto handleValue = static_cast<EntityTraits::underlying_type>(entity);
         ImGui::PushID(handleValue);
 
         auto flags = 0;
         if(SelectedEntity == handleValue)
             flags = flags | ImGuiTreeNodeFlags_Framed;
 
-        auto open = ImGui::TreeNodeEx(entity->Tag.c_str(), flags);
+        auto open = ImGui::TreeNodeEx(tag->Value().data(), flags);
         if(ImGui::IsItemClicked())
             SelectedEntity = handleValue;
         
         if(open)
         {
             for(auto child : transform->GetChildren())
-                SceneGraphNode(GetEntity(child), GetComponent<Transform>(child));
+                SceneGraphNode(registry, child, registry->Get<Tag>(child), registry->Get<Transform>(child));
 
             ImGui::TreePop();
         }
@@ -94,34 +95,33 @@ namespace nc::ui::editor::controls
         ImGui::PopID();
     }
 
-    void EntityPanel(EntityHandle handle)
+    void EntityPanel(registry_type* registry, Entity entity)
     {
-        auto* entity = GetEntity(handle);
-
-        if(!entity) // entity may have been deleted
+        if(!registry->Contains<Entity>(entity)) // entity may have been deleted
         {
-            SelectedEntity = HandleTraits::NullHandle;
+            SelectedEntity = EntityTraits::NullHandle;
             return;
         }
 
         ImGui::Separator();
-        ImGui::Text("Tag     %s", entity->Tag.c_str());
-        ImGui::Text("Handle  %d", HandleUtils::Index(handle));
-        ImGui::Text("Version %d", HandleUtils::Version(handle));
-        ImGui::Text("Layer   %d", HandleUtils::Layer(handle));
-        ImGui::Text("Static  %s", HandleUtils::IsStatic(handle) ? "True" : "False");
-        controls::Component(GetComponent<Transform>(handle));
-        controls::Component(GetComponent<NetworkDispatcher>(handle));
-        controls::Component(GetComponent<ParticleEmitter>(handle));
-        controls::Component(GetComponent<Renderer>(handle));
-        if(auto col = GetComponent<Collider>(handle); col)
+        ImGui::Text("Tag     %s", registry->Get<Tag>(entity)->Value().data());
+        ImGui::Text("Index   %d", EntityUtils::Index(entity));
+        ImGui::Text("Version %d", EntityUtils::Version(entity));
+        ImGui::Text("Layer   %d", EntityUtils::Layer(entity));
+        ImGui::Text("Static  %s", EntityUtils::IsStatic(entity) ? "True" : "False");
+        controls::Component(registry->Get<Transform>(entity));
+        controls::Component(registry->Get<NetworkDispatcher>(entity));
+        controls::Component(registry->Get<ParticleEmitter>(entity));
+        controls::Component(registry->Get<Renderer>(entity));
+        if(auto col = registry->Get<Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
             col->SetEditorSelection(true);
             controls::Component(col);
         }
-        controls::Component(GetComponent<PointLight>(handle));
-        for(const auto& comp : entity->GetUserComponents())
+        controls::Component(registry->Get<PointLight>(entity));
+        
+        for(const auto& comp : registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
             controls::Component(comp);
 
         ImGui::Separator();
@@ -154,7 +154,7 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void UtilitiesPanel(float* dtMult, ecs::registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight)
+    void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight)
     {
         static auto initColumnWidth = false;
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
@@ -268,7 +268,7 @@ namespace nc::ui::editor::controls
             {
                 ImGui::Indent();
                 for(const auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", HandleUtils::Index(component.GetParentHandle()), static_cast<const void*>(&component));
+                    ImGui::Text("Handle: %5u  |  Address: %p", EntityUtils::Index(component.GetParentEntity()), static_cast<const void*>(&component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();
@@ -277,7 +277,7 @@ namespace nc::ui::editor::controls
     }
 
     /** @todo this will eventually need to be generic */
-    void ComponentSystems(ecs::registry_type* registry)
+    void ComponentSystems(registry_type* registry)
     {
         ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());

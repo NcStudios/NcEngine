@@ -4,24 +4,26 @@
 
 namespace nc::sample
 {
-    class ConstantTranslation : public Component
+    class ConstantTranslation : public AutoComponent
     {
         public:
-            ConstantTranslation(EntityHandle handle, Vector3 velocity);
+            ConstantTranslation(Entity entity, registry_type* registry, Vector3 velocity);
             void FrameUpdate(float dt) override;
         
         private:
+            registry_type* m_registry;
             Vector3 m_velocity;
     };
 
-    inline ConstantTranslation::ConstantTranslation(EntityHandle handle, Vector3 velocity)
-        : Component{handle},
-            m_velocity{velocity}
+    inline ConstantTranslation::ConstantTranslation(Entity entity, registry_type* registry, Vector3 velocity)
+        : AutoComponent{entity},
+          m_registry{registry},
+          m_velocity{velocity}
     {
     }
 
     inline void ConstantTranslation::FrameUpdate(float dt)
     {
-        GetComponent<Transform>(GetParentHandle())->Translate(m_velocity * dt);
+        m_registry->Get<Transform>(GetParentEntity())->Translate(m_velocity * dt);
     }
 }

@@ -22,8 +22,8 @@ namespace
 
 namespace nc::sample
 {
-    EdgePanCamera::EdgePanCamera(EntityHandle handle)
-        : Camera(handle),
+    EdgePanCamera::EdgePanCamera(Entity entity)
+        : Camera(entity),
         m_lastFrameZoom{0.0f}
     {}
 

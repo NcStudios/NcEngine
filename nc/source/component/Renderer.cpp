@@ -13,8 +13,8 @@ namespace nc
 {
     Renderer::~Renderer() = default;
 
-    Renderer::Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept
-        : ComponentBase(handle),
+    Renderer::Renderer(Entity entity, graphics::Mesh mesh, graphics::Material material) noexcept
+        : ComponentBase(entity),
           m_model{ std::make_unique<graphics::Model>(std::move(mesh), std::move(material)) }
     {
     }
@@ -29,7 +29,7 @@ namespace nc
     
     void Renderer::Update(graphics::FrameManager* frame)
     {
-        auto* transform = GetComponent<Transform>(GetParentHandle());
+        auto* transform = ActiveRegistry()->Get<Transform>(GetParentEntity());
         m_model->SetTransformationMatrix(transform->GetTransformationMatrix());
         m_model->Submit(frame);
     }

@@ -13,7 +13,7 @@ namespace nc
     class Transform final : public ComponentBase
     {
         public:
-            Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale, EntityHandle parent);
+            Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Entity parent);
             ~Transform() = default;
             Transform(const Transform&) = delete;
             Transform(Transform&&) = default;
@@ -45,23 +45,23 @@ namespace nc
             void Rotate(Vector3 axis, float radians);
 
             // Hierarchy methods
-            std::span<EntityHandle> GetChildren(); // Get all immediate children of this transform
-            EntityHandle GetRoot() const;         // Get the root node relative to this transform
-            EntityHandle GetParent() const;        // Get the immediate parent of this transform - may be nullptr
-            void SetParent(EntityHandle parent);   // Make this transform the child of another - nullptr will detach from existing parent
+            std::span<Entity> GetChildren(); // Get all immediate children of this transform
+            Entity GetRoot() const;         // Get the root node relative to this transform
+            Entity GetParent() const;        // Get the immediate parent of this transform - may be nullptr
+            void SetParent(Entity parent);   // Make this transform the child of another - nullptr will detach from existing parent
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
             
         private:
-            void AddChild(EntityHandle child);
-            void RemoveChild(EntityHandle child);
+            void AddChild(Entity child);
+            void RemoveChild(Entity child);
             void UpdateWorldMatrix();
 
             DirectX::XMMATRIX m_localMatrix;
             DirectX::XMMATRIX m_worldMatrix;
-            EntityHandle m_parent;
-            std::vector<EntityHandle> m_children;
+            Entity m_parent;
+            std::vector<Entity> m_children;
     };
 } //end namespace nc

@@ -2,7 +2,7 @@
 
 namespace nc::sample
 {
-    void VulkanScene::Load()
+    void VulkanScene::Load(registry_type*)
     {
     }
 

@@ -3,8 +3,6 @@
 #include "platform/win32/NCWinDef.h"
 #include "ui/IUI.h"
 #include "editor/Editor.h"
-#include "entity/Entity.h"
-#include "ecs/EntityComponentSystem.h"
 
 namespace nc::graphics { class Graphics; }
 
@@ -28,7 +26,7 @@ namespace nc::ui
             void FrameBegin();
 
             #ifdef NC_EDITOR_ENABLED
-            void Frame(float* dt, ecs::registry_type* registry);
+            void Frame(float* dt, registry_type* registry);
             #else
             void Frame();
             #endif

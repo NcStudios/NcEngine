@@ -7,10 +7,10 @@
 namespace nc::sample
 {
     /** Raycast to clickables on left mouse click using a given layer mask. */
-    class ClickHandler : public Component
+    class ClickHandler : public AutoComponent
     {
         public:
-            ClickHandler(EntityHandle handle, physics::LayerMask mask);
+            ClickHandler(Entity entity, physics::LayerMask mask);
             void FrameUpdate(float) override;
             void SetLayer(physics::LayerMask mask);
 
@@ -18,8 +18,8 @@ namespace nc::sample
             physics::LayerMask m_mask;
     };
 
-    inline ClickHandler::ClickHandler(EntityHandle handle, physics::LayerMask mask)
-        : Component{handle},
+    inline ClickHandler::ClickHandler(Entity entity, physics::LayerMask mask)
+        : AutoComponent{entity},
           m_mask{mask}
     {
     }

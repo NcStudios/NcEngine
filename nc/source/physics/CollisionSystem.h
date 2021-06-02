@@ -37,12 +37,12 @@ namespace nc::physics
         const ecs::StaticTreeEntry* second;
     };
 
-    /** EntityHandles of two colliding objects. Produced by narrow detection,
+    /** Entitys of two colliding objects. Produced by narrow detection,
      *  consumed by compare/notify. */
     struct NarrowDetectEvent
     {
-        HandleTraits::handle_type first;
-        HandleTraits::handle_type second;
+        EntityTraits::underlying_type first;
+        EntityTraits::underlying_type second;
     };
 
     /** @todo FindXXXEvents will notify immediately - do we want to delay this? */

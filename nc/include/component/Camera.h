@@ -3,10 +3,10 @@
 
 namespace nc
 {
-    class Camera : public Component
+    class Camera : public AutoComponent
     {
         public:
-            Camera(EntityHandle handle) noexcept;
+            Camera(Entity entity) noexcept;
             ~Camera() = default;
             Camera(const Camera&) = delete;
             Camera(Camera&&) = delete;

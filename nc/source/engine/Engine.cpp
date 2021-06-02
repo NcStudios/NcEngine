@@ -115,7 +115,7 @@ namespace nc::core
     {
         V_LOG("Starting engine loop");
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
-        m_sceneSystem.DoSceneChange();
+        m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
         auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
@@ -175,15 +175,17 @@ namespace nc::core
         V_LOG("Swapping scene");
         m_sceneSystem.UnloadActiveScene();
         ClearState();
-        m_sceneSystem.DoSceneChange();
+        m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
     }
 
     void Engine::FixedStepLogic()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
-        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
-            entity->SendFixedUpdate();
+
+        for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
+            group.SendFixedUpdate();
+
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
     }
@@ -191,8 +193,10 @@ namespace nc::core
     void Engine::FrameLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
-            entity->SendFrameUpdate(dt);
+
+        for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
+            group.SendFrameUpdate(dt);
+        
         NC_PROFILE_END();
     }
 

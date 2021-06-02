@@ -8,8 +8,8 @@
 
 namespace nc
 {
-    Camera::Camera(EntityHandle handle) noexcept
-        : Component(handle)
+    Camera::Camera(Entity entity) noexcept
+        : AutoComponent(entity)
     {
     }
 

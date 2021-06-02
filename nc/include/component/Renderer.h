@@ -17,7 +17,7 @@ namespace nc
     class Renderer final: public ComponentBase
     {
         public:
-            Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept;
+            Renderer(Entity entity, graphics::Mesh mesh, graphics::Material material) noexcept;
             ~Renderer() noexcept;
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&) = default;

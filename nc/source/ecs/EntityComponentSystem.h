@@ -1,23 +1,14 @@
 #pragma once
 
-#include "Registry.h"
+#include "Ecs.h"
 #include "ColliderSystem.h"
 #include "ParticleEmitterSystem.h"
-#include "component/Collider.h"
-#include "component/NetworkDispatcher.h"
-#include "component/PointLight.h"
-#include "component/PointLightManager.h"
-#include "component/Renderer.h"
-#include "component/Transform.h"
 #include "config/Config.h"
-
 
 namespace nc::graphics { class Graphics; }
 
 namespace nc::ecs
 {
-    using registry_type = ecs::Registry<Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Transform>;
-
     class EntityComponentSystem
     {
         public:

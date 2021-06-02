@@ -186,155 +186,155 @@ void InitializeResources()
 }
 
 template<Resource Resource_t>
-EntityHandle Create_(EntityInfo info);
+Entity Create_(registry_type*, EntityInfo);
 
-template<> EntityHandle Create_<Resource::Beeper>(EntityInfo info)
+template<> Entity Create_<Resource::Beeper>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Beeper, material::Beeper);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Beeper, material::Beeper);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Coin>(EntityInfo info)
+template<> Entity Create_<Resource::Coin>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Coin, material::Coin);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Coin, material::Coin);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Cube>(EntityInfo info)
+template<> Entity Create_<Resource::Cube>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Cube, material::Default);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Cube, material::Default);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::CubeBlue>(EntityInfo info)
+template<> Entity Create_<Resource::CubeBlue>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Cube, material::CubeBlue);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Cube, material::CubeBlue);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::CubeGreen>(EntityInfo info)
+template<> Entity Create_<Resource::CubeGreen>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Cube, material::CubeGreen);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Cube, material::CubeGreen);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::CubeRed>(EntityInfo info)
+template<> Entity Create_<Resource::CubeRed>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Cube, material::CubeRed);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Cube, material::CubeRed);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Sphere>(EntityInfo info)
+template<> Entity Create_<Resource::Sphere>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Sphere, material::Default);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Sphere, material::Default);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Table>(EntityInfo info)
+template<> Entity Create_<Resource::Table>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Table, material::Table);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Table, material::Table);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Token>(EntityInfo info)
+template<> Entity Create_<Resource::Token>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Token, material::Token);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Token, material::Token);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::WireframeCube>(EntityInfo info)
+template<> Entity Create_<Resource::WireframeCube>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Cube, material::WireframeCube);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Cube, material::WireframeCube);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Worm>(EntityInfo info)
+template<> Entity Create_<Resource::Worm>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Worm, material::Worm);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Worm, material::Worm);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Sun>(EntityInfo info)
+template<> Entity Create_<Resource::Sun>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Sun);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Sun);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Mercury>(EntityInfo info)
+template<> Entity Create_<Resource::Mercury>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Mercury);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Mercury);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Venus>(EntityInfo info)
+template<> Entity Create_<Resource::Venus>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Venus);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Venus);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Earth>(EntityInfo info)
+template<> Entity Create_<Resource::Earth>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Earth);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Earth);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Mars>(EntityInfo info)
+template<> Entity Create_<Resource::Mars>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Mars);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Mars);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Jupiter>(EntityInfo info)
+template<> Entity Create_<Resource::Jupiter>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Jupiter);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Jupiter);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Saturn>(EntityInfo info)
+template<> Entity Create_<Resource::Saturn>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Saturn);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Saturn);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Uranus>(EntityInfo info)
+template<> Entity Create_<Resource::Uranus>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Uranus);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Uranus);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Neptune>(EntityInfo info)
+template<> Entity Create_<Resource::Neptune>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Neptune);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Neptune);
     return handle;
 }
 
-template<> EntityHandle Create_<Resource::Pluto>(EntityInfo info)
+template<> Entity Create_<Resource::Pluto>(registry_type* registry, EntityInfo info)
 {
-    auto handle = CreateEntity(std::move(info));
-    AddComponent<Renderer>(handle, mesh::Planet, material::Pluto);
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::Pluto);
     return handle;
 }
-using CreateFunc_t = EntityHandle(*)(EntityInfo info);
+using CreateFunc_t = Entity(*)(registry_type* registry, EntityInfo info);
 
 const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
 {
@@ -361,8 +361,8 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::Pluto,         Create_<Resource::Pluto>}
 };
 
-nc::EntityHandle Create(Resource resource, EntityInfo info)
+nc::Entity Create(registry_type* registry, Resource resource, EntityInfo info)
 {
-    return dispatch.at(resource)(std::move(info));
+    return dispatch.at(resource)(registry, std::move(info));
 }
 } // end namespace project::prefab

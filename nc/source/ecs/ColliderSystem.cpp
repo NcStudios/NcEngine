@@ -1,6 +1,6 @@
 #include "ColliderSystem.h"
 #include "config/Config.h"
-#include "entity/HandleUtils.h"
+#include "Entity.h"
 
 namespace nc::ecs
 {
@@ -28,15 +28,15 @@ namespace nc::ecs
     
     void ColliderSystem::Add(const Collider& collider)
     {
-        auto handle = collider.GetParentHandle();
+        auto entity = collider.GetParentEntity();
 
-        if(HandleUtils::IsStatic(handle))
-            m_staticTree.Add(handle, collider.GetInfo());
+        if(EntityUtils::IsStatic(entity))
+            m_staticTree.Add(entity, collider.GetInfo());
         else
         {
             m_dynamicSoA.Add
             (
-                static_cast<HandleTraits::handle_type>(handle),
+                static_cast<EntityTraits::underlying_type>(entity),
                 DirectX::XMMATRIX{},
                 physics::GetVolumePropertiesFromColliderInfo(collider.GetInfo()),
                 collider.GetType()
@@ -44,12 +44,12 @@ namespace nc::ecs
         }
     }
 
-    void ColliderSystem::Remove(EntityHandle handle)
+    void ColliderSystem::Remove(Entity entity)
     {
-        if(HandleUtils::IsStatic(handle))
-            m_staticTree.Remove(handle);
+        if(EntityUtils::IsStatic(entity))
+            m_staticTree.Remove(entity);
         else
-            m_dynamicSoA.Remove(static_cast<HandleTraits::handle_type>(handle));
+            m_dynamicSoA.Remove(static_cast<EntityTraits::underlying_type>(entity));
     }
 
     void ColliderSystem::Clear()

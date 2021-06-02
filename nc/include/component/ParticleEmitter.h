@@ -48,14 +48,16 @@ namespace nc
         ParticleKinematicInfo kinematic;
     };
 
-    class ParticleEmitter : public Component
+    class ParticleEmitter final : public ComponentBase
     {
         public:
-            ParticleEmitter(EntityHandle handle, ParticleInfo info, ecs::ParticleEmitterSystem* emitterSystem);
+            ParticleEmitter(Entity entity, ParticleInfo info);
 
             const ParticleInfo& GetInfo() const noexcept;
             void Emit(size_t count);
         
+            void RegisterSystem(ecs::ParticleEmitterSystem* system);
+
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif

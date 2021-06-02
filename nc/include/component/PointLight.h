@@ -25,7 +25,7 @@ namespace nc
 
             alignas(16)Vector3 ProjectedPos;
 
-            PointLight(EntityHandle handle, Properties properties) noexcept;
+            PointLight(Entity entity, Properties properties) noexcept;
             ~PointLight() = default;
             PointLight(PointLight&&) = default;
             PointLight& operator=(PointLight&&) = default;

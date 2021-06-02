@@ -13,7 +13,7 @@ namespace nc::ecs
     class ColliderSystem
     {
         public:
-            using DynamicColliderSoA = SoA<HandleTraits::handle_type, DirectX::XMMATRIX, physics::VolumeProperties, ColliderType>;
+            using DynamicColliderSoA = SoA<EntityTraits::underlying_type, DirectX::XMMATRIX, physics::VolumeProperties, ColliderType>;
 
             static constexpr size_t HandleTypeIndex = 0u;
             static constexpr size_t MatrixIndex = 1u;
@@ -32,7 +32,7 @@ namespace nc::ecs
             DynamicColliderSoA* GetDynamicSoA();
 
             void Add(const Collider& collider);
-            void Remove(EntityHandle handle);
+            void Remove(Entity entity);
             void Clear();
 
         private:

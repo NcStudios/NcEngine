@@ -22,17 +22,17 @@ namespace nc::ecs
             void ProcessFrameEvents();
 
             // this may need to be delayed too
-            void Emit(EntityHandle handle, size_t count);
+            void Emit(Entity entity, size_t count);
 
             // ComponentSystem Methods
-            void Add(const ParticleEmitter& emitter);
-            void Remove(EntityHandle handle);
+            void Add(ParticleEmitter& emitter);
+            void Remove(Entity entity);
             void Clear();
 
         private:
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;
-            std::vector<EntityHandle> m_toRemove;
+            std::vector<Entity> m_toRemove;
             particle::GraphicsData m_graphicsData;
             particle::ParticleRenderer m_renderer;
 

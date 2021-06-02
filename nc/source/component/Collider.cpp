@@ -2,6 +2,7 @@
 #include "ColliderDetail.h"
 #include "Ecs.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
+#include "debug/Utils.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -20,8 +21,8 @@ namespace
 namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
-    Collider::Collider(EntityHandle handle, ColliderInfo info)
-        : ComponentBase(handle),
+    Collider::Collider(Entity entity, ColliderInfo info)
+        : ComponentBase(entity),
           m_info{info},
           m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
           m_widgetModel{collider_detail::CreateWireframeModelPtr(info.type)},
@@ -31,8 +32,8 @@ namespace nc
         IF_THROW(info.type == ColliderType::Sphere && !IsUniformScale(info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
     #else
-    Collider::Collider(EntityHandle handle, ColliderInfo info)
-        : ComponentBase(handle),
+    Collider::Collider(Entity entity, ColliderInfo info)
+        : ComponentBase(entity),
           m_info{info}
     {
     }
@@ -61,7 +62,7 @@ namespace nc
         m_widgetModel->SetTransformationMatrix
         (
             DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
-            GetComponent<Transform>(GetParentHandle())->GetTransformationMatrix() *
+            ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix() *
             DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
 
