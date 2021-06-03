@@ -68,7 +68,7 @@ namespace nc::sample
         staticCubeSpawner->SetPrefab(prefab::Resource::CubeRed);
         staticCubeSpawner->Spawn(5);
 
-        //Fixed interval spawner for moving cubes
+        // Fixed interval spawner for moving cubes
         SpawnBehavior dynamicCubeBehavior
         {
             .positionRandomRange = Vector3::Splat(15.0f),

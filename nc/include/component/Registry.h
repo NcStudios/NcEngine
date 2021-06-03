@@ -17,6 +17,8 @@
  *  State tracked per component type in the registry:
  *  - A packed array of the components.
  * 
+ *  - A staging array of recently added components waiting to be merged into the pool.
+ * 
  *  - A packed array of all the entity indices associated with the component with the same
  *    ordering as the component pool. Useful for sorting different component pools according
  *    to entity.
@@ -44,7 +46,11 @@
  *   - Newly added and destroyed entities exist in staging areas until CommitStagedChanges is called.
  *     Staged additions are queryable with GetEntity, but they will not appear in the active set. Staged
  *     removals are not queryable, nor do they appear in the active set, but their components are still
- *     present in their respective pools.
+ *     present in their respective pools until destruction is finalized.
+ *
+ *   - Newly added components also exist in a staging area to allow adding components while iterating
+ *     over pools. Calls to Contains and Get work normally while a component is staged, but Remove
+ *     will only work when called in a later frame.
  * 
  *   - On destruction of an entity, all components are removed in the order they appear in the
  *     registry's template argument list. The entity is destroyed after all components are removed.
@@ -321,7 +327,7 @@ namespace nc::ecs
         auto& storage = GetStorageFor<AutoComponentGroup>();
         auto poolIndex = storage.sparseArray.at(EntityUtils::Index(entity));
         if(poolIndex == EntityTraits::NullIndex)
-            throw "shoot";
+            return false;
         
         AutoComponentGroup& group = storage.componentPool.at(poolIndex);
         return group.Remove<T>();
@@ -359,7 +365,7 @@ namespace nc::ecs
         if(const AutoComponentGroup* group = Get<AutoComponentGroup>(entity); group)
             return group->Contains<T>();
 
-        throw std::runtime_error("Registry::Contains (AutoComponent) - AutoComponentGroup does not exist");
+        return false;
     }
 
     template<class... Ts>
@@ -403,7 +409,7 @@ namespace nc::ecs
         if(AutoComponentGroup* group = Get<AutoComponentGroup>(entity); group)
             return group->Get<T>();
         
-        throw std::runtime_error("Registry::Get (AutoComponent) - AutoComponentGroup does not exists");
+        return nullptr;
     }
 
     template<class... Ts>
@@ -413,7 +419,7 @@ namespace nc::ecs
         if(const AutoComponentGroup* group = Get<AutoComponentGroup>(entity); group)
             return group->Get<T>();
         
-        throw std::runtime_error("Registry::Get (AutoComponent) - AutoComponentGroup does not exists");
+        return nullptr;
     }
 
     template<class... Ts>
