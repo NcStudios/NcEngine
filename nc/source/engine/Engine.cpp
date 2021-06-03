@@ -96,7 +96,7 @@ namespace nc::core
           m_sceneSystem{},
           m_time{},
           #ifdef NC_EDITOR_ENABLED
-          m_ui{m_window.GetHWND(), &m_graphics, m_ecs.GetComponentSystems()}
+          m_ui{m_window.GetHWND(), &m_graphics}
           #else
           m_ui{m_window.GetHWND(), &m_graphics}
           #endif
@@ -134,15 +134,15 @@ namespace nc::core
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
-            auto activeEntities = m_ecs.GetActiveEntities();
 
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
-                FixedStepLogic(activeEntities);
+                FixedStepLogic();
             }
 
-            FrameLogic(activeEntities, dt);
+            FrameLogic(dt);
             particleUpdateJobResult.wait();
+            m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
             FrameCleanup();
@@ -178,20 +178,20 @@ namespace nc::core
         m_sceneSystem.DoSceneChange();
     }
 
-    void Engine::FixedStepLogic(std::span<Entity*> activeEntities)
+    void Engine::FixedStepLogic()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
-        for(auto* entity : activeEntities)
+        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
             entity->SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
     }
 
-    void Engine::FrameLogic(std::span<Entity*> activeEntities, float dt)
+    void Engine::FrameLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-        for(auto* entity : activeEntities)
+        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
             entity->SendFrameUpdate(dt);
         NC_PROFILE_END();
     }
@@ -210,28 +210,27 @@ namespace nc::core
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        for(auto* light : m_ecs.GetPointLightSystem()->GetComponents())
-        {
-            m_pointLightManager.AddPointLight(light, camViewMatrix);
-        }
+        auto* registry = m_ecs.GetRegistry();
+
+        for(auto& light : registry->ViewAll<PointLight>())
+            m_pointLightManager.AddPointLight(&light, camViewMatrix);
 
         m_pointLightManager.Bind();
 
-        for(auto* renderer : m_ecs.GetRendererSystem()->GetComponents())
-        {
-            renderer->Update(&m_frameManager);
-        }
+        for(auto& renderer : registry->ViewAll<Renderer>())
+            renderer.Update(&m_frameManager);
 
-        #ifdef NC_EDITOR_ENABLED
-        m_physics.UpdateWidgets(&m_frameManager);
-        #endif
+#ifdef NC_EDITOR_ENABLED
+        for(auto& collider : registry->ViewAll<Collider>())
+            collider.UpdateWidget(&m_frameManager);
+#endif
 
         m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
         m_frameManager.Execute(&m_graphics);
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
+        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
         #else
         m_ui.Frame();
         #endif
@@ -244,7 +243,6 @@ namespace nc::core
 
     void Engine::FrameCleanup()
     {
-        m_ecs.FrameEnd();
         if(m_sceneSystem.IsSceneChangeScheduled())
         {
             DoSceneSwap();

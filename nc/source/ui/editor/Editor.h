@@ -15,12 +15,11 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            Editor(graphics::Graphics* graphics, const ecs::Systems& systems);
-            void Frame(float* dt, std::span<Entity*> activeEntities);
+            Editor(graphics::Graphics* graphics);
+            void Frame(float* dt, ecs::registry_type* registry);
 
         private:
             nc::graphics::Graphics* m_graphics;
-            ecs::Systems m_componentSystems;
             bool m_openState_Editor;
             bool m_openState_UtilitiesPanel;
 

@@ -14,7 +14,7 @@ namespace nc::ui
     {
         public:
             #ifdef NC_EDITOR_ENABLED
-            UIImpl(HWND hwnd, graphics::Graphics* graphics, const ecs::Systems& systems);
+            UIImpl(HWND hwnd, graphics::Graphics* graphics);
             #else
             UIImpl(HWND hwnd, graphics::Graphics* graphics);
             #endif
@@ -28,7 +28,7 @@ namespace nc::ui
             void FrameBegin();
 
             #ifdef NC_EDITOR_ENABLED
-            void Frame(float* dt, std::span<Entity*> activeEntities);
+            void Frame(float* dt, ecs::registry_type* registry);
             #else
             void Frame();
             #endif

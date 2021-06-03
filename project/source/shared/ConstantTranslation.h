@@ -11,19 +11,17 @@ namespace nc::sample
             void FrameUpdate(float dt) override;
         
         private:
-            Transform* m_transform;
             Vector3 m_velocity;
     };
 
     inline ConstantTranslation::ConstantTranslation(EntityHandle handle, Vector3 velocity)
         : Component{handle},
-            m_transform{GetComponent<Transform>(handle)},
             m_velocity{velocity}
     {
     }
 
     inline void ConstantTranslation::FrameUpdate(float dt)
     {
-        m_transform->Translate(m_velocity * dt);
+        GetComponent<Transform>(GetParentHandle())->Translate(m_velocity * dt);
     }
 }

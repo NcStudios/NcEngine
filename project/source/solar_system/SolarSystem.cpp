@@ -76,18 +76,17 @@ namespace nc::sample
         camera::SetMainCamera(camera);
 
         auto sun = prefab::Create(prefab::Resource::Sun, {.scale = Vector3::Splat(2.0f), .tag = "Sun"});
-        auto sunTransform = GetComponent<Transform>(sun);
 
         // Planet Orbits
-        auto mercuryPivot = CreateEntity({.parent = sunTransform, .tag = "Mercury Pivot"});
-        auto venusPivot = CreateEntity({.parent = sunTransform, .tag = "Venus Pivot"});
-        auto earthPivot = CreateEntity({.parent = sunTransform, .tag = "Earth Pivot"});
-        auto marsPivot = CreateEntity({.parent = sunTransform, .tag = "Mars Pivot"});
-        auto jupiterPivot = CreateEntity({.parent = sunTransform, .tag = "Jupiter Pivot"});
-        auto saturnPivot = CreateEntity({.parent = sunTransform, .tag = "Saturn Pivot"});
-        auto uranusPivot = CreateEntity({.parent = sunTransform, .tag = "Uranus Pivot"});
-        auto neptunePivot = CreateEntity({.parent = sunTransform, .tag = "Neptune Pivot"});
-        auto plutoPivot = CreateEntity({.parent = sunTransform, .tag = "Pluto Pivot"});
+        auto mercuryPivot = CreateEntity({.parent = sun, .tag = "Mercury Pivot"});
+        auto venusPivot = CreateEntity({.parent = sun, .tag = "Venus Pivot"});
+        auto earthPivot = CreateEntity({.parent = sun, .tag = "Earth Pivot"});
+        auto marsPivot = CreateEntity({.parent = sun, .tag = "Mars Pivot"});
+        auto jupiterPivot = CreateEntity({.parent = sun, .tag = "Jupiter Pivot"});
+        auto saturnPivot = CreateEntity({.parent = sun, .tag = "Saturn Pivot"});
+        auto uranusPivot = CreateEntity({.parent = sun, .tag = "Uranus Pivot"});
+        auto neptunePivot = CreateEntity({.parent = sun, .tag = "Neptune Pivot"});
+        auto plutoPivot = CreateEntity({.parent = sun, .tag = "Pluto Pivot"});
         AddComponent<ConstantRotation>(mercuryPivot, Vector3::Up(), MercuryOrbitSpeed);
         AddComponent<ConstantRotation>(venusPivot, Vector3::Up(), VenusOrbitSpeed);
         AddComponent<ConstantRotation>(earthPivot, Vector3::Up(), EarthOrbitSpeed);
@@ -102,67 +101,67 @@ namespace nc::sample
                                       {.position = Vector3::Right() * MercuryDistance,
                                        .rotation = Quaternion::FromAxisAngle(Vector3::Right(), MercuryTilt),
                                        .scale = Vector3::Splat(MercurySize),
-                                       .parent = GetComponent<Transform>(mercuryPivot),
+                                       .parent = mercuryPivot,
                                        .tag = "Mercury"});
 
         auto venus = prefab::Create(prefab::Resource::Venus,
                                     {.position = Vector3::Right() * VenusDistance,
                                      .rotation = Quaternion::FromAxisAngle(Vector3::Right(), VenusTilt),
                                      .scale = Vector3::Splat(VenusSize),
-                                     .parent = GetComponent<Transform>(venusPivot),
+                                     .parent = venusPivot,
                                      .tag = "Venus"});
 
         auto earth = prefab::Create(prefab::Resource::Earth,
                                     {.position = Vector3::Right() * EarthDistance,
                                      .rotation = Quaternion::FromAxisAngle(Vector3::Right(), EarthTilt),
                                      .scale = Vector3::Splat(EarthSize),
-                                     .parent = GetComponent<Transform>(earthPivot),
+                                     .parent = earthPivot,
                                      .tag = "Earth"});
 
         auto mars = prefab::Create(prefab::Resource::Mars,
                                    {.position = Vector3::Right() * MarsDistance,
                                     .rotation = Quaternion::FromAxisAngle(Vector3::Right(), MarsTilt),
                                     .scale = Vector3::Splat(MarsSize),
-                                    .parent = GetComponent<Transform>(marsPivot),
+                                    .parent = marsPivot,
                                     .tag = "Mars"});
 
         auto jupiter = prefab::Create(prefab::Resource::Jupiter,
                                       {.position = Vector3::Right() * JupiterDistance,
                                        .rotation = Quaternion::FromAxisAngle(Vector3::Right(), JupiterTilt),
                                        .scale = Vector3::Splat(JupiterSize),
-                                       .parent = GetComponent<Transform>(jupiterPivot),
+                                       .parent = jupiterPivot,
                                        .tag = "Jupiter"});
         
         auto saturn = prefab::Create(prefab::Resource::Saturn,
                                      {.position = Vector3::Right() * SaturnDistance,
                                       .rotation = Quaternion::FromAxisAngle(Vector3::Right(), SaturnTilt),
                                       .scale = Vector3::Splat(SaturnSize),
-                                      .parent = GetComponent<Transform>(saturnPivot),
+                                      .parent = saturnPivot,
                                       .tag = "Saturn"});
         prefab::Create(prefab::Resource::Saturn,
                        {.scale = Vector3{2.0f, 0.01f, 2.0f},
-                        .parent = GetComponent<Transform>(saturn),
+                        .parent = saturn,
                         .tag = "Rings"});
 
         auto uranus = prefab::Create(prefab::Resource::Uranus,
                                      {.position = Vector3::Right() * UranusDistance,
                                       .rotation = Quaternion::FromAxisAngle(Vector3::Right(), UranusTilt),
                                       .scale = Vector3::Splat(UranusSize),
-                                      .parent = GetComponent<Transform>(uranusPivot),
+                                      .parent = uranusPivot,
                                       .tag = "Uranus"});
 
         auto neptune = prefab::Create(prefab::Resource::Neptune,
                                       {.position = Vector3::Right() * NeptuneDistance,
                                        .rotation = Quaternion::FromAxisAngle(Vector3::Right(), NeptuneTilt),
                                        .scale = Vector3::Splat(NeptuneSize),
-                                       .parent = GetComponent<Transform>(neptunePivot),
+                                       .parent = neptunePivot,
                                        .tag = "Neptune"});
 
         auto pluto = prefab::Create(prefab::Resource::Pluto,
                                     {.position = Vector3::Right() * PlutoDistance,
                                      .rotation = Quaternion::FromAxisAngle(Vector3::Right(), PlutoTilt),
                                      .scale = Vector3::Splat(PlutoSize),
-                                     .parent = GetComponent<Transform>(plutoPivot),
+                                     .parent = plutoPivot,
                                      .tag = "Pluto"});
 
         // Planet Rotations

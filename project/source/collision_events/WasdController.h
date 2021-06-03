@@ -12,13 +12,11 @@ namespace nc::sample
             void FrameUpdate(float dt) override;
 
         private:
-            Transform* m_transform;
             float m_speed;
     };
 
     inline WasdController::WasdController(EntityHandle parentHandle, float speed)
         : Component{parentHandle},
-            m_transform{GetComponent<Transform>(parentHandle)},
             m_speed{speed}
     {
     }
@@ -26,6 +24,6 @@ namespace nc::sample
     inline void WasdController::FrameUpdate(float dt)
     {
         auto [leftRight, frontBack] = input::GetAxis() * m_speed * dt;
-        m_transform->TranslateLocalSpace(Vector3{leftRight, 0.0f, frontBack});
+        GetComponent<Transform>(GetParentHandle())->TranslateLocalSpace(Vector3{leftRight, 0.0f, frontBack});
     }
 }

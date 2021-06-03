@@ -18,21 +18,20 @@ namespace nc
             const EntityHandle Handle;
             const std::string Tag;
             const physics::Layer Layer;
-            const bool IsStatic;
 
-            Entity(EntityHandle handle, std::string tag, physics::Layer layer, bool isStatic) noexcept;
+            Entity(EntityHandle handle, std::string tag, physics::Layer layer) noexcept;
             Entity(const Entity& other) = delete;
             Entity& operator=(const Entity&) = delete;
             Entity(Entity&& other) = default;
             Entity& operator=(Entity&& other) = default;
             ~Entity() = default;
 
-            void SendFrameUpdate(float dt) noexcept;
-            void SendFixedUpdate() noexcept;
-            void SendOnDestroy() noexcept;
-            void SendOnCollisionEnter(Entity* other) noexcept;
-            void SendOnCollisionStay(Entity* other) noexcept;
-            void SendOnCollisionExit(Entity* other) noexcept;
+            void SendFrameUpdate(float dt);
+            void SendFixedUpdate();
+            void SendOnDestroy();
+            void SendOnCollisionEnter(EntityHandle hit);
+            void SendOnCollisionStay(EntityHandle hit);
+            void SendOnCollisionExit(EntityHandle hit);
 
             template<std::derived_from<Component> T, class ... Args>
             T * AddUserComponent(Args&& ... args) noexcept;

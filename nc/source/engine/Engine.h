@@ -52,8 +52,8 @@ namespace nc::core
 
             void ClearState();
             void DoSceneSwap();
-            void FixedStepLogic(std::span<Entity*> activeEntities);
-            void FrameLogic(std::span<Entity*> activeEntities, float dt);
+            void FixedStepLogic();
+            void FrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();
             void SetBindings();

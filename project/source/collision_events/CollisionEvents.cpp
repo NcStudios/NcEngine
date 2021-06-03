@@ -41,7 +41,7 @@ namespace nc::sample
         AddComponent<WasdController>(blueCube, 2.0f);
         AddComponent<CollisionLogger>(blueCube);
 
-        auto smallCube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{2.0f, 0.0f, 2.5f}, .tag = "Small Cube", .isStatic = true});
+        auto smallCube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{2.0f, 0.0f, 2.5f}, .tag = "Small Cube", .flags = EntityFlags::Static});
         AddComponent<Collider>(smallCube, ColliderInfo{});
         AddComponent<CollisionLogger>(smallCube);
 
@@ -53,7 +53,7 @@ namespace nc::sample
         AddComponent<Collider>(longBox, ColliderInfo{});
         AddComponent<CollisionLogger>(longBox);
 
-        auto smallSphere = prefab::Create(prefab::Resource::Sphere, {.position = Vector3{-2.0f, 0.0f, 2.5f}, .tag = "Small Sphere", .isStatic = true});
+        auto smallSphere = prefab::Create(prefab::Resource::Sphere, {.position = Vector3{-2.0f, 0.0f, 2.5f}, .tag = "Small Sphere", .flags = EntityFlags::Static});
         AddComponent<Collider>(smallSphere, ColliderInfo{.type = ColliderType::Sphere});
         AddComponent<CollisionLogger>(smallSphere);
 
@@ -66,7 +66,7 @@ namespace nc::sample
 
         for(int i = 0; i < 50; ++i)
         {
-            auto cube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{startPos + i * spacing, 0.0f, 5.0f}, .isStatic = true});
+            auto cube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{startPos + i * spacing, 0.0f, 5.0f}, .flags = EntityFlags::Static});
             AddComponent<Collider>(cube, ColliderInfo{});
             AddComponent<CollisionLogger>(cube);
         }

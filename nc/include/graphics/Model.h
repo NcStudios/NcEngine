@@ -27,6 +27,7 @@ namespace nc::graphics
         public:
             Model(Mesh mesh, Material material);
             Model(Model&&) = default;
+            Model& operator=(Model&&) = default;
             ~Model();
 
             void SetMaterial(const Material& material) noexcept;

@@ -25,29 +25,29 @@ namespace nc::physics
         return { {info.offset.x, info.offset.y, info.offset.z}, {info.scale.x / 2.0f, info.scale.y / 2.0f, info.scale.z / 2.0f} };
     }
 
-    inline DirectX::BoundingSphere EstimateBoundingVolume(const VolumeProperties& volumeProperties, const DirectX::XMMATRIX* transform)
+    inline DirectX::BoundingSphere EstimateBoundingVolume(const VolumeProperties& volumeProperties, DirectX::FXMMATRIX transform)
     {
         const auto& extents = volumeProperties.extents;
         const auto radius = sqrt(extents.x * extents.x + extents.y * extents.y + extents.z * extents.z);
         DirectX::BoundingSphere out{volumeProperties.center, radius};
-        out.Transform(out, *transform);
+        out.Transform(out, transform);
         return out;
     }
 
-    inline nc::Collider::BoundingVolume CalculateBoundingVolume(nc::ColliderType type, const VolumeProperties& volumeProperties, const DirectX::XMMATRIX* transform)
+    inline nc::Collider::BoundingVolume CalculateBoundingVolume(nc::ColliderType type, const VolumeProperties& volumeProperties, DirectX::FXMMATRIX transform)
     {
         switch(type)
         {
             case nc::ColliderType::Box:
             {
                 DirectX::BoundingOrientedBox out(volumeProperties.center, volumeProperties.extents, {0,0,0,1.0f});
-                out.Transform(out, *transform);
+                out.Transform(out, transform);
                 return {out};
             }
             case nc::ColliderType::Sphere:
             {
                 DirectX::BoundingSphere out{volumeProperties.center, volumeProperties.extents.x};
-                out.Transform(out, *transform);
+                out.Transform(out, transform);
                 return {out};
             }
         }

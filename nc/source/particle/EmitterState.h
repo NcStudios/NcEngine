@@ -53,7 +53,6 @@ namespace nc::particle
             ParticleSoA m_soa;
             ParticleInfo m_info;
             GraphicsData* m_graphicsData;
-            Transform* m_transform;
             EntityHandle m_handle;
             float m_emissionCounter;
     };

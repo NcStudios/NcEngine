@@ -7,10 +7,16 @@
 
 namespace nc
 {
-    ParticleEmitter::ParticleEmitter(EntityHandle handle, ecs::ParticleEmitterSystem* emitterSystem)
+    ParticleEmitter::ParticleEmitter(EntityHandle handle, ParticleInfo info, ecs::ParticleEmitterSystem* emitterSystem)
         : Component{handle},
+          m_info{info},
           m_emitterSystem{emitterSystem}
     {
+    }
+
+    const ParticleInfo& ParticleEmitter::GetInfo() const noexcept
+    {
+        return m_info;
     }
 
     void ParticleEmitter::Emit(size_t count)

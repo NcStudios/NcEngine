@@ -30,6 +30,8 @@ namespace nc::alloc
             template<class... Args>
             T* Add(Args&&... args);
 
+            void Insert(T value);
+
             template<class Predicate>
             bool RemoveIf(Predicate predicate);
 
@@ -97,6 +99,23 @@ namespace nc::alloc
         }
 
         return ptr;
+    }
+
+    template<class T>
+    void PoolAdapter<T>::Insert(T value)
+    {
+        auto* ptr = m_allocator.allocate(1);
+        ptr = new(ptr) T{std::move(value)};
+
+        if constexpr(storage_policy::sort_dense_storage_by_address::value)
+        {
+            auto pos = std::ranges::upper_bound(m_data, ptr, std::less<T*>());
+            m_data.insert(pos, ptr);
+        }
+        else
+        {
+            m_data.push_back(ptr);
+        }
     }
 
     template<class T>
