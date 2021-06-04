@@ -173,6 +173,9 @@ namespace nc::ecs
             template<class T>
             auto ViewAll() const -> std::span<const T>;
 
+            template<class T, class U>
+            void Sort();
+
             template<class T>
             void ReserveHeadroom(size_t additionalRequiredCount);
 
@@ -229,6 +232,81 @@ namespace nc::ecs
           m_toRemove{},
           m_handleManager{}
     {
+    }
+
+    template<class... Ts>
+    template<class Reference, class Target>
+    void Registry<Ts...>::Sort()
+    {
+        // force committing changes?
+
+        auto& referenceStorage = GetStorageFor<Reference>();
+        auto& targetStorage = GetStorageFor<Target>();
+
+        auto& sortedSparseArray = referenceStorage.sparseArray;
+        auto& sortedEntityPool = referenceStorage.entityPool;
+        auto& sortedComponents = referenceStorage.componentPool;
+        auto& unsortedSparseArray = targetStorage.sparseArray;
+        auto& unsortedEntityPool = targetStorage.entityPool;
+        auto& unsortedComponents = targetStorage.componentPool;
+
+        size_t sortedSize = sortedEntityPool.size();
+        if(sortedSize == 0u || unsortedEntityPool.size() == 0u)
+            return;
+
+        size_t currentIndex = 0u;
+        size_t endIndex = sortedSize - 1;
+
+        while(currentIndex < endIndex)
+        {
+            auto entityIndex = sortedEntityPool.at(currentIndex);
+
+            auto unsortedIndex = unsortedSparseArray.at(entityIndex);
+
+            // both have entity
+            if(unsortedIndex != EntityTraits::NullIndex)
+            {
+                // check if sorted?
+
+
+                auto sortedIndex = sortedSparseArray.at(entityIndex);
+                
+                // swap entity
+                auto tempEntity = unsortedEntityPool.at(sortedIndex);
+                unsortedEntityPool.at(sortedIndex) = unsortedEntityPool.at(unsortedIndex);
+                unsortedEntityPool.at(unsortedIndex) = tempEntity;
+
+                // swap component
+                auto tempComponent = std::move(unsortedComponents.at(sortedIndex));
+                unsortedComponents.at(sortedIndex) = std::move(unsortedComponents.at(unsortedIndex));
+                unsortedComponents.at(unsortedIndex) = std::move(tempComponent);
+
+                // update sparse
+                unsortedSparseArray.at(entityIndex) = sortedIndex;
+                unsortedSparseArray.at(tempEntity) = unsortedIndex;
+
+                ++currentIndex;
+            }
+            // entity only in sorted
+            else
+            {
+                // swap entity to end
+                sortedEntityPool.at(currentIndex) = sortedEntityPool.at(endIndex);
+                sortedEntityPool.at(endIndex) = entityIndex;
+
+                // swap component to end
+                auto temp = std::move(sortedComponents.at(currentIndex));
+                sortedComponents.at(currentIndex) = std::move(sortedComponents.at(endIndex));
+                sortedComponents.at(endIndex) = std::move(temp);
+
+                // update sparse
+                sortedSparseArray.at(entityIndex) = endIndex;
+                auto movedEntityIndex = sortedEntityPool.at(currentIndex);
+                sortedSparseArray.at(movedEntityIndex) = currentIndex;
+
+                --endIndex;
+            }
+        }
     }
 
     template<class... Ts>

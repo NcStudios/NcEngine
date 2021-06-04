@@ -59,7 +59,7 @@ const auto TestInfo = EntityInfo{};
 class Registry_unit_tests : public ::testing::Test
 {
     public:
-        size_t maxEntities = 5u;
+        size_t maxEntities = 10u;
         Registry<Transform, AutoComponentGroup, Tag, Fake1, Fake2> registry;
 
         Registry_unit_tests()
@@ -296,7 +296,6 @@ TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
     EXPECT_EQ(ptr, nullptr);
 }
 
-////
 TEST_F(Registry_unit_tests, AddAutoComponent_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
@@ -478,6 +477,41 @@ TEST_F(Registry_unit_tests, GetAutoComponentConst_CallAfterRemoved_ReturnsNull)
     const auto* ptr = constRegistry.Get<FakeAutoComponent>(handle);
     EXPECT_EQ(ptr, nullptr);
 }
+
+TEST_F(Registry_unit_tests, Sort)
+{
+    auto handle1 = registry.Add<Entity>({});
+    auto handle2 = registry.Add<Entity>({});
+    auto handle3 = registry.Add<Entity>({});
+    auto handle4 = registry.Add<Entity>({});
+    auto handle5 = registry.Add<Entity>({});
+    auto handle6 = registry.Add<Entity>({});
+    auto handle7 = registry.Add<Entity>({});
+    auto handle8 = registry.Add<Entity>({});
+
+    registry.Add<Fake1>(handle1, 5);
+    registry.Add<Fake1>(handle8, 4);
+    registry.Add<Fake1>(handle4, 3);
+    registry.Add<Fake1>(handle5, 2);
+    registry.Add<Fake1>(handle2, 1);
+
+
+    //registry.Sort<Transform, Fake1>();
+    registry.Sort<Fake1, Transform>();
+
+    auto transforms = registry.ViewAll<Transform>();
+    auto fakes = registry.ViewAll<Fake1>();
+
+
+
+    for(size_t i = 0; i < fakes.size(); ++i)
+    {
+        EXPECT_EQ(transforms[i].GetParentEntity(), fakes[i].GetParentEntity());
+    }
+
+
+}
+
 
 int main(int argc, char ** argv)
 {
