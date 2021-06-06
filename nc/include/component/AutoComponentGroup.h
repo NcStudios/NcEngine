@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component/Component.h"
+#include "debug/Utils.h"
 
 #include <concepts>
 #include <memory>
@@ -20,10 +21,10 @@ namespace nc
             AutoComponentGroup& operator=(const AutoComponentGroup&) = delete;
 
             template<std::derived_from<AutoComponent> T, class ... Args>
-            T* Add(Args&& ... args) noexcept;
+            T* Add(Args&& ... args);
 
             template<std::derived_from<AutoComponent> T>
-            bool Remove() noexcept;
+            void Remove();
 
             template<std::derived_from<AutoComponent> T>
             bool Contains() const noexcept;
@@ -45,17 +46,15 @@ namespace nc
     };
 
     template<std::derived_from<AutoComponent> T, class ... Args>
-    T* AutoComponentGroup::Add(Args&& ... args) noexcept
+    T* AutoComponentGroup::Add(Args&& ... args)
     {
-        if (Contains<T>())
-            return nullptr;
-
+        IF_THROW(Contains<T>(), std::string{"Entity already has component of this type\n   "} + __PRETTY_FUNCTION__);
         m_components.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
         return dynamic_cast<T*>(m_components.back().get());
     }
 
     template<std::derived_from<AutoComponent> T>
-    bool AutoComponentGroup::Remove() noexcept
+    void AutoComponentGroup::Remove()
     {
         const std::type_info &targetType(typeid(T));
         for(std::vector<AutoComponent>::size_type i = 0; i < m_components.size(); ++i)
@@ -64,10 +63,11 @@ namespace nc
             {
                 m_components.at(i) = std::move(m_components.back());
                 m_components.pop_back();
-                return true;
+                return;
             }
         }
-        return false;
+
+        throw std::runtime_error(std::string{"Component does not exist\n   "} + __PRETTY_FUNCTION__);
     }
 
     template<std::derived_from<AutoComponent> T>

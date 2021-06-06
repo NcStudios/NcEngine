@@ -1,10 +1,18 @@
 #pragma once
 #include "Entity.h"
 
+#include <concepts>
 #include <type_traits>
 
 namespace nc
 {
+    class AutoComponent;
+
+    template<class T>
+    concept Component = std::movable<T> &&
+                        !std::same_as<Entity, T> &&
+                        !std::derived_from<T, AutoComponent>;
+
     /** Base class for all Components. Only Components associated with a system
      *  should derive directly from ComponentBase. */
     class ComponentBase
