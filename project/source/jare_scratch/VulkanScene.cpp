@@ -3,7 +3,7 @@
 #include "MainCamera.h"
 #include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/Texture.h"
-#include "graphics/vulkan/PhongMaterial.h"
+#include "graphics/vulkan/Material.h"
 #include "graphics/vulkan/TechniqueType.h"
 #include "shared/SceneNavigationCamera.h"
 #include "shared/WasdController.h"
@@ -47,7 +47,7 @@ namespace nc::sample
                                                     };
         nc::graphics::vulkan::LoadTextures(texturePaths); 
 
-        auto boxMaterial = nc::graphics::vulkan::PhongMaterial{};
+        auto boxMaterial = nc::graphics::vulkan::Material{};
         boxMaterial.baseColor = defaultTexturesPath + "Box/BaseColor.png";
         boxMaterial.normal = defaultTexturesPath + "Box/Normal.png";
         boxMaterial.roughness = defaultTexturesPath + "Box/Roughness.png";
@@ -82,7 +82,7 @@ namespace nc::sample
     void VulkanScene::GenerateFloor(const std::vector<std::string>& meshPaths)
     {
         const std::string defaultTexturesPath = "project/Textures/";
-        auto floorMaterial = nc::graphics::vulkan::PhongMaterial{};
+        auto floorMaterial = nc::graphics::vulkan::Material{};
         floorMaterial.baseColor = defaultTexturesPath + "Floor/BaseColor.png";
         floorMaterial.normal = defaultTexturesPath + "Floor/Normal.png";
         floorMaterial.roughness = defaultTexturesPath + "Floor/Roughness.png";
@@ -106,7 +106,7 @@ namespace nc::sample
         AddComponent<vulkan::MeshRenderer>(floor6, meshPaths[0], floorMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
 
         auto floor7 = CreateEntity({.position = Vector3{30.0f, 0.0f, -10.0f}, .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), .scale = Vector3{5.0f, 5.0f, 1.0f}, .tag = "Floor"});
-        AddComponent<vulkan::MeshRenderer>(floor7, meshPaths[0], floorMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+        AddComponent<vulkan::MeshRenderer>(floor7, meshPaths[0], floorMaterial, nc::graphics::vulkan::TechniqueType::Wireframe);
 
         auto floor8 = CreateEntity({.position = Vector3{0.0f, 0.0f, 0.0f}, .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), .scale = Vector3{5.0f, 5.0f, 1.0f}, .tag = "Floor"});
         AddComponent<vulkan::MeshRenderer>(floor8, meshPaths[0], floorMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);

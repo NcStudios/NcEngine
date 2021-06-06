@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component/Component.h"
-#include "graphics/vulkan/PhongMaterial.h"
+#include "graphics/vulkan/Material.h"
 #include "graphics/vulkan/TechniqueType.h"
 
 #include <string>
@@ -13,10 +13,10 @@ namespace nc::vulkan
     class MeshRenderer : public Component
     {
         public:
-            MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, Transform* transform);
+            MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::Material material, Transform* transform);
             Transform* GetTransform();
             const std::string& GetMeshUid() const;
-            const nc::graphics::vulkan::PhongMaterial& GetMaterial() const;
+            const nc::graphics::vulkan::Material& GetMaterial() const;
 
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
@@ -25,6 +25,6 @@ namespace nc::vulkan
         private:
             Transform* m_transform;
             std::string m_meshUid;
-            nc::graphics::vulkan::PhongMaterial m_material;
+            nc::graphics::vulkan::Material m_material;
     };
 }

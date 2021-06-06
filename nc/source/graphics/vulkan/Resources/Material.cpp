@@ -1,4 +1,4 @@
-#include "graphics/vulkan/PhongMaterial.h"
+#include "graphics/vulkan/Material.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -7,10 +7,10 @@
 namespace nc::graphics::vulkan
 {
     #ifdef NC_EDITOR_ENABLED
-    void PhongMaterial::EditorGuiElement()
+    void Material::EditorGuiElement()
     {
         ImGui::SameLine();
-        ImGui::Text("Phong Material");
+        ImGui::Text("Material");
         ImGui::Spacing();
         ImGui::Text("Base Color:");
         ImGui::Text(baseColor.c_str());
