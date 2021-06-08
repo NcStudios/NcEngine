@@ -110,16 +110,14 @@ namespace nc::graphics::vulkan
 
     void PhongAndUiTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
     {
-        for (auto& [meshUid, renderers] : m_meshRenderers)
+        auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
+        if (renderers == m_meshRenderers.end())
         {
-            if (meshUid.compare(meshRenderer->GetMeshUid()) == 0)
-            {
-                renderers.push_back(meshRenderer);
-                return;
-            }
+            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<nc::vulkan::MeshRenderer*>{meshRenderer} );
+            return;
         }
 
-        m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<nc::vulkan::MeshRenderer*>{meshRenderer} );
+        renderers->second.push_back(meshRenderer);
     }
 
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd)
@@ -131,8 +129,8 @@ namespace nc::graphics::vulkan
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
 
-        const auto viewMatrix = m_graphics->GetViewMatrix();
-        const auto projectionMatrix = m_graphics->GetProjectionMatrix();
+        const auto& viewMatrix = m_graphics->GetViewMatrix();
+        const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
 
         auto pushConstants = PhongPushConstants{};
         pushConstants.viewProjection = viewMatrix * projectionMatrix;

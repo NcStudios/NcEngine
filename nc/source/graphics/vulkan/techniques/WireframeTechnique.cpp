@@ -33,7 +33,6 @@ namespace nc::graphics::vulkan
         device.destroyPipeline(m_pipeline);
     }
 
-
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
@@ -41,16 +40,14 @@ namespace nc::graphics::vulkan
 
     void WireframeTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
     {
-        for (auto& [meshUid, renderers] : m_meshRenderers)
+        auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
+        if (renderers == m_meshRenderers.end())
         {
-            if (meshUid.compare(meshRenderer->GetMeshUid()) == 0)
-            {
-                renderers.push_back(meshRenderer);
-                return;
-            }
+            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<nc::vulkan::MeshRenderer*>{meshRenderer} );
+            return;
         }
-
-        m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<nc::vulkan::MeshRenderer*>{meshRenderer} );
+        
+        renderers->second.push_back(meshRenderer);
     }
 
     std::unordered_map<std::string, std::vector<nc::vulkan::MeshRenderer*>>* WireframeTechnique::GetMeshRenderers()
@@ -128,8 +125,8 @@ namespace nc::graphics::vulkan
         cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
         cmd->bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
 
-        const auto viewMatrix = m_graphics->GetViewMatrix();
-        const auto projectionMatrix = m_graphics->GetProjectionMatrix();
+        const auto& viewMatrix = m_graphics->GetViewMatrix();
+        const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
 
         auto pushConstants = WireframePushConstants{};
         pushConstants.viewProjection = viewMatrix * projectionMatrix;
