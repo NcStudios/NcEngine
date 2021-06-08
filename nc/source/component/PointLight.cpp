@@ -21,10 +21,19 @@ namespace nc
         PixelConstBufData = lightProperties;
     }
 
+    void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view)
+    {
+        auto* transform = ActiveRegistry()->Get<Transform>(GetParentEntity());
+        PixelConstBufData.pos = transform->GetPosition();
+        const auto pos_v = DirectX::XMLoadVector3(&PixelConstBufData.pos);
+        DirectX::XMStoreVector3(&ProjectedPos, DirectX::XMVector3Transform(pos_v, view));
+    }
+
     #ifdef NC_EDITOR_ENABLED
-    void PointLight::EditorGuiElement()
+    template<> void ComponentGuiElement<PointLight>(PointLight* light)
     {
         const float dragSpeed = 1.0f;
+        auto& PixelConstBufData = light->PixelConstBufData;
 
         ImGui::Text("Point Light");
         ImGui::Indent();
@@ -43,12 +52,4 @@ namespace nc
         ImGui::Unindent();
     }
     #endif
-
-    void PointLight::SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view)
-    {
-        auto* transform = ActiveRegistry()->Get<Transform>(GetParentEntity());
-        PixelConstBufData.pos = transform->GetPosition();
-        const auto pos_v = DirectX::XMLoadVector3(&PixelConstBufData.pos);
-        DirectX::XMStoreVector3(&ProjectedPos, DirectX::XMVector3Transform(pos_v, view));
-    }
 }

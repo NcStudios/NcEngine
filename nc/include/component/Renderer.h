@@ -24,16 +24,19 @@ namespace nc
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&) = default;
 
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
-
             void SetMesh(const graphics::Mesh& mesh);
             void SetMaterial(const graphics::Material& material);
             void Update(graphics::FrameManager* frame);
 
         private:
             std::unique_ptr<graphics::Model> m_model;
+            
+            #ifdef NC_EDITOR_ENABLED
+            friend void ComponentGuiElement<Renderer>(Renderer*);
+            #endif
     };
-    
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<Renderer>(Renderer* renderer);
+    #endif
 }

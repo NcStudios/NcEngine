@@ -2,14 +2,21 @@
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
-#endif
 
 namespace nc
 {
-    #ifdef NC_EDITOR_ENABLED
-    void ComponentBase::EditorGuiElement()
+    void AutoComponent::ComponentGuiElement()
     {
-        ImGui::Text("User Component");
+        ImGui::Text("User AutoComponent");
     }
-    #endif
-} //end namespace nc
+
+    namespace internal
+    {
+        void DefaultComponentGuiElement()
+        {
+            ImGui::Text("User Component");
+        }
+    }
+}
+
+#endif

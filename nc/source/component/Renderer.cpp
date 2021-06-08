@@ -18,14 +18,6 @@ namespace nc
           m_model{ std::make_unique<graphics::Model>(std::move(mesh), std::move(material)) }
     {
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    void Renderer::EditorGuiElement()
-    {
-        ImGui::Text("Renderer");
-        m_model->GetMaterial()->EditorGuiElement();
-    }
-    #endif
     
     void Renderer::Update(graphics::FrameManager* frame)
     {
@@ -44,4 +36,11 @@ namespace nc
         m_model->SetMaterial(material);
     }
 
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<Renderer>(Renderer* renderer)
+    {
+        ImGui::Text("Renderer");
+        renderer->m_model->GetMaterial()->EditorGuiElement();
+    }
+    #endif
 }

@@ -30,7 +30,7 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void ParticleEmitter::EditorGuiElement()
+    template<> void ComponentGuiElement<ParticleEmitter>(ParticleEmitter*)
     {
         ImGui::Text("Particle Emitter");
     }

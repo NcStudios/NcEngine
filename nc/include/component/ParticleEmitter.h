@@ -58,10 +58,6 @@ namespace nc
         
             void RegisterSystem(ecs::ParticleEmitterSystem* system);
 
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
-
         private:
             ParticleInfo m_info;
             ecs::ParticleEmitterSystem* m_emitterSystem;
@@ -75,4 +71,8 @@ namespace nc
         using requires_on_add_callback = std::true_type;
         using requires_on_remove_callback = std::true_type;
     };
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<ParticleEmitter>(ParticleEmitter*);
+    #endif
 } // namespace nc
