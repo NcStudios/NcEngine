@@ -6,6 +6,8 @@
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
 #include "graphics/vulkan/techniques/PhongAndUiTechnique.h"
+#include "graphics/vulkan/Swapchain.h"
+#include "graphics/vulkan/Initializers.h"
 
 namespace nc::graphics::vulkan
 {
@@ -13,29 +15,71 @@ namespace nc::graphics::vulkan
     : m_graphics{graphics},
       m_textureManager{graphics},
       m_meshManager{graphics},
-      m_phongAndUiTechnique{nullptr}
+      m_mainRenderPass{},
+      m_phongAndUiTechnique{nullptr},
+      m_wireframeTechnique{nullptr}
     {
+        m_mainRenderPass = m_graphics->GetSwapchainPtr()->GetPassDefinition();
+    }
+
+    Renderer::~Renderer()
+    {
+        m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
     }
 
     void Renderer::Record(Commands* commands)
     {  
+        auto swapchain = m_graphics->GetSwapchainPtr();
         auto& commandBuffers = *commands->GetCommandBuffers();
         
-        m_phongAndUiTechnique->Setup();
-
         for (size_t i = 0; i < commandBuffers.size(); ++i)
         {
+            swapchain->WaitForFrameFence(true);
+            
             auto* cmd = &commandBuffers[i];
 
+            // Begin recording commands to each command buffer.
+            cmd->begin(vk::CommandBufferBeginInfo{});
+            BeginRenderPass(cmd, swapchain, &m_mainRenderPass, i);
+
+            // Wireframe technique
+            m_wireframeTechnique->Bind(cmd);
+            m_wireframeTechnique->Record(cmd);
+
             // Phong and UI technique
-            m_phongAndUiTechnique->BeginRecord(cmd, i);
-            RecordMeshRenderers(cmd, m_phongAndUiTechnique->GetPipelineLayout(), m_phongAndUiTechnique->GetMeshRenderers());
+            m_phongAndUiTechnique->Bind(cmd);
+            m_phongAndUiTechnique->Record(cmd);
             RecordUi(cmd);
-            m_phongAndUiTechnique->EndRecord(cmd);
+
+            // End recording commands to each command buffer.
+            cmd->endRenderPass();
+            cmd->end();
         }
     }
 
-    void Renderer::RegisterMeshRenderer(TechniqueType techniqueType, MeshRenderer* renderer)
+    void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, vulkan::Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index)
+    {
+        auto dimensions = m_graphics->GetDimensions();
+
+        vk::ClearValue clearValues[2];
+		clearValues[0].setColor(vk::ClearColorValue(m_graphics->GetClearColor()));
+		clearValues[1].setDepthStencil({ 1.0f, 0 });
+
+        vk::RenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.setRenderPass(*renderPass); // Specify the render pass and attachments.
+        renderPassInfo.setFramebuffer(swapchain->GetFrameBuffer(index));
+        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
+        renderPassInfo.renderArea.setExtent(swapchain->GetExtent());
+        renderPassInfo.setClearValueCount(2); // Set clear color
+        renderPassInfo.setPClearValues(clearValues);
+
+        SetViewportAndScissor(cmd, dimensions);
+
+        // Begin render pass and bind pipeline
+        cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+    }
+
+    void Renderer::RegisterMeshRenderer(TechniqueType techniqueType, nc::vulkan::MeshRenderer* renderer)
     {
         switch (techniqueType)
         {
@@ -43,53 +87,23 @@ namespace nc::graphics::vulkan
             {
                 if (!m_phongAndUiTechnique)
                 {
-                    m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics);
+                    m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
                 }
                 m_phongAndUiTechnique->RegisterMeshRenderer(renderer);
+                break;
+            }
+            case TechniqueType::Wireframe:
+            {
+                if (!m_wireframeTechnique)
+                {
+                    m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
+                }
+                m_wireframeTechnique->RegisterMeshRenderer(renderer);
                 break;
             }
             case TechniqueType::None:
             {
                 break;
-            }
-        }
-    }
-
-    void Renderer::RecordMeshRenderers(vk::CommandBuffer* cmd, vk::PipelineLayout* pipeline, std::unordered_map<std::string, std::vector<MeshRenderer*>>* meshRenderers)
-    {
-        vk::DeviceSize offsets[] = { 0 };
-
-        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
-        cmd->bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
-
-        const auto viewMatrix = m_graphics->GetViewMatrix();
-        const auto projectionMatrix = m_graphics->GetProjectionMatrix();
-
-        auto pushConstants = PushConstants{};
-        pushConstants.viewProjection = viewMatrix * projectionMatrix;
-        pushConstants.cameraPos = m_graphics->GetCameraPosition();
-        
-        for (auto& [meshUid, renderers] : *meshRenderers)
-        {
-            const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
-            
-            for (auto* meshRenderer : renderers)
-            {
-                auto& material = meshRenderer->GetMaterial();
-                pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
-                pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
-                pushConstants.baseColorIndex = ResourceManager::GetTextureAccessor(material.baseColor);
-                pushConstants.normalColorIndex = ResourceManager::GetTextureAccessor(material.normal);
-                pushConstants.roughnessColorIndex = ResourceManager::GetTextureAccessor(material.roughness);
-
-                cmd->pushConstants(*pipeline, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(PushConstants), &pushConstants);
-                cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                
-                #ifdef NC_EDITOR_ENABLED
-                m_graphics->IncrementDrawCallCount();
-                #endif
             }
         }
     }

@@ -345,6 +345,8 @@ namespace nc::graphics::vulkan
 
         vk::PhysicalDeviceFeatures deviceFeatures{};
         deviceFeatures.setSamplerAnisotropy(VK_TRUE);
+        deviceFeatures.setFillModeNonSolid(VK_TRUE);
+        deviceFeatures.setWideLines(VK_TRUE);
 
         vk::PhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures{};
         indexingFeatures.setPNext(nullptr);

@@ -1,7 +1,7 @@
 #include "MeshRendererSystem.h"
 #include "ECS.h"
 #include "graphics/Graphics2.h"
-#include "graphics/vulkan/PhongMaterial.h"
+#include "graphics/vulkan/Material.h"
 #include "graphics/vulkan/Renderer.h"
 
 namespace nc::ecs
@@ -17,7 +17,7 @@ namespace nc::ecs
         return &m_componentSystem;
     }
 
-    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, nc::graphics::vulkan::TechniqueType techniqueType)
+    vulkan::MeshRenderer* MeshRendererSystem::Add(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::Material material, nc::graphics::vulkan::TechniqueType techniqueType)
     {
         auto renderer = m_componentSystem.Add(parentHandle, std::move(meshUid), std::move(material), GetComponent<Transform>(parentHandle));
         m_graphics->GetRendererPtr()->RegisterMeshRenderer(techniqueType, renderer);

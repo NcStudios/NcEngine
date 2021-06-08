@@ -4,7 +4,7 @@
 
 namespace nc::graphics::vulkan
 {
-    struct PhongMaterial
+    struct Material
     {
         std::string baseColor; // Slot 0
         std::string normal; // Slot 1

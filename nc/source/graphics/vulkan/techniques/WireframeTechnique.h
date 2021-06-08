@@ -1,8 +1,8 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include <vector>
 #include "directx/math/DirectXMath.h"
+#include <vector>
 
 namespace nc::vulkan
 {
@@ -12,33 +12,25 @@ namespace nc::vulkan
 namespace nc::graphics
 {
     class Graphics2;
-    
+
     namespace vulkan
     {
         class Commands; class Base; class Swapchain;
 
-        struct PhongPushConstants
+        struct WireframePushConstants
         {
             // N MVP matrices
             DirectX::XMMATRIX normal;
             DirectX::XMMATRIX model;
-            DirectX::XMMATRIX viewProjection ;
-
-            // Camera world position
-            Vector3 cameraPos;
-
-            // Indices into texture array
-            uint32_t baseColorIndex;
-            uint32_t normalColorIndex;
-            uint32_t roughnessColorIndex;
+            DirectX::XMMATRIX viewProjection;
         };
 
-        class PhongAndUiTechnique
+        class WireframeTechnique
         {
             public:
-                PhongAndUiTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass);
-                ~PhongAndUiTechnique();
-                
+                WireframeTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass);
+                ~WireframeTechnique();
+
                 void Bind(vk::CommandBuffer* cmd);
                 void RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
                 void Record(vk::CommandBuffer* cmd);
