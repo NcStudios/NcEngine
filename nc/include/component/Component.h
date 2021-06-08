@@ -19,8 +19,6 @@ namespace nc
             ComponentBase& operator=(const ComponentBase&) = delete;
             ComponentBase& operator=(ComponentBase&&) = default;
 
-            /** @todo Fix this naming - it is omega confusing in transform when parent
-             * means something else. */
             Entity GetParentEntity() const noexcept { return m_parentEntity; }
 
             #ifdef NC_EDITOR_ENABLED

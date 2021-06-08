@@ -92,7 +92,6 @@ namespace nc::physics
                 continue;
 
             //project clickable to screen space
-            //auto worldPos = clickable->parentTransform->GetPosition();
             auto worldPos = registry->Get<Transform>(clickable->entity)->GetPosition();
             auto worldPos_v = DirectX::XMLoadVector3(&worldPos);
             auto screenPos_v = DirectX::XMVector3Project(worldPos_v,

@@ -498,7 +498,6 @@ namespace nc::ecs
 
         m_toRemove.clear();
 
-        // can just insert whole vector?
         for(auto entity : m_toAdd)
         {
             m_active.push_back(entity);

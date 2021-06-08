@@ -20,7 +20,8 @@ namespace nc::ecs
             static constexpr size_t VolumePropertiesIndex = 2u;
             static constexpr size_t ColliderTypeIndex = 3u;
 
-            ColliderSystem(uint32_t maxDynamic,
+            ColliderSystem(registry_type* registry,
+                           uint32_t maxDynamic,
                            uint32_t maxStatic,
                            uint32_t octreeDensityThreshold,
                            float octreeMinimumExtent,

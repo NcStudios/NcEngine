@@ -16,14 +16,12 @@ namespace nc::physics
     template<explicit_layer_type T>
     auto ToLayerMask(T layer) -> LayerMask
     {
-        //check max
         return layer == 0u ? LayerMask{0u} : LayerMask{1u} << (layer - 1u);
     }
 
     template<explicit_layer_type T>
     auto ToLayerMask32(T layer) -> LayerMask32
     {
-        //check max
         return layer == 0u ? LayerMask32{0u} : LayerMask32{1u} << (layer - 1u);
     }
 }
