@@ -1,9 +1,12 @@
 #pragma once
 
+#include "graphics/Graphics2.h"
 #include "graphics/vulkan/Resources/ImmutableImage.h"
 #include "graphics/vulkan/Resources/ImmutableBuffer.h"
+#include "graphics/vulkan/Resources/WriteableBuffer.h"
 #include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/Texture.h"
+#include "component/vulkan/PointLight.h"
 
 #include <vector>
 #include <unordered_map>
@@ -60,5 +63,21 @@ namespace nc::graphics::vulkan
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             vk::UniqueSampler m_sampler;
             vk::ImageLayout m_layout;
+    };
+
+    class PointLightsData
+    {
+        public:
+            PointLightsData() = default;
+            PointLightsData(nc::graphics::Graphics2* graphics, uint32_t maxPointLights);
+            void Update(const std::vector<nc::vulkan::PointLightInfo>& pointLights);
+            vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
+            vk::DescriptorSet* GetDescriptorSet() noexcept; 
+            void Clear() noexcept;
+
+        private:
+            WriteableBuffer<nc::vulkan::PointLightInfo> m_pointLightsArrayBuffer;
+            vk::UniqueDescriptorSet m_descriptorSet;
+            vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
     };
 }

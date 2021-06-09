@@ -115,6 +115,7 @@ namespace nc::ui::editor::controls
         controls::Component(GetComponent<Renderer>(handle));
         #ifdef USE_VULKAN
         controls::Component(GetComponent<vulkan::MeshRenderer>(handle));
+        controls::Component(GetComponent<vulkan::PointLight>(handle));
         #else
         controls::Component(GetComponent<ParticleEmitter>(handle));
         #endif
@@ -284,6 +285,7 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<Transform>("Transform", systems->transform);
         #ifdef USE_VULKAN
         ComponentSystemHeader<nc::vulkan::MeshRenderer>("Mesh Renderer", systems->meshRenderer);
+        ComponentSystemHeader<nc::vulkan::PointLight>("Point Light", systems->pointLight2);
         #else
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", systems->particleEmitter);
         #endif

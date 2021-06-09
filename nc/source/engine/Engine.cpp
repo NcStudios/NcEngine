@@ -7,6 +7,7 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
+#include "graphics/vulkan/Renderer.h"
 #include "Ecs.h"
 
 namespace nc::core
@@ -70,6 +71,7 @@ namespace nc::core
           m_jobSystem{4},
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
+          m_renderer{ &m_graphics2 },
           m_ecs{ &m_graphics2 },
           m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
@@ -81,6 +83,7 @@ namespace nc::core
           #endif
 
     {
+        m_graphics2.SetRenderer(&m_renderer);
         SetBindings();
         V_LOG("Engine initialized");
     }
@@ -201,10 +204,12 @@ namespace nc::core
 #ifdef USE_VULKAN
         m_graphics2.FrameBegin();
         m_ui.FrameBegin();
+
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics2.SetViewMatrix(camViewMatrix);
-
-        auto meshRendererSystem = m_ecs.GetMeshRendererSystem();
+        
+        auto cameraPos = camera::GetMainCameraTransform()->GetPosition();
+        m_graphics2.SetCameraPosition(cameraPos);
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
@@ -214,8 +219,10 @@ namespace nc::core
 
         m_ui.FrameEnd();
 
+        m_ecs.GetPointLightSystem2()->Update();
+
         // @todo: conditionally update based on changes
-        meshRendererSystem->RecordTechniques(m_graphics2.GetCommandsPtr());
+        m_graphics2.GetRendererPtr()->Record(m_graphics2.GetCommandsPtr());
 
         m_graphics2.Draw();
         m_graphics2.FrameEnd();

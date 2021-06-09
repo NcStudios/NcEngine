@@ -3,15 +3,14 @@
 
 namespace nc::graphics::vulkan
 {
-    
     class ResourceManager
     {
         public:
             static void LoadTextures(TexturesData textures);
             static bool TextureExists(const std::string& uid);
             static uint32_t GetTextureAccessor(const std::string& uid);
-            static vk::DescriptorSet* GetDescriptorSet();
-            static vk::DescriptorSetLayout* GetDescriptorSetLayout();
+            static vk::DescriptorSet* GetTexturesDescriptorSet();
+            static vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout();
 
             static void LoadMeshes(MeshesData meshes);
             static bool MeshExists(const std::string& uid);
@@ -19,14 +18,19 @@ namespace nc::graphics::vulkan
             static vk::Buffer* GetVertexBuffer();
             static vk::Buffer* GetIndexBuffer();
 
+            static void InitializePointLights(graphics::Graphics2* graphics, uint32_t maxPointLights);
+            static void UpdatePointLights(const std::vector<nc::vulkan::PointLightInfo>& pointLights);
+            static vk::DescriptorSet* GetPointLightsDescriptorSet();
+            static vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout();
+
             static void Clear();
 
         private:
             void LoadTextures_(TexturesData textures);
             bool TextureExists_(const std::string& uid);
             uint32_t GetTextureAccessor_(const std::string& uid);
-            vk::DescriptorSet* GetDescriptorSet_();
-            vk::DescriptorSetLayout* GetDescriptorSetLayout_();
+            vk::DescriptorSet* GetTexturesDescriptorSet_();
+            vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout_();
 
             void LoadMeshes_(MeshesData meshes);
             bool MeshExists_(const std::string& uid);       
@@ -34,12 +38,18 @@ namespace nc::graphics::vulkan
             vk::Buffer* GetVertexBuffer_();
             vk::Buffer* GetIndexBuffer_();
 
+            void InitializePointLights_(graphics::Graphics2* graphics, uint32_t maxPointLights);
+            void UpdatePointLights_(const std::vector<nc::vulkan::PointLightInfo>& pointLights);
+            vk::DescriptorSet* GetPointLightsDescriptorSet_();
+            vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout_();
+
             void Clear_();
 
             static ResourceManager& Get();
 
             MeshesData m_meshResources;
             TexturesData m_textureResources;
+            PointLightsData m_pointLightResources;
     };
 
     inline ResourceManager& ResourceManager::Get()
@@ -63,14 +73,14 @@ namespace nc::graphics::vulkan
         return Get().GetTextureAccessor_(uid);
     }
 
-    inline vk::DescriptorSet* ResourceManager::GetDescriptorSet()
+    inline vk::DescriptorSet* ResourceManager::GetTexturesDescriptorSet()
     {
-        return Get().GetDescriptorSet_();
+        return Get().GetTexturesDescriptorSet_();
     }
 
-    inline vk::DescriptorSetLayout* ResourceManager::GetDescriptorSetLayout()
+    inline vk::DescriptorSetLayout* ResourceManager::GetTexturesDescriptorSetLayout()
     {
-        return Get().GetDescriptorSetLayout_();
+        return Get().GetTexturesDescriptorSetLayout_();
     }
 
     inline void ResourceManager::LoadMeshes(MeshesData meshes)
@@ -98,6 +108,26 @@ namespace nc::graphics::vulkan
         return Get().GetIndexBuffer_();
     }
 
+    inline void ResourceManager::InitializePointLights(graphics::Graphics2* graphics, uint32_t maxPointLights)
+    {
+        Get().InitializePointLights_(graphics, maxPointLights);
+    }
+
+    inline void ResourceManager::UpdatePointLights(const std::vector<nc::vulkan::PointLightInfo>& pointLights)
+    {
+        Get().UpdatePointLights_(pointLights);
+    }
+
+    inline vk::DescriptorSetLayout* ResourceManager::GetPointLightsDescriptorSetLayout()
+    {
+        return Get().GetPointLightsDescriptorSetLayout_();
+    }
+
+    inline vk::DescriptorSet* ResourceManager::GetPointLightsDescriptorSet()
+    {
+        return Get().GetPointLightsDescriptorSet_();
+    }
+
     inline void ResourceManager::Clear()
     {
         return Get().Clear_();
@@ -118,14 +148,14 @@ namespace nc::graphics::vulkan
         return m_textureResources.GetAccessor(uid);
     }
 
-    inline vk::DescriptorSet* ResourceManager::GetDescriptorSet_()
+    inline vk::DescriptorSet* ResourceManager::GetTexturesDescriptorSet_()
     {
         return m_textureResources.GetDescriptorSet();
     }
 
-    inline vk::DescriptorSetLayout* ResourceManager::GetDescriptorSetLayout_()
+    inline vk::DescriptorSetLayout* ResourceManager::GetTexturesDescriptorSetLayout_()
     {
-        return m_textureResources.GetDescriptorLayout();;
+        return m_textureResources.GetDescriptorLayout();
     }
 
     inline void ResourceManager::LoadMeshes_(MeshesData meshes)
@@ -153,9 +183,30 @@ namespace nc::graphics::vulkan
         return m_meshResources.GetIndexBuffer();
     }
 
+    inline void ResourceManager::InitializePointLights_(graphics::Graphics2* graphics, uint32_t maxPointLights)
+    {
+        m_pointLightResources = PointLightsData(graphics, maxPointLights);
+    }
+
+    inline void ResourceManager::UpdatePointLights_(const std::vector<nc::vulkan::PointLightInfo>& pointLights)
+    {
+        m_pointLightResources.Update(pointLights);
+    }
+
+    inline vk::DescriptorSetLayout* ResourceManager::GetPointLightsDescriptorSetLayout_()
+    {
+        return m_pointLightResources.GetDescriptorLayout();
+    }
+
+    inline vk::DescriptorSet* ResourceManager::GetPointLightsDescriptorSet_()
+    {
+        return m_pointLightResources.GetDescriptorSet();
+    }
+
     inline void ResourceManager::Clear_()
     {
         m_textureResources.Clear();
         m_meshResources.Clear();
+        m_pointLightResources.Clear();
     }
 }

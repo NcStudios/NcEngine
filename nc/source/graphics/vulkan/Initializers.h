@@ -38,13 +38,14 @@ namespace nc::graphics::vulkan
     vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, const std::array<vk::VertexInputAttributeDescription, 5>& vertexAttributeDesc);
     vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo();
     vk::PipelineViewportStateCreateInfo CreateViewportCreateInfo();
-    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo();
+    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth);
     vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo();
     vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo();
     vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo();
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment);
     vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, size_t dataTypeSize);
-    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, vk::DescriptorSetLayout& layout);
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, const std::vector<vk::DescriptorSetLayout>& layouts);
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
     
     // Screen size
     vk::Viewport CreateViewport(const Vector2& dimensions);

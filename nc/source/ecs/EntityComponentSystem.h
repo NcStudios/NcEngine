@@ -8,6 +8,7 @@
 #include "HandleManager.h"
 #ifdef USE_VULKAN
 #include "MeshRendererSystem.h"
+#include "PointLightSystem.h"
 #else
 #include "ParticleEmitterSystem.h"
 #endif
@@ -25,7 +26,8 @@ namespace nc
     namespace physics { class ColliderSystem; }
 
     #ifdef USE_VULKAN
-    namespace graphics { class Graphics2; }
+    namespace vulkan { class MeshRenderer; }
+    namespace graphics { class Graphics2;}
     #endif
 }
 
@@ -39,7 +41,8 @@ namespace nc::ecs
         ecs::ComponentSystem<Renderer>* renderer;
         ecs::ComponentSystem<Transform>* transform;
 #ifdef USE_VULKAN
-        ecs::ComponentSystem<nc::graphics::vulkan::MeshRenderer>* meshRenderer;
+        ecs::ComponentSystem<nc::vulkan::MeshRenderer>* meshRenderer;
+        ecs::ComponentSystem<nc::vulkan::PointLight>* pointLight2;
 #else
         ecs::ComponentSystem<ParticleEmitter>* particleEmitter;
 #endif
@@ -51,6 +54,7 @@ namespace nc::ecs
             #ifdef USE_VULKAN
             EntityComponentSystem(nc::graphics::Graphics2* graphics);
             MeshRendererSystem* GetMeshRendererSystem();
+            PointLightSystem* GetPointLightSystem2();
             #else
             EntityComponentSystem(graphics::Graphics* graphics);
             #endif
@@ -87,6 +91,7 @@ namespace nc::ecs
             std::unique_ptr<ComponentSystem<PointLight>> m_lightSystem;
             #ifdef USE_VULKAN
             std::unique_ptr<MeshRendererSystem> m_meshRendererSystem;
+            std::unique_ptr<PointLightSystem> m_pointLightSystem2;
             #else
             std::unique_ptr<ParticleEmitterSystem> m_particleEmitterSystem;
             #endif

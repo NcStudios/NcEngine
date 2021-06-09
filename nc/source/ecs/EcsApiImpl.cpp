@@ -1,9 +1,6 @@
 #include "Ecs.h"
 #include "ecs/ColliderSystem.h"
 #include "ecs/EntityComponentSystem.h"
-#ifdef USE_VULKAN
-    #include "ecs/MeshRendererSystem.h"
-#endif
 
 namespace nc
 {
@@ -17,6 +14,7 @@ namespace nc
         ecs::ComponentSystem<Renderer>* g_rendererSystem = nullptr;
         #ifdef USE_VULKAN
             ecs::MeshRendererSystem* g_meshRendererSystem = nullptr;
+            ecs::PointLightSystem* g_pointLightSystem2 = nullptr;
         #endif
         ecs::ComponentSystem<Transform>* g_transformSystem = nullptr;
 
@@ -30,6 +28,7 @@ namespace nc
             g_transformSystem = impl->GetTransformSystem();
             #ifdef USE_VULKAN
             g_meshRendererSystem = impl->GetMeshRendererSystem();
+            g_pointLightSystem2 = impl->GetPointLightSystem2();
             #endif
         }
     }
@@ -195,7 +194,7 @@ namespace nc
     }
 
     #ifdef USE_VULKAN
-    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::PhongMaterial material, graphics::vulkan::TechniqueType techniqueType)
+    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, graphics::vulkan::Material material, graphics::vulkan::TechniqueType techniqueType)
     {
         IF_THROW(!GetEntity(handle), "AddComponent<MeshRenderer> - Bad handle");
         IF_THROW(internal::g_meshRendererSystem->Contains(handle), "AddComponent<MeshRenderer> - entity already has a renderer");
@@ -218,6 +217,31 @@ namespace nc
     {
         IF_THROW(!GetEntity(handle), "GetComponent<MeshRenderer> - Bad handle");
         return internal::g_meshRendererSystem->GetPointerTo(handle);
+    }
+
+    template<> vulkan::PointLight* AddComponent<vulkan::PointLight>(EntityHandle handle, vulkan::PointLightInfo info)
+    {
+        IF_THROW(!GetEntity(handle), "AddComponent<PointLight> - Bad handle");
+        IF_THROW(internal::g_pointLightSystem2->Contains(handle), "AddComponent<PointLight> - entity already has a point light");
+        return internal::g_pointLightSystem2->Add(handle, info);
+    }
+
+    template<> bool RemoveComponent<vulkan::PointLight>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "RemoveComponent<PointLight> - Bad handle");
+        return internal::g_pointLightSystem2->Remove(handle);
+    }
+
+    template<> bool HasComponent<vulkan::PointLight>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "HasComponent<PointLight> - Bad handle");
+        return internal::g_pointLightSystem2->Contains(handle);
+    }
+
+    template<> vulkan::PointLight* GetComponent<vulkan::PointLight>(EntityHandle handle)
+    {
+        IF_THROW(!GetEntity(handle), "GetComponent<PointLight> - Bad handle");
+        return internal::g_pointLightSystem2->GetPointerTo(handle);
     }
     #endif
 }

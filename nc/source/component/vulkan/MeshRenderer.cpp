@@ -7,7 +7,7 @@
 
 namespace nc::vulkan
 {
-    MeshRenderer::MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::PhongMaterial material, Transform* transform)
+    MeshRenderer::MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::Material material, Transform* transform)
     : Component{parentHandle},
       m_transform{transform},
       m_meshUid{std::move(meshUid)},
@@ -25,7 +25,7 @@ namespace nc::vulkan
         return m_meshUid;
     }
 
-    const nc::graphics::vulkan::PhongMaterial& MeshRenderer::GetMaterial() const
+    const nc::graphics::vulkan::Material& MeshRenderer::GetMaterial() const
     {
         return m_material;
     }

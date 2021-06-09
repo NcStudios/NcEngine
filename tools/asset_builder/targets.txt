@@ -5,3 +5,5 @@ project/models/coin.fbx
 project/models/table.fbx
 project/models/token.fbx
 project/models/worm.fbx
+project/models/Cube.fbx
+project/models/plane.fbx
