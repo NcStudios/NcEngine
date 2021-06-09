@@ -22,10 +22,9 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     Collider::Collider(EntityHandle handle, ColliderInfo info)
         : ComponentBase(handle),
-          m_type{info.type},
-          m_transformMatrix{GetComponent<Transform>(handle)->GetTransformationMatrix()},
+          m_info{info},
           m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
-          m_widgetModel{collider_detail::CreateWireframeModel(info.type)},
+          m_widgetModel{collider_detail::CreateWireframeModelPtr(info.type)},
           m_selectedInEditor{false}
     {
         IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
@@ -34,14 +33,19 @@ namespace nc
     #else
     Collider::Collider(EntityHandle handle, ColliderInfo info)
         : ComponentBase(handle),
-          m_type{info.type}
+          m_info{info}
     {
     }
     #endif
 
+    const ColliderInfo& Collider::GetInfo() const
+    {
+        return m_info;
+    }
+
     ColliderType Collider::GetType() const
     {
-        return m_type;
+        return m_info.type;
     }
 
     #ifdef NC_EDITOR_ENABLED
@@ -51,22 +55,22 @@ namespace nc
         if(!std::exchange(m_selectedInEditor, false))
             return;
 
-        auto [offset, scale] = collider_detail::GetOffsetAndScaleFromVolume(m_boundingVolume, m_type);
+        const auto& scale = m_info.scale;
+        const auto& offset = m_info.offset; 
 
-        m_widgetModel.SetTransformationMatrix
+        m_widgetModel->SetTransformationMatrix
         (
             DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
-            m_transformMatrix *
+            GetComponent<Transform>(GetParentHandle())->GetTransformationMatrix() *
             DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
 
-        m_widgetModel.Submit(frame);
+        m_widgetModel->Submit(frame);
     }
 
     void Collider::EditorGuiElement()
     {
         ImGui::Text("Collider");
-        ui::editor::xyzWidgetHeader("     ");
         /** @todo put widgets back */
     }
 

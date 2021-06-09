@@ -1,8 +1,7 @@
 #include "EmitterState.h"
 #include "Ecs.h"
 #include "MainCamera.h"
-
-#include <random>
+#include "random/Random.h"
 
 namespace
 {
@@ -15,37 +14,6 @@ namespace
                DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
     }
 
-    /** @todo Not quite sure where this should go - it may be worth it to extend this
-     *  a bit and expose it through the api. Random generation helpers would be
-     *  useful for game logic (sample scene spawner already duplicates this code). */
-    class Random
-    {
-        public:
-            Random()
-                : m_device{},
-                  m_gen{m_device()},
-                  m_distribution{-1.0f, 1.0f}
-            {
-            }
-
-        float Float()
-        {
-            return m_distribution(m_gen);
-        }
-
-        Vector3 Vec3(Vector3 offset, Vector3 range)
-        {
-            return offset + HadamardProduct(Vector3{Float(), Float(), Float()}, range);
-        }
-
-        private:
-            std::random_device m_device;
-            std::mt19937 m_gen;
-            std::uniform_real_distribution<float> m_distribution;
-    };
-
-    Random g_random;
-
     particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset)
     {
         const auto& [emission, init, kinematic] = info;
@@ -54,11 +22,11 @@ namespace
         {
             .maxLifetime = init.lifetime,
             .currentLifetime = 0.0f,
-            .position = positionOffset + g_random.Vec3(init.position, init.positionRange),
-            .linearVelocity = g_random.Vec3(kinematic.velocity, kinematic.velocityRange),
-            .rotation = init.rotation + g_random.Float() * init.rotationRange,
-            .angularVelocity = kinematic.rotation + g_random.Float() * kinematic.rotationRange,
-            .scale = g_random.Float() * init.scaleRange + init.scale
+            .position = positionOffset + random::Vec3(init.position, init.positionRange),
+            .linearVelocity = random::Vec3(kinematic.velocity, kinematic.velocityRange),
+            .rotation = random::Float(init.rotation, init.rotationRange), //.rotation + g_random.Float() * init.rotationRange,
+            .angularVelocity = random::Float(kinematic.rotation, kinematic.rotationRange), //kinematic.rotation + g_random.Float() * kinematic.rotationRange,
+            .scale = random::Float(init.scale, init.scaleRange) //g_random.Float() * init.scaleRange + init.scale
         };
     }
 
@@ -83,7 +51,6 @@ namespace nc::particle
         : m_soa{info.emission.maxParticleCount},
           m_info{info},
           m_graphicsData{graphicsData},
-          m_transform{GetComponent<Transform>(handle)},
           m_handle{handle},
           m_emissionCounter{0.0f}
     {
@@ -92,7 +59,7 @@ namespace nc::particle
 
     void EmitterState::Emit(size_t count)
     {
-        auto parentPosition = m_transform->GetPosition();
+        auto parentPosition = GetComponent<Transform>(m_handle)->GetPosition();
         auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
         for(size_t i = 0; i < particleCount; ++i)
         {

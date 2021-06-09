@@ -72,7 +72,7 @@ namespace nc::core
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_renderer{ &m_graphics2 },
-          m_ecs{ &m_graphics2 },
+          m_ecs{m_graphics2, config::GetMemorySettings(), config::GetPhysicsSettings()},
           m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
@@ -96,12 +96,12 @@ namespace nc::core
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
           m_pointLightManager{},
           m_frameManager{},
-          m_ecs{&m_graphics},
+          m_ecs{&m_graphics, config::GetMemorySettings(), config::GetPhysicsSettings()},
           m_physics{&m_graphics, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
           #ifdef NC_EDITOR_ENABLED
-          m_ui{m_window.GetHWND(), &m_graphics, m_ecs.GetComponentSystems()}
+          m_ui{m_window.GetHWND(), &m_graphics}
           #else
           m_ui{m_window.GetHWND(), &m_graphics}
           #endif
@@ -134,22 +134,29 @@ namespace nc::core
             m_window.ProcessSystemMessages(); 
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
+
             #ifndef USE_VULKAN
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
             #endif
+            
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
                 FixedStepLogic();
             }
 
             FrameLogic(dt);
+
             #ifndef USE_VULKAN
             particleUpdateJobResult.wait();
             #endif
+
+            m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
+
             #ifndef USE_VULKAN
             particleEmitterSystem->ProcessFrameEvents();
             #endif
+
             FrameCleanup();
         }
 
@@ -169,7 +176,7 @@ namespace nc::core
     void Engine::ClearState()
     {
         V_LOG("Clearing engine state");
-        m_ecs.ClearState();
+        m_ecs.Clear();
         m_physics.ClearState();
         camera::ClearMainCamera();
         // SceneSystem state is never cleared
@@ -187,7 +194,8 @@ namespace nc::core
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
-        m_ecs.SendFixedUpdate();
+        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
+            entity->SendFixedUpdate();
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
     }
@@ -195,7 +203,8 @@ namespace nc::core
     void Engine::FrameLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-        m_ecs.SendFrameUpdate(dt);
+        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
+            entity->SendFrameUpdate(dt);
         NC_PROFILE_END();
     }
 
@@ -234,28 +243,27 @@ namespace nc::core
         auto camViewMatrix = camera::CalculateViewMatrix();
         m_graphics.SetViewMatrix(camViewMatrix);
 
-        for(auto& light : m_ecs.GetPointLightSystem()->GetComponents())
-        {
-            m_pointLightManager.AddPointLight(light.get(), camViewMatrix);
-        }
+        auto* registry = m_ecs.GetRegistry();
+
+        for(auto& light : registry->ViewAll<PointLight>())
+            m_pointLightManager.AddPointLight(&light, camViewMatrix);
 
         m_pointLightManager.Bind();
 
-        for(auto& renderer : m_ecs.GetRendererSystem()->GetComponents())
-        {
-            renderer->Update(&m_frameManager);
-        }
+        for(auto& renderer : registry->ViewAll<Renderer>())
+            renderer.Update(&m_frameManager);
 
-        #ifdef NC_EDITOR_ENABLED
-        m_physics.UpdateWidgets(&m_frameManager);
-        #endif
+#ifdef NC_EDITOR_ENABLED
+        for(auto& collider : registry->ViewAll<Collider>())
+            collider.UpdateWidget(&m_frameManager);
+#endif
 
         m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
         m_frameManager.Execute(&m_graphics);
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
+        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
         #else
         m_ui.Frame();
         #endif
@@ -268,7 +276,6 @@ namespace nc::core
 
     void Engine::FrameCleanup()
     {
-        m_ecs.SendOnDestroy();
         if(m_sceneSystem.IsSceneChangeScheduled())
         {
             DoSceneSwap();

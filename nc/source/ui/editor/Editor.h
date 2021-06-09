@@ -22,18 +22,17 @@ namespace nc::ui::editor
     {
         public:
             #ifdef USE_VULKAN
-            Editor(graphics::Graphics2* graphics, const ecs::Systems& systems);
+            Editor(graphics::Graphics2* graphics);
             #endif
-            Editor(graphics::Graphics* graphics, const ecs::Systems& systems);
+            Editor(graphics::Graphics* graphics);
 
-            void Frame(float* dt, ecs::EntityMap& activeEntities);
+            void Frame(float* dt, ecs::registry_type* registry);
 
         private:
             #ifdef USE_VULKAN
             nc::graphics::Graphics2* m_graphics2;
             #endif
             nc::graphics::Graphics* m_graphics;
-            ecs::Systems m_componentSystems;
             bool m_openState_Editor;
             bool m_openState_UtilitiesPanel;
 

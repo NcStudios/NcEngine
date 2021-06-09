@@ -66,8 +66,8 @@ namespace nc::sample
 
         // UI Callbacks
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);
-        SpawnCallback = std::bind(Spawner::Spawn, spawner, std::placeholders::_1);
-        DestroyCallback = std::bind(Spawner::Destroy, spawner, std::placeholders::_1);
+        SpawnCallback = std::bind(Spawner::StageSpawn, spawner, std::placeholders::_1);
+        DestroyCallback = std::bind(Spawner::StageDestroy, spawner, std::placeholders::_1);
         GetFPSCallback = std::bind(FPSTracker::GetFPS, fpsTracker);
     }
 

@@ -27,8 +27,8 @@ namespace nc
 
             PointLight(EntityHandle handle, Properties properties) noexcept;
             ~PointLight() = default;
-            PointLight(PointLight&&) = delete;
-            PointLight& operator=(PointLight&&) = delete;
+            PointLight(PointLight&&) = default;
+            PointLight& operator=(PointLight&&) = default;
             PointLight(const PointLight&) = delete;
             PointLight& operator=(const PointLight&) = delete;
 
@@ -38,8 +38,14 @@ namespace nc
             #ifdef NC_EDITOR_ENABLED
             void EditorGuiElement() override;
             #endif
+    };
 
-        private:
-            Transform * m_transform;
+    template<>
+    struct StoragePolicy<PointLight>
+    {
+        using allow_trivial_destruction = std::true_type;
+        using sort_dense_storage_by_address = std::true_type;
+        using requires_on_add_callback = std::false_type;
+        using requires_on_remove_callback = std::false_type;
     };
 }

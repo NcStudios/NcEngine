@@ -47,6 +47,7 @@ namespace nc
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
 
+            const ColliderInfo& GetInfo() const;
             ColliderType GetType() const;
 
             #ifdef NC_EDITOR_ENABLED
@@ -56,13 +57,27 @@ namespace nc
             #endif
 
         private:
-            const ColliderType m_type;
+            ColliderInfo m_info;
 
             #ifdef NC_EDITOR_ENABLED
-            DirectX::FXMMATRIX m_transformMatrix;
             BoundingVolume m_boundingVolume;
-            graphics::Model m_widgetModel;
+            /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
+            std::unique_ptr<graphics::Model> m_widgetModel;
             bool m_selectedInEditor;
             #endif
+    };
+
+    template<>
+    struct StoragePolicy<Collider>
+    {
+        #ifdef NC_EDITOR_ENABLED
+        using allow_trivial_destruction = std::false_type;
+        #else
+        using allow_trivial_destruction = std::true_type;
+        #endif
+
+        using sort_dense_storage_by_address = std::true_type;
+        using requires_on_add_callback = std::true_type;
+        using requires_on_remove_callback = std::true_type;
     };
 }

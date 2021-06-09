@@ -4,11 +4,10 @@
 
 namespace nc
 {
-Entity::Entity(EntityHandle handle, std::string tag, physics::Layer layer, bool isStatic) noexcept
+Entity::Entity(EntityHandle handle, std::string tag, physics::Layer layer) noexcept
     : Handle{handle}, 
       Tag{std::move(tag)},
       Layer{layer},
-      IsStatic{isStatic},
       m_userComponents{}
 {
 }
@@ -23,7 +22,7 @@ std::vector<Component*> Entity::GetUserComponents() const noexcept
     return out;
 }
 
-void Entity::SendFrameUpdate(float dt) noexcept
+void Entity::SendFrameUpdate(float dt)
 {
     for (auto& comp : m_userComponents)
     {
@@ -31,7 +30,7 @@ void Entity::SendFrameUpdate(float dt) noexcept
     }
 }
 
-void Entity::SendFixedUpdate() noexcept
+void Entity::SendFixedUpdate()
 {
     for(auto& comp : m_userComponents)
     {
@@ -39,7 +38,7 @@ void Entity::SendFixedUpdate() noexcept
     }
 }
 
-void Entity::SendOnDestroy() noexcept
+void Entity::SendOnDestroy()
 {
     for (auto& comp : m_userComponents)
     {
@@ -47,27 +46,27 @@ void Entity::SendOnDestroy() noexcept
     }
 }
 
-void Entity::SendOnCollisionEnter(Entity* other) noexcept
+void Entity::SendOnCollisionEnter(EntityHandle hit)
 {
     for(auto& comp : m_userComponents)
     {
-        comp->OnCollisionEnter(other);
+        comp->OnCollisionEnter(hit);
     }
 }
 
-void Entity::SendOnCollisionStay(Entity* other) noexcept
+void Entity::SendOnCollisionStay(EntityHandle hit)
 {
     for(auto& comp : m_userComponents)
     {
-        comp->OnCollisionStay(other);
+        comp->OnCollisionStay(hit);
     }
 }
 
-void Entity::SendOnCollisionExit(Entity* other) noexcept
+void Entity::SendOnCollisionExit(EntityHandle hit)
 {
     for(auto& comp : m_userComponents)
     {
-        comp->OnCollisionExit(other);
+        comp->OnCollisionExit(hit);
     }
 }
 } //end namespace nc

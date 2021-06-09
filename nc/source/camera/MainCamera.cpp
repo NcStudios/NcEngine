@@ -4,7 +4,7 @@
 
 namespace
 {
-    nc::Transform* g_mainCameraTransform = nullptr;
+    nc::EntityHandle g_mainCamera = nc::EntityHandle::Null();
 }
 
 namespace nc::camera
@@ -13,26 +13,27 @@ namespace nc::camera
     void SetMainCamera(Camera* camera)
     {
         V_LOG("Setting main camera");
-        g_mainCameraTransform = GetComponent<Transform>(camera->GetParentHandle());
+        g_mainCamera = camera->GetParentHandle();
     }
 
     void ClearMainCamera()
     {
-        g_mainCameraTransform = nullptr;
+        g_mainCamera = EntityHandle::Null();
     }
 
     DirectX::XMMATRIX CalculateViewMatrix()
     {
-        IF_THROW(!g_mainCameraTransform, "camera::CalculateViewMatrix - No camera is set");
+        IF_THROW(!g_mainCamera.Valid(), "camera::CalculateViewMatrix - No camera is set");
+        auto* transform = GetComponent<Transform>(g_mainCamera);
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, g_mainCameraTransform->GetTransformationMatrix());
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform->GetTransformationMatrix());
         auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
         return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
     }
     
     Transform* GetMainCameraTransform()
     {
-        IF_THROW(!g_mainCameraTransform, "camera::GetMainCameraTransform - No camera is set");
-        return g_mainCameraTransform;
+        IF_THROW(!g_mainCamera.Valid(), "camera::GetMainCameraTransform - No camera is set");
+        return GetComponent<Transform>(g_mainCamera);
     }
 }

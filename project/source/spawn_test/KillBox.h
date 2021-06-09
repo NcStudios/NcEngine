@@ -10,32 +10,22 @@ namespace nc::sample
     {
         public:
             KillBox(EntityHandle handle, bool logOnDestroy = false);
-            void OnCollisionExit(Entity* other) override;
+            void OnCollisionExit(EntityHandle hit) override;
 
         private:
             bool m_logOnDestroy;
-            #ifndef USE_VULKAN
-            ParticleEmitter* m_particleSystem;
-            #endif
     };
 
     inline KillBox::KillBox(EntityHandle handle, bool logOnDestroy)
         : Component{handle},
           m_logOnDestroy{logOnDestroy}
-          #ifndef USE_VULKAN
-          ,
-          m_particleSystem{AddComponent<ParticleEmitter>(handle, ParticleInfo{})}
-          #endif
     {
     }
 
-    inline void KillBox::OnCollisionExit(Entity* other)
+    inline void KillBox::OnCollisionExit(EntityHandle hit)
     {
-        if(other)
-        {
-            if(m_logOnDestroy)
-                GameLog::Log("KillBox - Object Destroyed");
-            DestroyEntity(other->Handle);
-        }
+        if(m_logOnDestroy)
+            GameLog::Log("KillBox - Object Destroyed");
+        DestroyEntity(hit);
     }
 }

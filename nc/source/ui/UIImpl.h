@@ -19,18 +19,10 @@ namespace nc::ui
     class UIImpl
     {
         public:
-            #ifdef NC_EDITOR_ENABLED
-                #ifdef USE_VULKAN
-                UIImpl(HWND hwnd, graphics::Graphics2* graphics, ecs::MeshRendererSystem* meshRendererSystem, const ecs::Systems& systems);
-                #else
-                UIImpl(HWND hwnd, graphics::Graphics* graphics, const ecs::Systems& systems);
-                #endif
+            #ifdef USE_VULKAN
+            UIImpl(HWND hwnd, graphics::Graphics2* graphics);
             #else
-                #ifdef USE_VULKAN
-                UIImpl(HWND hwnd, graphics::Graphics2* graphics, ecs::RendererSystem* rendererSystem);
-                #else
-                UIImpl(HWND hwnd, graphics::Graphics* graphics);
-                #endif
+            UIImpl(HWND hwnd, graphics::Graphics* graphics);
             #endif
 
             ~UIImpl() noexcept;
@@ -43,7 +35,7 @@ namespace nc::ui
             void FrameBegin();
 
             #ifdef NC_EDITOR_ENABLED
-            void Frame(float* dt, ecs::EntityMap& activeEntities);
+            void Frame(float* dt, ecs::registry_type* registry);
             #else
             void Frame();
             #endif
@@ -59,7 +51,6 @@ namespace nc::ui
             
             #ifdef USE_VULKAN
             graphics::Graphics2* m_graphics;
-            ecs::MeshRendererSystem* m_meshRendererSystem;
             #endif
 
     };

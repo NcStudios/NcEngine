@@ -16,7 +16,10 @@ namespace nc::sample
             using SpawnExtension = std::function<void(EntityHandle)>;
 
             Spawner(EntityHandle handle, prefab::Resource resource, SpawnBehavior behavior, SpawnExtension extension = nullptr);
+            void FrameUpdate(float) override;
+            void StageSpawn(unsigned count = 1u);
             void Spawn(unsigned count = 1u);
+            void StageDestroy(unsigned count = 1u);
             void Destroy(unsigned count = 1u);
             void SetPrefab(prefab::Resource resource);
             const std::vector<EntityHandle>& GetHandles() const;
@@ -30,6 +33,8 @@ namespace nc::sample
             bool m_applyConstantVelocity;
             bool m_applyConstantRotation;
             bool m_spawnStaticEntities;
+            size_t m_stagedAdditions;
+            size_t m_stagedDeletions;
     };
 
     inline Spawner::Spawner(EntityHandle handle, prefab::Resource resource, SpawnBehavior behavior, SpawnExtension extension)
@@ -43,8 +48,33 @@ namespace nc::sample
                                   0.0f != behavior.thetaRandomRange},
           m_spawnStaticEntities{behavior.spawnAsStaticEntity &&
                                 !m_applyConstantRotation &&
-                                !m_applyConstantRotation}
+                                !m_applyConstantRotation},
+          m_stagedAdditions{0u},
+          m_stagedDeletions{0u}
     {
+    }
+
+    inline void Spawner::FrameUpdate(float)
+    {
+        // Additions/Deletions are delayed until FrameUpdate because Spawn/Destroy are
+        // callbacks from ui events, and modifying state in the middle of rendering can
+        // cause problems.
+        if(m_stagedAdditions)
+        {
+            Spawn(m_stagedAdditions);
+            m_stagedAdditions = 0u;
+        }
+
+        if(m_stagedDeletions)
+        {
+            Destroy(m_stagedDeletions);
+            m_stagedDeletions = 0u;
+        }
+    }
+
+    inline void Spawner::StageSpawn(unsigned count)
+    {
+        m_stagedAdditions = count;
     }
 
     inline void Spawner::Spawn(unsigned count)
@@ -55,7 +85,7 @@ namespace nc::sample
             {
                 .position = m_generator.Position(),
                 .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
-                .isStatic = m_spawnStaticEntities
+                .flags = m_spawnStaticEntities
             });
 
             if(m_applyConstantVelocity)
@@ -66,6 +96,11 @@ namespace nc::sample
                 m_extension(handle);
             return handle;
         });
+    }
+
+    inline void Spawner::StageDestroy(unsigned count)
+    {
+        m_stagedDeletions = count;
     }
 
     inline void Spawner::Destroy(unsigned count)

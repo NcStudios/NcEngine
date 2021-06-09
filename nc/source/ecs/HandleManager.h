@@ -1,20 +1,44 @@
 #pragma once
 
-#include "entity/EntityHandle.h"
+#include "entity/HandleUtils.h"
+
+#include <vector>
 
 namespace nc::ecs
 {
     class HandleManager
     {
-        static const EntityHandle::Handle_t initialHandle = 1u;
-
         public:
-            HandleManager() : m_current{initialHandle} {}
-            EntityHandle GenerateNewHandle() {return EntityHandle{m_current++}; }
-            EntityHandle GetCurrent() const { return EntityHandle{m_current}; }
-            void Reset() { m_current = initialHandle; }
+            HandleManager()
+                : m_freeHandles{},
+                  m_nextIndex{0u}
+            {
+            }
+
+            EntityHandle GenerateNewHandle(HandleTraits::layer_type layer, HandleTraits::flags_type flags)
+            {
+                if(m_freeHandles.empty())
+                    return EntityHandle{HandleUtils::Join(m_nextIndex++, 0u, layer, flags)};
+                
+                auto out = m_freeHandles.back();
+                m_freeHandles.pop_back();
+                return HandleUtils::Recycle(out, layer, flags);
+            }
+
+            void ReclaimHandle(EntityHandle handle)
+            {
+                m_freeHandles.push_back(handle);
+            }
+
+            void Reset()
+            {
+                m_freeHandles.clear();
+                m_freeHandles.shrink_to_fit();
+                m_nextIndex = 0u;
+            }
         
         private:
-            EntityHandle::Handle_t m_current;
+            std::vector<EntityHandle> m_freeHandles;
+            HandleTraits::index_type m_nextIndex;
     };
 }

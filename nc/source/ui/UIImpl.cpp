@@ -34,28 +34,15 @@ namespace nc::ui
     }
 
     /* UIImpl */
-    #ifdef NC_EDITOR_ENABLED
-        #ifdef USE_VULKAN
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics2* graphics, ecs::MeshRendererSystem* meshRendererSystem, const ecs::Systems& systems)
-    : m_editor{graphics, systems},
-        m_projectUI{nullptr},
-        m_graphics{graphics},
-        m_meshRendererSystem{meshRendererSystem}
-        #else
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics, const ecs::Systems& systems)
-    : m_editor{graphics, systems},
-        m_projectUI{nullptr}
-        #endif
+    #ifdef USE_VULKAN
+    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics2* graphics)
+    : m_editor{graphics},
+      m_projectUI{nullptr},
+      m_graphics{graphics}
     #else
-        #ifdef USE_VULKAN
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics2* graphics, ecs::MeshRendererSystem* meshRendererSystem)
-    : m_projectUI{ nullptr },          
-        m_graphics{graphics},
-        m_meshRendererSystem{meshRendererSystem}
-        #else
     UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
-        : m_projectUI{ nullptr }
-        #endif
+    : m_editor{graphics},
+      m_projectUI{nullptr}
     #endif
     {
         g_instance = this;
@@ -113,9 +100,9 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, ecs::EntityMap& activeEntities)
+    void UIImpl::Frame(float* dt, ecs::registry_type* registry)
     {
-        m_editor.Frame(dt, activeEntities);
+        m_editor.Frame(dt, registry);
         if(m_projectUI)
         {
             m_projectUI->Draw();
