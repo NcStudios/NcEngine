@@ -285,19 +285,6 @@ namespace nc::ui::editor::controls
     /** @todo this will eventually need to be generic */
     void ComponentSystems(ecs::registry_type* registry)
     {
-<<<<<<< HEAD
-        ComponentSystemHeader<Collider>("Collider", systems->collider);
-        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", systems->networkDispatcher);
-        ComponentSystemHeader<PointLight>("Point Light", systems->pointLight);
-        ComponentSystemHeader<Renderer>("Renderer", systems->renderer);
-        ComponentSystemHeader<Transform>("Transform", systems->transform);
-        #ifdef USE_VULKAN
-        ComponentSystemHeader<nc::vulkan::MeshRenderer>("Mesh Renderer", systems->meshRenderer);
-        ComponentSystemHeader<nc::vulkan::PointLight>("Point Light", systems->pointLight2);
-        #else
-        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", systems->particleEmitter);
-        #endif
-=======
         ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
@@ -308,7 +295,6 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<nc::vulkan::MeshRenderer>("Mesh Renderer", registry->ViewAll<nc::vulkan::MeshRenderer>());
         ComponentSystemHeader<nc::vulkan::PointLight>("Point Light", registry->ViewAll<nc::vulkan::PointLight>());
         #else
->>>>>>> 2ba4fce09e642bfcaab3925893e146b57cf32ac1
     }
 
     void GraphicsResourcePanel()
