@@ -294,7 +294,7 @@ namespace nc::ui::editor::controls
         #ifdef USE_VULKAN
         ComponentSystemHeader<nc::vulkan::MeshRenderer>("Mesh Renderer", registry->ViewAll<nc::vulkan::MeshRenderer>());
         ComponentSystemHeader<nc::vulkan::PointLight>("Point Light", registry->ViewAll<nc::vulkan::PointLight>());
-        #else
+        #endif
     }
 
     void GraphicsResourcePanel()

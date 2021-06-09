@@ -1,5 +1,6 @@
 #include "PointLightSystem.h"
 #include "ECS.h"
+#include "EntityComponentSystem.h"
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Renderer.h"
@@ -9,62 +10,39 @@ namespace nc::ecs
 {
     const uint32_t PointLightSystem::MAX_POINT_LIGHTS;
 
-    PointLightSystem::PointLightSystem(graphics::Graphics2* graphics, uint32_t maxPointLights)
-    : m_componentSystem{maxPointLights},
-      m_pointLightInfos{},
-      m_graphics{graphics}
+    PointLightSystem::PointLightSystem(graphics::Graphics2* graphics, uint32_t maxPointLights, registry_type* registry)
+    : m_pointLightInfos{},
+      m_graphics{graphics},
+      m_registry{registry}
     {
         graphics::vulkan::ResourceManager::InitializePointLights(graphics, maxPointLights);
-    }
-
-    ComponentSystem<vulkan::PointLight>* PointLightSystem::GetSystem()
-    {
-        return &m_componentSystem;
-    }
-
-    vulkan::PointLight* PointLightSystem::Add(EntityHandle parentHandle, vulkan::PointLightInfo info)
-    {
-        auto pointLight = m_componentSystem.Add(parentHandle, info);
-        info.isInitialized = true;
-        m_pointLightInfos.push_back(info);
-        graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
-        return pointLight;
     }
 
     void PointLightSystem::Update()
     {
         m_pointLightInfos.clear();
-        for (auto& pointLight : m_componentSystem.GetComponents())
+        for (auto& pointLight : m_registry->ViewAll<vulkan::PointLight>())
         {
-            pointLight->Update();
-            m_pointLightInfos.push_back(pointLight->GetInfo());
+            pointLight.Update();
+            m_pointLightInfos.push_back(pointLight.GetInfo());
         }
         graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
     }
 
-    bool PointLightSystem::Remove(EntityHandle parentHandle)
+
+    void PointLightSystem::Add(vulkan::PointLight& pointLight)
     {
-        return m_componentSystem.Remove(parentHandle);
+        auto& info = pointLight.GetInfo();
+        m_pointLightInfos.push_back(info);
+        graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
     }
 
-    bool PointLightSystem::Contains(EntityHandle parentHandle) const
+    void PointLightSystem::Remove(EntityHandle)
     {
-        return m_componentSystem.Contains(parentHandle);
-    }
-
-    vulkan::PointLight* PointLightSystem::GetPointerTo(EntityHandle parentHandle)
-    {
-        return m_componentSystem.GetPointerTo(parentHandle);
-    }
-
-    auto PointLightSystem::GetComponents() -> ComponentSystem<vulkan::PointLight>::ContainerType&
-    {
-        return m_componentSystem.GetComponents();
     }
 
     void PointLightSystem::Clear()
     {
         m_pointLightInfos.resize(0);
-        m_componentSystem.Clear();
     }
 }

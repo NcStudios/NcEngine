@@ -1,5 +1,7 @@
 #pragma once
 
+#include "component/Component.h"
+
 #include "vulkan/vulkan.hpp"
 #include <vector>
 #include "directx/math/DirectXMath.h"
@@ -43,13 +45,13 @@ namespace nc::graphics
                 void RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
                 void Record(vk::CommandBuffer* cmd);
 
-                std::unordered_map<std::string, std::vector<nc::vulkan::MeshRenderer*>>* GetMeshRenderers();
+                std::unordered_map<std::string, std::vector<EntityHandle>>* GetMeshRenderers();
                 vk::PipelineLayout* GetPipelineLayout();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);
 
-                std::unordered_map<std::string, std::vector<nc::vulkan::MeshRenderer*>> m_meshRenderers;
+                std::unordered_map<std::string, std::vector<EntityHandle>> m_meshRenderers;
 
                 nc::graphics::Graphics2* m_graphics;
                 Base* m_base;

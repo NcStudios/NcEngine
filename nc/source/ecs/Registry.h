@@ -63,7 +63,7 @@ namespace nc::ecs
     template<class T>
     struct SystemCallbacks
     {
-        using on_add_type = std::function<void(const T&)>;
+        using on_add_type = std::function<void(T&)>;
         using on_remove_type = std::function<void(EntityHandle)>;
         on_add_type OnAdd = nullptr;
         on_remove_type OnRemove = nullptr;

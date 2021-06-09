@@ -47,8 +47,7 @@ namespace nc::vulkan
     PointLight::PointLight(EntityHandle parentHandle, PointLightInfo info)
     : Component{parentHandle},
       m_range{13},
-      m_info{info},
-      m_transform{GetComponent<Transform>(parentHandle)}
+      m_info{info}
     {
         auto attenuation = GetAttenuationFromRange(m_range);
         m_info.attConst = attenuation.constant;
@@ -63,7 +62,7 @@ namespace nc::vulkan
 
     void PointLight::Update()
     {
-        auto transformPos = m_transform->GetPosition();
+        auto transformPos = GetComponent<Transform>(GetParentHandle())->GetPosition();
         auto attenuation = GetAttenuationFromRange(m_range);
         m_info.attConst = attenuation.constant;
         m_info.attLin = attenuation.linear;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Ecs.h"
-#include "ComponentSystem.h"
 #include "component/vulkan/PointLight.h"
 
 #include <unordered_map>
@@ -12,6 +11,18 @@ namespace nc::graphics
     namespace vulkan { class Commands; }
 }
 
+// @todo delete this
+namespace nc
+{
+    namespace ecs
+    {
+        template<class ... args>
+        class Registry;
+
+        using registry_type = ecs::Registry<Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Transform, nc::vulkan::PointLight, nc::vulkan::MeshRenderer>;
+    }
+}
+
 namespace nc::ecs
 {
     class PointLightSystem
@@ -19,24 +30,20 @@ namespace nc::ecs
         public:
             static const uint32_t MAX_POINT_LIGHTS = 50u;
 
-            PointLightSystem(graphics::Graphics2* graphics, uint32_t maxPointLights);
+            PointLightSystem(graphics::Graphics2* graphics, uint32_t maxPointLights, registry_type* registryType);
             PointLightSystem(PointLightSystem&&) = delete;
             PointLightSystem(const PointLightSystem&) = delete;
             PointLightSystem& operator = (PointLightSystem&&) = delete;
             PointLightSystem& operator = (const PointLightSystem&) = delete;
 
-            ComponentSystem<vulkan::PointLight>* GetSystem();
-            vulkan::PointLight* Add(EntityHandle parentHandle, vulkan::PointLightInfo info);
             void Update();
-            bool Remove(EntityHandle parentHandle);
-            bool Contains(EntityHandle parentHandle) const;
-            vulkan::PointLight* GetPointerTo(EntityHandle parentHandle);
-            auto GetComponents() -> ComponentSystem<vulkan::PointLight>::ContainerType&;
             void Clear();
+            void Add(vulkan::PointLight& pointLight);
+            void Remove(EntityHandle entity);
 
         private:
-            ComponentSystem<vulkan::PointLight> m_componentSystem;
             std::vector<vulkan::PointLightInfo> m_pointLightInfos;
             nc::graphics::Graphics2* m_graphics;
+            registry_type* m_registry;
     };
 }

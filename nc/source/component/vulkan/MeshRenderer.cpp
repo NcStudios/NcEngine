@@ -7,17 +7,17 @@
 
 namespace nc::vulkan
 {
-    MeshRenderer::MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::Material material, Transform* transform)
+    MeshRenderer::MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::Material material, nc::graphics::vulkan::TechniqueType techniqueType)
     : Component{parentHandle},
-      m_transform{transform},
       m_meshUid{std::move(meshUid)},
-      m_material{std::move(material)}
+      m_material{std::move(material)},
+      m_techniqueType{techniqueType}
     {
     }
 
     Transform* MeshRenderer::GetTransform()
     {
-        return m_transform;
+        return GetComponent<Transform>(GetParentHandle());
     }
 
     const std::string& MeshRenderer::GetMeshUid() const
@@ -28,6 +28,11 @@ namespace nc::vulkan
     const nc::graphics::vulkan::Material& MeshRenderer::GetMaterial() const
     {
         return m_material;
+    }
+
+    nc::graphics::vulkan::TechniqueType MeshRenderer::GetTechniqueType() const
+    {
+        return m_techniqueType;
     }
     
     #ifdef NC_EDITOR_ENABLED

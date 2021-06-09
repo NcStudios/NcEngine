@@ -5,6 +5,7 @@
 
 namespace
 {
+    #ifndef USE_VULKAN
     auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
     {
         return nc::particle::GraphicsData
@@ -14,18 +15,28 @@ namespace
             graphics
         };
     }
+    #endif
 }
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(graphics::Graphics* graphics)
+    #ifdef USE_VULKAN
+    ParticleEmitterSystem::ParticleEmitterSystem()
         : m_emitterStates{},
           m_toAdd{},
-          m_toRemove{},
-          m_graphicsData{CreateParticleGraphicsData(graphics)},
-          m_renderer{graphics}
+          m_toRemove{}
     {
     }
+    #else
+    ParticleEmitterSystem::ParticleEmitterSystem(graphics::Graphics* graphics)
+    : m_emitterStates{},
+        m_toAdd{},
+        m_toRemove{},
+        m_graphicsData{CreateParticleGraphicsData(graphics)},
+        m_renderer{graphics}
+    {
+    }
+    #endif
 
     void ParticleEmitterSystem::UpdateParticles(float dt)
     {
@@ -37,7 +48,9 @@ namespace nc::ecs
 
     void ParticleEmitterSystem::RenderParticles()
     {
+        #ifndef USE_VULKAN
         m_renderer.Render(m_emitterStates);
+        #endif
     }
 
     void ParticleEmitterSystem::ProcessFrameEvents()
@@ -82,9 +95,11 @@ namespace nc::ecs
         pos->Emit(count);
     }
 
-    void ParticleEmitterSystem::Add(const ParticleEmitter& emitter)
+    void ParticleEmitterSystem::Add([[maybe_unused]] const ParticleEmitter& emitter)
     {
+        #ifndef USE_VULKAN
         m_toAdd.emplace_back(emitter.GetParentHandle(), emitter.GetInfo(), &m_graphicsData);
+        #endif
     }
 
     void ParticleEmitterSystem::Remove(EntityHandle handle)

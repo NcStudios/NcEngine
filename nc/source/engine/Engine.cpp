@@ -72,16 +72,11 @@ namespace nc::core
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_renderer{ &m_graphics2 },
-          m_ecs{m_graphics2, config::GetMemorySettings(), config::GetPhysicsSettings()},
+          m_ecs{&m_graphics2, config::GetMemorySettings(), config::GetPhysicsSettings()},
           m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
-          #ifdef NC_EDITOR_ENABLED
-          m_ui{m_window.GetHWND(), &m_graphics2, m_ecs.GetMeshRendererSystem(), m_ecs.GetComponentSystems()}
-          #else
           m_ui{m_window.GetHWND(), &m_graphics2}
-          #endif
-
     {
         m_graphics2.SetRenderer(&m_renderer);
         SetBindings();
@@ -100,11 +95,7 @@ namespace nc::core
           m_physics{&m_graphics, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
-          #ifdef NC_EDITOR_ENABLED
           m_ui{m_window.GetHWND(), &m_graphics}
-          #else
-          m_ui{m_window.GetHWND(), &m_graphics}
-          #endif
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -221,14 +212,14 @@ namespace nc::core
         m_graphics2.SetCameraPosition(cameraPos);
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetActiveEntities());
+        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
         #else
         m_ui.Frame();
         #endif
 
         m_ui.FrameEnd();
 
-        m_ecs.GetPointLightSystem2()->Update();
+        m_ecs.GetPointLightSystem()->Update();
 
         // @todo: conditionally update based on changes
         m_graphics2.GetRendererPtr()->Record(m_graphics2.GetCommandsPtr());

@@ -11,18 +11,19 @@ namespace nc::ecs
                                                  const config::MemorySettings& memSettings,
                                                  const config::PhysicsSettings& physSettings)
     #endif
-        : m_colliderSystem{memSettings.maxTransforms,
+        : m_registry{memSettings.maxTransforms},
+          m_colliderSystem{memSettings.maxTransforms,
                            memSettings.maxStaticColliders,
                            physSettings.octreeDensityThreshold,
                            physSettings.octreeMinimumExtent,
                            physSettings.worldspaceExtent},
           #ifdef USE_VULKAN
           m_particleEmitterSystem{},
-          m_pointLightSystem{graphics, 50u},
+          m_pointLightSystem{graphics, 50u, &m_registry},
+          m_meshRendererSystem{graphics}
           #else
-          m_particleEmitterSystem{graphics},
+          m_particleEmitterSystem{graphics}
           #endif
-          m_registry{memSettings.maxTransforms}
     {
         internal::RegisterEcs(this);
 
@@ -48,6 +49,32 @@ namespace nc::ecs
             [particleEmitterSystem](EntityHandle h) { particleEmitterSystem->Remove(h); }
         );
 
+        #ifdef USE_VULKAN
+        
+        auto* meshRendererSystem = &m_meshRendererSystem;
+        m_registry.RegisterOnAddCallback<vulkan::MeshRenderer>
+        (
+            [meshRendererSystem](vulkan::MeshRenderer& mr) { meshRendererSystem->Add(mr); }
+        );
+
+        m_registry.RegisterOnRemoveCallback<vulkan::MeshRenderer>
+        (
+            [meshRendererSystem](EntityHandle h) { meshRendererSystem->Remove(h); }
+        );
+
+        auto* pointLightSystem = &m_pointLightSystem;
+        m_registry.RegisterOnAddCallback<vulkan::PointLight>
+        (
+            [pointLightSystem](vulkan::PointLight& pl) { pointLightSystem->Add(pl); }
+        );
+
+        m_registry.RegisterOnRemoveCallback<vulkan::PointLight>
+        (
+            [pointLightSystem](EntityHandle h) { pointLightSystem->Remove(h); }
+        );
+
+        #endif
+
         m_registry.VerifyCallbacks();
     }
     
@@ -56,6 +83,12 @@ namespace nc::ecs
     {
         return &m_pointLightSystem;
     }
+
+    MeshRendererSystem* EntityComponentSystem::GetMeshRendererSystem()
+    {
+        return &m_meshRendererSystem;
+    }
+
     #endif
 
     void EntityComponentSystem::Clear()

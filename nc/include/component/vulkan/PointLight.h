@@ -46,6 +46,17 @@ namespace nc::vulkan
         private:
             float m_range;
             PointLightInfo m_info;
-            nc::Transform* m_transform;
+    };
+}
+
+namespace nc
+{
+    template<>
+    struct StoragePolicy<vulkan::PointLight>
+    {
+        using allow_trivial_destruction = std::false_type;
+        using sort_dense_storage_by_address = std::true_type;
+        using requires_on_add_callback = std::true_type;
+        using requires_on_remove_callback = std::true_type;
     };
 }

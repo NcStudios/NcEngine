@@ -1,4 +1,5 @@
 #include "WireframeTechnique.h"
+#include "Ecs.h"
 #include "config/Config.h"
 #include "component/Transform.h"
 #include "component/vulkan/MeshRenderer.h"
@@ -43,14 +44,14 @@ namespace nc::graphics::vulkan
         auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
         if (renderers == m_meshRenderers.end())
         {
-            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<nc::vulkan::MeshRenderer*>{meshRenderer} );
+            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<EntityHandle>{meshRenderer->GetParentHandle()} );
             return;
         }
         
-        renderers->second.push_back(meshRenderer);
+        renderers->second.push_back(meshRenderer->GetParentHandle());
     }
 
-    std::unordered_map<std::string, std::vector<nc::vulkan::MeshRenderer*>>* WireframeTechnique::GetMeshRenderers()
+    std::unordered_map<std::string, std::vector<EntityHandle>>* WireframeTechnique::GetMeshRenderers()
     {
         return &m_meshRenderers;
     }
@@ -135,8 +136,9 @@ namespace nc::graphics::vulkan
         {
             const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
             
-            for (auto* meshRenderer : renderers)
+            for (auto handle : renderers)
             {
+                auto* meshRenderer = GetComponent<nc::vulkan::MeshRenderer>(handle);
                 pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
                 pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
 
