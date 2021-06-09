@@ -34,7 +34,6 @@ namespace nc::vulkan
     class PointLight final : public Component
     {
         public:
-            PointLight(EntityHandle parentHandle);
             PointLight(EntityHandle parentHandle, PointLightInfo info);
             const PointLightInfo& GetInfo();
             void Set(const PointLightInfo& info);

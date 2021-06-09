@@ -62,7 +62,7 @@ namespace nc::graphics::vulkan
             const vk::Format& GetDepthFormat() const noexcept;
             vk::DescriptorPool* GetRenderingDescriptorPoolPtr() noexcept;
             vma::Allocator* GetAllocator() noexcept;
-            vma::Allocation* GetBufferAllocation(uint32_t index) noexcept;
+            vma::Allocation* GetBufferAllocation(uint32_t index);
 
             uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage memoryUsageType, vk::Buffer* createdBuffer);
             uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage);

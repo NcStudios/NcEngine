@@ -314,7 +314,7 @@ namespace nc::graphics::vulkan
         return &m_allocator;
     }
 
-    vma::Allocation* Base::GetBufferAllocation(uint32_t index) noexcept
+    vma::Allocation* Base::GetBufferAllocation(uint32_t index)
     {
         return &(m_buffers.at(index)).second;
     }
