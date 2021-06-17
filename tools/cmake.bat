@@ -31,6 +31,10 @@ set CONFIGURATION="%~2"
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Debug -DNC_EDITOR_ENABLED=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON -DSANITIZE_UB=ON
         goto Run
     )
+    if %CONFIGURATION%=="Release-Vulkan" (
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DUSE_VULKAN=ON 
+        goto Run
+    )
     if %CONFIGURATION%=="Release" (
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release
         goto Run

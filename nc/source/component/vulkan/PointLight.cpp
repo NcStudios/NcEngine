@@ -18,6 +18,7 @@ namespace nc::vulkan
     }
 
     #ifdef USE_VULKAN
+    #ifdef NC_EDITOR_ENABLED
     void PointLight::EditorGuiElement()
     {
         const float dragSpeed = 1.0f;
@@ -42,6 +43,7 @@ namespace nc::vulkan
             ImGui::Unindent();
         ImGui::Unindent();
     }
+    #endif
     #endif
 
     PointLight::PointLight(EntityHandle parentHandle, PointLightInfo info)
