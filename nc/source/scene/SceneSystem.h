@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Scene.h"
+#include "Ecs.h"
 
 #include <memory>
 
@@ -14,7 +15,7 @@ namespace nc::scene
             void QueueSceneChange(std::unique_ptr<Scene> swapScene);
             bool IsSceneChangeScheduled() const;
             void UnloadActiveScene();
-            void DoSceneChange();
+            void DoSceneChange(registry_type* registry);
 
         private:
             std::unique_ptr<Scene> m_activeScene;

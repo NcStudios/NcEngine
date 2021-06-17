@@ -8,8 +8,8 @@
 
 namespace nc
 {
-    NetworkDispatcher::NetworkDispatcher(EntityHandle handle) noexcept
-        : ComponentBase(handle)
+    NetworkDispatcher::NetworkDispatcher(Entity entity) noexcept
+        : ComponentBase(entity)
     {
     }
 
@@ -31,7 +31,8 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void NetworkDispatcher::EditorGuiElement()
+    template<>
+    void ComponentGuiElement<NetworkDispatcher>(NetworkDispatcher*)
     {
         ImGui::Text("NetworkDispatcher");
     }

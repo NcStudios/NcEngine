@@ -48,17 +48,15 @@ namespace nc
         ParticleKinematicInfo kinematic;
     };
 
-    class ParticleEmitter : public Component
+    class ParticleEmitter final : public ComponentBase
     {
         public:
-            ParticleEmitter(EntityHandle handle, ParticleInfo info, ecs::ParticleEmitterSystem* emitterSystem);
+            ParticleEmitter(Entity entity, ParticleInfo info);
 
             const ParticleInfo& GetInfo() const noexcept;
             void Emit(size_t count);
         
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
+            void RegisterSystem(ecs::ParticleEmitterSystem* system);
 
         private:
             ParticleInfo m_info;
@@ -73,4 +71,8 @@ namespace nc
         using requires_on_add_callback = std::true_type;
         using requires_on_remove_callback = std::true_type;
     };
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<ParticleEmitter>(ParticleEmitter*);
+    #endif
 } // namespace nc

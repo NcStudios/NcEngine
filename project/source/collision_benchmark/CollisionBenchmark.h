@@ -7,7 +7,7 @@ namespace nc::sample
     class CollisionBenchmark : public scene::Scene
     {
         public:
-            void Load() override;
+            void Load(registry_type* registry) override;
             void Unload() override;
         
         private:

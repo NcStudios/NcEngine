@@ -18,13 +18,31 @@ namespace
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(graphics::Graphics* graphics)
+    #ifdef USE_VULKAN
+    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry)
+    #else
+    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics)
+    #endif
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
+          #ifdef USE_VULKAN
+          m_graphicsData{nullptr},
+          m_renderer{nullptr}
+          #else
           m_graphicsData{CreateParticleGraphicsData(graphics)},
           m_renderer{graphics}
+          #endif
     {
+        registry->RegisterOnAddCallback<ParticleEmitter>
+        (
+            [this](ParticleEmitter& emitter) { this->Add(emitter); }
+        );
+
+        registry->RegisterOnRemoveCallback<ParticleEmitter>
+        (
+            [this](Entity entity) { this->Remove(entity); }
+        );
     }
 
     void ParticleEmitterSystem::UpdateParticles(float dt)
@@ -52,22 +70,22 @@ namespace nc::ecs
 
         m_toAdd.clear();
 
-        for(auto handle : m_toRemove)
+        for(auto entity : m_toRemove)
         {
-            std::erase_if(m_emitterStates, [handle](auto& state)
+            std::erase_if(m_emitterStates, [entity](auto& state)
             {
-                return state.GetHandle() == handle;
+                return state.GetEntity() == entity;
             });
         }
 
         m_toRemove.clear();
     }
 
-    void ParticleEmitterSystem::Emit(EntityHandle handle, size_t count)
+    void ParticleEmitterSystem::Emit(Entity entity, size_t count)
     {
-        auto findPred = [handle](particle::EmitterState& state)
+        auto findPred = [entity](particle::EmitterState& state)
         {
-            return state.GetHandle() == handle;
+            return state.GetEntity() == entity;
         };
 
         auto pos = std::ranges::find_if(m_emitterStates, findPred);
@@ -82,14 +100,15 @@ namespace nc::ecs
         pos->Emit(count);
     }
 
-    void ParticleEmitterSystem::Add(const ParticleEmitter& emitter)
+    void ParticleEmitterSystem::Add(ParticleEmitter& emitter)
     {
-        m_toAdd.emplace_back(emitter.GetParentHandle(), emitter.GetInfo(), &m_graphicsData);
+        emitter.RegisterSystem(this);
+        m_toAdd.emplace_back(emitter.GetParentEntity(), emitter.GetInfo(), &m_graphicsData);
     }
 
-    void ParticleEmitterSystem::Remove(EntityHandle handle)
+    void ParticleEmitterSystem::Remove(Entity entity)
     {
-        m_toRemove.push_back(handle);
+        m_toRemove.push_back(entity);
     }
 
     void ParticleEmitterSystem::Clear()

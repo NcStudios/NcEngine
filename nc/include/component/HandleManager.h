@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entity/HandleUtils.h"
+#include "Entity.h"
 
 #include <vector>
 
@@ -15,17 +15,17 @@ namespace nc::ecs
             {
             }
 
-            EntityHandle GenerateNewHandle(HandleTraits::layer_type layer, HandleTraits::flags_type flags)
+            Entity GenerateNewHandle(EntityTraits::layer_type layer, EntityTraits::flags_type flags)
             {
                 if(m_freeHandles.empty())
-                    return EntityHandle{HandleUtils::Join(m_nextIndex++, 0u, layer, flags)};
+                    return Entity{EntityUtils::Join(m_nextIndex++, 0u, layer, flags)};
                 
                 auto out = m_freeHandles.back();
                 m_freeHandles.pop_back();
-                return HandleUtils::Recycle(out, layer, flags);
+                return EntityUtils::Recycle(out, layer, flags);
             }
 
-            void ReclaimHandle(EntityHandle handle)
+            void ReclaimHandle(Entity handle)
             {
                 m_freeHandles.push_back(handle);
             }
@@ -38,7 +38,7 @@ namespace nc::ecs
             }
         
         private:
-            std::vector<EntityHandle> m_freeHandles;
-            HandleTraits::index_type m_nextIndex;
+            std::vector<Entity> m_freeHandles;
+            EntityTraits::index_type m_nextIndex;
     };
 }

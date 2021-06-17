@@ -9,14 +9,15 @@
 
 namespace nc::sample
 {
-    void Worms::Load()
+    void Worms::Load(registry_type* registry)
     {
         // Setup
-        m_sceneHelper.Setup(false);
+        m_sceneHelper.Setup(registry, false);
         prefab::InitializeResources();
 
         // Camera
-        auto camera = AddComponent<Camera>(CreateEntity({.tag = "Main Camera"}));
+        auto cameraEntity = registry->Add<Entity>({.tag = "Main Camera"});
+        auto camera = registry->Add<Camera>(cameraEntity);
         camera::SetMainCamera(camera);
 
         // Light
@@ -31,9 +32,9 @@ namespace nc::sample
             .attQuad = 0.0f
         };
 
-        auto lightHandle = CreateEntity({.tag = "Point Light"});
-        AddComponent<PointLight>(lightHandle, lightProperties);
-        AddComponent<MouseFollower>(lightHandle);
+        auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});
+        registry->Add<PointLight>(lightHandle, lightProperties);
+        registry->Add<MouseFollower>(lightHandle, registry);
 
         // Worm Spawner
         SpawnBehavior spawnBehavior
@@ -45,8 +46,8 @@ namespace nc::sample
             .thetaRandomRange = 1.0f
         };
 
-        auto spawnerHandle = CreateEntity({.tag = "Spawner"});
-        auto spawner = AddComponent<Spawner>(spawnerHandle, prefab::Resource::Worm, spawnBehavior);
+        auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
+        auto spawner = registry->Add<Spawner>(spawnerHandle, registry, prefab::Resource::Worm, spawnBehavior);
         spawner->Spawn(40u);
     }
 

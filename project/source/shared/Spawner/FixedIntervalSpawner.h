@@ -7,7 +7,12 @@ namespace nc::sample
     class FixedIntervalSpawner : public Spawner
     {
         public:
-            FixedIntervalSpawner(EntityHandle handle, prefab::Resource resource, SpawnBehavior behavior, float spawnRate, Spawner::SpawnExtension extension = nullptr);
+            FixedIntervalSpawner(Entity entity,
+                                 registry_type* registry,
+                                 prefab::Resource resource,
+                                 SpawnBehavior behavior,
+                                 float spawnRate,
+                                 Spawner::SpawnExtension extension = nullptr);
             void FrameUpdate(float dt) override;
 
         private:
@@ -15,8 +20,13 @@ namespace nc::sample
             float m_lastSpawnTime = 0.0f;
     };
 
-    inline FixedIntervalSpawner::FixedIntervalSpawner(EntityHandle handle, prefab::Resource resource, SpawnBehavior behavior, float spawnRate, Spawner::SpawnExtension extension)
-        : Spawner{handle, resource, behavior, extension},
+    inline FixedIntervalSpawner::FixedIntervalSpawner(Entity entity,
+                                                      registry_type* registry,
+                                                      prefab::Resource resource,
+                                                      SpawnBehavior behavior,
+                                                      float spawnRate,
+                                                      Spawner::SpawnExtension extension)
+        : Spawner{entity, registry, resource, behavior, extension},
           m_spawnRate{spawnRate}
     {
     }

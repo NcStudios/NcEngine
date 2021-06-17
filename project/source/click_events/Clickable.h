@@ -2,16 +2,17 @@
 
 #include "Ecs.h"
 #include "Physics.h"
+#include "Entity.h"
 #include "shared/GameLog.h"
 
 #include <string>
 
 namespace nc::sample
 {
-    class Clickable : public Component, public physics::IClickable
+    class Clickable : public AutoComponent, public physics::IClickable
     {
         public:
-            Clickable(EntityHandle handle, physics::LayerMask mask);
+            Clickable(Entity entity, std::string tag);
             ~Clickable() noexcept;
             void OnClick() override;
         
@@ -19,13 +20,14 @@ namespace nc::sample
             std::string m_Tag;
     };
 
-    inline Clickable::Clickable(EntityHandle handle, physics::LayerMask mask)
-        : Component(handle),
-          physics::IClickable(GetComponent<Transform>(handle), 40.0f),
-          m_Tag{GetEntity(handle)->Tag}
+    inline Clickable::Clickable(Entity entity, std::string tag)
+        : AutoComponent(entity),
+          physics::IClickable(entity, 40.0f),
+          m_Tag{std::move(tag)}
     {
         physics::RegisterClickable(this);
-        IClickable::layers = mask;
+        auto layer = EntityUtils::Layer(entity);
+        IClickable::layers = physics::ToLayerMask(layer);
     }
 
     inline Clickable::~Clickable() noexcept

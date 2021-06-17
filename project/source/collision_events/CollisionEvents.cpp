@@ -25,50 +25,50 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionEvents::Load()
+    void CollisionEvents::Load(registry_type* registry)
     {
         // Setup
-        m_sceneHelper.Setup(true, true, Widget);
+        m_sceneHelper.Setup(registry, true, true, Widget);
 
         // Camera
-        auto cameraHandle = CreateEntity({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = AddComponent<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
+        auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
+        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
         camera::SetMainCamera(camera);
 
         // Objects
-        auto blueCube = prefab::Create(prefab::Resource::CubeBlue, {.tag = "Blue Cube"});
-        AddComponent<Collider>(blueCube, ColliderInfo{});
-        AddComponent<WasdController>(blueCube, 2.0f);
-        AddComponent<CollisionLogger>(blueCube);
+        auto blueCube = prefab::Create(registry, prefab::Resource::CubeBlue, {.tag = "Blue Cube"});
+        registry->Add<Collider>(blueCube, ColliderInfo{});
+        registry->Add<WasdController>(blueCube, registry, 2.0f);
+        registry->Add<CollisionLogger>(blueCube, registry);
 
-        auto smallCube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{2.0f, 0.0f, 2.5f}, .tag = "Small Cube", .flags = EntityFlags::Static});
-        AddComponent<Collider>(smallCube, ColliderInfo{});
-        AddComponent<CollisionLogger>(smallCube);
+        auto smallCube = prefab::Create(registry, prefab::Resource::Cube, {.position = Vector3{2.0f, 0.0f, 2.5f}, .tag = "Small Cube", .flags = EntityFlags::Static});
+        registry->Add<Collider>(smallCube, ColliderInfo{});
+        registry->Add<CollisionLogger>(smallCube, registry);
 
-        auto bigCube = prefab::Create(prefab::Resource::Cube, {.position = Vector3::Right() * 5.0f, .scale = Vector3::Splat(3.0f), .tag = "Big Cube"});
-        AddComponent<Collider>(bigCube, ColliderInfo{});
-        AddComponent<CollisionLogger>(bigCube);
+        auto bigCube = prefab::Create(registry, prefab::Resource::Cube, {.position = Vector3::Right() * 5.0f, .scale = Vector3::Splat(3.0f), .tag = "Big Cube"});
+        registry->Add<Collider>(bigCube, ColliderInfo{});
+        registry->Add<CollisionLogger>(bigCube, registry);
 
-        auto longBox = prefab::Create(prefab::Resource::Cube, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Box"});
-        AddComponent<Collider>(longBox, ColliderInfo{});
-        AddComponent<CollisionLogger>(longBox);
+        auto longBox = prefab::Create(registry, prefab::Resource::Cube, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Box"});
+        registry->Add<Collider>(longBox, ColliderInfo{});
+        registry->Add<CollisionLogger>(longBox, registry);
 
-        auto smallSphere = prefab::Create(prefab::Resource::Sphere, {.position = Vector3{-2.0f, 0.0f, 2.5f}, .tag = "Small Sphere", .flags = EntityFlags::Static});
-        AddComponent<Collider>(smallSphere, ColliderInfo{.type = ColliderType::Sphere});
-        AddComponent<CollisionLogger>(smallSphere);
+        auto smallSphere = prefab::Create(registry, prefab::Resource::Sphere, {.position = Vector3{-2.0f, 0.0f, 2.5f}, .tag = "Small Sphere", .flags = EntityFlags::Static});
+        registry->Add<Collider>(smallSphere, ColliderInfo{.type = ColliderType::Sphere});
+        registry->Add<CollisionLogger>(smallSphere, registry);
 
-        auto bigSphere = prefab::Create(prefab::Resource::Sphere, {.position = Vector3::Left() * 5.0f, .scale = Vector3::Splat(3.0f), .tag = "Big Sphere"});
-        AddComponent<Collider>(bigSphere, ColliderInfo{.type = ColliderType::Sphere});
-        AddComponent<CollisionLogger>(bigSphere);
+        auto bigSphere = prefab::Create(registry, prefab::Resource::Sphere, {.position = Vector3::Left() * 5.0f, .scale = Vector3::Splat(3.0f), .tag = "Big Sphere"});
+        registry->Add<Collider>(bigSphere, ColliderInfo{.type = ColliderType::Sphere});
+        registry->Add<CollisionLogger>(bigSphere, registry);
 
         float startPos = -20.0f;
         float spacing = 2.0f;
 
         for(int i = 0; i < 50; ++i)
         {
-            auto cube = prefab::Create(prefab::Resource::Cube, {.position = Vector3{startPos + i * spacing, 0.0f, 5.0f}, .flags = EntityFlags::Static});
-            AddComponent<Collider>(cube, ColliderInfo{});
-            AddComponent<CollisionLogger>(cube);
+            auto cube = prefab::Create(registry, prefab::Resource::Cube, {.position = Vector3{startPos + i * spacing, 0.0f, 5.0f}, .flags = EntityFlags::Static});
+            registry->Add<Collider>(cube, ColliderInfo{});
+            registry->Add<CollisionLogger>(cube, registry);
         }
     }
 
