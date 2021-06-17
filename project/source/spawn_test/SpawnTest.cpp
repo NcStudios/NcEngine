@@ -3,10 +3,17 @@
 #include "imgui/imgui.h"
 #include "KillBox.h"
 #include "shared/spawner/FixedIntervalSpawner.h"
+#include "shared/FPSTracker.h"
 #include "shared/SceneNavigationCamera.h"
 
 namespace
 {
+    std::function<float()> GetFPSCallback = nullptr;
+    std::function<int()> GetDynamicCountCallback = nullptr;
+    std::function<void(float)> SetSpawnRateFunc = nullptr;
+
+    float spawnRate = 0.2f;
+
     void Widget()
     {
         ImGui::Text("Spawn Test");
@@ -16,6 +23,13 @@ namespace
             ImGui::Text("-middle mouse button + drag to pan");
             ImGui::Text("-right mouse button + drag to look");
             ImGui::Text("-mouse wheel to zoom");
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+            //ImGui::Text("Dynamic Object Count: %d", GetDynamicCountCallback());
+            ImGui::Text("FPS: %.1f", GetFPSCallback());
+            
+            if(ImGui::DragFloat("Spawn Rate", &spawnRate, 0.001f, 0.00001f, 5.0f, "%.5f"))
+                SetSpawnRateFunc(spawnRate);
+            
         } ImGui::EndChild();
     }
 }
@@ -26,6 +40,11 @@ namespace nc::sample
     {
         // Setup
         m_sceneHelper.Setup(registry, true, false, Widget);
+
+        // Fps Tracker
+        auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
+        auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
+        GetFPSCallback = std::bind(FPSTracker::GetFPS, fpsTracker);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, -9.0f, -100.0f}, .tag = "SceneNavigationCamera"});
@@ -45,7 +64,7 @@ namespace nc::sample
         pointLight->Set(lightProperties);
 
         // Collider that destroys anything leaving its bounded area
-        auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(60.0f), .tag = "KillBox"});
+        auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(100.0f), .tag = "KillBox"});
         registry->Add<Collider>(killBox, ColliderInfo{});
         registry->Add<KillBox>(killBox, registry);
 
@@ -84,7 +103,10 @@ namespace nc::sample
         };
         
         auto dynamicCubeSpawnerHandle = registry->Add<Entity>({.tag = "Dynamic Cube Spawner"});
-        registry->Add<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, registry, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);
+        auto* intervalSpawner = registry->Add<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, registry, prefab::Resource::CubeGreen, dynamicCubeBehavior, spawnRate, dynamicCubeExtension);
+    
+        GetDynamicCountCallback = std::bind(FixedIntervalSpawner::GetObjectCount, intervalSpawner);
+        SetSpawnRateFunc = std::bind(FixedIntervalSpawner::SetSpawnRate, intervalSpawner, std::placeholders::_1);
     }
 
     void SpawnTest::Unload()

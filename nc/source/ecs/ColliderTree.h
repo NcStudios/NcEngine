@@ -1,7 +1,8 @@
 #pragma once
 
 #include "alloc/PoolAdapter.h"
-#include "physics/CollisionUtility.h"
+#include "component/Collider.h"
+#include "directx/math/DirectXMath.h"
 
 #include <vector>
 #include <variant>
@@ -43,7 +44,9 @@ namespace nc::ecs
     /** The bounding volume and handle of a static collider in the octree. */
     struct StaticTreeEntry
     {
+        DirectX::XMMATRIX matrix;
         Collider::BoundingVolume volume;
+        SphereCollider volumeEstimate;
         physics::LayerMask layer;
         Entity entity;
     };
@@ -54,28 +57,24 @@ namespace nc::ecs
     class Octant
     {
         public:
-            Octant(DirectX::XMFLOAT3 center, float halfSideLength);
+            Octant(Vector3 center, float halfSideLength);
             void Add(const StaticTreeEntry* newEntry);
             bool AtMinimumExtent() const;
             void Subdivide();
             void Clear();
-            void BroadCheck(const DirectX::BoundingSphere& dynamicEstimate, std::vector<const StaticTreeEntry*>* out) const;
+            void BroadCheck(SphereCollider collider, std::vector<const StaticTreeEntry*>* out) const;
             float GetExtent() const noexcept;
 
         private:
             void AddToChildren(const StaticTreeEntry* colliderData);
             void GetEntriesFromChildren(std::vector<const StaticTreeEntry*>* out) const;
-            bool Contains(const Collider::BoundingVolume& other) const;
 
             using LeafNodeDataType = std::vector<const StaticTreeEntry*>;
             using InnerNodeDataType = std::vector<Octant>;
 
-            DirectX::BoundingBox m_boundingVolume;
+            BoxCollider m_boundingVolume;
             std::variant<LeafNodeDataType, InnerNodeDataType> m_data;
     };
-
-    /** possible @todo Tree could toggle between quad/oct depending on config. Some
-     *  games may not benefit from subdividing across 3 dimensions */
 
     /** An octree for static colliders. */
     class ColliderTree
@@ -87,7 +86,7 @@ namespace nc::ecs
             void Remove(Entity entity);
             void Rebuild();
             void Clear();
-            std::vector<const StaticTreeEntry*> BroadCheck(const DirectX::BoundingSphere& volume) const;
+            std::vector<const StaticTreeEntry*> BroadCheck(const SphereCollider& volume) const;
 
         private:
             alloc::PoolAdapter<StaticTreeEntry> m_pool;

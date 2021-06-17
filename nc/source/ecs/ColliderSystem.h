@@ -8,17 +8,30 @@
 
 namespace nc::ecs
 {
+    /** The collider properties required for constructing bounding volumes. */
+    struct VolumeProperties
+    {
+        Vector3 center;
+        Vector3 extents;
+        float maxExtent;
+    };
+
     /** Wrapper around ComponentSystem<Collider> that maintains a separate
      *  representations for internal use. */
     class ColliderSystem
     {
         public:
-            using DynamicColliderSoA = SoA<EntityTraits::underlying_type, DirectX::XMMATRIX, physics::VolumeProperties, ColliderType>;
+            using DynamicColliderSoA = SoA<EntityTraits::underlying_type,
+                                           DirectX::XMMATRIX,
+                                           Collider::BoundingVolume,
+                                           VolumeProperties,
+                                           ColliderType>;
 
             static constexpr size_t HandleTypeIndex = 0u;
             static constexpr size_t MatrixIndex = 1u;
-            static constexpr size_t VolumePropertiesIndex = 2u;
-            static constexpr size_t ColliderTypeIndex = 3u;
+            static constexpr size_t BoundingVolumeIndex = 2u;
+            static constexpr size_t VolumePropertiesIndex = 3u;
+            static constexpr size_t ColliderTypeIndex = 4u;
 
             ColliderSystem(uint32_t maxDynamic,
                            uint32_t maxStatic,

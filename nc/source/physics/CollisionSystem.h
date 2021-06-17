@@ -2,7 +2,6 @@
 
 #include "Ecs.h"
 #include "ecs/ColliderSystem.h"
-#include "CollisionUtility.h"
 
 #include <cstdint>
 #include <vector>
@@ -18,6 +17,14 @@ namespace nc::physics
     enum class CollisionEventType : uint8_t
     {
         Enter, Stay, Exit
+    };
+
+    /** An estimated bounding volume and index mapping to the associated
+     *  collider's position in the SoA representation. */
+    struct DynamicEstimate
+    {
+        SphereCollider estimate;
+        uint32_t index;
     };
 
     /** Indices of two dynamic collider's positions in SoA.
@@ -45,6 +52,24 @@ namespace nc::physics
         EntityTraits::underlying_type second;
     };
 
+    #ifdef NC_EDITOR_ENABLED
+    struct CollisionMetrics
+    {
+        unsigned staticBroadChecks;
+        unsigned staticNarrowChecks;
+        unsigned dynamicBroadChecks;
+        unsigned dynamicNarrowChecks;
+
+        void Reset()
+        {
+            staticBroadChecks = 0u;
+            staticNarrowChecks = 0u;
+            dynamicBroadChecks = 0u;
+            dynamicNarrowChecks = 0u;
+        }
+    };
+    #endif
+
     /** @todo FindXXXEvents will notify immediately - do we want to delay this? */
 
     class CollisionSystem
@@ -69,9 +94,14 @@ namespace nc::physics
             void BroadDetectVsStatic();
             void NarrowDetectVsDynamic();
             void NarrowDetectVsStatic();
-            void FindEnterAndStayEvents() const;
-            void FindExitEvents() const;
+            void FindExitAndStayEvents() const;
+            void FindEnterEvents() const;
             void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;
             void Cleanup();
+        
+        public:
+            #ifdef NC_EDITOR_ENABLED
+            inline static CollisionMetrics metrics;
+            #endif
     };
 } // namespace nc::physics

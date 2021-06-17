@@ -4,6 +4,39 @@
 
 namespace nc::ecs
 {
+    VolumeProperties GetVolumePropertiesFromColliderInfo(const ColliderInfo& info)
+    {
+        // for mesh should get support in x/y/z for maxExtent
+
+        float maxExtent = 0.0f;
+        switch(info.type)
+        {
+            case ColliderType::Box:
+            {
+                maxExtent = Magnitude(info.scale / 2.0f);
+                //maxExtent = Magnitude(info.scale) / 2.0f;
+                break;
+            }
+            case ColliderType::Sphere:
+            {
+                maxExtent = info.scale.x / 2.0f;
+                break;
+            }
+            case ColliderType::Mesh: // fix
+            {
+                maxExtent = 0.5f;
+                break;
+            }
+        }
+
+        return VolumeProperties
+        {
+            info.offset,
+            info.scale / 2.0f,
+            maxExtent
+        };
+    }
+
     ColliderSystem::ColliderSystem(uint32_t maxDynamic,
                                    uint32_t maxStatic,
                                    uint32_t octreeDensityThreshold,
@@ -34,11 +67,14 @@ namespace nc::ecs
             m_staticTree.Add(entity, collider.GetInfo());
         else
         {
+            const auto& info = collider.GetInfo();
+
             m_dynamicSoA.Add
             (
                 static_cast<EntityTraits::underlying_type>(entity),
                 DirectX::XMMATRIX{},
-                physics::GetVolumePropertiesFromColliderInfo(collider.GetInfo()),
+                CreateBoundingVolume(info.type, info.offset, info.scale),
+                GetVolumePropertiesFromColliderInfo(info),
                 collider.GetType()
             );
         }

@@ -17,6 +17,9 @@ namespace nc::sample
             const std::deque<std::string>& GetItems();
             static void Log(std::string item);
 
+            //fuck me
+            static void ClearStatic();
+
         private:
             static GameLog* m_instance;
             std::deque<std::string> m_items;

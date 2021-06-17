@@ -25,7 +25,7 @@ namespace nc
 {
     enum class ColliderType : uint8_t
     {
-        Box = 0u, Sphere = 1u
+        Box = 0u, Sphere = 1u, Mesh = 2u
     };
 
     struct ColliderInfo
@@ -35,10 +35,39 @@ namespace nc
         Vector3 scale = Vector3::One();
     };
 
+    struct SphereCollider
+    {
+        Vector3 center;
+        float radius;
+    };
+
+    struct BoxCollider
+    {
+        Vector3 center;
+        Vector3 extents;
+    };
+
+    struct MeshCollider
+    {
+        static std::vector<Vector3> vertices;
+    };
+
+    inline std::vector<Vector3> MeshCollider::vertices
+    {
+        Vector3{  0.5f,  0.5f,  0.5f },
+        Vector3{  0.5f,  0.5f, -0.5f },
+        Vector3{  0.5f, -0.5f,  0.5f },
+        Vector3{  0.5f, -0.5f, -0.5f },
+        Vector3{ -0.5f,  0.5f,  0.5f },
+        Vector3{ -0.5f,  0.5f, -0.5f },
+        Vector3{ -0.5f, -0.5f,  0.5f },
+        Vector3{ -0.5f, -0.5f, -0.5f }
+    };
+
     class Collider final : public ComponentBase
     {
         public:
-            using BoundingVolume = std::variant<DirectX::BoundingOrientedBox, DirectX::BoundingSphere>;
+            using BoundingVolume = std::variant<BoxCollider, SphereCollider, MeshCollider>;
 
             Collider(Entity entity, ColliderInfo info);
             ~Collider() = default;
@@ -59,12 +88,14 @@ namespace nc
             ColliderInfo m_info;
 
             #ifdef NC_EDITOR_ENABLED
-            BoundingVolume m_boundingVolume;
             /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
             std::unique_ptr<graphics::Model> m_widgetModel;
             bool m_selectedInEditor;
             #endif
     };
+
+    Collider::BoundingVolume CreateBoundingVolume(ColliderType type, const Vector3& offset, const Vector3& scale);
+
 
     template<>
     struct StoragePolicy<Collider>

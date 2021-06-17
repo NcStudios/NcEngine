@@ -26,6 +26,12 @@ namespace nc::sample::prefab
                 return std::string{"CubeRed"};
             case Resource::Sphere:
                 return std::string{"Sphere"};
+            case Resource::SphereBlue:
+                return std::string{"SphereBlue"};
+            case Resource::SphereGreen:
+                return std::string{"Sphere Green"};
+            case Resource::SphereRed:
+                return std::string{"Sphere Red"};
             case Resource::Table:
                 return std::string{"Table"};
             case Resource::Token:
@@ -74,9 +80,9 @@ namespace nc::sample::prefab
     {
         graphics::Material Beeper{nullptr};
         graphics::Material Coin{nullptr};
-        graphics::Material CubeBlue{nullptr};
-        graphics::Material CubeGreen{nullptr};
-        graphics::Material CubeRed{nullptr};
+        graphics::Material SolidBlue{nullptr};
+        graphics::Material SolidGreen{nullptr};
+        graphics::Material SolidRed{nullptr};
         graphics::Material Default{nullptr};
         graphics::Material Table{nullptr};
         graphics::Material Token{nullptr};
@@ -128,14 +134,14 @@ void InitializeResources()
     const std::vector<std::string> beeperTextures{textureDir + "Beeper//BaseColor.png", textureDir + "Beeper//Normal.png", textureDir + "Beeper//Roughness.png", defaultMetallic};
     material::Beeper = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(beeperTextures, materialProperties);
 
-    const std::vector<std::string> cubeBlueTextures{textureDir + "SolidColor//Blue.png", defaultNormal, defaultMetallic, defaultMetallic};
-    material::CubeBlue = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeBlueTextures, materialProperties);
+    const std::vector<std::string> solidBlueTextures{textureDir + "SolidColor//Blue.png", defaultNormal, defaultMetallic, defaultMetallic};
+    material::SolidBlue = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(solidBlueTextures, materialProperties);
 
-    const std::vector<std::string> cubeGreenTextures{textureDir + "SolidColor//Green.png", defaultNormal, defaultMetallic, defaultMetallic};
-    material::CubeGreen = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeGreenTextures, materialProperties);
+    const std::vector<std::string> solidGreenTextures{textureDir + "SolidColor//Green.png", defaultNormal, defaultMetallic, defaultMetallic};
+    material::SolidGreen = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(solidGreenTextures, materialProperties);
 
-    const std::vector<std::string> cubeRedTextures{textureDir + "SolidColor//Red.png", defaultNormal, defaultMetallic, defaultMetallic};
-    material::CubeRed = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(cubeRedTextures, materialProperties);
+    const std::vector<std::string> solidRedTextures{textureDir + "SolidColor//Red.png", defaultNormal, defaultMetallic, defaultMetallic};
+    material::SolidRed = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(solidRedTextures, materialProperties);
 
     const std::vector<std::string> coinTextures{textureDir + "Coin//BaseColor.png", textureDir + "Coin//Normal.png", textureDir + "Coin//Roughness.png", defaultMetallic};
     material::Coin = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(coinTextures, materialProperties);
@@ -212,28 +218,49 @@ template<> Entity Create_<Resource::Cube>(registry_type* registry, EntityInfo in
 template<> Entity Create_<Resource::CubeBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<Renderer>(handle, mesh::Cube, material::CubeBlue);
+    registry->Add<Renderer>(handle, mesh::Cube, material::SolidBlue);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<Renderer>(handle, mesh::Cube, material::CubeGreen);
+    registry->Add<Renderer>(handle, mesh::Cube, material::SolidGreen);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<Renderer>(handle, mesh::Cube, material::CubeRed);
+    registry->Add<Renderer>(handle, mesh::Cube, material::SolidRed);
     return handle;
 }
 
 template<> Entity Create_<Resource::Sphere>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<Renderer>(handle, mesh::Sphere, material::Default);
+    registry->Add<Renderer>(handle, mesh::Planet, material::Default);
+    return handle;
+}
+
+template<> Entity Create_<Resource::SphereBlue>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::SolidBlue);
+    return handle;
+}
+
+template<> Entity Create_<Resource::SphereGreen>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::SolidGreen);
+    return handle;
+}
+
+template<> Entity Create_<Resource::SphereRed>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Planet, material::SolidRed);
     return handle;
 }
 
@@ -345,6 +372,9 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::CubeGreen,     Create_<Resource::CubeGreen>},
     std::pair{Resource::CubeRed,       Create_<Resource::CubeRed>},
     std::pair{Resource::Sphere,        Create_<Resource::Sphere>},
+    std::pair{Resource::SphereBlue,    Create_<Resource::SphereBlue>},
+    std::pair{Resource::SphereGreen,   Create_<Resource::SphereGreen>},
+    std::pair{Resource::SphereRed,     Create_<Resource::SphereRed>},
     std::pair{Resource::Table,         Create_<Resource::Table>},
     std::pair{Resource::Token,         Create_<Resource::Token>},
     std::pair{Resource::WireframeCube, Create_<Resource::WireframeCube>},

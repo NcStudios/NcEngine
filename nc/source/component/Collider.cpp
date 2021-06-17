@@ -1,5 +1,4 @@
 #include "component/Collider.h"
-#include "ColliderDetail.h"
 #include "Ecs.h"
 #include "graphics/d3dresource/ConstantBufferResources.h"
 #include "debug/Utils.h"
@@ -11,21 +10,67 @@
 #ifdef NC_EDITOR_ENABLED
 namespace
 {
+    const auto CubeMeshPath = std::string{"project/assets/mesh/cube.nca"};
+    const auto SphereMeshPath = std::string{"project/assets/mesh/sphere.nca"};
+    const auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
+
     bool IsUniformScale(const nc::Vector3& scale)
     {
         return nc::math::FloatEqual(scale.x, scale.y) && nc::math::FloatEqual(scale.y, scale.z);
+    }
+    
+    nc::graphics::Model CreateWireframeModel(nc::ColliderType type)
+    {
+        switch(type)
+        {
+            case nc::ColliderType::Box:
+                return nc::graphics::Model{ {CubeMeshPath}, CreateMaterial() };
+            case nc::ColliderType::Sphere:
+                return nc::graphics::Model{ {SphereMeshPath}, CreateMaterial() };
+            default:
+                throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
+        }
+    }
+
+    std::unique_ptr<nc::graphics::Model> CreateWireframeModelPtr(nc::ColliderType type)
+    {
+        switch(type)
+        {
+            case nc::ColliderType::Box:
+                return std::make_unique<nc::graphics::Model>( nc::graphics::Mesh{CubeMeshPath}, CreateMaterial() );
+            case nc::ColliderType::Sphere:
+                return std::make_unique<nc::graphics::Model>( nc::graphics::Mesh{SphereMeshPath}, CreateMaterial() );
+            default:
+                throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
+        }
     }
 }
 #endif
 
 namespace nc
 {
+    Collider::BoundingVolume CreateBoundingVolume(ColliderType type, const Vector3& offset, const Vector3& scale)
+    {
+        switch(type)
+        {
+            //case ColliderType::Box:
+            //    return { BoxCollider{offset, scale * 0.5f} };
+            case ColliderType::Box:
+                return { BoxCollider{offset, scale} };
+            case ColliderType::Sphere:
+                return { SphereCollider{offset, scale.x * 0.5f} };
+            case ColliderType::Mesh:
+                return { MeshCollider{} };
+            default:
+                throw std::runtime_error("CreateBoundingVolume - Unkown ColliderType");
+        }
+    }
+
     #ifdef NC_EDITOR_ENABLED
     Collider::Collider(Entity entity, ColliderInfo info)
         : ComponentBase(entity),
           m_info{info},
-          m_boundingVolume{collider_detail::CreateBoundingVolume(info.type, info.offset, info.scale)},
-          m_widgetModel{collider_detail::CreateWireframeModelPtr(info.type)},
+          m_widgetModel{CreateWireframeModelPtr(info.type)},
           m_selectedInEditor{false}
     {
         IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
