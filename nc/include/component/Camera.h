@@ -14,7 +14,7 @@ namespace nc
             Camera& operator=(Camera&&) = delete;
 
             #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
+            void ComponentGuiElement() override;
             #endif
     };
 }

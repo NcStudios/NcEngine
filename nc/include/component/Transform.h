@@ -49,10 +49,6 @@ namespace nc
             Entity GetRoot() const;         // Get the root node relative to this transform
             Entity GetParent() const;        // Get the immediate parent of this transform - may be nullptr
             void SetParent(Entity parent);   // Make this transform the child of another - nullptr will detach from existing parent
-
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
             
         private:
             void AddChild(Entity child);
@@ -63,5 +59,13 @@ namespace nc
             DirectX::XMMATRIX m_worldMatrix;
             Entity m_parent;
             std::vector<Entity> m_children;
+            
+            #ifdef NC_EDITOR_ENABLED
+            friend void ComponentGuiElement<Transform>(Transform*);
+            #endif
     };
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<Transform>(Transform* transform);
+    #endif
 } //end namespace nc

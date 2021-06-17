@@ -36,7 +36,8 @@ struct Fake1 : public ComponentBase
 struct Fake2 : public ComponentBase
 {
     Fake2(Entity entity, int v)
-        : ComponentBase{entity}
+        : ComponentBase{entity},
+          value{v}
     {}
 
     int value;
@@ -538,42 +539,6 @@ TEST_F(Registry_unit_tests, GetAutoComponentConst_CallAfterRemoved_ReturnsNull)
     const auto& constRegistry = registry;
     const auto* ptr = constRegistry.Get<FakeAutoComponent>(handle);
     EXPECT_EQ(ptr, nullptr);
-}
-
-TEST_F(Registry_unit_tests, Sort)
-{
-    auto handle1 = registry.Add<Entity>({});
-    auto handle2 = registry.Add<Entity>({});
-    registry.Add<Entity>({});
-    auto handle4 = registry.Add<Entity>({});
-    auto handle5 = registry.Add<Entity>({});
-    registry.Add<Entity>({});
-    registry.Add<Entity>({});
-    auto handle8 = registry.Add<Entity>({});
-
-    registry.Add<Fake1>(handle1, 5);
-    registry.Add<Fake1>(handle8, 4);
-    registry.Add<Fake1>(handle4, 3);
-    registry.Add<Fake1>(handle5, 2);
-    registry.Add<Fake1>(handle2, 1);
-
-    registry.CommitStagedChanges();
-
-    auto [fakes, transforms] = registry.ViewGroup<Fake1, Transform>();
-
-    ASSERT_EQ(transforms.size(), fakes.size());
-    EXPECT_EQ(transforms.size(), 5u);
-
-    for(size_t i = 0; i < fakes.size(); ++i)
-    {
-        auto te = transforms[i].GetParentEntity();
-        auto fe = fakes[i].GetParentEntity();
-
-        auto ti = EntityUtils::Index(te);
-        auto fi = EntityUtils::Index(fe);
-
-        EXPECT_EQ(te, fe);
-    }
 }
 
 TEST_F(Registry_unit_tests, ViewGroup_FirstGroupLarger_ReturnsSortedViews)

@@ -18,22 +18,15 @@ namespace nc
     class ComponentBase
     {
         public:
-            ComponentBase(Entity entity) noexcept
+            explicit ComponentBase(Entity entity) noexcept
                 : m_parentEntity{entity} {}
 
-            virtual ~ComponentBase() = default;
             ComponentBase(const ComponentBase&) = delete;
             ComponentBase(ComponentBase&&) = default;
             ComponentBase& operator=(const ComponentBase&) = delete;
             ComponentBase& operator=(ComponentBase&&) = default;
 
-            /** @todo Fix this naming - it is omega confusing in transform when parent
-             * means something else. */
             Entity GetParentEntity() const noexcept { return m_parentEntity; }
-
-            #ifdef NC_EDITOR_ENABLED
-            virtual void EditorGuiElement();
-            #endif
 
         private:
             Entity m_parentEntity;
@@ -43,8 +36,10 @@ namespace nc
     class AutoComponent : public ComponentBase
     {
         public:
-            AutoComponent(Entity entity) noexcept
+            explicit AutoComponent(Entity entity) noexcept
                 : ComponentBase{entity} {}
+
+            virtual ~AutoComponent() = default;
 
             virtual void FrameUpdate(float) {}
             virtual void FixedUpdate() {}
@@ -52,6 +47,10 @@ namespace nc
             virtual void OnCollisionEnter(Entity) {}
             virtual void OnCollisionStay(Entity) {};
             virtual void OnCollisionExit(Entity) {};
+
+            #ifdef NC_EDITOR_ENABLED
+            virtual void ComponentGuiElement();
+            #endif
     };
 
     /** Helper for configuring storage and allocation behavior. */
@@ -73,4 +72,19 @@ namespace nc
         /** Requires an OnRemove callback to be set in the registry. */
         using requires_on_remove_callback = std::false_type;
     };
+
+    /** Editor function that can be specialized to provide a custom widget.
+     *  AutoComponents must use override their member function instead. */
+    #ifdef NC_EDITOR_ENABLED
+    namespace internal
+    {
+        void DefaultComponentGuiElement();
+    }
+
+    template<class T>
+    void ComponentGuiElement(T*)
+    {
+        internal::DefaultComponentGuiElement();
+    }
+    #endif
 } //end namespace nc

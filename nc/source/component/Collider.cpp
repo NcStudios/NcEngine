@@ -69,15 +69,15 @@ namespace nc
         m_widgetModel->Submit(frame);
     }
 
-    void Collider::EditorGuiElement()
-    {
-        ImGui::Text("Collider");
-        /** @todo put widgets back */
-    }
-
     void Collider::SetEditorSelection(bool state)
     {
         m_selectedInEditor = state;
+    }
+
+    template<> void ComponentGuiElement<Collider>(Collider*)
+    {
+        ImGui::Text("Collider");
+        /** @todo put widgets back */
     }
     #endif
 }

@@ -34,10 +34,6 @@ namespace nc
 
             void Set(const PointLight::Properties& lightProperties);
             void SetPositionFromCameraProjection(const DirectX::FXMMATRIX& view);
-
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
     };
 
     template<>
@@ -48,4 +44,8 @@ namespace nc
         using requires_on_add_callback = std::false_type;
         using requires_on_remove_callback = std::false_type;
     };
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<PointLight>(PointLight* light);
+    #endif
 }
