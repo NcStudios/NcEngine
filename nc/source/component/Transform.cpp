@@ -296,10 +296,12 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Transform::EditorGuiElement()
+    template<> void ComponentGuiElement<Transform>(Transform* transform)
     {
+        auto& worldMatrix = transform->m_worldMatrix;
+
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, worldMatrix);
         Vector3 scl, pos;
         auto rot = Quaternion::Identity();
         DirectX::XMStoreVector3(&scl, scl_v);
@@ -315,11 +317,11 @@ namespace nc
         auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
 
         if(posResult)
-            SetPosition(pos);
+            transform->SetPosition(pos);
         if(rotResult)
-            SetRotation(angles);
+            transform->SetRotation(angles);
         if(sclResult)
-            SetScale(scl);
+            transform->SetScale(scl);
     }
     #endif
 }

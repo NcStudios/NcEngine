@@ -35,9 +35,12 @@ struct Fake1 : public ComponentBase
 
 struct Fake2 : public ComponentBase
 {
-    Fake2(Entity entity)
-        : ComponentBase{entity}
+    Fake2(Entity entity, int v)
+        : ComponentBase{entity},
+          value{v}
     {}
+
+    int value;
 };
 
 struct FakeAutoComponent : public AutoComponent
@@ -59,8 +62,9 @@ const auto TestInfo = EntityInfo{};
 class Registry_unit_tests : public ::testing::Test
 {
     public:
-        size_t maxEntities = 5u;
-        Registry<Transform, AutoComponentGroup, Tag, Fake1, Fake2> registry;
+        size_t maxEntities = 10u;
+        using type_list = RegistryTypeList<Transform, AutoComponentGroup, Tag, Fake1, Fake2>;
+        Registry<type_list> registry;
 
         Registry_unit_tests()
             : registry{maxEntities}
@@ -102,10 +106,9 @@ TEST_F(Registry_unit_tests, RemoveEntity_EntityExists_EntityRemovedFromActiveLis
     EXPECT_EQ(entities.size(), 0u);
 }
 
-TEST_F(Registry_unit_tests, RemoveEntity_DoesNotExist_ReturnsFalse)
+TEST_F(Registry_unit_tests, RemoveEntity_DoesNotExist_Throws)
 {
-    auto actual = registry.Remove<Entity>(Handle1);
-    EXPECT_FALSE(actual);
+    EXPECT_THROW(registry.Remove<Entity>(Handle1), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsEntity_Exists_ReturnsTrue)
@@ -129,180 +132,224 @@ TEST_F(Registry_unit_tests, ContainsEntity_AfterRemove_ReturnsFalse)
 
 TEST_F(Registry_unit_tests, AddComponent_ValidCall_ConstructsObject)
 {
-    auto* ptr = registry.Add<Fake1>(Handle1, 1);
-    EXPECT_EQ(ptr->GetParentEntity(), Handle1);
+    auto handle = registry.Add<Entity>({});
+    auto* ptr = registry.Add<Fake1>(handle, 1);
+    EXPECT_EQ(ptr->GetParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
+}
+
+TEST_F(Registry_unit_tests, AddComponent_BadEntity_Throws)
+{
+    EXPECT_THROW(registry.Add<Fake1>(Entity{0u}, 1), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, AddComponent_ReplaceAfterRemove_ConstructsObject)
 {
-    registry.Add<Fake1>(Handle1, 1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
-    registry.Remove<Fake1>(Handle1);
-    auto* ptr = registry.Add<Fake1>(Handle1, 2);
-    EXPECT_EQ(ptr->GetParentEntity(), Handle1);
+    registry.Remove<Fake1>(handle);
+    auto* ptr = registry.Add<Fake1>(handle, 2);
+    EXPECT_EQ(ptr->GetParentEntity(), handle);
     EXPECT_EQ(ptr->value, 2);
 }
 
 TEST_F(Registry_unit_tests, AddComponent_DoubleCall_Throws)
 {
-    registry.Add<Fake1>(Handle1, 1);
-    EXPECT_THROW(registry.Add<Fake1>(Handle1, 1), std::runtime_error);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
+    EXPECT_THROW(registry.Add<Fake1>(handle, 1), std::runtime_error);
 }
 
-TEST_F(Registry_unit_tests, RemoveComponent_ComponentExists_ReturnsTrue)
+TEST_F(Registry_unit_tests, RemoveComponent_ComponentExists_Removes)
 {
-    registry.Add<Fake1>(Handle1, 1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
-    auto actual = registry.Remove<Fake1>(Handle1);
-    EXPECT_TRUE(actual);
-}
-
-TEST_F(Registry_unit_tests, RemoveComponent_EmptyRegistry_ReturnsFalse)
-{
-    auto actual = registry.Remove<Fake1>(Handle1);
+    registry.Remove<Fake1>(handle);
+    auto actual = registry.Contains<Fake1>(handle);
     EXPECT_FALSE(actual);
 }
 
-TEST_F(Registry_unit_tests, RemoveComponent_ComponentDoesNotExist_ReturnsFalse)
+TEST_F(Registry_unit_tests, RemoveComponent_BadEntity_Throws)
 {
-    registry.Add<Fake1>(Handle1, 1);
-    auto actual = registry.Remove<Fake1>(Handle2);
-    EXPECT_FALSE(actual);
+    EXPECT_THROW(registry.Remove<Fake1>(Entity{0u}), std::runtime_error);
 }
 
-TEST_F(Registry_unit_tests, RemoveComponent_DoubleCall_ReturnsFalse)
+TEST_F(Registry_unit_tests, RemoveComponent_ComponentDoesNotExist_Throws)
 {
-    registry.Add<Fake1>(Handle1, 1);
-    registry.Remove<Fake1>(Handle1);
-    auto actual = registry.Remove<Fake1>(Handle1);
-    EXPECT_FALSE(actual);
+    auto handle = registry.Add<Entity>({});
+    EXPECT_THROW(registry.Remove<Fake1>(handle), std::runtime_error);
 }
 
-TEST_F(Registry_unit_tests, RemoveComponent_AfterClear_ReturnsFalse)
+TEST_F(Registry_unit_tests, RemoveComponent_DoubleCall_Throws)
 {
-    registry.Add<Fake1>(Handle1, 1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
+    registry.CommitStagedChanges();
+    registry.Remove<Fake1>(handle);
+    EXPECT_THROW(registry.Remove<Fake1>(handle), std::runtime_error);
+}
+
+TEST_F(Registry_unit_tests, RemoveComponent_AfterClear_Throws)
+{
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
     registry.Clear();
-    auto actual = registry.Remove<Fake1>(Handle1);
-    EXPECT_FALSE(actual);
+    EXPECT_THROW(registry.Remove<Fake1>(handle), std::runtime_error);
 }
 
-TEST_F(Registry_unit_tests, RemoveComponent_IncorrectType_ReturnsFalse)
+TEST_F(Registry_unit_tests, RemoveComponent_IncorrectType_Throws)
 {
-    registry.Add<Fake1>(Handle1, 1);
-    auto actual = registry.Remove<Fake2>(Handle1);
-    EXPECT_FALSE(actual);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
+    registry.CommitStagedChanges();
+    EXPECT_THROW(registry.Remove<Fake2>(handle), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsComponent_Exists_ReturnsTrue)
 {
-    registry.Add<Fake1>(Handle1, 1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
-    auto actual = registry.Contains<Fake1>(Handle1);
+    auto actual = registry.Contains<Fake1>(handle);
     EXPECT_TRUE(actual);
+}
+
+TEST_F(Registry_unit_tests, ContainsComponent_BadEntity_Throws)
+{
+    EXPECT_THROW(registry.Contains<Fake1>(Entity{0u}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsComponent_ExistsStaged_ReturnsTrue)
 {
-    registry.Add<Fake1>(Handle1, 1);
-    auto actual = registry.Contains<Fake1>(Handle1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
+    auto actual = registry.Contains<Fake1>(handle);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(Registry_unit_tests, ContainsComponent_DoesNotExist_ReturnsFalse)
 {
-    auto actual = registry.Contains<Fake1>(Handle1);
+    auto handle = registry.Add<Entity>({});
+    auto actual = registry.Contains<Fake1>(handle);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(Registry_unit_tests, ContainsComponent_AfterRemoved_ReturnsFalse)
 {
-    registry.Add<Fake1>(Handle1, 1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
-    registry.Remove<Fake1>(Handle1);
-    auto actual = registry.Contains<Fake1>(Handle1);
+    registry.Remove<Fake1>(handle);
+    auto actual = registry.Contains<Fake1>(handle);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(Registry_unit_tests, GetComponent_Exists_ReturnsPointer)
 {
+    auto handle = registry.Add<Entity>({});
     auto value = 10;
-    registry.Add<Fake1>(Handle1, value);
+    registry.Add<Fake1>(handle, value);
     registry.CommitStagedChanges();
-    auto* ptr = registry.Get<Fake1>(Handle1);
+    auto* ptr = registry.Get<Fake1>(handle);
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(ptr->value, value);
 }
 
+TEST_F(Registry_unit_tests, GetComponent_BadEntity_ReturnsNull)
+{
+    auto* actual = registry.Get<Fake1>(Entity{0u});
+    EXPECT_EQ(actual, nullptr);
+}
+
 TEST_F(Registry_unit_tests, GetComponent_ExistsStaged_ReturnsPointer)
 {
+    auto handle = registry.Add<Entity>({});
     auto value = 10;
-    registry.Add<Fake1>(Handle1, value);
-    auto* ptr = registry.Get<Fake1>(Handle1);
+    registry.Add<Fake1>(handle, value);
+    auto* ptr = registry.Get<Fake1>(handle);
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(ptr->value, value);
 }
 
 TEST_F(Registry_unit_tests, GetComponent_DoesNotExist_ReturnsNull)
 {
-    auto* ptr = registry.Get<Fake1>(Handle1);
+    auto handle = registry.Add<Entity>({});
+    auto* ptr = registry.Get<Fake1>(handle);
     EXPECT_EQ(ptr, nullptr);
 }
 
 TEST_F(Registry_unit_tests, GetComponent_CallAfterRemoved_ReturnsNull)
 {
-    registry.Add<Fake1>(Handle1, 1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
-    registry.Remove<Fake1>(Handle1);
-    auto* ptr = registry.Get<Fake1>(Handle1);
+    registry.Remove<Fake1>(handle);
+    auto* ptr = registry.Get<Fake1>(handle);
     EXPECT_EQ(ptr, nullptr);
 }
 
 TEST_F(Registry_unit_tests, GetComponentConst_Exists_ReturnsPointer)
 {
+    auto handle = registry.Add<Entity>({});
     auto value = 10;
-    registry.Add<Fake1>(Handle1, value);
+    registry.Add<Fake1>(handle, value);
     registry.CommitStagedChanges();
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(Handle1);
+    const auto* ptr = constRegistry.Get<Fake1>(handle);
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(ptr->value, value);
 }
 
+TEST_F(Registry_unit_tests, GetComponentConst_BadEntity_ReturnsNull)
+{
+    const auto& constRegistry = registry;
+    const auto* actual = constRegistry.Get<Fake1>(Entity{0u});
+    EXPECT_EQ(actual, nullptr);
+}
+
 TEST_F(Registry_unit_tests, GetComponentConst_ExistsStaged_ReturnsPointer)
 {
+    auto handle = registry.Add<Entity>({});
     auto value = 10;
-    registry.Add<Fake1>(Handle1, value);
+    registry.Add<Fake1>(handle, value);
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(Handle1);
+    const auto* ptr = constRegistry.Get<Fake1>(handle);
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(ptr->value, value);
 }
 
 TEST_F(Registry_unit_tests, GetComponentConst_DoesNotExist_ReturnsNull)
 {
+    auto handle = registry.Add<Entity>({});
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(Handle1);
+    const auto* ptr = constRegistry.Get<Fake1>(handle);
     EXPECT_EQ(ptr, nullptr);
 }
 
 TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
 {
-    registry.Add<Fake1>(Handle1, 1);
+    auto handle = registry.Add<Entity>({});
+    registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
-    registry.Remove<Fake1>(Handle1);
+    registry.Remove<Fake1>(handle);
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(Handle1);
+    const auto* ptr = constRegistry.Get<Fake1>(handle);
     EXPECT_EQ(ptr, nullptr);
 }
 
-////
 TEST_F(Registry_unit_tests, AddAutoComponent_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
     auto* ptr = registry.Add<FakeAutoComponent>(handle, 1);
     EXPECT_EQ(ptr->GetParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
+}
+
+TEST_F(Registry_unit_tests, AddAutoComponent_BadEntity_Throws)
+{
+    EXPECT_THROW(registry.Add<FakeAutoComponent>(Entity{0u}, 1), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, AddAutoComponent_ReplaceAfterRemove_ConstructsObject)
@@ -316,53 +363,50 @@ TEST_F(Registry_unit_tests, AddAutoComponent_ReplaceAfterRemove_ConstructsObject
     EXPECT_EQ(ptr->value, 2);
 }
 
-TEST_F(Registry_unit_tests, AddAutoComponent_DoubleCall_ReturnsNull)
+TEST_F(Registry_unit_tests, AddAutoComponent_DoubleCall_Throws)
 {
     auto handle = registry.Add<Entity>({});
     registry.Add<FakeAutoComponent>(handle, 1);
-    auto actual = registry.Add<FakeAutoComponent>(handle, 1);
-    EXPECT_EQ(actual, nullptr);
+    EXPECT_THROW(registry.Add<FakeAutoComponent>(handle, 1), std::runtime_error);
 }
 
-TEST_F(Registry_unit_tests, RemoveAutoComponent_ComponentExists_ReturnsTrue)
+TEST_F(Registry_unit_tests, RemoveAutoComponent_ComponentExists_Removes)
 {
     auto handle = registry.Add<Entity>({});
     registry.Add<FakeAutoComponent>(handle, 1);
     registry.CommitStagedChanges();
-    auto actual = registry.Remove<FakeAutoComponent>(handle);
-    EXPECT_TRUE(actual);
-}
-
-TEST_F(Registry_unit_tests, RemoveAutoComponent_EmptyRegistry_ReturnsFalse)
-{
-    auto handle = registry.Add<Entity>({});
-    auto actual = registry.Remove<FakeAutoComponent>(handle);
-    EXPECT_FALSE(actual);
-}
-
-TEST_F(Registry_unit_tests, RemoveAutoComponent_ComponentDoesNotExist_ReturnsFalse)
-{
-    auto handle = registry.Add<Entity>({});
-    auto actual = registry.Remove<FakeAutoComponent>(handle);
-    EXPECT_FALSE(actual);
-}
-
-TEST_F(Registry_unit_tests, RemoveAutoComponent_DoubleCall_ReturnsFalse)
-{
-    auto handle = registry.Add<Entity>({});
-    registry.Add<FakeAutoComponent>(handle, 1);
     registry.Remove<FakeAutoComponent>(handle);
-    auto actual = registry.Remove<FakeAutoComponent>(handle);
+    auto actual = registry.Contains<FakeAutoComponent>(handle);
     EXPECT_FALSE(actual);
 }
 
-TEST_F(Registry_unit_tests, RemoveAutoComponent_AfterClear_ReturnsFalse)
+TEST_F(Registry_unit_tests, RemoveAutoComponent_BadEntity_Throws)
+{
+    EXPECT_THROW(registry.Remove<FakeAutoComponent>(Entity{0u}), std::runtime_error);
+}
+
+TEST_F(Registry_unit_tests, RemoveAutoComponent_ComponentDoesNotExist_Throws)
+{
+    auto handle = registry.Add<Entity>({});
+    EXPECT_THROW(registry.Remove<FakeAutoComponent>(handle), std::runtime_error);
+}
+
+TEST_F(Registry_unit_tests, RemoveAutoComponent_DoubleCall_Throws)
 {
     auto handle = registry.Add<Entity>({});
     registry.Add<FakeAutoComponent>(handle, 1);
+    registry.CommitStagedChanges();
+    registry.Remove<FakeAutoComponent>(handle);
+    EXPECT_THROW(registry.Remove<FakeAutoComponent>(handle), std::runtime_error);
+}
+
+TEST_F(Registry_unit_tests, RemoveAutoComponent_AfterClear_Throws)
+{
+    auto handle = registry.Add<Entity>({});
+    registry.Add<FakeAutoComponent>(handle, 1);
+    registry.CommitStagedChanges();
     registry.Clear();
-    auto actual = registry.Remove<FakeAutoComponent>(handle);
-    EXPECT_FALSE(actual);
+    EXPECT_THROW(registry.Remove<FakeAutoComponent>(handle), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsAutoComponent_Exists_ReturnsTrue)
@@ -372,6 +416,11 @@ TEST_F(Registry_unit_tests, ContainsAutoComponent_Exists_ReturnsTrue)
     registry.CommitStagedChanges();
     auto actual = registry.Contains<FakeAutoComponent>(handle);
     EXPECT_TRUE(actual);
+}
+
+TEST_F(Registry_unit_tests, ContainsAutoComponent_BadEntity_Throws)
+{
+    EXPECT_THROW(registry.Contains<FakeAutoComponent>(Entity{0u}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsAutoComponent_ExistsStaged_ReturnsTrue)
@@ -408,6 +457,12 @@ TEST_F(Registry_unit_tests, GetAutoComponent_Exists_ReturnsPointer)
     auto* ptr = registry.Get<FakeAutoComponent>(handle);
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(ptr->value, value);
+}
+
+TEST_F(Registry_unit_tests, GetAutoComponent_BadEntity_Throws)
+{
+    auto* actual = registry.Get<FakeAutoComponent>(Entity{0u});
+    EXPECT_EQ(actual, nullptr);
 }
 
 TEST_F(Registry_unit_tests, GetAutoComponent_ExistsStaged_ReturnsPointer)
@@ -449,6 +504,13 @@ TEST_F(Registry_unit_tests, GetAutoComponentConst_Exists_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
+TEST_F(Registry_unit_tests, GetAutoComponentConst_BadEntity_ReturnsNull)
+{
+    const auto& constRegistry = registry;
+    const auto* actual = constRegistry.Get<FakeAutoComponent>(Entity{8u});
+    EXPECT_EQ(actual, nullptr);
+}
+
 TEST_F(Registry_unit_tests, GetAutoComponentConst_ExistsStaged_ReturnsPointer)
 {
     auto handle = registry.Add<Entity>({});
@@ -477,6 +539,72 @@ TEST_F(Registry_unit_tests, GetAutoComponentConst_CallAfterRemoved_ReturnsNull)
     const auto& constRegistry = registry;
     const auto* ptr = constRegistry.Get<FakeAutoComponent>(handle);
     EXPECT_EQ(ptr, nullptr);
+}
+
+TEST_F(Registry_unit_tests, ViewGroup_FirstGroupLarger_ReturnsSortedViews)
+{
+    auto h1 = registry.Add<Entity>({});
+    auto h2 = registry.Add<Entity>({});
+    auto h3 = registry.Add<Entity>({});
+    auto h4 = registry.Add<Entity>({});
+    auto h5 = registry.Add<Entity>({});
+
+    registry.Add<Fake1>(h2, 1);
+    registry.Add<Fake1>(h1, 1);
+    registry.Add<Fake1>(h3, 1);
+    registry.Add<Fake1>(h5, 1);
+    registry.Add<Fake1>(h4, 1);
+
+    registry.Add<Fake2>(h5, 1);
+    registry.Add<Fake2>(h4, 1);
+    registry.Add<Fake2>(h1, 1);
+
+    registry.CommitStagedChanges();
+
+    auto [fake1, fake2] = registry.ViewGroup<Fake1, Fake2>();
+
+    auto fake1Size = fake1.size();
+    auto fake2Size = fake2.size();
+    ASSERT_EQ(fake1Size, fake2Size);
+    EXPECT_EQ(fake1Size, 3u);
+
+    for(size_t i = 0u; i < fake1Size; ++i)
+    {
+        EXPECT_EQ(fake1[i].GetParentEntity(), fake2[i].GetParentEntity());
+    }
+}
+
+TEST_F(Registry_unit_tests, ViewGroup_SecondGroupLarger_ReturnsSortedViews)
+{
+    auto h1 = registry.Add<Entity>({});
+    auto h2 = registry.Add<Entity>({});
+    auto h3 = registry.Add<Entity>({});
+    auto h4 = registry.Add<Entity>({});
+    auto h5 = registry.Add<Entity>({});
+
+    registry.Add<Fake1>(h1, 1);
+    registry.Add<Fake1>(h2, 1);
+    registry.Add<Fake1>(h3, 1);
+
+    registry.Add<Fake2>(h5, 1);
+    registry.Add<Fake2>(h4, 1);
+    registry.Add<Fake2>(h1, 1);
+    registry.Add<Fake2>(h2, 1);
+    registry.Add<Fake2>(h3, 1);
+
+    registry.CommitStagedChanges();
+
+    auto [fake1, fake2] = registry.ViewGroup<Fake1, Fake2>();
+
+    auto fake1Size = fake1.size();
+    auto fake2Size = fake2.size();
+    ASSERT_EQ(fake1Size, fake2Size);
+    EXPECT_EQ(fake1Size, 3u);
+
+    for(size_t i = 0u; i < fake1Size; ++i)
+    {
+        EXPECT_EQ(fake1[i].GetParentEntity(), fake2[i].GetParentEntity());
+    }
 }
 
 int main(int argc, char ** argv)

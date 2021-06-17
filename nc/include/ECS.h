@@ -13,7 +13,8 @@
 
 namespace nc
 {
-    using registry_type = ecs::Registry<AutoComponentGroup, Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Tag, Transform>;
+    using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup, Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Tag, Transform>;
+    using registry_type = ecs::Registry<registry_type_list>;
 
     auto ActiveRegistry() -> registry_type*;
 

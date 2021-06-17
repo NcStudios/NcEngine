@@ -20,7 +20,7 @@ namespace nc::ui::editor::controls
     inline void SceneGraphPanel(registry_type* registry, float windowHeight);
     inline void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform);
     inline void EntityPanel(registry_type* registry, Entity entity);
-    inline void Component(ComponentBase* comp);
+    inline void AutoComponentElement(AutoComponent* comp);
     inline void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void GraphicsResourcePanel();
     inline void FrameData(float* dtMult, unsigned drawCallCount);
@@ -109,32 +109,38 @@ namespace nc::ui::editor::controls
         ImGui::Text("Version %d", EntityUtils::Version(entity));
         ImGui::Text("Layer   %d", EntityUtils::Layer(entity));
         ImGui::Text("Static  %s", EntityUtils::IsStatic(entity) ? "True" : "False");
-        controls::Component(registry->Get<Transform>(entity));
-        controls::Component(registry->Get<NetworkDispatcher>(entity));
-        controls::Component(registry->Get<ParticleEmitter>(entity));
-        controls::Component(registry->Get<Renderer>(entity));
-        if(auto col = registry->Get<Collider>(entity); col)
+
+        if(auto* transform = registry->Get<Transform>(entity); transform)
+            ComponentGuiElement(transform);
+        if(auto* renderer = registry->Get<Renderer>(entity))
+            ComponentGuiElement(renderer);
+        if(auto* emitter = registry->Get<ParticleEmitter>(entity))
+            ComponentGuiElement(emitter);
+        if(auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
+            ComponentGuiElement(dispatcher);
+        if(auto* light = registry->Get<PointLight>(entity))
+            ComponentGuiElement(light);
+        if(auto* col = registry->Get<Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
             col->SetEditorSelection(true);
-            controls::Component(col);
+            ComponentGuiElement(col);
         }
-        controls::Component(registry->Get<PointLight>(entity));
-        
+
         for(const auto& comp : registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
-            controls::Component(comp);
+            controls::AutoComponentElement(comp);
 
         ImGui::Separator();
     }
 
-    void Component(ComponentBase* comp)
+    void AutoComponentElement(AutoComponent* comp)
     {
         if(!comp)
             return;
         ImGui::Separator();
         ImGui::BeginGroup();
             ImGui::Spacing();
-            comp->EditorGuiElement();
+            comp->ComponentGuiElement();
             ImGui::Spacing();
         ImGui::EndGroup();
     }
