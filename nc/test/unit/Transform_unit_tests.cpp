@@ -7,13 +7,13 @@
 
 // using namespace nc;
 
-// constexpr auto TestLayer = HandleTraits::layer_type{0u};
-// constexpr auto TestVersion = HandleTraits::version_type{0u};
+// constexpr auto TestLayer = EntityTraits::layer_type{0u};
+// constexpr auto TestVersion = EntityTraits::version_type{0u};
 // constexpr auto TestFlags = EntityFlags::None;
 
-// auto TestHandle = EntityHandle{1u, TestVersion, TestLayer, TestFlags};
-// auto TestHandle2 = EntityHandle{2u, TestVersion, TestLayer, TestFlags};
-// auto TestHandle3 = EntityHandle{3u, TestVersion, TestLayer, TestFlags};
+// auto TestHandle = Entity{1u, TestVersion, TestLayer, TestFlags};
+// auto TestHandle2 = Entity{2u, TestVersion, TestLayer, TestFlags};
+// auto TestHandle3 = Entity{3u, TestVersion, TestLayer, TestFlags};
 // auto TestPos1 = Vector3{0.0f, 1.0f, 2.0f};
 // auto TestPos2 = Vector3{1.5f, 1.5f, 1.5f};
 // auto TestRotQuat1 = Quaternion::Identity();
@@ -29,7 +29,7 @@
 // namespace nc
 // {
 //     template<>
-//     Transform* GetComponent<Transform>(EntityHandle handle)
+//     Transform* Get<Transform>(Entity handle)
 //     {
 //         return g_registry->Get(handle);
 //     }
@@ -56,14 +56,14 @@
 
 // TEST_F(Transform_unit_tests, GetLocalPosition_CalledFromRoot_DecomposesPositionFromMatrix)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto actual = t->GetLocalPosition();
 //     EXPECT_EQ(actual, TestPos1);
 // }
 
 // TEST_F(Transform_unit_tests, GetLocalPosition_CalledFromChild_ResultIsRelativeToParent)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     auto actual = child->GetLocalPosition();
 //     EXPECT_EQ(actual, Vector3::Zero());
@@ -71,14 +71,14 @@
 
 // TEST_F(Transform_unit_tests, GetPosition_CalledFromRoot_DecomposesPositionFromMatrix)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto actual = t->GetPosition();
 //     EXPECT_EQ(actual, TestPos1);
 // }
 
 // TEST_F(Transform_unit_tests, GetPosition_CalledFromChild_ResultIncludesParentPosition)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     auto actual = child->GetPosition();
 //     EXPECT_EQ(actual, TestPos1);
@@ -86,14 +86,14 @@
 
 // TEST_F(Transform_unit_tests, GetLocalRotation_CalledFromRoot_DecomposesRotationFromMatrix)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto actual = t->GetLocalRotation();
 //     EXPECT_EQ(actual, TestRotQuat1);
 // }
 
 // TEST_F(Transform_unit_tests, GetLocalRotation_CalledFromChild_ResultIsRelativeToParent)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale1, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale1, Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, TestPos1, TestRotQuat2, TestScale2, TestHandle);
 //     auto actual = child->GetLocalRotation();
 //     EXPECT_EQ(actual, TestRotQuat2);
@@ -101,14 +101,14 @@
 
 // TEST_F(Transform_unit_tests, GetRotation_CalledFromRoot_DecomposesRotationFromMatrix)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale1, Entity::Null());
 //     auto actual = t->GetRotation();
 //     EXPECT_EQ(actual, TestRotQuat2);
 // }
 
 // TEST_F(Transform_unit_tests, GetRotation_CalledFromChild_ResultIncludesParentRotation)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, TestPos2, TestRotQuat3, TestScale3, TestHandle);
 //     auto expected = Multiply(TestRotQuat2, TestRotQuat3);
 //     auto actual = child->GetRotation();
@@ -117,14 +117,14 @@
 
 // TEST_F(Transform_unit_tests, GetLocalScale_CalledFromRoot_DecomposesScaleFromMatrix)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto actual = t->GetLocalScale();
 //     EXPECT_EQ(actual, TestScale1);
 // }
 
 // TEST_F(Transform_unit_tests, GetLocalScale_CalledFromChild_ResultIsRelativeToParent)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale2, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale2, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, TestPos1, TestRotQuat1, TestScale3, TestHandle);
 //     auto actual = child->GetLocalScale();
 //     EXPECT_EQ(actual, TestScale3);
@@ -132,14 +132,14 @@
 
 // TEST_F(Transform_unit_tests, GetScale_CalledFromRoot_DecomposesScaleFromMatrix)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto actual = t->GetScale();
 //     EXPECT_EQ(actual, TestScale1);
 // }
 
 // TEST_F(Transform_unit_tests, GetScale_CalledFromChild_ResultIncludesParentScale)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale2, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale2, Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, TestPos1, TestRotQuat1, TestScale3, TestHandle);
 //     auto actual = child->GetScale();
 //     auto expected = HadamardProduct(TestScale2, TestScale3);
@@ -148,7 +148,7 @@
 
 // TEST_F(Transform_unit_tests, Up_ReturnsNormalizedVector)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, Entity::Null());
 //     auto actual = t->Up();
 //     auto expected = Normalize(actual);
 //     EXPECT_EQ(actual, expected);
@@ -157,7 +157,7 @@
 // TEST_F(Transform_unit_tests, Up_RotatedTransform_ReturnsCorrectAxis)
 // {
 //     auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
-//     auto* t = registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), Entity::Null());
 //     auto actual = t->Up();
 //     auto expected = Vector3::Front();
 //     EXPECT_EQ(actual, expected);
@@ -166,7 +166,7 @@
 // TEST_F(Transform_unit_tests, Up_RotatedParent_ChildReturnsCorrectAxis)
 // {
 //     auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
-//     registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), EntityHandle::Null());
+//     registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     auto actual = child->Up();
 //     auto expected = Vector3::Front();
@@ -175,7 +175,7 @@
 
 // TEST_F(Transform_unit_tests, Forward_ReturnsNormalizedVector)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, Entity::Null());
 //     auto actual = t->Forward();
 //     auto expected = Normalize(actual);
 //     EXPECT_EQ(actual, expected);
@@ -184,7 +184,7 @@
 // TEST_F(Transform_unit_tests, Forward_RotatedTransform_ReturnsCorrectAxis)
 // {
 //     auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
-//     auto* t = registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), Entity::Null());
 //     auto actual = t->Forward();
 //     auto expected = Vector3::Down();
 //     EXPECT_EQ(actual, expected);
@@ -193,7 +193,7 @@
 // TEST_F(Transform_unit_tests, Forward_RotatedParent_ChildReturnsCorrectAxis)
 // {
 //     auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
-//     registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), EntityHandle::Null());
+//     registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     auto actual = child->Forward();
 //     auto expected = Vector3::Down();
@@ -202,7 +202,7 @@
 
 // TEST_F(Transform_unit_tests, Right_ReturnsNormalizedVector)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat2, TestScale2, Entity::Null());
 //     auto actual = t->Right();
 //     auto expected = Normalize(actual);
 //     EXPECT_EQ(actual, expected);
@@ -211,7 +211,7 @@
 // TEST_F(Transform_unit_tests, Right_RotatedTransform_ReturnsCorrectAxis)
 // {
 //     auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
-//     auto* t = registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), Entity::Null());
 //     auto actual = t->Right();
 //     auto expected = Vector3::Right();
 //     EXPECT_EQ(actual, expected);
@@ -220,7 +220,7 @@
 // TEST_F(Transform_unit_tests, Right_RotatedParent_ChildReturnsCorrectAxis)
 // {
 //     auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
-//     registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), EntityHandle::Null());
+//     registry.Emplace(TestHandle, Vector3::Zero(), rot, Vector3::One(), Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     auto actual = child->Right();
 //     auto expected = Vector3::Right();
@@ -229,7 +229,7 @@
 
 // TEST_F(Transform_unit_tests, Set_CalledOnRoot_CorrectlyRecomposesBothMatrices)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     t->Set(TestPos2, TestRotQuat2, TestScale2);
 //     EXPECT_EQ(t->GetPosition(), TestPos2);
 //     EXPECT_EQ(t->GetRotation(), TestRotQuat2);
@@ -241,7 +241,7 @@
 
 // TEST_F(Transform_unit_tests, Set_CalledOnParent_OnlyRecomposesChildWorldMatrix)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto parent = registry.GetTransformView(TestHandle);
 //     auto* child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent->Set(TestPos2, TestRotQuat2, TestScale2);
@@ -255,7 +255,7 @@
 
 // TEST_F(Transform_unit_tests, SetAngleOverload_CalledOnRoot_CorrectlyRecomposesBothMatrices)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     t->Set(TestPos2, TestRotAngles, TestScale2);
 //     EXPECT_EQ(t->GetPosition(), TestPos2);
 //     auto expectedRot = Quaternion::FromEulerAngles(TestRotAngles);
@@ -268,11 +268,11 @@
 
 // TEST_F(Transform_unit_tests, SetAngleOverload_CalledOnParent_OnlyRecomposesChildWorldMatrix)
 // {
-//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
     
-//     auto* parent = GetComponent<Transform>(TestHandle);
-//     auto* child = GetComponent<Transform>(TestHandle2);
+//     auto* parent = Get<Transform>(TestHandle);
+//     auto* child = Get<Transform>(TestHandle2);
 //     parent->Set(TestPos2, TestRotAngles, TestScale2);
 //     EXPECT_EQ(child->GetPosition(), TestPos2);
 //     auto expectedRot = Quaternion::FromEulerAngles(TestRotAngles);
@@ -285,7 +285,7 @@
 
 // TEST_F(Transform_unit_tests, SetPosition_CalledOnRoot_OnlyPositionModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     t.SetPosition(TestPos2);
 //     EXPECT_EQ(t.GetPosition(), TestPos2);
 //     EXPECT_EQ(t.GetRotation(), TestRotQuat1);
@@ -297,7 +297,7 @@
 
 // TEST_F(Transform_unit_tests, SetPosition_CalledOnParent_OnlyWorldPositionModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent.SetPosition(TestPos2);
 //     EXPECT_EQ(child.GetPosition(), TestPos2);
@@ -310,7 +310,7 @@
 
 // TEST_F(Transform_unit_tests, SetRotation_CalledOnRoot_OnlyRotationModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     t.SetRotation(TestRotQuat2);
 //     EXPECT_EQ(t.GetPosition(), TestPos1);
 //     EXPECT_EQ(t.GetRotation(), TestRotQuat2);
@@ -322,7 +322,7 @@
 
 // TEST_F(Transform_unit_tests, SetRotation_CalledOnParent_OnlyWorldRotationModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent.SetRotation(TestRotQuat2);
 //     EXPECT_EQ(child.GetPosition(), TestPos1);
@@ -335,7 +335,7 @@
 
 // TEST_F(Transform_unit_tests, SetRotationAnglesOverload_CalledOnRoot_OnlyRotationModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     t.SetRotation(TestRotAngles);
 //     EXPECT_EQ(t.GetPosition(), TestPos1);
 //     auto expectedRot = Quaternion::FromEulerAngles(TestRotAngles);
@@ -348,7 +348,7 @@
 
 // TEST_F(Transform_unit_tests, SetRotationAnglesOverload_CalledOnParent_OnlyWorldRotationModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent.SetRotation(TestRotAngles);
 //     EXPECT_EQ(child.GetPosition(), TestPos1);
@@ -362,7 +362,7 @@
 
 // TEST_F(Transform_unit_tests, SetScale_CalledOnRoot_OnlyScaleModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     t.SetScale(TestScale2);
 //     EXPECT_EQ(t.GetPosition(), TestPos1);
 //     EXPECT_EQ(t.GetRotation(), TestRotQuat1);
@@ -374,7 +374,7 @@
 
 // TEST_F(Transform_unit_tests, SetScale_CalledOnParent_OnlyWorldScaleModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent.SetScale(TestScale2);
 //     EXPECT_EQ(child.GetPosition(), TestPos1);
@@ -387,7 +387,7 @@
 
 // TEST_F(Transform_unit_tests, Translate_CalledOnRoot_OnlyPositionModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     t.Translate(TestPos1);
 //     auto expectedPos = TestPos1 + TestPos1;
 //     EXPECT_EQ(t.GetPosition(), expectedPos);
@@ -400,7 +400,7 @@
 
 // TEST_F(Transform_unit_tests, Translate_CalledOnParent_OnlyWorldPositionModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, TestRotQuat1, TestScale1, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent.Translate(TestPos1);
 //     auto expectedPos = TestPos1 + TestPos1;
@@ -414,7 +414,7 @@
 
 // TEST_F(Transform_unit_tests, TranslateLocalSpace_CalledOnRoot_OnlyPositionModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, Entity::Null());
 //     t.TranslateLocalSpace(TestPos1);
 //     auto expectedPos = TestPos1 + TestPos1;
 //     EXPECT_EQ(t.GetPosition(), expectedPos);
@@ -427,7 +427,7 @@
 
 // TEST_F(Transform_unit_tests, TranslateLocalSpace_CalledOnParent_OnlyWorldPositionModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent.TranslateLocalSpace(TestPos1);
 //     auto expectedPos = TestPos1 + TestPos1;
@@ -441,7 +441,7 @@
 
 // TEST_F(Transform_unit_tests, Rotate_CalledOnRoot_OnlyRotationModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, Entity::Null());
 //     t.Rotate(TestRotQuat2);
 //     EXPECT_EQ(t.GetPosition(), TestPos1);
 //     EXPECT_EQ(t.GetRotation(), TestRotQuat2);
@@ -453,7 +453,7 @@
 
 // TEST_F(Transform_unit_tests, Rotate_CalledOnParent_OnlyWorldRotationModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, Entity::Null());
 //     auto child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     parent.Rotate(TestRotQuat2);
 //     EXPECT_EQ(child.GetPosition(), TestPos1);
@@ -466,7 +466,7 @@
 
 // TEST_F(Transform_unit_tests, RotateAxisAngleOverload_CalledOnRoot_OnlyRotationModified)
 // {
-//     auto* t = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, EntityHandle::Null());
+//     auto* t = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, Entity::Null());
 //     auto expectedAxis = Vector3::Up();
 //     auto expectedAngle = 2.2f; 
 //     t.Rotate(expectedAxis, expectedAngle);
@@ -482,7 +482,7 @@
 
 // TEST_F(Transform_unit_tests, RotateAxisAngleOverload_CalledOnParent_OnlyWorldRotationModifiedInChild)
 // {
-//     auto parent = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(TestHandle, TestPos1, Quaternion::Identity(), TestScale1, Entity::Null());
 //     auto* child = registry.Emplace(TestHandle2, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), TestHandle);
 //     auto expectedAxis = Vector3::Up();
 //     auto expectedAngle = 2.2f; 
@@ -501,7 +501,7 @@
 // {
 //     auto parentHandle = TestHandle;
 //     auto childHandle = TestHandle2;
-//     auto parent = registry.Emplace(parentHandle, TestPos1, Quaternion::Identity(), TestScale1, EntityHandle::Null());
+//     auto parent = registry.Emplace(parentHandle, TestPos1, Quaternion::Identity(), TestScale1, Entity::Null());
 //     auto* child = registry.Emplace(childHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), parentHandle};
 //     auto children = parent.GetChildren();
 //     auto actualCount = children.size();
@@ -511,7 +511,7 @@
 
 // TEST_F(Transform_unit_tests, GetRoot_CalledOnRoot_ReturnsSelf)
 // {
-//     auto root = registry.Emplace(TestHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
+//     auto root = registry.Emplace(TestHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
 //     auto actual = root.GetRoot();
 //     EXPECT_EQ(actual, TestHandle);
 // }
@@ -520,7 +520,7 @@
 // {
 //     auto parentHandle = TestHandle;
 //     auto childHandle = TestHandle2;
-//     auto parent = registry.Emplace(parentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
+//     auto parent = registry.Emplace(parentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
 //     auto child = registry.Emplace(childHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), parentHandle};
 //     auto actual = child.GetRoot();
 //     EXPECT_EQ(actual, parentHandle);
@@ -531,7 +531,7 @@
 //     auto rootHandle = TestHandle;
 //     auto parentHandle = TestHandle2;
 //     auto childHandle = TestHandle3;
-//     auto root = registry.Emplace(rootHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
+//     auto root = registry.Emplace(rootHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
 //     auto parent = registry.Emplace(parentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), rootHandle};
 //     auto child = registry.Emplace(childHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), parentHandle};
 //     auto actual = child.GetRoot();
@@ -542,8 +542,8 @@
 // {
 //     auto parentHandle = TestHandle;
 //     auto childHandle = TestHandle2;
-//     auto parent = registry.Emplace(parentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
-//     auto child = registry.Emplace(childHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
+//     auto parent = registry.Emplace(parentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
+//     auto child = registry.Emplace(childHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
 //     child.SetParent(parentHandle);
 //     EXPECT_EQ(child.GetParent(), parentHandle);
 //     auto children = parent.GetChildren();
@@ -556,8 +556,8 @@
 //     auto initialParentHandle = TestHandle;
 //     auto newParentHandle = TestHandle2;
 //     auto childHandle = TestHandle3;
-//     auto initialParent = registry.Emplace(initialParentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
-//     auto newParent = registry.Emplace(newParentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
+//     auto initialParent = registry.Emplace(initialParentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
+//     auto newParent = registry.Emplace(newParentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
 //     auto child = registry.Emplace(childHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), initialParentHandle};
 //     child.SetParent(newParentHandle);
 //     EXPECT_EQ(child.GetParent(), newParentHandle);
@@ -572,10 +572,10 @@
 // {
 //     auto parentHandle = TestHandle;
 //     auto childHandle = TestHandle2;
-//     auto parent = registry.Emplace(parentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), EntityHandle::Null());
+//     auto parent = registry.Emplace(parentHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), Entity::Null());
 //     auto child = registry.Emplace(childHandle, Vector3::Zero(), Quaternion::Identity(), Vector3::One(), parentHandle};
-//     child.SetParent(EntityHandle::Null());
-//     EXPECT_EQ(child.GetParent(), EntityHandle::Null());
+//     child.SetParent(Entity::Null());
+//     EXPECT_EQ(child.GetParent(), Entity::Null());
 //     auto children = parent.GetChildren();
 //     EXPECT_EQ(children.size(), 0u);
 // }

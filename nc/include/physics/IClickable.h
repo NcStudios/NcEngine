@@ -2,15 +2,13 @@
 
 #include "LayerMask.h"
 
-namespace nc { class Transform; }
-
 namespace nc::physics
 {
     class IClickable
     {
         public:
-            IClickable(Transform* transform, float radius)
-                : parentTransform{transform},
+            IClickable(Entity entity, float radius)
+                : entity{entity},
                   boundingBoxRadius{radius},
                   layers{LayerMaskNone}
             {
@@ -18,7 +16,7 @@ namespace nc::physics
 
             virtual void OnClick() = 0;
 
-            Transform* parentTransform;
+            Entity entity;
             float boundingBoxRadius;
             LayerMask layers;
         

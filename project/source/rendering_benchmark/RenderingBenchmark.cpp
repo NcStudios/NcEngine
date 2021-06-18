@@ -43,13 +43,13 @@ namespace
 
 namespace nc::sample
 {
-    void RenderingBenchmark::Load()
+    void RenderingBenchmark::Load(registry_type* registry)
     {
         // Setup
-        m_sceneHelper.Setup(false, true, Widget);
+        m_sceneHelper.Setup(registry, false, true, Widget);
 
         // Camera
-        auto camera = AddComponent<Camera>(CreateEntity({.tag = "Main Camera"}));
+        auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
         nc::camera::SetMainCamera(camera);
 
         // Spawner
@@ -60,9 +60,9 @@ namespace nc::sample
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
         };
         
-        auto handle = CreateEntity({.tag = "Spawner"});
-        auto spawner = AddComponent<Spawner>(handle, prefab::Resource::Cube, spawnBehavior);
-        auto fpsTracker = AddComponent<FPSTracker>(handle);
+        auto handle = registry->Add<Entity>({.tag = "Spawner"});
+        auto spawner = registry->Add<Spawner>(handle, registry, prefab::Resource::Cube, spawnBehavior);
+        auto fpsTracker = registry->Add<FPSTracker>(handle);
 
         // UI Callbacks
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);

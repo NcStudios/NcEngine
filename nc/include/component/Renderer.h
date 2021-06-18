@@ -17,16 +17,12 @@ namespace nc
     class Renderer final: public ComponentBase
     {
         public:
-            Renderer(EntityHandle handle, graphics::Mesh mesh, graphics::Material material) noexcept;
+            Renderer(Entity entity, graphics::Mesh mesh, graphics::Material material) noexcept;
             ~Renderer() noexcept;
             Renderer(const Renderer&) = delete;
             Renderer(Renderer&&) = default;
             Renderer& operator=(const Renderer&) = delete;
             Renderer& operator=(Renderer&&) = default;
-
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
 
             void SetMesh(const graphics::Mesh& mesh);
             void SetMaterial(const graphics::Material& material);
@@ -34,6 +30,13 @@ namespace nc
 
         private:
             std::unique_ptr<graphics::Model> m_model;
+            
+            #ifdef NC_EDITOR_ENABLED
+            friend void ComponentGuiElement<Renderer>(Renderer*);
+            #endif
     };
-    
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<Renderer>(Renderer* renderer);
+    #endif
 }

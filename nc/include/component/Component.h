@@ -1,51 +1,56 @@
 #pragma once
-#include "entity/EntityHandle.h"
+#include "Entity.h"
 
+#include <concepts>
 #include <type_traits>
 
 namespace nc
 {
-    class Entity;
+    class AutoComponent;
+
+    template<class T>
+    concept Component = std::movable<T> &&
+                        !std::same_as<Entity, T> &&
+                        !std::derived_from<T, AutoComponent>;
 
     /** Base class for all Components. Only Components associated with a system
      *  should derive directly from ComponentBase. */
     class ComponentBase
     {
         public:
-            ComponentBase(EntityHandle handle) noexcept
-                : m_parentHandle{handle} {}
+            explicit ComponentBase(Entity entity) noexcept
+                : m_parentEntity{entity} {}
 
-            virtual ~ComponentBase() = default;
             ComponentBase(const ComponentBase&) = delete;
             ComponentBase(ComponentBase&&) = default;
             ComponentBase& operator=(const ComponentBase&) = delete;
             ComponentBase& operator=(ComponentBase&&) = default;
 
-            /** @todo Fix this naming - it is omega confusing in transform when parent
-             * means something else. */
-            EntityHandle GetParentHandle() const noexcept { return m_parentHandle; }
-
-            #ifdef NC_EDITOR_ENABLED
-            virtual void EditorGuiElement();
-            #endif
+            Entity GetParentEntity() const noexcept { return m_parentEntity; }
 
         private:
-            EntityHandle m_parentHandle;
+            Entity m_parentEntity;
     };
 
-    /** Base class for user-defined Components. */
-    class Component : public ComponentBase
+    /** Base class for components with no associated system. */
+    class AutoComponent : public ComponentBase
     {
         public:
-            Component(EntityHandle handle) noexcept
-                : ComponentBase{handle} {}
+            explicit AutoComponent(Entity entity) noexcept
+                : ComponentBase{entity} {}
+
+            virtual ~AutoComponent() = default;
 
             virtual void FrameUpdate(float) {}
             virtual void FixedUpdate() {}
             virtual void OnDestroy() {}
-            virtual void OnCollisionEnter(EntityHandle) {}
-            virtual void OnCollisionStay(EntityHandle) {};
-            virtual void OnCollisionExit(EntityHandle) {};
+            virtual void OnCollisionEnter(Entity) {}
+            virtual void OnCollisionStay(Entity) {};
+            virtual void OnCollisionExit(Entity) {};
+
+            #ifdef NC_EDITOR_ENABLED
+            virtual void ComponentGuiElement();
+            #endif
     };
 
     /** Helper for configuring storage and allocation behavior. */
@@ -67,4 +72,19 @@ namespace nc
         /** Requires an OnRemove callback to be set in the registry. */
         using requires_on_remove_callback = std::false_type;
     };
+
+    /** Editor function that can be specialized to provide a custom widget.
+     *  AutoComponents must use override their member function instead. */
+    #ifdef NC_EDITOR_ENABLED
+    namespace internal
+    {
+        void DefaultComponentGuiElement();
+    }
+
+    template<class T>
+    void ComponentGuiElement(T*)
+    {
+        internal::DefaultComponentGuiElement();
+    }
+    #endif
 } //end namespace nc

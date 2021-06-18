@@ -5,25 +5,27 @@
 
 namespace nc::sample
 {
-    class WasdController : public Component
+    class WasdController : public AutoComponent
     {
         public:
-            WasdController(EntityHandle parentHandle, float speed);
+            WasdController(Entity entity, registry_type* registry, float speed);
             void FrameUpdate(float dt) override;
 
         private:
+            registry_type* m_registry;
             float m_speed;
     };
 
-    inline WasdController::WasdController(EntityHandle parentHandle, float speed)
-        : Component{parentHandle},
-            m_speed{speed}
+    inline WasdController::WasdController(Entity entity, registry_type* registry, float speed)
+        : AutoComponent{entity},
+          m_registry{registry},
+          m_speed{speed}
     {
     }
     
     inline void WasdController::FrameUpdate(float dt)
     {
         auto [leftRight, frontBack] = input::GetAxis() * m_speed * dt;
-        GetComponent<Transform>(GetParentHandle())->TranslateLocalSpace(Vector3{leftRight, 0.0f, frontBack});
+        m_registry->Get<Transform>(GetParentEntity())->TranslateLocalSpace(Vector3{leftRight, 0.0f, frontBack});
     }
 }

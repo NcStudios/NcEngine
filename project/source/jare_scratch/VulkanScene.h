@@ -8,7 +8,7 @@ namespace nc::sample
     class VulkanScene : public scene::Scene
     {
         public:
-            void Load() override;
+            void Load(registry_type* registry) override;
             void Unload() override;
             void GenerateFloor(const std::vector<std::string>& meshPaths);
         private:

@@ -25,7 +25,7 @@ namespace
 
 namespace nc::sample
 {
-    void VulkanScene::Load()
+    void VulkanScene::Load(registry_type*)
     {
         m_sceneHelper.Setup(true, true, Widget);
 

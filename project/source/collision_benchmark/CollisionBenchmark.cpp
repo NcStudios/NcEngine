@@ -64,12 +64,12 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionBenchmark::Load()
+    void CollisionBenchmark::Load(registry_type* registry)
     {
         // Setup
-        m_sceneHelper.Setup(false, true, Widget);
+        m_sceneHelper.Setup(registry, false, true, Widget);
 
-        auto camera = AddComponent<Camera>(CreateEntity({.tag = "Main Camera"}));
+        auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
         camera::SetMainCamera(camera);
 
         // Cube Spawner Options
@@ -80,22 +80,22 @@ namespace nc::sample
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
         };
 
-        auto spawnExtension = [](EntityHandle handle)
+        auto spawnExtension = [registry](Entity entity)
         {
-            AddComponent<Collider>(handle, ColliderInfo{});
+            registry->Add<Collider>(entity, ColliderInfo{});
         };
         
         // Dynamic Cube Spawner
-        auto dynamicSpawnerHandle = CreateEntity({.tag = "DynamicCubeSpawner"});
-        auto dynamicSpawner = AddComponent<Spawner>(dynamicSpawnerHandle, prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
+        auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
+        auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, registry, prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
 
         // Static Cube Spawner
         spawnBehavior.spawnAsStaticEntity = true;
-        auto staticSpawnerHandle = CreateEntity({.tag = "StaticCubeSpawner"});
-        auto staticSpawner = AddComponent<Spawner>(staticSpawnerHandle, prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
+        auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
+        auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, registry, prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
 
-        auto fpsTrackerHandle = CreateEntity({.tag = "FpsTracker"});
-        auto fpsTracker = AddComponent<FPSTracker>(fpsTrackerHandle);
+        auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
+        auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
 
         // UI Callbacks
         GetDynamicCountCallback = std::bind(Spawner::GetObjectCount, dynamicSpawner);

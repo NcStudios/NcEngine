@@ -56,10 +56,11 @@ namespace nc::physics
     {
         const auto* soa = m_colliderSystem->GetDynamicSoA();
         auto [index, handles, matrices, properties] = soa->View<0u, 1u, 2u>();
+        auto* registry = ActiveRegistry();
 
         while(index.Valid())
         {
-            matrices[index] = GetComponent<Transform>(static_cast<EntityHandle>(handles[index]))->GetTransformationMatrix();
+            matrices[index] = registry->Get<Transform>(static_cast<Entity>(handles[index]))->GetTransformationMatrix();
             m_dynamicEstimates.emplace_back(EstimateBoundingVolume(properties[index], matrices[index]), index);
             ++index;
         }
@@ -91,7 +92,7 @@ namespace nc::physics
                 // Because static volumes can exist in multiple tree nodes, identical intersections may be reported.
                 const auto beg = m_broadEventsVsStatic.cbegin();
                 const auto end = m_broadEventsVsStatic.cend();
-                if(end == std::find_if(beg, end, [pair](const auto& event) { return event.second->handle == pair->handle; }))
+                if(end == std::find_if(beg, end, [pair](const auto& event) { return event.second->entity == pair->entity; }))
                     m_broadEventsVsStatic.emplace_back(m_dynamicEstimates[i].index, pair);
             }
         }
@@ -104,7 +105,7 @@ namespace nc::physics
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
         
-        const auto handles = dynamicSoA->GetSpan<HandleTraits::handle_type>();
+        const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
         const auto transforms = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
@@ -121,7 +122,7 @@ namespace nc::physics
     void CollisionSystem::NarrowDetectVsStatic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
-        const auto handles = dynamicSoA->GetSpan<HandleTraits::handle_type>();
+        const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto types = dynamicSoA->GetSpan<ColliderType>();
         const auto transforms = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
@@ -129,7 +130,7 @@ namespace nc::physics
         {
             const auto volume = CalculateBoundingVolume(types[dynamicIndex], properties[dynamicIndex], transforms[dynamicIndex]);
             if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, volume, staticPair->volume))
-                m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<HandleTraits::handle_type>(staticPair->handle));
+                m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity));
         }
     }
     
@@ -159,26 +160,34 @@ namespace nc::physics
 
     void CollisionSystem::NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const
     {
-        auto h1 = static_cast<EntityHandle>(data.first);
-        auto h2 = static_cast<EntityHandle>(data.second);
+        auto h1 = static_cast<Entity>(data.first);
+        auto h2 = static_cast<Entity>(data.second);
+        auto* reg = ActiveRegistry();
+
         switch(type)
         {
             case CollisionEventType::Enter:
             {
-                if(auto* e1 = GetEntity(h1); e1) e1->SendOnCollisionEnter(h2);
-                if(auto* e2 = GetEntity(h2); e2) e2->SendOnCollisionEnter(h1);
+                if(reg->Contains<Entity>(h1))
+                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionEnter(h2);
+                if(reg->Contains<Entity>(h2))
+                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionEnter(h1);
                 break;
             }
             case CollisionEventType::Stay:
             {
-                if(auto* e1 = GetEntity(h1); e1) e1->SendOnCollisionStay(h2);
-                if(auto* e2 = GetEntity(h2); e2) e2->SendOnCollisionStay(h1);
+                if(reg->Contains<Entity>(h1))
+                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionStay(h2);
+                if(reg->Contains<Entity>(h2))
+                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionStay(h1);
                 break;
             }
             case CollisionEventType::Exit:
             {
-                if(auto* e1 = GetEntity(h1); e1) e1->SendOnCollisionExit(h2);
-                if(auto* e2 = GetEntity(h2); e2) e2->SendOnCollisionExit(h1);
+                if(reg->Contains<Entity>(h1))
+                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionExit(h2);
+                if(reg->Contains<Entity>(h2))
+                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionExit(h1);
                 break;
             }
             default:

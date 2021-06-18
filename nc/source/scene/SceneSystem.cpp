@@ -47,7 +47,7 @@ namespace nc::scene
         m_activeScene = nullptr;
     }
 
-    void SceneSystem::DoSceneChange()
+    void SceneSystem::DoSceneChange(registry_type* registry)
     {
         if(!m_swapScene)
         {
@@ -56,6 +56,6 @@ namespace nc::scene
         m_activeScene = std::move(m_swapScene);
         m_swapScene = nullptr;
         m_isSceneChangeScheduled = false;
-        m_activeScene->Load();
+        m_activeScene->Load(registry);
     }
 }

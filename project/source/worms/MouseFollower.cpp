@@ -5,8 +5,9 @@
 
 namespace nc::sample
 {
-    MouseFollower::MouseFollower(EntityHandle handle)
-    : Component(handle),
+    MouseFollower::MouseFollower(Entity entity, registry_type* registry)
+    : AutoComponent(entity),
+      m_registry{registry},
       m_screenDimensions { window::GetDimensions() },
       m_zDepth { 0.0f },
       m_zRatio { 0.0f }
@@ -32,6 +33,6 @@ namespace nc::sample
         m_zRatio = m_viewPortDist / m_zDepth;
         auto worldX = input::MouseX() + m_screenDimensions.x / 2;
         auto worldY = input::MouseY() + m_screenDimensions.y / 2;
-        GetComponent<Transform>(GetParentHandle())->SetPosition(Vector3{worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
+        m_registry->Get<Transform>(GetParentEntity())->SetPosition(Vector3{worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
     }
 }

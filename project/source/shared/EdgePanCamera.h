@@ -9,7 +9,7 @@ namespace nc::sample
     class EdgePanCamera : public Camera
     {
         public:
-            EdgePanCamera(EntityHandle handle);
+            EdgePanCamera(Entity entity);
             void FrameUpdate(float dt) override;
 
         private:

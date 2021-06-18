@@ -22,14 +22,14 @@ namespace
 
 namespace nc::sample
 {
-    void SpawnTest::Load()
+    void SpawnTest::Load(registry_type* registry)
     {
         // Setup
-        m_sceneHelper.Setup(true, false, Widget);
+        m_sceneHelper.Setup(registry, true, false, Widget);
 
         // Camera
-        auto cameraHandle = CreateEntity({.position = Vector3{0.0f, -9.0f, -100.0f}, .tag = "SceneNavigationCamera"});
-        auto camera = AddComponent<SceneNavigationCamera>(cameraHandle, 0.25f, 0.005f, 1.4f);
+        auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, -9.0f, -100.0f}, .tag = "SceneNavigationCamera"});
+        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.25f, 0.005f, 1.4f);
         camera::SetMainCamera(camera);
 
         // Point Light
@@ -40,14 +40,14 @@ namespace nc::sample
             .attConst = 1.0f,
             .attLin = 0.0001f
         };
-        auto lvHandle = CreateEntity({.tag = "Point Light"});
-        auto pointLight = AddComponent<PointLight>(lvHandle);
+        auto lvHandle = registry->Add<Entity>({.tag = "Point Light"});
+        auto pointLight = registry->Add<PointLight>(lvHandle, PointLight::Properties{});
         pointLight->Set(lightProperties);
 
         // Collider that destroys anything leaving its bounded area
-        auto killBox = CreateEntity({.scale = Vector3::Splat(60.0f), .tag = "KillBox"});
-        AddComponent<Collider>(killBox, ColliderInfo{});
-        AddComponent<KillBox>(killBox);
+        auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(60.0f), .tag = "KillBox"});
+        registry->Add<Collider>(killBox, ColliderInfo{});
+        registry->Add<KillBox>(killBox, registry);
 
         // Spawner for stationary cubes
         SpawnBehavior staticCubeBehavior
@@ -56,19 +56,19 @@ namespace nc::sample
             .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f),
         };
 
-        auto staticCubeExtension = [](EntityHandle handle)
+        auto staticCubeExtension = [registry](Entity handle)
         {
-            GetComponent<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
-            AddComponent<Collider>(handle, ColliderInfo{});
+            registry->Get<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
+            registry->Add<Collider>(handle, ColliderInfo{});
         };
 
-        auto staticCubeSpawnerHandle = CreateEntity({.tag = "Static Cube Spawner"});
-        auto staticCubeSpawner = AddComponent<Spawner>(staticCubeSpawnerHandle, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);
+        auto staticCubeSpawnerHandle = registry->Add<Entity>({.tag = "Static Cube Spawner"});
+        auto staticCubeSpawner = registry->Add<Spawner>(staticCubeSpawnerHandle, registry, prefab::Resource::CubeBlue, staticCubeBehavior, staticCubeExtension);
         staticCubeSpawner->Spawn(5);
         staticCubeSpawner->SetPrefab(prefab::Resource::CubeRed);
         staticCubeSpawner->Spawn(5);
 
-        //Fixed interval spawner for moving cubes
+        // Fixed interval spawner for moving cubes
         SpawnBehavior dynamicCubeBehavior
         {
             .positionRandomRange = Vector3::Splat(15.0f),
@@ -78,13 +78,13 @@ namespace nc::sample
             .thetaRandomRange = 2.0f
         };
 
-        auto dynamicCubeExtension = [](EntityHandle handle)
+        auto dynamicCubeExtension = [registry](Entity handle)
         {
-            AddComponent<Collider>(handle, ColliderInfo{});
+            registry->Add<Collider>(handle, ColliderInfo{});
         };
         
-        auto dynamicCubeSpawnerHandle = CreateEntity({.tag = "Dynamic Cube Spawner"});
-        AddComponent<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);
+        auto dynamicCubeSpawnerHandle = registry->Add<Entity>({.tag = "Dynamic Cube Spawner"});
+        registry->Add<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, registry, prefab::Resource::CubeGreen, dynamicCubeBehavior, 0.2f, dynamicCubeExtension);
     }
 
     void SpawnTest::Unload()

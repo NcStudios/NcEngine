@@ -9,10 +9,10 @@
 
 namespace nc::sample
 {
-    class FrameTimer : public Component
+    class FrameTimer : public AutoComponent
     {
         public:
-            FrameTimer(EntityHandle handle);
+            FrameTimer(Entity entity);
             void FrameUpdate(float dt) override;
 
         private:
@@ -24,8 +24,8 @@ namespace nc::sample
             void Stop();
     };
 
-    inline FrameTimer::FrameTimer(EntityHandle handle)
-        : Component(handle)
+    inline FrameTimer::FrameTimer(Entity entity)
+        : AutoComponent(entity)
     {
     }
 
