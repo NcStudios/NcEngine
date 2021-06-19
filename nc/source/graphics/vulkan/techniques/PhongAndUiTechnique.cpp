@@ -94,7 +94,7 @@ namespace nc::graphics::vulkan
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    std::unordered_map<std::string, std::vector<EntityHandle>>* PhongAndUiTechnique::GetMeshRenderers()
+    std::unordered_map<std::string, std::vector<Entity>>* PhongAndUiTechnique::GetMeshRenderers()
     {
         return &m_meshRenderers;
     }
@@ -114,11 +114,11 @@ namespace nc::graphics::vulkan
         auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
         if (renderers == m_meshRenderers.end())
         {
-            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<EntityHandle>{meshRenderer->GetParentHandle()} );
+            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()} );
             return;
         }
 
-        renderers->second.push_back(meshRenderer->GetParentHandle());
+        renderers->second.push_back(meshRenderer->GetParentEntity());
     }
 
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd)
@@ -143,7 +143,7 @@ namespace nc::graphics::vulkan
             
             for (auto handle : renderers)
             {
-                auto* meshRenderer = GetComponent<nc::vulkan::MeshRenderer>(handle);
+                auto* meshRenderer = ActiveRegistry()->Get<nc::vulkan::MeshRenderer>(handle);
                 auto& material = meshRenderer->GetMaterial();
                 pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
                 pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));

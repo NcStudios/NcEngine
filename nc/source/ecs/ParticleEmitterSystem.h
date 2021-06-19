@@ -14,7 +14,7 @@ namespace nc::ecs
         public:
 
             #ifdef USE_VULKAN
-            ParticleEmitterSystem(registry_type* registry)
+            ParticleEmitterSystem(registry_type* registry);
             #else
             ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics);
             #endif

@@ -6,9 +6,18 @@
 
 namespace nc::ecs
 {
-    MeshRendererSystem::MeshRendererSystem(graphics::Graphics2* graphics)
+    MeshRendererSystem::MeshRendererSystem(registry_type* registry, graphics::Graphics2* graphics)
     : m_graphics{graphics}
     {
+        registry->RegisterOnAddCallback<vulkan::MeshRenderer>
+        (
+            [this](vulkan::MeshRenderer& meshRenderer) { this->Add(meshRenderer); }
+        );
+
+        registry->RegisterOnRemoveCallback<vulkan::MeshRenderer>
+        (
+            [this](Entity entity) { this->Remove(entity); }
+        );
     }
 
     void MeshRendererSystem::Add(vulkan::MeshRenderer& meshRenderer)
@@ -17,7 +26,7 @@ namespace nc::ecs
         m_graphics->GetRendererPtr()->RegisterMeshRenderer(techniqueType, &meshRenderer);
     }
 
-    void MeshRendererSystem::Remove(EntityHandle)
+    void MeshRendererSystem::Remove(Entity)
     {
         //@todo
     }

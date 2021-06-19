@@ -11,18 +11,6 @@ namespace nc::graphics
     namespace vulkan { class Commands; }
 }
 
-// @todo delete this
-namespace nc
-{
-    namespace ecs
-    {
-        template<class ... args>
-        class Registry;
-
-        using registry_type = ecs::Registry<Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Transform, nc::vulkan::PointLight, nc::vulkan::MeshRenderer>;
-    }
-}
-
 namespace nc::ecs
 {
     class PointLightSystem
@@ -30,7 +18,7 @@ namespace nc::ecs
         public:
             static const uint32_t MAX_POINT_LIGHTS = 50u;
 
-            PointLightSystem(graphics::Graphics2* graphics, uint32_t maxPointLights, registry_type* registryType);
+            PointLightSystem(registry_type* registryType, graphics::Graphics2* graphics, uint32_t maxPointLights);
             PointLightSystem(PointLightSystem&&) = delete;
             PointLightSystem(const PointLightSystem&) = delete;
             PointLightSystem& operator = (PointLightSystem&&) = delete;
@@ -39,7 +27,7 @@ namespace nc::ecs
             void Update();
             void Clear();
             void Add(vulkan::PointLight& pointLight);
-            void Remove(EntityHandle entity);
+            void Remove(Entity entity);
 
         private:
             std::vector<vulkan::PointLightInfo> m_pointLightInfos;

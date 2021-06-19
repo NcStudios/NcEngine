@@ -65,7 +65,7 @@ namespace nc::sample
     #ifdef USE_VULKAN
     void SolarSystem::Load(registry_type* registry)
     {}
-    #endif
+    #else
     void SolarSystem::Load(registry_type* registry)
     {
         m_sceneHelper.Setup(registry, false, true);

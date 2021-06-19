@@ -19,11 +19,11 @@ namespace nc::ecs
                            physSettings.octreeMinimumExtent,
                            physSettings.worldspaceExtent},
           #ifdef USE_VULKAN
-          m_particleEmitterSystem{},
-          m_pointLightSystem{graphics, 50u, &m_registry},
-          m_meshRendererSystem{graphics}
+          m_particleEmitterSystem{&m_registry},
+          m_pointLightSystem{&m_registry, graphics, 50u},
+          m_meshRendererSystem{&m_registry, graphics}
           #else
-          m_particleEmitterSystem{graphics}
+          m_particleEmitterSystem{&m_registry, graphics}
           #endif
     {
         internal::SetActiveRegistry(&m_registry);

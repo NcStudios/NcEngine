@@ -45,13 +45,13 @@ namespace nc::graphics
                 void RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
                 void Record(vk::CommandBuffer* cmd);
 
-                std::unordered_map<std::string, std::vector<EntityHandle>>* GetMeshRenderers();
+                std::unordered_map<std::string, std::vector<Entity>>* GetMeshRenderers();
                 vk::PipelineLayout* GetPipelineLayout();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);
 
-                std::unordered_map<std::string, std::vector<EntityHandle>> m_meshRenderers;
+                std::unordered_map<std::string, std::vector<Entity>> m_meshRenderers;
 
                 nc::graphics::Graphics2* m_graphics;
                 Base* m_base;

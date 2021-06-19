@@ -10,11 +10,21 @@ namespace nc::ecs
 {
     const uint32_t PointLightSystem::MAX_POINT_LIGHTS;
 
-    PointLightSystem::PointLightSystem(graphics::Graphics2* graphics, uint32_t maxPointLights, registry_type* registry)
+    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics2* graphics, uint32_t maxPointLights)
     : m_pointLightInfos{},
       m_graphics{graphics},
       m_registry{registry}
     {
+        m_registry->RegisterOnAddCallback<vulkan::PointLight>
+        (
+            [this](vulkan::PointLight& pointLight) { this->Add(pointLight); }
+        );
+
+        m_registry->RegisterOnRemoveCallback<vulkan::PointLight>
+        (
+            [this](Entity entity) { this->Remove(entity); }
+        );
+
         graphics::vulkan::ResourceManager::InitializePointLights(graphics, maxPointLights);
     }
 
@@ -37,7 +47,7 @@ namespace nc::ecs
         graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
     }
 
-    void PointLightSystem::Remove(EntityHandle)
+    void PointLightSystem::Remove(Entity)
     {
     }
 

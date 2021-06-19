@@ -3,9 +3,11 @@
 #include "Ecs.h"
 #include "ColliderSystem.h"
 #include "ParticleEmitterSystem.h"
+#include "MeshRendererSystem.h"
+#include "PointLightSystem.h"
 #include "config/Config.h"
 
-namespace nc::graphics { class Graphics; }
+namespace nc::graphics { class Graphics; class Graphics2; }
 
 namespace nc::ecs
 {
@@ -27,8 +29,8 @@ namespace nc::ecs
             auto GetParticleEmitterSystem() noexcept { return &m_particleEmitterSystem; }
             
             #ifdef USE_VULKAN
-            PointLightSystem* GetPointLightSystem();
-            MeshRendererSystem* GetMeshRendererSystem();
+            PointLightSystem* GetPointLightSystem() noexcept { return &m_pointLightSystem; }
+            MeshRendererSystem* GetMeshRendererSystem() noexcept { return &m_meshRendererSystem; }
             #endif
 
             void Clear();
