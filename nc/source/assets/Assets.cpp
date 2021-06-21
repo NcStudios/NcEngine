@@ -22,8 +22,8 @@ namespace nc
         file >> maxExtent >> vertexCount;
         std::vector<Vector3> vertices;
         vertices.reserve(vertexCount);
-
         Vector3 vertex;
+        
         for(size_t i = 0u; i < vertexCount; ++i)
         {
             if(file.fail())

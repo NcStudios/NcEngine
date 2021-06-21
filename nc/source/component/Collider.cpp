@@ -36,41 +36,42 @@ namespace
     //     }
     // }
 
+    /** @todo Currently no solution for hull widget. */
     std::unique_ptr<nc::graphics::Model> CreateWireframeModelPtr(nc::ColliderType type)
     {
-        switch(type)
+        const std::string& path = [](nc::ColliderType type) -> const std::string&
         {
-            case nc::ColliderType::Box:
-                return std::make_unique<nc::graphics::Model>(nc::graphics::Mesh{CubeMeshPath}, CreateMaterial());
-            case nc::ColliderType::Sphere:
-                return std::make_unique<nc::graphics::Model>(nc::graphics::Mesh{SphereMeshPath}, CreateMaterial());
-            case nc::ColliderType::Capsule:
-                return std::make_unique<nc::graphics::Model>(nc::graphics::Mesh{CapsuleMeshPath}, CreateMaterial());
-            // what to do about mesh?
-            case nc::ColliderType::Hull:
-                return std::make_unique<nc::graphics::Model>( nc::graphics::Mesh{SphereMeshPath}, CreateMaterial() );
-            default:
-                throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
-        }
+            switch(type)
+            {
+                case nc::ColliderType::Box: return CubeMeshPath;
+                case nc::ColliderType::Sphere: return SphereMeshPath;
+                case nc::ColliderType::Capsule: return CapsuleMeshPath;
+                case nc::ColliderType::Hull: return SphereMeshPath;
+                default: throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
+            }
+        }(type);
+
+        return std::make_unique<nc::graphics::Model>(nc::graphics::Mesh{path}, CreateMaterial());
     }
 }
 #endif
 
 namespace nc
 {
-    #ifdef NC_EDITOR_ENABLED
-    /* Debug Ctors */
     Collider::Collider(Entity entity, SphereProperties properties)
         : ComponentBase(entity),
           m_info{.type = ColliderType::Sphere,
                  .offset = properties.center,
                  .scale = Vector3::Splat(properties.radius * 2.0f),
-                 .meshPath = ""},
+                 .assetPath = ""}
+          #ifdef NC_EDITOR_ENABLED
+          ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
           m_selectedInEditor{false}
+          #endif
     {
-        IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
-        IF_THROW(!IsUniformScale(info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
+        IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(!IsUniformScale(m_info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
 
     Collider::Collider(Entity entity, BoxProperties properties)
@@ -78,11 +79,14 @@ namespace nc
           m_info{.type = ColliderType::Box,
                  .offset = properties.center,
                  .scale = properties.extents,
-                 .meshPath = ""},
+                 .assetPath = ""}
+          #ifdef NC_EDITOR_ENABLED
+          ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Box)},
           m_selectedInEditor{false}
+          #endif
     {
-        IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
     }
 
     Collider::Collider(Entity entity, CapsuleProperties properties)
@@ -90,11 +94,14 @@ namespace nc
           m_info{.type = ColliderType::Capsule,
                  .offset = properties.center,
                  .scale = Vector3{properties.radius * 2.0f, properties.height / 2.0f, properties.radius * 2.0f},
-                 .meshPath = ""},
+                 .assetPath = ""}
+          #ifdef NC_EDITOR_ENABLED
+          ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Capsule)},
           m_selectedInEditor{false}
+          #endif
     {
-        IF_THROW(HasAnyZeroElement(info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
     }
 
     Collider::Collider(Entity entity, HullProperties properties)
@@ -102,47 +109,52 @@ namespace nc
           m_info{.type = ColliderType::Hull,
                  .offset = Vector3::Zero(),
                  .scale = Vector3::One(),
-                 .meshPath = std::move(properties.assetPath)},
+                 .assetPath = std::move(properties.assetPath)}
+          #ifdef NC_EDITOR_ENABLED
+          ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
           m_selectedInEditor{false}
+          #endif
     {
     }
-    #else
-    /* Release Ctors */
-    Collider::Collider(Entity entity, SphereProperties properties)
-        : ComponentBase(entity),
-          m_info{.type = ColliderType::Sphere,
-                 .offset = properties.center,
-                 .scale = Vector3::Splat(properties.radius)}
-    {
-    }
+    // #else
+    // /* Release Ctors */
+    // Collider::Collider(Entity entity, SphereProperties properties)
+    //     : ComponentBase(entity),
+    //       m_info{.type = ColliderType::Sphere,
+    //              .offset = properties.center,
+    //              .scale = Vector3::Splat(properties.radius),
+    //              .assetPath = ""}
+    // {
+    // }
 
-    Collider::Collider(Entity entity, BoxProperties properties)
-        : ComponentBase(entity),
-          m_info{.type = ColliderType::Box,
-                 .offset = properties.center,
-                 .scale = properties.extents}
-    {
-    }
+    // Collider::Collider(Entity entity, BoxProperties properties)
+    //     : ComponentBase(entity),
+    //       m_info{.type = ColliderType::Box,
+    //              .offset = properties.center,
+    //              .scale = properties.extents,
+    //              .assetPath = ""}
+    // {
+    // }
 
-    Collider::Collider(Entity entity, CapsuleProperties properties)
-        : ComponentBase(entity),
-          m_info{.type = ColliderType::Capsule,
-                 .offset = properties.center,
-                 .scale = Vector3{properties.radius * 2.0f, properties.height / 2.0f, properties.radius * 2.0f},
-                 .meshPath = ""}
-    {
-    }
+    // Collider::Collider(Entity entity, CapsuleProperties properties)
+    //     : ComponentBase(entity),
+    //       m_info{.type = ColliderType::Capsule,
+    //              .offset = properties.center,
+    //              .scale = Vector3{properties.radius * 2.0f, properties.height / 2.0f, properties.radius * 2.0f},
+    //              .assetPath = ""}
+    // {
+    // }
 
-    Collider::Collider(Entity entity, HullProperties properties)
-        : ComponentBase(entity),
-          m_info{.type = ColliderType::Hull,
-                 .offset = Vector3::Zero(),
-                 .scale = Vector3::One(),
-                 .meshPath = std::move(properties.assetPath)}
-    {
-    }
-    #endif
+    // Collider::Collider(Entity entity, HullProperties properties)
+    //     : ComponentBase(entity),
+    //       m_info{.type = ColliderType::Hull,
+    //              .offset = Vector3::Zero(),
+    //              .scale = Vector3::One(),
+    //              .assetPath = std::move(properties.assetPath)}
+    // {
+    // }
+    // #endif
 
     const Collider::VolumeInfo& Collider::GetInfo() const
     {

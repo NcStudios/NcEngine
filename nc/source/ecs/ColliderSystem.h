@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Ecs.h"
 #include "SoA.h"
 #include "ColliderTree.h"
 #include "assets/HullColliderManager.h"

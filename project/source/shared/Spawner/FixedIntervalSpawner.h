@@ -39,10 +39,7 @@ namespace nc::sample
         if(m_lastSpawnTime > m_spawnRate)
         {
             m_lastSpawnTime = 0.0f;
-            //Spawner::Spawn();
-
-            //temp
-            Spawner::Spawn(10u);
+            Spawner::Spawn();
         }
     }
 

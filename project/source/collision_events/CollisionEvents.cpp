@@ -52,14 +52,13 @@ namespace nc::sample
 
         // Movable Object
         auto blueDisc = prefab::Create(registry, prefab::Resource::DiscBlue, {.rotation = Quaternion::FromEulerAngles(1.57095f, 0.0f, 0.0f), .scale = Vector3::Splat(1.0f), .tag = "Blue Disc"});
-        registry->Add<Collider>(blueDisc, HullProperties{.meshPath = "project/assets/mesh_colliders/coin.nca"});
+        registry->Add<Collider>(blueDisc, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"});
         registry->Add<WasdController>(blueDisc, registry, 2.0f);
         registry->Add<CollisionLogger>(blueDisc, registry);
 
         // Dynamic Objects
         auto smallGreenCube = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{3.5f, 0.0f, -1.0f}, .rotation = Quaternion::FromEulerAngles(0.0f, 0.785f, 0.0f), .tag = "Small Green Cube"});
         registry->Add<Collider>(smallGreenCube, BoxProperties{});
-        registry->Add<WasdController2>(smallGreenCube, registry, 2.0f);
         registry->Add<CollisionLogger>(smallGreenCube, registry);
 
         auto smallGreenSphere = prefab::Create(registry, prefab::Resource::SphereGreen, {.position = Vector3{-3.5f, 0.0f, -1.0f}, .tag = "Small Green Sphere"});
@@ -75,7 +74,7 @@ namespace nc::sample
         registry->Add<CollisionLogger>(greenCapsule, registry);
 
         auto greenDisc = prefab::Create(registry, prefab::Resource::DiscGreen, {.position = Vector3{-6.0f, 0.0f, 1.5f}, .rotation = Quaternion::FromEulerAngles(1.57095f, 0.0f, 0.0f), .scale = Vector3::Splat(7.0f), .tag = "Green Disc"});
-        registry->Add<Collider>(greenDisc, HullProperties{.meshPath = "project/assets/mesh_colliders/coin.nca"});
+        registry->Add<Collider>(greenDisc, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"});
         registry->Add<CollisionLogger>(greenDisc, registry);
 
 

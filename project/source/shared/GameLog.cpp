@@ -26,12 +26,6 @@ namespace nc::sample
         m_items.clear();
     }
 
-    // double fuck bun
-    void GameLog::ClearStatic()
-    {
-        GameLog::m_instance->Clear();
-    }
-
     const std::deque<std::string>& GameLog::GetItems()
     {
         return m_items;

@@ -98,7 +98,7 @@ void Usage()
               << "  -m <manifest>           Parse multiple assets from <manifest>\n"
               << "  -o <dir>                Output assets to <dir>\n\n"
               
-              << "  Valid asset types are 'mesh' or 'hullcollider', and are case-insensitive.\n\n"
+              << "  Valid asset types are 'mesh' or 'hull', and are case-insensitive.\n\n"
 
               << "  When using -m, <manifest> should be the path to a newline-separated list of\n"
               << "  pairs in the form '<asset-type> <path-to-input-file>'.\n\n"
@@ -174,7 +174,7 @@ auto GetAssetType(std::string type) -> AssetType
 
     if(type.compare("mesh") == 0)
         return AssetType::Mesh;
-    else if(type.compare("hullcollider") == 0)
+    else if(type.compare("hull") == 0)
         return AssetType::HullCollider;
     
     throw std::runtime_error("Failed to parse asset type: " + type);

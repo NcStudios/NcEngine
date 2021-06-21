@@ -9,7 +9,6 @@
 namespace
 {
     std::function<float()> GetFPSCallback = nullptr;
-    std::function<int()> GetDynamicCountCallback = nullptr;
     std::function<void(float)> SetSpawnRateFunc = nullptr;
 
     float spawnRate = 0.2f;
@@ -24,7 +23,6 @@ namespace
             ImGui::Text("-right mouse button + drag to look");
             ImGui::Text("-mouse wheel to zoom");
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            //ImGui::Text("Dynamic Object Count: %d", GetDynamicCountCallback());
             ImGui::Text("FPS: %.1f", GetFPSCallback());
             
             if(ImGui::DragFloat("Spawn Rate", &spawnRate, 0.001f, 0.00001f, 5.0f, "%.5f"))
@@ -105,7 +103,6 @@ namespace nc::sample
         auto dynamicCubeSpawnerHandle = registry->Add<Entity>({.tag = "Dynamic Cube Spawner"});
         auto* intervalSpawner = registry->Add<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, registry, prefab::Resource::CubeGreen, dynamicCubeBehavior, spawnRate, dynamicCubeExtension);
     
-        GetDynamicCountCallback = std::bind(FixedIntervalSpawner::GetObjectCount, intervalSpawner);
         SetSpawnRateFunc = std::bind(FixedIntervalSpawner::SetSpawnRate, intervalSpawner, std::placeholders::_1);
     }
 
