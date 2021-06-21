@@ -65,7 +65,7 @@ namespace nc::sample
 
         // Collider that destroys anything leaving its bounded area
         auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(100.0f), .tag = "KillBox"});
-        registry->Add<Collider>(killBox, ColliderInfo{});
+        registry->Add<Collider>(killBox, BoxProperties{});
         registry->Add<KillBox>(killBox, registry);
 
         // Spawner for stationary cubes
@@ -78,7 +78,7 @@ namespace nc::sample
         auto staticCubeExtension = [registry](Entity handle)
         {
             registry->Get<Transform>(handle)->SetScale(Vector3::Splat(6.0f));
-            registry->Add<Collider>(handle, ColliderInfo{});
+            registry->Add<Collider>(handle, BoxProperties{});
         };
 
         auto staticCubeSpawnerHandle = registry->Add<Entity>({.tag = "Static Cube Spawner"});
@@ -99,7 +99,7 @@ namespace nc::sample
 
         auto dynamicCubeExtension = [registry](Entity handle)
         {
-            registry->Add<Collider>(handle, ColliderInfo{});
+            registry->Add<Collider>(handle, BoxProperties{});
         };
         
         auto dynamicCubeSpawnerHandle = registry->Add<Entity>({.tag = "Dynamic Cube Spawner"});

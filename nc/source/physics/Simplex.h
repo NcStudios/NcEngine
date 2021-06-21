@@ -32,12 +32,6 @@ namespace nc::physics
                 m_size = std::min(m_size + 1u, size_t{4u});
             }
 
-            // void push_back(const Vector3& vertex)
-            // {
-            //     m_size = std::min(m_size + 1u, size_t{4u});
-            //     m_points[m_size - 1] = vertex;
-            // }
-
         private:
             std::array<Vector3, 4u> m_points;
             size_t m_size;

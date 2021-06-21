@@ -1,12 +1,10 @@
 #pragma once
 
 #include "component/Component.h"
-#include "math/Vector3.h"
 #include "physics/LayerMask.h"
 #include "graphics/Model.h"
-#include "directx/math/DirectXCollision.h"
 
-#include <variant>
+#include <string>
 
 /**  Notes on colliders:
  * 
@@ -25,58 +23,55 @@ namespace nc
 {
     enum class ColliderType : uint8_t
     {
-        Box = 0u, Sphere = 1u, Mesh = 2u
+        Box, Sphere, Capsule, Hull
     };
 
-    struct ColliderInfo
+    struct SphereProperties
     {
-        ColliderType type = ColliderType::Box;
-        Vector3 offset = Vector3::Zero();
-        Vector3 scale = Vector3::One();
+        Vector3 center = Vector3::Zero();
+        float radius = 0.5f;
     };
 
-    struct SphereCollider
+    struct BoxProperties
     {
-        Vector3 center;
-        float radius;
+        Vector3 center = Vector3::Zero();
+        Vector3 extents = Vector3::One();
     };
 
-    struct BoxCollider
+    struct CapsuleProperties
     {
-        Vector3 center;
-        Vector3 extents;
+        Vector3 center = Vector3::Zero();
+        float height = 2.0f;
+        float radius = 0.5f;
     };
 
-    struct MeshCollider
+    struct HullProperties
     {
-        static std::vector<Vector3> vertices;
-    };
-
-    inline std::vector<Vector3> MeshCollider::vertices
-    {
-        Vector3{  0.5f,  0.5f,  0.5f },
-        Vector3{  0.5f,  0.5f, -0.5f },
-        Vector3{  0.5f, -0.5f,  0.5f },
-        Vector3{  0.5f, -0.5f, -0.5f },
-        Vector3{ -0.5f,  0.5f,  0.5f },
-        Vector3{ -0.5f,  0.5f, -0.5f },
-        Vector3{ -0.5f, -0.5f,  0.5f },
-        Vector3{ -0.5f, -0.5f, -0.5f }
+        std::string assetPath;
     };
 
     class Collider final : public ComponentBase
     {
         public:
-            using BoundingVolume = std::variant<BoxCollider, SphereCollider, MeshCollider>;
+            struct VolumeInfo
+            {
+                ColliderType type;
+                Vector3 offset;
+                Vector3 scale;
+                std::string meshPath;
+            };
 
-            Collider(Entity entity, ColliderInfo info);
+            Collider(Entity entity, SphereProperties properties);
+            Collider(Entity entity, BoxProperties properties);
+            Collider(Entity entity, CapsuleProperties properties);
+            Collider(Entity entity, HullProperties properties);
             ~Collider() = default;
             Collider(const Collider&) = delete;
             Collider(Collider&&) = default;
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
 
-            const ColliderInfo& GetInfo() const;
+            const VolumeInfo& GetInfo() const;
             ColliderType GetType() const;
 
             #ifdef NC_EDITOR_ENABLED
@@ -85,7 +80,7 @@ namespace nc
             #endif
 
         private:
-            ColliderInfo m_info;
+            VolumeInfo m_info;
 
             #ifdef NC_EDITOR_ENABLED
             /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
@@ -93,9 +88,6 @@ namespace nc
             bool m_selectedInEditor;
             #endif
     };
-
-    Collider::BoundingVolume CreateBoundingVolume(ColliderType type, const Vector3& offset, const Vector3& scale);
-
 
     template<>
     struct StoragePolicy<Collider>

@@ -2,10 +2,7 @@
 
 #include "alloc/PoolAdapter.h"
 #include "component/Collider.h"
-#include "directx/math/DirectXMath.h"
-
-#include <vector>
-#include <variant>
+#include "physics/CollisionVolumes.h"
 
 namespace nc
 {
@@ -45,8 +42,8 @@ namespace nc::ecs
     struct StaticTreeEntry
     {
         DirectX::XMMATRIX matrix;
-        Collider::BoundingVolume volume;
-        SphereCollider volumeEstimate;
+        physics::BoundingVolume volume;
+        physics::SphereCollider volumeEstimate;
         physics::LayerMask layer;
         Entity entity;
     };
@@ -62,7 +59,7 @@ namespace nc::ecs
             bool AtMinimumExtent() const;
             void Subdivide();
             void Clear();
-            void BroadCheck(SphereCollider collider, std::vector<const StaticTreeEntry*>* out) const;
+            void BroadCheck(physics::SphereCollider collider, std::vector<const StaticTreeEntry*>* out) const;
             float GetExtent() const noexcept;
 
         private:
@@ -72,7 +69,7 @@ namespace nc::ecs
             using LeafNodeDataType = std::vector<const StaticTreeEntry*>;
             using InnerNodeDataType = std::vector<Octant>;
 
-            BoxCollider m_boundingVolume;
+            physics::BoxCollider m_boundingVolume;
             std::variant<LeafNodeDataType, InnerNodeDataType> m_data;
     };
 
@@ -82,11 +79,11 @@ namespace nc::ecs
         public:
             ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float minimumExtent, float worldspaceExtent);
 
-            void Add(Entity entity, const ColliderInfo& info);
+            void Add(Entity entity, const Collider::VolumeInfo& info);
             void Remove(Entity entity);
             void Rebuild();
             void Clear();
-            std::vector<const StaticTreeEntry*> BroadCheck(const SphereCollider& volume) const;
+            std::vector<const StaticTreeEntry*> BroadCheck(const physics::SphereCollider& volume) const;
 
         private:
             alloc::PoolAdapter<StaticTreeEntry> m_pool;

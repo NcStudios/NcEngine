@@ -1,40 +1,45 @@
-#include "GJK.h"
+#include "IntersectionQueries.h"
 #include "Simplex.h"
 #include "debug/Utils.h"
 
+#include <algorithm>
+#include <array>
+#include <stdexcept>
+
 namespace nc::physics
 {
-    bool SameDirection(const Vector3& a, const Vector3& b)
-    {
-        return Dot(a, b) > 0.0f;
-    }
+    using namespace DirectX;
 
-    auto GetRotation(DirectX::FXMMATRIX matrix) -> DirectX::XMVECTOR;
-    auto Support(const Collider::BoundingVolume& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR;
-    auto Support(const SphereCollider& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR;
-    auto Support(const BoxCollider& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR;
-    auto Support(const MeshCollider& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR;
+    bool SameDirection(const Vector3& a, const Vector3& b);
     bool RefinePoint(Simplex& simplex, Vector3& direction);
-    bool RefineLine(Simplex& points, Vector3& direction);
-    bool RefineTriangle(Simplex& points, Vector3& direction);
-    bool RefineTetrahedron(Simplex& points, Vector3& direction);
-
+    bool RefineLine(Simplex& simplex, Vector3& direction);
+    bool RefineTriangle(Simplex& simplex, Vector3& direction);
+    bool RefineTetrahedron(Simplex& simplex, Vector3& direction);
+    XMVECTOR GetRotation(FXMMATRIX matrix);
+    XMVECTOR MinkowskiSupport(const BoundingVolume& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const SphereCollider& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const BoxCollider& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const CapsuleCollider& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const HullCollider& collider, DirectX::FXMVECTOR direction_v);
+    
     constexpr std::array<bool(*)(Simplex&, Vector3&), 4u> RefineSimplex = 
     {
         RefinePoint, RefineLine, RefineTriangle, RefineTetrahedron
     };
 
-    bool BroadCollision(const SphereCollider& a, const SphereCollider& b)
+    bool Intersect(const SphereCollider& a, const SphereCollider& b)
     {
-        // can use dist squared?
-        auto dist = Distance(a.center, b.center);
-        return dist < a.radius + b.radius;
+        auto radii = a.radius + b.radius;
+        return SquareMagnitude(a.center - b.center) < radii * radii;
     }
 
-    bool GJK(const Collider::BoundingVolume& a,
-             const Collider::BoundingVolume& b,
-             DirectX::FXMMATRIX aMatrix,
-             DirectX::FXMMATRIX bMatrix)
+    bool Intersect(const SphereCollider& sphere, const BoxCollider& aabb)
+    {
+        auto squareDistance = SquareMtdToAABB(sphere.center, aabb);
+        return squareDistance <= sphere.radius * sphere.radius;
+    }
+
+    bool Gjk(const BoundingVolume& a, const BoundingVolume& b, FXMMATRIX aMatrix, FXMMATRIX bMatrix)
     {
         auto aRotation = GetRotation(aMatrix);
         auto bRotation = GetRotation(bMatrix);
@@ -46,13 +51,11 @@ namespace nc::physics
 
         while(++itCount <= maxIterations)
         {
-            using namespace DirectX;
-
             const auto direction_v = XMLoadVector3(&direction);
             auto aDirection_v = XMVector3InverseRotate(direction_v, aRotation);
-            auto aSupport_v = XMVector3Transform(Support(a, aDirection_v), aMatrix);
+            auto aSupport_v = XMVector3Transform(MinkowskiSupport(a, aDirection_v), aMatrix);
             auto bDirection_v = XMVector3InverseRotate(XMVectorNegate(direction_v), bRotation);
-            auto bSupport_v = XMVector3Transform(Support(b, bDirection_v), bMatrix);
+            auto bSupport_v = XMVector3Transform(MinkowskiSupport(b, bDirection_v), bMatrix);
             auto support_v = aSupport_v - bSupport_v;
 
             if(XMVector3Less(XMVector3Dot(support_v, direction_v), g_XMZero))
@@ -70,8 +73,7 @@ namespace nc::physics
         return false;
     }
 
-    bool GJK(const Collider::BoundingVolume& a,
-             const Collider::BoundingVolume& b)
+    bool Gjk(const BoundingVolume& a, const BoundingVolume& b)
     {
         Vector3 direction = Vector3::One();
         Simplex simplex;
@@ -80,10 +82,8 @@ namespace nc::physics
 
         while(++itCount <= maxIterations)
         {
-            using namespace DirectX;
-
             const auto direction_v = XMLoadVector3(&direction);
-            auto support_v = Support(a, direction_v) - Support(b, XMVectorNegate(direction_v));
+            auto support_v = MinkowskiSupport(a, direction_v) - MinkowskiSupport(b, XMVectorNegate(direction_v));
 
             if(XMVector3Less(XMVector3Dot(support_v, direction_v), g_XMZero))
                 return false;
@@ -100,24 +100,48 @@ namespace nc::physics
         return false;
     }
 
-    DirectX::XMVECTOR GetRotation(DirectX::FXMMATRIX matrix)
+    XMVECTOR GetRotation(FXMMATRIX matrix)
     {
-        DirectX::XMVECTOR scl, rot, pos;
-        DirectX::XMMatrixDecompose(&scl, &rot, &pos, matrix);
+        XMVECTOR scl, rot, pos;
+        XMMatrixDecompose(&scl, &rot, &pos, matrix);
         return rot;
     }
 
-    auto Support(const SphereCollider& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR
+    bool SameDirection(const Vector3& a, const Vector3& b)
     {
-        using namespace DirectX;
+        return Dot(a, b) > 0.0f;
+    }
+
+    float SquareMtdToAABB(const Vector3& point, const BoxCollider& aabb)
+    {
+        auto SingleAxisDistance = [](float point, float min, float max)
+        {
+            float out = 0.0f;
+            if(point < min)
+                out += (min - point) * (min - point);
+            else if(point > max)
+                out += (point - max) * (point - max);
+            return out;
+        };
+
+        auto halfExtents = aabb.extents / 2.0f;
+        auto min = aabb.center - halfExtents;
+        auto max = aabb.center + halfExtents;
+        return SingleAxisDistance(point.x, min.x, max.x) +
+               SingleAxisDistance(point.y, min.y, max.y) +
+               SingleAxisDistance(point.z, min.z, max.z);
+    }
+
+    XMVECTOR MinkowskiSupport(const SphereCollider& collider, FXMVECTOR direction_v)
+    {
         return XMLoadVector3(&collider.center) +
                XMVectorScale(XMVector3Normalize(direction_v), collider.radius);
     }
 
-    auto Support(const BoxCollider& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR
+    XMVECTOR MinkowskiSupport(const BoxCollider& collider, FXMVECTOR direction_v)
     {
         Vector3 dir;
-        DirectX::XMStoreVector3(&dir, direction_v);
+        XMStoreVector3(&dir, direction_v);
 
         auto sign = [](float n) { return n < 0.0f ? -1.0f : 1.0f; };
 
@@ -129,21 +153,37 @@ namespace nc::physics
         };
 
         dir = collider.center + extent;
-        return DirectX::XMLoadVector3(&dir);
+        return XMLoadVector3(&dir);
     }
 
-    auto Support(const MeshCollider& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR
+    XMVECTOR MinkowskiSupport(const CapsuleCollider& collider, FXMVECTOR direction_v)
     {
-        IF_THROW(collider.vertices.size() == 0u, "Gjk Support - MeshCollider vertex buffer is empty");
+        // make simd
+
+        Vector3 normalizedDirection;
+        XMStoreVector3(&normalizedDirection, XMVector3Normalize(direction_v));
+
+        auto dotPointA = Dot(collider.pointA, normalizedDirection);
+        auto dotPointB = Dot(collider.pointB, normalizedDirection);
+
+        const auto& extremePoint = dotPointA > dotPointB ? collider.pointA : collider.pointB;
+
+        auto out = extremePoint + normalizedDirection * collider.radius;
+        return XMLoadVector3(&out);
+    }
+
+    XMVECTOR MinkowskiSupport(const HullCollider& collider, FXMVECTOR direction_v)
+    {
+        IF_THROW(collider.vertices.size() == 0u, "MinkowskiSupport - HullCollider vertex buffer is empty");
         const auto& vertices = collider.vertices;
-        auto maxVertex_v = DirectX::XMLoadVector3(&vertices[0]);
-        auto maxDot_v = DirectX::XMVector3Dot(maxVertex_v, direction_v);
+        auto maxVertex_v = XMLoadVector3(&vertices[0]);
+        auto maxDot_v = XMVector3Dot(maxVertex_v, direction_v);
 
         for(size_t i = 1u; i < vertices.size(); ++i)
         {
-            auto vertex_v = DirectX::XMLoadVector3(&vertices[i]);
-            auto dot_v = DirectX::XMVector3Dot(vertex_v, direction_v);
-            if(DirectX::XMVector3Greater(dot_v, maxDot_v))
+            auto vertex_v = XMLoadVector3(&vertices[i]);
+            auto dot_v = XMVector3Dot(vertex_v, direction_v);
+            if(XMVector3Greater(dot_v, maxDot_v))
             {
                 maxDot_v = dot_v;
                 maxVertex_v = vertex_v;
@@ -153,11 +193,11 @@ namespace nc::physics
         return maxVertex_v;
     }
 
-    auto Support(const Collider::BoundingVolume& collider, DirectX::FXMVECTOR direction_v) -> DirectX::XMVECTOR
+    XMVECTOR MinkowskiSupport(const BoundingVolume& collider, FXMVECTOR direction_v)
     {
         return std::visit([&direction_v](auto&& bv)
         {
-            return Support(bv, direction_v);
+            return MinkowskiSupport(bv, direction_v);
         }, collider);
     }
 
@@ -174,7 +214,7 @@ namespace nc::physics
 
         if(SameDirection(ab, ao))
         {
-            direction = CrossProduct(CrossProduct(ab, ao), ab);
+            direction = TripleCrossProduct(ab, ao, ab);
         }
         else
         {
@@ -197,7 +237,7 @@ namespace nc::physics
             if(SameDirection(ac, ao))
             {
                 simplex.ToLine<0u, 2u>();
-                direction = CrossProduct(CrossProduct(ac, ao), ac);
+                direction = TripleCrossProduct(ac, ao, ac);
             }
             else
             {
@@ -244,12 +284,12 @@ namespace nc::physics
             simplex.ToTriangle<0u, 1u, 2u>();
             return RefineTriangle(simplex, direction);
         }
-        if(SameDirection(acd, ao))
+        else if(SameDirection(acd, ao))
         {
             simplex.ToTriangle<0u, 2u, 3u>();
             return RefineTriangle(simplex, direction);
         }
-        if(SameDirection(adb, ao))
+        else if(SameDirection(adb, ao))
         {
             simplex.ToTriangle<0u, 1u, 3u>();
             return RefineTriangle(simplex, direction);

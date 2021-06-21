@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Ecs.h"
 #include "ecs/ColliderSystem.h"
 
 #include <cstdint>

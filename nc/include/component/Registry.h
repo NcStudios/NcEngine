@@ -424,6 +424,8 @@ namespace nc::ecs
         m_toRemove.shrink_to_fit();
 
         std::apply([](auto&&... data) { (data.Clear(), ...); }, m_storage);
+
+        m_handleManager.Reset();
     }
 
     template<class TypeList>

@@ -51,37 +51,45 @@ namespace nc::sample
         camera::SetMainCamera(camera);
 
         // Movable Object
-        auto blueCube = prefab::Create(registry, prefab::Resource::SphereBlue, {.position = Vector3{0.0f, 0.0f, 0.0f}, .tag = "Blue Cube"});
-        registry->Add<Collider>(blueCube, ColliderInfo{.type = ColliderType::Sphere});
-        registry->Add<WasdController>(blueCube, registry, 2.0f);
-        registry->Add<CollisionLogger>(blueCube, registry);
+        auto blueDisc = prefab::Create(registry, prefab::Resource::DiscBlue, {.rotation = Quaternion::FromEulerAngles(1.57095f, 0.0f, 0.0f), .scale = Vector3::Splat(1.0f), .tag = "Blue Disc"});
+        registry->Add<Collider>(blueDisc, HullProperties{.meshPath = "project/assets/mesh_colliders/coin.nca"});
+        registry->Add<WasdController>(blueDisc, registry, 2.0f);
+        registry->Add<CollisionLogger>(blueDisc, registry);
 
         // Dynamic Objects
         auto smallGreenCube = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{3.5f, 0.0f, -1.0f}, .rotation = Quaternion::FromEulerAngles(0.0f, 0.785f, 0.0f), .tag = "Small Green Cube"});
-        registry->Add<Collider>(smallGreenCube, ColliderInfo{});
+        registry->Add<Collider>(smallGreenCube, BoxProperties{});
         registry->Add<WasdController2>(smallGreenCube, registry, 2.0f);
         registry->Add<CollisionLogger>(smallGreenCube, registry);
 
         auto smallGreenSphere = prefab::Create(registry, prefab::Resource::SphereGreen, {.position = Vector3{-3.5f, 0.0f, -1.0f}, .tag = "Small Green Sphere"});
-        registry->Add<Collider>(smallGreenSphere, ColliderInfo{.type = ColliderType::Sphere});
+        registry->Add<Collider>(smallGreenSphere, SphereProperties{.center = Vector3::Zero(), .radius = 0.5f});
         registry->Add<CollisionLogger>(smallGreenSphere, registry);
 
         auto bigGreenCube = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, 6.5f}, .scale = Vector3::Splat(2.0f), .tag = "Big Green Cube"});
-        registry->Add<Collider>(bigGreenCube, ColliderInfo{});
+        registry->Add<Collider>(bigGreenCube, BoxProperties{});
         registry->Add<CollisionLogger>(bigGreenCube, registry);
+
+        auto greenCapsule = prefab::Create(registry, prefab::Resource::CapsuleGreen, {.position = Vector3{5.0f, 0.0f, 1.5f}, .tag = "Green Capsule"});
+        registry->Add<Collider>(greenCapsule, CapsuleProperties{});
+        registry->Add<CollisionLogger>(greenCapsule, registry);
+
+        auto greenDisc = prefab::Create(registry, prefab::Resource::DiscGreen, {.position = Vector3{-6.0f, 0.0f, 1.5f}, .rotation = Quaternion::FromEulerAngles(1.57095f, 0.0f, 0.0f), .scale = Vector3::Splat(7.0f), .tag = "Green Disc"});
+        registry->Add<Collider>(greenDisc, HullProperties{.meshPath = "project/assets/mesh_colliders/coin.nca"});
+        registry->Add<CollisionLogger>(greenDisc, registry);
 
 
         // Static Objects
-        auto bigRedCube = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{3.0f, 0.0f, 3.0f}, .scale = Vector3::Splat(1.0f), .tag = "Big Red Cube", .flags = EntityFlags::Static});
-        registry->Add<Collider>(bigRedCube, ColliderInfo{});
-        registry->Add<CollisionLogger>(bigRedCube, registry);
+        auto redCube = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{3.5f, 0.0f, 4.5f}, .scale = Vector3::Splat(1.0f), .tag = "Big Red Cube", .flags = EntityFlags::Static});
+        registry->Add<Collider>(redCube, BoxProperties{});
+        registry->Add<CollisionLogger>(redCube, registry);
 
-        auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.0f, 0.0f, 3.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = EntityFlags::Static});
-        registry->Add<Collider>(bigRedSphere, ColliderInfo{.type = ColliderType::Sphere});
+        auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = EntityFlags::Static});
+        registry->Add<Collider>(bigRedSphere, SphereProperties{});
         registry->Add<CollisionLogger>(bigRedSphere, registry);
 
         auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = EntityFlags::Static});
-        registry->Add<Collider>(longRedBox, ColliderInfo{});
+        registry->Add<Collider>(longRedBox, BoxProperties{});
         registry->Add<CollisionLogger>(longRedBox, registry);
     }
 

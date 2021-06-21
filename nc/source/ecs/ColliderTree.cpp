@@ -1,6 +1,6 @@
 #include "ColliderTree.h"
 #include "Ecs.h"
-#include "physics/Gjk.h"
+#include "physics/IntersectionQueries.h"
 
 namespace
 {
@@ -11,69 +11,10 @@ namespace
     constexpr size_t InnerNodeIndex = 1u;
 }
 
-
-#include "ColliderSystem.h"
-#include <iostream>
-
 namespace nc::ecs
 {
-    SphereCollider EstimateBoundingVolume(const ecs::VolumeProperties& volumeProperties, DirectX::FXMMATRIX transform)
-    {
-        auto xExtent_v = DirectX::XMVector3Dot(transform.r[0], transform.r[0]);
-        auto yExtent_v = DirectX::XMVector3Dot(transform.r[1], transform.r[1]);
-        auto zExtent_v = DirectX::XMVector3Dot(transform.r[2], transform.r[2]);
-        auto maxExtent_v = DirectX::XMVectorMax(xExtent_v, DirectX::XMVectorMax(yExtent_v, zExtent_v));
-        float maxTransformExtent = sqrt(DirectX::XMVectorGetX(maxExtent_v));
-
-        auto center_v = DirectX::XMLoadVector3(&volumeProperties.center);
-        center_v = DirectX::XMVector3Transform(center_v, transform);
-        
-        std::cout << "maxTransformsExtent:  " << maxTransformExtent << '\n'
-                  << "properties.maxExtent: " << volumeProperties.maxExtent << '\n';
-
-        SphereCollider out{Vector3::Zero(), maxTransformExtent * volumeProperties.maxExtent};
-        DirectX::XMStoreVector3(&out.center, center_v);
-        return out;
-    }
-
-    VolumeProperties GetVolumeProperties(const ColliderInfo& info)
-    {
-        // for mesh should get support in x/y/z for maxExtent
-
-        float maxExtent = 0.0f;
-        switch(info.type)
-        {
-            case ColliderType::Box:
-            {
-                maxExtent = Magnitude(info.scale / 2.0f);
-                //maxExtent = Magnitude(info.scale) / 2.0f;
-                break;
-            }
-            case ColliderType::Sphere:
-            {
-                maxExtent = info.scale.x / 2.0f;
-                break;
-            }
-            case ColliderType::Mesh: // fix
-            {
-                maxExtent = 0.5f;
-                break;
-            }
-        }
-
-        return VolumeProperties
-        {
-            info.offset,
-            info.scale / 2.0f,
-            maxExtent
-        };
-    }
-
-    ///////////////////////////////////
-
-
     Octant::Octant(Vector3 center, float extent)
-        : m_boundingVolume{center, Vector3::Splat(extent)},
+        : m_boundingVolume{center, Vector3::Splat(extent), extent / 2.0f},
           m_data{LeafNodeDataType{}} // don't default insert!!
     {
         std::get<LeafNodeIndex>(m_data).reserve(DensityThreshold);
@@ -81,10 +22,8 @@ namespace nc::ecs
 
     void Octant::Add(const StaticTreeEntry* newEntry)
     {
-        if(!physics::GJK(newEntry->volume, m_boundingVolume, newEntry->matrix, DirectX::XMMatrixIdentity()))
+        if(!physics::Gjk(newEntry->volume, m_boundingVolume, newEntry->matrix, DirectX::XMMatrixIdentity()))
             return;
-        //if(!Contains(newEntry->volume))
-        //    return;
 
         if(auto* staticColliders = std::get_if<LeafNodeIndex>(&m_data); staticColliders)
         {
@@ -144,9 +83,9 @@ namespace nc::ecs
         entries.reserve(DensityThreshold);
     }
 
-    void Octant::BroadCheck(SphereCollider collider, std::vector<const StaticTreeEntry*>* out) const
+    void Octant::BroadCheck(physics::SphereCollider collider, std::vector<const StaticTreeEntry*>* out) const
     {
-        if(!physics::GJK(collider, m_boundingVolume))
+        if(!physics::Intersect(collider, m_boundingVolume))
             return;
 
         if(const auto* children = std::get_if<InnerNodeIndex>(&m_data); children)
@@ -158,9 +97,7 @@ namespace nc::ecs
 
         for(const auto* entry : std::get<LeafNodeIndex>(m_data))
         {
-            //if(physics::GJK(collider, entry->volume))
-            //    out->emplace_back(entry);
-            if(physics::GJK(collider, entry->volume, DirectX::XMMatrixIdentity(), entry->matrix))
+            if(physics::Intersect(collider, entry->volumeEstimate))
                 out->emplace_back(entry);
         }
     }
@@ -184,13 +121,15 @@ namespace nc::ecs
         MinimumExtent = minimumExtent;
     }
 
-    void ColliderTree::Add(Entity entity, const ColliderInfo& info)
+    void ColliderTree::Add(Entity entity, const Collider::VolumeInfo& info)
     {
         auto* registry = ActiveRegistry();
         auto matrix = registry->Get<Transform>(entity)->GetTransformationMatrix();
+        auto bv = physics::CreateBoundingVolume(info);
+        auto estimate = physics::EstimateBoundingVolume(bv, matrix);
         auto* entry = m_pool.Add(matrix,
-                                 CreateBoundingVolume(info.type, info.offset, info.scale),
-                                 EstimateBoundingVolume(GetVolumeProperties(info), matrix),
+                                 bv,
+                                 estimate,
                                  physics::ToLayerMask(EntityUtils::Layer(entity)),
                                  entity);
 
@@ -218,7 +157,7 @@ namespace nc::ecs
         m_pool.Clear();
     }
 
-    std::vector<const StaticTreeEntry*> ColliderTree::BroadCheck(const SphereCollider& volume) const
+    std::vector<const StaticTreeEntry*> ColliderTree::BroadCheck(const physics::SphereCollider& volume) const
     {
         std::vector<const StaticTreeEntry*> out;
         m_root.BroadCheck(volume, &out);

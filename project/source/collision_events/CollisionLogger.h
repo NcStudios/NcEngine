@@ -25,21 +25,18 @@ namespace nc::sample
 
     inline void CollisionLogger::OnCollisionEnter(Entity hit)
     {
-        //GameLog::ClearStatic();
         if(auto* tag = m_registry->Get<Tag>(hit); tag)
             GameLog::Log(std::string{"Collision Enter: "} + tag->Value().data());
     }
 
     inline void CollisionLogger::OnCollisionStay(Entity hit)
     {
-        //GameLog::ClearStatic();
         if(auto* tag = m_registry->Get<Tag>(hit); tag)
             GameLog::Log(std::string{"Collision Stay: "} + tag->Value().data());
     }
 
     inline void CollisionLogger::OnCollisionExit(Entity hit)
     {
-        //GameLog::ClearStatic();
         if(auto* tag = m_registry->Get<Tag>(hit); tag)
             GameLog::Log(std::string{"Collision Exit: "} + tag->Value().data());
     }
