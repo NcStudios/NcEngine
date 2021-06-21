@@ -117,44 +117,6 @@ namespace nc
           #endif
     {
     }
-    // #else
-    // /* Release Ctors */
-    // Collider::Collider(Entity entity, SphereProperties properties)
-    //     : ComponentBase(entity),
-    //       m_info{.type = ColliderType::Sphere,
-    //              .offset = properties.center,
-    //              .scale = Vector3::Splat(properties.radius),
-    //              .assetPath = ""}
-    // {
-    // }
-
-    // Collider::Collider(Entity entity, BoxProperties properties)
-    //     : ComponentBase(entity),
-    //       m_info{.type = ColliderType::Box,
-    //              .offset = properties.center,
-    //              .scale = properties.extents,
-    //              .assetPath = ""}
-    // {
-    // }
-
-    // Collider::Collider(Entity entity, CapsuleProperties properties)
-    //     : ComponentBase(entity),
-    //       m_info{.type = ColliderType::Capsule,
-    //              .offset = properties.center,
-    //              .scale = Vector3{properties.radius * 2.0f, properties.height / 2.0f, properties.radius * 2.0f},
-    //              .assetPath = ""}
-    // {
-    // }
-
-    // Collider::Collider(Entity entity, HullProperties properties)
-    //     : ComponentBase(entity),
-    //       m_info{.type = ColliderType::Hull,
-    //              .offset = Vector3::Zero(),
-    //              .scale = Vector3::One(),
-    //              .assetPath = std::move(properties.assetPath)}
-    // {
-    // }
-    // #endif
 
     const Collider::VolumeInfo& Collider::GetInfo() const
     {
