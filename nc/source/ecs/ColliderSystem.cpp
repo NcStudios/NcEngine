@@ -4,7 +4,8 @@
 
 namespace nc::ecs
 {
-    ColliderSystem::ColliderSystem(uint32_t maxDynamic,
+    ColliderSystem::ColliderSystem(registry_type* registry,
+                                   uint32_t maxDynamic,
                                    uint32_t maxStatic,
                                    uint32_t octreeDensityThreshold,
                                    float octreeMinimumExtent,
@@ -13,6 +14,15 @@ namespace nc::ecs
           m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent},
           m_hullColliderManager{}
     {
+        registry->RegisterOnAddCallback<Collider>
+        (
+            [this](const Collider& collider) { this->Add(collider); }
+        );
+
+        registry->RegisterOnRemoveCallback<Collider>
+        (
+            [this](Entity entity) { this->Remove(entity); }
+        );
     }
 
     ColliderSystem::~ColliderSystem() = default;

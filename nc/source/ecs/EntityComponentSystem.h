@@ -27,8 +27,8 @@ namespace nc::ecs
             void Clear();
 
         private:
+            registry_type m_registry;
             ColliderSystem m_colliderSystem;
             ParticleEmitterSystem m_particleEmitterSystem;
-            registry_type m_registry;
     };
 } // namespace nc::ecs

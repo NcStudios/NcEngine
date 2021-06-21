@@ -18,13 +18,31 @@ namespace
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(graphics::Graphics* graphics)
+    #ifdef USE_VULKAN
+    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry)
+    #else
+    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics)
+    #endif
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
+          #ifdef USE_VULKAN
+          m_graphicsData{nullptr},
+          m_renderer{nullptr}
+          #else
           m_graphicsData{CreateParticleGraphicsData(graphics)},
           m_renderer{graphics}
+          #endif
     {
+        registry->RegisterOnAddCallback<ParticleEmitter>
+        (
+            [this](ParticleEmitter& emitter) { this->Add(emitter); }
+        );
+
+        registry->RegisterOnRemoveCallback<ParticleEmitter>
+        (
+            [this](Entity entity) { this->Remove(entity); }
+        );
     }
 
     void ParticleEmitterSystem::UpdateParticles(float dt)
