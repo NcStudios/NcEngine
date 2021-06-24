@@ -1,5 +1,6 @@
 #include "ColliderTree.h"
 #include "Ecs.h"
+#include "physics/IntersectionQueries.h"
 
 namespace
 {
@@ -12,8 +13,8 @@ namespace
 
 namespace nc::ecs
 {
-    Octant::Octant(DirectX::XMFLOAT3 center, float extent)
-        : m_boundingVolume{center, {extent, extent, extent}},
+    Octant::Octant(Vector3 center, float extent)
+        : m_boundingVolume{center, Vector3::Splat(extent), extent / 2.0f},
           m_data{LeafNodeDataType{}} // don't default insert!!
     {
         std::get<LeafNodeIndex>(m_data).reserve(DensityThreshold);
@@ -21,7 +22,7 @@ namespace nc::ecs
 
     void Octant::Add(const StaticTreeEntry* newEntry)
     {
-        if(!Contains(newEntry->volume))
+        if(!physics::Gjk(newEntry->volume, m_boundingVolume, newEntry->matrix, DirectX::XMMatrixIdentity()))
             return;
 
         if(auto* staticColliders = std::get_if<LeafNodeIndex>(&m_data); staticColliders)
@@ -40,14 +41,14 @@ namespace nc::ecs
 
     bool Octant::AtMinimumExtent() const
     {
-        return m_boundingVolume.Extents.x / 2.0f < MinimumExtent;
+        return m_boundingVolume.extents.x / 2.0f < MinimumExtent;
     }
 
     void Octant::Subdivide()
     {
         // calculate points for children
-        const auto newExtent = m_boundingVolume.Extents.x / 2.0f;
-        const auto& [centerX, centerY, centerZ] = m_boundingVolume.Center;
+        const auto newExtent = m_boundingVolume.extents.x / 2.0f;
+        const auto& [centerX, centerY, centerZ] = m_boundingVolume.center;
         const auto xMin = centerX - newExtent;
         const auto xMax = centerX + newExtent;
         const auto yMin = centerY - newExtent;
@@ -61,14 +62,14 @@ namespace nc::ecs
         // replace colliders with children octants
         m_data.emplace<InnerNodeIndex>(InnerNodeDataType
         {
-            Octant{DirectX::XMFLOAT3{xMin, yMin, zMin}, newExtent},
-            Octant{DirectX::XMFLOAT3{xMin, yMin, zMax}, newExtent},
-            Octant{DirectX::XMFLOAT3{xMin, yMax, zMin}, newExtent},
-            Octant{DirectX::XMFLOAT3{xMin, yMax, zMax}, newExtent},
-            Octant{DirectX::XMFLOAT3{xMax, yMin, zMin}, newExtent},
-            Octant{DirectX::XMFLOAT3{xMax, yMin, zMax}, newExtent},
-            Octant{DirectX::XMFLOAT3{xMax, yMax, zMin}, newExtent},
-            Octant{DirectX::XMFLOAT3{xMax, yMax, zMax}, newExtent}
+            Octant{Vector3{xMin, yMin, zMin}, newExtent},
+            Octant{Vector3{xMin, yMin, zMax}, newExtent},
+            Octant{Vector3{xMin, yMax, zMin}, newExtent},
+            Octant{Vector3{xMin, yMax, zMax}, newExtent},
+            Octant{Vector3{xMax, yMin, zMin}, newExtent},
+            Octant{Vector3{xMax, yMin, zMax}, newExtent},
+            Octant{Vector3{xMax, yMax, zMin}, newExtent},
+            Octant{Vector3{xMax, yMax, zMax}, newExtent}
         });
 
         // pass colliders onto children
@@ -82,29 +83,28 @@ namespace nc::ecs
         entries.reserve(DensityThreshold);
     }
 
-    void Octant::BroadCheck(const DirectX::BoundingSphere& dynamicEstimate, std::vector<const StaticTreeEntry*>* out) const
+    void Octant::BroadCheck(physics::SphereCollider estimate, std::vector<const StaticTreeEntry*>* out) const
     {
-        if(!Contains(dynamicEstimate))
+        if(!physics::Intersect(estimate, m_boundingVolume))
             return;
 
         if(const auto* children = std::get_if<InnerNodeIndex>(&m_data); children)
         {
             for(const auto& child : *children)
-                child.BroadCheck(dynamicEstimate, out);
-
+                child.BroadCheck(estimate, out);
             return;
         }
 
         for(const auto* entry : std::get<LeafNodeIndex>(m_data))
         {
-            if(std::visit([&dynamicEstimate](auto&& staticVolume) { return dynamicEstimate.Intersects(staticVolume); }, entry->volume))
+            if(physics::Intersect(estimate, entry->volumeEstimate))
                 out->emplace_back(entry);
         }
     }
 
     float Octant::GetExtent() const noexcept
     {
-        return m_boundingVolume.Extents.x;
+        return m_boundingVolume.extents.x;
     }
 
     void Octant::AddToChildren(const StaticTreeEntry* colliderData)
@@ -113,27 +113,26 @@ namespace nc::ecs
             childSpace.Add(colliderData);
     }
 
-    bool Octant::Contains(const Collider::BoundingVolume& other) const
-    {
-        return std::visit([this](auto&& a) { return a.Intersects(m_boundingVolume); }, other);
-    }
-
     ColliderTree::ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float minimumExtent, float worldspaceExtent)
         : m_pool{maxStaticColliders},
-          m_root{{0.0f, 0.0f, 0.0f}, worldspaceExtent}
+          m_root{Vector3::Zero(), worldspaceExtent}
     {
         DensityThreshold = densityThreshold;
         MinimumExtent = minimumExtent;
     }
 
-    void ColliderTree::Add(Entity entity, const ColliderInfo& info)
+    void ColliderTree::Add(Entity entity, const Collider::VolumeInfo& info)
     {
         auto* registry = ActiveRegistry();
+        auto matrix = registry->Get<Transform>(entity)->GetTransformationMatrix();
+        auto bv = physics::CreateBoundingVolume(info);
+        auto estimate = physics::EstimateBoundingVolume(bv, matrix);
+        auto* entry = m_pool.Add(matrix,
+                                 bv,
+                                 estimate,
+                                 physics::ToLayerMask(EntityUtils::Layer(entity)),
+                                 entity);
 
-        auto volume = physics::CalculateBoundingVolume(info.type,
-                                                       physics::GetVolumePropertiesFromColliderInfo(info),
-                                                       registry->Get<Transform>(entity)->GetTransformationMatrix());
-        auto* entry = m_pool.Add(volume, physics::ToLayerMask(EntityUtils::Layer(entity)), entity);
         m_root.Add(entry);
     }
 
@@ -158,10 +157,10 @@ namespace nc::ecs
         m_pool.Clear();
     }
 
-    std::vector<const StaticTreeEntry*> ColliderTree::BroadCheck(const DirectX::BoundingSphere& volume) const
+    std::vector<const StaticTreeEntry*> ColliderTree::BroadCheck(const physics::SphereCollider& estimate) const
     {
         std::vector<const StaticTreeEntry*> out;
-        m_root.BroadCheck(volume, &out);
+        m_root.BroadCheck(estimate, &out);
         return out;
     }
 } // namespace nc::ecs

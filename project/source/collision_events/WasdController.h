@@ -26,6 +26,11 @@ namespace nc::sample
     inline void WasdController::FrameUpdate(float dt)
     {
         auto [leftRight, frontBack] = input::GetAxis() * m_speed * dt;
-        m_registry->Get<Transform>(GetParentEntity())->TranslateLocalSpace(Vector3{leftRight, 0.0f, frontBack});
+
+        auto q = input::GetKey(input::KeyCode::Q);
+        auto e = input::GetKey(input::KeyCode::E);
+        auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * m_speed * dt;
+
+        m_registry->Get<Transform>(GetParentEntity())->Translate(Vector3{leftRight, upDown, frontBack});
     }
 }

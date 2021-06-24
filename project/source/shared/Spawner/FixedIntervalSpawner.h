@@ -13,7 +13,9 @@ namespace nc::sample
                                  SpawnBehavior behavior,
                                  float spawnRate,
                                  Spawner::SpawnExtension extension = nullptr);
+            
             void FrameUpdate(float dt) override;
+            void SetSpawnRate(float rate);
 
         private:
             float m_spawnRate;
@@ -39,5 +41,10 @@ namespace nc::sample
             m_lastSpawnTime = 0.0f;
             Spawner::Spawn();
         }
+    }
+
+    inline void FixedIntervalSpawner::SetSpawnRate(float rate)
+    {
+        m_spawnRate = math::Clamp(rate, 0.0001f, 10.0f);
     }
 }

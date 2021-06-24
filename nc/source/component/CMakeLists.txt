@@ -3,7 +3,6 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/component/AutoComponentGroup.cpp
         ${ROOT_DIR}/source/component/Camera.cpp
         ${ROOT_DIR}/source/component/Collider.cpp
-        ${ROOT_DIR}/source/component/ColliderDetail.cpp
         ${ROOT_DIR}/source/component/Component.cpp
         ${ROOT_DIR}/source/component/NetworkDispatcher.cpp
         ${ROOT_DIR}/source/component/ParticleEmitter.cpp

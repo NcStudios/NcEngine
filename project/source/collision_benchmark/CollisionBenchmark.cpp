@@ -82,7 +82,7 @@ namespace nc::sample
 
         auto spawnExtension = [registry](Entity entity)
         {
-            registry->Add<Collider>(entity, ColliderInfo{});
+            registry->Add<Collider>(entity, BoxProperties{});
         };
         
         // Dynamic Cube Spawner

@@ -1,7 +1,7 @@
-nc/resources/mesh/cube.fbx
-nc/resources/mesh/sphere.fbx
-project/models/beeper.fbx
-project/models/coin.fbx
-project/models/table.fbx
-project/models/token.fbx
-project/models/worm.fbx
+mesh nc/resources/mesh/cube.fbx
+mesh nc/resources/mesh/sphere.fbx
+mesh project/models/beeper.fbx
+mesh project/models/coin.fbx
+mesh project/models/table.fbx
+mesh project/models/token.fbx
+mesh project/models/worm.fbx
