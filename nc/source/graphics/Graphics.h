@@ -1,6 +1,6 @@
 #pragma once
 #include "platform/win32/NCWin32.h"
-#include "math/Vector2.h"
+#include "math/Vector.h"
 
 #include <array>
 #include <d3d11.h>
