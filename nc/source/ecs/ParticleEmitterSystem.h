@@ -5,16 +5,15 @@
 #include "particle/ParticleRenderer.h"
 #include "particle/EmitterState.h"
 
-namespace nc::graphics { class Graphics; }
+namespace nc::graphics { class Graphics2; }
 
 namespace nc::ecs
 {
     class ParticleEmitterSystem
     {
         public:
-
             #ifdef USE_VULKAN
-            ParticleEmitterSystem(registry_type* registry);
+            ParticleEmitterSystem(registry_type* registry, graphics::Graphics2* graphics);
             #else
             ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics);
             #endif
@@ -38,10 +37,11 @@ namespace nc::ecs
         private:
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;
-        #ifndef USE_VULKAN
             std::vector<Entity> m_toRemove;
+
+        #ifdef USE_VULKAN
             particle::GraphicsData m_graphicsData;
-            particle::ParticleRenderer m_renderer;
+            graphics::Graphics2* m_graphics;
         #endif
 
     };

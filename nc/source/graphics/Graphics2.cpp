@@ -1,4 +1,5 @@
 #include "Graphics2.h"
+#include "debug/Profiler.h"
 #include "vulkan/Base.h"
 #include "vulkan/Commands.h"
 #include "vulkan/resources/DepthStencil.h"
@@ -206,6 +207,7 @@ namespace nc::graphics
     // See Device.cpp for synchronization of these calls.
     void Graphics2::Draw()
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         if (m_isMinimized) return;
 
         uint32_t imageIndex = UINT32_MAX;
@@ -218,6 +220,7 @@ namespace nc::graphics
 
         // Returns the image to the swapchain
         if (!PresentImage(imageIndex)) return;
+        NC_PROFILE_END();
     }
 
     void Graphics2::FrameEnd()

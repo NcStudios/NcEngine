@@ -29,8 +29,8 @@ namespace nc::ecs
             auto GetParticleEmitterSystem() noexcept { return &m_particleEmitterSystem; }
             
             #ifdef USE_VULKAN
-            PointLightSystem* GetPointLightSystem() noexcept { return &m_pointLightSystem; }
-            MeshRendererSystem* GetMeshRendererSystem() noexcept { return &m_meshRendererSystem; }
+            auto GetPointLightSystem() noexcept { return &m_pointLightSystem; }
+            auto GetMeshRendererSystem() noexcept { return &m_meshRendererSystem; }
             #endif
 
             void Clear();

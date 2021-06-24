@@ -4,7 +4,7 @@
 #include "graphics/vulkan/Commands.h"
 #include "graphics/Graphics2.h"
 
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vk_mem_alloc.hpp"
 #include "stb/stb_image.h"
 
 namespace nc::graphics::vulkan

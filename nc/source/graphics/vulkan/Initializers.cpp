@@ -164,8 +164,22 @@ namespace nc::graphics::vulkan
         return depthStencil;
     }
 
-    vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo()
+    vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo(bool useAlphaBlending)
     {
+        if (useAlphaBlending)
+        {
+            vk::PipelineColorBlendAttachmentState colorBlendAttachment{};
+            colorBlendAttachment.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
+            colorBlendAttachment.setBlendEnable(static_cast<vk::Bool32>(true));
+            colorBlendAttachment.setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha);
+            colorBlendAttachment.setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
+            colorBlendAttachment.setColorBlendOp(vk::BlendOp::eAdd);
+            colorBlendAttachment.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
+            colorBlendAttachment.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
+            colorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
+            return colorBlendAttachment;
+        }
+
         vk::PipelineColorBlendAttachmentState colorBlendAttachment{};
         colorBlendAttachment.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
         colorBlendAttachment.setBlendEnable(static_cast<vk::Bool32>(false));
@@ -177,8 +191,19 @@ namespace nc::graphics::vulkan
         return colorBlendAttachment;
     }
 
-    vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment)
+    vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment, bool useAlphaBlending)
     {
+        if (useAlphaBlending)
+        {
+            vk::PipelineColorBlendStateCreateInfo colorBlending{};
+            colorBlending.setLogicOpEnable(static_cast<vk::Bool32>(false));
+            colorBlending.setLogicOp(vk::LogicOp::eAnd);
+            colorBlending.setAttachmentCount(1);
+            colorBlending.setPAttachments(&colorBlendAttachment);
+            colorBlending.setBlendConstants({1.0f, 1.0f, 1.0f, 1.0f});
+            return colorBlending;
+        }
+        
         vk::PipelineColorBlendStateCreateInfo colorBlending{};
         colorBlending.setLogicOpEnable(static_cast<vk::Bool32>(false));
         colorBlending.setLogicOp(vk::LogicOp::eCopy);

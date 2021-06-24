@@ -9,7 +9,7 @@
 namespace nc
 {
     class Transform;
-    namespace graphics { class Graphics; }
+    namespace graphics { class Graphics2; }
 }
 
 namespace nc::particle
@@ -29,7 +29,7 @@ namespace nc::particle
     {
         DirectX::FXMMATRIX viewMatrix;
         DirectX::FXMMATRIX projectionMatrix;
-        graphics::Graphics* graphics;
+        graphics::Graphics2* graphics;
     };
 
     class EmitterState
@@ -44,6 +44,7 @@ namespace nc::particle
             void Emit(size_t count);
             void Update(float dt);
             const ParticleSoA* GetSoA() const;
+            ParticleInfo* GetInfo();
             Entity GetEntity() const;
 
         private:

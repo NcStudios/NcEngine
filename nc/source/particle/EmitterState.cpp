@@ -97,6 +97,11 @@ namespace nc::particle
             m_soa.RemoveAtIndex(i);
     }
 
+    ParticleInfo* EmitterState::GetInfo()
+    {
+        return &m_info;
+    }
+
     auto EmitterState::GetSoA() const -> const ParticleSoA*
     {
         return &m_soa;
@@ -131,7 +136,8 @@ namespace nc::particle
 
         return graphics::MvpMatrices
         {
-            DirectX::XMMatrixTranspose(modelView),
+            // @todo: Replace MvpMatrices with Normal + VP matrices.
+            ComposeMatrix(particle.scale, Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)), particle.position),
             DirectX::XMMatrixTranspose(modelView * m_graphicsData->projectionMatrix)
         };
     }

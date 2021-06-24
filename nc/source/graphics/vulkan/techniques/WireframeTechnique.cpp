@@ -3,6 +3,7 @@
 #include "config/Config.h"
 #include "component/Transform.h"
 #include "component/vulkan/MeshRenderer.h"
+#include "debug/Profiler.h"
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Initializers.h"
 #include "graphics/vulkan/resources/ImmutableBuffer.h"
@@ -36,7 +37,9 @@ namespace nc::graphics::vulkan
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+        NC_PROFILE_END();
     }
 
     void WireframeTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
@@ -50,16 +53,6 @@ namespace nc::graphics::vulkan
         }
         
         renderers->second.push_back(meshRenderer->GetParentEntity());
-    }
-
-    std::unordered_map<std::string, std::vector<Entity>>* WireframeTechnique::GetMeshRenderers()
-    {
-        return &m_meshRenderers;
-    }
-
-    vk::PipelineLayout* WireframeTechnique::GetPipelineLayout()
-    {
-        return &m_pipelineLayout;
     }
 
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -105,8 +98,8 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo();
-        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment);
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout);
@@ -122,11 +115,7 @@ namespace nc::graphics::vulkan
 
     void WireframeTechnique::Record(vk::CommandBuffer* cmd)
     {
-        vk::DeviceSize offsets[] = { 0 };
-
-        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
-        cmd->bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
-
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         const auto& viewMatrix = m_graphics->GetViewMatrix();
         const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
 
@@ -151,6 +140,7 @@ namespace nc::graphics::vulkan
                 #endif
             }
         }
+        NC_PROFILE_END();
     }
 
 }
