@@ -8,8 +8,7 @@
 
 namespace nc::ecs
 {
-    /** Wrapper around ComponentSystem<Collider> that maintains a separate
-     *  representations for internal use. */
+    /** System for managing internal collider state. */
     class ColliderSystem
     {
         public:

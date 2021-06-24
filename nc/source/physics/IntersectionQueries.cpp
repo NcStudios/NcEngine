@@ -158,8 +158,6 @@ namespace nc::physics
 
     XMVECTOR MinkowskiSupport(const CapsuleCollider& collider, FXMVECTOR direction_v)
     {
-        // make simd
-
         Vector3 normalizedDirection;
         XMStoreVector3(&normalizedDirection, XMVector3Normalize(direction_v));
 
@@ -284,12 +282,14 @@ namespace nc::physics
             simplex.ToTriangle<0u, 1u, 2u>();
             return RefineTriangle(simplex, direction);
         }
-        else if(SameDirection(acd, ao))
+        
+        if(SameDirection(acd, ao))
         {
             simplex.ToTriangle<0u, 2u, 3u>();
             return RefineTriangle(simplex, direction);
         }
-        else if(SameDirection(adb, ao))
+
+        if(SameDirection(adb, ao))
         {
             simplex.ToTriangle<0u, 1u, 3u>();
             return RefineTriangle(simplex, direction);

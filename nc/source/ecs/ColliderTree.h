@@ -59,7 +59,7 @@ namespace nc::ecs
             bool AtMinimumExtent() const;
             void Subdivide();
             void Clear();
-            void BroadCheck(physics::SphereCollider collider, std::vector<const StaticTreeEntry*>* out) const;
+            void BroadCheck(physics::SphereCollider estimate, std::vector<const StaticTreeEntry*>* out) const;
             float GetExtent() const noexcept;
 
         private:
@@ -83,7 +83,7 @@ namespace nc::ecs
             void Remove(Entity entity);
             void Rebuild();
             void Clear();
-            std::vector<const StaticTreeEntry*> BroadCheck(const physics::SphereCollider& volume) const;
+            std::vector<const StaticTreeEntry*> BroadCheck(const physics::SphereCollider& estimate) const;
 
         private:
             alloc::PoolAdapter<StaticTreeEntry> m_pool;
