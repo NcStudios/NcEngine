@@ -326,11 +326,14 @@ namespace nc::ui::editor::controls
         const auto& metrics = physics::CollisionSystem::metrics;
         ImGui::Text("Collision Checks:");
         ImGui::Text("  Broad Phase");
-        ImGui::Text("    Static:   %d", metrics.staticBroadChecks);
-        ImGui::Text("    Dynamic:  %d", metrics.dynamicBroadChecks);
+        ImGui::Text("    Static:  %d", metrics.staticBroadChecks);
+        ImGui::Text("    Dynamic: %d", metrics.dynamicBroadChecks);
         ImGui::Text("  Narrow Phase");
         ImGui::Text("    Static:  %d", metrics.staticNarrowChecks);
         ImGui::Text("    Dynamic: %d", metrics.dynamicNarrowChecks);
+        ImGui::Text("  Collisions");
+        ImGui::Text("    Static:  %d", metrics.staticCollisions);
+        ImGui::Text("    Dynamic: %d", metrics.dynamicCollisions);
     }
 } // end namespace nc::ui::editor
 #endif

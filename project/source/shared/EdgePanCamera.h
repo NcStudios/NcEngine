@@ -2,7 +2,6 @@
 
 #include "component/Transform.h"
 #include "component/Camera.h"
-#include "math/Vector2.h"
 
 namespace nc::sample
 {

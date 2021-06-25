@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/Vector2.h"
+#include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #ifndef VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_PLATFORM_WIN32_KHR

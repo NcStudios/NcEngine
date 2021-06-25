@@ -1,5 +1,4 @@
 #include "IntersectionQueries.h"
-#include "Simplex.h"
 #include "debug/Utils.h"
 
 #include <algorithm>
@@ -9,6 +8,11 @@
 namespace nc::physics
 {
     using namespace DirectX;
+
+    constexpr float FloatMax = std::numeric_limits<float>::max();
+    constexpr float EpaTolerance = 0.001f;
+    constexpr size_t GjkMaxIterations = 10u;
+    constexpr size_t EpaMaxIterations = 32u;
 
     bool SameDirection(const Vector3& a, const Vector3& b);
     bool RefinePoint(Simplex& simplex, Vector3& direction);
@@ -27,6 +31,32 @@ namespace nc::physics
         RefinePoint, RefineLine, RefineTriangle, RefineTetrahedron
     };
 
+    bool Intersect(const BoundingVolume& a, const BoundingVolume& b)
+    {
+        Vector3 direction = Vector3::One();
+        Simplex simplex;
+        size_t itCount = 0;
+
+        while(++itCount <= GjkMaxIterations)
+        {
+            const auto direction_v = XMLoadVector3(&direction);
+            auto support_v = MinkowskiSupport(a, direction_v) - MinkowskiSupport(b, XMVectorNegate(direction_v));
+
+            if(XMVector3Less(XMVector3Dot(support_v, direction_v), g_XMZero))
+                break;
+
+            Vector3 support;
+            XMStoreVector3(&support, support_v);
+
+            simplex.push_front(support);
+
+            if(RefineSimplex[simplex.size() - 1](simplex, direction))
+                return true;
+        }
+
+        return false;
+    }
+
     bool Intersect(const SphereCollider& a, const SphereCollider& b)
     {
         auto radii = a.radius + b.radius;
@@ -39,65 +69,81 @@ namespace nc::physics
         return squareDistance <= sphere.radius * sphere.radius;
     }
 
-    bool Gjk(const BoundingVolume& a, const BoundingVolume& b, FXMMATRIX aMatrix, FXMMATRIX bMatrix)
+    bool Gjk(const BoundingVolume& a, const BoundingVolume& b, FXMMATRIX aMatrix, FXMMATRIX bMatrix, CollisionState* stateOut)
     {
-        auto aRotation = GetRotation(aMatrix);
-        auto bRotation = GetRotation(bMatrix);
+        IF_THROW(!stateOut, "Gjk - CollisionState cannot be null");
 
+        stateOut->simplex = Simplex{};
+        stateOut->rotationA = GetRotation(aMatrix);
+        stateOut->rotationB = GetRotation(bMatrix);
         Vector3 direction = Vector3::One();
-        Simplex simplex;
         size_t itCount = 0;
-        constexpr size_t maxIterations = 10u;
 
-        while(++itCount <= maxIterations)
+        while(++itCount <= GjkMaxIterations)
         {
             const auto direction_v = XMLoadVector3(&direction);
-            auto aDirection_v = XMVector3InverseRotate(direction_v, aRotation);
+            auto aDirection_v = XMVector3InverseRotate(direction_v, stateOut->rotationA);
             auto aSupport_v = XMVector3Transform(MinkowskiSupport(a, aDirection_v), aMatrix);
-            auto bDirection_v = XMVector3InverseRotate(XMVectorNegate(direction_v), bRotation);
+            auto bDirection_v = XMVector3InverseRotate(XMVectorNegate(direction_v), stateOut->rotationB);
             auto bSupport_v = XMVector3Transform(MinkowskiSupport(b, bDirection_v), bMatrix);
             auto support_v = aSupport_v - bSupport_v;
 
             if(XMVector3Less(XMVector3Dot(support_v, direction_v), g_XMZero))
-                return false;
+                break;
 
             Vector3 support;
             XMStoreVector3(&support, support_v);
 
-            simplex.push_front(support);
+            stateOut->simplex.push_front(support);
 
-            if(RefineSimplex[simplex.size() - 1](simplex, direction))
+            if(RefineSimplex[stateOut->simplex.size() - 1](stateOut->simplex, direction))
                 return true;
         }
 
         return false;
     }
 
-    bool Gjk(const BoundingVolume& a, const BoundingVolume& b)
+    NormalData Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state)
     {
-        Vector3 direction = Vector3::One();
-        Simplex simplex;
-        size_t itCount = 0;
-        constexpr size_t maxIterations = 10u;
+        state->polytope.Initialize(state->simplex);
+        auto minFace = state->polytope.ComputeNormalData();
+        NormalData minNorm{Vector3::Zero(), FloatMax};
+        size_t iterations = 0u;
 
-        while(++itCount <= maxIterations)
+        while(minNorm.distance == FloatMax)
         {
-            const auto direction_v = XMLoadVector3(&direction);
-            auto support_v = MinkowskiSupport(a, direction_v) - MinkowskiSupport(b, XMVectorNegate(direction_v));
+            // Normal data for the face closest to the origin.
+            minNorm = state->polytope.GetNormalData(minFace);
 
-            if(XMVector3Less(XMVector3Dot(support_v, direction_v), g_XMZero))
-                return false;
+            if(iterations++ > EpaMaxIterations)
+                break;
 
+            // Find a point on the Minkowski hull in the direction of the closest face's normal.
+            auto direction_v = XMLoadVector3(&minNorm.normal);
+            auto aDirection_v = XMVector3InverseRotate(direction_v, state->rotationA);
+            auto aSupport_v = XMVector3Transform(MinkowskiSupport(a, aDirection_v), aMatrix);
+            auto bDirection_v = XMVector3InverseRotate(XMVectorNegate(direction_v), state->rotationB);
+            auto bSupport_v = XMVector3Transform(MinkowskiSupport(b, bDirection_v), bMatrix);
+            auto support_v = aSupport_v - bSupport_v;
             Vector3 support;
             XMStoreVector3(&support, support_v);
 
-            simplex.push_front(support);
+            if(abs(Dot(minNorm.normal, support) - minNorm.distance) > EpaTolerance)
+            {
+                // The closest face is not on the hull, so we expand towards the hull.
+                if(!state->polytope.Expand(support, &minFace))
+                {
+                    /** @todo Need to determine if this can happen under normal circumstances.
+                     *  It has thrown here a few times, but always when there is wonk elsewhere. */
+                    throw std::runtime_error("Epa - minDistance not found");
+                }
 
-            if(RefineSimplex[simplex.size() - 1](simplex, direction))
-                return true;
+                minNorm.distance = FloatMax;
+            }
         }
-
-        return false;
+        
+        minNorm.distance += EpaTolerance;
+        return minNorm;
     }
 
     XMVECTOR GetRotation(FXMMATRIX matrix)

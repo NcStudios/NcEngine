@@ -5,12 +5,23 @@
 #include "debug/Profiler.h"
 #include "job/JobSystem.h"
 
+#ifdef NC_EDITOR_ENABLED
+    #define INCREMENT_METRIC(value) ++value
+#else
+    #define INCREMENT_METRIC(value)
+#endif
+
 namespace nc::physics
 {
     bool operator ==(const NarrowDetectEvent& lhs, const NarrowDetectEvent& rhs)
     {
         return (lhs.first == rhs.first && lhs.second == rhs.second) ||
                (lhs.first == rhs.second && lhs.second == rhs.first);
+    }
+
+    bool operator ==(const BroadDetectVsStaticEvent& lhs, const BroadDetectVsStaticEvent& rhs)
+    {
+        return (lhs.first == rhs.first && lhs.second == rhs.second);
     }
 
     CollisionSystem::CollisionSystem(ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
@@ -20,7 +31,8 @@ namespace nc::physics
           m_broadEventsVsDynamic{},
           m_broadEventsVsStatic{},
           m_currentCollisions{},
-          m_previousCollisions{}
+          m_previousCollisions{},
+          m_manifolds{}
     {
     }
 
@@ -30,13 +42,13 @@ namespace nc::physics
         metrics.Reset();
         #endif
 
+        /** @todo re-visit JobSystem here */ 
         FetchEstimates();
-        
         BroadDetectVsStatic();
         BroadDetectVsDynamic();
         NarrowDetectVsStatic();
         NarrowDetectVsDynamic();
-
+        ResolveCollisions();
         FindExitAndStayEvents();
         FindEnterEvents();
 
@@ -49,6 +61,7 @@ namespace nc::physics
         m_broadEventsVsStatic.resize(0u);
         m_currentCollisions.resize(0u);
         m_previousCollisions.resize(0u);
+        m_manifolds.resize(0u);
     }
 
     void CollisionSystem::FetchEstimates()
@@ -74,9 +87,7 @@ namespace nc::physics
         {
             for(size_t j = i + 1; j < dynamicSize; ++j)
             {
-                #ifdef NC_EDITOR_ENABLED
-                ++metrics.dynamicBroadChecks;
-                #endif
+                INCREMENT_METRIC(metrics.dynamicBroadChecks);
 
                 if(Intersect(m_dynamicEstimates[i].estimate, m_dynamicEstimates[j].estimate))
                     m_broadEventsVsDynamic.emplace_back(m_dynamicEstimates[i].index, m_dynamicEstimates[j].index);
@@ -92,15 +103,16 @@ namespace nc::physics
         {
             for(const auto* pair : staticTree->BroadCheck(m_dynamicEstimates[i].estimate))
             {
-                #ifdef NC_EDITOR_ENABLED
-                ++metrics.staticBroadChecks;
-                #endif
-
                 // Because static volumes can exist in multiple tree nodes, identical intersections may be reported.
                 const auto beg = m_broadEventsVsStatic.cbegin();
                 const auto end = m_broadEventsVsStatic.cend();
-                if(end == std::find_if(beg, end, [pair](const auto& event) { return event.second->entity == pair->entity; }))
-                    m_broadEventsVsStatic.emplace_back(m_dynamicEstimates[i].index, pair);
+
+                auto newEvent = BroadDetectVsStaticEvent{m_dynamicEstimates[i].index, pair};
+                if(end == std::find(beg, end, newEvent))
+                {
+                    INCREMENT_METRIC(metrics.staticBroadChecks);
+                    m_broadEventsVsStatic.push_back(newEvent);
+                }
             }
         }
     }
@@ -111,15 +123,27 @@ namespace nc::physics
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
+        CollisionState state;
 
         for(const auto& [i, j] : m_broadEventsVsDynamic)
         {
-            #ifdef NC_EDITOR_ENABLED
-            ++metrics.dynamicNarrowChecks;
-            #endif
+            INCREMENT_METRIC(metrics.dynamicNarrowChecks);
+            const auto& iVolume = volumes[i];
+            const auto& jVolume = volumes[j];
+            const auto& iMatrix = matrices[i];
+            const auto& jMatrix = matrices[j];
 
-            if(Gjk(volumes[i], volumes[j], matrices[i], matrices[j]))
+            if(Gjk(iVolume, jVolume, iMatrix, jMatrix, &state))
+            {
+                INCREMENT_METRIC(metrics.dynamicCollisions);
+
+                /** @todo We could notify based on entries in m_manifold instead
+                 *  of m_currentCollisions, but that won't work for trigger colliders
+                 *  (once they are added). Leaving m_currentCollisions unchanged for now. */
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
+                auto contactData = Epa(iVolume, jVolume, iMatrix, jMatrix, &state);
+                m_manifolds.emplace_back(handles[i], handles[j], contactData);
+            }
         }
     }
 
@@ -129,17 +153,46 @@ namespace nc::physics
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
+        CollisionState state;
+
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
         {
-            #ifdef NC_EDITOR_ENABLED
-            ++metrics.staticNarrowChecks;
-            #endif
+            INCREMENT_METRIC(metrics.staticNarrowChecks);
+            const auto& dVolume = volumes[dynamicIndex];
+            const auto& sVolume = staticPair->volume;
+            const auto& dMatrix = matrices[dynamicIndex];
+            const auto& sMatrix = staticPair->matrix;
 
-            if(Gjk(volumes[dynamicIndex], staticPair->volume, matrices[dynamicIndex], staticPair->matrix))
+            if(Gjk(dVolume, sVolume, dMatrix, sMatrix, &state))
+            {
+                INCREMENT_METRIC(metrics.staticCollisions);
+
+                /** @todo See NarrowDetectVsDynamic */
                 m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity));
+                auto contactData = Epa(dVolume, sVolume, dMatrix, sMatrix, &state);
+                m_manifolds.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity), contactData);
+            }
         }
     }
     
+    void CollisionSystem::ResolveCollisions()
+    {
+        for(auto& manifold : m_manifolds)
+        {
+            auto a = Entity{manifold.entityA};
+            auto b = Entity{manifold.entityB};
+            auto mtv = manifold.contact.normal * manifold.contact.distance;
+            auto* registry = ActiveRegistry();
+            auto* transformA = registry->Get<Transform>(a);
+            auto* transformB = registry->Get<Transform>(b);
+
+            if(!EntityUtils::IsStatic(a))
+                transformA->Translate(-mtv);
+            if(!EntityUtils::IsStatic(b))
+                transformB->Translate(mtv);
+        }
+    }
+
     void CollisionSystem::FindExitAndStayEvents() const
     {
         auto currBeg = m_currentCollisions.cbegin();
@@ -208,5 +261,6 @@ namespace nc::physics
         m_dynamicEstimates.clear();
         m_broadEventsVsDynamic.clear();
         m_broadEventsVsStatic.clear();
+        m_manifolds.clear();
     }
 } // namespace nc::phsyics

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vulkan/vk_mem_alloc.hpp"
-#include "math/Vector2.h"
+#include "math/Vector.h"
 
 namespace nc::graphics::vulkan
 {

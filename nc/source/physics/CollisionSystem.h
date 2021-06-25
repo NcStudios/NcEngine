@@ -56,15 +56,19 @@ namespace nc::physics
     {
         unsigned staticBroadChecks;
         unsigned staticNarrowChecks;
+        unsigned staticCollisions;
         unsigned dynamicBroadChecks;
         unsigned dynamicNarrowChecks;
+        unsigned dynamicCollisions;
 
         void Reset()
         {
             staticBroadChecks = 0u;
             staticNarrowChecks = 0u;
+            staticCollisions = 0u;
             dynamicBroadChecks = 0u;
             dynamicNarrowChecks = 0u;
+            dynamicCollisions = 0u;
         }
     };
     #endif
@@ -87,12 +91,14 @@ namespace nc::physics
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
+            std::vector<Manifold> m_manifolds;
 
             void FetchEstimates();
             void BroadDetectVsDynamic();
             void BroadDetectVsStatic();
             void NarrowDetectVsDynamic();
             void NarrowDetectVsStatic();
+            void ResolveCollisions();
             void FindExitAndStayEvents() const;
             void FindEnterEvents() const;
             void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;

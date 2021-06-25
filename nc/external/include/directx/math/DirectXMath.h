@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "math/Vector3.h"
+#include "math/Vector.h"
 #include "math/Quaternion.h"
 
 #ifndef __cplusplus
