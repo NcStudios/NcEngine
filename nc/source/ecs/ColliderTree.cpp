@@ -84,21 +84,21 @@ namespace nc::ecs
         entries.reserve(DensityThreshold);
     }
 
-    void Octant::BroadCheck(physics::SphereCollider collider, std::vector<const StaticTreeEntry*>* out) const
+    void Octant::BroadCheck(physics::SphereCollider estimate, std::vector<const StaticTreeEntry*>* out) const
     {
-        if(!physics::Intersect(collider, m_boundingVolume))
+        if(!physics::Intersect(estimate, m_boundingVolume))
             return;
 
         if(const auto* children = std::get_if<InnerNodeIndex>(&m_data); children)
         {
             for(const auto& child : *children)
-                child.BroadCheck(collider, out);
+                child.BroadCheck(estimate, out);
             return;
         }
 
         for(const auto* entry : std::get<LeafNodeIndex>(m_data))
         {
-            if(physics::Intersect(collider, entry->volumeEstimate))
+            if(physics::Intersect(estimate, entry->volumeEstimate))
                 out->emplace_back(entry);
         }
     }
@@ -158,10 +158,10 @@ namespace nc::ecs
         m_pool.Clear();
     }
 
-    std::vector<const StaticTreeEntry*> ColliderTree::BroadCheck(const physics::SphereCollider& volume) const
+    std::vector<const StaticTreeEntry*> ColliderTree::BroadCheck(const physics::SphereCollider& estimate) const
     {
         std::vector<const StaticTreeEntry*> out;
-        m_root.BroadCheck(volume, &out);
+        m_root.BroadCheck(estimate, &out);
         return out;
     }
 } // namespace nc::ecs

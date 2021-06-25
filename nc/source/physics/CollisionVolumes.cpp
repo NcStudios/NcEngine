@@ -20,7 +20,7 @@ namespace nc::physics
             }
             case ColliderType::Sphere:
             {
-                return { SphereCollider{info.offset, info.scale.x * 0.5f} };
+                return { SphereCollider{info.offset, info.scale.x / 2.0f} };
             }
             case ColliderType::Capsule:
             {
@@ -33,7 +33,7 @@ namespace nc::physics
                 return { HullColliderManager::Acquire(info.assetPath) };
             }
             default:
-                throw std::runtime_error("CreateBoundingVolume - Unkown ColliderType");
+                throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");
         }
     }
 
