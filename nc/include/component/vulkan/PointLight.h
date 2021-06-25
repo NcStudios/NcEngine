@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component/Component.h"
-#include "math/Vector4.h"
+#include "math/Vector.h"
 #include "directx/math/DirectXMath.h"
 
 namespace nc { class Transform; }

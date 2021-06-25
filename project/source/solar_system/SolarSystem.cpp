@@ -172,7 +172,7 @@ namespace nc::sample
         venusMaterial.normal    = defaultTexturesPath + "Planets/Venus/Normal.png";
         venusMaterial.roughness = defaultTexturesPath + "Planets/Venus/Roughness.png";
 
-        window::SetClearColor({0.0f, 0.0f, 0.0f, 1.0f});
+        window::SetClearColor({0.001f, 0.001f, 0.001f, 1.0f});
 
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-8.6f, 3.9f, -8.2f},
                                          .rotation = Quaternion::FromEulerAngles(0.5f, 0.9f, 0.0f),
