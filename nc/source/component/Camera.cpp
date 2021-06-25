@@ -4,17 +4,15 @@
 #include "imgui/imgui.h"
 #endif
 
-#include <string>
-
 namespace nc
 {
-    Camera::Camera(EntityHandle handle) noexcept
-        : Component(handle)
+    Camera::Camera(Entity entity) noexcept
+        : AutoComponent(entity)
     {
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Camera::EditorGuiElement()
+    void Camera::ComponentGuiElement()
     {
         ImGui::Text("Camera");
     }

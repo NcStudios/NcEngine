@@ -5,11 +5,13 @@
 #include "graphics\vulkan\TextureManager.h"
 #include "graphics\vulkan\techniques\PhongAndUiTechnique.h"
 #include "graphics\vulkan\techniques\WireframeTechnique.h"
+#include "graphics\vulkan\techniques\ParticleTechnique.h"
 
 #include <unordered_map>
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::vulkan { class MeshRenderer; }
+namespace nc::particle::vulkan { class ParticleRenderer; }
 
 namespace nc::graphics::vulkan
 {
@@ -21,12 +23,14 @@ namespace nc::graphics::vulkan
             Renderer(graphics::Graphics2* graphics);
             ~Renderer();
             
-            void Record(Commands* commands);
-            void RegisterMeshRenderer(TechniqueType technique, nc::vulkan::MeshRenderer* renderer);
             void BeginRenderPass(vk::CommandBuffer* cmd, vulkan::Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
+            void Record(Commands* commands);
+            void BindSharedData(vk::CommandBuffer* cmd);
+
+            void RegisterMeshRenderer(TechniqueType technique, nc::vulkan::MeshRenderer* renderer);
+            void RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates);
 
         private:
-            void RecordMeshRenderers(vk::CommandBuffer* cmd, vk::PipelineLayout* pipeline, std::unordered_map<std::string, std::vector<nc::vulkan::MeshRenderer*>>* meshRenderers);
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics2* m_graphics;
@@ -36,5 +40,6 @@ namespace nc::graphics::vulkan
 
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;
             std::unique_ptr<WireframeTechnique> m_wireframeTechnique;
+            std::unique_ptr<ParticleTechnique> m_particleTechnique;
     };
 }

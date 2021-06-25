@@ -31,5 +31,5 @@ namespace nc::sample::prefab
 
     std::string ToString(Resource resource);
     void InitializeResources();
-    EntityHandle Create(Resource resource, EntityInfo info);
+    Entity Create(registry_type* registry, Resource resource, EntityInfo info);
 } // end namespace project::prefab

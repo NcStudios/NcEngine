@@ -47,11 +47,11 @@ namespace
 
 namespace nc::particle
 {
-    EmitterState::EmitterState(EntityHandle handle, const ParticleInfo& info, GraphicsData* graphicsData)
+    EmitterState::EmitterState(Entity entity, const ParticleInfo& info, GraphicsData* graphicsData)
         : m_soa{info.emission.maxParticleCount},
           m_info{info},
           m_graphicsData{graphicsData},
-          m_handle{handle},
+          m_entity{entity},
           m_emissionCounter{0.0f}
     {
         Emit(m_info.emission.initialEmissionCount);
@@ -59,7 +59,7 @@ namespace nc::particle
 
     void EmitterState::Emit(size_t count)
     {
-        auto parentPosition = GetComponent<Transform>(m_handle)->GetPosition();
+        auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->GetPosition();
         auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
         for(size_t i = 0; i < particleCount; ++i)
         {
@@ -97,14 +97,19 @@ namespace nc::particle
             m_soa.RemoveAtIndex(i);
     }
 
+    ParticleInfo* EmitterState::GetInfo()
+    {
+        return &m_info;
+    }
+
     auto EmitterState::GetSoA() const -> const ParticleSoA*
     {
         return &m_soa;
     }
 
-    EntityHandle EmitterState::GetHandle() const
+    Entity EmitterState::GetEntity() const
     {
-        return m_handle;
+        return m_entity;
     }
 
     void EmitterState::PeriodicEmission(float dt)
@@ -131,7 +136,8 @@ namespace nc::particle
 
         return graphics::MvpMatrices
         {
-            DirectX::XMMatrixTranspose(modelView),
+            // @todo: Replace MvpMatrices with Normal + VP matrices.
+            ComposeMatrix(particle.scale, Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)), particle.position),
             DirectX::XMMatrixTranspose(modelView * m_graphicsData->projectionMatrix)
         };
     }

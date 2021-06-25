@@ -10,35 +10,46 @@ namespace nc::sample
 {
     /** A prefab spawner configurable with a SpawnBehavior. If provided, extension
         will be applied to each handle after creation. */
-    class Spawner : public Component
+    class Spawner : public AutoComponent
     {
         public:
-            using SpawnExtension = std::function<void(EntityHandle)>;
+            using SpawnExtension = std::function<void(Entity)>;
 
-            Spawner(EntityHandle handle, prefab::Resource resource, SpawnBehavior behavior, SpawnExtension extension = nullptr);
+            Spawner(Entity entity,
+                    registry_type* registry,
+                    prefab::Resource resource,
+                    SpawnBehavior behavior,
+                    SpawnExtension extension = nullptr);
             void FrameUpdate(float) override;
             void StageSpawn(unsigned count = 1u);
             void Spawn(unsigned count = 1u);
             void StageDestroy(unsigned count = 1u);
             void Destroy(unsigned count = 1u);
             void SetPrefab(prefab::Resource resource);
-            const std::vector<EntityHandle>& GetHandles() const;
+            const std::vector<Entity>& GetHandles() const;
             int GetObjectCount() const;
         
         private:
+            registry_type* m_registry;
             SpawnExtension m_extension;
-            std::vector<EntityHandle> m_entities;
+            std::vector<Entity> m_entities;
             SpawnPropertyGenerator m_generator;
             prefab::Resource m_resource;
             bool m_applyConstantVelocity;
             bool m_applyConstantRotation;
+            EntityTraits::layer_type m_layer;
             bool m_spawnStaticEntities;
             size_t m_stagedAdditions;
             size_t m_stagedDeletions;
     };
 
-    inline Spawner::Spawner(EntityHandle handle, prefab::Resource resource, SpawnBehavior behavior, SpawnExtension extension)
-        : Component{handle},
+    inline Spawner::Spawner(Entity entity,
+                            registry_type* registry,
+                            prefab::Resource resource,
+                            SpawnBehavior behavior,
+                            SpawnExtension extension)
+        : AutoComponent{entity},
+          m_registry{registry},
           m_extension{extension},
           m_entities{},
           m_generator{behavior},
@@ -46,6 +57,7 @@ namespace nc::sample
           m_applyConstantVelocity{Vector3::Zero() != behavior.velocityRandomRange},
           m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxisRandomRange &&
                                   0.0f != behavior.thetaRandomRange},
+          m_layer{behavior.layer},
           m_spawnStaticEntities{behavior.spawnAsStaticEntity &&
                                 !m_applyConstantRotation &&
                                 !m_applyConstantRotation},
@@ -81,17 +93,18 @@ namespace nc::sample
     {
         std::generate_n(std::back_inserter(m_entities), count, [this]()
         {
-            auto handle = prefab::Create(m_resource,
+            auto handle = prefab::Create(m_registry, m_resource,
             {
                 .position = m_generator.Position(),
                 .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
+                .layer = m_layer,
                 .flags = m_spawnStaticEntities
             });
 
             if(m_applyConstantVelocity)
-                AddComponent<ConstantTranslation>(handle, m_generator.Velocity());
+                m_registry->Add<ConstantTranslation>(handle, m_registry, m_generator.Velocity());
             if(m_applyConstantRotation)
-                AddComponent<ConstantRotation>(handle, m_generator.RotationAxis(), m_generator.Theta());
+                m_registry->Add<ConstantRotation>(handle, m_registry, m_generator.RotationAxis(), m_generator.Theta());
             if(m_extension)
                 m_extension(handle);
             return handle;
@@ -107,7 +120,7 @@ namespace nc::sample
     {
         while(!m_entities.empty() && count--)
         {
-            DestroyEntity(m_entities.back());
+            m_registry->Remove<Entity>(m_entities.back());
             m_entities.pop_back();
         }
     }
@@ -117,7 +130,7 @@ namespace nc::sample
         m_resource = resource;
     }
 
-    inline const std::vector<EntityHandle>& Spawner::GetHandles() const
+    inline const std::vector<Entity>& Spawner::GetHandles() const
     {
         return m_entities;
     }

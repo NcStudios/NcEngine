@@ -2766,40 +2766,6 @@ namespace VMA_HPP_NAMESPACE {
 #endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
 }
 
-namespace VULKAN_HPP_NAMESPACE {
-  template <> struct FlagTraits<VMA_HPP_NAMESPACE::AllocationCreateFlagBits>
-  {
-    enum
-    {
-      allFlags = VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eDedicatedMemory) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eNeverAllocate) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eMapped) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eCanBecomeLost) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eCanMakeOtherLost) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eUserDataCopyString) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eUpperAddress) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eDontBind)  | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eWithinBudget)  | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eStrategyBestFit) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eStrategyWorstFit) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eStrategyFirstFit) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eStrategyMinMemory) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eStrategyMinTime) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eStrategyMinFragmentation) | VkFlags(VMA_HPP_NAMESPACE::AllocationCreateFlagBits::eStrategyMask)
-    };
-  };
-
-  template <> struct FlagTraits<VMA_HPP_NAMESPACE::AllocatorCreateFlagBits>
-  {
-    enum
-    {
-      allFlags = VkFlags(VMA_HPP_NAMESPACE::AllocatorCreateFlagBits::eExternallySynchronized) | VkFlags(VMA_HPP_NAMESPACE::AllocatorCreateFlagBits::eKhrDedicatedAllocation) | VkFlags(VMA_HPP_NAMESPACE::AllocatorCreateFlagBits::eKhrBindMemory2) | VkFlags(VMA_HPP_NAMESPACE::AllocatorCreateFlagBits::eExtMemoryBudget )
-    };
-  };
-
-  template <> struct FlagTraits<VMA_HPP_NAMESPACE::PoolCreateFlagBits>
-  {
-    enum
-    {
-      allFlags = VkFlags(VMA_HPP_NAMESPACE::PoolCreateFlagBits::eIgnoreBufferImageGranularity) | VkFlags(VMA_HPP_NAMESPACE::PoolCreateFlagBits::eLinearAlgorithm) | VkFlags(VMA_HPP_NAMESPACE::PoolCreateFlagBits::eBuddyAlgorithm) | VkFlags(VMA_HPP_NAMESPACE::PoolCreateFlagBits::eAlgorithmMask)
-    };
-  };
-
-  template <> struct FlagTraits<VMA_HPP_NAMESPACE::RecordFlagBits>
-  {
-    enum
-    {
-      allFlags = VkFlags(VMA_HPP_NAMESPACE::RecordFlagBits::eFlushAfterCall)
-    };
-  };
-}
-
 #endif
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop

@@ -13,6 +13,8 @@
 namespace
 {
     std::function<void(nc::physics::LayerMask)> LayerSelectCallback = nullptr;
+    const auto CoinLayer = nc::EntityTraits::layer_type{1u};
+    const auto TokenLayer = nc::EntityTraits::layer_type{2u};
     const auto MaskNone = nc::physics::LayerMask32None;
     const auto MaskAll = nc::physics::LayerMask32All;
     const auto MaskCoin = nc::physics::LayerMask32{1u};
@@ -49,27 +51,28 @@ namespace
 
 namespace nc::sample
 {
-    void ClickEvents::Load()
+    void ClickEvents::Load(registry_type* registry)
     {
         // Setup
-        m_sceneHelper.Setup(true, false, Widget);
+        m_sceneHelper.Setup(registry, true, false, Widget);
 
-        auto cameraHandle = CreateEntity({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = AddComponent<EdgePanCamera>(cameraHandle);
+        auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
+        auto camera = registry->Add<EdgePanCamera>(cameraHandle);
         camera::SetMainCamera(camera);
-        auto clickHandler = AddComponent<ClickHandler>(cameraHandle, MaskAll);
+        auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll);
         LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
-        auto lvHandle = CreateEntity({.position = Vector3{-2.4f, 12.1f, 0.0f}, .tag = "Point Light"});
-        AddComponent<PointLight>(lvHandle);
-        auto lvHandle2 = CreateEntity({.position = Vector3{12.1f, 14.5f, 7.3f}, .tag = "Point Light"});
-        AddComponent<PointLight>(lvHandle2);
-        auto lvHandle3 = CreateEntity({.position = Vector3{4.1f, 14.5f, 3.3f}, .tag = "Point Light"});
-        AddComponent<PointLight>(lvHandle3);
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.4f, 12.1f, 0.0f}, .tag = "Point Light"});
+        registry->Add<PointLight>(lvHandle, PointLight::Properties{});
+        auto lvHandle2 = registry->Add<Entity>({.position = Vector3{12.1f, 14.5f, 7.3f}, .tag = "Point Light"});
+        registry->Add<PointLight>(lvHandle2, PointLight::Properties{});
+        auto lvHandle3 = registry->Add<Entity>({.position = Vector3{4.1f, 14.5f, 3.3f}, .tag = "Point Light"});
+        registry->Add<PointLight>(lvHandle3, PointLight::Properties{});
 
         // Objects
-        prefab::Create(prefab::Resource::Table, 
+        prefab::Create(registry,
+                       prefab::Resource::Table, 
                        {.position = Vector3{0.0f, -0.4f, 0.0f},
                        .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
                        .scale = Vector3::Splat(7.5f),
@@ -79,28 +82,23 @@ namespace nc::sample
         SpawnBehavior behavior
         {
             .rotationOffset = Vector3{math::Pi / 2.0f, 0.0f, 0.0f},
-            .positionRandomRange = Vector3{4.2f, 0.0f, 2.8f}
+            .positionRandomRange = Vector3{4.2f, 0.0f, 2.8f},
+            .layer = CoinLayer
         };
         
-        auto coinExtension = [](EntityHandle handle)
+        auto spawnExtension = [registry](Entity handle)
         {
-            GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
-            AddComponent<Clickable>(handle, MaskCoin);
+            registry->Get<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
+            registry->Add<Clickable>(handle, registry->Get<Tag>(handle)->Value().data());
         };
 
-        auto coinSpawnerHandle = CreateEntity({.tag = "Coin Spawner"});
-        auto coinSpawner = AddComponent<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, coinExtension);
+        auto coinSpawnerHandle = registry->Add<Entity>({.tag = "Coin Spawner"});
+        auto coinSpawner = registry->Add<Spawner>(coinSpawnerHandle, registry, prefab::Resource::Coin, behavior, spawnExtension);
         coinSpawner->Spawn(20);
-
-        // Token Spawner
-        auto tokenExtension = [](EntityHandle handle)
-        {
-            GetComponent<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
-            AddComponent<Clickable>(handle, MaskToken);
-        };
         
-        auto tokenSpawnerHandle = CreateEntity({.tag = "Token Spawner"});
-        auto tokenSpawner = AddComponent<Spawner>(tokenSpawnerHandle, prefab::Resource::Token, behavior, tokenExtension);
+        behavior.layer = TokenLayer;
+        auto tokenSpawnerHandle = registry->Add<Entity>({.tag = "Token Spawner"});
+        auto tokenSpawner = registry->Add<Spawner>(tokenSpawnerHandle, registry, prefab::Resource::Token, behavior, spawnExtension);
         tokenSpawner->Spawn(20);
     }
 

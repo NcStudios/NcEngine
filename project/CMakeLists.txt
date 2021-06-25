@@ -8,6 +8,7 @@ endif()
 #Options
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(USE_VULKAN "Use Vulkan rather than DirectX" OFF)
+option(VALIDATION "Use Vulkan validation layers" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior sanitizer" OFF)
@@ -52,6 +53,10 @@ add_definitions(${WIN32_DEFINITIONS})
 
 if(USE_VULKAN)
     add_definitions(-DUSE_VULKAN)
+endif()
+
+if(VALIDATION)
+    add_definitions(-DVALIDATION)
 endif()
 
 if(NC_EDITOR_ENABLED)

@@ -111,13 +111,11 @@ namespace nc::core
     {
         V_LOG("Starting engine loop");
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
-        m_sceneSystem.DoSceneChange();
+        m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
         auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
-        #ifndef USE_VULKAN
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
-        #endif
 
         while(m_isRunning)
         {
@@ -126,9 +124,7 @@ namespace nc::core
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
 
-            #ifndef USE_VULKAN
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
-            #endif
             
             if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
             {
@@ -137,16 +133,12 @@ namespace nc::core
 
             FrameLogic(dt);
 
-            #ifndef USE_VULKAN
             particleUpdateJobResult.wait();
-            #endif
 
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
 
-            #ifndef USE_VULKAN
             particleEmitterSystem->ProcessFrameEvents();
-            #endif
 
             FrameCleanup();
         }
@@ -178,15 +170,17 @@ namespace nc::core
         V_LOG("Swapping scene");
         m_sceneSystem.UnloadActiveScene();
         ClearState();
-        m_sceneSystem.DoSceneChange();
+        m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
     }
 
     void Engine::FixedStepLogic()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep();
-        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
-            entity->SendFixedUpdate();
+
+        for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
+            group.SendFixedUpdate();
+
         m_time.ResetFixedDeltaTime();
         NC_PROFILE_END();
     }
@@ -194,14 +188,17 @@ namespace nc::core
     void Engine::FrameLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-        for(auto* entity : m_ecs.GetRegistry()->GetActiveEntities())
-            entity->SendFrameUpdate(dt);
+
+        for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
+            group.SendFrameUpdate(dt);
+        
         NC_PROFILE_END();
     }
 
     void Engine::FrameRender()
     {
 #ifdef USE_VULKAN
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         m_graphics2.FrameBegin();
         m_ui.FrameBegin();
 
@@ -226,6 +223,7 @@ namespace nc::core
 
         m_graphics2.Draw();
         m_graphics2.FrameEnd();
+        NC_PROFILE_END();
 #else
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         m_ui.FrameBegin();

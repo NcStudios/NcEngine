@@ -100,7 +100,7 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, ecs::registry_type* registry)
+    void UIImpl::Frame(float* dt, registry_type* registry)
     {
         m_editor.Frame(dt, registry);
         if(m_projectUI)

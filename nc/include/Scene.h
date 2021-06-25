@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Ecs.h"
+
 #include <memory>
 
 namespace nc::scene
@@ -8,7 +10,7 @@ namespace nc::scene
     {
         public:
             virtual ~Scene() = default;
-            virtual void Load() = 0;
+            virtual void Load(registry_type* registry) = 0;
             virtual void Unload() = 0;
     };
 

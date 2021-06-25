@@ -1,22 +1,22 @@
 #pragma once
 
+#include "Ecs.h"
 #include "component/ParticleEmitter.h"
 #include "particle/ParticleRenderer.h"
 #include "particle/EmitterState.h"
 
-namespace nc::graphics { class Graphics; }
+namespace nc::graphics { class Graphics2; }
 
 namespace nc::ecs
 {
     class ParticleEmitterSystem
     {
         public:
-
-        #ifdef USE_VULKAN
-            ParticleEmitterSystem();
-        #else
-            ParticleEmitterSystem(graphics::Graphics* graphics);
-        #endif
+            #ifdef USE_VULKAN
+            ParticleEmitterSystem(registry_type* registry, graphics::Graphics2* graphics);
+            #else
+            ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics);
+            #endif
 
             /** UpdateParticles is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -27,20 +27,21 @@ namespace nc::ecs
             void ProcessFrameEvents();
 
             // this may need to be delayed too
-            void Emit(EntityHandle handle, size_t count);
+            void Emit(Entity entity, size_t count);
 
             // ComponentSystem Methods
-            void Add(const ParticleEmitter& emitter);
-            void Remove(EntityHandle handle);
+            void Add(ParticleEmitter& emitter);
+            void Remove(Entity entity);
             void Clear();
 
         private:
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;
-            std::vector<EntityHandle> m_toRemove;
-        #ifndef USE_VULKAN
+            std::vector<Entity> m_toRemove;
+
+        #ifdef USE_VULKAN
             particle::GraphicsData m_graphicsData;
-            particle::ParticleRenderer m_renderer;
+            graphics::Graphics2* m_graphics;
         #endif
 
     };

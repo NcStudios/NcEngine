@@ -28,8 +28,8 @@ namespace
 
 namespace nc
 {
-    Transform::Transform(EntityHandle handle, const Vector3& pos, const Quaternion& rot, const Vector3& scale, EntityHandle parent)
-        : ComponentBase(handle),
+    Transform::Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Entity parent)
+        : ComponentBase(entity),
           m_localMatrix{ComposeMatrix(scale, rot, pos)},
           m_worldMatrix{m_localMatrix},
           m_parent{parent},
@@ -38,8 +38,8 @@ namespace nc
         IF_THROW(HasAnyZeroElement(scale), "Transform::Transform - Invalid scale(elements cannot be 0)");
         if(m_parent.Valid())
         {
-            auto* parentTransform = GetComponent<Transform>(parent);
-            parentTransform->AddChild(handle);
+            auto* parentTransform = ActiveRegistry()->Get<Transform>(parent);
+            parentTransform->AddChild(entity);
             m_worldMatrix = parentTransform->GetTransformationMatrix() * m_worldMatrix;
         }
     }
@@ -235,41 +235,43 @@ namespace nc
         UpdateWorldMatrix();
     }
 
-    std::span<EntityHandle> Transform::GetChildren()
+    std::span<Entity> Transform::GetChildren()
     {
-        return std::span<EntityHandle>(m_children.data(), m_children.size());
+        return std::span<Entity>(m_children.data(), m_children.size());
     }
 
-    EntityHandle Transform::GetRoot() const
+    Entity Transform::GetRoot() const
     {
         if(m_parent.Valid())
-            return GetComponent<Transform>(m_parent)->GetRoot();
+            return ActiveRegistry()->Get<Transform>(m_parent)->GetRoot();
         
-        return GetParentHandle();
+        return GetParentEntity();
     }
 
-    EntityHandle Transform::GetParent() const
+    Entity Transform::GetParent() const
     {
         return m_parent;
     }
 
-    void Transform::SetParent(EntityHandle parent)
+    void Transform::SetParent(Entity parent)
     {
+        auto* registry = ActiveRegistry();
+
         if(m_parent.Valid())
-            GetComponent<Transform>(m_parent)->RemoveChild(GetParentHandle());
+            registry->Get<Transform>(m_parent)->RemoveChild(GetParentEntity());
         
         m_parent = parent;
 
         if(m_parent.Valid())
-            GetComponent<Transform>(m_parent)->AddChild(GetParentHandle());
+            registry->Get<Transform>(m_parent)->AddChild(GetParentEntity());
     }
 
-    void Transform::AddChild(EntityHandle child)
+    void Transform::AddChild(Entity child)
     {
         m_children.push_back(child);
     }
 
-    void Transform::RemoveChild(EntityHandle child)
+    void Transform::RemoveChild(Entity child)
     {
         auto pos = std::remove_if(m_children.begin(), m_children.end(), [child](auto& c)
         {
@@ -282,20 +284,24 @@ namespace nc
 
     void Transform::UpdateWorldMatrix()
     {
+        auto* registry = ActiveRegistry();
+
         if(m_parent.Valid())
-            m_worldMatrix = m_localMatrix * GetComponent<Transform>(m_parent)->GetTransformationMatrix();
+            m_worldMatrix = m_localMatrix * registry->Get<Transform>(m_parent)->GetTransformationMatrix();
         else
             m_worldMatrix = m_localMatrix;
         
         for(auto child : m_children)
-            GetComponent<Transform>(child)->UpdateWorldMatrix();
+            registry->Get<Transform>(child)->UpdateWorldMatrix();
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Transform::EditorGuiElement()
+    template<> void ComponentGuiElement<Transform>(Transform* transform)
     {
+        auto& worldMatrix = transform->m_worldMatrix;
+
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, worldMatrix);
         Vector3 scl, pos;
         auto rot = Quaternion::Identity();
         DirectX::XMStoreVector3(&scl, scl_v);
@@ -311,11 +317,11 @@ namespace nc
         auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
 
         if(posResult)
-            SetPosition(pos);
+            transform->SetPosition(pos);
         if(rotResult)
-            SetRotation(angles);
+            transform->SetRotation(angles);
         if(sclResult)
-            SetScale(scl);
+            transform->SetScale(scl);
     }
     #endif
 }

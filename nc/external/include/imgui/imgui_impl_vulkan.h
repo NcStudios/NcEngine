@@ -40,7 +40,7 @@
 #if defined(IMGUI_IMPL_VULKAN_NO_PROTOTYPES) && !defined(VK_NO_PROTOTYPES)
 #define VK_NO_PROTOTYPES
 #endif
-#include <vulkan/vulkan.hpp>
+#include "vulkan/vk_mem_alloc.hpp"
 
 // Initialization data, for ImGui_ImplVulkan_Init()
 // [Please zero-clear before use!]

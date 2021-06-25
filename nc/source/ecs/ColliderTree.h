@@ -44,8 +44,8 @@ namespace nc::ecs
     struct StaticTreeEntry
     {
         Collider::BoundingVolume volume;
-        physics::Layer layer;
-        EntityHandle handle;
+        physics::LayerMask layer;
+        Entity entity;
     };
 
     /** ColliderTree node representing a cubic chunk of the world. Leaf nodes store
@@ -83,8 +83,8 @@ namespace nc::ecs
         public:
             ColliderTree(uint32_t maxStaticColliders, uint32_t densityThreshold, float minimumExtent, float worldspaceExtent);
 
-            void Add(EntityHandle handle, const ColliderInfo& info);
-            void Remove(EntityHandle handle);
+            void Add(Entity entity, const ColliderInfo& info);
+            void Remove(Entity entity);
             void Rebuild();
             void Clear();
             std::vector<const StaticTreeEntry*> BroadCheck(const DirectX::BoundingSphere& volume) const;

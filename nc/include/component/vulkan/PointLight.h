@@ -31,17 +31,18 @@ namespace nc::vulkan
         float padding[3] = {0.0f, 0.0f, 0.0f};
     };
 
-    class PointLight final : public Component
+    class PointLight final : public ComponentBase
     {
         public:
-            PointLight(EntityHandle parentHandle, PointLightInfo info);
-            const PointLightInfo& GetInfo();
-            void Set(const PointLightInfo& info);
-            void Update();
+            PointLight(Entity entity, PointLightInfo info);
 
-        #ifdef NC_EDITOR_ENABLED
-        void EditorGuiElement() override;
-        #endif
+            const PointLightInfo& GetInfo() const;
+            float GetRange() const;
+
+            void SetInfo(PointLightInfo info);
+            void SetRange(float range);
+
+            void Update();
 
         private:
             float m_range;
@@ -59,4 +60,8 @@ namespace nc
         using requires_on_add_callback = std::true_type;
         using requires_on_remove_callback = std::true_type;
     };
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<vulkan::PointLight>(vulkan::PointLight* light);
+    #endif
 }

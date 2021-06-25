@@ -2,7 +2,7 @@
 #include "Core.h"
 #include "debug/Utils.h"
 #ifdef USE_VULKAN
-    #include "jare_scratch/VulkanScene.h"
+    #include "solar_system/SolarSystem.h"
 #else
     #include "worms/Worms.h"
 #endif
@@ -15,7 +15,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     {
         nc::core::Initialize(instance);
 #ifdef USE_VULKAN
-        nc::core::Start(std::make_unique<nc::sample::VulkanScene>());
+        nc::core::Start(std::make_unique<nc::sample::SolarSystem>());
 #else
         nc::core::Start(std::make_unique<nc::sample::Worms>());
 #endif

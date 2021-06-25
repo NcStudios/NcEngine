@@ -1,5 +1,6 @@
 target_sources(${ENGINE_LIB}
     PRIVATE
+        ${ROOT_DIR}/source/component/AutoComponentGroup.cpp
         ${ROOT_DIR}/source/component/Camera.cpp
         ${ROOT_DIR}/source/component/Collider.cpp
         ${ROOT_DIR}/source/component/ColliderDetail.cpp

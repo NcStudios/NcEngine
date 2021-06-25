@@ -5,19 +5,21 @@
 namespace nc::sample
 {
     /** Applies a constant rotation around an axis to the parent object */
-    class ConstantRotation : public Component
+    class ConstantRotation : public AutoComponent
     {
         public:
-            ConstantRotation(EntityHandle handle, Vector3 axis, float radiansPerSecond);
+            ConstantRotation(Entity entity, registry_type* registry, Vector3 axis, float radiansPerSecond);
             void FrameUpdate(float dt) override;
 
         private:
+            registry_type* m_registry;
             Vector3 m_axis;
             float m_radiansPerSecond;
     };
 
-    inline ConstantRotation::ConstantRotation(EntityHandle handle, Vector3 axis, float radiansPerSecond)
-        : Component{handle},
+    inline ConstantRotation::ConstantRotation(Entity entity, registry_type* registry, Vector3 axis, float radiansPerSecond)
+        : AutoComponent{entity},
+          m_registry{registry},
           m_axis{axis},
           m_radiansPerSecond{radiansPerSecond}
     {
@@ -25,6 +27,6 @@ namespace nc::sample
 
     inline void ConstantRotation::FrameUpdate(float dt)
     {
-        GetComponent<Transform>(GetParentHandle())->Rotate(m_axis, m_radiansPerSecond * dt);
+        m_registry->Get<Transform>(GetParentEntity())->Rotate(m_axis, m_radiansPerSecond * dt);
     }
 }

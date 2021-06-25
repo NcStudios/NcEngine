@@ -126,16 +126,20 @@ namespace nc::ecs
         MinimumExtent = minimumExtent;
     }
 
-    void ColliderTree::Add(EntityHandle handle, const ColliderInfo& info)
+    void ColliderTree::Add(Entity entity, const ColliderInfo& info)
     {
-        auto volume = physics::CalculateBoundingVolume(info.type, physics::GetVolumePropertiesFromColliderInfo(info), GetComponent<Transform>(handle)->GetTransformationMatrix());
-        auto* entry = m_pool.Add(volume, GetEntity(handle)->Layer, handle);
+        auto* registry = ActiveRegistry();
+
+        auto volume = physics::CalculateBoundingVolume(info.type,
+                                                       physics::GetVolumePropertiesFromColliderInfo(info),
+                                                       registry->Get<Transform>(entity)->GetTransformationMatrix());
+        auto* entry = m_pool.Add(volume, physics::ToLayerMask(EntityUtils::Layer(entity)), entity);
         m_root.Add(entry);
     }
 
-    void ColliderTree::Remove(EntityHandle handle)
+    void ColliderTree::Remove(Entity entity)
     {
-        if(m_pool.RemoveIf([handle](auto* e) { return e->handle == handle; }))
+        if(m_pool.RemoveIf([entity](auto* e) { return e->entity == entity; }))
             Rebuild();
     }
 

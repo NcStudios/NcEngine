@@ -1,10 +1,11 @@
 #include "MainCamera.h"
 #include "MainCameraInternal.h"
 #include "Ecs.h"
+#include "debug/Utils.h"
 
 namespace
 {
-    nc::EntityHandle g_mainCamera = nc::EntityHandle::Null();
+    nc::Entity g_mainCamera = nc::Entity::Null();
 }
 
 namespace nc::camera
@@ -13,18 +14,18 @@ namespace nc::camera
     void SetMainCamera(Camera* camera)
     {
         V_LOG("Setting main camera");
-        g_mainCamera = camera->GetParentHandle();
+        g_mainCamera = camera->GetParentEntity();
     }
 
     void ClearMainCamera()
     {
-        g_mainCamera = EntityHandle::Null();
+        g_mainCamera = Entity::Null();
     }
 
     DirectX::XMMATRIX CalculateViewMatrix()
     {
         IF_THROW(!g_mainCamera.Valid(), "camera::CalculateViewMatrix - No camera is set");
-        auto* transform = GetComponent<Transform>(g_mainCamera);
+        auto* transform = ActiveRegistry()->Get<Transform>(g_mainCamera);
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform->GetTransformationMatrix());
         auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
@@ -34,6 +35,6 @@ namespace nc::camera
     Transform* GetMainCameraTransform()
     {
         IF_THROW(!g_mainCamera.Valid(), "camera::GetMainCameraTransform - No camera is set");
-        return GetComponent<Transform>(g_mainCamera);
+        return ActiveRegistry()->Get<Transform>(g_mainCamera);
     }
 }

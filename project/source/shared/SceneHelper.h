@@ -15,7 +15,7 @@ namespace nc::sample
     class SceneHelper
     {
         public:
-            void Setup(bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
+            void Setup(registry_type* registry, bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
             void TearDown();
 
         private:
@@ -23,13 +23,13 @@ namespace nc::sample
             std::unique_ptr<GameLog> m_log;
     };
 
-    inline void SceneHelper::Setup(bool enableLog, bool createLight, std::function<void()> widgetCallback)
+    inline void SceneHelper::Setup(registry_type* registry, bool enableLog, bool createLight, std::function<void()> widgetCallback)
     {
         if(enableLog)
         {
             m_log = std::make_unique<GameLog>();
-            auto timerHandle = CreateEntity({.tag = "FrameTimer"});
-            AddComponent<FrameTimer>(timerHandle);
+            auto timerHandle = registry->Add<Entity>({.tag = "FrameTimer"});
+            registry->Add<FrameTimer>(timerHandle);
         }
 
         m_ui = std::make_unique<SampleUI>(m_log.get(), widgetCallback);
@@ -37,8 +37,8 @@ namespace nc::sample
 
         if(createLight)
         {
-            auto lvHandle = CreateEntity({.position = Vector3::Up() * 12.0f, .tag = "Point Light"});
-            AddComponent<PointLight>(lvHandle);
+            auto lvHandle = registry->Add<Entity>({.position = Vector3::Up() * 12.0f, .tag = "Point Light"});
+            registry->Add<PointLight>(lvHandle, PointLight::Properties{});
         }
     }
 

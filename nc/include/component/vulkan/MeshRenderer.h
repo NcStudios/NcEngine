@@ -10,19 +10,15 @@ namespace nc { class Transform; }
 
 namespace nc::vulkan
 {
-    class MeshRenderer : public Component
+    class MeshRenderer : public ComponentBase
     {
         public:
-            MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::Material material, nc::graphics::vulkan::TechniqueType techniqueType);
+            MeshRenderer(Entity entity, std::string meshUid, nc::graphics::vulkan::Material material, nc::graphics::vulkan::TechniqueType techniqueType);
             Transform* GetTransform();
             const std::string& GetMeshUid() const;
-            const nc::graphics::vulkan::Material& GetMaterial() const;
+            nc::graphics::vulkan::Material& GetMaterial();
             nc::graphics::vulkan::TechniqueType GetTechniqueType() const;
 
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
-        
         private:
             std::string m_meshUid;
             nc::graphics::vulkan::Material m_material;
@@ -40,4 +36,8 @@ namespace nc
         using requires_on_add_callback = std::true_type;
         using requires_on_remove_callback = std::true_type;
     };
+
+    #ifdef NC_EDITOR_ENABLED
+    template<> void ComponentGuiElement<vulkan::MeshRenderer>(vulkan::MeshRenderer* meshRenderer);
+    #endif
 }

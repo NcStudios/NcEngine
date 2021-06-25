@@ -3,6 +3,7 @@
 #include "config/Config.h"
 #include "component/Transform.h"
 #include "component/vulkan/MeshRenderer.h"
+#include "debug/Profiler.h"
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Initializers.h"
@@ -79,8 +80,8 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo();
-        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment);
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout);
@@ -94,19 +95,11 @@ namespace nc::graphics::vulkan
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    std::unordered_map<std::string, std::vector<EntityHandle>>* PhongAndUiTechnique::GetMeshRenderers()
-    {
-        return &m_meshRenderers;
-    }
-
-    vk::PipelineLayout* PhongAndUiTechnique::GetPipelineLayout()
-    {
-        return &m_pipelineLayout;
-    }
-
     void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+        NC_PROFILE_END();
     }
 
     void PhongAndUiTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
@@ -114,19 +107,16 @@ namespace nc::graphics::vulkan
         auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
         if (renderers == m_meshRenderers.end())
         {
-            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<EntityHandle>{meshRenderer->GetParentHandle()} );
+            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()} );
             return;
         }
 
-        renderers->second.push_back(meshRenderer->GetParentHandle());
+        renderers->second.push_back(meshRenderer->GetParentEntity());
     }
 
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd)
     {
-        vk::DeviceSize offsets[] = { 0 };
-
-        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
-        cmd->bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
 
@@ -143,7 +133,7 @@ namespace nc::graphics::vulkan
             
             for (auto handle : renderers)
             {
-                auto* meshRenderer = GetComponent<nc::vulkan::MeshRenderer>(handle);
+                auto* meshRenderer = ActiveRegistry()->Get<nc::vulkan::MeshRenderer>(handle);
                 auto& material = meshRenderer->GetMaterial();
                 pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
                 pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
@@ -159,5 +149,6 @@ namespace nc::graphics::vulkan
                 #endif
             }
         }
+        NC_PROFILE_END();
     }
 }

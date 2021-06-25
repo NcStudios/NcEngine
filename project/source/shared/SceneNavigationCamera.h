@@ -9,7 +9,7 @@ namespace nc::sample
     class SceneNavigationCamera : public Camera
     {
         public:
-            SceneNavigationCamera(EntityHandle handle, float panDamp, float lookDamp, float zoomDamp);
+            SceneNavigationCamera(Entity entity, float panDamp, float lookDamp, float zoomDamp);
             void FrameUpdate(float dt) override;
 
         private:
@@ -25,8 +25,8 @@ namespace nc::sample
             void Zoom(float dt, Transform* transform);
     };
 
-    inline SceneNavigationCamera::SceneNavigationCamera(EntityHandle handle, float panDamp, float lookDamp, float zoomDamp)
-        : Camera{handle},
+    inline SceneNavigationCamera::SceneNavigationCamera(Entity entity, float panDamp, float lookDamp, float zoomDamp)
+        : Camera{entity},
           m_panDampen{panDamp},
           m_lookDampen{lookDamp},
           m_zoomDampen{zoomDamp}

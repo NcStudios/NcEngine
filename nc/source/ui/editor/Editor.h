@@ -1,8 +1,7 @@
 #ifdef NC_EDITOR_ENABLED
 #pragma once
 
-#include "entity/Entity.h"
-#include "ecs/EntityComponentSystem.h"
+#include "Ecs.h"
 
 namespace nc 
 {
@@ -14,6 +13,7 @@ namespace nc
         class Graphics2;
         #endif
     }
+    namespace graphics { class Graphics; }
 }
 
 namespace nc::ui::editor
@@ -26,7 +26,7 @@ namespace nc::ui::editor
             #endif
             Editor(graphics::Graphics* graphics);
 
-            void Frame(float* dt, ecs::registry_type* registry);
+            void Frame(float* dt, registry_type* registry);
 
         private:
             #ifdef USE_VULKAN

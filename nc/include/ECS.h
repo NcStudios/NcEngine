@@ -1,122 +1,27 @@
 #pragma once
 
-#include "entity/Entity.h"
-#include "entity/EntityInfo.h"
+#include "Entity.h"
+#include "component/AutoComponentGroup.h"
 #include "component/Collider.h"
-#include "component/PointLight.h"
 #include "component/NetworkDispatcher.h"
-#include "component/Renderer.h"
-#include "component/Transform.h"
-#include "debug/Utils.h"
 #include "component/ParticleEmitter.h"
-#ifdef USE_VULKAN
+#include "component/PointLight.h"
+#include "component/Registry.h"
+#include "component/Renderer.h"
+#include "component/Tag.h"
+#include "component/Transform.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "component/vulkan/PointLight.h"
-#include "graphics/vulkan/TechniqueType.h"
-#endif
-#include <concepts>
-#include <string>
 
 namespace nc
 {
-    /** Entity Functions */
-    EntityHandle CreateEntity(EntityInfo info = EntityInfo{});
-    void DestroyEntity(EntityHandle handle);
-    bool EntityExists(EntityHandle handle);
-    [[nodiscard]] Entity* GetEntity(EntityHandle handle);
-    [[nodiscard]] Entity* GetEntity(const std::string& tag);
+    using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup, Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Tag, Transform, vulkan::MeshRenderer, vulkan::PointLight>;
+    using registry_type = ecs::Registry<registry_type_list>;
 
-    /** Component Functions */
-    template<std::derived_from<ComponentBase> T, class ...Args>
-    T* AddComponent(EntityHandle handle, Args ... args);
-    
-    template<std::derived_from<ComponentBase> T>
-    bool RemoveComponent(EntityHandle handle);
-    
-    template<std::derived_from<ComponentBase> T>
-    [[nodiscard]] T* GetComponent(EntityHandle handle);
-    
-    template<std::derived_from<ComponentBase> T>
-    [[nodiscard]] bool HasComponent(EntityHandle handle);
+    auto ActiveRegistry() -> registry_type*;
 
-    /** Specializations for engine components */
-    template<> ParticleEmitter* AddComponent<ParticleEmitter>(EntityHandle handle, ParticleInfo info);
-    template<> ParticleEmitter* GetComponent<ParticleEmitter>(EntityHandle handle);
-    template<> bool HasComponent<ParticleEmitter>(EntityHandle handle);
-    template<> bool RemoveComponent<ParticleEmitter>(EntityHandle handle);
-    
-    template<> PointLight* AddComponent<PointLight>(EntityHandle handle, PointLight::Properties properties);
-    template<> PointLight* AddComponent<PointLight>(EntityHandle handle);
-    template<> PointLight* GetComponent<PointLight>(EntityHandle handle);
-    template<> bool HasComponent<PointLight>(EntityHandle handle);
-    template<> bool RemoveComponent<PointLight>(EntityHandle handle);
-
-    #ifdef USE_VULKAN
-    template<> vulkan::MeshRenderer* AddComponent<vulkan::MeshRenderer>(EntityHandle handle, std::string meshUid, nc::graphics::vulkan::Material material, nc::graphics::vulkan::TechniqueType techniqueType);
-    template<> vulkan::MeshRenderer* GetComponent<vulkan::MeshRenderer>(EntityHandle handle);
-    template<> bool HasComponent<vulkan::MeshRenderer>(EntityHandle handle);
-    template<> bool RemoveComponent<vulkan::MeshRenderer>(EntityHandle handle);
-
-    template<> vulkan::PointLight* AddComponent<vulkan::PointLight>(EntityHandle handle, vulkan::PointLightInfo info);
-    template<> vulkan::PointLight* GetComponent<vulkan::PointLight>(EntityHandle handle);
-    template<> bool HasComponent<vulkan::PointLight>(EntityHandle handle);
-    template<> bool RemoveComponent<vulkan::PointLight>(EntityHandle handle);
-    #endif
-    
-    template<> Renderer* AddComponent<Renderer>(EntityHandle handle, graphics::Mesh mesh, graphics::Material material);
-    template<> Renderer* GetComponent<Renderer>(EntityHandle handle);
-    template<> bool HasComponent<Renderer>(EntityHandle handle);
-    template<> bool RemoveComponent<Renderer>(EntityHandle handle);
-
-    template<> NetworkDispatcher* AddComponent<NetworkDispatcher>(EntityHandle handle);
-    template<> NetworkDispatcher* GetComponent<NetworkDispatcher>(EntityHandle handle);
-    template<> bool HasComponent<NetworkDispatcher>(EntityHandle handle);
-    template<> bool RemoveComponent<NetworkDispatcher>(EntityHandle handle);
-
-    template<> Transform* GetComponent<Transform>(EntityHandle handle);
-
-    template<> Collider* AddComponent<Collider>(EntityHandle handle, ColliderInfo info);
-    template<> Collider* GetComponent<Collider>(EntityHandle handle);
-    template<> bool HasComponent<Collider>(EntityHandle handle);
-    template<> bool RemoveComponent<Collider>(EntityHandle handle);
-
-    /** Template definitions for custom componenets */
-    template<std::derived_from<ComponentBase> T, class ... Args>
-    T * AddComponent(const EntityHandle handle, Args ... args)
-    {
-        auto ptr = GetEntity(handle);
-        IF_THROW(ptr == nullptr, "Bad handle");
-        return ptr->AddUserComponent<T>(std::forward<Args>(args)...);
-    }
-
-    template<std::derived_from<ComponentBase> T>
-    bool RemoveComponent(const EntityHandle handle)
-    {
-        auto ptr = GetEntity(handle);
-        IF_THROW(ptr == nullptr, "Bad handle");
-        return ptr->RemoveUserComponent<T>();
-    }
-
-    template<std::derived_from<ComponentBase> T>
-    T * GetComponent(const EntityHandle handle)
-    {
-        auto ptr = GetEntity(handle);
-        IF_THROW(ptr == nullptr, "Bad handle");
-        return ptr->GetUserComponent<T>();
-    }
-
-    template<std::derived_from<ComponentBase> T>
-    bool HasComponent(const EntityHandle handle)
-    {
-        auto ptr = GetEntity(handle);
-        IF_THROW(ptr == nullptr, "Bad handle");
-        return ptr->HasUserComponent<T>();
-    }
-
-    /** Internal use */
-    namespace ecs { class EntityComponentSystem; }
     namespace internal
     {
-        void RegisterEcs(ecs::EntityComponentSystem* impl);
+        void SetActiveRegistry(registry_type* registry);
     }
 } // end namespace nc

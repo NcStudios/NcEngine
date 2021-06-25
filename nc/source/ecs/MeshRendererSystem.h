@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Ecs.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "graphics/vulkan/MeshManager.h"
 #include "graphics/vulkan/TextureManager.h"
@@ -14,10 +15,10 @@ namespace nc::ecs
     class MeshRendererSystem
     {
         public:
-            MeshRendererSystem(graphics::Graphics2* graphics);
+            MeshRendererSystem(registry_type* registry, graphics::Graphics2* graphics);
 
             void Add(vulkan::MeshRenderer& meshRenderer);
-            void Remove(EntityHandle entity);
+            void Remove(Entity entity);
 
         private:
             nc::graphics::Graphics2* m_graphics;

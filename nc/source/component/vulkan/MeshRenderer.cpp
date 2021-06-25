@@ -7,8 +7,8 @@
 
 namespace nc::vulkan
 {
-    MeshRenderer::MeshRenderer(EntityHandle parentHandle, std::string meshUid, nc::graphics::vulkan::Material material, nc::graphics::vulkan::TechniqueType techniqueType)
-    : Component{parentHandle},
+    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, nc::graphics::vulkan::Material material, nc::graphics::vulkan::TechniqueType techniqueType)
+    : ComponentBase{entity},
       m_meshUid{std::move(meshUid)},
       m_material{std::move(material)},
       m_techniqueType{techniqueType}
@@ -17,7 +17,7 @@ namespace nc::vulkan
 
     Transform* MeshRenderer::GetTransform()
     {
-        return GetComponent<Transform>(GetParentHandle());
+        return ActiveRegistry()->Get<Transform>(GetParentEntity());
     }
 
     const std::string& MeshRenderer::GetMeshUid() const
@@ -25,7 +25,7 @@ namespace nc::vulkan
         return m_meshUid;
     }
 
-    const nc::graphics::vulkan::Material& MeshRenderer::GetMaterial() const
+    nc::graphics::vulkan::Material& MeshRenderer::GetMaterial()
     {
         return m_material;
     }
@@ -34,12 +34,15 @@ namespace nc::vulkan
     {
         return m_techniqueType;
     }
-    
+}
+
+namespace nc
+{
     #ifdef NC_EDITOR_ENABLED
-    void MeshRenderer::EditorGuiElement()
+    template<> void ComponentGuiElement<vulkan::MeshRenderer>(vulkan::MeshRenderer* meshRenderer)
     {
         ImGui::Text("Mesh Renderer");
-        m_material.EditorGuiElement();
+        meshRenderer->GetMaterial().EditorGuiElement();
     }
     #endif
 }

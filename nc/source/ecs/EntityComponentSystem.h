@@ -1,31 +1,16 @@
 #pragma once
 
-#include "Registry.h"
+#include "Ecs.h"
 #include "ColliderSystem.h"
 #include "ParticleEmitterSystem.h"
 #include "MeshRendererSystem.h"
 #include "PointLightSystem.h"
-#include "component/Collider.h"
-#include "component/NetworkDispatcher.h"
-#include "component/PointLight.h"
-#include "component/PointLightManager.h"
-#include "component/Renderer.h"
-#include "component/Transform.h"
-#include "component/vulkan/PointLight.h"
-#include "component/vulkan/MeshRenderer.h"
 #include "config/Config.h"
 
-
-namespace nc::graphics { class Graphics; }
+namespace nc::graphics { class Graphics; class Graphics2; }
 
 namespace nc::ecs
 {
-    #ifdef USE_VULKAN
-    using registry_type = ecs::Registry<Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Transform, nc::vulkan::PointLight, nc::vulkan::MeshRenderer>;
-    #else
-    using registry_type = ecs::Registry<Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Transform>;
-    #endif
-
     class EntityComponentSystem
     {
         public:
@@ -44,8 +29,8 @@ namespace nc::ecs
             auto GetParticleEmitterSystem() noexcept { return &m_particleEmitterSystem; }
             
             #ifdef USE_VULKAN
-            PointLightSystem* GetPointLightSystem();
-            MeshRendererSystem* GetMeshRendererSystem();
+            auto GetPointLightSystem() noexcept { return &m_pointLightSystem; }
+            auto GetMeshRendererSystem() noexcept { return &m_meshRendererSystem; }
             #endif
 
             void Clear();

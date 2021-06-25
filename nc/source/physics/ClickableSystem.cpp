@@ -1,5 +1,6 @@
 #include "ClickableSystem.h"
 #include "Physics.h"
+#include "Ecs.h"
 #include "debug/Utils.h"
 #include "Input.h"
 #include "MainCamera.h"
@@ -83,6 +84,7 @@ namespace nc::physics
         auto worldMatrix = DirectX::XMMatrixIdentity();
         IClickable* out = nullptr;
         float smallestZ = std::numeric_limits<float>::max();
+        auto* registry = ActiveRegistry();
 
         for(auto& clickable : m_clickableComponents)
         {
@@ -90,7 +92,7 @@ namespace nc::physics
                 continue;
 
             //project clickable to screen space
-            auto worldPos = clickable->parentTransform->GetPosition();
+            auto worldPos = registry->Get<Transform>(clickable->entity)->GetPosition();
             auto worldPos_v = DirectX::XMLoadVector3(&worldPos);
             auto screenPos_v = DirectX::XMVector3Project(worldPos_v,
                                                          0.0f, 0.0f,
