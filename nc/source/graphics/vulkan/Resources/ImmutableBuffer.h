@@ -5,7 +5,7 @@
 #include "graphics/Graphics2.h"
 
 #include <vector>
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics::vulkan
 {

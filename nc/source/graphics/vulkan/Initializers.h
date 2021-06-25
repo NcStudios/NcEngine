@@ -2,7 +2,7 @@
 
 #include "graphics/vulkan/Mesh.h"
 
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vk_mem_alloc.hpp"
 #include <array>
 #include <vector>
 
@@ -41,8 +41,8 @@ namespace nc::graphics::vulkan
     vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth);
     vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo();
     vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo();
-    vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo();
-    vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment);
+    vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo(bool useAlphaBlending);
+    vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment, bool useAlphaBlending);
     vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, size_t dataTypeSize);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, const std::vector<vk::DescriptorSetLayout>& layouts);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);

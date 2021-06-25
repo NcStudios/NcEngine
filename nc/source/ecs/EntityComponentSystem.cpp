@@ -6,11 +6,6 @@ namespace nc::ecs
     EntityComponentSystem::EntityComponentSystem(graphics::Graphics2* graphics,
                                                  const config::MemorySettings& memSettings,
                                                  const config::PhysicsSettings& physSettings)
-    #else
-    EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
-                                                 const config::MemorySettings& memSettings,
-                                                 const config::PhysicsSettings& physSettings)
-    #endif
         : m_registry{memSettings.maxTransforms},
           m_colliderSystem{&m_registry,
                            memSettings.maxTransforms,
@@ -18,13 +13,22 @@ namespace nc::ecs
                            physSettings.octreeDensityThreshold,
                            physSettings.octreeMinimumExtent,
                            physSettings.worldspaceExtent},
-          #ifdef USE_VULKAN
-          m_particleEmitterSystem{&m_registry},
+          m_particleEmitterSystem{&m_registry, graphics},
           m_pointLightSystem{&m_registry, graphics, 50u},
           m_meshRendererSystem{&m_registry, graphics}
-          #else
+    #else
+    EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
+                                                 const config::MemorySettings& memSettings,
+                                                 const config::PhysicsSettings& physSettings)
+        : m_registry{memSettings.maxTransforms},
+          m_colliderSystem{&m_registry,
+                           memSettings.maxTransforms,
+                           memSettings.maxStaticColliders,
+                           physSettings.octreeDensityThreshold,
+                           physSettings.octreeMinimumExtent,
+                           physSettings.worldspaceExtent},
           m_particleEmitterSystem{&m_registry, graphics}
-          #endif
+    #endif
     {
         internal::SetActiveRegistry(&m_registry);
         m_registry.VerifyCallbacks();

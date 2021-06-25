@@ -1,8 +1,7 @@
-#include "PhongAndUiTechnique.h"
+#include "ParticleTechnique.h"
 #include "Ecs.h"
 #include "config/Config.h"
 #include "component/Transform.h"
-#include "component/vulkan/MeshRenderer.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
@@ -16,8 +15,8 @@
 
 namespace nc::graphics::vulkan
 {
-    PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
-    : m_meshRenderers{},
+    ParticleTechnique::ParticleTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
+    : m_emitterStates{},
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
@@ -28,7 +27,7 @@ namespace nc::graphics::vulkan
         CreatePipeline(renderPass);
     }
 
-    PhongAndUiTechnique::~PhongAndUiTechnique()
+    ParticleTechnique::~ParticleTechnique()
     {
         auto device = m_base->GetDevice();
         device.destroyDescriptorSetLayout(m_descriptorSetLayout);
@@ -36,12 +35,12 @@ namespace nc::graphics::vulkan
         device.destroyPipeline(m_pipeline);
     }
 
-    void PhongAndUiTechnique::CreatePipeline(vk::RenderPass* renderPass)
+    void ParticleTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetGraphicsSettings().vulkanShadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PhongVertex.spv");
-        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PhongFragment.spv");
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ParticleVertex.spv");
+        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ParticleFragment.spv");
 
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
@@ -52,7 +51,7 @@ namespace nc::graphics::vulkan
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(PhongPushConstants)); // PushConstants
+        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(ParticlePushConstants)); // PushConstants
         std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout()};
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
@@ -80,8 +79,8 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
-        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(true);
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, true);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout);
@@ -95,59 +94,55 @@ namespace nc::graphics::vulkan
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
+    void ParticleTechnique::Bind(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
+    void ParticleTechnique::RegisterEmitters(std::vector<particle::EmitterState>* emitterStates)
     {
-        auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
-        if (renderers == m_meshRenderers.end())
-        {
-            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()} );
-            return;
-        }
-
-        renderers->second.push_back(meshRenderer->GetParentEntity());
+        m_emitterStates = emitterStates;
     }
 
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd)
+    void DrawIndexed(vk::CommandBuffer* cmd, const nc::graphics::vulkan::Mesh& meshAccessor)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
+        cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        NC_PROFILE_END();
+    }
 
+    void ParticleTechnique::Record(vk::CommandBuffer* cmd)
+    {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         const auto& viewMatrix = m_graphics->GetViewMatrix();
         const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
 
-        auto pushConstants = PhongPushConstants{};
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
+
+        auto pushConstants = ParticlePushConstants{};
         pushConstants.viewProjection = viewMatrix * projectionMatrix;
         pushConstants.cameraPos = m_graphics->GetCameraPosition();
-        
-        for (auto& [meshUid, renderers] : m_meshRenderers)
-        {
-            const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
-            
-            for (auto handle : renderers)
-            {
-                auto* meshRenderer = ActiveRegistry()->Get<nc::vulkan::MeshRenderer>(handle);
-                auto& material = meshRenderer->GetMaterial();
-                pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
-                pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
-                pushConstants.baseColorIndex = ResourceManager::GetTextureAccessor(material.baseColor);
-                pushConstants.normalColorIndex = ResourceManager::GetTextureAccessor(material.normal);
-                pushConstants.roughnessColorIndex = ResourceManager::GetTextureAccessor(material.roughness);
 
-                cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(PhongPushConstants), &pushConstants);
-                cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                
-                #ifdef NC_EDITOR_ENABLED
-                m_graphics->IncrementDrawCallCount();
-                #endif
+        const auto meshAccessor = ResourceManager::GetMeshAccessor("project/assets/mesh/plane.nca");
+        
+        for (auto& emitterState : *m_emitterStates)
+        {
+            auto [index, matrices] = emitterState.GetSoA()->View<particle::EmitterState::MvpMatricesIndex>();
+
+            for(; index.Valid(); ++index)
+            {
+                pushConstants.model = matrices[index].modelView; // Is actually untransposed model matrix, see MvpMatrices.h
+                pushConstants.baseColorIndex =  ResourceManager::GetTextureAccessor(emitterState.GetInfo()->init.particleTexturePath);
+
+                cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
+                DrawIndexed(cmd, meshAccessor);
             }
+            
+            #ifdef NC_EDITOR_ENABLED
+            m_graphics->IncrementDrawCallCount();
+            #endif
         }
         NC_PROFILE_END();
     }

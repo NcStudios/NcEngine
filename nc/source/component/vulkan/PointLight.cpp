@@ -51,13 +51,7 @@ namespace nc::vulkan
 
     void PointLight::SetInfo(PointLightInfo info)
     {
-        m_info.pos = info.pos;
-        m_info.ambient = info.ambient;
-        m_info.attConst = info.attConst;
-        m_info.attLin = info.attLin;
-        m_info.attQuad = info.attQuad;
-        m_info.diffuseColor = info.diffuseColor;
-        m_info.specularColor = info.specularColor;
+        m_info = info;
         m_info.isInitialized = true;
     }
 

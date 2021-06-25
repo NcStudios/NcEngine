@@ -52,7 +52,7 @@
 //  2016-10-18: Vulkan: Add location decorators & change to use structs as in/out in glsl, update embedded spv (produced with glslangValidator -x). Null the released resources.
 //  2016-08-27: Vulkan: Fix Vulkan example for use when a depth buffer is active.
 
-#include <vulkan/vulkan.hpp>
+#include "vulkan/vk_mem_alloc.hpp"
 #include "imgui/imgui_impl_vulkan.h"
 #include <stdio.h>
 

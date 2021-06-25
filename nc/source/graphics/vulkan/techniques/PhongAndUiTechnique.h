@@ -2,7 +2,7 @@
 
 #include "component/Component.h"
 
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vk_mem_alloc.hpp"
 #include <vector>
 #include "directx/math/DirectXMath.h"
 
@@ -44,9 +44,6 @@ namespace nc::graphics
                 void Bind(vk::CommandBuffer* cmd);
                 void RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
                 void Record(vk::CommandBuffer* cmd);
-
-                std::unordered_map<std::string, std::vector<Entity>>* GetMeshRenderers();
-                vk::PipelineLayout* GetPipelineLayout();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);

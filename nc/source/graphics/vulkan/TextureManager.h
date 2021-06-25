@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 #include <string>
-#include "vulkan/vulkan.hpp"
+#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {

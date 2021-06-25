@@ -39,5 +39,6 @@ if(USE_VULKAN)
             ${ROOT_DIR}/source/graphics/vulkan/resources/ImmutableImage.cpp
             ${ROOT_DIR}/source/graphics/vulkan/techniques/PhongAndUiTechnique.cpp
             ${ROOT_DIR}/source/graphics/vulkan/techniques/WireframeTechnique.cpp
+            ${ROOT_DIR}/source/graphics/vulkan/techniques/ParticleTechnique.cpp
     )
 endif()

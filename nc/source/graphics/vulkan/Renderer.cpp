@@ -2,6 +2,7 @@
 
 #include "component/vulkan/MeshRenderer.h"
 #include "component/Transform.h"
+#include "debug/Profiler.h"
 #include "graphics/Graphics2.h"
 #include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
@@ -17,7 +18,8 @@ namespace nc::graphics::vulkan
       m_meshManager{graphics},
       m_mainRenderPass{},
       m_phongAndUiTechnique{nullptr},
-      m_wireframeTechnique{nullptr}
+      m_wireframeTechnique{nullptr},
+      m_particleTechnique{nullptr}
     {
         m_mainRenderPass = m_graphics->GetSwapchainPtr()->GetPassDefinition();
     }
@@ -29,6 +31,8 @@ namespace nc::graphics::vulkan
 
     void Renderer::Record(Commands* commands)
     {  
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+
         auto swapchain = m_graphics->GetSwapchainPtr();
         auto& commandBuffers = *commands->GetCommandBuffers();
         
@@ -41,24 +45,45 @@ namespace nc::graphics::vulkan
             // Begin recording commands to each command buffer.
             cmd->begin(vk::CommandBufferBeginInfo{});
             BeginRenderPass(cmd, swapchain, &m_mainRenderPass, i);
+            BindSharedData(cmd);
 
-            // Wireframe technique
-            m_wireframeTechnique->Bind(cmd);
-            m_wireframeTechnique->Record(cmd);
+            if (m_wireframeTechnique)
+            {
+                m_wireframeTechnique->Bind(cmd);
+                m_wireframeTechnique->Record(cmd);
+            }
 
-            // Phong and UI technique
-            m_phongAndUiTechnique->Bind(cmd);
-            m_phongAndUiTechnique->Record(cmd);
-            RecordUi(cmd);
+            if (m_particleTechnique)
+            {
+                m_particleTechnique->Bind(cmd);
+                m_particleTechnique->Record(cmd);
+            }
+
+            if (m_phongAndUiTechnique)
+            {
+                m_phongAndUiTechnique->Bind(cmd);
+                m_phongAndUiTechnique->Record(cmd);
+                RecordUi(cmd);
+            }
 
             // End recording commands to each command buffer.
             cmd->endRenderPass();
             cmd->end();
         }
+
+        NC_PROFILE_END();
+    }
+
+    void Renderer::BindSharedData(vk::CommandBuffer* cmd)
+    {
+        vk::DeviceSize offsets[] = { 0 };
+        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
+        cmd->bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
     }
 
     void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, vulkan::Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto dimensions = m_graphics->GetDimensions();
 
         vk::ClearValue clearValues[2];
@@ -77,6 +102,16 @@ namespace nc::graphics::vulkan
 
         // Begin render pass and bind pipeline
         cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+        NC_PROFILE_END();
+    }
+
+    void Renderer::RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates)
+    {
+        if (!m_particleTechnique)
+        {
+            m_particleTechnique = std::make_unique<ParticleTechnique>(m_graphics, &m_mainRenderPass);
+        }
+        m_particleTechnique->RegisterEmitters(m_emitterStates);
     }
 
     void Renderer::RegisterMeshRenderer(TechniqueType techniqueType, nc::vulkan::MeshRenderer* renderer)
@@ -110,6 +145,8 @@ namespace nc::graphics::vulkan
 
     void Renderer::RecordUi(vk::CommandBuffer* cmd)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
+        NC_PROFILE_END();
     }
 }
