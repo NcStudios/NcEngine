@@ -46,6 +46,7 @@ namespace nc::ecs
         physics::SphereCollider volumeEstimate;
         physics::LayerMask layer;
         Entity entity;
+        bool isTrigger;
     };
 
     /** ColliderTree node representing a cubic chunk of the world. Leaf nodes store

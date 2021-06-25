@@ -132,7 +132,8 @@ namespace nc::ecs
                                  bv,
                                  estimate,
                                  physics::ToLayerMask(EntityUtils::Layer(entity)),
-                                 entity);
+                                 entity,
+                                 info.isTrigger);
 
         m_root.Add(entry);
     }

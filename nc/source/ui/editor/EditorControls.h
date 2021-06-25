@@ -113,19 +113,40 @@ namespace nc::ui::editor::controls
         ImGui::Text("Static  %s", EntityUtils::IsStatic(entity) ? "True" : "False");
 
         if(auto* transform = registry->Get<Transform>(entity); transform)
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(transform);
+        }
+
         if(auto* renderer = registry->Get<Renderer>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(renderer);
+        }
+
         if(auto* emitter = registry->Get<ParticleEmitter>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
+        }
+
         if(auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(dispatcher);
+        }
+
         if(auto* light = registry->Get<PointLight>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(light);
+        }
+
         if(auto* col = registry->Get<Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
             col->SetEditorSelection(true);
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(col);
         }
 
@@ -139,11 +160,9 @@ namespace nc::ui::editor::controls
     {
         if(!comp)
             return;
-        ImGui::Separator();
+        ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
         ImGui::BeginGroup();
-            ImGui::Spacing();
             comp->ComponentGuiElement();
-            ImGui::Spacing();
         ImGui::EndGroup();
     }
 

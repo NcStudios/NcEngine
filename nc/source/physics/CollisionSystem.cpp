@@ -123,6 +123,7 @@ namespace nc::physics
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
+        const auto trigger = dynamicSoA->GetSpan<bool>();
         CollisionState state;
 
         for(const auto& [i, j] : m_broadEventsVsDynamic)
@@ -141,8 +142,12 @@ namespace nc::physics
                  *  of m_currentCollisions, but that won't work for trigger colliders
                  *  (once they are added). Leaving m_currentCollisions unchanged for now. */
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
-                auto contactData = Epa(iVolume, jVolume, iMatrix, jMatrix, &state);
-                m_manifolds.emplace_back(handles[i], handles[j], contactData);
+
+                if(!trigger[i] && !trigger[j])
+                {
+                    auto contactData = Epa(iVolume, jVolume, iMatrix, jMatrix, &state);
+                    m_manifolds.emplace_back(handles[i], handles[j], contactData);
+                }
             }
         }
     }
@@ -153,6 +158,7 @@ namespace nc::physics
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
+        const auto trigger = dynamicSoA->GetSpan<bool>();
         CollisionState state;
 
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
@@ -169,8 +175,12 @@ namespace nc::physics
 
                 /** @todo See NarrowDetectVsDynamic */
                 m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity));
-                auto contactData = Epa(dVolume, sVolume, dMatrix, sMatrix, &state);
-                m_manifolds.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity), contactData);
+
+                if(!trigger[dynamicIndex] && !staticPair->isTrigger)
+                {
+                    auto contactData = Epa(dVolume, sVolume, dMatrix, sMatrix, &state);
+                    m_manifolds.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity), contactData);
+                }
             }
         }
     }
