@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Entity.h"
-#include "math/Vector3.h"
+#include "math/Vector.h"
 
 namespace nc::sample
 {

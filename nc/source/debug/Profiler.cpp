@@ -31,7 +31,7 @@ namespace nc::debug::profiler
             case Filter::User:
                 return "User";
             default:
-                throw std::runtime_error("ToCString - Unkown Filter value");
+                throw std::runtime_error("ToCString - Unknown Filter value");
         }
     }
 

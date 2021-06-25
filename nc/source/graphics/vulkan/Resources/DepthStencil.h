@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include "math/Vector2.h"
+#include "math/Vector.h"
 
 namespace nc::graphics::vulkan
 {

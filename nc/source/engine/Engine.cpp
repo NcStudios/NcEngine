@@ -116,7 +116,8 @@ namespace nc::core
         V_LOG("Starting engine loop");
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
-        auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
+        /** @todo Enable interval and tinker a bit once kinematics are popped, locked, and dropped */
+        //auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
     #ifdef USE_VULKAN
@@ -135,12 +136,11 @@ namespace nc::core
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
 
-            if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
-            {
-                FixedStepLogic();
-            }
-
             FrameLogic(dt);
+
+            /** @todo see fixedUpdateInterval todo above */
+            FixedStepLogic();
+
             particleUpdateJobResult.wait();
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();

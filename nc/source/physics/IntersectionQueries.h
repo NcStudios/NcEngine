@@ -1,20 +1,30 @@
 #pragma once
 
 #include "CollisionVolumes.h"
+#include "Simplex.h"
+#include "Polytope.h"
 
 namespace nc::physics
 {
-    /* Test intersection between two transformed spheres. */
-    bool Intersect(const SphereCollider& a, const SphereCollider& b);
-
-    /* Test intersection between transformed sphere and axis-aligned bounding box. */
-    bool Intersect(const SphereCollider& sphere, const BoxCollider& aabb);
+    /* Collision data produced by Gjk and consumed by Epa. */
+    struct CollisionState
+    {
+        Simplex simplex;
+        Polytope polytope;
+        DirectX::XMVECTOR rotationA;
+        DirectX::XMVECTOR rotationB;
+    };
 
     /* Intersection query between any two untransformed volumes. */
-    bool Gjk(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix);
-            
-    /* Intersection query between any two transformed volumes. */
-    bool Gjk(const BoundingVolume& a, const BoundingVolume& b);
+    bool Gjk(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* stateOut);
+
+    /* Generate contact data from output of Gjk. */
+    NormalData Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state);
+
+    /* Intersection queries between transformed volumes. */
+    bool Intersect(const BoundingVolume& a, const BoundingVolume& b);
+    bool Intersect(const SphereCollider& a, const SphereCollider& b);
+    bool Intersect(const SphereCollider& sphere, const BoxCollider& aabb);
 
     /* Get square minimum translation distance from a point to an axis-aligned bounding box. */
     float SquareMtdToAABB(const Vector3& point, const BoxCollider& aabb);
