@@ -14,30 +14,52 @@
  *  format using AssImp. Currently, the only purpose of this is to speed
  *  up debugging by moving calls to AssImp outside of the engine. */
 
+enum class AssetType
+{
+    Mesh,
+    HullCollider
+};
+
+struct Target
+{
+    std::filesystem::path path;
+    AssetType type;
+};
+
 struct Config
 {
     std::optional<std::filesystem::path> SingleTargetPath;
+    std::optional<AssetType> SingleTargetType;
     std::optional<std::filesystem::path> TargetsFilePath;
     std::filesystem::path OutputDirectory;
 };
 
 const auto AssetExtension = std::string{".nca"};
 const auto DefaultAssetTargetFilename = std::string{"targets.txt"};
-constexpr auto AssimpFlags = aiProcess_Triangulate |
-                             aiProcess_JoinIdenticalVertices |
-                             aiProcess_ConvertToLeftHanded |
-                             aiProcess_GenNormals |
-                             aiProcess_CalcTangentSpace;
+constexpr auto MeshFlags = aiProcess_Triangulate |
+                           aiProcess_JoinIdenticalVertices |
+                           aiProcess_ConvertToLeftHanded |
+                           aiProcess_GenNormals |
+                           aiProcess_CalcTangentSpace;
+
+constexpr auto HullColliderFlags = aiProcess_Triangulate |
+                                   aiProcess_JoinIdenticalVertices |
+                                   aiProcess_ConvertToLeftHanded;
 
 void Usage();
 bool ParseArgs(int argc, char** argv, Config* config);
+auto GetAssetType(std::string type) -> AssetType;
 void CreateOutputDirectory(const std::filesystem::path& directory);
-auto ReadTargets(const Config& config) -> std::vector<std::filesystem::path>;
+auto ReadTargets(const Config& config) -> std::vector<Target>;
 bool IsValidMeshExtension(const std::filesystem::path& extension);
 auto ToAssetPath(const std::filesystem::path& meshPath, const Config& config) -> std::filesystem::path;
 void SanitizeFloat(float* value, bool* badValueDetected);
 void SanitizeVector(aiVector3D* value, bool* badValueDetected);
-void BuildAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
+void BuildAsset(Assimp::Importer* importer, const Target& inPath, const Config& config);
+void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
+void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
+auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D;
+auto GetHullColliderMaximumExtent(const aiVector3D* data, unsigned count) -> float;
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&;
 
 int main(int argc, char** argv)
@@ -53,9 +75,9 @@ int main(int argc, char** argv)
     {
         CreateOutputDirectory(config.OutputDirectory);
         Assimp::Importer importer;
-        for(const auto& targetPath : ReadTargets(config))
+        for(const auto& target : ReadTargets(config))
         {
-            BuildAsset(&importer, targetPath, config);
+            BuildAsset(&importer, target, config);
         }
     }
     catch(const std::exception& e)
@@ -72,11 +94,18 @@ void Usage()
               << "Options:\n"
               << "  -h or --help            Display this information\n"
               << "  -t <target>             Parse a single asset from <target>\n"
+              << "  -a <asset type>         Specify asset type for a single target.\n"
               << "  -m <manifest>           Parse multiple assets from <manifest>\n"
               << "  -o <dir>                Output assets to <dir>\n\n"
-              << "  When using -m, <manifest> should be a newline-separated list of paths to\n"
-              << "  meshes to parse. If neither -t nor -m are used, the executable's directory\n"
-              << "  will searched for a manifest named \"targets.txt\".\n\n"
+              
+              << "  Valid asset types are 'mesh' or 'hull', and are case-insensitive.\n\n"
+
+              << "  When using -m, <manifest> should be the path to a newline-separated list of\n"
+              << "  pairs in the form '<asset-type> <path-to-input-file>'.\n\n"
+              
+              << "  If neither -t nor -m are used, the executable's directory will be searched\n"
+              << "  for a manifest named \"targets.txt\".\n\n"
+              
               << "  All paths should be absolute or relative to the current directory when\n"
               << "  calling build.exe.\n";
 }
@@ -107,6 +136,12 @@ bool ParseArgs(int argc, char** argv, Config* out)
             continue;
         }
 
+        if(option.compare("-a") == 0)
+        {
+            out->SingleTargetType = GetAssetType(std::string{argv[current++]});
+            continue;
+        }
+
         if(option.compare("-m") == 0)
         {
             out->TargetsFilePath = std::filesystem::path(argv[current++]);
@@ -133,6 +168,18 @@ bool ParseArgs(int argc, char** argv, Config* out)
     return true;
 }
 
+auto GetAssetType(std::string type) -> AssetType
+{
+    std::ranges::transform(type, type.begin(), [](char c) { return std::tolower(c); });
+
+    if(type.compare("mesh") == 0)
+        return AssetType::Mesh;
+    else if(type.compare("hull") == 0)
+        return AssetType::HullCollider;
+    
+    throw std::runtime_error("Failed to parse asset type: " + type);
+}
+
 void CreateOutputDirectory(const std::filesystem::path& directory)
 {
     if(std::filesystem::exists(directory))
@@ -143,13 +190,18 @@ void CreateOutputDirectory(const std::filesystem::path& directory)
         throw std::runtime_error("Failed to create output directory: " + directory.string());
 }
 
-auto ReadTargets(const Config& config) -> std::vector<std::filesystem::path>
+auto ReadTargets(const Config& config) -> std::vector<Target>
 {
-    std::vector<std::filesystem::path> out;
+    std::vector<Target> out;
 
     if(config.SingleTargetPath)
-        out.push_back(config.SingleTargetPath.value());
-    
+    {
+        if(!config.SingleTargetType)
+            throw std::runtime_error("Single target must specify asset type with -c");
+
+        out.emplace_back(config.SingleTargetPath.value(), config.SingleTargetType.value());
+    }
+
     if(!config.TargetsFilePath)
         return out;
 
@@ -167,10 +219,15 @@ auto ReadTargets(const Config& config) -> std::vector<std::filesystem::path>
         if(file.fail())
             throw std::runtime_error("Failure reading file: " + filePath.string());
         
+        Target newTarget;
+        file.getline(buffer, bufferSize, ' ');
+        newTarget.type = GetAssetType(std::string{buffer});
+
         file.getline(buffer, bufferSize, '\n');
-        auto& path = out.emplace_back(buffer);
-        path.make_preferred();
-        std::cout << "    " << path << '\n';
+        newTarget.path = buffer;
+        newTarget.path.make_preferred();
+        std::cout << "    " << newTarget.path << '\n';
+        out.push_back(newTarget);
     }
 
     file.close();
@@ -209,18 +266,35 @@ void SanitizeVector(aiVector3D* value, bool* badValueDetected)
     SanitizeFloat(&value->z, badValueDetected);
 }
 
-void BuildAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
+void BuildAsset(Assimp::Importer* importer, const Target& target, const Config& config)
+{
+    switch(target.type)
+    {
+        case AssetType::Mesh:
+        {
+            BuildMeshAsset(importer, target.path, config);
+            break;
+        }
+        case AssetType::HullCollider:
+        {
+            BuildHullColliderAsset(importer, target.path, config);
+            break;
+        }
+    }
+}
+
+void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
 {
     if (!IsValidMeshExtension(inPath.extension()))
         throw std::runtime_error("Invalid mesh file extension: " + inPath.string());
 
     const auto assetPath = ToAssetPath(inPath, config);
-    std::cout << "Creating: " << assetPath << '\n';
+    std::cout << "Creating Mesh: " << assetPath << '\n';
     std::ofstream outFile{assetPath};
     if(!outFile)
         throw std::runtime_error("Failure opening asset file");
 
-    const auto pModel = importer->ReadFile(inPath.string(), AssimpFlags);
+    const auto pModel = importer->ReadFile(inPath.string(), MeshFlags);
     if(!pModel)
         throw std::runtime_error("AssImp failure");
 
@@ -261,6 +335,83 @@ void BuildAsset(Assimp::Importer* importer, const std::filesystem::path& inPath,
 
     outFile.close();
 }
+
+void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
+{
+    if (!IsValidMeshExtension(inPath.extension()))
+        throw std::runtime_error("Invalid hull file extension: " + inPath.string());
+
+    const auto assetPath = ToAssetPath(inPath, config);
+    std::cout << "Creating Hull Collider: " << assetPath << '\n';
+    std::ofstream outFile{assetPath};
+    if(!outFile)
+        throw std::runtime_error("Failure opening asset file");
+
+    const auto pModel = importer->ReadFile(inPath.string(), HullColliderFlags);
+    if(!pModel)
+        throw std::runtime_error("AssImp failure");
+
+    const auto pMesh = pModel->mMeshes[0];
+    float maxExtent = GetHullColliderMaximumExtent(pMesh->mVertices, pMesh->mNumVertices);
+
+    outFile << maxExtent << '\n'
+            << pMesh->mNumVertices << '\n';
+
+    bool valueWasSanitized = false;
+    for (size_t i = 0u; i < pMesh->mNumVertices; ++i)
+    {
+        auto& ver = pMesh->mVertices[i];
+        SanitizeVector(&ver, &valueWasSanitized);
+        outFile << ver << '\n';
+    }
+
+    if(valueWasSanitized)
+        std::cerr << "    Warning: Bad value detected in mesh data. Some values have been set to 0.\n";
+
+    outFile.close();
+}
+
+auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D
+{
+    if(count == 0u)
+        throw std::runtime_error("Vertex count in hull collider is zero");
+    
+    unsigned maxIndex = 0u;
+    float maxDot = data[0] * direction;
+
+    for(unsigned i = 1u; i < count; ++i)
+    {
+        float dot = data[i] * direction;
+        if(dot > maxDot)
+        {
+            maxDot = dot;
+            maxIndex = i;
+        }
+    }
+
+    return data[maxIndex];
+}
+
+float GetHullColliderMaximumExtent(const aiVector3D* data, unsigned count)
+{
+    std::array<float, 6u> squareMagnitudes;
+    squareMagnitudes[0] = GetMaximumVertexInDirection(data, count, aiVector3D{ 1,  0,  0}).SquareLength();
+    squareMagnitudes[1] = GetMaximumVertexInDirection(data, count, aiVector3D{-1,  0,  0}).SquareLength();
+    squareMagnitudes[2] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0,  1,  0}).SquareLength();
+    squareMagnitudes[3] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0, -1,  0}).SquareLength();
+    squareMagnitudes[4] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0,  0,  1}).SquareLength();
+    squareMagnitudes[5] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0,  0, -1}).SquareLength();
+
+    float maxMagnitude = squareMagnitudes[0];
+    for(unsigned i = 1u; i < 6u; ++i)
+    {
+        if(squareMagnitudes[i] > maxMagnitude)
+            maxMagnitude = squareMagnitudes[i];
+    }
+
+    return sqrt(maxMagnitude);
+}
+
 
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&
 {

@@ -1,3 +1,4 @@
+add_subdirectory(assets)
 add_subdirectory(camera)
 add_subdirectory(component)
 add_subdirectory(config)

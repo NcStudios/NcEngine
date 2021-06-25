@@ -39,6 +39,10 @@ set CONFIGURATION="%~2"
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release
         goto Run
     )
+    if %CONFIGURATION%=="Release-WithEditor" (
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DNC_EDITOR_ENABLED=ON
+        goto Run
+    )
     if %CONFIGURATION%=="Release-Profile" (
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DPROFILING_ENABLED=ON
         goto Run

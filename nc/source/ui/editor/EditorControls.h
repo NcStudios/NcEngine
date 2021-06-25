@@ -4,6 +4,7 @@
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
 #include "ecs/ColliderSystem.h"
+#include "physics/CollisionSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
 #include "imgui/imgui.h"
@@ -27,6 +28,7 @@ namespace nc::ui::editor::controls
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
     inline void ComponentSystems(registry_type* registry);
+    inline void PhysicsMetrics();
 
     /**
      * Scene Graph Controls
@@ -190,6 +192,7 @@ namespace nc::ui::editor::controls
                 WrapTabItem("Profiler", Profiler);
                 WrapTabItem("Systems", ComponentSystems, registry);
                 WrapTabItem("Gfx Resources", GraphicsResourcePanel);
+                WrapTabItem("Physics Metrics", PhysicsMetrics);
                 ImGui::EndTabBar();
             }
 
@@ -316,6 +319,18 @@ namespace nc::ui::editor::controls
             if(filter.PassFilter(id.c_str()))
                 ImGui::Text(id.c_str());
         }
+    }
+
+    void PhysicsMetrics()
+    {
+        const auto& metrics = physics::CollisionSystem::metrics;
+        ImGui::Text("Collision Checks:");
+        ImGui::Text("  Broad Phase");
+        ImGui::Text("    Static:   %d", metrics.staticBroadChecks);
+        ImGui::Text("    Dynamic:  %d", metrics.dynamicBroadChecks);
+        ImGui::Text("  Narrow Phase");
+        ImGui::Text("    Static:  %d", metrics.staticNarrowChecks);
+        ImGui::Text("    Dynamic: %d", metrics.dynamicNarrowChecks);
     }
 } // end namespace nc::ui::editor
 #endif

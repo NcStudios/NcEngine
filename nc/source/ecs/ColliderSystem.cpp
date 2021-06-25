@@ -11,7 +11,8 @@ namespace nc::ecs
                                    float octreeMinimumExtent,
                                    float worldspaceExtent)
         : m_dynamicSoA{maxDynamic},
-          m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent}
+          m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent},
+          m_hullColliderManager{}
     {
         registry->RegisterOnAddCallback<Collider>
         (
@@ -44,11 +45,13 @@ namespace nc::ecs
             m_staticTree.Add(entity, collider.GetInfo());
         else
         {
+            const auto& info = collider.GetInfo();
+
             m_dynamicSoA.Add
             (
                 static_cast<EntityTraits::underlying_type>(entity),
                 DirectX::XMMATRIX{},
-                physics::GetVolumePropertiesFromColliderInfo(collider.GetInfo()),
+                physics::CreateBoundingVolume(info),
                 collider.GetType()
             );
         }

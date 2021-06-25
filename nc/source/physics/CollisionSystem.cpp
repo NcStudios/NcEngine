@@ -1,8 +1,8 @@
 #include "CollisionSystem.h"
-#include "CollisionUtility.h"
+#include "Ecs.h"
+#include "IntersectionQueries.h"
 #include "config/Config.h"
 #include "debug/Profiler.h"
-#include "directx/math/DirectXCollision.h"
 #include "job/JobSystem.h"
 
 namespace nc::physics
@@ -26,20 +26,19 @@ namespace nc::physics
 
     void CollisionSystem::DoCollisionStep()
     {
-        FetchEstimates();
+        #ifdef NC_EDITOR_ENABLED
+        metrics.Reset();
+        #endif
 
-        auto broadDynamicJobResult = m_jobSystem->Schedule(BroadDetectVsDynamic, this);
-        auto broadStaticJobResult = m_jobSystem->Schedule(BroadDetectVsStatic, this);
-        broadDynamicJobResult.wait();
-        broadStaticJobResult.wait();
+        FetchEstimates();
         
-        auto narrowDynamicJobResult = m_jobSystem->Schedule(NarrowDetectVsDynamic, this);
-        auto narrowStaticJobResult = m_jobSystem->Schedule(NarrowDetectVsStatic, this);
-        narrowDynamicJobResult.wait();
-        broadStaticJobResult.wait();
-        
-        FindEnterAndStayEvents();
-        FindExitEvents();
+        BroadDetectVsStatic();
+        BroadDetectVsDynamic();
+        NarrowDetectVsStatic();
+        NarrowDetectVsDynamic();
+
+        FindExitAndStayEvents();
+        FindEnterEvents();
 
         Cleanup();
     }
@@ -55,13 +54,15 @@ namespace nc::physics
     void CollisionSystem::FetchEstimates()
     {
         const auto* soa = m_colliderSystem->GetDynamicSoA();
-        auto [index, handles, matrices, properties] = soa->View<0u, 1u, 2u>();
+        auto [index, handles, matrices, volumes] = soa->View<ecs::ColliderSystem::HandleTypeIndex,
+                                                    ecs::ColliderSystem::MatrixIndex,
+                                                    ecs::ColliderSystem::BoundingVolumeIndex>();
         auto* registry = ActiveRegistry();
 
         while(index.Valid())
         {
             matrices[index] = registry->Get<Transform>(static_cast<Entity>(handles[index]))->GetTransformationMatrix();
-            m_dynamicEstimates.emplace_back(EstimateBoundingVolume(properties[index], matrices[index]), index);
+            m_dynamicEstimates.emplace_back(EstimateBoundingVolume(volumes[index], matrices[index]), index);
             ++index;
         }
     }
@@ -71,10 +72,13 @@ namespace nc::physics
         const auto dynamicSize = m_dynamicEstimates.size();
         for(size_t i = 0u; i < dynamicSize; ++i)
         {
-            // Check vs other dynamic bodies
             for(size_t j = i + 1; j < dynamicSize; ++j)
             {
-                if(m_dynamicEstimates[i].volumeEstimate.Intersects(m_dynamicEstimates[j].volumeEstimate))
+                #ifdef NC_EDITOR_ENABLED
+                ++metrics.dynamicBroadChecks;
+                #endif
+
+                if(Intersect(m_dynamicEstimates[i].estimate, m_dynamicEstimates[j].estimate))
                     m_broadEventsVsDynamic.emplace_back(m_dynamicEstimates[i].index, m_dynamicEstimates[j].index);
             }
         }
@@ -86,9 +90,12 @@ namespace nc::physics
         auto* staticTree = m_colliderSystem->GetStaticTree();
         for(size_t i = 0u; i < dynamicSize; ++i)
         {
-            // Check vs bodies in static tree
-            for(const auto* pair : staticTree->BroadCheck(m_dynamicEstimates[i].volumeEstimate))
+            for(const auto* pair : staticTree->BroadCheck(m_dynamicEstimates[i].estimate))
             {
+                #ifdef NC_EDITOR_ENABLED
+                ++metrics.staticBroadChecks;
+                #endif
+
                 // Because static volumes can exist in multiple tree nodes, identical intersections may be reported.
                 const auto beg = m_broadEventsVsStatic.cbegin();
                 const auto end = m_broadEventsVsStatic.cend();
@@ -98,23 +105,20 @@ namespace nc::physics
         }
     }
 
-    /** @todo Narrow detection computes the bounding volumes for each pair encountered,
-     *  potentially calculating the same volume multiple times. This could be done once
-     *  upfront. */
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
-        
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
-        const auto types = dynamicSoA->GetSpan<ColliderType>();
-        const auto transforms = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
-        const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
+        const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
+        const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
 
         for(const auto& [i, j] : m_broadEventsVsDynamic)
         {
-            const auto v1 = CalculateBoundingVolume(types[i], properties[i], transforms[i]);
-            const auto v2 = CalculateBoundingVolume(types[j], properties[j], transforms[j]);
-            if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, v1, v2))
+            #ifdef NC_EDITOR_ENABLED
+            ++metrics.dynamicNarrowChecks;
+            #endif
+
+            if(Gjk(volumes[i], volumes[j], matrices[i], matrices[j]))
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
         }
     }
@@ -123,18 +127,20 @@ namespace nc::physics
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
-        const auto types = dynamicSoA->GetSpan<ColliderType>();
-        const auto transforms = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
-        const auto properties = dynamicSoA->GetSpan<VolumeProperties>();
+        const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
+        const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
         {
-            const auto volume = CalculateBoundingVolume(types[dynamicIndex], properties[dynamicIndex], transforms[dynamicIndex]);
-            if(std::visit([](auto&& a, auto&& b) { return a.Intersects(b); }, volume, staticPair->volume))
+            #ifdef NC_EDITOR_ENABLED
+            ++metrics.staticNarrowChecks;
+            #endif
+
+            if(Gjk(volumes[dynamicIndex], staticPair->volume, matrices[dynamicIndex], staticPair->matrix))
                 m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity));
         }
     }
     
-    void CollisionSystem::FindEnterAndStayEvents() const
+    void CollisionSystem::FindExitAndStayEvents() const
     {
         auto currBeg = m_currentCollisions.cbegin();
         auto currEnd = m_currentCollisions.cend();
@@ -147,7 +153,7 @@ namespace nc::physics
         }
     }
 
-    void CollisionSystem::FindExitEvents() const
+    void CollisionSystem::FindEnterEvents() const
     {
         auto prevBeg = m_previousCollisions.cbegin();
         auto prevEnd = m_previousCollisions.cend();
