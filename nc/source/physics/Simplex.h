@@ -6,7 +6,7 @@
 
 namespace nc::physics
 {
-    struct Simplex
+    class Simplex
     {
         public:
             Simplex() : m_points(), m_size{0} {}

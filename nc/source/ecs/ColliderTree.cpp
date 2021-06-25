@@ -22,7 +22,8 @@ namespace nc::ecs
 
     void Octant::Add(const StaticTreeEntry* newEntry)
     {
-        if(!physics::Gjk(newEntry->volume, m_boundingVolume, newEntry->matrix, DirectX::XMMatrixIdentity()))
+        physics::CollisionState state;
+        if(!physics::Gjk(newEntry->volume, m_boundingVolume, newEntry->matrix, DirectX::XMMatrixIdentity(), &state))
             return;
 
         if(auto* staticColliders = std::get_if<LeafNodeIndex>(&m_data); staticColliders)
