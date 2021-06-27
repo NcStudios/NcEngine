@@ -14,7 +14,7 @@ namespace nc::ecs
                            physSettings.octreeMinimumExtent,
                            physSettings.worldspaceExtent},
           m_particleEmitterSystem{&m_registry, graphics},
-          m_pointLightSystem{&m_registry, graphics, 50u},
+          m_pointLightSystem{&m_registry, graphics},
           m_meshRendererSystem{&m_registry, graphics}
     #else
     EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
@@ -41,6 +41,7 @@ namespace nc::ecs
         m_particleEmitterSystem.Clear();
         #ifdef USE_VULKAN
         m_pointLightSystem.Clear();
+        m_meshRendererSystem.Clear();
         #endif
     }
 } // end namespace nc::ecs

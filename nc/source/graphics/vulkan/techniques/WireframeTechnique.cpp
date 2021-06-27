@@ -42,17 +42,17 @@ namespace nc::graphics::vulkan
         NC_PROFILE_END();
     }
 
-    void WireframeTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
+    std::vector<Entity>* WireframeTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
     {
         auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
         if (renderers == m_meshRenderers.end())
         {
-
-            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()} );
-            return;
+            auto [it, result] = m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()});
+            return &(it->second);
         }
         
         renderers->second.push_back(meshRenderer->GetParentEntity());
+        return &(renderers->second);
     }
 
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -143,4 +143,8 @@ namespace nc::graphics::vulkan
         NC_PROFILE_END();
     }
 
+    void WireframeTechnique::Clear()
+    {
+        m_meshRenderers.clear();
+    }
 }

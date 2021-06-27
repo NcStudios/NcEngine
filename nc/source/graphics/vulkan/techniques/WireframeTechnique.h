@@ -34,8 +34,9 @@ namespace nc::graphics
                 ~WireframeTechnique();
 
                 void Bind(vk::CommandBuffer* cmd);
-                void RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
+                std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
                 void Record(vk::CommandBuffer* cmd);
+                void Clear();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);

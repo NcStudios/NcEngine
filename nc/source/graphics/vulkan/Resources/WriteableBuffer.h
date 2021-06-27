@@ -62,7 +62,13 @@ namespace nc::graphics::vulkan
     template<typename T>
     WriteableBuffer<T>::~WriteableBuffer()
     {
-        Clear();
+        if (m_writeableBuffer)
+        {
+            m_base->DestroyBuffer(m_memoryIndex);
+            m_writeableBuffer = nullptr;
+        }
+
+        m_base = nullptr;
     }
 
     template<typename T>

@@ -146,4 +146,10 @@ namespace nc::graphics::vulkan
         }
         NC_PROFILE_END();
     }
+
+    void ParticleTechnique::Clear()
+    {
+        // @todo: This whole storage strategy will be changed, this is really just a stand-in until then.
+        m_emitterStates = nullptr;
+    }
 }

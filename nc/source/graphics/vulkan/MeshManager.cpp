@@ -150,7 +150,7 @@ namespace nc::graphics::vulkan
 
         auto vertexBuffer = ImmutableBuffer<Vertex>(m_graphics, std::move(allVertices));
         auto indexBuffer = ImmutableBuffer<uint32_t>(m_graphics, std::move(allIndices));
-        auto meshesData = MeshesData(std::move(vertexBuffer), std::move(indexBuffer), std::move(meshes));
+        auto meshesData = std::make_unique<MeshesData>(std::move(vertexBuffer), std::move(indexBuffer), std::move(meshes));
         ResourceManager::LoadMeshes(std::move(meshesData));
     }
 }

@@ -40,6 +40,7 @@ namespace nc::graphics
                 void Bind(vk::CommandBuffer* cmd);
                 void RegisterEmitters(std::vector<particle::EmitterState>* emitterStates);
                 void Record(vk::CommandBuffer* cmd);
+                void Clear();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);

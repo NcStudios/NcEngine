@@ -102,16 +102,17 @@ namespace nc::graphics::vulkan
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
+    std::vector<Entity>* PhongAndUiTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
     {
         auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
         if (renderers == m_meshRenderers.end())
         {
-            m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()} );
-            return;
+            auto [it, result] = m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()});
+            return &(it->second);
         }
 
         renderers->second.push_back(meshRenderer->GetParentEntity());
+        return &(renderers->second);
     }
 
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd)
@@ -150,5 +151,10 @@ namespace nc::graphics::vulkan
             }
         }
         NC_PROFILE_END();
+    }
+
+    void PhongAndUiTechnique::Clear()
+    {
+        m_meshRenderers.clear();
     }
 }

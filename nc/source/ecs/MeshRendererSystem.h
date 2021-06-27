@@ -19,6 +19,7 @@ namespace nc::ecs
 
             void Add(vulkan::MeshRenderer& meshRenderer);
             void Remove(Entity entity);
+            void Clear();            
 
         private:
             nc::graphics::Graphics2* m_graphics;

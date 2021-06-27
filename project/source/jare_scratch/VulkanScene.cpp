@@ -6,7 +6,7 @@
 #include "graphics/vulkan/Material.h"
 #include "graphics/vulkan/TechniqueType.h"
 #include "shared/SceneNavigationCamera.h"
-#include "shared/WasdController.h"
+#include "collision_events/WasdController.h"
 #include "imgui/imgui.h"
 
 #include <string>
@@ -59,11 +59,11 @@ namespace nc::sample
         registry->Add<vulkan::PointLight>(lvHandle2, vulkan::PointLightInfo{.specularColor = Vector4(0.5f, 0.5f, 0.75f, 0.0f)});
         auto lvHandle3 = registry->Add<Entity>({.position = Vector3{30.0f, 5.0, 0.0f}, .tag = "Point Light 3"});
         registry->Add<vulkan::PointLight>(lvHandle3, vulkan::PointLightInfo{.specularColor = Vector4(0.75f, 0.5f, 0.5f, 0.0f)});
+        registry->Add<WasdController>(lvHandle3, registry, 2.0f);
 
         // Create the entity
         auto box = registry->Add<Entity>({.position = Vector3{0.0f, 1.0f, 2.0f}, .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), .tag = "Box"});
         registry->Add<vulkan::MeshRenderer>(box, meshPaths[1], boxMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
-        registry->Add<WasdController>(box, registry, 2.0f);
 
         // Create the flooring
         GenerateFloor(registry, meshPaths);
@@ -76,7 +76,7 @@ namespace nc::sample
 
     void VulkanScene::Unload()
     {
-        
+        m_sceneHelper.TearDown();
     }
 
     void VulkanScene::GenerateFloor(registry_type* registry, const std::vector<std::string>& meshPaths)

@@ -28,7 +28,7 @@ struct PointLight
     float attConst;
     float attLin;
     float attQuad;
-    bool isInitialized;
+    int isInitialized;
 };
 
 layout (set = 0, binding = 0) uniform sampler smplr;
@@ -88,7 +88,7 @@ void main()
 
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
-        if (!pointLights.lights[i].isInitialized)
+        if (pointLights.lights[i].isInitialized == 0)
         {
             break;
         }

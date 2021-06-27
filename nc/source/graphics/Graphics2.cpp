@@ -35,7 +35,7 @@ namespace nc::graphics
 
     Graphics2::~Graphics2()
     {
-        vulkan::ResourceManager::Clear();
+        Clear();
     }
 
     void Graphics2::RecreateSwapchain(Vector2 dimensions)
@@ -158,6 +158,13 @@ namespace nc::graphics
             return false;
         }
         return true;
+    }
+    
+    void Graphics2::Clear()
+    {
+        WaitIdle();
+        m_renderer->Clear();
+        vulkan::ResourceManager::Clear();
     }
     
     void Graphics2::SetClearColor(std::array<float, 4> color)

@@ -8,6 +8,7 @@
 #include "config/ConfigInternal.h"
 #include "input/InputInternal.h"
 #include "graphics/vulkan/Renderer.h"
+#include "graphics/vulkan/resources/ResourceManager.h"
 #include "Ecs.h"
 
 namespace nc::core
@@ -148,16 +149,17 @@ namespace nc::core
     void Engine::Shutdown()
     {
         V_LOG("Shutdown EngineImpl");
-#ifdef USE_VULKAN
-        // Block until all rendering is complete, so we do not tear down queues with pending operations.
-        m_graphics2.WaitIdle();
-#endif
         ClearState();
     }
 
     void Engine::ClearState()
     {
         V_LOG("Clearing engine state");
+
+#ifdef USE_VULKAN
+        m_graphics2.Clear();
+#endif
+
         m_ecs.Clear();
         m_physics.ClearState();
         camera::ClearMainCamera();

@@ -44,6 +44,7 @@ namespace nc::graphics
 
             // Blocks the current thread until all operations in the command queues on the device are completed. 
             void WaitIdle();
+            void Clear();
 
             void FrameBegin();
             void Draw();

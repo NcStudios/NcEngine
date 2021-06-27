@@ -116,5 +116,8 @@ namespace nc::ecs
         m_toAdd.shrink_to_fit();
         m_toRemove.clear();
         m_toRemove.shrink_to_fit();
+        #ifdef USE_VULKAN
+        m_graphics->GetRendererPtr()->ClearParticleEmitters();
+        #endif
     }
 } // namespace nc::ecs

@@ -27,7 +27,7 @@ namespace nc::vulkan
         float attConst = 1.0f;
         float attLin = 0.22f;
         float attQuad = 0.20f;
-        bool isInitialized = 0;
+        int isInitialized = 1;
         float padding[3] = {0.0f, 0.0f, 0.0f};
     };
 

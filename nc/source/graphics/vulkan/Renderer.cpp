@@ -17,6 +17,7 @@ namespace nc::graphics::vulkan
       m_textureManager{graphics},
       m_meshManager{graphics},
       m_mainRenderPass{},
+      m_storageHandles{},
       m_phongAndUiTechnique{nullptr},
       m_wireframeTechnique{nullptr},
       m_particleTechnique{nullptr}
@@ -124,7 +125,7 @@ namespace nc::graphics::vulkan
                 {
                     m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
                 }
-                m_phongAndUiTechnique->RegisterMeshRenderer(renderer);
+                m_storageHandles.emplace_back(renderer->GetParentEntity(), m_phongAndUiTechnique->RegisterMeshRenderer(renderer));
                 break;
             }
             case TechniqueType::Wireframe:
@@ -133,7 +134,7 @@ namespace nc::graphics::vulkan
                 {
                     m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
                 }
-                m_wireframeTechnique->RegisterMeshRenderer(renderer);
+                m_storageHandles.emplace_back(renderer->GetParentEntity(), m_wireframeTechnique->RegisterMeshRenderer(renderer));
                 break;
             }
             case TechniqueType::None:
@@ -143,10 +144,65 @@ namespace nc::graphics::vulkan
         }
     }
 
+    void Renderer::DeregisterMeshRenderer(Entity entity)
+    {
+        // @todo: This will be replaced with a proper storage strategy.
+        auto it = std::ranges::find_if(m_storageHandles, [entity](const auto& pair)
+        {
+            return entity == pair.first;
+        });
+
+        if (it == m_storageHandles.end())
+        {
+            return;
+        }
+
+        auto& vec = *(it->second);
+        auto itemIt = std::ranges::find(vec, entity);
+
+        if (itemIt == vec.end())
+        {
+            return;
+        }
+
+        *itemIt = vec.back();
+        vec.pop_back();
+
+        *it = m_storageHandles.back();
+        m_storageHandles.pop_back();
+    }
+
     void Renderer::RecordUi(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
         NC_PROFILE_END();
+    }
+
+    void Renderer::ClearMeshRenderers()
+    {
+        if (m_wireframeTechnique)
+        {
+            m_wireframeTechnique.reset();
+        }
+        
+        if (m_phongAndUiTechnique)
+        {
+            m_phongAndUiTechnique.reset();
+        }
+    }
+
+    void Renderer::ClearParticleEmitters()
+    {
+        if (m_particleTechnique)
+        {
+            m_particleTechnique.reset();
+        }
+    }
+
+    void Renderer::Clear()
+    {
+        ClearMeshRenderers();
+        ClearParticleEmitters();
     }
 }
