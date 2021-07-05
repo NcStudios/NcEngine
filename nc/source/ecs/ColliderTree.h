@@ -2,7 +2,7 @@
 
 #include "alloc/PoolAdapter.h"
 #include "component/Collider.h"
-#include "physics/CollisionVolumes.h"
+#include "physics/collision/CollisionVolumes.h"
 
 namespace nc
 {

@@ -4,7 +4,7 @@
 #include "SoA.h"
 #include "ColliderTree.h"
 #include "assets/HullColliderManager.h"
-#include "physics/CollisionVolumes.h"
+#include "physics/collision/CollisionVolumes.h"
 
 namespace nc::ecs
 {

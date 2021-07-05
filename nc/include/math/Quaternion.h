@@ -20,6 +20,8 @@ namespace nc
         static Quaternion FromAxisAngle(const Vector3& axis, float radians); // axis cannot be zero
     };
 
+    Quaternion Normalize(const Quaternion& quat);
+
     /** note: For consistency with DirectXMath, the argument order is reversed from the order in which they are
      *  multiplied. In other words, this computes the lhs rotation followed by rhs (or the product rhs*lhs). */
     Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs);

@@ -100,6 +100,8 @@ namespace nc::core
           #else
           m_ui{m_window.GetHWND(), &m_graphics}
           #endif
+          ,
+          m_debugRenderer{&m_graphics}
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -133,13 +135,17 @@ namespace nc::core
             m_time.UpdateTime();
             m_window.ProcessSystemMessages(); 
 
+            m_debugRenderer.ClearLines();
+            m_debugRenderer.ClearPoints();
+
+
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
 
             FrameLogic(dt);
 
             /** @todo see fixedUpdateInterval todo above */
-            FixedStepLogic();
+            FixedStepLogic(dt);
 
             particleUpdateJobResult.wait();
             m_ecs.GetRegistry()->CommitStagedChanges();
@@ -178,10 +184,10 @@ namespace nc::core
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
     }
 
-    void Engine::FixedStepLogic()
+    void Engine::FixedStepLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
-        m_physics.DoPhysicsStep();
+        m_physics.DoPhysicsStep(dt);
 
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFixedUpdate();
@@ -231,7 +237,12 @@ namespace nc::core
 
         m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
+
+
         m_frameManager.Execute(&m_graphics);
+
+        m_debugRenderer.Render();
+
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());

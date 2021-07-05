@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CollisionVolumes.h"
 #include "Simplex.h"
+#include "Manifold.h"
 
 #include <vector>
 
@@ -13,10 +13,13 @@ namespace nc::physics
             void Initialize(const Simplex& simplex);
             auto GetNormalData(size_t index) const -> NormalData;
             auto ComputeNormalData() -> size_t;
-            auto Expand(const Vector3& support, size_t* oldMinFace) -> bool;
+            auto Expand(const Vector3& supportCSO, const Vector3& worldSupportA, const Vector3& worldSupportB, const Vector3& localSupportA, const Vector3& localSupportB, size_t* oldMinFace) -> bool;
+            bool GetContacts(size_t minFace, Vector3* worldContactA, Vector3* worldContactB, Vector3* localContactA, Vector3* localContactB) const;
 
         private:
             std::vector<Vector3> m_vertices;
+            std::vector<std::pair<Vector3, Vector3>> m_worldSupports;
+            std::vector<std::pair<Vector3, Vector3>> m_localSupports;
             std::vector<size_t> m_indices;
             std::vector<NormalData> m_normals;
             std::vector<std::pair<size_t, size_t>> m_edges;

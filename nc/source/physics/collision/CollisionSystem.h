@@ -1,9 +1,15 @@
 #pragma once
 
 #include "ecs/ColliderSystem.h"
+#include "Manifold.h"
 
 #include <cstdint>
 #include <vector>
+
+
+
+#include "IntersectionQueries.h"
+
 
 namespace nc
 {
@@ -73,6 +79,7 @@ namespace nc::physics
     };
     #endif
 
+
     /** @todo FindXXXEvents will notify immediately - do we want to delay this? */
 
     class CollisionSystem
@@ -80,7 +87,9 @@ namespace nc::physics
         public:
             CollisionSystem(ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
 
-            void DoCollisionStep();
+            auto DoCollisionStep() -> const std::vector<Manifold>&;
+            void NotifyCollisionEvents();
+            void Cleanup();
             void ClearState();
 
         private:
@@ -91,18 +100,18 @@ namespace nc::physics
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
-            std::vector<Manifold> m_manifolds;
+            std::vector<Manifold> m_persistentManifolds;
 
             void FetchEstimates();
             void BroadDetectVsDynamic();
             void BroadDetectVsStatic();
             void NarrowDetectVsDynamic();
             void NarrowDetectVsStatic();
-            void ResolveCollisions();
-            void FindExitAndStayEvents() const;
+            void AddContact(EntityTraits::underlying_type entityA, EntityTraits::underlying_type entityB, const Contact& contact);
+            void RemoveManifold(NarrowDetectEvent event);
+            void FindExitAndStayEvents();
             void FindEnterEvents() const;
             void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;
-            void Cleanup();
         
         public:
             #ifdef NC_EDITOR_ENABLED

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "physics/CollisionVolumes.h"
+#include "physics/collision/CollisionVolumes.h"
 
 #include <span>
 #include <stdexcept>

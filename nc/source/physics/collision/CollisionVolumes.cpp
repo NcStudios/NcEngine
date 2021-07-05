@@ -1,6 +1,6 @@
 #include "CollisionVolumes.h"
 #include "assets/HullColliderManager.h"
-#include "physics/IntersectionQueries.h"
+#include "IntersectionQueries.h"
 
 namespace nc::physics
 {

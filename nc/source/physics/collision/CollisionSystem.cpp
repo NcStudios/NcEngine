@@ -32,15 +32,22 @@ namespace nc::physics
           m_broadEventsVsStatic{},
           m_currentCollisions{},
           m_previousCollisions{},
-          m_manifolds{}
+          m_persistentManifolds{}
     {
     }
 
-    void CollisionSystem::DoCollisionStep()
+    auto CollisionSystem::DoCollisionStep() -> const std::vector<Manifold>&
     {
         #ifdef NC_EDITOR_ENABLED
         metrics.Reset();
         #endif
+
+        auto* registry = ActiveRegistry();
+
+        for(auto& manifold : m_persistentManifolds)
+        {
+            manifold.UpdateWorldPoints(registry);
+        }
 
         /** @todo re-visit JobSystem here */ 
         FetchEstimates();
@@ -48,11 +55,14 @@ namespace nc::physics
         BroadDetectVsDynamic();
         NarrowDetectVsStatic();
         NarrowDetectVsDynamic();
-        ResolveCollisions();
+
+        return m_persistentManifolds;
+    }
+
+    void CollisionSystem::NotifyCollisionEvents()
+    {
         FindExitAndStayEvents();
         FindEnterEvents();
-
-        Cleanup();
     }
 
     void CollisionSystem::ClearState()
@@ -61,7 +71,7 @@ namespace nc::physics
         m_broadEventsVsStatic.resize(0u);
         m_currentCollisions.resize(0u);
         m_previousCollisions.resize(0u);
-        m_manifolds.resize(0u);
+        m_persistentManifolds.resize(0u);
     }
 
     void CollisionSystem::FetchEstimates()
@@ -117,6 +127,40 @@ namespace nc::physics
         }
     }
 
+    void CollisionSystem::AddContact(EntityTraits::underlying_type entityA, EntityTraits::underlying_type entityB, const Contact& contact)
+    {
+        auto pos = std::ranges::find_if(m_persistentManifolds, [entityA, entityB](const auto& manifold)
+        {
+            return (manifold.entityA == entityA && manifold.entityB == entityB) ||
+                   (manifold.entityA == entityB && manifold.entityB == entityA);
+        });
+
+        if(pos == m_persistentManifolds.end())
+        {
+            Manifold newManifold{entityA, entityB, {}};
+            newManifold.contacts.push_back(contact);
+            m_persistentManifolds.push_back(newManifold);
+            return;
+        }
+
+        pos->AddContact(contact);
+    }
+
+    void CollisionSystem::RemoveManifold(NarrowDetectEvent event)
+    {
+        auto pos = std::ranges::find_if(m_persistentManifolds, [event](const auto& manifold)
+        {
+            return (manifold.entityA == event.first && manifold.entityB == event.second) ||
+                   (manifold.entityA == event.second && manifold.entityB == event.first);
+        });
+
+        if(pos != m_persistentManifolds.end())
+        {
+            *pos = m_persistentManifolds.back();
+            m_persistentManifolds.pop_back();
+        }
+    }
+
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
@@ -145,8 +189,11 @@ namespace nc::physics
 
                 if(!trigger[i] && !trigger[j])
                 {
-                    auto contactData = Epa(iVolume, jVolume, iMatrix, jMatrix, &state);
-                    m_manifolds.emplace_back(handles[i], handles[j], contactData);
+                    Contact contact;
+                    if(Epa(iVolume, jVolume, iMatrix, jMatrix, &state, &contact))
+                    {
+                        AddContact(handles[i], handles[j], contact);
+                    }
                 }
             }
         }
@@ -178,41 +225,31 @@ namespace nc::physics
 
                 if(!trigger[dynamicIndex] && !staticPair->isTrigger)
                 {
-                    auto contactData = Epa(dVolume, sVolume, dMatrix, sMatrix, &state);
-                    m_manifolds.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity), contactData);
+                    Contact contact;
+                    if(Epa(dVolume, sVolume, dMatrix, sMatrix, &state, &contact))
+                    {
+                        AddContact(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity), contact);
+                    }
                 }
             }
         }
     }
-    
-    void CollisionSystem::ResolveCollisions()
-    {
-        for(auto& manifold : m_manifolds)
-        {
-            auto a = Entity{manifold.entityA};
-            auto b = Entity{manifold.entityB};
-            auto mtv = manifold.contact.normal * manifold.contact.distance;
-            auto* registry = ActiveRegistry();
-            auto* transformA = registry->Get<Transform>(a);
-            auto* transformB = registry->Get<Transform>(b);
 
-            if(!EntityUtils::IsStatic(a))
-                transformA->Translate(-mtv);
-            if(!EntityUtils::IsStatic(b))
-                transformB->Translate(mtv);
-        }
-    }
-
-    void CollisionSystem::FindExitAndStayEvents() const
+    void CollisionSystem::FindExitAndStayEvents()
     {
         auto currBeg = m_currentCollisions.cbegin();
         auto currEnd = m_currentCollisions.cend();
         for(const auto& prev : m_previousCollisions)
         {
             if(currEnd == std::find(currBeg, currEnd, prev))
+            {
                 NotifyCollisionEvent(prev, CollisionEventType::Exit);
+                RemoveManifold(prev);
+            }
             else
+            {
                 NotifyCollisionEvent(prev, CollisionEventType::Stay);
+            }
         }
     }
 
@@ -271,6 +308,5 @@ namespace nc::physics
         m_dynamicEstimates.clear();
         m_broadEventsVsDynamic.clear();
         m_broadEventsVsStatic.clear();
-        m_manifolds.clear();
     }
 } // namespace nc::phsyics

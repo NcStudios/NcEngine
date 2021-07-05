@@ -4,7 +4,7 @@
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
 #include "ecs/ColliderSystem.h"
-#include "physics/CollisionSystem.h"
+#include "physics/collision/CollisionSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "imgui/imgui.h"
 

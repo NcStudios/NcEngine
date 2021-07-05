@@ -17,6 +17,10 @@
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
 
+
+#include "physics/DebugRenderer.h"
+
+
 namespace nc::core
 {
     class Engine
@@ -50,9 +54,11 @@ namespace nc::core
             ui::UIImpl m_ui;
         #endif
 
+            physics::DebugRenderer m_debugRenderer;
+
             void ClearState();
             void DoSceneSwap();
-            void FixedStepLogic();
+            void FixedStepLogic(float dt);
             void FrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();

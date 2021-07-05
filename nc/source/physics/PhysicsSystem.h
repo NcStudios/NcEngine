@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CollisionSystem.h"
+#include "collision/CollisionSystem.h"
 #include "ClickableSystem.h"
 
 namespace nc
@@ -20,7 +20,7 @@ namespace nc::physics
             PhysicsSystem(graphics::Graphics* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
             #endif
 
-            void DoPhysicsStep();
+            void DoPhysicsStep(float dt);
             void ClearState();
 
         private:

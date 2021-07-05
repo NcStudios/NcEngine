@@ -76,6 +76,13 @@ namespace nc
         return out;
     }
 
+    DirectX::XMVECTOR Transform::GetRotationXM() const
+    {
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
+        return rot_v;
+    }
+
     Vector3 Transform::GetScale() const
     {
         using namespace DirectX;

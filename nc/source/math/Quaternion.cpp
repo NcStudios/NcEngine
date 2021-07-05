@@ -62,6 +62,12 @@ namespace nc
         return out;
     }
 
+    Quaternion Normalize(const Quaternion& quat)
+    {
+        float magInv = 1.0f / sqrt(quat.x * quat.x + quat.y * quat.y + quat.z * quat.z + quat.w * quat.w);
+        return Quaternion{magInv * quat.x, magInv * quat.y, magInv * quat.z, magInv * quat.w};
+    }
+
     Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs)
     {
         auto lhs_v = DirectX::XMVectorSet(lhs.x, lhs.y, lhs.z, lhs.w);

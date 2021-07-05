@@ -1,6 +1,6 @@
 #include "ColliderTree.h"
 #include "Ecs.h"
-#include "physics/IntersectionQueries.h"
+#include "physics/collision/IntersectionQueries.h"
 
 namespace
 {
