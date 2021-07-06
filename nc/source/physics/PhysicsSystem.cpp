@@ -51,7 +51,7 @@ namespace nc::physics
         UpdateWorldInertiaTensors(registry, bodies);
         ApplyGravity(bodies, dt);
 
-        const auto& manifolds = m_collisionSystem.DoCollisionStep();
+        const auto& manifolds = m_collisionSystem.DoCollisionStep(registry);
         Constraints constraints;
         GenerateConstraints(registry, manifolds, &constraints);
 
@@ -70,7 +70,7 @@ namespace nc::physics
 
         Integrate(registry, bodies, dt);
 
-        m_collisionSystem.NotifyCollisionEvents();
+        m_collisionSystem.NotifyCollisionEvents(registry);
         m_collisionSystem.Cleanup();
     }
 

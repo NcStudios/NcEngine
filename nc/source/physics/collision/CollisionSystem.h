@@ -6,11 +6,6 @@
 #include <cstdint>
 #include <vector>
 
-
-
-#include "IntersectionQueries.h"
-
-
 namespace nc
 {
     namespace graphics { class FrameManager; }
@@ -87,8 +82,8 @@ namespace nc::physics
         public:
             CollisionSystem(ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
 
-            auto DoCollisionStep() -> const std::vector<Manifold>&;
-            void NotifyCollisionEvents();
+            auto DoCollisionStep(registry_type* registry) -> const std::vector<Manifold>&;
+            void NotifyCollisionEvents(registry_type* registry);
             void Cleanup();
             void ClearState();
 
@@ -102,16 +97,19 @@ namespace nc::physics
             std::vector<NarrowDetectEvent> m_previousCollisions;
             std::vector<Manifold> m_persistentManifolds;
 
-            void FetchEstimates();
+            void FetchEstimates(registry_type* registry);
             void BroadDetectVsDynamic();
             void BroadDetectVsStatic();
             void NarrowDetectVsDynamic();
             void NarrowDetectVsStatic();
             void AddContact(EntityTraits::underlying_type entityA, EntityTraits::underlying_type entityB, const Contact& contact);
             void RemoveManifold(NarrowDetectEvent event);
-            void FindExitAndStayEvents();
-            void FindEnterEvents() const;
-            void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;
+            void FindExitAndStayEvents(registry_type* registry);
+            void FindEnterEvents(registry_type* registry) const;
+            void NotifyCollisionEnter(registry_type* registry, const NarrowDetectEvent& data) const;
+            void NotifyCollisionExit(registry_type* registry, const NarrowDetectEvent& data) const;
+            void NotifyCollisionStay(registry_type* registry, const NarrowDetectEvent& data) const;
+
         
         public:
             #ifdef NC_EDITOR_ENABLED

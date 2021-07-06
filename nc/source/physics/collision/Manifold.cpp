@@ -75,7 +75,6 @@ namespace nc::physics
         float maxPenetration = contacts[0].depth;
         for(size_t i = 1u; i < contacts.size(); ++i)
         {
-            // feel like it should be reversed
             if(contacts[i].depth > maxPenetration)
             {
                 maxPenetrationIndex = i;
@@ -93,7 +92,6 @@ namespace nc::physics
         float maxPenetration = contact.depth;
         for(size_t i = 0; i < contacts.size(); ++i)
         {
-            // feel like it should be reversed
             if(contacts[i].depth > maxPenetration)
             {
                 maxPenetrationIndex = i;
@@ -106,18 +104,17 @@ namespace nc::physics
         float res2 = 0.0f;
         float res3 = 0.0f;
         
-        // do in local space? bullet does
         if(maxPenetrationIndex != 0)
-            res0 = CalcArea4Points(contact.worldPointA, contacts[1].worldPointA, contacts[2].worldPointA, contacts[3].worldPointA);
+            res0 = CalcArea4Points(contact.localPointA, contacts[1].localPointA, contacts[2].localPointA, contacts[3].localPointA);
 
         if(maxPenetrationIndex != 1)
-            res1 = CalcArea4Points(contact.worldPointA, contacts[0].worldPointA, contacts[2].worldPointA, contacts[3].worldPointA);
+            res1 = CalcArea4Points(contact.localPointA, contacts[0].localPointA, contacts[2].localPointA, contacts[3].localPointA);
 
         if(maxPenetrationIndex != 2)
-            res2 = CalcArea4Points(contact.worldPointA, contacts[0].worldPointA, contacts[1].worldPointA, contacts[3].worldPointA);
+            res2 = CalcArea4Points(contact.localPointA, contacts[0].localPointA, contacts[1].localPointA, contacts[3].localPointA);
 
         if(maxPenetrationIndex != 3)
-            res3 = CalcArea4Points(contact.worldPointA, contacts[0].worldPointA, contacts[1].worldPointA, contacts[2].worldPointA);
+            res3 = CalcArea4Points(contact.localPointA, contacts[0].localPointA, contacts[1].localPointA, contacts[2].localPointA);
 
         int biggestArea = ClosestAxis(res0, res1, res2, res3);
         return biggestArea;

@@ -36,14 +36,14 @@ namespace nc::graphics
 
             void Render()
             {
-                constexpr size_t CubeVertexCount = 24u;
+                constexpr size_t CubeIndexCount = 36u;
                 DebugTechnique::BindCommonResources();
                 m_mesh.Bind();
 
                 for(const auto& matrices : m_points)
                 {
                     BindMatrices(matrices);
-                    m_graphics->DrawIndexed(CubeVertexCount);
+                    m_graphics->DrawIndexed(CubeIndexCount);
                 }
             }
 
@@ -54,7 +54,7 @@ namespace nc::graphics
             {
                 using namespace DirectX;
 
-                auto modelView = XMMatrixScaling(0.5f, 0.5f, 0.5f) *
+                auto modelView = XMMatrixScaling(0.1f, 0.1f, 0.1f) *
                                  XMMatrixTranslation(position.x, position.y, position.z) *
                                  DebugRenderer::m_instance->m_graphics->GetViewMatrix();
 

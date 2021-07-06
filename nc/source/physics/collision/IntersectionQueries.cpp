@@ -5,8 +5,6 @@
 #include <array>
 #include <stdexcept>
 
-#include <iostream>
-
 namespace nc::physics
 {
     using namespace DirectX;
@@ -158,9 +156,10 @@ namespace nc::physics
                 {
                     /** @todo Need to determine if this can happen under normal circumstances.
                      *  It has thrown here a few times, but always when there is wonk elsewhere. */
-                    std::cout << "Epa - minDistance not found\n";
-                    contact->depth = 0.0f;
-                    return false;
+                    throw std::runtime_error("Epa - minDistance not found");
+                    //std::cout << "Epa - minDistance not found\n";
+                    //contact->depth = 0.0f;
+                    //return false;
                 }
 
                 minNorm.distance = FloatMax;

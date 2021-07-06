@@ -45,25 +45,6 @@ namespace nc::graphics
         DebugTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Stencil>(Stencil::GetUID(Stencil::Mode::Off), Stencil::Mode::Off));
         DebugTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Rasterizer>(Rasterizer::GetUID(Rasterizer::Mode::Wireframe), Rasterizer::Mode::Wireframe));
 
-        // Mesh
-        //graphics::LoadMeshAsset("project/assets/mesh/plane.nca");
-        //DebugTechnique::m_mesh = std::make_unique<graphics::Mesh>("project/assets/mesh/plane.nca");
-
-        // Textures
-        //const std::string particleTexturePath = "nc//resources//texture//DefaultParticle.png";
-        //const std::string normalPath = "nc/resources/texture/DefaultNormal.png";
-        //const std::string roughnessPath = "nc/resources/texture/DefaultMetallic.png";
-        //const std::string metallicPath = "nc/resources/texture/DefaultMetallic.png";
-        //DebugTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(particleTexturePath), particleTexturePath, 0));
-        //DebugTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(normalPath), normalPath, 1));
-        //DebugTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(roughnessPath), roughnessPath, 2));
-        //DebugTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(metallicPath), metallicPath, 3));
-
-        // Material Properties
-        //MaterialProperties materialProperties{};
-        //m_materialPropertiesBuffer = std::make_unique<PixelConstantBuffer<MaterialProperties>>(materialProperties, 1u);
-        //DebugTechnique::m_commonResources.push_back(m_materialPropertiesBuffer.get());
-
         // Add vertex shader
         const auto defaultShaderPath = nc::config::GetGraphicsSettings().d3dShadersPath;
         const auto vertexShaderPath = defaultShaderPath + "wireframevertexshader.cso";

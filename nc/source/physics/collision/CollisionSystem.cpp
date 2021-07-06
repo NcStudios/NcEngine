@@ -36,13 +36,11 @@ namespace nc::physics
     {
     }
 
-    auto CollisionSystem::DoCollisionStep() -> const std::vector<Manifold>&
+    auto CollisionSystem::DoCollisionStep(registry_type* registry) -> const std::vector<Manifold>&
     {
         #ifdef NC_EDITOR_ENABLED
         metrics.Reset();
         #endif
-
-        auto* registry = ActiveRegistry();
 
         for(auto& manifold : m_persistentManifolds)
         {
@@ -50,7 +48,7 @@ namespace nc::physics
         }
 
         /** @todo re-visit JobSystem here */ 
-        FetchEstimates();
+        FetchEstimates(registry);
         BroadDetectVsStatic();
         BroadDetectVsDynamic();
         NarrowDetectVsStatic();
@@ -59,10 +57,10 @@ namespace nc::physics
         return m_persistentManifolds;
     }
 
-    void CollisionSystem::NotifyCollisionEvents()
+    void CollisionSystem::NotifyCollisionEvents(registry_type* registry)
     {
-        FindExitAndStayEvents();
-        FindEnterEvents();
+        FindExitAndStayEvents(registry);
+        FindEnterEvents(registry);
     }
 
     void CollisionSystem::ClearState()
@@ -74,13 +72,12 @@ namespace nc::physics
         m_persistentManifolds.resize(0u);
     }
 
-    void CollisionSystem::FetchEstimates()
+    void CollisionSystem::FetchEstimates(registry_type* registry)
     {
         const auto* soa = m_colliderSystem->GetDynamicSoA();
         auto [index, handles, matrices, volumes] = soa->View<ecs::ColliderSystem::HandleTypeIndex,
                                                     ecs::ColliderSystem::MatrixIndex,
                                                     ecs::ColliderSystem::BoundingVolumeIndex>();
-        auto* registry = ActiveRegistry();
 
         while(index.Valid())
         {
@@ -137,8 +134,7 @@ namespace nc::physics
 
         if(pos == m_persistentManifolds.end())
         {
-            Manifold newManifold{entityA, entityB, {}};
-            newManifold.contacts.push_back(contact);
+            Manifold newManifold{entityA, entityB, {contact}};
             m_persistentManifolds.push_back(newManifold);
             return;
         }
@@ -183,8 +179,8 @@ namespace nc::physics
                 INCREMENT_METRIC(metrics.dynamicCollisions);
 
                 /** @todo We could notify based on entries in m_manifold instead
-                 *  of m_currentCollisions, but that won't work for trigger colliders
-                 *  (once they are added). Leaving m_currentCollisions unchanged for now. */
+                 *  of m_currentCollisions, but that won't work for trigger colliders.
+                 *  Leaving m_currentCollisions unchanged for now. */
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
 
                 if(!trigger[i] && !trigger[j])
@@ -235,7 +231,7 @@ namespace nc::physics
         }
     }
 
-    void CollisionSystem::FindExitAndStayEvents()
+    void CollisionSystem::FindExitAndStayEvents(registry_type* registry)
     {
         auto currBeg = m_currentCollisions.cbegin();
         auto currEnd = m_currentCollisions.cend();
@@ -243,62 +239,55 @@ namespace nc::physics
         {
             if(currEnd == std::find(currBeg, currEnd, prev))
             {
-                NotifyCollisionEvent(prev, CollisionEventType::Exit);
+                NotifyCollisionExit(registry, prev);
                 RemoveManifold(prev);
             }
             else
             {
-                NotifyCollisionEvent(prev, CollisionEventType::Stay);
+                NotifyCollisionStay(registry, prev);
             }
         }
     }
 
-    void CollisionSystem::FindEnterEvents() const
+    void CollisionSystem::FindEnterEvents(registry_type* registry) const
     {
         auto prevBeg = m_previousCollisions.cbegin();
         auto prevEnd = m_previousCollisions.cend();
         for(const auto& curr : m_currentCollisions)
         {
             if(prevEnd == std::find(prevBeg, prevEnd, curr))
-                NotifyCollisionEvent(curr, CollisionEventType::Enter);
+                NotifyCollisionEnter(registry, curr);
         }
     }
 
-    void CollisionSystem::NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const
+    void CollisionSystem::NotifyCollisionEnter(registry_type* registry, const NarrowDetectEvent& data) const
     {
         auto h1 = static_cast<Entity>(data.first);
         auto h2 = static_cast<Entity>(data.second);
-        auto* reg = ActiveRegistry();
+        if(registry->Contains<Entity>(h1))
+            registry->Get<AutoComponentGroup>(h1)->SendOnCollisionEnter(h2);
+        if(registry->Contains<Entity>(h2))
+            registry->Get<AutoComponentGroup>(h2)->SendOnCollisionEnter(h1);
+    }
 
-        switch(type)
-        {
-            case CollisionEventType::Enter:
-            {
-                if(reg->Contains<Entity>(h1))
-                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionEnter(h2);
-                if(reg->Contains<Entity>(h2))
-                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionEnter(h1);
-                break;
-            }
-            case CollisionEventType::Stay:
-            {
-                if(reg->Contains<Entity>(h1))
-                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionStay(h2);
-                if(reg->Contains<Entity>(h2))
-                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionStay(h1);
-                break;
-            }
-            case CollisionEventType::Exit:
-            {
-                if(reg->Contains<Entity>(h1))
-                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionExit(h2);
-                if(reg->Contains<Entity>(h2))
-                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionExit(h1);
-                break;
-            }
-            default:
-                throw std::runtime_error("NotifyCollisionEvent - Unknown CollisionEventType");
-        }
+    void CollisionSystem::NotifyCollisionExit(registry_type* registry, const NarrowDetectEvent& data) const
+    {
+        auto h1 = static_cast<Entity>(data.first);
+        auto h2 = static_cast<Entity>(data.second);
+        if(registry->Contains<Entity>(h1))
+            registry->Get<AutoComponentGroup>(h1)->SendOnCollisionExit(h2);
+        if(registry->Contains<Entity>(h2))
+            registry->Get<AutoComponentGroup>(h2)->SendOnCollisionExit(h1);
+    }
+
+    void CollisionSystem::NotifyCollisionStay(registry_type* registry, const NarrowDetectEvent& data) const
+    {
+        auto h1 = static_cast<Entity>(data.first);
+        auto h2 = static_cast<Entity>(data.second);
+        if(registry->Contains<Entity>(h1))
+            registry->Get<AutoComponentGroup>(h1)->SendOnCollisionStay(h2);
+        if(registry->Contains<Entity>(h2))
+            registry->Get<AutoComponentGroup>(h2)->SendOnCollisionStay(h1);
     }
 
     void CollisionSystem::Cleanup()
