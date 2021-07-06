@@ -100,8 +100,6 @@ namespace nc::core
           #else
           m_ui{m_window.GetHWND(), &m_graphics}
           #endif
-          ,
-          m_debugRenderer{&m_graphics}
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -134,10 +132,6 @@ namespace nc::core
         {
             m_time.UpdateTime();
             m_window.ProcessSystemMessages(); 
-
-            m_debugRenderer.ClearLines();
-            m_debugRenderer.ClearPoints();
-
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
@@ -237,12 +231,11 @@ namespace nc::core
 
         m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
-
-
         m_frameManager.Execute(&m_graphics);
 
-        m_debugRenderer.Render();
-
+        #ifdef NC_DEBUG_RENDERING
+        m_physics.DebugRender();
+        #endif
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());

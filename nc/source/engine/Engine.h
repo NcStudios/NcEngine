@@ -17,10 +17,6 @@
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
 
-
-#include "physics/DebugRenderer.h"
-
-
 namespace nc::core
 {
     class Engine
@@ -53,8 +49,6 @@ namespace nc::core
         #ifndef USE_VULKAN
             ui::UIImpl m_ui;
         #endif
-
-            physics::DebugRenderer m_debugRenderer;
 
             void ClearState();
             void DoSceneSwap();

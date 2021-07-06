@@ -1,62 +1,94 @@
 #include "component/PhysicsBody.h"
 #include "Ecs.h"
 
-#include <iostream>
+namespace
+{
+    DirectX::XMMATRIX CreateInverseInertiaTensor(const nc::Vector3& scale, float mass, nc::ColliderType type)
+    {
+        float iX, iY, iZ;
+
+        switch(type)
+        {
+            case nc::ColliderType::Box:
+            {
+                auto m = mass / 12.0f;
+                auto squareScale = nc::HadamardProduct(scale, scale);
+                iX = m * (squareScale.y + squareScale.z);
+                iY = m * (squareScale.x + squareScale.z);
+                iZ = m * (squareScale.x + squareScale.y);
+                break;
+            }
+            case nc::ColliderType::Capsule:
+            {
+                /** @todo This is for a cylinder. */
+                auto m = mass / 12.0f;
+                auto r = scale.x * 0.5f;
+                auto h = scale.y * 2.0f;
+                iX = iY = m * (3.0f * r * r + h * h);
+                iZ = m * r * r * 0.5f;
+                break;
+            }
+            case nc::ColliderType::Sphere:
+            {
+                float radius = scale.x * 0.5f;
+                iX = iY = iZ = (2.0f / 3.0f) * mass * radius * radius;
+                break;
+            }
+            case nc::ColliderType::Hull:
+            {
+                /** @todo Need to compute these in preprocessing. Use sphere for now. */
+                float sqRadius = scale.x * scale.x;
+                iX = iY = iZ = (2.0f / 3.0f) * mass * sqRadius;
+                break;
+            }
+            default:
+            {
+                throw std::runtime_error("GetInverseInertiaTensor - Unknown ColliderType");
+            }
+        }
+
+        return DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixScaling(iX, iY, iZ));
+    }
+}
+
+#define NC_PHYSICS_DEBUGGING 1
 
 namespace nc
 {
     PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties)
         : ComponentBase{entity},
-            m_properties{properties},
-            m_inertiaWorld{},
-            m_inertiaLocal{}
+          m_properties{properties},
+          m_invInertiaWorld{},
+          m_invInertiaLocal{}
     {
-        /** @todo Maybe PhysicsSystem has Soa and tensors can live there. */
         auto* registry = ActiveRegistry();
-        auto transformScale = registry->Get<Transform>(entity)->GetScale();
-        auto colliderScale = registry->Get<Collider>(entity)->GetInfo().scale;
+        auto* collider = registry->Get<Collider>(entity);
         
-        auto m = properties.mass / 12.0f;
+        if(!collider)
+            throw std::runtime_error("PhysicsBody added to Entity with no Collider");
+
+        if(EntityUtils::IsStatic(entity))
+        {
+            m_properties.mass = 0.0f;
+        }
+
+        if(m_properties.mass == 0.0f)
+        {
+            m_invInertiaLocal = DirectX::XMMatrixScaling(0.0f, 0.0f, 0.0f);
+            return;
+        }
+
+        auto colliderScale = collider->GetInfo().scale;
+        auto transformScale = registry->Get<Transform>(entity)->GetScale();
         auto totalScale = HadamardProduct(transformScale, colliderScale);
-        auto squareDimensions = m * HadamardProduct(totalScale, totalScale);
-        auto iX = squareDimensions.y + squareDimensions.z;
-        auto iY = squareDimensions.x + squareDimensions.z;
-        auto iZ = squareDimensions.x + squareDimensions.y;
-        m_inertiaLocal = DirectX::XMVectorSet(iX, iY, iZ, 0.0f);
-
-
-        //auto iv = properties.mass * (1.0f / 6.0f);
-        //m_inertiaLocal = DirectX::XMVectorSet(iv, iv, iv, 0.0f);
+        m_invInertiaLocal = CreateInverseInertiaTensor(totalScale, m_properties.mass, collider->GetType());
     }
-
-    // void PhysicsBody::UpdateWorldInertia(Transform* transform)
-    // {
-    //     auto rotation_v = transform->GetRotationXM();
-    //     auto rotation_m = DirectX::XMMatrixRotationQuaternion(rotation_v);
-    //     m_inertiaWorld = rotation_m;
-    //     m_inertiaWorld.r[0] *= m_inertiaLocal;
-    //     m_inertiaWorld.r[1] *= m_inertiaLocal;
-    //     m_inertiaWorld.r[2] *= m_inertiaLocal;
-    //     m_inertiaWorld.r[3] *= m_inertiaLocal;
-    //     m_inertiaWorld *= DirectX::XMMatrixTranspose(rotation_m);
-    // }
 
     void PhysicsBody::UpdateWorldInertia(Transform* transform)
     {
-        // auto iv = m_properties.mass * (2.0f / 6.0f);
-        // auto inertia = DirectX::XMMatrixSet
-        // (
-        //     iv,  0.0f, 0.0f, 0.0f,
-        //     0.0f, iv,  0.0f, 0.0f,
-        //     0.0f, 0.0f, iv,  0.0f,
-        //     0.0f, 0.0f, 0.0f,  0.0f
-        // );
-
-        auto inertia = DirectX::XMMatrixScalingFromVector(m_inertiaLocal);
-
         auto rot_v = transform->GetRotationXM();
         auto rot_m = DirectX::XMMatrixRotationQuaternion(rot_v);
-        m_inertiaWorld = rot_m * inertia * XMMatrixTranspose(rot_m);
+        m_invInertiaWorld = rot_m * m_invInertiaLocal * XMMatrixTranspose(rot_m);
     }
 
     #ifdef NC_EDITOR_ENABLED

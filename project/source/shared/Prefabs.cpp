@@ -126,20 +126,18 @@ void InitializeResources()
     isInitialized = true;
 
     LoadHullColliderAsset("project/assets/mesh_colliders/coin.nca");
-    LoadHullColliderAsset("project/assets/mesh_colliders/cube.nca");
 
-
-    //graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
     graphics::LoadMeshAsset("project/assets/mesh/capsule.nca");
     graphics::LoadMeshAsset("project/assets/mesh/coin.nca");
-    //graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
     graphics::LoadMeshAsset("project/assets/mesh/planet.nca");
     graphics::LoadMeshAsset("project/assets/mesh/sphere.nca");
     graphics::LoadMeshAsset("project/assets/mesh/table.nca");
     graphics::LoadMeshAsset("project/assets/mesh/token.nca");
     graphics::LoadMeshAsset("project/assets/mesh/worm.nca");
 
-    //mesh::Beeper = graphics::Mesh{"project/assets/mesh/beeper.nca"};
+    mesh::Beeper = graphics::Mesh{"project/assets/mesh/beeper.nca"};
     mesh::Capsule = graphics::Mesh{"project/assets/mesh/capsule.nca"};
     mesh::Coin = graphics::Mesh{"project/assets/mesh/coin.nca"};
     mesh::Cube = graphics::Mesh{"project/assets/mesh/cube.nca"};
@@ -155,8 +153,8 @@ void InitializeResources()
     const auto defaultNormal = std::string{"nc//resources//texture//DefaultNormal.png"};
     const auto defaultMetallic = std::string{"nc//resources//texture//DefaultMetallic.png"};
 
-    //const std::vector<std::string> beeperTextures{textureDir + "Beeper//BaseColor.png", textureDir + "Beeper//Normal.png", textureDir + "Beeper//Roughness.png", defaultMetallic};
-    //material::Beeper = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(beeperTextures, materialProperties);
+    const std::vector<std::string> beeperTextures{textureDir + "Beeper//BaseColor.png", textureDir + "Beeper//Normal.png", textureDir + "Beeper//Roughness.png", defaultMetallic};
+    material::Beeper = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(beeperTextures, materialProperties);
 
     const std::vector<std::string> solidBlueTextures{textureDir + "SolidColor//Blue.png", defaultNormal, defaultMetallic, defaultMetallic};
     material::SolidBlue = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(solidBlueTextures, materialProperties);
@@ -184,35 +182,35 @@ void InitializeResources()
     const std::vector<std::string> wormTextures{textureDir + "Logo//BaseColor.png", textureDir + "Logo//Normal.png", textureDir + "Logo//Roughness.png", defaultMetallic};
     material::Worm = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(wormTextures, materialProperties);
 
-//     const std::vector<std::string> sunTextures{textureDir + "Planets/Sun/BaseColor.png", textureDir + "Planets/Sun/Normal.png", textureDir + "Planets/Sun/Roughness.png", defaultMetallic};
-//     material::Sun = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(sunTextures, materialProperties);
+    const std::vector<std::string> sunTextures{textureDir + "Planets/Sun/BaseColor.png", textureDir + "Planets/Sun/Normal.png", textureDir + "Planets/Sun/Roughness.png", defaultMetallic};
+    material::Sun = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(sunTextures, materialProperties);
 
-//     const std::vector<std::string> mercuryTextures{textureDir + "Planets/Mercury/BaseColor.png", textureDir + "Planets/Mercury/Normal.png", textureDir + "Planets/Mercury/Roughness.png", defaultMetallic};
-//     material::Mercury = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(mercuryTextures, materialProperties);
+    const std::vector<std::string> mercuryTextures{textureDir + "Planets/Mercury/BaseColor.png", textureDir + "Planets/Mercury/Normal.png", textureDir + "Planets/Mercury/Roughness.png", defaultMetallic};
+    material::Mercury = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(mercuryTextures, materialProperties);
 
-//     const std::vector<std::string> venusTextures{textureDir + "Planets/Venus/BaseColor.png", textureDir + "Planets/Venus/Normal.png", textureDir + "Planets/Venus/Roughness.png", defaultMetallic};
-//     material::Venus = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(venusTextures, materialProperties);
+    const std::vector<std::string> venusTextures{textureDir + "Planets/Venus/BaseColor.png", textureDir + "Planets/Venus/Normal.png", textureDir + "Planets/Venus/Roughness.png", defaultMetallic};
+    material::Venus = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(venusTextures, materialProperties);
 
-//     const std::vector<std::string> earthTextures{textureDir + "Planets/Earth/BaseColor.png", textureDir + "Planets/Earth/Normal.png", textureDir + "Planets/Earth/Roughness.png", defaultMetallic};
-//     material::Earth = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(earthTextures, materialProperties);
+    const std::vector<std::string> earthTextures{textureDir + "Planets/Earth/BaseColor.png", textureDir + "Planets/Earth/Normal.png", textureDir + "Planets/Earth/Roughness.png", defaultMetallic};
+    material::Earth = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(earthTextures, materialProperties);
 
-//     const std::vector<std::string> marsTextures{textureDir + "Planets/Mars/BaseColor.png", textureDir + "Planets/Mars/Normal.png", textureDir + "Planets/Mars/Roughness.png", defaultMetallic};
-//     material::Mars = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(marsTextures, materialProperties);
+    const std::vector<std::string> marsTextures{textureDir + "Planets/Mars/BaseColor.png", textureDir + "Planets/Mars/Normal.png", textureDir + "Planets/Mars/Roughness.png", defaultMetallic};
+    material::Mars = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(marsTextures, materialProperties);
 
-//     const std::vector<std::string> jupiterTextures{textureDir + "Planets/Jupiter/BaseColor.png", textureDir + "Planets/Jupiter/Normal.png", textureDir + "Planets/Jupiter/Roughness.png", defaultMetallic};
-//     material::Jupiter = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(jupiterTextures, materialProperties);
+    const std::vector<std::string> jupiterTextures{textureDir + "Planets/Jupiter/BaseColor.png", textureDir + "Planets/Jupiter/Normal.png", textureDir + "Planets/Jupiter/Roughness.png", defaultMetallic};
+    material::Jupiter = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(jupiterTextures, materialProperties);
 
-//     const std::vector<std::string> saturnTextures{textureDir + "Planets/Saturn/BaseColor.png", textureDir + "Planets/Saturn/Normal.png", textureDir + "Planets/Saturn/Roughness.png", defaultMetallic};
-//     material::Saturn = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(saturnTextures, materialProperties);
+    const std::vector<std::string> saturnTextures{textureDir + "Planets/Saturn/BaseColor.png", textureDir + "Planets/Saturn/Normal.png", textureDir + "Planets/Saturn/Roughness.png", defaultMetallic};
+    material::Saturn = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(saturnTextures, materialProperties);
 
-//     const std::vector<std::string> uranusTextures{textureDir + "Planets/Uranus/BaseColor.png", textureDir + "Planets/Uranus/Normal.png", textureDir + "Planets/Uranus/Roughness.png", defaultMetallic};
-//     material::Uranus = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(uranusTextures, materialProperties);
+    const std::vector<std::string> uranusTextures{textureDir + "Planets/Uranus/BaseColor.png", textureDir + "Planets/Uranus/Normal.png", textureDir + "Planets/Uranus/Roughness.png", defaultMetallic};
+    material::Uranus = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(uranusTextures, materialProperties);
 
-//     const std::vector<std::string> neptuneTextures{textureDir + "Planets/Neptune/BaseColor.png", textureDir + "Planets/Neptune/Normal.png", textureDir + "Planets/Neptune/Roughness.png", defaultMetallic};
-//     material::Neptune = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(neptuneTextures, materialProperties);
+    const std::vector<std::string> neptuneTextures{textureDir + "Planets/Neptune/BaseColor.png", textureDir + "Planets/Neptune/Normal.png", textureDir + "Planets/Neptune/Roughness.png", defaultMetallic};
+    material::Neptune = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(neptuneTextures, materialProperties);
 
-//     const std::vector<std::string> plutoTextures{textureDir + "Planets/Pluto/BaseColor.png", textureDir + "Planets/Pluto/Normal.png", textureDir + "Planets/Pluto/Roughness.png", defaultMetallic};
-//     material::Pluto = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(plutoTextures, materialProperties);
+    const std::vector<std::string> plutoTextures{textureDir + "Planets/Pluto/BaseColor.png", textureDir + "Planets/Pluto/Normal.png", textureDir + "Planets/Pluto/Roughness.png", defaultMetallic};
+    material::Pluto = graphics::Material::CreateMaterial<graphics::TechniqueType::PhongShading>(plutoTextures, materialProperties);
 }
 
 template<Resource Resource_t>

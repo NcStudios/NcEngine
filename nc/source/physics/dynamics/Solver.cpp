@@ -1,22 +1,11 @@
 #include "Solver.h"
 #include "physics/PhysicsConstants.h"
-#include "physics/DebugRenderer.h"
+#include "graphics/DebugRenderer.h"
 
 using namespace DirectX;
 
 namespace nc::physics
 {
-    XMMATRIX ScaleMatrix(FXMMATRIX matrix, FXMVECTOR vector)
-    {
-        return XMMATRIX
-        {
-            matrix.r[0] * vector,
-            matrix.r[1] * vector,
-            matrix.r[2] * vector,
-            matrix.r[3]
-        };
-    }
-
     XMVECTOR MultiplyJVContact(const ConstraintMatrix& v,
                                const ConstraintMatrix& jNormal,
                                const ConstraintMatrix& jTangent,
@@ -100,63 +89,21 @@ namespace nc::physics
                                               PhysicsBody* physBodyA,
                                               PhysicsBody* physBodyB)
     {
-        auto& bodyA = physBodyA->GetProperties();
-        auto& bodyB = physBodyB->GetProperties();
-
         auto rA = contact.worldPointA - transformA->GetPosition();
         auto rB = contact.worldPointB - transformB->GetPosition();
-
         auto rA_v = XMLoadVector3(&rA);
         auto rB_v = XMLoadVector3(&rB);
-        auto normal_v = XMLoadVector3(&contact.normal);
 
-        // are these going to be normalized?
-        auto tangent_v = XMVector3Orthogonal(normal_v);
-        auto bitangent_v = XMVector3Cross(normal_v, tangent_v);
+        auto normal_v = XMLoadVector3(&contact.normal);
+        auto tangent_v = XMVector3Normalize(XMVector3Orthogonal(normal_v));
+        auto bitangent_v = XMVector3Normalize(XMVector3Cross(normal_v, tangent_v));
 
         auto jNormal = ConstraintMatrix::VelocityJacobian(rA_v, rB_v, normal_v);
         auto jTangent = ConstraintMatrix::VelocityJacobian(rA_v, rB_v, tangent_v);
         auto jBitangent = ConstraintMatrix::VelocityJacobian(rA_v, rB_v, bitangent_v);
 
-        // VECTOR WAY
-        // auto ivA = bodyA.mass * (2.0f / 6.0f);
-        // auto ivB = bodyB.mass * (2.0f / 6.0f);
-        // auto inertiaA_v = DirectX::XMVectorSet(ivA, ivA, ivA, 0.0f);
-        // auto inertiaB_v = DirectX::XMVectorSet(ivB, ivB, ivB, 0.0f);
-        // auto rot1 = transformA->GetRotation();
-        // auto rot2 = transformB->GetRotation();
-        // auto rotA = XMMatrixRotationQuaternion(XMVectorSet(rot1.x, rot1.y, rot1.z, rot1.w));
-        // auto rotB = XMMatrixRotationQuaternion(XMVectorSet(rot2.x, rot2.y, rot2.z, rot2.w));
-        // auto rotInvA = ScaleMatrix(rotA, inertiaA_v);
-        // auto rotInvB = ScaleMatrix(rotB, inertiaB_v);
-        // auto invInertiaA = rotInvA * XMMatrixTranspose(rotA);
-        // auto invInertiaB = rotInvB * XMMatrixTranspose(rotB);
-        //auto invInertiaA = XMMatrixTranspose(rotA) * rotInvA;
-        //auto invInertiaB = XMMatrixTranspose(rotB) * rotInvB;
-
-        // MATRIX WAY
-        // auto ivA = bodyA.mass * (2.0f / 6.0f);
-        // auto ivB = bodyB.mass * (2.0f / 6.0f);
-        // auto inertiaA = DirectX::XMMatrixSet
-        // (
-        //     ivA,  0.0f, 0.0f, 0.0f,
-        //     0.0f, ivA,  0.0f, 0.0f,
-        //     0.0f, 0.0f, ivA,  0.0f,
-        //     0.0f, 0.0f, 0.0f,  0.0f
-        // );
-        // auto inertiaB = DirectX::XMMatrixSet
-        // (
-        //     ivB,  0.0f, 0.0f, 0.0f,
-        //     0.0f, ivB,  0.0f, 0.0f,
-        //     0.0f, 0.0f, ivB,  0.0f,
-        //     0.0f, 0.0f, 0.0f,  0.0f
-        // );
-        // auto rot1 = transformA->GetRotation();
-        // auto rot2 = transformB->GetRotation();
-        // auto rotA = XMMatrixRotationQuaternion(XMVectorSet(rot1.x, rot1.y, rot1.z, rot1.w));
-        // auto rotB = XMMatrixRotationQuaternion(XMVectorSet(rot2.x, rot2.y, rot2.z, rot2.w));
-        // auto invInertiaA = rotA * inertiaA * XMMatrixTranspose(rotA);
-        // auto invInertiaB = rotB * inertiaB * XMMatrixTranspose(rotB);
+        auto& bodyA = physBodyA->GetProperties();
+        auto& bodyB = physBodyB->GetProperties();
 
         const auto& invInertiaA = physBodyA->GetInverseInertia();
         const auto& invInertiaB = physBodyB->GetInverseInertia();
@@ -194,10 +141,8 @@ namespace nc::physics
         };
     }
 
-    void GenerateConstraints(const std::vector<Manifold>& manifolds, Constraints* constraints)
+    void GenerateConstraints(registry_type* registry, const std::vector<Manifold>& manifolds, Constraints* constraints)
     {
-        auto* registry = ActiveRegistry();
-
         for(const auto& manifold : manifolds)
         {
             Entity entityA = Entity{manifold.entityA};
@@ -215,8 +160,11 @@ namespace nc::physics
 
             for(const auto& contact : manifold.contacts)
             {
-                DebugRenderer::AddPoint(contact.worldPointA);
-                DebugRenderer::AddPoint(contact.worldPointB);
+                #ifdef NC_DEBUG_RENDERING
+                graphics::DebugRenderer::AddPoint(contact.worldPointA);
+                graphics::DebugRenderer::AddPoint(contact.worldPointB);
+                #endif
+
                 constraints->contact.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
             }
         }
@@ -275,47 +223,5 @@ namespace nc::physics
         bodyA.angularVelocity += deltaWA;
         bodyB.velocity += deltaVB;
         bodyB.angularVelocity += deltaWB;
-    }
-
-    void ApplyGravity(float dt)
-    {
-        auto* registry = ActiveRegistry();
-        auto g = GravityAcceleration * dt;
-
-        for(auto& body : registry->ViewAll<PhysicsBody>())
-        {
-            auto& properties = body.GetProperties();
-
-            if(properties.useGravity)
-            {
-                properties.velocity += g;
-            }
-        }
-    }
-
-    void Integrate(float dt)
-    {
-        auto* registry = ActiveRegistry();
-
-        for(auto& body : registry->ViewAll<PhysicsBody>())
-        {
-            Entity entity = body.GetParentEntity();
-
-            // hacky
-            if(EntityUtils::IsStatic(entity))
-                continue;
-            
-            auto& properties = body.GetProperties();
-            auto* transform = registry->Get<Transform>(entity);
-
-            properties.velocity = HadamardProduct(properties.linearFreedom, properties.velocity);
-            properties.angularVelocity = HadamardProduct(properties.angularFreedom, properties.angularVelocity);
-
-            transform->Translate(properties.velocity * dt);
-            transform->Rotate(Quaternion::FromEulerAngles(properties.angularVelocity * dt * 0.5f));
-
-            properties.velocity *= pow(1.0f - properties.drag, dt);
-            properties.angularVelocity *= pow(1.0f - properties.angularDrag, dt);
-        }
     }
 }

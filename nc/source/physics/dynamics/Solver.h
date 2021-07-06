@@ -6,9 +6,7 @@
 
 namespace nc::physics
 {
-    void GenerateConstraints(const std::vector<Manifold>& persistentManifolds, Constraints* constraints);
+    void GenerateConstraints(registry_type* registry, const std::vector<Manifold>& persistentManifolds, Constraints* constraints);
     void ResolveConstraint(const BasicContactConstraint& constraint);
     void ResolveConstraint(ContactConstraint& constraint, float dt);
-    void ApplyGravity(float dt);
-    void Integrate(float dt);
 } // namespace nc::physics

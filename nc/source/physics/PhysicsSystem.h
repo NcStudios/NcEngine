@@ -2,6 +2,7 @@
 
 #include "collision/CollisionSystem.h"
 #include "ClickableSystem.h"
+#include "graphics/DebugRenderer.h"
 
 namespace nc
 {
@@ -23,8 +24,15 @@ namespace nc::physics
             void DoPhysicsStep(float dt);
             void ClearState();
 
+            #ifdef NC_DEBUG_RENDERING
+            void DebugRender();
+            #endif
+
         private:
             CollisionSystem m_collisionSystem;
             ClickableSystem m_clickableSystem;
+            #ifdef NC_DEBUG_RENDERING
+            graphics::DebugRenderer m_debugRenderer;
+            #endif
     };
 } // namespace nc::physics
