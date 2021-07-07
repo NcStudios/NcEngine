@@ -51,8 +51,6 @@ namespace
     }
 }
 
-#define NC_PHYSICS_DEBUGGING 1
-
 namespace nc
 {
     PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties)
