@@ -302,9 +302,6 @@ template<> Entity Create_<Resource::DiscBlue>(registry_type* registry, EntityInf
 
 template<> Entity Create_<Resource::DiscGreen>(registry_type* registry, EntityInfo info)
 {
-    //////
-    info.scale = Vector3::Splat(10.0f);
-
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<Renderer>(handle, mesh::Coin, material::SolidGreen);
     return handle;
