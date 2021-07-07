@@ -145,6 +145,16 @@ namespace nc::physics
             {
                 *cur = contacts.back();
                 contacts.pop_back();
+                continue;
+            }
+
+            auto projectedPoint = contact.worldPointA - contact.normal * contact.depth;
+            auto projectedDifference = contact.worldPointB - projectedPoint;
+            auto distance2d = Dot(projectedDifference, projectedDifference);
+            if(distance2d > ContactBreakDistance * ContactBreakDistance)
+            {
+                *cur = contacts.back();
+                contacts.pop_back();
             }
         }
     }

@@ -15,7 +15,7 @@ namespace nc
         float angularDrag = 0.1f;
         float restitution = 0.3f;
         float friction = 0.5f;
-        float baumgarte = 0.3f;
+        float baumgarte = 0.4f;
         bool useGravity = true;
     };
 

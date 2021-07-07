@@ -79,7 +79,11 @@ namespace nc::sample
         registry->Add<Collider>(topBox, BoxProperties{}, false);
         registry->Add<PhysicsBody>(topBox, PhysicsProperties{.mass = 4.0f});
 
-        // // Fixed interval spawner for moving cubes
+        auto topSphere = prefab::Create(registry, prefab::Resource::SphereGreen, {.position = Vector3{1.0f, 2.0f, 1.0f}, .scale = Vector3::Splat(2.0f)});
+        registry->Add<Collider>(topSphere, SphereProperties{}, false);
+        registry->Add<PhysicsBody>(topSphere, PhysicsProperties{.mass = 4.0f});
+
+        // Fixed interval spawner for moving cubes
         SpawnBehavior dynamicCubeBehavior
         {
             .positionRandomRange = Vector3::Splat(15.0f),
