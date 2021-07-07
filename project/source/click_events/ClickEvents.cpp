@@ -55,6 +55,7 @@ namespace nc::sample
     {
         // Setup
         m_sceneHelper.Setup(registry, true, false, Widget);
+        prefab::InitializeResources();
 
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
@@ -63,12 +64,12 @@ namespace nc::sample
         LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.4f, 12.1f, 0.0f}, .tag = "Point Light"});
-        registry->Add<PointLight>(lvHandle, PointLight::Properties{});
-        auto lvHandle2 = registry->Add<Entity>({.position = Vector3{12.1f, 14.5f, 7.3f}, .tag = "Point Light"});
-        registry->Add<PointLight>(lvHandle2, PointLight::Properties{});
-        auto lvHandle3 = registry->Add<Entity>({.position = Vector3{4.1f, 14.5f, 3.3f}, .tag = "Point Light"});
-        registry->Add<PointLight>(lvHandle3, PointLight::Properties{});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 5.0f, 0.0f}, .tag = "Point Light 1"});
+        registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.specularColor = Vector4(0.5f, 0.75f, 0.5f, 0.0f)});
+        auto lvHandle2 = registry->Add<Entity>({.position = Vector3{15.0f, 5.0f, 15.0f}, .tag = "Point Light 2"});
+        registry->Add<vulkan::PointLight>(lvHandle2, vulkan::PointLightInfo{.specularColor = Vector4(0.5f, 0.5f, 0.75f, 0.0f)});
+        auto lvHandle3 = registry->Add<Entity>({.position = Vector3{30.0f, 5.0, 0.0f}, .tag = "Point Light 3"});
+        registry->Add<vulkan::PointLight>(lvHandle3, vulkan::PointLightInfo{.specularColor = Vector4(0.75f, 0.5f, 0.5f, 0.0f)});
 
         // Objects
         prefab::Create(registry,

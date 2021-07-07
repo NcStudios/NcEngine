@@ -93,6 +93,8 @@ void InitializeResources()
                                                  "project/assets/mesh_colliders/coin.nca" };
     nc::graphics::vulkan::LoadMeshes(mesh::meshPaths); 
 
+    LoadHullColliderAsset(defaultMeshesPath + "mesh_colliders/coin.nca");
+
     const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto defaultNormal    = std::string{"nc/resources/texture/DefaultNormal.png"};
     const auto defaultRoughness = std::string{"nc/resources/texture/DefaultMetallic.png"};
@@ -297,7 +299,7 @@ template<> Entity Create_<Resource::Table>(registry_type* registry, EntityInfo i
 template<> Entity Create_<Resource::Token>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[6], material::Token, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[7], material::Token, nc::graphics::vulkan::TechniqueType::PhongAndUi);
     return handle;
 }
 

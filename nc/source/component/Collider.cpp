@@ -13,7 +13,14 @@ namespace
     const auto CubeMeshPath = std::string{"project/assets/mesh/cube.nca"};
     const auto SphereMeshPath = std::string{"project/assets/mesh/sphere.nca"};
     const auto CapsuleMeshPath = std::string{"project/assets/mesh/capsule.nca"};
-    const auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
+
+    // const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
+    // const auto defaultNormal    = std::string{"nc/resources/texture/DefaultNormal.png"};
+    // const auto defaultRoughness = std::string{"nc/resources/texture/DefaultMetallic.png"};
+
+    const auto wireframeDefaultMaterial = graphics::vulkan::Material{ .baseColor = "",
+                                                                      .normal    = "",
+                                                                      .roughness = "" };
 
     #ifdef NC_DEBUG_BUILD
     bool IsUniformScale(const nc::Vector3& scale)

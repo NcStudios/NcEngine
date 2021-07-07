@@ -19,6 +19,19 @@ namespace nc::graphics::vulkan
         Clear();
     }
 
+    const std::vector<std::string> MeshesData::GetMeshPaths() const
+    {
+        std::vector<std::string> meshPaths;
+        meshPaths.reserve(m_accessors.size());
+
+        for (auto keyValue : m_accessors)
+        {
+            meshPaths.push_back(keyValue.first);
+        }
+
+        return meshPaths;
+    }
+
     bool MeshesData::MeshExists(const std::string& uid) const noexcept
     {
         return m_accessors.contains(uid);
