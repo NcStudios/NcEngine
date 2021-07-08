@@ -1,6 +1,7 @@
 #include "PhysicsSystem.h"
 #include "PhysicsConstants.h"
 #include "dynamics/Solver.h"
+#include "debug/Profiler.h"
 
 namespace nc::physics
 {
@@ -40,6 +41,8 @@ namespace nc::physics
         if(dt == 0.0f)
             return;
 
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         #ifdef NC_DEBUG_RENDERING
         m_debugRenderer.ClearLines();
         m_debugRenderer.ClearPoints();
@@ -72,20 +75,28 @@ namespace nc::physics
 
         m_collisionSystem.NotifyCollisionEvents(registry);
         m_collisionSystem.Cleanup();
+
+        NC_PROFILE_END();
     }
 
     void UpdateWorldInertiaTensors(registry_type* registry, std::span<PhysicsBody> bodies)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         for(auto& body : bodies)
         {
             auto* transform = registry->Get<Transform>(body.GetParentEntity());
             /** @todo Can this be skipped for static bodies? */
             body.UpdateWorldInertia(transform);
         }
+
+        NC_PROFILE_END();
     }
 
     void ApplyGravity(std::span<PhysicsBody> bodies, float dt)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         auto g = GravityAcceleration * dt;
 
         for(auto& body : bodies)
@@ -97,10 +108,14 @@ namespace nc::physics
                 properties.velocity += g;
             }
         }
+
+        NC_PROFILE_END();
     }
 
     void Integrate(registry_type* registry, std::span<PhysicsBody> bodies, float dt)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         for(auto& body : bodies)
         {
             Entity entity = body.GetParentEntity();
@@ -120,5 +135,7 @@ namespace nc::physics
             properties.velocity *= pow(1.0f - properties.drag, dt);
             properties.angularVelocity *= pow(1.0f - properties.angularDrag, dt);
         }
+
+        NC_PROFILE_END();
     }
 } // namespace nc::physics

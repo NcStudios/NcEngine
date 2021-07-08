@@ -1,6 +1,7 @@
 #include "Solver.h"
 #include "physics/PhysicsConstants.h"
 #include "graphics/DebugRenderer.h"
+#include "debug/Profiler.h"
 
 using namespace DirectX;
 
@@ -14,6 +15,8 @@ namespace nc::physics
                                const ConstraintMatrix& jTangent,
                                const ConstraintMatrix& jBitangent)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         auto dotVa = XMVector3Dot(jNormal.vA(), v.vA());
         auto dotWa = XMVector3Dot(jNormal.wA(), v.wA());
         auto dotVb = XMVector3Dot(jNormal.vB(), v.vB());
@@ -31,12 +34,17 @@ namespace nc::physics
         dotVb = XMVector3Dot(jBitangent.vB(), v.vB());
         dotWb = XMVector3Dot(jBitangent.wB(), v.wB());
         result = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(result, dotVa + dotWa + dotVb + dotWb);
+        
+        NC_PROFILE_END();
+        
         return result;
     }
 
     /** Compute velocity deltas using lagrange multipliers. */
     ConstraintMatrix ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         const auto &jN = constraint.jNormal, &jT = constraint.jTangent, &jB = constraint.jBitangent;
         const auto &iA = constraint.invInertiaA, &iB = constraint.invInertiaB;
         float mA = constraint.invMassA, mB = constraint.invMassB;
@@ -56,6 +64,8 @@ namespace nc::physics
         auto wB = XMVectorScale(XMVector3Transform(jN.wB(), iB), lNormal) +
                   XMVectorScale(XMVector3Transform(jT.wB(), iB), lTangent) +
                   XMVectorScale(XMVector3Transform(jB.wB(), iB), lBitangent);
+
+        NC_PROFILE_END();
 
         return ConstraintMatrix{vA, wA, vB, wB};
     }
@@ -93,6 +103,8 @@ namespace nc::physics
                                               PhysicsBody* physBodyA,
                                               PhysicsBody* physBodyB)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         auto rA = contact.worldPointA - transformA->GetPosition();
         auto rB = contact.worldPointB - transformB->GetPosition();
         auto rA_v = XMLoadVector3(&rA);
@@ -132,6 +144,8 @@ namespace nc::physics
         effectiveMass = effectiveMass + XMVectorReplicate(invMassA + invMassB);
         effectiveMass = XMVectorReciprocal(effectiveMass);
 
+        NC_PROFILE_END();
+
         return ContactConstraint
         {
             entityA, entityB,
@@ -147,6 +161,8 @@ namespace nc::physics
 
     void GenerateConstraints(registry_type* registry, const std::vector<Manifold>& manifolds, Constraints* constraints)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         for(const auto& manifold : manifolds)
         {
             Entity entityA = Entity{manifold.entityA};
@@ -172,6 +188,8 @@ namespace nc::physics
                 constraints->contact.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
             }
         }
+
+        NC_PROFILE_END();
     }
 
     void ResolveConstraint(const BasicContactConstraint& constraint)
@@ -185,6 +203,8 @@ namespace nc::physics
 
     void ResolveConstraint(ContactConstraint& constraint, float dt)
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         auto& bodyA = constraint.physBodyA->GetProperties();
         auto& bodyB = constraint.physBodyB->GetProperties();
 
@@ -226,5 +246,7 @@ namespace nc::physics
         bodyA.angularVelocity += deltaWA;
         bodyB.velocity += deltaVB;
         bodyB.angularVelocity += deltaWB;
+    
+        NC_PROFILE_END();
     }
 }

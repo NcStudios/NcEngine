@@ -180,14 +180,12 @@ namespace nc::core
 
     void Engine::FixedStepLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
         m_physics.DoPhysicsStep(dt);
 
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFixedUpdate();
 
         m_time.ResetFixedDeltaTime();
-        NC_PROFILE_END();
     }
 
     void Engine::FrameLogic(float dt)

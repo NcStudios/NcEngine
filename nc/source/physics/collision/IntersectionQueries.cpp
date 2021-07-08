@@ -1,5 +1,6 @@
 #include "IntersectionQueries.h"
 #include "debug/Utils.h"
+#include "debug/Profiler.h"
 
 #include <algorithm>
 #include <array>
@@ -78,6 +79,7 @@ namespace nc::physics
     bool Gjk(const BoundingVolume& a, const BoundingVolume& b, FXMMATRIX aMatrix, FXMMATRIX bMatrix, CollisionState* stateOut)
     {
         IF_THROW(!stateOut, "Gjk - CollisionState cannot be null");
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Collision);
 
         stateOut->simplex = Simplex{};
         stateOut->rotationA = GetRotation(aMatrix);
@@ -109,8 +111,13 @@ namespace nc::physics
             stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
 
             if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
+            {
+                NC_PROFILE_END();
                 return true;
+            }
         }
+
+        NC_PROFILE_END();
 
         return false;
     }
@@ -118,6 +125,7 @@ namespace nc::physics
     bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state, Contact* contact)
     {
         /** @todo Storing the points for contact could be cleaner/more efficient */
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Collision);
 
         state->polytope.Initialize(state->simplex);
         auto minFace = state->polytope.ComputeNormalData();
@@ -159,6 +167,7 @@ namespace nc::physics
                     //throw std::runtime_error("Epa - minDistance not found");
                     std::cout << "Epa - minDistance not found\n";
                     contact->depth = 0.0f;
+                    NC_PROFILE_END();
                     return false;
                 }
 
@@ -169,6 +178,9 @@ namespace nc::physics
         auto success = state->polytope.GetContacts(minFace, contact);
         contact->normal = Normalize(minNorm.normal);
         contact->depth = minNorm.distance + EpaTolerance;
+        
+        NC_PROFILE_END();
+        
         return success;
     }
 
