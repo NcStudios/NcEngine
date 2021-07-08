@@ -30,7 +30,7 @@ namespace nc::physics
             }
             case ColliderType::Hull:
             {
-                return { HullColliderManager::Acquire(info.assetPath) };
+                return { HullColliderManager::Acquire(info.hullAssetPath) };
             }
             default:
                 throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");

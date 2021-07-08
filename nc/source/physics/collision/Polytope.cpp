@@ -1,16 +1,15 @@
 #include "Polytope.h"
 
 #include <algorithm>
-
 #include <iostream>
 
 namespace nc::physics
 {
     void Polytope::Initialize(const Simplex& simplex)
     {
-        m_vertices = std::vector<Vector3>(simplex.PointsBegin(), simplex.PointsEnd());
-        m_worldSupports = std::vector<std::pair<Vector3, Vector3>>(simplex.WorldSupportsBegin(), simplex.WorldSupportsEnd());
-        m_localSupports = std::vector<std::pair<Vector3, Vector3>>(simplex.LocalSupportsBegin(), simplex.LocalSupportsEnd());
+        m_vertices = std::vector<Vector3>(simplex.m_points.begin(), simplex.m_points.end());
+        m_worldSupports = std::vector<std::pair<Vector3, Vector3>>(simplex.m_worldSupports.begin(), simplex.m_worldSupports.end());
+        m_localSupports = std::vector<std::pair<Vector3, Vector3>>(simplex.m_localSupports.begin(), simplex.m_localSupports.end());
         m_indices = InitialFaces();
         m_normals.clear();
         m_edges.clear();
@@ -139,7 +138,7 @@ namespace nc::physics
         return Vector3{u, v, w};
     }
 
-    bool Polytope::GetContacts(size_t minFace, Vector3* worldContactA, Vector3* worldContactB, Vector3* localContactA, Vector3* localContactB) const
+    bool Polytope::GetContacts(size_t minFace, Contact* contact) const
     {
         size_t ii = minFace * 3u;
         size_t i1 = m_indices[ii];
@@ -172,15 +171,15 @@ namespace nc::physics
         const auto& [worldA2, worldB2] = m_worldSupports[i2];
         const auto& [worldA3, worldB3] = m_worldSupports[i3];
 
-        *worldContactA = u * worldA1 + v * worldA2 + w * worldA3;
-        *worldContactB = u * worldB1 + v * worldB2 + w * worldB3;
+        contact->worldPointA = u * worldA1 + v * worldA2 + w * worldA3;
+        contact->worldPointB = u * worldB1 + v * worldB2 + w * worldB3;
 
         const auto& [localA1, localB1] = m_localSupports[i1];
         const auto& [localA2, localB2] = m_localSupports[i2];
         const auto& [localA3, localB3] = m_localSupports[i3];
 
-        *localContactA = u * localA1 + v * localA2 + w * localA3;
-        *localContactB = u * localB1 + v * localB2 + w * localB3;
+        contact->localPointA = u * localA1 + v * localA2 + w * localA3;
+        contact->localPointB = u * localB1 + v * localB2 + w * localB3;
 
         return true;
     }

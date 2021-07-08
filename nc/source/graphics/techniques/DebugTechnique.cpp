@@ -21,7 +21,6 @@ namespace nc::graphics
 
     const std::string BlenderTag = "texture_blender_resource";
 
-
     std::vector<d3dresource::GraphicsResource*> DebugTechnique::m_commonResources;
     std::unique_ptr<graphics::Mesh> DebugTechnique::m_lineMesh;
     std::unique_ptr<graphics::Mesh> DebugTechnique::m_pointMesh;

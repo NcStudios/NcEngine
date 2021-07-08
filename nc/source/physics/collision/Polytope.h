@@ -14,7 +14,7 @@ namespace nc::physics
             auto GetNormalData(size_t index) const -> NormalData;
             auto ComputeNormalData() -> size_t;
             auto Expand(const Vector3& supportCSO, const Vector3& worldSupportA, const Vector3& worldSupportB, const Vector3& localSupportA, const Vector3& localSupportB, size_t* oldMinFace) -> bool;
-            bool GetContacts(size_t minFace, Vector3* worldContactA, Vector3* worldContactB, Vector3* localContactA, Vector3* localContactB) const;
+            bool GetContacts(size_t minFace, Contact* contact) const;
 
         private:
             std::vector<Vector3> m_vertices;

@@ -14,11 +14,6 @@ namespace nc
 
 namespace nc::physics
 {
-    enum class CollisionEventType : uint8_t
-    {
-        Enter, Stay, Exit
-    };
-
     /** An estimated bounding volume and index mapping to the associated
      *  collider's position in the SoA representation. */
     struct DynamicEstimate
@@ -73,7 +68,6 @@ namespace nc::physics
         }
     };
     #endif
-
 
     /** @todo FindXXXEvents will notify immediately - do we want to delay this? */
 

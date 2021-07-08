@@ -63,7 +63,7 @@ namespace nc
           m_info{.type = ColliderType::Sphere,
                  .offset = properties.center,
                  .scale = Vector3::Splat(properties.radius * 2.0f),
-                 .assetPath = "",
+                 .hullAssetPath = "",
                  .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,
@@ -80,7 +80,7 @@ namespace nc
           m_info{.type = ColliderType::Box,
                  .offset = properties.center,
                  .scale = properties.extents,
-                 .assetPath = "",
+                 .hullAssetPath = "",
                  .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,
@@ -96,7 +96,7 @@ namespace nc
           m_info{.type = ColliderType::Capsule,
                  .offset = properties.center,
                  .scale = Vector3{properties.radius * 2.0f, properties.height / 2.0f, properties.radius * 2.0f},
-                 .assetPath = "",
+                 .hullAssetPath = "",
                  .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,
@@ -112,7 +112,7 @@ namespace nc
           m_info{.type = ColliderType::Hull,
                  .offset = Vector3::Zero(),
                  .scale = Vector3::One(),
-                 .assetPath = std::move(properties.assetPath),
+                 .hullAssetPath = std::move(properties.assetPath),
                  .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,

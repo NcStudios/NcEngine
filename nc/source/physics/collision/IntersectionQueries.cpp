@@ -54,9 +54,9 @@ namespace nc::physics
             XMStoreVector3(&supportA, supportA_v);
             XMStoreVector3(&supportB, supportB_v);
 
-            simplex.push_front(supportCSO, supportA, supportB, supportA, supportB);
+            simplex.PushFront(supportCSO, supportA, supportB, supportA, supportB);
 
-            if(RefineSimplex[simplex.size() - 1](simplex, direction))
+            if(RefineSimplex[simplex.Size() - 1](simplex, direction))
                 return true;
         }
 
@@ -106,9 +106,9 @@ namespace nc::physics
             XMStoreVector3(&localSupportA, bSupportLocal_v);
             XMStoreVector3(&localSupportB, bSupportLocal_v);
 
-            stateOut->simplex.push_front(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
+            stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
 
-            if(RefineSimplex[stateOut->simplex.size() - 1](stateOut->simplex, direction))
+            if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
                 return true;
         }
 
@@ -118,7 +118,6 @@ namespace nc::physics
     bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state, Contact* contact)
     {
         /** @todo Storing the points for contact could be cleaner/more efficient */
-
 
         state->polytope.Initialize(state->simplex);
         auto minFace = state->polytope.ComputeNormalData();
@@ -145,7 +144,6 @@ namespace nc::physics
             Vector3 support;
             XMStoreVector3(&support, support_v);
 
-            // fix
             XMStoreVector3(&(contact->worldPointA), aSupportWorld_v);
             XMStoreVector3(&(contact->worldPointB), bSupportWorld_v);
             XMStoreVector3(&(contact->localPointA), aSupportLocal_v);
@@ -168,7 +166,7 @@ namespace nc::physics
             }
         }
 
-        auto success = state->polytope.GetContacts(minFace, &(contact->worldPointA), &(contact->worldPointB), &(contact->localPointA), &(contact->localPointB));
+        auto success = state->polytope.GetContacts(minFace, contact);
         contact->normal = Normalize(minNorm.normal);
         contact->depth = minNorm.distance + EpaTolerance;
         return success;

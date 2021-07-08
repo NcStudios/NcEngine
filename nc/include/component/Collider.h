@@ -58,7 +58,7 @@ namespace nc
                 ColliderType type;
                 Vector3 offset;
                 Vector3 scale;
-                std::string assetPath;
+                std::string hullAssetPath;
                 bool isTrigger;
             };
 

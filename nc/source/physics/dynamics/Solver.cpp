@@ -6,31 +6,35 @@ using namespace DirectX;
 
 namespace nc::physics
 {
+    /** Compute J * V for 3 separate jacobians. Since ConstraintMatrix
+     *  represents a 12 element vector, we just sum the dot product of each
+     *  row. Result is returned as a vector: [Rnorm, Rtan, Rbit] */
     XMVECTOR MultiplyJVContact(const ConstraintMatrix& v,
                                const ConstraintMatrix& jNormal,
                                const ConstraintMatrix& jTangent,
                                const ConstraintMatrix& jBitangent)
     {
-        auto dot0 = XMVector3Dot(jNormal.vA(), v.vA());
-        auto dot1 = XMVector3Dot(jNormal.wA(), v.wA());
-        auto dot2 = XMVector3Dot(jNormal.vB(), v.vB());
-        auto dot3 = XMVector3Dot(jNormal.wB(), v.wB());
-        auto result = dot0 + dot1 + dot2 + dot3;
+        auto dotVa = XMVector3Dot(jNormal.vA(), v.vA());
+        auto dotWa = XMVector3Dot(jNormal.wA(), v.wA());
+        auto dotVb = XMVector3Dot(jNormal.vB(), v.vB());
+        auto dotWb = XMVector3Dot(jNormal.wB(), v.wB());
+        auto result = dotVa + dotWa + dotVb + dotWb;
 
-        dot0 = XMVector3Dot(jTangent.vA(), v.vA());
-        dot1 = XMVector3Dot(jTangent.wA(), v.wA());
-        dot2 = XMVector3Dot(jTangent.vB(), v.vB());
-        dot3 = XMVector3Dot(jTangent.wB(), v.wB());
-        result = XMVectorMergeXY(result, dot0 + dot1 + dot2 + dot3);
+        dotVa = XMVector3Dot(jTangent.vA(), v.vA());
+        dotWa = XMVector3Dot(jTangent.wA(), v.wA());
+        dotVb = XMVector3Dot(jTangent.vB(), v.vB());
+        dotWb = XMVector3Dot(jTangent.wB(), v.wB());
+        result = XMVectorMergeXY(result, dotVa + dotWa + dotVb + dotWb);
 
-        dot0 = XMVector3Dot(jBitangent.vA(), v.vA());
-        dot1 = XMVector3Dot(jBitangent.wA(), v.wA());
-        dot2 = XMVector3Dot(jBitangent.vB(), v.vB());
-        dot3 = XMVector3Dot(jBitangent.wB(), v.wB());
-        result = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(result, dot0 + dot1 + dot2 + dot3);
+        dotVa = XMVector3Dot(jBitangent.vA(), v.vA());
+        dotWa = XMVector3Dot(jBitangent.wA(), v.wA());
+        dotVb = XMVector3Dot(jBitangent.vB(), v.vB());
+        dotWb = XMVector3Dot(jBitangent.wB(), v.wB());
+        result = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(result, dotVa + dotWa + dotVb + dotWb);
         return result;
     }
 
+    /** Compute velocity deltas using lagrange multipliers. */
     ConstraintMatrix ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent)
     {
         const auto &jN = constraint.jNormal, &jT = constraint.jTangent, &jB = constraint.jBitangent;
@@ -178,7 +182,6 @@ namespace nc::physics
         if(constraint.transformB)
             constraint.transformB->Translate(constraint.mtv);
     }
-
 
     void ResolveConstraint(ContactConstraint& constraint, float dt)
     {

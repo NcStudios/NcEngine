@@ -1,5 +1,6 @@
 #include "Manifold.h"
 #include "physics/PhysicsConstants.h"
+#include "debug/Utils.h"
 
 #include <array>
 
@@ -71,6 +72,8 @@ namespace nc::physics
 
     const Contact& Manifold::GetDeepestContact() const
     {
+        IF_THROW(contacts.size() == 0u, "Manifold::GetDeepestContact - Empty contacts");
+
         size_t maxPenetrationIndex = 0;
         float maxPenetration = contacts[0].depth;
         for(size_t i = 1u; i < contacts.size(); ++i)
