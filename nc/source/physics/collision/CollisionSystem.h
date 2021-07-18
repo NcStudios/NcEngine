@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ecs/ColliderSystem.h"
+#include "Manifold.h"
 
 #include <cstdint>
 #include <vector>
@@ -13,11 +14,6 @@ namespace nc
 
 namespace nc::physics
 {
-    enum class CollisionEventType : uint8_t
-    {
-        Enter, Stay, Exit
-    };
-
     /** An estimated bounding volume and index mapping to the associated
      *  collider's position in the SoA representation. */
     struct DynamicEstimate
@@ -80,7 +76,9 @@ namespace nc::physics
         public:
             CollisionSystem(ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
 
-            void DoCollisionStep();
+            auto DoCollisionStep(registry_type* registry) -> const std::vector<Manifold>&;
+            void NotifyCollisionEvents(registry_type* registry);
+            void Cleanup();
             void ClearState();
 
         private:
@@ -91,18 +89,21 @@ namespace nc::physics
             std::vector<BroadDetectVsStaticEvent> m_broadEventsVsStatic;
             std::vector<NarrowDetectEvent> m_currentCollisions;
             std::vector<NarrowDetectEvent> m_previousCollisions;
-            std::vector<Manifold> m_manifolds;
+            std::vector<Manifold> m_persistentManifolds;
 
-            void FetchEstimates();
+            void FetchEstimates(registry_type* registry);
             void BroadDetectVsDynamic();
             void BroadDetectVsStatic();
             void NarrowDetectVsDynamic();
             void NarrowDetectVsStatic();
-            void ResolveCollisions();
-            void FindExitAndStayEvents() const;
-            void FindEnterEvents() const;
-            void NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const;
-            void Cleanup();
+            void AddContact(EntityTraits::underlying_type entityA, EntityTraits::underlying_type entityB, const Contact& contact);
+            void RemoveManifold(NarrowDetectEvent event);
+            void FindExitAndStayEvents(registry_type* registry);
+            void FindEnterEvents(registry_type* registry) const;
+            void NotifyCollisionEnter(registry_type* registry, const NarrowDetectEvent& data) const;
+            void NotifyCollisionExit(registry_type* registry, const NarrowDetectEvent& data) const;
+            void NotifyCollisionStay(registry_type* registry, const NarrowDetectEvent& data) const;
+
         
         public:
             #ifdef NC_EDITOR_ENABLED

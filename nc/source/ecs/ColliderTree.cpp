@@ -1,6 +1,6 @@
 #include "ColliderTree.h"
 #include "Ecs.h"
-#include "physics/IntersectionQueries.h"
+#include "physics/collision/IntersectionQueries.h"
 
 namespace
 {
@@ -132,7 +132,8 @@ namespace nc::ecs
                                  bv,
                                  estimate,
                                  physics::ToLayerMask(EntityUtils::Layer(entity)),
-                                 entity);
+                                 entity,
+                                 info.isTrigger);
 
         m_root.Add(entry);
     }

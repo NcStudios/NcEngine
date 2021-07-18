@@ -19,7 +19,7 @@ namespace nc::physics
     bool Gjk(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* stateOut);
 
     /* Generate contact data from output of Gjk. */
-    NormalData Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state);
+    bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state, Contact* contact);
 
     /* Intersection queries between transformed volumes. */
     bool Intersect(const BoundingVolume& a, const BoundingVolume& b);

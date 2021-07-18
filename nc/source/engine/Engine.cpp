@@ -139,7 +139,7 @@ namespace nc::core
             FrameLogic(dt);
 
             /** @todo see fixedUpdateInterval todo above */
-            FixedStepLogic();
+            FixedStepLogic(dt);
 
             particleUpdateJobResult.wait();
             m_ecs.GetRegistry()->CommitStagedChanges();
@@ -178,10 +178,10 @@ namespace nc::core
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
     }
 
-    void Engine::FixedStepLogic()
+    void Engine::FixedStepLogic(float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
-        m_physics.DoPhysicsStep();
+        m_physics.DoPhysicsStep(dt);
 
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFixedUpdate();
@@ -232,6 +232,10 @@ namespace nc::core
         m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
         m_frameManager.Execute(&m_graphics);
+
+        #ifdef NC_DEBUG_RENDERING
+        m_physics.DebugRender();
+        #endif
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());

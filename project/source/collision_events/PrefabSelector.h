@@ -48,25 +48,25 @@ namespace nc::sample
             case ColliderType::Box:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::CubeBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, BoxProperties{});
+                m_registry->Add<Collider>(m_currentObject, BoxProperties{}, false);
                 break;
             }
             case ColliderType::Sphere:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::SphereBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, SphereProperties{});
+                m_registry->Add<Collider>(m_currentObject, SphereProperties{}, false);
                 break;
             }
             case ColliderType::Capsule:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::CapsuleBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, CapsuleProperties{});
+                m_registry->Add<Collider>(m_currentObject, CapsuleProperties{}, false);
                 break;
             }
             case ColliderType::Hull:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::DiscBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"});
+                m_registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"}, false);
                 break;
             }
         }

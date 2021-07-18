@@ -58,13 +58,14 @@ namespace nc
                 ColliderType type;
                 Vector3 offset;
                 Vector3 scale;
-                std::string assetPath;
+                std::string hullAssetPath;
+                bool isTrigger;
             };
 
-            Collider(Entity entity, SphereProperties properties);
-            Collider(Entity entity, BoxProperties properties);
-            Collider(Entity entity, CapsuleProperties properties);
-            Collider(Entity entity, HullProperties properties);
+            Collider(Entity entity, SphereProperties properties, bool isTrigger);
+            Collider(Entity entity, BoxProperties properties, bool isTrigger);
+            Collider(Entity entity, CapsuleProperties properties, bool isTrigger);
+            Collider(Entity entity, HullProperties properties, bool isTrigger);
             ~Collider() = default;
             Collider(const Collider&) = delete;
             Collider(Collider&&) = default;
@@ -102,6 +103,8 @@ namespace nc
         using requires_on_add_callback = std::true_type;
         using requires_on_remove_callback = std::true_type;
     };
+
+    const char* ToCString(nc::ColliderType type);
 
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<Collider>(Collider*);

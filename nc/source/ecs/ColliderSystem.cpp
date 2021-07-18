@@ -52,7 +52,8 @@ namespace nc::ecs
                 static_cast<EntityTraits::underlying_type>(entity),
                 DirectX::XMMATRIX{},
                 physics::CreateBoundingVolume(info),
-                collider.GetType()
+                collider.GetType(),
+                info.isTrigger
             );
         }
     }

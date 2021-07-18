@@ -4,7 +4,7 @@
 #include "SoA.h"
 #include "ColliderTree.h"
 #include "assets/HullColliderManager.h"
-#include "physics/CollisionVolumes.h"
+#include "physics/collision/CollisionVolumes.h"
 
 namespace nc::ecs
 {
@@ -15,12 +15,14 @@ namespace nc::ecs
             using DynamicColliderSoA = SoA<EntityTraits::underlying_type,
                                            DirectX::XMMATRIX,
                                            physics::BoundingVolume,
-                                           ColliderType>;
+                                           ColliderType,
+                                           bool>;
 
             static constexpr size_t HandleTypeIndex = 0u;
             static constexpr size_t MatrixIndex = 1u;
             static constexpr size_t BoundingVolumeIndex = 2u;
             static constexpr size_t ColliderTypeIndex = 3u;
+            static constexpr size_t TriggerIndex = 4u;
 
             ColliderSystem(registry_type* registry,
                            uint32_t maxDynamic,

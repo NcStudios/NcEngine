@@ -1,6 +1,6 @@
 #include "CollisionVolumes.h"
 #include "assets/HullColliderManager.h"
-#include "physics/IntersectionQueries.h"
+#include "IntersectionQueries.h"
 
 namespace nc::physics
 {
@@ -30,7 +30,7 @@ namespace nc::physics
             }
             case ColliderType::Hull:
             {
-                return { HullColliderManager::Acquire(info.assetPath) };
+                return { HullColliderManager::Acquire(info.hullAssetPath) };
             }
             default:
                 throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");

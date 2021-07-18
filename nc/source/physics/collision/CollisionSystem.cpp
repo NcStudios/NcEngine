@@ -32,45 +32,65 @@ namespace nc::physics
           m_broadEventsVsStatic{},
           m_currentCollisions{},
           m_previousCollisions{},
-          m_manifolds{}
+          m_persistentManifolds{}
     {
     }
 
-    void CollisionSystem::DoCollisionStep()
+    auto CollisionSystem::DoCollisionStep(registry_type* registry) -> const std::vector<Manifold>&
     {
         #ifdef NC_EDITOR_ENABLED
         metrics.Reset();
         #endif
 
+        for(auto& manifold : m_persistentManifolds)
+        {
+            manifold.UpdateWorldPoints(registry);
+        }
+
         /** @todo re-visit JobSystem here */ 
-        FetchEstimates();
+        FetchEstimates(registry);
         BroadDetectVsStatic();
         BroadDetectVsDynamic();
         NarrowDetectVsStatic();
         NarrowDetectVsDynamic();
-        ResolveCollisions();
-        FindExitAndStayEvents();
-        FindEnterEvents();
 
-        Cleanup();
+        return m_persistentManifolds;
     }
 
+    void CollisionSystem::NotifyCollisionEvents(registry_type* registry)
+    {
+        FindExitAndStayEvents(registry);
+        FindEnterEvents(registry);
+    }
+
+    /** End of frame/step cleanup. */
+    void CollisionSystem::Cleanup()
+    {
+        m_previousCollisions = std::move(m_currentCollisions);
+        m_currentCollisions.clear();
+        m_dynamicEstimates.clear();
+        m_broadEventsVsDynamic.clear();
+        m_broadEventsVsStatic.clear();
+    }
+
+    /** Reset all state. */
     void CollisionSystem::ClearState()
     {
         m_broadEventsVsDynamic.resize(0u);
         m_broadEventsVsStatic.resize(0u);
         m_currentCollisions.resize(0u);
         m_previousCollisions.resize(0u);
-        m_manifolds.resize(0u);
+        m_persistentManifolds.resize(0u);
     }
 
-    void CollisionSystem::FetchEstimates()
+    /** Update locally stored transformation matrices and estimated bounding volumes
+     *  for each dynamic collider. */
+    void CollisionSystem::FetchEstimates(registry_type* registry)
     {
         const auto* soa = m_colliderSystem->GetDynamicSoA();
         auto [index, handles, matrices, volumes] = soa->View<ecs::ColliderSystem::HandleTypeIndex,
-                                                    ecs::ColliderSystem::MatrixIndex,
-                                                    ecs::ColliderSystem::BoundingVolumeIndex>();
-        auto* registry = ActiveRegistry();
+                                                             ecs::ColliderSystem::MatrixIndex,
+                                                             ecs::ColliderSystem::BoundingVolumeIndex>();
 
         while(index.Valid())
         {
@@ -80,6 +100,7 @@ namespace nc::physics
         }
     }
 
+    /** Check for intersection between all dynamic volume estimates. */
     void CollisionSystem::BroadDetectVsDynamic()
     {
         const auto dynamicSize = m_dynamicEstimates.size();
@@ -95,6 +116,7 @@ namespace nc::physics
         }
     }
 
+    /** Check for intersection between dynamic volume estimates and static estimates. */
     void CollisionSystem::BroadDetectVsStatic()
     {
         const auto dynamicSize = m_dynamicEstimates.size();
@@ -117,12 +139,15 @@ namespace nc::physics
         }
     }
 
+    /** Perform narrow phase collision checks on all estimated dynamic vs. dynamic collisions.
+     *  For collisions between non trigger colliders, use Epa to generate contacts. */
     void CollisionSystem::NarrowDetectVsDynamic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
+        const auto trigger = dynamicSoA->GetSpan<bool>();
         CollisionState state;
 
         for(const auto& [i, j] : m_broadEventsVsDynamic)
@@ -138,21 +163,31 @@ namespace nc::physics
                 INCREMENT_METRIC(metrics.dynamicCollisions);
 
                 /** @todo We could notify based on entries in m_manifold instead
-                 *  of m_currentCollisions, but that won't work for trigger colliders
-                 *  (once they are added). Leaving m_currentCollisions unchanged for now. */
+                 *  of m_currentCollisions, but that won't work for trigger colliders.
+                 *  Leaving m_currentCollisions unchanged for now. */
                 m_currentCollisions.emplace_back(handles[i], handles[j]);
-                auto contactData = Epa(iVolume, jVolume, iMatrix, jMatrix, &state);
-                m_manifolds.emplace_back(handles[i], handles[j], contactData);
+
+                if(!trigger[i] && !trigger[j])
+                {
+                    Contact contact;
+                    if(Epa(iVolume, jVolume, iMatrix, jMatrix, &state, &contact))
+                    {
+                        AddContact(handles[i], handles[j], contact);
+                    }
+                }
             }
         }
     }
 
+    /** Perform narrow phase collision checks on all estimated dynamic vs static collisions.
+     *  For collisions between non trigger colliders, use Epa to generate contacts. */
     void CollisionSystem::NarrowDetectVsStatic()
     {
         auto* dynamicSoA = m_colliderSystem->GetDynamicSoA();
         const auto handles = dynamicSoA->GetSpan<EntityTraits::underlying_type>();
         const auto matrices = dynamicSoA->GetSpan<DirectX::XMMATRIX>();
         const auto volumes = dynamicSoA->GetSpan<BoundingVolume>();
+        const auto trigger = dynamicSoA->GetSpan<bool>();
         CollisionState state;
 
         for(auto& [dynamicIndex, staticPair] : m_broadEventsVsStatic)
@@ -169,98 +204,110 @@ namespace nc::physics
 
                 /** @todo See NarrowDetectVsDynamic */
                 m_currentCollisions.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity));
-                auto contactData = Epa(dVolume, sVolume, dMatrix, sMatrix, &state);
-                m_manifolds.emplace_back(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity), contactData);
+
+                if(!trigger[dynamicIndex] && !staticPair->isTrigger)
+                {
+                    Contact contact;
+                    if(Epa(dVolume, sVolume, dMatrix, sMatrix, &state, &contact))
+                    {
+                        AddContact(handles[dynamicIndex], static_cast<EntityTraits::underlying_type>(staticPair->entity), contact);
+                    }
+                }
             }
         }
     }
-    
-    void CollisionSystem::ResolveCollisions()
-    {
-        for(auto& manifold : m_manifolds)
-        {
-            auto a = Entity{manifold.entityA};
-            auto b = Entity{manifold.entityB};
-            auto mtv = manifold.contact.normal * manifold.contact.distance;
-            auto* registry = ActiveRegistry();
-            auto* transformA = registry->Get<Transform>(a);
-            auto* transformB = registry->Get<Transform>(b);
 
-            if(!EntityUtils::IsStatic(a))
-                transformA->Translate(-mtv);
-            if(!EntityUtils::IsStatic(b))
-                transformB->Translate(mtv);
+    /** Add contact information from Epa to a persistent manifold. If no manifold exists between the objects, create one. */
+    void CollisionSystem::AddContact(EntityTraits::underlying_type entityA, EntityTraits::underlying_type entityB, const Contact& contact)
+    {
+        auto pos = std::ranges::find_if(m_persistentManifolds, [entityA, entityB](const auto& manifold)
+        {
+            return (manifold.entityA == entityA && manifold.entityB == entityB) ||
+                   (manifold.entityA == entityB && manifold.entityB == entityA);
+        });
+
+        if(pos == m_persistentManifolds.end())
+        {
+            Manifold newManifold{entityA, entityB, {contact}};
+            m_persistentManifolds.push_back(newManifold);
+            return;
+        }
+
+        pos->AddContact(contact);
+    }
+
+    /** Remove the contact manifold associated with two entities from the persistent collection. */
+    void CollisionSystem::RemoveManifold(NarrowDetectEvent event)
+    {
+        auto pos = std::ranges::find_if(m_persistentManifolds, [event](const auto& manifold)
+        {
+            return (manifold.entityA == event.first && manifold.entityB == event.second) ||
+                   (manifold.entityA == event.second && manifold.entityB == event.first);
+        });
+
+        if(pos != m_persistentManifolds.end())
+        {
+            *pos = m_persistentManifolds.back();
+            m_persistentManifolds.pop_back();
         }
     }
 
-    void CollisionSystem::FindExitAndStayEvents() const
+    void CollisionSystem::FindExitAndStayEvents(registry_type* registry)
     {
         auto currBeg = m_currentCollisions.cbegin();
         auto currEnd = m_currentCollisions.cend();
         for(const auto& prev : m_previousCollisions)
         {
             if(currEnd == std::find(currBeg, currEnd, prev))
-                NotifyCollisionEvent(prev, CollisionEventType::Exit);
+            {
+                NotifyCollisionExit(registry, prev);
+                RemoveManifold(prev);
+            }
             else
-                NotifyCollisionEvent(prev, CollisionEventType::Stay);
+            {
+                NotifyCollisionStay(registry, prev);
+            }
         }
     }
 
-    void CollisionSystem::FindEnterEvents() const
+    void CollisionSystem::FindEnterEvents(registry_type* registry) const
     {
         auto prevBeg = m_previousCollisions.cbegin();
         auto prevEnd = m_previousCollisions.cend();
         for(const auto& curr : m_currentCollisions)
         {
             if(prevEnd == std::find(prevBeg, prevEnd, curr))
-                NotifyCollisionEvent(curr, CollisionEventType::Enter);
+                NotifyCollisionEnter(registry, curr);
         }
     }
 
-    void CollisionSystem::NotifyCollisionEvent(const NarrowDetectEvent& data, CollisionEventType type) const
+    void CollisionSystem::NotifyCollisionEnter(registry_type* registry, const NarrowDetectEvent& data) const
     {
         auto h1 = static_cast<Entity>(data.first);
         auto h2 = static_cast<Entity>(data.second);
-        auto* reg = ActiveRegistry();
-
-        switch(type)
-        {
-            case CollisionEventType::Enter:
-            {
-                if(reg->Contains<Entity>(h1))
-                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionEnter(h2);
-                if(reg->Contains<Entity>(h2))
-                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionEnter(h1);
-                break;
-            }
-            case CollisionEventType::Stay:
-            {
-                if(reg->Contains<Entity>(h1))
-                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionStay(h2);
-                if(reg->Contains<Entity>(h2))
-                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionStay(h1);
-                break;
-            }
-            case CollisionEventType::Exit:
-            {
-                if(reg->Contains<Entity>(h1))
-                    reg->Get<AutoComponentGroup>(h1)->SendOnCollisionExit(h2);
-                if(reg->Contains<Entity>(h2))
-                    reg->Get<AutoComponentGroup>(h2)->SendOnCollisionExit(h1);
-                break;
-            }
-            default:
-                throw std::runtime_error("NotifyCollisionEvent - Unknown CollisionEventType");
-        }
+        if(registry->Contains<Entity>(h1))
+            registry->Get<AutoComponentGroup>(h1)->SendOnCollisionEnter(h2);
+        if(registry->Contains<Entity>(h2))
+            registry->Get<AutoComponentGroup>(h2)->SendOnCollisionEnter(h1);
     }
 
-    void CollisionSystem::Cleanup()
+    void CollisionSystem::NotifyCollisionExit(registry_type* registry, const NarrowDetectEvent& data) const
     {
-        m_previousCollisions = std::move(m_currentCollisions);
-        m_currentCollisions.clear();
-        m_dynamicEstimates.clear();
-        m_broadEventsVsDynamic.clear();
-        m_broadEventsVsStatic.clear();
-        m_manifolds.clear();
+        auto h1 = static_cast<Entity>(data.first);
+        auto h2 = static_cast<Entity>(data.second);
+        if(registry->Contains<Entity>(h1))
+            registry->Get<AutoComponentGroup>(h1)->SendOnCollisionExit(h2);
+        if(registry->Contains<Entity>(h2))
+            registry->Get<AutoComponentGroup>(h2)->SendOnCollisionExit(h1);
+    }
+
+    void CollisionSystem::NotifyCollisionStay(registry_type* registry, const NarrowDetectEvent& data) const
+    {
+        auto h1 = static_cast<Entity>(data.first);
+        auto h2 = static_cast<Entity>(data.second);
+        if(registry->Contains<Entity>(h1))
+            registry->Get<AutoComponentGroup>(h1)->SendOnCollisionStay(h2);
+        if(registry->Contains<Entity>(h2))
+            registry->Get<AutoComponentGroup>(h2)->SendOnCollisionStay(h1);
     }
 } // namespace nc::phsyics

@@ -58,12 +58,13 @@ namespace
 
 namespace nc
 {
-    Collider::Collider(Entity entity, SphereProperties properties)
+    Collider::Collider(Entity entity, SphereProperties properties, bool isTrigger)
         : ComponentBase(entity),
           m_info{.type = ColliderType::Sphere,
                  .offset = properties.center,
                  .scale = Vector3::Splat(properties.radius * 2.0f),
-                 .assetPath = ""}
+                 .hullAssetPath = "",
+                 .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
@@ -74,12 +75,13 @@ namespace nc
         IF_THROW(!IsUniformScale(m_info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
     }
 
-    Collider::Collider(Entity entity, BoxProperties properties)
+    Collider::Collider(Entity entity, BoxProperties properties, bool isTrigger)
         : ComponentBase(entity),
           m_info{.type = ColliderType::Box,
                  .offset = properties.center,
                  .scale = properties.extents,
-                 .assetPath = ""}
+                 .hullAssetPath = "",
+                 .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Box)},
@@ -89,12 +91,13 @@ namespace nc
         IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
     }
 
-    Collider::Collider(Entity entity, CapsuleProperties properties)
+    Collider::Collider(Entity entity, CapsuleProperties properties, bool isTrigger)
         : ComponentBase(entity),
           m_info{.type = ColliderType::Capsule,
                  .offset = properties.center,
                  .scale = Vector3{properties.radius * 2.0f, properties.height / 2.0f, properties.radius * 2.0f},
-                 .assetPath = ""}
+                 .hullAssetPath = "",
+                 .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Capsule)},
@@ -104,12 +107,13 @@ namespace nc
         IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
     }
 
-    Collider::Collider(Entity entity, HullProperties properties)
+    Collider::Collider(Entity entity, HullProperties properties, bool isTrigger)
         : ComponentBase(entity),
           m_info{.type = ColliderType::Hull,
                  .offset = Vector3::Zero(),
                  .scale = Vector3::One(),
-                 .assetPath = std::move(properties.assetPath)}
+                 .hullAssetPath = std::move(properties.assetPath),
+                 .isTrigger = isTrigger}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
@@ -153,9 +157,24 @@ namespace nc
         m_selectedInEditor = state;
     }
 
-    template<> void ComponentGuiElement<Collider>(Collider*)
+    const char* ToCString(nc::ColliderType type)
     {
+        switch(type)
+        {
+            case nc::ColliderType::Box:     return "Box";
+            case nc::ColliderType::Capsule: return "Capsule";
+            case nc::ColliderType::Sphere:  return "Sphere";
+            case nc::ColliderType::Hull:    return "Hull";
+            default: throw std::runtime_error("ToCString - Unknown ColliderType");
+        }
+    }
+
+    template<> void ComponentGuiElement<Collider>(Collider* collider)
+    {
+        const auto& info = collider->GetInfo();
         ImGui::Text("Collider");
+        ImGui::Text("  Type:    %s", ToCString(info.type));
+        ImGui::Text("  Trigger: %s", info.isTrigger ? "True" : "False");
         /** @todo put widgets back */
     }
     #endif
