@@ -106,7 +106,7 @@ namespace nc::sample
         registry->Add<CollisionLogger>(bigRedSphere, registry);
 
         auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = EntityFlags::Static});
-        registry->Add<Collider>(longRedBox, BoxProperties{}, false);
+        registry->Add<Collider>(longRedBox, BoxProperties{}, true);
         registry->Add<CollisionLogger>(longRedBox, registry);
     }
 

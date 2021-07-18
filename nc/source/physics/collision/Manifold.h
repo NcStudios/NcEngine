@@ -23,8 +23,8 @@ namespace nc::physics
 
     struct Manifold
     {
-        EntityTraits::underlying_type entityA;
-        EntityTraits::underlying_type entityB;
+        Entity entityA;
+        Entity entityB;
         std::vector<Contact> contacts;
 
         int AddContact(const Contact& contact);

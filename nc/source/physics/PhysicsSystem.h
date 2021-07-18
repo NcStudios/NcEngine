@@ -1,11 +1,12 @@
 #pragma once
 
-#include "collision/CollisionSystem.h"
 #include "ClickableSystem.h"
+#include "collision/CollisionCache.h"
 #include "graphics/DebugRenderer.h"
 
 namespace nc
 {
+    namespace ecs { class ColliderSystem; }
     namespace graphics { class FrameManager; }
     namespace job { class JobSystem; }
 }
@@ -29,8 +30,10 @@ namespace nc::physics
             #endif
 
         private:
-            CollisionSystem m_collisionSystem;
             ClickableSystem m_clickableSystem;
+            CollisionCache m_cache;
+            ecs::ColliderSystem* m_colliderSystem;
+            job::JobSystem* m_jobSystem;
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugRenderer m_debugRenderer;
             #endif

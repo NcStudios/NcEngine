@@ -3,14 +3,27 @@
 #include <algorithm>
 #include <iostream>
 
+namespace
+{
+    const auto InitialFaces = std::vector<size_t>{0u,1u,2u,  0u,3u,1u,  0u,2u,3u,  1u,3u,2u};
+}
+
 namespace nc::physics
 {
     void Polytope::Initialize(const Simplex& simplex)
     {
-        m_vertices = std::vector<Vector3>(simplex.m_points.begin(), simplex.m_points.end());
-        m_worldSupports = std::vector<std::pair<Vector3, Vector3>>(simplex.m_worldSupports.begin(), simplex.m_worldSupports.end());
-        m_localSupports = std::vector<std::pair<Vector3, Vector3>>(simplex.m_localSupports.begin(), simplex.m_localSupports.end());
-        m_indices = InitialFaces();
+        m_vertices.clear();
+        std::copy(simplex.m_points.begin(), simplex.m_points.end(), std::back_inserter(m_vertices));
+        
+        m_worldSupports.clear();
+        std::copy(simplex.m_worldSupports.begin(), simplex.m_worldSupports.end(), std::back_inserter(m_worldSupports));
+
+        m_localSupports.clear();
+        std::copy(simplex.m_localSupports.begin(), simplex.m_localSupports.end(), std::back_inserter(m_localSupports));
+
+        m_indices.clear();
+        std::copy(InitialFaces.begin(), InitialFaces.end(), std::back_inserter(m_indices));
+
         m_normals.clear();
         m_edges.clear();
         m_newIndices.clear();
@@ -27,7 +40,7 @@ namespace nc::physics
         return ComputeNormalData_<DataSet::Merged>();
     }
 
-    auto Polytope::Expand(const Vector3& supportCSO, const Vector3& worldSupportA, const Vector3& worldSupportB, const Vector3& localSupportA, const Vector3& localSupportB, size_t* oldMinFace) -> bool
+    auto Polytope::Expand(const Vector3& supportCSO, const Contact& contact, size_t* oldMinFace) -> bool
     {
         m_edges.clear();
         m_newIndices.clear();
@@ -48,8 +61,8 @@ namespace nc::physics
         CreateIndicesFromEdges();
 
         m_vertices.push_back(supportCSO);
-        m_worldSupports.emplace_back(worldSupportA, worldSupportB);
-        m_localSupports.emplace_back(localSupportA, localSupportB);
+        m_worldSupports.emplace_back(contact.worldPointA, contact.worldPointB);
+        m_localSupports.emplace_back(contact.localPointA, contact.localPointB);
 
         auto newMinFace = ComputeNormalData_<DataSet::Unmerged>();
         float newMinDistance = std::numeric_limits<float>::max();
@@ -67,13 +80,7 @@ namespace nc::physics
             *oldMinFace = newMinFace + m_normals.size();
 
         MergeNewFeatures();
-
         return true;
-    }
-
-    std::vector<size_t> Polytope::InitialFaces()
-    {
-        return std::vector<size_t>{0,1,2,  0,3,1,  0,2,3,  1,3,2};
     }
 
     void Polytope::CreateIndicesFromEdges()
@@ -180,7 +187,7 @@ namespace nc::physics
 
         contact->localPointA = u * localA1 + v * localA2 + w * localA3;
         contact->localPointB = u * localB1 + v * localB2 + w * localB3;
-
+        
         return true;
     }
 

@@ -5,18 +5,86 @@
 
 using namespace DirectX;
 
-namespace nc::physics
+namespace
 {
-    /** Compute J * V for 3 separate jacobians. Since ConstraintMatrix
-     *  represents a 12 element vector, we just sum the dot product of each
-     *  row. Result is returned as a vector: [Rnorm, Rtan, Rbit] */
+    using namespace nc;
+    using namespace nc::physics;
+
+    ContactConstraint CreateContactConstraint(const Contact&, Entity, Entity, Transform*, Transform*, PhysicsBody*, PhysicsBody*);
+    BasicContactConstraint CreateBasicContactConstraint(Entity a, Entity b, Transform* transformA, Transform* transformB, const Manifold& manifold);
+    void ResolveConstraint(ContactConstraint& constraint, float dt);
+    void ResolveConstraint(const BasicContactConstraint& constraint);
+    XMVECTOR MultiplyJVContact(const ConstraintMatrix& v, const ConstraintMatrix& jNormal, const ConstraintMatrix& jTangent, const ConstraintMatrix& jBitangent);
+    ConstraintMatrix ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent);
+    float ClampLambda(float newLambda, float* totalLambda);
+    float ClampMu(float newMu, float extent, float* totalMu);
+
+    /** Resolve basic contact by direct translation. */
+    void ResolveConstraint(const BasicContactConstraint& constraint)
+    {
+        if(constraint.transformA)
+            constraint.transformA->Translate(-constraint.mtv);
+
+        if(constraint.transformB)
+            constraint.transformB->Translate(constraint.mtv);
+    }
+
+    /** Resolve contacts through sequential impulse. */
+    void ResolveConstraint(ContactConstraint& constraint, float dt)
+    {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+        auto& bodyA = constraint.physBodyA->GetProperties();
+        auto& bodyB = constraint.physBodyB->GetProperties();
+
+        /** V = [Va, Wa, Vb, Wb] */
+        ConstraintMatrix v{bodyA.velocity, bodyA.angularVelocity, bodyB.velocity, bodyB.angularVelocity};
+
+        /** Baumgarte Stabilization / Restitution
+         *  bias = b / h (Pa-Pb) * n + Cr(Va + Wa X Ra - Vb - Wb X Rb) * n */
+        float restitution = bodyA.restitution * bodyB.restitution;
+        auto relativeVelocity_v = v.vA() + XMVector3Cross(v.wA(), constraint.rA) - v.vB() + XMVector3Cross(v.wB(), constraint.rB);
+        relativeVelocity_v = XMVector3Dot(relativeVelocity_v, constraint.normal);
+        relativeVelocity_v = XMVectorScale(relativeVelocity_v, restitution);
+        float baumgarteTerm = math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * bodyA.baumgarte * bodyB.baumgarte / dt;
+        auto baumgarte_v = XMVectorReplicate(baumgarteTerm);
+        auto bias_v = XMVectorMultiply(baumgarte_v + relativeVelocity_v, g_XMIdentityR0);
+
+        /** lagrange = -(JV + b) / (J M^-1 J^t)^-1 = effMass [-(JV + b)] */
+        auto lagrange_v = MultiplyJVContact(v, constraint.jNormal, constraint.jTangent, constraint.jBitangent);
+        lagrange_v = XMVectorNegate(lagrange_v + bias_v) * constraint.effectiveMass;
+        Vector3 lagrange;
+        XMStoreVector3(&lagrange, lagrange_v);
+        auto& [lagrangeNormal, lagrangeTangent, lagrangeBitangent] = lagrange;
+
+        /** (Ln >= 0) && (-mu*Ln <= Lt <= mu*Ln) && (-mu*Ln <= Lb < = mu*Ln) */
+        float friction = bodyA.friction * bodyB.friction;
+        float maxFriction = friction * constraint.totalLambda;
+        lagrangeNormal = ClampLambda(lagrangeNormal, &constraint.totalLambda);
+        lagrangeTangent = ClampMu(lagrangeTangent, maxFriction, &constraint.totalMuTangent);
+        lagrangeBitangent = ClampMu(lagrangeBitangent, maxFriction, &constraint.totalMuBitangent);
+
+        auto deltas = ComputeDeltas(constraint, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
+
+        Vector3 deltaVA, deltaWA, deltaVB, deltaWB;
+        XMStoreVector3(&deltaVA, deltas.vA());
+        XMStoreVector3(&deltaWA, deltas.wA());
+        XMStoreVector3(&deltaVB, deltas.vB());
+        XMStoreVector3(&deltaWB, deltas.wB());
+        bodyA.velocity += deltaVA;
+        bodyA.angularVelocity += deltaWA;
+        bodyB.velocity += deltaVB;
+        bodyB.angularVelocity += deltaWB;
+        NC_PROFILE_END();
+    }
+
+    /** Compute J * V for 3 separate jacobians. Since ConstraintMatrix represents a 12 element vector,
+     *  we just sum the dot product of each row. Result is returned as a vector: [Rnorm, Rtan, Rbit] */
     XMVECTOR MultiplyJVContact(const ConstraintMatrix& v,
                                const ConstraintMatrix& jNormal,
                                const ConstraintMatrix& jTangent,
                                const ConstraintMatrix& jBitangent)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
         auto dotVa = XMVector3Dot(jNormal.vA(), v.vA());
         auto dotWa = XMVector3Dot(jNormal.wA(), v.wA());
         auto dotVb = XMVector3Dot(jNormal.vB(), v.vB());
@@ -36,7 +104,6 @@ namespace nc::physics
         result = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(result, dotVa + dotWa + dotVb + dotWb);
         
         NC_PROFILE_END();
-        
         return result;
     }
 
@@ -44,7 +111,6 @@ namespace nc::physics
     ConstraintMatrix ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
         const auto &jN = constraint.jNormal, &jT = constraint.jTangent, &jB = constraint.jBitangent;
         const auto &iA = constraint.invInertiaA, &iB = constraint.invInertiaB;
         float mA = constraint.invMassA, mB = constraint.invMassB;
@@ -66,10 +132,10 @@ namespace nc::physics
                   XMVectorScale(XMVector3Transform(jB.wB(), iB), lBitangent);
 
         NC_PROFILE_END();
-
         return ConstraintMatrix{vA, wA, vB, wB};
     }
 
+    /** Clamping for impulse along normal. */
     float ClampLambda(float newLambda, float* totalLambda)
     {
         float temp = *totalLambda;
@@ -77,6 +143,7 @@ namespace nc::physics
         return *totalLambda - temp;
     }
 
+    /** Clamping for impulse along tangents (friction). */
     float ClampMu(float newMu, float extent, float* totalMu)
     {
         float temp = *totalMu;
@@ -158,6 +225,25 @@ namespace nc::physics
             0.0f, 0.0f, 0.0f
         };
     }
+} // end anonymous namespace
+
+namespace nc::physics
+{
+    void ResolveConstraints(Constraints* constraints, float dt)
+    {
+        for(size_t i = 0u; i < SolverIterations; ++i)
+        {
+            for(auto& c : constraints->contact)
+            {
+                ResolveConstraint(c, dt);
+            }
+        }
+
+        for(const auto& c : constraints->basic)
+        {
+            ResolveConstraint(c);
+        }
+    }
 
     void GenerateConstraints(registry_type* registry, const std::vector<Manifold>& manifolds, Constraints* constraints)
     {
@@ -191,62 +277,4 @@ namespace nc::physics
 
         NC_PROFILE_END();
     }
-
-    void ResolveConstraint(const BasicContactConstraint& constraint)
-    {
-        if(constraint.transformA)
-            constraint.transformA->Translate(-constraint.mtv);
-
-        if(constraint.transformB)
-            constraint.transformB->Translate(constraint.mtv);
-    }
-
-    void ResolveConstraint(ContactConstraint& constraint, float dt)
-    {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
-        auto& bodyA = constraint.physBodyA->GetProperties();
-        auto& bodyB = constraint.physBodyB->GetProperties();
-
-        /** V = [Va, Wa, Vb, Wb] */
-        ConstraintMatrix v{bodyA.velocity, bodyA.angularVelocity, bodyB.velocity, bodyB.angularVelocity};
-
-        /** Baumgarte Stabilization / Restitution
-         *  bias = b / h (Pa-Pb) * n + Cr(Va + Wa X Ra - Vb - Wb X Rb) * n */
-        float restitution = bodyA.restitution * bodyB.restitution;
-        auto relativeVelocity_v = v.vA() + XMVector3Cross(v.wA(), constraint.rA) - v.vB() + XMVector3Cross(v.wB(), constraint.rB);
-        relativeVelocity_v = XMVector3Dot(relativeVelocity_v, constraint.normal);
-        relativeVelocity_v = XMVectorScale(relativeVelocity_v, restitution);
-        float baumgarteTerm = math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * bodyA.baumgarte * bodyB.baumgarte / dt;
-        auto baumgarte_v = XMVectorReplicate(baumgarteTerm);
-        auto bias_v = XMVectorMultiply(baumgarte_v + relativeVelocity_v, g_XMIdentityR0);
-
-        /** lagrange = -(JV + b) / (J M^-1 J^t)^-1 = effMass [-(JV + b)] */
-        auto lagrange_v = MultiplyJVContact(v, constraint.jNormal, constraint.jTangent, constraint.jBitangent);
-        lagrange_v = XMVectorNegate(lagrange_v + bias_v) * constraint.effectiveMass;
-        Vector3 lagrange;
-        XMStoreVector3(&lagrange, lagrange_v);
-        auto& [lagrangeNormal, lagrangeTangent, lagrangeBitangent] = lagrange;
-
-        /** (Ln >= 0) && (-mu*Ln <= Lt <= mu*Ln) && (-mu*Ln <= Lb < = mu*Ln) */
-        float friction = bodyA.friction * bodyB.friction;
-        float maxFriction = friction * constraint.totalLambda;
-        lagrangeNormal = ClampLambda(lagrangeNormal, &constraint.totalLambda);
-        lagrangeTangent = ClampMu(lagrangeTangent, maxFriction, &constraint.totalMuTangent);
-        lagrangeBitangent = ClampMu(lagrangeBitangent, maxFriction, &constraint.totalMuBitangent);
-
-        auto deltas = ComputeDeltas(constraint, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
-
-        Vector3 deltaVA, deltaWA, deltaVB, deltaWB;
-        XMStoreVector3(&deltaVA, deltas.vA());
-        XMStoreVector3(&deltaWA, deltas.wA());
-        XMStoreVector3(&deltaVB, deltas.vB());
-        XMStoreVector3(&deltaWB, deltas.wB());
-        bodyA.velocity += deltaVA;
-        bodyA.angularVelocity += deltaWA;
-        bodyB.velocity += deltaVB;
-        bodyB.angularVelocity += deltaWB;
-    
-        NC_PROFILE_END();
-    }
-}
+} // end namespace nc::physics

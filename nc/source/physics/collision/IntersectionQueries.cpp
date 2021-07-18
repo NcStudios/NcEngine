@@ -8,6 +8,13 @@
 
 #include <iostream> // remove once minDistance error is figured out
 
+/** @todo 
+ *  - Rather than having MinkowskiSupport determine the collider type,
+ *    figure it out at the top level call. This will branch once per collider
+ *    rather than each gjk/epa loop iteration.
+ *  - Collisions can be more efficient in certain situations. For example, 
+ *    narrow phase sphere vs. sphere uses full gjk + epa, which is silly. */
+
 namespace nc::physics
 {
     using namespace DirectX;
@@ -79,7 +86,6 @@ namespace nc::physics
     bool Gjk(const BoundingVolume& a, const BoundingVolume& b, FXMMATRIX aMatrix, FXMMATRIX bMatrix, CollisionState* stateOut)
     {
         IF_THROW(!stateOut, "Gjk - CollisionState cannot be null");
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Collision);
 
         stateOut->simplex = Simplex{};
         stateOut->rotationA = GetRotation(aMatrix);
@@ -105,27 +111,23 @@ namespace nc::physics
             XMStoreVector3(&supportCSO, supportCSO_v);
             XMStoreVector3(&worldSupportA, aSupportWorld_v);
             XMStoreVector3(&worldSupportB, bSupportWorld_v);
-            XMStoreVector3(&localSupportA, bSupportLocal_v);
+            XMStoreVector3(&localSupportA, aSupportLocal_v);
             XMStoreVector3(&localSupportB, bSupportLocal_v);
 
             stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
 
             if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
             {
-                NC_PROFILE_END();
                 return true;
             }
         }
 
-        NC_PROFILE_END();
-
         return false;
     }
 
-    bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state, Contact* contact)
+    bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state)
     {
         /** @todo Storing the points for contact could be cleaner/more efficient */
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Collision);
 
         state->polytope.Initialize(state->simplex);
         auto minFace = state->polytope.ComputeNormalData();
@@ -152,22 +154,21 @@ namespace nc::physics
             Vector3 support;
             XMStoreVector3(&support, support_v);
 
-            XMStoreVector3(&(contact->worldPointA), aSupportWorld_v);
-            XMStoreVector3(&(contact->worldPointB), bSupportWorld_v);
-            XMStoreVector3(&(contact->localPointA), aSupportLocal_v);
-            XMStoreVector3(&(contact->localPointB), bSupportLocal_v);
+            XMStoreVector3(&(state->contact.worldPointA), aSupportWorld_v);
+            XMStoreVector3(&(state->contact.worldPointB), bSupportWorld_v);
+            XMStoreVector3(&(state->contact.localPointA), aSupportLocal_v);
+            XMStoreVector3(&(state->contact.localPointB), bSupportLocal_v);
 
             if(abs(Dot(minNorm.normal, support) - minNorm.distance) > EpaTolerance)
             {
                 // The closest face is not on the hull, so we expand towards the hull.
-                if(!state->polytope.Expand(support, contact->worldPointA, contact->worldPointB, contact->localPointA, contact->localPointB, &minFace))
+                if(!state->polytope.Expand(support, state->contact, &minFace))
                 {
                     /** @todo Need to determine if this can happen under normal circumstances.
                      *  It has thrown here a few times, but always when there is wonk elsewhere. */
                     //throw std::runtime_error("Epa - minDistance not found");
                     std::cout << "Epa - minDistance not found\n";
-                    contact->depth = 0.0f;
-                    NC_PROFILE_END();
+                    state->contact.depth = 0.0f;
                     return false;
                 }
 
@@ -175,12 +176,9 @@ namespace nc::physics
             }
         }
 
-        auto success = state->polytope.GetContacts(minFace, contact);
-        contact->normal = Normalize(minNorm.normal);
-        contact->depth = minNorm.distance + EpaTolerance;
-        
-        NC_PROFILE_END();
-        
+        auto success = state->polytope.GetContacts(minFace, &state->contact);
+        state->contact.normal = Normalize(minNorm.normal);
+        state->contact.depth = minNorm.distance + EpaTolerance;
         return success;
     }
 

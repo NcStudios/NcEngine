@@ -2,6 +2,7 @@
 
 #include "Simplex.h"
 #include "Manifold.h"
+#include "debug/Profiler.h"
 
 #include <vector>
 
@@ -13,7 +14,7 @@ namespace nc::physics
             void Initialize(const Simplex& simplex);
             auto GetNormalData(size_t index) const -> NormalData;
             auto ComputeNormalData() -> size_t;
-            auto Expand(const Vector3& supportCSO, const Vector3& worldSupportA, const Vector3& worldSupportB, const Vector3& localSupportA, const Vector3& localSupportB, size_t* oldMinFace) -> bool;
+            auto Expand(const Vector3& supportCSO, const Contact& contact, size_t* oldMinFace) -> bool;
             bool GetContacts(size_t minFace, Contact* contact) const;
 
         private:
@@ -28,7 +29,6 @@ namespace nc::physics
 
             enum class DataSet { Merged, Unmerged };
 
-            std::vector<size_t> InitialFaces();
             void CreateIndicesFromEdges();
             void MergeNewFeatures();
             void CheckEdge(size_t a, size_t b);

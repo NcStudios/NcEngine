@@ -12,13 +12,13 @@ namespace nc::ecs
     class ColliderSystem
     {
         public:
-            using DynamicColliderSoA = SoA<EntityTraits::underlying_type,
+            using DynamicColliderSoA = SoA<Entity,
                                            DirectX::XMMATRIX,
                                            physics::BoundingVolume,
                                            ColliderType,
                                            bool>;
 
-            static constexpr size_t HandleTypeIndex = 0u;
+            static constexpr size_t HandleIndex = 0u;
             static constexpr size_t MatrixIndex = 1u;
             static constexpr size_t BoundingVolumeIndex = 2u;
             static constexpr size_t ColliderTypeIndex = 3u;
