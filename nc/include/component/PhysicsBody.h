@@ -17,6 +17,7 @@ namespace nc
         float friction = 0.5f;                     // Coefficient of friction [0, 1]
         float baumgarte = 0.4f;                    // Position correction factor to apply on collision [0, 1]
         bool useGravity = true;                    // Is the object affected by gravity
+        bool kinematic  = false;                   // Prevent forces and collisions from affecting the object
     };
 
     class PhysicsBody final : public ComponentBase
@@ -27,11 +28,12 @@ namespace nc
             void UpdateWorldInertia(Transform* transform);
             auto GetProperties() -> PhysicsProperties& { return m_properties; }
             auto GetInverseInertia() const -> DirectX::FXMMATRIX { return m_invInertiaWorld; }
-
+            bool IsKinematic() const { return m_properties.kinematic; }
+            
         private:
             PhysicsProperties m_properties;
             DirectX::XMMATRIX m_invInertiaWorld;
-            DirectX::XMMATRIX m_invInertiaLocal;
+            Vector3 m_invInertiaLocal;
     };
 
     #ifdef NC_EDITOR_ENABLED

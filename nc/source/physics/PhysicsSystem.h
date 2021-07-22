@@ -2,11 +2,11 @@
 
 #include "ClickableSystem.h"
 #include "collision/CollisionCache.h"
+#include "assets/HullColliderManager.h"
 #include "graphics/DebugRenderer.h"
 
 namespace nc
 {
-    namespace ecs { class ColliderSystem; }
     namespace graphics { class FrameManager; }
     namespace job { class JobSystem; }
 }
@@ -17,9 +17,9 @@ namespace nc::physics
     {
         public:
             #ifdef USE_VULKAN
-            PhysicsSystem(graphics::Graphics2* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
+            PhysicsSystem(graphics::Graphics2* graphics, job::JobSystem* jobSystem);
             #else
-            PhysicsSystem(graphics::Graphics* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem);
+            PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem);
             #endif
 
             void DoPhysicsStep(float dt);
@@ -30,9 +30,9 @@ namespace nc::physics
             #endif
 
         private:
-            ClickableSystem m_clickableSystem;
             CollisionCache m_cache;
-            ecs::ColliderSystem* m_colliderSystem;
+            ClickableSystem m_clickableSystem;
+            HullColliderManager m_hullColliderManager;
             job::JobSystem* m_jobSystem;
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugRenderer m_debugRenderer;

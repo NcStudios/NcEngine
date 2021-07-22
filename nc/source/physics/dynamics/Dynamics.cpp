@@ -28,7 +28,7 @@ namespace nc::physics
         {
             auto& properties = body.GetProperties();
 
-            if(properties.useGravity)
+            if(properties.useGravity && !properties.kinematic)
             {
                 properties.velocity += g;
             }
@@ -49,6 +49,9 @@ namespace nc::physics
                 continue;
             
             auto& properties = body.GetProperties();
+            if(properties.kinematic)
+                continue;
+                
             auto* transform = registry->Get<Transform>(entity);
 
             properties.velocity = HadamardProduct(properties.linearFreedom, properties.velocity);

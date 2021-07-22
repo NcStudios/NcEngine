@@ -29,15 +29,6 @@ namespace nc::physics
             DirectX::XMMATRIX m_data;
     };
 
-    /** Resolve collisions involving a non-PhysicsBody.
-     *  @todo What should happen in non-PhysicsBody vs. PhysicsBody?
-     *    - move non-PhysicsBody / move both / apply force(how?)... */
-    struct BasicContactConstraint
-    {
-        Transform *transformA, *transformB; // null for static entities
-        Vector3 mtv;
-    };
-
     /** Resolve PhysicsBody vs. PhysicsBody collisions. */
     struct ContactConstraint
     {
@@ -48,14 +39,8 @@ namespace nc::physics
         DirectX::XMVECTOR normal, rA, rB, effectiveMass;
         float penetrationDepth;
         float invMassA, invMassB;
+        float restitution, friction, baumgarte;
         float totalLambda, totalMuTangent, totalMuBitangent;
-    };
-
-    /** Collection of constraints. */
-    struct Constraints
-    {
-        std::vector<BasicContactConstraint> basic;
-        std::vector<ContactConstraint> contact;
     };
 
     inline ConstraintMatrix::ConstraintMatrix(const Vector3& vA, const Vector3& wA, const Vector3& vB, const Vector3& wB)

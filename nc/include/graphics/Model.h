@@ -2,13 +2,9 @@
 
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
-
-#include <vector>
-#include <string>
-#include <memory>
-#include <stdint.h>
-#include <d3d11.h>
 #include "directx/math/DirectXMath.h"
+
+#include <memory>
 
 namespace nc::graphics
 {

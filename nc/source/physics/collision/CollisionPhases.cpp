@@ -1,65 +1,173 @@
 #include "CollisionPhases.h"
 #include "IntersectionQueries.h"
 
-#include <iostream>
-
 namespace
 {
     using namespace nc;
     using namespace nc::physics;
 
-    void AddContact(Entity entityA, Entity entityB, const Contact& contact, std::vector<Manifold>& manifolds)
+    auto GetColliderInteractionType(bool isTrigger, PhysicsBody* body) -> ColliderInteractionType
     {
-        auto pos = std::ranges::find_if(manifolds, [entityA, entityB](const auto& manifold)
-        {
-            return (manifold.entityA == entityA && manifold.entityB == entityB) ||
-                   (manifold.entityA == entityB && manifold.entityB == entityA);
-        });
+        // note: could probably store this in collider... have physics body send message in c'tor
+        // to update as it already gets the collider pointer
 
-        if(pos == manifolds.end())
+        if(body)
         {
-            Manifold newManifold{entityA, entityB, {contact}};
-            manifolds.push_back(newManifold);
-            return;
+            if(body->IsKinematic())
+            {
+                if(isTrigger)
+                {
+                    return ColliderInteractionType::KinematicPhysicsTrigger;
+                }
+
+                return ColliderInteractionType::PhysicsTrigger;
+            }
+
+            // need to add kinematic body
+            if(isTrigger)
+            {
+                return ColliderInteractionType::PhysicsTrigger;
+            }
+
+            return ColliderInteractionType::Physics;
         }
 
-        pos->AddContact(contact);
+        if(isTrigger)
+        {
+            return ColliderInteractionType::ColliderTrigger;
+        }
+
+        return ColliderInteractionType::Collider;
+
+    }
+
+    CollisionEventType GetInteractionType(ColliderInteractionType typeA, ColliderInteractionType typeB)
+    {
+        if(typeA == ColliderInteractionType::Collider)
+        {
+            if(typeB == ColliderInteractionType::Physics)
+                return CollisionEventType::Physics;
+            
+            if(typeB == ColliderInteractionType::PhysicsTrigger || typeB == ColliderInteractionType::KinematicPhysicsTrigger)
+                return CollisionEventType::Trigger;
+            
+            return CollisionEventType::None;
+        }
+
+        if(typeA == ColliderInteractionType::Physics)
+        {
+            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::Physics || typeB == ColliderInteractionType::KinematicPhysics)
+                return CollisionEventType::Physics;
+            
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::KinematicPhysics)
+        {
+            if(typeB == ColliderInteractionType::Physics)
+                return CollisionEventType::Physics;
+            
+            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
+                return CollisionEventType::None;
+            
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::ColliderTrigger)
+        {
+            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::ColliderTrigger)
+                return CollisionEventType::None;
+            
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::PhysicsTrigger)
+        {
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::KinematicPhysicsTrigger)
+        {
+            return CollisionEventType::Trigger;
+        }
+
+        throw std::runtime_error("GetInteractionType - Unknown ColliderInteractionType");
     }
 }
 
 namespace nc::physics
 {
-    void FetchEstimates(registry_type* registry,
-                        ecs::ColliderSystem::DynamicColliderSoA* soa,
-                        std::vector<DynamicEstimate>& estimates)
+    auto FetchEstimates(registry_type* registry) -> PerFrameCollisionData
     {
-        auto [index, handles, matrices, volumes, trigger] = soa->View<ecs::ColliderSystem::HandleIndex,
-                                                                      ecs::ColliderSystem::MatrixIndex,
-                                                                      ecs::ColliderSystem::BoundingVolumeIndex,
-                                                                      ecs::ColliderSystem::TriggerIndex>();
+        auto colliders = registry->ViewAll<Collider>();
+        auto colliderCount = colliders.size();
+        
+        std::vector<DirectX::XMMATRIX> matrices;
+        std::vector<ColliderEstimate> estimates;
+        matrices.reserve(colliderCount);
+        estimates.reserve(colliderCount);
 
-        while(index.Valid())
+        for(uint32_t i = 0u; i < colliderCount; ++i)
         {
-            auto interactionType = trigger[index] ? CollisionInteractionType::Trigger : CollisionInteractionType::Physics;
-            matrices[index] = registry->Get<Transform>(handles[index])->GetTransformationMatrix();
-            estimates.emplace_back(EstimateBoundingVolume(volumes[index], matrices[index]), index, interactionType);
-            ++index;
+            const auto& collider = colliders[i];
+            auto entity = collider.GetParentEntity();
+            auto* body = registry->Get<PhysicsBody>(entity);
+            auto interactionType = GetColliderInteractionType(collider.IsTrigger(), body);
+            matrices.push_back(registry->Get<Transform>(entity)->GetTransformationMatrix());
+            estimates.emplace_back(collider.EstimateBoundingVolume(matrices.back()), i, interactionType);
         }
+
+        return PerFrameCollisionData{ std::move(matrices), std::move(estimates) };
     }
 
     void UpdateManifolds(registry_type* registry, std::vector<Manifold>& manifolds)
     {
-        for(auto& manifold : manifolds)
+        for(auto cur = manifolds.rbegin(); cur != manifolds.rend(); ++cur)
         {
-            manifold.UpdateWorldPoints(registry);
+            cur->UpdateWorldPoints(registry);
+            
+            if(cur->contacts.empty())
+            {
+                *cur = std::move(manifolds.back());
+                manifolds.pop_back();
+            }
         }
     }
 
-    void FindBroadPairs(const std::vector<DynamicEstimate>& estimates,
-                        std::vector<BroadDetectVsDynamicEvent>& broadPhysicsEvents,
-                        std::vector<BroadDetectVsDynamicEvent>& broadTriggerEvents)
+    void MergeNewContacts(const NarrowPhysicsResult& newEvents, std::vector<Manifold>& manifolds)
+    {
+        IF_THROW(newEvents.events.size() != newEvents.events.size(), "MergeNewContacts - NarrowPhaseResults are not the same size");
+
+        const auto eventCount = newEvents.contacts.size();
+        for(size_t i = 0u; i < eventCount; ++i)
+        {
+            const auto& [entityA, entityB] = newEvents.events[i];
+            auto pos = std::ranges::find_if(manifolds, [entityA, entityB](const auto& manifold)
+            {
+                return (manifold.entityA == entityA && manifold.entityB == entityB) ||
+                       (manifold.entityA == entityB && manifold.entityB == entityA);
+            });
+
+            if(pos == manifolds.end())
+            {
+                Manifold newManifold{entityA, entityB, {newEvents.contacts[i]}};
+                manifolds.push_back(newManifold);
+                continue;
+            }
+
+            pos->AddContact(newEvents.contacts[i]);
+        }
+    }
+
+    auto FindBroadPairs(std::span<const ColliderEstimate> estimates) -> BroadResult
     {
         const auto count = estimates.size();
+
+        std::vector<BroadEvent> physicsEvents;
+        std::vector<BroadEvent> triggerEvents;
+        /** @todo how much to reserve? */
+        physicsEvents.reserve(count / 2u);
+        triggerEvents.reserve(count / 2u);
 
         for(size_t i = 0u; i < count; ++i)
         {
@@ -67,108 +175,76 @@ namespace nc::physics
             {
                 const auto& first = estimates[i];
                 const auto& second = estimates[j];
+                auto interactionType = GetInteractionType(first.interactionType, second.interactionType);
 
-                if(first.interactionType == CollisionInteractionType::Trigger && second.interactionType == CollisionInteractionType::Trigger)
+                if(interactionType == CollisionEventType::None)
+                {
                     continue;
+                }
 
                 if(Intersect(first.estimate, second.estimate))
                 {
-                    if(first.interactionType == CollisionInteractionType::Trigger || second.interactionType == CollisionInteractionType::Trigger)
-                        broadTriggerEvents.emplace_back(first.index, second.index);
+                    if(interactionType == CollisionEventType::Physics)
+                        physicsEvents.emplace_back(first.index, second.index);
                     else
-                        broadPhysicsEvents.emplace_back(first.index, second.index);
+                        triggerEvents.emplace_back(first.index, second.index);
                 }
             }
         }
+
+        return BroadResult{ std::move(physicsEvents), std::move(triggerEvents) };
     }
 
-    void FindBroadStaticPairs(const std::vector<DynamicEstimate>& estimates,
-                              const ecs::ColliderTree* staticTree,
-                              std::vector<BroadDetectVsStaticEvent>& broadStaticPhysicsEvents,
-                              std::vector<BroadDetectVsStaticEvent>& broadStaticTriggerEvents)
+    auto FindNarrowPhysicsPairs(std::span<Collider> colliders, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadPhysicsEvents) -> NarrowPhysicsResult
     {
-        const auto count = estimates.size();
-
-        for(size_t i = 0u; i < count; ++i)
-        {
-            for(const auto* staticEntry : staticTree->BroadCheck(estimates[i].estimate))
-            {
-                bool estimateIsTrigger = (estimates[i].interactionType == CollisionInteractionType::Trigger) ? true : false;
-
-                if(estimateIsTrigger && staticEntry->isTrigger)
-                    continue;
-
-                auto& container = (estimateIsTrigger || staticEntry->isTrigger) ? broadStaticTriggerEvents : broadStaticPhysicsEvents;
-                const auto beg = container.cbegin();
-                const auto end = container.cend();
-                auto newEvent = BroadDetectVsStaticEvent{estimates[i].index, staticEntry};
-                
-                if(end == std::find(beg, end, newEvent))
-                    container.push_back(newEvent);
-            }
-        }
-    }
-
-    void FindNarrowPhysicsPairs(const std::vector<BroadDetectVsDynamicEvent>& broadPhysicsEvents,
-                                const std::vector<BroadDetectVsStaticEvent>& broadStaticPhysicsEvents,
-                                const ecs::ColliderSystem::DynamicColliderSoA* soa,
-                                std::vector<NarrowDetectEvent>& narrowPhysicsEvents,
-                                std::vector<Manifold>& manifolds)
-    {
-        const auto handles = soa->GetSpan<Entity>();
-        const auto matrices = soa->GetSpan<DirectX::XMMATRIX>();
-        const auto volumes = soa->GetSpan<BoundingVolume>();
+        std::vector<NarrowEvent> events;
+        std::vector<Contact> contacts;
+        const auto broadEventCount = broadPhysicsEvents.size();
+        events.reserve(broadEventCount);
+        contacts.reserve(broadEventCount);
         CollisionState state;
 
         for(const auto& [i, j] : broadPhysicsEvents)
         {
-            if(Gjk(volumes[i], volumes[j], matrices[i], matrices[j], &state))
+            const auto& v1 = colliders[i].GetVolume();
+            const auto& v2 = colliders[j].GetVolume();
+            const auto& m1 = matrices[i];
+            const auto& m2 = matrices[j];
+
+            if(Gjk(v1, v2, m1, m2, &state))
             {
-                if(Epa(volumes[i], volumes[j], matrices[i], matrices[j], &state))
+                if(Epa(v1, v2, m1, m2, &state))
                 {
-                    narrowPhysicsEvents.emplace_back(handles[i], handles[j]);
-                    AddContact(handles[i], handles[j], state.contact, manifolds);
+                    auto e1 = colliders[i].GetParentEntity();
+                    auto e2 = colliders[j].GetParentEntity();
+                    events.emplace_back(e1, e2);
+                    contacts.push_back(state.contact);
                 }
             }
         }
 
-        for(const auto& [dynamicIndex, staticEntry] : broadStaticPhysicsEvents)
-        {
-            if(Gjk(volumes[dynamicIndex], staticEntry->volume, matrices[dynamicIndex], staticEntry->matrix, &state))
-            {
-                if(Epa(volumes[dynamicIndex], staticEntry->volume, matrices[dynamicIndex], staticEntry->matrix, &state))
-                {
-                    narrowPhysicsEvents.emplace_back(handles[dynamicIndex], staticEntry->entity);
-                    AddContact(handles[dynamicIndex], staticEntry->entity, state.contact, manifolds);
-                }
-            }
-        }
+        return NarrowPhysicsResult{ std::move(events), std::move(contacts) };
     }
 
-    void FindNarrowTriggerPairs(const std::vector<BroadDetectVsDynamicEvent>& broadTriggerEvents,
-                                const std::vector<BroadDetectVsStaticEvent>& broadStaticTriggerEvents,
-                                const ecs::ColliderSystem::DynamicColliderSoA* soa,
-                                std::vector<NarrowDetectEvent>& narrowTriggerEvents)
+    auto FindNarrowTriggerPairs(std::span<Collider> colliders, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadTriggerEvents) -> std::vector<NarrowEvent>
     {
-        const auto handles = soa->GetSpan<Entity>();
-        const auto matrices = soa->GetSpan<DirectX::XMMATRIX>();
-        const auto volumes = soa->GetSpan<BoundingVolume>();
+        std::vector<NarrowEvent> events;
+        events.reserve(broadTriggerEvents.size());
         CollisionState state;
 
         for(const auto& [i, j] : broadTriggerEvents)
         {
-            if(Gjk(volumes[i], volumes[j], matrices[i], matrices[j], &state))
+            const auto& v1 = colliders[i].GetVolume();
+            const auto& v2 = colliders[j].GetVolume();
+            const auto& m1 = matrices[i];
+            const auto& m2 = matrices[j];
+
+            if(Gjk(v1, v2, m1, m2, &state))
             {
-                narrowTriggerEvents.emplace_back(handles[i], handles[j]);
+                events.emplace_back(colliders[i].GetParentEntity(), colliders[j].GetParentEntity());
             }
         }
 
-        for(const auto& [dynamicIndex, staticEntry] : broadStaticTriggerEvents)
-        {
-            if(Gjk(volumes[dynamicIndex], staticEntry->volume, matrices[dynamicIndex], staticEntry->matrix, &state))
-            {
-                narrowTriggerEvents.emplace_back(handles[dynamicIndex], staticEntry->entity);
-            }
-        }
+        return events;
     }
 }

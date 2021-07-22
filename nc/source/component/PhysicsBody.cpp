@@ -3,7 +3,7 @@
 
 namespace
 {
-    DirectX::XMMATRIX CreateInverseInertiaTensor(const nc::Vector3& scale, float mass, nc::ColliderType type)
+    nc::Vector3 CreateInverseInertiaTensor(const nc::Vector3& scale, float mass, nc::ColliderType type)
     {
         float iX, iY, iZ;
 
@@ -47,7 +47,7 @@ namespace
             }
         }
 
-        return DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixScaling(iX, iY, iZ));
+        return nc::Vector3{1.0f / iX, 1.0f / iY, 1.0f / iZ};
     }
 }
 
@@ -72,7 +72,7 @@ namespace nc
 
         if(m_properties.mass == 0.0f)
         {
-            m_invInertiaLocal = DirectX::XMMatrixScaling(0.0f, 0.0f, 0.0f);
+            m_invInertiaLocal = Vector3::Zero();
             return;
         }
 
@@ -86,7 +86,8 @@ namespace nc
     {
         auto rot_v = transform->GetRotationXM();
         auto rot_m = DirectX::XMMatrixRotationQuaternion(rot_v);
-        m_invInertiaWorld = rot_m * m_invInertiaLocal * XMMatrixTranspose(rot_m);
+        auto invInertiaLocalMatrix = DirectX::XMMatrixScaling(m_invInertiaLocal.x, m_invInertiaLocal.y, m_invInertiaLocal.z);
+        m_invInertiaWorld = rot_m * invInertiaLocalMatrix * DirectX::XMMatrixTranspose(rot_m);
     }
 
     #ifdef NC_EDITOR_ENABLED
