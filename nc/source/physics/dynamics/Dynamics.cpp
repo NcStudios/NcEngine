@@ -21,16 +21,13 @@ namespace nc::physics
     void ApplyGravity(std::span<PhysicsBody> bodies, float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
-        auto g = GravityAcceleration * dt;
+        auto g_v = DirectX::XMVectorScale(DirectX::XMLoadVector3(&GravityAcceleration), dt);
 
         for(auto& body : bodies)
         {
-            auto& properties = body.GetProperties();
-
-            if(properties.useGravity && !properties.kinematic)
+            if(body.UseGravity())
             {
-                properties.velocity += g;
+                body.UpdateVelocity(g_v);
             }
         }
 
@@ -43,25 +40,8 @@ namespace nc::physics
 
         for(auto& body : bodies)
         {
-            Entity entity = body.GetParentEntity();
-
-            if(EntityUtils::IsStatic(entity))
-                continue;
-            
-            auto& properties = body.GetProperties();
-            if(properties.kinematic)
-                continue;
-                
-            auto* transform = registry->Get<Transform>(entity);
-
-            properties.velocity = HadamardProduct(properties.linearFreedom, properties.velocity);
-            properties.angularVelocity = HadamardProduct(properties.angularFreedom, properties.angularVelocity);
-
-            transform->Translate(properties.velocity * dt);
-            transform->Rotate(Quaternion::FromEulerAngles(properties.angularVelocity * dt));
-
-            properties.velocity *= pow(1.0f - properties.drag, dt);
-            properties.angularVelocity *= pow(1.0f - properties.angularDrag, dt);
+            auto* transform = registry->Get<Transform>(body.GetParentEntity());
+            body.Integrate(transform, dt);
         }
 
         NC_PROFILE_END();

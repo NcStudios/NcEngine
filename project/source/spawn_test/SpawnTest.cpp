@@ -69,7 +69,6 @@ namespace nc::sample
 
         auto platform = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{0.0f, -25.0f, 0.0f}, .scale = Vector3{35.0f, 6.0f, 35.0f}, .tag = "Platform", .flags = EntityFlags::Static});
         registry->Add<Collider>(platform, BoxProperties{}, false);
-        registry->Add<PhysicsBody>(platform, PhysicsProperties{.mass = 0.0f, .useGravity = false});
 
         auto bottomBox = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, 0.0f}, .scale = Vector3::Splat(2.0f), .flags = EntityFlags::None});
         registry->Add<Collider>(bottomBox, BoxProperties{}, false);

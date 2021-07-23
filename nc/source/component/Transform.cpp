@@ -242,6 +242,12 @@ namespace nc
         UpdateWorldMatrix();
     }
 
+    void Transform::Translate(DirectX::FXMVECTOR translation)
+    {
+        m_localMatrix.r[3] += translation;
+        UpdateWorldMatrix();
+    }
+
     std::span<Entity> Transform::GetChildren()
     {
         return std::span<Entity>(m_children.data(), m_children.size());

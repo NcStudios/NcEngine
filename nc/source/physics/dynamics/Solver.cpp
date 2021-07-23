@@ -10,8 +10,8 @@ namespace
     using namespace nc;
     using namespace nc::physics;
 
-    PhysicsProperties g_StaticPhysicsProperties = PhysicsProperties{.mass = 0.0f, .useGravity = false};
-    DirectX::XMMATRIX g_StaticInverseInertia = DirectX::XMMatrixIdentity();
+    const PhysicsProperties g_StaticPhysicsProperties = PhysicsProperties{.mass = 0.0f, .useGravity = false};
+    const DirectX::XMMATRIX g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
 
     ContactConstraint CreateContactConstraint(const Contact&, Entity, Entity, Transform*, Transform*, PhysicsBody*, PhysicsBody*);
     void ResolveConstraint(ContactConstraint& constraint, float dt);
@@ -24,15 +24,18 @@ namespace
     void ResolveConstraint(ContactConstraint& constraint, float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-        auto& bodyA = constraint.physBodyA ? constraint.physBodyA->GetProperties() : g_StaticPhysicsProperties;
-        auto& bodyB = constraint.physBodyB ? constraint.physBodyB->GetProperties() : g_StaticPhysicsProperties;
-
         /** V = [Va, Wa, Vb, Wb] */
-        ConstraintMatrix v{bodyA.velocity, bodyA.angularVelocity, bodyB.velocity, bodyB.angularVelocity};
+        ConstraintMatrix v
+        {
+            constraint.physBodyA ? constraint.physBodyA->GetVelocity() : g_XMZero,
+            constraint.physBodyA ? constraint.physBodyA->GetAngularVelocity() : g_XMZero,
+            constraint.physBodyB ? constraint.physBodyB->GetVelocity() : g_XMZero,
+            constraint.physBodyB ? constraint.physBodyB->GetAngularVelocity() : g_XMZero
+        };
 
         /** Baumgarte Stabilization / Restitution
          *  bias = b / h (Pa-Pb) * n + Cr(Va + Wa X Ra - Vb - Wb X Rb) * n */
-        auto relativeVelocity_v = v.vA() + XMVector3Cross(v.wA(), constraint.rA) - v.vB() + XMVector3Cross(v.wB(), constraint.rB);
+        auto relativeVelocity_v = v.vA() + XMVector3Cross(v.wA(), constraint.rA) - v.vB() - XMVector3Cross(v.wB(), constraint.rB);
         relativeVelocity_v = XMVector3Dot(relativeVelocity_v, constraint.normal);
         relativeVelocity_v = XMVectorScale(relativeVelocity_v, constraint.restitution);
         float baumgarteTerm = math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * constraint.baumgarte / dt;
@@ -54,22 +57,14 @@ namespace
 
         auto deltas = ComputeDeltas(constraint, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
 
-        Vector3 deltaVA, deltaWA, deltaVB, deltaWB;
-        XMStoreVector3(&deltaVA, deltas.vA());
-        XMStoreVector3(&deltaWA, deltas.wA());
-        XMStoreVector3(&deltaVB, deltas.vB());
-        XMStoreVector3(&deltaWB, deltas.wB());
-
         if(constraint.physBodyA)
         {
-            bodyA.velocity += deltaVA;
-            bodyA.angularVelocity += deltaWA;
+            constraint.physBodyA->UpdateVelocities(deltas.vA(), deltas.wA());
         }
 
         if(constraint.physBodyB)
         {
-            bodyB.velocity += deltaVB;
-            bodyB.angularVelocity += deltaWB;
+            constraint.physBodyB->UpdateVelocities(deltas.vB(), deltas.wB());
         }
         NC_PROFILE_END();
     }
