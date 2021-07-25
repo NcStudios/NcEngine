@@ -4,7 +4,6 @@
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
 #include "ecs/ColliderSystem.h"
-#include "physics/collision/CollisionSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "imgui/imgui.h"
 
@@ -201,7 +200,6 @@ namespace nc::ui::editor::controls
                 WrapTabItem("Profiler", Profiler);
                 WrapTabItem("Systems", ComponentSystems, registry);
                 WrapTabItem("Gfx Resources", GraphicsResourcePanel);
-                WrapTabItem("Physics Metrics", PhysicsMetrics);
                 ImGui::EndTabBar();
             }
 
@@ -236,7 +234,7 @@ namespace nc::ui::editor::controls
 
         textFilter.Draw("Search##telemetry", 128.0f);
 
-        for(auto v : {Filter::All, Filter::Logic, Filter::Physics, Filter::Rendering, Filter::User})
+        for(auto v : {Filter::All, Filter::Logic, Filter::Collision, Filter::Dynamics, Filter::Rendering, Filter::User})
         {
             ImGui::SameLine();
             ImGui::RadioButton(ToCString(v), &filterSelection, static_cast<int>(v));
@@ -324,21 +322,6 @@ namespace nc::ui::editor::controls
             if(filter.PassFilter(id.c_str()))
                 ImGui::Text(id.c_str());
         }
-    }
-
-    void PhysicsMetrics()
-    {
-        const auto& metrics = physics::CollisionSystem::metrics;
-        ImGui::Text("Collision Checks:");
-        ImGui::Text("  Broad Phase");
-        ImGui::Text("    Static:  %d", metrics.staticBroadChecks);
-        ImGui::Text("    Dynamic: %d", metrics.dynamicBroadChecks);
-        ImGui::Text("  Narrow Phase");
-        ImGui::Text("    Static:  %d", metrics.staticNarrowChecks);
-        ImGui::Text("    Dynamic: %d", metrics.dynamicNarrowChecks);
-        ImGui::Text("  Collisions");
-        ImGui::Text("    Static:  %d", metrics.staticCollisions);
-        ImGui::Text("    Dynamic: %d", metrics.dynamicCollisions);
     }
 } // end namespace nc::ui::editor
 #endif

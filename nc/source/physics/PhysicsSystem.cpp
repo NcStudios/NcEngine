@@ -1,20 +1,24 @@
 #include "PhysicsSystem.h"
 #include "PhysicsConstants.h"
+#include "collision/CollisionPhases.h"
+#include "collision/CollisionNotification.h"
+#include "dynamics/Dynamics.h"
 #include "dynamics/Solver.h"
+#include "ecs/ColliderSystem.h"
+#include "job/JobSystem.h"
+#include "debug/Profiler.h"
 
 namespace nc::physics
 {
-    void UpdateWorldInertiaTensors(registry_type* registry, std::span<PhysicsBody> bodies);
-    void ApplyGravity(std::span<PhysicsBody> bodies, float dt);
-    void Integrate(registry_type* registry, std::span<PhysicsBody> bodies, float dt);
-
     #ifdef USE_VULKAN
     PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
     #else
     PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
     #endif
-        : m_collisionSystem{colliderSystem, jobSystem},
-          m_clickableSystem{graphics}
+        : m_clickableSystem{graphics},
+          m_cache{},
+          m_colliderSystem{colliderSystem},
+          m_jobSystem{jobSystem}
           #ifdef NC_DEBUG_RENDERING
           , m_debugRenderer{graphics}
           #endif
@@ -31,7 +35,7 @@ namespace nc::physics
     void PhysicsSystem::ClearState()
     {
         m_clickableSystem.Clear();
-        m_collisionSystem.ClearState();
+        Clear(&m_cache);
     }
 
     void PhysicsSystem::DoPhysicsStep(float dt)
@@ -40,85 +44,40 @@ namespace nc::physics
         if(dt == 0.0f)
             return;
 
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
         #ifdef NC_DEBUG_RENDERING
         m_debugRenderer.ClearLines();
         m_debugRenderer.ClearPoints();
         #endif
+
+        /** @todo Can use JobSystem here. Also, JobSystem seems to have a bug related
+         *  to arguments. (Works if all args are captured in a lambda, but not if
+         *  args are passed to func and bound in JobSystem.) */
 
         auto* registry = ActiveRegistry();
         auto bodies = registry->ViewAll<PhysicsBody>();
 
         UpdateWorldInertiaTensors(registry, bodies);
         ApplyGravity(bodies, dt);
+        UpdateManifolds(registry, m_cache.manifolds);
 
-        const auto& manifolds = m_collisionSystem.DoCollisionStep(registry);
+        const auto* tree = m_colliderSystem->GetStaticTree();
+        const auto* soa = m_colliderSystem->GetDynamicSoA();
+        FetchEstimates(registry, m_colliderSystem->GetDynamicSoA(), m_cache.estimates);
+        FindBroadPairs(m_cache.estimates, m_cache.broad.physics, m_cache.broad.trigger);
+        FindBroadStaticPairs(m_cache.estimates, tree, m_cache.broad.staticPhysics, m_cache.broad.staticTrigger);
+        FindNarrowPhysicsPairs(m_cache.broad.physics, m_cache.broad.staticPhysics, soa, m_cache.narrow.physics, m_cache.manifolds);
+        FindNarrowTriggerPairs(m_cache.broad.trigger, m_cache.broad.staticTrigger, soa, m_cache.narrow.trigger);
+
         Constraints constraints;
-        GenerateConstraints(registry, manifolds, &constraints);
-
-        for(size_t i = 0u; i < SolverIterations; ++i)
-        {
-            for(auto& c : constraints.contact)
-            {
-                ResolveConstraint(c, dt);
-            }
-        }
-
-        for(const auto& c : constraints.basic)
-        {
-            ResolveConstraint(c);
-        }
-
+        GenerateConstraints(registry, m_cache.manifolds, &constraints);
+        ResolveConstraints(&constraints, dt);
         Integrate(registry, bodies, dt);
 
-        m_collisionSystem.NotifyCollisionEvents(registry);
-        m_collisionSystem.Cleanup();
-    }
+        NotifyCollisionEvents(registry, &m_cache);
+        UpdatePreviousEvents(&m_cache);
 
-    void UpdateWorldInertiaTensors(registry_type* registry, std::span<PhysicsBody> bodies)
-    {
-        for(auto& body : bodies)
-        {
-            auto* transform = registry->Get<Transform>(body.GetParentEntity());
-            /** @todo Can this be skipped for static bodies? */
-            body.UpdateWorldInertia(transform);
-        }
-    }
-
-    void ApplyGravity(std::span<PhysicsBody> bodies, float dt)
-    {
-        auto g = GravityAcceleration * dt;
-
-        for(auto& body : bodies)
-        {
-            auto& properties = body.GetProperties();
-
-            if(properties.useGravity)
-            {
-                properties.velocity += g;
-            }
-        }
-    }
-
-    void Integrate(registry_type* registry, std::span<PhysicsBody> bodies, float dt)
-    {
-        for(auto& body : bodies)
-        {
-            Entity entity = body.GetParentEntity();
-
-            if(EntityUtils::IsStatic(entity))
-                continue;
-            
-            auto& properties = body.GetProperties();
-            auto* transform = registry->Get<Transform>(entity);
-
-            properties.velocity = HadamardProduct(properties.linearFreedom, properties.velocity);
-            properties.angularVelocity = HadamardProduct(properties.angularFreedom, properties.angularVelocity);
-
-            transform->Translate(properties.velocity * dt);
-            transform->Rotate(Quaternion::FromEulerAngles(properties.angularVelocity * dt));
-
-            properties.velocity *= pow(1.0f - properties.drag, dt);
-            properties.angularVelocity *= pow(1.0f - properties.angularDrag, dt);
-        }
+        NC_PROFILE_END();
     }
 } // namespace nc::physics

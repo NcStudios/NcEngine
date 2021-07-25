@@ -51,4 +51,22 @@ namespace nc
         for(auto& comp : m_components)
             comp->OnCollisionExit(hit);
     }
+
+    void AutoComponentGroup::SendOnTriggerEnter(Entity hit)
+    {
+        for(auto& comp : m_components)
+            comp->OnTriggerEnter(hit);
+    }
+
+    void AutoComponentGroup::SendOnTriggerStay(Entity hit)
+    {
+        for(auto& comp : m_components)
+            comp->OnTriggerStay(hit);
+    }
+
+    void AutoComponentGroup::SendOnTriggerExit(Entity hit)
+    {
+        for(auto& comp : m_components)
+            comp->OnTriggerExit(hit);
+    }
 }

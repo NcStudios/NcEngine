@@ -21,9 +21,10 @@ namespace nc::debug::profiler
     {
         All = 0u,
         Logic = 1u,
-        Physics = 2u,
-        Rendering = 3u,
-        User = 4u
+        Collision = 2u,
+        Dynamics = 3u,
+        Rendering = 4u,
+        User = 5u
     };
 }
 

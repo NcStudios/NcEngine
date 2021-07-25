@@ -11,6 +11,7 @@ namespace nc::physics
     {
         Simplex simplex;
         Polytope polytope;
+        Contact contact;
         DirectX::XMVECTOR rotationA;
         DirectX::XMVECTOR rotationB;
     };
@@ -19,7 +20,7 @@ namespace nc::physics
     bool Gjk(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* stateOut);
 
     /* Generate contact data from output of Gjk. */
-    bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state, Contact* contact);
+    bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state);
 
     /* Intersection queries between transformed volumes. */
     bool Intersect(const BoundingVolume& a, const BoundingVolume& b);

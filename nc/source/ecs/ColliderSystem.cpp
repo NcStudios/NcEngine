@@ -49,7 +49,7 @@ namespace nc::ecs
 
             m_dynamicSoA.Add
             (
-                static_cast<EntityTraits::underlying_type>(entity),
+                entity,
                 DirectX::XMMATRIX{},
                 physics::CreateBoundingVolume(info),
                 collider.GetType(),
@@ -63,7 +63,7 @@ namespace nc::ecs
         if(EntityUtils::IsStatic(entity))
             m_staticTree.Remove(entity);
         else
-            m_dynamicSoA.Remove(static_cast<EntityTraits::underlying_type>(entity));
+            m_dynamicSoA.Remove(entity);
     }
 
     void ColliderSystem::Clear()

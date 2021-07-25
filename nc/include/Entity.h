@@ -46,6 +46,7 @@ namespace nc
     class Entity
     {
         public:
+            explicit constexpr Entity() noexcept;
             explicit constexpr Entity(EntityTraits::underlying_type handle) noexcept;
             static constexpr Entity Null() noexcept;
             explicit constexpr operator EntityTraits::underlying_type() const noexcept;
@@ -90,6 +91,11 @@ namespace nc
         [[nodiscard]] static constexpr auto Recycle(Entity entity, layer_type layer, flags_type flags) noexcept -> Entity;
         [[nodiscard]] static constexpr auto Join(index_type index, version_type version, layer_type layer, flags_type flags) noexcept -> underlying_type;
     };
+
+    constexpr Entity::Entity() noexcept
+        : m_handle{EntityTraits::NullHandle}
+    {
+    }
 
     constexpr Entity::Entity(EntityTraits::underlying_type handle) noexcept
         : m_handle{handle}
