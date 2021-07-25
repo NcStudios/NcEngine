@@ -20,7 +20,7 @@ namespace
                     return ColliderInteractionType::KinematicPhysicsTrigger;
                 }
 
-                return ColliderInteractionType::PhysicsTrigger;
+                return ColliderInteractionType::KinematicPhysics;
             }
 
             // need to add kinematic body
@@ -114,7 +114,7 @@ namespace nc::physics
             auto* body = registry->Get<PhysicsBody>(entity);
             auto interactionType = GetColliderInteractionType(collider.IsTrigger(), body);
             matrices.push_back(registry->Get<Transform>(entity)->GetTransformationMatrix());
-            estimates.emplace_back(collider.EstimateBoundingVolume(matrices.back()), i, interactionType);
+            estimates.emplace_back(collider.EstimateBoundingVolume(matrices.back()), i, interactionType, collider.IsAwake());
         }
 
         return PerFrameCollisionData{ std::move(matrices), std::move(estimates) };
@@ -175,12 +175,13 @@ namespace nc::physics
             {
                 const auto& first = estimates[i];
                 const auto& second = estimates[j];
-                auto interactionType = GetInteractionType(first.interactionType, second.interactionType);
 
-                if(interactionType == CollisionEventType::None)
-                {
+                if(!first.isAwake && !second.isAwake)
                     continue;
-                }
+
+                auto interactionType = GetInteractionType(first.interactionType, second.interactionType);
+                if(interactionType == CollisionEventType::None)
+                    continue;
 
                 if(Intersect(first.estimate, second.estimate))
                 {
@@ -203,11 +204,14 @@ namespace nc::physics
         events.reserve(broadEventCount);
         contacts.reserve(broadEventCount);
         CollisionState state;
+        auto* registry = ActiveRegistry();
 
-        for(const auto& [i, j] : broadPhysicsEvents)
+        for(auto& [i, j] : broadPhysicsEvents)
         {
-            const auto& v1 = colliders[i].GetVolume();
-            const auto& v2 = colliders[j].GetVolume();
+            auto& collider1 = colliders[i];
+            auto& collider2 = colliders[j];
+            const auto& v1 = collider1.GetVolume();
+            const auto& v2 = collider2.GetVolume();
             const auto& m1 = matrices[i];
             const auto& m2 = matrices[j];
 
@@ -215,8 +219,21 @@ namespace nc::physics
             {
                 if(Epa(v1, v2, m1, m2, &state))
                 {
-                    auto e1 = colliders[i].GetParentEntity();
-                    auto e2 = colliders[j].GetParentEntity();
+                    auto e1 = collider1.GetParentEntity();
+                    auto e2 = collider2.GetParentEntity();
+
+                    if(!collider1.IsAwake())
+                    {
+                        collider1.Wake();
+                        registry->Get<PhysicsBody>(e1)->Wake();
+                    }
+
+                    if(!collider2.IsAwake())
+                    {
+                        collider2.Wake();
+                        registry->Get<PhysicsBody>(e2)->Wake();
+                    }
+
                     events.emplace_back(e1, e2);
                     contacts.push_back(state.contact);
                 }

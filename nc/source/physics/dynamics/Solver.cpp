@@ -196,6 +196,16 @@ namespace
         float friction = bodyA.friction * bodyB.friction;
         float baumgarte = bodyA.baumgarte * bodyB.baumgarte;
 
+        #if NC_PHYSICS_WARMSTARTING
+        float lambda = contact.lambda * WarmstartFactor;
+        float muTangent = contact.muTangent * WarmstartFactor;
+        float muBitangent = contact.muBitangent * WarmstartFactor;
+        #else
+        float lambda = 0.0f;
+        float muTangent = 0.0f;
+        float muBitangent = 0.0f;
+        #endif
+
         NC_PROFILE_END();
 
         return ContactConstraint
@@ -208,7 +218,7 @@ namespace
             contact.depth,
             invMassA, invMassB,
             restitution, friction, baumgarte,
-            0.0f, 0.0f, 0.0f
+            lambda, muTangent, muBitangent
         };
     }
 } // end anonymous namespace
@@ -254,5 +264,30 @@ namespace nc::physics
 
         NC_PROFILE_END();
         return constraints;
+    }
+
+    void CacheLagranges(std::span<Manifold> manifolds, std::span<ContactConstraint> constraints)
+    {
+        auto index = 0u;
+
+        for(auto& manifold : manifolds)
+        {
+            for(auto& contact : manifold.contacts)
+            {
+                #if 0
+                if(index >= constraints.size())
+                    throw std::runtime_error("CacheLagranges - Invalid index");
+
+                if(manifold.entityA != constraints[index].entityA || manifold.entityB != constraints[index].entityB)
+                    throw std::runtime_error("CacheLagranges - Entity mismatch");
+                #endif
+
+                const auto& constraint = constraints[index];
+                contact.lambda = constraint.totalLambda;
+                contact.muTangent = constraint.totalMuTangent;
+                contact.muBitangent = constraint.totalMuBitangent;
+                ++index;
+            }
+        }
     }
 } // end namespace nc::physics

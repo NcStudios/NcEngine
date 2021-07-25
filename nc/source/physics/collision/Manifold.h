@@ -18,6 +18,9 @@ namespace nc::physics
         Vector3 localPointB;
         Vector3 normal;
         float depth;
+        float lambda;
+        float muTangent;
+        float muBitangent;
         bool success;
     };
 

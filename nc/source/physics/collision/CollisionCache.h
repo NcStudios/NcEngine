@@ -31,6 +31,7 @@ namespace nc::physics
         SphereCollider estimate;
         uint32_t index;
         ColliderInteractionType interactionType;
+        bool isAwake;
     };
 
     /** Indices of two dynamic collider's positions in the registry.

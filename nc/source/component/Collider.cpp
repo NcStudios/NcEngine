@@ -121,7 +121,8 @@ namespace nc
                  .scale = Vector3::Splat(properties.radius * 2.0f),
                  .hullAssetPath = "",
                  .isTrigger = isTrigger},
-          m_volume{CreateBoundingVolume(m_info)}
+          m_volume{CreateBoundingVolume(m_info)},
+          m_awake{true}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
@@ -139,7 +140,8 @@ namespace nc
                  .scale = properties.extents,
                  .hullAssetPath = "",
                  .isTrigger = isTrigger},
-          m_volume{CreateBoundingVolume(m_info)}
+          m_volume{CreateBoundingVolume(m_info)},
+          m_awake{true}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Box)},
@@ -156,7 +158,8 @@ namespace nc
                  .scale = Vector3{properties.radius * 2.0f, properties.height / 2.0f, properties.radius * 2.0f},
                  .hullAssetPath = "",
                  .isTrigger = isTrigger},
-          m_volume{CreateBoundingVolume(m_info)}
+          m_volume{CreateBoundingVolume(m_info)},
+          m_awake{true}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Capsule)},
@@ -173,28 +176,14 @@ namespace nc
                  .scale = Vector3::One(),
                  .hullAssetPath = std::move(properties.assetPath),
                  .isTrigger = isTrigger},
-          m_volume{CreateBoundingVolume(m_info)}
+          m_volume{CreateBoundingVolume(m_info)},
+          m_awake{true}
           #ifdef NC_EDITOR_ENABLED
           ,
           m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
           m_selectedInEditor{false}
           #endif
     {
-    }
-
-    const Collider::VolumeInfo& Collider::GetInfo() const
-    {
-        return m_info;
-    }
-
-    ColliderType Collider::GetType() const
-    {
-        return m_info.type;
-    }
-
-    bool Collider::IsTrigger() const
-    {
-        return m_info.isTrigger;
     }
 
     auto Collider::EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider

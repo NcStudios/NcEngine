@@ -71,7 +71,7 @@ namespace nc::sample
             }
         }
 
-        m_registry->Add<PhysicsBody>(m_currentObject, PhysicsProperties{});
+        m_registry->Add<PhysicsBody>(m_currentObject, PhysicsProperties{.kinematic = true});
         m_registry->Add<WasdController>(m_currentObject, m_registry, 2.0f);
         m_registry->Add<CollisionLogger>(m_currentObject, m_registry);
     }

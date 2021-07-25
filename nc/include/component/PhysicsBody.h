@@ -22,6 +22,11 @@ namespace nc
         bool kinematic  = false;  // Prevent forces and collisions from affecting the object
     };
 
+    enum class IntegrationResult
+    {
+        Integrated, Ignored, PutToSleep
+    };
+
     class PhysicsBody final : public ComponentBase
     {
         public:
@@ -30,7 +35,9 @@ namespace nc
             void UpdateWorldInertia(Transform* transform);
             void UpdateVelocity(DirectX::FXMVECTOR delta);
             void UpdateVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta);
-            void Integrate(Transform* transform, float dt);
+            auto Integrate(Transform* transform, float dt) -> IntegrationResult;
+            void Wake() { m_framesAtThreshold = 0u; m_awake = true; }
+            void Sleep() { m_awake = false; }
 
             auto GetVelocity() const -> DirectX::FXMVECTOR { return m_velocity.r[0]; }
             auto GetAngularVelocity() const -> DirectX::FXMVECTOR { return m_velocity.r[1]; }
@@ -38,12 +45,15 @@ namespace nc
             auto GetInverseInertia() const -> DirectX::FXMMATRIX { return m_invInertiaWorld; }
             auto UseGravity() const -> bool { return m_properties.useGravity; }
             auto IsKinematic() const -> bool { return m_properties.kinematic; }
+            auto IsAwake() const -> bool { return m_awake; }
 
         private:
             PhysicsProperties m_properties;
             DirectX::XMMATRIX m_velocity;
             DirectX::XMMATRIX m_invInertiaWorld;
             Vector3 m_invInertiaLocal;
+            uint8_t m_framesAtThreshold;
+            bool m_awake;
     };
 
     #ifdef NC_EDITOR_ENABLED

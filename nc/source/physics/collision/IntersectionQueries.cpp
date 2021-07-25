@@ -169,6 +169,9 @@ namespace nc::physics
                     //throw std::runtime_error("Epa - minDistance not found");
                     std::cout << "Epa - minDistance not found\n";
                     state->contact.depth = 0.0f;
+                    state->contact.lambda = 0.0f;
+                    state->contact.muTangent = 0.0f;
+                    state->contact.muBitangent = 0.0f;
                     return false;
                 }
 
@@ -179,6 +182,9 @@ namespace nc::physics
         auto success = state->polytope.GetContacts(minFace, &state->contact);
         state->contact.normal = Normalize(minNorm.normal);
         state->contact.depth = minNorm.distance + EpaTolerance;
+        state->contact.lambda = 0.0f;
+        state->contact.muTangent = 0.0f;
+        state->contact.muBitangent = 0.0f;
         return success;
     }
 

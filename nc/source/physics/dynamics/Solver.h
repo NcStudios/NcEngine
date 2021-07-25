@@ -12,4 +12,7 @@ namespace nc::physics
     /** Resolve all physics constraints. Linear and angular velocities will be
      *  updated and must be integrated separately. */
     void ResolveConstraints(std::span<ContactConstraint> constraints, float dt);
+
+    /** Store current frame impulses from constraints in each contact for warmstarting. */
+    void CacheLagranges(std::span<Manifold> manifolds, std::span<ContactConstraint> constraints);
 } // namespace nc::physics

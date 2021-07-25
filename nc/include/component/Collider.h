@@ -71,11 +71,15 @@ namespace nc
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
 
-            const VolumeInfo& GetInfo() const;
-            ColliderType GetType() const;
-            bool IsTrigger() const;
-            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
+            void Wake() { m_awake = true; }
+            void Sleep() { m_awake = false; }
+
+            auto GetInfo() const -> const VolumeInfo& { return m_info; }
+            auto GetType() const -> ColliderType { return m_info.type; };
+            auto IsTrigger() const -> bool { return m_info.isTrigger; }
+            auto IsAwake() const -> bool { return m_awake; }
             auto GetVolume() const -> const BoundingVolume& { return m_volume; }
+            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
 
             #ifdef NC_EDITOR_ENABLED
             void UpdateWidget(graphics::FrameManager* frame);
@@ -85,6 +89,7 @@ namespace nc
         private:
             VolumeInfo m_info;
             BoundingVolume m_volume;
+            bool m_awake;
 
             #ifdef NC_EDITOR_ENABLED
             /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
