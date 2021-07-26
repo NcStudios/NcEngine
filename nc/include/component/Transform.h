@@ -47,6 +47,7 @@ namespace nc
             void Rotate(Vector3 axis, float radians);
 
             void Translate(DirectX::FXMVECTOR translation);
+            void Rotate(DirectX::FXMVECTOR quaternion);
 
             // Hierarchy methods
             std::span<Entity> GetChildren(); // Get all immediate children of this transform

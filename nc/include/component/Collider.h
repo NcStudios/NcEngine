@@ -75,10 +75,10 @@ namespace nc
             void Sleep() { m_awake = false; }
 
             auto GetInfo() const -> const VolumeInfo& { return m_info; }
-            auto GetType() const -> ColliderType { return m_info.type; };
+            auto GetType() const -> ColliderType { return m_info.type; }
+            auto GetVolume() const -> const BoundingVolume& { return m_volume; }
             auto IsTrigger() const -> bool { return m_info.isTrigger; }
             auto IsAwake() const -> bool { return m_awake; }
-            auto GetVolume() const -> const BoundingVolume& { return m_volume; }
             auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
 
             #ifdef NC_EDITOR_ENABLED

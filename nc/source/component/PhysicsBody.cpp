@@ -149,11 +149,11 @@ namespace nc
             m_framesAtThreshold = 0u;
         }
 
-        Vector3 angVel;
-        DirectX::XMStoreVector3(&angVel, m_velocity.r[1]);
+        auto rotQuat = DirectX::XMVectorScale(m_velocity.r[1], dt);
+        rotQuat = DirectX::XMQuaternionRotationRollPitchYawFromVector(rotQuat);
 
         transform->Translate(DirectX::XMVectorScale(m_velocity.r[0], dt));
-        transform->Rotate(Quaternion::FromEulerAngles(angVel * dt));
+        transform->Rotate(rotQuat);
         return IntegrationResult::Integrated;
     }
 
