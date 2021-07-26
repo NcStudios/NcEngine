@@ -97,7 +97,7 @@ namespace
 
 namespace nc::physics
 {
-    auto FetchEstimates(registry_type* registry) -> PerFrameCollisionData
+    auto FetchEstimates(registry_type* registry) -> CollisionStepInitData
     {
         auto colliders = registry->ViewAll<Collider>();
         auto colliderCount = colliders.size();
@@ -117,7 +117,7 @@ namespace nc::physics
             estimates.emplace_back(collider.EstimateBoundingVolume(matrices.back()), i, interactionType, collider.IsAwake());
         }
 
-        return PerFrameCollisionData{ std::move(matrices), std::move(estimates) };
+        return CollisionStepInitData{ std::move(matrices), std::move(estimates) };
     }
 
     void UpdateManifolds(registry_type* registry, std::vector<Manifold>& manifolds)

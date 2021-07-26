@@ -5,14 +5,9 @@
 
 namespace nc::physics
 {
-    struct PerFrameCollisionData
-    {
-        std::vector<DirectX::XMMATRIX> matrices;
-        std::vector<ColliderEstimate> estimates;
-    };
-
-    /** Get transformation matrices collider estimates for each collider. */
-    auto FetchEstimates(registry_type* registry) -> PerFrameCollisionData;
+    /** Compute estimates for each collider. The world space matrices are also returned,
+     *  in a separate vector, for narrow phase use. */
+    auto FetchEstimates(registry_type* registry) -> CollisionStepInitData;
 
     /** Transform contact points to updated worldspace positions and remove stale points from manifolds.
      *  Remove any manifolds with no remaining contact points. */

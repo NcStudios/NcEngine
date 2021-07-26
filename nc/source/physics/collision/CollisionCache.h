@@ -34,6 +34,14 @@ namespace nc::physics
         bool isAwake;
     };
 
+    /** A copy of world space matrices and estimates for each collider. Created at
+     *  the start of the collision step. */
+    struct CollisionStepInitData
+    {
+        std::vector<DirectX::XMMATRIX> matrices;
+        std::vector<ColliderEstimate> estimates;
+    };
+
     /** Indices of two dynamic collider's positions in the registry.
      *  Produced by broad detection, consumed by narrow detection. */
     struct BroadEvent
