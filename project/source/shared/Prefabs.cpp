@@ -93,7 +93,7 @@ void InitializeResources()
                                                  "project/assets/mesh_colliders/coin.nca" };
     nc::graphics::vulkan::LoadMeshes(mesh::meshPaths); 
 
-    LoadHullColliderAsset(defaultMeshesPath + "mesh_colliders/coin.nca");
+    LoadHullColliderAsset("project/assets/mesh_colliders/coin.nca");
 
     const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto defaultNormal    = std::string{"nc/resources/texture/DefaultNormal.png"};
@@ -131,7 +131,7 @@ void InitializeResources()
                                                        .normal    = defaultNormal,
                                                        .roughness = defaultRoughness };
 
-    material::SolidGreen = graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
+    material::SolidGreen = graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "SolidColor/Green.png",
                                                        .normal    = defaultNormal,
                                                        .roughness = defaultRoughness };
 

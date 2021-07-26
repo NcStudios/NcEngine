@@ -29,11 +29,15 @@ namespace nc::graphics::vulkan
             void Clear();
 
             void RegisterMeshRenderer(TechniqueType technique, nc::vulkan::MeshRenderer* renderer);
-            void DeregisterMeshRenderer(Entity entity);
             void ClearMeshRenderers();
 
             void RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates);
             void ClearParticleEmitters();
+
+            void RegisterDebugWidget(nc::vulkan::DebugWidget* widget);
+            void ClearDebugWidgets();
+
+            void DeregisterRenderable(Entity entity);
 
         private:
             void RecordUi(vk::CommandBuffer* cmd);

@@ -10,12 +10,13 @@
 #include "component/Renderer.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
+#include "component/vulkan/DebugWidget.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "component/vulkan/PointLight.h"
 
 namespace nc
 {
-    using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup, Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Tag, Transform, vulkan::MeshRenderer, vulkan::PointLight>;
+    using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup, Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Tag, Transform,  vulkan::DebugWidget, vulkan::MeshRenderer, vulkan::PointLight>;
     using registry_type = ecs::Registry<registry_type_list>;
 
     auto ActiveRegistry() -> registry_type*;

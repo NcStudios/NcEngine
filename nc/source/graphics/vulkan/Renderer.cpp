@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include "component/vulkan/DebugWidget.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "component/Transform.h"
 #include "debug/Profiler.h"
@@ -144,7 +145,7 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Renderer::DeregisterMeshRenderer(Entity entity)
+    void Renderer::DeregisterRenderable(Entity entity)
     {
         // @todo: This will be replaced with a proper storage strategy.
         auto it = std::ranges::find_if(m_storageHandles, [entity](const auto& pair)
@@ -170,6 +171,21 @@ namespace nc::graphics::vulkan
 
         *it = m_storageHandles.back();
         m_storageHandles.pop_back();
+    }
+
+    void Renderer::RegisterDebugWidget(nc::vulkan::DebugWidget* widget)
+    {
+        if (!m_wireframeTechnique)
+        {
+            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
+        }
+        
+        m_storageHandles.emplace_back(widget->GetParentEntity(), m_wireframeTechnique->RegisterDebugWidget(widget));
+    }
+
+    void Renderer::ClearDebugWidgets()
+    {
+        // @todo
     }
 
     void Renderer::RecordUi(vk::CommandBuffer* cmd)
