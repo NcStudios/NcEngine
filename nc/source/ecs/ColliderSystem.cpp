@@ -103,6 +103,11 @@ namespace nc::ecs
                 shape = vulkan::WidgetShape::Capsule;
                 break;
             }
+            case ColliderType::Hull:
+            {
+                shape = vulkan::WidgetShape::Hull;
+                break;
+            }
         }
 
         m_registry->Add<vulkan::DebugWidget>(entity, shape);

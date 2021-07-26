@@ -15,9 +15,9 @@ namespace nc::ecs
                            physSettings.octreeMinimumExtent,
                            physSettings.worldspaceExtent},
           m_particleEmitterSystem{&m_registry, graphics},
-          m_pointLightSystem{&m_registry, graphics},
+          m_debugWidgetSystem{&m_registry, graphics},
           m_meshRendererSystem{&m_registry, graphics},
-          m_debugWidgetSystem{&m_registry, graphics}
+          m_pointLightSystem{&m_registry, graphics}
     #else
     EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
                                                  const config::MemorySettings& memSettings,
