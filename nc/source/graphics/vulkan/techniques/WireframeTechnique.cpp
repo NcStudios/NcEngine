@@ -23,8 +23,7 @@ namespace nc::graphics::vulkan
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{},
-      m_pipelineLayout{},
-      m_descriptorSetLayout{}
+      m_pipelineLayout{}
     {
         CreatePipeline(renderPass);
     }
@@ -32,7 +31,6 @@ namespace nc::graphics::vulkan
     WireframeTechnique::~WireframeTechnique()
     {
         auto device = m_base->GetDevice();
-        device.destroyDescriptorSetLayout(m_descriptorSetLayout);
         device.destroyPipelineLayout(m_pipelineLayout);
         device.destroyPipeline(m_pipeline);
     }
@@ -176,8 +174,13 @@ namespace nc::graphics::vulkan
         NC_PROFILE_END();
     }
 
-    void WireframeTechnique::Clear()
+    void WireframeTechnique::ClearMeshRenderers()
     {
         m_meshRenderers.clear();
+    }
+
+    void WireframeTechnique::ClearDebugWidgets()
+    {
+        m_debugWidgets.clear();
     }
 }

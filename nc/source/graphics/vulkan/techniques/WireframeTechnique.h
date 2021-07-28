@@ -34,10 +34,14 @@ namespace nc::graphics
                 ~WireframeTechnique();
 
                 void Bind(vk::CommandBuffer* cmd);
-                std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
+
                 std::vector<Entity>* RegisterDebugWidget(nc::vulkan::DebugWidget* debugWidget);
+                std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
+
+                void ClearDebugWidgets();
+                void ClearMeshRenderers();
+
                 void Record(vk::CommandBuffer* cmd);
-                void Clear();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);
@@ -50,7 +54,6 @@ namespace nc::graphics
                 Swapchain* m_swapchain;
                 vk::Pipeline m_pipeline;
                 vk::PipelineLayout m_pipelineLayout;
-                vk::DescriptorSetLayout m_descriptorSetLayout;
         };
     }
 }

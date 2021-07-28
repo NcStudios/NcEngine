@@ -185,7 +185,10 @@ namespace nc::graphics::vulkan
 
     void Renderer::ClearDebugWidgets()
     {
-        // @todo
+        if (m_wireframeTechnique)
+        {
+            m_wireframeTechnique->ClearDebugWidgets();
+        }
     }
 
     void Renderer::RecordUi(vk::CommandBuffer* cmd)
@@ -199,12 +202,12 @@ namespace nc::graphics::vulkan
     {
         if (m_wireframeTechnique)
         {
-            m_wireframeTechnique.reset();
+            m_wireframeTechnique->ClearMeshRenderers();
         }
         
         if (m_phongAndUiTechnique)
         {
-            m_phongAndUiTechnique.reset();
+            m_phongAndUiTechnique->Clear();
         }
     }
 
@@ -212,13 +215,14 @@ namespace nc::graphics::vulkan
     {
         if (m_particleTechnique)
         {
-            m_particleTechnique.reset();
+            m_particleTechnique->Clear();
         }
     }
 
     void Renderer::Clear()
     {
-        ClearMeshRenderers();
-        ClearParticleEmitters();
+        m_wireframeTechnique.reset();
+        m_phongAndUiTechnique.reset();
+        m_particleTechnique.reset();
     }
 }

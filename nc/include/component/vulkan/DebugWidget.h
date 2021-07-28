@@ -26,7 +26,6 @@ namespace nc::vulkan
         public:
             DebugWidget(Entity entity, WidgetShape shape);
 
-            Transform* GetTransform();
             DirectX::FXMMATRIX GetTransformationMatrix() const noexcept;
             const std::string& GetMeshUid() const;
             bool IsEnabled() const noexcept;

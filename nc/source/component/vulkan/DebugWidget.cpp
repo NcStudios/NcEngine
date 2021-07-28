@@ -51,11 +51,6 @@ namespace nc::vulkan
         m_isEnabled = isEnabled;
     }
 
-    Transform* DebugWidget::GetTransform()
-    {
-        return ActiveRegistry()->Get<Transform>(GetParentEntity());
-    }
-
     DirectX::FXMMATRIX DebugWidget::GetTransformationMatrix() const noexcept
     {
         return m_transformationMatrix;
@@ -77,6 +72,7 @@ namespace nc
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<vulkan::DebugWidget>(vulkan::DebugWidget* debugWidget)
     {
+        (void)debugWidget;
         ImGui::Text("Debug widget");
     }
     #endif
