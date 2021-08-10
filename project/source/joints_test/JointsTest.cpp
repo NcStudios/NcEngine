@@ -62,17 +62,17 @@ namespace nc::sample
         // Ground
         auto platform1 = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{0.0f, -1.0f, 0.0f}, .scale = Vector3{30.0f, 1.0f, 30.0f}, .tag = "Platform1"});
         registry->Add<Collider>(platform1, BoxProperties{}, false);
-        registry->Add<PhysicsBody>(platform1, PhysicsProperties{.mass = 0.0f, .kinematic = true});
+        registry->Add<PhysicsBody>(platform1, PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
         auto platform2 = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{8.0f, -1.0f, 30.0f}, .scale = Vector3{10.0f, 1.0f, 10.0f}, .tag = "Platform2"});
         registry->Add<Collider>(platform2, BoxProperties{}, false);
-        registry->Add<PhysicsBody>(platform2, PhysicsProperties{.mass = 0.0f, .kinematic = true});
+        registry->Add<PhysicsBody>(platform2, PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
         // Hinge
         {
             auto anchor = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 3.25f, 10.0f}, .scale = Vector3{3.0f, 0.5f, 0.5f}});
             registry->Add<Collider>(anchor, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(anchor, PhysicsProperties{.kinematic = true});
+            registry->Add<PhysicsBody>(anchor, PhysicsProperties{.isKinematic = true});
 
             auto panel = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, 1.5f, 10.0f}, .scale = Vector3{3.0f, 3.0f, 0.1f}});
             registry->Add<Collider>(panel, BoxProperties{}, false);
@@ -86,7 +86,7 @@ namespace nc::sample
         {
             auto base = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{10.0f, -0.75f, -10.0f}, .scale = Vector3::Splat(2.0f)});
             registry->Add<Collider>(base, SphereProperties{}, false);
-            registry->Add<PhysicsBody>(base, PhysicsProperties{.kinematic = true}, Vector3::One(), Vector3::Zero());
+            registry->Add<PhysicsBody>(base, PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
 
             auto balancePlatform = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{10.0f, -0.4f, -10.0f}, .scale = Vector3{6.0f, 0.1f, 6.0f}});
             registry->Add<Collider>(balancePlatform, BoxProperties{}, false);
@@ -99,7 +99,7 @@ namespace nc::sample
         {
             auto pole = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 1.0f, -10.0f}, .scale = Vector3{0.05f, 4.0f, 0.05f}});
             registry->Add<Collider>(pole, BoxProperties{}, true);
-            registry->Add<PhysicsBody>(pole, PhysicsProperties{.kinematic = true});
+            registry->Add<PhysicsBody>(pole, PhysicsProperties{.isKinematic = true});
 
             auto bar1 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, -0.5f, -10.0f}, .scale = Vector3{3.0f, 1.0f, 0.1f}});
             registry->Add<Collider>(bar1, BoxProperties{}, false);

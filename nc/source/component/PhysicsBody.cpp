@@ -108,7 +108,7 @@ namespace nc
 
     void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
     {
-        if(m_properties.kinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
             return;
         
         m_linearVelocity += DirectX::XMVectorScale(impulse, m_properties.mass) * m_linearFreedom;
@@ -127,7 +127,7 @@ namespace nc
 
     void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
     {
-        if(m_properties.kinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
             return;
         
         m_linearVelocity += delta * m_linearFreedom;
@@ -135,7 +135,7 @@ namespace nc
 
     void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
     {
-        if(m_properties.kinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
             return;
         
         m_linearVelocity += velDelta * m_linearFreedom;
@@ -157,7 +157,7 @@ namespace nc
     {
         /** @todo Applying a force/velocity to a sleeping body will not wake it. That should
          *  probably happen here. */
-        if(m_properties.kinematic || !m_awake)
+        if(m_properties.isKinematic || !m_awake)
             return IntegrationResult::Ignored;
         
         auto linearDragFactor = pow(1.0f - m_properties.drag, dt);
@@ -212,7 +212,7 @@ namespace nc
             ImGui::Text("Restitution  %.2f", properties.restitution);
             ImGui::Text("Friction     %.2f", properties.friction);
             ImGui::Text("Use Gravity  %s", properties.useGravity ? "True" : "False");
-            ImGui::Text("Kinematic    %s", properties.kinematic ? "True" : "False");
+            ImGui::Text("Kinematic    %s", properties.isKinematic ? "True" : "False");
         ImGui::EndGroup();
     }
     #endif
