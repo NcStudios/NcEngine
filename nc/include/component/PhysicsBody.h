@@ -13,13 +13,13 @@ namespace nc
     struct PhysicsProperties
     {
         float mass = 1.0f;        // Mass in kilograms (0 is infinite)
-        float drag = 0.05f;       // Linear resistence
+        float drag = 0.05f;       // Linear resistance
         float angularDrag = 0.1f; // Angular resistence
         float restitution = 0.3f; // Coefficient of restitution (collision elasticity) [0, 1]
         float friction = 0.5f;    // Coefficient of friction [0, 1]
         float baumgarte = 0.4f;   // Position correction factor to apply on collision [0, 1]
         bool useGravity = true;   // Is the object affected by gravity
-        bool kinematic  = false;  // Prevent forces and collisions from affecting the object
+        bool isKinematic  = false;  // Prevent forces and collisions from affecting the object
     };
 
     enum class IntegrationResult
@@ -44,7 +44,7 @@ namespace nc
             auto GetProperties() const -> const PhysicsProperties& { return m_properties; }
             auto GetInverseInertia() const -> DirectX::FXMMATRIX { return m_invInertiaWorld; }
             auto UseGravity() const -> bool { return m_properties.useGravity; }
-            auto IsKinematic() const -> bool { return m_properties.kinematic; }
+            auto IsKinematic() const -> bool { return m_properties.isKinematic; }
             auto IsAwake() const -> bool { return m_awake; }
 
         private:

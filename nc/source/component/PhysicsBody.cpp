@@ -106,7 +106,7 @@ namespace nc
 
     void PhysicsBody::UpdateVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
     {
-        if(m_properties.kinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
             return;
         
         m_velocity.r[0] += velDelta * m_velocity.r[2];
@@ -115,7 +115,7 @@ namespace nc
 
     void PhysicsBody::UpdateVelocity(DirectX::FXMVECTOR delta)
     {
-        if(m_properties.kinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
             return;
         
         m_velocity.r[0] += delta * m_velocity.r[2];
@@ -123,7 +123,7 @@ namespace nc
 
     IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
     {
-        if(m_properties.kinematic || !m_awake)
+        if(m_properties.isKinematic || !m_awake)
             return IntegrationResult::Ignored;
         
         auto linearDragFactor = pow(1.0f - m_properties.drag, dt);

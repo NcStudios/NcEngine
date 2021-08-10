@@ -213,6 +213,12 @@ namespace nc
         UpdateWorldMatrix();
     }
 
+    void Transform::Translate(DirectX::FXMVECTOR translation)
+    {
+        m_localMatrix.r[3] += translation;
+        UpdateWorldMatrix();
+    }
+    
     void Transform::TranslateLocalSpace(Vector3 translation)
     {
         auto trans_v = ToXMVector(translation);
@@ -233,26 +239,20 @@ namespace nc
         UpdateWorldMatrix();
     }
 
-    void Transform::Rotate(Vector3 axis, float radians)
-    {
-        auto pos_v = m_localMatrix.r[3];
-        m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
-        m_localMatrix *= ToRotMatrix(axis, radians);
-        m_localMatrix.r[3] = pos_v;
-        UpdateWorldMatrix();
-    }
-
-    void Transform::Translate(DirectX::FXMVECTOR translation)
-    {
-        m_localMatrix.r[3] += translation;
-        UpdateWorldMatrix();
-    }
-
     void Transform::Rotate(DirectX::FXMVECTOR quaternion)
     {
         auto pos_v = m_localMatrix.r[3];
         m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
         m_localMatrix *= DirectX::XMMatrixRotationQuaternion(quaternion);
+        m_localMatrix.r[3] = pos_v;
+        UpdateWorldMatrix();
+    }
+
+    void Transform::Rotate(Vector3 axis, float radians)
+    {
+        auto pos_v = m_localMatrix.r[3];
+        m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
+        m_localMatrix *= ToRotMatrix(axis, radians);
         m_localMatrix.r[3] = pos_v;
         UpdateWorldMatrix();
     }
