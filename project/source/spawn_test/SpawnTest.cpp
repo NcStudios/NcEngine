@@ -93,7 +93,6 @@ namespace nc::sample
         {
             registry->Add<Collider>(handle, BoxProperties{}, false);
             registry->Add<PhysicsBody>(handle, PhysicsProperties{.mass = 5.0f});
-        
         };
         
         auto dynamicCubeSpawnerHandle = registry->Add<Entity>({.tag = "Dynamic Cube Spawner"});

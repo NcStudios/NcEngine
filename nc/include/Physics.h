@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Ecs.h"
 #include "physics/IClickable.h"
 
 namespace nc::physics
@@ -12,4 +13,10 @@ namespace nc::physics
      *  before they are destroyed. */
     void RegisterClickable(IClickable* clickable);
     void UnregisterClickable(IClickable* clickable) noexcept;
+
+    /** Add and remove joints between entities. Both entities must have a PhysicsBody.
+     *  Joints must be manually removed if an object is destroyed. */
+    void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f);
+    void RemoveJoint(Entity entityA, Entity entityB);
+    void RemoveAllJoints(Entity entity);
 }

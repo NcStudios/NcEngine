@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "../collision/Manifold.h"
 
 namespace nc::physics
 {
@@ -29,7 +29,7 @@ namespace nc::physics
             DirectX::XMMATRIX m_data;
     };
 
-    /** Resolve PhysicsBody vs. PhysicsBody collisions. */
+    /** Velocity-based contact constraint. */
     struct ContactConstraint
     {
         Entity entityA, entityB;
@@ -39,8 +39,24 @@ namespace nc::physics
         DirectX::XMVECTOR normal, rA, rB, effectiveMass;
         float penetrationDepth;
         float invMassA, invMassB;
-        float restitution, friction, baumgarte;
+        float restitution, friction;
         float totalLambda, totalMuTangent, totalMuBitangent;
+    };
+
+    /** Position-based contact constraint. */
+    struct PositionConstraint
+    {
+        Transform* transformA;
+        Transform* transformB;
+        CollisionEventType eventType;
+        Vector3 normal;
+        float depth;
+    };
+
+    struct Constraints
+    {
+        std::vector<ContactConstraint> contact;
+        std::vector<PositionConstraint> position;
     };
 
     inline ConstraintMatrix::ConstraintMatrix(const Vector3& vA, const Vector3& wA, const Vector3& vB, const Vector3& wB)
@@ -61,7 +77,7 @@ namespace nc::physics
         return ConstraintMatrix
         {
             DirectX::XMVectorNegate(direction),
-            DirectX::XMVectorNegate(DirectX::XMVector3Cross(a, direction)),
+            DirectX::XMVector3Cross(DirectX::XMVectorNegate(a), direction),
             direction,
             DirectX::XMVector3Cross(b, direction)
         };

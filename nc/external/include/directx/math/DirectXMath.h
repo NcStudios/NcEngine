@@ -1025,6 +1025,7 @@ XMVECTOR    XM_CALLCONV     XMLoadUInt3(_In_ const XMUINT3* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadInt4(_In_reads_(4) const uint32_t* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadInt4A(_In_reads_(4) const uint32_t* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadFloat4(_In_ const XMFLOAT4* pSource);
+XMVECTOR    XM_CALLCONV     XMLoadQuaternion(_In_ const nc::Quaternion* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadFloat4A(_In_ const XMFLOAT4A* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadSInt4(_In_ const XMINT4* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadUInt4(_In_ const XMUINT4* pSource);
