@@ -1,83 +1,96 @@
 #pragma once
 
 #include "Manifold.h"
-#include "ecs/ColliderTree.h"
 
 #include <cstdint>
-#include <vector>
 
 namespace nc::physics
 {
-    /** Handling collisions requires either a physics response and collision notification
-     *  or a trigger notification with no physics. */
-    enum CollisionInteractionType
+    /** Specifies how a Collider interacts with other colliders. */
+    enum class ColliderInteractionType
     {
-        Physics,
-        Trigger
+        Collider,               // Collider
+        Physics,                // Collider and PhysicsBody
+        KinematicPhysics,       // Collider and PhysicsBody with kinematic == true
+        ColliderTrigger,        // Collider with isTrigger == true
+        PhysicsTrigger,         // Collider with isTrigger == true and PhysicsBody
+        KinematicPhysicsTrigger // Collider and PhysicsBody with both flags == true
     };
 
-    /** An estimated bounding volume and index mapping to the associated
-     *  collider's position in the SoA representation. */
-    struct DynamicEstimate
+    /** Specifies whether a collision event requires no action, a physics response and
+     *  collision notification, or a trigger notification. */
+    enum class CollisionEventType
+    {
+        None, Physics, Trigger
+    };
+
+    /** A collider's estimated bounding volume, index in the registry storage, and
+     *  interaction type. Used for broad detection. */
+    struct ColliderEstimate
     {
         SphereCollider estimate;
         uint32_t index;
-        CollisionInteractionType interactionType;
+        ColliderInteractionType interactionType;
+        bool isAwake;
     };
 
-    /** Indices of two dynamic collider's positions in SoA.
+    /** A copy of world space matrices and estimates for each collider. Created at
+     *  the start of the collision step. */
+    struct CollisionStepInitData
+    {
+        std::vector<DirectX::XMMATRIX> matrices;
+        std::vector<ColliderEstimate> estimates;
+    };
+
+    /** Indices of two dynamic collider's positions in the registry.
      *  Produced by broad detection, consumed by narrow detection. */
-    struct BroadDetectVsDynamicEvent
+    struct BroadEvent
     {
         uint32_t first;
         uint32_t second;
     };
 
-    /** Index of dynamic collider's SoA position and pointer to static
-     *  collider tree entry. Produced by broad detection, consumed by
-     *  narrow detection. */
-    struct BroadDetectVsStaticEvent
+    /** Collection of broad phase physics and trigger events. */
+    struct BroadResult
     {
-        uint32_t first;
-        const ecs::StaticTreeEntry* second;
+        std::vector<BroadEvent> physics;
+        std::vector<BroadEvent> trigger;
     };
 
-    /** Entitys of two colliding objects. Produced by narrow detection,
+    /** Entities of two colliding objects. Produced by narrow detection,
      *  consumed by notification. */
-    struct NarrowDetectEvent
+    struct NarrowEvent
     {
         Entity first;
         Entity second;
     };
 
-    /** Collection of broad phase events. */
-    struct BroadPhaseCache
+    /** Collision events and contact points for narrow phase detection.
+     *  Each pair in events receives an OnCollisionXXX event. The contact
+     *  points must be merged into the existing manifolds. */
+    struct NarrowPhysicsResult
     {
-        std::vector<BroadDetectVsDynamicEvent> physics;
-        std::vector<BroadDetectVsDynamicEvent> trigger;
-        std::vector<BroadDetectVsStaticEvent> staticPhysics;
-        std::vector<BroadDetectVsStaticEvent> staticTrigger;
+        std::vector<NarrowEvent> events;
+        std::vector<Contact> contacts;
     };
 
-    /** Collection of narrow phase events. */
-    struct NarrowPhaseCache
-    {
-        std::vector<NarrowDetectEvent> physics;
-        std::vector<NarrowDetectEvent> trigger;
-    };
-
-    /** A container for tracking collision events and manifolds. */
+    /** A container for tracking collision events and manifolds from frame
+     *  to frame. */
     struct CollisionCache
     {
-        BroadPhaseCache broad;
-        NarrowPhaseCache narrow;
-        NarrowPhaseCache previousNarrow;
-        std::vector<DynamicEstimate> estimates;
+        std::vector<NarrowEvent> previousPhysics;
+        std::vector<NarrowEvent> previousTrigger;
         std::vector<Manifold> manifolds;
     };
 
-    void UpdatePreviousEvents(CollisionCache* cache);
-    void Clear(CollisionCache* cache);
-    bool operator ==(const BroadDetectVsStaticEvent& lhs, const BroadDetectVsStaticEvent& rhs);
-    bool operator ==(const NarrowDetectEvent& lhs, const NarrowDetectEvent& rhs);
+    inline bool operator ==(const BroadEvent& lhs, const BroadEvent& rhs)
+    {
+        return (lhs.first == rhs.first && lhs.second == rhs.second);
+    }
+
+    inline bool operator ==(const NarrowEvent& lhs, const NarrowEvent& rhs)
+    {
+        return (lhs.first == rhs.first && lhs.second == rhs.second) ||
+               (lhs.first == rhs.second && lhs.second == rhs.first);
+    }
 } // namespace nc::physics

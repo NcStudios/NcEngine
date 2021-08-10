@@ -10,42 +10,35 @@ namespace
     using namespace nc;
     using namespace nc::physics;
 
+    const PhysicsProperties g_StaticPhysicsProperties = PhysicsProperties{.mass = 0.0f, .useGravity = false};
+    const DirectX::XMMATRIX g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
+
     ContactConstraint CreateContactConstraint(const Contact&, Entity, Entity, Transform*, Transform*, PhysicsBody*, PhysicsBody*);
-    BasicContactConstraint CreateBasicContactConstraint(Entity a, Entity b, Transform* transformA, Transform* transformB, const Manifold& manifold);
     void ResolveConstraint(ContactConstraint& constraint, float dt);
-    void ResolveConstraint(const BasicContactConstraint& constraint);
     XMVECTOR MultiplyJVContact(const ConstraintMatrix& v, const ConstraintMatrix& jNormal, const ConstraintMatrix& jTangent, const ConstraintMatrix& jBitangent);
     ConstraintMatrix ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent);
     float ClampLambda(float newLambda, float* totalLambda);
     float ClampMu(float newMu, float extent, float* totalMu);
 
-    /** Resolve basic contact by direct translation. */
-    void ResolveConstraint(const BasicContactConstraint& constraint)
-    {
-        if(constraint.transformA)
-            constraint.transformA->Translate(-constraint.mtv);
-
-        if(constraint.transformB)
-            constraint.transformB->Translate(constraint.mtv);
-    }
-
     /** Resolve contacts through sequential impulse. */
     void ResolveConstraint(ContactConstraint& constraint, float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-        auto& bodyA = constraint.physBodyA->GetProperties();
-        auto& bodyB = constraint.physBodyB->GetProperties();
-
         /** V = [Va, Wa, Vb, Wb] */
-        ConstraintMatrix v{bodyA.velocity, bodyA.angularVelocity, bodyB.velocity, bodyB.angularVelocity};
+        ConstraintMatrix v
+        {
+            constraint.physBodyA ? constraint.physBodyA->GetVelocity() : g_XMZero,
+            constraint.physBodyA ? constraint.physBodyA->GetAngularVelocity() : g_XMZero,
+            constraint.physBodyB ? constraint.physBodyB->GetVelocity() : g_XMZero,
+            constraint.physBodyB ? constraint.physBodyB->GetAngularVelocity() : g_XMZero
+        };
 
         /** Baumgarte Stabilization / Restitution
          *  bias = b / h (Pa-Pb) * n + Cr(Va + Wa X Ra - Vb - Wb X Rb) * n */
-        float restitution = bodyA.restitution * bodyB.restitution;
-        auto relativeVelocity_v = v.vA() + XMVector3Cross(v.wA(), constraint.rA) - v.vB() + XMVector3Cross(v.wB(), constraint.rB);
+        auto relativeVelocity_v = v.vA() + XMVector3Cross(v.wA(), constraint.rA) - v.vB() - XMVector3Cross(v.wB(), constraint.rB);
         relativeVelocity_v = XMVector3Dot(relativeVelocity_v, constraint.normal);
-        relativeVelocity_v = XMVectorScale(relativeVelocity_v, restitution);
-        float baumgarteTerm = math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * bodyA.baumgarte * bodyB.baumgarte / dt;
+        relativeVelocity_v = XMVectorScale(relativeVelocity_v, constraint.restitution);
+        float baumgarteTerm = math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * constraint.baumgarte / dt;
         auto baumgarte_v = XMVectorReplicate(baumgarteTerm);
         auto bias_v = XMVectorMultiply(baumgarte_v + relativeVelocity_v, g_XMIdentityR0);
 
@@ -57,23 +50,22 @@ namespace
         auto& [lagrangeNormal, lagrangeTangent, lagrangeBitangent] = lagrange;
 
         /** (Ln >= 0) && (-mu*Ln <= Lt <= mu*Ln) && (-mu*Ln <= Lb < = mu*Ln) */
-        float friction = bodyA.friction * bodyB.friction;
-        float maxFriction = friction * constraint.totalLambda;
+        float maxFriction = constraint.friction * constraint.totalLambda;
         lagrangeNormal = ClampLambda(lagrangeNormal, &constraint.totalLambda);
         lagrangeTangent = ClampMu(lagrangeTangent, maxFriction, &constraint.totalMuTangent);
         lagrangeBitangent = ClampMu(lagrangeBitangent, maxFriction, &constraint.totalMuBitangent);
 
         auto deltas = ComputeDeltas(constraint, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
 
-        Vector3 deltaVA, deltaWA, deltaVB, deltaWB;
-        XMStoreVector3(&deltaVA, deltas.vA());
-        XMStoreVector3(&deltaWA, deltas.wA());
-        XMStoreVector3(&deltaVB, deltas.vB());
-        XMStoreVector3(&deltaWB, deltas.wB());
-        bodyA.velocity += deltaVA;
-        bodyA.angularVelocity += deltaWA;
-        bodyB.velocity += deltaVB;
-        bodyB.angularVelocity += deltaWB;
+        if(constraint.physBodyA)
+        {
+            constraint.physBodyA->UpdateVelocities(deltas.vA(), deltas.wA());
+        }
+
+        if(constraint.physBodyB)
+        {
+            constraint.physBodyB->UpdateVelocities(deltas.vB(), deltas.wB());
+        }
         NC_PROFILE_END();
     }
 
@@ -151,17 +143,6 @@ namespace
         return *totalMu - temp;
     }
 
-    BasicContactConstraint CreateBasicContactConstraint(Entity a, Entity b, Transform* transformA, Transform* transformB, const Manifold& manifold)
-    {
-        const auto& contact = manifold.GetDeepestContact();
-        return BasicContactConstraint
-        {
-            EntityUtils::IsStatic(a) ? nullptr : transformA,
-            EntityUtils::IsStatic(b) ? nullptr : transformB,
-            contact.normal * contact.depth
-        };
-    }
-
     ContactConstraint CreateContactConstraint(const Contact& contact,
                                               Entity entityA,
                                               Entity entityB,
@@ -185,11 +166,11 @@ namespace
         auto jTangent = ConstraintMatrix::VelocityJacobian(rA_v, rB_v, tangent_v);
         auto jBitangent = ConstraintMatrix::VelocityJacobian(rA_v, rB_v, bitangent_v);
 
-        auto& bodyA = physBodyA->GetProperties();
-        auto& bodyB = physBodyB->GetProperties();
+        auto& bodyA = physBodyA ? physBodyA->GetProperties() : g_StaticPhysicsProperties;
+        const auto& invInertiaA = physBodyA ? physBodyA->GetInverseInertia() : g_StaticInverseInertia;
 
-        const auto& invInertiaA = physBodyA->GetInverseInertia();
-        const auto& invInertiaB = physBodyB->GetInverseInertia();
+        auto& bodyB = physBodyB ? physBodyB->GetProperties() : g_StaticPhysicsProperties;
+        const auto& invInertiaB = physBodyB ? physBodyB->GetInverseInertia() : g_StaticInverseInertia;
 
         auto jInertiaProductA = XMVector3Transform(jNormal.wA(), invInertiaA);
         auto jInertiaProductB = XMVector3Transform(jNormal.wB(), invInertiaB);
@@ -211,6 +192,20 @@ namespace
         effectiveMass = effectiveMass + XMVectorReplicate(invMassA + invMassB);
         effectiveMass = XMVectorReciprocal(effectiveMass);
 
+        float restitution = bodyA.restitution * bodyB.restitution;
+        float friction = bodyA.friction * bodyB.friction;
+        float baumgarte = bodyA.baumgarte * bodyB.baumgarte;
+
+        #if NC_PHYSICS_WARMSTARTING
+        float lambda = contact.lambda * WarmstartFactor;
+        float muTangent = contact.muTangent * WarmstartFactor;
+        float muBitangent = contact.muBitangent * WarmstartFactor;
+        #else
+        float lambda = 0.0f;
+        float muTangent = 0.0f;
+        float muBitangent = 0.0f;
+        #endif
+
         NC_PROFILE_END();
 
         return ContactConstraint
@@ -222,32 +217,30 @@ namespace
             normal_v, rA_v, rB_v, effectiveMass,
             contact.depth,
             invMassA, invMassB,
-            0.0f, 0.0f, 0.0f
+            restitution, friction, baumgarte,
+            lambda, muTangent, muBitangent
         };
     }
 } // end anonymous namespace
 
 namespace nc::physics
 {
-    void ResolveConstraints(Constraints* constraints, float dt)
+    void ResolveConstraints(std::span<ContactConstraint> constraints, float dt)
     {
         for(size_t i = 0u; i < SolverIterations; ++i)
         {
-            for(auto& c : constraints->contact)
+            for(auto& constraint : constraints)
             {
-                ResolveConstraint(c, dt);
+                ResolveConstraint(constraint, dt);
             }
-        }
-
-        for(const auto& c : constraints->basic)
-        {
-            ResolveConstraint(c);
         }
     }
 
-    void GenerateConstraints(registry_type* registry, const std::vector<Manifold>& manifolds, Constraints* constraints)
+    auto GenerateConstraints(registry_type* registry, std::span<const Manifold> manifolds) -> std::vector<ContactConstraint>
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
+
+        std::vector<ContactConstraint> constraints;
 
         for(const auto& manifold : manifolds)
         {
@@ -258,12 +251,6 @@ namespace nc::physics
             auto* physBodyA = registry->Get<PhysicsBody>(entityA);
             auto* physBodyB = registry->Get<PhysicsBody>(entityB);
 
-            if(!physBodyA || !physBodyB)
-            {
-                constraints->basic.push_back(CreateBasicContactConstraint(entityA, entityB, transformA, transformB, manifold));
-                continue;
-            }
-
             for(const auto& contact : manifold.contacts)
             {
                 #ifdef NC_DEBUG_RENDERING
@@ -271,10 +258,36 @@ namespace nc::physics
                 graphics::DebugRenderer::AddPoint(contact.worldPointB);
                 #endif
 
-                constraints->contact.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
+                constraints.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
             }
         }
 
         NC_PROFILE_END();
+        return constraints;
+    }
+
+    void CacheLagranges(std::span<Manifold> manifolds, std::span<ContactConstraint> constraints)
+    {
+        auto index = 0u;
+
+        for(auto& manifold : manifolds)
+        {
+            for(auto& contact : manifold.contacts)
+            {
+                #if 0
+                if(index >= constraints.size())
+                    throw std::runtime_error("CacheLagranges - Invalid index");
+
+                if(manifold.entityA != constraints[index].entityA || manifold.entityB != constraints[index].entityB)
+                    throw std::runtime_error("CacheLagranges - Entity mismatch");
+                #endif
+
+                const auto& constraint = constraints[index];
+                contact.lambda = constraint.totalLambda;
+                contact.muTangent = constraint.totalMuTangent;
+                contact.muBitangent = constraint.totalMuBitangent;
+                ++index;
+            }
+        }
     }
 } // end namespace nc::physics

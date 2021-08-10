@@ -2,6 +2,11 @@
 #include "../PhysicsConstants.h"
 #include "debug/Profiler.h"
 
+namespace
+{
+    const auto GravityVector = DirectX::XMVectorSet(0.0f, nc::physics::Gravity, 0.0f, 0.0f);
+}
+
 namespace nc::physics
 {
     void UpdateWorldInertiaTensors(registry_type* registry, std::span<PhysicsBody> bodies)
@@ -21,16 +26,13 @@ namespace nc::physics
     void ApplyGravity(std::span<PhysicsBody> bodies, float dt)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
-        auto g = GravityAcceleration * dt;
+        auto g = DirectX::XMVectorScale(GravityVector, dt);
 
         for(auto& body : bodies)
         {
-            auto& properties = body.GetProperties();
-
-            if(properties.useGravity)
+            if(body.UseGravity())
             {
-                properties.velocity += g;
+                body.UpdateVelocity(g);
             }
         }
 
@@ -43,22 +45,13 @@ namespace nc::physics
 
         for(auto& body : bodies)
         {
-            Entity entity = body.GetParentEntity();
+            auto* transform = registry->Get<Transform>(body.GetParentEntity());
 
-            if(EntityUtils::IsStatic(entity))
-                continue;
-            
-            auto& properties = body.GetProperties();
-            auto* transform = registry->Get<Transform>(entity);
-
-            properties.velocity = HadamardProduct(properties.linearFreedom, properties.velocity);
-            properties.angularVelocity = HadamardProduct(properties.angularFreedom, properties.angularVelocity);
-
-            transform->Translate(properties.velocity * dt);
-            transform->Rotate(Quaternion::FromEulerAngles(properties.angularVelocity * dt));
-
-            properties.velocity *= pow(1.0f - properties.drag, dt);
-            properties.angularVelocity *= pow(1.0f - properties.angularDrag, dt);
+            if(body.Integrate(transform, dt) == IntegrationResult::PutToSleep)
+            {
+                auto* collider = registry->Get<Collider>(body.GetParentEntity());
+                collider->Sleep();
+            }
         }
 
         NC_PROFILE_END();

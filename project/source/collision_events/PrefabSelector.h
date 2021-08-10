@@ -25,7 +25,7 @@ namespace nc::sample
         : AutoComponent{entity},
           m_registry{registry},
           m_currentObject{Entity::Null()},
-          m_typeToSpawn{ColliderType::Capsule},
+          m_typeToSpawn{ColliderType::Box},
           m_doSpawn{true}
     {
     }
@@ -71,6 +71,7 @@ namespace nc::sample
             }
         }
 
+        m_registry->Add<PhysicsBody>(m_currentObject, PhysicsProperties{.isKinematic = true});
         m_registry->Add<WasdController>(m_currentObject, m_registry, 2.0f);
         m_registry->Add<CollisionLogger>(m_currentObject, m_registry);
     }

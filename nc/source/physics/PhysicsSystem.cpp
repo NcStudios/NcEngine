@@ -4,20 +4,19 @@
 #include "collision/CollisionNotification.h"
 #include "dynamics/Dynamics.h"
 #include "dynamics/Solver.h"
-#include "ecs/ColliderSystem.h"
 #include "job/JobSystem.h"
 #include "debug/Profiler.h"
 
 namespace nc::physics
 {
     #ifdef USE_VULKAN
-    PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
+    PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics, job::JobSystem* jobSystem)
     #else
-    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, ecs::ColliderSystem* colliderSystem, job::JobSystem* jobSystem)
+    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem)
     #endif
-        : m_clickableSystem{graphics},
-          m_cache{},
-          m_colliderSystem{colliderSystem},
+        : m_cache{},
+          m_clickableSystem{graphics},
+          m_hullColliderManager{},
           m_jobSystem{jobSystem}
           #ifdef NC_DEBUG_RENDERING
           , m_debugRenderer{graphics}
@@ -35,7 +34,9 @@ namespace nc::physics
     void PhysicsSystem::ClearState()
     {
         m_clickableSystem.Clear();
-        Clear(&m_cache);
+        m_cache.previousPhysics.clear();
+        m_cache.previousTrigger.clear();
+        m_cache.manifolds.clear();
     }
 
     void PhysicsSystem::DoPhysicsStep(float dt)
@@ -62,21 +63,23 @@ namespace nc::physics
         ApplyGravity(bodies, dt);
         UpdateManifolds(registry, m_cache.manifolds);
 
-        const auto* tree = m_colliderSystem->GetStaticTree();
-        const auto* soa = m_colliderSystem->GetDynamicSoA();
-        FetchEstimates(registry, m_colliderSystem->GetDynamicSoA(), m_cache.estimates);
-        FindBroadPairs(m_cache.estimates, m_cache.broad.physics, m_cache.broad.trigger);
-        FindBroadStaticPairs(m_cache.estimates, tree, m_cache.broad.staticPhysics, m_cache.broad.staticTrigger);
-        FindNarrowPhysicsPairs(m_cache.broad.physics, m_cache.broad.staticPhysics, soa, m_cache.narrow.physics, m_cache.manifolds);
-        FindNarrowTriggerPairs(m_cache.broad.trigger, m_cache.broad.staticTrigger, soa, m_cache.narrow.trigger);
+        const auto [matrices, estimates] = FetchEstimates(registry);
+        const auto broadEvents = FindBroadPairs(estimates);
 
-        Constraints constraints;
-        GenerateConstraints(registry, m_cache.manifolds, &constraints);
-        ResolveConstraints(&constraints, dt);
+        auto colliders = registry->ViewAll<Collider>();
+
+        auto physicsResult = FindNarrowPhysicsPairs(colliders, matrices, broadEvents.physics);
+        MergeNewContacts(physicsResult, m_cache.manifolds);
+        auto triggerEvents = FindNarrowTriggerPairs(colliders, matrices, broadEvents.trigger);
+
+        auto constraints = GenerateConstraints(registry, m_cache.manifolds);
+        ResolveConstraints(constraints, dt);
         Integrate(registry, bodies, dt);
 
-        NotifyCollisionEvents(registry, &m_cache);
-        UpdatePreviousEvents(&m_cache);
+        NotifyCollisionEvents(registry, physicsResult.events, triggerEvents, &m_cache);
+
+        m_cache.previousPhysics = std::move(physicsResult.events);
+        m_cache.previousTrigger = std::move(triggerEvents);
 
         NC_PROFILE_END();
     }

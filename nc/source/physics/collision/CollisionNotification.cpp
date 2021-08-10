@@ -5,100 +5,7 @@ namespace
     using namespace nc;
     using namespace nc::physics;
 
-    template<CollisionInteractionType CollisionDescription>
-    auto GetNarrowEventsByType(const CollisionCache* cache) -> const std::vector<NarrowDetectEvent>&;
-
-    template<CollisionInteractionType CollisionDescription>
-    auto GetPreviousNarrowEventsByType(const CollisionCache* cache) -> const std::vector<NarrowDetectEvent>&;
-
-    template<CollisionInteractionType CollisionDescription>
-    void FindExitAndStayEvents(registry_type* registry, CollisionCache* cache);
-
-    template<CollisionInteractionType CollisionDescription>
-    void FindEnterEvents(registry_type* registry, CollisionCache* cache);
-
-    template<CollisionInteractionType CollisionDescription>
-    void NotifyEnter(registry_type* registry, const NarrowDetectEvent& data);
-
-    template<CollisionInteractionType CollisionDescription>
-    void NotifyExit(registry_type* registry, const NarrowDetectEvent& data);
-
-    template<CollisionInteractionType CollisionDescription>
-    void NotifyStay(registry_type* registry, const NarrowDetectEvent& data);
-
-    template<CollisionInteractionType CollisionDescription>
-    auto GetNarrowEventsByType(const CollisionCache* cache) -> const std::vector<NarrowDetectEvent>&
-    {
-        if constexpr(CollisionDescription == CollisionInteractionType::Physics)
-            return cache->narrow.physics;
-        else
-            return cache->narrow.trigger;
-    }
-
-    template<CollisionInteractionType CollisionDescription>
-    auto GetPreviousNarrowEventsByType(const CollisionCache* cache) -> const std::vector<NarrowDetectEvent>&
-    {
-        if constexpr(CollisionDescription == CollisionInteractionType::Physics)
-            return cache->previousNarrow.physics;
-        else
-            return cache->previousNarrow.trigger;
-    }
-
-    template<CollisionInteractionType CollisionDescription>
-    void FindExitAndStayEvents(registry_type* registry, CollisionCache* cache)
-    {
-        const auto& current = GetNarrowEventsByType<CollisionDescription>(cache);
-        auto beg = current.cbegin();
-        auto end = current.cend();
-
-        for(const auto& prev : GetPreviousNarrowEventsByType<CollisionDescription>(cache))
-        {
-            if(end == std::find(beg, end, prev))
-            {
-                NotifyExit<CollisionDescription>(registry, prev);
-
-                if constexpr(CollisionDescription == CollisionInteractionType::Physics)
-                {
-                    auto& manifolds = cache->manifolds;
-
-                    auto pos = std::ranges::find_if(manifolds, [prev](const auto& manifold)
-                    {
-                        return (manifold.entityA == prev.first && manifold.entityB == prev.second) ||
-                               (manifold.entityA == prev.second && manifold.entityB == prev.first);
-                    });
-
-                    if(pos != manifolds.end())
-                    {
-                        *pos = manifolds.back();
-                        manifolds.pop_back();
-                    }
-                }
-            }
-            else
-            {
-                NotifyStay<CollisionDescription>(registry, prev);
-            }
-        }
-    }
-
-    template<CollisionInteractionType CollisionDescription>
-    void FindEnterEvents(registry_type* registry, CollisionCache* cache)
-    {
-        const auto& previous = GetPreviousNarrowEventsByType<CollisionDescription>(cache);
-        auto beg = previous.cbegin();
-        auto end = previous.cend();
-
-        for(const auto& cur : GetNarrowEventsByType<CollisionDescription>(cache))
-        {
-            if(end == std::find(beg, end, cur))
-            {
-                NotifyEnter<CollisionDescription>(registry, cur);
-            }
-        }
-    }
-
-    template<>
-    void NotifyEnter<CollisionInteractionType::Physics>(registry_type* registry, const NarrowDetectEvent& data)
+    void NotifyPhysicsEnter(registry_type* registry, const NarrowEvent& data)
     {
         if(registry->Contains<Entity>(data.first))
             registry->Get<AutoComponentGroup>(data.first)->SendOnCollisionEnter(data.second);
@@ -106,8 +13,7 @@ namespace
             registry->Get<AutoComponentGroup>(data.second)->SendOnCollisionEnter(data.first);
     }
 
-    template<>
-    void NotifyEnter<CollisionInteractionType::Trigger>(registry_type* registry, const NarrowDetectEvent& data)
+    void NotifyTriggerEnter(registry_type* registry, const NarrowEvent& data)
     {
         if(registry->Contains<Entity>(data.first))
             registry->Get<AutoComponentGroup>(data.first)->SendOnTriggerEnter(data.second);
@@ -115,8 +21,7 @@ namespace
             registry->Get<AutoComponentGroup>(data.second)->SendOnTriggerEnter(data.first);
     }
 
-    template<>
-    void NotifyExit<CollisionInteractionType::Physics>(registry_type* registry, const NarrowDetectEvent& data)
+    void NotifyPhysicsExit(registry_type* registry, const NarrowEvent& data)
     {
         if(registry->Contains<Entity>(data.first))
             registry->Get<AutoComponentGroup>(data.first)->SendOnCollisionExit(data.second);
@@ -124,8 +29,7 @@ namespace
             registry->Get<AutoComponentGroup>(data.second)->SendOnCollisionExit(data.first);
     }
 
-    template<>
-    void NotifyExit<CollisionInteractionType::Trigger>(registry_type* registry, const NarrowDetectEvent& data)
+    void NotifyTriggerExit(registry_type* registry, const NarrowEvent& data)
     {
         if(registry->Contains<Entity>(data.first))
             registry->Get<AutoComponentGroup>(data.first)->SendOnTriggerExit(data.second);
@@ -133,8 +37,7 @@ namespace
             registry->Get<AutoComponentGroup>(data.second)->SendOnTriggerExit(data.first);
     }
 
-    template<>
-    void NotifyStay<CollisionInteractionType::Physics>(registry_type* registry, const NarrowDetectEvent& data)
+    void NotifyPhysicsStay(registry_type* registry, const NarrowEvent& data)
     {
         if(registry->Contains<Entity>(data.first))
             registry->Get<AutoComponentGroup>(data.first)->SendOnCollisionStay(data.second);
@@ -142,23 +45,106 @@ namespace
             registry->Get<AutoComponentGroup>(data.second)->SendOnCollisionStay(data.first);
     }
 
-    template<>
-    void NotifyStay<CollisionInteractionType::Trigger>(registry_type* registry, const NarrowDetectEvent& data)
+    void NotifyTriggerStay(registry_type* registry, const NarrowEvent& data)
     {
         if(registry->Contains<Entity>(data.first))
             registry->Get<AutoComponentGroup>(data.first)->SendOnTriggerStay(data.second);
         if(registry->Contains<Entity>(data.second))
             registry->Get<AutoComponentGroup>(data.second)->SendOnTriggerStay(data.first);
     }
+
+    void FindPhysicsExitAndStayEvents(registry_type* registry,
+                                      const std::vector<NarrowEvent>& events,
+                                      const std::vector<NarrowEvent>& previousEvents,
+                                      std::vector<Manifold>& manifolds)
+    {
+        auto beg = events.cbegin();
+        auto end = events.cend();
+
+        for(const auto& prev : previousEvents)
+        {
+            if(end == std::find(beg, end, prev))
+            {
+                NotifyPhysicsExit(registry, prev);
+
+                auto pos = std::ranges::find_if(manifolds, [prev](const auto& manifold)
+                {
+                    return (manifold.entityA == prev.first && manifold.entityB == prev.second) ||
+                           (manifold.entityA == prev.second && manifold.entityB == prev.first);
+                });
+
+                if(pos != manifolds.end())
+                {
+                    *pos = manifolds.back();
+                    manifolds.pop_back();
+                }
+            }
+            else
+            {
+                NotifyPhysicsStay(registry, prev);
+            }
+        }
+    }
+
+    void FindTriggerExitAndStayEvents(registry_type* registry,
+                                      const std::vector<NarrowEvent>& events,
+                                      const std::vector<NarrowEvent>& previousEvents)
+    {
+        auto beg = events.cbegin();
+        auto end = events.cend();
+
+        for(const auto& prev : previousEvents)
+        {
+            if(end == std::find(beg, end, prev))
+            {
+                NotifyTriggerExit(registry, prev);
+            }
+            else
+            {
+                NotifyTriggerStay(registry, prev);
+            }
+        }
+    }
+
+    void FindPhysicsEnterEvents(registry_type* registry, const std::vector<NarrowEvent>& events, const std::vector<NarrowEvent>& previousEvents)
+    {
+        auto beg = previousEvents.cbegin();
+        auto end = previousEvents.cend();
+
+        for(const auto& cur : events)
+        {
+            if(end == std::find(beg, end, cur))
+            {
+                NotifyPhysicsEnter(registry, cur);
+            }
+        }
+    }
+
+    void FindTriggerEnterEvents(registry_type* registry, const std::vector<NarrowEvent>& events, const std::vector<NarrowEvent>& previousEvents)
+    {
+        auto beg = previousEvents.cbegin();
+        auto end = previousEvents.cend();
+
+        for(const auto& cur : events)
+        {
+            if(end == std::find(beg, end, cur))
+            {
+                NotifyTriggerEnter(registry, cur);
+            }
+        }
+    }
 } // anonymous namespace
 
 namespace nc::physics
 {
-    void NotifyCollisionEvents(registry_type* registry, CollisionCache* cache)
+    void NotifyCollisionEvents(registry_type* registry,
+                               const std::vector<NarrowEvent>& physicsEvents,
+                               const std::vector<NarrowEvent>& triggerEvents,
+                               CollisionCache* cache)
     {
-        FindExitAndStayEvents<CollisionInteractionType::Physics>(registry, cache);
-        FindEnterEvents<CollisionInteractionType::Physics>(registry, cache);
-        FindExitAndStayEvents<CollisionInteractionType::Trigger>(registry, cache);
-        FindEnterEvents<CollisionInteractionType::Trigger>(registry, cache);
+        FindPhysicsExitAndStayEvents(registry, physicsEvents, cache->previousPhysics, cache->manifolds);
+        FindPhysicsEnterEvents(registry, triggerEvents, cache->previousPhysics);
+        FindTriggerExitAndStayEvents(registry, triggerEvents, cache->previousTrigger);
+        FindTriggerEnterEvents(registry, triggerEvents, cache->previousTrigger);
     }
 }

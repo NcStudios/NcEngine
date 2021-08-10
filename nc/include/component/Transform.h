@@ -42,8 +42,10 @@ namespace nc
             void SetRotation(const Vector3& angles);
             void SetScale(const Vector3& scale);
             void Translate(Vector3 vec);
+            void Translate(DirectX::FXMVECTOR translation);
             void TranslateLocalSpace(Vector3 vec);
             void Rotate(const Quaternion& quat);
+            void Rotate(DirectX::FXMVECTOR quaternion);
             void Rotate(Vector3 axis, float radians);
 
             // Hierarchy methods

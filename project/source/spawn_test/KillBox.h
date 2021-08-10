@@ -10,7 +10,7 @@ namespace nc::sample
     {
         public:
             KillBox(Entity entity, registry_type* registry, bool logOnDestroy = false);
-            void OnCollisionExit(Entity hit) override;
+            void OnTriggerExit(Entity hit) override;
 
         private:
             registry_type* m_registry;
@@ -24,7 +24,7 @@ namespace nc::sample
     {
     }
 
-    inline void KillBox::OnCollisionExit(Entity hit)
+    inline void KillBox::OnTriggerExit(Entity hit)
     {
         if(m_logOnDestroy)
             GameLog::Log("KillBox - Object Destroyed");

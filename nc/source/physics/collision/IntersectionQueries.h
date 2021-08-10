@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CollisionVolumes.h"
+#include "component/Collider.h"
 #include "Simplex.h"
 #include "Polytope.h"
 

@@ -74,8 +74,8 @@ namespace nc::core
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_frameManager2{},
-          m_ecs{config::GetMemorySettings(), config::GetPhysicsSettings()},
-          m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
+          m_ecs{config::GetMemorySettings()},
+          m_physics{ &m_graphics2, &m_jobSystem},
           m_sceneSystem{},
           m_time{}
     {
@@ -91,8 +91,8 @@ namespace nc::core
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
           m_pointLightManager{},
           m_frameManager{},
-          m_ecs{&m_graphics, config::GetMemorySettings(), config::GetPhysicsSettings()},
-          m_physics{&m_graphics, m_ecs.GetColliderSystem(), &m_jobSystem},
+          m_ecs{&m_graphics, config::GetMemorySettings()},
+          m_physics{&m_graphics, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
           #ifdef NC_EDITOR_ENABLED
@@ -102,6 +102,7 @@ namespace nc::core
           #endif
     {
         SetBindings();
+        m_ecs.GetRegistry()->VerifyCallbacks();
         V_LOG("Engine initialized");
     }
     #endif

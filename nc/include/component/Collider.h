@@ -1,10 +1,9 @@
 #pragma once
 
 #include "component/Component.h"
+#include "physics/CollisionVolumes.h"
 #include "physics/LayerMask.h"
 #include "graphics/Model.h"
-
-#include <string>
 
 /**  Notes on colliders:
  * 
@@ -72,8 +71,15 @@ namespace nc
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
 
-            const VolumeInfo& GetInfo() const;
-            ColliderType GetType() const;
+            void Wake() { m_awake = true; }
+            void Sleep() { m_awake = false; }
+
+            auto GetInfo() const -> const VolumeInfo& { return m_info; }
+            auto GetType() const -> ColliderType { return m_info.type; }
+            auto GetVolume() const -> const BoundingVolume& { return m_volume; }
+            auto IsTrigger() const -> bool { return m_info.isTrigger; }
+            auto IsAwake() const -> bool { return m_awake; }
+            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
 
             #ifdef NC_EDITOR_ENABLED
             void UpdateWidget(graphics::FrameManager* frame);
@@ -82,6 +88,8 @@ namespace nc
 
         private:
             VolumeInfo m_info;
+            BoundingVolume m_volume;
+            bool m_awake;
 
             #ifdef NC_EDITOR_ENABLED
             /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
@@ -100,8 +108,8 @@ namespace nc
         #endif
 
         using sort_dense_storage_by_address = std::true_type;
-        using requires_on_add_callback = std::true_type;
-        using requires_on_remove_callback = std::true_type;
+        using requires_on_add_callback = std::false_type;
+        using requires_on_remove_callback = std::false_type;
     };
 
     const char* ToCString(nc::ColliderType type);

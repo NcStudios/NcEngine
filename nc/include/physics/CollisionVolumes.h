@@ -1,13 +1,11 @@
 #pragma once
 
 #include "math/Vector.h"
-#include "component/Collider.h"
-#include "directx/math/DirectXMath.h"
 
 #include <span>
 #include <variant>
 
-namespace nc::physics
+namespace nc
 {
     struct SphereCollider
     {
@@ -36,7 +34,4 @@ namespace nc::physics
     };
 
     using BoundingVolume = std::variant<BoxCollider, SphereCollider, CapsuleCollider, HullCollider>;
-
-    auto CreateBoundingVolume(const Collider::VolumeInfo& info) -> BoundingVolume;
-    auto EstimateBoundingVolume(const BoundingVolume& volume, DirectX::FXMMATRIX matrix) -> SphereCollider;
-} // namespace nc::physics
+}

@@ -1,10 +1,8 @@
 #pragma once
 
-#include "physics/collision/CollisionVolumes.h"
+#include "component/Collider.h"
 
-#include <span>
 #include <stdexcept>
-#include <string>
 #include <vector>
 #include <unordered_map>
 
@@ -31,7 +29,7 @@ namespace nc
                 return Get()->IsLoaded_(uid);
             }
 
-            static auto Acquire(const std::string& uid) -> physics::HullCollider
+            static auto Acquire(const std::string& uid) -> HullCollider
             {
                 return Get()->Acquire_(uid);
             }
@@ -59,13 +57,13 @@ namespace nc
                 return m_resources.end() != m_resources.find(uid);
             }
             
-            auto Acquire_(const std::string& uid) const -> physics::HullCollider
+            auto Acquire_(const std::string& uid) const -> HullCollider
             {
                 const auto it = m_resources.find(uid);
                 if(it == m_resources.end())
                     throw std::runtime_error("HullColliderManager::Acquire_ - Resource is not loaded: " + uid);
 
-                return physics::HullCollider{std::span<const Vector3>{it->second.vertices}, it->second.maxExtent};
+                return HullCollider{std::span<const Vector3>{it->second.vertices}, it->second.maxExtent};
             }
     };
 } // namespace nc

@@ -3,7 +3,6 @@
 #include "debug/Profiler.h"
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
-#include "ecs/ColliderSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "imgui/imgui.h"
 
@@ -308,6 +307,7 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
+        ComponentSystemHeader<PhysicsBody>("Physics Body", registry->ViewAll<PhysicsBody>());
         ComponentSystemHeader<PointLight>("Point Light", registry->ViewAll<PointLight>());
         ComponentSystemHeader<Renderer>("Renderer", registry->ViewAll<Renderer>());
         ComponentSystemHeader<Transform>("Transform", registry->ViewAll<Transform>());
