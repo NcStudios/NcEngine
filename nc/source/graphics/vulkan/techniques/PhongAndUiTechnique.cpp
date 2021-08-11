@@ -22,8 +22,7 @@ namespace nc::graphics::vulkan
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{},
-      m_pipelineLayout{},
-      m_descriptorSetLayout{}
+      m_pipelineLayout{}
     {
         CreatePipeline(renderPass);
     }
@@ -31,7 +30,6 @@ namespace nc::graphics::vulkan
     PhongAndUiTechnique::~PhongAndUiTechnique()
     {
         auto device = m_base->GetDevice();
-        device.destroyDescriptorSetLayout(m_descriptorSetLayout);
         device.destroyPipelineLayout(m_pipelineLayout);
         device.destroyPipeline(m_pipeline);
     }
@@ -99,6 +97,8 @@ namespace nc::graphics::vulkan
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 
@@ -118,9 +118,6 @@ namespace nc::graphics::vulkan
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
-
         const auto& viewMatrix = m_graphics->GetViewMatrix();
         const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
 

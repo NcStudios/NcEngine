@@ -12,6 +12,8 @@ namespace nc::graphics::vulkan
             static vk::DescriptorSet* GetTexturesDescriptorSet();
             static vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout();
 
+            static std::vector<std::string> GetMeshPaths(); 
+            static bool HasMeshes();
             static void LoadMeshes(std::unique_ptr<MeshesData> meshes);
             static bool MeshExists(const std::string& uid);
             static const Mesh& GetMeshAccessor(const std::string& uid);
@@ -33,6 +35,8 @@ namespace nc::graphics::vulkan
             vk::DescriptorSet* GetTexturesDescriptorSet_();
             vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout_();
 
+            std::vector<std::string> GetMeshPaths_(); 
+            bool HasMeshes_();
             void LoadMeshes_(std::unique_ptr<MeshesData> meshes);
             bool MeshExists_(const std::string& uid);       
             const Mesh& GetMeshAccessor_(const std::string& uid);
@@ -83,6 +87,16 @@ namespace nc::graphics::vulkan
     inline vk::DescriptorSetLayout* ResourceManager::GetTexturesDescriptorSetLayout()
     {
         return Get().GetTexturesDescriptorSetLayout_();
+    }
+
+    inline std::vector<std::string> ResourceManager::GetMeshPaths()
+    {
+        return Get().GetMeshPaths_();
+    }
+
+    inline bool ResourceManager::HasMeshes()
+    {
+        return Get().HasMeshes_();
     }
 
     inline void ResourceManager::LoadMeshes(std::unique_ptr<MeshesData> meshes)
@@ -164,6 +178,16 @@ namespace nc::graphics::vulkan
     inline vk::DescriptorSetLayout* ResourceManager::GetTexturesDescriptorSetLayout_()
     {
         return m_textureResources->GetDescriptorLayout();
+    }
+
+    inline std::vector<std::string> ResourceManager::GetMeshPaths_()
+    {
+        return m_meshResources->GetMeshPaths();
+    }
+
+    inline bool ResourceManager::HasMeshes_()
+    {
+        return m_meshResources != nullptr;
     }
 
     inline void ResourceManager::LoadMeshes_(std::unique_ptr<MeshesData> meshes)

@@ -9,6 +9,7 @@
 #include "input/InputInternal.h"
 #include "graphics/vulkan/Renderer.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
+#include "graphics/Model.h" // @todo: Hack - remove when DX11 is removed.
 #include "Ecs.h"
 
 namespace nc::core
@@ -218,6 +219,13 @@ namespace nc::core
         m_ui.FrameEnd();
 
         m_ecs.GetPointLightSystem()->Update();
+
+        #ifdef NC_EDITOR_ENABLED
+        auto* registry = m_ecs.GetRegistry();
+        
+        for(auto& collider : registry->ViewAll<Collider>())
+            collider.UpdateWidget();
+        #endif
 
         // @todo: conditionally update based on changes
         m_graphics2.GetRendererPtr()->Record(m_graphics2.GetCommandsPtr());

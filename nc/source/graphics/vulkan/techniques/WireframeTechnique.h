@@ -8,7 +8,7 @@
 
 namespace nc::vulkan
 {
-    class MeshRenderer;
+    class MeshRenderer; class DebugWidget;
 }
 
 namespace nc::graphics
@@ -34,13 +34,19 @@ namespace nc::graphics
                 ~WireframeTechnique();
 
                 void Bind(vk::CommandBuffer* cmd);
+
+                std::vector<Entity>* RegisterDebugWidget(nc::vulkan::DebugWidget* debugWidget);
                 std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
+
+                void ClearDebugWidgets();
+                void ClearMeshRenderers();
+
                 void Record(vk::CommandBuffer* cmd);
-                void Clear();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);
 
+                std::unordered_map<std::string, std::vector<Entity>> m_debugWidgets;
                 std::unordered_map<std::string, std::vector<Entity>> m_meshRenderers;
 
                 nc::graphics::Graphics2* m_graphics;
@@ -48,7 +54,6 @@ namespace nc::graphics
                 Swapchain* m_swapchain;
                 vk::Pipeline m_pipeline;
                 vk::PipelineLayout m_pipelineLayout;
-                vk::DescriptorSetLayout m_descriptorSetLayout;
         };
     }
 }

@@ -2,7 +2,7 @@
 
 #include "component/Component.h"
 #include "physics/LayerMask.h"
-#include "graphics/Model.h"
+#include "vulkan/DebugWidget.h"
 
 #include <string>
 
@@ -74,17 +74,15 @@ namespace nc
             const VolumeInfo& GetInfo() const;
             ColliderType GetType() const;
 
-            #ifdef NC_EDITOR_ENABLED
-            void UpdateWidget(graphics::FrameManager* frame);
+           #ifdef NC_EDITOR_ENABLED
+            void UpdateWidget();
             void SetEditorSelection(bool state);
-            #endif
+           #endif
 
         private:
             VolumeInfo m_info;
 
             #ifdef NC_EDITOR_ENABLED
-            /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
-            std::unique_ptr<graphics::Model> m_widgetModel;
             bool m_selectedInEditor;
             #endif
     };

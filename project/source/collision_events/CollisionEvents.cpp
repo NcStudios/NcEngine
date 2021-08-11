@@ -61,21 +61,10 @@ namespace nc::sample
     {
         // Setup
         m_sceneHelper.Setup(registry, true, false, Widget);
+        prefab::InitializeResources();
 
-        // Light
-        auto lightProperties = PointLight::Properties
-        {
-            .pos = Vector3::Zero(),
-            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-            .diffuseIntensity = 3.0,
-            .attConst = 0.0f,
-            .attLin = 0.05f,
-            .attQuad = 0.0f
-        };
-
-        auto light1 = registry->Add<Entity>({.position = Vector3{2.0f, 8.0f, 0.0f}, .tag = "Light 1"});
-        registry->Add<PointLight>(light1, lightProperties);
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 5.0f, 0.0f}, .tag = "Point Light 1"});
+        registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.specularColor = Vector4(0.5f, 0.75f, 0.5f, 0.0f)});
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});

@@ -2,6 +2,7 @@
 #include "Ecs.h"
 #include "config/Config.h"
 #include "component/Transform.h"
+#include "component/vulkan/DebugWidget.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics2.h"
@@ -16,13 +17,13 @@
 namespace nc::graphics::vulkan
 {
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
-    : m_meshRenderers{},
+    : m_debugWidgets{},
+      m_meshRenderers{},
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{},
-      m_pipelineLayout{},
-      m_descriptorSetLayout{}
+      m_pipelineLayout{}
     {
         CreatePipeline(renderPass);
     }
@@ -30,7 +31,6 @@ namespace nc::graphics::vulkan
     WireframeTechnique::~WireframeTechnique()
     {
         auto device = m_base->GetDevice();
-        device.destroyDescriptorSetLayout(m_descriptorSetLayout);
         device.destroyPipelineLayout(m_pipelineLayout);
         device.destroyPipeline(m_pipeline);
     }
@@ -40,6 +40,19 @@ namespace nc::graphics::vulkan
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
         NC_PROFILE_END();
+    }
+
+    std::vector<Entity>* WireframeTechnique::RegisterDebugWidget(nc::vulkan::DebugWidget* debugWidget)
+    {
+        auto widgets = m_debugWidgets.find(debugWidget->GetMeshUid());
+        if (widgets == m_debugWidgets.end())
+        {
+            auto [it, result] = m_debugWidgets.emplace(debugWidget->GetMeshUid(), std::vector<Entity>{debugWidget->GetParentEntity()});
+            return &(it->second);
+        }
+        
+        widgets->second.push_back(debugWidget->GetParentEntity());
+        return &(widgets->second);
     }
 
     std::vector<Entity>* WireframeTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
@@ -121,6 +134,28 @@ namespace nc::graphics::vulkan
 
         auto pushConstants = WireframePushConstants{};
         pushConstants.viewProjection = viewMatrix * projectionMatrix;
+
+        #ifdef NC_EDITOR_ENABLED
+        for (auto& [meshUid, debugWidgets] : m_debugWidgets)
+        {
+            const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
+            
+            for (auto handle : debugWidgets)
+            {
+                auto* widget = ActiveRegistry()->Get<nc::vulkan::DebugWidget>(handle);
+                if (!widget->IsEnabled())
+                {
+                    continue;
+                }
+
+                pushConstants.model = widget->GetTransformationMatrix();
+                pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
+
+                cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+                cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            }
+        }
+        #endif
         
         for (auto& [meshUid, renderers] : m_meshRenderers)
         {
@@ -134,17 +169,18 @@ namespace nc::graphics::vulkan
 
                 cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
                 cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                
-                #ifdef NC_EDITOR_ENABLED
-                m_graphics->IncrementDrawCallCount();
-                #endif
             }
         }
         NC_PROFILE_END();
     }
 
-    void WireframeTechnique::Clear()
+    void WireframeTechnique::ClearMeshRenderers()
     {
         m_meshRenderers.clear();
+    }
+
+    void WireframeTechnique::ClearDebugWidgets()
+    {
+        m_debugWidgets.clear();
     }
 }

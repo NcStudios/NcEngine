@@ -51,7 +51,7 @@ vec3 MaterialColor(int textureIndex)
    return vec3(texture(sampler2D(textures[textureIndex], smplr), inUV));
 }
 
-const float specularIntensity = 0.4;
+const float specularIntensity = 0.75;
 const float ambientIntensity = 1.0;
 
 vec3 CalculatePointLight(PointLight light, vec3 normal)
@@ -74,7 +74,7 @@ vec3 CalculatePointLight(PointLight light, vec3 normal)
     float specularImpact = pow(max(dot(viewDir, reflectionDir), 0.0), 100/(500 * MaterialColor(pc.roughnessIndex).r + 0.01));
     vec3 specularColor = specularIntensity * specularImpact * light.specularColor.rgb;
 
-    return (diffuseColor + ambientColor) * attenuation + specularColor;
+    return max((diffuseColor + ambientColor  + specularColor) * attenuation, 0.0);
 }
 
 void main() 

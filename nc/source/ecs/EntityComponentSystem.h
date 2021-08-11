@@ -3,6 +3,7 @@
 #include "Ecs.h"
 #include "ColliderSystem.h"
 #include "ParticleEmitterSystem.h"
+#include "DebugWidgetSystem.h"
 #include "MeshRendererSystem.h"
 #include "PointLightSystem.h"
 #include "config/Config.h"
@@ -29,8 +30,9 @@ namespace nc::ecs
             auto GetParticleEmitterSystem() noexcept { return &m_particleEmitterSystem; }
             
             #ifdef USE_VULKAN
-            auto GetPointLightSystem() noexcept { return &m_pointLightSystem; }
+            auto GetDebugWidgetSystem() noexcept { return &m_debugWidgetSystem; }
             auto GetMeshRendererSystem() noexcept { return &m_meshRendererSystem; }
+            auto GetPointLightSystem() noexcept { return &m_pointLightSystem; }
             #endif
 
             void Clear();
@@ -42,8 +44,9 @@ namespace nc::ecs
             ParticleEmitterSystem m_particleEmitterSystem;
 
             #ifdef USE_VULKAN
-            PointLightSystem m_pointLightSystem;
+            DebugWidgetSystem m_debugWidgetSystem;
             MeshRendererSystem m_meshRendererSystem;
+            PointLightSystem m_pointLightSystem;
             #endif
     };
 } // namespace nc::ecs
