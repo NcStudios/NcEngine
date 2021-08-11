@@ -74,12 +74,12 @@ vec3 CalculatePointLight(PointLight light, vec3 normal)
     float specularImpact = pow(max(dot(viewDir, reflectionDir), 0.0), 100/(500 * MaterialColor(pc.roughnessIndex).r + 0.01));
     vec3 specularColor = specularIntensity * specularImpact * light.specularColor.rgb;
 
-    return max((diffuseColor + ambientColor) * attenuation + specularColor, 0.0);
+    return max((diffuseColor + ambientColor  + specularColor) * attenuation, 0.0);
 }
 
 void main() 
 {
-    vec3 result = vec3(0.025);
+    vec3 result = vec3(0.0);
 
     // The normal map texture is in tangent space. The inTBN matrix converts it to world space.
     vec3 normal = MaterialColor(pc.normalIndex);
