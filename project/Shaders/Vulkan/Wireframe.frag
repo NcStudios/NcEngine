@@ -18,19 +18,6 @@ layout(push_constant) uniform PER_OBJECT
     int roughnessIndex;
 } pc;
 
-struct PointLight
-{
-    vec4 lightPos;
-    vec4 ambientColor;
-    vec4 diffuseColor;
-    vec4 specularColor;
-    float diffuseIntensity;
-    float attConst;
-    float attLin;
-    float attQuad;
-    bool isInitialized;
-};
-
 layout (location = 0) out vec4 outFragColor;
 
 void main() 

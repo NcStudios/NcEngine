@@ -10,16 +10,17 @@ namespace nc::ecs
                                    uint32_t octreeDensityThreshold,
                                    float octreeMinimumExtent,
                                    float worldspaceExtent)
-        : m_dynamicSoA{maxDynamic},
+        : m_registry{registry},
+          m_dynamicSoA{maxDynamic},
           m_staticTree{maxStatic, octreeDensityThreshold, octreeMinimumExtent, worldspaceExtent},
           m_hullColliderManager{}
     {
-        registry->RegisterOnAddCallback<Collider>
+        m_registry->RegisterOnAddCallback<Collider>
         (
             [this](const Collider& collider) { this->Add(collider); }
         );
 
-        registry->RegisterOnRemoveCallback<Collider>
+        m_registry->RegisterOnRemoveCallback<Collider>
         (
             [this](Entity entity) { this->Remove(entity); }
         );
@@ -41,6 +42,10 @@ namespace nc::ecs
     {
         auto entity = collider.GetParentEntity();
 
+        #ifdef NC_EDITOR_ENABLED
+        AddDebugWidget(collider);
+        #endif
+
         if(EntityUtils::IsStatic(entity))
             m_staticTree.Add(entity, collider.GetInfo());
         else
@@ -59,6 +64,10 @@ namespace nc::ecs
 
     void ColliderSystem::Remove(Entity entity)
     {
+        #ifdef NC_EDITOR_ENABLED
+        m_registry->Remove<vulkan::DebugWidget>(entity);
+        #endif
+
         if(EntityUtils::IsStatic(entity))
             m_staticTree.Remove(entity);
         else
@@ -70,4 +79,39 @@ namespace nc::ecs
         m_dynamicSoA.Clear();
         m_staticTree.Clear();
     }
+
+    #ifdef NC_EDITOR_ENABLED
+    void ColliderSystem::AddDebugWidget(const Collider& collider)
+    {
+        auto entity = collider.GetParentEntity();
+
+        vulkan::WidgetShape shape;
+        switch (collider.GetType())
+        {
+            case ColliderType::Box:
+            {
+                shape = vulkan::WidgetShape::Cube;
+                break;
+            }
+            case ColliderType::Sphere:
+            {
+                shape = vulkan::WidgetShape::Sphere;
+                break;
+            }
+            case ColliderType::Capsule:
+            {
+                shape = vulkan::WidgetShape::Capsule;
+                break;
+            }
+            case ColliderType::Hull:
+            {
+                shape = vulkan::WidgetShape::Hull;
+                break;
+            }
+        }
+
+        m_registry->Add<vulkan::DebugWidget>(entity, shape);
+    }
+    #endif
+
 } // namespace nc::ecs

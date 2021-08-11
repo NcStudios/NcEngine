@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include "component/vulkan/DebugWidget.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "component/Transform.h"
 #include "debug/Profiler.h"
@@ -144,7 +145,7 @@ namespace nc::graphics::vulkan
         }
     }
 
-    void Renderer::DeregisterMeshRenderer(Entity entity)
+    void Renderer::DeregisterRenderable(Entity entity)
     {
         // @todo: This will be replaced with a proper storage strategy.
         auto it = std::ranges::find_if(m_storageHandles, [entity](const auto& pair)
@@ -172,6 +173,24 @@ namespace nc::graphics::vulkan
         m_storageHandles.pop_back();
     }
 
+    void Renderer::RegisterDebugWidget(nc::vulkan::DebugWidget* widget)
+    {
+        if (!m_wireframeTechnique)
+        {
+            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
+        }
+        
+        m_storageHandles.emplace_back(widget->GetParentEntity(), m_wireframeTechnique->RegisterDebugWidget(widget));
+    }
+
+    void Renderer::ClearDebugWidgets()
+    {
+        if (m_wireframeTechnique)
+        {
+            m_wireframeTechnique->ClearDebugWidgets();
+        }
+    }
+
     void Renderer::RecordUi(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
@@ -183,12 +202,12 @@ namespace nc::graphics::vulkan
     {
         if (m_wireframeTechnique)
         {
-            m_wireframeTechnique.reset();
+            m_wireframeTechnique->ClearMeshRenderers();
         }
         
         if (m_phongAndUiTechnique)
         {
-            m_phongAndUiTechnique.reset();
+            m_phongAndUiTechnique->Clear();
         }
     }
 
@@ -196,13 +215,14 @@ namespace nc::graphics::vulkan
     {
         if (m_particleTechnique)
         {
-            m_particleTechnique.reset();
+            m_particleTechnique->Clear();
         }
     }
 
     void Renderer::Clear()
     {
-        ClearMeshRenderers();
-        ClearParticleEmitters();
+        m_wireframeTechnique.reset();
+        m_phongAndUiTechnique.reset();
+        m_particleTechnique.reset();
     }
 }

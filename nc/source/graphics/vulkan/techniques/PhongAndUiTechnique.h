@@ -56,7 +56,6 @@ namespace nc::graphics
                 Swapchain* m_swapchain;
                 vk::Pipeline m_pipeline;
                 vk::PipelineLayout m_pipelineLayout;
-                vk::DescriptorSetLayout m_descriptorSetLayout;
         };
     }
 }

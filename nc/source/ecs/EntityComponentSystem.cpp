@@ -1,4 +1,5 @@
 #include "EntityComponentSystem.h"
+#include "graphics/Model.h" // @todo: Hack - remove
 
 namespace nc::ecs
 {
@@ -14,8 +15,9 @@ namespace nc::ecs
                            physSettings.octreeMinimumExtent,
                            physSettings.worldspaceExtent},
           m_particleEmitterSystem{&m_registry, graphics},
-          m_pointLightSystem{&m_registry, graphics},
-          m_meshRendererSystem{&m_registry, graphics}
+          m_debugWidgetSystem{&m_registry, graphics},
+          m_meshRendererSystem{&m_registry, graphics},
+          m_pointLightSystem{&m_registry, graphics}
     #else
     EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
                                                  const config::MemorySettings& memSettings,
@@ -42,6 +44,7 @@ namespace nc::ecs
         #ifdef USE_VULKAN
         m_pointLightSystem.Clear();
         m_meshRendererSystem.Clear();
+        m_debugWidgetSystem.Clear();
         #endif
     }
 } // end namespace nc::ecs

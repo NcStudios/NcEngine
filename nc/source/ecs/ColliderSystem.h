@@ -39,6 +39,11 @@ namespace nc::ecs
             void Clear();
 
         private:
+            #ifdef NC_EDITOR_ENABLED
+            void AddDebugWidget(const Collider& collider);
+            #endif
+            
+            registry_type* m_registry;
             DynamicColliderSoA m_dynamicSoA;
             ColliderTree m_staticTree;
             HullColliderManager m_hullColliderManager;

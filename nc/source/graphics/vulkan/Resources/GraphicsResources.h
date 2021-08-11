@@ -25,6 +25,7 @@ namespace nc::graphics::vulkan
             MeshesData& operator=(MeshesData&&) = default;
             ~MeshesData();
 
+            const std::vector<std::string> GetMeshPaths() const;
             bool MeshExists(const std::string& uid) const noexcept;
             vk::Buffer* GetVertexBuffer();
             vk::Buffer* GetIndexBuffer();
