@@ -7,7 +7,8 @@
 
 namespace nc::physics
 {
-    /** Create ContactConstraints for every contact point in each manifold. */
+    /** Create contact constraints for every contact point in each manifold. Also creates
+     *  position constraints for each manifold if EnableDirectPositionCorrection == true. */
     auto GenerateConstraints(registry_type* registry, std::span<const Manifold> persistentManifolds) -> Constraints;
     
     /** Prepare joints for resolution. Applies worldpsace transformations and 

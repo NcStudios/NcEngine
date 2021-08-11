@@ -121,8 +121,11 @@ namespace nc
 
     void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
     {
-        auto torque_v = torque * m_angularFreedom;
-        m_angularVelocity += DirectX::XMVector3Transform(torque_v, m_invInertiaWorld);
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+            return;
+
+        auto restrictedTorque = torque * m_angularFreedom;
+        m_angularVelocity += DirectX::XMVector3Transform(restrictedTorque, m_invInertiaWorld);
     }
 
     void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
@@ -156,7 +159,8 @@ namespace nc
     IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
     {
         /** @todo Applying a force/velocity to a sleeping body will not wake it. That should
-         *  probably happen here. */
+         *  probably happen here. Note that it cannot happen in ApplyXXX because the collider
+         *  needs to be notified as well. */
         if(m_properties.isKinematic || !m_awake)
             return IntegrationResult::Ignored;
         
@@ -177,7 +181,6 @@ namespace nc
                     m_linearVelocity = DirectX::g_XMZero;
                     m_angularVelocity = DirectX::g_XMZero;
                     m_awake = false;
-
                     return IntegrationResult::PutToSleep;
                 }
             }
@@ -198,8 +201,6 @@ namespace nc
     template<> void ComponentGuiElement<PhysicsBody>(PhysicsBody* body)
     {
         const auto& properties = body->m_properties;
-    
-        
         ImGui::Text("PhysicsBody");
         ImGui::SameLine();
         body->m_awake ? ImGui::Text("(awake)") : ImGui::Text("(asleep)");

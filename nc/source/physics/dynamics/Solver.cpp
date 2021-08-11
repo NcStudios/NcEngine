@@ -11,8 +11,8 @@ namespace
     using namespace nc::physics;
 
     /** Default properties for entities without a PhysicsBody. */
-    const PhysicsProperties g_StaticPhysicsProperties = PhysicsProperties{.mass = 0.0f, .useGravity = false};
-    const DirectX::XMMATRIX g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
+    const auto g_StaticPhysicsProperties = PhysicsProperties{.mass = 0.0f, .useGravity = false};
+    const auto g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
 
     auto CreateContactConstraint(const Contact&, Entity, Entity, Transform*, Transform*, PhysicsBody*, PhysicsBody*) -> ContactConstraint;
     void UpdateJoint(registry_type* registry, Joint& joint, float dt);
@@ -314,7 +314,7 @@ namespace
     void UpdateJoint(registry_type* registry, Joint& joint, float dt)
     {
         // Get anchor world space positions
-        XMVECTOR pA;
+        XMVECTOR pA, pB;
         {
             auto* transformA = registry->Get<Transform>(joint.entityA);
             auto positionA = transformA->GetPosition();
@@ -322,10 +322,7 @@ namespace
             auto rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotationA));
             joint.rA = XMVector3Transform(joint.anchorA, rotMatrix);
             pA = XMLoadVector3(&positionA) + joint.rA;
-        }
 
-        XMVECTOR pB;
-        {
             auto* transformB = registry->Get<Transform>(joint.entityB);
             auto positionB = transformB->GetPosition();
             auto rotationB = transformB->GetRotation();
@@ -337,31 +334,38 @@ namespace
         /** Scale bias by time step and positional error */
         joint.bias = -1.0f * joint.biasFactor * (1.0f / dt) * (pB - pA);
 
+        /** Fetch inverse mass and inertia of each body */
         joint.bodyA = registry->Get<PhysicsBody>(joint.entityA);
         joint.bodyB = registry->Get<PhysicsBody>(joint.entityB);
         IF_THROW(!joint.bodyA || !joint.bodyB, "UpdateJoint - Entity does not have a PhysicsBody");
+        auto invMassA = joint.bodyA->GetInverseMass();
+        const auto& invInertiaA = joint.bodyA->GetInverseInertia();
+        auto invMassB = joint.bodyB->GetInverseMass();
+        const auto& invInertiaB = joint.bodyB->GetInverseInertia();
 
-        /** effectiveMass = [(M^-1) - (skewRA * iA^-1 * skewRA) - (skewRB * iB^-1 * skewRB)]^-1 */
-        auto invMass = joint.bodyA->GetInverseMass() + joint.bodyB->GetInverseMass();
-        auto k1 = XMMatrixScaling(invMass, invMass, invMass);
-        auto skewRA = Skew(joint.rA);
-        auto k2 = skewRA * joint.bodyA->GetInverseInertia() * skewRA; 
-        auto skewRB = Skew(joint.rB);
-        auto k3 = skewRB * joint.bodyB->GetInverseInertia() * skewRB;
-        joint.m = XMMatrixInverse(nullptr, k1 - k2 - k3);
+        /** effectiveMass = [(M^-1) - (skewRa * Ia^-1 * skewRa) - (skewRb * Ib^-1 * skewRb)]^-1 */
+        {
+            auto invMass = invMassA + invMassB;
+            auto k1 = XMMatrixScaling(invMass, invMass, invMass);
+            auto skewRa = Skew(joint.rA);
+            auto k2 = skewRa * invInertiaA * skewRa; 
+            auto skewRb = Skew(joint.rB);
+            auto k3 = skewRb * invInertiaB * skewRb;
+            joint.m = XMMatrixInverse(nullptr, k1 - k2 - k3);
+        }
 
         /** Apply or zero out accumulated impulse */
         if constexpr(EnableJointWarmstarting)
         {
-            auto vA = XMVectorScale(joint.p, joint.bodyA->GetInverseMass() * WarmstartFactor);
+            auto vA = XMVectorScale(joint.p, invMassA * WarmstartFactor);
             vA = XMVectorNegate(XMVectorScale(vA, WarmstartFactor));
-            auto wA = XMVector3Transform(XMVector3Cross(joint.rA, joint.p), joint.bodyA->GetInverseInertia());
+            auto wA = XMVector3Transform(XMVector3Cross(joint.rA, joint.p), invInertiaA);
             wA = XMVectorNegate(XMVectorScale(wA, WarmstartFactor));
             joint.bodyA->ApplyVelocities(vA, wA);
 
-            auto vB = XMVectorScale(joint.p, joint.bodyB->GetInverseMass());
+            auto vB = XMVectorScale(joint.p, invMassB);
             vB = XMVectorScale(vB, WarmstartFactor);
-            auto wB = XMVector3Transform(XMVector3Cross(joint.rB, joint.p), joint.bodyB->GetInverseInertia());
+            auto wB = XMVector3Transform(XMVector3Cross(joint.rB, joint.p), invInertiaB);
             wB =  XMVectorScale(wB, WarmstartFactor);
             joint.bodyB->ApplyVelocities(vB, wB);
         }
@@ -403,9 +407,13 @@ namespace nc::physics
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
         const auto manifoldCount = manifolds.size();
         std::vector<ContactConstraint> contactConstraints;
-        std::vector<PositionConstraint> positionConstraints;
         contactConstraints.reserve(manifoldCount * 4u);
-        positionConstraints.reserve(manifoldCount);
+
+        std::vector<PositionConstraint> positionConstraints;
+        if constexpr(EnableDirectPositionCorrection)
+        {
+            positionConstraints.reserve(manifoldCount);
+        }
 
         for(const auto& manifold : manifolds)
         {
