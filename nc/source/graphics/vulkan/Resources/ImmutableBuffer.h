@@ -73,7 +73,10 @@ namespace nc::graphics::vulkan
         if (m_immutableBuffer)
         {
             m_base->DestroyBuffer(m_memoryIndex);
+            m_immutableBuffer = nullptr;
         }
+
+        m_base = nullptr;
     }
 
     template<typename T, IncludedUsage UsageFlag_T>

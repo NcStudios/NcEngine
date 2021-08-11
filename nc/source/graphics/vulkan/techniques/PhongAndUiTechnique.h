@@ -42,8 +42,9 @@ namespace nc::graphics
                 ~PhongAndUiTechnique();
                 
                 void Bind(vk::CommandBuffer* cmd);
-                void RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
+                std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
                 void Record(vk::CommandBuffer* cmd);
+                void Clear();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);
@@ -55,7 +56,6 @@ namespace nc::graphics
                 Swapchain* m_swapchain;
                 vk::Pipeline m_pipeline;
                 vk::PipelineLayout m_pipelineLayout;
-                vk::DescriptorSetLayout m_descriptorSetLayout;
         };
     }
 }

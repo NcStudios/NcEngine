@@ -1,6 +1,6 @@
 #include "component/Collider.h"
+#include "component/vulkan/DebugWidget.h"
 #include "Ecs.h"
-#include "graphics/d3dresource/ConstantBufferResources.h"
 #include "debug/Utils.h"
 
 #ifdef NC_EDITOR_ENABLED
@@ -13,7 +13,6 @@ namespace
     const auto CubeMeshPath = std::string{"project/assets/mesh/cube.nca"};
     const auto SphereMeshPath = std::string{"project/assets/mesh/sphere.nca"};
     const auto CapsuleMeshPath = std::string{"project/assets/mesh/capsule.nca"};
-    const auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
 
     #ifdef NC_DEBUG_BUILD
     bool IsUniformScale(const nc::Vector3& scale)
@@ -21,38 +20,6 @@ namespace
         return nc::math::FloatEqual(scale.x, scale.y) && nc::math::FloatEqual(scale.y, scale.z);
     }
     #endif
-
-    // Changed to unique_ptr for dx11, change back with vulkan
-    // nc::graphics::Model CreateWireframeModel(nc::ColliderType type)
-    // {
-    //     switch(type)
-    //     {
-    //         case nc::ColliderType::Box:
-    //             return nc::graphics::Model{ {CubeMeshPath}, CreateMaterial() };
-    //         case nc::ColliderType::Sphere:
-    //             return nc::graphics::Model{ {SphereMeshPath}, CreateMaterial() };
-    //         default:
-    //             throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
-    //     }
-    // }
-
-    /** @todo Currently no solution for hull widget. */
-    std::unique_ptr<nc::graphics::Model> CreateWireframeModelPtr(nc::ColliderType type)
-    {
-        const std::string& path = [](nc::ColliderType type) -> const std::string&
-        {
-            switch(type)
-            {
-                case nc::ColliderType::Box: return CubeMeshPath;
-                case nc::ColliderType::Sphere: return SphereMeshPath;
-                case nc::ColliderType::Capsule: return CapsuleMeshPath;
-                case nc::ColliderType::Hull: return SphereMeshPath;
-                default: throw std::runtime_error("CreateWireFrameModel - Unknown ColliderType");
-            }
-        }(type);
-
-        return std::make_unique<nc::graphics::Model>(nc::graphics::Mesh{path}, CreateMaterial());
-    }
 }
 #endif
 
@@ -66,7 +33,6 @@ namespace nc
                  .assetPath = ""}
           #ifdef NC_EDITOR_ENABLED
           ,
-          m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
           m_selectedInEditor{false}
           #endif
     {
@@ -82,7 +48,6 @@ namespace nc
                  .assetPath = ""}
           #ifdef NC_EDITOR_ENABLED
           ,
-          m_widgetModel{CreateWireframeModelPtr(ColliderType::Box)},
           m_selectedInEditor{false}
           #endif
     {
@@ -97,7 +62,6 @@ namespace nc
                  .assetPath = ""}
           #ifdef NC_EDITOR_ENABLED
           ,
-          m_widgetModel{CreateWireframeModelPtr(ColliderType::Capsule)},
           m_selectedInEditor{false}
           #endif
     {
@@ -112,7 +76,6 @@ namespace nc
                  .assetPath = std::move(properties.assetPath)}
           #ifdef NC_EDITOR_ENABLED
           ,
-          m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
           m_selectedInEditor{false}
           #endif
     {
@@ -129,23 +92,28 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Collider::UpdateWidget(graphics::FrameManager* frame)
+    void Collider::UpdateWidget()
     {
+        auto* debugWidget = ActiveRegistry()->Get<vulkan::DebugWidget>(GetParentEntity());
+
         // Expire to false to avoid state management in editor (it sets this to true as needed)
         if(!std::exchange(m_selectedInEditor, false))
+        {
+            debugWidget->Enable(false);
             return;
+        }
+
+        debugWidget->Enable(true);
 
         const auto& scale = m_info.scale;
         const auto& offset = m_info.offset; 
 
-        m_widgetModel->SetTransformationMatrix
+        debugWidget->SetTransformationMatrix
         (
             DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
             ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix() *
             DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
-
-        m_widgetModel->Submit(frame);
     }
 
     void Collider::SetEditorSelection(bool state)

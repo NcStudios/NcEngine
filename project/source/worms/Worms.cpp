@@ -20,21 +20,42 @@ namespace nc::sample
         auto camera = registry->Add<Camera>(cameraEntity);
         camera::SetMainCamera(camera);
 
+        // Window
+        window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});
+
         // Light
-        auto lightProperties = PointLight::Properties
+        auto lightOneProperties = vulkan::PointLightInfo
         {
-            .pos = Vector3::Zero(),
-            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-            .diffuseIntensity = 3.56,
-            .attConst = 0.0f,
-            .attLin = 0.05f,
-            .attQuad = 0.0f
+            .pos = Vector4::Zero(),
+            .ambient = Vector4{1.0f, 1.0f, 1.0f, 1.0f},
+            .diffuseColor = Vector4{1.0f, 1.0f, 1.0f, 1.0f},
+            .specularColor = Vector4{1.0, 1.0f, 1.0f, 1.0f},
+            .diffuseIntensity = 20.0f,
+            .attConst = 1.0f,
+            .attLin = 0.0014f,
+            .attQuad = 0.000007f
+        };
+
+        // Light
+        auto lightTwoProperties = vulkan::PointLightInfo
+        {
+            .pos = Vector4::Splat(5.0f),
+            .ambient = Vector4{1.0f, 1.0f, 1.0f, 1.0f},
+            .diffuseColor = Vector4{1.0f, 1.0f, 1.0f, 1.0f},
+            .specularColor = Vector4{1.0, 1.0f, 1.0f, 1.0f},
+            .diffuseIntensity = 20.0f,
+            .attConst = 1.0f,
+            .attLin = 0.0014f,
+            .attQuad = 0.000007f
         };
 
         auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});
-        registry->Add<PointLight>(lightHandle, lightProperties);
+        registry->Add<vulkan::PointLight>(lightHandle, lightOneProperties);
         registry->Add<MouseFollower>(lightHandle, registry);
+
+        auto lightTwoHandle = registry->Add<Entity>({.tag = "Point Light"});
+        registry->Add<vulkan::PointLight>(lightTwoHandle, lightTwoProperties);
+        registry->Add<MouseFollower>(lightTwoHandle, registry);
 
         // Worm Spawner
         SpawnBehavior spawnBehavior

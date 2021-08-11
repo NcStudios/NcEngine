@@ -26,9 +26,18 @@ namespace nc::graphics::vulkan
             void BeginRenderPass(vk::CommandBuffer* cmd, vulkan::Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
             void Record(Commands* commands);
             void BindSharedData(vk::CommandBuffer* cmd);
+            void Clear();
 
             void RegisterMeshRenderer(TechniqueType technique, nc::vulkan::MeshRenderer* renderer);
+            void ClearMeshRenderers();
+
             void RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates);
+            void ClearParticleEmitters();
+
+            void RegisterDebugWidget(nc::vulkan::DebugWidget* widget);
+            void ClearDebugWidgets();
+
+            void DeregisterRenderable(Entity entity);
 
         private:
             void RecordUi(vk::CommandBuffer* cmd);
@@ -38,6 +47,7 @@ namespace nc::graphics::vulkan
             MeshManager m_meshManager;
             vk::RenderPass m_mainRenderPass;
 
+            std::vector<std::pair<Entity, std::vector<Entity>*>> m_storageHandles;
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;
             std::unique_ptr<WireframeTechnique> m_wireframeTechnique;
             std::unique_ptr<ParticleTechnique> m_particleTechnique;

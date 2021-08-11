@@ -3,6 +3,8 @@
 #include "Ecs.h"
 #include "Input.h"
 
+#include <iostream>
+
 namespace nc::sample
 {
     class WasdController : public AutoComponent
@@ -32,5 +34,16 @@ namespace nc::sample
         auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * m_speed * dt;
 
         m_registry->Get<Transform>(GetParentEntity())->Translate(Vector3{leftRight, upDown, frontBack});
+
+        if (input::GetKeyDown(input::KeyCode::B))
+        {
+            std::cout << "Remove pressed.\n";
+            m_registry->Remove<vulkan::PointLight>(GetParentEntity());
+        }
+        else if (input::GetKeyDown(input::KeyCode::V))
+        {
+            std::cout << "Add pressed.\n";
+            m_registry->Add<vulkan::PointLight>(GetParentEntity(), vulkan::PointLightInfo{.specularColor = Vector4(0.75f, 0.5f, 0.5f, 0.0f)});
+        }
     }
 }

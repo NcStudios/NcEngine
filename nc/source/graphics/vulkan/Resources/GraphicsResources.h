@@ -21,7 +21,11 @@ namespace nc::graphics::vulkan
             MeshesData(ImmutableBuffer<Vertex> vertexBuffer, 
                        ImmutableBuffer<uint32_t> indexBuffer, 
                        std::unordered_map<std::string, Mesh> accessors);
-                       
+            MeshesData(MeshesData&&) = default;
+            MeshesData& operator=(MeshesData&&) = default;
+            ~MeshesData();
+
+            const std::vector<std::string> GetMeshPaths() const;
             bool MeshExists(const std::string& uid) const noexcept;
             vk::Buffer* GetVertexBuffer();
             vk::Buffer* GetIndexBuffer();
@@ -45,6 +49,9 @@ namespace nc::graphics::vulkan
                          vk::UniqueDescriptorSetLayout descriptorSetLayout,
                          vk::UniqueSampler sampler,
                          vk::ImageLayout layout);
+            TexturesData(TexturesData&&) = default;
+            TexturesData& operator=(TexturesData&&) = default;
+            ~TexturesData();
 
             bool TextureExists(const std::string& uid) const noexcept;
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
@@ -69,11 +76,14 @@ namespace nc::graphics::vulkan
     {
         public:
             PointLightsData() = default;
-            PointLightsData(nc::graphics::Graphics2* graphics, uint32_t maxPointLights);
+            PointLightsData(Graphics2* graphics, uint32_t maxPointLights);
+            PointLightsData(PointLightsData&&) = default;
+            PointLightsData& operator=(PointLightsData&&) = default;
+            ~PointLightsData();
+
             void Update(const std::vector<nc::vulkan::PointLightInfo>& pointLights);
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
             vk::DescriptorSet* GetDescriptorSet() noexcept; 
-            void Clear() noexcept;
 
         private:
             WriteableBuffer<nc::vulkan::PointLightInfo> m_pointLightsArrayBuffer;

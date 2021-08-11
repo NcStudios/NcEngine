@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Ecs.h"
-#include "component/vulkan/MeshRenderer.h"
+#include "component/vulkan/DebugWidget.h"
 #include "graphics/vulkan/MeshManager.h"
-#include "graphics/vulkan/TextureManager.h"
 
 namespace nc::graphics 
 {
@@ -12,12 +11,12 @@ namespace nc::graphics
 
 namespace nc::ecs
 {
-    class MeshRendererSystem
+    class DebugWidgetSystem
     {
         public:
-            MeshRendererSystem(registry_type* registry, graphics::Graphics2* graphics);
+            DebugWidgetSystem(registry_type* registry, graphics::Graphics2* graphics);
 
-            void Add(vulkan::MeshRenderer& meshRenderer);
+            void Add(vulkan::DebugWidget& debugWidget);
             void Remove(Entity entity);
             void Clear();            
 

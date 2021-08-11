@@ -26,8 +26,13 @@ namespace nc::ecs
         m_graphics->GetRendererPtr()->RegisterMeshRenderer(techniqueType, &meshRenderer);
     }
 
-    void MeshRendererSystem::Remove(Entity)
+    void MeshRendererSystem::Remove(Entity entity)
     {
-        //@todo
+        m_graphics->GetRendererPtr()->DeregisterRenderable(entity);
+    }
+
+    void MeshRendererSystem::Clear()
+    {
+        m_graphics->GetRendererPtr()->ClearMeshRenderers();
     }
 }

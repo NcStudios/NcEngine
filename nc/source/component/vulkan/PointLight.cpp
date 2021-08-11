@@ -46,13 +46,11 @@ namespace nc::vulkan
         m_info.attLin = attenuation.linear;
         m_info.attQuad = attenuation.quadratic;
         m_info.pos = Vector4(transformPos.x, transformPos.y, transformPos.z, 1.0);
-        m_info.isInitialized = true;
     }
 
     void PointLight::SetInfo(PointLightInfo info)
     {
         m_info = info;
-        m_info.isInitialized = true;
     }
 
     void PointLight::SetRange(float range)
@@ -74,6 +72,7 @@ namespace nc
         Vector4 diffuse = info.diffuseColor;
         Vector4 specular = info.specularColor;
         float diffuseIntensity = info.diffuseIntensity;
+        bool initialized = info.isInitialized;
 
         const float dragSpeed = 1.0f;
         ImGui::Text("Point Light");
@@ -101,6 +100,7 @@ namespace nc
                 auto diffuseIntensityResult = ui::editor::floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 600.0f, "%.2f");
                 auto rangeResult = ui::editor::floatWidget("Range", "range", &range, dragSpeed,  0.0f, 600.0f, "%.2f");
             ImGui::Unindent();
+            ImGui::Checkbox("IsInitialized", &initialized);
         ImGui::Unindent();
 
         if (rangeResult) light->SetRange(range);

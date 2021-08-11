@@ -111,8 +111,20 @@ namespace nc::graphics::vulkan
         std::vector<Vertex> allVertices = {};
         std::vector<uint32_t> allIndices = {};
         std::unordered_map<std::string, Mesh> meshes;
+        std::vector<std::string> pathsToLoad;
 
-        for (auto& path : meshPaths)
+        auto meshesExist = ResourceManager::HasMeshes();
+        if (meshesExist)
+        {
+            pathsToLoad = ResourceManager::GetMeshPaths();
+            pathsToLoad.insert(meshPaths.end(), meshPaths.begin(), meshPaths.end());
+        }
+        else
+        {
+            pathsToLoad = meshPaths;
+        }
+
+        for (auto& path : pathsToLoad)
         {
             if (ResourceManager::MeshExists(path)) continue;
 
@@ -150,7 +162,7 @@ namespace nc::graphics::vulkan
 
         auto vertexBuffer = ImmutableBuffer<Vertex>(m_graphics, std::move(allVertices));
         auto indexBuffer = ImmutableBuffer<uint32_t>(m_graphics, std::move(allIndices));
-        auto meshesData = MeshesData(std::move(vertexBuffer), std::move(indexBuffer), std::move(meshes));
+        auto meshesData = std::make_unique<MeshesData>(std::move(vertexBuffer), std::move(indexBuffer), std::move(meshes));
         ResourceManager::LoadMeshes(std::move(meshesData));
     }
 }

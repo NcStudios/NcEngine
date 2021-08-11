@@ -1,6 +1,8 @@
 #include "GraphicsResources.h"
 #include "graphics/vulkan/Initializers.h"
 
+#include <iostream>
+
 namespace nc::graphics::vulkan
 {
     MeshesData::MeshesData(ImmutableBuffer<Vertex> vertexBuffer, 
@@ -10,6 +12,24 @@ namespace nc::graphics::vulkan
       m_indexBuffer{std::move(indexBuffer)},
       m_accessors(std::move(accessors))
     {
+    }
+
+    MeshesData::~MeshesData()
+    {
+        Clear();
+    }
+
+    const std::vector<std::string> MeshesData::GetMeshPaths() const
+    {
+        std::vector<std::string> meshPaths;
+        meshPaths.reserve(m_accessors.size());
+
+        for (auto keyValue : m_accessors)
+        {
+            meshPaths.push_back(keyValue.first);
+        }
+
+        return meshPaths;
     }
 
     bool MeshesData::MeshExists(const std::string& uid) const noexcept
@@ -56,6 +76,19 @@ namespace nc::graphics::vulkan
     {
     }
 
+    TexturesData::~TexturesData()
+    {
+        for (auto& texture : m_textureBuffers)
+        {
+            texture.Clear();
+        }
+
+        m_textureBuffers.resize(0);
+        m_descriptorSet.reset();
+        m_descriptorSetLayout.reset();
+        m_sampler.reset();
+    }
+
     bool TexturesData::TextureExists(const std::string& uid) const noexcept
     {
         return m_accessors.contains(uid);
@@ -84,12 +117,9 @@ namespace nc::graphics::vulkan
         }
 
         m_textureBuffers.resize(0);
-        m_descriptorSet.reset();
-        m_descriptorSetLayout.reset();
-        m_sampler.reset();
     }
 
-    PointLightsData::PointLightsData(nc::graphics::Graphics2* graphics, uint32_t maxPointLights)
+    PointLightsData::PointLightsData(Graphics2* graphics, uint32_t maxPointLights)
     {
         auto base = graphics->GetBasePtr();
 
@@ -115,6 +145,13 @@ namespace nc::graphics::vulkan
         base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
     }
 
+    PointLightsData::~PointLightsData()
+    {
+        m_pointLightsArrayBuffer.Clear();
+        m_descriptorSet.reset();
+        m_descriptorSetLayout.reset();
+    }
+
     void PointLightsData::Update(const std::vector<nc::vulkan::PointLightInfo>& pointLights)
     {
         m_pointLightsArrayBuffer.Map(pointLights);
@@ -128,12 +165,5 @@ namespace nc::graphics::vulkan
     vk::DescriptorSet* PointLightsData::GetDescriptorSet() noexcept
     {
         return &m_descriptorSet.get();
-    }
-
-    void PointLightsData::Clear() noexcept
-    {
-        m_pointLightsArrayBuffer.Clear();
-        m_descriptorSet.reset();
-        m_descriptorSetLayout.reset();
     }
 }

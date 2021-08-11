@@ -40,6 +40,7 @@ namespace nc::graphics
                 void Bind(vk::CommandBuffer* cmd);
                 void RegisterEmitters(std::vector<particle::EmitterState>* emitterStates);
                 void Record(vk::CommandBuffer* cmd);
+                void Clear();
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);
@@ -50,7 +51,6 @@ namespace nc::graphics
                 Swapchain* m_swapchain;
                 vk::Pipeline m_pipeline;
                 vk::PipelineLayout m_pipelineLayout;
-                vk::DescriptorSetLayout m_descriptorSetLayout;
         };
     }
 }

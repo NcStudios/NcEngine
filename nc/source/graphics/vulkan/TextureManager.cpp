@@ -103,7 +103,7 @@ namespace nc::graphics::vulkan
         // m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(2, writeDescriptorSets.data(), 0, nullptr);
 
 
-        auto texturesData = TexturesData(std::move(images), std::move(imageInfos), std::move(accessors), std::move(descriptorSet), std::move(layout), std::move(sampler), layoutType);
+        auto texturesData = std::make_unique<TexturesData>(std::move(images), std::move(imageInfos), std::move(accessors), std::move(descriptorSet), std::move(layout), std::move(sampler), layoutType);
 
         // Send the vulkan objects over to Resource Manager.
         ResourceManager::LoadTextures(std::move(texturesData));
