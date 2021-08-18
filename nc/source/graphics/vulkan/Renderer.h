@@ -34,8 +34,10 @@ namespace nc::graphics::vulkan
             void RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates);
             void ClearParticleEmitters();
 
-            void RegisterDebugWidget(nc::vulkan::DebugWidget* widget);
-            void ClearDebugWidgets();
+            #ifdef NC_EDITOR_ENABLED
+            void RegisterDebugWidget(nc::vulkan::DebugWidget widget);
+            void ClearDebugWidget();
+            #endif
 
             void DeregisterRenderable(Entity entity);
 
