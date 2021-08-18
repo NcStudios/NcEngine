@@ -24,8 +24,10 @@ namespace nc::debug::profiler
                 return "All";
             case Filter::Logic:
                 return "Logic";
-            case Filter::Physics:
-                return "Physics";
+            case Filter::Collision:
+                return "Collision";
+            case Filter::Dynamics:
+                return "Dynamics";
             case Filter::Rendering:
                 return "Rendering";
             case Filter::User:

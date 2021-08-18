@@ -45,8 +45,11 @@ namespace nc
             virtual void FixedUpdate() {}
             virtual void OnDestroy() {}
             virtual void OnCollisionEnter(Entity) {}
-            virtual void OnCollisionStay(Entity) {};
-            virtual void OnCollisionExit(Entity) {};
+            virtual void OnCollisionStay(Entity) {}
+            virtual void OnCollisionExit(Entity) {}
+            virtual void OnTriggerEnter(Entity) {}
+            virtual void OnTriggerStay(Entity) {}
+            virtual void OnTriggerExit(Entity) {}
 
             #ifdef NC_EDITOR_ENABLED
             virtual void ComponentGuiElement();

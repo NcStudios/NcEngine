@@ -1,7 +1,8 @@
 #pragma once
 
-#include "CollisionVolumes.h"
 #include "Simplex.h"
+#include "Manifold.h"
+#include "debug/Profiler.h"
 
 #include <vector>
 
@@ -13,10 +14,13 @@ namespace nc::physics
             void Initialize(const Simplex& simplex);
             auto GetNormalData(size_t index) const -> NormalData;
             auto ComputeNormalData() -> size_t;
-            auto Expand(const Vector3& support, size_t* oldMinFace) -> bool;
+            auto Expand(const Vector3& supportCSO, const Contact& contact, size_t* oldMinFace) -> bool;
+            bool GetContacts(size_t minFace, Contact* contact) const;
 
         private:
             std::vector<Vector3> m_vertices;
+            std::vector<std::pair<Vector3, Vector3>> m_worldSupports;
+            std::vector<std::pair<Vector3, Vector3>> m_localSupports;
             std::vector<size_t> m_indices;
             std::vector<NormalData> m_normals;
             std::vector<std::pair<size_t, size_t>> m_edges;
@@ -25,7 +29,6 @@ namespace nc::physics
 
             enum class DataSet { Merged, Unmerged };
 
-            std::vector<size_t> InitialFaces();
             void CreateIndicesFromEdges();
             void MergeNewFeatures();
             void CheckEdge(size_t a, size_t b);

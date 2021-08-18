@@ -76,6 +76,10 @@ namespace nc
     constexpr auto operator *(float scalar, const Vector3& vec) noexcept -> Vector3;
     constexpr auto operator /(const Vector3& vec, float scalar) noexcept -> Vector3;
     constexpr auto operator -(const Vector3& vec) noexcept -> Vector3;
+    constexpr auto operator +=(Vector3& lhs, const Vector3& rhs) noexcept -> Vector3&;
+    constexpr auto operator -=(Vector3& lhs, const Vector3& rhs) noexcept -> Vector3&;
+    constexpr auto operator *=(Vector3& lhs, float rhs) noexcept -> Vector3&;
+    constexpr auto operator /=(Vector3& lhs, float rhs) noexcept -> Vector3&;
     constexpr auto Dot(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
     constexpr auto CrossProduct(const Vector3& lhs, const Vector3& rhs) noexcept -> Vector3;
     constexpr auto TripleCrossProduct(const Vector3& a, const Vector3& b, const Vector3& c) noexcept -> Vector3;
@@ -87,6 +91,8 @@ namespace nc
     constexpr auto SquareDistance(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
     constexpr auto Distance(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
     constexpr auto HasAnyZeroElement(const Vector3& vec) noexcept -> bool;
+    constexpr auto OrthogonalTo(const Vector3& vec) noexcept -> Vector3;
+    constexpr void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept;
 
     /* Vector4 Functions */
     constexpr auto operator ==(const Vector4& lhs, const Vector4& rhs) noexcept -> bool;
@@ -235,6 +241,30 @@ namespace nc
         return vec * -1.0f;
     }
 
+    constexpr Vector3& operator +=(Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        lhs = lhs + rhs;
+        return lhs;
+    }
+
+    constexpr Vector3& operator -=(Vector3& lhs, const Vector3& rhs) noexcept
+    {
+        lhs = lhs - rhs;
+        return lhs;
+    }
+
+    constexpr Vector3& operator *=(Vector3& lhs, float rhs) noexcept
+    {
+        lhs = lhs * rhs;
+        return lhs;
+    }
+
+    constexpr Vector3& operator /=(Vector3& lhs, float rhs) noexcept
+    {
+        lhs = lhs / rhs;
+        return lhs;
+    }
+
     constexpr float Dot(const Vector3& lhs, const Vector3& rhs) noexcept
     {
         return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
@@ -293,6 +323,20 @@ namespace nc
     constexpr bool HasAnyZeroElement(const Vector3& vec) noexcept
     {
         return math::FloatEqual(vec.x, 0.0f) || math::FloatEqual(vec.y, 0.0f) || math::FloatEqual(vec.z, 0.0f);
+    }
+
+    constexpr Vector3 OrthogonalTo(const Vector3& vec) noexcept
+    {
+        constexpr float invSqrt3 = 1.0f / sqrt(3.0f);
+        return (abs(vec.x) >= invSqrt3) ?
+            Normalize(Vector3{vec.y, -1.0f * vec.x, 0.0f}) :
+            Normalize(Vector3{0.0f, vec.z, -1.0f * vec.y});
+    }
+
+    constexpr void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept
+    {
+        *a = OrthogonalTo(vec);
+        *b = CrossProduct(*a, vec);
     }
 
     /* Vector 4 Implementation */

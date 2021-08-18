@@ -49,7 +49,7 @@ namespace nc::core
 
             void ClearState();
             void DoSceneSwap();
-            void FixedStepLogic();
+            void FixedStepLogic(float dt);
             void FrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();

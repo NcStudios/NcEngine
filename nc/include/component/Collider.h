@@ -1,6 +1,7 @@
 #pragma once
 
 #include "component/Component.h"
+#include "physics/CollisionVolumes.h"
 #include "physics/LayerMask.h"
 #include <string>
 
@@ -58,21 +59,29 @@ namespace nc
                 ColliderType type;
                 Vector3 offset;
                 Vector3 scale;
-                std::string assetPath;
+                std::string hullAssetPath;
+                bool isTrigger;
             };
 
-            Collider(Entity entity, SphereProperties properties);
-            Collider(Entity entity, BoxProperties properties);
-            Collider(Entity entity, CapsuleProperties properties);
-            Collider(Entity entity, HullProperties properties);
+            Collider(Entity entity, SphereProperties properties, bool isTrigger);
+            Collider(Entity entity, BoxProperties properties, bool isTrigger);
+            Collider(Entity entity, CapsuleProperties properties, bool isTrigger);
+            Collider(Entity entity, HullProperties properties, bool isTrigger);
             ~Collider() = default;
             Collider(const Collider&) = delete;
             Collider(Collider&&) = default;
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
 
-            const VolumeInfo& GetInfo() const;
-            ColliderType GetType() const;
+            void Wake() { m_awake = true; }
+            void Sleep() { m_awake = false; }
+
+            auto GetInfo() const -> const VolumeInfo& { return m_info; }
+            auto GetType() const -> ColliderType { return m_info.type; }
+            auto GetVolume() const -> const BoundingVolume& { return m_volume; }
+            auto IsTrigger() const -> bool { return m_info.isTrigger; }
+            auto IsAwake() const -> bool { return m_awake; }
+            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
 
            #ifdef NC_EDITOR_ENABLED
             void UpdateWidget(graphics::vulkan::Renderer* renderer);
@@ -81,11 +90,15 @@ namespace nc
 
         private:
             VolumeInfo m_info;
+            BoundingVolume m_volume;
+            bool m_awake;
 
             #ifdef NC_EDITOR_ENABLED
             bool m_selectedInEditor;
             #endif
     };
+    
+    const char* ToCString(nc::ColliderType type);
 
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<Collider>(Collider*);

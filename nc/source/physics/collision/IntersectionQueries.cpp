@@ -1,9 +1,19 @@
 #include "IntersectionQueries.h"
 #include "debug/Utils.h"
+#include "debug/Profiler.h"
 
 #include <algorithm>
 #include <array>
 #include <stdexcept>
+
+#include <iostream> // remove once minDistance error is figured out
+
+/** @todo 
+ *  - Rather than having MinkowskiSupport determine the collider type,
+ *    figure it out at the top level call. This will branch once per collider
+ *    rather than each gjk/epa loop iteration.
+ *  - Collisions can be more efficient in certain situations. For example, 
+ *    narrow phase sphere vs. sphere uses full gjk + epa, which is silly. */
 
 namespace nc::physics
 {
@@ -40,17 +50,21 @@ namespace nc::physics
         while(++itCount <= GjkMaxIterations)
         {
             const auto direction_v = XMLoadVector3(&direction);
-            auto support_v = MinkowskiSupport(a, direction_v) - MinkowskiSupport(b, XMVectorNegate(direction_v));
+            auto supportA_v = MinkowskiSupport(a, direction_v);
+            auto supportB_v = MinkowskiSupport(b, XMVectorNegate(direction_v));
+            auto supportCSO_v =  supportA_v - supportB_v;
 
-            if(XMVector3Less(XMVector3Dot(support_v, direction_v), g_XMZero))
+            if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
                 break;
 
-            Vector3 support;
-            XMStoreVector3(&support, support_v);
+            Vector3 supportCSO, supportA, supportB;
+            XMStoreVector3(&supportCSO, supportCSO_v);
+            XMStoreVector3(&supportA, supportA_v);
+            XMStoreVector3(&supportB, supportB_v);
 
-            simplex.push_front(support);
+            simplex.PushFront(supportCSO, supportA, supportB, supportA, supportB);
 
-            if(RefineSimplex[simplex.size() - 1](simplex, direction))
+            if(RefineSimplex[simplex.Size() - 1](simplex, direction))
                 return true;
         }
 
@@ -83,28 +97,38 @@ namespace nc::physics
         {
             const auto direction_v = XMLoadVector3(&direction);
             auto aDirection_v = XMVector3InverseRotate(direction_v, stateOut->rotationA);
-            auto aSupport_v = XMVector3Transform(MinkowskiSupport(a, aDirection_v), aMatrix);
+            auto aSupportLocal_v = MinkowskiSupport(a, aDirection_v);
+            auto aSupportWorld_v = XMVector3Transform(aSupportLocal_v, aMatrix);
             auto bDirection_v = XMVector3InverseRotate(XMVectorNegate(direction_v), stateOut->rotationB);
-            auto bSupport_v = XMVector3Transform(MinkowskiSupport(b, bDirection_v), bMatrix);
-            auto support_v = aSupport_v - bSupport_v;
+            auto bSupportLocal_v = MinkowskiSupport(b, bDirection_v);
+            auto bSupportWorld_v = XMVector3Transform(bSupportLocal_v, bMatrix);
+            auto supportCSO_v = aSupportWorld_v - bSupportWorld_v;
 
-            if(XMVector3Less(XMVector3Dot(support_v, direction_v), g_XMZero))
+            if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
                 break;
 
-            Vector3 support;
-            XMStoreVector3(&support, support_v);
+            Vector3 supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB;
+            XMStoreVector3(&supportCSO, supportCSO_v);
+            XMStoreVector3(&worldSupportA, aSupportWorld_v);
+            XMStoreVector3(&worldSupportB, bSupportWorld_v);
+            XMStoreVector3(&localSupportA, aSupportLocal_v);
+            XMStoreVector3(&localSupportB, bSupportLocal_v);
 
-            stateOut->simplex.push_front(support);
+            stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
 
-            if(RefineSimplex[stateOut->simplex.size() - 1](stateOut->simplex, direction))
+            if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
+            {
                 return true;
+            }
         }
 
         return false;
     }
 
-    NormalData Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state)
+    bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state)
     {
+        /** @todo Storing the points for contact could be cleaner/more efficient */
+
         state->polytope.Initialize(state->simplex);
         auto minFace = state->polytope.ComputeNormalData();
         NormalData minNorm{Vector3::Zero(), FloatMax};
@@ -121,29 +145,47 @@ namespace nc::physics
             // Find a point on the Minkowski hull in the direction of the closest face's normal.
             auto direction_v = XMLoadVector3(&minNorm.normal);
             auto aDirection_v = XMVector3InverseRotate(direction_v, state->rotationA);
-            auto aSupport_v = XMVector3Transform(MinkowskiSupport(a, aDirection_v), aMatrix);
+            auto aSupportLocal_v = MinkowskiSupport(a, aDirection_v);
+            auto aSupportWorld_v = XMVector3Transform(aSupportLocal_v, aMatrix);
             auto bDirection_v = XMVector3InverseRotate(XMVectorNegate(direction_v), state->rotationB);
-            auto bSupport_v = XMVector3Transform(MinkowskiSupport(b, bDirection_v), bMatrix);
-            auto support_v = aSupport_v - bSupport_v;
+            auto bSupportLocal_v = MinkowskiSupport(b, bDirection_v);
+            auto bSupportWorld_v = XMVector3Transform(bSupportLocal_v, bMatrix);
+            auto support_v = aSupportWorld_v - bSupportWorld_v;
             Vector3 support;
             XMStoreVector3(&support, support_v);
+
+            XMStoreVector3(&(state->contact.worldPointA), aSupportWorld_v);
+            XMStoreVector3(&(state->contact.worldPointB), bSupportWorld_v);
+            XMStoreVector3(&(state->contact.localPointA), aSupportLocal_v);
+            XMStoreVector3(&(state->contact.localPointB), bSupportLocal_v);
 
             if(abs(Dot(minNorm.normal, support) - minNorm.distance) > EpaTolerance)
             {
                 // The closest face is not on the hull, so we expand towards the hull.
-                if(!state->polytope.Expand(support, &minFace))
+                if(!state->polytope.Expand(support, state->contact, &minFace))
                 {
                     /** @todo Need to determine if this can happen under normal circumstances.
                      *  It has thrown here a few times, but always when there is wonk elsewhere. */
-                    throw std::runtime_error("Epa - minDistance not found");
+                    //throw std::runtime_error("Epa - minDistance not found");
+                    std::cout << "Epa - minDistance not found\n";
+                    state->contact.depth = 0.0f;
+                    state->contact.lambda = 0.0f;
+                    state->contact.muTangent = 0.0f;
+                    state->contact.muBitangent = 0.0f;
+                    return false;
                 }
 
                 minNorm.distance = FloatMax;
             }
         }
-        
-        minNorm.distance += EpaTolerance;
-        return minNorm;
+
+        auto success = state->polytope.GetContacts(minFace, &state->contact);
+        state->contact.normal = Normalize(minNorm.normal);
+        state->contact.depth = minNorm.distance + EpaTolerance;
+        state->contact.lambda = 0.0f;
+        state->contact.muTangent = 0.0f;
+        state->contact.muBitangent = 0.0f;
+        return success;
     }
 
     XMVECTOR GetRotation(FXMMATRIX matrix)

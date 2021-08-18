@@ -74,7 +74,7 @@ namespace nc::core
           m_window{ hInstance },
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_renderer{ &m_graphics2 },
-          m_ecs{&m_graphics2, config::GetMemorySettings(), config::GetPhysicsSettings()},
+          m_ecs{&m_graphics2, config::GetMemorySettings()},
           m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
           m_sceneSystem{},
           m_time{},
@@ -93,13 +93,14 @@ namespace nc::core
           m_graphics{ m_window.GetHWND(), m_window.GetDimensions() },
           m_pointLightManager{},
           m_frameManager{},
-          m_ecs{&m_graphics, config::GetMemorySettings(), config::GetPhysicsSettings()},
-          m_physics{&m_graphics, m_ecs.GetColliderSystem(), &m_jobSystem},
+          m_ecs{&m_graphics, config::GetMemorySettings()},
+          m_physics{&m_graphics, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
           m_ui{m_window.GetHWND(), &m_graphics}
     {
         SetBindings();
+        m_ecs.GetRegistry()->VerifyCallbacks();
         V_LOG("Engine initialized");
     }
     #endif
@@ -132,7 +133,7 @@ namespace nc::core
             FrameLogic(dt);
 
             /** @todo see fixedUpdateInterval todo above */
-            FixedStepLogic();
+            FixedStepLogic(dt);
 
             particleUpdateJobResult.wait();
 
@@ -175,16 +176,14 @@ namespace nc::core
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
     }
 
-    void Engine::FixedStepLogic()
+    void Engine::FixedStepLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Physics);
-        m_physics.DoPhysicsStep();
+        m_physics.DoPhysicsStep(dt);
 
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFixedUpdate();
 
         m_time.ResetFixedDeltaTime();
-        NC_PROFILE_END();
     }
 
     void Engine::FrameLogic(float dt)
@@ -260,6 +259,10 @@ namespace nc::core
         m_ecs.GetParticleEmitterSystem()->RenderParticles();
 
         m_frameManager.Execute(&m_graphics);
+
+        #ifdef NC_DEBUG_RENDERING
+        m_physics.DebugRender();
+        #endif
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());

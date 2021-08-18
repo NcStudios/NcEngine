@@ -12,6 +12,9 @@ namespace nc::sample
             void OnCollisionEnter(Entity hit) override;
             void OnCollisionStay(Entity hit) override;
             void OnCollisionExit(Entity hit) override;
+            void OnTriggerEnter(Entity hit) override;
+            void OnTriggerStay(Entity hit) override;
+            void OnTriggerExit(Entity hit) override;
         
         private:
             registry_type* m_registry;
@@ -39,5 +42,23 @@ namespace nc::sample
     {
         if(auto* tag = m_registry->Get<Tag>(hit); tag)
             GameLog::Log(std::string{"Collision Exit: "} + tag->Value().data());
+    }
+
+    inline void CollisionLogger::OnTriggerEnter(Entity hit)
+    {
+        if(auto* tag = m_registry->Get<Tag>(hit); tag)
+            GameLog::Log(std::string{"Trigger Enter: "} + tag->Value().data());
+    }
+
+    inline void CollisionLogger::OnTriggerStay(Entity hit)
+    {
+        if(auto* tag = m_registry->Get<Tag>(hit); tag)
+            GameLog::Log(std::string{"Trigger Stay: "} + tag->Value().data());
+    }
+
+    inline void CollisionLogger::OnTriggerExit(Entity hit)
+    {
+        if(auto* tag = m_registry->Get<Tag>(hit); tag)
+            GameLog::Log(std::string{"Trigger Exit: "} + tag->Value().data());
     }
 }

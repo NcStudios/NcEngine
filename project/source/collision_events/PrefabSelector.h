@@ -25,7 +25,7 @@ namespace nc::sample
         : AutoComponent{entity},
           m_registry{registry},
           m_currentObject{Entity::Null()},
-          m_typeToSpawn{ColliderType::Capsule},
+          m_typeToSpawn{ColliderType::Box},
           m_doSpawn{true}
     {
     }
@@ -48,29 +48,30 @@ namespace nc::sample
             case ColliderType::Box:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::CubeBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, BoxProperties{});
+                m_registry->Add<Collider>(m_currentObject, BoxProperties{}, false);
                 break;
             }
             case ColliderType::Sphere:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::SphereBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, SphereProperties{});
+                m_registry->Add<Collider>(m_currentObject, SphereProperties{}, false);
                 break;
             }
             case ColliderType::Capsule:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::CapsuleBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, CapsuleProperties{});
+                m_registry->Add<Collider>(m_currentObject, CapsuleProperties{}, false);
                 break;
             }
             case ColliderType::Hull:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::DiscBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"});
+                m_registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"}, false);
                 break;
             }
         }
 
+        m_registry->Add<PhysicsBody>(m_currentObject, PhysicsProperties{.isKinematic = true});
         m_registry->Add<WasdController>(m_currentObject, m_registry, 2.0f);
         m_registry->Add<CollisionLogger>(m_currentObject, m_registry);
     }

@@ -3,8 +3,6 @@
 #include "debug/Profiler.h"
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
-#include "ecs/ColliderSystem.h"
-#include "physics/CollisionSystem.h"
 #include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
 #include "imgui/imgui.h"
@@ -114,8 +112,14 @@ namespace nc::ui::editor::controls
         ImGui::Text("Static  %s", EntityUtils::IsStatic(entity) ? "True" : "False");
 
         if(auto* transform = registry->Get<Transform>(entity); transform)
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(transform);
+        }
+
         if(auto* renderer = registry->Get<Renderer>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(renderer);
 
         #ifdef USE_VULKAN
@@ -124,18 +128,33 @@ namespace nc::ui::editor::controls
         if (auto* pointLight = registry->Get<vulkan::PointLight>(entity))
             ComponentGuiElement(pointLight);
         #else
+        }
+
         if(auto* emitter = registry->Get<ParticleEmitter>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
         #endif
         
+        }
+
         if(auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(dispatcher);
+        }
+
         if(auto* light = registry->Get<PointLight>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(light);
+        }
+
         if(auto* col = registry->Get<Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
             col->SetEditorSelection(true);
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(col);
         }
 
@@ -149,11 +168,9 @@ namespace nc::ui::editor::controls
     {
         if(!comp)
             return;
-        ImGui::Separator();
+        ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
         ImGui::BeginGroup();
-            ImGui::Spacing();
             comp->ComponentGuiElement();
-            ImGui::Spacing();
         ImGui::EndGroup();
     }
 
@@ -192,7 +209,6 @@ namespace nc::ui::editor::controls
                 WrapTabItem("Profiler", Profiler);
                 WrapTabItem("Systems", ComponentSystems, registry);
                 WrapTabItem("Gfx Resources", GraphicsResourcePanel);
-                WrapTabItem("Physics Metrics", PhysicsMetrics);
                 ImGui::EndTabBar();
             }
 
@@ -227,7 +243,7 @@ namespace nc::ui::editor::controls
 
         textFilter.Draw("Search##telemetry", 128.0f);
 
-        for(auto v : {Filter::All, Filter::Logic, Filter::Physics, Filter::Rendering, Filter::User})
+        for(auto v : {Filter::All, Filter::Logic, Filter::Collision, Filter::Dynamics, Filter::Rendering, Filter::User})
         {
             ImGui::SameLine();
             ImGui::RadioButton(ToCString(v), &filterSelection, static_cast<int>(v));
@@ -301,6 +317,7 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
+        ComponentSystemHeader<PhysicsBody>("Physics Body", registry->ViewAll<PhysicsBody>());
         ComponentSystemHeader<PointLight>("Point Light", registry->ViewAll<PointLight>());
         ComponentSystemHeader<Renderer>("Renderer", registry->ViewAll<Renderer>());
         ComponentSystemHeader<Transform>("Transform", registry->ViewAll<Transform>());
@@ -319,21 +336,6 @@ namespace nc::ui::editor::controls
             if(filter.PassFilter(id.c_str()))
                 ImGui::Text(id.c_str());
         }
-    }
-
-    void PhysicsMetrics()
-    {
-        const auto& metrics = physics::CollisionSystem::metrics;
-        ImGui::Text("Collision Checks:");
-        ImGui::Text("  Broad Phase");
-        ImGui::Text("    Static:  %d", metrics.staticBroadChecks);
-        ImGui::Text("    Dynamic: %d", metrics.dynamicBroadChecks);
-        ImGui::Text("  Narrow Phase");
-        ImGui::Text("    Static:  %d", metrics.staticNarrowChecks);
-        ImGui::Text("    Dynamic: %d", metrics.dynamicNarrowChecks);
-        ImGui::Text("  Collisions");
-        ImGui::Text("    Static:  %d", metrics.staticCollisions);
-        ImGui::Text("    Dynamic: %d", metrics.dynamicCollisions);
     }
 } // end namespace nc::ui::editor
 #endif

@@ -5,6 +5,7 @@
 #include "component/Collider.h"
 #include "component/NetworkDispatcher.h"
 #include "component/ParticleEmitter.h"
+#include "component/PhysicsBody.h"
 #include "component/PointLight.h"
 #include "component/Registry.h"
 #include "component/Renderer.h"
@@ -15,7 +16,18 @@
 
 namespace nc
 {
-    using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup, Collider, NetworkDispatcher, ParticleEmitter, PointLight, Renderer, Tag, Transform, vulkan::MeshRenderer, vulkan::PointLight>;
+    using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup,
+                                                     Collider,
+                                                     NetworkDispatcher,
+                                                     ParticleEmitter,
+                                                     PhysicsBody,
+                                                     PointLight,
+                                                     Renderer,
+                                                     Tag,
+                                                     Transform,
+                                                     vulkan::MeshRenderer,
+                                                     vulkan::PointLight>;
+                                                     
     using registry_type = ecs::Registry<registry_type_list>;
 
     auto ActiveRegistry() -> registry_type*;

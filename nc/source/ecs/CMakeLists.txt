@@ -1,7 +1,5 @@
 target_sources(${ENGINE_LIB}
     PRIVATE
-        ${ROOT_DIR}/source/ecs/ColliderSystem.cpp
-        ${ROOT_DIR}/source/ecs/ColliderTree.cpp
         ${ROOT_DIR}/source/ecs/EntityComponentSystem.cpp
         ${ROOT_DIR}/source/ecs/EcsApiImpl.cpp
         ${ROOT_DIR}/source/ecs/ParticleEmitterSystem.cpp
