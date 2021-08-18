@@ -2,8 +2,6 @@
 
 #include "component/Component.h"
 #include "physics/LayerMask.h"
-#include "vulkan/DebugWidget.h"
-
 #include <string>
 
 /**  Notes on colliders:
@@ -21,6 +19,8 @@
 
 namespace nc
 {
+    namespace graphics::vulkan { class Renderer; }
+
     enum class ColliderType : uint8_t
     {
         Box, Sphere, Capsule, Hull
@@ -75,7 +75,7 @@ namespace nc
             ColliderType GetType() const;
 
            #ifdef NC_EDITOR_ENABLED
-            void UpdateWidget();
+            void UpdateWidget(graphics::vulkan::Renderer* renderer);
             void SetEditorSelection(bool state);
            #endif
 
@@ -85,20 +85,6 @@ namespace nc
             #ifdef NC_EDITOR_ENABLED
             bool m_selectedInEditor;
             #endif
-    };
-
-    template<>
-    struct StoragePolicy<Collider>
-    {
-        #ifdef NC_EDITOR_ENABLED
-        using allow_trivial_destruction = std::false_type;
-        #else
-        using allow_trivial_destruction = std::true_type;
-        #endif
-
-        using sort_dense_storage_by_address = std::true_type;
-        using requires_on_add_callback = std::true_type;
-        using requires_on_remove_callback = std::true_type;
     };
 
     #ifdef NC_EDITOR_ENABLED

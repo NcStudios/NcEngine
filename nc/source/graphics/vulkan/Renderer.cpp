@@ -73,6 +73,13 @@ namespace nc::graphics::vulkan
             cmd->end();
         }
 
+        #ifdef NC_EDITOR_ENABLED
+        if (m_wireframeTechnique)
+        {
+            m_wireframeTechnique->ClearDebugWidget();
+        }
+        #endif
+
         NC_PROFILE_END();
     }
 
@@ -173,23 +180,25 @@ namespace nc::graphics::vulkan
         m_storageHandles.pop_back();
     }
 
-    void Renderer::RegisterDebugWidget(nc::vulkan::DebugWidget* widget)
+    #ifdef NC_EDITOR_ENABLED
+    void Renderer::RegisterDebugWidget(nc::vulkan::DebugWidget widget)
     {
         if (!m_wireframeTechnique)
         {
             m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
         }
         
-        m_storageHandles.emplace_back(widget->GetParentEntity(), m_wireframeTechnique->RegisterDebugWidget(widget));
+        m_wireframeTechnique->RegisterDebugWidget(std::move(widget));
     }
 
-    void Renderer::ClearDebugWidgets()
+    void Renderer::ClearDebugWidget()
     {
         if (m_wireframeTechnique)
         {
-            m_wireframeTechnique->ClearDebugWidgets();
+            m_wireframeTechnique->ClearDebugWidget();
         }
     }
+    #endif
 
     void Renderer::RecordUi(vk::CommandBuffer* cmd)
     {

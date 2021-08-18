@@ -1,5 +1,6 @@
 #include "component/Collider.h"
 #include "component/vulkan/DebugWidget.h"
+#include "graphics/vulkan/Renderer.h"
 #include "Ecs.h"
 #include "debug/Utils.h"
 
@@ -92,28 +93,25 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Collider::UpdateWidget()
+    void Collider::UpdateWidget(graphics::vulkan::Renderer* renderer)
     {
-        auto* debugWidget = ActiveRegistry()->Get<vulkan::DebugWidget>(GetParentEntity());
-
         // Expire to false to avoid state management in editor (it sets this to true as needed)
         if(!std::exchange(m_selectedInEditor, false))
         {
-            debugWidget->Enable(false);
             return;
         }
-
-        debugWidget->Enable(true);
 
         const auto& scale = m_info.scale;
         const auto& offset = m_info.offset; 
 
-        debugWidget->SetTransformationMatrix
+        auto transformationMatrix = DirectX::FXMMATRIX
         (
             DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
             ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix() *
             DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
+
+        renderer->RegisterDebugWidget(vulkan::DebugWidget(m_info.type, transformationMatrix));
     }
 
     void Collider::SetEditorSelection(bool state)

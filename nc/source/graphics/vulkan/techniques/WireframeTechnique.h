@@ -1,14 +1,19 @@
 #pragma once
 
 #include "component/Component.h"
-
 #include "vulkan/vk_mem_alloc.hpp"
 #include "directx/math/DirectXMath.h"
+
 #include <vector>
+
+#ifdef NC_EDITOR_ENABLED
+#include "component/vulkan/DebugWidget.h"
+#include <optional>
+#endif
 
 namespace nc::vulkan
 {
-    class MeshRenderer; class DebugWidget;
+    class MeshRenderer; 
 }
 
 namespace nc::graphics
@@ -34,19 +39,22 @@ namespace nc::graphics
                 ~WireframeTechnique();
 
                 void Bind(vk::CommandBuffer* cmd);
-
-                std::vector<Entity>* RegisterDebugWidget(nc::vulkan::DebugWidget* debugWidget);
                 std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
-
-                void ClearDebugWidgets();
                 void ClearMeshRenderers();
-
                 void Record(vk::CommandBuffer* cmd);
+
+                #ifdef NC_EDITOR_ENABLED
+                void RegisterDebugWidget(nc::vulkan::DebugWidget debugWidget);
+                void ClearDebugWidget();
+                #endif
 
             private:
                 void CreatePipeline(vk::RenderPass* renderPass);
 
-                std::unordered_map<std::string, std::vector<Entity>> m_debugWidgets;
+                #ifdef NC_EDITOR_ENABLED
+                std::optional<nc::vulkan::DebugWidget> m_debugWidget;
+                #endif
+
                 std::unordered_map<std::string, std::vector<Entity>> m_meshRenderers;
 
                 nc::graphics::Graphics2* m_graphics;

@@ -1,79 +1,49 @@
 #include "component/vulkan/DebugWidget.h"
-#include "Ecs.h"
+#include <stdexcept>
 
-#ifdef NC_EDITOR_ENABLED
-#include "ui/editor/Widgets.h"
-#endif
-
-namespace nc::vulkan
+namespace
 {
-    DebugWidget::DebugWidget(Entity entity, WidgetShape shape)
-        : ComponentBase{entity}
+    using namespace nc;
+    using namespace nc::vulkan;
+
+    const auto CubeMeshPath = std::string{"project/assets/mesh/cube.nca"};
+    const auto SphereMeshPath = std::string{"project/assets/mesh/sphere.nca"};
+    const auto CapsuleMeshPath = std::string{"project/assets/mesh/capsule.nca"};
+
+    std::string GetMeshPathForCollider(ColliderType colliderType)
     {
-        switch(shape)
+        switch(colliderType)
         {
-            case WidgetShape::Cube:
+            case ColliderType::Box:
             {
-                m_meshUid = CubeMeshPath;
-                break;
+                return CubeMeshPath;
             }
-            case WidgetShape::Sphere:
+            case ColliderType::Sphere:
             {
-                m_meshUid = SphereMeshPath;
-                break;
+                return SphereMeshPath;
             }
-            case WidgetShape::Capsule:
+            case ColliderType::Capsule:
             {
-                m_meshUid = CapsuleMeshPath;
-                break;
+                return CapsuleMeshPath;
             }
-            case WidgetShape::Hull:
+            case ColliderType::Hull:
             {
-                m_meshUid = SphereMeshPath;
-                break;
+                // @todo: Eventually not have sphere here.
+                return SphereMeshPath;
             }
             default:
             {
-                m_meshUid = SphereMeshPath;
-                break;
+                throw std::runtime_error("DebugWidget::GetMeshPathForCollider - The given colliderType was not a valid ColliderType.");
             }
         }
-
-    }
-
-    bool DebugWidget::IsEnabled() const noexcept
-    {
-        return m_isEnabled;
-    }
-
-    void DebugWidget::Enable(bool isEnabled) noexcept
-    {
-        m_isEnabled = isEnabled;
-    }
-
-    DirectX::FXMMATRIX DebugWidget::GetTransformationMatrix() const noexcept
-    {
-        return m_transformationMatrix;
-    }
-
-    void DebugWidget::SetTransformationMatrix(DirectX::FXMMATRIX matrix) noexcept
-    {
-        m_transformationMatrix = matrix;
-    }
-
-    const std::string& DebugWidget::GetMeshUid() const
-    {
-        return m_meshUid;
     }
 }
 
-namespace nc
+namespace nc::vulkan
 {
-    #ifdef NC_EDITOR_ENABLED
-    template<> void ComponentGuiElement<vulkan::DebugWidget>(vulkan::DebugWidget* debugWidget)
+    DebugWidget::DebugWidget(ColliderType colliderType, DirectX::FXMMATRIX transform)
+        : meshUid{GetMeshPathForCollider(colliderType)},
+          transformationMatrix{transform}
     {
-        (void)debugWidget;
-        ImGui::Text("Debug widget");
     }
-    #endif
 }

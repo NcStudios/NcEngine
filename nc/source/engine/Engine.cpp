@@ -222,13 +222,14 @@ namespace nc::core
 
         #ifdef NC_EDITOR_ENABLED
         auto* registry = m_ecs.GetRegistry();
-        
+        auto* renderer = m_graphics2.GetRendererPtr();
+
         for(auto& collider : registry->ViewAll<Collider>())
-            collider.UpdateWidget();
+            collider.UpdateWidget(renderer);
         #endif
 
         // @todo: conditionally update based on changes
-        m_graphics2.GetRendererPtr()->Record(m_graphics2.GetCommandsPtr());
+        renderer->Record(m_graphics2.GetCommandsPtr());
 
         m_graphics2.Draw();
         m_graphics2.FrameEnd();
