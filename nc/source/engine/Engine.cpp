@@ -75,7 +75,7 @@ namespace nc::core
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_renderer{ &m_graphics2 },
           m_ecs{&m_graphics2, config::GetMemorySettings()},
-          m_physics{ &m_graphics2, m_ecs.GetColliderSystem(), &m_jobSystem},
+          m_physics{ &m_graphics2, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
           m_ui{m_window.GetHWND(), &m_graphics2}

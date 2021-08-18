@@ -3,6 +3,7 @@
 #include "component/Component.h"
 #include "physics/CollisionVolumes.h"
 #include "physics/LayerMask.h"
+#include "directx/math/DirectXMath.h"
 #include <string>
 
 /**  Notes on colliders:
@@ -97,7 +98,7 @@ namespace nc
             bool m_selectedInEditor;
             #endif
     };
-    
+
     const char* ToCString(nc::ColliderType type);
 
     #ifdef NC_EDITOR_ENABLED

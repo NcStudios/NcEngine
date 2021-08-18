@@ -5,16 +5,14 @@ namespace nc::ecs
 {
     #ifdef USE_VULKAN
     EntityComponentSystem::EntityComponentSystem(graphics::Graphics2* graphics,
-                                                 const config::MemorySettings& memSettings,
-                                                 const config::PhysicsSettings& physSettings)
+                                                 const config::MemorySettings& memSettings)
         : m_registry{memSettings.maxTransforms},
           m_particleEmitterSystem{&m_registry, graphics},
           m_meshRendererSystem{&m_registry, graphics},
           m_pointLightSystem{&m_registry, graphics}
     #else
     EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
-                                                 const config::MemorySettings& memSettings,
-                                                 const config::PhysicsSettings& physSettings)
+                                                 const config::MemorySettings& memSettings)
         : m_registry{memSettings.maxTransforms},
           m_particleEmitterSystem{&m_registry, graphics}
     #endif
