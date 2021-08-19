@@ -2,6 +2,7 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -9,10 +10,6 @@
 #include <optional>
 #include <string>
 #include <vector>
-
-/** The AssetBuilder is a utility to convert fbx and obj file to a simple
- *  format using AssImp. Currently, the only purpose of this is to speed
- *  up debugging by moving calls to AssImp outside of the engine. */
 
 enum class AssetType
 {
@@ -32,6 +29,14 @@ struct Config
     std::optional<AssetType> SingleTargetType;
     std::optional<std::filesystem::path> TargetsFilePath;
     std::filesystem::path OutputDirectory;
+};
+
+struct MeshExtents
+{
+    float xExtent = 0.0f;
+    float yExtent = 0.0f;
+    float zExtent = 0.0f;
+    float maxExtent = 0.0f;
 };
 
 const auto AssetExtension = std::string{".nca"};
@@ -59,7 +64,7 @@ void BuildAsset(Assimp::Importer* importer, const Target& inPath, const Config& 
 void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D;
-auto GetHullColliderMaximumExtent(const aiVector3D* data, unsigned count) -> float;
+auto GetHullColliderExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&;
 
 int main(int argc, char** argv)
@@ -352,9 +357,10 @@ void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::p
         throw std::runtime_error("AssImp failure");
 
     const auto pMesh = pModel->mMeshes[0];
-    float maxExtent = GetHullColliderMaximumExtent(pMesh->mVertices, pMesh->mNumVertices);
+    auto extents = GetHullColliderExtents(pMesh->mVertices, pMesh->mNumVertices);
 
-    outFile << maxExtent << '\n'
+    outFile << extents.xExtent << ' ' << extents.yExtent << ' ' << extents.zExtent << '\n'
+            << extents.maxExtent << '\n'
             << pMesh->mNumVertices << '\n';
 
     bool valueWasSanitized = false;
@@ -392,26 +398,38 @@ auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVecto
     return data[maxIndex];
 }
 
-float GetHullColliderMaximumExtent(const aiVector3D* data, unsigned count)
+auto GetHullColliderExtents(const aiVector3D* data, unsigned count) -> MeshExtents
 {
-    std::array<float, 6u> squareMagnitudes;
-    squareMagnitudes[0] = GetMaximumVertexInDirection(data, count, aiVector3D{ 1,  0,  0}).SquareLength();
-    squareMagnitudes[1] = GetMaximumVertexInDirection(data, count, aiVector3D{-1,  0,  0}).SquareLength();
-    squareMagnitudes[2] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0,  1,  0}).SquareLength();
-    squareMagnitudes[3] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0, -1,  0}).SquareLength();
-    squareMagnitudes[4] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0,  0,  1}).SquareLength();
-    squareMagnitudes[5] = GetMaximumVertexInDirection(data, count, aiVector3D{ 0,  0, -1}).SquareLength();
+    auto minX = GetMaximumVertexInDirection(data, count, aiVector3D{ -1,  0,  0});
+    auto maxX = GetMaximumVertexInDirection(data, count, aiVector3D{  1,  0,  0});
+    auto minY = GetMaximumVertexInDirection(data, count, aiVector3D{  0, -1,  0});
+    auto maxY = GetMaximumVertexInDirection(data, count, aiVector3D{  0,  1,  0});
+    auto minZ = GetMaximumVertexInDirection(data, count, aiVector3D{  0,  0, -1});
+    auto maxZ = GetMaximumVertexInDirection(data, count, aiVector3D{  0,  0,  1});
 
-    float maxMagnitude = squareMagnitudes[0];
+    if(minX.x > 0.0f || maxX.x < 0.0f || minY.y > 0.0f || maxY.y < 0.0f || minZ.z > 0.0f || maxZ.z < 0.0f)
+        std::cerr << "Warning: Hull collider mesh does not contain the origin. The origin is assumed to be the center of mass.\n";
+
+    std::array<float, 6u> squareMagnitudes
+    {
+        minX.SquareLength(), maxX.SquareLength(), minY.SquareLength(), maxY.SquareLength(), minZ.SquareLength(), maxZ.SquareLength()
+    };
+
+    float maxSquareMagnitude = squareMagnitudes[0];
     for(unsigned i = 1u; i < 6u; ++i)
     {
-        if(squareMagnitudes[i] > maxMagnitude)
-            maxMagnitude = squareMagnitudes[i];
+        if(squareMagnitudes[i] > maxSquareMagnitude)
+            maxSquareMagnitude = squareMagnitudes[i];
     }
 
-    return sqrt(maxMagnitude);
+    return MeshExtents
+    {
+        .xExtent = maxX.x - minX.x,
+        .yExtent = maxY.y - minY.y,
+        .zExtent = maxZ.z - minZ.z,
+        .maxExtent = sqrtf(maxSquareMagnitude)
+    };
 }
-
 
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&
 {

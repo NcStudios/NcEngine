@@ -81,7 +81,7 @@ namespace nc::sample
         // Coin Spawner
         SpawnBehavior behavior
         {
-            .rotationOffset = Vector3{math::Pi / 2.0f, 0.0f, 0.0f},
+            .rotationOffset = Vector3{std::numbers::pi / 2.0f, 0.0f, 0.0f},
             .positionRandomRange = Vector3{4.2f, 0.0f, 2.8f},
             .layer = CoinLayer
         };

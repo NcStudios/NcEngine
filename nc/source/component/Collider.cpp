@@ -9,17 +9,18 @@
 #include "ui/editor/Widgets.h"
 #endif
 
-#ifdef NC_EDITOR_ENABLED
 namespace
 {
     using namespace nc;
 
+    #ifdef NC_EDITOR_ENABLED
     const auto CubeMeshPath = std::string{"project/assets/mesh/cube.nca"};
     const auto SphereMeshPath = std::string{"project/assets/mesh/sphere.nca"};
     const auto CapsuleMeshPath = std::string{"project/assets/mesh/capsule.nca"};
     const auto CreateMaterial = nc::graphics::Material::CreateMaterial<nc::graphics::TechniqueType::Wireframe>;
-
     auto CreateWireframeModelPtr(ColliderType type) -> std::unique_ptr<graphics::Model>;
+    #endif
+    
     auto EstimateBoundingVolume(const SphereCollider& sphere, const Vector3& translation, float scale) -> SphereCollider;
     auto EstimateBoundingVolume(const BoxCollider& box, const Vector3& translation, float scale) -> SphereCollider;
     auto EstimateBoundingVolume(const CapsuleCollider& capsule, const Vector3& translation, float scale) -> SphereCollider;
@@ -37,6 +38,7 @@ namespace
     /** @todo
      *  - Changed to unique_ptr for dx11, change back with vulkan 
      *  - Currently no solution for hull widget. */
+    #ifdef NC_EDITOR_ENABLED
     std::unique_ptr<graphics::Model> CreateWireframeModelPtr(ColliderType type)
     {
         const std::string& path = [](ColliderType type) -> const std::string&
@@ -53,6 +55,7 @@ namespace
 
         return std::make_unique<graphics::Model>(graphics::Mesh{path}, CreateMaterial());
     }
+    #endif
 
     SphereCollider EstimateBoundingVolume(const SphereCollider& sphere, const Vector3& translation, float scale)
     {
@@ -110,7 +113,6 @@ namespace
         }
     }
 }
-#endif
 
 namespace nc
 {
@@ -197,6 +199,18 @@ namespace nc
         }, m_volume);
     }
 
+    const char* ToCString(ColliderType type)
+    {
+        switch(type)
+        {
+            case ColliderType::Box:     return "Box";
+            case ColliderType::Capsule: return "Capsule";
+            case ColliderType::Sphere:  return "Sphere";
+            case ColliderType::Hull:    return "Hull";
+            default: throw std::runtime_error("ToCString - Unknown ColliderType");
+        }
+    }
+
     #ifdef NC_EDITOR_ENABLED
     void Collider::UpdateWidget(graphics::FrameManager* frame)
     {
@@ -220,18 +234,6 @@ namespace nc
     void Collider::SetEditorSelection(bool state)
     {
         m_selectedInEditor = state;
-    }
-
-    const char* ToCString(nc::ColliderType type)
-    {
-        switch(type)
-        {
-            case nc::ColliderType::Box:     return "Box";
-            case nc::ColliderType::Capsule: return "Capsule";
-            case nc::ColliderType::Sphere:  return "Sphere";
-            case nc::ColliderType::Hull:    return "Hull";
-            default: throw std::runtime_error("ToCString - Unknown ColliderType");
-        }
     }
 
     template<> void ComponentGuiElement<Collider>(Collider* collider)

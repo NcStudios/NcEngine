@@ -4,12 +4,6 @@
 
 namespace nc
 {
-    /** Notes on physics bodies
-     *  - A PhysicsBody must be added to an Entity with a Collider.
-     *  - Static Entities will automatically have a mass of 0.
-     *  - Translations and rotations can be resticted on a per-axis
-     *    basis with linear/angularFreedom.
-     */
     struct PhysicsProperties
     {
         float mass = 1.0f;        // Mass in kilograms (0 is infinite)

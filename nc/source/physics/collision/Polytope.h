@@ -72,9 +72,9 @@ namespace nc::physics
 
         for(size_t i = 0u; i < indices.size(); i += 3)
         {
-            auto a = m_vertices[indices[i]];
-            auto b = m_vertices[indices[i+1]];
-            auto c = m_vertices[indices[i+2]];
+            auto a = m_vertices.at(indices.at(i));
+            auto b = m_vertices.at(indices.at(i+1));
+            auto c = m_vertices.at(indices.at(i+2));
 
             auto normal = Normalize(CrossProduct(b - a, c - a));
             auto distance = Dot(normal, a);
