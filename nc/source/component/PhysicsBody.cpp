@@ -6,6 +6,8 @@
 #include "imgui/imgui.h"
 #endif
 
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -36,11 +38,10 @@ namespace
             case ColliderType::Capsule:
             {
                 /** Estimated with a cylinder */
-                auto m = mass / 12.0f;
                 auto r = scale.x * 0.5f;
                 auto h = scale.y * 2.0f;
-                iX = iY = m * (3.0f * r * r + h * h);
-                iZ = m * r * r * 0.5f;
+                iX = iY = (mass / 12.0f) * (3.0f * r * r + h * h);
+                iZ = mass * r * r * 0.5f;
                 break;
             }
             case ColliderType::Sphere:
