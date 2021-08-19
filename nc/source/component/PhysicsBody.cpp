@@ -6,8 +6,6 @@
 #include "imgui/imgui.h"
 #endif
 
-#include <iostream>
-
 namespace
 {
     using namespace nc;
