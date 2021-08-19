@@ -35,7 +35,7 @@ When creating a Collider, the type of properties struct passed will determine th
 3. Capsule
     * Defined by a center, height, and radius
 4. Hull
-    * Described by an asset (.nca) file containing a vertex list for a convex hull
+    * Described by an asset (.nca) file containing a vertex list for a convex hull. As this is an asset, it must be loaded before attempting to created one.
 
 These values describing a shape cannot be modified after construction, but the shapes will be affected by the object's transform. For example, dynamically scaling a transform's scale will propagate to the collider. Transforms should always have a positive scale in each axis. Also, sphere colliders always assume uniform scaling.
 
@@ -61,7 +61,7 @@ A PhysicsBody allows an object to be manipulated by the physics solver. This ena
 
 PhysicsBodies require a Collider and must be added to an Entity after the Collider.
 
-To represent an object with infinite mass, use a mass of 0.0f. Adding a PhysicsBody to a static Entity will ignore the specified mass and use 0.0f.
+To represent an object with infinite mass, use a mass of 0.0f. Adding a PhysicsBody to a static Entity will ignore the specified mass and use 0.0f. The center of mass is assumed to be the transform's position.
 
 For standard PhysicsBodies, the linear and angular velocities, as well as the associated Transform, will be modified as needed by the physics system. Setting isKinematic to true still allows the physics system to build constraints involving the object, but it disallows modifications to the object's PhysicsBody and Transform.
 
