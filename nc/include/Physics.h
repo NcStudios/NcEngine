@@ -15,7 +15,7 @@ namespace nc::physics
     void UnregisterClickable(IClickable* clickable) noexcept;
 
     /** Add and remove joints between entities. Both entities must have a PhysicsBody.
-     *  Joints must be manually removed if an object is destroyed. */
+     *  Joints must be manually removed before an object is destroyed. */
     void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f);
     void RemoveJoint(Entity entityA, Entity entityB);
     void RemoveAllJoints(Entity entity);
