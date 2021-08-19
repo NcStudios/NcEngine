@@ -1,5 +1,6 @@
 #include "CollisionPhases.h"
 #include "IntersectionQueries.h"
+#include "physics/PhysicsConstants.h"
 
 namespace
 {
@@ -46,7 +47,7 @@ namespace
         if(typeA == ColliderInteractionType::Collider)
         {
             if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::Physics;
+                return CollisionEventType::SecondBodyPhysics;
             
             if(typeB == ColliderInteractionType::PhysicsTrigger || typeB == ColliderInteractionType::KinematicPhysicsTrigger)
                 return CollisionEventType::Trigger;
@@ -56,16 +57,19 @@ namespace
 
         if(typeA == ColliderInteractionType::Physics)
         {
-            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::Physics || typeB == ColliderInteractionType::KinematicPhysics)
-                return CollisionEventType::Physics;
+            if(typeB == ColliderInteractionType::Physics)
+                return CollisionEventType::TwoBodyPhysics;
             
+            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
+                return CollisionEventType::FirstBodyPhysics;
+
             return CollisionEventType::Trigger;
         }
 
         if(typeA == ColliderInteractionType::KinematicPhysics)
         {
             if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::Physics;
+                return CollisionEventType::SecondBodyPhysics;
             
             if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
                 return CollisionEventType::None;
@@ -141,7 +145,7 @@ namespace nc::physics
         const auto eventCount = newEvents.contacts.size();
         for(size_t i = 0u; i < eventCount; ++i)
         {
-            const auto& [entityA, entityB] = newEvents.events[i];
+            const auto& [entityA, entityB, eventType] = newEvents.events[i];
             auto pos = std::ranges::find_if(manifolds, [entityA, entityB](const auto& manifold)
             {
                 return (manifold.entityA == entityA && manifold.entityB == entityB) ||
@@ -150,7 +154,7 @@ namespace nc::physics
 
             if(pos == manifolds.end())
             {
-                Manifold newManifold{entityA, entityB, {newEvents.contacts[i]}};
+                Manifold newManifold{entityA, entityB, eventType, {newEvents.contacts[i]}};
                 manifolds.push_back(newManifold);
                 continue;
             }
@@ -176,8 +180,11 @@ namespace nc::physics
                 const auto& first = estimates[i];
                 const auto& second = estimates[j];
 
-                if(!first.isAwake && !second.isAwake)
-                    continue;
+                if constexpr(physics::EnableSleeping)
+                {
+                    if(!first.isAwake && !second.isAwake)
+                        continue;
+                }
 
                 auto interactionType = GetInteractionType(first.interactionType, second.interactionType);
                 if(interactionType == CollisionEventType::None)
@@ -185,10 +192,10 @@ namespace nc::physics
 
                 if(Intersect(first.estimate, second.estimate))
                 {
-                    if(interactionType == CollisionEventType::Physics)
-                        physicsEvents.emplace_back(first.index, second.index);
+                    if(interactionType == CollisionEventType::Trigger)
+                        triggerEvents.emplace_back(first.index, second.index, interactionType);
                     else
-                        triggerEvents.emplace_back(first.index, second.index);
+                        physicsEvents.emplace_back(first.index, second.index, interactionType);
                 }
             }
         }
@@ -204,9 +211,9 @@ namespace nc::physics
         events.reserve(broadEventCount);
         contacts.reserve(broadEventCount);
         CollisionState state;
-        auto* registry = ActiveRegistry();
+        [[maybe_unused]] auto* registry = ActiveRegistry();
 
-        for(auto& [i, j] : broadPhysicsEvents)
+        for(auto& [i, j, eventType] : broadPhysicsEvents)
         {
             auto& collider1 = colliders[i];
             auto& collider2 = colliders[j];
@@ -222,19 +229,22 @@ namespace nc::physics
                     auto e1 = collider1.GetParentEntity();
                     auto e2 = collider2.GetParentEntity();
 
-                    if(!collider1.IsAwake())
+                    if constexpr(EnableSleeping)
                     {
-                        collider1.Wake();
-                        registry->Get<PhysicsBody>(e1)->Wake();
+                        if(!collider1.IsAwake())
+                        {
+                            collider1.Wake();
+                            registry->Get<PhysicsBody>(e1)->Wake();
+                        }
+
+                        if(!collider2.IsAwake())
+                        {
+                            collider2.Wake();
+                            registry->Get<PhysicsBody>(e2)->Wake();
+                        }
                     }
 
-                    if(!collider2.IsAwake())
-                    {
-                        collider2.Wake();
-                        registry->Get<PhysicsBody>(e2)->Wake();
-                    }
-
-                    events.emplace_back(e1, e2);
+                    events.emplace_back(e1, e2, eventType);
                     contacts.push_back(state.contact);
                 }
             }
@@ -249,7 +259,7 @@ namespace nc::physics
         events.reserve(broadTriggerEvents.size());
         CollisionState state;
 
-        for(const auto& [i, j] : broadTriggerEvents)
+        for(const auto& [i, j, unused] : broadTriggerEvents)
         {
             const auto& v1 = colliders[i].GetVolume();
             const auto& v2 = colliders[j].GetVolume();

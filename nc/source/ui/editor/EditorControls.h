@@ -122,6 +122,12 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(renderer);
         }
 
+        if(auto* body = registry->Get<PhysicsBody>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+            ComponentGuiElement(body);
+        }
+
         if(auto* emitter = registry->Get<ParticleEmitter>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();

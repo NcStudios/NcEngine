@@ -32,7 +32,7 @@ namespace nc::physics
         {
             if(body.UseGravity())
             {
-                body.UpdateVelocity(g);
+                body.ApplyVelocity(g);
             }
         }
 
@@ -49,8 +49,11 @@ namespace nc::physics
 
             if(body.Integrate(transform, dt) == IntegrationResult::PutToSleep)
             {
-                auto* collider = registry->Get<Collider>(body.GetParentEntity());
-                collider->Sleep();
+                if constexpr(EnableSleeping)
+                {
+                    auto* collider = registry->Get<Collider>(body.GetParentEntity());
+                    collider->Sleep();
+                }
             }
         }
 

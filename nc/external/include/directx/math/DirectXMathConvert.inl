@@ -716,6 +716,28 @@ inline XMVECTOR XM_CALLCONV XMLoadFloat4
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
+inline XMVECTOR XM_CALLCONV XMLoadQuaternion
+(
+    const nc::Quaternion* pSource
+)
+{
+    assert(pSource);
+#if defined(_XM_NO_INTRINSICS_)
+    XMVECTOR V;
+    V.vector4_f32[0] = pSource->x;
+    V.vector4_f32[1] = pSource->y;
+    V.vector4_f32[2] = pSource->z;
+    V.vector4_f32[3] = pSource->w;
+    return V;
+#elif defined(_XM_ARM_NEON_INTRINSICS_)
+    return vld1q_f32( reinterpret_cast<const float*>(pSource) );
+#elif defined(_XM_SSE_INTRINSICS_)
+    return _mm_loadu_ps( &pSource->x );
+#endif
+}
+
+//------------------------------------------------------------------------------
+_Use_decl_annotations_
 inline XMVECTOR XM_CALLCONV XMLoadFloat4A
 (
     const XMFLOAT4A* pSource

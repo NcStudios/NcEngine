@@ -6,23 +6,7 @@
 
 namespace nc::physics
 {
-    /** Specifies how a Collider interacts with other colliders. */
-    enum class ColliderInteractionType
-    {
-        Collider,               // Collider
-        Physics,                // Collider and PhysicsBody
-        KinematicPhysics,       // Collider and PhysicsBody with kinematic == true
-        ColliderTrigger,        // Collider with isTrigger == true
-        PhysicsTrigger,         // Collider with isTrigger == true and PhysicsBody
-        KinematicPhysicsTrigger // Collider and PhysicsBody with both flags == true
-    };
 
-    /** Specifies whether a collision event requires no action, a physics response and
-     *  collision notification, or a trigger notification. */
-    enum class CollisionEventType
-    {
-        None, Physics, Trigger
-    };
 
     /** A collider's estimated bounding volume, index in the registry storage, and
      *  interaction type. Used for broad detection. */
@@ -48,6 +32,7 @@ namespace nc::physics
     {
         uint32_t first;
         uint32_t second;
+        CollisionEventType eventType;
     };
 
     /** Collection of broad phase physics and trigger events. */
@@ -63,6 +48,7 @@ namespace nc::physics
     {
         Entity first;
         Entity second;
+        CollisionEventType eventType;
     };
 
     /** Collision events and contact points for narrow phase detection.
