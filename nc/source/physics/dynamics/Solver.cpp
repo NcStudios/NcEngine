@@ -326,8 +326,8 @@ namespace
             auto* transformB = registry->Get<Transform>(joint.entityB);
             auto positionB = transformB->GetPosition();
             auto rotationB = transformB->GetRotation();
-            auto rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotationB));
-            joint.rB = XMVector3Transform(joint.anchorB, rotMatrix);
+            auto rotBMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotationB));
+            joint.rB = XMVector3Transform(joint.anchorB, rotBMatrix);
             pB = XMLoadVector3(&positionB) + joint.rB;
         }
 
