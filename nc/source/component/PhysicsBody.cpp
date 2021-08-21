@@ -2,11 +2,17 @@
 #include "Ecs.h"
 #include "physics/PhysicsConstants.h"
 
+#ifdef NC_EDITOR_ENABLED
+#include "imgui/imgui.h"
+#endif
+
 namespace
 {
     using namespace nc;
 
     const auto VelocitySleepThreshold = DirectX::XMVectorSet(physics::SleepEpsilon, physics::SleepEpsilon, physics::SleepEpsilon, 0.0f);
+    const auto AngularVelocityMin = DirectX::XMVectorReplicate(-1.0f * physics::MaxAngularVelocity);
+    const auto AngularVelocityMax = DirectX::XMVectorReplicate(physics::MaxAngularVelocity);
 
     Vector3 CreateInverseInertiaTensor(const Vector3& scale, float mass, ColliderType type)
     {
@@ -61,7 +67,10 @@ namespace nc
     PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 linearFreedom, Vector3 angularFreedom)
         : ComponentBase{entity},
           m_properties{properties},
-          m_velocity{},
+          m_linearVelocity{},
+          m_angularVelocity{},
+          m_linearFreedom{DirectX::XMLoadVector3(&linearFreedom)},
+          m_angularFreedom{DirectX::XMLoadVector3(&angularFreedom)},
           m_invInertiaWorld{},
           m_invInertiaLocal{},
           m_framesAtThreshold{0u},
@@ -78,9 +87,6 @@ namespace nc
             m_properties.mass = 0.0f;
         }
 
-        m_velocity.r[2] = DirectX::XMLoadVector3(&linearFreedom);
-        m_velocity.r[3] = DirectX::XMLoadVector3(&angularFreedom);
-
         if(m_properties.mass == 0.0f)
         {
             m_invInertiaLocal = Vector3::Zero();
@@ -91,6 +97,52 @@ namespace nc
         auto transformScale = registry->Get<Transform>(entity)->GetScale();
         auto totalScale = HadamardProduct(transformScale, colliderScale);
         m_invInertiaLocal = CreateInverseInertiaTensor(totalScale, m_properties.mass, collider->GetType());
+
+        m_properties.mass = 1.0f / m_properties.mass;
+    }
+
+    void PhysicsBody::ApplyImpulse(const Vector3& impulse)
+    {
+        ApplyImpulse(DirectX::XMLoadVector3(&impulse));
+    }
+
+    void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
+    {
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+            return;
+        
+        m_linearVelocity += DirectX::XMVectorScale(impulse, m_properties.mass) * m_linearFreedom;
+    }
+
+    void PhysicsBody::ApplyTorqueImpulse(const Vector3& torque)
+    {
+        ApplyTorqueImpulse(DirectX::XMLoadVector3(&torque));
+    }
+
+    void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
+    {
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+            return;
+
+        auto restrictedTorque = torque * m_angularFreedom;
+        m_angularVelocity += DirectX::XMVector3Transform(restrictedTorque, m_invInertiaWorld);
+    }
+
+    void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
+    {
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+            return;
+        
+        m_linearVelocity += delta * m_linearFreedom;
+    }
+
+    void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
+    {
+        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+            return;
+        
+        m_linearVelocity += velDelta * m_linearFreedom;
+        m_angularVelocity += angVelDelta * m_angularFreedom;
     }
 
     void PhysicsBody::UpdateWorldInertia(Transform* transform)
@@ -104,62 +156,65 @@ namespace nc
         m_invInertiaWorld = rot_m * invInertiaLocalMatrix * DirectX::XMMatrixTranspose(rot_m);
     }
 
-    void PhysicsBody::UpdateVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
-    {
-        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
-            return;
-        
-        m_velocity.r[0] += velDelta * m_velocity.r[2];
-        m_velocity.r[1] += angVelDelta * m_velocity.r[3];
-    }
-
-    void PhysicsBody::UpdateVelocity(DirectX::FXMVECTOR delta)
-    {
-        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
-            return;
-        
-        m_velocity.r[0] += delta * m_velocity.r[2];
-    }
-
     IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
     {
+        /** @todo Applying a force/velocity to a sleeping body will not wake it. That should
+         *  probably happen here. Note that it cannot happen in ApplyXXX because the collider
+         *  needs to be notified as well. */
         if(m_properties.isKinematic || !m_awake)
             return IntegrationResult::Ignored;
         
         auto linearDragFactor = pow(1.0f - m_properties.drag, dt);
         auto angularDragFactor = pow(1.0f - m_properties.angularDrag, dt);
-        m_velocity.r[0] = DirectX::XMVectorScale(m_velocity.r[0], linearDragFactor);
-        m_velocity.r[1] = DirectX::XMVectorScale(m_velocity.r[1], angularDragFactor);
+        m_linearVelocity = DirectX::XMVectorScale(m_linearVelocity, linearDragFactor);
+        m_angularVelocity = DirectX::XMVectorScale(m_angularVelocity, angularDragFactor);
+        m_angularVelocity = DirectX::XMVectorClamp(m_angularVelocity, AngularVelocityMin, AngularVelocityMax);
 
-        auto velSquareMag = DirectX::XMVector3LengthSq(m_velocity.r[0]) + DirectX::XMVector3LengthSq(m_velocity.r[1]);
-
-        if(DirectX::XMVector3Less(velSquareMag, VelocitySleepThreshold))
+        if constexpr(physics::EnableSleeping)
         {
-            if(++m_framesAtThreshold >= physics::FramesUntilSleep)
-            {
-                m_velocity.r[0] = DirectX::g_XMZero;
-                m_velocity.r[1] = DirectX::g_XMZero;
-                m_awake = false;
+            auto velSquareMag = DirectX::XMVector3LengthSq(m_linearVelocity) + DirectX::XMVector3LengthSq(m_angularVelocity);
 
-                return IntegrationResult::PutToSleep;
+            if(DirectX::XMVector3Less(velSquareMag, VelocitySleepThreshold))
+            {
+                if(++m_framesAtThreshold >= physics::FramesUntilSleep)
+                {
+                    m_linearVelocity = DirectX::g_XMZero;
+                    m_angularVelocity = DirectX::g_XMZero;
+                    m_awake = false;
+                    return IntegrationResult::PutToSleep;
+                }
+            }
+            else
+            {
+                m_framesAtThreshold = 0u;
             }
         }
-        else
-        {
-            m_framesAtThreshold = 0u;
-        }
 
-        auto rotQuat = DirectX::XMVectorScale(m_velocity.r[1], dt);
+        transform->Translate(DirectX::XMVectorScale(m_linearVelocity, dt));
+        auto rotQuat = DirectX::XMVectorScale(m_angularVelocity, dt);
         rotQuat = DirectX::XMQuaternionRotationRollPitchYawFromVector(rotQuat);
-
-        transform->Translate(DirectX::XMVectorScale(m_velocity.r[0], dt));
         transform->Rotate(rotQuat);
         return IntegrationResult::Integrated;
     }
 
     #ifdef NC_EDITOR_ENABLED
-    template<> void ComponentGuiElement<PhysicsBody>(PhysicsBody*)
+    template<> void ComponentGuiElement<PhysicsBody>(PhysicsBody* body)
     {
+        const auto& properties = body->m_properties;
+        ImGui::Text("PhysicsBody");
+        ImGui::SameLine();
+        body->m_awake ? ImGui::Text("(awake)") : ImGui::Text("(asleep)");
+
+        ImGui::BeginGroup();
+            ImGui::Indent();
+            ImGui::Text("Inverse Mass %.2f", properties.mass);
+            ImGui::Text("Drag         %.2f", properties.drag);
+            ImGui::Text("Ang Drag     %.2f", properties.angularDrag);
+            ImGui::Text("Restitution  %.2f", properties.restitution);
+            ImGui::Text("Friction     %.2f", properties.friction);
+            ImGui::Text("Use Gravity  %s", properties.useGravity ? "True" : "False");
+            ImGui::Text("Kinematic    %s", properties.isKinematic ? "True" : "False");
+        ImGui::EndGroup();
     }
     #endif
 }

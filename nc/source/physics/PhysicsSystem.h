@@ -2,6 +2,7 @@
 
 #include "ClickableSystem.h"
 #include "collision/CollisionCache.h"
+#include "dynamics/Joint.h"
 #include "assets/HullColliderManager.h"
 #include "graphics/DebugRenderer.h"
 
@@ -22,6 +23,10 @@ namespace nc::physics
             PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem);
             #endif
 
+            void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness);
+            void RemoveJoint(Entity entityA, Entity entityB);
+            void RemoveAllJoints(Entity entity);
+
             void DoPhysicsStep(float dt);
             void ClearState();
 
@@ -31,6 +36,7 @@ namespace nc::physics
 
         private:
             CollisionCache m_cache;
+            std::vector<Joint> m_joints;
             ClickableSystem m_clickableSystem;
             HullColliderManager m_hullColliderManager;
             job::JobSystem* m_jobSystem;

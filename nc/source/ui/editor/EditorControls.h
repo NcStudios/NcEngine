@@ -130,6 +130,12 @@ namespace nc::ui::editor::controls
         #else
         }
 
+        if(auto* body = registry->Get<PhysicsBody>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+            ComponentGuiElement(body);
+        }
+
         if(auto* emitter = registry->Get<ParticleEmitter>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();

@@ -10,6 +10,7 @@
 #include "spawn_test/SpawnTest.h"
 #include "collision_benchmark/CollisionBenchmark.h"
 #include "collision_events/CollisionEvents.h"
+#include "joints_test/JointsTest.h"
 #include "rendering_benchmark/RenderingBenchmark.h"
 #include "jare_scratch/VulkanScene.h"
 #include "solar_system/SolarSystem.h"
@@ -116,6 +117,9 @@ namespace nc::sample
 
             if(ImGui::Button("Collision Events", buttonSize))
                 scene::Change(std::make_unique<CollisionEvents>());
+
+            if(ImGui::Button("Joints Test", buttonSize))
+                scene::Change(std::make_unique<JointsTest>());
 
             if(ImGui::Button("Spawn Test", buttonSize))
                 scene::Change(std::make_unique<SpawnTest>());
