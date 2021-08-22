@@ -20,24 +20,32 @@ namespace nc::graphics::vulkan
             vk::Buffer* GetBuffer();
 
             void Clear();
-            void Map(const std::vector<T>& data);
+
+            template<std::invocable<T&> Func>
+            void Map(const std::vector<T>& dataToMap, Func&& myNuller);
 
         private:
             vulkan::Base* m_base;
             uint32_t m_memoryIndex;
+            uint32_t m_memorySize;
             vk::Buffer m_writeableBuffer;
     };
 
     template<typename T>
     WriteableBuffer<T>::WriteableBuffer()
-    : m_memoryIndex { 0 },
+    : m_base{ nullptr },
+      m_memoryIndex { 0 },
+      m_memorySize { 0 },
       m_writeableBuffer { nullptr }
     {
     }
 
     template<typename T>
     WriteableBuffer<T>::WriteableBuffer(Graphics2* graphics, uint32_t size)
-    : m_base{ graphics->GetBasePtr() }
+    : m_base{ graphics->GetBasePtr() },
+      m_memoryIndex { 0 },
+      m_memorySize{ 0 },
+      m_writeableBuffer { nullptr }
     {
         m_memoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu, &m_writeableBuffer);
     }
@@ -46,6 +54,7 @@ namespace nc::graphics::vulkan
     WriteableBuffer<T>::WriteableBuffer(WriteableBuffer&& other)
     : m_base{std::exchange(other.m_base, nullptr)},
       m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
+      m_memorySize{std::exchange(other.m_memorySize, 0)},
       m_writeableBuffer{std::exchange(other.m_writeableBuffer, nullptr)}
     {
     }
@@ -55,6 +64,7 @@ namespace nc::graphics::vulkan
     {
         m_base = std::exchange(other.m_base, nullptr);
         m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
+        m_memorySize = std::exchange(other.m_memorySize, 0);
         m_writeableBuffer = std::exchange(other.m_writeableBuffer, nullptr);
         return *this;
     }
@@ -89,8 +99,9 @@ namespace nc::graphics::vulkan
         m_base = nullptr;
     }
 
-    template<typename T>
-    void WriteableBuffer<T>::Map(const std::vector<T>& dataToMap)
+    template<typename T> 
+    template<std::invocable<T&> Func>
+    void WriteableBuffer<T>::Map(const std::vector<T>& dataToMap, Func&& myNuller)
     {
         auto allocation = *(m_base->GetBufferAllocation(m_memoryIndex));
         
@@ -99,9 +110,25 @@ namespace nc::graphics::vulkan
 
         T* mappedContainerHandle = (T*)dataContainer;
 
-        for (uint32_t i = 0; i < static_cast<uint32_t>(dataToMap.size()); ++i)
+        auto dataToMapSize = dataToMap.size();
+
+        for (uint32_t i = 0; i < static_cast<uint32_t>(dataToMapSize); ++i)
         {
             mappedContainerHandle[i] = dataToMap[i];
+        }
+
+        // Note: WriteableBuffer can have a dynamic array. This block handles the case where we are mapping less data than has been previously mapped.
+        // If the dataToMapSize is empty, we must set the first item to "null" via myNuller which needs to be handled by the object being mapped.
+        if (dataToMapSize == 0)
+        {
+            myNuller(mappedContainerHandle[0]);
+        }
+
+        // Note: WriteableBuffer can have a dynamic array. This block handles the case where we are mapping less data than has been previously mapped.
+        // We must set the first "unmapped" item to "null" via myNuller which needs to be handled by the object being mapped.
+        if (dataToMapSize < m_memorySize)
+        {
+            myNuller(mappedContainerHandle[dataToMapSize]);
         }
 
         m_base->GetAllocator()->unmapMemory(allocation);

@@ -121,14 +121,14 @@ namespace nc::ui::editor::controls
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(renderer);
+        }
 
         #ifdef USE_VULKAN
         if(auto* meshRenderer = registry->Get<vulkan::MeshRenderer>(entity))
             ComponentGuiElement(meshRenderer);
         if (auto* pointLight = registry->Get<vulkan::PointLight>(entity))
             ComponentGuiElement(pointLight);
-        #else
-        }
+        #endif
 
         if(auto* body = registry->Get<PhysicsBody>(entity))
         {
@@ -140,7 +140,6 @@ namespace nc::ui::editor::controls
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
-        #endif
         
         }
 

@@ -27,13 +27,10 @@ namespace nc::ecs
 
             void Update();
             void Clear();
-            void Add(vulkan::PointLight& pointLight);
-            void Remove(Entity entity);
 
         private:
-            std::vector<Entity> m_pointLightEntities;
-            std::vector<vulkan::PointLightInfo> m_pointLightInfos;
             nc::graphics::Graphics2* m_graphics;
             registry_type* m_registry;
+            bool m_isSystemDirty;
     };
 }
