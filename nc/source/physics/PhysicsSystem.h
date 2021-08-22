@@ -3,7 +3,6 @@
 #include "ClickableSystem.h"
 #include "collision/CollisionCache.h"
 #include "dynamics/Joint.h"
-#include "assets/HullColliderManager.h"
 #include "graphics/DebugRenderer.h"
 
 namespace nc
@@ -38,7 +37,6 @@ namespace nc::physics
             CollisionCache m_cache;
             std::vector<Joint> m_joints;
             ClickableSystem m_clickableSystem;
-            HullColliderManager m_hullColliderManager;
             job::JobSystem* m_jobSystem;
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugRenderer m_debugRenderer;

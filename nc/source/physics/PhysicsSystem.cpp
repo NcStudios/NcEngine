@@ -38,7 +38,6 @@ namespace nc::physics
         : m_cache{},
           m_joints{},
           m_clickableSystem{graphics},
-          m_hullColliderManager{},
           m_jobSystem{jobSystem}
           #ifdef NC_DEBUG_RENDERING
           , m_debugRenderer{graphics}

@@ -34,5 +34,15 @@ namespace nc
         float maxExtent;
     };
 
-    using BoundingVolume = std::variant<BoxCollider, SphereCollider, CapsuleCollider, HullCollider>;
+    struct MeshCollider
+    {
+        struct Triangle
+        {
+            Vector3 a, b, c, normal;
+        };
+
+        std::span<const Triangle> triangleList;
+    };
+
+    using BoundingVolume = std::variant<BoxCollider, SphereCollider, CapsuleCollider, HullCollider, MeshCollider>;
 }

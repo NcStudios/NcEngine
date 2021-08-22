@@ -8,6 +8,7 @@
 #else
     #include "graphics/Graphics.h"
 #endif
+#include "assets/AssetManager.h"
 #include "job/JobSystem.h"
 #include "physics/PhysicsSystem.h"
 #include "component/PointLightManager.h"
@@ -45,6 +46,7 @@ namespace nc::core
             physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
+            AssetManager m_assetManager;
 
         #ifndef USE_VULKAN
             ui::UIImpl m_ui;

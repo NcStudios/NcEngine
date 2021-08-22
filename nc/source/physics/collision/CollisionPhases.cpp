@@ -114,6 +114,10 @@ namespace nc::physics
         for(uint32_t i = 0u; i < colliderCount; ++i)
         {
             const auto& collider = colliders[i];
+            
+            //if(collider.GetType() == ColliderType::Mesh)
+            //    continue;
+
             auto entity = collider.GetParentEntity();
             auto* body = registry->Get<PhysicsBody>(entity);
             auto interactionType = GetColliderInteractionType(collider.IsTrigger(), body);

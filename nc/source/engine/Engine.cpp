@@ -77,7 +77,8 @@ namespace nc::core
           m_ecs{config::GetMemorySettings()},
           m_physics{ &m_graphics2, &m_jobSystem},
           m_sceneSystem{},
-          m_time{}
+          m_time{},
+          m_assetManager{}
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -95,6 +96,7 @@ namespace nc::core
           m_physics{&m_graphics, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
+          m_assetManager{},
           #ifdef NC_EDITOR_ENABLED
           m_ui{m_window.GetHWND(), &m_graphics}
           #else

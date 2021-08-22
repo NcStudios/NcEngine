@@ -3,7 +3,7 @@
 #include "graphics/d3dresource/ConstantBufferResources.h"
 #include "debug/Utils.h"
 
-#include "assets/HullColliderManager.h"
+#include "assets/AssetManager.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -25,6 +25,7 @@ namespace
     auto EstimateBoundingVolume(const BoxCollider& box, const Vector3& translation, float scale) -> SphereCollider;
     auto EstimateBoundingVolume(const CapsuleCollider& capsule, const Vector3& translation, float scale) -> SphereCollider;
     auto EstimateBoundingVolume(const HullCollider& mesh, const Vector3& translation, float scale) -> SphereCollider;
+    auto EstimateBoundingVolume(const MeshCollider& mesh, const Vector3& translation, float scale) -> SphereCollider;
     auto CreateBoundingVolume(const Collider::VolumeInfo& info) -> BoundingVolume;
     auto GetMatrixScaleExtent(DirectX::FXMMATRIX matrix) -> float;
 
@@ -76,6 +77,12 @@ namespace
     {
         return SphereCollider{translation, mesh.maxExtent * scale};
     }
+
+    SphereCollider EstimateBoundingVolume(const MeshCollider&, const Vector3&, float)
+    {
+        // need for visit
+        throw std::runtime_error("EstimateBoundingVolume(MeshCollider) - This function shouldn't be called");
+    }
     
     float GetMatrixScaleExtent(DirectX::FXMMATRIX matrix)
     {
@@ -106,7 +113,11 @@ namespace
             }
             case ColliderType::Hull:
             {
-                return { HullColliderManager::Acquire(info.hullAssetPath) };
+                return { AssetManager::AcquireHullCollider(info.hullAssetPath) };
+            }
+            case ColliderType::Mesh:
+            {
+                return { AssetManager::AcquireMeshCollider(info.hullAssetPath) };
             }
             default:
                 throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");
@@ -186,6 +197,25 @@ namespace nc
           m_selectedInEditor{false}
           #endif
     {
+    }
+
+    Collider::Collider(Entity entity, MeshProperties properties, bool isTrigger)
+        : ComponentBase(entity),
+          m_info{.type = ColliderType::Mesh,
+                 .offset = Vector3::Zero(),
+                 .scale = Vector3::One(),
+                 .hullAssetPath = std::move(properties.assetPath),
+                 .isTrigger = isTrigger},
+         m_volume{CreateBoundingVolume(m_info)},
+         m_awake{true}
+         #ifdef NC_EDITOR_ENABLED
+         ,
+         m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
+         m_selectedInEditor{false}
+         #endif
+    {
+        if(!EntityUtils::IsStatic(entity))
+            throw std::runtime_error("Collider - Mesh colliders may only be added to static entities");
     }
 
     auto Collider::EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider

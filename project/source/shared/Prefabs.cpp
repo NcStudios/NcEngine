@@ -126,6 +126,8 @@ void InitializeResources()
     isInitialized = true;
 
     LoadHullColliderAsset("project/assets/mesh_colliders/coin.nca");
+    LoadMeshColliderAsset("project/assets/mesh_colliders/plane.nca");
+
 
     graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
     graphics::LoadMeshAsset("project/assets/mesh/capsule.nca");

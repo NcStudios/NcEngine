@@ -1,5 +1,5 @@
 #include "Assets.h"
-#include "HullColliderManager.h"
+#include "AssetManager.h"
 
 #include <fstream>
 
@@ -34,6 +34,31 @@ namespace nc
             vertices.push_back(vertex);
         }
 
-        HullColliderManager::Load(path, HullColliderFlyweight{std::move(vertices), extents, maxExtent});
+        AssetManager::LoadHullCollider(path, HullColliderFlyweight{std::move(vertices), extents, maxExtent});
+    }
+
+    void LoadMeshColliderAsset(const std::string& path)
+    {
+        std::ifstream file{path};
+        if(!file.is_open())
+            throw std::runtime_error("LoadHullColliderAsset - Could not open file: " + path);
+
+        size_t triangleCount;
+        file >> triangleCount;
+
+        std::vector<MeshCollider::Triangle> triangles;
+        triangles.reserve(triangleCount);
+        Vector3 a, b, c, n;
+
+        for(size_t i = 0u; i < triangleCount; ++i)
+        {
+            if(file.fail())
+                throw std::runtime_error("LoadMeshColliderAsset - Failure reading file: " + path);
+
+            file >> a >> b >> c >> n;
+            triangles.emplace_back(a, b, c, n);
+        }
+
+        AssetManager::LoadMeshCollider(path, MeshColliderFlyweight{std::move(triangles)});
     }
 } // namespace nc

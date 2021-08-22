@@ -14,7 +14,8 @@
 enum class AssetType
 {
     Mesh,
-    HullCollider
+    HullCollider,
+    MeshCollider
 };
 
 struct Target
@@ -51,6 +52,10 @@ constexpr auto HullColliderFlags = aiProcess_Triangulate |
                                    aiProcess_JoinIdenticalVertices |
                                    aiProcess_ConvertToLeftHanded;
 
+constexpr auto MeshColliderFlags = aiProcess_Triangulate |
+                                   aiProcess_GenNormals |
+                                   aiProcess_ConvertToLeftHanded;
+
 void Usage();
 bool ParseArgs(int argc, char** argv, Config* config);
 auto GetAssetType(std::string type) -> AssetType;
@@ -63,6 +68,7 @@ void SanitizeVector(aiVector3D* value, bool* badValueDetected);
 void BuildAsset(Assimp::Importer* importer, const Target& inPath, const Config& config);
 void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
+void BuildMeshColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D;
 auto GetHullColliderExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&;
@@ -95,6 +101,10 @@ int main(int argc, char** argv)
 
 void Usage()
 {
+
+    /** @todo update */
+
+
     std::cout << "Usage: build.exe [options]\n"
               << "Options:\n"
               << "  -h or --help            Display this information\n"
@@ -103,7 +113,8 @@ void Usage()
               << "  -m <manifest>           Parse multiple assets from <manifest>\n"
               << "  -o <dir>                Output assets to <dir>\n\n"
               
-              << "  Valid asset types are 'mesh' or 'hull', and are case-insensitive.\n\n"
+              << "  Valid asset types are 'mesh', 'hull-collider', and 'mesh-collider' and are\n"
+              << "  case-insensitive.\n\n"
 
               << "  When using -m, <manifest> should be the path to a newline-separated list of\n"
               << "  pairs in the form '<asset-type> <path-to-input-file>'.\n\n"
@@ -179,8 +190,10 @@ auto GetAssetType(std::string type) -> AssetType
 
     if(type.compare("mesh") == 0)
         return AssetType::Mesh;
-    else if(type.compare("hull") == 0)
+    else if(type.compare("hull-collider") == 0)
         return AssetType::HullCollider;
+    else if(type.compare("mesh-collider") == 0)
+        return AssetType::MeshCollider;
     
     throw std::runtime_error("Failed to parse asset type: " + type);
 }
@@ -285,6 +298,11 @@ void BuildAsset(Assimp::Importer* importer, const Target& target, const Config& 
             BuildHullColliderAsset(importer, target.path, config);
             break;
         }
+        case AssetType::MeshCollider:
+        {
+            BuildMeshColliderAsset(importer, target.path, config);
+            break;
+        }
     }
 }
 
@@ -369,6 +387,65 @@ void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::p
         auto& ver = pMesh->mVertices[i];
         SanitizeVector(&ver, &valueWasSanitized);
         outFile << ver << '\n';
+    }
+
+    if(valueWasSanitized)
+        std::cerr << "    Warning: Bad value detected in mesh data. Some values have been set to 0.\n";
+
+    outFile.close();
+}
+
+void BuildMeshColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
+{
+    if (!IsValidMeshExtension(inPath.extension()))
+        throw std::runtime_error("Invalid mesh file extension: " + inPath.string());
+
+    const auto assetPath = ToAssetPath(inPath, config);
+    std::cout << "Creating Mesh Collider: " << assetPath << '\n';
+    std::ofstream outFile{assetPath};
+    if(!outFile)
+        throw std::runtime_error("Failure opening asset file");
+
+    const auto pModel = importer->ReadFile(inPath.string(), MeshColliderFlags);
+    if(!pModel)
+        throw std::runtime_error("AssImp failure");
+
+    const auto pMesh = pModel->mMeshes[0];
+    auto* vertices = pMesh->mVertices;
+    bool valueWasSanitized = false;
+    outFile << pMesh->mNumFaces << '\n';
+
+    for (size_t i = 0u; i < pMesh->mNumFaces; ++i)
+    {
+        const auto& face = pMesh->mFaces[i];
+        if(face.mNumIndices != 3)
+            throw std::runtime_error("Failure parsing indices");
+
+        const auto i1 = face.mIndices[0];
+        const auto i2 = face.mIndices[1];
+        const auto i3 = face.mIndices[2];
+
+        auto& a = vertices[face.mIndices[0]];
+        auto& b = vertices[face.mIndices[1]];
+        auto& c = vertices[face.mIndices[2]];
+        SanitizeVector(&a, &valueWasSanitized);
+        SanitizeVector(&b, &valueWasSanitized);
+        SanitizeVector(&c, &valueWasSanitized);
+
+        auto& nA = pMesh->mNormals[face.mIndices[0]];
+        auto& nB = pMesh->mNormals[face.mIndices[1]];
+        auto& nC = pMesh->mNormals[face.mIndices[2]];
+
+        if(nA != nB || nB != nC)
+            std::cerr << "Normals don't match\n";
+
+        // auto ab = b - a;
+        // auto bc = c - b;
+        // auto normal = 
+
+        outFile << a << ' ' << b << ' ' << c << ' ' << nA << '\n';
+
+        //outFile << face.mIndices[0] << ' ' << face.mIndices[1] << ' ' << face.mIndices[2] << '\n';
     }
 
     if(valueWasSanitized)

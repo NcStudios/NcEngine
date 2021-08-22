@@ -9,7 +9,7 @@ namespace nc
 {
     enum class ColliderType : uint8_t
     {
-        Box, Sphere, Capsule, Hull
+        Box, Sphere, Capsule, Hull, Mesh
     };
 
     struct SphereProperties
@@ -36,6 +36,11 @@ namespace nc
         std::string assetPath;
     };
 
+    struct MeshProperties
+    {
+        std::string assetPath;
+    };
+
     class Collider final : public ComponentBase
     {
         public:
@@ -52,6 +57,7 @@ namespace nc
             Collider(Entity entity, BoxProperties properties, bool isTrigger);
             Collider(Entity entity, CapsuleProperties properties, bool isTrigger);
             Collider(Entity entity, HullProperties properties, bool isTrigger);
+            Collider(Entity entity, MeshProperties properties, bool isTrigger);
             ~Collider() = default;
             Collider(const Collider&) = delete;
             Collider(Collider&&) = default;
