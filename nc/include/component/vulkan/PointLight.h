@@ -38,15 +38,17 @@ namespace nc::vulkan
 
             const PointLightInfo& GetInfo() const;
             float GetRange() const;
+            bool IsDirty() const;
 
             void SetInfo(PointLightInfo info);
             void SetRange(float range);
 
-            void Update();
+            bool Update();
 
         private:
             float m_range;
             PointLightInfo m_info;
+            bool m_isDirty;
     };
 }
 

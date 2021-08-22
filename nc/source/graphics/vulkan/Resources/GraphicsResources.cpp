@@ -154,7 +154,10 @@ namespace nc::graphics::vulkan
 
     void PointLightsData::Update(const std::vector<nc::vulkan::PointLightInfo>& pointLights)
     {
-        m_pointLightsArrayBuffer.Map(pointLights);
+        m_pointLightsArrayBuffer.Map(pointLights, [](nc::vulkan::PointLightInfo& info)
+        {
+            info.isInitialized = false;
+        });
     }
 
     vk::DescriptorSetLayout* PointLightsData::GetDescriptorLayout() noexcept

@@ -13,19 +13,18 @@ namespace nc::ecs
     const uint32_t PointLightSystem::MAX_POINT_LIGHTS;
 
     PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics2* graphics)
-    : m_pointLightEntities{},
-      m_pointLightInfos{},
-      m_graphics{graphics},
-      m_registry{registry}
+    : m_graphics{graphics},
+      m_registry{registry},
+      m_isSystemDirty{true}
     {
         m_registry->RegisterOnAddCallback<vulkan::PointLight>
         (
-            [this](vulkan::PointLight& pointLight) { this->Add(pointLight); }
+            [this](vulkan::PointLight&) { m_isSystemDirty = true; }
         );
 
         m_registry->RegisterOnRemoveCallback<vulkan::PointLight>
         (
-            [this](Entity entity) { this->Remove(entity); }
+            [this](Entity) { m_isSystemDirty = true; }
         );
 
         graphics::vulkan::ResourceManager::InitializePointLights(graphics, MAX_POINT_LIGHTS);
@@ -33,44 +32,34 @@ namespace nc::ecs
 
     void PointLightSystem::Update()
     {
-        m_pointLightInfos.clear();
-        m_pointLightEntities.clear();
-
-        for (auto& pointLight : m_registry->ViewAll<vulkan::PointLight>())
+        auto pointLightComponents = m_registry->ViewAll<vulkan::PointLight>();
+        for (auto& pointLight : pointLightComponents)
         {
-            pointLight.Update();
-            m_pointLightInfos.emplace_back(pointLight.GetInfo());
-            m_pointLightEntities.emplace_back(pointLight.GetParentEntity());
-        }
-        graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
-    }
-
-    void PointLightSystem::Add(vulkan::PointLight& pointLight)
-    {
-        m_pointLightInfos.emplace_back(pointLight.GetInfo());
-        m_pointLightEntities.emplace_back(pointLight.GetParentEntity());
-        graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
-    }
-
-    void PointLightSystem::Remove(Entity entity)
-    {
-        auto entityIt = std::ranges::find(m_pointLightEntities, entity);
-
-        if (entityIt == m_pointLightEntities.end())
-        {
-            return;
+            if (pointLight.Update())
+            {
+                m_isSystemDirty = true;
+            }
         }
 
-        auto index = static_cast<uint32_t>(entityIt - m_pointLightEntities.begin());
-        auto& pointLight = m_pointLightInfos[index];
-        pointLight.isInitialized = false;
-        graphics::vulkan::ResourceManager::UpdatePointLights(m_pointLightInfos);
+        if (m_isSystemDirty)
+        {
+            auto pointLightInfos = std::vector<vulkan::PointLightInfo>();
+            pointLightInfos.reserve(pointLightComponents.size());
+
+            // Pull the PointLightInfo structs out of their respective components in the registry to map them to the GPU.
+            std::transform(pointLightComponents.begin(), pointLightComponents.end(), std::back_inserter(pointLightInfos), [](auto&& pointLightComponent)
+            { 
+                return pointLightComponent.GetInfo(); 
+            });
+
+            graphics::vulkan::ResourceManager::UpdatePointLights(pointLightInfos);
+            m_isSystemDirty = false;
+        }
     }
 
     void PointLightSystem::Clear()
     {
-        m_pointLightInfos.clear();
-        m_pointLightEntities.clear();
+        m_isSystemDirty = true;
         graphics::vulkan::ResourceManager::ResetPointLights(m_graphics, MAX_POINT_LIGHTS);
     }
 }

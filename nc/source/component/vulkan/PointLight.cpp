@@ -38,18 +38,37 @@ namespace nc::vulkan
         return m_range;
     }
 
-    void PointLight::Update()
+    bool PointLight::IsDirty() const
     {
+        return m_isDirty;
+    }
+
+    bool PointLight::Update()
+    {        
         auto transformPos = ActiveRegistry()->Get<Transform>(GetParentEntity())->GetPosition();
         auto attenuation = GetAttenuationFromRange(m_range);
+
+        if (transformPos.x != m_info.pos.x || transformPos.y != m_info.pos.y || transformPos.z != m_info.pos.z)
+        {
+            m_isDirty = true;
+        }
+
+        if (attenuation.constant != m_info.attConst || attenuation.linear != m_info.attLin || attenuation.quadratic != m_info.attQuad)
+        {
+            m_isDirty = true;
+        }
+
+        m_info.pos = Vector4(transformPos.x, transformPos.y, transformPos.z, 1.0);
         m_info.attConst = attenuation.constant;
         m_info.attLin = attenuation.linear;
         m_info.attQuad = attenuation.quadratic;
-        m_info.pos = Vector4(transformPos.x, transformPos.y, transformPos.z, 1.0);
+
+        return std::exchange(m_isDirty, false);
     }
 
     void PointLight::SetInfo(PointLightInfo info)
     {
+        m_isDirty = true;
         m_info = info;
     }
 
@@ -61,7 +80,6 @@ namespace nc::vulkan
 
 namespace nc
 {
-    #ifdef USE_VULKAN
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<vulkan::PointLight>(vulkan::PointLight* light)
     {
@@ -112,9 +130,10 @@ namespace nc
         if (specularResult) pointLightInfo.specularColor = specular;
         if (diffuseIntensityResult) pointLightInfo.diffuseIntensity = diffuseIntensity;
 
-        light->SetInfo(pointLightInfo);
-
+        if (ambientResult || diffuseResult || specularResult || diffuseIntensityResult)
+        {
+            light->SetInfo(pointLightInfo);
+        }
     }
-    #endif
     #endif
 }
