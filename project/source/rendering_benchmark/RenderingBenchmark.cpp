@@ -47,6 +47,7 @@ namespace nc::sample
     {
         // Setup
         m_sceneHelper.Setup(registry, false, true, Widget);
+        prefab::InitializeResources();
 
         // Camera
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
@@ -63,6 +64,14 @@ namespace nc::sample
         auto handle = registry->Add<Entity>({.tag = "Spawner"});
         auto spawner = registry->Add<Spawner>(handle, registry, prefab::Resource::Cube, spawnBehavior);
         auto fpsTracker = registry->Add<FPSTracker>(handle);
+
+        // Lights
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.ambient = Vector4(1.0f, 0.7f, 1.0f, 0.0f),
+                                                                           .diffuseColor = Vector4(0.8f, 0.6f, 1.0f, 0.0f),
+                                                                           .specularColor = Vector4(1.0f, 0.9f, 1.0f, 0.0f),
+                                                                           .diffuseIntensity = 2.0f
+                                                                          });
 
         // UI Callbacks
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);

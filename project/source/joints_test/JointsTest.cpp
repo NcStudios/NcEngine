@@ -11,6 +11,7 @@ namespace nc::sample
     void JointsTest::Load(registry_type* registry)
     {
         m_sceneHelper.Setup(registry, false, false, nullptr);
+        prefab::InitializeResources();
 
         // Light
         auto lightProperties = PointLight::Properties
@@ -31,6 +32,14 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
         camera::SetMainCamera(camera);
+
+        // Lights
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.ambient = Vector4(1.0f, 0.7f, 1.0f, 0.0f),
+                                                                           .diffuseColor = Vector4(0.8f, 0.6f, 1.0f, 0.0f),
+                                                                           .specularColor = Vector4(1.0f, 0.9f, 1.0f, 0.0f),
+                                                                           .diffuseIntensity = 2.0f
+                                                                          });
 
         // Movable object
         {
