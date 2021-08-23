@@ -16,7 +16,6 @@ namespace nc::physics
         for(auto& body : bodies)
         {
             auto* transform = registry->Get<Transform>(body.GetParentEntity());
-            /** @todo Can this be skipped for static bodies? */
             body.UpdateWorldInertia(transform);
         }
 

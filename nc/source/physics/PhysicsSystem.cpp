@@ -135,7 +135,7 @@ namespace nc::physics
         UpdateManifolds(registry, m_cache.manifolds);
 
         const auto [matrices, estimates] = FetchEstimates(registry);
-        const auto broadEvents = FindBroadPairs(estimates);
+        const auto broadEvents = FindBroadPairs(estimates, m_cache.previousBroadPhysicsCount, m_cache.previousBroadTriggerCount);
 
         auto colliders = registry->ViewAll<Collider>();
         auto physicsResult = FindNarrowPhysicsPairs(colliders, matrices, broadEvents.physics);
@@ -151,6 +151,8 @@ namespace nc::physics
 
         m_cache.previousPhysics = std::move(physicsResult.events);
         m_cache.previousTrigger = std::move(triggerEvents);
+        m_cache.previousBroadPhysicsCount = broadEvents.physics.size();
+        m_cache.previousBroadTriggerCount = broadEvents.trigger.size();
 
         NC_PROFILE_END();
     }

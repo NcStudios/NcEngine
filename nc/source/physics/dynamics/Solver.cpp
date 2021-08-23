@@ -316,19 +316,19 @@ namespace
         // Get anchor world space positions
         XMVECTOR pA, pB;
         {
-            auto* transformA = registry->Get<Transform>(joint.entityA);
-            auto positionA = transformA->GetPosition();
-            auto rotationA = transformA->GetRotation();
-            auto rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotationA));
+            auto* transform = registry->Get<Transform>(joint.entityA);
+            auto position = transform->GetPosition();
+            auto rotation = transform->GetRotation();
+            auto rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotation));
             joint.rA = XMVector3Transform(joint.anchorA, rotMatrix);
-            pA = XMLoadVector3(&positionA) + joint.rA;
+            pA = XMLoadVector3(&position) + joint.rA;
 
-            auto* transformB = registry->Get<Transform>(joint.entityB);
-            auto positionB = transformB->GetPosition();
-            auto rotationB = transformB->GetRotation();
-            auto rotBMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotationB));
-            joint.rB = XMVector3Transform(joint.anchorB, rotBMatrix);
-            pB = XMLoadVector3(&positionB) + joint.rB;
+            transform = registry->Get<Transform>(joint.entityB);
+            position = transform->GetPosition();
+            rotation = transform->GetRotation();
+            rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotation));
+            joint.rB = XMVector3Transform(joint.anchorB, rotMatrix);
+            pB = XMLoadVector3(&position) + joint.rB;
         }
 
         /** Scale bias by time step and positional error */

@@ -6,8 +6,6 @@
 
 namespace nc::physics
 {
-
-
     /** A collider's estimated bounding volume, index in the registry storage, and
      *  interaction type. Used for broad detection. */
     struct ColliderEstimate
@@ -67,6 +65,8 @@ namespace nc::physics
         std::vector<NarrowEvent> previousPhysics;
         std::vector<NarrowEvent> previousTrigger;
         std::vector<Manifold> manifolds;
+        size_t previousBroadPhysicsCount;
+        size_t previousBroadTriggerCount;
     };
 
     inline bool operator ==(const BroadEvent& lhs, const BroadEvent& rhs)

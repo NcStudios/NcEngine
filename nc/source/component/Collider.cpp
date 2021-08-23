@@ -166,6 +166,18 @@ namespace nc
         }, m_volume);
     }
 
+    const char* ToCString(ColliderType type)
+    {
+        switch(type)
+        {
+            case ColliderType::Box:     return "Box";
+            case ColliderType::Capsule: return "Capsule";
+            case ColliderType::Sphere:  return "Sphere";
+            case ColliderType::Hull:    return "Hull";
+            default: throw std::runtime_error("ToCString - Unknown ColliderType");
+        }
+    }
+
     #ifdef NC_EDITOR_ENABLED
     void Collider::UpdateWidget(graphics::vulkan::Renderer* renderer)
     {
@@ -191,18 +203,6 @@ namespace nc
     void Collider::SetEditorSelection(bool state)
     {
         m_selectedInEditor = state;
-    }
-
-    const char* ToCString(nc::ColliderType type)
-    {
-        switch(type)
-        {
-            case nc::ColliderType::Box:     return "Box";
-            case nc::ColliderType::Capsule: return "Capsule";
-            case nc::ColliderType::Sphere:  return "Sphere";
-            case nc::ColliderType::Hull:    return "Hull";
-            default: throw std::runtime_error("ToCString - Unknown ColliderType");
-        }
     }
 
     template<> void ComponentGuiElement<Collider>(Collider* collider)

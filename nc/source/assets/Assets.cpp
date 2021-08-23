@@ -17,9 +17,10 @@ namespace nc
         if(!file.is_open())
             throw std::runtime_error("LoadHullColliderAsset - Could not open file: " + path);
         
-        float maxExtent = 0.0f;
-        size_t vertexCount = 0u;
-        file >> maxExtent >> vertexCount;
+        Vector3 extents;
+        float maxExtent;
+        size_t vertexCount;
+        file >> extents.x >> extents.y >> extents.z >> maxExtent >> vertexCount;
         std::vector<Vector3> vertices;
         vertices.reserve(vertexCount);
         Vector3 vertex;
@@ -33,6 +34,6 @@ namespace nc
             vertices.push_back(vertex);
         }
 
-        HullColliderManager::Load(path, HullColliderFlyweight{std::move(vertices), maxExtent});
+        HullColliderManager::Load(path, HullColliderFlyweight{std::move(vertices), extents, maxExtent});
     }
 } // namespace nc

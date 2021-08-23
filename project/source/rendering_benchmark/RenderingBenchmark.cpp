@@ -58,7 +58,7 @@ namespace nc::sample
         {
             .positionOffset = Vector3{0.0f, 0.0f, 35.0f},
             .positionRandomRange = Vector3::Splat(15.0f),
-            .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f)
+            .rotationRandomRange = Vector3::Splat(std::numbers::pi / 2.0f)
         };
         
         auto handle = registry->Add<Entity>({.tag = "Spawner"});

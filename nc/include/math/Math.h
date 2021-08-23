@@ -10,7 +10,6 @@ namespace nc::math
 {
     constexpr auto FloatEpsilon = std::numeric_limits<float>::epsilon();
     constexpr auto DoubleEpsilon = std::numeric_limits<double>::epsilon();
-    constexpr auto Pi = std::numbers::pi_v<float>;
 
     template<std::totally_ordered T>
     constexpr T Min(T a, T b) noexcept { return a < b ? a : b; }
