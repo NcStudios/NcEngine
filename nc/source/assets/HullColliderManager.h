@@ -11,6 +11,7 @@ namespace nc
     struct HullColliderFlyweight
     {
         std::vector<Vector3> vertices;
+        Vector3 extents;
         float maxExtent;
     };
 
@@ -63,7 +64,7 @@ namespace nc
                 if(it == m_resources.end())
                     throw std::runtime_error("HullColliderManager::Acquire_ - Resource is not loaded: " + uid);
 
-                return HullCollider{std::span<const Vector3>{it->second.vertices}, it->second.maxExtent};
+                return HullCollider{std::span<const Vector3>{it->second.vertices}, it->second.extents, it->second.maxExtent};
             }
     };
 } // namespace nc

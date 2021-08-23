@@ -14,8 +14,12 @@ namespace
     const auto AngularVelocityMin = DirectX::XMVectorReplicate(-1.0f * physics::MaxAngularVelocity);
     const auto AngularVelocityMax = DirectX::XMVectorReplicate(physics::MaxAngularVelocity);
 
-    Vector3 CreateInverseInertiaTensor(const Vector3& scale, float mass, ColliderType type)
+    Vector3 CreateInverseInertiaTensor(Transform* transform, Collider* collider, float mass)
     {
+        auto transformScale = transform->GetScale();
+        auto colliderScale = collider->GetInfo().scale;
+        auto scale = HadamardProduct(transformScale, colliderScale);
+        auto type = collider->GetType();
         float iX, iY, iZ;
 
         switch(type)
@@ -23,7 +27,7 @@ namespace
             case ColliderType::Box:
             {
                 auto m = mass / 12.0f;
-                auto squareScale = nc::HadamardProduct(scale, scale);
+                auto squareScale = HadamardProduct(scale, scale);
                 iX = m * (squareScale.y + squareScale.z);
                 iY = m * (squareScale.x + squareScale.z);
                 iZ = m * (squareScale.x + squareScale.y);
@@ -31,25 +35,29 @@ namespace
             }
             case ColliderType::Capsule:
             {
-                /** @todo This is for a cylinder. */
-                auto m = mass / 12.0f;
+                /** Estimated with a cylinder */
                 auto r = scale.x * 0.5f;
                 auto h = scale.y * 2.0f;
-                iX = iY = m * (3.0f * r * r + h * h);
-                iZ = m * r * r * 0.5f;
+                iX = iY = (mass / 12.0f) * (3.0f * r * r + h * h);
+                iZ = mass * r * r * 0.5f;
                 break;
             }
             case ColliderType::Sphere:
             {
                 float radius = scale.x * 0.5f;
-                iX = iY = iZ = (2.0f / 3.0f) * mass * radius * radius;
+                iX = iY = iZ = (2.0f / 5.0f) * mass * radius * radius;
                 break;
             }
             case ColliderType::Hull:
             {
-                /** @todo Need to compute these in preprocessing. Use sphere for now. */
-                float sqRadius = scale.x * scale.x;
-                iX = iY = iZ = (2.0f / 3.0f) * mass * sqRadius;
+                /** Estimated with a bounding box */
+                const auto& hull = std::get<HullCollider>(collider->GetVolume());
+                scale = HadamardProduct(scale, hull.extents);
+                auto squareScale = HadamardProduct(scale, scale);
+                auto m = mass / 12.0f;
+                iX = m * (squareScale.y + squareScale.z);
+                iY = m * (squareScale.x + squareScale.z);
+                iZ = m * (squareScale.x + squareScale.y);
                 break;
             }
             default:
@@ -93,11 +101,8 @@ namespace nc
             return;
         }
 
-        auto colliderScale = collider->GetInfo().scale;
-        auto transformScale = registry->Get<Transform>(entity)->GetScale();
-        auto totalScale = HadamardProduct(transformScale, colliderScale);
-        m_invInertiaLocal = CreateInverseInertiaTensor(totalScale, m_properties.mass, collider->GetType());
-
+        auto* transform = registry->Get<Transform>(entity);
+        m_invInertiaLocal = CreateInverseInertiaTensor(transform, collider, m_properties.mass);
         m_properties.mass = 1.0f / m_properties.mass;
     }
 

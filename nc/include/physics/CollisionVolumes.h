@@ -30,6 +30,7 @@ namespace nc
     struct HullCollider
     {
         std::span<const Vector3> vertices;
+        Vector3 extents;
         float maxExtent;
     };
 
