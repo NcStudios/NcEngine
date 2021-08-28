@@ -96,11 +96,6 @@ namespace nc::sample
         registry->Add<Collider>(greenDisc, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"}, false);
         registry->Add<PhysicsBody>(greenDisc, PhysicsProperties{});
 
-
-        auto disc2 = prefab::Create(registry, prefab::Resource::DiscGreen, {.position = Vector3{-6.0f, 10.0f, -5.5f}, .scale = Vector3::Splat(7.0f), .tag = "Green Disc", .flags = EntityFlags::Static});
-        registry->Add<Collider>(disc2, MeshProperties{.assetPath = "project/assets/mesh_colliders/plane.nca"}, false);
-
-
         // Static Objects
         auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{25.0f, 1.0f, 25.0f}, .tag = "Ground", .flags = EntityFlags::Static});
         registry->Add<Collider>(ground, BoxProperties{}, false);

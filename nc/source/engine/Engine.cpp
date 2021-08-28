@@ -75,7 +75,7 @@ namespace nc::core
           m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_frameManager2{},
           m_ecs{config::GetMemorySettings()},
-          m_physics{ &m_graphics2, &m_jobSystem},
+          m_physics{m_ecs.GetRegistry(), &m_graphics2, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
           m_assetManager{}
@@ -93,7 +93,7 @@ namespace nc::core
           m_pointLightManager{},
           m_frameManager{},
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physics{&m_graphics, &m_jobSystem},
+          m_physics{m_ecs.GetRegistry(), &m_graphics, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
           m_assetManager{},
@@ -134,7 +134,7 @@ namespace nc::core
         while(m_isRunning)
         {
             m_time.UpdateTime();
-            m_window.ProcessSystemMessages(); 
+            m_window.ProcessSystemMessages();
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);

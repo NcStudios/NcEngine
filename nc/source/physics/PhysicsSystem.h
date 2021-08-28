@@ -2,6 +2,7 @@
 
 #include "ClickableSystem.h"
 #include "collision/CollisionCache.h"
+#include "collision/BspTree.h"
 #include "dynamics/Joint.h"
 #include "graphics/DebugRenderer.h"
 
@@ -17,9 +18,9 @@ namespace nc::physics
     {
         public:
             #ifdef USE_VULKAN
-            PhysicsSystem(graphics::Graphics2* graphics, job::JobSystem* jobSystem);
+            PhysicsSystem(registry_type* registry, graphics::Graphics2* graphics, job::JobSystem* jobSystem);
             #else
-            PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem);
+            PhysicsSystem(registry_type* registry, graphics::Graphics* graphics, job::JobSystem* jobSystem);
             #endif
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness);
@@ -36,6 +37,7 @@ namespace nc::physics
         private:
             CollisionCache m_cache;
             std::vector<Joint> m_joints;
+            BspTree m_bspTree;
             ClickableSystem m_clickableSystem;
             job::JobSystem* m_jobSystem;
             #ifdef NC_DEBUG_RENDERING

@@ -41,14 +41,18 @@ namespace nc::sample::prefab
                 return std::string{"DiscGreen"};
             case Resource::DiscRed:
                 return std::string{"DiscRed"};
+            case Resource::RampRed:
+                return std::string{"RampRed"};
             case Resource::Sphere:
                 return std::string{"Sphere"};
             case Resource::SphereBlue:
                 return std::string{"SphereBlue"};
             case Resource::SphereGreen:
-                return std::string{"Sphere Green"};
+                return std::string{"SphereGreen"};
             case Resource::SphereRed:
-                return std::string{"Sphere Red"};
+                return std::string{"SphereRed"};
+            case Resource::PlaneGreen:
+                return std::string{"PlaneGreen"};
             case Resource::Table:
                 return std::string{"Table"};
             case Resource::Token:
@@ -88,7 +92,9 @@ namespace nc::sample::prefab
         graphics::Mesh Coin{};
         graphics::Mesh Cube{};
         graphics::Mesh Planet{};
+        graphics::Mesh Ramp{};
         graphics::Mesh Sphere{};
+        graphics::Mesh Plane{};
         graphics::Mesh Table{};
         graphics::Mesh Token{};
         graphics::Mesh Worm{};
@@ -125,15 +131,16 @@ void InitializeResources()
 
     isInitialized = true;
 
-    LoadHullColliderAsset("project/assets/mesh_colliders/coin.nca");
+    LoadConvexHullAsset("project/assets/mesh_colliders/coin.nca");
     LoadMeshColliderAsset("project/assets/mesh_colliders/plane.nca");
-
+    LoadMeshColliderAsset("project/assets/mesh_colliders/ramp.nca");
 
     graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
     graphics::LoadMeshAsset("project/assets/mesh/capsule.nca");
     graphics::LoadMeshAsset("project/assets/mesh/coin.nca");
-    graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
+    //graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
     graphics::LoadMeshAsset("project/assets/mesh/planet.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/ramp.nca");
     graphics::LoadMeshAsset("project/assets/mesh/sphere.nca");
     graphics::LoadMeshAsset("project/assets/mesh/table.nca");
     graphics::LoadMeshAsset("project/assets/mesh/token.nca");
@@ -143,7 +150,9 @@ void InitializeResources()
     mesh::Capsule = graphics::Mesh{"project/assets/mesh/capsule.nca"};
     mesh::Coin = graphics::Mesh{"project/assets/mesh/coin.nca"};
     mesh::Cube = graphics::Mesh{"project/assets/mesh/cube.nca"};
+    mesh::Plane = graphics::Mesh{"project/assets/mesh/plane.nca"};
     mesh::Planet = graphics::Mesh{"project/assets/mesh/planet.nca"};
+    mesh::Ramp = graphics::Mesh{"project/assets/mesh/ramp.nca"};
     mesh::Sphere = graphics::Mesh{"project/assets/mesh/sphere.nca"};
     mesh::Table = graphics::Mesh{"project/assets/mesh/table.nca"};
     mesh::Token = graphics::Mesh{"project/assets/mesh/token.nca"};
@@ -316,6 +325,13 @@ template<> Entity Create_<Resource::DiscRed>(registry_type* registry, EntityInfo
     return handle;
 }
 
+template<> Entity Create_<Resource::RampRed>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Ramp, material::SolidRed);
+    return handle;
+}
+
 template<> Entity Create_<Resource::Sphere>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
@@ -341,6 +357,13 @@ template<> Entity Create_<Resource::SphereRed>(registry_type* registry, EntityIn
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<Renderer>(handle, mesh::Planet, material::SolidRed);
+    return handle;
+}
+
+template<> Entity Create_<Resource::PlaneGreen>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<Renderer>(handle, mesh::Plane, material::SolidGreen);
     return handle;
 }
 
@@ -459,10 +482,12 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::DiscBlue,      Create_<Resource::DiscBlue>},
     std::pair{Resource::DiscGreen,     Create_<Resource::DiscGreen>},
     std::pair{Resource::DiscRed,       Create_<Resource::DiscRed>},
+    std::pair{Resource::RampRed,       Create_<Resource::RampRed>},
     std::pair{Resource::Sphere,        Create_<Resource::Sphere>},
     std::pair{Resource::SphereBlue,    Create_<Resource::SphereBlue>},
     std::pair{Resource::SphereGreen,   Create_<Resource::SphereGreen>},
     std::pair{Resource::SphereRed,     Create_<Resource::SphereRed>},
+    std::pair{Resource::PlaneGreen,    Create_<Resource::PlaneGreen>},
     std::pair{Resource::Table,         Create_<Resource::Table>},
     std::pair{Resource::Token,         Create_<Resource::Token>},
     std::pair{Resource::WireframeCube, Create_<Resource::WireframeCube>},

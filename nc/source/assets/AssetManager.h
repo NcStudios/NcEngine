@@ -8,7 +8,7 @@
 
 namespace nc
 {
-    struct HullColliderFlyweight
+    struct ConvexHullFlyweight
     {
         std::vector<Vector3> vertices;
         Vector3 extents;
@@ -17,7 +17,8 @@ namespace nc
 
     struct MeshColliderFlyweight
     {
-        std::vector<MeshCollider::Triangle> triangles;
+        std::vector<Triangle> triangles;
+        float maxExtent;
     };
 
     /** @todo Mesh assets are managed elsewhere. Can we merge everything together? */
@@ -27,9 +28,9 @@ namespace nc
         public:
             AssetManager() { AssetManager::instance = this; }
 
-            static bool LoadHullCollider(const std::string& uid, HullColliderFlyweight data)
+            static bool LoadConvexHull(const std::string& uid, ConvexHullFlyweight data)
             {
-                return Get()->LoadHullCollider_(uid, std::move(data));
+                return Get()->LoadConvexHull_(uid, std::move(data));
             }
             
             static bool LoadMeshCollider(const std::string& uid, MeshColliderFlyweight data)
@@ -37,9 +38,9 @@ namespace nc
                 return Get()->LoadMeshCollider_(uid, std::move(data));
             }
 
-            static bool IsHullColliderLoaded(const std::string& uid)
+            static bool IsConvexHullLoaded(const std::string& uid)
             {
-                return Get()->IsHullColliderLoaded_(uid);
+                return Get()->IsConvexHullLoaded_(uid);
             }
 
             static bool IsMeshColliderLoaded(const std::string& uid)
@@ -47,19 +48,19 @@ namespace nc
                 return Get()->IsMeshColliderLoaded_(uid);
             }
 
-            static auto AcquireHullCollider(const std::string& uid) -> HullCollider
+            static auto AcquireConvexHull(const std::string& uid) -> ConvexHull
             {
-                return Get()->AcquireHullCollider_(uid);
+                return Get()->AcquireConvexHull_(uid);
             }
 
-            static auto AcquireMeshCollider(const std::string& uid) -> MeshCollider
+            static auto AcquireMeshCollider(const std::string& uid) -> const MeshColliderFlyweight&
             {
                 return Get()->AcquireMeshCollider_(uid);
             }
 
         private:
             static inline AssetManager* instance = nullptr;
-            std::unordered_map<std::string, HullColliderFlyweight> m_hullColliders;
+            std::unordered_map<std::string, ConvexHullFlyweight> m_hullColliders;
             std::unordered_map<std::string, MeshColliderFlyweight> m_meshColliders;
 
             static auto Get() -> AssetManager*
@@ -67,9 +68,9 @@ namespace nc
                 return AssetManager::instance;
             }
 
-            bool LoadHullCollider_(const std::string& uid, HullColliderFlyweight data)
+            bool LoadConvexHull_(const std::string& uid, ConvexHullFlyweight data)
             {
-                if(IsHullColliderLoaded_(uid))
+                if(IsConvexHullLoaded_(uid))
                     return false;
                 
                 m_hullColliders.emplace(uid, std::move(data));
@@ -85,7 +86,7 @@ namespace nc
                 return true;
             }
 
-            bool IsHullColliderLoaded_(const std::string& uid) const
+            bool IsConvexHullLoaded_(const std::string& uid) const
             {
                 return m_hullColliders.end() != m_hullColliders.find(uid);
             }
@@ -95,22 +96,22 @@ namespace nc
                 return m_meshColliders.end() != m_meshColliders.find(uid);
             }
 
-            auto AcquireHullCollider_(const std::string& uid) const -> HullCollider
+            auto AcquireConvexHull_(const std::string& uid) const -> ConvexHull
             {
                 const auto it = m_hullColliders.find(uid);
                 if(it == m_hullColliders.end())
-                    throw std::runtime_error("AssetManager::AcquireHullCollider_ - Resource is not loaded: " + uid);
+                    throw std::runtime_error("AssetManager::AcquireConvexHull_ - Resource is not loaded: " + uid);
 
-                return HullCollider{std::span<const Vector3>{it->second.vertices}, it->second.extents, it->second.maxExtent};
+                return ConvexHull{std::span<const Vector3>{it->second.vertices}, it->second.extents, it->second.maxExtent};
             }
 
-            auto AcquireMeshCollider_(const std::string& uid) const -> MeshCollider
+            auto AcquireMeshCollider_(const std::string& uid) const -> const MeshColliderFlyweight&
             {
                 const auto it = m_meshColliders.find(uid);
                 if(it == m_meshColliders.end())
                     throw std::runtime_error("AssetManager::AcquireMeshCollider_ - Resource is not loaded: " + uid);
                 
-                return MeshCollider{};
+                return it->second;
             }
     };
 } // namespace nc

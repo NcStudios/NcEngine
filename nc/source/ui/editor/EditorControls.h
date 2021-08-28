@@ -154,6 +154,12 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(col);
         }
 
+        if(auto* col = registry->Get<MeshCollider>(entity); col)
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+            ComponentGuiElement(col);
+        }
+
         for(const auto& comp : registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
             controls::AutoComponentElement(comp);
 

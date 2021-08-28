@@ -31,12 +31,13 @@ namespace nc::physics
     }
 
     #ifdef USE_VULKAN
-    PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics, job::JobSystem* jobSystem)
+    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics2* graphics, job::JobSystem* jobSystem)
     #else
-    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem)
+    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics* graphics, job::JobSystem* jobSystem)
     #endif
         : m_cache{},
           m_joints{},
+          m_bspTree{registry},
           m_clickableSystem{graphics},
           m_jobSystem{jobSystem}
           #ifdef NC_DEBUG_RENDERING
@@ -103,6 +104,7 @@ namespace nc::physics
     void PhysicsSystem::ClearState()
     {
         m_joints.clear();
+        m_bspTree.Clear();
         m_clickableSystem.Clear();
         m_cache.previousPhysics.clear();
         m_cache.previousTrigger.clear();
@@ -140,6 +142,9 @@ namespace nc::physics
         auto physicsResult = FindNarrowPhysicsPairs(colliders, matrices, broadEvents.physics);
         MergeNewContacts(physicsResult, m_cache.manifolds);
         auto triggerEvents = FindNarrowTriggerPairs(colliders, matrices, broadEvents.trigger);
+
+        auto staticResults = m_bspTree.CheckCollisions(matrices, estimates, colliders);
+        MergeNewContacts(staticResults, m_cache.manifolds);
 
         auto constraints = GenerateConstraints(registry, m_cache.manifolds);
         UpdateJoints(registry, m_joints, dt);

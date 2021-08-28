@@ -3,46 +3,44 @@
 #include "math/Vector.h"
 
 #include <span>
-#include <variant>
 
 namespace nc
 {
-    struct SphereCollider
+    struct Sphere
     {
         Vector3 center;
         float radius;
     };
 
-    struct BoxCollider
+    struct Box
     {
         Vector3 center;
         Vector3 extents;
         float maxExtent;
     };
 
-    struct CapsuleCollider
+    struct Capsule
     {
         Vector3 pointA, pointB;
         float radius;
         float maxExtent;
     };
 
-    struct HullCollider
+    struct ConvexHull
     {
         std::span<const Vector3> vertices;
         Vector3 extents;
         float maxExtent;
     };
 
-    struct MeshCollider
+    struct Triangle
     {
-        struct Triangle
-        {
-            Vector3 a, b, c, normal;
-        };
-
-        std::span<const Triangle> triangleList;
+        Vector3 a, b, c;
     };
 
-    using BoundingVolume = std::variant<BoxCollider, SphereCollider, CapsuleCollider, HullCollider, MeshCollider>;
+    struct Plane
+    {
+        Vector3 normal;
+        float d;
+    };
 }

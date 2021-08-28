@@ -21,11 +21,10 @@ namespace
     auto CreateWireframeModelPtr(ColliderType type) -> std::unique_ptr<graphics::Model>;
     #endif
     
-    auto EstimateBoundingVolume(const SphereCollider& sphere, const Vector3& translation, float scale) -> SphereCollider;
-    auto EstimateBoundingVolume(const BoxCollider& box, const Vector3& translation, float scale) -> SphereCollider;
-    auto EstimateBoundingVolume(const CapsuleCollider& capsule, const Vector3& translation, float scale) -> SphereCollider;
-    auto EstimateBoundingVolume(const HullCollider& mesh, const Vector3& translation, float scale) -> SphereCollider;
-    auto EstimateBoundingVolume(const MeshCollider& mesh, const Vector3& translation, float scale) -> SphereCollider;
+    auto EstimateBoundingVolume(const Sphere& sphere, const Vector3& translation, float scale) -> Sphere;
+    auto EstimateBoundingVolume(const Box& box, const Vector3& translation, float scale) -> Sphere;
+    auto EstimateBoundingVolume(const Capsule& capsule, const Vector3& translation, float scale) -> Sphere;
+    auto EstimateBoundingVolume(const ConvexHull& mesh, const Vector3& translation, float scale) -> Sphere;
     auto CreateBoundingVolume(const Collider::VolumeInfo& info) -> BoundingVolume;
     auto GetMatrixScaleExtent(DirectX::FXMMATRIX matrix) -> float;
 
@@ -58,30 +57,24 @@ namespace
     }
     #endif
 
-    SphereCollider EstimateBoundingVolume(const SphereCollider& sphere, const Vector3& translation, float scale)
+    Sphere EstimateBoundingVolume(const Sphere& sphere, const Vector3& translation, float scale)
     {
-        return SphereCollider{sphere.center + translation, sphere.radius * scale};
+        return Sphere{sphere.center + translation, sphere.radius * scale};
     }
 
-    SphereCollider EstimateBoundingVolume(const BoxCollider& box, const Vector3& translation, float scale)
+    Sphere EstimateBoundingVolume(const Box& box, const Vector3& translation, float scale)
     {
-        return SphereCollider{box.center + translation, box.maxExtent * scale};
+        return Sphere{box.center + translation, box.maxExtent * scale};
     }
 
-    SphereCollider EstimateBoundingVolume(const CapsuleCollider& capsule, const Vector3& translation, float scale)
+    Sphere EstimateBoundingVolume(const Capsule& capsule, const Vector3& translation, float scale)
     {
-        return SphereCollider{translation + (capsule.pointA + capsule.pointB) / 2.0f, capsule.maxExtent * scale};
+        return Sphere{translation + (capsule.pointA + capsule.pointB) / 2.0f, capsule.maxExtent * scale};
     }
 
-    SphereCollider EstimateBoundingVolume(const HullCollider& mesh, const Vector3& translation, float scale)
+    Sphere EstimateBoundingVolume(const ConvexHull& mesh, const Vector3& translation, float scale)
     {
-        return SphereCollider{translation, mesh.maxExtent * scale};
-    }
-
-    SphereCollider EstimateBoundingVolume(const MeshCollider&, const Vector3&, float)
-    {
-        // need for visit
-        throw std::runtime_error("EstimateBoundingVolume(MeshCollider) - This function shouldn't be called");
+        return Sphere{translation, mesh.maxExtent * scale};
     }
     
     float GetMatrixScaleExtent(DirectX::FXMMATRIX matrix)
@@ -99,25 +92,21 @@ namespace
         {
             case ColliderType::Box:
             {
-                return { BoxCollider{info.offset, info.scale, Magnitude(info.scale / 2.0f)} };
+                return { Box{info.offset, info.scale, Magnitude(info.scale / 2.0f)} };
             }
             case ColliderType::Sphere:
             {
-                return { SphereCollider{info.offset, info.scale.x / 2.0f} };
+                return { Sphere{info.offset, info.scale.x / 2.0f} };
             }
             case ColliderType::Capsule:
             {
                 auto radius = info.scale.x / 2.0f;
                 auto halfSegment = Vector3::Up() * (info.scale.y - radius);
-                return { CapsuleCollider{info.offset + halfSegment, info.offset - halfSegment, radius, info.scale.y} };
+                return { Capsule{info.offset + halfSegment, info.offset - halfSegment, radius, info.scale.y} };
             }
             case ColliderType::Hull:
             {
-                return { AssetManager::AcquireHullCollider(info.hullAssetPath) };
-            }
-            case ColliderType::Mesh:
-            {
-                return { AssetManager::AcquireMeshCollider(info.hullAssetPath) };
+                return { AssetManager::AcquireConvexHull(info.hullAssetPath) };
             }
             default:
                 throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");
@@ -198,27 +187,8 @@ namespace nc
           #endif
     {
     }
-
-    Collider::Collider(Entity entity, MeshProperties properties, bool isTrigger)
-        : ComponentBase(entity),
-          m_info{.type = ColliderType::Mesh,
-                 .offset = Vector3::Zero(),
-                 .scale = Vector3::One(),
-                 .hullAssetPath = std::move(properties.assetPath),
-                 .isTrigger = isTrigger},
-         m_volume{CreateBoundingVolume(m_info)},
-         m_awake{true}
-         #ifdef NC_EDITOR_ENABLED
-         ,
-         m_widgetModel{CreateWireframeModelPtr(ColliderType::Sphere)},
-         m_selectedInEditor{false}
-         #endif
-    {
-        if(!EntityUtils::IsStatic(entity))
-            throw std::runtime_error("Collider - Mesh colliders may only be added to static entities");
-    }
-
-    auto Collider::EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider
+    
+    auto Collider::EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere
     {
         Vector3 translation;
         DirectX::XMStoreVector3(&translation, matrix.r[3]);

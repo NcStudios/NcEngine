@@ -10,7 +10,7 @@ namespace nc::physics
      *  interaction type. Used for broad detection. */
     struct ColliderEstimate
     {
-        SphereCollider estimate;
+        Sphere estimate;
         uint32_t index;
         ColliderInteractionType interactionType;
         bool isAwake;

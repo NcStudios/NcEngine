@@ -14,7 +14,7 @@
 enum class AssetType
 {
     Mesh,
-    HullCollider,
+    ConvexHull,
     MeshCollider
 };
 
@@ -48,12 +48,11 @@ constexpr auto MeshFlags = aiProcess_Triangulate |
                            aiProcess_GenNormals |
                            aiProcess_CalcTangentSpace;
 
-constexpr auto HullColliderFlags = aiProcess_Triangulate |
-                                   aiProcess_JoinIdenticalVertices |
-                                   aiProcess_ConvertToLeftHanded;
+constexpr auto ConvexHullFlags = aiProcess_Triangulate |
+                                 aiProcess_JoinIdenticalVertices |
+                                 aiProcess_ConvertToLeftHanded;
 
 constexpr auto MeshColliderFlags = aiProcess_Triangulate |
-                                   aiProcess_GenNormals |
                                    aiProcess_ConvertToLeftHanded;
 
 void Usage();
@@ -67,10 +66,10 @@ void SanitizeFloat(float* value, bool* badValueDetected);
 void SanitizeVector(aiVector3D* value, bool* badValueDetected);
 void BuildAsset(Assimp::Importer* importer, const Target& inPath, const Config& config);
 void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
-void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
+void BuildConvexHullAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 void BuildMeshColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D;
-auto GetHullColliderExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
+auto GetConvexHullExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&;
 
 int main(int argc, char** argv)
@@ -191,7 +190,7 @@ auto GetAssetType(std::string type) -> AssetType
     if(type.compare("mesh") == 0)
         return AssetType::Mesh;
     else if(type.compare("hull-collider") == 0)
-        return AssetType::HullCollider;
+        return AssetType::ConvexHull;
     else if(type.compare("mesh-collider") == 0)
         return AssetType::MeshCollider;
     
@@ -293,9 +292,9 @@ void BuildAsset(Assimp::Importer* importer, const Target& target, const Config& 
             BuildMeshAsset(importer, target.path, config);
             break;
         }
-        case AssetType::HullCollider:
+        case AssetType::ConvexHull:
         {
-            BuildHullColliderAsset(importer, target.path, config);
+            BuildConvexHullAsset(importer, target.path, config);
             break;
         }
         case AssetType::MeshCollider:
@@ -359,7 +358,7 @@ void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inP
     outFile.close();
 }
 
-void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
+void BuildConvexHullAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
 {
     if (!IsValidMeshExtension(inPath.extension()))
         throw std::runtime_error("Invalid hull file extension: " + inPath.string());
@@ -370,12 +369,12 @@ void BuildHullColliderAsset(Assimp::Importer* importer, const std::filesystem::p
     if(!outFile)
         throw std::runtime_error("Failure opening asset file");
 
-    const auto pModel = importer->ReadFile(inPath.string(), HullColliderFlags);
+    const auto pModel = importer->ReadFile(inPath.string(), ConvexHullFlags);
     if(!pModel)
         throw std::runtime_error("AssImp failure");
 
     const auto pMesh = pModel->mMeshes[0];
-    auto extents = GetHullColliderExtents(pMesh->mVertices, pMesh->mNumVertices);
+    auto extents = GetConvexHullExtents(pMesh->mVertices, pMesh->mNumVertices);
 
     outFile << extents.xExtent << ' ' << extents.yExtent << ' ' << extents.zExtent << '\n'
             << extents.maxExtent << '\n'
@@ -412,18 +411,17 @@ void BuildMeshColliderAsset(Assimp::Importer* importer, const std::filesystem::p
 
     const auto pMesh = pModel->mMeshes[0];
     auto* vertices = pMesh->mVertices;
+    auto extents = GetConvexHullExtents(vertices, pMesh->mNumVertices);
+    outFile << pMesh->mNumFaces << '\n'
+            << extents.maxExtent << '\n';
+
     bool valueWasSanitized = false;
-    outFile << pMesh->mNumFaces << '\n';
 
     for (size_t i = 0u; i < pMesh->mNumFaces; ++i)
     {
         const auto& face = pMesh->mFaces[i];
         if(face.mNumIndices != 3)
             throw std::runtime_error("Failure parsing indices");
-
-        const auto i1 = face.mIndices[0];
-        const auto i2 = face.mIndices[1];
-        const auto i3 = face.mIndices[2];
 
         auto& a = vertices[face.mIndices[0]];
         auto& b = vertices[face.mIndices[1]];
@@ -432,20 +430,7 @@ void BuildMeshColliderAsset(Assimp::Importer* importer, const std::filesystem::p
         SanitizeVector(&b, &valueWasSanitized);
         SanitizeVector(&c, &valueWasSanitized);
 
-        auto& nA = pMesh->mNormals[face.mIndices[0]];
-        auto& nB = pMesh->mNormals[face.mIndices[1]];
-        auto& nC = pMesh->mNormals[face.mIndices[2]];
-
-        if(nA != nB || nB != nC)
-            std::cerr << "Normals don't match\n";
-
-        // auto ab = b - a;
-        // auto bc = c - b;
-        // auto normal = 
-
-        outFile << a << ' ' << b << ' ' << c << ' ' << nA << '\n';
-
-        //outFile << face.mIndices[0] << ' ' << face.mIndices[1] << ' ' << face.mIndices[2] << '\n';
+        outFile << a << ' ' << b << ' ' << c << '\n';
     }
 
     if(valueWasSanitized)
@@ -475,7 +460,7 @@ auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVecto
     return data[maxIndex];
 }
 
-auto GetHullColliderExtents(const aiVector3D* data, unsigned count) -> MeshExtents
+auto GetConvexHullExtents(const aiVector3D* data, unsigned count) -> MeshExtents
 {
     auto minX = GetMaximumVertexInDirection(data, count, aiVector3D{ -1,  0,  0});
     auto maxX = GetMaximumVertexInDirection(data, count, aiVector3D{  1,  0,  0});

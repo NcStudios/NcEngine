@@ -1,5 +1,6 @@
 target_sources(${ENGINE_LIB}
     PRIVATE
+        ${ROOT_DIR}/source/physics/collision/BspTree.cpp
         ${ROOT_DIR}/source/physics/collision/CollisionNotification.cpp
         ${ROOT_DIR}/source/physics/collision/CollisionPhases.cpp
         ${ROOT_DIR}/source/physics/collision/IntersectionQueries.cpp

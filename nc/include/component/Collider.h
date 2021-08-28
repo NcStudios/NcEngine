@@ -1,15 +1,17 @@
 #pragma once
 
 #include "component/Component.h"
-#include "physics/CollisionVolumes.h"
+#include "physics/Geometry.h"
 #include "physics/LayerMask.h"
 #include "graphics/Model.h"
+
+#include <variant>
 
 namespace nc
 {
     enum class ColliderType : uint8_t
     {
-        Box, Sphere, Capsule, Hull, Mesh
+        Box, Sphere, Capsule, Hull
     };
 
     struct SphereProperties
@@ -36,10 +38,7 @@ namespace nc
         std::string assetPath;
     };
 
-    struct MeshProperties
-    {
-        std::string assetPath;
-    };
+    using BoundingVolume = std::variant<Box, Sphere, Capsule, ConvexHull>;
 
     class Collider final : public ComponentBase
     {
@@ -57,7 +56,6 @@ namespace nc
             Collider(Entity entity, BoxProperties properties, bool isTrigger);
             Collider(Entity entity, CapsuleProperties properties, bool isTrigger);
             Collider(Entity entity, HullProperties properties, bool isTrigger);
-            Collider(Entity entity, MeshProperties properties, bool isTrigger);
             ~Collider() = default;
             Collider(const Collider&) = delete;
             Collider(Collider&&) = default;
@@ -72,7 +70,7 @@ namespace nc
             auto GetVolume() const -> const BoundingVolume& { return m_volume; }
             auto IsTrigger() const -> bool { return m_info.isTrigger; }
             auto IsAwake() const -> bool { return m_awake; }
-            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
+            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
             #ifdef NC_EDITOR_ENABLED
             void UpdateWidget(graphics::FrameManager* frame);

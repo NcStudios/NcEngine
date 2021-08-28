@@ -31,10 +31,11 @@ namespace nc::physics
     bool RefineTetrahedron(Simplex& simplex, Vector3& direction);
     XMVECTOR GetRotation(FXMMATRIX matrix);
     XMVECTOR MinkowskiSupport(const BoundingVolume& collider, DirectX::FXMVECTOR direction_v);
-    XMVECTOR MinkowskiSupport(const SphereCollider& collider, DirectX::FXMVECTOR direction_v);
-    XMVECTOR MinkowskiSupport(const BoxCollider& collider, DirectX::FXMVECTOR direction_v);
-    XMVECTOR MinkowskiSupport(const CapsuleCollider& collider, DirectX::FXMVECTOR direction_v);
-    XMVECTOR MinkowskiSupport(const HullCollider& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const Sphere& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const Box& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const Capsule& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const ConvexHull& collider, DirectX::FXMVECTOR direction_v);
+    XMVECTOR MinkowskiSupport(const Triangle& triangle, DirectX::FXMVECTOR direction_v);
     
     constexpr std::array<bool(*)(Simplex&, Vector3&), 4u> RefineSimplex = 
     {
@@ -71,16 +72,55 @@ namespace nc::physics
         return false;
     }
 
-    bool Intersect(const SphereCollider& a, const SphereCollider& b)
+    bool Intersect(const Sphere& a, const Sphere& b)
     {
         auto radii = a.radius + b.radius;
         return SquareMagnitude(a.center - b.center) < radii * radii;
     }
 
-    bool Intersect(const SphereCollider& sphere, const BoxCollider& aabb)
+    bool Intersect(const Sphere& sphere, const Box& aabb)
     {
         auto squareDistance = SquareMtdToAABB(sphere.center, aabb);
         return squareDistance <= sphere.radius * sphere.radius;
+    }
+
+    bool Gjk(const BoundingVolume& a, const Triangle& b, FXMMATRIX aMatrix, CollisionState* stateOut)
+    {
+        IF_THROW(!stateOut, "Gjk - CollisionState cannot be null");
+
+        stateOut->simplex = Simplex{};
+        stateOut->rotationA = GetRotation(aMatrix);
+        Vector3 direction = Vector3::One();
+        size_t itCount = 0;
+
+        while(++itCount <= GjkMaxIterations)
+        {
+            const auto direction_v = XMLoadVector3(&direction);
+            auto aDirection_v = XMVector3InverseRotate(direction_v, stateOut->rotationA);
+            auto aSupportLocal_v = MinkowskiSupport(a, aDirection_v);
+            auto aSupportWorld_v = XMVector3Transform(aSupportLocal_v, aMatrix);
+            auto bDirection_v = XMVectorNegate(direction_v);
+            auto bSupportWorld_v = MinkowskiSupport(b, bDirection_v);
+            auto supportCSO_v = aSupportWorld_v - bSupportWorld_v;
+
+            if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
+                break;
+
+            Vector3 supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB;
+            XMStoreVector3(&supportCSO, supportCSO_v);
+            XMStoreVector3(&worldSupportA, aSupportWorld_v);
+            XMStoreVector3(&worldSupportB, bSupportWorld_v);
+            XMStoreVector3(&localSupportA, aSupportLocal_v);
+
+            stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, worldSupportB);
+
+            if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     bool Gjk(const BoundingVolume& a, const BoundingVolume& b, FXMMATRIX aMatrix, FXMMATRIX bMatrix, CollisionState* stateOut)
@@ -123,6 +163,68 @@ namespace nc::physics
         }
 
         return false;
+    }
+
+    bool Epa(const BoundingVolume& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, CollisionState* state)
+    {
+        state->polytope.Initialize(state->simplex);
+        auto minFace = state->polytope.ComputeNormalData();
+        NormalData minNorm{Vector3::Zero(), FloatMax};
+        size_t iterations = 0u;
+
+        while(minNorm.distance == FloatMax)
+        {
+            // Normal data for the face closest to the origin.
+            minNorm = state->polytope.GetNormalData(minFace);
+
+            if(iterations++ > EpaMaxIterations)
+                break;
+
+            // Find a point on the Minkowski hull in the direction of the closest face's normal.
+            auto direction_v = XMLoadVector3(&minNorm.normal);
+            auto aDirection_v = XMVector3InverseRotate(direction_v, state->rotationA);
+            auto aSupportLocal_v = MinkowskiSupport(a, aDirection_v);
+            auto aSupportWorld_v = XMVector3Transform(aSupportLocal_v, aMatrix);
+
+            auto bDirection_v = XMVectorNegate(direction_v);
+            auto bSupportWorld_v = MinkowskiSupport(b, bDirection_v);
+            
+            auto support_v = aSupportWorld_v - bSupportWorld_v;
+            Vector3 support;
+            XMStoreVector3(&support, support_v);
+
+            XMStoreVector3(&(state->contact.worldPointA), aSupportWorld_v);
+            XMStoreVector3(&(state->contact.worldPointB), bSupportWorld_v);
+            XMStoreVector3(&(state->contact.localPointA), aSupportLocal_v);
+            XMStoreVector3(&(state->contact.localPointB), bSupportWorld_v);
+
+            if(abs(Dot(minNorm.normal, support) - minNorm.distance) > EpaTolerance)
+            {
+                // The closest face is not on the hull, so we expand towards the hull.
+                if(!state->polytope.Expand(support, state->contact, &minFace))
+                {
+                    /** @todo Need to determine if this can happen under normal circumstances.
+                     *  It has thrown here a few times, but always when there is wonk elsewhere. */
+                    //throw std::runtime_error("Epa - minDistance not found");
+                    std::cout << "Epa - minDistance not found\n";
+                    state->contact.depth = 0.0f;
+                    state->contact.lambda = 0.0f;
+                    state->contact.muTangent = 0.0f;
+                    state->contact.muBitangent = 0.0f;
+                    return false;
+                }
+
+                minNorm.distance = FloatMax;
+            }
+        }
+
+        auto success = state->polytope.GetContacts(minFace, &state->contact);
+        state->contact.normal = Normalize(minNorm.normal);
+        state->contact.depth = minNorm.distance + EpaTolerance;
+        state->contact.lambda = 0.0f;
+        state->contact.muTangent = 0.0f;
+        state->contact.muBitangent = 0.0f;
+        return success;
     }
 
     bool Epa(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state)
@@ -200,7 +302,7 @@ namespace nc::physics
         return Dot(a, b) > 0.0f;
     }
 
-    float SquareMtdToAABB(const Vector3& point, const BoxCollider& aabb)
+    float SquareMtdToAABB(const Vector3& point, const Box& aabb)
     {
         auto SingleAxisDistance = [](float point, float min, float max)
         {
@@ -220,13 +322,13 @@ namespace nc::physics
                SingleAxisDistance(point.z, min.z, max.z);
     }
 
-    XMVECTOR MinkowskiSupport(const SphereCollider& collider, FXMVECTOR direction_v)
+    XMVECTOR MinkowskiSupport(const Sphere& collider, FXMVECTOR direction_v)
     {
         return XMLoadVector3(&collider.center) +
                XMVectorScale(XMVector3Normalize(direction_v), collider.radius);
     }
 
-    XMVECTOR MinkowskiSupport(const BoxCollider& collider, FXMVECTOR direction_v)
+    XMVECTOR MinkowskiSupport(const Box& collider, FXMVECTOR direction_v)
     {
         Vector3 dir;
         XMStoreVector3(&dir, direction_v);
@@ -244,7 +346,7 @@ namespace nc::physics
         return XMLoadVector3(&dir);
     }
 
-    XMVECTOR MinkowskiSupport(const CapsuleCollider& collider, FXMVECTOR direction_v)
+    XMVECTOR MinkowskiSupport(const Capsule& collider, FXMVECTOR direction_v)
     {
         Vector3 normalizedDirection;
         XMStoreVector3(&normalizedDirection, XMVector3Normalize(direction_v));
@@ -258,9 +360,9 @@ namespace nc::physics
         return XMLoadVector3(&out);
     }
 
-    XMVECTOR MinkowskiSupport(const HullCollider& collider, FXMVECTOR direction_v)
+    XMVECTOR MinkowskiSupport(const ConvexHull& collider, FXMVECTOR direction_v)
     {
-        IF_THROW(collider.vertices.size() == 0u, "MinkowskiSupport - HullCollider vertex buffer is empty");
+        IF_THROW(collider.vertices.size() == 0u, "MinkowskiSupport - ConvexHull vertex buffer is empty");
         const auto& vertices = collider.vertices;
         auto maxVertex_v = XMLoadVector3(&vertices[0]);
         auto maxDot_v = XMVector3Dot(maxVertex_v, direction_v);
@@ -277,6 +379,23 @@ namespace nc::physics
         }
 
         return maxVertex_v;
+    }
+
+    XMVECTOR MinkowskiSupport(const Triangle& triangle, DirectX::FXMVECTOR direction_v)
+    {
+        auto a_v = DirectX::XMLoadVector3(&triangle.a);
+        auto b_v = DirectX::XMLoadVector3(&triangle.b);
+        auto c_v = DirectX::XMLoadVector3(&triangle.c);
+        auto dotA_v = XMVector3Dot(a_v, direction_v);
+        auto dotB_v = XMVector3Dot(b_v, direction_v);
+        auto dotC_v = XMVector3Dot(c_v, direction_v);
+        
+        if(XMVector3Greater(dotA_v, dotB_v))
+        {
+            return XMVector3Greater(dotA_v, dotC_v) ? a_v : c_v;
+        }
+
+        return XMVector3Greater(dotB_v, dotC_v) ? b_v : c_v;
     }
 
     XMVECTOR MinkowskiSupport(const BoundingVolume& collider, FXMVECTOR direction_v)
