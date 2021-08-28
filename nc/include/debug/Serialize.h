@@ -11,4 +11,5 @@ namespace nc
     std::ostream& operator << (std::ostream& os, const Vector3& v);
     std::ostream& operator << (std::ostream& os, const Vector4& v);
     std::ostream& operator << (std::ostream& os, DirectX::FXMMATRIX matrix);
+    std::ostream& operator << (std::ostream& os, DirectX::XMVECTOR vector);
 } // namespace nc

@@ -172,6 +172,7 @@ namespace nc::graphics::vulkan
         }
 
         auto& vec = *(it->second);
+        // @TODO: Fix bug around deregistering.
         auto itemIt = std::ranges::find(vec, entity);
 
         if (itemIt == vec.end())

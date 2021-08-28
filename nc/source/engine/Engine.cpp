@@ -115,8 +115,7 @@ namespace nc::core
         V_LOG("Starting engine loop");
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
-        /** @todo Enable interval and tinker a bit once kinematics are popped, locked, and dropped */
-        //auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
+        auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
@@ -127,13 +126,16 @@ namespace nc::core
             m_window.ProcessSystemMessages(); 
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
-
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
             
             FrameLogic(dt);
 
             /** @todo see fixedUpdateInterval todo above */
-            FixedStepLogic(dt);
+            if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
+            {
+                FixedStepLogic(m_time.GetFixedDeltaTime());
+                m_time.ResetFixedDeltaTime();
+            }
 
             particleUpdateJobResult.wait();
 
@@ -219,9 +221,10 @@ namespace nc::core
 
         m_ecs.GetPointLightSystem()->Update();
 
+        auto* renderer = m_graphics2.GetRendererPtr();
+        
         #ifdef NC_EDITOR_ENABLED
         auto* registry = m_ecs.GetRegistry();
-        auto* renderer = m_graphics2.GetRendererPtr();
 
         for(auto& collider : registry->ViewAll<Collider>())
             collider.UpdateWidget(renderer);
@@ -287,6 +290,8 @@ namespace nc::core
             m_frameManager.Reset();
         #endif
         m_time.ResetFrameDeltaTime();
+        m_time.ResetFixedDeltaTime();
+        m_time.UpdateTime();
     }
 
     void Engine::SetBindings()

@@ -7,6 +7,7 @@
 #include "WasdController.h"
 #include "PrefabSelector.h"
 #include "CollisionLogger.h"
+#include "debug/Serialize.h"
 
 #include <functional>
 
@@ -77,7 +78,7 @@ namespace nc::sample
         registry->Add<Collider>(bigGreenCube, BoxProperties{}, false);
         registry->Add<PhysicsBody>(bigGreenCube, PhysicsProperties{});
 
-        auto greenCapsule = prefab::Create(registry, prefab::Resource::CapsuleGreen, {.position = Vector3{5.0f, 0.0f, 1.5f}, .tag = "Green Capsule"});
+        auto greenCapsule = prefab::Create(registry, prefab::Resource::CapsuleGreen, {.position = Vector3{5.0f, 2.0f, 1.5f}, .tag = "Green Capsule"});
         registry->Add<Collider>(greenCapsule, CapsuleProperties{}, false);
         registry->Add<PhysicsBody>(greenCapsule, PhysicsProperties{});
 

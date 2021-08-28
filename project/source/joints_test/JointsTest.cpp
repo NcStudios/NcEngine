@@ -5,6 +5,7 @@
 #include "ForceBasedController.h"
 #include "shared/SceneNavigationCamera.h"
 #include "Physics.h"
+#include "debug/Serialize.h"
 
 namespace nc::sample
 {
