@@ -3,8 +3,8 @@
 /** @todo This class will probably be useful from time to time. It
  *  will need to be Vulkan compatible. We may also want this #define
  *  to be a build option in the future. */
-#define NC_DEBUG_RENDERING
-//#undef NC_DEBUG_RENDERING
+//#define NC_DEBUG_RENDERING
+#undef NC_DEBUG_RENDERING
 
 #ifdef NC_DEBUG_RENDERING
 

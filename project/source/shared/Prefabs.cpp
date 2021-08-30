@@ -138,7 +138,7 @@ void InitializeResources()
     graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
     graphics::LoadMeshAsset("project/assets/mesh/capsule.nca");
     graphics::LoadMeshAsset("project/assets/mesh/coin.nca");
-    //graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
+    graphics::LoadMeshAsset("project/assets/mesh/cube.nca");
     graphics::LoadMeshAsset("project/assets/mesh/planet.nca");
     graphics::LoadMeshAsset("project/assets/mesh/ramp.nca");
     graphics::LoadMeshAsset("project/assets/mesh/sphere.nca");

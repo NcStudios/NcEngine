@@ -42,6 +42,8 @@ namespace nc::physics
         bool success;
     };
 
+    /** @todo Manifold could use array for contact points */
+
     struct Manifold
     {
         Entity entityA;

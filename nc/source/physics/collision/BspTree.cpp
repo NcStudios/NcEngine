@@ -3,6 +3,8 @@
 #include "IntersectionQueries.h"
 #include "graphics/DebugRenderer.h"
 
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -188,14 +190,11 @@ namespace nc::physics
                 /** Narrow check against each mesh triangle until we find a collision. */
                 for(const auto& triangle : mesh.triangles)
                 {
-                    if(Gjk(volume, triangle, matrix, &state))
+                    if(Collide(volume, triangle, matrix, &state))
                     {
-                        if(Epa(volume, triangle, matrix, &state))
-                        {
-                            events.emplace_back(entity, mesh.entity, CollisionEventType::FirstBodyPhysics);
-                            contacts.push_back(state.contact);
-                            continue;
-                        }
+                        events.emplace_back(entity, mesh.entity, CollisionEventType::FirstBodyPhysics);
+                        contacts.push_back(state.contact);
+                        continue;
                     }
                 }
             }

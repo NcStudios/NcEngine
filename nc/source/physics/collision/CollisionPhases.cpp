@@ -221,31 +221,28 @@ namespace nc::physics
             const auto& m1 = matrices[i];
             const auto& m2 = matrices[j];
 
-            if(Gjk(v1, v2, m1, m2, &state))
+            if(Collide(v1, v2, m1, m2, &state))
             {
-                if(Epa(v1, v2, m1, m2, &state))
+                auto e1 = collider1.GetParentEntity();
+                auto e2 = collider2.GetParentEntity();
+
+                if constexpr(EnableSleeping)
                 {
-                    auto e1 = collider1.GetParentEntity();
-                    auto e2 = collider2.GetParentEntity();
-
-                    if constexpr(EnableSleeping)
+                    if(!collider1.IsAwake())
                     {
-                        if(!collider1.IsAwake())
-                        {
-                            collider1.Wake();
-                            registry->Get<PhysicsBody>(e1)->Wake();
-                        }
-
-                        if(!collider2.IsAwake())
-                        {
-                            collider2.Wake();
-                            registry->Get<PhysicsBody>(e2)->Wake();
-                        }
+                        collider1.Wake();
+                        registry->Get<PhysicsBody>(e1)->Wake();
                     }
 
-                    events.emplace_back(e1, e2, eventType);
-                    contacts.push_back(state.contact);
+                    if(!collider2.IsAwake())
+                    {
+                        collider2.Wake();
+                        registry->Get<PhysicsBody>(e2)->Wake();
+                    }
                 }
+
+                events.emplace_back(e1, e2, eventType);
+                contacts.push_back(state.contact);
             }
         }
 
@@ -265,7 +262,7 @@ namespace nc::physics
             const auto& m1 = matrices[i];
             const auto& m2 = matrices[j];
 
-            if(Gjk(v1, v2, m1, m2, &state))
+            if(Intersect(v1, v2, m1, m2))
             {
                 events.emplace_back(colliders[i].GetParentEntity(), colliders[j].GetParentEntity());
             }
