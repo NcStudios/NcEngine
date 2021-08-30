@@ -65,8 +65,14 @@ namespace nc::graphics::vulkan
             {
                 m_phongAndUiTechnique->Bind(cmd);
                 m_phongAndUiTechnique->Record(cmd);
-                RecordUi(cmd);
             }
+            else
+            {
+                m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
+                m_phongAndUiTechnique->Bind(cmd);
+            }
+
+            RecordUi(cmd);
 
             // End recording commands to each command buffer.
             cmd->endRenderPass();
@@ -166,6 +172,7 @@ namespace nc::graphics::vulkan
         }
 
         auto& vec = *(it->second);
+        // @TODO: Fix bug around deregistering.
         auto itemIt = std::ranges::find(vec, entity);
 
         if (itemIt == vec.end())

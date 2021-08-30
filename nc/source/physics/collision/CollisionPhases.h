@@ -17,7 +17,7 @@ namespace nc::physics
     void MergeNewContacts(const NarrowPhysicsResult& newEvents, std::vector<Manifold>& manifolds);
 
     /** Broad phase comparison between collider estimates. Returns potential physics and trigger events. */
-    auto FindBroadPairs(std::span<const ColliderEstimate> estimates) -> BroadResult;
+    auto FindBroadPairs(std::span<const ColliderEstimate> estimates, size_t physicsReserveCount, size_t triggerReserveCount) -> BroadResult;
 
     /** Narrow phase collision detection and contact generation for collisions requiring a physics response. */
     auto FindNarrowPhysicsPairs(std::span<Collider> colliders, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadPhysicsEvents) -> NarrowPhysicsResult;

@@ -32,7 +32,7 @@ namespace nc::physics
 
     auto Polytope::GetNormalData(size_t index) const -> NormalData
     {
-        return m_normals[index];
+        return m_normals.at(index);
     }
 
     auto Polytope::ComputeNormalData() -> size_t
@@ -48,7 +48,7 @@ namespace nc::physics
 
         for(size_t i = 0u; i < m_normals.size(); ++i)
         {
-            if(Dot(m_normals[i].normal, supportCSO) > 0.0f)
+            if(Dot(m_normals.at(i).normal, supportCSO) > 0.0f)
             {
                 RemoveFace(i);
                 --i;
@@ -56,8 +56,12 @@ namespace nc::physics
         }
 
         if(m_edges.empty())
+        {
+            /** @todo How do we end up with 0 edges? It is pretty rare - potentially
+             *  just a first frame thing on certain scenes. */
             return false;
-        
+        }
+
         CreateIndicesFromEdges();
 
         m_vertices.push_back(supportCSO);
@@ -69,9 +73,9 @@ namespace nc::physics
 
         for(size_t i = 0u; i < m_normals.size(); ++i)
         {
-            if(m_normals[i].distance < newMinDistance)
+            if(m_normals.at(i).distance < newMinDistance)
             {
-                newMinDistance = m_normals[i].distance;
+                newMinDistance = m_normals.at(i).distance;
                 *oldMinFace = i;
             }
         }
@@ -101,12 +105,12 @@ namespace nc::physics
 
     void Polytope::CheckEdge(size_t a, size_t b)
     {
-        auto reverse = std::ranges::find(m_edges, std::make_pair(m_indices[b], m_indices[a]));
+        auto reverse = std::ranges::find(m_edges, std::make_pair(m_indices.at(b), m_indices.at(a)));
 
         if(reverse != m_edges.end())
             m_edges.erase(reverse);
         else
-            m_edges.emplace_back(m_indices[a], m_indices[b]);
+            m_edges.emplace_back(m_indices.at(a), m_indices.at(b));
     }
 
     void Polytope::RemoveFace(size_t normalIndex)
@@ -118,13 +122,13 @@ namespace nc::physics
         CheckEdge(index1, index2);
         CheckEdge(index2, index3);
         CheckEdge(index3, index1);
-        m_indices[index3] = m_indices.back();
+        m_indices.at(index3) = m_indices.back();
         m_indices.pop_back();
-        m_indices[index2] = m_indices.back();
+        m_indices.at(index2) = m_indices.back();
         m_indices.pop_back();
-        m_indices[index1]= m_indices.back();
+        m_indices.at(index1)= m_indices.back();
         m_indices.pop_back();
-        m_normals[normalIndex] = m_normals.back();
+        m_normals.at(normalIndex) = m_normals.back();
         m_normals.pop_back();
     }
 
@@ -148,42 +152,34 @@ namespace nc::physics
     bool Polytope::GetContacts(size_t minFace, Contact* contact) const
     {
         size_t ii = minFace * 3u;
-        size_t i1 = m_indices[ii];
-        size_t i2 = m_indices[ii + 1u];
-        size_t i3 = m_indices[ii + 2u];
-
-        auto normal = Normalize(m_normals[minFace].normal);
-        float distanceFromOrigin = m_normals[minFace].distance;
-        const auto& cso1 = m_vertices[i1];
-        const auto& cso2 = m_vertices[i2];
-        const auto& cso3 = m_vertices[i3];
-
+        size_t i1 = m_indices.at(ii);
+        size_t i2 = m_indices.at(ii + 1u);
+        size_t i3 = m_indices.at(ii + 2u);
+        auto normal = Normalize(m_normals.at(minFace).normal);
+        float distanceFromOrigin = m_normals.at(minFace).distance;
+        const auto& cso1 = m_vertices.at(i1);
+        const auto& cso2 = m_vertices.at(i2);
+        const auto& cso3 = m_vertices.at(i3);
         auto [u, v, w] = BarycentricProjection(normal * distanceFromOrigin, cso1, cso2, cso3);
 
-        /** @todo Can these be removed or throw if true? It seems they only happen with bad manifolds.
-         *  Maybe they can happen in legitimate cases too? Leaving them until I know for sure. */
-        if(fabs(u) > 1.0f || fabs(v > 1.0f) || fabs(w) > 1.0f)
-        {
-            std::cout << "fabs problem\n";
-            return false;
-        }
-
+        /** @todo This has happened previously, but it seems like it may have been in an already
+         *  problematic case. I'm leaving the check for now, but it should be removed from release
+         *  builds eventually. */
         if(std::isnan(u) || std::isnan(v) || std::isnan(w))
         {
-            std::cout << "nan problem\n";
-            return false;
+            throw std::runtime_error("Polytope::GetContacts - NaN in Barycentric Projection");
         }
 
-        const auto& [worldA1, worldB1] = m_worldSupports[i1];
-        const auto& [worldA2, worldB2] = m_worldSupports[i2];
-        const auto& [worldA3, worldB3] = m_worldSupports[i3];
+        const auto& [worldA1, worldB1] = m_worldSupports.at(i1);
+        const auto& [worldA2, worldB2] = m_worldSupports.at(i2);
+        const auto& [worldA3, worldB3] = m_worldSupports.at(i3);
 
         contact->worldPointA = u * worldA1 + v * worldA2 + w * worldA3;
         contact->worldPointB = u * worldB1 + v * worldB2 + w * worldB3;
 
-        const auto& [localA1, localB1] = m_localSupports[i1];
-        const auto& [localA2, localB2] = m_localSupports[i2];
-        const auto& [localA3, localB3] = m_localSupports[i3];
+        const auto& [localA1, localB1] = m_localSupports.at(i1);
+        const auto& [localA2, localB2] = m_localSupports.at(i2);
+        const auto& [localA3, localB3] = m_localSupports.at(i3);
 
         contact->localPointA = u * localA1 + v * localA2 + w * localA3;
         contact->localPointB = u * localB1 + v * localB2 + w * localB3;

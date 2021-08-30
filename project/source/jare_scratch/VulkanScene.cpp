@@ -46,13 +46,13 @@ namespace nc::sample
         blueMaterial.normal = defaultTexturesPath + "SolidColor/Yellow.png";
         blueMaterial.roughness = defaultTexturesPath + "SolidColor/Yellow.png";
 
-        // Lights
-        // auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
-        // registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.ambient = Vector4(1.0f, 0.7f, 1.0f, 0.0f),
-        //                                                                    .diffuseColor = Vector4(0.8f, 0.6f, 1.0f, 0.0f),
-        //                                                                    .specularColor = Vector4(1.0f, 0.9f, 1.0f, 0.0f),
-        //                                                                    .diffuseIntensity = 2.0f
-        //                                                                   });
+        //Lights
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.ambient = Vector4(1.0f, 0.7f, 1.0f, 0.0f),
+                                                                           .diffuseColor = Vector4(0.8f, 0.6f, 1.0f, 0.0f),
+                                                                           .specularColor = Vector4(1.0f, 0.9f, 1.0f, 0.0f),
+                                                                           .diffuseIntensity = 2.0f
+                                                                          });
 
         // Create the skeeball
         auto skeeballCourt = registry->Add<Entity>({.position = Vector3{0.0f, 1.0f, 2.0f}, .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), .tag = "Box"});

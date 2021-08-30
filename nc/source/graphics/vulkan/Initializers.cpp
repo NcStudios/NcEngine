@@ -315,6 +315,7 @@ namespace nc::graphics::vulkan
         allocationInfo.setDescriptorSetCount(descriptorSetCount);
         allocationInfo.setPSetLayouts(descriptorSetLayout);
 
+        // @todo: return the vector rather than the indiviual item, don't use move in return values
         return std::move(graphics->GetBasePtr()->GetDevice().allocateDescriptorSetsUnique(allocationInfo)[0]);
     }
 

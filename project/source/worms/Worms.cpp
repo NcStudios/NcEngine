@@ -62,7 +62,7 @@ namespace nc::sample
         {
             .positionOffset = Vector3{0.0f, 0.0f, 25.0f},
             .positionRandomRange = Vector3::Splat(15.0f),
-            .rotationRandomRange = Vector3::Splat(math::Pi / 2.0f),
+            .rotationRandomRange = Vector3::Splat(std::numbers::pi / 2.0f),
             .rotationAxisRandomRange = Vector3::One(),
             .thetaRandomRange = 1.0f
         };

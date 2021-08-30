@@ -163,15 +163,13 @@ namespace nc::physics
         }
     }
 
-    auto FindBroadPairs(std::span<const ColliderEstimate> estimates) -> BroadResult
+    auto FindBroadPairs(std::span<const ColliderEstimate> estimates, size_t prevPhysicsCount, size_t prevTriggerCount) -> BroadResult
     {
-        const auto count = estimates.size();
-
         std::vector<BroadEvent> physicsEvents;
         std::vector<BroadEvent> triggerEvents;
-        /** @todo how much to reserve? */
-        physicsEvents.reserve(count / 2u);
-        triggerEvents.reserve(count / 2u);
+        physicsEvents.reserve(prevPhysicsCount);
+        triggerEvents.reserve(prevTriggerCount);
+        const auto count = estimates.size();
 
         for(size_t i = 0u; i < count; ++i)
         {

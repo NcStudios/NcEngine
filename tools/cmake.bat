@@ -28,7 +28,7 @@ set CONFIGURATION="%~2"
         goto Run
     )
     if %CONFIGURATION%=="Release-Vulkan" (
-        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DNC_EDITOR_ENABLED=ON -DUSE_VULKAN=ON 
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DNC_EDITOR_ENABLED=OFF -DUSE_VULKAN=ON 
         goto Run
     )
     if %CONFIGURATION%=="Debug" (
