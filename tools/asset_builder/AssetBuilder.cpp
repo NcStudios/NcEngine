@@ -100,10 +100,6 @@ int main(int argc, char** argv)
 
 void Usage()
 {
-
-    /** @todo update */
-
-
     std::cout << "Usage: build.exe [options]\n"
               << "Options:\n"
               << "  -h or --help            Display this information\n"

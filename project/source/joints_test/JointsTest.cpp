@@ -70,79 +70,54 @@ namespace nc::sample
 
         // Ramp
         {
-            auto ramp = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{9.0f, 0.6f, 6.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
+            auto ramp = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{9.0f, 2.6f, 6.0f}, .scale = Vector3::Splat(3.0f), .flags = EntityFlags::Static});
             registry->Add<MeshCollider>(ramp, "project/assets/mesh_colliders/ramp.nca");
-
-
-            auto ramp2 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{8.0f, 0.6f, 0.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp2, "project/assets/mesh_colliders/ramp.nca");
-
-            auto ramp3 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{7.0f, 0.6f, -6.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp3, "project/assets/mesh_colliders/ramp.nca");
-        
-            auto ramp4 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{-9.0f, 0.6f, 5.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp4, "project/assets/mesh_colliders/ramp.nca");
-
-            auto ramp5 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{-8.0f, 0.6f, -1.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp5, "project/assets/mesh_colliders/ramp.nca");
-
-            auto ramp6 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{-7.0f, 0.6f, -6.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp6, "project/assets/mesh_colliders/ramp.nca");
-
-            auto ramp7 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{0.0f, 0.6f, -12.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp7, "project/assets/mesh_colliders/ramp.nca");
-
-            auto ramp8 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{0.0f, 20.6f, -14.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp8, "project/assets/mesh_colliders/ramp.nca");
-
-            auto ramp9 = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{0.0f, 10.6f, -14.0f}, .scale = Vector3::Splat(1.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp9, "project/assets/mesh_colliders/ramp.nca");
         }
 
-        // // Hinge
-        // {
-        //     auto anchor = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 3.25f, 10.0f}, .scale = Vector3{3.0f, 0.5f, 0.5f}});
-        //     registry->Add<Collider>(anchor, BoxProperties{}, false);
-        //     registry->Add<PhysicsBody>(anchor, PhysicsProperties{.isKinematic = true});
+        // Hinge
+        {
+            auto anchor = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 3.25f, 10.0f}, .scale = Vector3{3.0f, 0.5f, 0.5f}});
+            registry->Add<Collider>(anchor, BoxProperties{}, false);
+            registry->Add<PhysicsBody>(anchor, PhysicsProperties{.isKinematic = true});
 
-        //     auto panel = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, 1.5f, 10.0f}, .scale = Vector3{3.0f, 3.0f, 0.1f}});
-        //     registry->Add<Collider>(panel, BoxProperties{}, false);
-        //     registry->Add<PhysicsBody>(panel, PhysicsProperties{});
+            auto panel = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, 1.5f, 10.0f}, .scale = Vector3{3.0f, 3.0f, 0.1f}});
+            registry->Add<Collider>(panel, BoxProperties{}, false);
+            registry->Add<PhysicsBody>(panel, PhysicsProperties{});
 
-        //     physics::AddJoint(anchor, panel, Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
-        //     physics::AddJoint(anchor, panel, Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
-        // }
+            physics::AddJoint(anchor, panel, Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
+            physics::AddJoint(anchor, panel, Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
+        }
 
-        // // Balance platform
-        // {
-        //     auto base = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{10.0f, -0.75f, -10.0f}, .scale = Vector3::Splat(2.0f)});
-        //     registry->Add<Collider>(base, SphereProperties{}, false);
-        //     registry->Add<PhysicsBody>(base, PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
+        // Balance platform
+        {
+            auto base = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{10.0f, -0.75f, -10.0f}, .scale = Vector3::Splat(2.0f)});
+            registry->Add<Collider>(base, SphereProperties{}, false);
+            registry->Add<PhysicsBody>(base, PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
 
-        //     auto balancePlatform = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{10.0f, -0.4f, -10.0f}, .scale = Vector3{6.0f, 0.1f, 6.0f}});
-        //     registry->Add<Collider>(balancePlatform, BoxProperties{}, false);
-        //     registry->Add<PhysicsBody>(balancePlatform, PhysicsProperties{.mass = 5.0f});
+            auto balancePlatform = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{10.0f, -0.4f, -10.0f}, .scale = Vector3{6.0f, 0.1f, 6.0f}});
+            registry->Add<Collider>(balancePlatform, BoxProperties{}, false);
+            registry->Add<PhysicsBody>(balancePlatform, PhysicsProperties{.mass = 5.0f});
 
-        //     physics::AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
-        // }
+            physics::AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
+        }
 
-        // // Swinging bars
-        // {
-        //     auto pole = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 1.0f, -10.0f}, .scale = Vector3{0.05f, 4.0f, 0.05f}});
-        //     registry->Add<Collider>(pole, BoxProperties{}, true);
-        //     registry->Add<PhysicsBody>(pole, PhysicsProperties{.isKinematic = true});
+        // Swinging bars
+        {
+            auto pole = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 1.0f, -10.0f}, .scale = Vector3{0.05f, 4.0f, 0.05f}});
+            registry->Add<Collider>(pole, BoxProperties{}, true);
+            registry->Add<PhysicsBody>(pole, PhysicsProperties{.isKinematic = true});
 
-        //     auto bar1 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, -0.5f, -10.0f}, .scale = Vector3{3.0f, 1.0f, 0.1f}});
-        //     registry->Add<Collider>(bar1, BoxProperties{}, false);
-        //     registry->Add<PhysicsBody>(bar1, PhysicsProperties{}, Vector3::One(), Vector3::Up());
+            auto bar1 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, -0.5f, -10.0f}, .scale = Vector3{3.0f, 1.0f, 0.1f}});
+            registry->Add<Collider>(bar1, BoxProperties{}, false);
+            registry->Add<PhysicsBody>(bar1, PhysicsProperties{}, Vector3::One(), Vector3::Up());
 
-        //     auto bar2 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, 1.0f, -10.0f}, .scale = Vector3{3.0f, 1.0f, 0.1f}});
-        //     registry->Add<Collider>(bar2, BoxProperties{}, false);
-        //     registry->Add<PhysicsBody>(bar2, PhysicsProperties{}, Vector3::One(), Vector3::Up());
+            auto bar2 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, 1.0f, -10.0f}, .scale = Vector3{3.0f, 1.0f, 0.1f}});
+            registry->Add<Collider>(bar2, BoxProperties{}, false);
+            registry->Add<PhysicsBody>(bar2, PhysicsProperties{}, Vector3::One(), Vector3::Up());
 
-        //     physics::AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
-        //     physics::AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
-        // }
+            physics::AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
+            physics::AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
+        }
 
         // Bridge
         {

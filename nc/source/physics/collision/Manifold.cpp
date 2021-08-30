@@ -125,8 +125,21 @@ namespace nc::physics
 
     void Manifold::UpdateWorldPoints(registry_type* registry)
     {
-        const auto& aMatrix = registry->Get<Transform>(Entity{entityA})->GetTransformationMatrix();
-        const auto& bMatrix = registry->Get<Transform>(Entity{entityB})->GetTransformationMatrix();
+        /** @todo Manifolds can linger after objects are destroyed. The check below prevents problems,
+         *  but the caller then has to destroy this manifold upon detecting it is empty. It would be
+         *  cleaner to handle this through registy callbacks, but we can't because the BspTree uses the
+         *  MeshCollider callback. Long story short, I think we need to support multiple callbacks per
+         *  component type. */
+        auto* transformA = registry->Get<Transform>(Entity{entityA});
+        auto* transformB = registry->Get<Transform>(Entity{entityB});
+        if(!transformA || !transformB)
+        {
+            contacts.clear();
+            return;
+        }
+
+        const auto& aMatrix = transformA->GetTransformationMatrix();
+        const auto& bMatrix = transformB->GetTransformationMatrix();
 
         for(auto cur = contacts.rbegin(); cur != contacts.rend(); ++cur)
         {
