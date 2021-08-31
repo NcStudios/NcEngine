@@ -4,16 +4,11 @@
 
 #include <array>
 
-namespace nc::physics
+namespace
 {
-    bool operator == (const Contact& a, const Contact& b)
-    {
-        return (a.normal == b.normal) &&
-               (
-                   (a.worldPointA == b.worldPointA && a.worldPointB == b.worldPointB) ||
-                   (a.worldPointA == b.worldPointB && a.worldPointB == b.worldPointA)
-               );
-    }
+    using namespace nc;
+
+    constexpr float SquareContactBreakDistance = physics::ContactBreakDistance * physics::ContactBreakDistance;
 
     int ClosestAxis(float x, float y, float z, float w)
     {
@@ -48,7 +43,10 @@ namespace nc::physics
         float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
         return math::Max(math::Max(mag0, mag1), mag2);
     }
+}
 
+namespace nc::physics
+{
     int Manifold::AddContact(const Contact& contact)
     {
         int insertIndex = contacts.size();
@@ -154,10 +152,9 @@ namespace nc::physics
             DirectX::XMStoreVector3(&contact.worldPointA, pointA_v);
             DirectX::XMStoreVector3(&contact.worldPointB, pointB_v);
 
-            float newDepth = Dot(contact.worldPointA - contact.worldPointB, contact.normal);
-            contact.depth = newDepth;
+            contact.depth = Dot(contact.worldPointA - contact.worldPointB, contact.normal);
 
-            if(newDepth < ContactBreakDistance)
+            if(contact.depth < ContactBreakDistance)
             {
                 *cur = contacts.back();
                 contacts.pop_back();
@@ -166,8 +163,8 @@ namespace nc::physics
 
             auto projectedPoint = contact.worldPointA - contact.normal * contact.depth;
             auto projectedDifference = contact.worldPointB - projectedPoint;
-            auto distance2d = Dot(projectedDifference, projectedDifference);
-            if(distance2d > ContactBreakDistance * ContactBreakDistance)
+            auto distance2d = SquareMagnitude(projectedDifference);
+            if(distance2d > SquareContactBreakDistance)
             {
                 *cur = contacts.back();
                 contacts.pop_back();

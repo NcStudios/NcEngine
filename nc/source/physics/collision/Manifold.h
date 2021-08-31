@@ -39,7 +39,6 @@ namespace nc::physics
         float lambda;
         float muTangent;
         float muBitangent;
-        bool success;
     };
 
     /** @todo Manifold could use array for contact points */
