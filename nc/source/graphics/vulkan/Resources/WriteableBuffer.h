@@ -23,6 +23,7 @@ namespace nc::graphics::vulkan
 
             template<std::invocable<T&> Func>
             void Map(const std::vector<T>& dataToMap, Func&& myNuller);
+            void Map(const std::vector<T>& dataToMap);
 
         private:
             vulkan::Base* m_base;
@@ -131,6 +132,16 @@ namespace nc::graphics::vulkan
             myNuller(mappedContainerHandle[dataToMapSize]);
         }
 
+        m_base->GetAllocator()->unmapMemory(allocation);
+    }
+
+    template<typename T> 
+    void WriteableBuffer<T>::Map(const std::vector<T>& dataToMap)
+    {
+        auto allocation = *(m_base->GetBufferAllocation(m_memoryIndex));
+        void* dataContainer;
+        m_base->GetAllocator()->mapMemory(allocation, &dataContainer);
+        memcpy(dataContainer, dataToMap.data(), sizeof(T) * dataToMap.size());
         m_base->GetAllocator()->unmapMemory(allocation);
     }
 }

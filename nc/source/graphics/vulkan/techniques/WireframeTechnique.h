@@ -1,15 +1,15 @@
+#ifdef NC_EDITOR_ENABLED
+
 #pragma once
 
 #include "component/Component.h"
 #include "vulkan/vk_mem_alloc.hpp"
 #include "directx/math/DirectXMath.h"
+#include "component/vulkan/DebugWidget.h"
 
 #include <vector>
-
-#ifdef NC_EDITOR_ENABLED
-#include "component/vulkan/DebugWidget.h"
+#include <span>
 #include <optional>
-#endif
 
 namespace nc::vulkan
 {
@@ -27,7 +27,6 @@ namespace nc::graphics
         struct WireframePushConstants
         {
             // N MVP matrices
-            DirectX::XMMATRIX normal;
             DirectX::XMMATRIX model;
             DirectX::XMMATRIX viewProjection;
         };
@@ -39,13 +38,12 @@ namespace nc::graphics
                 ~WireframeTechnique();
 
                 void Bind(vk::CommandBuffer* cmd);
-                std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
-                void ClearMeshRenderers();
                 void Record(vk::CommandBuffer* cmd);
 
                 #ifdef NC_EDITOR_ENABLED
                 void RegisterDebugWidget(nc::vulkan::DebugWidget debugWidget);
                 void ClearDebugWidget();
+                bool HasDebugWidget() const;
                 #endif
 
             private:
@@ -55,8 +53,6 @@ namespace nc::graphics
                 std::optional<nc::vulkan::DebugWidget> m_debugWidget;
                 #endif
 
-                std::unordered_map<std::string, std::vector<Entity>> m_meshRenderers;
-
                 nc::graphics::Graphics2* m_graphics;
                 Base* m_base;
                 Swapchain* m_swapchain;
@@ -65,3 +61,4 @@ namespace nc::graphics
         };
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#ifdef NC_EDITOR_ENABLED
 #include "WireframeTechnique.h"
 #include "Ecs.h"
 #include "config/Config.h"
@@ -20,7 +21,6 @@ namespace nc::graphics::vulkan
       #ifdef NC_EDITOR_ENABLED
       m_debugWidget{},
       #endif
-      m_meshRenderers{},
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
@@ -44,7 +44,6 @@ namespace nc::graphics::vulkan
         NC_PROFILE_END();
     }
 
-    #ifdef NC_EDITOR_ENABLED
     void WireframeTechnique::RegisterDebugWidget(nc::vulkan::DebugWidget debugWidget)
     {
         m_debugWidget = std::move(debugWidget);
@@ -54,19 +53,10 @@ namespace nc::graphics::vulkan
     {
         m_debugWidget = std::nullopt;
     }
-    #endif
 
-    std::vector<Entity>* WireframeTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
+    bool WireframeTechnique::HasDebugWidget() const
     {
-        auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
-        if (renderers == m_meshRenderers.end())
-        {
-            auto [it, result] = m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()});
-            return &(it->second);
-        }
-        
-        renderers->second.push_back(meshRenderer->GetParentEntity());
-        return &(renderers->second);
+        return m_debugWidget.has_value();
     }
 
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -136,38 +126,14 @@ namespace nc::graphics::vulkan
         auto pushConstants = WireframePushConstants{};
         pushConstants.viewProjection = viewMatrix * projectionMatrix;
 
-        #ifdef NC_EDITOR_ENABLED
         if (m_debugWidget.has_value())
         {
-            const auto meshAccessor = ResourceManager::GetMeshAccessor(m_debugWidget->meshUid);
-
+            const auto& meshAccessor = ResourceManager::GetMeshAccessor(m_debugWidget->meshUid);
             pushConstants.model = m_debugWidget->transformationMatrix;
-            pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
-
             cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
-        #endif
-        
-        for (auto& [meshUid, renderers] : m_meshRenderers)
-        {
-            const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
-            
-            for (auto handle : renderers)
-            {
-                auto* meshRenderer = ActiveRegistry()->Get<nc::vulkan::MeshRenderer>(handle);
-                pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
-                pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
-
-                cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
-                cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            }
-        }
         NC_PROFILE_END();
     }
-
-    void WireframeTechnique::ClearMeshRenderers()
-    {
-        m_meshRenderers.clear();
-    }
 }
+#endif

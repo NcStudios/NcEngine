@@ -7,6 +7,7 @@
 #include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/Texture.h"
 #include "component/vulkan/PointLight.h"
+#include "component/vulkan/MeshRenderer.h"
 
 #include <vector>
 #include <unordered_map>
@@ -87,6 +88,25 @@ namespace nc::graphics::vulkan
 
         private:
             WriteableBuffer<nc::vulkan::PointLightInfo> m_pointLightsArrayBuffer;
+            vk::UniqueDescriptorSet m_descriptorSet;
+            vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
+    };
+
+    class ObjectsData
+    {
+        public:
+            ObjectsData() = default;
+            ObjectsData(Graphics2* graphics);
+            ObjectsData(ObjectsData&&) = default;
+            ObjectsData& operator=(ObjectsData&&) = default;
+            ~ObjectsData();
+
+            void Update(const std::vector<nc::vulkan::ObjectData>& objectsData);
+            vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
+            vk::DescriptorSet* GetDescriptorSet() noexcept; 
+
+        private:
+            WriteableBuffer<nc::vulkan::ObjectData> m_objectsDataBuffer;
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
     };

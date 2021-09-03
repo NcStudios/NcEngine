@@ -20,7 +20,6 @@ namespace nc::graphics::vulkan
 
     struct Mesh
     {
-        std::string uid;
         uint32_t firstVertex;
         uint32_t firstIndex;
         uint32_t indicesCount;

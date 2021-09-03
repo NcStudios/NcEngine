@@ -28,9 +28,6 @@ namespace nc::graphics::vulkan
             void BindSharedData(vk::CommandBuffer* cmd);
             void Clear();
 
-            void RegisterMeshRenderer(TechniqueType technique, nc::vulkan::MeshRenderer* renderer);
-            void ClearMeshRenderers();
-
             void RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates);
             void ClearParticleEmitters();
 
@@ -42,6 +39,7 @@ namespace nc::graphics::vulkan
             void DeregisterRenderable(Entity entity);
 
         private:
+            std::pair<std::span<nc::vulkan::MeshRenderer>, std::span<nc::vulkan::MeshRenderer>> GetMeshRenderersByTechnique();
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics2* m_graphics;
@@ -51,7 +49,9 @@ namespace nc::graphics::vulkan
 
             std::vector<std::pair<Entity, std::vector<Entity>*>> m_storageHandles;
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;
+            #ifdef NC_EDITOR_ENABLED
             std::unique_ptr<WireframeTechnique> m_wireframeTechnique;
+            #endif
             std::unique_ptr<ParticleTechnique> m_particleTechnique;
     };
 }

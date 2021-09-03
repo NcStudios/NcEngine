@@ -21,6 +21,7 @@ namespace nc::graphics
         m_swapchain{ std::make_unique<vulkan::Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
         m_commands{ std::make_unique<vulkan::Commands>(m_base.get(), *m_swapchain) },
         m_renderer{ nullptr },
+        m_resourceManager{std::make_unique<vulkan::ResourceManager>()},
         m_dimensions{ dimensions },
         m_isMinimized{ false },
         m_isFullscreen{ false },

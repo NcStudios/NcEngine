@@ -6,6 +6,11 @@ namespace nc::graphics::vulkan
     class ResourceManager
     {
         public:
+            ResourceManager()
+            {
+                m_resourceManager = this;
+            }
+
             static void LoadTextures(std::unique_ptr<TexturesData> textures);
             static bool TextureExists(const std::string& uid);
             static uint32_t GetTextureAccessor(const std::string& uid);
@@ -25,6 +30,12 @@ namespace nc::graphics::vulkan
             static vk::DescriptorSet* GetPointLightsDescriptorSet();
             static vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout();
             static void ResetPointLights(graphics::Graphics2* graphics, uint32_t maxPointLights);
+
+            static void InitializeObjects(graphics::Graphics2* graphics);
+            static void UpdateObjects(const std::vector<nc::vulkan::ObjectData>& objects);
+            static vk::DescriptorSet* GetObjectsDescriptorSet();
+            static vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout();
+            static void ResetObjects(graphics::Graphics2* graphics);
 
             static void Clear();
 
@@ -49,19 +60,30 @@ namespace nc::graphics::vulkan
             vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout_();
             void ResetPointLights_(graphics::Graphics2* graphics, uint32_t maxPointLights);
 
+            void InitializeObjects_(graphics::Graphics2* graphics);
+            void UpdateObjects_(const std::vector<nc::vulkan::ObjectData>& objects);
+            vk::DescriptorSet* GetObjectsDescriptorSet_();
+            vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout_();
+            void ResetObjects_(graphics::Graphics2* graphics);
+
             void Clear_();
 
             static ResourceManager& Get();
 
+            inline static ResourceManager* m_resourceManager = nullptr;
             std::unique_ptr<MeshesData> m_meshResources;
             std::unique_ptr<TexturesData> m_textureResources;
             std::unique_ptr<PointLightsData> m_pointLightResources;
+            std::unique_ptr<ObjectsData> m_objects;
     };
 
     inline ResourceManager& ResourceManager::Get()
     {
-        static ResourceManager instance;
-        return instance;
+        if (m_resourceManager == nullptr)
+        {
+            throw std::runtime_error("ResourceManager::Get: m_resourceManager was null.");
+        }
+        return *m_resourceManager;
     }
 
     inline void ResourceManager::LoadTextures(std::unique_ptr<TexturesData> textures)
@@ -144,14 +166,39 @@ namespace nc::graphics::vulkan
         return Get().GetPointLightsDescriptorSet_();
     }
 
-    inline void ResourceManager::Clear()
-    {
-        return Get().Clear_();
-    }
-
     inline void ResourceManager::ResetPointLights(graphics::Graphics2* graphics, uint32_t maxPointLights)
     {
         return Get().ResetPointLights_(graphics, maxPointLights);
+    }
+
+    inline void ResourceManager::InitializeObjects(graphics::Graphics2* graphics)
+    {
+        Get().InitializeObjects_(graphics);
+    }
+
+    inline void ResourceManager::UpdateObjects(const std::vector<nc::vulkan::ObjectData>& objectsData)
+    {
+        Get().UpdateObjects_(objectsData);
+    }
+
+    inline vk::DescriptorSetLayout* ResourceManager::GetObjectsDescriptorSetLayout()
+    {
+        return Get().GetObjectsDescriptorSetLayout_();
+    }
+
+    inline vk::DescriptorSet* ResourceManager::GetObjectsDescriptorSet()
+    {
+        return Get().GetObjectsDescriptorSet_();
+    }
+
+    inline void ResourceManager::ResetObjects(graphics::Graphics2* graphics)
+    {
+        return Get().ResetObjects_(graphics);
+    }
+
+    inline void ResourceManager::Clear()
+    {
+        return Get().Clear_();
     }
 
     inline void ResourceManager::LoadTextures_(std::unique_ptr<TexturesData> textures)
@@ -242,10 +289,37 @@ namespace nc::graphics::vulkan
         return m_pointLightResources->GetDescriptorSet();
     }
 
+    inline void ResourceManager::InitializeObjects_(graphics::Graphics2* graphics)
+    {
+        m_objects = std::make_unique<ObjectsData>(graphics);
+    }
+
+    inline void ResourceManager::UpdateObjects_(const std::vector<nc::vulkan::ObjectData>& objects)
+    {
+        m_objects->Update(objects);
+    }
+
+    inline void ResourceManager::ResetObjects_(graphics::Graphics2* graphics)
+    {
+        m_objects.reset();
+        m_objects = std::make_unique<ObjectsData>(graphics);
+    }
+
+    inline vk::DescriptorSetLayout* ResourceManager::GetObjectsDescriptorSetLayout_()
+    {
+        return m_objects->GetDescriptorLayout();
+    }
+
+    inline vk::DescriptorSet* ResourceManager::GetObjectsDescriptorSet_()
+    {
+        return m_objects->GetDescriptorSet();
+    }
+
     inline void ResourceManager::Clear_()
     {
         m_textureResources.reset();
         m_meshResources.reset();
         m_pointLightResources.reset();
+        m_objects.reset();
     }
 }

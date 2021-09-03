@@ -1,10 +1,11 @@
 #pragma once
 
 #include "component/Component.h"
-
 #include "vulkan/vk_mem_alloc.hpp"
-#include <vector>
 #include "directx/math/DirectXMath.h"
+
+#include <vector>
+#include <span>
 
 namespace nc::vulkan
 {
@@ -21,18 +22,8 @@ namespace nc::graphics
 
         struct PhongPushConstants
         {
-            // N MVP matrices
-            DirectX::XMMATRIX normal;
-            DirectX::XMMATRIX model;
-            DirectX::XMMATRIX viewProjection ;
-
             // Camera world position
             Vector3 cameraPos;
-
-            // Indices into texture array
-            uint32_t baseColorIndex;
-            uint32_t normalColorIndex;
-            uint32_t roughnessColorIndex;
         };
 
         class PhongAndUiTechnique
@@ -42,8 +33,7 @@ namespace nc::graphics
                 ~PhongAndUiTechnique();
                 
                 void Bind(vk::CommandBuffer* cmd);
-                std::vector<Entity>* RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer);
-                void Record(vk::CommandBuffer* cmd);
+                void Record(vk::CommandBuffer* cmd, std::span<nc::vulkan::MeshRenderer> renderers);
                 void Clear();
 
             private:

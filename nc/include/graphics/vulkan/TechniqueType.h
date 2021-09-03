@@ -8,6 +8,5 @@ namespace nc::graphics::vulkan
     {
         None = 0,
         PhongAndUi = 1,
-        Wireframe = 2
     };
 }
