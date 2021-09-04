@@ -32,8 +32,8 @@ namespace nc::vulkan
             const nc::graphics::vulkan::Mesh& GetMesh() const;
             nc::graphics::vulkan::Material& GetMaterial();
             nc::graphics::vulkan::TechniqueType GetTechniqueType() const;
-            ObjectData GetObjectData() const;
-            void Update(const DirectX::FXMMATRIX& viewMatrix, const DirectX::FXMMATRIX& projectionMatrix);
+            const ObjectData& GetObjectData() const;
+            void Update(Transform* transform, const DirectX::FXMMATRIX& viewMatrix, const DirectX::FXMMATRIX& projectionMatrix);
 
         private:
             nc::graphics::vulkan::Mesh m_mesh;

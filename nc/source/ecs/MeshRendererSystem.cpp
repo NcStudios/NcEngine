@@ -32,7 +32,7 @@ namespace nc::ecs
         auto meshRenderers = m_registry->ViewAll<vulkan::MeshRenderer>();
         for (auto& meshRenderer : meshRenderers)
         {
-            meshRenderer.Update(viewMatrix, projectionMatrix);
+            meshRenderer.Update(m_registry->Get<Transform>(meshRenderer.GetParentEntity()), viewMatrix, projectionMatrix);
         }
 
         auto objectsData = std::vector<vulkan::ObjectData>();

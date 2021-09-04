@@ -576,8 +576,7 @@ namespace nc::graphics::vulkan
         auto buffer = m_buffers.find(id);
         if (buffer == m_buffers.end())
         {
-            return;
-            //throw std::runtime_error("The given buffer ID was not present in the dictionary.");
+            throw std::runtime_error("The given buffer ID was not present in the dictionary.");
         }
 
         m_allocator.destroyBuffer(buffer->second.first, buffer->second.second);

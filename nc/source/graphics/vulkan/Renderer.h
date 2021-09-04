@@ -39,7 +39,6 @@ namespace nc::graphics::vulkan
             void DeregisterRenderable(Entity entity);
 
         private:
-            std::pair<std::span<nc::vulkan::MeshRenderer>, std::span<nc::vulkan::MeshRenderer>> GetMeshRenderersByTechnique();
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics2* m_graphics;

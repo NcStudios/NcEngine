@@ -1,4 +1,5 @@
 #include "component/vulkan/MeshRenderer.h"
+#include "component/Transform.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
 #include "Ecs.h"
 
@@ -36,14 +37,14 @@ namespace nc::vulkan
         return m_material;
     }
 
-    void MeshRenderer::Update(const  DirectX::FXMMATRIX& viewMatrix, const  DirectX::FXMMATRIX& projectionMatrix)
+    void MeshRenderer::Update(Transform* transform, const DirectX::FXMMATRIX& viewMatrix, const  DirectX::FXMMATRIX& projectionMatrix)
     {
-        m_objectData.model = ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix();
+        m_objectData.model = transform->GetTransformationMatrix();
         m_objectData.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, m_objectData.model));
         m_objectData.viewProjection = viewMatrix * projectionMatrix;
     }
 
-    ObjectData MeshRenderer::GetObjectData() const
+    const ObjectData& MeshRenderer::GetObjectData() const
     {
         return m_objectData;
     }

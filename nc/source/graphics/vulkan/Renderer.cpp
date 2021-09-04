@@ -12,7 +12,6 @@
 #include "graphics/vulkan/Initializers.h"
 
 #include <span>
-#include <iostream>
 
 namespace nc::graphics::vulkan
 {

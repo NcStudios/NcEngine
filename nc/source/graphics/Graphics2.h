@@ -65,7 +65,7 @@ namespace nc::graphics
             std::unique_ptr<vulkan::Swapchain> m_swapchain;
             std::unique_ptr<vulkan::Commands> m_commands;
             vulkan::Renderer* m_renderer;
-            std::unique_ptr<vulkan::ResourceManager> m_resourceManager;
+            std::unique_ptr<vulkan::ResourceManager> m_resourceManager; // @todo: This doesn't need to be a unique pointer.
 
             Vector2 m_dimensions;
             bool m_isMinimized;
