@@ -115,7 +115,6 @@ namespace nc::core
         V_LOG("Starting engine loop");
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
-        auto fixedUpdateInterval = config::GetPhysicsSettings().fixedUpdateInterval;
         m_isRunning = true;
         
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
@@ -127,15 +126,11 @@ namespace nc::core
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
-            
+
             FrameLogic(dt);
 
             /** @todo see fixedUpdateInterval todo above */
-            if (m_time.GetFixedDeltaTime() > fixedUpdateInterval)
-            {
-                FixedStepLogic(m_time.GetFixedDeltaTime());
-                m_time.ResetFixedDeltaTime();
-            }
+            FixedStepLogic(dt);
 
             particleUpdateJobResult.wait();
 
@@ -220,6 +215,7 @@ namespace nc::core
         m_ui.FrameEnd();
 
         m_ecs.GetPointLightSystem()->Update();
+        m_ecs.GetMeshRendererSystem()->Update();
 
         auto* renderer = m_graphics2.GetRendererPtr();
         

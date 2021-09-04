@@ -4,18 +4,9 @@
 
 layout(push_constant) uniform PER_OBJECT
 {
-    // N MVP matrices
-    mat4 normal; // Transforms the vertex data normals into world space
+    // MVP matrices
     mat4 model;
     mat4 viewProjection;
-
-    // Camera world position
-    vec3 cameraPos;
-
-    // Textures
-    int baseColorIndex;
-    int normalIndex;
-    int roughnessIndex;
 } pc;
 
 layout (location = 0) out vec4 outFragColor;

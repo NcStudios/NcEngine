@@ -26,7 +26,6 @@ namespace nc::sample::prefab
         SphereRed,
         Table,
         Token,
-        WireframeCube,
         Worm
     };
 

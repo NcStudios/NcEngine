@@ -169,4 +169,54 @@ namespace nc::graphics::vulkan
     {
         return &m_descriptorSet.get();
     }
+
+    ObjectsData::ObjectsData(Graphics2* graphics)
+    {
+        const uint32_t MAX_OBJECTS = 100000;
+        const uint32_t objectsSize = (sizeof(nc::vulkan::ObjectData) * MAX_OBJECTS);
+        auto base = graphics->GetBasePtr();
+
+        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)};
+        m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
+        m_objectsDataBuffer = WriteableBuffer<nc::vulkan::ObjectData>(graphics, objectsSize); //@todo: not hard code upper bound
+        m_descriptorSet = CreateDescriptorSet(graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+
+		vk::DescriptorBufferInfo objectsDataBufferInfo;
+		objectsDataBufferInfo.buffer = *m_objectsDataBuffer.GetBuffer();
+		objectsDataBufferInfo.offset = 0;
+		objectsDataBufferInfo.range = objectsSize;
+
+        vk::WriteDescriptorSet write{};
+        write.setDstBinding(0);
+        write.setDstArrayElement(0);
+        write.setDescriptorType(vk::DescriptorType::eStorageBuffer);
+        write.setDescriptorCount(1);
+        write.setDstSet(m_descriptorSet.get());
+        write.setPBufferInfo(&objectsDataBufferInfo);
+        write.setPImageInfo(0);
+
+        base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
+    }
+
+    ObjectsData::~ObjectsData()
+    {
+        m_objectsDataBuffer.Clear();
+        m_descriptorSet.reset();
+        m_descriptorSetLayout.reset();
+    }
+
+    void ObjectsData::Update(const std::vector<nc::vulkan::ObjectData>& objectsData)
+    {
+        m_objectsDataBuffer.Map(objectsData);
+    }
+
+    vk::DescriptorSetLayout* ObjectsData::GetDescriptorLayout() noexcept
+    {
+        return &m_descriptorSetLayout.get();
+    }
+
+    vk::DescriptorSet* ObjectsData::GetDescriptorSet() noexcept
+    {
+        return &m_descriptorSet.get();
+    }
 }

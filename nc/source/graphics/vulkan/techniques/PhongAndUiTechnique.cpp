@@ -51,7 +51,7 @@ namespace nc::graphics::vulkan
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(PhongPushConstants)); // PushConstants
-        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout()};
+        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout(), *ResourceManager::GetObjectsDescriptorSetLayout()};
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
@@ -99,53 +99,28 @@ namespace nc::graphics::vulkan
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 2, 1, ResourceManager::GetObjectsDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 
-    std::vector<Entity>* PhongAndUiTechnique::RegisterMeshRenderer(nc::vulkan::MeshRenderer* meshRenderer)
-    {
-        auto renderers = m_meshRenderers.find(meshRenderer->GetMeshUid());
-        if (renderers == m_meshRenderers.end())
-        {
-            auto [it, result] = m_meshRenderers.emplace(meshRenderer->GetMeshUid(), std::vector<Entity>{meshRenderer->GetParentEntity()});
-            return &(it->second);
-        }
-
-        renderers->second.push_back(meshRenderer->GetParentEntity());
-        return &(renderers->second);
-    }
-
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd)
+    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, std::span<nc::vulkan::MeshRenderer> meshRenderers)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        const auto& viewMatrix = m_graphics->GetViewMatrix();
-        const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
-
         auto pushConstants = PhongPushConstants{};
-        pushConstants.viewProjection = viewMatrix * projectionMatrix;
         pushConstants.cameraPos = m_graphics->GetCameraPosition();
-        
-        for (auto& [meshUid, renderers] : m_meshRenderers)
-        {
-            const auto meshAccessor = ResourceManager::GetMeshAccessor(meshUid);
-            
-            for (auto handle : renderers)
-            {
-                auto* meshRenderer = ActiveRegistry()->Get<nc::vulkan::MeshRenderer>(handle);
-                auto& material = meshRenderer->GetMaterial();
-                pushConstants.model = meshRenderer->GetTransform()->GetTransformationMatrix();
-                pushConstants.normal = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, pushConstants.model));
-                pushConstants.baseColorIndex = ResourceManager::GetTextureAccessor(material.baseColor);
-                pushConstants.normalColorIndex = ResourceManager::GetTextureAccessor(material.normal);
-                pushConstants.roughnessColorIndex = ResourceManager::GetTextureAccessor(material.roughness);
+        cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
 
-                cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(PhongPushConstants), &pushConstants);
-                cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                
-                #ifdef NC_EDITOR_ENABLED
-                m_graphics->IncrementDrawCallCount();
-                #endif
-            }
+        uint32_t objectInstance = 0;
+        for (auto& renderer : meshRenderers)
+        {
+            auto& mesh = renderer.GetMesh();
+            cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            
+            #ifdef NC_EDITOR_ENABLED
+            m_graphics->IncrementDrawCallCount();
+            #endif
+            
+            objectInstance++;
         }
         NC_PROFILE_END();
     }

@@ -1,14 +1,13 @@
 #pragma once
 
 #include "math/Vector.h"
-
 #include "platform/win32/NcWin32.h"
 #include "directx/math/DirectXMath.h"
 #include <memory>
 
 namespace nc::graphics
 {
-    namespace vulkan { class Base; class Commands; class Swapchain; class DepthStencil; class Renderer; }
+    namespace vulkan { class Base; class Commands; class Swapchain; class DepthStencil; class Renderer; class ResourceManager; }
 
     class Graphics2
     {
@@ -66,6 +65,7 @@ namespace nc::graphics
             std::unique_ptr<vulkan::Swapchain> m_swapchain;
             std::unique_ptr<vulkan::Commands> m_commands;
             vulkan::Renderer* m_renderer;
+            std::unique_ptr<vulkan::ResourceManager> m_resourceManager; // @todo: This doesn't need to be a unique pointer.
 
             Vector2 m_dimensions;
             bool m_isMinimized;

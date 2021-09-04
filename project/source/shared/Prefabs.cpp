@@ -51,8 +51,6 @@ namespace nc::sample::prefab
                 return std::string{"Table"};
             case Resource::Token:
                 return std::string{"Token"};
-            case Resource::WireframeCube:
-                return std::string{"WireframeCube"};
             case Resource::Worm:
                 return std::string{"Worm"};
         }
@@ -74,7 +72,6 @@ namespace nc::sample::prefab
         graphics::vulkan::Material Default{};
         graphics::vulkan::Material Table{};
         graphics::vulkan::Material Token{};
-        graphics::vulkan::Material WireframeCube{};
         graphics::vulkan::Material Worm{};
     } // end namespace material
 
@@ -303,13 +300,6 @@ template<> Entity Create_<Resource::Token>(registry_type* registry, EntityInfo i
     return handle;
 }
 
-template<> Entity Create_<Resource::WireframeCube>(registry_type* registry, EntityInfo info)
-{
-    auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[3], material::Default, nc::graphics::vulkan::TechniqueType::Wireframe);
-    return handle;
-}
-
 template<> Entity Create_<Resource::Worm>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
@@ -341,7 +331,6 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::SphereRed,     Create_<Resource::SphereRed>},
     std::pair{Resource::Table,         Create_<Resource::Table>},
     std::pair{Resource::Token,         Create_<Resource::Token>},
-    std::pair{Resource::WireframeCube, Create_<Resource::WireframeCube>},
     std::pair{Resource::Worm,          Create_<Resource::Worm>}
 };
 

@@ -1,5 +1,5 @@
 #include "Renderer.h"
-
+#include "Ecs.h"
 #include "component/vulkan/DebugWidget.h"
 #include "component/vulkan/MeshRenderer.h"
 #include "component/Transform.h"
@@ -11,19 +11,22 @@
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/Initializers.h"
 
+#include <span>
+
 namespace nc::graphics::vulkan
 {
     Renderer::Renderer(graphics::Graphics2* graphics)
     : m_graphics{graphics},
       m_textureManager{graphics},
       m_meshManager{graphics},
-      m_mainRenderPass{},
+      m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
       m_storageHandles{},
       m_phongAndUiTechnique{nullptr},
+      #ifdef NC_EDITOR_ENABLED
       m_wireframeTechnique{nullptr},
+      #endif
       m_particleTechnique{nullptr}
     {
-        m_mainRenderPass = m_graphics->GetSwapchainPtr()->GetPassDefinition();
     }
 
     Renderer::~Renderer()
@@ -32,11 +35,26 @@ namespace nc::graphics::vulkan
     }
 
     void Renderer::Record(Commands* commands)
-    {  
+    {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        
+        //@todo: these don't belong here.  
+        if (m_phongAndUiTechnique == nullptr)
+        {
+            m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
+        }
+
+        #ifdef NC_EDITOR_ENABLED
+        if (m_wireframeTechnique == nullptr)
+        {
+            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
+        }
+        #endif
 
         auto swapchain = m_graphics->GetSwapchainPtr();
         auto& commandBuffers = *commands->GetCommandBuffers();
+
+        auto meshRenderers = ActiveRegistry()->ViewAll<nc::vulkan::MeshRenderer>();
         
         for (size_t i = 0; i < commandBuffers.size(); ++i)
         {
@@ -49,11 +67,13 @@ namespace nc::graphics::vulkan
             BeginRenderPass(cmd, swapchain, &m_mainRenderPass, i);
             BindSharedData(cmd);
 
-            if (m_wireframeTechnique)
+            #ifdef NC_EDITOR_ENABLED
+            if (m_wireframeTechnique->HasDebugWidget())
             {
                 m_wireframeTechnique->Bind(cmd);
                 m_wireframeTechnique->Record(cmd);
             }
+            #endif
 
             if (m_particleTechnique)
             {
@@ -61,15 +81,10 @@ namespace nc::graphics::vulkan
                 m_particleTechnique->Record(cmd);
             }
 
-            if (m_phongAndUiTechnique)
+            m_phongAndUiTechnique->Bind(cmd);
+            if (!meshRenderers.empty())
             {
-                m_phongAndUiTechnique->Bind(cmd);
-                m_phongAndUiTechnique->Record(cmd);
-            }
-            else
-            {
-                m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
-                m_phongAndUiTechnique->Bind(cmd);
+                m_phongAndUiTechnique->Record(cmd, meshRenderers);
             }
 
             RecordUi(cmd);
@@ -129,34 +144,6 @@ namespace nc::graphics::vulkan
         m_particleTechnique->RegisterEmitters(m_emitterStates);
     }
 
-    void Renderer::RegisterMeshRenderer(TechniqueType techniqueType, nc::vulkan::MeshRenderer* renderer)
-    {
-        switch (techniqueType)
-        {
-            case TechniqueType::PhongAndUi:
-            {
-                if (!m_phongAndUiTechnique)
-                {
-                    m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
-                }
-                m_storageHandles.emplace_back(renderer->GetParentEntity(), m_phongAndUiTechnique->RegisterMeshRenderer(renderer));
-                break;
-            }
-            case TechniqueType::Wireframe:
-            {
-                if (!m_wireframeTechnique)
-                {
-                    m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
-                }
-                m_storageHandles.emplace_back(renderer->GetParentEntity(), m_wireframeTechnique->RegisterMeshRenderer(renderer));
-                break;
-            }
-            case TechniqueType::None:
-            {
-                break;
-            }
-        }
-    }
 
     void Renderer::DeregisterRenderable(Entity entity)
     {
@@ -190,11 +177,6 @@ namespace nc::graphics::vulkan
     #ifdef NC_EDITOR_ENABLED
     void Renderer::RegisterDebugWidget(nc::vulkan::DebugWidget widget)
     {
-        if (!m_wireframeTechnique)
-        {
-            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
-        }
-        
         m_wireframeTechnique->RegisterDebugWidget(std::move(widget));
     }
 
@@ -214,19 +196,6 @@ namespace nc::graphics::vulkan
         NC_PROFILE_END();
     }
 
-    void Renderer::ClearMeshRenderers()
-    {
-        if (m_wireframeTechnique)
-        {
-            m_wireframeTechnique->ClearMeshRenderers();
-        }
-        
-        if (m_phongAndUiTechnique)
-        {
-            m_phongAndUiTechnique->Clear();
-        }
-    }
-
     void Renderer::ClearParticleEmitters()
     {
         if (m_particleTechnique)
@@ -237,8 +206,5 @@ namespace nc::graphics::vulkan
 
     void Renderer::Clear()
     {
-        m_wireframeTechnique.reset();
-        m_phongAndUiTechnique.reset();
-        m_particleTechnique.reset();
     }
 }

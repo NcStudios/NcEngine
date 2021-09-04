@@ -149,7 +149,6 @@ namespace nc::graphics::vulkan
 
             auto mesh = graphics::vulkan::Mesh
             {
-                path,
                 static_cast<uint32_t>(allVertices.size()), 
                 static_cast<uint32_t>(allIndices.size()), 
                 static_cast<uint32_t>(indices.size()),
