@@ -1,5 +1,6 @@
 #include "Assets.h"
 #include "AssetManager.h"
+#include "audio/audio_file/AudioFile.h"
 
 #include <fstream>
 
@@ -9,6 +10,24 @@ namespace nc
     {
         stream >> vec.x >> vec.y >> vec.z;
         return stream;
+    }
+
+    void LoadSoundClipAsset(const std::string& path)
+    {
+        AudioFile<double> asset;
+        if(!asset.load(path))
+            throw std::runtime_error("LoadSoundClipAsset - Could not open file: " + path);
+
+        size_t samplesPerChannel = asset.samples.at(0).size();
+
+        SoundClipFlyweight data
+        {
+            .leftChannel = std::move(asset.samples.at(0)),
+            .rightChannel = std::move(asset.samples.at(1)),
+            .samplesPerChannel = samplesPerChannel
+        };
+
+        AssetManager::LoadSoundClip(path, std::move(data));
     }
 
     void LoadConvexHullAsset(const std::string& path)

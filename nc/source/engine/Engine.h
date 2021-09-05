@@ -8,6 +8,7 @@
 #else
     #include "graphics/Graphics.h"
 #endif
+#include "audio/AudioSystem.h"
 #include "assets/AssetManager.h"
 #include "job/JobSystem.h"
 #include "physics/PhysicsSystem.h"
@@ -47,6 +48,7 @@ namespace nc::core
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
             AssetManager m_assetManager;
+            audio::AudioSystem m_audioSystem;
 
         #ifndef USE_VULKAN
             ui::UIImpl m_ui;

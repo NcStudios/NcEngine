@@ -3,6 +3,7 @@
 #include "MainCamera.h"
 #include "shared/Prefabs.h"
 #include "ForceBasedController.h"
+#include "SoundPlayer.h"
 #include "shared/SceneNavigationCamera.h"
 #include "Physics.h"
 
@@ -38,7 +39,9 @@ namespace nc::sample
             registry->Add<Collider>(head, BoxProperties{}, false);
             registry->Add<PhysicsBody>(head, PhysicsProperties{.mass = 5.0f});
             registry->Add<ForceBasedController>(head, registry);
-            
+            registry->Add<AudioSource>(head, "project/assets/sounds/hit.wav", AudioSourceProperties{.gain = 0.2});
+            registry->Add<SoundPlayer>(head, registry);
+
             auto segment1 = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, -0.9f}, .scale = Vector3::Splat(0.8f)});
             registry->Add<Collider>(segment1, BoxProperties{}, false);
             registry->Add<PhysicsBody>(segment1, PhysicsProperties{.mass = 3.0f});

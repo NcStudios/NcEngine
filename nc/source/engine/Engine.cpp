@@ -78,7 +78,8 @@ namespace nc::core
           m_physics{m_ecs.GetRegistry(), &m_graphics2, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
-          m_assetManager{}
+          m_assetManager{},
+          m_audioSystem{m_ecs.GetRegistry()}
     {
         SetBindings();
         V_LOG("Engine initialized");
@@ -97,6 +98,7 @@ namespace nc::core
           m_sceneSystem{},
           m_time{},
           m_assetManager{},
+          m_audioSystem{m_ecs.GetRegistry()},
           #ifdef NC_EDITOR_ENABLED
           m_ui{m_window.GetHWND(), &m_graphics}
           #else

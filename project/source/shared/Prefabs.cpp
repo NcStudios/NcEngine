@@ -131,6 +131,8 @@ void InitializeResources()
 
     isInitialized = true;
 
+    LoadSoundClipAsset("project/assets/sounds/hit.wav");
+
     LoadConvexHullAsset("project/assets/mesh_colliders/coin.nca");
     LoadMeshColliderAsset("project/assets/mesh_colliders/plane.nca");
     LoadMeshColliderAsset("project/assets/mesh_colliders/ramp.nca");

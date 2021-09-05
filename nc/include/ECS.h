@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.h"
+#include "component/AudioSource.h"
 #include "component/AutoComponentGroup.h"
 #include "component/Collider.h"
 #include "component/MeshCollider.h"
@@ -15,7 +16,8 @@
 
 namespace nc
 {
-    using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup,
+    using registry_type_list = ecs::RegistryTypeList<AudioSource,
+                                                     AutoComponentGroup,
                                                      Collider,
                                                      MeshCollider,
                                                      NetworkDispatcher,
