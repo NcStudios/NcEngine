@@ -16,7 +16,8 @@ namespace nc::graphics::vulkan
     enum class AttachmentType : uint8_t
     {
         Color,
-        Depth
+        Depth,
+        ShadowDepth
     };
 
     enum class ShaderStage : uint8_t
@@ -25,13 +26,18 @@ namespace nc::graphics::vulkan
         Pixel
     };
 
+    // Resources
+    vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode);
+
     // Attachments
     vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
     vk::AttachmentReference CreateAttachmentReference(AttachmentType type, uint32_t attachmentIndex);
     
     // Subpasses
+    vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& depthReference);
     vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& colorReference, const vk::AttachmentReference& depthReference);
-    vk::SubpassDependency CreateSubpassDependency();
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask);
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags);
     
     //Pipelines
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);

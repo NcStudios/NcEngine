@@ -6,6 +6,7 @@
 #include "graphics\vulkan\techniques\PhongAndUiTechnique.h"
 #include "graphics\vulkan\techniques\WireframeTechnique.h"
 #include "graphics\vulkan\techniques\ParticleTechnique.h"
+#include "graphics\vulkan\Resources\DepthStencil.h"
 
 #include <unordered_map>
 #include "vulkan/vk_mem_alloc.hpp"
@@ -17,6 +18,22 @@ namespace nc::graphics::vulkan
 {
     class Commands;
     
+    struct ShadowMappingPass
+    {
+        ShadowMappingPass()
+        : renderPass{ nullptr},
+          frameBuffer{ nullptr},
+          sampler{ nullptr},
+          depthStencil{ nullptr}
+        {
+        }
+
+        vk::UniqueRenderPass renderPass;
+        vk::UniqueFramebuffer frameBuffer;
+        vk::UniqueSampler sampler;
+        std::unique_ptr<DepthStencil> depthStencil;
+    };
+
     class Renderer
     {
         public:
@@ -40,11 +57,13 @@ namespace nc::graphics::vulkan
 
         private:
             void RecordUi(vk::CommandBuffer* cmd);
+            void InitializeShadowMappingRenderPass(vulkan::Swapchain* swapchain);
 
             graphics::Graphics2* m_graphics;
             TextureManager m_textureManager;
             MeshManager m_meshManager;
             vk::RenderPass m_mainRenderPass;
+            ShadowMappingPass m_shadowMappingPass;
 
             std::vector<std::pair<Entity, std::vector<Entity>*>> m_storageHandles;
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;

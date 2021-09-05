@@ -1,6 +1,7 @@
 #include "Base.h"
 #include "graphics/vulkan/Mesh.h"
 #include "graphics/vulkan/Commands.h"
+#include "graphics/vulkan/Initializers.h"
 #include "stb/stb_image.h"
 
 #include <set>
@@ -464,22 +465,7 @@ namespace nc::graphics::vulkan
         vk::PhysicalDeviceProperties properties{};
         m_physicalDevice.getProperties(&properties);
 
-        vk::SamplerCreateInfo samplerInfo{};
-        samplerInfo.setMagFilter(vk::Filter::eLinear);
-        samplerInfo.setMinFilter(vk::Filter::eLinear);
-        samplerInfo.setAddressModeU(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeV(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeW(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAnisotropyEnable(VK_TRUE);
-        samplerInfo.setMaxAnisotropy(properties.limits.maxSamplerAnisotropy);
-        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueBlack);
-        samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
-        samplerInfo.setCompareEnable(VK_FALSE);
-        samplerInfo.setCompareOp(vk::CompareOp::eAlways);
-        samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
-        samplerInfo.setMipLodBias(0.0f);
-        samplerInfo.setMinLod(0.0f);
-        samplerInfo.setMaxLod(0.0f);
+        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
 
         return m_logicalDevice.createSamplerUnique(samplerInfo);
     }

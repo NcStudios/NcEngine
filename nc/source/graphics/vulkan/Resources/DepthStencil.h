@@ -10,17 +10,19 @@ namespace nc::graphics::vulkan
     class DepthStencil
     {
         public:
-            DepthStencil(vulkan::Base* base, Vector2 dimensions);
+            DepthStencil(vulkan::Base* base, Vector2 dimensions, bool isSampledFrom = false);
             ~DepthStencil();
 
             const vk::Image& GetImage() const noexcept;
             const vk::ImageView& GetImageView() const noexcept;
+            const Vector2& GetDimensions() const noexcept;
 
         private:
             // External members
             vulkan::Base* m_base;
 
             // Internal members
+            Vector2 m_dimensions;
             vk::Image m_image;
             vk::ImageView m_view;
             uint32_t m_memoryIndex;

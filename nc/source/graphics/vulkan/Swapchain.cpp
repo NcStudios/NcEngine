@@ -69,7 +69,12 @@ namespace nc::graphics::vulkan
         vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
         vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
 
-        vk::SubpassDependency subpassDependency = CreateSubpassDependency();
+        vk::SubpassDependency subpassDependency = CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
+                                                                          0,
+                                                                          vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                                                          vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                                                          vk::AccessFlags(),
+                                                                          vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
 
         vk::RenderPassCreateInfo renderPassInfo{};
         renderPassInfo.setAttachmentCount(static_cast<uint32_t>(renderPassAttachments.size()));

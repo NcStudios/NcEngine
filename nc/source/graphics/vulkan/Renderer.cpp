@@ -20,6 +20,7 @@ namespace nc::graphics::vulkan
       m_textureManager{graphics},
       m_meshManager{graphics},
       m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
+      m_shadowMappingPass{},
       m_storageHandles{},
       m_phongAndUiTechnique{nullptr},
       #ifdef NC_EDITOR_ENABLED
@@ -27,6 +28,7 @@ namespace nc::graphics::vulkan
       #endif
       m_particleTechnique{nullptr}
     {
+        InitializeShadowMappingRenderPass(m_graphics->GetSwapchainPtr());
     }
 
     Renderer::~Renderer()
@@ -61,6 +63,13 @@ namespace nc::graphics::vulkan
             swapchain->WaitForFrameFence(true);
             
             auto* cmd = &commandBuffers[i];
+
+            // Shadow mapping pass
+            cmd->begin(vk::CommandBufferBeginInfo{});
+            BeginRenderPass(cmd, swapchain, &m_shadowMappingPass.renderPass.get(), i);
+
+
+
 
             // Begin recording commands to each command buffer.
             cmd->begin(vk::CommandBufferBeginInfo{});
@@ -133,6 +142,72 @@ namespace nc::graphics::vulkan
         // Begin render pass and bind pipeline
         cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
         NC_PROFILE_END();
+    }
+
+    void Renderer::InitializeShadowMappingRenderPass(vulkan::Swapchain* swapchain)
+    {
+        auto device = m_graphics->GetBasePtr()->GetDevice();
+
+        // Create depth stencil
+        m_shadowMappingPass.depthStencil = std::make_unique<DepthStencil>(m_graphics->GetBasePtr(), swapchain->GetExtentDimensions(), true);
+
+        // Create sampler which will be used to sample in the fragment shader to get shadow data.
+        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToEdge);
+        m_shadowMappingPass.sampler = device.createSamplerUnique(samplerInfo);
+
+        // Create render pass
+        std::array<vk::AttachmentDescription, 1> renderPassAttachments = 
+        {
+            CreateAttachmentDescription(AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore)
+        };
+
+        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
+        vk::SubpassDescription subpass = CreateSubpassDescription(depthReference);
+
+        std::array<vk::SubpassDependency, 2> subpassDependencies =
+        {
+            CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
+                                    0,
+                                    vk::PipelineStageFlagBits::eFragmentShader,
+                                    vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                    vk::AccessFlagBits::eShaderRead,
+                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+                                    vk::DependencyFlagBits::eByRegion),
+
+            CreateSubpassDependency(0,
+                                    VK_SUBPASS_EXTERNAL,
+                                    vk::PipelineStageFlagBits::eLateFragmentTests,
+                                    vk::PipelineStageFlagBits::eFragmentShader,
+                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+                                    vk::AccessFlagBits::eShaderRead,
+                                    vk::DependencyFlagBits::eByRegion),
+        };
+
+        vk::RenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.setAttachmentCount(1);
+        renderPassInfo.setPAttachments(renderPassAttachments.data());
+        renderPassInfo.setSubpassCount(1);
+        renderPassInfo.setPSubpasses(&subpass);
+        renderPassInfo.setDependencyCount(static_cast<uint32_t>(subpassDependencies.size()));
+        renderPassInfo.setPDependencies(subpassDependencies.data());
+
+        m_shadowMappingPass.renderPass = device.createRenderPassUnique(renderPassInfo);
+
+        // Create frame buffer
+        std::array<vk::ImageView, 1> attachments;
+        attachments[0] = m_shadowMappingPass.depthStencil->GetImageView();
+
+        auto dimensions = m_shadowMappingPass.depthStencil->GetDimensions();
+
+        vk::FramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.setRenderPass(m_shadowMappingPass.renderPass.get());
+        framebufferInfo.setAttachmentCount(1);
+        framebufferInfo.setPAttachments(attachments.data());
+        framebufferInfo.setWidth(dimensions.x);
+        framebufferInfo.setHeight(dimensions.y);
+        framebufferInfo.setLayers(1);
+
+        m_shadowMappingPass.frameBuffer = device.createFramebufferUnique(framebufferInfo);
     }
 
     void Renderer::RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates)

@@ -3,14 +3,15 @@
 
 namespace nc::graphics::vulkan
 {
-    DepthStencil::DepthStencil(vulkan::Base* base, Vector2 dimensions)
+    DepthStencil::DepthStencil(vulkan::Base* base, Vector2 dimensions, bool isSampledFrom = false)
     : m_base{base},
       m_image{},
       m_view{},
       m_memoryIndex{0}
     {
         auto depthFormat = base->GetDepthFormat();
-        m_memoryIndex = m_base->CreateImage(depthFormat, dimensions, vk::ImageUsageFlagBits::eDepthStencilAttachment, &m_image);
+        auto imageUseFlags = isSampledFrom ? vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled : vk::ImageUsageFlagBits::eDepthStencilAttachment;
+        m_memoryIndex = m_base->CreateImage(depthFormat, dimensions, imageUseFlags, &m_image);
         
         vk::ImageSubresourceRange imageSubresourceRange{};
         imageSubresourceRange.setBaseMipLevel(0);
@@ -41,6 +42,11 @@ namespace nc::graphics::vulkan
     const vk::ImageView& DepthStencil::GetImageView() const noexcept
     {
         return m_view;
+    }
+
+    const Vector2& DepthStencil::GetDimensions() const noexcept
+    {
+        return m_dimensions;
     }
 
     DepthStencil::~DepthStencil()

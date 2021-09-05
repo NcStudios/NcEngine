@@ -5,6 +5,26 @@
 
 namespace nc::graphics::vulkan
 {
+    vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode)
+    {
+        vk::SamplerCreateInfo samplerInfo{};
+        samplerInfo.setMagFilter(vk::Filter::eLinear);
+        samplerInfo.setMinFilter(vk::Filter::eLinear);
+        samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+        samplerInfo.setAddressModeU(addressMode);
+        samplerInfo.setAddressModeV(addressMode);
+        samplerInfo.setAddressModeW(addressMode);
+        samplerInfo.setAnisotropyEnable(VK_TRUE);
+        samplerInfo.setMaxAnisotropy(1.0f);
+        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueBlack);
+        samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
+        samplerInfo.setCompareEnable(VK_FALSE);
+        samplerInfo.setCompareOp(vk::CompareOp::eAlways);
+        samplerInfo.setMipLodBias(0.0f);
+        samplerInfo.setMinLod(0.0f);
+        samplerInfo.setMaxLod(0.0f);
+    }
+
     vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
     {
         vk::AttachmentDescription attachmentDescription{};
@@ -19,7 +39,6 @@ namespace nc::graphics::vulkan
             case AttachmentType::Color:
                 attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
                 attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-                attachmentDescription.setInitialLayout(vk::ImageLayout::eUndefined);
                 attachmentDescription.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
                 break;
 
@@ -27,6 +46,11 @@ namespace nc::graphics::vulkan
                 attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eClear);
                 attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
                 attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+                break;
+            case AttachmentType::ShadowDepth:
+                attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+                attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+                attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
                 break;
         }
         return attachmentDescription;
@@ -64,16 +88,32 @@ namespace nc::graphics::vulkan
         return subpassDescription;
     }
 
-    vk::SubpassDependency CreateSubpassDependency()
+    vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& depthReference)
+    {
+        vk::SubpassDescription subpassDescription{};
+        subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
+        subpassDescription.setColorAttachmentCount(0);
+        subpassDescription.setPDepthStencilAttachment(&depthReference);
+        return subpassDescription;
+    }
+
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags)
+    {
+        vk::SubpassDependency subpassDependency = CreateSubpassDependency(sourceSubpassIndex, destSubpassIndex, sourceStageMask, destStageMask, sourceAccessMask, destAccessMask);
+        subpassDependency.setDependencyFlags(dependencyFlags);
+        return subpassDependency;      
+    }
+
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask, vk::AccessFlags destAccessMask)
     {
         vk::SubpassDependency subpassDependency;
 
-        subpassDependency.setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        subpassDependency.setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        subpassDependency.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests); // The type of operation to wait on. (What our dependency is)
-        subpassDependency.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests); // Specifies the type of operation that should do the waiting
-        subpassDependency.setSrcAccessMask(vk::AccessFlags());  // Specifies the specific operation that should do the waiting
-        subpassDependency.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite);  // Specifies the specific operation that should do the waiting
+        subpassDependency.setSrcSubpass(sourceSubpassIndex); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
+        subpassDependency.setDstSubpass(destSubpassIndex); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
+        subpassDependency.setSrcStageMask(sourceStageMask); // The type of operation to wait on. (What our dependency is)
+        subpassDependency.setDstStageMask(destStageMask); // Specifies the type of operation that should do the waiting
+        subpassDependency.setSrcAccessMask(sourceAccessMask);  // Specifies the specific operation that should do the waiting
+        subpassDependency.setDstAccessMask(destAccessMask);  // Specifies the specific operation that should do the waiting
         
         return subpassDependency;      
     }
