@@ -27,9 +27,9 @@ namespace nc::sample
         auto lightOneProperties = PointLightInfo
         {
             .pos = Vector3::Zero(),
-            .ambient = Vector3{0.15f, 0.15f, 0.15f},
-            .diffuseColor = Vector3{0.3751, 0.3751, 0.3751f},
-            .diffuseIntensity = 5.56,
+            .ambient = Vector3{0.05f, 0.05f, 0.05f},
+            .diffuseColor = Vector3{0.3, 0.3, 0.3},
+            .diffuseIntensity = 10.56,
             .attConst = 0.0f,
             .attLin = 0.05f,
             .attQuad = 0.0f
