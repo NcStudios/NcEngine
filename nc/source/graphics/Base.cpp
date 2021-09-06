@@ -247,44 +247,44 @@ namespace nc::graphics
     void Base::CreateDescriptorPools()
     {
         // Create descriptor pool for IMGUI
-        vk::DescriptorPoolSize imguiPoolSizes[] =
+        std::array<vk::DescriptorPoolSize, 11> imguiPoolSizes =
         {
-            { vk::DescriptorType::eSampler, 1000 },
-            { vk::DescriptorType::eCombinedImageSampler, 1000 },
-            { vk::DescriptorType::eSampledImage, 1000 },
-            { vk::DescriptorType::eStorageImage, 1000 },
-            { vk::DescriptorType::eUniformTexelBuffer, 1000 },
-            { vk::DescriptorType::eStorageTexelBuffer, 1000 },
-            { vk::DescriptorType::eUniformBuffer, 1000 },
-            { vk::DescriptorType::eStorageBuffer, 1000 },
-            { vk::DescriptorType::eUniformBufferDynamic, 1000 },
-            { vk::DescriptorType::eStorageBufferDynamic, 1000 },
-            { vk::DescriptorType::eInputAttachment, 1000 }
+            vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eStorageImage, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eUniformTexelBuffer, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eStorageTexelBuffer, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eUniformBufferDynamic, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBufferDynamic, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eInputAttachment, 1000 }
         };
 
         vk::DescriptorPoolCreateInfo imguiDescriptorPoolInfo = {};
         imguiDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
         imguiDescriptorPoolInfo.setMaxSets(1000);
-        imguiDescriptorPoolInfo.setPoolSizeCount(sizeof(imguiPoolSizes));
-        imguiDescriptorPoolInfo.setPoolSizes(*imguiPoolSizes);
+        imguiDescriptorPoolInfo.setPoolSizeCount(imguiPoolSizes.size());
+        imguiDescriptorPoolInfo.setPPoolSizes(imguiPoolSizes.data());
 
         if (m_logicalDevice.createDescriptorPool(&imguiDescriptorPoolInfo, nullptr, &m_imguiDescriptorPool) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Could not create ImGUI descriptor pool.");
         }
 
-        vk::DescriptorPoolSize renderingPoolSizes[] =
+        std::array<vk::DescriptorPoolSize, 3> renderingPoolSizes =
         {
-            { vk::DescriptorType::eSampler, 10 },
-            { vk::DescriptorType::eSampledImage, 1000 },
-            { vk::DescriptorType::eStorageBuffer, 10 }
+            vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 }
         };
         
         vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
         renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
         renderingDescriptorPoolInfo.setMaxSets(1000);
-        renderingDescriptorPoolInfo.setPoolSizeCount(sizeof(renderingPoolSizes));
-        renderingDescriptorPoolInfo.setPoolSizes(*renderingPoolSizes);
+        renderingDescriptorPoolInfo.setPoolSizeCount(renderingPoolSizes.size());
+        renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
         
         if (m_logicalDevice.createDescriptorPool(&renderingDescriptorPoolInfo, nullptr, &m_renderingDescriptorPool) != vk::Result::eSuccess)
         {
