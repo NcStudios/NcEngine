@@ -2,14 +2,13 @@
 
 #include "Ecs.h"
 #include "SoA.h"
-#include "component/vulkan/PointLight.h"
+#include "component/PointLight.h"
 
 #include <unordered_map>
 
 namespace nc::graphics
 {
-    class Graphics2;
-    namespace vulkan { class Commands; }
+    class Graphics2; class Commands;
 }
 
 namespace nc::ecs

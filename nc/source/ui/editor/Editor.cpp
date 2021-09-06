@@ -1,10 +1,7 @@
 #ifdef NC_EDITOR_ENABLED
 #include "Editor.h"
 #include "EditorControls.h"
-#include "graphics/Graphics.h"
-#ifdef USE_VULKAN
 #include "graphics/Graphics2.h"
-#endif
 #include "Input.h"
 #include "Window.h"
 
@@ -25,17 +22,8 @@ namespace
 
 namespace nc::ui::editor
 {
-    #ifdef USE_VULKAN
     Editor::Editor(graphics::Graphics2 * graphics)
         : m_graphics2{graphics},
-          m_openState_Editor{false},
-          m_openState_UtilitiesPanel{true}
-    {
-    }
-    #endif
-
-    Editor::Editor(graphics::Graphics * graphics)
-        : m_graphics{graphics},
           m_openState_Editor{false},
           m_openState_UtilitiesPanel{true}
     {

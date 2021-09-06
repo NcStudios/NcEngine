@@ -6,13 +6,11 @@
 #include "component/NetworkDispatcher.h"
 #include "component/ParticleEmitter.h"
 #include "component/PhysicsBody.h"
-#include "component/PointLight.h"
 #include "component/Registry.h"
-#include "component/Renderer.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
-#include "component/vulkan/MeshRenderer.h"
-#include "component/vulkan/PointLight.h"
+#include "component/MeshRenderer.h"
+#include "component/PointLight.h"
 
 namespace nc
 {
@@ -21,12 +19,10 @@ namespace nc
                                                      NetworkDispatcher,
                                                      ParticleEmitter,
                                                      PhysicsBody,
-                                                     PointLight,
-                                                     Renderer,
                                                      Tag,
                                                      Transform,
-                                                     vulkan::MeshRenderer,
-                                                     vulkan::PointLight>;
+                                                     MeshRenderer,
+                                                     PointLight>;
                                                      
     using registry_type = ecs::Registry<registry_type_list>;
 

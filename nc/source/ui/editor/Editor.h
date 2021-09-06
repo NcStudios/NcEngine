@@ -8,12 +8,8 @@ namespace nc
     class Transform;
     namespace graphics 
     { 
-        class Graphics;
-        #ifdef USE_VULKAN
         class Graphics2;
-        #endif
     }
-    namespace graphics { class Graphics; }
 }
 
 namespace nc::ui::editor
@@ -21,18 +17,11 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            #ifdef USE_VULKAN
             Editor(graphics::Graphics2* graphics);
-            #endif
-            Editor(graphics::Graphics* graphics);
-
             void Frame(float* dt, registry_type* registry);
 
         private:
-            #ifdef USE_VULKAN
             nc::graphics::Graphics2* m_graphics2;
-            #endif
-            nc::graphics::Graphics* m_graphics;
             bool m_openState_Editor;
             bool m_openState_UtilitiesPanel;
 

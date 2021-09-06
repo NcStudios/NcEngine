@@ -8,7 +8,7 @@
 
 namespace nc
 {
-    namespace graphics::vulkan { class Renderer; }
+    namespace graphics { class Renderer; }
 
     enum class ColliderType : uint8_t
     {
@@ -72,7 +72,7 @@ namespace nc
             auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
 
            #ifdef NC_EDITOR_ENABLED
-            void UpdateWidget(graphics::vulkan::Renderer* renderer);
+            void UpdateWidget(graphics::Renderer* renderer);
             void SetEditorSelection(bool state);
            #endif
 

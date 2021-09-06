@@ -39,7 +39,6 @@ namespace nc::sample
     {
         // Setup
         m_sceneHelper.Setup(registry, true, false, Widget);
-        prefab::InitializeResources();
 
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
@@ -53,9 +52,8 @@ namespace nc::sample
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
-        registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.ambient = Vector4(1.0f, 0.7f, 1.0f, 0.0f),
-                                                                           .diffuseColor = Vector4(0.8f, 0.6f, 1.0f, 0.0f),
-                                                                           .specularColor = Vector4(1.0f, 0.9f, 1.0f, 0.0f),
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(1.0f, 0.7f, 1.0f),
+                                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
                                                                            .diffuseIntensity = 5.0f
                                                                           });
 

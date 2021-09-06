@@ -17,11 +17,7 @@ namespace nc::physics
     class PhysicsSystem
     {
         public:
-            #ifdef USE_VULKAN
             PhysicsSystem(graphics::Graphics2* graphics, job::JobSystem* jobSystem);
-            #else
-            PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem);
-            #endif
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness);
             void RemoveJoint(Entity entityA, Entity entityB);

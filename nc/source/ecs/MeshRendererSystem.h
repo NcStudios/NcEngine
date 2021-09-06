@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Ecs.h"
-#include "component/vulkan/MeshRenderer.h"
-#include "graphics/vulkan/MeshManager.h"
-#include "graphics/vulkan/TextureManager.h"
+#include "component/MeshRenderer.h"
+#include "graphics/MeshManager.h"
+#include "graphics/TextureManager.h"
 
 namespace nc::graphics 
 {
@@ -17,7 +17,7 @@ namespace nc::ecs
         public:
             MeshRendererSystem(registry_type* registry, graphics::Graphics2* graphics);
 
-            void Add(vulkan::MeshRenderer& meshRenderer);
+            void Add(MeshRenderer& meshRenderer);
             void Remove(Entity entity);
             void Clear();
             void Update();

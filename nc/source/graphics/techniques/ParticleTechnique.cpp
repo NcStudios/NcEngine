@@ -1,117 +1,152 @@
-#include "ParticleTechnique.h"
-#include "graphics/TechniqueType.h"
-#include "graphics/MaterialProperties.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
-#include "graphics/d3dresource/ShaderResources.h"
-#include "graphics/d3dresource/MeshResources.h"
-#include "graphics/d3dresource/ConstantBufferResources.h"
-#include "config/Config.h"
+// #include "ParticleTechnique.h"
+// #include "Ecs.h"
+// #include "config/Config.h"
+// #include "component/Transform.h"
+// #include "debug/Profiler.h"
+// #include "graphics/Graphics2.h"
+// #include "graphics/Commands.h"
+// #include "graphics/Initializers.h"
+// #include "graphics/ShaderUtilities.h"
+// #include "graphics/MeshManager.h"
+// #include "graphics/Swapchain.h"
+// #include "graphics/Base.h"
+// #include "graphics/resources/ImmutableBuffer.h"
+// #include "graphics/resources/ResourceManager.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "ui/editor/Widgets.h"
-#endif
+// namespace nc::graphics
+// {
+//     ParticleTechnique::ParticleTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
+//     : m_emitterStates{},
+//       m_graphics{graphics},
+//       m_base{graphics->GetBasePtr()},
+//       m_swapchain{graphics->GetSwapchainPtr()},
+//       m_pipeline{},
+//       m_pipelineLayout{}
+//     {
+//         CreatePipeline(renderPass);
+//     }
 
-using namespace nc::graphics::d3dresource;
+//     ParticleTechnique::~ParticleTechnique()
+//     {
+//         auto device = m_base->GetDevice();
+//         device.destroyPipelineLayout(m_pipelineLayout);
+//         device.destroyPipeline(m_pipeline);
+//     }
 
-namespace
-{
-    const auto ParticleInputElementDesc = std::vector<D3D11_INPUT_ELEMENT_DESC>
-    {
-        { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "Normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TexCoord", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "Tangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "Bitangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-    
-    const std::string SamplerTag = "texture_sampler_resource";
-    const std::string BlenderTag = "particle_texture_blender_resource";
-}
+//     void ParticleTechnique::CreatePipeline(vk::RenderPass* renderPass)
+//     {
+//         // Shaders
+//         auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+//         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ParticleVertex.spv");
+//         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ParticleFragment.spv");
 
-namespace nc::graphics
-{
-    std::vector<GraphicsResource*> ParticleTechnique::m_commonResources = {};
-    std::unique_ptr<graphics::Mesh> ParticleTechnique::m_mesh = nullptr;
-    std::unique_ptr<d3dresource::PixelConstantBuffer<MaterialProperties>> ParticleTechnique::m_materialPropertiesBuffer = nullptr;
+//         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
+//         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
 
-    ParticleTechnique::ParticleTechnique()
-    {
-        ParticleTechnique::InitializeCommonResources();
+//         vk::PipelineShaderStageCreateInfo shaderStages[] = 
+//         {
+//             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
+//             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+//         };
+
+//         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(ParticlePushConstants)); // PushConstants
+//         std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout()};
+//         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
+//         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
+
+//         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+//         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
+//         dynamicStateInfo.setDynamicStateCount(dynamicStates.size());
+//         dynamicStateInfo.setDynamicStates(dynamicStates);
+
+//         // Graphics pipeline
+//         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
+//         pipelineCreateInfo.setStageCount(2); // Shader stages
+//         pipelineCreateInfo.setPStages(shaderStages); // Shader stages
+//         auto vertexBindingDescription = GetVertexBindingDescription();
+//         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
+//         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
+//         pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
+//         auto inputAssembly = CreateInputAssemblyCreateInfo();
+//         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
+//         auto viewportState = CreateViewportCreateInfo();
+//         pipelineCreateInfo.setPViewportState(&viewportState);
+//         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+//         pipelineCreateInfo.setPRasterizationState(&rasterizer);
+//         auto multisampling = CreateMulitsampleCreateInfo();
+//         pipelineCreateInfo.setPMultisampleState(&multisampling);
+//         auto depthStencil = CreateDepthStencilCreateInfo();
+//         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
+//         auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(true);
+//         auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, true);
+//         pipelineCreateInfo.setPColorBlendState(&colorBlending);
+//         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
+//         pipelineCreateInfo.setLayout(m_pipelineLayout);
+//         pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+//         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
+//         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
+//         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
+
+//         m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
+//         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
+//         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+//     }
+
+//     void ParticleTechnique::Bind(vk::CommandBuffer* cmd)
+//     {
+//         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+//         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+//         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
+//         NC_PROFILE_END();
+//     }
+
+//     void ParticleTechnique::RegisterEmitters(std::vector<particle::EmitterState>* emitterStates)
+//     {
+//         m_emitterStates = emitterStates;
+//     }
+
+//     void DrawIndexed(vk::CommandBuffer* cmd, const nc::graphics::Mesh& meshAccessor)
+//     {
+//         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+//         cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+//         NC_PROFILE_END();
+//     }
+
+//     void ParticleTechnique::Record(vk::CommandBuffer* cmd)
+//     {
+//         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+//         const auto& viewMatrix = m_graphics->GetViewMatrix();
+//         const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
+
+//         auto pushConstants = ParticlePushConstants{};
+//         pushConstants.viewProjection = viewMatrix * projectionMatrix;
+//         pushConstants.cameraPos = m_graphics->GetCameraPosition();
+
+//         const auto meshAccessor = ResourceManager::GetMeshAccessor("project/assets/mesh/plane.nca");
         
-        Step single(2);
-        {
-        }
-        AddStep(std::move(single));
-    }
+//         for (auto& emitterState : *m_emitterStates)
+//         {
+//             auto [index, matrices] = emitterState.GetSoA()->View<particle::EmitterState::MvpMatricesIndex>();
 
-    #ifdef NC_EDITOR_ENABLED
-    void ParticleTechnique::EditorGuiElement()
-    {
-        ImGui::SameLine();
-        ImGui::Text("(Particle)");
-    }
-    #endif
+//             for(; index.Valid(); ++index)
+//             {
+//                 pushConstants.model = matrices[index].modelView; // Is actually untransposed model matrix, see MvpMatrices.h
+//                 pushConstants.baseColorIndex =  ResourceManager::GetTextureAccessor(emitterState.GetInfo()->init.particleTexturePath);
 
-    size_t ParticleTechnique::GetUID() noexcept
-    {
-        const size_t name = 200;
-        return name;
-    }
+//                 cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
+//                 DrawIndexed(cmd, meshAccessor);
+//             }
+            
+//             #ifdef NC_EDITOR_ENABLED
+//             m_graphics->IncrementDrawCallCount();
+//             #endif
+//         }
+//         NC_PROFILE_END();
+//     }
 
-    void ParticleTechnique::InitializeCommonResources()
-    {
-        static bool isInitialized = false;
-        if(isInitialized)
-        {
-            return;
-        }
-
-        isInitialized = true;
-
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Stencil>(Stencil::GetUID(Stencil::Mode::Off), Stencil::Mode::Off));
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Rasterizer>(Rasterizer::GetUID(Rasterizer::Mode::Solid), Rasterizer::Mode::Solid));
-
-        // Mesh
-        graphics::LoadMeshAsset("project/assets/mesh/plane.nca");
-        ParticleTechnique::m_mesh = std::make_unique<graphics::Mesh>("project/assets/mesh/plane.nca");
-
-        // Textures
-        const std::string particleTexturePath = "nc//resources//texture//DefaultParticle.png";
-        const std::string normalPath = "nc/resources/texture/DefaultNormal.png";
-        const std::string roughnessPath = "nc/resources/texture/DefaultMetallic.png";
-        const std::string metallicPath = "nc/resources/texture/DefaultMetallic.png";
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(particleTexturePath), particleTexturePath, 0));
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(normalPath), normalPath, 1));
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(roughnessPath), roughnessPath, 2));
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Texture>(Texture::GetUID(metallicPath), metallicPath, 3));
-
-        // Material Properties
-        MaterialProperties materialProperties{};
-        m_materialPropertiesBuffer = std::make_unique<PixelConstantBuffer<MaterialProperties>>(materialProperties, 1u);
-        ParticleTechnique::m_commonResources.push_back(m_materialPropertiesBuffer.get());
-
-        // Add vertex shader
-        const auto defaultShaderPath = nc::config::GetGraphicsSettings().d3dShadersPath;
-        const auto vertexShaderPath = defaultShaderPath + "phongvertexshader.cso";
-        auto pvs = GraphicsResourceManager::AcquireOnDemand<VertexShader>(VertexShader::GetUID(vertexShaderPath), vertexShaderPath);
-        auto pvsbc = static_cast<VertexShader&>(*pvs).GetBytecode();
-        ParticleTechnique::m_commonResources.push_back(std::move(pvs));
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<InputLayout>(InputLayout::GetUID("phongvertexshader"), ParticleInputElementDesc, pvsbc));
-
-        // Add pixel shader
-        const auto pixelShaderPath = defaultShaderPath + "phongpixelshader.cso";
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<PixelShader>(PixelShader::GetUID(pixelShaderPath), pixelShaderPath));
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Blender>(Blender::GetUID(BlenderTag), true));
-        ParticleTechnique::m_commonResources.push_back(GraphicsResourceManager::AcquireOnDemand<Sampler>(Sampler::GetUID(SamplerTag)));
-    }
-
-    void ParticleTechnique::BindCommonResources()
-    {
-        m_mesh->Bind();
-
-        for(const auto& res : ParticleTechnique::m_commonResources)
-        {
-            res->Bind();
-        }
-    }
-}
+//     void ParticleTechnique::Clear()
+//     {
+//         // @todo: This whole storage strategy will be changed, this is really just a stand-in until then.
+//         m_emitterStates = nullptr;
+//     }
+// }

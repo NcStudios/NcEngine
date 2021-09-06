@@ -13,7 +13,7 @@
 #include "joints_test/JointsTest.h"
 #include "rendering_benchmark/RenderingBenchmark.h"
 #include "jare_scratch/VulkanScene.h"
-#include "solar_system/SolarSystem.h"
+// #include "solar_system/SolarSystem.h"
 
 namespace
 {
@@ -133,8 +133,8 @@ namespace nc::sample
             if(ImGui::Button("Jare Scratch", buttonSize))
                 scene::Change(std::make_unique<VulkanScene>());
 
-            if(ImGui::Button("Solar System", buttonSize))
-                scene::Change(std::make_unique<SolarSystem>());
+            // if(ImGui::Button("Solar System", buttonSize))
+            //     scene::Change(std::make_unique<SolarSystem>());
         } ImGui::EndChild();
     }
 

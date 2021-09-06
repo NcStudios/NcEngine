@@ -8,7 +8,6 @@ endif()
 #OPTIONS
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
-option(USE_VULKAN "Use Vulkan rather than DirectX" OFF)
 option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior santizer" OFF)
@@ -49,10 +48,6 @@ if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()
 
-if(USE_VULKAN)
-    add_definitions(-DUSE_VULKAN)
-endif()
-
 if(NC_USE_VALIDATION)
     add_definitions(-DNC_USE_VALIDATION)
 endif()
@@ -80,14 +75,12 @@ target_compile_options(${ENGINE_LIB}
         ${GCC_WARNING_FLAGS}
 )
 
-if(USE_VULKAN)
-    find_package(Vulkan REQUIRED)
+find_package(Vulkan REQUIRED)
 
-    #Link libraries
-    target_link_libraries(${ENGINE_LIB} 
-        Vulkan::Vulkan
-    )
-endif()
+#Link libraries
+target_link_libraries(${ENGINE_LIB}
+    Vulkan::Vulkan
+)
 
 if(SANITIZE_UB)
     target_compile_options(${ENGINE_LIB}

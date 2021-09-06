@@ -2,7 +2,6 @@
 
 #include "Ecs.h"
 #include "component/ParticleEmitter.h"
-#include "particle/ParticleRenderer.h"
 #include "particle/EmitterState.h"
 
 namespace nc::graphics { class Graphics2; }
@@ -12,11 +11,7 @@ namespace nc::ecs
     class ParticleEmitterSystem
     {
         public:
-            #ifdef USE_VULKAN
             ParticleEmitterSystem(registry_type* registry, graphics::Graphics2* graphics);
-            #else
-            ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics);
-            #endif
 
             /** UpdateParticles is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -39,10 +34,8 @@ namespace nc::ecs
             std::vector<particle::EmitterState> m_toAdd;
             std::vector<Entity> m_toRemove;
 
-        #ifdef USE_VULKAN
             particle::GraphicsData m_graphicsData;
             graphics::Graphics2* m_graphics;
-        #endif
 
     };
 } // namespace nc::ecs

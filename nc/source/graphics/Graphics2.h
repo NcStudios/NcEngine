@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-    namespace vulkan { class Base; class Commands; class Swapchain; class DepthStencil; class Renderer; class ResourceManager; }
+   class Base; class Commands; class Swapchain; class DepthStencil; class Renderer; class ResourceManager;
 
     class Graphics2
     {
@@ -31,13 +31,13 @@ namespace nc::graphics
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
             void ToggleFullscreen();
             void SetClearColor(std::array<float, 4> color);
-            void SetRenderer(vulkan::Renderer* renderer);
+            void SetRenderer(Renderer* renderer);
 
-            const vulkan::Base& GetBase() const noexcept;
-            vulkan::Base* GetBasePtr() const noexcept;
-            vulkan::Swapchain* GetSwapchainPtr() const noexcept;
-            vulkan::Commands* GetCommandsPtr() const noexcept;
-            vulkan::Renderer* GetRendererPtr() const noexcept;
+            const Base& GetBase() const noexcept;
+            Base* GetBasePtr() const noexcept;
+            Swapchain* GetSwapchainPtr() const noexcept;
+            Commands* GetCommandsPtr() const noexcept;
+            Renderer* GetRendererPtr() const noexcept;
             const Vector2 GetDimensions() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 
@@ -60,12 +60,12 @@ namespace nc::graphics
             void RenderToImage(uint32_t imageIndex);
             bool PresentImage(uint32_t imageIndex);
 
-            std::unique_ptr<vulkan::Base> m_base;
-            std::unique_ptr<vulkan::DepthStencil> m_depthStencil;
-            std::unique_ptr<vulkan::Swapchain> m_swapchain;
-            std::unique_ptr<vulkan::Commands> m_commands;
-            vulkan::Renderer* m_renderer;
-            std::unique_ptr<vulkan::ResourceManager> m_resourceManager; // @todo: This doesn't need to be a unique pointer.
+            std::unique_ptr<Base> m_base;
+            std::unique_ptr<DepthStencil> m_depthStencil;
+            std::unique_ptr<Swapchain> m_swapchain;
+            std::unique_ptr<Commands> m_commands;
+            Renderer* m_renderer;
+            std::unique_ptr<ResourceManager> m_resourceManager; // @todo: This doesn't need to be a unique pointer.
 
             Vector2 m_dimensions;
             bool m_isMinimized;

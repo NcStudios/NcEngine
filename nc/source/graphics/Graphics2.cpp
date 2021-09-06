@@ -1,11 +1,11 @@
 #include "Graphics2.h"
 #include "debug/Profiler.h"
-#include "vulkan/Base.h"
-#include "vulkan/Commands.h"
-#include "vulkan/resources/DepthStencil.h"
-#include "vulkan/Swapchain.h"
-#include "vulkan/Renderer.h"
-#include "vulkan/resources/ResourceManager.h"
+#include "Base.h"
+#include "Commands.h"
+#include "resources/DepthStencil.h"
+#include "Swapchain.h"
+#include "Renderer.h"
+#include "resources/ResourceManager.h"
 #include "config/Config.h"
 
 namespace
@@ -16,12 +16,12 @@ namespace
 namespace nc::graphics
 {
     Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
-        : m_base{ std::make_unique<vulkan::Base>(hwnd, hinstance) },
-        m_depthStencil{ std::make_unique<vulkan::DepthStencil>(m_base.get(), dimensions) }, 
-        m_swapchain{ std::make_unique<vulkan::Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
-        m_commands{ std::make_unique<vulkan::Commands>(m_base.get(), *m_swapchain) },
+        : m_base{ std::make_unique<Base>(hwnd, hinstance) },
+        m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
+        m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+        m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
         m_renderer{ nullptr },
-        m_resourceManager{std::make_unique<vulkan::ResourceManager>()},
+        m_resourceManager{std::make_unique<ResourceManager>()},
         m_dimensions{ dimensions },
         m_isMinimized{ false },
         m_isFullscreen{ false },
@@ -52,9 +52,9 @@ namespace nc::graphics
         m_depthStencil.reset();
 
         // Recreate swapchain and resources
-        m_depthStencil = std::make_unique<vulkan::DepthStencil>(m_base.get(), dimensions);
-        m_swapchain = std::make_unique<vulkan::Swapchain>(m_base.get(), *m_depthStencil, dimensions);
-        m_commands = std::make_unique<vulkan::Commands>(m_base.get(), *m_swapchain);
+        m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions);
+        m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
     }
 
     DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
@@ -117,27 +117,27 @@ namespace nc::graphics
         m_base->GetDevice().waitIdle();
     }
 
-    vulkan::Base* Graphics2::GetBasePtr() const noexcept
+    Base* Graphics2::GetBasePtr() const noexcept
     {
         return m_base.get();
     }
 
-    const vulkan::Base& Graphics2::GetBase() const noexcept
+    const Base& Graphics2::GetBase() const noexcept
     {
         return *m_base.get();
     }
     
-    vulkan::Swapchain* Graphics2::GetSwapchainPtr() const noexcept
+    Swapchain* Graphics2::GetSwapchainPtr() const noexcept
     {
         return m_swapchain.get();
     }
 
-    vulkan::Commands* Graphics2::GetCommandsPtr() const noexcept
+    Commands* Graphics2::GetCommandsPtr() const noexcept
     {
         return m_commands.get();
     }
 
-    vulkan::Renderer* Graphics2::GetRendererPtr() const noexcept
+    Renderer* Graphics2::GetRendererPtr() const noexcept
     {
         return m_renderer;
     }
@@ -165,7 +165,7 @@ namespace nc::graphics
     {
         WaitIdle();
         m_renderer->Clear();
-        vulkan::ResourceManager::Clear();
+        ResourceManager::Clear();
     }
     
     void Graphics2::SetClearColor(std::array<float, 4> color)
@@ -173,7 +173,7 @@ namespace nc::graphics
         m_clearColor = color;
     }
 
-    void Graphics2::SetRenderer(vulkan::Renderer* renderer)
+    void Graphics2::SetRenderer(Renderer* renderer)
     {
         m_renderer = renderer;
     }

@@ -1,38 +1,50 @@
-#pragma once
+// #pragma once
 
-#include "graphics/techniques/Technique.h"
-#include "graphics/MaterialProperties.h"
-#include "graphics/Mesh.h"
+// #include "component/Component.h"
+// #include "particle/EmitterState.h"
 
-#include <string>
-#include <vector>
+// #include "vulkan/vk_mem_alloc.hpp"
+// #include <vector>
+// #include "directx/math/DirectXMath.h"
 
-namespace nc::graphics
-{
-    namespace d3dresource
-    {
-        template<typename T>
-        class PixelConstantBuffer;
-    }
+// namespace nc::graphics
+// {
+//     class Graphics2; class Commands; class Base; class Swapchain;
 
-    class ParticleTechnique : public Technique
-    {
-        public:
-            static constexpr size_t ParticleMeshIndexCount = 6u;
+//     struct ParticlePushConstants
+//     {
+//         // N MVP matrices
+//         DirectX::XMMATRIX model;
+//         DirectX::XMMATRIX viewProjection;
 
-            ParticleTechnique();
+//         // Camera world position
+//         Vector3 cameraPos;
+
+//         // Indices into texture array
+//         uint32_t baseColorIndex;
+//         uint32_t normalColorIndex;
+//         uint32_t roughnessColorIndex;
+//     };
+
+//     class ParticleTechnique
+//     {
+//         public:
+//             ParticleTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass);
+//             ~ParticleTechnique();
             
-            static size_t GetUID() noexcept;
-            static void InitializeCommonResources();
-            static void BindCommonResources();
+//             void Bind(vk::CommandBuffer* cmd);
+//             void RegisterEmitters(std::vector<particle::EmitterState>* emitterStates);
+//             void Record(vk::CommandBuffer* cmd);
+//             void Clear();
 
-            #ifdef NC_EDITOR_ENABLED
-            void EditorGuiElement() override;
-            #endif
-            
-        private:
-            static std::vector<d3dresource::GraphicsResource*> m_commonResources;
-            static std::unique_ptr<graphics::Mesh> m_mesh;
-            static std::unique_ptr<d3dresource::PixelConstantBuffer<MaterialProperties>> m_materialPropertiesBuffer;
-    };
-}
+//         private:
+//             void CreatePipeline(vk::RenderPass* renderPass);
+
+//             std::vector<particle::EmitterState>* m_emitterStates;
+//             nc::graphics::Graphics2* m_graphics;
+//             Base* m_base;
+//             Swapchain* m_swapchain;
+//             vk::Pipeline m_pipeline;
+//             vk::PipelineLayout m_pipelineLayout;
+//     };
+// }

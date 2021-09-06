@@ -1,12 +1,14 @@
 #include "Prefabs.h"
 #include "Assets.h"
-#include "graphics/vulkan/Mesh.h"
-#include "graphics/vulkan/Texture.h"
-#include "graphics/vulkan/Material.h"
-#include "graphics/vulkan/TechniqueType.h"
+#include "graphics/Mesh.h"
+#include "graphics/Texture.h"
+#include "graphics/Material.h"
+#include "graphics/TechniqueType.h"
 
 namespace nc::sample::prefab
 {
+    bool IsInitialized = false;
+
     std::string ToString(Resource resource)
     {
         switch(resource)
@@ -39,6 +41,8 @@ namespace nc::sample::prefab
                 return std::string{"DiscGreen"};
             case Resource::DiscRed:
                 return std::string{"DiscRed"};
+            case Resource::Skeeball:
+                return std::string{"Skeeball"};
             case Resource::Sphere:
                 return std::string{"Sphere"};
             case Resource::SphereBlue:
@@ -64,19 +68,24 @@ namespace nc::sample::prefab
 
     namespace material
     {
-        graphics::vulkan::Material Beeper{};
-        graphics::vulkan::Material Coin{};
-        graphics::vulkan::Material SolidBlue{};
-        graphics::vulkan::Material SolidGreen{};
-        graphics::vulkan::Material SolidRed{};
-        graphics::vulkan::Material Default{};
-        graphics::vulkan::Material Table{};
-        graphics::vulkan::Material Token{};
-        graphics::vulkan::Material Worm{};
+        graphics::Material Beeper{};
+        graphics::Material Coin{};
+        graphics::Material SolidBlue{};
+        graphics::Material SolidGreen{};
+        graphics::Material SolidRed{};
+        graphics::Material Default{};
+        graphics::Material Table{};
+        graphics::Material Token{};
+        graphics::Material Worm{};
     } // end namespace material
 
 void InitializeResources()
 {
+    if (IsInitialized)
+    {
+        return;
+    }
+
     const std::string defaultMeshesPath = "project/assets/mesh/";
     mesh::meshPaths = std::vector<std::string> { defaultMeshesPath + "beeper.nca",
                                                  defaultMeshesPath + "capsule.nca",
@@ -87,8 +96,9 @@ void InitializeResources()
                                                  defaultMeshesPath + "table.nca",
                                                  defaultMeshesPath + "token.nca",
                                                  defaultMeshesPath + "worm.nca",
+                                                 defaultMeshesPath + "skeeball.nca",
                                                  "project/assets/mesh_colliders/coin.nca" };
-    nc::graphics::vulkan::LoadMeshes(mesh::meshPaths); 
+    nc::graphics::LoadMeshes(mesh::meshPaths); 
 
     LoadHullColliderAsset("project/assets/mesh_colliders/coin.nca");
 
@@ -118,43 +128,44 @@ void InitializeResources()
                                                   defaultTexturesPath + "Logo/BaseColor.png",
                                                   defaultTexturesPath + "Logo/Normal.png",
                                                   defaultTexturesPath + "Logo/Roughness.png" };
-    nc::graphics::vulkan::LoadTextures(texturePaths); 
+    nc::graphics::LoadTextures(texturePaths); 
 
-    material::Beeper =     graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "Beeper/BaseColor.png",
+    material::Beeper =     graphics::Material{ .baseColor = defaultTexturesPath + "Beeper/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Beeper/Normal.png",
                                                        .roughness = defaultTexturesPath + "Beeper/Roughness.png" };
     
-    material::SolidBlue =  graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
+    material::SolidBlue =  graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
                                                        .normal    = defaultNormal,
                                                        .roughness = defaultRoughness };
 
-    material::SolidGreen = graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "SolidColor/Green.png",
+    material::SolidGreen = graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Green.png",
                                                        .normal    = defaultNormal,
                                                        .roughness = defaultRoughness };
 
-    material::SolidRed =   graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "SolidColor/Red.png",
+    material::SolidRed =   graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Red.png",
                                                        .normal    = defaultNormal,
                                                        .roughness = defaultRoughness };
 
-    material::Coin =       graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "Coin/BaseColor.png",
+    material::Coin =       graphics::Material{ .baseColor = defaultTexturesPath + "Coin/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Coin/Normal.png",
                                                        .roughness = defaultTexturesPath + "Coin/Roughness.png" };
 
-    material::Default =    graphics::vulkan::Material{ .baseColor = defaultBaseColor,
+    material::Default =    graphics::Material{ .baseColor = defaultBaseColor,
                                                        .normal    = defaultNormal,
                                                        .roughness = defaultRoughness };
 
-    material::Table =      graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "Table/BaseColor.png",
+    material::Table =      graphics::Material{ .baseColor = defaultTexturesPath + "Table/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Table/Normal.png",
                                                        .roughness = defaultTexturesPath + "Table/Roughness.png" };
      
-    material::Token =      graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "Token/BaseColor.png",
+    material::Token =      graphics::Material{ .baseColor = defaultTexturesPath + "Token/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Token/Normal.png",
                                                        .roughness = defaultTexturesPath + "Token/Roughness.png" };
 
-    material::Worm =       graphics::vulkan::Material{ .baseColor = defaultTexturesPath + "Logo/BaseColor.png",
+    material::Worm =       graphics::Material{ .baseColor = defaultTexturesPath + "Logo/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Logo/Normal.png",
                                                        .roughness = defaultTexturesPath + "Logo/Roughness.png" };
+    IsInitialized = true;
 }
 
 template<Resource Resource_t>
@@ -163,147 +174,154 @@ Entity Create_(registry_type*, EntityInfo);
 template<> Entity Create_<Resource::Beeper>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[0], material::Beeper, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[0], material::Beeper, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Capsule>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[1], material::Default, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CapsuleBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[1], material::SolidBlue, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CapsuleGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[1], material::SolidGreen, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CapsuleRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[1], material::SolidRed, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Coin>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[2], material::Coin, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::Coin, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Cube>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[3], material::Default, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[3], material::SolidBlue, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[3], material::SolidGreen, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[3], material::SolidRed, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Disc>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[2], material::Default, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::DiscBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[2], material::SolidBlue, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::DiscGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[2], material::SolidGreen, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::DiscRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[2], material::SolidRed, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
+    return handle;
+}
+
+template<> Entity Create_<Resource::Skeeball>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[9], material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Sphere>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[4], material::Default, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::SphereBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[4], material::SolidBlue, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::SphereGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[4], material::SolidGreen, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::SphereRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[4], material::SolidRed, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Table>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[6], material::Table, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[6], material::Table, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Token>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[7], material::Token, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[7], material::Token, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Worm>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<vulkan::MeshRenderer>(handle, mesh::meshPaths[8], material::Worm, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, mesh::meshPaths[8], material::Worm, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
@@ -325,6 +343,7 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::DiscBlue,      Create_<Resource::DiscBlue>},
     std::pair{Resource::DiscGreen,     Create_<Resource::DiscGreen>},
     std::pair{Resource::DiscRed,       Create_<Resource::DiscRed>},
+    std::pair{Resource::Skeeball,      Create_<Resource::Skeeball>},
     std::pair{Resource::Sphere,        Create_<Resource::Sphere>},
     std::pair{Resource::SphereBlue,    Create_<Resource::SphereBlue>},
     std::pair{Resource::SphereGreen,   Create_<Resource::SphereGreen>},
