@@ -171,6 +171,7 @@ namespace nc::core
         V_LOG("Clearing engine state");
         m_ecs.Clear();
         m_physics.ClearState();
+        m_audioSystem.Clear();
         camera::ClearMainCamera();
         // SceneSystem state is never cleared
     }

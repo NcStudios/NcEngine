@@ -15,10 +15,10 @@ namespace nc::sample
         
             void OnCollisionEnter(Entity) override
             {
-                if(auto* audio = m_registry->Get<AudioSource>(GetParentEntity()); audio)
-                {
-                    audio->Play();
-                }
+                //if(auto* audio = m_registry->Get<AudioSource>(GetParentEntity()); audio)
+               // {
+               //     audio->Play();
+               // }
             }
 
         private:

@@ -11,11 +11,14 @@ namespace nc::audio
             AudioSystem(registry_type* registry);
             ~AudioSystem();
 
+            void Clear();
+            void RegisterListener(Entity listener);
             int WriteCallback(double* output, unsigned bufferFrames, RtAudioStreamStatus status);
             auto ProbeDevices() -> std::vector<RtAudio::DeviceInfo>;
 
         private:
             registry_type* m_registry;
             RtAudio m_rtAudio;
+            Entity m_listener;
     };
 }

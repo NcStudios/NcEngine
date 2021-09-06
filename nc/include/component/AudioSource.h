@@ -12,9 +12,18 @@ namespace nc
         double right = 0.0f;
     };
 
+    enum class AttenuationFunction
+    {
+        Linear, Inverse
+    };
+
     struct AudioSourceProperties
     {
-        double gain = 1.0f;
+        float gain = 1.0f;
+        float innerRadius = 1.0f;
+        float outerRadius = 15.0f;
+        AttenuationFunction attenuation = AttenuationFunction::Linear;
+        bool spatialize = false;
         bool loop = false;
     };
 
@@ -23,7 +32,8 @@ namespace nc
         public:
             AudioSource(Entity entity, const std::string& path, AudioSourceProperties properties = AudioSourceProperties{});
 
-            auto GetNextSample() -> AudioSample;
+            void WriteSamples(double* buffer, size_t frames, const Vector3& listenerPosition, const Vector3& rightEar, const Vector3& leftEar);
+
             void Play() { m_playing = true; m_currentSampleIndex = 0u; }
             void Stop() { m_playing = false; m_currentSampleIndex = 0u; }
             bool IsPlaying() const { return m_playing; }
@@ -35,5 +45,7 @@ namespace nc
             size_t m_currentSampleIndex;
             AudioSourceProperties m_properties;
             bool m_playing;
+
+            void WriteNonSpatialSamples(double* buffer, size_t frames);
     };
 }

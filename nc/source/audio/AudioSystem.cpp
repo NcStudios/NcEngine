@@ -1,7 +1,9 @@
 #include "AudioSystem.h"
+#include "Audio.h"
 
 namespace
 {
+    nc::audio::AudioSystem* g_audioSystem = nullptr;
     constexpr unsigned OutputChannelCount = 2u;
     constexpr unsigned SampleRate = 44100u;
     constexpr unsigned BufferFrames = 256u;
@@ -15,10 +17,19 @@ namespace
 
 namespace nc::audio
 {
+    void RegisterListener(Entity entity)
+    {
+        IF_THROW(!g_audioSystem, "RegisterAudioListener - AudioSystem is not set");
+        g_audioSystem->RegisterListener(entity);
+    }
+
     AudioSystem::AudioSystem(registry_type* registry)
         : m_registry{registry},
-          m_rtAudio{}
+          m_rtAudio{},
+          m_listener{Entity::Null()}
     {
+        g_audioSystem = this;
+
         /** @todo initializing RtAudio needs to be more robust
          *  -should have a way to select different devices
          *  -buffer frames should be in config
@@ -73,37 +84,47 @@ namespace nc::audio
             m_rtAudio.closeStream();
     }
 
+    void AudioSystem::Clear()
+    {
+        m_listener = Entity::Null();
+    }
+
+    void AudioSystem::RegisterListener(Entity listener)
+    {
+        m_listener = listener;
+    }
+
     int AudioSystem::WriteCallback(double* output, unsigned bufferFrames, RtAudioStreamStatus status)
     {
+        if(!m_listener.Valid())
+            return 0;
+
+        auto* listenerTransform = ActiveRegistry()->Get<Transform>(m_listener);
+        if(!listenerTransform)
+            throw std::runtime_error("AudioSystem::WriteCallback - Invalid listener registered");
+        
+        auto listenerPosition = listenerTransform->GetPosition();
+        auto rightEar = listenerTransform->Right();
+        auto leftEar = -rightEar;
+
         /** @todo We should log underflows and/or display them in the editor. For now, I just want to
          *  quickly see when they happen. */
         if(status)
             std::cerr << "Audio stream underflow\n";
-        
+
+        for(unsigned i = 0; i < bufferFrames * 2u; ++i)
+        {
+            output[i] = 0.0f;
+        }
+
         auto sources = m_registry->ViewAll<AudioSource>();
 
-        for(unsigned i = 0u; i < bufferFrames; ++i)
+        for(auto& source : sources)
         {
-            AudioSample sample;
-            size_t sourceCount = 0u;
-
-            for(auto& source : sources)
-            {
-                if(!source.IsPlaying())
-                    continue;
-                
-                auto [left, right] = source.GetNextSample();
-                sample.left += left;
-                sample.right += right;
-                ++sourceCount;
-            }
-
-            /** @todo There are more appropriate ways to do mixing. Not yet
-             *  sure how we want to handle clipping and so on. */
-            sample.left /= static_cast<double>(sourceCount);
-            sample.right /= static_cast<double>(sourceCount);
-            *output++ = sample.left;
-            *output++ = sample.right;
+            if(!source.IsPlaying())
+                continue;
+            
+            source.WriteSamples(output, bufferFrames, listenerPosition, rightEar, leftEar);
         }
 
         return 0;
