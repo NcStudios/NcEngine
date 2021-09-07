@@ -4,39 +4,30 @@
 #include "graphics/Mesh.h"
 #include "graphics/Material.h"
 #include "graphics/TechniqueType.h"
-#include "directx/math/DirectXMath.h"
+#include "graphics/Texture.h"
 
 namespace nc
 {
-    class Transform;
-    struct ObjectData
-    {
-        DirectX::XMMATRIX model;
-        DirectX::XMMATRIX modelView;
-        DirectX::XMMATRIX viewProjection;
-
-        uint32_t baseColorIndex; // Todo: Make this more generic for materials
-        uint32_t normalIndex;  // Todo: Make this more generic for materials
-        uint32_t roughnessIndex;  // Todo: Make this more generic for materials
-
-        uint32_t isInitialized = 0;
-    };
-
     class MeshRenderer : public ComponentBase
     {
         public:
-            MeshRenderer(Entity entity, std::string meshUid, graphics::Material material, graphics::TechniqueType techniqueType);
-            const graphics::Mesh& GetMesh() const;
-            graphics::Material& GetMaterial();
-            graphics::TechniqueType GetTechniqueType() const;
-            const ObjectData& GetObjectData() const;
-            void Update(Transform* transform, const DirectX::FXMMATRIX& viewMatrix, const DirectX::FXMMATRIX& projectionMatrix);
+            MeshRenderer(Entity entity, std::string meshUid, nc::graphics::Material material, nc::graphics::TechniqueType techniqueType);
+            
+            auto GetMesh() const -> const graphics::Mesh& { return m_mesh; }
+            auto GetTextureIndices() const -> const graphics::TextureIndices& { return m_textureIndices; }
+            auto GetTechniqueType() const -> graphics::TechniqueType { return m_techniqueType; }
+
+            #ifdef NC_EDITOR_ENABLED
+            auto GetMaterial() const -> const graphics::Material& { return m_material; }
+            #endif
 
         private:
-            graphics::Mesh m_mesh;
+            #ifdef NC_EDITOR_ENABLED
             graphics::Material m_material;
+            #endif
+            graphics::Mesh m_mesh;
+            graphics::TextureIndices m_textureIndices;
             graphics::TechniqueType m_techniqueType;
-            ObjectData m_objectData;
     };
     
     #ifdef NC_EDITOR_ENABLED
