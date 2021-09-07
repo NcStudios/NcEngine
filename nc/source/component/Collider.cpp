@@ -28,7 +28,7 @@ namespace
     }
     #endif
 
-    SphereCollider EstimateBoundingVolume(const Sphere& sphere, const Vector3& translation, float scale)
+    Sphere EstimateBoundingVolume(const Sphere& sphere, const Vector3& translation, float scale)
     {
         return Sphere{sphere.center + translation, sphere.radius * scale};
     }

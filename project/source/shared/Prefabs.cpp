@@ -65,11 +65,6 @@ namespace nc::sample::prefab
         throw std::runtime_error("prefab::ToString(resource) - Unknown resource");
     }
 
-    namespace mesh
-    {
-        std::vector<std::string> meshPaths;
-    } // end namespace mesh
-
     namespace material
     {
         graphics::Material Beeper{};
@@ -97,7 +92,7 @@ void InitializeResources()
     LoadConcaveColliderAsset("project/assets/mesh_colliders/ramp.nca");
 
     const std::string defaultMeshesPath = "project/assets/mesh/";
-    mesh::meshPaths = std::vector<std::string> { defaultMeshesPath + "beeper.nca",
+    auto meshPaths = std::vector<std::string> { defaultMeshesPath + "beeper.nca",
                                                  defaultMeshesPath + "capsule.nca",
                                                  defaultMeshesPath + "coin.nca",
                                                  defaultMeshesPath + "cube.nca",
@@ -107,9 +102,8 @@ void InitializeResources()
                                                  defaultMeshesPath + "table.nca",
                                                  defaultMeshesPath + "token.nca",
                                                  defaultMeshesPath + "worm.nca",
-                                                 defaultMeshesPath + "skeeball.nca",
-                                                 "project/assets/mesh_colliders/coin.nca" };
-    nc::graphics::LoadMeshes(mesh::meshPaths); 
+                                                 defaultMeshesPath + "skeeball.nca" };
+    nc::graphics::LoadMeshes(meshPaths); 
 
     const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto defaultNormal    = std::string{"nc/resources/texture/DefaultNormal.png"};
