@@ -1,7 +1,7 @@
 #include "Initializers.h"
 #include "graphics/Base.h"
 #include "graphics/MeshManager.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 
 namespace nc::graphics
 {
@@ -291,7 +291,7 @@ namespace nc::graphics
         return layoutBinding;
     }
 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics2* graphics, std::vector<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::vector<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
     {
         vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
         extendedInfo.setPNext(nullptr);
@@ -307,7 +307,7 @@ namespace nc::graphics
         return graphics->GetBasePtr()->GetDevice().createDescriptorSetLayoutUnique(setInfo);
     }
     
-    vk::UniqueDescriptorSet CreateDescriptorSet(Graphics2* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
+    vk::UniqueDescriptorSet CreateDescriptorSet(Graphics* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
     {
         vk::DescriptorSetAllocateInfo allocationInfo{};
         allocationInfo.setPNext(nullptr);

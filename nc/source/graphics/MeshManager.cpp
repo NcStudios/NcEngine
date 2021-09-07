@@ -1,5 +1,5 @@
 #include "graphics/MeshManager.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/resources/ResourceManager.h"
 #include "graphics/resources/GraphicsResources.h"
 #include "graphics/resources/ImmutableBuffer.h"
@@ -94,7 +94,7 @@ namespace nc::graphics
         return attributeDescriptions;
     }
 
-    MeshManager::MeshManager(nc::graphics::Graphics2* graphics)
+    MeshManager::MeshManager(nc::graphics::Graphics* graphics)
     : m_graphics{graphics}
     {
         impl = this;

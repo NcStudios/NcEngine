@@ -1,7 +1,5 @@
-#include "component/MeshRenderer.h"
-#include "component/Transform.h"
-#include "graphics/resources/ResourceManager.h"
 #include "Ecs.h"
+#include "graphics/resources/ResourceManager.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"

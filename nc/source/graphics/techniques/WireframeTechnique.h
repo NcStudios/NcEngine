@@ -18,7 +18,7 @@ namespace nc
 
 namespace nc::graphics
 {
-    class Graphics2; class Commands; class Base; class Swapchain;
+    class Graphics; class Commands; class Base; class Swapchain;
 
     struct WireframePushConstants
     {
@@ -30,7 +30,7 @@ namespace nc::graphics
     class WireframeTechnique
     {
         public:
-            WireframeTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass);
+            WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
             ~WireframeTechnique();
 
             void Bind(vk::CommandBuffer* cmd);
@@ -49,7 +49,7 @@ namespace nc::graphics
             std::optional<nc::DebugWidget> m_debugWidget;
             #endif
 
-            nc::graphics::Graphics2* m_graphics;
+            nc::graphics::Graphics* m_graphics;
             Base* m_base;
             Swapchain* m_swapchain;
             vk::Pipeline m_pipeline;

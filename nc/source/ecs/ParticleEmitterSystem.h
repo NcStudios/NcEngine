@@ -4,14 +4,14 @@
 #include "component/ParticleEmitter.h"
 #include "particle/EmitterState.h"
 
-namespace nc::graphics { class Graphics2; }
+namespace nc::graphics { class Graphics; }
 
 namespace nc::ecs
 {
     class ParticleEmitterSystem
     {
         public:
-            ParticleEmitterSystem(registry_type* registry, graphics::Graphics2* graphics);
+            ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics);
 
             /** UpdateParticles is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -35,7 +35,7 @@ namespace nc::ecs
             std::vector<Entity> m_toRemove;
 
             particle::GraphicsData m_graphicsData;
-            graphics::Graphics2* m_graphics;
+            graphics::Graphics* m_graphics;
 
     };
 } // namespace nc::ecs

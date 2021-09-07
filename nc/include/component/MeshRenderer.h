@@ -6,10 +6,6 @@
 #include "graphics/TechniqueType.h"
 #include "graphics/Texture.h"
 
-#include <string>
-
-namespace nc { class Transform; }
-
 namespace nc
 {
     class MeshRenderer : public ComponentBase
@@ -33,19 +29,7 @@ namespace nc
             graphics::TextureIndices m_textureIndices;
             graphics::TechniqueType m_techniqueType;
     };
-}
-
-namespace nc
-{
-    template<>
-    struct StoragePolicy<MeshRenderer>
-    {
-        using allow_trivial_destruction = std::false_type;
-        using sort_dense_storage_by_address = std::true_type;
-        using requires_on_add_callback = std::true_type;
-        using requires_on_remove_callback = std::true_type;
-    };
-
+    
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<MeshRenderer>(MeshRenderer* meshRenderer);
     #endif

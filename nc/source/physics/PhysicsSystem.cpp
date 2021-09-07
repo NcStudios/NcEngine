@@ -30,7 +30,7 @@ namespace nc::physics
         g_physicsSystem->RemoveAllJoints(entity);
     }
 
-    PhysicsSystem::PhysicsSystem(graphics::Graphics2* graphics, job::JobSystem* jobSystem)
+    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem)
         : m_cache{},
           m_joints{},
           m_clickableSystem{graphics},

@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    class Graphics2;
+    class Graphics;
 }
 
 namespace nc::graphics
@@ -55,8 +55,8 @@ namespace nc::graphics
 
     // Descriptor sets
     vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, uint32_t descriptorCount, vk::DescriptorType type, vk::ShaderStageFlags shaderStages); 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics2* graphics, std::vector<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags);
-    vk::UniqueDescriptorSet CreateDescriptorSet(Graphics2* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout);
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::vector<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags);
+    vk::UniqueDescriptorSet CreateDescriptorSet(Graphics* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout);
     vk::WriteDescriptorSet CreateSamplerDescriptorWrite(vk::Sampler* sampler, vk::DescriptorSet* descriptorSet, uint32_t binding);
     vk::WriteDescriptorSet CreateImagesDescriptorWrite(vk::DescriptorSet* descriptorSet, std::vector<vk::DescriptorImageInfo>* imagesInfo, uint32_t imagesCount, uint32_t binding);
     vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler* sampler, const vk::ImageView& imageView, vk::ImageLayout layout);

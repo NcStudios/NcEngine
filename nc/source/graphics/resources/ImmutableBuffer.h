@@ -2,7 +2,7 @@
 
 #include "graphics/Base.h"
 #include "graphics/Commands.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 
 #include <vector>
 #include "vulkan/vk_mem_alloc.hpp"
@@ -33,7 +33,7 @@ namespace nc::graphics
         public:
 
             ImmutableBuffer();
-            ImmutableBuffer(nc::graphics::Graphics2* graphics, const std::vector<T>& data);
+            ImmutableBuffer(nc::graphics::Graphics* graphics, const std::vector<T>& data);
             ImmutableBuffer(ImmutableBuffer&&);
             ImmutableBuffer& operator = (ImmutableBuffer&&);
             ImmutableBuffer& operator = (const ImmutableBuffer&) = delete;
@@ -42,7 +42,7 @@ namespace nc::graphics
             
             vk::Buffer* GetBuffer();
 
-            void Bind(nc::graphics::Graphics2* graphics, const std::vector<T>& data);
+            void Bind(nc::graphics::Graphics* graphics, const std::vector<T>& data);
             void Clear();
 
         private:
@@ -60,7 +60,7 @@ namespace nc::graphics
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
-    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics2* graphics, const std::vector<T>& data)
+    ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics* graphics, const std::vector<T>& data)
     : m_memoryIndex { 0 },
       m_immutableBuffer { nullptr }
     {
@@ -80,7 +80,7 @@ namespace nc::graphics
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
-    void ImmutableBuffer<T, UsageFlag_T>::Bind(nc::graphics::Graphics2* graphics, const std::vector<T>& data)
+    void ImmutableBuffer<T, UsageFlag_T>::Bind(nc::graphics::Graphics* graphics, const std::vector<T>& data)
     {
         m_base = graphics->GetBasePtr();
 

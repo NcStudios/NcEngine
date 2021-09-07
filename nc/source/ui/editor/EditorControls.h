@@ -109,38 +109,38 @@ namespace nc::ui::editor::controls
         ImGui::Text("Layer   %d", EntityUtils::Layer(entity));
         ImGui::Text("Static  %s", EntityUtils::IsStatic(entity) ? "True" : "False");
 
-        if(auto* transform = registry->Get<Transform>(entity); transform)
+        if (auto* transform = registry->Get<Transform>(entity); transform)
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(transform);
         }
 
-        if(auto* meshRenderer = registry->Get<MeshRenderer>(entity))
+        if (auto* meshRenderer = registry->Get<MeshRenderer>(entity))
             ComponentGuiElement(meshRenderer);
 
         if (auto* pointLight = registry->Get<PointLight>(entity))
             ComponentGuiElement(pointLight);
 
-        if(auto* body = registry->Get<PhysicsBody>(entity))
+        if (auto* body = registry->Get<PhysicsBody>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(body);
         }
 
-        if(auto* emitter = registry->Get<ParticleEmitter>(entity))
+        if (auto* emitter = registry->Get<ParticleEmitter>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
         
         }
 
-        if(auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
+        if (auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(dispatcher);
         }
 
-        if(auto* col = registry->Get<Collider>(entity); col)
+        if (auto* col = registry->Get<Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
             col->SetEditorSelection(true);

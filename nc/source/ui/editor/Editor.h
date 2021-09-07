@@ -5,10 +5,9 @@
 
 namespace nc 
 {
-    class Transform;
     namespace graphics 
     { 
-        class Graphics2;
+        class Graphics;
     }
 }
 
@@ -17,11 +16,11 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            Editor(graphics::Graphics2* graphics);
+            Editor(graphics::Graphics* graphics);
             void Frame(float* dt, registry_type* registry);
 
         private:
-            nc::graphics::Graphics2* m_graphics2;
+            nc::graphics::Graphics* m_graphics;
             bool m_openState_Editor;
             bool m_openState_UtilitiesPanel;
 

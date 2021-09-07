@@ -14,7 +14,7 @@ namespace nc
 
 namespace nc::graphics
 {
-    class Graphics2; class Commands; class Base; class Swapchain;
+    class Graphics; class Commands; class Base; class Swapchain;
 
     struct PhongPushConstants
     {
@@ -26,7 +26,7 @@ namespace nc::graphics
     class PhongAndUiTechnique
     {
         public:
-            PhongAndUiTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass);
+            PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
             ~PhongAndUiTechnique();
             
             void Bind(vk::CommandBuffer* cmd);
@@ -38,7 +38,7 @@ namespace nc::graphics
 
             std::unordered_map<std::string, std::vector<Entity>> m_meshRenderers;
 
-            nc::graphics::Graphics2* m_graphics;
+            nc::graphics::Graphics* m_graphics;
             Base* m_base;
             Swapchain* m_swapchain;
             vk::Pipeline m_pipeline;

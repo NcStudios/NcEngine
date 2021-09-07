@@ -1,12 +1,12 @@
 #include "ParticleEmitterSystem.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 
 #include <algorithm>
 
 namespace
 {
-    auto CreateParticleGraphicsData(nc::graphics::Graphics2* graphics)
+    auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
     {
         return nc::particle::GraphicsData
         {
@@ -19,7 +19,7 @@ namespace
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics2* graphics)
+    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics)
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},

@@ -6,7 +6,7 @@
 #include "MainCamera.h"
 #include "Window.h"
 #include "directx/math/DirectXMath.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 
 #include <algorithm>
 #include <limits>
@@ -39,7 +39,7 @@ namespace nc::physics
     /** System Implementation */
     ClickableSystem::ClickableSystem
     (
-        graphics::Graphics2* graphics
+        graphics::Graphics* graphics
     )
         : m_clickableComponents{},
           m_graphics{graphics}

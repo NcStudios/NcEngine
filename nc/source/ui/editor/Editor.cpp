@@ -1,7 +1,7 @@
 #ifdef NC_EDITOR_ENABLED
 #include "Editor.h"
 #include "EditorControls.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "Input.h"
 #include "Window.h"
 
@@ -22,8 +22,8 @@ namespace
 
 namespace nc::ui::editor
 {
-    Editor::Editor(graphics::Graphics2 * graphics)
-        : m_graphics2{graphics},
+    Editor::Editor(graphics::Graphics* graphics)
+        : m_graphics{graphics},
           m_openState_Editor{false},
           m_openState_UtilitiesPanel{true}
     {
@@ -48,7 +48,7 @@ namespace nc::ui::editor
             DrawMenu();
             controls::SceneGraphPanel(registry, height);
             if(m_openState_UtilitiesPanel)
-                controls::UtilitiesPanel(dt, registry, m_graphics2->GetDrawCallCount(), width, height);
+                controls::UtilitiesPanel(dt, registry, m_graphics->GetDrawCallCount(), width, height);
         }
         ImGui::End();
     }

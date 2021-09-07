@@ -132,7 +132,7 @@ namespace nc::graphics
         m_textureBuffers.resize(0);
     }
 
-    PointLightsData::PointLightsData(Graphics2* graphics, uint32_t maxPointLights)
+    PointLightsData::PointLightsData(Graphics* graphics, uint32_t maxPointLights)
     {
         auto base = graphics->GetBasePtr();
 
@@ -183,7 +183,7 @@ namespace nc::graphics
         return &m_descriptorSet.get();
     }
 
-    ObjectsData::ObjectsData(Graphics2* graphics)
+    ObjectsData::ObjectsData(Graphics* graphics)
     {
         const uint32_t MAX_OBJECTS = 100000;
         const uint32_t objectsSize = (sizeof(ObjectData) * MAX_OBJECTS);

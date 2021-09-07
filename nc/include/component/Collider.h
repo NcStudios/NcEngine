@@ -4,7 +4,6 @@
 #include "physics/CollisionVolumes.h"
 #include "physics/LayerMask.h"
 #include "directx/math/DirectXMath.h"
-#include <string>
 
 namespace nc
 {

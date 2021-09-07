@@ -70,15 +70,15 @@ namespace nc::core
           m_frameDeltaTimeFactor{ 1.0f },
           m_jobSystem{4},
           m_window{ hInstance },
-          m_graphics2{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_renderer{ &m_graphics2 },
-          m_ecs{&m_graphics2, config::GetMemorySettings()},
-          m_physics{ &m_graphics2, &m_jobSystem},
+          m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
+          m_renderer{ &m_graphics },
+          m_ecs{&m_graphics, config::GetMemorySettings()},
+          m_physics{ &m_graphics, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
-          m_ui{m_window.GetHWND(), &m_graphics2}
+          m_ui{m_window.GetHWND(), &m_graphics}
     {
-        m_graphics2.SetRenderer(&m_renderer);
+        m_graphics.SetRenderer(&m_renderer);
         SetBindings();
         V_LOG("Engine initialized");
     }
@@ -133,7 +133,7 @@ namespace nc::core
     {
         V_LOG("Clearing engine state");
 
-        m_graphics2.Clear();
+        m_graphics.Clear();
         m_ecs.Clear();
         m_physics.ClearState();
         camera::ClearMainCamera();
@@ -171,14 +171,14 @@ namespace nc::core
     void Engine::FrameRender()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        m_graphics2.FrameBegin();
+        m_graphics.FrameBegin();
         m_ui.FrameBegin();
 
         auto camViewMatrix = camera::CalculateViewMatrix();
-        m_graphics2.SetViewMatrix(camViewMatrix);
+        m_graphics.SetViewMatrix(camViewMatrix);
         
         auto cameraPos = camera::GetMainCameraTransform()->GetPosition();
-        m_graphics2.SetCameraPosition(cameraPos);
+        m_graphics.SetCameraPosition(cameraPos);
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
@@ -191,7 +191,7 @@ namespace nc::core
         m_ecs.GetPointLightSystem()->Update();
         m_ecs.GetMeshRendererSystem()->Update();
 
-        auto* renderer = m_graphics2.GetRendererPtr();
+        auto* renderer = m_graphics.GetRendererPtr();
         
         #ifdef NC_EDITOR_ENABLED
         auto* registry = m_ecs.GetRegistry();
@@ -201,10 +201,10 @@ namespace nc::core
         #endif
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics2.GetCommandsPtr());
+        renderer->Record(m_graphics.GetCommandsPtr());
 
-        m_graphics2.Draw();
-        m_graphics2.FrameEnd();
+        m_graphics.Draw();
+        m_graphics.FrameEnd();
         NC_PROFILE_END();
     }
 
@@ -225,8 +225,8 @@ namespace nc::core
     {
         using namespace std::placeholders;
 
-        m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics2::OnResize, &m_graphics2, _1, _2, _3, _4, _5));
-        m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics2::SetClearColor, &m_graphics2, _1));
+        m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
+        m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics::SetClearColor, &m_graphics, _1));
         m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
     }
 } // end namespace nc::engine

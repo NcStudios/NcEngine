@@ -27,17 +27,17 @@ namespace nc::graphics
             static vk::Buffer* GetVertexBuffer();
             static vk::Buffer* GetIndexBuffer();
 
-            static void InitializePointLights(graphics::Graphics2* graphics, uint32_t maxPointLights);
+            static void InitializePointLights(graphics::Graphics* graphics, uint32_t maxPointLights);
             static void UpdatePointLights(const std::vector<nc::PointLightInfo>& pointLights);
             static vk::DescriptorSet* GetPointLightsDescriptorSet();
             static vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout();
-            static void ResetPointLights(graphics::Graphics2* graphics, uint32_t maxPointLights);
+            static void ResetPointLights(graphics::Graphics* graphics, uint32_t maxPointLights);
 
-            static void InitializeObjects(graphics::Graphics2* graphics);
+            static void InitializeObjects(graphics::Graphics* graphics);
             static void UpdateObjects(const std::vector<ObjectData>& objects);
             static vk::DescriptorSet* GetObjectsDescriptorSet();
             static vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout();
-            static void ResetObjects(graphics::Graphics2* graphics);
+            static void ResetObjects(graphics::Graphics* graphics);
 
             static void Clear();
 
@@ -58,17 +58,17 @@ namespace nc::graphics
             vk::Buffer* GetVertexBuffer_();
             vk::Buffer* GetIndexBuffer_();
 
-            void InitializePointLights_(graphics::Graphics2* graphics, uint32_t maxPointLights);
+            void InitializePointLights_(graphics::Graphics* graphics, uint32_t maxPointLights);
             void UpdatePointLights_(const std::vector<nc::PointLightInfo>& pointLights);
             vk::DescriptorSet* GetPointLightsDescriptorSet_();
             vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout_();
-            void ResetPointLights_(graphics::Graphics2* graphics, uint32_t maxPointLights);
+            void ResetPointLights_(graphics::Graphics* graphics, uint32_t maxPointLights);
 
-            void InitializeObjects_(graphics::Graphics2* graphics);
+            void InitializeObjects_(graphics::Graphics* graphics);
             void UpdateObjects_(const std::vector<ObjectData>& objects);
             vk::DescriptorSet* GetObjectsDescriptorSet_();
             vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout_();
-            void ResetObjects_(graphics::Graphics2* graphics);
+            void ResetObjects_(graphics::Graphics* graphics);
 
             void Clear_();
 
@@ -160,7 +160,7 @@ namespace nc::graphics
         return Get().GetIndexBuffer_();
     }
 
-    inline void ResourceManager::InitializePointLights(graphics::Graphics2* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::InitializePointLights(graphics::Graphics* graphics, uint32_t maxPointLights)
     {
         Get().InitializePointLights_(graphics, maxPointLights);
     }
@@ -180,12 +180,12 @@ namespace nc::graphics
         return Get().GetPointLightsDescriptorSet_();
     }
 
-    inline void ResourceManager::ResetPointLights(graphics::Graphics2* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::ResetPointLights(graphics::Graphics* graphics, uint32_t maxPointLights)
     {
         return Get().ResetPointLights_(graphics, maxPointLights);
     }
 
-    inline void ResourceManager::InitializeObjects(graphics::Graphics2* graphics)
+    inline void ResourceManager::InitializeObjects(graphics::Graphics* graphics)
     {
         Get().InitializeObjects_(graphics);
     }
@@ -205,7 +205,7 @@ namespace nc::graphics
         return Get().GetObjectsDescriptorSet_();
     }
 
-    inline void ResourceManager::ResetObjects(graphics::Graphics2* graphics)
+    inline void ResourceManager::ResetObjects(graphics::Graphics* graphics)
     {
         return Get().ResetObjects_(graphics);
     }
@@ -287,7 +287,7 @@ namespace nc::graphics
         return m_meshResources->GetIndexBuffer();
     }
 
-    inline void ResourceManager::InitializePointLights_(graphics::Graphics2* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::InitializePointLights_(graphics::Graphics* graphics, uint32_t maxPointLights)
     {
         m_pointLightResources = std::make_unique<PointLightsData>(graphics, maxPointLights);
     }
@@ -297,7 +297,7 @@ namespace nc::graphics
         m_pointLightResources->Update(pointLights);
     }
 
-    inline void ResourceManager::ResetPointLights_(graphics::Graphics2* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::ResetPointLights_(graphics::Graphics* graphics, uint32_t maxPointLights)
     {
         m_pointLightResources.reset();
         m_pointLightResources = std::make_unique<PointLightsData>(graphics, maxPointLights);
@@ -313,7 +313,7 @@ namespace nc::graphics
         return m_pointLightResources->GetDescriptorSet();
     }
 
-    inline void ResourceManager::InitializeObjects_(graphics::Graphics2* graphics)
+    inline void ResourceManager::InitializeObjects_(graphics::Graphics* graphics)
     {
         m_objects = std::make_unique<ObjectsData>(graphics);
     }
@@ -323,7 +323,7 @@ namespace nc::graphics
         m_objects->Update(objects);
     }
 
-    inline void ResourceManager::ResetObjects_(graphics::Graphics2* graphics)
+    inline void ResourceManager::ResetObjects_(graphics::Graphics* graphics)
     {
         m_objects.reset();
         m_objects = std::make_unique<ObjectsData>(graphics);

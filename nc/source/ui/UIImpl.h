@@ -6,7 +6,6 @@
 
 namespace nc::graphics 
 { 
-    class Graphics2;
     class Graphics;
 }
 
@@ -15,7 +14,7 @@ namespace nc::ui
     class UIImpl
     {
         public:
-            UIImpl(HWND hwnd, graphics::Graphics2* graphics);
+            UIImpl(HWND hwnd, graphics::Graphics* graphics);
 
             ~UIImpl() noexcept;
 
@@ -41,7 +40,7 @@ namespace nc::ui
             
             IUI* m_projectUI;
             
-            graphics::Graphics2* m_graphics;
+            graphics::Graphics* m_graphics;
 
     };
 } // namespace nc::ui

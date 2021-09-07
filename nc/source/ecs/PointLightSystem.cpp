@@ -1,18 +1,18 @@
-#include "PointLightSystem.h"
 #include "ECS.h"
 #include "EntityComponentSystem.h"
-#include "graphics/Graphics2.h"
 #include "graphics/Commands.h"
+#include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 #include "graphics/resources/ResourceManager.h"
+#include "PointLightSystem.h"
 
 #include <iostream>
+            
+namespace { constexpr uint32_t MAX_POINT_LIGHTS = 10u; }
 
 namespace nc::ecs
 {
-    const uint32_t PointLightSystem::MAX_POINT_LIGHTS;
-
-    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics2* graphics)
+    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics)
     : m_graphics{graphics},
       m_registry{registry},
       m_isSystemDirty{true}

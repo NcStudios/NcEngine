@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    class Graphics2;
+    class Graphics;
 
     vk::VertexInputBindingDescription GetVertexBindingDescription();
     std::array<vk::VertexInputAttributeDescription, 5> GetVertexAttributeDescriptions();
@@ -16,10 +16,10 @@ namespace nc::graphics
     class MeshManager
     {
         public:
-            MeshManager(nc::graphics::Graphics2* graphics);
+            MeshManager(nc::graphics::Graphics* graphics);
             void LoadMeshes(const std::vector<std::string>& meshPaths);
 
         private:
-            nc::graphics::Graphics2* m_graphics;
+            nc::graphics::Graphics* m_graphics;
     };
 }

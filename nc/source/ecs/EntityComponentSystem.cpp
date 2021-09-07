@@ -2,7 +2,7 @@
 
 namespace nc::ecs
 {
-    EntityComponentSystem::EntityComponentSystem(graphics::Graphics2* graphics,
+    EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
                                                  const config::MemorySettings& memSettings)
         : m_registry{memSettings.maxTransforms},
           m_particleEmitterSystem{&m_registry, graphics},

@@ -9,7 +9,7 @@
 namespace nc
 {
     class Transform;
-    namespace graphics { class Graphics2; }
+    namespace graphics { class Graphics; }
 }
 
 namespace nc::particle
@@ -29,7 +29,7 @@ namespace nc::particle
     {
         DirectX::FXMMATRIX viewMatrix;
         DirectX::FXMMATRIX projectionMatrix;
-        graphics::Graphics2* graphics;
+        graphics::Graphics* graphics;
     };
 
     class EmitterState

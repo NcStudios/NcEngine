@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ObjectData.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/Resources/ImmutableImage.h"
 #include "graphics/Resources/ImmutableBuffer.h"
 #include "graphics/Resources/WriteableBuffer.h"
@@ -78,7 +78,7 @@ namespace nc::graphics
     {
         public:
             PointLightsData() = default;
-            PointLightsData(Graphics2* graphics, uint32_t maxPointLights);
+            PointLightsData(Graphics* graphics, uint32_t maxPointLights);
             PointLightsData(PointLightsData&&) = default;
             PointLightsData& operator=(PointLightsData&&) = default;
             ~PointLightsData();
@@ -97,7 +97,7 @@ namespace nc::graphics
     {
         public:
             ObjectsData() = default;
-            ObjectsData(Graphics2* graphics);
+            ObjectsData(Graphics* graphics);
             ObjectsData(ObjectsData&&) = default;
             ObjectsData& operator=(ObjectsData&&) = default;
             ~ObjectsData();

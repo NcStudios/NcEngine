@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs/EntityComponentSystem.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 #include "job/JobSystem.h"
 #include "physics/PhysicsSystem.h"
@@ -25,7 +25,7 @@ namespace nc::core
             float m_frameDeltaTimeFactor;
             job::JobSystem m_jobSystem;
             window::WindowImpl m_window;
-            graphics::Graphics2 m_graphics2;
+            graphics::Graphics m_graphics;
             graphics::Renderer m_renderer;
             // @todo: Implement missing managers below
             ecs::EntityComponentSystem m_ecs;

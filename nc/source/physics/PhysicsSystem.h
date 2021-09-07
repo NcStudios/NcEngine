@@ -17,7 +17,7 @@ namespace nc::physics
     class PhysicsSystem
     {
         public:
-            PhysicsSystem(graphics::Graphics2* graphics, job::JobSystem* jobSystem);
+            PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem);
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness);
             void RemoveJoint(Entity entityA, Entity entityB);
