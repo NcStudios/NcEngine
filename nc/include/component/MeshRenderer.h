@@ -18,7 +18,7 @@ namespace nc
             auto GetTechniqueType() const -> graphics::TechniqueType { return m_techniqueType; }
 
             #ifdef NC_EDITOR_ENABLED
-            auto GetMaterial() const -> const graphics::Material& { return m_material; }
+            auto GetMaterial() -> graphics::Material& { return m_material; }
             #endif
 
         private:
