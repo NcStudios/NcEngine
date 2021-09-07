@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ObjectData.h"
 #include "graphics/Graphics2.h"
 #include "graphics/Resources/ImmutableImage.h"
 #include "graphics/Resources/ImmutableBuffer.h"
@@ -101,12 +102,12 @@ namespace nc::graphics
             ObjectsData& operator=(ObjectsData&&) = default;
             ~ObjectsData();
 
-            void Update(const std::vector<nc::ObjectData>& objectsData);
+            void Update(const std::vector<ObjectData>& objectsData);
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
             vk::DescriptorSet* GetDescriptorSet() noexcept; 
 
         private:
-            WriteableBuffer<nc::ObjectData> m_objectsDataBuffer;
+            WriteableBuffer<ObjectData> m_objectsDataBuffer;
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
     };
