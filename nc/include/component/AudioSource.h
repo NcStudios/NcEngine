@@ -12,9 +12,10 @@ namespace nc
         double right = 0.0f;
     };
 
+    /** @todo InverseSquareLaw, Log? */
     enum class AttenuationFunction
     {
-        Linear, Inverse
+        Linear
     };
 
     struct AudioSourceProperties

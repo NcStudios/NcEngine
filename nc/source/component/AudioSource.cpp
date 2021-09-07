@@ -11,20 +11,14 @@ namespace
         if(innerRadius * innerRadius > squareDistance)
             return 1.0f;
 
-        float distance = std::sqrt(squareDistance);
-        float distanceRatio = (distance - innerRadius) / (outerRadius - innerRadius);
-
         switch(curveType)
         {
             case AttenuationFunction::Linear:
             {
+                float distance = std::sqrt(squareDistance);
+                float distanceRatio = (distance - innerRadius) / (outerRadius - innerRadius);
                 return math::Clamp(1.0f - distanceRatio, 0.0f, 1.0f);
             }
-            //case AttenuationFunction::Inverse:
-            //{
-            //    return 1.0f / factor;
-            //    break;
-            //}
         }
 
         throw std::runtime_error("CalculateAttenuation - Unknown AttenuationFunction");
