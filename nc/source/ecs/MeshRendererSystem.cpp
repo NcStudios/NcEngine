@@ -25,9 +25,9 @@ namespace nc::ecs
 
         for(const auto& renderer : renderers)
         {
-            const auto& matrix = m_registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
+            const auto& modelMatrix = m_registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
             auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
-            objectsData.emplace_back(matrix, matrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
+            objectsData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
         }
 
         graphics::ResourceManager::UpdateObjects(objectsData);
