@@ -9,15 +9,15 @@ namespace nc::graphics
 {
    class Base; class Commands; class Swapchain; class DepthStencil; class Renderer; class ResourceManager;
 
-    class Graphics2
+    class Graphics
     {
         public:
-            Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
-            ~Graphics2() noexcept;
-            Graphics2(const Graphics2&) = delete;
-            Graphics2(Graphics2&&) = delete;
-            Graphics2& operator=(const Graphics2&) = delete;
-            Graphics2& operator=(Graphics2&&) = delete;
+            Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            ~Graphics() noexcept;
+            Graphics(const Graphics&) = delete;
+            Graphics(Graphics&&) = delete;
+            Graphics& operator=(const Graphics&) = delete;
+            Graphics& operator=(Graphics&&) = delete;
 
             const Vector3 GetCameraPosition() const noexcept;
             DirectX::FXMMATRIX GetViewMatrix() const noexcept;

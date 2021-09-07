@@ -11,17 +11,8 @@
 
 namespace nc
 {
-    Attenuation GetAttenuationFromRange(float range)
-    {
-        Attenuation att = {};
-        att.constant = 1.0f;
-        att.linear = 4.5f / range;
-        att.quadratic = 75.0f / (range * range);
-        return att;
-    }
-
     #ifdef NC_EDITOR_ENABLED
-    void SerializeToFile(std::string filePath, const PointLightInfo& info) // @todo: remove or build out into formal asset generator
+    void SerializeToFile(const std::string& filePath, const PointLightInfo& info) // @todo: remove or build out into formal asset generator
     {
         std::ofstream pointLightDataFile(filePath);
 
@@ -41,18 +32,15 @@ namespace nc
 
     PointLight::PointLight(Entity entity, PointLightInfo info)
     : ComponentBase{entity},
-      m_info{info}
+      m_info{info},
+      m_projectedPos{},
+      m_isDirty{false}
     {
     }
 
     const PointLightInfo& PointLight::GetInfo() const
     {
         return m_info;
-    }
-
-    float PointLight::GetRange() const
-    {
-        return m_range;
     }
 
     bool PointLight::IsDirty() const
@@ -70,11 +58,11 @@ namespace nc
         }
 
         const auto pos_v = DirectX::XMLoadVector3(&transformPos);
-        DirectX::XMStoreVector3(&ProjectedPos, DirectX::XMVector3Transform(pos_v, view));
+        DirectX::XMStoreVector3(&m_projectedPos, DirectX::XMVector3Transform(pos_v, view));
 
-        m_info.pos.x = ProjectedPos.x;
-        m_info.pos.y = ProjectedPos.y;
-        m_info.pos.z = ProjectedPos.z;
+        m_info.pos.x = m_projectedPos.x;
+        m_info.pos.y = m_projectedPos.y;
+        m_info.pos.z = m_projectedPos.z;
 
         return std::exchange(m_isDirty, false);
     }
@@ -85,11 +73,6 @@ namespace nc
         m_info = info;
     }
 
-    void PointLight::SetRange(float range)
-    {
-        m_range = range;
-    }
-    
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<PointLight>(PointLight* light)
     {

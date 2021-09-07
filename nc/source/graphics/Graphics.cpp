@@ -1,4 +1,4 @@
-#include "Graphics2.h"
+#include "Graphics.h"
 #include "debug/Profiler.h"
 #include "Base.h"
 #include "Commands.h"
@@ -15,7 +15,7 @@ namespace
 
 namespace nc::graphics
 {
-    Graphics2::Graphics2(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    Graphics::Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_base{ std::make_unique<Base>(hwnd, hinstance) },
         m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
         m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
@@ -34,12 +34,12 @@ namespace nc::graphics
         SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
-    Graphics2::~Graphics2()
+    Graphics::~Graphics()
     {
         Clear();
     }
 
-    void Graphics2::RecreateSwapchain(Vector2 dimensions)
+    void Graphics::RecreateSwapchain(Vector2 dimensions)
     {
         // Wait for all current commands to complete execution
         WaitIdle();
@@ -57,42 +57,42 @@ namespace nc::graphics
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
     }
 
-    DirectX::FXMMATRIX Graphics2::GetViewMatrix() const noexcept
+    DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
     {
         return m_viewMatrix;
     }
 
-    DirectX::FXMMATRIX Graphics2::GetProjectionMatrix() const noexcept
+    DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
     {
         return m_projectionMatrix;
     }
 
-    void Graphics2::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
+    void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
     {
         m_viewMatrix = cam;
     }
 
-    void Graphics2::SetCameraPosition(Vector3 cameraPosition)
+    void Graphics::SetCameraPosition(Vector3 cameraPosition)
     {
         m_cameraWorldPosition = cameraPosition;
     }
 
-    const Vector3 Graphics2::GetCameraPosition() const noexcept
+    const Vector3 Graphics::GetCameraPosition() const noexcept
     {
         return m_cameraWorldPosition;
     }
 
-    void Graphics2::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
+    void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
     {
         m_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
     }
 
-    void Graphics2::ToggleFullscreen()
+    void Graphics::ToggleFullscreen()
     {
         // @todo
     }
 
-    void Graphics2::ResizeTarget(float width, float height)
+    void Graphics::ResizeTarget(float width, float height)
     {
         (void)width;
         (void)height;
@@ -100,7 +100,7 @@ namespace nc::graphics
         // @todo
     }
 
-    void Graphics2::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
         (void)width;
         (void)height;
@@ -112,42 +112,42 @@ namespace nc::graphics
         m_isMinimized = windowArg == 1;
     }
 
-    void Graphics2::WaitIdle()
+    void Graphics::WaitIdle()
     {
         m_base->GetDevice().waitIdle();
     }
 
-    Base* Graphics2::GetBasePtr() const noexcept
+    Base* Graphics::GetBasePtr() const noexcept
     {
         return m_base.get();
     }
 
-    const Base& Graphics2::GetBase() const noexcept
+    const Base& Graphics::GetBase() const noexcept
     {
         return *m_base.get();
     }
     
-    Swapchain* Graphics2::GetSwapchainPtr() const noexcept
+    Swapchain* Graphics::GetSwapchainPtr() const noexcept
     {
         return m_swapchain.get();
     }
 
-    Commands* Graphics2::GetCommandsPtr() const noexcept
+    Commands* Graphics::GetCommandsPtr() const noexcept
     {
         return m_commands.get();
     }
 
-    Renderer* Graphics2::GetRendererPtr() const noexcept
+    Renderer* Graphics::GetRendererPtr() const noexcept
     {
         return m_renderer;
     }
 
-    const Vector2 Graphics2::GetDimensions() const noexcept
+    const Vector2 Graphics::GetDimensions() const noexcept
     {
         return m_dimensions;
     }
 
-    bool Graphics2::GetNextImageIndex(uint32_t* imageIndex)
+    bool Graphics::GetNextImageIndex(uint32_t* imageIndex)
     {
         m_swapchain->WaitForFrameFence(false);
 
@@ -161,29 +161,29 @@ namespace nc::graphics
         return true;
     }
     
-    void Graphics2::Clear()
+    void Graphics::Clear()
     {
         WaitIdle();
         m_renderer->Clear();
         ResourceManager::Clear();
     }
     
-    void Graphics2::SetClearColor(std::array<float, 4> color)
+    void Graphics::SetClearColor(std::array<float, 4> color)
     {
         m_clearColor = color;
     }
 
-    void Graphics2::SetRenderer(Renderer* renderer)
+    void Graphics::SetRenderer(Renderer* renderer)
     {
         m_renderer = renderer;
     }
 
-    const std::array<float, 4>& Graphics2::GetClearColor() const noexcept
+    const std::array<float, 4>& Graphics::GetClearColor() const noexcept
     {
         return m_clearColor;
     }
 
-    void Graphics2::RenderToImage(uint32_t imageIndex)
+    void Graphics::RenderToImage(uint32_t imageIndex)
     {
         m_swapchain->WaitForImageFence(imageIndex);
         m_swapchain->SyncImageAndFrameFence(imageIndex);
@@ -191,7 +191,7 @@ namespace nc::graphics
         m_commands->SubmitRenderCommand(imageIndex);
     }
 
-    bool Graphics2::PresentImage(uint32_t imageIndex)
+    bool Graphics::PresentImage(uint32_t imageIndex)
     {
         bool isSwapChainValid = true;
         m_swapchain->Present(imageIndex, isSwapChainValid);
@@ -204,7 +204,7 @@ namespace nc::graphics
         return true;
     }
 
-    void Graphics2::FrameBegin()
+    void Graphics::FrameBegin()
     {
         m_drawCallCount = 0;
     }
@@ -213,7 +213,7 @@ namespace nc::graphics
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
     // See Device.cpp for synchronization of these calls.
-    void Graphics2::Draw()
+    void Graphics::Draw()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         if (m_isMinimized) return;
@@ -231,18 +231,18 @@ namespace nc::graphics
         NC_PROFILE_END();
     }
 
-    void Graphics2::FrameEnd()
+    void Graphics::FrameEnd()
     {
         // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
         m_swapchain->IncrementFrameIndex();
     }
     #ifdef NC_EDITOR_ENABLED
-    void Graphics2::IncrementDrawCallCount()
+    void Graphics::IncrementDrawCallCount()
     {
         m_drawCallCount++;
     }
     
-    uint32_t Graphics2::GetDrawCallCount() const
+    uint32_t Graphics::GetDrawCallCount() const
     {
         return m_drawCallCount;
     }

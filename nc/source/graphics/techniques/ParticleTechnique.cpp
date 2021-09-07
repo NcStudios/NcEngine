@@ -3,7 +3,7 @@
 // #include "config/Config.h"
 // #include "component/Transform.h"
 // #include "debug/Profiler.h"
-// #include "graphics/Graphics2.h"
+// #include "graphics/Graphics.h"
 // #include "graphics/Commands.h"
 // #include "graphics/Initializers.h"
 // #include "graphics/ShaderUtilities.h"
@@ -15,7 +15,7 @@
 
 // namespace nc::graphics
 // {
-//     ParticleTechnique::ParticleTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
+//     ParticleTechnique::ParticleTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
 //     : m_emitterStates{},
 //       m_graphics{graphics},
 //       m_base{graphics->GetBasePtr()},

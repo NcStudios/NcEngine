@@ -13,12 +13,6 @@ add_library(${IMGUI_LIB}
 
 find_package(Vulkan REQUIRED)
 
-#Link libraries
-target_link_libraries(${IMGUI_LIB} 
-    PRIVATE
-        Vulkan::Vulkan
-)
-
 target_include_directories(${IMGUI_LIB}
     PRIVATE
         ${NC_INCLUDE_DIR}
@@ -28,6 +22,7 @@ target_include_directories(${IMGUI_LIB}
 target_link_libraries(${IMGUI_LIB}
     PRIVATE
         "-ld3dcompiler_47"
+        Vulkan::Vulkan
 )
 
 set_target_properties(${IMGUI_LIB}

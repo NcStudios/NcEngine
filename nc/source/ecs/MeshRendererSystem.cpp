@@ -1,26 +1,16 @@
 #include "MeshRendererSystem.h"
 #include "ECS.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/Material.h"
 #include "graphics/Renderer.h"
 #include "graphics/resources/ResourceManager.h"
 
 namespace nc::ecs
 {
-    MeshRendererSystem::MeshRendererSystem(registry_type* registry, graphics::Graphics2* graphics)
+    MeshRendererSystem::MeshRendererSystem(registry_type* registry, graphics::Graphics* graphics)
     : m_graphics{graphics},
       m_registry{registry}
     {
-        registry->RegisterOnAddCallback<MeshRenderer>
-        (
-            [this](MeshRenderer& meshRenderer) { this->Add(meshRenderer); }
-        );
-
-        registry->RegisterOnRemoveCallback<MeshRenderer>
-        (
-            [this](Entity entity) { this->Remove(entity); }
-        );
-
         graphics::ResourceManager::InitializeObjects(graphics);
     }
 
@@ -44,14 +34,6 @@ namespace nc::ecs
         });
 
         graphics::ResourceManager::UpdateObjects(objectsData);
-    }
-
-    void MeshRendererSystem::Add(MeshRenderer&)
-    {
-    }
-
-    void MeshRendererSystem::Remove(Entity)
-    {
     }
 
     void MeshRendererSystem::Clear()

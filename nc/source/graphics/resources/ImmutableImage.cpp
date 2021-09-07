@@ -9,7 +9,7 @@ namespace nc::graphics
     {
     }
 
-    ImmutableImage::ImmutableImage(nc::graphics::Graphics2* graphics, stbi_uc* pixels, uint32_t width, uint32_t height)
+    ImmutableImage::ImmutableImage(nc::graphics::Graphics* graphics, stbi_uc* pixels, uint32_t width, uint32_t height)
     : m_memoryIndex { 0 },
       m_immutableImage { nullptr },
       m_view{}
@@ -40,7 +40,7 @@ namespace nc::graphics
         Clear();
     }
 
-    void ImmutableImage::Bind(nc::graphics::Graphics2* graphics, stbi_uc* pixels, uint32_t width, uint32_t height)
+    void ImmutableImage::Bind(nc::graphics::Graphics* graphics, stbi_uc* pixels, uint32_t width, uint32_t height)
     {
         m_base = graphics->GetBasePtr();
         m_memoryIndex = m_base->CreateTexture(pixels, width, height, &m_immutableImage);

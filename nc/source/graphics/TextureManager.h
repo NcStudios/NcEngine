@@ -6,15 +6,15 @@
 
 namespace nc::graphics
 {
-    class Graphics2;
+    class Graphics;
 
     class TextureManager
     {
         public:
-            TextureManager(nc::graphics::Graphics2* graphics);
+            TextureManager(nc::graphics::Graphics* graphics);
             void LoadTextures(const std::vector<std::string>& paths);
             
         private:
-            nc::graphics::Graphics2* m_graphics;
+            nc::graphics::Graphics* m_graphics;
     };
 }

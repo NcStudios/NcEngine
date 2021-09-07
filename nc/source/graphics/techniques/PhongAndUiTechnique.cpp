@@ -4,7 +4,7 @@
 #include "component/Transform.h"
 #include "component/MeshRenderer.h"
 #include "debug/Profiler.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/Commands.h"
 #include "graphics/Initializers.h"
 #include "graphics/ShaderUtilities.h"
@@ -16,7 +16,7 @@
 
 namespace nc::graphics
 {
-    PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
+    PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_meshRenderers{},
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},

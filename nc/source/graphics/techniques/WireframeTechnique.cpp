@@ -5,7 +5,7 @@
 #include "component/Transform.h"
 #include "component/MeshRenderer.h"
 #include "debug/Profiler.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/ShaderUtilities.h"
@@ -16,7 +16,7 @@
 
 namespace nc::graphics
 {
-    WireframeTechnique::WireframeTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
+    WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : 
       #ifdef NC_EDITOR_ENABLED
       m_debugWidget{},

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/Base.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 
 namespace nc::graphics
 {
@@ -10,7 +10,7 @@ namespace nc::graphics
     {
         public:
             WriteableBuffer();
-            WriteableBuffer(Graphics2* graphics, uint32_t size);
+            WriteableBuffer(Graphics* graphics, uint32_t size);
             WriteableBuffer(WriteableBuffer&&);
             WriteableBuffer& operator = (WriteableBuffer&&);
             WriteableBuffer& operator = (const WriteableBuffer&) = delete;
@@ -42,7 +42,7 @@ namespace nc::graphics
     }
 
     template<typename T>
-    WriteableBuffer<T>::WriteableBuffer(Graphics2* graphics, uint32_t size)
+    WriteableBuffer<T>::WriteableBuffer(Graphics* graphics, uint32_t size)
     : m_base{ graphics->GetBasePtr() },
       m_memoryIndex { 0 },
       m_memorySize{ 0 },

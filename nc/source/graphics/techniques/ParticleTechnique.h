@@ -9,7 +9,7 @@
 
 // namespace nc::graphics
 // {
-//     class Graphics2; class Commands; class Base; class Swapchain;
+//     class Graphics; class Commands; class Base; class Swapchain;
 
 //     struct ParticlePushConstants
 //     {
@@ -29,7 +29,7 @@
 //     class ParticleTechnique
 //     {
 //         public:
-//             ParticleTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass);
+//             ParticleTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
 //             ~ParticleTechnique();
             
 //             void Bind(vk::CommandBuffer* cmd);
@@ -41,7 +41,7 @@
 //             void CreatePipeline(vk::RenderPass* renderPass);
 
 //             std::vector<particle::EmitterState>* m_emitterStates;
-//             nc::graphics::Graphics2* m_graphics;
+//             nc::graphics::Graphics* m_graphics;
 //             Base* m_base;
 //             Swapchain* m_swapchain;
 //             vk::Pipeline m_pipeline;

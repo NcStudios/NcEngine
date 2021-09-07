@@ -20,7 +20,7 @@ namespace nc::graphics
     class Renderer
     {
         public:
-            Renderer(graphics::Graphics2* graphics);
+            Renderer(graphics::Graphics* graphics);
             ~Renderer();
             
             void BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
@@ -41,7 +41,7 @@ namespace nc::graphics
         private:
             void RecordUi(vk::CommandBuffer* cmd);
 
-            graphics::Graphics2* m_graphics;
+            graphics::Graphics* m_graphics;
             TextureManager m_textureManager;
             MeshManager m_meshManager;
             vk::RenderPass m_mainRenderPass;

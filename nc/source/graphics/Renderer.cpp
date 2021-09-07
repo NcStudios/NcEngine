@@ -4,7 +4,7 @@
 #include "component/MeshRenderer.h"
 #include "component/Transform.h"
 #include "debug/Profiler.h"
-#include "graphics/Graphics2.h"
+#include "graphics/Graphics.h"
 #include "graphics/Commands.h"
 #include "graphics/resources/ResourceManager.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
@@ -15,7 +15,7 @@
 
 namespace nc::graphics
 {
-    Renderer::Renderer(graphics::Graphics2* graphics)
+    Renderer::Renderer(graphics::Graphics* graphics)
     : m_graphics{graphics},
       m_textureManager{graphics},
       m_meshManager{graphics},

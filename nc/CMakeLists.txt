@@ -77,11 +77,6 @@ target_compile_options(${ENGINE_LIB}
 
 find_package(Vulkan REQUIRED)
 
-#Link libraries
-target_link_libraries(${ENGINE_LIB}
-    Vulkan::Vulkan
-)
-
 if(SANITIZE_UB)
     target_compile_options(${ENGINE_LIB}
         PRIVATE
@@ -96,6 +91,11 @@ if(PROFILING_ENABLED)
             -pg
     )
 endif()
+
+#Link libraries
+target_link_libraries(${ENGINE_LIB}
+    Vulkan::Vulkan
+)
 
 #Include Dirs
 target_include_directories(${ENGINE_LIB}

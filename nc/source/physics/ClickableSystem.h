@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-    class Graphics2;
+    class Graphics;
 }
 
 namespace nc::physics
@@ -14,7 +14,7 @@ namespace nc::physics
     class ClickableSystem
     {
         public:
-            ClickableSystem(graphics::Graphics2* graphics);
+            ClickableSystem(graphics::Graphics* graphics);
 
             void RegisterClickable(IClickable* toAdd);
             void UnregisterClickable(IClickable* toRemove) noexcept;
@@ -23,6 +23,6 @@ namespace nc::physics
 
         private:
             std::vector<IClickable*> m_clickableComponents;
-            graphics::Graphics2* m_graphics;
+            graphics::Graphics* m_graphics;
     };
 }

@@ -8,15 +8,6 @@ namespace nc
 {
     class Transform;
 
-    struct Attenuation
-    {
-        float constant = 1.0f;
-        float linear = 0.7f;
-        float quadratic = 1.8f;
-    };
-
-    Attenuation GetAttenuationFromRange(float range);
-
     struct PointLightInfo
     {
         alignas(16)Vector3 pos = Vector3::Zero();
@@ -31,7 +22,7 @@ namespace nc
     };
 
     #ifdef NC_EDITOR_ENABLED
-    void SerializeToFile(std::string filePath, const PointLightInfo& info); // @todo: remove or build out into formal asset generator
+    void SerializeToFile(const std::string& filePath, const PointLightInfo& info); // @todo: remove or build out into formal asset generator
     #endif
 
     class PointLight final : public ComponentBase
@@ -40,19 +31,15 @@ namespace nc
             PointLight(Entity entity, PointLightInfo info);
 
             const PointLightInfo& GetInfo() const;
-            float GetRange() const;
             bool IsDirty() const;
 
             void SetInfo(PointLightInfo info);
-            void SetRange(float range);
             bool Update(const DirectX::XMMATRIX& view);
 
         private:
-            float m_range;
             PointLightInfo m_info;
+            alignas(16)Vector3 m_projectedPos;
             bool m_isDirty;
-
-            alignas(16)Vector3 ProjectedPos;
     };
     
     template<>
