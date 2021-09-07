@@ -1,14 +1,13 @@
-#include "UIImpl.h"
-#include "UI.h"
 #include "debug/Utils.h"
+#include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Graphics2.h"
-#include "graphics/vulkan/Base.h"
-#include "graphics/vulkan/Swapchain.h"
-#include "imgui/imgui_impl_vulkan.h"
+#include "graphics/Swapchain.h"
 #include "imgui/imgui.h"
+#include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
+#include "UI.h"
+#include "UIImpl.h"
 
 namespace
 {
@@ -33,12 +32,12 @@ namespace nc::ui
 
     /* UIImpl */
     #ifdef NC_EDITOR_ENABLED
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics2* graphics)
+    UIImpl::UIImpl(HWND hwnd, graphics::Graphics* graphics)
     : m_editor{graphics},
       m_projectUI{nullptr},
       m_graphics{graphics}
     #else
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics2* graphics)
+    UIImpl::UIImpl(HWND hwnd, graphics::Graphics* graphics)
     : m_projectUI{nullptr},
       m_graphics{graphics}
     #endif

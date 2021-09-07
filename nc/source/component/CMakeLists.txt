@@ -4,20 +4,11 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/component/Camera.cpp
         ${ROOT_DIR}/source/component/Collider.cpp
         ${ROOT_DIR}/source/component/Component.cpp
+        ${ROOT_DIR}/source/component/DebugWidget.cpp
+        ${ROOT_DIR}/source/component/MeshRenderer.cpp
         ${ROOT_DIR}/source/component/NetworkDispatcher.cpp
         ${ROOT_DIR}/source/component/ParticleEmitter.cpp
         ${ROOT_DIR}/source/component/PhysicsBody.cpp
         ${ROOT_DIR}/source/component/PointLight.cpp
-        ${ROOT_DIR}/source/component/PointLightManager.cpp
-        ${ROOT_DIR}/source/component/Renderer.cpp
         ${ROOT_DIR}/source/component/Transform.cpp
 )
-
-if(USE_VULKAN)
-    target_sources(${ENGINE_LIB}
-        PRIVATE 
-            ${ROOT_DIR}/source/component/vulkan/DebugWidget.cpp
-            ${ROOT_DIR}/source/component/vulkan/MeshRenderer.cpp
-            ${ROOT_DIR}/source/component/vulkan/PointLight.cpp
-    )
-endif()

@@ -20,6 +20,7 @@ namespace nc::sample::prefab
         DiscBlue,
         DiscGreen,
         DiscRed,
+        Skeeball,
         Sphere,
         SphereBlue,
         SphereGreen,

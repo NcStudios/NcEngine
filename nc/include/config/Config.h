@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <string>
@@ -30,8 +31,7 @@ namespace nc::config
         float nearClip;
         float farClip;
         float frameUpdateInterval;
-        std::string d3dShadersPath;
-        std::string vulkanShadersPath;
+        std::string shadersPath;
     };
 
     struct PhysicsSettings

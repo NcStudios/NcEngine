@@ -1,13 +1,10 @@
 #include "VulkanScene.h"
 #include "Ecs.h"
 #include "MainCamera.h"
-#include "graphics/vulkan/Mesh.h"
-#include "graphics/vulkan/Texture.h"
-#include "graphics/vulkan/Material.h"
-#include "graphics/vulkan/TechniqueType.h"
 #include "shared/SceneNavigationCamera.h"
 #include "collision_events/WasdController.h"
 #include "imgui/imgui.h"
+#include "shared/Prefabs.h"
 
 #include <string>
 
@@ -29,34 +26,19 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(registry, true, true, Widget);
 
-        // Load all scene meshes
-        const std::string defaultMeshesPath = "project/assets/mesh/";
-        const std::vector<std::string> meshPaths { defaultMeshesPath + "skeeball.nca" };
-        nc::graphics::vulkan::LoadMeshes(meshPaths); 
-
-        // Load all scene textures
-        const std::string defaultTexturesPath = "project/Textures/";
-        const std::vector<std::string> texturePaths { "nc/resources/texture/DefaultBaseColor.png",
-                                                      defaultTexturesPath + "SolidColor/Yellow.png"
-                                                    };
-        nc::graphics::vulkan::LoadTextures(texturePaths); 
-
-        auto blueMaterial = nc::graphics::vulkan::Material{};
-        blueMaterial.baseColor = "nc/resources/texture/DefaultBaseColor.png";
-        blueMaterial.normal = defaultTexturesPath + "SolidColor/Yellow.png";
-        blueMaterial.roughness = defaultTexturesPath + "SolidColor/Yellow.png";
-
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
-        registry->Add<vulkan::PointLight>(lvHandle, vulkan::PointLightInfo{.ambient = Vector4(1.0f, 0.7f, 1.0f, 0.0f),
-                                                                           .diffuseColor = Vector4(0.8f, 0.6f, 1.0f, 0.0f),
-                                                                           .specularColor = Vector4(1.0f, 0.9f, 1.0f, 0.0f),
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(1.0f, 0.7f, 1.0f),
+                                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
                                                                            .diffuseIntensity = 2.0f
                                                                           });
 
         // Create the skeeball
-        auto skeeballCourt = registry->Add<Entity>({.position = Vector3{0.0f, 1.0f, 2.0f}, .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f), .tag = "Box"});
-        registry->Add<vulkan::MeshRenderer>(skeeballCourt, meshPaths[0], blueMaterial, nc::graphics::vulkan::TechniqueType::PhongAndUi);
+        prefab::Create(registry,
+                       prefab::Resource::Skeeball, 
+                       {.position = Vector3{0.0f, 1.0f, 2.0f},
+                        .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
+                        .tag = "Skeeball"});
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});

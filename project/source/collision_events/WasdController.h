@@ -38,12 +38,12 @@ namespace nc::sample
         if (input::GetKeyDown(input::KeyCode::B))
         {
             std::cout << "Remove pressed.\n";
-            m_registry->Remove<vulkan::PointLight>(GetParentEntity());
+            m_registry->Remove<PointLight>(GetParentEntity());
         }
         else if (input::GetKeyDown(input::KeyCode::V))
         {
             std::cout << "Add pressed.\n";
-            m_registry->Add<vulkan::PointLight>(GetParentEntity(), vulkan::PointLightInfo{.specularColor = Vector4(0.75f, 0.5f, 0.5f, 0.0f)});
+            m_registry->Add<PointLight>(GetParentEntity(), PointLightInfo{});
         }
     }
 }

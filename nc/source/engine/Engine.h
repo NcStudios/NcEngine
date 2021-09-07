@@ -1,17 +1,10 @@
 #pragma once
 
 #include "ecs/EntityComponentSystem.h"
-#include "graphics/rendergraph/FrameManager.h"
-#ifdef USE_VULKAN
-    #include "graphics/Graphics2.h"
-    #include "graphics/vulkan/Renderer.h"
-#else
-    #include "graphics/Graphics.h"
-#endif
+#include "graphics/Graphics.h"
+#include "graphics/Renderer.h"
 #include "job/JobSystem.h"
 #include "physics/PhysicsSystem.h"
-#include "component/PointLightManager.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
 #include "scene/SceneSystem.h"
 #include "time/NcTime.h"
 #include "ui/UIImpl.h"
@@ -32,15 +25,9 @@ namespace nc::core
             float m_frameDeltaTimeFactor;
             job::JobSystem m_jobSystem;
             window::WindowImpl m_window;
-        #ifdef USE_VULKAN
-            graphics::Graphics2 m_graphics2;
-            graphics::vulkan::Renderer m_renderer;
-            // @todo: Implement missing managers below
-        #else            
             graphics::Graphics m_graphics;
-            PointLightManager m_pointLightManager;
-            graphics::FrameManager m_frameManager;
-        #endif
+            graphics::Renderer m_renderer;
+            // @todo: Implement missing managers below
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;

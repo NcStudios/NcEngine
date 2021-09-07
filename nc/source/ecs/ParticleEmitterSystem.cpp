@@ -1,12 +1,12 @@
 #include "ParticleEmitterSystem.h"
-#include "graphics/Graphics2.h"
-#include "graphics/vulkan/Renderer.h"
+#include "graphics/Graphics.h"
+#include "graphics/Renderer.h"
 
 #include <algorithm>
 
 namespace
 {
-    auto CreateParticleGraphicsData(nc::graphics::Graphics2* graphics)
+    auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
     {
         return nc::particle::GraphicsData
         {
@@ -19,19 +19,12 @@ namespace
 
 namespace nc::ecs
 {
-    #ifndef USE_VULKAN
     ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics)
-        : m_emitterStates{},
-          m_toAdd{},
-          m_toRemove{}
-    #else
-    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics2* graphics)
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
           m_graphicsData{CreateParticleGraphicsData(graphics)},
-          m_graphics{graphics}
-    #endif
+          m_graphics{graphics}    
     {
         registry->RegisterOnAddCallback<ParticleEmitter>
         (
@@ -94,13 +87,11 @@ namespace nc::ecs
         pos->Emit(count);
     }
 
-    void ParticleEmitterSystem::Add(ParticleEmitter& emitter)
+    void ParticleEmitterSystem::Add(ParticleEmitter&)
     {
-        #ifdef USE_VULKAN
-        m_graphics->GetRendererPtr()->RegisterParticleEmitter(&m_emitterStates);
-        m_toAdd.emplace_back(emitter.GetParentEntity(), emitter.GetInfo(), &m_graphicsData);
-        emitter.RegisterSystem(this);
-        #endif
+        // m_graphics->GetRendererPtr()->RegisterParticleEmitter(&m_emitterStates);
+        // m_toAdd.emplace_back(emitter.GetParentEntity(), emitter.GetInfo(), &m_graphicsData);
+        // emitter.RegisterSystem(this);
     }
 
     void ParticleEmitterSystem::Remove(Entity entity)
@@ -116,8 +107,6 @@ namespace nc::ecs
         m_toAdd.shrink_to_fit();
         m_toRemove.clear();
         m_toRemove.shrink_to_fit();
-        #ifdef USE_VULKAN
-        m_graphics->GetRendererPtr()->ClearParticleEmitters();
-        #endif
+        // m_graphics->GetRendererPtr()->ClearParticleEmitters();
     }
 } // namespace nc::ecs

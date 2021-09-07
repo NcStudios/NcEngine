@@ -1,41 +1,42 @@
-#include "PointLightSystem.h"
 #include "ECS.h"
 #include "EntityComponentSystem.h"
-#include "graphics/Graphics2.h"
-#include "graphics/vulkan/Commands.h"
-#include "graphics/vulkan/Renderer.h"
-#include "graphics/vulkan/resources/ResourceManager.h"
+#include "graphics/Commands.h"
+#include "graphics/Graphics.h"
+#include "graphics/Renderer.h"
+#include "graphics/resources/ResourceManager.h"
+#include "PointLightSystem.h"
 
 #include <iostream>
+            
+namespace { constexpr uint32_t MAX_POINT_LIGHTS = 10u; }
 
 namespace nc::ecs
 {
-    const uint32_t PointLightSystem::MAX_POINT_LIGHTS;
-
-    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics2* graphics)
+    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics)
     : m_graphics{graphics},
       m_registry{registry},
       m_isSystemDirty{true}
     {
-        m_registry->RegisterOnAddCallback<vulkan::PointLight>
+        m_registry->RegisterOnAddCallback<PointLight>
         (
-            [this](vulkan::PointLight&) { m_isSystemDirty = true; }
+            [this](PointLight&) { m_isSystemDirty = true; }
         );
 
-        m_registry->RegisterOnRemoveCallback<vulkan::PointLight>
+        m_registry->RegisterOnRemoveCallback<PointLight>
         (
             [this](Entity) { m_isSystemDirty = true; }
         );
 
-        graphics::vulkan::ResourceManager::InitializePointLights(graphics, MAX_POINT_LIGHTS);
+        graphics::ResourceManager::InitializePointLights(graphics, MAX_POINT_LIGHTS);
     }
 
     void PointLightSystem::Update()
     {
-        auto pointLightComponents = m_registry->ViewAll<vulkan::PointLight>();
+        auto pointLightComponents = m_registry->ViewAll<PointLight>();
+        const auto& view = m_graphics->GetViewMatrix();
         for (auto& pointLight : pointLightComponents)
         {
-            if (pointLight.Update())
+            if (pointLight.Update(view))
             {
                 m_isSystemDirty = true;
             }
@@ -43,7 +44,7 @@ namespace nc::ecs
 
         if (m_isSystemDirty)
         {
-            auto pointLightInfos = std::vector<vulkan::PointLightInfo>();
+            auto pointLightInfos = std::vector<PointLightInfo>();
             pointLightInfos.reserve(pointLightComponents.size());
 
             // Pull the PointLightInfo structs out of their respective components in the registry to map them to the GPU.
@@ -52,7 +53,7 @@ namespace nc::ecs
                 return pointLightComponent.GetInfo(); 
             });
 
-            graphics::vulkan::ResourceManager::UpdatePointLights(pointLightInfos);
+            graphics::ResourceManager::UpdatePointLights(pointLightInfos);
             m_isSystemDirty = false;
         }
     }
@@ -60,6 +61,6 @@ namespace nc::ecs
     void PointLightSystem::Clear()
     {
         m_isSystemDirty = true;
-        graphics::vulkan::ResourceManager::ResetPointLights(m_graphics, MAX_POINT_LIGHTS);
+        graphics::ResourceManager::ResetPointLights(m_graphics, MAX_POINT_LIGHTS);
     }
 }
