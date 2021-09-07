@@ -23,6 +23,8 @@ namespace nc::graphics::vulkan
         samplerInfo.setMipLodBias(0.0f);
         samplerInfo.setMinLod(0.0f);
         samplerInfo.setMaxLod(0.0f);
+
+        return samplerInfo;
     }
 
     vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
@@ -68,6 +70,7 @@ namespace nc::graphics::vulkan
                 break;
 
             case AttachmentType::Depth:
+            case AttachmentType::ShadowDepth:
                 attachmentReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
                 break;
         }
@@ -148,6 +151,12 @@ namespace nc::graphics::vulkan
         return vertexInputInfo;
     }
 
+    vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo()
+    {
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
+        return vertexInputInfo;
+    }
+
     vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo()
     {
         // @todo: Look into using element buffers here to reuse vertices
@@ -167,7 +176,7 @@ namespace nc::graphics::vulkan
         return viewportState;
     }
 
-    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth)
+    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth, bool depthBiasEnable)
     {
         vk::PipelineRasterizationStateCreateInfo rasterizer{};
         rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
@@ -176,7 +185,7 @@ namespace nc::graphics::vulkan
         rasterizer.setLineWidth(lineWidth);
         rasterizer.setCullMode(vk::CullModeFlagBits::eBack);
         rasterizer.setFrontFace(vk::FrontFace::eClockwise);
-        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(false));
+        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(depthBiasEnable));
         rasterizer.setDepthBiasConstantFactor(0.0f);
         rasterizer.setDepthBiasClamp(0.0f);
         rasterizer.setDepthBiasSlopeFactor(0.0f);
@@ -195,12 +204,20 @@ namespace nc::graphics::vulkan
         return multisampling;
     }
 
-    vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo()
+    vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo(bool shadowMapping)
     {
         vk::PipelineDepthStencilStateCreateInfo depthStencil{};
         depthStencil.setDepthTestEnable(static_cast<vk::Bool32>(true));
         depthStencil.setDepthWriteEnable(static_cast<vk::Bool32>(true));
-        depthStencil.setDepthCompareOp(vk::CompareOp::eLess);
+
+        if (shadowMapping)
+        {
+            depthStencil.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
+        }
+        else
+        {
+            depthStencil.setDepthCompareOp(vk::CompareOp::eLess);
+        }
         return depthStencil;
     }
 
@@ -229,6 +246,14 @@ namespace nc::graphics::vulkan
         colorBlendAttachment.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
         colorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
         return colorBlendAttachment;
+    }
+
+    vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo()
+    {
+        vk::PipelineColorBlendStateCreateInfo colorBlending{};
+        colorBlending.setAttachmentCount(0);
+        colorBlending.setPAttachments(nullptr);
+        return colorBlending;
     }
 
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment, bool useAlphaBlending)

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "ECS.h"
 #include "graphics\vulkan\TechniqueType.h"
 #include "graphics\vulkan\MeshManager.h"
 #include "graphics\vulkan\TextureManager.h"
-#include "graphics\vulkan\techniques\PhongAndUiTechnique.h"
-#include "graphics\vulkan\techniques\WireframeTechnique.h"
 #include "graphics\vulkan\techniques\ParticleTechnique.h"
+#include "graphics\vulkan\techniques\PhongAndUiTechnique.h"
+#include "graphics\vulkan\techniques\ShadowMappingTechnique.h"
+#include "graphics\vulkan\techniques\WireframeTechnique.h"
 #include "graphics\vulkan\Resources\DepthStencil.h"
 
 #include <unordered_map>
@@ -41,7 +43,7 @@ namespace nc::graphics::vulkan
             ~Renderer();
             
             void BeginRenderPass(vk::CommandBuffer* cmd, vulkan::Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
-            void Record(Commands* commands);
+            void Record(Commands* commands, registry_type* registry);
             void BindSharedData(vk::CommandBuffer* cmd);
             void Clear();
 
@@ -71,5 +73,6 @@ namespace nc::graphics::vulkan
             std::unique_ptr<WireframeTechnique> m_wireframeTechnique;
             #endif
             std::unique_ptr<ParticleTechnique> m_particleTechnique;
+            std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
     };
 }

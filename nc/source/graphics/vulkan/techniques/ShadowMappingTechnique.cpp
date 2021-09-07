@@ -1,85 +1,98 @@
-#include "PhongAndUiTechnique.h"
+#include "ShadowMappingTechnique.h"
 #include "Ecs.h"
 #include "config/Config.h"
 #include "component/Transform.h"
 #include "component/vulkan/MeshRenderer.h"
+#include "component/vulkan/PointLight.h"
+#include "graphics/vulkan/MeshManager.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics2.h"
-#include "graphics/vulkan/Commands.h"
 #include "graphics/vulkan/Initializers.h"
 #include "graphics/vulkan/ShaderUtilities.h"
-#include "graphics/vulkan/MeshManager.h"
 #include "graphics/vulkan/Swapchain.h"
 #include "graphics/vulkan/Base.h"
-#include "graphics/vulkan/resources/ImmutableBuffer.h"
 #include "graphics/vulkan/resources/ResourceManager.h"
+
 
 namespace nc::graphics::vulkan
 {
-    PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
-    : m_meshRenderers{},
+    ShadowMappingTechnique::ShadowMappingTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
+    : 
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{},
-      m_pipelineLayout{}
+      m_pipelineLayout{},
+      m_depthProjectionMatrix{}
     {
+        const auto& graphicsSettings = config::GetGraphicsSettings();
+        m_depthProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip);
+        m_modelMatrix = DirectX::XMMatrixSet(
+            1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 1.0f
+        );
+
         CreatePipeline(renderPass);
     }
 
-    PhongAndUiTechnique::~PhongAndUiTechnique()
+    ShadowMappingTechnique::~ShadowMappingTechnique()
     {
         auto device = m_base->GetDevice();
         device.destroyPipelineLayout(m_pipelineLayout);
         device.destroyPipeline(m_pipeline);
     }
 
-    void PhongAndUiTechnique::CreatePipeline(vk::RenderPass* renderPass)
+    void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
+    {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+        NC_PROFILE_END();
+    }
+
+    void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetGraphicsSettings().vulkanShadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PhongVertex.spv");
-        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PhongFragment.spv");
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
 
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
-        auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
 
         vk::PipelineShaderStageCreateInfo shaderStages[] = 
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(PhongPushConstants)); // PushConstants
-        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout(), *ResourceManager::GetObjectsDescriptorSetLayout()};
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
+        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(ShadowMappingPushConstants)); // PushConstants
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
-        std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+        std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
         dynamicStateInfo.setDynamicStateCount(dynamicStates.size());
         dynamicStateInfo.setDynamicStates(dynamicStates);
 
         // Graphics pipeline
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
-        pipelineCreateInfo.setStageCount(2); // Shader stages
+        pipelineCreateInfo.setStageCount(1); // Shader stages
         pipelineCreateInfo.setPStages(shaderStages); // Shader stages
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
         pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
+        pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
         auto inputAssembly = CreateInputAssemblyCreateInfo();
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
         auto viewportState = CreateViewportCreateInfo();
         pipelineCreateInfo.setPViewportState(&viewportState);
-        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f, true);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
         auto multisampling = CreateMulitsampleCreateInfo();
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
-        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
+        auto colorBlending = CreateColorBlendStateCreateInfo();
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout);
@@ -90,43 +103,45 @@ namespace nc::graphics::vulkan
 
         m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
-        m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
+    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, registry_type* registry, std::span<nc::vulkan::PointLight> pointLights, std::span<nc::vulkan::MeshRenderer> meshRenderers)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 2, 1, ResourceManager::GetObjectsDescriptorSet(), 0, 0);
-        NC_PROFILE_END();
-    }
 
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, std::span<nc::vulkan::MeshRenderer> meshRenderers)
-    {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        auto pushConstants = PhongPushConstants{};
-        pushConstants.cameraPos = m_graphics->GetCameraPosition();
-        cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
+        cmd->setDepthBias
+        (
+            DEPTH_BIAS_CONSTANT,
+            0.0f,
+            DEPTH_BIAS_SLOPE
+        );
 
-        uint32_t objectInstance = 0;
-        for (auto& renderer : meshRenderers)
+        auto pushConstants = ShadowMappingPushConstants{};
+
+        for (const auto& pointLight : pointLights)
         {
-            auto& mesh = renderer.GetMesh();
-            cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            
-            #ifdef NC_EDITOR_ENABLED
-            m_graphics->IncrementDrawCallCount();
-            #endif
-            
-            objectInstance++;
+            auto depthViewMatrix = CalculateViewMatrix(registry->Get<Transform>(pointLight.GetParentEntity()));
+            pushConstants.depthMVP = m_depthProjectionMatrix * depthViewMatrix * m_modelMatrix;
+
+            cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
+
+            uint32_t objectInstance = 0;
+            for (const auto& renderer : meshRenderers)
+            {
+                auto& mesh = renderer.GetMesh();
+                cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                objectInstance++;
+            }
         }
+
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::Clear()
+    DirectX::XMMATRIX ShadowMappingTechnique::CalculateViewMatrix(Transform* lightTransform)
     {
-        m_meshRenderers.clear();
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, lightTransform->GetTransformationMatrix());
+        auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
+        return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
     }
 }

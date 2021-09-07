@@ -26,7 +26,8 @@ namespace nc::graphics::vulkan
       #ifdef NC_EDITOR_ENABLED
       m_wireframeTechnique{nullptr},
       #endif
-      m_particleTechnique{nullptr}
+      m_particleTechnique{nullptr},
+      m_shadowMappingTechnique{nullptr}
     {
         InitializeShadowMappingRenderPass(m_graphics->GetSwapchainPtr());
     }
@@ -36,7 +37,7 @@ namespace nc::graphics::vulkan
         m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
     }
 
-    void Renderer::Record(Commands* commands)
+    void Renderer::Record(Commands* commands, registry_type* registry)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         
@@ -53,28 +54,56 @@ namespace nc::graphics::vulkan
         }
         #endif
 
+        if (m_shadowMappingTechnique == nullptr)
+        {
+            m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(m_graphics, &m_shadowMappingPass.renderPass.get());
+        }
+
+        vk::ClearValue clearValues[2];
+
         auto swapchain = m_graphics->GetSwapchainPtr();
         auto& commandBuffers = *commands->GetCommandBuffers();
 
-        auto meshRenderers = ActiveRegistry()->ViewAll<nc::vulkan::MeshRenderer>();
+        auto meshRenderers = registry->ViewAll<nc::vulkan::MeshRenderer>();
+        auto pointLights = registry->ViewAll<nc::vulkan::PointLight>();
         
         for (size_t i = 0; i < commandBuffers.size(); ++i)
         {
             swapchain->WaitForFrameFence(true);
-            
             auto* cmd = &commandBuffers[i];
+
 
             // Shadow mapping pass
             cmd->begin(vk::CommandBufferBeginInfo{});
-            BeginRenderPass(cmd, swapchain, &m_shadowMappingPass.renderPass.get(), i);
 
+            auto dimensions = m_graphics->GetDimensions();
 
+		    clearValues[0].setDepthStencil({ 1.0f, 0 });
 
+            vk::RenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.setRenderPass(m_shadowMappingPass.renderPass.get()); // Specify the render pass and attachments.
+            renderPassInfo.setFramebuffer(m_shadowMappingPass.frameBuffer.get());
+            renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
+            renderPassInfo.renderArea.setExtent(swapchain->GetExtent());
+            renderPassInfo.setClearValueCount(1); // Set clear color
+            renderPassInfo.setPClearValues(clearValues);
 
-            // Begin recording commands to each command buffer.
-            cmd->begin(vk::CommandBufferBeginInfo{});
-            BeginRenderPass(cmd, swapchain, &m_mainRenderPass, i);
+            SetViewportAndScissor(cmd, dimensions);
+
+            // Begin render pass and bind pipeline
+            cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
             BindSharedData(cmd);
+
+            if (!pointLights.empty())
+            {
+                m_shadowMappingTechnique->Bind(cmd);
+                m_shadowMappingTechnique->Record(cmd, registry, pointLights, meshRenderers);
+            }
+
+            cmd->endRenderPass(); // End shadow mapping
+
+            // Second Pass (particles, mesh renderers)
+            BeginRenderPass(cmd, swapchain, &m_mainRenderPass, i);
 
             #ifdef NC_EDITOR_ENABLED
             if (m_wireframeTechnique->HasDebugWidget())
@@ -98,8 +127,7 @@ namespace nc::graphics::vulkan
 
             RecordUi(cmd);
 
-            // End recording commands to each command buffer.
-            cmd->endRenderPass();
+            cmd->endRenderPass(); // End second pass
             cmd->end();
         }
 
@@ -149,7 +177,7 @@ namespace nc::graphics::vulkan
         auto device = m_graphics->GetBasePtr()->GetDevice();
 
         // Create depth stencil
-        m_shadowMappingPass.depthStencil = std::make_unique<DepthStencil>(m_graphics->GetBasePtr(), swapchain->GetExtentDimensions(), true);
+        m_shadowMappingPass.depthStencil = std::make_unique<DepthStencil>(m_graphics->GetBasePtr(), m_graphics->GetDimensions(), vk::Format::eD16Unorm);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
         vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToEdge);
@@ -161,7 +189,7 @@ namespace nc::graphics::vulkan
             CreateAttachmentDescription(AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore)
         };
 
-        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
+        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 0);
         vk::SubpassDescription subpass = CreateSubpassDescription(depthReference);
 
         std::array<vk::SubpassDependency, 2> subpassDependencies =
@@ -196,8 +224,7 @@ namespace nc::graphics::vulkan
         // Create frame buffer
         std::array<vk::ImageView, 1> attachments;
         attachments[0] = m_shadowMappingPass.depthStencil->GetImageView();
-
-        auto dimensions = m_shadowMappingPass.depthStencil->GetDimensions();
+        auto dimensions = m_graphics->GetDimensions();
 
         vk::FramebufferCreateInfo framebufferInfo{};
         framebufferInfo.setRenderPass(m_shadowMappingPass.renderPass.get());

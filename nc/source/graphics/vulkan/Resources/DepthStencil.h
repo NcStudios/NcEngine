@@ -10,7 +10,8 @@ namespace nc::graphics::vulkan
     class DepthStencil
     {
         public:
-            DepthStencil(vulkan::Base* base, Vector2 dimensions, bool isSampledFrom = false);
+            DepthStencil(vulkan::Base* base, Vector2 dimensions);
+            DepthStencil(vulkan::Base* base, Vector2 dimensions, vk::Format depthFormat);
             ~DepthStencil();
 
             const vk::Image& GetImage() const noexcept;

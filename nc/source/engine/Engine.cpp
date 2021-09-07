@@ -227,7 +227,7 @@ namespace nc::core
         #endif
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics2.GetCommandsPtr());
+        renderer->Record(m_graphics2.GetCommandsPtr(), registry);
 
         m_graphics2.Draw();
         m_graphics2.FrameEnd();
