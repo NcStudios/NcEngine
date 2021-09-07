@@ -23,10 +23,10 @@ namespace nc::graphics
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{},
       m_pipelineLayout{},
-      m_depthProjectionMatrix{}
+      m_lightProjectionMatrix{}
     {
         const auto& graphicsSettings = config::GetGraphicsSettings();
-        m_depthProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip);
+        m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip);
         m_modelMatrix = DirectX::XMMatrixSet(
             1.0f, 1.0f, 1.0f, 1.0f,
             1.0f, 1.0f, 1.0f, 1.0f,
@@ -48,6 +48,7 @@ namespace nc::graphics
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetObjectsDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 
@@ -65,7 +66,8 @@ namespace nc::graphics
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(ShadowMappingPushConstants)); // PushConstants
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
+        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetObjectsDescriptorSetLayout()};
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
@@ -120,8 +122,8 @@ namespace nc::graphics
 
         for (const auto& pointLight : pointLights)
         {
-            auto depthViewMatrix = CalculateViewMatrix(registry->Get<Transform>(pointLight.GetParentEntity()));
-            pushConstants.depthMVP = m_depthProjectionMatrix * depthViewMatrix * m_modelMatrix;
+            auto lightViewMatrix = CalculateViewMatrix(registry->Get<Transform>(pointLight.GetParentEntity()));
+            pushConstants.lightViewProjection = lightViewMatrix * m_lightProjectionMatrix;
 
             cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 

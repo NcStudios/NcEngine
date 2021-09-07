@@ -21,8 +21,8 @@ namespace nc::graphics
 
     struct ShadowMappingPushConstants
     {
-        // Light MVP matrix
-        DirectX::XMMATRIX depthMVP;
+        // Light VP matrix
+        DirectX::XMMATRIX lightViewProjection;
     };
 
     class ShadowMappingTechnique
@@ -43,7 +43,7 @@ namespace nc::graphics
             Swapchain* m_swapchain;
             vk::Pipeline m_pipeline;
             vk::PipelineLayout m_pipelineLayout;
-            DirectX::XMMATRIX m_depthProjectionMatrix;
+            DirectX::XMMATRIX m_lightProjectionMatrix;
             DirectX::XMMATRIX m_modelMatrix;
     };
 }

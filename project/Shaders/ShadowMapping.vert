@@ -1,4 +1,6 @@
-#version 450
+#version 460
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_nonuniform_qualifier : enable
 
 layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;
@@ -6,18 +8,36 @@ layout (location = 2) in vec2 inUV;
 layout (location = 3) in vec3 inTangent;
 layout (location = 4) in vec3 inBitangent;
 
+struct ObjectData
+{
+    // N MVP matrices
+    mat4 model;
+    mat4 modelView;
+    mat4 viewProjection;
+
+    // Textures
+    int baseColorIndex;
+    int normalIndex;
+    int roughnessIndex;
+
+    int isInitialized;
+};
+
 layout(push_constant) uniform PER_OBJECT
 {
-    // MVP matrix for point light
-    mat4 depthMVP;
+    // VP matrix for point light
+    mat4 depthVP;
 } pc;
 
-out gl_PerVertex 
+layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
-    vec4 gl_Position;   
-};
+    ObjectData objects[];
+} objectBuffer;
 
 void main()
 {
-	gl_Position = pc.depthMVP * vec4(inPos, 1.0);
+    // Calculate the vertex's position in the view space of the point light
+    // Take the world space position of the vertex (vertex position * model matrix for that vertex's object), then multiply by the view projection of the light.
+    vec4 worldPosOfVertex = objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
+	gl_Position = pc.depthVP * worldPosOfVertex;
 }
