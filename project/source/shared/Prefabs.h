@@ -20,24 +20,14 @@ namespace nc::sample::prefab
         DiscBlue,
         DiscGreen,
         DiscRed,
+        Skeeball,
         Sphere,
         SphereBlue,
         SphereGreen,
         SphereRed,
         Table,
         Token,
-        WireframeCube,
-        Worm,
-        Sun,
-        Mercury,
-        Venus,
-        Earth,
-        Mars,
-        Jupiter,
-        Saturn,
-        Uranus,
-        Neptune,
-        Pluto
+        Worm
     };
 
     std::string ToString(Resource resource);

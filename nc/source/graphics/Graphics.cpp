@@ -1,212 +1,251 @@
 #include "Graphics.h"
+#include "debug/Profiler.h"
+#include "Base.h"
+#include "Commands.h"
+#include "resources/DepthStencil.h"
+#include "Swapchain.h"
+#include "Renderer.h"
+#include "resources/ResourceManager.h"
 #include "config/Config.h"
-#include "DXException.h"
-#include "d3dresource/GraphicsResourceManager.h"
 
 namespace
 {
-    constexpr std::array<float, 4> DefaultClearColor = {0.2f, 0.2f, 0.2f, 1.0f};
+    constexpr std::array<float, 4> DefaultClearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 }
 
 namespace nc::graphics
 {
-Graphics::Graphics(HWND hwnd, Vector2 dimensions)
-    : m_device{ nullptr },
-      m_context{ nullptr },
-      m_swapChain{ nullptr },
-      m_renderTarget{ nullptr },
-      m_dsv{ nullptr },
-      m_clearColor{DefaultClearColor},
-      m_isFullscreen {false},
-      m_viewMatrix{},
-      m_projectionMatrix{}
-{
-    auto& [width, height] = dimensions;
-    const auto& graphicsSettings = config::GetGraphicsSettings();
-    m_isFullscreen = graphicsSettings.launchInFullscreen;
-    d3dresource::GraphicsResourceManager::SetGraphics(this);
-    CreateDeviceAndSwapchain(hwnd);
-    CreateRenderTargetViewFromBackBuffer();
-    CreateDepthStencilView(width, height);
-    BindDepthStencilView();
-    ConfigureViewport(width, height);
-    SetProjectionMatrix(width, height, graphicsSettings.nearClip, graphicsSettings.farClip);
-
-    m_swapChain->SetFullscreenState(m_isFullscreen, nullptr);
-}
-
-Graphics::~Graphics() noexcept
-{
-    m_swapChain->SetFullscreenState(FALSE, nullptr); // D3D can't close in fullscreen mode. switch to windowed mode on attempting to close
-    m_renderTarget->Release();
-    m_dsv->Release();
-    m_swapChain->Release();
-    m_context->Release();
-    m_device->Release();
-}
-
-DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
-{
-    return m_viewMatrix;
-}
-
-DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
-{
-    return m_projectionMatrix;
-}
-
-void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
-{
-    m_viewMatrix = cam;
-}
-
-void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
-{
-    m_projectionMatrix = DirectX::XMMatrixPerspectiveLH(1.0f, height / width, nearZ, farZ);
-}
-
-void Graphics::ToggleFullscreen()
-{
-    m_isFullscreen = !m_isFullscreen;
-    m_swapChain->SetFullscreenState(m_isFullscreen, nullptr);
-}
-
-void Graphics::SetClearColor(std::array<float, 4> color)
-{
-    m_clearColor = color;
-}
-
-void Graphics::ResizeTarget(float width, float height)
-{
-    auto mode = DXGI_MODE_DESC
+    Graphics::Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+        : m_base{ std::make_unique<Base>(hwnd, hinstance) },
+        m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
+        m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+        m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
+        m_renderer{ nullptr },
+        m_resourceManager{std::make_unique<ResourceManager>()},
+        m_dimensions{ dimensions },
+        m_isMinimized{ false },
+        m_isFullscreen{ false },
+        m_cameraWorldPosition{},
+        m_viewMatrix{},
+        m_projectionMatrix{},
+        m_clearColor{DefaultClearColor},
+        m_drawCallCount{0}
     {
-        (UINT)width, (UINT)height, {0, 0},
-        DXGI_FORMAT_UNKNOWN,
-        DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
-        DXGI_MODE_SCALING_UNSPECIFIED
-    };
+        SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
+    }
 
-    m_swapChain->ResizeTarget(&mode);
-}
+    Graphics::~Graphics()
+    {
+        Clear();
+    }
 
-void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
-{   
-    (void)windowArg;
-    m_context->OMSetRenderTargets(0,0,0);
-    m_renderTarget->Release();
-    m_dsv->Release();
-    THROW_FAILED(m_swapChain->ResizeBuffers(0u, 0u, 0u, DXGI_FORMAT_UNKNOWN, 0u));
+    void Graphics::RecreateSwapchain(Vector2 dimensions)
+    {
+        // Wait for all current commands to complete execution
+        WaitIdle();
 
-    CreateRenderTargetViewFromBackBuffer();
-    CreateDepthStencilView(width, height);
-    BindDepthStencilView();
-    ConfigureViewport(width, height);
-    SetProjectionMatrix(width, height, nearZ, farZ);
-}
+        // Destroy all resources used by the swapchain
+        m_dimensions = dimensions;
+        m_depthStencil.reset();
+        m_commands.reset();
+        m_swapchain.reset();
+        m_depthStencil.reset();
 
-void Graphics::FrameBegin()
-{
+        // Recreate swapchain and resources
+        m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions);
+        m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
+    }
+
+    DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
+    {
+        return m_viewMatrix;
+    }
+
+    DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
+    {
+        return m_projectionMatrix;
+    }
+
+    void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
+    {
+        m_viewMatrix = cam;
+    }
+
+    void Graphics::SetCameraPosition(Vector3 cameraPosition)
+    {
+        m_cameraWorldPosition = cameraPosition;
+    }
+
+    const Vector3 Graphics::GetCameraPosition() const noexcept
+    {
+        return m_cameraWorldPosition;
+    }
+
+    void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
+    {
+        m_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
+    }
+
+    void Graphics::ToggleFullscreen()
+    {
+        // @todo
+    }
+
+    void Graphics::ResizeTarget(float width, float height)
+    {
+        (void)width;
+        (void)height;
+
+        // @todo
+    }
+
+    void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    {
+        (void)width;
+        (void)height;
+        (void)nearZ;
+        (void)farZ;
+
+        m_dimensions = Vector2{ width, height };
+        SetProjectionMatrix(width, height, nearZ, farZ);
+        m_isMinimized = windowArg == 1;
+    }
+
+    void Graphics::WaitIdle()
+    {
+        m_base->GetDevice().waitIdle();
+    }
+
+    Base* Graphics::GetBasePtr() const noexcept
+    {
+        return m_base.get();
+    }
+
+    const Base& Graphics::GetBase() const noexcept
+    {
+        return *m_base.get();
+    }
+    
+    Swapchain* Graphics::GetSwapchainPtr() const noexcept
+    {
+        return m_swapchain.get();
+    }
+
+    Commands* Graphics::GetCommandsPtr() const noexcept
+    {
+        return m_commands.get();
+    }
+
+    Renderer* Graphics::GetRendererPtr() const noexcept
+    {
+        return m_renderer;
+    }
+
+    const Vector2 Graphics::GetDimensions() const noexcept
+    {
+        return m_dimensions;
+    }
+
+    bool Graphics::GetNextImageIndex(uint32_t* imageIndex)
+    {
+        m_swapchain->WaitForFrameFence(false);
+
+        bool isSwapChainValid = true;
+        *imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);
+        if (!isSwapChainValid)
+        {
+            RecreateSwapchain(m_dimensions);
+            return false;
+        }
+        return true;
+    }
+    
+    void Graphics::Clear()
+    {
+        WaitIdle();
+        m_renderer->Clear();
+        ResourceManager::Clear();
+    }
+    
+    void Graphics::SetClearColor(std::array<float, 4> color)
+    {
+        m_clearColor = color;
+    }
+
+    void Graphics::SetRenderer(Renderer* renderer)
+    {
+        m_renderer = renderer;
+    }
+
+    const std::array<float, 4>& Graphics::GetClearColor() const noexcept
+    {
+        return m_clearColor;
+    }
+
+    void Graphics::RenderToImage(uint32_t imageIndex)
+    {
+        m_swapchain->WaitForImageFence(imageIndex);
+        m_swapchain->SyncImageAndFrameFence(imageIndex);
+        m_swapchain->ResetFrameFence();
+        m_commands->SubmitRenderCommand(imageIndex);
+    }
+
+    bool Graphics::PresentImage(uint32_t imageIndex)
+    {
+        bool isSwapChainValid = true;
+        m_swapchain->Present(imageIndex, isSwapChainValid);
+
+        if (!isSwapChainValid)
+        {
+            RecreateSwapchain(m_dimensions);
+            return false;
+        }
+        return true;
+    }
+
+    void Graphics::FrameBegin()
+    {
+        m_drawCallCount = 0;
+    }
+
+    // Gets an image from the swap chain, executes the command buffer for that image which writes to the image.
+    // Then, returns the image written to to the swap chain for presentation.
+    // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
+    // See Device.cpp for synchronization of these calls.
+    void Graphics::Draw()
+    {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        if (m_isMinimized) return;
+
+        uint32_t imageIndex = UINT32_MAX;
+
+        // Gets the next image in the swapchain
+        if (!GetNextImageIndex(&imageIndex)) return;
+
+        // Executes the command buffer to render to the image
+        RenderToImage(imageIndex);
+
+        // Returns the image to the swapchain
+        if (!PresentImage(imageIndex)) return;
+        NC_PROFILE_END();
+    }
+
+    void Graphics::FrameEnd()
+    {
+        // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
+        m_swapchain->IncrementFrameIndex();
+    }
     #ifdef NC_EDITOR_ENABLED
-    m_drawCallCount = 0u;
+    void Graphics::IncrementDrawCallCount()
+    {
+        m_drawCallCount++;
+    }
+    
+    uint32_t Graphics::GetDrawCallCount() const
+    {
+        return m_drawCallCount;
+    }
+
     #endif
-    m_context->ClearRenderTargetView(m_renderTarget, m_clearColor.data());
-    m_context->ClearDepthStencilView(m_dsv, D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
-
-void Graphics::DrawIndexed(UINT count)
-{
-    #ifdef NC_EDITOR_ENABLED
-    ++m_drawCallCount;
-    #endif
-    m_context->DrawIndexed(count, 0u, 0u);
-}
-
-void Graphics::FrameEnd()
-{
-    THROW_FAILED(m_swapChain->Present(1u, 0u));
-}
-
-void Graphics::CreateDeviceAndSwapchain(HWND hwnd)
-{
-    //d3d core init
-    auto sd = DXGI_SWAP_CHAIN_DESC
-    {
-        //struct BufferDesc
-        { 0, 0,                                //Width, Height, 
-        { 0, 0 },                              //RefreshRate {Num,Den}
-        DXGI_FORMAT_B8G8R8A8_UNORM,            //Format
-        DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,  //ScanlineOrdering
-        DXGI_MODE_SCALING_UNSPECIFIED },       //Scaling
-        { 4, 0 },                              //struct SampleDesc {Count,Quality}
-        DXGI_USAGE_RENDER_TARGET_OUTPUT, 2,    //BufferUsage, BufferCount
-        hwnd, TRUE, DXGI_SWAP_EFFECT_DISCARD,  //OutputWindow, Windowed, SwapEffect,
-        DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH //Flags (Allows full-screen mode)
-    };
-    THROW_FAILED
-    (
-        D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE,
-                                      nullptr, 0, nullptr, 0,
-                                      D3D11_SDK_VERSION, &sd, &m_swapChain,
-                                      &m_device, nullptr, &m_context)
-    );
-}
-
-void Graphics::CreateRenderTargetViewFromBackBuffer()
-{
-    ID3D11Resource* backBuffer = nullptr;
-    THROW_FAILED(m_swapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&backBuffer)));
-    THROW_FAILED(m_device->CreateRenderTargetView(backBuffer, nullptr, &m_renderTarget));
-    backBuffer->Release();
-}
-
-void Graphics::CreateDepthStencilView(float width, float height) 
-{
-    //depth stencil texture
-    ID3D11Texture2D* depthStencilTexture;
-    auto depthTextDesc = D3D11_TEXTURE2D_DESC
-    {
-        (unsigned int)width,      //Width
-        (unsigned int)height,     //Height
-        1u, 1u,                   //MipLevels, ArraySize
-        DXGI_FORMAT_D32_FLOAT,    //Format
-        { 4u, 0u },               //SampleDesc {Count, Quality}
-        D3D11_USAGE_DEFAULT,      //Usage
-        D3D11_BIND_DEPTH_STENCIL, //BindFlags
-        0u, 0u                    //CPUFlags, MiscFlags
-    };
-    THROW_FAILED(m_device->CreateTexture2D(&depthTextDesc, nullptr, &depthStencilTexture));
-
-    //create depth stencil texture view
-    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-    dsvDesc.Format                        = DXGI_FORMAT_D32_FLOAT;
-    dsvDesc.ViewDimension                 = D3D11_DSV_DIMENSION_TEXTURE2DMS;
-    dsvDesc.Texture2D.MipSlice            = 0u;
-    THROW_FAILED(m_device->CreateDepthStencilView(depthStencilTexture, &dsvDesc, &m_dsv));
-    depthStencilTexture->Release();
-}
-
-void Graphics::BindDepthStencilView()
-{
-    m_context->OMSetRenderTargets(1u, &m_renderTarget, m_dsv);
-}
-
-void Graphics::ConfigureViewport(float width, float height)
-{
-    auto viewport = D3D11_VIEWPORT
-    {
-        0.0f,  0.0f,   //TopLeftX, TopLeftY
-        width, height, //Width, Height
-        0.0f,  1.0f    //MinDepth, MaxDepth
-    };
-    m_context->RSSetViewports(1u, &viewport);
-}
-
-#ifdef NC_EDITOR_ENABLED
-uint32_t Graphics::GetDrawCallCount() const
-{
-    return m_drawCallCount;
-}
-#endif
-
-} // end namespace nc::graphics
-

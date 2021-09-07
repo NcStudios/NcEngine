@@ -12,7 +12,7 @@ namespace nc::sample
     void Worms::Load(registry_type* registry)
     {
         // Setup
-        m_sceneHelper.Setup(registry, false);
+        m_sceneHelper.Setup(registry, false, false);
         prefab::InitializeResources();
 
         // Camera
@@ -20,20 +20,23 @@ namespace nc::sample
         auto camera = registry->Add<Camera>(cameraEntity);
         camera::SetMainCamera(camera);
 
+        // Window
+        window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});
+
         // Light
-        auto lightProperties = PointLight::Properties
+        auto lightOneProperties = PointLightInfo
         {
             .pos = Vector3::Zero(),
-            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-            .diffuseIntensity = 3.56,
+            .ambient = Vector3{0.05f, 0.05f, 0.05f},
+            .diffuseColor = Vector3{0.3, 0.3, 0.3},
+            .diffuseIntensity = 10.56,
             .attConst = 0.0f,
             .attLin = 0.05f,
             .attQuad = 0.0f
         };
 
         auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});
-        registry->Add<PointLight>(lightHandle, lightProperties);
+        registry->Add<PointLight>(lightHandle, lightOneProperties);
         registry->Add<MouseFollower>(lightHandle, registry);
 
         // Worm Spawner

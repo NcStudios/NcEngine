@@ -3,7 +3,7 @@
 #include "debug/Profiler.h"
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
-#include "graphics/d3dresource/GraphicsResourceManager.h"
+#include "graphics/resources/ResourceManager.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls
@@ -21,7 +21,6 @@ namespace nc::ui::editor::controls
     inline void EntityPanel(registry_type* registry, Entity entity);
     inline void AutoComponentElement(AutoComponent* comp);
     inline void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
-    inline void GraphicsResourcePanel();
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
     inline void ComponentSystems(registry_type* registry);
@@ -110,43 +109,38 @@ namespace nc::ui::editor::controls
         ImGui::Text("Layer   %d", EntityUtils::Layer(entity));
         ImGui::Text("Static  %s", EntityUtils::IsStatic(entity) ? "True" : "False");
 
-        if(auto* transform = registry->Get<Transform>(entity); transform)
+        if (auto* transform = registry->Get<Transform>(entity); transform)
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(transform);
         }
 
-        if(auto* renderer = registry->Get<Renderer>(entity))
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(renderer);
-        }
+        if (auto* meshRenderer = registry->Get<MeshRenderer>(entity))
+            ComponentGuiElement(meshRenderer);
 
-        if(auto* body = registry->Get<PhysicsBody>(entity))
+        if (auto* pointLight = registry->Get<PointLight>(entity))
+            ComponentGuiElement(pointLight);
+
+        if (auto* body = registry->Get<PhysicsBody>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(body);
         }
 
-        if(auto* emitter = registry->Get<ParticleEmitter>(entity))
+        if (auto* emitter = registry->Get<ParticleEmitter>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
+        
         }
 
-        if(auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
+        if (auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(dispatcher);
         }
 
-        if(auto* light = registry->Get<PointLight>(entity))
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(light);
-        }
-
-        if(auto* col = registry->Get<Collider>(entity); col)
+        if (auto* col = registry->Get<Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
             col->SetEditorSelection(true);
@@ -204,7 +198,6 @@ namespace nc::ui::editor::controls
             {
                 WrapTabItem("Profiler", Profiler);
                 WrapTabItem("Systems", ComponentSystems, registry);
-                WrapTabItem("Gfx Resources", GraphicsResourcePanel);
                 ImGui::EndTabBar();
             }
 
@@ -314,20 +307,10 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
         ComponentSystemHeader<PhysicsBody>("Physics Body", registry->ViewAll<PhysicsBody>());
-        ComponentSystemHeader<PointLight>("Point Light", registry->ViewAll<PointLight>());
-        ComponentSystemHeader<Renderer>("Renderer", registry->ViewAll<Renderer>());
         ComponentSystemHeader<Transform>("Transform", registry->ViewAll<Transform>());
+        ComponentSystemHeader<nc::MeshRenderer>("Mesh Renderer", registry->ViewAll<nc::MeshRenderer>());
+        ComponentSystemHeader<nc::PointLight>("Point Light", registry->ViewAll<nc::PointLight>());
     }
 
-    void GraphicsResourcePanel()
-    {
-        static ImGuiTextFilter filter;
-        filter.Draw("##gfxFilterId", 128.0f);
-        for(auto& [id, res] : graphics::d3dresource::GraphicsResourceManager::Get().m_resources)
-        {
-            if(filter.PassFilter(id.c_str()))
-                ImGui::Text(id.c_str());
-        }
-    }
 } // end namespace nc::ui::editor
 #endif

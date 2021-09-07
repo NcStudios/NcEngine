@@ -1,5 +1,6 @@
 #include "ParticleEmitterSystem.h"
 #include "graphics/Graphics.h"
+#include "graphics/Renderer.h"
 
 #include <algorithm>
 
@@ -18,21 +19,12 @@ namespace
 
 namespace nc::ecs
 {
-    #ifdef USE_VULKAN
-    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry)
-    #else
     ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics)
-    #endif
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
-          #ifdef USE_VULKAN
-          m_graphicsData{nullptr},
-          m_renderer{nullptr}
-          #else
           m_graphicsData{CreateParticleGraphicsData(graphics)},
-          m_renderer{graphics}
-          #endif
+          m_graphics{graphics}    
     {
         registry->RegisterOnAddCallback<ParticleEmitter>
         (
@@ -51,11 +43,6 @@ namespace nc::ecs
         {
             state.Update(dt);
         }
-    }
-
-    void ParticleEmitterSystem::RenderParticles()
-    {
-        m_renderer.Render(m_emitterStates);
     }
 
     void ParticleEmitterSystem::ProcessFrameEvents()
@@ -100,10 +87,11 @@ namespace nc::ecs
         pos->Emit(count);
     }
 
-    void ParticleEmitterSystem::Add(ParticleEmitter& emitter)
+    void ParticleEmitterSystem::Add(ParticleEmitter&)
     {
-        emitter.RegisterSystem(this);
-        m_toAdd.emplace_back(emitter.GetParentEntity(), emitter.GetInfo(), &m_graphicsData);
+        // m_graphics->GetRendererPtr()->RegisterParticleEmitter(&m_emitterStates);
+        // m_toAdd.emplace_back(emitter.GetParentEntity(), emitter.GetInfo(), &m_graphicsData);
+        // emitter.RegisterSystem(this);
     }
 
     void ParticleEmitterSystem::Remove(Entity entity)
@@ -119,5 +107,6 @@ namespace nc::ecs
         m_toAdd.shrink_to_fit();
         m_toRemove.clear();
         m_toRemove.shrink_to_fit();
+        // m_graphics->GetRendererPtr()->ClearParticleEmitters();
     }
 } // namespace nc::ecs

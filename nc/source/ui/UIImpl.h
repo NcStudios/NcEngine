@@ -4,18 +4,18 @@
 #include "ui/IUI.h"
 #include "editor/Editor.h"
 
-namespace nc::graphics { class Graphics; }
+namespace nc::graphics 
+{ 
+    class Graphics;
+}
 
 namespace nc::ui
 {
     class UIImpl
     {
         public:
-            #ifdef NC_EDITOR_ENABLED
             UIImpl(HWND hwnd, graphics::Graphics* graphics);
-            #else
-            UIImpl(HWND hwnd, graphics::Graphics* graphics);
-            #endif
+
             ~UIImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -39,5 +39,8 @@ namespace nc::ui
             #endif
             
             IUI* m_projectUI;
+            
+            graphics::Graphics* m_graphics;
+
     };
 } // namespace nc::ui

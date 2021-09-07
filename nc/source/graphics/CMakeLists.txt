@@ -1,39 +1,20 @@
-target_sources(${ENGINE_LIB} 
+target_sources(${ENGINE_LIB}
     PRIVATE
+        ${ROOT_DIR}/source/graphics/Base.cpp
+        ${ROOT_DIR}/source/graphics/Commands.cpp
         ${ROOT_DIR}/source/graphics/Graphics.cpp
-        ${ROOT_DIR}/source/graphics/Model.cpp
-        ${ROOT_DIR}/source/graphics/d3dresource/GraphicsResource.cpp
-        ${ROOT_DIR}/source/graphics/d3dresource/ShaderResources.cpp
-        ${ROOT_DIR}/source/graphics/d3dresource/MeshResources.cpp
-        ${ROOT_DIR}/source/graphics/d3dresource/ConstantBufferResources.cpp
-        ${ROOT_DIR}/source/graphics/Mesh.cpp
-        ${ROOT_DIR}/source/graphics/WICTextureLoader.cpp
-        ${ROOT_DIR}/source/graphics/Material.cpp
-        ${ROOT_DIR}/source/graphics/techniques/DebugTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/Technique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/ParticleTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/PhongShadingTechnique.cpp
+        ${ROOT_DIR}/source/graphics/MeshManager.cpp
+        ${ROOT_DIR}/source/graphics/Initializers.cpp
+        ${ROOT_DIR}/source/graphics/Renderer.cpp
+        ${ROOT_DIR}/source/graphics/resources/DepthStencil.cpp
+        ${ROOT_DIR}/source/graphics/resources/GraphicsResources.cpp
+        ${ROOT_DIR}/source/graphics/resources/Material.cpp
+        ${ROOT_DIR}/source/graphics/resources/ImmutableImage.cpp
+        ${ROOT_DIR}/source/graphics/techniques/PhongAndUiTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/WireframeTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/TechniqueManager.cpp
-        ${ROOT_DIR}/source/graphics/ResourceGroup.cpp
-        ${ROOT_DIR}/source/graphics/rendergraph/FrameManager.cpp
-        ${ROOT_DIR}/source/graphics/rendergraph/Job.cpp
-        ${ROOT_DIR}/source/graphics/rendergraph/Pass.cpp
+        ${ROOT_DIR}/source/graphics/techniques/ParticleTechnique.cpp
+        ${ROOT_DIR}/source/graphics/ShaderUtilities.cpp
+        ${ROOT_DIR}/source/graphics/Swapchain.cpp
+        ${ROOT_DIR}/source/graphics/TextureManager.cpp
+        ${ROOT_DIR}/source/graphics/vma.cpp
 )
-
-if(USE_VULKAN)
-    target_sources(${ENGINE_LIB}
-        PRIVATE
-            ${ROOT_DIR}/source/graphics/Graphics2.cpp
-            ${ROOT_DIR}/source/graphics/DummyModel.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/Base.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/Commands.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/Swapchain.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/FrameManager.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/resources/VertexBuffer.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/resources/IndexBuffer.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/resources/DepthStencil.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/techniques/TechniqueBase.cpp
-            ${ROOT_DIR}/source/graphics/vulkan/techniques/SimpleTechnique.cpp
-    )
-endif()

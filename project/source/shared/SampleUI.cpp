@@ -12,7 +12,8 @@
 #include "collision_events/CollisionEvents.h"
 #include "joints_test/JointsTest.h"
 #include "rendering_benchmark/RenderingBenchmark.h"
-#include "solar_system/SolarSystem.h"
+#include "jare_scratch/VulkanScene.h"
+// #include "solar_system/SolarSystem.h"
 
 namespace
 {
@@ -130,9 +131,10 @@ namespace nc::sample
                 scene::Change(std::make_unique<CollisionBenchmark>());
 
             if(ImGui::Button("Jare Scratch", buttonSize))
-            {}
-            if(ImGui::Button("Solar System", buttonSize))
-                scene::Change(std::make_unique<SolarSystem>());
+                scene::Change(std::make_unique<VulkanScene>());
+
+            // if(ImGui::Button("Solar System", buttonSize))
+            //     scene::Change(std::make_unique<SolarSystem>());
         } ImGui::EndChild();
     }
 

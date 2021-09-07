@@ -44,6 +44,7 @@ namespace nc::particle
             void Emit(size_t count);
             void Update(float dt);
             const ParticleSoA* GetSoA() const;
+            ParticleInfo* GetInfo();
             Entity GetEntity() const;
 
         private:
