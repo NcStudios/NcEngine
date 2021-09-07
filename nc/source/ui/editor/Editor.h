@@ -5,7 +5,10 @@
 
 namespace nc 
 {
-    namespace graphics { class Graphics; }
+    namespace graphics 
+    { 
+        class Graphics;
+    }
 }
 
 namespace nc::ui::editor

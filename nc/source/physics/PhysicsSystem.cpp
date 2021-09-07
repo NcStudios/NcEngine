@@ -30,11 +30,7 @@ namespace nc::physics
         g_physicsSystem->RemoveAllJoints(entity);
     }
 
-    #ifdef USE_VULKAN
-    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics2* graphics, job::JobSystem* jobSystem)
-    #else
     PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics* graphics, job::JobSystem* jobSystem)
-    #endif
         : m_cache{},
           m_joints{},
           m_bspTree{registry},

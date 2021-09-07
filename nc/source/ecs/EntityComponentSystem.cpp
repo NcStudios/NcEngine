@@ -2,17 +2,12 @@
 
 namespace nc::ecs
 {
-    #ifdef USE_VULKAN
-    EntityComponentSystem::EntityComponentSystem(const config::MemorySettings& memSettings)
-    #else
-    EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics, const config::MemorySettings& memSettings)
-    #endif
+    EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
+                                                 const config::MemorySettings& memSettings)
         : m_registry{memSettings.maxTransforms},
-          #ifdef USE_VULKAN
-          m_particleEmitterSystem{&m_registry}
-          #else
-          m_particleEmitterSystem{&m_registry, graphics}
-          #endif
+          m_particleEmitterSystem{&m_registry, graphics},
+          m_meshRendererSystem{&m_registry, graphics},
+          m_pointLightSystem{&m_registry, graphics}
     {
         internal::SetActiveRegistry(&m_registry);
     }
@@ -21,5 +16,7 @@ namespace nc::ecs
     {
         m_registry.Clear();
         m_particleEmitterSystem.Clear();
+        m_pointLightSystem.Clear();
+        m_meshRendererSystem.Clear();
     }
 } // end namespace nc::ecs

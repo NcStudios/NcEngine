@@ -1,2 +1,0 @@
-D:\VulkanSDK\1.2.162.1\Bin\glslc.exe %~dp0\..\project\shaders\Vulkan\shader.vert -o %~dp0\..\project\shaders\Vulkan\Compiled\vert.spv
-D:\VulkanSDK\1.2.162.1\Bin\glslc.exe %~dp0\..\project\shaders\Vulkan\shader.frag -o %~dp0\..\project\shaders\Vulkan\Compiled\frag.spv

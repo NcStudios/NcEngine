@@ -9,7 +9,6 @@
 #ifdef NC_DEBUG_RENDERING
 
 #include "graphics/MvpMatrices.h"
-#include "graphics/d3dresource/ConstantBufferResources.h"
 #include "graphics/techniques/DebugTechnique.h"
 #include "graphics/techniques/TechniqueManager.h"
 #include "graphics/Graphics.h"

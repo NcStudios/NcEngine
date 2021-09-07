@@ -6,12 +6,7 @@
 #include "MainCamera.h"
 #include "Window.h"
 #include "directx/math/DirectXMath.h"
-
-#ifdef USE_VULKAN
-#include "graphics/Graphics2.h"
-#else
 #include "graphics/Graphics.h"
-#endif
 
 #include <algorithm>
 #include <limits>
@@ -44,11 +39,7 @@ namespace nc::physics
     /** System Implementation */
     ClickableSystem::ClickableSystem
     (
-        #ifdef USE_VULKAN
-        graphics::Graphics2* graphics
-        #else
         graphics::Graphics* graphics
-        #endif
     )
         : m_clickableComponents{},
           m_graphics{graphics}

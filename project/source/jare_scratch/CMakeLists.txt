@@ -1,4 +1,4 @@
 target_sources(${GAME_EXE}
-    PRIVATE
+    PRIVATE 
         ${ROOT_DIR}/source/jare_scratch/VulkanScene.cpp
 )

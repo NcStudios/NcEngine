@@ -31,4 +31,13 @@ namespace nc
            << m._41 << ", " << m._42 << ", " << m._43 << ", " << m._44 << '\n';
         return os;
     }
+
+    std::ostream& operator << (std::ostream& os, DirectX::XMVECTOR vector)
+    {
+        DirectX::XMFLOAT3 m;
+        DirectX::XMStoreFloat3(&m, vector);
+
+        os << m.x << ", " << m.y << ", " << m.z << '\n';
+        return os;
+    }
 } // namespace nc

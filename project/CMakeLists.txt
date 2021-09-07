@@ -7,7 +7,7 @@ endif()
 
 #Options
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
-option(USE_VULKAN "Use Vulkan rather than DirectX" OFF)
+option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior sanitizer" OFF)
@@ -50,8 +50,8 @@ set_target_properties(${SERVER_EXE}
 #Definitions
 add_definitions(${WIN32_DEFINITIONS})
 
-if(USE_VULKAN)
-    add_definitions(-DUSE_VULKAN)
+if(NC_USE_VALIDATION)
+    add_definitions(-DNC_USE_VALIDATION)
 endif()
 
 if(NC_EDITOR_ENABLED)
@@ -107,15 +107,10 @@ target_link_libraries(${GAME_EXE}
         ${WIN32_LINK_FLAGS}
 )
 
-if(USE_VULKAN)
-    target_link_libraries(${GAME_EXE}
-        PRIVATE
-            Vulkan::Vulkan
-            ${LIB_DIR}/glfw3.dll
-            ${LIB_DIR}/libglfw3dll.a
-            ${LIB_DIR}/libglfw3.a
-    )
-endif()
+target_link_libraries(${GAME_EXE}
+    PRIVATE
+        Vulkan::Vulkan
+)
 
 if(PROFILING_ENABLED)
     target_link_options(${GAME_EXE}
@@ -136,6 +131,6 @@ add_subdirectory(source/jare_scratch)
 add_subdirectory(source/joints_test)
 add_subdirectory(source/rendering_benchmark)
 add_subdirectory(source/shared)
-add_subdirectory(source/solar_system)
+# add_subdirectory(source/solar_system)
 add_subdirectory(source/spawn_test)
 add_subdirectory(source/worms)
