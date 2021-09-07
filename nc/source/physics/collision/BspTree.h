@@ -5,7 +5,7 @@
 
 namespace nc::physics
 {
-    /** Internal MeshCollider representation */
+    /** Internal ConcaveCollider representation */
     struct TriMesh
     {
         std::vector<Triangle> triangles;
@@ -49,7 +49,7 @@ namespace nc::physics
 
         public:
             BspTree(registry_type* registry);
-            void OnAdd(MeshCollider& collider);
+            void OnAdd(ConcaveCollider& collider);
             void OnRemove(Entity entity);
             void Clear();
             auto CheckCollisions(std::span<const DirectX::XMMATRIX> matrices,

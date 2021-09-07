@@ -15,7 +15,7 @@ enum class AssetType
 {
     Mesh,
     ConvexHull,
-    MeshCollider
+    ConcaveCollider
 };
 
 struct Target
@@ -52,8 +52,8 @@ constexpr auto ConvexHullFlags = aiProcess_Triangulate |
                                  aiProcess_JoinIdenticalVertices |
                                  aiProcess_ConvertToLeftHanded;
 
-constexpr auto MeshColliderFlags = aiProcess_Triangulate |
-                                   aiProcess_ConvertToLeftHanded;
+constexpr auto ConcaveColliderFlags = aiProcess_Triangulate |
+                                      aiProcess_ConvertToLeftHanded;
 
 void Usage();
 bool ParseArgs(int argc, char** argv, Config* config);
@@ -67,7 +67,7 @@ void SanitizeVector(aiVector3D* value, bool* badValueDetected);
 void BuildAsset(Assimp::Importer* importer, const Target& inPath, const Config& config);
 void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 void BuildConvexHullAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
-void BuildMeshColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
+void BuildConcaveColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D;
 auto GetConvexHullExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&;
@@ -108,7 +108,7 @@ void Usage()
               << "  -m <manifest>           Parse multiple assets from <manifest>\n"
               << "  -o <dir>                Output assets to <dir>\n\n"
               
-              << "  Valid asset types are 'mesh', 'hull-collider', and 'mesh-collider' and are\n"
+              << "  Valid asset types are 'mesh', 'hull-collider', and 'concave-collider' and are\n"
               << "  case-insensitive.\n\n"
 
               << "  When using -m, <manifest> should be the path to a newline-separated list of\n"
@@ -187,8 +187,8 @@ auto GetAssetType(std::string type) -> AssetType
         return AssetType::Mesh;
     else if(type.compare("hull-collider") == 0)
         return AssetType::ConvexHull;
-    else if(type.compare("mesh-collider") == 0)
-        return AssetType::MeshCollider;
+    else if(type.compare("concave-collider") == 0)
+        return AssetType::ConcaveCollider;
     
     throw std::runtime_error("Failed to parse asset type: " + type);
 }
@@ -293,9 +293,9 @@ void BuildAsset(Assimp::Importer* importer, const Target& target, const Config& 
             BuildConvexHullAsset(importer, target.path, config);
             break;
         }
-        case AssetType::MeshCollider:
+        case AssetType::ConcaveCollider:
         {
-            BuildMeshColliderAsset(importer, target.path, config);
+            BuildConcaveColliderAsset(importer, target.path, config);
             break;
         }
     }
@@ -390,18 +390,18 @@ void BuildConvexHullAsset(Assimp::Importer* importer, const std::filesystem::pat
     outFile.close();
 }
 
-void BuildMeshColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
+void BuildConcaveColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config)
 {
     if (!IsValidMeshExtension(inPath.extension()))
         throw std::runtime_error("Invalid mesh file extension: " + inPath.string());
 
     const auto assetPath = ToAssetPath(inPath, config);
-    std::cout << "Creating Mesh Collider: " << assetPath << '\n';
+    std::cout << "Creating Concave Collider: " << assetPath << '\n';
     std::ofstream outFile{assetPath};
     if(!outFile)
         throw std::runtime_error("Failure opening asset file");
 
-    const auto pModel = importer->ReadFile(inPath.string(), MeshColliderFlags);
+    const auto pModel = importer->ReadFile(inPath.string(), ConcaveColliderFlags);
     if(!pModel)
         throw std::runtime_error("AssImp failure");
 

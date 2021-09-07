@@ -1,4 +1,4 @@
-#include "component/MeshCollider.h"
+#include "component/ConcaveCollider.h"
 
 #include <stdexcept>
 
@@ -8,19 +8,19 @@
 
 namespace nc
 {
-    MeshCollider::MeshCollider(Entity entity, std::string assetPath)
+    ConcaveCollider::ConcaveCollider(Entity entity, std::string assetPath)
         : ComponentBase(entity),
           m_path{std::move(assetPath)}
     {
         if(!EntityUtils::IsStatic(entity))
-            throw std::runtime_error("MeshCollider - Cannot be added to a non-static entity");
+            throw std::runtime_error("ConcaveCollider - Cannot be added to a non-static entity");
     }
 
     #ifdef NC_EDITOR_ENABLED
-    template<> void ComponentGuiElement<MeshCollider>(MeshCollider* collider)
+    template<> void ComponentGuiElement<ConcaveCollider>(ConcaveCollider* collider)
     {
         const auto& path = collider->GetPath();
-        ImGui::Text("MeshCollider");
+        ImGui::Text("ConcaveCollider");
         ImGui::Text("  Path: %s", path.c_str());
     }
     #endif

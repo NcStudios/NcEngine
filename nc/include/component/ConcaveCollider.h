@@ -4,10 +4,10 @@
 
 namespace nc
 {
-    class MeshCollider final : public ComponentBase
+    class ConcaveCollider final : public ComponentBase
     {
         public:
-            MeshCollider(Entity entity, std::string assetPath);
+            ConcaveCollider(Entity entity, std::string assetPath);
             auto GetPath() const -> const std::string& { return m_path; }
 
         private:
@@ -15,7 +15,7 @@ namespace nc
     };
 
     template<>
-    struct StoragePolicy<MeshCollider>
+    struct StoragePolicy<ConcaveCollider>
     {
         using allow_trivial_destruction = std::false_type;
         using sort_dense_storage_by_address = std::true_type;
@@ -24,6 +24,6 @@ namespace nc
     };
 
     #ifdef NC_EDITOR_ENABLED
-    template<> void ComponentGuiElement<MeshCollider>(MeshCollider*);
+    template<> void ComponentGuiElement<ConcaveCollider>(ConcaveCollider*);
     #endif
 }

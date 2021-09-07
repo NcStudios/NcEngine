@@ -154,7 +154,7 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(col);
         }
 
-        if(auto* col = registry->Get<MeshCollider>(entity); col)
+        if(auto* col = registry->Get<ConcaveCollider>(entity); col)
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(col);

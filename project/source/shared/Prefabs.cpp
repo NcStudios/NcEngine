@@ -132,8 +132,8 @@ void InitializeResources()
     isInitialized = true;
 
     LoadConvexHullAsset("project/assets/mesh_colliders/coin.nca");
-    LoadMeshColliderAsset("project/assets/mesh_colliders/plane.nca");
-    LoadMeshColliderAsset("project/assets/mesh_colliders/ramp.nca");
+    LoadConcaveColliderAsset("project/assets/mesh_colliders/plane.nca");
+    LoadConcaveColliderAsset("project/assets/mesh_colliders/ramp.nca");
 
     graphics::LoadMeshAsset("project/assets/mesh/beeper.nca");
     graphics::LoadMeshAsset("project/assets/mesh/capsule.nca");

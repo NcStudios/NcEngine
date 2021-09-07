@@ -37,11 +37,11 @@ namespace nc
         AssetManager::LoadConvexHull(path, ConvexHullFlyweight{std::move(vertices), extents, maxExtent});
     }
 
-    void LoadMeshColliderAsset(const std::string& path)
+    void LoadConcaveColliderAsset(const std::string& path)
     {
         std::ifstream file{path};
         if(!file.is_open())
-            throw std::runtime_error("LoadMeshColliderAsset - Could not open file: " + path);
+            throw std::runtime_error("LoadConcaveColliderAsset - Could not open file: " + path);
 
         size_t triangleCount;
         float maxExtent;
@@ -54,12 +54,12 @@ namespace nc
         for(size_t i = 0u; i < triangleCount; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("LoadMeshColliderAsset - Failure reading file: " + path);
+                throw std::runtime_error("LoadConcaveColliderAsset - Failure reading file: " + path);
 
             file >> a >> b >> c;
             triangles.emplace_back(a, b, c);
         }
 
-        AssetManager::LoadMeshCollider(path, MeshColliderFlyweight{std::move(triangles), maxExtent});
+        AssetManager::LoadConcaveCollider(path, ConcaveColliderFlyweight{std::move(triangles), maxExtent});
     }
 } // namespace nc
