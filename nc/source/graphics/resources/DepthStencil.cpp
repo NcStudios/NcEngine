@@ -34,7 +34,7 @@ namespace nc::graphics
         m_view = m_base->GetDevice().createImageView(imageViewInfo);
     }
 
-    DepthStencil::DepthStencil(vulkan::Base* base, Vector2 dimensions, vk::Format depthFormat)
+    DepthStencil::DepthStencil(Base* base, Vector2 dimensions, vk::Format depthFormat)
     : m_base{base},
       m_image{},
       m_view{},

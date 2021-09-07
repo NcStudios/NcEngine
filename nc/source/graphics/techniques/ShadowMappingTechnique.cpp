@@ -1,22 +1,22 @@
 #include "ShadowMappingTechnique.h"
-#include "Ecs.h"
 #include "config/Config.h"
+#include "Ecs.h"
+#include "component/MeshRenderer.h"
+#include "component/PointLight.h"
 #include "component/Transform.h"
-#include "component/vulkan/MeshRenderer.h"
-#include "component/vulkan/PointLight.h"
-#include "graphics/vulkan/MeshManager.h"
 #include "debug/Profiler.h"
-#include "graphics/Graphics2.h"
-#include "graphics/vulkan/Initializers.h"
-#include "graphics/vulkan/ShaderUtilities.h"
-#include "graphics/vulkan/Swapchain.h"
-#include "graphics/vulkan/Base.h"
-#include "graphics/vulkan/resources/ResourceManager.h"
+#include "graphics/Base.h"
+#include "graphics/Graphics.h"
+#include "graphics/Initializers.h"
+#include "graphics/MeshManager.h"
+#include "graphics/ShaderUtilities.h"
+#include "graphics/Swapchain.h"
+#include "graphics/resources/ResourceManager.h"
 
 
-namespace nc::graphics::vulkan
+namespace nc::graphics
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(nc::graphics::Graphics2* graphics, vk::RenderPass* renderPass)
+    ShadowMappingTechnique::ShadowMappingTechnique(Graphics* graphics, vk::RenderPass* renderPass)
     : 
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
@@ -54,7 +54,7 @@ namespace nc::graphics::vulkan
     void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().vulkanShadersPath;
+        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
 
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
@@ -105,7 +105,7 @@ namespace nc::graphics::vulkan
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, registry_type* registry, std::span<nc::vulkan::PointLight> pointLights, std::span<nc::vulkan::MeshRenderer> meshRenderers)
+    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, registry_type* registry, std::span<nc::PointLight> pointLights, std::span<nc::MeshRenderer> meshRenderers)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 

@@ -192,16 +192,15 @@ namespace nc::core
         m_ecs.GetMeshRendererSystem()->Update();
 
         auto* renderer = m_graphics.GetRendererPtr();
-        
-        #ifdef NC_EDITOR_ENABLED
         auto* registry = m_ecs.GetRegistry();
 
+        #ifdef NC_EDITOR_ENABLED
         for(auto& collider : registry->ViewAll<Collider>())
             collider.UpdateWidget(renderer);
         #endif
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics2.GetCommandsPtr(), registry);
+        renderer->Record(m_graphics.GetCommandsPtr(), registry);
 
         m_graphics.Draw();
         m_graphics.FrameEnd();

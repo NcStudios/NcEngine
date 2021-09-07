@@ -31,7 +31,7 @@ namespace nc::graphics
       m_shadowMappingTechnique{nullptr}
     //   m_particleTechnique{nullptr}
     {
-        InitializeShadowMappingRenderPass(m_graphics->GetSwapchainPtr());
+        InitializeShadowMappingRenderPass();
     }
 
     Renderer::~Renderer()
@@ -174,7 +174,7 @@ namespace nc::graphics
         NC_PROFILE_END();
     }
 
-    void Renderer::InitializeShadowMappingRenderPass(vulkan::Swapchain* swapchain)
+    void Renderer::InitializeShadowMappingRenderPass()
     {
         auto device = m_graphics->GetBasePtr()->GetDevice();
 
