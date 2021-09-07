@@ -68,14 +68,15 @@ namespace nc::core
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
-          m_jobSystem{4},
+          m_jobSystem{2},
           m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_renderer{ &m_graphics },
+          m_renderer{&m_graphics},
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physics{ &m_graphics, &m_jobSystem},
+          m_physics{m_ecs.GetRegistry(), &m_graphics, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
+          m_assetManager{},
           m_ui{m_window.GetHWND(), &m_graphics}
     {
         m_graphics.SetRenderer(&m_renderer);
@@ -100,7 +101,7 @@ namespace nc::core
         while(m_isRunning)
         {
             m_time.UpdateTime();
-            m_window.ProcessSystemMessages(); 
+            m_window.ProcessSystemMessages();
 
             auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);

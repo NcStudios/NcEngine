@@ -51,7 +51,7 @@ namespace
             case ColliderType::Hull:
             {
                 /** Estimated with a bounding box */
-                const auto& hull = std::get<HullCollider>(collider->GetVolume());
+                const auto& hull = std::get<ConvexHull>(collider->GetVolume());
                 scale = HadamardProduct(scale, hull.extents);
                 auto squareScale = HadamardProduct(scale, scale);
                 auto m = mass / 12.0f;

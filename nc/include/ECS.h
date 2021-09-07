@@ -3,6 +3,7 @@
 #include "Entity.h"
 #include "component/AutoComponentGroup.h"
 #include "component/Collider.h"
+#include "component/ConcaveCollider.h"
 #include "component/NetworkDispatcher.h"
 #include "component/ParticleEmitter.h"
 #include "component/PhysicsBody.h"
@@ -16,6 +17,7 @@ namespace nc
 {
     using registry_type_list = ecs::RegistryTypeList<AutoComponentGroup,
                                                      Collider,
+                                                     ConcaveCollider,
                                                      NetworkDispatcher,
                                                      ParticleEmitter,
                                                      PhysicsBody,

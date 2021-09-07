@@ -30,11 +30,11 @@ namespace nc::physics
         g_physicsSystem->RemoveAllJoints(entity);
     }
 
-    PhysicsSystem::PhysicsSystem(graphics::Graphics* graphics, job::JobSystem* jobSystem)
+    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics* graphics, job::JobSystem* jobSystem)
         : m_cache{},
           m_joints{},
+          m_bspTree{registry},
           m_clickableSystem{graphics},
-          m_hullColliderManager{},
           m_jobSystem{jobSystem}
           #ifdef NC_DEBUG_RENDERING
           , m_debugRenderer{graphics}
@@ -100,6 +100,7 @@ namespace nc::physics
     void PhysicsSystem::ClearState()
     {
         m_joints.clear();
+        m_bspTree.Clear();
         m_clickableSystem.Clear();
         m_cache.previousPhysics.clear();
         m_cache.previousTrigger.clear();
@@ -137,6 +138,9 @@ namespace nc::physics
         auto physicsResult = FindNarrowPhysicsPairs(colliders, matrices, broadEvents.physics);
         MergeNewContacts(physicsResult, m_cache.manifolds);
         auto triggerEvents = FindNarrowTriggerPairs(colliders, matrices, broadEvents.trigger);
+
+        auto staticResults = m_bspTree.CheckCollisions(matrices, estimates, colliders);
+        MergeNewContacts(staticResults, m_cache.manifolds);
 
         auto constraints = GenerateConstraints(registry, m_cache.manifolds);
         UpdateJoints(registry, m_joints, dt);

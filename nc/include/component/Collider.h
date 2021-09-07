@@ -1,9 +1,11 @@
 #pragma once
 
 #include "component/Component.h"
-#include "physics/CollisionVolumes.h"
+#include "physics/Geometry.h"
 #include "physics/LayerMask.h"
 #include "directx/math/DirectXMath.h"
+
+#include <variant>
 
 namespace nc
 {
@@ -38,6 +40,8 @@ namespace nc
         std::string assetPath;
     };
 
+    using BoundingVolume = std::variant<Box, Sphere, Capsule, ConvexHull>;
+
     class Collider final : public ComponentBase
     {
         public:
@@ -68,7 +72,7 @@ namespace nc
             auto GetVolume() const -> const BoundingVolume& { return m_volume; }
             auto IsTrigger() const -> bool { return m_info.isTrigger; }
             auto IsAwake() const -> bool { return m_awake; }
-            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> SphereCollider;
+            auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
            #ifdef NC_EDITOR_ENABLED
             void UpdateWidget(graphics::Renderer* renderer);

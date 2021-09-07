@@ -1,5 +1,5 @@
 #include "Assets.h"
-#include "HullColliderManager.h"
+#include "AssetManager.h"
 
 #include <fstream>
 
@@ -11,11 +11,11 @@ namespace nc
         return stream;
     }
 
-    void LoadHullColliderAsset(const std::string& path)
+    void LoadConvexHullAsset(const std::string& path)
     {
         std::ifstream file{path};
         if(!file.is_open())
-            throw std::runtime_error("LoadHullColliderAsset - Could not open file: " + path);
+            throw std::runtime_error("LoadConvexHullAsset - Could not open file: " + path);
         
         Vector3 extents;
         float maxExtent;
@@ -28,12 +28,38 @@ namespace nc
         for(size_t i = 0u; i < vertexCount; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("LoadHullColliderAsset - Failure reading file: " + path);
+                throw std::runtime_error("LoadConvexHullAsset - Failure reading file: " + path);
 
             file >> vertex;
             vertices.push_back(vertex);
         }
 
-        HullColliderManager::Load(path, HullColliderFlyweight{std::move(vertices), extents, maxExtent});
+        AssetManager::LoadConvexHull(path, ConvexHullFlyweight{std::move(vertices), extents, maxExtent});
+    }
+
+    void LoadConcaveColliderAsset(const std::string& path)
+    {
+        std::ifstream file{path};
+        if(!file.is_open())
+            throw std::runtime_error("LoadConcaveColliderAsset - Could not open file: " + path);
+
+        size_t triangleCount;
+        float maxExtent;
+        file >> triangleCount >> maxExtent;
+
+        std::vector<Triangle> triangles;
+        triangles.reserve(triangleCount);
+        Vector3 a, b, c;
+
+        for(size_t i = 0u; i < triangleCount; ++i)
+        {
+            if(file.fail())
+                throw std::runtime_error("LoadConcaveColliderAsset - Failure reading file: " + path);
+
+            file >> a >> b >> c;
+            triangles.emplace_back(a, b, c);
+        }
+
+        AssetManager::LoadConcaveCollider(path, ConcaveColliderFlyweight{std::move(triangles), maxExtent});
     }
 } // namespace nc
