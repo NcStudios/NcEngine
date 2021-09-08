@@ -241,7 +241,7 @@ namespace nc::graphics
       m_descriptorSet{nullptr},
       m_descriptorSetLayout{nullptr}
     {
-        InitializeShadowMap();
+        InitializeShadowMap(m_graphics->GetDimensions());
     }
 
     ShadowMapData::~ShadowMapData()
@@ -267,16 +267,16 @@ namespace nc::graphics
         return m_depthStencil->GetImageView();
     }
 
-    void ShadowMapData::ResizeShadowMap()
+    void ShadowMapData::ResizeShadowMap(Vector2 dimensions)
     {
-        InitializeShadowMap();
+        InitializeShadowMap(dimensions);
     }
 
-    void ShadowMapData::InitializeShadowMap()
+    void ShadowMapData::InitializeShadowMap(Vector2 dimensions)
     {
         auto* base = m_graphics->GetBasePtr();
 
-        m_depthStencil = std::make_unique<DepthStencil>(base, m_graphics->GetDimensions(), vk::Format::eD16Unorm);
+        m_depthStencil = std::make_unique<DepthStencil>(base, dimensions, vk::Format::eD16Unorm);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
         vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToEdge);

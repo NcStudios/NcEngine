@@ -68,6 +68,43 @@ const float specularIntensity = 0.6;
 
 layout (set = 3, binding = 0) uniform sampler2D shadowMap;
 
+float textureProj(vec4 shadowCoord, vec2 off)
+{
+	float shadow = 1.0;
+	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) 
+	{
+		float dist = texture( shadowMap, (shadowCoord.st + off) ).r;
+		if ( shadowCoord.w > 0.0 && dist < shadowCoord.z ) 
+		{
+			shadow = 0.1;
+		}
+	}
+	return shadow;
+}
+
+float filterPCF(vec4 sc)
+{
+	ivec2 texDim = textureSize(shadowMap, 0);
+	float scale = 1.5;
+	float dx = scale * 1.0 / float(texDim.x);
+	float dy = scale * 1.0 / float(texDim.y);
+
+	float shadowFactor = 0.0;
+	int count = 0;
+	int range = 1;
+	
+	for (int x = -range; x <= range; x++)
+	{
+		for (int y = -range; y <= range; y++)
+		{
+			shadowFactor += textureProj(sc, vec2(dx*x, dy*y));
+			count++;
+		}
+	
+	}
+	return shadowFactor / count;
+}
+
 vec3 CalculatePointLight(PointLight light, vec3 calculatedNormal, vec3 baseColor, vec3 roughnessColor)
 {
     const vec3 vToL = light.lightPos - inViewPosition;
@@ -86,30 +123,8 @@ vec3 CalculatePointLight(PointLight light, vec3 calculatedNormal, vec3 baseColor
     const vec3 viewCamToFrag = normalize(inViewPosition);
     const vec3 specular = att * light.diffuseColor * roughnessColor.rrr * light.diffuseIntensity * pow(max(0.0, dot(-r, viewCamToFrag)), specularPower);
 
-    return clamp(((diffuse + light.ambientColor * 0.75) * baseColor + specular), 0.0, 1.0);
+    return (clamp(((diffuse + light.ambientColor * 0.75) * baseColor + specular), 0.0, 1.0));
 }
-
-float CalculateShadowFactor()
-{
-    // Convert to normalized device coordinates
-    vec3 lightSpaceCoords = inLightSpacePosition.xyz / inLightSpacePosition.w;
-
-    if (abs(lightSpaceCoords.x) > 1.0 || 
-        abs(lightSpaceCoords.y) > 1.0 ||
-        abs(lightSpaceCoords.z) > 1.0)
-    return 0.0;
-
-    // Translate from NDC to shadow map space
-    vec2 shadowMapCoords = lightSpaceCoords.xy * 0.5 + 0.5;
-
-    if (lightSpaceCoords.z > texture(shadowMap, shadowMapCoords.xy).x)
-    {
-        return 0.0;
-    }
-
-    return 1.0;
-}
-
 
 void main() 
 {
@@ -135,6 +150,7 @@ void main()
 
         result += CalculatePointLight(pointLights.lights[i], calculatedNormal, baseColor, roughnessColor);
     }
+    const float shadow = clamp(filterPCF(inLightSpacePosition / inLightSpacePosition.w), 0.3, 1.0);
 
-    outFragColor = vec4(result * clamp(CalculateShadowFactor(), 0.5, 1.0), 1.0);
+    outFragColor = vec4(result * shadow, 1.0);
 }

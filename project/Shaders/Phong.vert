@@ -57,6 +57,13 @@ out gl_PerVertex {
 	vec4 gl_Position;
 };
 
+const mat4 biasMat = mat4( 
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.5, 0.5, 0.0, 1.0 
+);
+
 void main() 
 {
     mat4 mvMatrix = objectBuffer.objects[gl_BaseInstance].modelView;
@@ -67,6 +74,6 @@ void main()
     outUV = inUV;
 
     outObjectInstance = gl_BaseInstance;
-    outLightSpacePos = pointLights.lights[0].lightViewProj * objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
+    outLightSpacePos = biasMat * pointLights.lights[0].lightViewProj * objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
     gl_Position = objectBuffer.objects[gl_BaseInstance].viewProjection * objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
 }

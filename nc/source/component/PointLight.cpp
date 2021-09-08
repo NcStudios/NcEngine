@@ -16,6 +16,8 @@ namespace
 {
     // Angle of light's field of view.
     constexpr float LIGHT_FIELD_OF_VIEW = 45.0f;
+
+
 }
 
 namespace nc

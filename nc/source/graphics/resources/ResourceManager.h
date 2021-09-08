@@ -40,7 +40,7 @@ namespace nc::graphics
             static void ResetObjects(graphics::Graphics* graphics);
 
             static void InitializeShadowMap(graphics::Graphics* graphics);
-            void ResizeShadowMap();
+            static void ResizeShadowMap(Vector2 dimensions);
             static vk::DescriptorSetLayout* GetShadowMapDescriptorSetLayout();
             static vk::DescriptorSet* GetShadowMapDescriptorSet();
             static const vk::ImageView& GetShadowMapImageView();
@@ -77,7 +77,7 @@ namespace nc::graphics
             void ResetObjects_(graphics::Graphics* graphics);
 
             void InitializeShadowMap_(graphics::Graphics* graphics);
-            void ResizeShadowMap_();
+            void ResizeShadowMap_(Vector2 dimensions);
             vk::DescriptorSetLayout* GetShadowMapDescriptorSetLayout_();
             vk::DescriptorSet* GetShadowMapDescriptorSet_();
             const vk::ImageView& GetShadowMapImageView_();
@@ -233,9 +233,9 @@ namespace nc::graphics
         return Get().InitializeShadowMap_(graphics);
     }
 
-    inline void ResourceManager::ResizeShadowMap()
+    inline void ResourceManager::ResizeShadowMap(Vector2 dimensions)
     {
-        return Get().ResizeShadowMap_();
+        return Get().ResizeShadowMap_(dimensions);
     }
 
     inline vk::DescriptorSetLayout* ResourceManager::GetShadowMapDescriptorSetLayout()
@@ -388,9 +388,9 @@ namespace nc::graphics
         m_shadowMapData = std::make_unique<ShadowMapData>(graphics);
     }
 
-    inline void ResourceManager::ResizeShadowMap_()
+    inline void ResourceManager::ResizeShadowMap_(Vector2 dimensions)
     {
-        return m_shadowMapData->ResizeShadowMap();
+        return m_shadowMapData->ResizeShadowMap(dimensions);
     }
 
     inline vk::DescriptorSetLayout* ResourceManager::GetShadowMapDescriptorSetLayout_()

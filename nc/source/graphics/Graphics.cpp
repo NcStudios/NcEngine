@@ -46,10 +46,12 @@ namespace nc::graphics
 
         // Destroy all resources used by the swapchain
         m_dimensions = dimensions;
-        m_depthStencil.reset();
         m_commands.reset();
         m_swapchain.reset();
         m_depthStencil.reset();
+
+        ResourceManager::ResizeShadowMap(dimensions);
+        m_renderer->InitializeShadowMappingRenderPass();
 
         // Recreate swapchain and resources
         m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);

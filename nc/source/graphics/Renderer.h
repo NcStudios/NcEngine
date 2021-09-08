@@ -49,12 +49,12 @@ namespace nc::graphics
             void RegisterDebugWidget(nc::DebugWidget widget);
             void ClearDebugWidget();
             #endif
+            void InitializeShadowMappingRenderPass();
 
             void DeregisterRenderable(Entity entity);
 
         private:
             void RecordUi(vk::CommandBuffer* cmd);
-            void InitializeShadowMappingRenderPass();
 
             graphics::Graphics* m_graphics;
             TextureManager m_textureManager;

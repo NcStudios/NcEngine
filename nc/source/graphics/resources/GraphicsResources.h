@@ -120,13 +120,13 @@ namespace nc::graphics
             ShadowMapData& operator=(ShadowMapData&&) = default;
             ~ShadowMapData();
 
-            void ResizeShadowMap();
+            void ResizeShadowMap(Vector2 dimensions);
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
             vk::DescriptorSet* GetDescriptorSet() noexcept;
             const vk::ImageView& GetShadowMapImageView() noexcept;
 
         private:
-            void InitializeShadowMap();
+            void InitializeShadowMap(Vector2 dimensions);
 
             Graphics* m_graphics;
             vk::UniqueSampler m_sampler;

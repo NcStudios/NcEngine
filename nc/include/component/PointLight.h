@@ -45,7 +45,6 @@ namespace nc
             PointLightInfo m_info;
             DirectX::XMMATRIX m_lightProjectionMatrix;
             alignas(16)Vector3 m_projectedPos;
-
             bool m_isDirty;
     };
 
