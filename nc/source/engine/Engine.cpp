@@ -96,7 +96,7 @@ namespace nc::core
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
         m_isRunning = true;
-        auto fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
+        const auto fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
 
         while(m_isRunning)
