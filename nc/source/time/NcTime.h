@@ -10,9 +10,9 @@ namespace nc::time
 
             double GetFrameDeltaTime() const noexcept { return m_frameDeltaTime; }
             double GetAccumulatedTime() const noexcept { return m_accumulatedTime; }
-            void DecrementAccumulatedDeltaTime(float time) noexcept { m_accumulatedTime -= time; }
+            void DecrementAccumulatedTime(float time) noexcept { m_accumulatedTime -= time; }
             void ResetFrameDeltaTime() noexcept { m_frameDeltaTime = 0.0; }
-            void ResetAccumulatedDeltaTime() noexcept { m_accumulatedTime = 0.0; }
+            void ResetAccumulatedTime() noexcept { m_accumulatedTime = 0.0; }
             double UpdateTime() noexcept;
 
         private:

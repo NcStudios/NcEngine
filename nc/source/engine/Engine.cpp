@@ -111,7 +111,7 @@ namespace nc::core
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
             {
                 FixedStepLogic(fixedTimeStep);
-                m_time.DecrementAccumulatedDeltaTime(fixedTimeStep);
+                m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
 
@@ -140,7 +140,7 @@ namespace nc::core
         m_physics.ClearState();
         camera::ClearMainCamera();
         m_time.ResetFrameDeltaTime();
-        m_time.ResetAccumulatedDeltaTime();
+        m_time.ResetAccumulatedTime();
         // SceneSystem state is never cleared
     }
 
