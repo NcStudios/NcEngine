@@ -8,18 +8,19 @@ namespace nc::time
         public:
             Time() noexcept;
 
-            double GetFixedDeltaTime() const noexcept;
-            double GetFrameDeltaTime() const noexcept;
-            void ResetFixedDeltaTime() noexcept;
-            void ResetFrameDeltaTime() noexcept;
-            void UpdateTime() noexcept;
+            double GetFrameDeltaTime() const noexcept { return m_frameDeltaTime; }
+            double GetAccumulatedTime() const noexcept { return m_accumulatedTime; }
+            void DecrementAccumulatedTime(float time) noexcept { m_accumulatedTime -= time; }
+            void ResetFrameDeltaTime() noexcept { m_frameDeltaTime = 0.0; }
+            void ResetAccumulatedTime() noexcept { m_accumulatedTime = 0.0; }
+            double UpdateTime() noexcept;
 
         private:
             using Clock = std::chrono::high_resolution_clock;
             std::chrono::time_point<Clock> m_lastTime;
             std::chrono::time_point<Clock> m_currentTime;
-            double m_fixedDeltaTime;
             double m_frameDeltaTime;
+            double m_accumulatedTime;
     };
 
     class Timer
