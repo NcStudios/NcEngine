@@ -48,8 +48,7 @@ namespace
     const auto TargetFpsKey = std::string{"target_fps"};
     const auto NearClipKey = std::string{"near_clip"};
     const auto FarClipKey = std::string{"far_clip"};
-    const auto D3dShadersPathKey = std::string{"d3d_shaders_path"};
-    const auto VulkanShadersPathKey = std::string{"vulkan_shaders_path"};
+    const auto ShadersPathKey = std::string{"shaders_path"};
 
     void MapKeyValue(const std::string& key, const std::string& value, Config* out)
     {
@@ -101,10 +100,8 @@ namespace
             out->graphicsSettings.nearClip = std::stof(value);
         else if (key == FarClipKey)
             out->graphicsSettings.farClip = std::stof(value);
-        else if (key == D3dShadersPathKey)
-            out->graphicsSettings.d3dShadersPath = value;
-        else if (key == VulkanShadersPathKey)
-            out->graphicsSettings.vulkanShadersPath = value;
+        else if (key == ShadersPathKey)
+            out->graphicsSettings.shadersPath = value;
         else
             throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
     };
@@ -180,8 +177,7 @@ namespace nc::config
                 << TargetFpsKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.targetFPS << '\n'
                 << NearClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.nearClip << '\n'
                 << FarClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.farClip << '\n'
-                << D3dShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.d3dShadersPath << '\n'
-                << VulkanShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.vulkanShadersPath;
+                << ShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.shadersPath;
 
         outFile.close();
     }
@@ -201,7 +197,6 @@ namespace nc::config
                  (g_config->graphicsSettings.frameUpdateInterval > 0.0f) &&
                  (g_config->graphicsSettings.nearClip > 0.0f) &&
                  (g_config->graphicsSettings.farClip > 0.0f) &&
-                 (g_config->graphicsSettings.d3dShadersPath != "") &&
-                 (g_config->graphicsSettings.vulkanShadersPath != "")};
+                 (g_config->graphicsSettings.shadersPath != "")};
     }
 } // end namespace nc::config 

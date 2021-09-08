@@ -22,7 +22,7 @@ namespace nc
         float maxExtent;
     };
 
-    struct MeshColliderFlyweight
+    struct ConcaveColliderFlyweight
     {
         std::vector<Triangle> triangles;
         float maxExtent;
@@ -45,9 +45,9 @@ namespace nc
                 return Get()->LoadConvexHull_(uid, std::move(data));
             }
             
-            static bool LoadMeshCollider(const std::string& uid, MeshColliderFlyweight data)
+            static bool LoadConcaveCollider(const std::string& uid, ConcaveColliderFlyweight data)
             {
-                return Get()->LoadMeshCollider_(uid, std::move(data));
+                return Get()->LoadConcaveCollider_(uid, std::move(data));
             }
 
             static bool IsSoundClipLoaded(const std::string& uid)
@@ -60,9 +60,9 @@ namespace nc
                 return Get()->IsConvexHullLoaded_(uid);
             }
 
-            static bool IsMeshColliderLoaded(const std::string& uid)
+            static bool IsConcaveColliderLoaded(const std::string& uid)
             {
-                return Get()->IsMeshColliderLoaded_(uid);
+                return Get()->IsConcaveColliderLoaded_(uid);
             }
 
             static auto AcquireSoundClip(const std::string& uid) -> const SoundClipFlyweight&
@@ -75,16 +75,16 @@ namespace nc
                 return Get()->AcquireConvexHull_(uid);
             }
 
-            static auto AcquireMeshCollider(const std::string& uid) -> const MeshColliderFlyweight&
+            static auto AcquireConcaveCollider(const std::string& uid) -> const ConcaveColliderFlyweight&
             {
-                return Get()->AcquireMeshCollider_(uid);
+                return Get()->AcquireConcaveCollider_(uid);
             }
 
         private:
             static inline AssetManager* instance = nullptr;
             std::unordered_map<std::string, SoundClipFlyweight> m_soundClips;
             std::unordered_map<std::string, ConvexHullFlyweight> m_hullColliders;
-            std::unordered_map<std::string, MeshColliderFlyweight> m_meshColliders;
+            std::unordered_map<std::string, ConcaveColliderFlyweight> m_concaveColliders;
 
             static auto Get() -> AssetManager*
             {
@@ -109,12 +109,12 @@ namespace nc
                 return true;
             }
 
-            bool LoadMeshCollider_(const std::string& uid, MeshColliderFlyweight data)
+            bool LoadConcaveCollider_(const std::string& uid, ConcaveColliderFlyweight data)
             {
-                if(IsMeshColliderLoaded_(uid))
+                if(IsConcaveColliderLoaded_(uid))
                     return false;
                 
-                m_meshColliders.emplace(uid, std::move(data));
+                m_concaveColliders.emplace(uid, std::move(data));
                 return true;
             }
 
@@ -128,9 +128,9 @@ namespace nc
                 return m_hullColliders.end() != m_hullColliders.find(uid);
             }
             
-            bool IsMeshColliderLoaded_(const std::string& uid) const
+            bool IsConcaveColliderLoaded_(const std::string& uid) const
             {
-                return m_meshColliders.end() != m_meshColliders.find(uid);
+                return m_concaveColliders.end() != m_concaveColliders.find(uid);
             }
 
             auto AcquireSoundClip_(const std::string& uid) const -> const SoundClipFlyweight&
@@ -151,11 +151,11 @@ namespace nc
                 return ConvexHull{std::span<const Vector3>{it->second.vertices}, it->second.extents, it->second.maxExtent};
             }
 
-            auto AcquireMeshCollider_(const std::string& uid) const -> const MeshColliderFlyweight&
+            auto AcquireConcaveCollider_(const std::string& uid) const -> const ConcaveColliderFlyweight&
             {
-                const auto it = m_meshColliders.find(uid);
-                if(it == m_meshColliders.end())
-                    throw std::runtime_error("AssetManager::AcquireMeshCollider_ - Resource is not loaded: " + uid);
+                const auto it = m_concaveColliders.find(uid);
+                if(it == m_concaveColliders.end())
+                    throw std::runtime_error("AssetManager::AcquireConcaveCollider_ - Resource is not loaded: " + uid);
                 
                 return it->second;
             }

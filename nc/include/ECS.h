@@ -4,29 +4,29 @@
 #include "component/AudioSource.h"
 #include "component/AutoComponentGroup.h"
 #include "component/Collider.h"
-#include "component/MeshCollider.h"
+#include "component/ConcaveCollider.h"
 #include "component/NetworkDispatcher.h"
 #include "component/ParticleEmitter.h"
 #include "component/PhysicsBody.h"
-#include "component/PointLight.h"
 #include "component/Registry.h"
-#include "component/Renderer.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
+#include "component/MeshRenderer.h"
+#include "component/PointLight.h"
 
 namespace nc
 {
     using registry_type_list = ecs::RegistryTypeList<AudioSource,
                                                      AutoComponentGroup,
                                                      Collider,
-                                                     MeshCollider,
+                                                     ConcaveCollider,
                                                      NetworkDispatcher,
                                                      ParticleEmitter,
                                                      PhysicsBody,
-                                                     PointLight,
-                                                     Renderer,
                                                      Tag,
-                                                     Transform>;
+                                                     Transform,
+                                                     MeshRenderer,
+                                                     PointLight>;
                                                      
     using registry_type = ecs::Registry<registry_type_list>;
 

@@ -22,7 +22,7 @@ namespace
 
 namespace nc::ui::editor
 {
-    Editor::Editor(graphics::Graphics * graphics)
+    Editor::Editor(graphics::Graphics* graphics)
         : m_graphics{graphics},
           m_openState_Editor{false},
           m_openState_UtilitiesPanel{true}

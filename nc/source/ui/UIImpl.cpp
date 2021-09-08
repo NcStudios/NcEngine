@@ -1,10 +1,13 @@
-#include "UIImpl.h"
-#include "UI.h"
 #include "debug/Utils.h"
+#include "graphics/Base.h"
 #include "graphics/Graphics.h"
+#include "graphics/Swapchain.h"
 #include "imgui/imgui.h"
+#include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
+#include "UI.h"
+#include "UIImpl.h"
 
 namespace
 {
@@ -29,25 +32,29 @@ namespace nc::ui
 
     /* UIImpl */
     #ifdef NC_EDITOR_ENABLED
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
-        : m_editor{graphics},
-          m_projectUI{nullptr}
+    UIImpl::UIImpl(HWND hwnd, graphics::Graphics* graphics)
+    : m_editor{graphics},
+      m_projectUI{nullptr},
+      m_graphics{graphics}
     #else
-    UIImpl::UIImpl(HWND hwnd, ::nc::graphics::Graphics* graphics)
-        : m_projectUI{ nullptr }
+    UIImpl::UIImpl(HWND hwnd, graphics::Graphics* graphics)
+    : m_projectUI{nullptr},
+      m_graphics{graphics}
     #endif
     {
         g_instance = this;
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
-        ImGui_ImplDX11_Init(graphics->m_device, graphics->m_context);
+
+        auto& uiPassDefinition = m_graphics->GetSwapchainPtr()->GetPassDefinition();
+        m_graphics->GetBasePtr()->InitializeImgui(uiPassDefinition);
     }
 
     UIImpl::~UIImpl() noexcept
     {
+        ImGui_ImplVulkan_Shutdown();
         ImGui_ImplWin32_Shutdown();
-        ImGui_ImplDX11_Shutdown();
         ImGui::DestroyContext();
     }
 
@@ -71,7 +78,7 @@ namespace nc::ui
 
     void UIImpl::FrameBegin()
     {
-        ImGui_ImplDX11_NewFrame();
+        ImGui_ImplVulkan_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
     }
@@ -98,6 +105,5 @@ namespace nc::ui
     void UIImpl::FrameEnd()
     {
         ImGui::Render();
-        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     }
 } //end namespace nc::ui

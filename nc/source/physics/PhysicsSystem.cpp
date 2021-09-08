@@ -30,11 +30,7 @@ namespace nc::physics
         g_physicsSystem->RemoveAllJoints(entity);
     }
 
-    #ifdef USE_VULKAN
-    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics2* graphics, job::JobSystem* jobSystem)
-    #else
     PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics* graphics, job::JobSystem* jobSystem)
-    #endif
         : m_cache{},
           m_joints{},
           m_bspTree{registry},
@@ -113,10 +109,6 @@ namespace nc::physics
 
     void PhysicsSystem::DoPhysicsStep(float dt)
     {
-        /** @todo Is it a problem that this is happening? */
-        if(dt == 0.0f)
-            return;
-
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
 
         #ifdef NC_DEBUG_RENDERING

@@ -50,17 +50,12 @@ namespace nc::sample
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.25f, 0.005f, 1.4f);
         camera::SetMainCamera(camera);
 
-        // Point Light
-        PointLight::Properties lightProperties
-        {
-            .ambient = Vector3::One(),
-            .diffuseIntensity = 4.5f,
-            .attConst = 1.0f,
-            .attLin = 0.0001f
-        };
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, -10.0f, 0.0f}, .tag = "Point Light"});
-        auto pointLight = registry->Add<PointLight>(lvHandle, PointLight::Properties{});
-        pointLight->Set(lightProperties);
+        // Lights
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(1.0f, 0.7f, 1.0f),
+                                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
+                                                                           .diffuseIntensity = 5.0f
+                                                                          });
 
         // Collider that destroys anything leaving its bounded area
         auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(100.0f), .tag = "KillBox", .flags = EntityFlags::Static});

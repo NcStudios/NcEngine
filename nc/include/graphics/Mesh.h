@@ -1,22 +1,27 @@
 #pragma once
 
-#include "ResourceGroup.h"
+#include "math/Vector.h"
 
 #include <string>
+#include <vector>
 
 namespace nc::graphics
 {
-    void LoadMeshAsset(const std::string& path);
-
-    class Mesh : public ResourceGroup
+    struct Vertex
     {
-        public:
-            Mesh() = default;
-            Mesh(const std::string& meshPath);
-            Mesh(const Mesh& other) = default;
-            Mesh(Mesh&& other) = default;
-            Mesh& operator=(Mesh&& other) = default;
-            Mesh& operator=(const Mesh& other) = default;
-            ~Mesh() = default;
+        Vector3 Position;
+        Vector3 Normal;
+        Vector2 UV;
+        Vector3 Tangent;
+        Vector3 Bitangent;
+    };
+
+    void LoadMeshes(const std::vector<std::string>& paths);
+
+    struct Mesh
+    {
+        uint32_t firstVertex;
+        uint32_t firstIndex;
+        uint32_t indicesCount;
     };
 }

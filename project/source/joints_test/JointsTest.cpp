@@ -13,26 +13,21 @@ namespace nc::sample
     {
         m_sceneHelper.Setup(registry, false, false, nullptr);
 
-        // Light
-        auto lightProperties = PointLight::Properties
-        {
-            .pos = Vector3::Zero(),
-            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-            .diffuseIntensity = 3.0,
-            .attConst = 0.0f,
-            .attLin = 0.05f,
-            .attQuad = 0.0f
-        };
-
-        auto light1 = registry->Add<Entity>({.position = Vector3{2.0f, 8.0f, 0.0f}, .tag = "Light 1"});
-        registry->Add<PointLight>(light1, lightProperties);
-
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
         camera::SetMainCamera(camera);
         audio::RegisterListener(cameraHandle);
+
+        // Lights
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
+                                                           .ambient = Vector3{0.443f, 0.412f, 0.412f},
+                                                           .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
+                                                           .diffuseIntensity = 3.0,
+                                                           .attConst = 0.0f,
+                                                           .attLin = 0.05f,
+                                                           .attQuad = 0.0f});
 
         // Movable object
         {
@@ -75,7 +70,7 @@ namespace nc::sample
         // Ramp
         {
             auto ramp = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{9.0f, 2.6f, 6.0f}, .scale = Vector3::Splat(3.0f), .flags = EntityFlags::Static});
-            registry->Add<MeshCollider>(ramp, "project/assets/mesh_colliders/ramp.nca");
+            registry->Add<ConcaveCollider>(ramp, "project/assets/mesh_colliders/ramp.nca");
         }
 
         // Hinge

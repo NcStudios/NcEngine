@@ -3,12 +3,14 @@
 #include "component/Component.h"
 #include "physics/Geometry.h"
 #include "physics/LayerMask.h"
-#include "graphics/Model.h"
+#include "directx/math/DirectXMath.h"
 
 #include <variant>
 
 namespace nc
 {
+    namespace graphics { class Renderer; }
+
     enum class ColliderType : uint8_t
     {
         Box, Sphere, Capsule, Hull
@@ -72,10 +74,10 @@ namespace nc
             auto IsAwake() const -> bool { return m_awake; }
             auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
-            #ifdef NC_EDITOR_ENABLED
-            void UpdateWidget(graphics::FrameManager* frame);
+           #ifdef NC_EDITOR_ENABLED
+            void UpdateWidget(graphics::Renderer* renderer);
             void SetEditorSelection(bool state);
-            #endif
+           #endif
 
         private:
             VolumeInfo m_info;
@@ -83,8 +85,6 @@ namespace nc
             bool m_awake;
 
             #ifdef NC_EDITOR_ENABLED
-            /** @todo this was made to be a unique_ptr for dx11, can remove with vulkan integration */
-            std::unique_ptr<graphics::Model> m_widgetModel;
             bool m_selectedInEditor;
             #endif
     };

@@ -29,9 +29,9 @@ namespace
         return HalfspaceContainment::Negative;
     }
 
-    auto CreateTriMesh(registry_type* registry, const MeshCollider& collider) -> TriMesh
+    auto CreateTriMesh(registry_type* registry, const ConcaveCollider& collider) -> TriMesh
     {
-        const auto& meshFlyweight = AssetManager::AcquireMeshCollider(collider.GetPath());
+        const auto& meshFlyweight = AssetManager::AcquireConcaveCollider(collider.GetPath());
         auto entity = collider.GetParentEntity();
         auto* transform = registry->Get<Transform>(entity);
         const auto& m = transform->GetTransformationMatrix();
@@ -96,18 +96,18 @@ namespace nc::physics
     {
         m_nodes.push_back(LeafNode{});
 
-        registry->RegisterOnAddCallback<MeshCollider>
+        registry->RegisterOnAddCallback<ConcaveCollider>
         (
-            [this](MeshCollider& collider){ this->OnAdd(collider); }
+            [this](ConcaveCollider& collider){ this->OnAdd(collider); }
         );
         
-        registry->RegisterOnRemoveCallback<MeshCollider>
+        registry->RegisterOnRemoveCallback<ConcaveCollider>
         (
             [this](Entity entity) { this->OnRemove(entity); }
         );
     }
 
-    void BspTree::OnAdd(MeshCollider& collider)
+    void BspTree::OnAdd(ConcaveCollider& collider)
     {
         size_t index = m_triMeshes.size();
         m_triMeshes.push_back(CreateTriMesh(m_registry, collider));

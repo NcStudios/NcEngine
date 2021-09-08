@@ -50,20 +50,14 @@ namespace nc::sample
         // Setup
         m_sceneHelper.Setup(registry, true, false, Widget);
 
-        // Light
-        auto lightProperties = PointLight::Properties
-        {
-            .pos = Vector3::Zero(),
-            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-            .diffuseIntensity = 3.0,
-            .attConst = 0.0f,
-            .attLin = 0.05f,
-            .attQuad = 0.0f
-        };
-
-        auto light1 = registry->Add<Entity>({.position = Vector3{2.0f, 8.0f, 0.0f}, .tag = "Light 1"});
-        registry->Add<PointLight>(light1, lightProperties);
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 5.0f, 0.0f}, .tag = "Point Light 1"});
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
+                                                           .ambient = Vector3{0.443f, 0.412f, 0.412f},
+                                                           .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
+                                                           .diffuseIntensity = 3.0,
+                                                           .attConst = 0.0f,
+                                                           .attLin = 0.05f,
+                                                           .attQuad = 0.0f});
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
@@ -88,7 +82,7 @@ namespace nc::sample
         registry->Add<Collider>(bigGreenCube, BoxProperties{}, false);
         registry->Add<PhysicsBody>(bigGreenCube, PhysicsProperties{});
 
-        auto greenCapsule = prefab::Create(registry, prefab::Resource::CapsuleGreen, {.position = Vector3{5.0f, 0.0f, 1.5f}, .tag = "Green Capsule"});
+        auto greenCapsule = prefab::Create(registry, prefab::Resource::CapsuleGreen, {.position = Vector3{5.0f, 2.0f, 1.5f}, .tag = "Green Capsule"});
         registry->Add<Collider>(greenCapsule, CapsuleProperties{}, false);
         registry->Add<PhysicsBody>(greenCapsule, PhysicsProperties{});
 
