@@ -127,7 +127,7 @@ namespace nc::graphics
 
         // Note: WriteableBuffer can have a dynamic array. This block handles the case where we are mapping less data than has been previously mapped.
         // We must set the first "unmapped" item to "null" via myNuller which needs to be handled by the object being mapped.
-        if (dataToMapSize < m_memorySize)
+        if (dataToMapSize < sizeof(m_writeableBuffer))
         {
             myNuller(mappedContainerHandle[dataToMapSize]);
         }

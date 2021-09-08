@@ -3,10 +3,6 @@
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout (location = 0) in vec3 inPos;
-layout (location = 1) in vec3 inNormal;
-layout (location = 2) in vec2 inUV;
-layout (location = 3) in vec3 inTangent;
-layout (location = 4) in vec3 inBitangent;
 
 struct ObjectData
 {
@@ -26,7 +22,7 @@ struct ObjectData
 layout(push_constant) uniform PER_OBJECT
 {
     // VP matrix for point light
-    mat4 depthVP;
+    mat4 lightViewProj;
 } pc;
 
 layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
@@ -39,5 +35,5 @@ void main()
     // Calculate the vertex's position in the view space of the point light
     // Take the world space position of the vertex (vertex position * model matrix for that vertex's object), then multiply by the view projection of the light.
     vec4 worldPosOfVertex = objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
-	gl_Position = pc.depthVP * worldPosOfVertex;
+	gl_Position = pc.lightViewProj * worldPosOfVertex;
 }

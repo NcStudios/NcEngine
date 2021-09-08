@@ -274,10 +274,11 @@ namespace nc::graphics
             throw std::runtime_error("Could not create ImGUI descriptor pool.");
         }
 
-        std::array<vk::DescriptorPoolSize, 3> renderingPoolSizes =
+        std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
         {
             vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 }
         };
         

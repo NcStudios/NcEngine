@@ -297,6 +297,16 @@ namespace nc::graphics
         return pipelineLayoutInfo;
     }
 
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const std::vector<vk::DescriptorSetLayout>& layouts)
+    {
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
+        pipelineLayoutInfo.setSetLayoutCount(layouts.size());  
+        pipelineLayoutInfo.setPSetLayouts(layouts.data());  
+        pipelineLayoutInfo.setPushConstantRangeCount(0); 
+        pipelineLayoutInfo.setPPushConstantRanges(nullptr);
+        return pipelineLayoutInfo;
+    }
+
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};

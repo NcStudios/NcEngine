@@ -1,5 +1,6 @@
 #include "component/PointLight.h"
 #include "component/Transform.h"
+#include "config/Config.h"
 #include "Ecs.h"
 
 #ifdef NC_EDITOR_ENABLED
@@ -8,6 +9,14 @@
 #include <fstream>
 #include <debug/Serialize.h>
 #endif
+
+#include <cassert>
+
+namespace
+{
+    // Angle of light's field of view.
+    constexpr float LIGHT_FIELD_OF_VIEW = 45.0f;
+}
 
 namespace nc
 {
@@ -33,9 +42,12 @@ namespace nc
     PointLight::PointLight(Entity entity, PointLightInfo info)
     : ComponentBase{entity},
       m_info{info},
+      m_lightProjectionMatrix{},
       m_projectedPos{},
       m_isDirty{false}
     {
+        const auto& graphicsSettings = config::GetGraphicsSettings();
+        m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip);
     }
 
     const PointLightInfo& PointLight::GetInfo() const
@@ -43,22 +55,33 @@ namespace nc
         return m_info;
     }
 
+    DirectX::XMMATRIX PointLight::CalculateLightViewMatrix()
+    {
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix());
+        auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
+        return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
+    }
+
     bool PointLight::IsDirty() const
     {
         return m_isDirty;
     }
 
-    bool PointLight::Update(const DirectX::XMMATRIX& view)
+    bool PointLight::Update(const DirectX::XMMATRIX& cameraView)
     {        
         auto transformPos = ActiveRegistry()->Get<Transform>(GetParentEntity())->GetPosition();
 
-        if (transformPos.x != m_info.pos.x || transformPos.y != m_info.pos.y || transformPos.z != m_info.pos.z)
+        const auto& lightViewMatrix = CalculateLightViewMatrix();
+        m_info.viewProjection = lightViewMatrix * m_lightProjectionMatrix;
+
+        const auto pos_v = DirectX::XMLoadVector3(&transformPos);
+        DirectX::XMStoreVector3(&m_projectedPos, DirectX::XMVector3Transform(pos_v, cameraView));
+        
+        if (m_projectedPos.x != m_info.pos.x || m_projectedPos.y != m_info.pos.y || m_projectedPos.z != m_info.pos.z)
         {
             m_isDirty = true;
         }
-
-        const auto pos_v = DirectX::XMLoadVector3(&transformPos);
-        DirectX::XMStoreVector3(&m_projectedPos, DirectX::XMVector3Transform(pos_v, view));
 
         m_info.pos.x = m_projectedPos.x;
         m_info.pos.y = m_projectedPos.y;

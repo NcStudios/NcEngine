@@ -39,6 +39,12 @@ namespace nc::graphics
             static vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout();
             static void ResetObjects(graphics::Graphics* graphics);
 
+            static void InitializeShadowMap(graphics::Graphics* graphics);
+            void ResizeShadowMap();
+            static vk::DescriptorSetLayout* GetShadowMapDescriptorSetLayout();
+            static vk::DescriptorSet* GetShadowMapDescriptorSet();
+            static const vk::ImageView& GetShadowMapImageView();
+
             static void Clear();
 
         private:
@@ -70,6 +76,12 @@ namespace nc::graphics
             vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout_();
             void ResetObjects_(graphics::Graphics* graphics);
 
+            void InitializeShadowMap_(graphics::Graphics* graphics);
+            void ResizeShadowMap_();
+            vk::DescriptorSetLayout* GetShadowMapDescriptorSetLayout_();
+            vk::DescriptorSet* GetShadowMapDescriptorSet_();
+            const vk::ImageView& GetShadowMapImageView_();
+
             void Clear_();
 
             static ResourceManager& Get();
@@ -79,6 +91,7 @@ namespace nc::graphics
             std::unique_ptr<TexturesData> m_textureResources;
             std::unique_ptr<PointLightsData> m_pointLightResources;
             std::unique_ptr<ObjectsData> m_objects;
+            std::unique_ptr<ShadowMapData> m_shadowMapData;
     };
 
     inline ResourceManager& ResourceManager::Get()
@@ -215,6 +228,31 @@ namespace nc::graphics
         return Get().Clear_();
     }
 
+    inline void ResourceManager::InitializeShadowMap(graphics::Graphics* graphics)
+    {
+        return Get().InitializeShadowMap_(graphics);
+    }
+
+    inline void ResourceManager::ResizeShadowMap()
+    {
+        return Get().ResizeShadowMap_();
+    }
+
+    inline vk::DescriptorSetLayout* ResourceManager::GetShadowMapDescriptorSetLayout()
+    {
+        return Get().GetShadowMapDescriptorSetLayout_();
+    }
+
+    inline vk::DescriptorSet* ResourceManager::GetShadowMapDescriptorSet()
+    {
+        return Get().GetShadowMapDescriptorSet_();
+    }
+
+    inline const vk::ImageView& ResourceManager::GetShadowMapImageView()
+    {
+        return Get().GetShadowMapImageView_();
+    }
+
     inline std::vector<std::string> ResourceManager::GetTexturePaths_()
     {
         return Get().GetTexturePaths_();
@@ -343,5 +381,30 @@ namespace nc::graphics
     {
         m_pointLightResources.reset();
         m_objects.reset();
+    }
+
+    inline void ResourceManager::InitializeShadowMap_(graphics::Graphics* graphics)
+    {
+        m_shadowMapData = std::make_unique<ShadowMapData>(graphics);
+    }
+
+    inline void ResourceManager::ResizeShadowMap_()
+    {
+        return m_shadowMapData->ResizeShadowMap();
+    }
+
+    inline vk::DescriptorSetLayout* ResourceManager::GetShadowMapDescriptorSetLayout_()
+    {
+        return m_shadowMapData->GetDescriptorLayout();
+    }
+
+    inline vk::DescriptorSet* ResourceManager::GetShadowMapDescriptorSet_()
+    {
+        return m_shadowMapData->GetDescriptorSet();
+    }
+
+    inline const vk::ImageView& ResourceManager::GetShadowMapImageView_()
+    {
+        return m_shadowMapData->GetShadowMapImageView();
     }
 }

@@ -51,7 +51,7 @@ namespace nc::graphics
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(PhongPushConstants)); // PushConstants
-        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout(), *ResourceManager::GetObjectsDescriptorSetLayout()};
+        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout(), *ResourceManager::GetObjectsDescriptorSetLayout(), *ResourceManager::GetShadowMapDescriptorSetLayout()};
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
@@ -100,6 +100,7 @@ namespace nc::graphics
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 2, 1, ResourceManager::GetObjectsDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 3, 1, ResourceManager::GetShadowMapDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 

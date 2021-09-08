@@ -1,4 +1,5 @@
 #include "GraphicsResources.h"
+#include "graphics/resources/DepthStencil.h"
 #include "graphics/Initializers.h"
 
 #include <iostream>
@@ -136,7 +137,7 @@ namespace nc::graphics
     {
         auto base = graphics->GetBasePtr();
 
-        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment)};
+        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment)};
         m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
         m_pointLightsArrayBuffer = WriteableBuffer<nc::PointLightInfo>(graphics, (sizeof(nc::PointLightInfo) * maxPointLights));
         m_descriptorSet = CreateDescriptorSet(graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
@@ -231,5 +232,74 @@ namespace nc::graphics
     vk::DescriptorSet* ObjectsData::GetDescriptorSet() noexcept
     {
         return &m_descriptorSet.get();
+    }
+
+    ShadowMapData::ShadowMapData(Graphics* graphics)
+    : m_graphics{graphics},
+      m_sampler{nullptr}, 
+      m_depthStencil{nullptr},
+      m_descriptorSet{nullptr},
+      m_descriptorSetLayout{nullptr}
+    {
+        InitializeShadowMap();
+    }
+
+    ShadowMapData::~ShadowMapData()
+    {
+        m_sampler.reset();
+        m_depthStencil.reset();
+        m_descriptorSet.reset();
+        m_descriptorSetLayout.reset();
+    }
+
+    vk::DescriptorSetLayout* ShadowMapData::GetDescriptorLayout() noexcept
+    {
+        return &m_descriptorSetLayout.get();
+    }
+
+    vk::DescriptorSet* ShadowMapData::GetDescriptorSet() noexcept
+    {
+        return &m_descriptorSet.get();
+    }
+
+    const vk::ImageView& ShadowMapData::GetShadowMapImageView() noexcept
+    {
+        return m_depthStencil->GetImageView();
+    }
+
+    void ShadowMapData::ResizeShadowMap()
+    {
+        InitializeShadowMap();
+    }
+
+    void ShadowMapData::InitializeShadowMap()
+    {
+        auto* base = m_graphics->GetBasePtr();
+
+        m_depthStencil = std::make_unique<DepthStencil>(base, m_graphics->GetDimensions(), vk::Format::eD16Unorm);
+
+        // Create sampler which will be used to sample in the fragment shader to get shadow data.
+        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToEdge);
+        m_sampler = base->GetDevice().createSamplerUnique(samplerInfo);
+        
+        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment )};
+        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
+        m_descriptorSet = CreateDescriptorSet(m_graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+
+        vk::DescriptorImageInfo imageSamplerInfo;
+        imageSamplerInfo.setSampler(m_sampler.get());
+        imageSamplerInfo.setImageView(m_depthStencil->GetImageView());
+        imageSamplerInfo.setImageLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+
+        vk::WriteDescriptorSet write{};
+        write.setDstBinding(0);
+        write.setDstArrayElement(0);
+        write.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+        write.setDescriptorCount(1);
+        write.setDstSet(m_descriptorSet.get());
+        write.setPBufferInfo(0);
+        write.setPImageInfo(&imageSamplerInfo);
+ 
+        base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
     }
 }

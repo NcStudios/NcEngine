@@ -10,15 +10,15 @@ layout(push_constant) uniform PER_OBJECT
 
 struct PointLight
 {
+    mat4 lightViewProj;
     vec3 lightPos;
-    vec3 ambientColor;
-    vec3 diffuseColor;
-    float diffuseIntensity;
     float attConst;
+    vec3 ambientColor;
     float attLin;
+    vec3 diffuseColor;
     float attQuad;
+    float diffuseIntensity;
     int isInitialized;
-    float padding[15];
 };
 
 struct ObjectData
@@ -50,10 +50,11 @@ layout (std140, set=1, binding=0) readonly buffer PointLightsArray
 } pointLights;
 
 layout (location = 0) in vec3 inViewPosition;
-layout (location = 1) in vec3 inNormal;
-layout (location = 2) in vec2 inUV;
-layout (location = 3) in mat3 inTBN;
-layout (location = 6) in flat int inObjectInstance;
+layout (location = 1) in vec4 inLightSpacePosition;
+layout (location = 2) in vec3 inNormal;
+layout (location = 3) in vec2 inUV;
+layout (location = 4) in mat3 inTBN;
+layout (location = 7) in flat int inObjectInstance;
 
 layout (location = 0) out vec4 outFragColor;
 
@@ -64,6 +65,8 @@ vec3 MaterialColor(int textureIndex)
 
 const float specularPower = 32.0;
 const float specularIntensity = 0.6;
+
+layout (set = 3, binding = 0) uniform sampler2D shadowMap;
 
 vec3 CalculatePointLight(PointLight light, vec3 calculatedNormal, vec3 baseColor, vec3 roughnessColor)
 {
@@ -83,8 +86,30 @@ vec3 CalculatePointLight(PointLight light, vec3 calculatedNormal, vec3 baseColor
     const vec3 viewCamToFrag = normalize(inViewPosition);
     const vec3 specular = att * light.diffuseColor * roughnessColor.rrr * light.diffuseIntensity * pow(max(0.0, dot(-r, viewCamToFrag)), specularPower);
 
-    return clamp(((diffuse + light.ambientColor) * baseColor + specular), 0.0, 1.0);
+    return clamp(((diffuse + light.ambientColor * 0.75) * baseColor + specular), 0.0, 1.0);
 }
+
+float CalculateShadowFactor()
+{
+    // Convert to normalized device coordinates
+    vec3 lightSpaceCoords = inLightSpacePosition.xyz / inLightSpacePosition.w;
+
+    if (abs(lightSpaceCoords.x) > 1.0 || 
+        abs(lightSpaceCoords.y) > 1.0 ||
+        abs(lightSpaceCoords.z) > 1.0)
+    return 0.0;
+
+    // Translate from NDC to shadow map space
+    vec2 shadowMapCoords = lightSpaceCoords.xy * 0.5 + 0.5;
+
+    if (lightSpaceCoords.z > texture(shadowMap, shadowMapCoords.xy).x)
+    {
+        return 0.0;
+    }
+
+    return 1.0;
+}
+
 
 void main() 
 {
@@ -111,5 +136,5 @@ void main()
         result += CalculatePointLight(pointLights.lights[i], calculatedNormal, baseColor, roughnessColor);
     }
 
-    outFragColor = vec4(result, 1.0);
+    outFragColor = vec4(result * clamp(CalculateShadowFactor(), 0.5, 1.0), 1.0);
 }

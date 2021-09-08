@@ -13,6 +13,15 @@
 #include "graphics/Swapchain.h"
 #include "graphics/resources/ResourceManager.h"
 
+namespace
+{
+    // Depth bias (and slope) are used to avoid shadowing artifacts
+    // Constant depth bias factor (always applied)
+    constexpr float DEPTH_BIAS_CONSTANT = 1.25f;
+
+    // Slope depth bias factor, applied depending on polygon's slope
+    constexpr float DEPTH_BIAS_SLOPE = 1.75f;
+}
 
 namespace nc::graphics
 {
@@ -22,18 +31,8 @@ namespace nc::graphics
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{},
-      m_pipelineLayout{},
-      m_lightProjectionMatrix{}
+      m_pipelineLayout{}
     {
-        const auto& graphicsSettings = config::GetGraphicsSettings();
-        m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip);
-        m_modelMatrix = DirectX::XMMatrixSet(
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f
-        );
-
         CreatePipeline(renderPass);
     }
 
@@ -107,7 +106,7 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, registry_type* registry, std::span<nc::PointLight> pointLights, std::span<nc::MeshRenderer> meshRenderers)
+    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, std::span<nc::PointLight> pointLights, std::span<nc::MeshRenderer> meshRenderers)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
@@ -120,10 +119,10 @@ namespace nc::graphics
 
         auto pushConstants = ShadowMappingPushConstants{};
 
+        // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
         for (const auto& pointLight : pointLights)
         {
-            auto lightViewMatrix = CalculateViewMatrix(registry->Get<Transform>(pointLight.GetParentEntity()));
-            pushConstants.lightViewProjection = lightViewMatrix * m_lightProjectionMatrix;
+            pushConstants.lightViewProjection = pointLight.GetInfo().viewProjection;
 
             cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
@@ -137,13 +136,5 @@ namespace nc::graphics
         }
 
         NC_PROFILE_END();
-    }
-
-    DirectX::XMMATRIX ShadowMappingTechnique::CalculateViewMatrix(Transform* lightTransform)
-    {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, lightTransform->GetTransformationMatrix());
-        auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
-        return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
     }
 }

@@ -52,6 +52,7 @@ namespace nc::graphics
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo();
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment, bool useAlphaBlending);
     vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, size_t dataTypeSize);
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const std::vector<vk::DescriptorSetLayout>& layouts);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, const std::vector<vk::DescriptorSetLayout>& layouts);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
     

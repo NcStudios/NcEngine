@@ -22,17 +22,13 @@ namespace nc::graphics
     struct ShadowMappingPass
     {
         ShadowMappingPass()
-        : renderPass{ nullptr},
-          frameBuffer{ nullptr},
-          sampler{ nullptr},
-          depthStencil{ nullptr}
+        : renderPass{nullptr},
+          frameBuffer{nullptr}
         {
         }
 
         vk::UniqueRenderPass renderPass;
         vk::UniqueFramebuffer frameBuffer;
-        vk::UniqueSampler sampler;
-        std::unique_ptr<DepthStencil> depthStencil;
     };
 
     class Renderer
@@ -63,7 +59,7 @@ namespace nc::graphics
             graphics::Graphics* m_graphics;
             TextureManager m_textureManager;
             MeshManager m_meshManager;
-            vk::RenderPass m_mainRenderPass;
+            vk::RenderPass m_mainRenderPass;        
             ShadowMappingPass m_shadowMappingPass;
 
             std::vector<std::pair<Entity, std::vector<Entity>*>> m_storageHandles;

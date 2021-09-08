@@ -17,6 +17,24 @@ struct ObjectData
     int isInitialized;
 };
 
+struct PointLight
+{
+    mat4 lightViewProj;
+    vec3 lightPos;
+    float attConst;
+    vec3 ambientColor;
+    float attLin;
+    vec3 diffuseColor;
+    float attQuad;
+    float diffuseIntensity;
+    int isInitialized;
+};
+
+layout (std140, set=1, binding=0) readonly buffer PointLightsArray
+{
+    PointLight lights[];
+} pointLights;
+
 layout(std140, set=2, binding = 0) readonly buffer ObjectBuffer
 {
     ObjectData objects[];
@@ -29,10 +47,11 @@ layout (location = 3) in vec3 inTangent;
 layout (location = 4) in vec3 inBitangent;
 
 layout (location = 0) out vec3 outViewPosition;
-layout (location = 1) out vec3 outNormal;
-layout (location = 2) out vec2 outUV;
-layout (location = 3) out mat3 outTBN;
-layout (location = 6) out int  outObjectInstance;
+layout (location = 1) out vec4 outLightSpacePos;
+layout (location = 2) out vec3 outNormal;
+layout (location = 3) out vec2 outUV;
+layout (location = 4) out mat3 outTBN;
+layout (location = 7) out int  outObjectInstance;
 
 out gl_PerVertex {
 	vec4 gl_Position;
@@ -48,5 +67,6 @@ void main()
     outUV = inUV;
 
     outObjectInstance = gl_BaseInstance;
+    outLightSpacePos = pointLights.lights[0].lightViewProj * objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
     gl_Position = objectBuffer.objects[gl_BaseInstance].viewProjection * objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
 }

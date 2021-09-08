@@ -6,19 +6,22 @@
 
 namespace nc
 {
-    class Transform;
+    constexpr size_t PointLightInfoSize = 128;
 
-    struct PointLightInfo
+    class Transform;
+    
+    struct alignas(PointLightInfoSize) PointLightInfo
     {
-        alignas(16)Vector3 pos = Vector3::Zero();
-        alignas(16)Vector3 ambient = Vector3::Splat(0.35f);
-        alignas(16)Vector3 diffuseColor = Vector3::One();
-        float diffuseIntensity = 2.5f;
+        DirectX::XMMATRIX viewProjection = {};
+        Vector3 pos = Vector3::Zero();
         float attConst = 2.61f;
+        Vector3 ambient = Vector3::Splat(0.35f);
         float attLin = 0.1819f;
+        Vector3 diffuseColor = Vector3::One();
         float attQuad = 0.0000001f;
+        float diffuseIntensity = 2.5f;
         int isInitialized = 1;
-        float padding[15] = {};
+        float padding[2] = {};
     };
 
     #ifdef NC_EDITOR_ENABLED
@@ -34,13 +37,19 @@ namespace nc
             bool IsDirty() const;
 
             void SetInfo(PointLightInfo info);
-            bool Update(const DirectX::XMMATRIX& view);
+            bool Update(const DirectX::XMMATRIX& cameraView);
 
         private:
+            DirectX::XMMATRIX CalculateLightViewMatrix();
+
             PointLightInfo m_info;
+            DirectX::XMMATRIX m_lightProjectionMatrix;
             alignas(16)Vector3 m_projectedPos;
+
             bool m_isDirty;
     };
+
+    static_assert(sizeof(PointLightInfo) == PointLightInfoSize, "PointLight::PointLight Size of m_info must be 128 bytes.");
     
     template<>
     struct StoragePolicy<PointLight>

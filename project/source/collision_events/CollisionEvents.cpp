@@ -52,12 +52,12 @@ namespace nc::sample
 
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 5.0f, 0.0f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
-                                                           .ambient = Vector3{0.443f, 0.412f, 0.412f},
-                                                           .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .diffuseIntensity = 3.0,
                                                            .attConst = 0.0f,
+                                                           .ambient = Vector3{0.443f, 0.412f, 0.412f},
                                                            .attLin = 0.05f,
-                                                           .attQuad = 0.0f});
+                                                           .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
+                                                           .attQuad = 0.0f,
+                                                           .diffuseIntensity = 3.0,});
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});

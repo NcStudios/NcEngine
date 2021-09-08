@@ -110,4 +110,28 @@ namespace nc::graphics
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
     };
+
+    class ShadowMapData
+    {
+        public:
+            ShadowMapData() = default;
+            ShadowMapData(Graphics* graphics);
+            ShadowMapData(ShadowMapData&&) = default;
+            ShadowMapData& operator=(ShadowMapData&&) = default;
+            ~ShadowMapData();
+
+            void ResizeShadowMap();
+            vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
+            vk::DescriptorSet* GetDescriptorSet() noexcept;
+            const vk::ImageView& GetShadowMapImageView() noexcept;
+
+        private:
+            void InitializeShadowMap();
+
+            Graphics* m_graphics;
+            vk::UniqueSampler m_sampler;
+            std::unique_ptr<DepthStencil> m_depthStencil;
+            vk::UniqueDescriptorSet m_descriptorSet;
+            vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
+    };
 }

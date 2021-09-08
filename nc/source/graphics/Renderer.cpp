@@ -31,6 +31,7 @@ namespace nc::graphics
       m_shadowMappingTechnique{nullptr}
     //   m_particleTechnique{nullptr}
     {
+        graphics::ResourceManager::InitializeShadowMap(graphics);
         InitializeShadowMappingRenderPass();
     }
 
@@ -74,7 +75,6 @@ namespace nc::graphics
             swapchain->WaitForFrameFence(true);
             auto* cmd = &commandBuffers[i];
 
-
             // Shadow mapping pass
             cmd->begin(vk::CommandBufferBeginInfo{});
 
@@ -99,7 +99,7 @@ namespace nc::graphics
             if (!pointLights.empty())
             {
                 m_shadowMappingTechnique->Bind(cmd);
-                m_shadowMappingTechnique->Record(cmd, registry, pointLights, meshRenderers);
+                m_shadowMappingTechnique->Record(cmd, pointLights, meshRenderers);
             }
 
             cmd->endRenderPass(); // End shadow mapping
@@ -178,14 +178,6 @@ namespace nc::graphics
     {
         auto device = m_graphics->GetBasePtr()->GetDevice();
 
-        // Create depth stencil
-        m_shadowMappingPass.depthStencil = std::make_unique<DepthStencil>(m_graphics->GetBasePtr(), m_graphics->GetDimensions(), vk::Format::eD16Unorm);
-
-        // Create sampler which will be used to sample in the fragment shader to get shadow data.
-        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToEdge);
-        m_shadowMappingPass.sampler = device.createSamplerUnique(samplerInfo);
-
-        // Create render pass
         std::array<vk::AttachmentDescription, 1> renderPassAttachments = 
         {
             CreateAttachmentDescription(AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore)
@@ -225,7 +217,7 @@ namespace nc::graphics
 
         // Create frame buffer
         std::array<vk::ImageView, 1> attachments;
-        attachments[0] = m_shadowMappingPass.depthStencil->GetImageView();
+        attachments[0] = ResourceManager::GetShadowMapImageView(); // Depth Stencil image view
         auto dimensions = m_graphics->GetDimensions();
 
         vk::FramebufferCreateInfo framebufferInfo{};
