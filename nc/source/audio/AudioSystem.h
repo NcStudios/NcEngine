@@ -23,8 +23,9 @@ namespace nc::audio
         private:
             registry_type* m_registry;
             RtAudio m_rtAudio;
-            std::queue<std::vector<double>> m_readyBuffers;
-            std::queue<std::vector<double>> m_staleBuffers;
+            std::queue<std::span<double>> m_readyBuffers;
+            std::queue<std::span<double>> m_staleBuffers;
+            std::vector<double> m_bufferMemory;
             std::mutex m_readyMutex;
             std::mutex m_staleMutex;
             Entity m_listener;

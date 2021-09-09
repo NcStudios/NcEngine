@@ -40,6 +40,7 @@ namespace nc::audio
           m_rtAudio{},
           m_readyBuffers{},
           m_staleBuffers{},
+          m_bufferMemory(BufferLength * BufferCount, 0.0),
           m_readyMutex{},
           m_staleMutex{},
           m_listener{Entity::Null()}
@@ -48,7 +49,8 @@ namespace nc::audio
 
         for(size_t i = 0u; i < BufferCount; ++i)
         {
-            m_staleBuffers.emplace(BufferLength, 0.0);
+            auto begin = m_bufferMemory.begin() + i * BufferLength;
+            m_staleBuffers.emplace(begin, BufferLength);
         }
 
         /** @todo initializing RtAudio needs to be more robust
@@ -117,7 +119,7 @@ namespace nc::audio
         std::lock_guard lock{m_readyMutex};
         while(!m_readyBuffers.empty())
         {
-            m_staleBuffers.push(std::move(m_readyBuffers.front()));
+            m_staleBuffers.push(m_readyBuffers.front());
             m_readyBuffers.pop();
         }
     }
@@ -136,11 +138,11 @@ namespace nc::audio
             return 0;
         }
 
-        std::vector<double> buffer;
+        std::span<double> buffer;
 
         {
             std::lock_guard lock{m_readyMutex};
-            buffer = std::move(m_readyBuffers.front());
+            buffer = m_readyBuffers.front();
             m_readyBuffers.pop();
         }
         
@@ -148,7 +150,7 @@ namespace nc::audio
 
         {
             std::lock_guard lock{m_staleMutex};
-            m_staleBuffers.push(std::move(buffer));
+            m_staleBuffers.push(buffer);
         }
 
         return 0;
@@ -159,7 +161,7 @@ namespace nc::audio
         if(!m_listener.Valid())
             return;
 
-        std::vector<double> buffer;
+        std::span<double> buffer;
 
         for(size_t i = 0u; i < BufferCount; ++i)
         {
@@ -168,7 +170,7 @@ namespace nc::audio
 
             {
                 std::lock_guard lock{m_staleMutex};
-                buffer = std::move(m_staleBuffers.front());
+                buffer = m_staleBuffers.front();
                 m_staleBuffers.pop();
             }
 
@@ -176,7 +178,7 @@ namespace nc::audio
 
             {
                 std::lock_guard lock{m_readyMutex};
-                m_readyBuffers.push(std::move(buffer));
+                m_readyBuffers.push(buffer);
             }
         }
     }
