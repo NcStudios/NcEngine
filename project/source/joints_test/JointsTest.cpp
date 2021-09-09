@@ -18,7 +18,7 @@ namespace nc::sample
         camera::SetMainCamera(camera);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 6.0f, -8.48875f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
                                                            .attConst = 0.0f,
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},

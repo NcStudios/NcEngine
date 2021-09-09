@@ -26,7 +26,7 @@ namespace nc::sample
         // Light
         auto lightOneProperties = PointLightInfo
         {
-            .pos = Vector3::Zero(),
+            .pos = Vector3{0.05f, 3.0f, -5.0f},
             .attConst = 0.0f,
             .ambient = Vector3{0.05f, 0.05f, 0.05f},
             .attLin = 0.05f,

@@ -50,7 +50,7 @@ namespace nc::sample
         // Setup
         m_sceneHelper.Setup(registry, true, false, Widget);
 
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 5.0f, 0.0f}, .tag = "Point Light 1"});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.05f, 3.0f, -5.0f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
                                                            .attConst = 0.0f,
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
