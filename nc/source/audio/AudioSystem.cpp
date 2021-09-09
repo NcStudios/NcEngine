@@ -187,7 +187,7 @@ namespace nc::audio
 
         const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
         if(!listenerTransform)
-            throw std::runtime_error("AudioSystem::WriteCallback - Invalid listener registered");
+            throw std::runtime_error("AudioSystem::MixToBuffer - Invalid listener registered");
         
         const auto listenerPosition = listenerTransform->GetPosition();
         const auto rightEar = listenerTransform->Right();
@@ -197,8 +197,15 @@ namespace nc::audio
             if(!source.IsPlaying())
                 continue;
             
-            auto* transform = m_registry->Get<Transform>(source.GetParentEntity());
-            source.WriteSamples(buffer, BufferFrames, transform->GetPosition(), listenerPosition, rightEar);
+            if(source.IsSpatial())
+            {
+                auto* transform = m_registry->Get<Transform>(source.GetParentEntity());
+                source.WriteSpatialSamples(buffer, BufferFrames, transform->GetPosition(), listenerPosition, rightEar);
+            }
+            else
+            {
+                source.WriteNonSpatialSamples(buffer, BufferFrames);
+            }
         }
     }
 

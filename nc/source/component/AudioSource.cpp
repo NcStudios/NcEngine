@@ -44,14 +44,8 @@ namespace nc
         m_properties.gain = math::Clamp(properties.gain, 0.0f, 1.0f);
     }
 
-    void AudioSource::WriteSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar)
+    void AudioSource::WriteSpatialSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar)
     {
-        if(!m_properties.spatialize)
-        {
-            WriteNonSpatialSamples(buffer, frames);
-            return;
-        }
-
         const auto squareDistance = SquareDistance(sourcePosition, listenerPosition);
         const auto squareOuterRadius = m_properties.outerRadius * m_properties.outerRadius;
 
