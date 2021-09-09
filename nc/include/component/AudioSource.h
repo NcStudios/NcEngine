@@ -33,8 +33,7 @@ namespace nc
         public:
             AudioSource(Entity entity, const std::string& path, AudioSourceProperties properties = AudioSourceProperties{});
 
-            void WriteSamples(double* buffer, size_t frames, const Vector3& listenerPosition, const Vector3& rightEar, const Vector3& leftEar);
-
+            void WriteSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar);
             void Play() { m_playing = true; m_currentSampleIndex = 0u; }
             void Stop() { m_playing = false; m_currentSampleIndex = 0u; }
             bool IsPlaying() const { return m_playing; }

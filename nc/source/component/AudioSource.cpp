@@ -6,18 +6,18 @@ namespace
 {
     using namespace nc;
 
-    float CalculateAttenuation(AttenuationFunction curveType, float innerRadius, float outerRadius, float squareDistance)
+    double CalculateAttenuation(AttenuationFunction curveType, double innerRadius, double outerRadius, double squareDistance)
     {
         if(innerRadius * innerRadius > squareDistance)
-            return 1.0f;
+            return 1.0;
 
         switch(curveType)
         {
             case AttenuationFunction::Linear:
             {
-                float distance = std::sqrt(squareDistance);
-                float distanceRatio = (distance - innerRadius) / (outerRadius - innerRadius);
-                return math::Clamp(1.0f - distanceRatio, 0.0f, 1.0f);
+                double distance = std::sqrt(squareDistance);
+                double distanceRatio = (distance - innerRadius) / (outerRadius - innerRadius);
+                return math::Clamp(1.0 - distanceRatio, 0.0, 1.0);
             }
         }
 
@@ -44,7 +44,7 @@ namespace nc
         m_properties.gain = math::Clamp(properties.gain, 0.0f, 1.0f);
     }
 
-    void AudioSource::WriteSamples(double* buffer, size_t frames, const Vector3& listenerPosition, const Vector3& rightEar, const Vector3& leftEar)
+    void AudioSource::WriteSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar)
     {
         if(!m_properties.spatialize)
         {
@@ -52,44 +52,27 @@ namespace nc
             return;
         }
 
-        auto* registry = ActiveRegistry();
-        auto* transform = registry->Get<Transform>(GetParentEntity());
-        auto position = transform->GetPosition();
-
-        auto squareDistance = SquareDistance(position, listenerPosition);
-        auto squareOuterRadius = m_properties.outerRadius * m_properties.outerRadius;
+        const auto squareDistance = SquareDistance(sourcePosition, listenerPosition);
+        const auto squareOuterRadius = m_properties.outerRadius * m_properties.outerRadius;
 
         /** @todo may want to 'advance' sound even if it can't be heard */
         if(squareDistance > squareOuterRadius)
             return;
 
-        auto attenuation = CalculateAttenuation(m_properties.attenuation, m_properties.innerRadius, m_properties.outerRadius, squareDistance);
-        auto gain = attenuation * m_properties.gain;
-
-
-        auto soundToLeftEar = Normalize(listenerPosition - position);
-        auto normLeftEar = Normalize(leftEar);
-        auto dotLeft = Dot(soundToLeftEar, normLeftEar);
-        float leftPanFactor = 1.0f;
-        if(dotLeft > 0.0f)
-            leftPanFactor = math::Clamp(1.0f - dotLeft, 0.1f, 1.0f);
-
-        auto soundToRightEar = Normalize(listenerPosition - position);
-        auto normRightEar = Normalize(rightEar);
-        auto dotRight = Dot(soundToRightEar, normRightEar);
-        float rightPanFactor = 1.0f;
-        if(dotRight > 0.0f)
-            rightPanFactor = math::Clamp(1.0f - dotRight, 0.1f, 1.0f);
+        const auto sourceToListener = Normalize(listenerPosition - sourcePosition);
+        const double dotRight = Dot(sourceToListener, rightEar);
+        const double rightPresence = dotRight <= 0.0 ? 1.0 : math::Clamp(1.0 - dotRight, 0.2, 1.0);
+        const double dotLeft = Dot(sourceToListener, -rightEar);
+        const double leftPresence = dotLeft <= 0.0 ? 1.0 : math::Clamp(1.0 - dotLeft, 0.2, 1.0);
+        const double attenuation = CalculateAttenuation(m_properties.attenuation, m_properties.innerRadius, m_properties.outerRadius, squareDistance);
+        const double gain = 0.5 * attenuation * m_properties.gain;
 
         for(size_t i = 0u; i < frames; ++i)
         {
-            float sample = gain * 0.5f * (m_leftChannel[m_currentSampleIndex] + m_rightChannel[m_currentSampleIndex]);
+            const double sample = gain * (m_leftChannel[m_currentSampleIndex] + m_rightChannel[m_currentSampleIndex]);
 
-            *buffer++ += sample * leftPanFactor;
-            *buffer++ += sample * rightPanFactor;
-
-            //*buffer++ += gain * leftPanFactor * m_leftChannel[m_currentSampleIndex];
-            //*buffer++ += gain * rightPanFactor * m_rightChannel[m_currentSampleIndex];
+            *buffer++ += sample * leftPresence;
+            *buffer++ += sample * rightPresence;
 
             if(++m_currentSampleIndex >= m_samplesPerChannel)
             {
@@ -105,7 +88,7 @@ namespace nc
 
     void AudioSource::WriteNonSpatialSamples(double* buffer, size_t frames)
     {
-        auto gain = m_properties.gain;
+        const double gain = 0.5 * m_properties.gain;
 
         for(size_t i = 0u; i < frames; ++i)
         {

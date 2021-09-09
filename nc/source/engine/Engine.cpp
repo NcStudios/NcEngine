@@ -104,6 +104,7 @@ namespace nc::core
         {
             auto dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
+            auto audioJobResult = m_jobSystem.Schedule(audio::AudioSystem::Update, &m_audioSystem);
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
 
             FrameLogic(dt);
@@ -117,6 +118,7 @@ namespace nc::core
             }
 
             particleUpdateJobResult.wait();
+            audioJobResult.wait();
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();

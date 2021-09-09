@@ -1,17 +1,29 @@
 #include "AudioSystem.h"
 #include "Audio.h"
 
+#include <cstring>
+#include <iostream>
+
 namespace
 {
     nc::audio::AudioSystem* g_audioSystem = nullptr;
     constexpr unsigned OutputChannelCount = 2u;
     constexpr unsigned SampleRate = 44100u;
+    constexpr unsigned BufferCount = 4u;
     constexpr unsigned BufferFrames = 256u;
+    constexpr unsigned BufferLength = BufferFrames * OutputChannelCount;
+    constexpr unsigned BufferSizeInBytes = BufferLength * sizeof(double);
 
-    int AudioSystemCallback(void* outputBuffer, void*, unsigned nBufferFrames, double, RtAudioStreamStatus status, void* userData)
+    int AudioSystemCallback(void* outputBuffer, void*, [[maybe_unused]] unsigned nBufferFrames, double, RtAudioStreamStatus status, void* userData)
     {
+        assert(nBufferFrames == BufferFrames);
+
+        /** @todo We should log underflows and/or display them in the editor. For now, I just want to
+         *  quickly see when they happen. */
+        if(status) std::cerr << "Audio stream underflow\n";
+
         auto* system = static_cast<nc::audio::AudioSystem*>(userData);
-        return system->WriteCallback(static_cast<double*>(outputBuffer), nBufferFrames, status);
+        return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer));
     }
 }
 
@@ -26,9 +38,18 @@ namespace nc::audio
     AudioSystem::AudioSystem(registry_type* registry)
         : m_registry{registry},
           m_rtAudio{},
+          m_readyBuffers{},
+          m_staleBuffers{},
+          m_readyMutex{},
+          m_staleMutex{},
           m_listener{Entity::Null()}
     {
         g_audioSystem = this;
+
+        for(size_t i = 0u; i < BufferCount; ++i)
+        {
+            m_staleBuffers.emplace(BufferLength, 0.0);
+        }
 
         /** @todo initializing RtAudio needs to be more robust
          *  -should have a way to select different devices
@@ -67,10 +88,15 @@ namespace nc::audio
             e.printMessage();
             throw std::runtime_error("AudioSystem - Failure starting audio stream");
         }
+
+        if(bufferFrames != BufferFrames)
+            throw std::runtime_error("AudioSystem - Invalid number of buffer frames specified");
     }
 
     AudioSystem::~AudioSystem()
     {
+        Clear();
+
         try
         {
             m_rtAudio.stopStream();
@@ -84,9 +110,16 @@ namespace nc::audio
             m_rtAudio.closeStream();
     }
 
-    void AudioSystem::Clear()
+    void AudioSystem::Clear() noexcept
     {
         m_listener = Entity::Null();
+
+        std::lock_guard lock{m_readyMutex};
+        while(!m_readyBuffers.empty())
+        {
+            m_staleBuffers.push(std::move(m_readyBuffers.front()));
+            m_readyBuffers.pop();
+        }
     }
 
     void AudioSystem::RegisterListener(Entity listener)
@@ -94,40 +127,79 @@ namespace nc::audio
         m_listener = listener;
     }
 
-    int AudioSystem::WriteCallback(double* output, unsigned bufferFrames, RtAudioStreamStatus status)
+    int AudioSystem::WriteToDeviceBuffer(double* output)
+    {
+        // empty check before lock is only safe with 1 consumer
+        if(m_readyBuffers.empty())
+        {
+            std::memset(output, 0, BufferSizeInBytes);
+            return 0;
+        }
+
+        std::vector<double> buffer;
+
+        {
+            std::lock_guard lock{m_readyMutex};
+            buffer = std::move(m_readyBuffers.front());
+            m_readyBuffers.pop();
+        }
+        
+        std::memcpy(output, buffer.data(), BufferSizeInBytes);
+
+        {
+            std::lock_guard lock{m_staleMutex};
+            m_staleBuffers.push(std::move(buffer));
+        }
+
+        return 0;
+    }
+
+    void AudioSystem::Update()
     {
         if(!m_listener.Valid())
-            return 0;
+            return;
 
-        auto* listenerTransform = ActiveRegistry()->Get<Transform>(m_listener);
+        std::vector<double> buffer;
+
+        for(size_t i = 0u; i < BufferCount; ++i)
+        {
+            if(m_staleBuffers.empty())
+                return;
+
+            {
+                std::lock_guard lock{m_staleMutex};
+                buffer = std::move(m_staleBuffers.front());
+                m_staleBuffers.pop();
+            }
+
+            MixToBuffer(buffer.data());
+
+            {
+                std::lock_guard lock{m_readyMutex};
+                m_readyBuffers.push(std::move(buffer));
+            }
+        }
+    }
+
+    void AudioSystem::MixToBuffer(double* buffer)
+    {
+        std::memset(buffer, 0, BufferSizeInBytes);
+
+        const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
         if(!listenerTransform)
             throw std::runtime_error("AudioSystem::WriteCallback - Invalid listener registered");
         
-        auto listenerPosition = listenerTransform->GetPosition();
-        auto rightEar = listenerTransform->Right();
-        auto leftEar = -rightEar;
+        const auto listenerPosition = listenerTransform->GetPosition();
+        const auto rightEar = listenerTransform->Right();
 
-        /** @todo We should log underflows and/or display them in the editor. For now, I just want to
-         *  quickly see when they happen. */
-        if(status)
-            std::cerr << "Audio stream underflow\n";
-
-        for(unsigned i = 0; i < bufferFrames * 2u; ++i)
-        {
-            output[i] = 0.0f;
-        }
-
-        auto sources = m_registry->ViewAll<AudioSource>();
-
-        for(auto& source : sources)
+        for(auto& source : m_registry->ViewAll<AudioSource>())
         {
             if(!source.IsPlaying())
                 continue;
             
-            source.WriteSamples(output, bufferFrames, listenerPosition, rightEar, leftEar);
+            auto* transform = m_registry->Get<Transform>(source.GetParentEntity());
+            source.WriteSamples(buffer, BufferFrames, transform->GetPosition(), listenerPosition, rightEar);
         }
-
-        return 0;
     }
 
     auto AudioSystem::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>

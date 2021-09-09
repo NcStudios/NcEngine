@@ -3,6 +3,9 @@
 #include "Ecs.h"
 #include "rtaudio/RtAudio.h"
 
+#include <mutex>
+#include <queue>
+
 namespace nc::audio
 {
     class AudioSystem
@@ -11,14 +14,21 @@ namespace nc::audio
             AudioSystem(registry_type* registry);
             ~AudioSystem();
 
-            void Clear();
             void RegisterListener(Entity listener);
-            int WriteCallback(double* output, unsigned bufferFrames, RtAudioStreamStatus status);
+            int WriteToDeviceBuffer(double* output);
+            void Update();
             auto ProbeDevices() -> std::vector<RtAudio::DeviceInfo>;
+            void Clear() noexcept;
 
         private:
             registry_type* m_registry;
             RtAudio m_rtAudio;
+            std::queue<std::vector<double>> m_readyBuffers;
+            std::queue<std::vector<double>> m_staleBuffers;
+            std::mutex m_readyMutex;
+            std::mutex m_staleMutex;
             Entity m_listener;
+
+            void MixToBuffer(double* buffer);
     };
 }
