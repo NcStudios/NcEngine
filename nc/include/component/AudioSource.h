@@ -42,8 +42,9 @@ namespace nc
             AudioSourceProperties m_properties;
             bool m_playing;
 
-            friend audio::AudioSystem;
             void WriteSpatialSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar);
             void WriteNonSpatialSamples(double* buffer, size_t frames);
+
+            friend audio::AudioSystem;
     };
 }

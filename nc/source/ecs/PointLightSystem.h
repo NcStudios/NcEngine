@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Commands;
+    class Graphics;
 }
 
 namespace nc::ecs
@@ -26,7 +26,7 @@ namespace nc::ecs
             void Clear();
 
         private:
-            nc::graphics::Graphics* m_graphics;
+            graphics::Graphics* m_graphics;
             registry_type* m_registry;
             bool m_isSystemDirty;
     };

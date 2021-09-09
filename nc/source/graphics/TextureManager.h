@@ -11,10 +11,10 @@ namespace nc::graphics
     class TextureManager
     {
         public:
-            TextureManager(nc::graphics::Graphics* graphics);
+            TextureManager(Graphics* graphics);
             void LoadTextures(const std::vector<std::string>& paths);
             
         private:
-            nc::graphics::Graphics* m_graphics;
+            Graphics* m_graphics;
     };
 }

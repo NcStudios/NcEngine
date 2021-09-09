@@ -16,21 +16,20 @@
 namespace nc::graphics
 {
     Renderer::Renderer(graphics::Graphics* graphics)
-    : m_graphics{graphics},
-      m_textureManager{graphics},
-      m_meshManager{graphics},
-      m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
-      m_storageHandles{},
-      m_phongAndUiTechnique{nullptr}
-      #ifdef NC_EDITOR_ENABLED
-      ,
-      m_wireframeTechnique{nullptr}
-      #endif
-    //   m_particleTechnique{nullptr}
+        : m_graphics{graphics},
+          m_textureManager{graphics},
+          m_meshManager{graphics},
+          m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
+          m_phongAndUiTechnique{nullptr}
+          #ifdef NC_EDITOR_ENABLED
+          ,
+          m_wireframeTechnique{nullptr}
+          #endif
+          //m_particleTechnique{nullptr}
     {
     }
 
-    Renderer::~Renderer()
+    Renderer::~Renderer() noexcept
     {
         m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
     }
@@ -145,36 +144,6 @@ namespace nc::graphics
     //     m_particleTechnique->RegisterEmitters(m_emitterStates);
     // }
 
-
-    void Renderer::DeregisterRenderable(Entity entity)
-    {
-        // @todo: This will be replaced with a proper storage strategy.
-        auto it = std::ranges::find_if(m_storageHandles, [entity](const auto& pair)
-        {
-            return entity == pair.first;
-        });
-
-        if (it == m_storageHandles.end())
-        {
-            return;
-        }
-
-        auto& vec = *(it->second);
-        // @TODO: Fix bug around deregistering.
-        auto itemIt = std::ranges::find(vec, entity);
-
-        if (itemIt == vec.end())
-        {
-            return;
-        }
-
-        *itemIt = vec.back();
-        vec.pop_back();
-
-        *it = m_storageHandles.back();
-        m_storageHandles.pop_back();
-    }
-
     #ifdef NC_EDITOR_ENABLED
     void Renderer::RegisterDebugWidget(nc::DebugWidget widget)
     {
@@ -205,7 +174,7 @@ namespace nc::graphics
     //     }
     // }
 
-    void Renderer::Clear()
+    void Renderer::Clear() noexcept
     {
     }
 }

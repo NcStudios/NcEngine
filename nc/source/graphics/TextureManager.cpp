@@ -21,8 +21,8 @@ namespace nc::graphics
         impl->LoadTextures(paths);
     }
     
-    TextureManager::TextureManager(nc::graphics::Graphics* graphics)
-    : m_graphics{graphics}
+    TextureManager::TextureManager(Graphics* graphics)
+        : m_graphics{graphics}
     {
         impl = this;
     }

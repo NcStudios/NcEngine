@@ -33,7 +33,6 @@ namespace nc::graphics
             void SetClearColor(std::array<float, 4> color);
             void SetRenderer(Renderer* renderer);
 
-            const Base& GetBase() const noexcept;
             Base* GetBasePtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
             Commands* GetCommandsPtr() const noexcept;
@@ -76,6 +75,5 @@ namespace nc::graphics
             DirectX::XMMATRIX m_projectionMatrix;
             std::array<float, 4> m_clearColor;
             uint32_t m_drawCallCount = 0;
-
     };
 }

@@ -27,16 +27,14 @@ namespace nc::graphics
     {
         public:
             PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
-            ~PhongAndUiTechnique();
+            ~PhongAndUiTechnique() noexcept;
             
             void Bind(vk::CommandBuffer* cmd);
             void Record(vk::CommandBuffer* cmd, std::span<nc::MeshRenderer> renderers);
-            void Clear();
+            void Clear() noexcept;
 
         private:
             void CreatePipeline(vk::RenderPass* renderPass);
-
-            std::unordered_map<std::string, std::vector<Entity>> m_meshRenderers;
 
             nc::graphics::Graphics* m_graphics;
             Base* m_base;

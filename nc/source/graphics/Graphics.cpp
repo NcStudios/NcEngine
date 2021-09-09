@@ -1,5 +1,6 @@
 #include "Graphics.h"
 #include "debug/Profiler.h"
+#include "debug/Utils.h"
 #include "Base.h"
 #include "Commands.h"
 #include "resources/DepthStencil.h"
@@ -17,26 +18,33 @@ namespace nc::graphics
 {
     Graphics::Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_base{ std::make_unique<Base>(hwnd, hinstance) },
-        m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
-        m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
-        m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
-        m_renderer{ nullptr },
-        m_resourceManager{std::make_unique<ResourceManager>()},
-        m_dimensions{ dimensions },
-        m_isMinimized{ false },
-        m_isFullscreen{ false },
-        m_cameraWorldPosition{},
-        m_viewMatrix{},
-        m_projectionMatrix{},
-        m_clearColor{DefaultClearColor},
-        m_drawCallCount{0}
+          m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
+          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+          m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
+          m_renderer{ nullptr },
+          m_resourceManager{std::make_unique<ResourceManager>()},
+          m_dimensions{ dimensions },
+          m_isMinimized{ false },
+          m_isFullscreen{ false },
+          m_cameraWorldPosition{},
+          m_viewMatrix{},
+          m_projectionMatrix{},
+          m_clearColor{DefaultClearColor},
+          m_drawCallCount{0}
     {
         SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
-    Graphics::~Graphics()
+    Graphics::~Graphics() noexcept
     {
-        Clear();
+        try
+        {
+            Clear();
+        }
+        catch(const std::runtime_error& e) // from WaitIdle()
+        {
+            debug::LogException(e);
+        }
     }
 
     void Graphics::RecreateSwapchain(Vector2 dimensions)
@@ -120,11 +128,6 @@ namespace nc::graphics
     Base* Graphics::GetBasePtr() const noexcept
     {
         return m_base.get();
-    }
-
-    const Base& Graphics::GetBase() const noexcept
-    {
-        return *m_base.get();
     }
     
     Swapchain* Graphics::GetSwapchainPtr() const noexcept

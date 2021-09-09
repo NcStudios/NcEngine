@@ -30,7 +30,7 @@ namespace nc::graphics
         CreatePipeline(renderPass);
     }
 
-    WireframeTechnique::~WireframeTechnique()
+    WireframeTechnique::~WireframeTechnique() noexcept
     {
         auto device = m_base->GetDevice();
         device.destroyPipelineLayout(m_pipelineLayout);

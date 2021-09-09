@@ -32,7 +32,7 @@ namespace nc::graphics
         return &m_commandBuffers;
     }
 
-    void Commands::FreeCommandBuffers()
+    void Commands::FreeCommandBuffers() noexcept
     {
         m_base->FreeCommandBuffers(&m_commandBuffers);
     }
