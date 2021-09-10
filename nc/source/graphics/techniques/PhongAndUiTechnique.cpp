@@ -17,8 +17,7 @@
 namespace nc::graphics
 {
     PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
-    : m_meshRenderers{},
-      m_graphics{graphics},
+    : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{},
@@ -27,7 +26,7 @@ namespace nc::graphics
         CreatePipeline(renderPass);
     }
 
-    PhongAndUiTechnique::~PhongAndUiTechnique()
+    PhongAndUiTechnique::~PhongAndUiTechnique() noexcept
     {
         auto device = m_base->GetDevice();
         device.destroyPipelineLayout(m_pipelineLayout);
@@ -125,8 +124,7 @@ namespace nc::graphics
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::Clear()
+    void PhongAndUiTechnique::Clear() noexcept
     {
-        m_meshRenderers.clear();
     }
 }

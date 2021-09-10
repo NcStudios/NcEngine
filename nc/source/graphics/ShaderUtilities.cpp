@@ -1,10 +1,7 @@
 #include "ShaderUtilities.h"
 #include "graphics/Base.h"
 
-#include <vector>
-#include <string>
 #include <fstream>
-#include <iostream>
 
 namespace nc::graphics
 {

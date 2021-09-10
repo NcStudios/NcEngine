@@ -31,7 +31,7 @@ namespace nc::graphics
     {
         public:
             WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
-            ~WireframeTechnique();
+            ~WireframeTechnique() noexcept;
 
             void Bind(vk::CommandBuffer* cmd);
             void Record(vk::CommandBuffer* cmd);

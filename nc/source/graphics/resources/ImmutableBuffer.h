@@ -31,14 +31,13 @@ namespace nc::graphics
     class ImmutableBuffer
     {
         public:
-
             ImmutableBuffer();
             ImmutableBuffer(nc::graphics::Graphics* graphics, const std::vector<T>& data);
+            ~ImmutableBuffer() noexcept;
             ImmutableBuffer(ImmutableBuffer&&);
-            ImmutableBuffer& operator = (ImmutableBuffer&&);
-            ImmutableBuffer& operator = (const ImmutableBuffer&) = delete;
+            ImmutableBuffer& operator=(ImmutableBuffer&&);
+            ImmutableBuffer& operator=(const ImmutableBuffer&) = delete;
             ImmutableBuffer(const ImmutableBuffer&) = delete;
-            ~ImmutableBuffer();
             
             vk::Buffer* GetBuffer();
 
@@ -46,7 +45,6 @@ namespace nc::graphics
             void Clear();
 
         private:
-
             Base* m_base;
             uint32_t m_memoryIndex;
             vk::Buffer m_immutableBuffer;
@@ -54,21 +52,21 @@ namespace nc::graphics
 
     template<typename T, IncludedUsage UsageFlag_T>
     ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer()
-    : m_memoryIndex { 0 },
-      m_immutableBuffer { nullptr }
+        : m_memoryIndex { 0 },
+          m_immutableBuffer { nullptr }
     {
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
     ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(nc::graphics::Graphics* graphics, const std::vector<T>& data)
-    : m_memoryIndex { 0 },
-      m_immutableBuffer { nullptr }
+        : m_memoryIndex { 0 },
+          m_immutableBuffer { nullptr }
     {
         Bind(graphics, data);
     }
 
     template<typename T, IncludedUsage UsageFlag_T>
-    ImmutableBuffer<T, UsageFlag_T>::~ImmutableBuffer()
+    ImmutableBuffer<T, UsageFlag_T>::~ImmutableBuffer() noexcept
     {
         if (m_immutableBuffer)
         {
@@ -105,9 +103,9 @@ namespace nc::graphics
 
     template<typename T, IncludedUsage UsageFlag_T>
     ImmutableBuffer<T, UsageFlag_T>::ImmutableBuffer(ImmutableBuffer&& other)
-    : m_base{std::exchange(other.m_base, nullptr)},
-      m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
-      m_immutableBuffer{std::exchange(other.m_immutableBuffer, nullptr)}
+        : m_base{std::exchange(other.m_base, nullptr)},
+          m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
+          m_immutableBuffer{std::exchange(other.m_immutableBuffer, nullptr)}
     {
     }
 

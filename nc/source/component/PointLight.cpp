@@ -18,46 +18,43 @@ namespace nc
 
         if (pointLightDataFile.is_open())
         {
-            pointLightDataFile << "Pos: " << info.pos << std::endl;
-            pointLightDataFile << "Ambient: " << info.ambient << std::endl;
-            pointLightDataFile << "Diffuse: " << info.diffuseColor << std::endl;
-            pointLightDataFile << "Diffuse Intensity: " << info.diffuseIntensity << std::endl;
-            pointLightDataFile << "Attenuation Constant: " << info.attConst << std::endl;
-            pointLightDataFile << "Attenuation Linear: " << info.attLin << std::endl;
-            pointLightDataFile << "Attenuation Quadratic: " << info.attQuad << std::endl;
+            pointLightDataFile << "Pos: " << info.pos << '\n';
+            pointLightDataFile << "Ambient: " << info.ambient << '\n';
+            pointLightDataFile << "Diffuse: " << info.diffuseColor << '\n';
+            pointLightDataFile << "Diffuse Intensity: " << info.diffuseIntensity << '\n';
+            pointLightDataFile << "Attenuation Constant: " << info.attConst << '\n';
+            pointLightDataFile << "Attenuation Linear: " << info.attLin << '\n';
+            pointLightDataFile << "Attenuation Quadratic: " << info.attQuad << '\n';
             pointLightDataFile.close();
         }
     }
     #endif
 
     PointLight::PointLight(Entity entity, PointLightInfo info)
-    : ComponentBase{entity},
-      m_info{info},
-      m_projectedPos{},
-      m_isDirty{false}
+        : ComponentBase{entity},
+          m_info{info},
+          m_projectedPos{},
+          m_isDirty{false}
     {
     }
 
-    const PointLightInfo& PointLight::GetInfo() const
+    void PointLight::SetInfo(PointLightInfo info)
     {
-        return m_info;
+        m_isDirty = true;
+        m_info = info;
     }
 
-    bool PointLight::IsDirty() const
+    /** @todo I don't think this method makes sense. We're comparing the world position
+     *  to the stored projected position? Waiting to change it until I can talk to you
+     *  to confirm. */
+    bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& view)
     {
-        return m_isDirty;
-    }
-
-    bool PointLight::Update(const DirectX::XMMATRIX& view)
-    {        
-        auto transformPos = ActiveRegistry()->Get<Transform>(GetParentEntity())->GetPosition();
-
-        if (transformPos.x != m_info.pos.x || transformPos.y != m_info.pos.y || transformPos.z != m_info.pos.z)
+        if (position.x != m_info.pos.x || position.y != m_info.pos.y || position.z != m_info.pos.z)
         {
             m_isDirty = true;
         }
 
-        const auto pos_v = DirectX::XMLoadVector3(&transformPos);
+        const auto pos_v = DirectX::XMLoadVector3(&position);
         DirectX::XMStoreVector3(&m_projectedPos, DirectX::XMVector3Transform(pos_v, view));
 
         m_info.pos.x = m_projectedPos.x;
@@ -65,12 +62,6 @@ namespace nc
         m_info.pos.z = m_projectedPos.z;
 
         return std::exchange(m_isDirty, false);
-    }
-
-    void PointLight::SetInfo(PointLightInfo info)
-    {
-        m_isDirty = true;
-        m_info = info;
     }
 
     #ifdef NC_EDITOR_ENABLED

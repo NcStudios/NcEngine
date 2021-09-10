@@ -1,6 +1,8 @@
 #pragma once
 
 #include "vulkan/vk_mem_alloc.hpp"
+
+#include <string>
 #include <vector>
 
 namespace nc::graphics

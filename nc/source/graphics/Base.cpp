@@ -101,7 +101,7 @@ namespace nc::graphics
         CreateDescriptorPools();
     }
 
-    Base::~Base()
+    Base::~Base() noexcept
     {
         m_logicalDevice.destroyDescriptorPool(m_renderingDescriptorPool);
         m_logicalDevice.destroyDescriptorPool(m_imguiDescriptorPool);
@@ -123,7 +123,7 @@ namespace nc::graphics
         m_instance.destroy();
     }
 
-    void Base::FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers)
+    void Base::FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers) noexcept
     {
         m_logicalDevice.freeCommandBuffers(m_commandPool, static_cast<uint32_t>(commandBuffers->size()), commandBuffers->data());
     }
@@ -571,24 +571,24 @@ namespace nc::graphics
         return m_logicalDevice.createImageViewUnique(viewInfo);
     }
 
-    void Base::DestroyBuffer(uint32_t id)
+    void Base::DestroyBuffer(uint32_t id) noexcept
     {
         auto buffer = m_buffers.find(id);
         if (buffer == m_buffers.end())
         {
-            throw std::runtime_error("The given buffer ID was not present in the dictionary.");
+            return;
         }
 
         m_allocator.destroyBuffer(buffer->second.first, buffer->second.second);
         m_buffers.erase(id);
     }
 
-    void Base::DestroyImage(uint32_t id)
+    void Base::DestroyImage(uint32_t id) noexcept
     {
         auto image = m_images.find(id);
         if (image == m_images.end())
         {
-            throw std::runtime_error("The given image ID was not present in the dictionary.");
+            return;
         }
 
         m_allocator.destroyImage(image->second.first, image->second.second);

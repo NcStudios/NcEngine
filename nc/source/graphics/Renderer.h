@@ -21,12 +21,12 @@ namespace nc::graphics
     {
         public:
             Renderer(graphics::Graphics* graphics);
-            ~Renderer();
+            ~Renderer() noexcept;
             
             void BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
             void Record(Commands* commands);
             void BindSharedData(vk::CommandBuffer* cmd);
-            void Clear();
+            void Clear() noexcept;
 
             // void RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates);
             void ClearParticleEmitters();
@@ -36,8 +36,6 @@ namespace nc::graphics
             void ClearDebugWidget();
             #endif
 
-            void DeregisterRenderable(Entity entity);
-
         private:
             void RecordUi(vk::CommandBuffer* cmd);
 
@@ -46,7 +44,6 @@ namespace nc::graphics
             MeshManager m_meshManager;
             vk::RenderPass m_mainRenderPass;
 
-            std::vector<std::pair<Entity, std::vector<Entity>*>> m_storageHandles;
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;
             #ifdef NC_EDITOR_ENABLED
             std::unique_ptr<WireframeTechnique> m_wireframeTechnique;
