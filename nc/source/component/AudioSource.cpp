@@ -38,7 +38,7 @@ namespace nc
     {
         const auto& soundClip = AssetManager::AcquireSoundClip(path);
         m_leftChannel = std::span<const double>{soundClip.leftChannel};
-        m_rightChannel = std::span<const double>(soundClip.rightChannel);
+        m_rightChannel = std::span<const double>{soundClip.rightChannel};
         m_samplesPerChannel = soundClip.samplesPerChannel;
 
         m_properties.gain = math::Clamp(properties.gain, 0.0f, 1.0f);
