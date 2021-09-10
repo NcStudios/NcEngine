@@ -14,7 +14,7 @@ namespace nc::graphics
     {
     }
 
-    MeshesData::~MeshesData()
+    MeshesData::~MeshesData() noexcept
     {
         Clear();
     }
@@ -66,17 +66,17 @@ namespace nc::graphics
                                vk::UniqueDescriptorSetLayout descriptorSetLayout,
                                vk::UniqueSampler sampler,
                                vk::ImageLayout layout)
-    : m_textureBuffers{std::move(textureBuffers)},
-      m_imageInfos{std::move(imageInfos)},
-      m_accessors{std::move(accessors)},
-      m_descriptorSet{std::move(descriptorSet)},
-      m_descriptorSetLayout{std::move(descriptorSetLayout)},
-      m_sampler{std::move(sampler)},
-      m_layout{layout}
+        : m_textureBuffers{std::move(textureBuffers)},
+          m_imageInfos{std::move(imageInfos)},
+          m_accessors{std::move(accessors)},
+          m_descriptorSet{std::move(descriptorSet)},
+          m_descriptorSetLayout{std::move(descriptorSetLayout)},
+          m_sampler{std::move(sampler)},
+          m_layout{layout}
     {
     }
 
-    TexturesData::~TexturesData()
+    TexturesData::~TexturesData() noexcept
     {
         for (auto& texture : m_textureBuffers)
         {
@@ -158,7 +158,7 @@ namespace nc::graphics
         base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
     }
 
-    PointLightsData::~PointLightsData()
+    PointLightsData::~PointLightsData() noexcept
     {
         m_pointLightsArrayBuffer.Clear();
         m_descriptorSet.reset();
@@ -211,7 +211,7 @@ namespace nc::graphics
         base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
     }
 
-    ObjectsData::~ObjectsData()
+    ObjectsData::~ObjectsData() noexcept
     {
         m_objectsDataBuffer.Clear();
         m_descriptorSet.reset();

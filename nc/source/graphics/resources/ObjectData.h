@@ -1,3 +1,4 @@
+#pragma once
 #include "directx/math/DirectXMath.h"
 
 namespace nc::graphics

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assets/AssetManager.h"
+#include "audio/AudioSystem.h"
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
@@ -33,6 +34,7 @@ namespace nc::core
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
             AssetManager m_assetManager;
+            audio::AudioSystem m_audioSystem;
             ui::UIImpl m_ui;
 
             void ClearState();

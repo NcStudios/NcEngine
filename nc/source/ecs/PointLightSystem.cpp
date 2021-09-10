@@ -7,15 +7,15 @@
 #include "PointLightSystem.h"
 
 #include <iostream>
-            
+
 namespace { constexpr uint32_t MAX_POINT_LIGHTS = 10u; }
 
 namespace nc::ecs
 {
     PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics)
-    : m_graphics{graphics},
-      m_registry{registry},
-      m_isSystemDirty{true}
+        : m_graphics{graphics},
+          m_registry{registry},
+          m_isSystemDirty{true}
     {
         m_registry->RegisterOnAddCallback<PointLight>
         (
@@ -36,7 +36,9 @@ namespace nc::ecs
         const auto& view = m_graphics->GetViewMatrix();
         for (auto& pointLight : pointLightComponents)
         {
-            if (pointLight.Update(view))
+            auto* transform = m_registry->Get<Transform>(pointLight.GetParentEntity());
+
+            if (pointLight.Update(transform->GetPosition(), view))
             {
                 m_isSystemDirty = true;
             }

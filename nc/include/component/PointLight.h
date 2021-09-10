@@ -6,7 +6,7 @@
 
 namespace nc
 {
-    class Transform;
+    namespace ecs { class PointLightSystem; }
 
     struct PointLightInfo
     {
@@ -21,25 +21,23 @@ namespace nc
         float padding[15] = {};
     };
 
-    #ifdef NC_EDITOR_ENABLED
-    void SerializeToFile(const std::string& filePath, const PointLightInfo& info); // @todo: remove or build out into formal asset generator
-    #endif
-
     class PointLight final : public ComponentBase
     {
         public:
             PointLight(Entity entity, PointLightInfo info);
 
-            const PointLightInfo& GetInfo() const;
-            bool IsDirty() const;
-
+            auto GetInfo() const -> const PointLightInfo& { return m_info; }
+            auto IsDirty() const -> bool { return m_isDirty; }
             void SetInfo(PointLightInfo info);
-            bool Update(const DirectX::XMMATRIX& view);
 
         private:
             PointLightInfo m_info;
             alignas(16)Vector3 m_projectedPos;
             bool m_isDirty;
+
+            bool Update(const Vector3& position, const DirectX::XMMATRIX& view);
+
+            friend ecs::PointLightSystem;
     };
     
     template<>
@@ -53,5 +51,6 @@ namespace nc
 
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<PointLight>(PointLight* light);
+    void SerializeToFile(const std::string& filePath, const PointLightInfo& info); // @todo: remove or build out into formal asset generator
     #endif
 }

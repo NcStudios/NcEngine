@@ -36,9 +36,9 @@
 //#ifndef NOCOLOR //used by imgui docking branch
 //#define NOCOLOR
 //#endif
-#ifndef NOCTLMGR
-#define NOCTLMGR
-#endif
+//#ifndef NOCTLMGR // used by RtAudio
+//#define NOCTLMGR
+//#endif
 #ifndef NODRAWTEXT
 #define NODRAWTEXT
 #endif

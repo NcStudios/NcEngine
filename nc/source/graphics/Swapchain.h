@@ -22,9 +22,8 @@ namespace nc::graphics
     class Swapchain
     {
         public:
-
             Swapchain(Base* base, const DepthStencil& depthStencil, Vector2 dimensions);
-            ~Swapchain();
+            ~Swapchain() noexcept;
 
             // Swap chain
             void Present(uint32_t imageIndex, bool& isSwapChainValid);
@@ -38,12 +37,12 @@ namespace nc::graphics
             // Frame buffers
             void CreateFrameBuffers();
             const vk::Framebuffer& GetFrameBuffer(uint32_t index) const;
-            void DestroyFrameBuffers();
+            void DestroyFrameBuffers() noexcept;
             const vk::RenderPass& GetPassDefinition();
 
             // Image synchronization
             void CreateSynchronizationObjects();
-            void DestroySynchronizationObjects();
+            void DestroySynchronizationObjects() noexcept;
             uint32_t GetNextRenderReadyImageIndex(bool& isSwapChainValid);
             uint32_t GetFrameIndex() const noexcept;
             void WaitForFrameFence(bool waitOnPreviousFrame) const;
@@ -55,7 +54,6 @@ namespace nc::graphics
             const std::vector<vk::Semaphore>& GetSemaphores(SemaphoreType semaphoreType) const noexcept;
 
         private:
-            
             // External members
             Base* m_base;
             const DepthStencil& m_depthStencil;

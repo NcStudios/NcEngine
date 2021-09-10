@@ -12,10 +12,10 @@ namespace nc::graphics
     {
         public:
             Commands(Base* base, const Swapchain& swapchain);
-            ~Commands();
+            ~Commands() noexcept;
 
             std::vector<vk::CommandBuffer>* GetCommandBuffers();
-            void FreeCommandBuffers();
+            void FreeCommandBuffers() noexcept;
             void SubmitRenderCommand(uint32_t imageIndex);
             static void SubmitCopyCommandImmediate(const Base& base, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
             static void SubmitCommandImmediate(const Base& base, std::function<void(vk::CommandBuffer cmd)>&& function);

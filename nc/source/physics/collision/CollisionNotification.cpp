@@ -143,7 +143,7 @@ namespace nc::physics
                                CollisionCache* cache)
     {
         FindPhysicsExitAndStayEvents(registry, physicsEvents, cache->previousPhysics, cache->manifolds);
-        FindPhysicsEnterEvents(registry, triggerEvents, cache->previousPhysics);
+        FindPhysicsEnterEvents(registry, physicsEvents, cache->previousPhysics);
         FindTriggerExitAndStayEvents(registry, triggerEvents, cache->previousTrigger);
         FindTriggerEnterEvents(registry, triggerEvents, cache->previousTrigger);
     }

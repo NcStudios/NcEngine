@@ -109,10 +109,6 @@ namespace nc::physics
 
     void PhysicsSystem::DoPhysicsStep(float dt)
     {
-        /** @todo Is it a problem that this is happening? */
-        if(dt == 0.0f)
-            return;
-
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
 
         #ifdef NC_DEBUG_RENDERING

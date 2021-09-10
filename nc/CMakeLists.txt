@@ -44,6 +44,9 @@ configure_file(${ROOT_DIR}/source/config/Version.h.in
 #Definitions
 add_definitions(${WIN32_DEFINITIONS})
 
+#Specify which Api RtAudio will use
+add_definitions(-D__WINDOWS_WASAPI__)
+
 if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
 endif()

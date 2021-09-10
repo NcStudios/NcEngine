@@ -22,9 +22,11 @@ namespace nc::graphics
             MeshesData(ImmutableBuffer<Vertex> vertexBuffer, 
                        ImmutableBuffer<uint32_t> indexBuffer, 
                        std::unordered_map<std::string, Mesh> accessors);
+            ~MeshesData() noexcept;
             MeshesData(MeshesData&&) = default;
             MeshesData& operator=(MeshesData&&) = default;
-            ~MeshesData();
+            MeshesData(const MeshesData&) = delete;
+            MeshesData& operator=(const MeshesData&) = delete;
 
             const std::vector<std::string> GetMeshPaths() const;
             bool MeshExists(const std::string& uid) const noexcept;
@@ -50,9 +52,11 @@ namespace nc::graphics
                          vk::UniqueDescriptorSetLayout descriptorSetLayout,
                          vk::UniqueSampler sampler,
                          vk::ImageLayout layout);
+            ~TexturesData() noexcept;
             TexturesData(TexturesData&&) = default;
             TexturesData& operator=(TexturesData&&) = default;
-            ~TexturesData();
+            TexturesData(const TexturesData&) = delete;
+            TexturesData& operator=(const TexturesData&) = delete;
 
             const std::vector<std::string> GetTexturePaths() const;
             bool TextureExists(const std::string& uid) const noexcept;
@@ -79,9 +83,11 @@ namespace nc::graphics
         public:
             PointLightsData() = default;
             PointLightsData(Graphics* graphics, uint32_t maxPointLights);
+            ~PointLightsData() noexcept;
             PointLightsData(PointLightsData&&) = default;
             PointLightsData& operator=(PointLightsData&&) = default;
-            ~PointLightsData();
+            PointLightsData(const PointLightsData&) = delete;
+            PointLightsData& operator=(const PointLightsData&) = delete;
 
             void Update(const std::vector<nc::PointLightInfo>& pointLights);
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
@@ -97,10 +103,12 @@ namespace nc::graphics
     {
         public:
             ObjectsData() = default;
+            ~ObjectsData() noexcept;
             ObjectsData(Graphics* graphics);
             ObjectsData(ObjectsData&&) = default;
             ObjectsData& operator=(ObjectsData&&) = default;
-            ~ObjectsData();
+            ObjectsData(const ObjectsData&) = delete;
+            ObjectsData& operator=(const ObjectsData&) = delete;
 
             void Update(const std::vector<ObjectData>& objectsData);
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
