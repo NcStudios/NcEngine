@@ -5,7 +5,8 @@
 namespace nc::camera
 {
     void ClearMainCamera();
-    DirectX::XMMATRIX CalculateViewMatrix();
-    void SetProjectionMatrix(float width, float height, float nearZ, float farZ);
+    void UpdateViewMatrix();
+    void UpdateProjectionMatrix(float width, float height, float nearZ, float farZ);
+    DirectX::FXMMATRIX GetViewMatrix();
     DirectX::FXMMATRIX GetProjectionMatrix();
 }

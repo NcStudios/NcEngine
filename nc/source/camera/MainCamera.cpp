@@ -6,6 +6,7 @@
 namespace
 {
     nc::Entity g_mainCamera = nc::Entity::Null();
+    DirectX::XMMATRIX g_viewMatrix;
     DirectX::XMMATRIX g_projectionMatrix;
 }
 
@@ -30,19 +31,24 @@ namespace nc::camera
         g_mainCamera = Entity::Null();
     }
 
-    DirectX::XMMATRIX CalculateViewMatrix()
+    void UpdateViewMatrix()
     {
         IF_THROW(!g_mainCamera.Valid(), "camera::CalculateViewMatrix - No camera is set");
         auto* transform = ActiveRegistry()->Get<Transform>(g_mainCamera);
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform->GetTransformationMatrix());
         auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
-        return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
+        g_viewMatrix = DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
     }
 
-    void SetProjectionMatrix(float width, float height, float nearZ, float farZ)
+    void UpdateProjectionMatrix(float width, float height, float nearZ, float farZ)
     {
         g_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
+    }
+
+    DirectX::FXMMATRIX GetViewMatrix()
+    {
+        return g_viewMatrix;
     }
 
     DirectX::FXMMATRIX GetProjectionMatrix()

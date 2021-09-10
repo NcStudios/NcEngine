@@ -180,43 +180,25 @@ namespace nc::core
     void Engine::FrameRender()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        auto* registry = m_ecs.GetRegistry();
+        camera::UpdateViewMatrix();
         m_graphics.FrameBegin();
         m_ui.FrameBegin();
 
-        //auto camViewMatrix = camera::CalculateViewMatrix();
-        //m_graphics.SetViewMatrix(camViewMatrix);
-        
-        //auto cameraPos = camera::GetMainCameraTransform()->GetPosition();
-        //m_graphics.SetCameraPosition(cameraPos);
-
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
+        m_ui.Frame(&m_frameDeltaTimeFactor, registry);
         #else
         m_ui.Frame();
         #endif
 
         m_ui.FrameEnd();
 
-        auto state = graphics::PerFrameRenderState
-        {
-            m_ecs.GetRegistry(),
-            //m_graphics.GetProjectionMatrix(),
-            m_ecs.GetPointLightSystem()->CheckDirtyAndReset()
-        };
-
-        graphics::ResourceManager::UpdateObjects(state.objectData);
-        if(state.isPointLightBindRequired)
-        {
-            graphics::ResourceManager::UpdatePointLights(state.pointLightInfos);
-        }
-
-        //m_ecs.GetPointLightSystem()->Update();
-        //m_ecs.GetMeshRendererSystem()->Update();
+        auto state = graphics::PerFrameRenderState{registry, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
+        graphics::MapPerFrameRenderState(state);
 
         auto* renderer = m_graphics.GetRendererPtr();
         
         #ifdef NC_EDITOR_ENABLED
-        auto* registry = m_ecs.GetRegistry();
 
         for(auto& collider : registry->ViewAll<Collider>())
             collider.UpdateWidget(renderer);

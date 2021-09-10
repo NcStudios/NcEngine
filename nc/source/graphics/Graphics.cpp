@@ -27,14 +27,10 @@ namespace nc::graphics
           m_dimensions{ dimensions },
           m_isMinimized{ false },
           m_isFullscreen{ false },
-          //m_cameraWorldPosition{},
-          //m_viewMatrix{},
-          //m_projectionMatrix{},
           m_clearColor{DefaultClearColor},
           m_drawCallCount{0}
     {
-        camera::SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
-        //SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
+        camera::UpdateProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
     Graphics::~Graphics() noexcept
@@ -67,31 +63,6 @@ namespace nc::graphics
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
     }
 
-    // DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
-    // {
-    //     return m_viewMatrix;
-    // }
-
-    // DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
-    // {
-    //     return m_projectionMatrix;
-    // }
-
-    // void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
-    // {
-    //     m_viewMatrix = cam;
-    // }
-
-    // void Graphics::SetCameraPosition(Vector3 cameraPosition)
-    // {
-    //     m_cameraWorldPosition = cameraPosition;
-    // }
-
-    // void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
-    // {
-    //     m_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
-    // }
-
     void Graphics::ToggleFullscreen()
     {
         // @todo
@@ -113,8 +84,7 @@ namespace nc::graphics
         (void)farZ;
 
         m_dimensions = Vector2{ width, height };
-        camera::SetProjectionMatrix(width, height, nearZ, farZ);
-        //SetProjectionMatrix(width, height, nearZ, farZ);
+        camera::UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
     }
 
