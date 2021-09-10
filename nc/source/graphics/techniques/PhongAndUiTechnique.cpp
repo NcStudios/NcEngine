@@ -112,16 +112,16 @@ namespace nc::graphics
         cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
 
         uint32_t objectInstance = 0;
-        for (auto& renderer : meshRenderers)
+        for (const auto& renderer : meshRenderers)
         {
-            auto& mesh = renderer.GetMesh();
+            const auto& mesh = renderer.GetMesh();
             cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             
             #ifdef NC_EDITOR_ENABLED
             m_graphics->IncrementDrawCallCount();
             #endif
             
-            objectInstance++;
+            ++objectInstance;
         }
         NC_PROFILE_END();
     }

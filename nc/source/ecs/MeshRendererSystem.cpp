@@ -18,20 +18,17 @@ namespace nc::ecs
     {
         const auto& viewMatrix = m_graphics->GetViewMatrix();
         const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
+        auto viewProjection = viewMatrix * projectionMatrix;
+        auto renderers = m_registry->ViewAll<MeshRenderer>();
+        auto objectsData = std::vector<graphics::ObjectData>();
+        objectsData.reserve(renderers.size());
 
-        auto meshRenderers = m_registry->ViewAll<MeshRenderer>();
-        for (auto& meshRenderer : meshRenderers)
+        for(const auto& renderer : renderers)
         {
-            meshRenderer.Update(m_registry->Get<Transform>(meshRenderer.GetParentEntity()), viewMatrix, projectionMatrix);
+            const auto& modelMatrix = m_registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
+            auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
+            objectsData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
         }
-
-        auto objectsData = std::vector<ObjectData>();
-        objectsData.reserve(meshRenderers.size());
-
-        std::transform(meshRenderers.begin(), meshRenderers.end(), std::back_inserter(objectsData), [](auto&& meshRenderer)
-        { 
-            return meshRenderer.GetObjectData(); 
-        });
 
         graphics::ResourceManager::UpdateObjects(objectsData);
     }

@@ -41,6 +41,8 @@ namespace nc::sample::prefab
                 return std::string{"DiscGreen"};
             case Resource::DiscRed:
                 return std::string{"DiscRed"};
+            case Resource::RampRed:
+                return std::string{"RampRed"};
             case Resource::Skeeball:
                 return std::string{"Skeeball"};
             case Resource::Sphere:
@@ -48,9 +50,11 @@ namespace nc::sample::prefab
             case Resource::SphereBlue:
                 return std::string{"SphereBlue"};
             case Resource::SphereGreen:
-                return std::string{"Sphere Green"};
+                return std::string{"SphereGreen"};
             case Resource::SphereRed:
-                return std::string{"Sphere Red"};
+                return std::string{"SphereRed"};
+            case Resource::PlaneGreen:
+                return std::string{"PlaneGreen"};
             case Resource::Table:
                 return std::string{"Table"};
             case Resource::Token:
@@ -60,11 +64,6 @@ namespace nc::sample::prefab
         }
         throw std::runtime_error("prefab::ToString(resource) - Unknown resource");
     }
-
-    namespace mesh
-    {
-        std::vector<std::string> meshPaths;
-    } // end namespace mesh
 
     namespace material
     {
@@ -86,21 +85,25 @@ void InitializeResources()
         return;
     }
 
+    IsInitialized = true;
+
+    LoadConvexHullAsset("project/assets/mesh_colliders/coin.nca");
+    LoadConcaveColliderAsset("project/assets/mesh_colliders/plane.nca");
+    LoadConcaveColliderAsset("project/assets/mesh_colliders/ramp.nca");
+
     const std::string defaultMeshesPath = "project/assets/mesh/";
-    mesh::meshPaths = std::vector<std::string> { defaultMeshesPath + "beeper.nca",
+    auto meshPaths = std::vector<std::string> { defaultMeshesPath + "beeper.nca",
                                                  defaultMeshesPath + "capsule.nca",
                                                  defaultMeshesPath + "coin.nca",
                                                  defaultMeshesPath + "cube.nca",
                                                  defaultMeshesPath + "planet.nca",
+                                                 defaultMeshesPath + "ramp.nca",
                                                  defaultMeshesPath + "sphere.nca",
                                                  defaultMeshesPath + "table.nca",
                                                  defaultMeshesPath + "token.nca",
                                                  defaultMeshesPath + "worm.nca",
-                                                 defaultMeshesPath + "skeeball.nca",
-                                                 "project/assets/mesh_colliders/coin.nca" };
-    nc::graphics::LoadMeshes(mesh::meshPaths); 
-
-    LoadHullColliderAsset("project/assets/mesh_colliders/coin.nca");
+                                                 defaultMeshesPath + "skeeball.nca" };
+    nc::graphics::LoadMeshes(meshPaths); 
 
     const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto defaultNormal    = std::string{"nc/resources/texture/DefaultNormal.png"};
@@ -165,7 +168,6 @@ void InitializeResources()
     material::Worm =       graphics::Material{ .baseColor = defaultTexturesPath + "Logo/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Logo/Normal.png",
                                                        .roughness = defaultTexturesPath + "Logo/Roughness.png" };
-    IsInitialized = true;
 }
 
 template<Resource Resource_t>
@@ -174,154 +176,168 @@ Entity Create_(registry_type*, EntityInfo);
 template<> Entity Create_<Resource::Beeper>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[0], material::Beeper, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/beeper.nca", material::Beeper, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Capsule>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::Default, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule.nca", material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CapsuleBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule.nca", material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CapsuleGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule.nca", material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CapsuleRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[1], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule", material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Coin>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::Coin, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::Coin, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Cube>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::Default, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::CubeRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[3], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Disc>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::Default, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::DiscBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::DiscGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::DiscRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[2], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Skeeball>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[9], material::Default, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/skeeball.nca", material::Default, nc::graphics::TechniqueType::PhongAndUi);
+    return handle;
+}
+
+template<> Entity Create_<Resource::RampRed>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/ramp.nca", material::SolidRed, graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Sphere>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::Default, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::Default, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::SphereBlue>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::SolidBlue, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::SphereGreen>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::SolidGreen, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::SphereRed>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[4], material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::SolidRed, nc::graphics::TechniqueType::PhongAndUi);
+    return handle;
+}
+
+template<> Entity Create_<Resource::PlaneGreen>(registry_type* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/plane.nca", material::SolidGreen, graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Table>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[6], material::Table, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/table.nca", material::Table, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Token>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[7], material::Token, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/token.nca", material::Token, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
 template<> Entity Create_<Resource::Worm>(registry_type* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, mesh::meshPaths[8], material::Worm, nc::graphics::TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/worm.nca", material::Worm, nc::graphics::TechniqueType::PhongAndUi);
     return handle;
 }
 
@@ -343,11 +359,13 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::DiscBlue,      Create_<Resource::DiscBlue>},
     std::pair{Resource::DiscGreen,     Create_<Resource::DiscGreen>},
     std::pair{Resource::DiscRed,       Create_<Resource::DiscRed>},
+    std::pair{Resource::RampRed,       Create_<Resource::RampRed>},
     std::pair{Resource::Skeeball,      Create_<Resource::Skeeball>},
     std::pair{Resource::Sphere,        Create_<Resource::Sphere>},
     std::pair{Resource::SphereBlue,    Create_<Resource::SphereBlue>},
     std::pair{Resource::SphereGreen,   Create_<Resource::SphereGreen>},
     std::pair{Resource::SphereRed,     Create_<Resource::SphereRed>},
+    std::pair{Resource::PlaneGreen,    Create_<Resource::PlaneGreen>},
     std::pair{Resource::Table,         Create_<Resource::Table>},
     std::pair{Resource::Token,         Create_<Resource::Token>},
     std::pair{Resource::Worm,          Create_<Resource::Worm>}

@@ -5,8 +5,9 @@
 namespace nc::physics
 {
     /** General Behavior */
-    constexpr float Gravity = -9.81f;          // Gravitational acceleration
-    constexpr float MaxAngularVelocity = 7.0f; // Value angular velocities are clamped to (radians/second)
+    constexpr size_t MaxPhysicsIterations = 3u; // Maximum number of times physics can run per game loop iteration
+    constexpr float Gravity = -9.81f;           // Gravitational acceleration
+    constexpr float MaxAngularVelocity = 7.0f;  // Value angular velocities are clamped to (radians/second)
 
     /** Solver Convergence */
     constexpr size_t SolverIterations = 5u;          // Number of times to run physics solver on constraints

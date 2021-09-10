@@ -4,6 +4,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/component/Camera.cpp
         ${ROOT_DIR}/source/component/Collider.cpp
         ${ROOT_DIR}/source/component/Component.cpp
+        ${ROOT_DIR}/source/component/ConcaveCollider.cpp
         ${ROOT_DIR}/source/component/DebugWidget.cpp
         ${ROOT_DIR}/source/component/MeshRenderer.cpp
         ${ROOT_DIR}/source/component/NetworkDispatcher.cpp

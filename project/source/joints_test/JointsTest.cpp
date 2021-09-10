@@ -63,6 +63,12 @@ namespace nc::sample
         registry->Add<Collider>(platform2, BoxProperties{}, false);
         registry->Add<PhysicsBody>(platform2, PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
+        // Ramp
+        {
+            auto ramp = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{9.0f, 2.6f, 6.0f}, .scale = Vector3::Splat(3.0f), .flags = EntityFlags::Static});
+            registry->Add<ConcaveCollider>(ramp, "project/assets/mesh_colliders/ramp.nca");
+        }
+
         // Hinge
         {
             auto anchor = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 3.25f, 10.0f}, .scale = Vector3{3.0f, 0.5f, 0.5f}});

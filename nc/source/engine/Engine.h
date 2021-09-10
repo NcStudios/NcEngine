@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assets/AssetManager.h"
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
@@ -27,11 +28,11 @@ namespace nc::core
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
             graphics::Renderer m_renderer;
-            // @todo: Implement missing managers below
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
+            AssetManager m_assetManager;
             ui::UIImpl m_ui;
 
             void ClearState();

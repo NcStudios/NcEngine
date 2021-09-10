@@ -187,12 +187,12 @@ namespace nc::graphics
     ObjectsData::ObjectsData(Graphics* graphics)
     {
         const uint32_t MAX_OBJECTS = 100000;
-        const uint32_t objectsSize = (sizeof(nc::ObjectData) * MAX_OBJECTS);
+        const uint32_t objectsSize = (sizeof(ObjectData) * MAX_OBJECTS);
         auto base = graphics->GetBasePtr();
 
         std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)};
         m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
-        m_objectsDataBuffer = WriteableBuffer<nc::ObjectData>(graphics, objectsSize); //@todo: not hard code upper bound
+        m_objectsDataBuffer = WriteableBuffer<ObjectData>(graphics, objectsSize); //@todo: not hard code upper bound
         m_descriptorSet = CreateDescriptorSet(graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
 		vk::DescriptorBufferInfo objectsDataBufferInfo;
@@ -219,7 +219,7 @@ namespace nc::graphics
         m_descriptorSetLayout.reset();
     }
 
-    void ObjectsData::Update(const std::vector<nc::ObjectData>& objectsData)
+    void ObjectsData::Update(const std::vector<ObjectData>& objectsData)
     {
         m_objectsDataBuffer.Map(objectsData);
     }

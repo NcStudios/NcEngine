@@ -13,38 +13,21 @@ namespace nc::time
     using std::chrono::nanoseconds;
 
     Time::Time() noexcept
+        : m_lastTime{Clock::now()},
+          m_currentTime{Clock::now()},
+          m_frameDeltaTime{0.0},
+          m_accumulatedTime{0.0}
     {
-        m_lastTime = Clock::now();
-        m_currentTime = Clock::now();
     }
 
-    double Time::GetFixedDeltaTime() const noexcept
-    {
-        return m_fixedDeltaTime;
-    }
-
-    double Time::GetFrameDeltaTime() const noexcept
-    {
-        return m_frameDeltaTime;
-    }
-
-    void Time::ResetFixedDeltaTime() noexcept
-    {
-        m_fixedDeltaTime = 0.0f;
-    }
-
-    void Time::ResetFrameDeltaTime() noexcept
-    {
-        m_frameDeltaTime = 0.0f;
-    }
-
-    void Time::UpdateTime() noexcept
+    double Time::UpdateTime() noexcept
     {
         const auto cycleDelta = duration_cast<microseconds>(m_currentTime - m_lastTime).count();
-        m_frameDeltaTime += cycleDelta / MicrosecondsPerSecond;
-        m_fixedDeltaTime += cycleDelta / MicrosecondsPerSecond;
+        m_frameDeltaTime = cycleDelta / MicrosecondsPerSecond;
+        m_accumulatedTime += m_frameDeltaTime;
         m_lastTime = m_currentTime;
         m_currentTime  = Clock::now();
+        return m_frameDeltaTime;
     }
 
     void Timer::Start() noexcept

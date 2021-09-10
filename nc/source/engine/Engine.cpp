@@ -1,15 +1,16 @@
 #include "Engine.h"
 #include "Core.h"
-#include "debug/Utils.h"
-#include "debug/Profiler.h"
+#include "Ecs.h"
 #include "MainCamera.h"
 #include "camera/MainCameraInternal.h"
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
+#include "debug/Utils.h"
+#include "debug/Profiler.h"
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
 #include "graphics/resources/ResourceManager.h"
-#include "Ecs.h"
+#include "physics/PhysicsConstants.h"
 
 namespace nc::core
 {
@@ -68,14 +69,15 @@ namespace nc::core
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
-          m_jobSystem{4},
+          m_jobSystem{2},
           m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_renderer{ &m_graphics },
+          m_renderer{&m_graphics},
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physics{ &m_graphics, &m_jobSystem},
+          m_physics{m_ecs.GetRegistry(), &m_graphics, &m_jobSystem},
           m_sceneSystem{},
           m_time{},
+          m_assetManager{},
           m_ui{m_window.GetHWND(), &m_graphics}
     {
         m_graphics.SetRenderer(&m_renderer);
@@ -94,29 +96,29 @@ namespace nc::core
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
         m_isRunning = true;
-        
+        const auto fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
 
         while(m_isRunning)
         {
-            m_time.UpdateTime();
-            m_window.ProcessSystemMessages(); 
-
-            auto dt = m_time.GetFrameDeltaTime() * m_frameDeltaTimeFactor;
+            auto dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            m_window.ProcessSystemMessages();
             auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
 
             FrameLogic(dt);
 
-            /** @todo see fixedUpdateInterval todo above */
-            FixedStepLogic(dt);
+            size_t physicsIterations = 0u;
+            while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
+            {
+                FixedStepLogic(fixedTimeStep);
+                m_time.DecrementAccumulatedTime(fixedTimeStep);
+                ++physicsIterations;
+            }
 
             particleUpdateJobResult.wait();
-
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
-
             particleEmitterSystem->ProcessFrameEvents();
-
             FrameCleanup();
         }
 
@@ -137,6 +139,8 @@ namespace nc::core
         m_ecs.Clear();
         m_physics.ClearState();
         camera::ClearMainCamera();
+        m_time.ResetFrameDeltaTime();
+        m_time.ResetAccumulatedTime();
         // SceneSystem state is never cleared
     }
 
@@ -154,8 +158,6 @@ namespace nc::core
 
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFixedUpdate();
-
-        m_time.ResetFixedDeltaTime();
     }
 
     void Engine::FrameLogic(float dt)
@@ -215,9 +217,6 @@ namespace nc::core
         }
         
         input::Flush();
-        m_time.ResetFrameDeltaTime();
-        m_time.ResetFixedDeltaTime();
-        m_time.UpdateTime();
     }
 
     void Engine::SetBindings()

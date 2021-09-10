@@ -20,11 +20,13 @@ namespace nc::sample::prefab
         DiscBlue,
         DiscGreen,
         DiscRed,
+        RampRed,
         Skeeball,
         Sphere,
         SphereBlue,
         SphereGreen,
         SphereRed,
+        PlaneGreen,
         Table,
         Token,
         Worm
