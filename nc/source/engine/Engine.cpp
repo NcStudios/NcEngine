@@ -12,6 +12,9 @@
 #include "graphics/resources/ResourceManager.h"
 #include "physics/PhysicsConstants.h"
 
+
+#include "graphics/PerFrameRenderState.h"
+
 namespace nc::core
 {
     /* Api Function Implementation */
@@ -180,11 +183,11 @@ namespace nc::core
         m_graphics.FrameBegin();
         m_ui.FrameBegin();
 
-        auto camViewMatrix = camera::CalculateViewMatrix();
-        m_graphics.SetViewMatrix(camViewMatrix);
+        //auto camViewMatrix = camera::CalculateViewMatrix();
+        //m_graphics.SetViewMatrix(camViewMatrix);
         
-        auto cameraPos = camera::GetMainCameraTransform()->GetPosition();
-        m_graphics.SetCameraPosition(cameraPos);
+        //auto cameraPos = camera::GetMainCameraTransform()->GetPosition();
+        //m_graphics.SetCameraPosition(cameraPos);
 
         #ifdef NC_EDITOR_ENABLED
         m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
@@ -194,8 +197,21 @@ namespace nc::core
 
         m_ui.FrameEnd();
 
-        m_ecs.GetPointLightSystem()->Update();
-        m_ecs.GetMeshRendererSystem()->Update();
+        auto state = graphics::PerFrameRenderState
+        {
+            m_ecs.GetRegistry(),
+            //m_graphics.GetProjectionMatrix(),
+            m_ecs.GetPointLightSystem()->CheckDirtyAndReset()
+        };
+
+        graphics::ResourceManager::UpdateObjects(state.objectData);
+        if(state.isPointLightBindRequired)
+        {
+            graphics::ResourceManager::UpdatePointLights(state.pointLightInfos);
+        }
+
+        //m_ecs.GetPointLightSystem()->Update();
+        //m_ecs.GetMeshRendererSystem()->Update();
 
         auto* renderer = m_graphics.GetRendererPtr();
         
@@ -207,7 +223,7 @@ namespace nc::core
         #endif
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr());
+        renderer->Record(m_graphics.GetCommandsPtr(), state);
 
         m_graphics.Draw();
         m_graphics.FrameEnd();

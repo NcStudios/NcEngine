@@ -6,6 +6,7 @@
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
+#include "PerFrameRenderState.h"
 #include "graphics/resources/ResourceManager.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/Swapchain.h"
@@ -34,7 +35,7 @@ namespace nc::graphics
         m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
     }
 
-    void Renderer::Record(Commands* commands)
+    void Renderer::Record(Commands* commands, const PerFrameRenderState& state)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         
@@ -54,7 +55,7 @@ namespace nc::graphics
         auto swapchain = m_graphics->GetSwapchainPtr();
         auto& commandBuffers = *commands->GetCommandBuffers();
 
-        auto meshRenderers = ActiveRegistry()->ViewAll<nc::MeshRenderer>();
+        //auto meshRenderers = ActiveRegistry()->ViewAll<MeshRenderer>();
         
         for (size_t i = 0; i < commandBuffers.size(); ++i)
         {
@@ -71,7 +72,7 @@ namespace nc::graphics
             if (m_wireframeTechnique->HasDebugWidget())
             {
                 m_wireframeTechnique->Bind(cmd);
-                m_wireframeTechnique->Record(cmd);
+                m_wireframeTechnique->Record(cmd, state.viewMatrix, state.projectionMatrix);
             }
             #endif
 
@@ -82,10 +83,14 @@ namespace nc::graphics
             // }
 
             m_phongAndUiTechnique->Bind(cmd);
-            if (!meshRenderers.empty())
+            if(!state.objectData.empty())
             {
-                m_phongAndUiTechnique->Record(cmd, meshRenderers);
+                m_phongAndUiTechnique->Record(cmd, state);
             }
+            // if (!meshRenderers.empty())
+            // {
+            //     m_phongAndUiTechnique->Record(cmd, meshRenderers);
+            // }
 
             RecordUi(cmd);
 

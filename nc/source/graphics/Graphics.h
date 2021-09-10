@@ -19,13 +19,12 @@ namespace nc::graphics
             Graphics& operator=(const Graphics&) = delete;
             Graphics& operator=(Graphics&&) = delete;
 
-            const Vector3 GetCameraPosition() const noexcept;
-            DirectX::FXMMATRIX GetViewMatrix() const noexcept;
-            DirectX::FXMMATRIX GetProjectionMatrix() const noexcept;
+            //DirectX::FXMMATRIX GetViewMatrix() const noexcept;
+            //DirectX::FXMMATRIX GetProjectionMatrix() const noexcept;
 
-            void SetViewMatrix(DirectX::FXMMATRIX cam) noexcept;
-            void SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept;
-            void SetCameraPosition(Vector3 cameraPosition);
+            //void SetViewMatrix(DirectX::FXMMATRIX cam) noexcept;
+            //void SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept;
+            //void SetCameraPosition(Vector3 cameraPosition);
 
             void ResizeTarget(float width, float height);
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
@@ -70,9 +69,9 @@ namespace nc::graphics
             bool m_isMinimized;
             bool m_isFullscreen;
             bool m_isResized;
-            Vector3 m_cameraWorldPosition;
-            DirectX::XMMATRIX m_viewMatrix;
-            DirectX::XMMATRIX m_projectionMatrix;
+            //Vector3 m_cameraWorldPosition;
+            //DirectX::XMMATRIX m_viewMatrix;
+            //DirectX::XMMATRIX m_projectionMatrix;
             std::array<float, 4> m_clearColor;
             uint32_t m_drawCallCount = 0;
     };

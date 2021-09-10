@@ -34,7 +34,6 @@ namespace nc::ecs
             std::vector<particle::EmitterState> m_toAdd;
             std::vector<Entity> m_toRemove;
 
-            particle::GraphicsData m_graphicsData;
             graphics::Graphics* m_graphics;
 
     };

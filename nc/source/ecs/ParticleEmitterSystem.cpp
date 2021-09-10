@@ -1,21 +1,22 @@
 #include "ParticleEmitterSystem.h"
+//#include "camera/MainCameraInternal.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 
 #include <algorithm>
 
-namespace
-{
-    auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
-    {
-        return nc::particle::GraphicsData
-        {
-            graphics->GetViewMatrix(),
-            graphics->GetProjectionMatrix(),
-            graphics
-        };
-    }
-}
+// namespace
+// {
+//     auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
+//     {
+//         return nc::particle::GraphicsData
+//         {
+//             // graphics->GetViewMatrix(),
+//             // graphics->GetProjectionMatrix(),
+//             // graphics
+//         };
+//     }
+// }
 
 namespace nc::ecs
 {
@@ -23,7 +24,7 @@ namespace nc::ecs
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
-          m_graphicsData{CreateParticleGraphicsData(graphics)},
+          //m_graphicsData{CreateParticleGraphicsData(graphics)},
           m_graphics{graphics}    
     {
         registry->RegisterOnAddCallback<ParticleEmitter>

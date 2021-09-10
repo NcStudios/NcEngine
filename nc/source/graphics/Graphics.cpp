@@ -1,4 +1,5 @@
 #include "Graphics.h"
+#include "camera/MainCameraInternal.h"
 #include "debug/Profiler.h"
 #include "debug/Utils.h"
 #include "Base.h"
@@ -26,13 +27,14 @@ namespace nc::graphics
           m_dimensions{ dimensions },
           m_isMinimized{ false },
           m_isFullscreen{ false },
-          m_cameraWorldPosition{},
-          m_viewMatrix{},
-          m_projectionMatrix{},
+          //m_cameraWorldPosition{},
+          //m_viewMatrix{},
+          //m_projectionMatrix{},
           m_clearColor{DefaultClearColor},
           m_drawCallCount{0}
     {
-        SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
+        camera::SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
+        //SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
     Graphics::~Graphics() noexcept
@@ -65,35 +67,30 @@ namespace nc::graphics
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
     }
 
-    DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
-    {
-        return m_viewMatrix;
-    }
+    // DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
+    // {
+    //     return m_viewMatrix;
+    // }
 
-    DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
-    {
-        return m_projectionMatrix;
-    }
+    // DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
+    // {
+    //     return m_projectionMatrix;
+    // }
 
-    void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
-    {
-        m_viewMatrix = cam;
-    }
+    // void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
+    // {
+    //     m_viewMatrix = cam;
+    // }
 
-    void Graphics::SetCameraPosition(Vector3 cameraPosition)
-    {
-        m_cameraWorldPosition = cameraPosition;
-    }
+    // void Graphics::SetCameraPosition(Vector3 cameraPosition)
+    // {
+    //     m_cameraWorldPosition = cameraPosition;
+    // }
 
-    const Vector3 Graphics::GetCameraPosition() const noexcept
-    {
-        return m_cameraWorldPosition;
-    }
-
-    void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
-    {
-        m_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
-    }
+    // void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
+    // {
+    //     m_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
+    // }
 
     void Graphics::ToggleFullscreen()
     {
@@ -116,7 +113,8 @@ namespace nc::graphics
         (void)farZ;
 
         m_dimensions = Vector2{ width, height };
-        SetProjectionMatrix(width, height, nearZ, farZ);
+        camera::SetProjectionMatrix(width, height, nearZ, farZ);
+        //SetProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
     }
 

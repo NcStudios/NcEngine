@@ -7,6 +7,7 @@
 namespace nc
 {
     namespace ecs { class PointLightSystem; }
+    namespace graphics { struct PerFrameRenderState; }
 
     struct PointLightInfo
     {
@@ -38,6 +39,7 @@ namespace nc
             bool Update(const Vector3& position, const DirectX::XMMATRIX& view);
 
             friend ecs::PointLightSystem;
+            friend graphics::PerFrameRenderState;
     };
     
     template<>

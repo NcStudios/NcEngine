@@ -14,7 +14,7 @@ namespace nc
 
 namespace nc::graphics
 {
-    class Graphics; class Commands; class Base; class Swapchain;
+    class Graphics; class Commands; class Base; struct PerFrameRenderState; class Swapchain;
 
     struct PhongPushConstants
     {
@@ -30,7 +30,7 @@ namespace nc::graphics
             ~PhongAndUiTechnique() noexcept;
             
             void Bind(vk::CommandBuffer* cmd);
-            void Record(vk::CommandBuffer* cmd, std::span<nc::MeshRenderer> renderers);
+            void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& state);
             void Clear() noexcept;
 
         private:

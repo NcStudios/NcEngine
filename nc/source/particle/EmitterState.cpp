@@ -7,12 +7,12 @@ namespace
 {
     using namespace nc;
 
-    DirectX::XMMATRIX ComposeMatrix(float scale, const Quaternion& r, const Vector3& pos)
-    {
-        return DirectX::XMMatrixScaling(scale, scale, scale) * 
-               DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(r.x, r.y, r.z, r.w)) *
-               DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-    }
+    // DirectX::XMMATRIX ComposeMatrix(float scale, const Quaternion& r, const Vector3& pos)
+    // {
+    //     return DirectX::XMMatrixScaling(scale, scale, scale) * 
+    //            DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(r.x, r.y, r.z, r.w)) *
+    //            DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+    // }
 
     particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset)
     {
@@ -47,10 +47,9 @@ namespace
 
 namespace nc::particle
 {
-    EmitterState::EmitterState(Entity entity, const ParticleInfo& info, GraphicsData* graphicsData)
+    EmitterState::EmitterState(Entity entity, const ParticleInfo& info)
         : m_soa{info.emission.maxParticleCount},
           m_info{info},
-          m_graphicsData{graphicsData},
           m_entity{entity},
           m_emissionCounter{0.0f}
     {
@@ -125,20 +124,23 @@ namespace nc::particle
         }
     }
 
-    graphics::MvpMatrices EmitterState::ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const
+    graphics::MvpMatrices EmitterState::ComputeMvp(const Particle&, const Quaternion&, const Vector3&) const
     {
-        const auto modelView = ComposeMatrix
-        (
-            particle.scale,
-            Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)),
-            particle.position
-        ) * m_graphicsData->viewMatrix;
+        return graphics::MvpMatrices{};
 
-        return graphics::MvpMatrices
-        {
-            // @todo: Replace MvpMatrices with Normal + VP matrices.
-            ComposeMatrix(particle.scale, Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)), particle.position),
-            DirectX::XMMatrixTranspose(modelView * m_graphicsData->projectionMatrix)
-        };
+        // const auto modelView = ComposeMatrix
+        // (
+        //     particle.scale,
+        //     Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)),
+        //     particle.position
+        // ) * m_graphicsData->viewMatrix;
+
+
+        // return graphics::MvpMatrices
+        // {
+        //     // @todo: Replace MvpMatrices with Normal + VP matrices.
+        //     ComposeMatrix(particle.scale, Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)), particle.position),
+        //     DirectX::XMMatrixTranspose(modelView * m_graphicsData->projectionMatrix)
+        // };
     }
 } // namespace nc::particle

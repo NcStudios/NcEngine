@@ -8,6 +8,7 @@
 
 #ifdef NC_DEBUG_RENDERING
 
+#include "camera/MainCameraInternal.h"
 #include "graphics/MvpMatrices.h"
 #include "graphics/techniques/DebugTechnique.h"
 #include "graphics/techniques/TechniqueManager.h"
@@ -46,8 +47,8 @@ namespace nc::graphics
                     m_graphics->DrawIndexed(CubeIndexCount);
                 }
 
-                const auto& view = m_graphics->GetViewMatrix();
-                const auto& projection = m_graphics->GetProjectionMatrix();
+                const auto& view = camera::CaluclateViewMatrix();
+                const auto& projection = camera::GetProjectionMatrix();
 
                 for(const auto& matrix : m_planes)
                 {
@@ -66,11 +67,14 @@ namespace nc::graphics
             {
                 using namespace DirectX;
 
+                const auto& view = camera::CalculateViewMatrix();
+                const auto& projection = camera::GetProjectionMatrix();
+
                 auto modelView = XMMatrixScaling(0.1f, 0.1f, 0.1f) *
                                  XMMatrixTranslation(position.x, position.y, position.z) *
-                                 DebugRenderer::m_instance->m_graphics->GetViewMatrix();
+                                 view;
 
-                auto mvp = modelView * DebugRenderer::m_instance->m_graphics->GetProjectionMatrix();
+                auto mvp = modelView * projection;
                 DebugRenderer::m_instance->m_points.emplace_back(XMMatrixTranspose(modelView), XMMatrixTranspose(mvp));
             }
 

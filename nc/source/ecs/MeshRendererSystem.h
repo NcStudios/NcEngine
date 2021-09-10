@@ -20,7 +20,7 @@ namespace nc::ecs
             void Add(MeshRenderer& meshRenderer);
             void Remove(Entity entity);
             void Clear();
-            void Update();
+            //void Update();
 
         private:
             nc::graphics::Graphics* m_graphics;
