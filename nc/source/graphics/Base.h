@@ -52,7 +52,7 @@ namespace nc::graphics
     {
         public:
             Base(HWND hwnd, HINSTANCE hinstance);
-            ~Base();
+            ~Base() noexcept;
 
             const vk::Device& GetDevice() const noexcept;
             const vk::PhysicalDevice& GetPhysicalDevice() const noexcept;
@@ -70,9 +70,9 @@ namespace nc::graphics
             vk::UniqueImageView CreateTextureView(const vk::Image& image);
             vk::UniqueSampler CreateTextureSampler();
 
-            void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers);
-            void DestroyBuffer(uint32_t id);
-            void DestroyImage(uint32_t id);
+            void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers) noexcept;
+            void DestroyBuffer(uint32_t id) noexcept;
+            void DestroyImage(uint32_t id) noexcept;
             void MapMemory(uint32_t bufferId, std::vector<Vertex> vertices, size_t size);
             void MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size);
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
@@ -108,5 +108,9 @@ namespace nc::graphics
             vk::CommandPool m_commandPool;
             vk::DescriptorPool m_imguiDescriptorPool;
             vk::DescriptorPool m_renderingDescriptorPool;
+
+            // Just in case we change the key type; some destructors depend on find not throwing.
+            static_assert(noexcept(decltype(m_buffers)::key_equal()));
+            static_assert(noexcept(decltype(m_images)::key_equal()));
     };
 }

@@ -95,7 +95,7 @@ namespace nc::graphics
     }
 
     MeshManager::MeshManager(nc::graphics::Graphics* graphics)
-    : m_graphics{graphics}
+        : m_graphics{graphics}
     {
         impl = this;
     }
@@ -124,7 +124,7 @@ namespace nc::graphics
             pathsToLoad = meshPaths;
         }
 
-        for (auto& path : pathsToLoad)
+        for (const auto& path : pathsToLoad)
         {
             if (ResourceManager::MeshExists(path)) continue;
 

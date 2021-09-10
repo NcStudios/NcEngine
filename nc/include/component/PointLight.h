@@ -7,6 +7,7 @@
 namespace nc
 {
     constexpr size_t PointLightInfoSize = 128;
+    namespace ecs { class PointLightSystem; }
 
     class Transform;
     
@@ -24,20 +25,14 @@ namespace nc
         float padding[2] = {};
     };
 
-    #ifdef NC_EDITOR_ENABLED
-    void SerializeToFile(const std::string& filePath, const PointLightInfo& info); // @todo: remove or build out into formal asset generator
-    #endif
-
     class PointLight final : public ComponentBase
     {
         public:
             PointLight(Entity entity, PointLightInfo info);
 
-            const PointLightInfo& GetInfo() const;
-            bool IsDirty() const;
-
+            auto GetInfo() const -> const PointLightInfo& { return m_info; }
+            auto IsDirty() const -> bool { return m_isDirty; }
             void SetInfo(PointLightInfo info);
-            bool Update(const DirectX::XMMATRIX& cameraView);
 
         private:
             DirectX::XMMATRIX CalculateLightViewMatrix();
@@ -46,6 +41,10 @@ namespace nc
             DirectX::XMMATRIX m_lightProjectionMatrix;
             alignas(16)Vector3 m_projectedPos;
             bool m_isDirty;
+
+            bool Update(const Vector3& position, const DirectX::XMMATRIX& view);
+
+            friend ecs::PointLightSystem;
     };
 
     static_assert(sizeof(PointLightInfo) == PointLightInfoSize, "PointLight::PointLight Size of m_info must be 128 bytes.");
@@ -61,5 +60,6 @@ namespace nc
 
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<PointLight>(PointLight* light);
+    void SerializeToFile(const std::string& filePath, const PointLightInfo& info); // @todo: remove or build out into formal asset generator
     #endif
 }

@@ -28,6 +28,7 @@ set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 set(EXTERNAL_INCLUDE_DIR ${ROOT_DIR}/../nc/external/include)
 set(PROJECT_INCLUDE_DIR ${ROOT_DIR}/source)
 set(NC_INCLUDE_DIR ${ROOT_DIR}/../nc/include)
+set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
 
 set(LIB_DIR ${ROOT_DIR}/../nc/lib)
 set(ENGINE_LIB "libNcEngine-${CMAKE_BUILD_TYPE}.a")
@@ -105,6 +106,7 @@ target_link_libraries(${GAME_EXE}
         ${LIB_DIR}/windowscodecs.lib
         #${LIB_DIR}/${ENET_LIB} no networking sample yet
         ${WIN32_LINK_FLAGS}
+        ${RTAUDIO_LINK_FLAGS}
 )
 
 target_link_libraries(${GAME_EXE}

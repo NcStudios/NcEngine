@@ -16,12 +16,12 @@ namespace nc::graphics
         Vector3 Bitangent;
     };
 
-    void LoadMeshes(const std::vector<std::string>& paths);
-
     struct Mesh
     {
         uint32_t firstVertex;
         uint32_t firstIndex;
         uint32_t indicesCount;
     };
+
+    void LoadMeshes(const std::vector<std::string>& paths);
 }

@@ -14,15 +14,15 @@ namespace nc::graphics
         public:
             ImmutableImage();
             ImmutableImage(nc::graphics::Graphics* graphics, stbi_uc* pixels, uint32_t width, uint32_t height);
+            ~ImmutableImage() noexcept;
             ImmutableImage(ImmutableImage&&);
-            ImmutableImage& operator = (ImmutableImage&&);
-            ImmutableImage& operator = (const ImmutableImage&) = delete;
+            ImmutableImage& operator=(ImmutableImage&&);
+            ImmutableImage& operator=(const ImmutableImage&) = delete;
             ImmutableImage(const ImmutableImage&) = delete;
-            ~ImmutableImage();
 
             vk::ImageView& GetImageView() noexcept;
             void Bind(nc::graphics::Graphics* graphics, stbi_uc* pixels, uint32_t width, uint32_t height);
-            void Clear();
+            void Clear() noexcept;
             
         private:
             Base* m_base;

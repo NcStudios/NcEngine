@@ -1,5 +1,6 @@
 #pragma once
 #include "graphics/resources/GraphicsResources.h"
+#include "assert.h"
 
 namespace nc::graphics
 {
@@ -11,7 +12,7 @@ namespace nc::graphics
                 m_resourceManager = this;
             }
 
-            static std::vector<std::string> GetTexturePaths(); 
+            static std::vector<std::string> GetTexturePaths();
             static bool HasTextures();
             static void LoadTextures(std::unique_ptr<TexturesData> textures);
             static bool TextureExists(const std::string& uid);
@@ -19,7 +20,7 @@ namespace nc::graphics
             static vk::DescriptorSet* GetTexturesDescriptorSet();
             static vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout();
 
-            static std::vector<std::string> GetMeshPaths(); 
+            static std::vector<std::string> GetMeshPaths();
             static bool HasMeshes();
             static void LoadMeshes(std::unique_ptr<MeshesData> meshes);
             static bool MeshExists(const std::string& uid);
@@ -45,10 +46,10 @@ namespace nc::graphics
             static vk::DescriptorSet* GetShadowMapDescriptorSet();
             static const vk::ImageView& GetShadowMapImageView();
 
-            static void Clear();
+            static void Clear() noexcept;
 
         private:
-            std::vector<std::string> GetTexturePaths_(); 
+            std::vector<std::string> GetTexturePaths_();
             bool HasTextures_();
             void LoadTextures_(std::unique_ptr<TexturesData> textures);
             bool TextureExists_(const std::string& uid);
@@ -56,10 +57,10 @@ namespace nc::graphics
             vk::DescriptorSet* GetTexturesDescriptorSet_();
             vk::DescriptorSetLayout* GetTexturesDescriptorSetLayout_();
 
-            std::vector<std::string> GetMeshPaths_(); 
+            std::vector<std::string> GetMeshPaths_();
             bool HasMeshes_();
             void LoadMeshes_(std::unique_ptr<MeshesData> meshes);
-            bool MeshExists_(const std::string& uid);       
+            bool MeshExists_(const std::string& uid);
             const Mesh& GetMeshAccessor_(const std::string& uid);
             vk::Buffer* GetVertexBuffer_();
             vk::Buffer* GetIndexBuffer_();
@@ -82,7 +83,7 @@ namespace nc::graphics
             vk::DescriptorSet* GetShadowMapDescriptorSet_();
             const vk::ImageView& GetShadowMapImageView_();
 
-            void Clear_();
+            void Clear_() noexcept;
 
             static ResourceManager& Get();
 
@@ -96,10 +97,7 @@ namespace nc::graphics
 
     inline ResourceManager& ResourceManager::Get()
     {
-        if (m_resourceManager == nullptr)
-        {
-            throw std::runtime_error("ResourceManager::Get: m_resourceManager was null.");
-        }
+        assert(m_resourceManager != nullptr);
         return *m_resourceManager;
     }
 
@@ -223,7 +221,7 @@ namespace nc::graphics
         return Get().ResetObjects_(graphics);
     }
 
-    inline void ResourceManager::Clear()
+    inline void ResourceManager::Clear() noexcept
     {
         return Get().Clear_();
     }
@@ -377,7 +375,7 @@ namespace nc::graphics
         return m_objects->GetDescriptorSet();
     }
 
-    inline void ResourceManager::Clear_()
+    inline void ResourceManager::Clear_() noexcept
     {
         m_pointLightResources.reset();
         m_objects.reset();

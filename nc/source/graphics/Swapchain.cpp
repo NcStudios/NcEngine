@@ -6,33 +6,33 @@
 namespace nc::graphics
 {
     Swapchain::Swapchain(Base* base, const DepthStencil& depthStencil, Vector2 dimensions)
-    : m_base{ base },
-      m_depthStencil{ depthStencil },
-      m_swapChain{},
-      m_swapChainImages{},
-      m_swapChainImageFormat{},
-      m_swapChainExtent{},
-      m_swapChainImageViews{},
-      m_framebuffers{},
-      m_defaultPass{},
-      m_imagesInFlightFences{},
-      m_framesInFlightFences{},
-      m_imageRenderReadySemaphores{},
-      m_imagePresentReadySemaphores{},
-      m_currentFrameIndex{0}
+        : m_base{ base },
+          m_depthStencil{ depthStencil },
+          m_swapChain{},
+          m_swapChainImages{},
+          m_swapChainImageFormat{},
+          m_swapChainExtent{},
+          m_swapChainImageViews{},
+          m_framebuffers{},
+          m_defaultPass{},
+          m_imagesInFlightFences{},
+          m_framesInFlightFences{},
+          m_imageRenderReadySemaphores{},
+          m_imagePresentReadySemaphores{},
+          m_currentFrameIndex{0}
     {
         Create(dimensions);
         CreateSynchronizationObjects();
         CreateFrameBuffers();
     }
     
-    Swapchain::~Swapchain()
+    Swapchain::~Swapchain() noexcept
     {
         Cleanup();
         DestroySynchronizationObjects();
     }
 
-    void Swapchain::DestroySynchronizationObjects()
+    void Swapchain::DestroySynchronizationObjects() noexcept
     {
         auto device = m_base->GetDevice();
 
@@ -336,7 +336,7 @@ namespace nc::graphics
         }
     }
 
-    void Swapchain::DestroyFrameBuffers()
+    void Swapchain::DestroyFrameBuffers() noexcept
     {
         auto device = m_base->GetDevice();
         for (auto& frameBuffer : m_framebuffers)

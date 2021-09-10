@@ -4,10 +4,10 @@
 namespace nc::graphics
 {
     DepthStencil::DepthStencil(Base* base, Vector2 dimensions)
-    : m_base{base},
-      m_image{},
-      m_view{},
-      m_memoryIndex{0}
+        : m_base{base},
+          m_image{},
+          m_view{},
+          m_memoryIndex{0}
     {
         auto depthFormat = base->GetDepthFormat();
         auto imageUseFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment;
@@ -64,6 +64,12 @@ namespace nc::graphics
         m_view = m_base->GetDevice().createImageView(imageViewInfo);
     }
 
+    DepthStencil::~DepthStencil() noexcept
+    {
+        m_base->GetDevice().destroyImageView(m_view);
+        m_base->DestroyImage(m_memoryIndex);
+    }
+
     const vk::Image& DepthStencil::GetImage() const noexcept
     {
         return m_image;
@@ -77,11 +83,5 @@ namespace nc::graphics
     const Vector2& DepthStencil::GetDimensions() const noexcept
     {
         return m_dimensions;
-    }
-
-    DepthStencil::~DepthStencil()
-    {
-        m_base->GetDevice().destroyImageView(m_view);
-        m_base->DestroyImage(m_memoryIndex);
     }
 }

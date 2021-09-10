@@ -35,12 +35,12 @@ namespace nc::graphics
     {
         public:
             Renderer(graphics::Graphics* graphics);
-            ~Renderer();
+            ~Renderer() noexcept;
             
             void Record(Commands* commands, registry_type* registry);
             void BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
             void BindSharedData(vk::CommandBuffer* cmd);
-            void Clear();
+            void Clear() noexcept;
 
             // void RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates);
             void ClearParticleEmitters();
@@ -51,8 +51,6 @@ namespace nc::graphics
             #endif
             void InitializeShadowMappingRenderPass();
 
-            void DeregisterRenderable(Entity entity);
-
         private:
             void RecordUi(vk::CommandBuffer* cmd);
 
@@ -62,7 +60,6 @@ namespace nc::graphics
             vk::RenderPass m_mainRenderPass;        
             ShadowMappingPass m_shadowMappingPass;
 
-            std::vector<std::pair<Entity, std::vector<Entity>*>> m_storageHandles;
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;
             #ifdef NC_EDITOR_ENABLED
             std::unique_ptr<WireframeTechnique> m_wireframeTechnique;

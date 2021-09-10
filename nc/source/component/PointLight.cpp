@@ -29,32 +29,33 @@ namespace nc
 
         if (pointLightDataFile.is_open())
         {
-            pointLightDataFile << "Pos: " << info.pos << std::endl;
-            pointLightDataFile << "Ambient: " << info.ambient << std::endl;
-            pointLightDataFile << "Diffuse: " << info.diffuseColor << std::endl;
-            pointLightDataFile << "Diffuse Intensity: " << info.diffuseIntensity << std::endl;
-            pointLightDataFile << "Attenuation Constant: " << info.attConst << std::endl;
-            pointLightDataFile << "Attenuation Linear: " << info.attLin << std::endl;
-            pointLightDataFile << "Attenuation Quadratic: " << info.attQuad << std::endl;
+            pointLightDataFile << "Pos: " << info.pos << '\n';
+            pointLightDataFile << "Ambient: " << info.ambient << '\n';
+            pointLightDataFile << "Diffuse: " << info.diffuseColor << '\n';
+            pointLightDataFile << "Diffuse Intensity: " << info.diffuseIntensity << '\n';
+            pointLightDataFile << "Attenuation Constant: " << info.attConst << '\n';
+            pointLightDataFile << "Attenuation Linear: " << info.attLin << '\n';
+            pointLightDataFile << "Attenuation Quadratic: " << info.attQuad << '\n';
             pointLightDataFile.close();
         }
     }
     #endif
 
     PointLight::PointLight(Entity entity, PointLightInfo info)
-    : ComponentBase{entity},
-      m_info{info},
-      m_lightProjectionMatrix{},
-      m_projectedPos{},
-      m_isDirty{false}
+        : ComponentBase{entity},
+          m_info{info},
+          m_lightProjectionMatrix{},
+          m_projectedPos{},
+          m_isDirty{false}
     {
         const auto& graphicsSettings = config::GetGraphicsSettings();
         m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip);
     }
 
-    const PointLightInfo& PointLight::GetInfo() const
+    void PointLight::SetInfo(PointLightInfo info)
     {
-        return m_info;
+        m_isDirty = true;
+        m_info = info;
     }
 
     DirectX::XMMATRIX PointLight::CalculateLightViewMatrix()
@@ -70,14 +71,12 @@ namespace nc
         return m_isDirty;
     }
 
-    bool PointLight::Update(const DirectX::XMMATRIX& cameraView)
+    bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& cameraView)
     {        
-        auto transformPos = ActiveRegistry()->Get<Transform>(GetParentEntity())->GetPosition();
-
         const auto& lightViewMatrix = CalculateLightViewMatrix();
         m_info.viewProjection = lightViewMatrix * m_lightProjectionMatrix;
 
-        const auto pos_v = DirectX::XMLoadVector3(&transformPos);
+        const auto pos_v = DirectX::XMLoadVector3(&position);
         DirectX::XMStoreVector3(&m_projectedPos, DirectX::XMVector3Transform(pos_v, cameraView));
         
         if (m_projectedPos.x != m_info.pos.x || m_projectedPos.y != m_info.pos.y || m_projectedPos.z != m_info.pos.z)
@@ -90,12 +89,6 @@ namespace nc
         m_info.pos.z = m_projectedPos.z;
 
         return std::exchange(m_isDirty, false);
-    }
-
-    void PointLight::SetInfo(PointLightInfo info)
-    {
-        m_isDirty = true;
-        m_info = info;
     }
 
     #ifdef NC_EDITOR_ENABLED

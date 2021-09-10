@@ -11,15 +11,15 @@ namespace nc::graphics
         public:
             WriteableBuffer();
             WriteableBuffer(Graphics* graphics, uint32_t size);
+            ~WriteableBuffer() noexcept;
             WriteableBuffer(WriteableBuffer&&);
             WriteableBuffer& operator = (WriteableBuffer&&);
             WriteableBuffer& operator = (const WriteableBuffer&) = delete;
             WriteableBuffer(const WriteableBuffer&) = delete;
-            ~WriteableBuffer();
 
-            vk::Buffer* GetBuffer();
+            vk::Buffer* GetBuffer() noexcept;
 
-            void Clear();
+            void Clear() noexcept;
 
             template<std::invocable<T&> Func>
             void Map(const std::vector<T>& dataToMap, Func&& myNuller);
@@ -52,26 +52,7 @@ namespace nc::graphics
     }
 
     template<typename T>
-    WriteableBuffer<T>::WriteableBuffer(WriteableBuffer&& other)
-    : m_base{std::exchange(other.m_base, nullptr)},
-      m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
-      m_memorySize{std::exchange(other.m_memorySize, 0)},
-      m_writeableBuffer{std::exchange(other.m_writeableBuffer, nullptr)}
-    {
-    }
-
-    template<typename T>
-    WriteableBuffer<T>& WriteableBuffer<T>::operator = (WriteableBuffer<T>&& other)
-    {
-        m_base = std::exchange(other.m_base, nullptr);
-        m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
-        m_memorySize = std::exchange(other.m_memorySize, 0);
-        m_writeableBuffer = std::exchange(other.m_writeableBuffer, nullptr);
-        return *this;
-    }
-
-    template<typename T>
-    WriteableBuffer<T>::~WriteableBuffer()
+    WriteableBuffer<T>::~WriteableBuffer() noexcept
     {
         if (m_writeableBuffer)
         {
@@ -83,13 +64,32 @@ namespace nc::graphics
     }
 
     template<typename T>
-    vk::Buffer* WriteableBuffer<T>::GetBuffer()
+    WriteableBuffer<T>::WriteableBuffer(WriteableBuffer&& other)
+    : m_base{std::exchange(other.m_base, nullptr)},
+      m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
+      m_memorySize{std::exchange(other.m_memorySize, 0)},
+      m_writeableBuffer{std::exchange(other.m_writeableBuffer, nullptr)}
+    {
+    }
+
+    template<typename T>
+    WriteableBuffer<T>& WriteableBuffer<T>::operator=(WriteableBuffer<T>&& other)
+    {
+        m_base = std::exchange(other.m_base, nullptr);
+        m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
+        m_memorySize = std::exchange(other.m_memorySize, 0);
+        m_writeableBuffer = std::exchange(other.m_writeableBuffer, nullptr);
+        return *this;
+    }
+
+    template<typename T>
+    vk::Buffer* WriteableBuffer<T>::GetBuffer() noexcept
     {
         return &m_writeableBuffer;
     }
 
     template<typename T>
-    void WriteableBuffer<T>::Clear()
+    void WriteableBuffer<T>::Clear() noexcept
     {
         if (m_writeableBuffer)
         {

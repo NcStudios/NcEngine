@@ -12,7 +12,7 @@ namespace nc::graphics
         public:
             DepthStencil(Base* base, Vector2 dimensions);
             DepthStencil(Base* base, Vector2 dimensions, vk::Format depthFormat);
-            ~DepthStencil();
+            ~DepthStencil() noexcept;
 
             const vk::Image& GetImage() const noexcept;
             const vk::ImageView& GetImageView() const noexcept;
