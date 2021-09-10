@@ -66,11 +66,6 @@ namespace nc
         return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
     }
 
-    bool PointLight::IsDirty() const
-    {
-        return m_isDirty;
-    }
-
     bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& cameraView)
     {        
         const auto& lightViewMatrix = CalculateLightViewMatrix();
