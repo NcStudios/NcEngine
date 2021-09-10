@@ -55,8 +55,6 @@ namespace nc::graphics
         auto swapchain = m_graphics->GetSwapchainPtr();
         auto& commandBuffers = *commands->GetCommandBuffers();
 
-        //auto meshRenderers = ActiveRegistry()->ViewAll<MeshRenderer>();
-        
         for (size_t i = 0; i < commandBuffers.size(); ++i)
         {
             swapchain->WaitForFrameFence(true);
@@ -83,14 +81,10 @@ namespace nc::graphics
             // }
 
             m_phongAndUiTechnique->Bind(cmd);
-            if(!state.objectData.empty())
+            if(!state.meshes.empty())
             {
-                m_phongAndUiTechnique->Record(cmd, state);
+                m_phongAndUiTechnique->Record(cmd, state.cameraPosition, state.meshes);
             }
-            // if (!meshRenderers.empty())
-            // {
-            //     m_phongAndUiTechnique->Record(cmd, meshRenderers);
-            // }
 
             RecordUi(cmd);
 

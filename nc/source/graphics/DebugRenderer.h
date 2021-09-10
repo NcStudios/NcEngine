@@ -47,7 +47,7 @@ namespace nc::graphics
                     m_graphics->DrawIndexed(CubeIndexCount);
                 }
 
-                const auto& view = camera::CaluclateViewMatrix();
+                const auto& view = camera::GetViewMatrix();
                 const auto& projection = camera::GetProjectionMatrix();
 
                 for(const auto& matrix : m_planes)
@@ -67,7 +67,7 @@ namespace nc::graphics
             {
                 using namespace DirectX;
 
-                const auto& view = camera::CalculateViewMatrix();
+                const auto& view = camera::GetViewMatrix();
                 const auto& projection = camera::GetProjectionMatrix();
 
                 auto modelView = XMMatrixScaling(0.1f, 0.1f, 0.1f) *

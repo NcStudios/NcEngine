@@ -1,8 +1,6 @@
 #include "PhongAndUiTechnique.h"
 #include "Ecs.h"
 #include "config/Config.h"
-#include "component/Transform.h"
-#include "component/MeshRenderer.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
@@ -103,18 +101,16 @@ namespace nc::graphics
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& state)
+    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const Mesh> meshes)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto pushConstants = PhongPushConstants{};
-        pushConstants.cameraPos = state.cameraPosition;
+        pushConstants.cameraPos = cameraPosition;
         cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
 
         uint32_t objectInstance = 0;
-        //for (const auto& renderer : meshRenderers)
-        for(const auto& mesh : state.meshes)
+        for(const auto& mesh : meshes)
         {
-            //const auto& mesh = renderer.GetMesh();
             cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             
             #ifdef NC_EDITOR_ENABLED

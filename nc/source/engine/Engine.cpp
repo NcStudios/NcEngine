@@ -9,11 +9,9 @@
 #include "debug/Profiler.h"
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
+#include "graphics/PerFrameRenderState.h"
 #include "graphics/resources/ResourceManager.h"
 #include "physics/PhysicsConstants.h"
-
-
-#include "graphics/PerFrameRenderState.h"
 
 namespace nc::core
 {

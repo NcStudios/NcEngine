@@ -33,7 +33,7 @@ namespace nc::camera
 
     void UpdateViewMatrix()
     {
-        IF_THROW(!g_mainCamera.Valid(), "camera::CalculateViewMatrix - No camera is set");
+        IF_THROW(!g_mainCamera.Valid(), "camera::UpdateViewMatrix - No camera is set");
         auto* transform = ActiveRegistry()->Get<Transform>(g_mainCamera);
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform->GetTransformationMatrix());
