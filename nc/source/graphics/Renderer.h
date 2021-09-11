@@ -52,6 +52,7 @@ namespace nc::graphics
             void InitializeShadowMappingRenderPass();
 
         private:
+            void InitializeTechniques();
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics* m_graphics;

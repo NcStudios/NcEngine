@@ -37,10 +37,8 @@ namespace nc::graphics
         m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
     }
 
-    void Renderer::Record(Commands* commands, registry_type* registry)
+    void Renderer::InitializeTechniques()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        
         //@todo: these don't belong here.  
         if (m_phongAndUiTechnique == nullptr)
         {
@@ -58,9 +56,15 @@ namespace nc::graphics
         {
             m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(m_graphics, &m_shadowMappingPass.renderPass.get());
         }
+    }
 
-        vk::ClearValue clearValues[2];
+    void Renderer::Record(Commands* commands, registry_type* registry)
+    {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
+        InitializeTechniques();
+        
+        std::array<vk::ClearValue, 2> clearValues = {};
         auto swapchain = m_graphics->GetSwapchainPtr();
         auto& commandBuffers = *commands->GetCommandBuffers();
 
@@ -69,28 +73,18 @@ namespace nc::graphics
         
         for (size_t i = 0; i < commandBuffers.size(); ++i)
         {
-            swapchain->WaitForFrameFence(true);
             auto* cmd = &commandBuffers[i];
 
-            // Shadow mapping pass
             cmd->begin(vk::CommandBufferBeginInfo{});
-
+            
+            swapchain->WaitForFrameFence(true);
             auto dimensions = m_graphics->GetDimensions();
-
 		    clearValues[0].setDepthStencil({ 1.0f, 0 });
-
-            vk::RenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.setRenderPass(m_shadowMappingPass.renderPass.get()); // Specify the render pass and attachments.
-            renderPassInfo.setFramebuffer(m_shadowMappingPass.frameBuffer.get());
-            renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
-            renderPassInfo.renderArea.setExtent(swapchain->GetExtent());
-            renderPassInfo.setClearValueCount(1); // Set clear color
-            renderPassInfo.setPClearValues(clearValues);
-
             SetViewportAndScissor(cmd, dimensions);
 
-            // Begin render pass and bind pipeline
-            cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+            // Shadow mapping pass
+            auto shadowMappingPassBeginInfo = CreateRenderPassBeginInfo(m_shadowMappingPass.renderPass.get(), m_shadowMappingPass.frameBuffer.get(), swapchain->GetExtent(), clearValues);
+            cmd->beginRenderPass(shadowMappingPassBeginInfo, vk::SubpassContents::eInline);
             BindSharedData(cmd);
 
             if (!pointLights.empty())

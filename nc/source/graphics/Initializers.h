@@ -55,7 +55,11 @@ namespace nc::graphics
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const std::vector<vk::DescriptorSetLayout>& layouts);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, const std::vector<vk::DescriptorSetLayout>& layouts);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
-    
+
+    // Render passes
+    vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::array<vk::ClearValue, 2>& clearValues);
+    vk::RenderPassCreateInfo CreateRenderPassCreateInfo(const std::vector<vk::AttachmentDescription>& attachmentDescriptions, const std::vector<vk::SubpassDependency>& subpassDependencies);
+
     // Screen size
     vk::Viewport CreateViewport(const Vector2& dimensions);
     vk::Extent2D CreateExtent(const Vector2& dimensions);

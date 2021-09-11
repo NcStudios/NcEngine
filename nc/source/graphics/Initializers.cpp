@@ -317,6 +317,30 @@ namespace nc::graphics
         return pipelineLayoutInfo;
     }
     
+    vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::array<vk::ClearValue, 2>& clearValues)
+    {
+        vk::RenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.setRenderPass(renderpass); // Specify the render pass and attachments.
+        renderPassInfo.setFramebuffer(framebuffer);
+        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
+        renderPassInfo.renderArea.setExtent(extent);
+        renderPassInfo.setClearValueCount(1); // Set clear color
+        renderPassInfo.setPClearValues(clearValues.data());
+        return renderPassInfo;
+    }
+
+    vk::RenderPassCreateInfo CreateRenderPassCreateInfo(const std::vector<vk::AttachmentDescription>& attachmentDescriptions, const std::vector<vk::SubpassDescription>& subpassDescriptions, const std::vector<vk::SubpassDependency>& subpassDependencies)
+    {
+        vk::RenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.setAttachmentCount(1);
+        renderPassInfo.setPAttachments(attachmentDescriptions.data());
+        renderPassInfo.setSubpassCount(static_cast<uint32_t>(subpassDescriptions.size()));
+        renderPassInfo.setPSubpasses(subpassDescriptions.data());
+        renderPassInfo.setDependencyCount(static_cast<uint32_t>(subpassDependencies.size()));
+        renderPassInfo.setPDependencies(subpassDependencies.data());
+        return renderPassInfo;
+    }
+
     vk::Viewport CreateViewport(const Vector2& dimensions)
     {
         vk::Viewport viewport = {};
