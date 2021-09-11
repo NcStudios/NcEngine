@@ -61,7 +61,6 @@ namespace nc::camera
         IF_THROW(!g_mainCamera.Valid(), "camera::CalculateFrustum - No camera is set");
 
         const auto* transform = ActiveRegistry()->Get<Transform>(g_mainCamera);
-        const auto world = transform->GetTransformationMatrix();
         const auto m = DirectX::XMMatrixTranspose(g_viewMatrix * g_projectionMatrix);
 
         auto left_v = DirectX::XMPlaneNormalize(m.r[3] + m.r[0]);
