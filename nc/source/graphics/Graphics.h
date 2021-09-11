@@ -36,7 +36,7 @@ namespace nc::graphics
             void WaitIdle();
             void Clear();
 
-            void FrameBegin();
+            uint32_t FrameBegin();
             void Draw();
             void FrameEnd();
 
@@ -57,6 +57,7 @@ namespace nc::graphics
             std::unique_ptr<Commands> m_commands;
             Renderer* m_renderer;
             std::unique_ptr<ResourceManager> m_resourceManager; // @todo: This doesn't need to be a unique pointer.
+            uint32_t m_imageIndex;
 
             Vector2 m_dimensions;
             bool m_isMinimized;
