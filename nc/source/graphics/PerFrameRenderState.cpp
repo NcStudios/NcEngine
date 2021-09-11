@@ -1,11 +1,8 @@
 #include "PerFrameRenderState.h"
 #include "MainCamera.h"
 #include "camera/MainCameraInternal.h"
-#include "resources/ResourceManager.h"
-
-
 #include "physics/collision/IntersectionQueries.h"
-#include <iostream>
+#include "resources/ResourceManager.h"
 
 namespace nc::graphics
 {
@@ -18,41 +15,29 @@ namespace nc::graphics
           isPointLightBindRequired{isPointLightSystemDirty}
     {
         const auto frustum = camera::CalculateFrustum();
-
-        auto viewProjection = viewMatrix * projectionMatrix;
-        auto renderers = registry->ViewAll<MeshRenderer>();
+        const auto viewProjection = viewMatrix * projectionMatrix;
+        const auto renderers = registry->ViewAll<MeshRenderer>();
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());
-
-        size_t culled = 0u;
+        Sphere sphere;
 
         for(const auto& renderer : renderers)
         {
             const auto& modelMatrix = registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
             const auto maxScaleExtent = GetMaxScaleExtent(modelMatrix);
             const auto maxMeshExtent = renderer.GetMesh().maxExtent;
+            DirectX::XMStoreVector3(&sphere.center, modelMatrix.r[3]);
+            sphere.radius = maxScaleExtent * maxMeshExtent;
 
-            const auto pos_v = modelMatrix.r[3];
-            Vector3 center;
-            DirectX::XMStoreVector3(&center, pos_v);
-            Sphere s{.center = center, .radius = maxScaleExtent * maxMeshExtent};
-
-
-            if(!physics::Intersect(s, frustum))
+            if(!physics::Intersect(frustum, sphere))
             {
-                ++culled;
                 continue;
             }
 
-
-            auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
+            const auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
             objectData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
             meshes.push_back(renderer.GetMesh());
-
         }
-
-        std::cout << "culled objects: " << culled << '\n';
-
 
         auto pointLights = registry->ViewAll<PointLight>();
 

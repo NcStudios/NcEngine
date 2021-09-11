@@ -92,44 +92,26 @@ namespace nc::physics
         return SquareMagnitude(a.center - b.center) < radii * radii;
     }
 
-    bool Intersect(const Sphere& a, const Frustum& b)
+    bool Intersect(const Frustum& a, const Sphere& b)
     {
-        auto left = TestHalfspace(b.left, a);
-        if(left == HalfspaceContainment::Intersecting)
-            return true;
-        if(left == HalfspaceContainment::Negative)
-            return false;
+        if(auto space = TestHalfspace(a.back, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
 
-        auto right = TestHalfspace(b.right, a);
-        if(right == HalfspaceContainment::Intersecting)
-            return true;
-        if(right == HalfspaceContainment::Negative)
-            return false;
+        if(auto space = TestHalfspace(a.left, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
 
-        auto bottom = TestHalfspace(b.bottom, a);
-        if(bottom == HalfspaceContainment::Intersecting)
-            return true;
-        if(bottom == HalfspaceContainment::Negative)
-            return false;
+        if(auto space = TestHalfspace(a.right, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
 
-        auto top = TestHalfspace(b.top, a);
-        if(top == HalfspaceContainment::Intersecting)
-            return true;
-        if(top == HalfspaceContainment::Negative)
-            return false;
+        if(auto space = TestHalfspace(a.top, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
 
-        auto front = TestHalfspace(b.front, a);
-        if(front == HalfspaceContainment::Intersecting)
-            return true;
-        if(front == HalfspaceContainment::Negative)
-            return false;
+        if(auto space = TestHalfspace(a.bottom, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
 
-        auto back = TestHalfspace(b.back, a);
-        if(back == HalfspaceContainment::Intersecting)
-            return true;
-        if(back == HalfspaceContainment::Negative)
-            return false;
-        
+        if(auto space = TestHalfspace(a.front, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
+
         return true;
     }
 
