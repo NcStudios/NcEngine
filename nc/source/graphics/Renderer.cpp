@@ -35,8 +35,9 @@ namespace nc::graphics
         m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
     }
 
-    void Renderer::Record(Commands* commands, const PerFrameRenderState& state)
+    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex)
     {
+
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         
         //@todo: these don't belong here.  
@@ -53,45 +54,40 @@ namespace nc::graphics
         #endif
 
         auto swapchain = m_graphics->GetSwapchainPtr();
+        swapchain->WaitForFrameFence();
         auto& commandBuffers = *commands->GetCommandBuffers();
+        auto* cmd = &commandBuffers[currentSwapChainImageIndex];
 
-        for (size_t i = 0; i < commandBuffers.size(); ++i)
+        // Begin recording commands to each command buffer.
+        cmd->begin(vk::CommandBufferBeginInfo{});
+        BeginRenderPass(cmd, swapchain, &m_mainRenderPass, currentSwapChainImageIndex);
+        BindSharedData(cmd);
+
+        #ifdef NC_EDITOR_ENABLED
+        if (m_wireframeTechnique->HasDebugWidget())
         {
-            swapchain->WaitForFrameFence(true);
-            
-            auto* cmd = &commandBuffers[i];
-
-            // Begin recording commands to each command buffer.
-            cmd->begin(vk::CommandBufferBeginInfo{});
-            BeginRenderPass(cmd, swapchain, &m_mainRenderPass, i);
-            BindSharedData(cmd);
-
-            #ifdef NC_EDITOR_ENABLED
-            if (m_wireframeTechnique->HasDebugWidget())
-            {
-                m_wireframeTechnique->Bind(cmd);
-                m_wireframeTechnique->Record(cmd, state.viewMatrix, state.projectionMatrix);
-            }
-            #endif
-
-            // if (m_particleTechnique)
-            // {
-            //     m_particleTechnique->Bind(cmd);
-            //     m_particleTechnique->Record(cmd);
-            // }
-
-            m_phongAndUiTechnique->Bind(cmd);
-            if(!state.meshes.empty())
-            {
-                m_phongAndUiTechnique->Record(cmd, state.cameraPosition, state.meshes);
-            }
-
-            RecordUi(cmd);
-
-            // End recording commands to each command buffer.
-            cmd->endRenderPass();
-            cmd->end();
+            m_wireframeTechnique->Bind(cmd);
+            m_wireframeTechnique->Record(cmd, state.viewMatrix, state.projectionMatrix);
         }
+        #endif
+
+        // if (m_particleTechnique)
+        // {
+        //     m_particleTechnique->Bind(cmd);
+        //     m_particleTechnique->Record(cmd);
+        // }
+
+        m_phongAndUiTechnique->Bind(cmd);
+        if(!state.meshes.empty())
+        {
+            m_phongAndUiTechnique->Record(cmd, state.cameraPosition, state.meshes);
+        }
+
+        RecordUi(cmd);
+
+        // End recording commands to each command buffer.
+        cmd->endRenderPass();
+        cmd->end();
 
         #ifdef NC_EDITOR_ENABLED
         if (m_wireframeTechnique)
