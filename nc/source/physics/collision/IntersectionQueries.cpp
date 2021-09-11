@@ -74,10 +74,63 @@ namespace nc::physics
         RefinePoint, RefineLine, RefineTriangle, RefineTetrahedron
     };
 
+    auto TestHalfspace(const Plane& plane, const Sphere& sphere) -> HalfspaceContainment
+    {
+        float dist = Dot(plane.normal, sphere.center) - plane.d;
+
+        if(std::abs(dist) <= sphere.radius)
+            return HalfspaceContainment::Intersecting;
+        else if(dist > 0.0f)
+            return HalfspaceContainment::Positive;
+        
+        return HalfspaceContainment::Negative;
+    }
+
     bool Intersect(const Sphere& a, const Sphere& b)
     {
         auto radii = a.radius + b.radius;
         return SquareMagnitude(a.center - b.center) < radii * radii;
+    }
+
+    bool Intersect(const Sphere& a, const Frustum& b)
+    {
+        auto left = TestHalfspace(b.left, a);
+        if(left == HalfspaceContainment::Intersecting)
+            return true;
+        if(left == HalfspaceContainment::Negative)
+            return false;
+
+        auto right = TestHalfspace(b.right, a);
+        if(right == HalfspaceContainment::Intersecting)
+            return true;
+        if(right == HalfspaceContainment::Negative)
+            return false;
+
+        auto bottom = TestHalfspace(b.bottom, a);
+        if(bottom == HalfspaceContainment::Intersecting)
+            return true;
+        if(bottom == HalfspaceContainment::Negative)
+            return false;
+
+        auto top = TestHalfspace(b.top, a);
+        if(top == HalfspaceContainment::Intersecting)
+            return true;
+        if(top == HalfspaceContainment::Negative)
+            return false;
+
+        auto front = TestHalfspace(b.front, a);
+        if(front == HalfspaceContainment::Intersecting)
+            return true;
+        if(front == HalfspaceContainment::Negative)
+            return false;
+
+        auto back = TestHalfspace(b.back, a);
+        if(back == HalfspaceContainment::Intersecting)
+            return true;
+        if(back == HalfspaceContainment::Negative)
+            return false;
+        
+        return true;
     }
 
     bool Intersect(const BoundingVolume& a, const BoundingVolume& b)

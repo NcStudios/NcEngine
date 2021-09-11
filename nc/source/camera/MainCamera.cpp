@@ -55,4 +55,39 @@ namespace nc::camera
     {
         return g_projectionMatrix;
     }
+
+    Frustum CalculateFrustum()
+    {
+        IF_THROW(!g_mainCamera.Valid(), "camera::CalculateFrustum - No camera is set");
+
+        const auto* transform = ActiveRegistry()->Get<Transform>(g_mainCamera);
+        const auto world = transform->GetTransformationMatrix();
+        //const auto m = DirectX::XMMatrixTranspose(world * g_viewMatrix * g_projectionMatrix);
+        const auto m = DirectX::XMMatrixTranspose(g_viewMatrix * g_projectionMatrix);
+        //const auto m = g_viewMatrix * g_projectionMatrix;
+
+        auto left_v = DirectX::XMPlaneNormalize(m.r[3] + m.r[0]);
+        auto right_v = DirectX::XMPlaneNormalize(m.r[3] - m.r[0]);
+        auto bottom_v = DirectX::XMPlaneNormalize(m.r[3] + m.r[1]);
+        auto top_v = DirectX::XMPlaneNormalize(m.r[3] - m.r[1]);
+        auto near_v = DirectX::XMPlaneNormalize(m.r[2]);
+        auto far_v = DirectX::XMPlaneNormalize(m.r[3] - m.r[2]);
+
+        Frustum out;
+        DirectX::XMStoreVector3(&out.left.normal, left_v);
+        DirectX::XMStoreVector3(&out.right.normal, right_v);
+        DirectX::XMStoreVector3(&out.bottom.normal, bottom_v);
+        DirectX::XMStoreVector3(&out.top.normal, top_v);
+        DirectX::XMStoreVector3(&out.front.normal, near_v);
+        DirectX::XMStoreVector3(&out.back.normal, far_v);
+
+        out.left.d = -1.0f * DirectX::XMVectorGetW(left_v);
+        out.right.d = -1.0f * DirectX::XMVectorGetW(right_v);
+        out.bottom.d = -1.0f * DirectX::XMVectorGetW(bottom_v);
+        out.top.d = -1.0f * DirectX::XMVectorGetW(top_v);
+        out.front.d = -1.0f * DirectX::XMVectorGetW(near_v);
+        out.back.d = -1.0f * DirectX::XMVectorGetW(far_v);
+
+        return out;
+    }
 }

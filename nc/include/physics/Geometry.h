@@ -43,4 +43,14 @@ namespace nc
         Vector3 normal;
         float d;
     };
+
+    struct Frustum
+    {
+        Plane left;
+        Plane right;
+        Plane bottom;
+        Plane top;
+        Plane front;
+        Plane back;
+    };
 }
