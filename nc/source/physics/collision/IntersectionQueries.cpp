@@ -94,7 +94,7 @@ namespace nc::physics
 
     bool Intersect(const Frustum& a, const Sphere& b)
     {
-        if(auto space = TestHalfspace(a.back, b); space != HalfspaceContainment::Positive)
+        if(auto space = TestHalfspace(a.front, b); space != HalfspaceContainment::Positive)
             return space == HalfspaceContainment::Intersecting ? true : false;
 
         if(auto space = TestHalfspace(a.left, b); space != HalfspaceContainment::Positive)
@@ -109,7 +109,7 @@ namespace nc::physics
         if(auto space = TestHalfspace(a.bottom, b); space != HalfspaceContainment::Positive)
             return space == HalfspaceContainment::Intersecting ? true : false;
 
-        if(auto space = TestHalfspace(a.front, b); space != HalfspaceContainment::Positive)
+        if(auto space = TestHalfspace(a.back, b); space != HalfspaceContainment::Positive)
             return space == HalfspaceContainment::Intersecting ? true : false;
 
         return true;
