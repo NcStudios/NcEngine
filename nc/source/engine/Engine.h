@@ -36,6 +36,7 @@ namespace nc::core
             AssetManager m_assetManager;
             audio::AudioSystem m_audioSystem;
             ui::UIImpl m_ui;
+            uint32_t m_currentImageIndex;
 
             void ClearState();
             void DoSceneSwap();

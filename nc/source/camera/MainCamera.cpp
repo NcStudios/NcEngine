@@ -55,4 +55,38 @@ namespace nc::camera
     {
         return g_projectionMatrix;
     }
+
+    Frustum CalculateFrustum()
+    {
+        IF_THROW(!g_mainCamera.Valid(), "camera::CalculateFrustum - No camera is set");
+
+        Frustum out;
+        const auto m = DirectX::XMMatrixTranspose(g_viewMatrix * g_projectionMatrix);
+
+        const auto left_v = DirectX::XMPlaneNormalize(m.r[3] + m.r[0]);
+        DirectX::XMStoreVector3(&out.left.normal, left_v);
+        out.left.d = -1.0f * DirectX::XMVectorGetW(left_v);
+        
+        const auto right_v = DirectX::XMPlaneNormalize(m.r[3] - m.r[0]);
+        DirectX::XMStoreVector3(&out.right.normal, right_v);
+        out.right.d = -1.0f * DirectX::XMVectorGetW(right_v);
+        
+        const auto bottom_v = DirectX::XMPlaneNormalize(m.r[3] + m.r[1]);
+        DirectX::XMStoreVector3(&out.bottom.normal, bottom_v);
+        out.bottom.d = -1.0f * DirectX::XMVectorGetW(bottom_v);
+        
+        const auto top_v = DirectX::XMPlaneNormalize(m.r[3] - m.r[1]);
+        DirectX::XMStoreVector3(&out.top.normal, top_v);
+        out.top.d = -1.0f * DirectX::XMVectorGetW(top_v);
+        
+        const auto front_v = DirectX::XMPlaneNormalize(m.r[2]);
+        DirectX::XMStoreVector3(&out.front.normal, front_v);
+        out.front.d = -1.0f * DirectX::XMVectorGetW(front_v);
+        
+        const auto back_v = DirectX::XMPlaneNormalize(m.r[3] - m.r[2]);
+        DirectX::XMStoreVector3(&out.back.normal, back_v);
+        out.back.d = -1.0f * DirectX::XMVectorGetW(back_v);
+
+        return out;
+    }
 }

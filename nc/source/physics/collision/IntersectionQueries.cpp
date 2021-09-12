@@ -74,10 +74,45 @@ namespace nc::physics
         RefinePoint, RefineLine, RefineTriangle, RefineTetrahedron
     };
 
+    auto TestHalfspace(const Plane& plane, const Sphere& sphere) -> HalfspaceContainment
+    {
+        float dist = Dot(plane.normal, sphere.center) - plane.d;
+
+        if(std::abs(dist) <= sphere.radius)
+            return HalfspaceContainment::Intersecting;
+        else if(dist > 0.0f)
+            return HalfspaceContainment::Positive;
+        
+        return HalfspaceContainment::Negative;
+    }
+
     bool Intersect(const Sphere& a, const Sphere& b)
     {
         auto radii = a.radius + b.radius;
         return SquareMagnitude(a.center - b.center) < radii * radii;
+    }
+
+    bool Intersect(const Frustum& a, const Sphere& b)
+    {
+        if(auto space = TestHalfspace(a.front, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
+
+        if(auto space = TestHalfspace(a.left, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
+
+        if(auto space = TestHalfspace(a.right, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
+
+        if(auto space = TestHalfspace(a.top, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
+
+        if(auto space = TestHalfspace(a.bottom, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
+
+        if(auto space = TestHalfspace(a.back, b); space != HalfspaceContainment::Positive)
+            return space == HalfspaceContainment::Intersecting ? true : false;
+
+        return true;
     }
 
     bool Intersect(const BoundingVolume& a, const BoundingVolume& b)
