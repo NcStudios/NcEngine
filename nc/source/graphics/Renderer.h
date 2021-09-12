@@ -16,6 +16,7 @@ namespace nc::particle { class ParticleRenderer; }
 namespace nc::graphics
 {
     class Commands;
+    struct PerFrameRenderState;
     
     class Renderer
     {
@@ -24,7 +25,7 @@ namespace nc::graphics
             ~Renderer() noexcept;
             
             void BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
-            void Record(Commands* commands);
+            void Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex);
             void BindSharedData(vk::CommandBuffer* cmd);
             void Clear() noexcept;
 

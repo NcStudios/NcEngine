@@ -135,6 +135,8 @@ namespace nc::graphics
             if(!file.is_open())
                 throw std::runtime_error("LoadMeshes - Could not open file: " + path);
 
+            float maxExtent;
+            file >> maxExtent;
             size_t vertexCount = 0;
             file >> vertexCount;
             std::vector<Vertex> vertices;
@@ -149,9 +151,10 @@ namespace nc::graphics
 
             auto mesh = graphics::Mesh
             {
-                static_cast<uint32_t>(allVertices.size()), 
-                static_cast<uint32_t>(allIndices.size()), 
+                static_cast<uint32_t>(allVertices.size()),
+                static_cast<uint32_t>(allIndices.size()),
                 static_cast<uint32_t>(indices.size()),
+                maxExtent
             };
 
             meshes.emplace(path, mesh);

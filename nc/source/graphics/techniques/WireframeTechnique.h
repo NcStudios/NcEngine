@@ -34,7 +34,7 @@ namespace nc::graphics
             ~WireframeTechnique() noexcept;
 
             void Bind(vk::CommandBuffer* cmd);
-            void Record(vk::CommandBuffer* cmd);
+            void Record(vk::CommandBuffer* cmd, DirectX::FXMMATRIX viewMatrix, DirectX::FXMMATRIX projectionMatrix);
 
             #ifdef NC_EDITOR_ENABLED
             void RegisterDebugWidget(nc::DebugWidget debugWidget);

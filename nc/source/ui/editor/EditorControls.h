@@ -314,8 +314,8 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
         ComponentSystemHeader<PhysicsBody>("Physics Body", registry->ViewAll<PhysicsBody>());
         ComponentSystemHeader<Transform>("Transform", registry->ViewAll<Transform>());
-        ComponentSystemHeader<nc::MeshRenderer>("Mesh Renderer", registry->ViewAll<nc::MeshRenderer>());
-        ComponentSystemHeader<nc::PointLight>("Point Light", registry->ViewAll<nc::PointLight>());
+        ComponentSystemHeader<nc::MeshRenderer>("Mesh Renderer", registry->ViewAll<MeshRenderer>());
+        ComponentSystemHeader<nc::PointLight>("Point Light", registry->ViewAll<PointLight>());
     }
 
 } // end namespace nc::ui::editor

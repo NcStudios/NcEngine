@@ -3,7 +3,7 @@
 #include "component/Component.h"
 #include "physics/Geometry.h"
 #include "physics/LayerMask.h"
-#include "directx/math/DirectXMath.h"
+#include "math/DirectXMathUtility.h"
 
 #include <variant>
 

@@ -3,7 +3,6 @@
 #include "graphics/Renderer.h"
 #include "Ecs.h"
 #include "debug/Utils.h"
-
 #include "assets/AssetManager.h"
 
 #ifdef NC_EDITOR_ENABLED
@@ -19,7 +18,6 @@ namespace
     auto EstimateBoundingVolume(const Capsule& capsule, const Vector3& translation, float scale) -> Sphere;
     auto EstimateBoundingVolume(const ConvexHull& mesh, const Vector3& translation, float scale) -> Sphere;
     auto CreateBoundingVolume(const Collider::VolumeInfo& info) -> BoundingVolume;
-    auto GetMatrixScaleExtent(DirectX::FXMMATRIX matrix) -> float;
 
     #ifdef NC_DEBUG_BUILD
     bool IsUniformScale(const Vector3& scale)
@@ -46,15 +44,6 @@ namespace
     Sphere EstimateBoundingVolume(const ConvexHull& mesh, const Vector3& translation, float scale)
     {
         return Sphere{translation, mesh.maxExtent * scale};
-    }
-    
-    float GetMatrixScaleExtent(DirectX::FXMMATRIX matrix)
-    {
-        auto xExtent_v = DirectX::XMVector3Dot(matrix.r[0], matrix.r[0]);
-        auto yExtent_v = DirectX::XMVector3Dot(matrix.r[1], matrix.r[1]);
-        auto zExtent_v = DirectX::XMVector3Dot(matrix.r[2], matrix.r[2]);
-        auto maxExtent_v = DirectX::XMVectorMax(xExtent_v, DirectX::XMVectorMax(yExtent_v, zExtent_v));
-        return sqrt(DirectX::XMVectorGetX(maxExtent_v));
     }
 
     BoundingVolume CreateBoundingVolume(const Collider::VolumeInfo& info)
@@ -159,7 +148,7 @@ namespace nc
     {
         Vector3 translation;
         DirectX::XMStoreVector3(&translation, matrix.r[3]);
-        auto scale = GetMatrixScaleExtent(matrix);
+        auto scale = GetMaxScaleExtent(matrix);
         return std::visit([&translation, scale](auto&& v)
         {
             return ::EstimateBoundingVolume(v, translation, scale);

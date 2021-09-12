@@ -30,34 +30,9 @@ namespace nc::ecs
         graphics::ResourceManager::InitializePointLights(graphics, MAX_POINT_LIGHTS);
     }
 
-    void PointLightSystem::Update()
+    bool PointLightSystem::CheckDirtyAndReset()
     {
-        auto pointLightComponents = m_registry->ViewAll<PointLight>();
-        const auto& view = m_graphics->GetViewMatrix();
-        for (auto& pointLight : pointLightComponents)
-        {
-            auto* transform = m_registry->Get<Transform>(pointLight.GetParentEntity());
-
-            if (pointLight.Update(transform->GetPosition(), view))
-            {
-                m_isSystemDirty = true;
-            }
-        }
-
-        if (m_isSystemDirty)
-        {
-            auto pointLightInfos = std::vector<PointLightInfo>();
-            pointLightInfos.reserve(pointLightComponents.size());
-
-            // Pull the PointLightInfo structs out of their respective components in the registry to map them to the GPU.
-            std::transform(pointLightComponents.begin(), pointLightComponents.end(), std::back_inserter(pointLightInfos), [](auto&& pointLightComponent)
-            { 
-                return pointLightComponent.GetInfo(); 
-            });
-
-            graphics::ResourceManager::UpdatePointLights(pointLightInfos);
-            m_isSystemDirty = false;
-        }
+        return std::exchange(m_isSystemDirty, false);
     }
 
     void PointLightSystem::Clear()

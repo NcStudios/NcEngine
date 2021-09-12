@@ -21,6 +21,7 @@ namespace nc::graphics
         uint32_t firstVertex;
         uint32_t firstIndex;
         uint32_t indicesCount;
+        float maxExtent;
     };
 
     void LoadMeshes(const std::vector<std::string>& paths);
