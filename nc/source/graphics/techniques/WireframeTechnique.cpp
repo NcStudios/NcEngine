@@ -117,12 +117,9 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    void WireframeTechnique::Record(vk::CommandBuffer* cmd)
+    void WireframeTechnique::Record(vk::CommandBuffer* cmd, DirectX::FXMMATRIX viewMatrix, DirectX::FXMMATRIX projectionMatrix)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        const auto& viewMatrix = m_graphics->GetViewMatrix();
-        const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
-
         auto pushConstants = WireframePushConstants{};
         pushConstants.viewProjection = viewMatrix * projectionMatrix;
 

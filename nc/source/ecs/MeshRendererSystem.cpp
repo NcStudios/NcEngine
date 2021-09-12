@@ -14,25 +14,6 @@ namespace nc::ecs
         graphics::ResourceManager::InitializeObjects(graphics);
     }
 
-    void MeshRendererSystem::Update()
-    {
-        const auto& viewMatrix = m_graphics->GetViewMatrix();
-        const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
-        auto viewProjection = viewMatrix * projectionMatrix;
-        auto renderers = m_registry->ViewAll<MeshRenderer>();
-        auto objectsData = std::vector<graphics::ObjectData>();
-        objectsData.reserve(renderers.size());
-
-        for(const auto& renderer : renderers)
-        {
-            const auto& modelMatrix = m_registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
-            auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
-            objectsData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
-        }
-
-        graphics::ResourceManager::UpdateObjects(objectsData);
-    }
-
     void MeshRendererSystem::Clear()
     {
         graphics::ResourceManager::ResetObjects(m_graphics);

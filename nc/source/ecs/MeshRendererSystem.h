@@ -17,10 +17,7 @@ namespace nc::ecs
         public:
             MeshRendererSystem(registry_type* registry, graphics::Graphics* graphics);
 
-            void Add(MeshRenderer& meshRenderer);
-            void Remove(Entity entity);
             void Clear();
-            void Update();
 
         private:
             nc::graphics::Graphics* m_graphics;

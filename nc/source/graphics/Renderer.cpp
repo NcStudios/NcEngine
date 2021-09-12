@@ -6,6 +6,7 @@
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
+#include "PerFrameRenderState.h"
 #include "graphics/resources/ResourceManager.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/Swapchain.h"
@@ -39,6 +40,8 @@ namespace nc::graphics
 
     void Renderer::InitializeTechniques()
     {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        
         //@todo: these don't belong here.  
         if (m_phongAndUiTechnique == nullptr)
         {
@@ -58,7 +61,7 @@ namespace nc::graphics
         }
     }
 
-    void Renderer::Record(Commands* commands, registry_type* registry)
+    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
@@ -66,63 +69,40 @@ namespace nc::graphics
         
         std::array<vk::ClearValue, 2> clearValues = {};
         auto swapchain = m_graphics->GetSwapchainPtr();
+        swapchain->WaitForFrameFence();
         auto& commandBuffers = *commands->GetCommandBuffers();
+        auto* cmd = &commandBuffers[currentSwapChainImageIndex];
 
-        auto meshRenderers = registry->ViewAll<nc::MeshRenderer>();
-        auto pointLights = registry->ViewAll<nc::PointLight>();
-        
-        for (size_t i = 0; i < commandBuffers.size(); ++i)
+        // Begin recording commands to each command buffer.
+        cmd->begin(vk::CommandBufferBeginInfo{});
+        BeginRenderPass(cmd, swapchain, &m_mainRenderPass, currentSwapChainImageIndex);
+        BindSharedData(cmd);
+
+        #ifdef NC_EDITOR_ENABLED
+        if (m_wireframeTechnique->HasDebugWidget())
         {
-            auto* cmd = &commandBuffers[i];
-
-            cmd->begin(vk::CommandBufferBeginInfo{});
-            
-            swapchain->WaitForFrameFence(true);
-            auto dimensions = m_graphics->GetDimensions();
-		    clearValues[0].setDepthStencil({ 1.0f, 0 });
-            SetViewportAndScissor(cmd, dimensions);
-
-            // Shadow mapping pass
-            auto shadowMappingPassBeginInfo = CreateRenderPassBeginInfo(m_shadowMappingPass.renderPass.get(), m_shadowMappingPass.frameBuffer.get(), swapchain->GetExtent(), clearValues);
-            cmd->beginRenderPass(shadowMappingPassBeginInfo, vk::SubpassContents::eInline);
-            BindSharedData(cmd);
-
-            if (!pointLights.empty())
-            {
-                m_shadowMappingTechnique->Bind(cmd);
-                m_shadowMappingTechnique->Record(cmd, pointLights, meshRenderers);
-            }
-
-            cmd->endRenderPass(); // End shadow mapping
-
-            // Second Pass (particles, mesh renderers)
-            BeginRenderPass(cmd, swapchain, &m_mainRenderPass, i);
-
-            #ifdef NC_EDITOR_ENABLED
-            if (m_wireframeTechnique->HasDebugWidget())
-            {
-                m_wireframeTechnique->Bind(cmd);
-                m_wireframeTechnique->Record(cmd);
-            }
-            #endif
-
-            // if (m_particleTechnique)
-            // {
-            //     m_particleTechnique->Bind(cmd);
-            //     m_particleTechnique->Record(cmd);
-            // }
-
-            m_phongAndUiTechnique->Bind(cmd);
-            if (!meshRenderers.empty())
-            {
-                m_phongAndUiTechnique->Record(cmd, meshRenderers);
-            }
-
-            RecordUi(cmd);
-
-            cmd->endRenderPass(); // End second pass
-            cmd->end();
+            m_wireframeTechnique->Bind(cmd);
+            m_wireframeTechnique->Record(cmd, state.viewMatrix, state.projectionMatrix);
         }
+        #endif
+
+        // if (m_particleTechnique)
+        // {
+        //     m_particleTechnique->Bind(cmd);
+        //     m_particleTechnique->Record(cmd);
+        // }
+
+        m_phongAndUiTechnique->Bind(cmd);
+        if(!state.meshes.empty())
+        {
+            m_phongAndUiTechnique->Record(cmd, state.cameraPosition, state.meshes);
+        }
+
+        RecordUi(cmd);
+
+        // End recording commands to each command buffer.
+        cmd->endRenderPass();
+        cmd->end();
 
         #ifdef NC_EDITOR_ENABLED
         if (m_wireframeTechnique)

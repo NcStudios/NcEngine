@@ -9,6 +9,7 @@
 #include "debug/Profiler.h"
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
+#include "graphics/PerFrameRenderState.h"
 #include "graphics/resources/ResourceManager.h"
 #include "physics/PhysicsConstants.h"
 
@@ -79,7 +80,8 @@ namespace nc::core
           m_time{},
           m_assetManager{},
           m_audioSystem{m_ecs.GetRegistry()},
-          m_ui{m_window.GetHWND(), &m_graphics}
+          m_ui{m_window.GetHWND(), &m_graphics},
+          m_currentImageIndex{0}
     {
         m_graphics.SetRenderer(&m_renderer);
         SetBindings();
@@ -177,36 +179,31 @@ namespace nc::core
     void Engine::FrameRender()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        m_graphics.FrameBegin();
+        auto* registry = m_ecs.GetRegistry();
+        camera::UpdateViewMatrix();
+        m_currentImageIndex = m_graphics.FrameBegin();
         m_ui.FrameBegin();
 
-        auto camViewMatrix = camera::CalculateViewMatrix();
-        m_graphics.SetViewMatrix(camViewMatrix);
-        
-        auto cameraPos = camera::GetMainCameraTransform()->GetPosition();
-        m_graphics.SetCameraPosition(cameraPos);
-
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, m_ecs.GetRegistry());
+        m_ui.Frame(&m_frameDeltaTimeFactor, registry);
         #else
         m_ui.Frame();
         #endif
 
         m_ui.FrameEnd();
 
-        m_ecs.GetPointLightSystem()->Update();
-        m_ecs.GetMeshRendererSystem()->Update();
+        auto state = graphics::PerFrameRenderState{registry, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
+        graphics::MapPerFrameRenderState(state);
 
         auto* renderer = m_graphics.GetRendererPtr();
-        auto* registry = m_ecs.GetRegistry();
-
+        
         #ifdef NC_EDITOR_ENABLED
         for(auto& collider : registry->ViewAll<Collider>())
             collider.UpdateWidget(renderer);
         #endif
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr(), registry);
+        renderer->Record(m_graphics.GetCommandsPtr(), state, m_currentImageIndex);
 
         m_graphics.Draw();
         m_graphics.FrameEnd();

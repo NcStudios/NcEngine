@@ -22,7 +22,7 @@ namespace nc::ecs
             PointLightSystem& operator = (PointLightSystem&&) = delete;
             PointLightSystem& operator = (const PointLightSystem&) = delete;
 
-            void Update();
+            bool CheckDirtyAndReset();
             void Clear();
 
         private:

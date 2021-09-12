@@ -8,6 +8,7 @@ namespace nc
 {
     constexpr size_t PointLightInfoSize = 128;
     namespace ecs { class PointLightSystem; }
+    namespace graphics { struct PerFrameRenderState; }
 
     class Transform;
     
@@ -45,6 +46,7 @@ namespace nc
             bool Update(const Vector3& position, const DirectX::XMMATRIX& view);
 
             friend ecs::PointLightSystem;
+            friend graphics::PerFrameRenderState;
     };
 
     static_assert(sizeof(PointLightInfo) == PointLightInfoSize, "PointLight::PointLight Size of m_info must be 128 bytes.");

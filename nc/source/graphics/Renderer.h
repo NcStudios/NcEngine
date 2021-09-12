@@ -18,6 +18,7 @@ namespace nc::particle { class ParticleRenderer; }
 namespace nc::graphics
 {
     class Commands;
+    struct PerFrameRenderState;
     
     struct ShadowMappingPass
     {
@@ -39,6 +40,7 @@ namespace nc::graphics
             
             void Record(Commands* commands, registry_type* registry);
             void BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
+            void Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex);
             void BindSharedData(vk::CommandBuffer* cmd);
             void Clear() noexcept;
 

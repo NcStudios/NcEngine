@@ -1,4 +1,5 @@
 #include "Graphics.h"
+#include "camera/MainCameraInternal.h"
 #include "debug/Profiler.h"
 #include "debug/Utils.h"
 #include "Base.h"
@@ -23,16 +24,14 @@ namespace nc::graphics
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_renderer{ nullptr },
           m_resourceManager{std::make_unique<ResourceManager>()},
+          m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
           m_isFullscreen{ false },
-          m_cameraWorldPosition{},
-          m_viewMatrix{},
-          m_projectionMatrix{},
           m_clearColor{DefaultClearColor},
           m_drawCallCount{0}
     {
-        SetProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
+        camera::UpdateProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
     Graphics::~Graphics() noexcept
@@ -67,36 +66,6 @@ namespace nc::graphics
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
     }
 
-    DirectX::FXMMATRIX Graphics::GetViewMatrix() const noexcept
-    {
-        return m_viewMatrix;
-    }
-
-    DirectX::FXMMATRIX Graphics::GetProjectionMatrix() const noexcept
-    {
-        return m_projectionMatrix;
-    }
-
-    void Graphics::SetViewMatrix(DirectX::FXMMATRIX cam) noexcept
-    {
-        m_viewMatrix = cam;
-    }
-
-    void Graphics::SetCameraPosition(Vector3 cameraPosition)
-    {
-        m_cameraWorldPosition = cameraPosition;
-    }
-
-    const Vector3 Graphics::GetCameraPosition() const noexcept
-    {
-        return m_cameraWorldPosition;
-    }
-
-    void Graphics::SetProjectionMatrix(float width, float height, float nearZ, float farZ) noexcept
-    {
-        m_projectionMatrix = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
-    }
-
     void Graphics::ToggleFullscreen()
     {
         // @todo
@@ -118,7 +87,7 @@ namespace nc::graphics
         (void)farZ;
 
         m_dimensions = Vector2{ width, height };
-        SetProjectionMatrix(width, height, nearZ, farZ);
+        camera::UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
     }
 
@@ -154,10 +123,9 @@ namespace nc::graphics
 
     bool Graphics::GetNextImageIndex(uint32_t* imageIndex)
     {
-        m_swapchain->WaitForFrameFence(false);
-
         bool isSwapChainValid = true;
         *imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);
+        m_imageIndex = *imageIndex;
         if (!isSwapChainValid)
         {
             RecreateSwapchain(m_dimensions);
@@ -192,7 +160,6 @@ namespace nc::graphics
     {
         m_swapchain->WaitForImageFence(imageIndex);
         m_swapchain->SyncImageAndFrameFence(imageIndex);
-        m_swapchain->ResetFrameFence();
         m_commands->SubmitRenderCommand(imageIndex);
     }
 
@@ -209,12 +176,19 @@ namespace nc::graphics
         return true;
     }
 
-    void Graphics::FrameBegin()
+    uint32_t Graphics::FrameBegin()
     {
         m_drawCallCount = 0;
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        uint32_t imageIndex = UINT32_MAX;
+
+        // Gets the next image in the swapchain
+        GetNextImageIndex(&imageIndex);
+
+        return m_imageIndex;
     }
 
-    // Gets an image from the swap chain, executes the command buffer for that image which writes to the image.
+    // Executes the command buffer for the next swapchain image which writes to the image.
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
     // See Device.cpp for synchronization of these calls.
@@ -223,16 +197,12 @@ namespace nc::graphics
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         if (m_isMinimized) return;
 
-        uint32_t imageIndex = UINT32_MAX;
-
-        // Gets the next image in the swapchain
-        if (!GetNextImageIndex(&imageIndex)) return;
-
         // Executes the command buffer to render to the image
-        RenderToImage(imageIndex);
+        RenderToImage(m_imageIndex);
 
         // Returns the image to the swapchain
-        if (!PresentImage(imageIndex)) return;
+        if (!PresentImage(m_imageIndex)) return;
+
         NC_PROFILE_END();
     }
 
@@ -241,6 +211,7 @@ namespace nc::graphics
         // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
         m_swapchain->IncrementFrameIndex();
     }
+
     #ifdef NC_EDITOR_ENABLED
     void Graphics::IncrementDrawCallCount()
     {
