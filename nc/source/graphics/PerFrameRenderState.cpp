@@ -4,6 +4,20 @@
 #include "physics/collision/IntersectionQueries.h"
 #include "resources/ResourceManager.h"
 
+namespace
+{
+    using namespace nc;
+
+    bool IsViewedByFrustum(const Frustum& frustum, const MeshRenderer& renderer, DirectX::FXMMATRIX transform)
+    {
+        const auto maxScaleExtent = GetMaxScaleExtent(transform);
+        const auto maxMeshExtent = renderer.GetMesh().maxExtent;
+        Sphere sphere{.center = Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent};
+        DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
+        return physics::Intersect(frustum, sphere);
+    }
+}
+
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(registry_type* registry, bool isPointLightSystemDirty)
@@ -24,15 +38,9 @@ namespace nc::graphics
         for(const auto& renderer : renderers)
         {
             const auto& modelMatrix = registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
-            const auto maxScaleExtent = GetMaxScaleExtent(modelMatrix);
-            const auto maxMeshExtent = renderer.GetMesh().maxExtent;
-            DirectX::XMStoreVector3(&sphere.center, modelMatrix.r[3]);
-            sphere.radius = maxScaleExtent * maxMeshExtent;
-
-            if(!physics::Intersect(frustum, sphere))
-            {
+            
+            if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
-            }
 
             const auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
             objectData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
