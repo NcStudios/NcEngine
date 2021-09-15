@@ -101,25 +101,39 @@ namespace nc::core
         const auto fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
 
+        tf::Executor taskExecutor{1u};
+        //tf::Taskflow mainLoopTasks;
+
+        auto& audioSystem = m_audioSystem;
+        float dt = 0.0f;
+
+        //mainLoopTasks.emplace([&audioSystem]() { audioSystem.Update(); });
+        //mainLoopTasks.emplace([particleEmitterSystem, &dt]() { particleEmitterSystem->UpdateParticles(dt); });
+
         while(m_isRunning)
         {
-            auto dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
+
             auto audioJobResult = m_jobSystem.Schedule(audio::AudioSystem::Update, &m_audioSystem);
-            auto particleUpdateJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
+            auto particleJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
+
+            //auto mainLoopTasksResult = taskExecutor.run(mainLoopTasks);
 
             FrameLogic(dt);
 
             size_t physicsIterations = 0u;
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
             {
-                FixedStepLogic(fixedTimeStep);
+                /** @todo need to store prev transforms for interpolation */
+                FixedStepLogic(fixedTimeStep, taskExecutor);
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
 
-            particleUpdateJobResult.wait();
+            particleJobResult.wait();
             audioJobResult.wait();
+            //mainLoopTasksResult.wait();
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
@@ -157,9 +171,9 @@ namespace nc::core
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
     }
 
-    void Engine::FixedStepLogic(float dt)
+    void Engine::FixedStepLogic(float dt, tf::Executor& taskExecutor)
     {
-        m_physics.DoPhysicsStep(dt);
+        m_physics.DoPhysicsStep(dt, taskExecutor);
 
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFixedUpdate();

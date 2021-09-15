@@ -9,40 +9,31 @@ namespace
 
 namespace nc::physics
 {
-    void UpdateWorldInertiaTensors(registry_type* registry, std::span<PhysicsBody> bodies)
+    void UpdateWorldInertiaTensors(registry_type* registry)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
-        for(auto& body : bodies)
+        for(auto& body : registry->ViewAll<PhysicsBody>())
         {
-            auto* transform = registry->Get<Transform>(body.GetParentEntity());
+            const auto* transform = registry->Get<Transform>(body.GetParentEntity());
             body.UpdateWorldInertia(transform);
         }
-
-        NC_PROFILE_END();
     }
 
-    void ApplyGravity(std::span<PhysicsBody> bodies, float dt)
+    void ApplyGravity(registry_type* registry, float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-        auto g = DirectX::XMVectorScale(GravityVector, dt);
+        const auto g = DirectX::XMVectorScale(GravityVector, dt);
 
-        for(auto& body : bodies)
+        for(auto& body : registry->ViewAll<PhysicsBody>())
         {
             if(body.UseGravity())
             {
                 body.ApplyVelocity(g);
             }
         }
-
-        NC_PROFILE_END();
     }
 
-    void Integrate(registry_type* registry, std::span<PhysicsBody> bodies, float dt)
+    void Integrate(registry_type* registry, float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
-        for(auto& body : bodies)
+        for(auto& body : registry->ViewAll<PhysicsBody>())
         {
             auto* transform = registry->Get<Transform>(body.GetParentEntity());
 
@@ -55,7 +46,5 @@ namespace nc::physics
                 }
             }
         }
-
-        NC_PROFILE_END();
     }
 }

@@ -9,7 +9,7 @@ namespace nc::physics
 {
     /** Create contact constraints for every contact point in each manifold. Also creates
      *  position constraints for each manifold if EnableDirectPositionCorrection == true. */
-    auto GenerateConstraints(registry_type* registry, std::span<const Manifold> persistentManifolds) -> Constraints;
+    void GenerateConstraints(registry_type* registry, std::span<const Manifold> persistentManifolds, Constraints* out);
     
     /** Prepare joints for resolution. Applies worldpsace transformations and 
      *  precomputes bias/effective mass matrix. */
@@ -21,5 +21,5 @@ namespace nc::physics
     void ResolveConstraints(Constraints& constraints, std::span<Joint> joints, float dt);
 
     /** Store current frame impulses from constraints in each contact for warmstarting. */
-    void CacheLagranges(std::span<Manifold> manifolds, std::span<ContactConstraint> constraints);
+    void CacheImpulses(std::span<const ContactConstraint> constraints, std::span<Manifold> manifolds);
 } // namespace nc::physics

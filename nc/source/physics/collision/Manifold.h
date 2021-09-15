@@ -52,7 +52,7 @@ namespace nc::physics
 
         int AddContact(const Contact& contact);
         int SortPoints(const Contact& contact);
-        void UpdateWorldPoints(registry_type* registry);
+        void UpdateWorldPoints(const registry_type* registry);
         const Contact& GetDeepestContact() const;
     };
 }

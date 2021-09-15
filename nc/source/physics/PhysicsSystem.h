@@ -5,6 +5,7 @@
 #include "collision/BspTree.h"
 #include "dynamics/Joint.h"
 #include "graphics/DebugRenderer.h"
+#include "taskflow/taskflow.hpp"
 
 namespace nc
 {
@@ -23,7 +24,7 @@ namespace nc::physics
             void RemoveJoint(Entity entityA, Entity entityB);
             void RemoveAllJoints(Entity entity);
 
-            void DoPhysicsStep(float dt);
+            void DoPhysicsStep(float dt, tf::Executor& taskExecutor);
             void ClearState();
 
             #ifdef NC_DEBUG_RENDERING
@@ -36,8 +37,11 @@ namespace nc::physics
             BspTree m_bspTree;
             ClickableSystem m_clickableSystem;
             job::JobSystem* m_jobSystem;
+            tf::Taskflow m_tasks;
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugRenderer m_debugRenderer;
             #endif
+
+            void BuildTaskGraph(registry_type* registry);
     };
 } // namespace nc::physics

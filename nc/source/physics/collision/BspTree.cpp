@@ -150,21 +150,23 @@ namespace nc::physics
         #endif
     }
 
-    auto BspTree::CheckCollisions(std::span<const DirectX::XMMATRIX> matrices,
+    void BspTree::CheckCollisions(std::span<const DirectX::XMMATRIX> matrices,
                                   std::span<const ColliderEstimate> estimates,
-                                  std::span<const Collider> colliders) -> NarrowPhysicsResult
+                                  NarrowPhysicsResult* out)
     {
-        if(m_nodes.empty())
-            return NarrowPhysicsResult{};
+        out->contacts.clear();
+        out->events.clear();
 
-        std::vector<NarrowEvent> events;
-        std::vector<Contact> contacts;
+        if(m_nodes.empty())
+            return;
+
+        out->contacts.reserve(m_previousContactCount);
+        out->events.reserve(m_previousContactCount);
         std::vector<size_t> narrowTestMeshIndices;
-        events.reserve(m_previousContactCount);
-        contacts.reserve(m_previousContactCount);
         narrowTestMeshIndices.reserve(NodeCapacity); // lower-bound guess
         CollisionState state;
         const size_t dynamicCount = estimates.size();
+        auto colliders = m_registry->ViewAll<Collider>();
 
         for(size_t i = 0u; i < dynamicCount; ++i)
         {
@@ -192,16 +194,15 @@ namespace nc::physics
                 {
                     if(Collide(volume, triangle, matrix, &state))
                     {
-                        events.emplace_back(entity, mesh.entity, CollisionEventType::FirstBodyPhysics);
-                        contacts.push_back(state.contact);
+                        out->events.emplace_back(entity, mesh.entity, CollisionEventType::FirstBodyPhysics);
+                        out->contacts.push_back(state.contact);
                         continue;
                     }
                 }
             }
         }
 
-        m_previousContactCount = contacts.size();
-        return NarrowPhysicsResult{std::move(events), std::move(contacts)};
+        m_previousContactCount = out->contacts.size();
     }
 
     void BspTree::AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex)
