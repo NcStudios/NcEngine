@@ -8,7 +8,7 @@
 
 namespace nc::ui::editor::controls
 {
-    auto SelectedEntity = EntityTraits::NullHandle;
+    auto SelectedEntity = Entity::Null();
     const auto TitleBarHeight = 40.0f;
     const auto DefaultItemWidth = 60.0f;
     const auto SceneGraphPanelWidth = 300;
@@ -62,8 +62,8 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityPanel", {0,0}, true))
             {
-                if(SelectedEntity != EntityTraits::NullHandle)
-                    controls::EntityPanel(registry, static_cast<Entity>(SelectedEntity));
+                if(SelectedEntity.Valid())
+                    controls::EntityPanel(registry, SelectedEntity);
 
             } ImGui::EndChild();
 
@@ -72,16 +72,15 @@ namespace nc::ui::editor::controls
 
     void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform)
     {
-        auto handleValue = static_cast<EntityTraits::underlying_type>(entity);
-        ImGui::PushID(handleValue);
+        ImGui::PushID(entity.Index());
 
         auto flags = 0;
-        if(SelectedEntity == handleValue)
+        if(SelectedEntity == entity)
             flags = flags | ImGuiTreeNodeFlags_Framed;
 
         auto open = ImGui::TreeNodeEx(tag->Value().data(), flags);
         if(ImGui::IsItemClicked())
-            SelectedEntity = handleValue;
+            SelectedEntity = entity;
         
         if(open)
         {
@@ -98,16 +97,15 @@ namespace nc::ui::editor::controls
     {
         if(!registry->Contains<Entity>(entity)) // entity may have been deleted
         {
-            SelectedEntity = EntityTraits::NullHandle;
+            SelectedEntity = Entity::Null();
             return;
         }
 
         ImGui::Separator();
         ImGui::Text("Tag     %s", registry->Get<Tag>(entity)->Value().data());
-        ImGui::Text("Index   %d", EntityUtils::Index(entity));
-        ImGui::Text("Version %d", EntityUtils::Version(entity));
-        ImGui::Text("Layer   %d", EntityUtils::Layer(entity));
-        ImGui::Text("Static  %s", EntityUtils::IsStatic(entity) ? "True" : "False");
+        ImGui::Text("Index   %d", entity.Index());
+        ImGui::Text("Layer   %d", entity.Layer());
+        ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
 
         if (auto* transform = registry->Get<Transform>(entity); transform)
         {
@@ -298,7 +296,7 @@ namespace nc::ui::editor::controls
             {
                 ImGui::Indent();
                 for(const auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", EntityUtils::Index(component.GetParentEntity()), static_cast<const void*>(&component));
+                    ImGui::Text("Handle: %5u  |  Address: %p", component.GetParentEntity().Index(), static_cast<const void*>(&component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();

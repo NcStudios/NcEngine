@@ -24,7 +24,7 @@ namespace nc::ecs
     class PerComponentStorage
     {
         using value_type = T;
-        using index_type = EntityTraits::index_type;
+        using index_type = Entity::index_type;
         
         struct StagedComponent
         {
@@ -74,7 +74,7 @@ namespace nc::ecs
 
     template<Component T>
     PerComponentStorage<T>::PerComponentStorage(size_t maxEntities)
-        : sparseArray(maxEntities, EntityTraits::NullIndex),
+        : sparseArray(maxEntities, Entity::NullIndex),
           entityPool{},
           componentPool{},
           stagingPool{},
@@ -97,10 +97,10 @@ namespace nc::ecs
     template<Component T>
     void PerComponentStorage<T>::Remove(Entity entity)
     {
-        auto sparseIndex = EntityUtils::Index(entity);
+        auto sparseIndex = entity.Index();
         auto poolIndex = sparseArray.at(sparseIndex);
 
-        IF_THROW(poolIndex == EntityTraits::NullIndex, std::string{"Entity does not have component\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(poolIndex == Entity::NullIndex, std::string{"Entity does not have component\n   "} + __PRETTY_FUNCTION__);
         
         componentPool.at(poolIndex) = std::move(componentPool.back());
         componentPool.pop_back();
@@ -109,7 +109,7 @@ namespace nc::ecs
         entityPool.at(poolIndex) = movedIndex;
         entityPool.pop_back();
 
-        sparseArray.at(sparseIndex) = EntityTraits::NullIndex;
+        sparseArray.at(sparseIndex) = Entity::NullIndex;
 
         if(sparseIndex != movedIndex)
             sparseArray.at(movedIndex) = poolIndex;
@@ -131,7 +131,7 @@ namespace nc::ecs
     template<Component T>
     bool PerComponentStorage<T>::Contains(Entity entity) const
     {
-        if(EntityTraits::NullIndex != sparseArray.at(EntityUtils::Index(entity)))
+        if(Entity::NullIndex != sparseArray.at(entity.Index()))
             return true;
 
         auto pos = std::ranges::find_if(stagingPool, [entity](const auto& pair)
@@ -145,8 +145,8 @@ namespace nc::ecs
     template<Component T>
     auto PerComponentStorage<T>::Get(Entity entity) -> T*
     {
-        auto poolIndex = sparseArray.at(EntityUtils::Index(entity));
-        if(poolIndex != EntityTraits::NullIndex)
+        auto poolIndex = sparseArray.at(entity.Index());
+        if(poolIndex != Entity::NullIndex)
             return &componentPool.at(poolIndex);
 
         auto pos = std::ranges::find_if(stagingPool, [entity](const auto& pair)
@@ -160,8 +160,8 @@ namespace nc::ecs
     template<Component T>
     auto PerComponentStorage<T>::Get(Entity entity) const -> const T*
     {
-        auto poolIndex = sparseArray.at(EntityUtils::Index(entity));
-        if(poolIndex != EntityTraits::NullIndex)
+        auto poolIndex = sparseArray.at(entity.Index());
+        if(poolIndex != Entity::NullIndex)
             return &componentPool.at(poolIndex);
 
         const auto pos = std::ranges::find_if(stagingPool, [entity](const auto& pair)
@@ -237,7 +237,7 @@ namespace nc::ecs
         for(auto& [entity, component] : stagingPool)
         {
             componentPool.push_back(std::move(component));
-            auto sparseIndex = EntityUtils::Index(entity);
+            auto sparseIndex = entity.Index();
             entityPool.push_back(sparseIndex);
             sparseArray.at(sparseIndex) = componentPool.size() - 1;
         }
@@ -248,7 +248,7 @@ namespace nc::ecs
     template<Component T>
     void PerComponentStorage<T>::Clear()
     {
-        std::ranges::fill(sparseArray, EntityTraits::NullIndex);
+        std::ranges::fill(sparseArray, Entity::NullIndex);
         entityPool.clear();
         entityPool.shrink_to_fit();
         componentPool.clear();
