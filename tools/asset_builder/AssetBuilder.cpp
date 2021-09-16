@@ -69,7 +69,7 @@ void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inP
 void BuildConvexHullAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 void BuildConcaveColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D;
-auto GetConvexHullExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
+auto GetMeshVertexExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&;
 
 int main(int argc, char** argv)
@@ -320,6 +320,9 @@ void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inP
     if(!pMesh->mNormals || !pMesh->mTextureCoords || !pMesh->mTangents || !pMesh->mBitangents)
             throw std::runtime_error("File does not contain all required data");
 
+    auto extents = GetMeshVertexExtents(pMesh->mVertices, pMesh->mNumVertices);
+    outFile << extents.maxExtent << '\n';
+    
     bool valueWasSanitized = false;
     outFile << pMesh->mNumVertices << '\n';
     for (size_t i = 0u; i < pMesh->mNumVertices; ++i)
@@ -370,7 +373,7 @@ void BuildConvexHullAsset(Assimp::Importer* importer, const std::filesystem::pat
         throw std::runtime_error("AssImp failure");
 
     const auto pMesh = pModel->mMeshes[0];
-    auto extents = GetConvexHullExtents(pMesh->mVertices, pMesh->mNumVertices);
+    auto extents = GetMeshVertexExtents(pMesh->mVertices, pMesh->mNumVertices);
 
     outFile << extents.xExtent << ' ' << extents.yExtent << ' ' << extents.zExtent << '\n'
             << extents.maxExtent << '\n'
@@ -407,7 +410,7 @@ void BuildConcaveColliderAsset(Assimp::Importer* importer, const std::filesystem
 
     const auto pMesh = pModel->mMeshes[0];
     auto* vertices = pMesh->mVertices;
-    auto extents = GetConvexHullExtents(vertices, pMesh->mNumVertices);
+    auto extents = GetMeshVertexExtents(vertices, pMesh->mNumVertices);
     outFile << pMesh->mNumFaces << '\n'
             << extents.maxExtent << '\n';
 
@@ -456,7 +459,7 @@ auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVecto
     return data[maxIndex];
 }
 
-auto GetConvexHullExtents(const aiVector3D* data, unsigned count) -> MeshExtents
+auto GetMeshVertexExtents(const aiVector3D* data, unsigned count) -> MeshExtents
 {
     auto minX = GetMaximumVertexInDirection(data, count, aiVector3D{ -1,  0,  0});
     auto maxX = GetMaximumVertexInDirection(data, count, aiVector3D{  1,  0,  0});

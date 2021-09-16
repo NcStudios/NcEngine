@@ -17,8 +17,8 @@ namespace nc::graphics
           m_defaultPass{},
           m_imagesInFlightFences{},
           m_framesInFlightFences{},
-          m_imageRenderReadySemaphores{},
-          m_imagePresentReadySemaphores{},
+          m_imageAvailableSemaphores{},
+          m_renderFinishedSemaphores{},
           m_currentFrameIndex{0}
     {
         Create(dimensions);
@@ -38,8 +38,8 @@ namespace nc::graphics
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
-            device.destroySemaphore(m_imageRenderReadySemaphores[i]);
-            device.destroySemaphore(m_imagePresentReadySemaphores[i]);
+            device.destroySemaphore(m_imageAvailableSemaphores[i]);
+            device.destroySemaphore(m_renderFinishedSemaphores[i]);
             device.destroyFence(m_framesInFlightFences[i]);
         }
     }
@@ -115,8 +115,8 @@ namespace nc::graphics
     // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
     void Swapchain::CreateSynchronizationObjects()
     {
-        m_imageRenderReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_imagePresentReadySemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_framesInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
         m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr); // To start, no frames in flight are using swapchain images, so explicitly initialize to nullptr.
 
@@ -127,8 +127,8 @@ namespace nc::graphics
         auto device =  m_base->GetDevice();
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
-            m_imageRenderReadySemaphores[i] = device.createSemaphore(semaphoreInfo);
-            m_imagePresentReadySemaphores[i] = device.createSemaphore(semaphoreInfo);
+            m_imageAvailableSemaphores[i] = device.createSemaphore(semaphoreInfo);
+            m_renderFinishedSemaphores[i] = device.createSemaphore(semaphoreInfo);
             m_framesInFlightFences[i] = device.createFence(fenceInfo);
         }
     }
@@ -142,7 +142,7 @@ namespace nc::graphics
     {
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setWaitSemaphoreCount(1);
-        presentInfo.setPWaitSemaphores(&m_imagePresentReadySemaphores[m_currentFrameIndex]); // Wait on this semaphore before presenting.
+        presentInfo.setPWaitSemaphores(&m_renderFinishedSemaphores[m_currentFrameIndex]); // Wait on this semaphore before presenting.
 
         vk::SwapchainKHR swapChains[] = {m_swapChain};
         presentInfo.setSwapchainCount(1);
@@ -165,7 +165,7 @@ namespace nc::graphics
     
     const std::vector<vk::Semaphore>& Swapchain::GetSemaphores(SemaphoreType semaphoreType) const noexcept
     {
-        return semaphoreType == SemaphoreType::RenderReady ? m_imageRenderReadySemaphores : m_imagePresentReadySemaphores;
+        return semaphoreType == SemaphoreType::ImageAvailableForRender ? m_imageAvailableSemaphores : m_renderFinishedSemaphores;
     }
 
     void Swapchain::WaitForImageFence(uint32_t imageIndex)
@@ -340,22 +340,9 @@ namespace nc::graphics
         }
     }
 
-    void Swapchain::WaitForFrameFence(bool waitOnPreviousFrame) const
+    void Swapchain::WaitForFrameFence() const
     {
-        uint32_t index = 0;
-        if (waitOnPreviousFrame)
-        {
-            if (m_currentFrameIndex == 0)
-            {
-                index = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
-            }
-            else
-            {
-                index = m_currentFrameIndex - 1;
-            }
-        }
-
-        if (m_base->GetDevice().waitForFences(m_framesInFlightFences[index], true, UINT64_MAX) != vk::Result::eSuccess)
+        if (m_base->GetDevice().waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
         {
             throw std::runtime_error("Could not wait for fences to complete.");
         }
@@ -388,7 +375,7 @@ namespace nc::graphics
 
     uint32_t Swapchain::GetNextRenderReadyImageIndex(bool& isSwapChainValid)
     {
-        auto resultAndIndex = m_base->GetDevice().acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageRenderReadySemaphores[m_currentFrameIndex]);
+        auto resultAndIndex = m_base->GetDevice().acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrameIndex]);
         if (resultAndIndex.result == vk::Result::eErrorOutOfDateKHR)
         {
             isSwapChainValid = false;

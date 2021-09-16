@@ -1,7 +1,12 @@
+mesh nc/resources/mesh/capsule.fbx
 mesh nc/resources/mesh/cube.fbx
 mesh nc/resources/mesh/sphere.fbx
+mesh nc/resources/mesh/plane.fbx
 mesh project/models/beeper.fbx
 mesh project/models/coin.fbx
+mesh project/models/planet.fbx
+mesh project/models/ramp.fbx
+mesh project/models/skeeball.fbx
 mesh project/models/table.fbx
 mesh project/models/token.fbx
 mesh project/models/worm.fbx

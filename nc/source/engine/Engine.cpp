@@ -79,7 +79,8 @@ namespace nc::core
           m_time{},
           m_assetManager{},
           m_audioSystem{m_ecs.GetRegistry()},
-          m_ui{m_window.GetHWND(), &m_graphics}
+          m_ui{m_window.GetHWND(), &m_graphics},
+          m_currentImageIndex{0}
     {
         m_graphics.SetRenderer(&m_renderer);
         SetBindings();
@@ -189,7 +190,7 @@ namespace nc::core
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto* registry = m_ecs.GetRegistry();
         camera::UpdateViewMatrix();
-        m_graphics.FrameBegin();
+        m_currentImageIndex = m_graphics.FrameBegin();
         m_ui.FrameBegin();
 
         #ifdef NC_EDITOR_ENABLED
@@ -212,7 +213,7 @@ namespace nc::core
         #endif
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr(), state);
+        renderer->Record(m_graphics.GetCommandsPtr(), state, m_currentImageIndex);
 
         m_graphics.Draw();
         m_graphics.FrameEnd();

@@ -10,25 +10,6 @@ namespace
     using namespace nc;
     using namespace nc::physics;
 
-    enum class HalfspaceContainment
-    {
-        Intersecting,
-        Positive,
-        Negative
-    };
-
-    auto TestHalfspace(const Plane& plane, const Sphere& sphere) -> HalfspaceContainment
-    {
-        float dist = Dot(plane.normal, sphere.center) - plane.d;
-
-        if(std::abs(dist) <= sphere.radius)
-            return HalfspaceContainment::Intersecting;
-        else if(dist > 0.0f)
-            return HalfspaceContainment::Positive;
-        
-        return HalfspaceContainment::Negative;
-    }
-
     auto CreateTriMesh(registry_type* registry, const ConcaveCollider& collider) -> TriMesh
     {
         const auto& meshFlyweight = AssetManager::AcquireConcaveCollider(collider.GetPath());
