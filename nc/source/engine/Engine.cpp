@@ -70,12 +70,11 @@ namespace nc::core
     Engine::Engine(HINSTANCE hInstance)
         : m_isRunning{ false },
           m_frameDeltaTimeFactor{ 1.0f },
-          m_jobSystem{2},
           m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_renderer{&m_graphics},
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physics{m_ecs.GetRegistry(), &m_graphics, &m_jobSystem},
+          m_physics{m_ecs.GetRegistry(), &m_graphics},
           m_sceneSystem{},
           m_time{},
           m_assetManager{},
@@ -101,24 +100,20 @@ namespace nc::core
         const auto fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
 
-        tf::Executor taskExecutor{1u};
-        //tf::Taskflow mainLoopTasks;
+        tf::Executor taskExecutor{6u};
+        TaskGraph mainLoopTasks;
 
-        auto& audioSystem = m_audioSystem;
         float dt = 0.0f;
 
-        //mainLoopTasks.emplace([&audioSystem]() { audioSystem.Update(); });
-        //mainLoopTasks.emplace([particleEmitterSystem, &dt]() { particleEmitterSystem->UpdateParticles(dt); });
+        mainLoopTasks.AddGuardedTask([&audioSystem = m_audioSystem]() { audioSystem.Update(); });
+        mainLoopTasks.AddGuardedTask([particleEmitterSystem, &dt]() { particleEmitterSystem->UpdateParticles(dt); });
 
         while(m_isRunning)
         {
             dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
 
-            auto audioJobResult = m_jobSystem.Schedule(audio::AudioSystem::Update, &m_audioSystem);
-            auto particleJobResult = m_jobSystem.Schedule(ecs::ParticleEmitterSystem::UpdateParticles, particleEmitterSystem, dt);
-
-            //auto mainLoopTasksResult = taskExecutor.run(mainLoopTasks);
+            auto mainLoopTasksResult = mainLoopTasks.RunAsync(taskExecutor);
 
             FrameLogic(dt);
 
@@ -126,14 +121,14 @@ namespace nc::core
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
             {
                 /** @todo need to store prev transforms for interpolation */
-                FixedStepLogic(fixedTimeStep, taskExecutor);
+                FixedStepLogic(taskExecutor);
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
 
-            particleJobResult.wait();
-            audioJobResult.wait();
-            //mainLoopTasksResult.wait();
+            mainLoopTasksResult.wait();
+            mainLoopTasks.ThrowIfExceptionStored();
+            
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
@@ -171,9 +166,9 @@ namespace nc::core
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
     }
 
-    void Engine::FixedStepLogic(float dt, tf::Executor& taskExecutor)
+    void Engine::FixedStepLogic(tf::Executor& taskExecutor)
     {
-        m_physics.DoPhysicsStep(dt, taskExecutor);
+        m_physics.DoPhysicsStep(taskExecutor);
 
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFixedUpdate();

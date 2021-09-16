@@ -6,7 +6,6 @@
 #include "config/Config.h"
 #include "dynamics/Dynamics.h"
 #include "dynamics/Solver.h"
-#include "job/JobSystem.h"
 #include "debug/Profiler.h"
 
 namespace
@@ -31,12 +30,11 @@ namespace nc::physics
         g_physicsSystem->RemoveAllJoints(entity);
     }
 
-    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics* graphics, job::JobSystem* jobSystem)
+    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics* graphics)
         : m_cache{},
           m_joints{},
           m_bspTree{registry},
           m_clickableSystem{graphics},
-          m_jobSystem{jobSystem},
           m_tasks{}
           #ifdef NC_DEBUG_RENDERING
           , m_debugRenderer{graphics}
@@ -44,7 +42,7 @@ namespace nc::physics
     {
         g_physicsSystem = this;
         m_cache.fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
-        //BuildTaskGraph(registry);
+        BuildTaskGraph(registry);
     }
 
     void PhysicsSystem::AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness)
@@ -118,33 +116,33 @@ namespace nc::physics
 
         // @todo should maybe have task data type thing instead of just cache
 
-        auto updateInertiaTask = m_tasks.emplace([registry]
+        auto updateInertiaTask = m_tasks.AddGuardedTask([registry]
         {
             UpdateWorldInertiaTensors(registry);
         });
 
-        auto applyGravityTask = m_tasks.emplace(
+        auto applyGravityTask = m_tasks.AddGuardedTask(
             [registry,
              dt = cache.fixedTimeStep]
         {
             ApplyGravity(registry, dt);
         });
 
-        auto updateManifoldsTask = m_tasks.emplace(
+        auto updateManifoldsTask = m_tasks.AddGuardedTask(
             [registry,
              &manifolds = cache.manifolds]
         {
             UpdateManifolds(registry, manifolds);
         });
 
-        auto fetchEstimatesTask = m_tasks.emplace(
+        auto fetchEstimatesTask = m_tasks.AddGuardedTask(
             [registry,
              &initData = cache.initData]
         {
             FetchEstimates(registry, &initData);
         });
 
-        auto broadPhaseTask = m_tasks.emplace(
+        auto broadPhaseTask = m_tasks.AddGuardedTask(
             [&estimates = std::as_const(cache.initData.estimates),
              &physicsCount = std::as_const(cache.previousBroadPhysicsCount),
              &triggerCount = std::as_const(cache.previousBroadTriggerCount),
@@ -153,7 +151,7 @@ namespace nc::physics
             FindBroadPairs(estimates, physicsCount, triggerCount, &broadResults);
         });
 
-        auto narrowPhasePhysicsTask = m_tasks.emplace(
+        auto narrowPhasePhysicsTask = m_tasks.AddGuardedTask(
             [registry,
              &matrices = std::as_const(cache.initData.matrices),
              &broadPhysicsResults = std::as_const(cache.broadResults.physics),
@@ -162,7 +160,7 @@ namespace nc::physics
             FindNarrowPhysicsPairs(registry, matrices, broadPhysicsResults, &physicsResults);
         });
 
-        auto narrowPhaseTriggerTask = m_tasks.emplace(
+        auto narrowPhaseTriggerTask = m_tasks.AddGuardedTask(
             [registry,
              &matrices = std::as_const(cache.initData.matrices),
              &broadTriggerResults = std::as_const(cache.broadResults.trigger),
@@ -171,7 +169,7 @@ namespace nc::physics
             FindNarrowTriggerPairs(registry, matrices, broadTriggerResults, &currentTrigger);
         });
 
-        auto staticPhaseTask = m_tasks.emplace(
+        auto staticPhaseTask = m_tasks.AddGuardedTask(
             [&bspTree = m_bspTree,
              &initData = std::as_const(cache.initData),
              &staticResults = cache.staticResults]
@@ -179,7 +177,7 @@ namespace nc::physics
             bspTree.CheckCollisions(initData.matrices, initData.estimates, &staticResults);
         });
 
-        auto mergeContactsTask = m_tasks.emplace(
+        auto mergeContactsTask = m_tasks.AddGuardedTask(
             [&physicsResults = std::as_const(cache.physicsResults),
              &staticResults = std::as_const(cache.staticResults),
              &manifolds = cache.manifolds]
@@ -188,7 +186,7 @@ namespace nc::physics
             MergeNewContacts(staticResults, manifolds);
         });
 
-        auto generateConstraintsTask = m_tasks.emplace(
+        auto generateConstraintsTask = m_tasks.AddGuardedTask(
             [registry,
              &manifolds = std::as_const(cache.manifolds),
              &constraints = cache.constraints]
@@ -196,7 +194,7 @@ namespace nc::physics
             GenerateConstraints(registry, manifolds, &constraints);
         });
 
-        auto updateJointsTask = m_tasks.emplace(
+        auto updateJointsTask = m_tasks.AddGuardedTask(
             [registry,
              &joints = m_joints,
              dt = cache.fixedTimeStep]
@@ -204,7 +202,7 @@ namespace nc::physics
             UpdateJoints(registry, joints, dt);
         });
 
-        auto resolveConstraintsTask = m_tasks.emplace(
+        auto resolveConstraintsTask = m_tasks.AddGuardedTask(
             [&constraints = cache.constraints,
              &joints = m_joints,
              dt = cache.fixedTimeStep]
@@ -213,7 +211,7 @@ namespace nc::physics
         });
 
 
-        auto cacheImpulsesTask = m_tasks.emplace(
+        auto cacheImpulsesTask = m_tasks.AddGuardedTask(
             [&constraints = std::as_const(cache.constraints.contact),
             &manifolds = cache.manifolds]
         {
@@ -221,14 +219,14 @@ namespace nc::physics
                 CacheImpulses(constraints, manifolds);
         });
 
-        auto integrateTask = m_tasks.emplace(
+        auto integrateTask = m_tasks.AddGuardedTask(
             [registry,
              dt = cache.fixedTimeStep]
         {
             Integrate(registry, dt);
         });
 
-        auto notifyEventsTask = m_tasks.emplace(
+        auto notifyEventsTask = m_tasks.AddGuardedTask(
             [registry,
              &physicsEvents = std::as_const(cache.physicsResults.events),
              &currentTrigger = std::as_const(cache.currentTrigger),
@@ -237,7 +235,7 @@ namespace nc::physics
             NotifyCollisionEvents(registry, physicsEvents, currentTrigger, &cache);
         });
 
-        auto updateCacheTask = m_tasks.emplace([&cache]
+        auto updateCacheTask = m_tasks.AddGuardedTask([&cache]
         {
             UpdateCache(&cache);
         });
@@ -255,7 +253,7 @@ namespace nc::physics
         updateCacheTask.succeed(notifyEventsTask);
 
         // For generating visual task flow
-        #if 1
+        #if 0
         m_tasks.name("Physics Step");
         updateInertiaTask.name("Update Inertia");
         applyGravityTask.name("Apply Gravity");
@@ -277,7 +275,7 @@ namespace nc::physics
         #endif
     }
 
-    void PhysicsSystem::DoPhysicsStep(float dt, tf::Executor& taskExecutor)
+    void PhysicsSystem::DoPhysicsStep(tf::Executor& taskExecutor)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
 
@@ -286,38 +284,9 @@ namespace nc::physics
         m_debugRenderer.ClearPoints();
         #endif
 
+        m_tasks.Run(taskExecutor);
         //auto result = taskExecutor.run(m_tasks);
         //result.wait();
-
-        auto* registry = ActiveRegistry();
-
-        UpdateWorldInertiaTensors(registry);
-        ApplyGravity(registry, dt);
-        UpdateManifolds(registry, m_cache.manifolds);
-
-        FetchEstimates(registry, &m_cache.initData);
-
-        FindBroadPairs(m_cache.initData.estimates, m_cache.previousBroadPhysicsCount, m_cache.previousBroadTriggerCount, &m_cache.broadResults);
-
-        FindNarrowPhysicsPairs(registry, m_cache.initData.matrices, m_cache.broadResults.physics, &m_cache.physicsResults);
-
-        FindNarrowTriggerPairs(registry, m_cache.initData.matrices, m_cache.broadResults.trigger, &m_cache.currentTrigger);
-
-        m_bspTree.CheckCollisions(m_cache.initData.matrices, m_cache.initData.estimates, &m_cache.staticResults);
-
-        MergeNewContacts(m_cache.physicsResults, m_cache.manifolds);
-        MergeNewContacts(m_cache.staticResults, m_cache.manifolds);
-
-        GenerateConstraints(registry, m_cache.manifolds, &m_cache.constraints);
-        UpdateJoints(registry, m_joints, dt);
-        ResolveConstraints(m_cache.constraints, m_joints, dt);
-
-        if constexpr(EnableContactWarmstarting)
-            CacheImpulses(m_cache.constraints.contact, m_cache.manifolds);
-
-        Integrate(registry, dt);
-        NotifyCollisionEvents(registry, m_cache.physicsResults.events, m_cache.currentTrigger, &m_cache);
-        UpdateCache(&m_cache);
 
         NC_PROFILE_END();
     }

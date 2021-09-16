@@ -5,10 +5,9 @@
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
-#include "job/JobSystem.h"
 #include "physics/PhysicsSystem.h"
 #include "scene/SceneSystem.h"
-#include "taskflow/taskflow.hpp"
+#include "task/Task.h"
 #include "time/NcTime.h"
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
@@ -26,7 +25,6 @@ namespace nc::core
         private:
             bool m_isRunning;
             float m_frameDeltaTimeFactor;
-            job::JobSystem m_jobSystem;
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
             graphics::Renderer m_renderer;
@@ -40,7 +38,7 @@ namespace nc::core
 
             void ClearState();
             void DoSceneSwap();
-            void FixedStepLogic(float dt, tf::Executor& taskExecutor);
+            void FixedStepLogic(tf::Executor& taskExecutor);
             void FrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();
