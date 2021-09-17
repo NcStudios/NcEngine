@@ -68,9 +68,7 @@ namespace nc::core
 
     /* Engine */
     Engine::Engine(HINSTANCE hInstance)
-        : m_isRunning{ false },
-          m_frameDeltaTimeFactor{ 1.0f },
-          m_window{ hInstance },
+        : m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_renderer{&m_graphics},
           m_ecs{&m_graphics, config::GetMemorySettings()},
@@ -80,11 +78,40 @@ namespace nc::core
           m_assetManager{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_ui{m_window.GetHWND(), &m_graphics},
-          m_currentImageIndex{0}
+          m_taskExecutor{6u}, // @todo probably add to config
+          m_tasks{},
+          m_dt{0.0f},
+          m_frameDeltaTimeFactor{1.0f},
+          m_currentImageIndex{0},
+          m_isRunning{false}
     {
         m_graphics.SetRenderer(&m_renderer);
         SetBindings();
+        BuildTaskGraph();
         V_LOG("Engine initialized");
+    }
+
+    void Engine::BuildTaskGraph()
+    {
+        [[maybe_unused]] auto writeAudioBuffersTask = m_tasks.AddGuardedTask(
+            [&audioSystem = m_audioSystem]
+        {
+            audioSystem.Update();
+        });
+
+        [[maybe_unused]] auto particleSystemTask = m_tasks.AddGuardedTask(
+            [particleEmitterSystem = m_ecs.GetParticleEmitterSystem(),
+             &dt = m_dt]
+        {
+            particleEmitterSystem->UpdateParticles(dt);
+        });
+
+        #if NC_OUTPUT_TASKFLOW
+        m_tasks.GetTaskFlow().name("Main loop");
+        writeAudioBuffersTask.name("Write Audio Buffers");
+        particleSystemTask.name("Update Particles");
+        m_tasks.GetTaskFlow().dump(std::cout);
+        #endif
     }
 
     void Engine::DisableRunningFlag()
@@ -101,34 +128,26 @@ namespace nc::core
         const auto fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
 
-        tf::Executor taskExecutor{6u};
-        TaskGraph mainLoopTasks;
-
-        float dt = 0.0f;
-
-        mainLoopTasks.AddGuardedTask([&audioSystem = m_audioSystem]() { audioSystem.Update(); });
-        mainLoopTasks.AddGuardedTask([particleEmitterSystem, &dt]() { particleEmitterSystem->UpdateParticles(dt); });
-
         while(m_isRunning)
         {
-            dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
 
-            auto mainLoopTasksResult = mainLoopTasks.RunAsync(taskExecutor);
+            auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
 
-            FrameLogic(dt);
+            FrameLogic(m_dt);
 
             size_t physicsIterations = 0u;
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
             {
                 /** @todo need to store prev transforms for interpolation */
-                FixedStepLogic(taskExecutor);
+                m_physics.DoPhysicsStep(m_taskExecutor);
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
 
             mainLoopTasksResult.wait();
-            mainLoopTasks.ThrowIfExceptionStored();
+            m_tasks.ThrowIfExceptionStored();
             
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
@@ -165,14 +184,6 @@ namespace nc::core
         m_sceneSystem.UnloadActiveScene();
         ClearState();
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
-    }
-
-    void Engine::FixedStepLogic(tf::Executor& taskExecutor)
-    {
-        m_physics.DoPhysicsStep(taskExecutor);
-
-        for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
-            group.SendFixedUpdate();
     }
 
     void Engine::FrameLogic(float dt)

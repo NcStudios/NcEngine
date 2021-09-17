@@ -116,6 +116,13 @@ namespace nc::physics
 
         // @todo should maybe have task data type thing instead of just cache
 
+        auto fixedUpdateTask = m_tasks.AddGuardedTask(
+            [registry]
+        {
+            for(auto& group : registry->ViewAll<AutoComponentGroup>())
+                group.SendFixedUpdate();
+        });
+
         auto updateInertiaTask = m_tasks.AddGuardedTask([registry]
         {
             UpdateWorldInertiaTensors(registry);
@@ -210,7 +217,6 @@ namespace nc::physics
             ResolveConstraints(constraints, joints, dt);
         });
 
-
         auto cacheImpulsesTask = m_tasks.AddGuardedTask(
             [&constraints = std::as_const(cache.constraints.contact),
             &manifolds = cache.manifolds]
@@ -240,6 +246,7 @@ namespace nc::physics
             UpdateCache(&cache);
         });
 
+        fixedUpdateTask.precede(updateInertiaTask, applyGravityTask, updateManifoldsTask, fetchEstimatesTask);
         broadPhaseTask.succeed(fetchEstimatesTask);
         broadPhaseTask.precede(narrowPhasePhysicsTask, narrowPhaseTriggerTask);
         staticPhaseTask.succeed(fetchEstimatesTask);
@@ -252,9 +259,9 @@ namespace nc::physics
         notifyEventsTask.succeed(integrateTask, narrowPhaseTriggerTask, cacheImpulsesTask);
         updateCacheTask.succeed(notifyEventsTask);
 
-        // For generating visual task flow
-        #if 0
-        m_tasks.name("Physics Step");
+        #if NC_OUTPUT_TASKFLOW
+        m_tasks.GetTaskFlow().name("Physics Step");
+        fixedUpdateTask.name("Component - FixedUpdate");
         updateInertiaTask.name("Update Inertia");
         applyGravityTask.name("Apply Gravity");
         updateManifoldsTask.name("Update Manifolds");
@@ -271,7 +278,7 @@ namespace nc::physics
         integrateTask.name("Integrate");
         notifyEventsTask.name("Notify Events");
         updateCacheTask.name("Update Cache");
-        m_tasks.dump(std::cout);
+        m_tasks.GetTaskFlow().dump(std::cout);
         #endif
     }
 
@@ -285,8 +292,6 @@ namespace nc::physics
         #endif
 
         m_tasks.Run(taskExecutor);
-        //auto result = taskExecutor.run(m_tasks);
-        //result.wait();
 
         NC_PROFILE_END();
     }

@@ -5,6 +5,8 @@
 #include <exception>
 #include <mutex>
 
+#define NC_OUTPUT_TASKFLOW 0
+
 namespace nc
 {
     /** State shared between all tasks in a graph for storing
@@ -39,13 +41,13 @@ namespace nc
              *  one exists. */
             void ThrowIfExceptionStored();
 
-            /** Add a task to the graph. */
-            template<class Func>
-            auto AddTask(Func&& func) -> tf::Task;
-
             /** Add a task enclosed in a try/catch guard to the graph. */
             template<class Func>
             auto AddGuardedTask(Func&& func) -> tf::Task;
+
+            /** Get underlying Taskflow object for adding unguarded tasks, 
+             *  composing, etc. */
+            auto GetTaskFlow() -> tf::Taskflow& { return m_tasks; }
 
         private:
             tf::Taskflow m_tasks;
@@ -86,12 +88,6 @@ namespace nc
     inline void TaskGraph::ThrowIfExceptionStored()
     {
         m_exceptionState.ThrowIfExceptionStored();
-    }
-
-    template<class Func>
-    auto TaskGraph::AddTask(Func&& func) -> tf::Task
-    {
-        return m_tasks.emplace(std::forward<Func>(func));
     }
 
     template<class Func>
