@@ -113,11 +113,7 @@ namespace nc::physics
     {
         auto& cache = m_cache;
 
-
-        // @todo should maybe have task data type thing instead of just cache
-
-        auto fixedUpdateTask = m_tasks.AddGuardedTask(
-            [registry]
+        auto fixedUpdateTask = m_tasks.AddGuardedTask([registry]
         {
             for(auto& group : registry->ViewAll<AutoComponentGroup>())
                 group.SendFixedUpdate();
@@ -128,23 +124,17 @@ namespace nc::physics
             UpdateWorldInertiaTensors(registry);
         });
 
-        auto applyGravityTask = m_tasks.AddGuardedTask(
-            [registry,
-             dt = cache.fixedTimeStep]
+        auto applyGravityTask = m_tasks.AddGuardedTask([registry, dt = cache.fixedTimeStep]
         {
             ApplyGravity(registry, dt);
         });
 
-        auto updateManifoldsTask = m_tasks.AddGuardedTask(
-            [registry,
-             &manifolds = cache.manifolds]
+        auto updateManifoldsTask = m_tasks.AddGuardedTask([registry, &manifolds = cache.manifolds]
         {
             UpdateManifolds(registry, manifolds);
         });
 
-        auto fetchEstimatesTask = m_tasks.AddGuardedTask(
-            [registry,
-             &initData = cache.initData]
+        auto fetchEstimatesTask = m_tasks.AddGuardedTask([registry, &initData = cache.initData]
         {
             FetchEstimates(registry, &initData);
         });
@@ -225,9 +215,7 @@ namespace nc::physics
                 CacheImpulses(constraints, manifolds);
         });
 
-        auto integrateTask = m_tasks.AddGuardedTask(
-            [registry,
-             dt = cache.fixedTimeStep]
+        auto integrateTask = m_tasks.AddGuardedTask([registry, dt = cache.fixedTimeStep]
         {
             Integrate(registry, dt);
         });

@@ -14,8 +14,8 @@ namespace nc::physics
             Simplex();
 
             void PushFront(const Vector3& vertex, const Vector3& worldSupportA, const Vector3& worldSupportB, const Vector3& localSupportA, const Vector3& localSupportB);
-            Vector3& operator[](size_t i) { return m_points[i]; }
-            size_t Size() const { return m_size; }
+            auto operator[](size_t i) -> Vector3& { return m_points[i]; }
+            auto Size() const -> size_t { return m_size; }
             bool HasAllUniqueVertices() const;
 
             template<size_t V1>

@@ -132,9 +132,7 @@ namespace nc::core
         {
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
-
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
-
             FrameLogic(m_dt);
 
             size_t physicsIterations = 0u;
@@ -148,7 +146,6 @@ namespace nc::core
 
             mainLoopTasksResult.wait();
             m_tasks.ThrowIfExceptionStored();
-            
             m_ecs.GetRegistry()->CommitStagedChanges();
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
