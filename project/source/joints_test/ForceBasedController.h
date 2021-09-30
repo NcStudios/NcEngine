@@ -9,7 +9,7 @@ namespace nc::sample
     {
         public:
             ForceBasedController(Entity entity, registry_type* registry);
-            void FrameUpdate(float dt) override;
+            void FixedUpdate() override;
 
         private:
             registry_type* m_registry;
@@ -21,7 +21,7 @@ namespace nc::sample
     {
     }
 
-    inline void ForceBasedController::FrameUpdate(float)
+    inline void ForceBasedController::FixedUpdate()
     {
         auto* body = m_registry->Get<PhysicsBody>(GetParentEntity());
 

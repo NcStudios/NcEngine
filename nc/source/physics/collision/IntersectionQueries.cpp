@@ -8,12 +8,6 @@
 
 #include <iostream> // remove once minDistance error is figured out
 
-/** @todo 
- *  - Rather than having MinkowskiSupport determine the collider type,
- *    figure it out at the top level call. This will branch once per collider
- *    rather than each gjk/epa loop iteration.
- *  - Collisions can be more efficient in certain situations. For example, 
- *    narrow phase sphere vs. sphere uses full gjk + epa, which is silly. */
 
 namespace nc::physics
 {
@@ -393,7 +387,7 @@ namespace nc::physics
 
         if(SameDirection(adb, ao))
         {
-            simplex.ToTriangle<0u, 1u, 3u>();
+            simplex.ToTriangle<0u, 3u, 1u>();
             return RefineTriangle(simplex, direction);
         }
 
@@ -465,6 +459,15 @@ namespace nc::physics
 
             if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
             {
+                /** In the case where the origin is on or very near a simplex feature we can end up adding
+                 *  the same vertex multiple times. This solution works, but I'm pretty sure we could catch
+                 *  it earlier. Also, this is only a problem for contact generation. I don't see anything 
+                 *  wrong with returning true for trigger cases, if we wanted.
+                 *  @todo In fact, we might fail to detect 'perfectly centered' triggers if we don't return
+                 *  true here. Should be verified. */
+                if(!stateOut->simplex.HasAllUniqueVertices())
+                    return false;
+
                 if constexpr(GenerateContacts)
                     return Epa<BVA, BVB>(a, b, aMatrix, bMatrix, stateOut);
                 else
@@ -514,6 +517,9 @@ namespace nc::physics
 
             if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
             {
+                if(!stateOut->simplex.HasAllUniqueVertices())
+                    return false;
+
                 return EpaVsTriangle(a, bXM, aMatrix, stateOut);
             }
         }
@@ -546,7 +552,9 @@ namespace nc::physics
             simplex.PushFront(supportCSO, supportA, supportB, supportA, supportB);
 
             if(RefineSimplex[simplex.Size() - 1](simplex, direction))
-                return true;
+            {
+                return simplex.HasAllUniqueVertices();
+            }
         }
 
         return false;

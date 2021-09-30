@@ -1,8 +1,0 @@
-Pos: 9.6, 3.1, 5.1, 1
-Ambient: 0, 0.238176, 1, 1
-Diffuse: 0.789216, 1, 1, 1
-Specular: 0, 0.0882354, 1, 0
-Diffuse Intensity: 41
-Attenuation Constant: 1
-Attenuation Linear: 0.115385
-Attenuation Quadratic: 0.0493097

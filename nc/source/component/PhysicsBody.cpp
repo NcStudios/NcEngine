@@ -150,7 +150,7 @@ namespace nc
         m_angularVelocity += angVelDelta * m_angularFreedom;
     }
 
-    void PhysicsBody::UpdateWorldInertia(Transform* transform)
+    void PhysicsBody::UpdateWorldInertia(const Transform* transform)
     {
         if(GetParentEntity().IsStatic())
             return;

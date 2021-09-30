@@ -52,9 +52,9 @@ namespace nc::physics
             void OnAdd(ConcaveCollider& collider);
             void OnRemove(Entity entity);
             void Clear();
-            auto CheckCollisions(std::span<const DirectX::XMMATRIX> matrices,
+            void CheckCollisions(std::span<const DirectX::XMMATRIX> matrices,
                                  std::span<const ColliderEstimate> estimates,
-                                 std::span<const Collider> colliders) -> NarrowPhysicsResult;
+                                 NarrowPhysicsResult* out);
 
         private:
             std::vector<node_type> m_nodes;

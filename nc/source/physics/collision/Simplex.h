@@ -14,8 +14,9 @@ namespace nc::physics
             Simplex();
 
             void PushFront(const Vector3& vertex, const Vector3& worldSupportA, const Vector3& worldSupportB, const Vector3& localSupportA, const Vector3& localSupportB);
-            Vector3& operator[](size_t i) { return m_points[i]; }
-            size_t Size() const { return m_size; }
+            auto operator[](size_t i) -> Vector3& { return m_points[i]; }
+            auto Size() const -> size_t { return m_size; }
+            bool HasAllUniqueVertices() const;
 
             template<size_t V1>
             void ToPoint();
@@ -46,6 +47,20 @@ namespace nc::physics
         m_worldSupports = { std::pair{worldSupportA, worldSupportB}, m_worldSupports[0], m_worldSupports[1], m_worldSupports[2] };
         m_localSupports = { std::pair{localSupportA, localSupportB}, m_localSupports[0], m_localSupports[1], m_localSupports[2] };
         m_size = std::min(m_size + 1u, size_t{4u});
+    }
+
+    inline bool Simplex::HasAllUniqueVertices() const
+    {
+        for(size_t i = 0u; i < m_size; ++i)
+        {
+            for(size_t j = i + 1u; j < m_size; ++j)
+            {
+                if(m_points[i] == m_points[j])
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     template<>

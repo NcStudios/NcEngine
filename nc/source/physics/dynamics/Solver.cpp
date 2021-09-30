@@ -33,8 +33,6 @@ namespace
                                               PhysicsBody* physBodyA,
                                               PhysicsBody* physBodyB)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
-
         /** Compute vectors from object centers to contact points */
         auto rA = contact.worldPointA - transformA->GetPosition();
         auto rB = contact.worldPointB - transformB->GetPosition();
@@ -101,8 +99,6 @@ namespace
             muBitangent = 0.0f;
         }
 
-        NC_PROFILE_END();
-
         return ContactConstraint
         {
             entityA, entityB,
@@ -120,7 +116,6 @@ namespace
     /** Resolve contacts through sequential impulse. */
     void ResolveContactConstraint(ContactConstraint& constraint, float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
         /** V = [Va, Wa, Vb, Wb] */
         ConstraintMatrix v
         {
@@ -168,7 +163,6 @@ namespace
         {
             constraint.physBodyB->ApplyVelocities(deltas.vB(), deltas.wB());
         }
-        NC_PROFILE_END();
     }
 
     void ResolvePositionConstraint(PositionConstraint& constraint)
@@ -203,7 +197,6 @@ namespace
                                const ConstraintMatrix& jTangent,
                                const ConstraintMatrix& jBitangent)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
         auto dotVa = XMVector3Dot(jNormal.vA(), v.vA());
         auto dotWa = XMVector3Dot(jNormal.wA(), v.wA());
         auto dotVb = XMVector3Dot(jNormal.vB(), v.vB());
@@ -222,14 +215,12 @@ namespace
         dotWb = XMVector3Dot(jBitangent.wB(), v.wB());
         result = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(result, dotVa + dotWa + dotVb + dotWb);
         
-        NC_PROFILE_END();
         return result;
     }
 
     /** Compute velocity deltas using lagrange multipliers. */
     ConstraintMatrix ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
         const auto &jN = constraint.jNormal, &jT = constraint.jTangent, &jB = constraint.jBitangent;
         const auto &iA = constraint.invInertiaA, &iB = constraint.invInertiaB;
         float mA = constraint.invMassA, mB = constraint.invMassB;
@@ -250,7 +241,6 @@ namespace
                   XMVectorScale(XMVector3Transform(jT.wB(), iB), lTangent) +
                   XMVectorScale(XMVector3Transform(jB.wB(), iB), lBitangent);
 
-        NC_PROFILE_END();
         return ConstraintMatrix{vA, wA, vB, wB};
     }
 
@@ -402,17 +392,16 @@ namespace nc::physics
         }
     }
 
-    auto GenerateConstraints(registry_type* registry, std::span<const Manifold> manifolds) -> Constraints
+    void GenerateConstraints(registry_type* registry, std::span<const Manifold> manifolds, Constraints* out)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
         const auto manifoldCount = manifolds.size();
-        std::vector<ContactConstraint> contactConstraints;
-        contactConstraints.reserve(manifoldCount * 4u);
+        out->contact.clear();
+        out->contact.reserve(manifoldCount * 4u);
 
-        std::vector<PositionConstraint> positionConstraints;
         if constexpr(EnableDirectPositionCorrection)
         {
-            positionConstraints.reserve(manifoldCount);
+            out->position.clear();
+            out->position.reserve(manifoldCount);
         }
 
         for(const auto& manifold : manifolds)
@@ -427,7 +416,7 @@ namespace nc::physics
             if constexpr(EnableDirectPositionCorrection)
             {
                 auto deepestContact = manifold.GetDeepestContact();
-                positionConstraints.emplace_back(transformA, transformB, manifold.eventType, deepestContact.normal, deepestContact.depth);
+                out->position.emplace_back(transformA, transformB, manifold.eventType, deepestContact.normal, deepestContact.depth);
             }
 
             for(const auto& contact : manifold.contacts)
@@ -437,12 +426,9 @@ namespace nc::physics
                 graphics::DebugRenderer::AddPoint(contact.worldPointB);
                 #endif
 
-                contactConstraints.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
+                out->contact.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
             }
         }
-
-        NC_PROFILE_END();
-        return Constraints{std::move(contactConstraints), std::move(positionConstraints)};
     }
 
     void UpdateJoints(registry_type* registry, std::span<Joint> joints, float dt)
@@ -453,7 +439,7 @@ namespace nc::physics
         }
     }
 
-    void CacheLagranges(std::span<Manifold> manifolds, std::span<ContactConstraint> constraints)
+    void CacheImpulses(std::span<const ContactConstraint> constraints, std::span<Manifold> manifolds)
     {
         auto index = 0u;
 
@@ -463,10 +449,10 @@ namespace nc::physics
             {
                 #if NC_PHSYICS_DEBUGGING
                 if(index >= constraints.size())
-                    throw std::runtime_error("CacheLagranges - Invalid index");
+                    throw std::runtime_error("CacheImpulses - Invalid index");
 
                 if(manifold.entityA != constraints[index].entityA || manifold.entityB != constraints[index].entityB)
-                    throw std::runtime_error("CacheLagranges - Entity mismatch");
+                    throw std::runtime_error("CacheImpulses - Entity mismatch");
                 #endif
 
                 const auto& constraint = constraints[index];
