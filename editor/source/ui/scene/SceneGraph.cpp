@@ -24,7 +24,7 @@ namespace nc::editor
           m_sceneSelectWidget{std::move(sceneCallbacks)},
           m_changeTagCallback{std::move(changeTagCallback)},
           m_dimensions{window::GetDimensions()},
-          m_selectedEntity{EntityTraits::NullHandle}
+          m_selectedEntity{}
     {
         window::RegisterOnResizeReceiver(this);
     }
@@ -92,8 +92,8 @@ namespace nc::editor
 
             if(ImGui::BeginChild("EntityPanel", {0,0}, true))
             {
-                if(m_selectedEntity != EntityTraits::NullHandle)
-                    EntityPanel(static_cast<Entity>(m_selectedEntity));
+                if(m_selectedEntity.Valid())
+                    EntityPanel(m_selectedEntity);
 
             } ImGui::EndChild();
 
@@ -102,20 +102,19 @@ namespace nc::editor
 
     void SceneGraph::SceneGraphNode(Entity entity, Tag* tag, Transform* transform)
     {
-        auto handleValue = static_cast<EntityTraits::underlying_type>(entity);
-        ImGui::PushID(handleValue);
+        ImGui::PushID(entity.Index());
 
         auto flags = 0;
-        if(m_selectedEntity == handleValue)
+        if(m_selectedEntity == entity)
             flags = flags | ImGuiTreeNodeFlags_Framed;
 
         auto open = ImGui::TreeNodeEx(tag->Value().data(), flags);
         if(ImGui::IsItemClicked())
-            m_selectedEntity = handleValue;
+            m_selectedEntity = entity;
         
         if(ImGui::BeginPopupContextItem())
         {
-            m_selectedEntity = handleValue;
+            m_selectedEntity = entity;
             EntityContextMenu(entity);
             ImGui::EndPopup();
         }
@@ -135,7 +134,7 @@ namespace nc::editor
     {
         if(!m_registry->Contains<Entity>(entity)) // entity may have been deleted
         {
-            m_selectedEntity = EntityTraits::NullHandle;
+            m_selectedEntity = Entity::Null();
             return;
         }
 
@@ -156,23 +155,20 @@ namespace nc::editor
     {
         if(ImGui::Selectable("New Entity"))
         {
-            auto entity = m_registry->Add<Entity>(EntityInfo{});
-            m_selectedEntity = static_cast<EntityTraits::underlying_type>(entity);
+            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{});
         }
         else if(ImGui::Selectable("New Static Entity"))
         {
-            auto entity = m_registry->Add<Entity>(EntityInfo{.flags = EntityFlags::Static});
-            m_selectedEntity = static_cast<EntityTraits::underlying_type>(entity);
+            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static});
         }
         else if(ImGui::Selectable("New PointLight"))
         {
-            auto entity = m_registry->Add<Entity>(EntityInfo{.tag = "PointLight"});
-            m_registry->Add<PointLight>(entity, PointLightInfo{});
-            m_selectedEntity = static_cast<EntityTraits::underlying_type>(entity);
+            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{.tag = "PointLight"});
+            m_registry->Add<PointLight>(m_selectedEntity, PointLightInfo{});
         }
         else
         {
-            m_selectedEntity = EntityTraits::NullHandle;
+            m_selectedEntity = Entity::Null();
         }
     }
 

@@ -29,7 +29,7 @@ namespace nc::editor
             SceneSelectWidget m_sceneSelectWidget;
             EntityCallbacks::ChangeTagCallbackType m_changeTagCallback;
             Vector2 m_dimensions;
-            EntityTraits::underlying_type m_selectedEntity;
+            Entity m_selectedEntity;
 
             void SceneGraphPanel();
             void SceneGraphNode(Entity entity, Tag* tag, Transform* transform);

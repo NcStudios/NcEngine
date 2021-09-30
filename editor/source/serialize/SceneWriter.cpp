@@ -87,7 +87,7 @@ namespace nc::editor
 
             m_handleNames.emplace
             (
-                EntityUtils::Index(entity),
+                entity.Index(),
                 entityString + std::to_string(i) + underscore + StripCharacter(std::string{tag->Value()}, ' ')
             );
         }
@@ -168,13 +168,13 @@ namespace nc::editor
     void SceneWriter::WriteEntity(Entity entity)
     {
         auto tag = m_registry->Get<Tag>(entity)->Value();
-        const auto& handleName = m_handleNames.at(EntityUtils::Index(entity));
+        const auto& handleName = m_handleNames.at(entity.Index());
         auto* transform = m_registry->Get<Transform>(entity);
         auto pos = transform->GetLocalPosition();
         auto rot = transform->GetLocalRotation();
         auto scl = transform->GetLocalScale();
         auto parent = transform->GetParent();
-        auto parentHandle = parent.Valid() ? m_handleNames.at(EntityUtils::Index(parent)) : std::string{"Entity::Null()"};
+        auto parentHandle = parent.Valid() ? m_handleNames.at(entity.Index()) : std::string{"Entity::Null()"};
 
         m_file << "NC_SCENE_ACTION_ADD_ENTITY( "
                << handleName << " , "
@@ -183,8 +183,8 @@ namespace nc::editor
                << scl << " , "
                << parentHandle << " , "
                << "\"" << tag << "\" , "
-               << static_cast<unsigned>(EntityUtils::Layer(entity)) << " , "
-               << static_cast<unsigned>(EntityUtils::Flags(entity)) << " )\n";
+               << static_cast<unsigned>(entity.Layer()) << " , "
+               << static_cast<unsigned>(entity.Flags()) << " )\n";
 
         WriteCollider(entity, handleName);
         WritePhysicsBody(entity, handleName);

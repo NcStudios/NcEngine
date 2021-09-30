@@ -124,8 +124,8 @@ namespace nc::editor
         args >> layer;
         args >> flags;
 
-        info.layer = static_cast<EntityTraits::layer_type>(layer);
-        info.flags = static_cast<EntityTraits::flags_type>(flags);
+        info.layer = static_cast<Entity::layer_type>(layer);
+        info.flags = static_cast<Entity::flags_type>(flags);
 
         if(parentHandleName == "Entity::Null()")
             info.parent = Entity::Null();

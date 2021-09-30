@@ -18,7 +18,7 @@ namespace nc::editor
         private:
             registry_type* m_registry;
             std::ofstream m_file;
-            std::unordered_map<EntityTraits::index_type, std::string> m_handleNames;
+            std::unordered_map<Entity::index_type, std::string> m_handleNames;
             std::filesystem::path m_scenesDirectory;
             std::string m_sceneName;
 
