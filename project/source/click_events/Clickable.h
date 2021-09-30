@@ -26,7 +26,7 @@ namespace nc::sample
           m_Tag{std::move(tag)}
     {
         physics::RegisterClickable(this);
-        auto layer = EntityUtils::Layer(entity);
+        auto layer = entity.Layer();
         IClickable::layers = physics::ToLayerMask(layer);
     }
 

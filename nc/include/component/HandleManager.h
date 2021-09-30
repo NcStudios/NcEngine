@@ -15,14 +15,14 @@ namespace nc::ecs
             {
             }
 
-            Entity GenerateNewHandle(EntityTraits::layer_type layer, EntityTraits::flags_type flags)
+            Entity GenerateNewHandle(Entity::layer_type layer, Entity::flags_type flags)
             {
                 if(m_freeHandles.empty())
-                    return Entity{EntityUtils::Join(m_nextIndex++, 0u, layer, flags)};
+                    return Entity{m_nextIndex++, layer, flags};
                 
                 auto out = m_freeHandles.back();
                 m_freeHandles.pop_back();
-                return EntityUtils::Recycle(out, layer, flags);
+                return Entity{out.Index(), layer, flags};
             }
 
             void ReclaimHandle(Entity handle)
@@ -39,6 +39,6 @@ namespace nc::ecs
         
         private:
             std::vector<Entity> m_freeHandles;
-            EntityTraits::index_type m_nextIndex;
+            Entity::index_type m_nextIndex;
     };
 }

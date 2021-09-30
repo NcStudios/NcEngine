@@ -57,7 +57,7 @@ namespace nc
     inline void TaskExceptionState::StoreException(std::exception_ptr e)
     {
         std::lock_guard lock{m_mutex};
-        if(m_exception != nullptr)
+        if(HasException())
             return;
 
         m_exception = e;
