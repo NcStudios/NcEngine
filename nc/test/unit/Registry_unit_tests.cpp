@@ -52,11 +52,11 @@ struct FakeAutoComponent : public AutoComponent
     int value;
 };
 
-constexpr auto Handle1 = Entity{EntityUtils::Join(0u, 0u, 0u, 0u)};
-constexpr auto Handle2 = Entity{EntityUtils::Join(1u, 0u, 0u, 0u)};
-constexpr auto Handle3 = Entity{EntityUtils::Join(2u, 0u, 0u, 0u)};
-constexpr auto Handle4 = Entity{EntityUtils::Join(3u, 0u, 0u, 0u)};
-constexpr auto Handle5 = Entity{EntityUtils::Join(4u, 0u, 0u, 0u)};
+constexpr auto Handle1 = Entity{0u, 0u, 0u};
+constexpr auto Handle2 = Entity{1u, 0u, 0u};
+constexpr auto Handle3 = Entity{2u, 0u, 0u};
+constexpr auto Handle4 = Entity{3u, 0u, 0u};
+constexpr auto Handle5 = Entity{4u, 0u, 0u};
 const auto TestInfo = EntityInfo{};
 
 class Registry_unit_tests : public ::testing::Test
@@ -140,7 +140,7 @@ TEST_F(Registry_unit_tests, AddComponent_ValidCall_ConstructsObject)
 
 TEST_F(Registry_unit_tests, AddComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Add<Fake1>(Entity{0u}, 1), std::runtime_error);
+    EXPECT_THROW(registry.Add<Fake1>(Entity{0u, 0u, 0u}, 1), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, AddComponent_ReplaceAfterRemove_ConstructsObject)

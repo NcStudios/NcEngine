@@ -58,14 +58,14 @@ namespace nc::sample
                                                                           });
 
         // Collider that destroys anything leaving its bounded area
-        auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(100.0f), .tag = "KillBox", .flags = EntityFlags::Static});
+        auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(100.0f), .tag = "KillBox", .flags = Entity::Flags::Static});
         registry->Add<Collider>(killBox, BoxProperties{}, true);
         registry->Add<KillBox>(killBox, registry);
 
-        auto platform = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{0.0f, -25.0f, 0.0f}, .scale = Vector3{35.0f, 6.0f, 35.0f}, .tag = "Platform", .flags = EntityFlags::Static});
+        auto platform = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{0.0f, -25.0f, 0.0f}, .scale = Vector3{35.0f, 6.0f, 35.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
         registry->Add<Collider>(platform, BoxProperties{}, false);
 
-        auto bottomBox = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, 0.0f}, .scale = Vector3::Splat(2.0f), .flags = EntityFlags::None});
+        auto bottomBox = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, 0.0f}, .scale = Vector3::Splat(2.0f), .flags = Entity::Flags::None});
         registry->Add<Collider>(bottomBox, BoxProperties{}, false);
         registry->Add<PhysicsBody>(bottomBox, PhysicsProperties{.mass = 4.0f, .useGravity = true});
 

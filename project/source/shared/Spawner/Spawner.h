@@ -37,7 +37,7 @@ namespace nc::sample
             prefab::Resource m_resource;
             bool m_applyConstantVelocity;
             bool m_applyConstantRotation;
-            EntityTraits::layer_type m_layer;
+            Entity::layer_type m_layer;
             bool m_spawnStaticEntities;
             size_t m_stagedAdditions;
             size_t m_stagedDeletions;

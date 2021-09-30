@@ -74,7 +74,7 @@ namespace nc::ecs
     class Registry
     {
         using storage_type = TypeList::storage_type;
-        using index_type = EntityTraits::index_type;
+        using index_type = Entity::index_type;
 
         public:
             Registry(size_t maxEntities);
@@ -332,7 +332,7 @@ namespace nc::ecs
             auto entityIndex = referenceEntities.at(current);
             auto indexInTarget = targetSparseArray.at(entityIndex);
 
-            if(indexInTarget != EntityTraits::NullIndex) // Entity has both components
+            if(indexInTarget != Entity::NullIndex) // Entity has both components
             {
                 if(indexInTarget != current)
                 {

@@ -12,7 +12,7 @@ namespace nc
         : ComponentBase(entity),
           m_path{std::move(assetPath)}
     {
-        if(!EntityUtils::IsStatic(entity))
+        if(!entity.IsStatic())
             throw std::runtime_error("ConcaveCollider - Cannot be added to a non-static entity");
     }
 
