@@ -12,5 +12,6 @@ namespace nc::graphics
         uint32_t roughness;
     };
 
+    /** @todo This could use filesystem like the others. */
     void LoadTextures(const std::vector<std::string>& paths);
 }

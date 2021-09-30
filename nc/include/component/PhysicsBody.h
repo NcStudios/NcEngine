@@ -22,6 +22,8 @@ namespace nc
 
     class PhysicsBody final : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(PhysicsBody)
+        
         public:
             PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 linearFreedom = Vector3::One(), Vector3 angularFreedom = Vector3::One());
 
@@ -39,6 +41,8 @@ namespace nc
             auto GetVelocity() const -> DirectX::FXMVECTOR { return m_linearVelocity; }
             auto GetAngularVelocity() const -> DirectX::FXMVECTOR { return m_angularVelocity; }
             auto GetInverseMass() const -> float { return m_properties.mass; }
+            auto GetDrag() const -> float { return m_properties.drag; }
+            auto GetAngularDrag() const -> float { return m_properties.angularDrag; }
             auto GetFriction() const -> float { return m_properties.friction; }
             auto GetRestitution() const -> float { return m_properties.restitution; }
             auto GetInverseInertia() const -> DirectX::FXMMATRIX { return m_invInertiaWorld; }

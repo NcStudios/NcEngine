@@ -1,0 +1,8 @@
+target_sources(${EDITOR_EXE}
+    PRIVATE
+        ${ROOT_DIR}/source/ui/dialog/AssetBrowser.cpp
+        ${ROOT_DIR}/source/ui/dialog/ChangeTagDialog.cpp
+        ${ROOT_DIR}/source/ui/dialog/Dialog.cpp
+        ${ROOT_DIR}/source/ui/dialog/FileBrowser.cpp
+        ${ROOT_DIR}/source/ui/dialog/NewSceneDialog.cpp
+)

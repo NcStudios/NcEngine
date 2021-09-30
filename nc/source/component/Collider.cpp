@@ -197,9 +197,46 @@ namespace nc
     template<> void ComponentGuiElement<Collider>(Collider* collider)
     {
         const auto& info = collider->GetInfo();
+
+        auto& offset = collider->m_info.offset;
+
         ImGui::Text("Collider");
-        ImGui::Text("  Type:    %s", ToCString(info.type));
-        ImGui::Text("  Trigger: %s", info.isTrigger ? "True" : "False");
+
+        if(ImGui::BeginCombo("Type", ToCString(info.type)))
+        {
+            if(ImGui::Selectable("Box"))
+            {
+
+            }
+            if(ImGui::Selectable("Capsule"))
+            {
+
+            }
+            if(ImGui::Selectable("Hull"))
+            {
+
+            }
+            if(ImGui::Selectable("Sphere"))
+            {
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::Checkbox("  ", &collider->m_info.isTrigger);
+        ImGui::SameLine();
+        ImGui::Text("Trigger");
+
+        switch(collider->m_info.type)
+        {
+            case ColliderType::Sphere:
+            {
+                ui::editor::xyzWidgetHeader("   ");
+                ui::editor::xyzWidget("Center", "collidercenter", &offset.x, &offset.y, &offset.z, 0.0001f, 1000.0f);
+
+                break;
+            }
+        }
+
         /** @todo put widgets back */
     }
     #endif

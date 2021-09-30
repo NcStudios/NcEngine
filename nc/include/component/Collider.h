@@ -44,6 +44,8 @@ namespace nc
 
     class Collider final : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(Collider)
+
         public:
             struct VolumeInfo
             {
@@ -86,6 +88,7 @@ namespace nc
 
             #ifdef NC_EDITOR_ENABLED
             bool m_selectedInEditor;
+            friend void ComponentGuiElement<Collider>(Collider*);
             #endif
     };
 

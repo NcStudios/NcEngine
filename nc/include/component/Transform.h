@@ -12,6 +12,8 @@ namespace nc
 {
     class Transform final : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(Transform)
+        
         public:
             Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Entity parent);
             ~Transform() = default;

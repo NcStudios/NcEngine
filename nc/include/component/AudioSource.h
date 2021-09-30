@@ -26,6 +26,8 @@ namespace nc
 
     class AudioSource : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(AudioSource)
+        
         public:
             AudioSource(Entity entity, const std::string& path, AudioSourceProperties properties = AudioSourceProperties{});
 

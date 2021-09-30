@@ -35,50 +35,17 @@ namespace nc
         public:
             AssetManager() { AssetManager::instance = this; }
 
-            static bool LoadSoundClip(const std::string& uid, SoundClipFlyweight data)
-            {
-                return Get()->LoadSoundClip_(uid, std::move(data));
-            }
+            static bool LoadSoundClip(const std::string& uid, SoundClipFlyweight data) { return Get()->LoadSoundClip_(uid, std::move(data)); }
+            static bool LoadConvexHull(const std::string& uid, ConvexHullFlyweight data) { return Get()->LoadConvexHull_(uid, std::move(data)); }
+            static bool LoadConcaveCollider(const std::string& uid, ConcaveColliderFlyweight data) { return Get()->LoadConcaveCollider_(uid, std::move(data)); }
 
-            static bool LoadConvexHull(const std::string& uid, ConvexHullFlyweight data)
-            {
-                return Get()->LoadConvexHull_(uid, std::move(data));
-            }
-            
-            static bool LoadConcaveCollider(const std::string& uid, ConcaveColliderFlyweight data)
-            {
-                return Get()->LoadConcaveCollider_(uid, std::move(data));
-            }
+            static bool IsSoundClipLoaded(const std::string& uid) { return Get()->IsSoundClipLoaded_(uid); }
+            static bool IsConvexHullLoaded(const std::string& uid) { return Get()->IsConvexHullLoaded_(uid); }
+            static bool IsConcaveColliderLoaded(const std::string& uid) { return Get()->IsConcaveColliderLoaded_(uid); }
 
-            static bool IsSoundClipLoaded(const std::string& uid)
-            {
-                return Get()->IsSoundClipLoaded_(uid);
-            }
-
-            static bool IsConvexHullLoaded(const std::string& uid)
-            {
-                return Get()->IsConvexHullLoaded_(uid);
-            }
-
-            static bool IsConcaveColliderLoaded(const std::string& uid)
-            {
-                return Get()->IsConcaveColliderLoaded_(uid);
-            }
-
-            static auto AcquireSoundClip(const std::string& uid) -> const SoundClipFlyweight&
-            {
-                return Get()->AcquireSoundClip_(uid);
-            }
-
-            static auto AcquireConvexHull(const std::string& uid) -> ConvexHull
-            {
-                return Get()->AcquireConvexHull_(uid);
-            }
-
-            static auto AcquireConcaveCollider(const std::string& uid) -> const ConcaveColliderFlyweight&
-            {
-                return Get()->AcquireConcaveCollider_(uid);
-            }
+            static auto AcquireSoundClip(const std::string& uid) -> const SoundClipFlyweight& { return Get()->AcquireSoundClip_(uid); }
+            static auto AcquireConvexHull(const std::string& uid) -> ConvexHull { return Get()->AcquireConvexHull_(uid); }
+            static auto AcquireConcaveCollider(const std::string& uid) -> const ConcaveColliderFlyweight& { return Get()->AcquireConcaveCollider_(uid); }
 
         private:
             static inline AssetManager* instance = nullptr;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core.h"
 #include "assets/AssetManager.h"
 #include "audio/AudioSystem.h"
 #include "ecs/EntityComponentSystem.h"
@@ -12,15 +13,17 @@
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
 
-namespace nc::core
+namespace nc
 {
     class Engine
     {
         public:
-            Engine(HINSTANCE hInstance);
-            void DisableRunningFlag();
+            Engine(HINSTANCE hInstance, bool useEditorMode);
             void MainLoop(std::unique_ptr<scene::Scene> initialScene);
+            void EditorLoop(std::unique_ptr<scene::Scene> initialScene);
+            void DisableRunningFlag() noexcept;
             void Shutdown();
+            bool UseEditorMode() const;
 
         private:
             window::WindowImpl m_window;
@@ -38,6 +41,7 @@ namespace nc::core
             float m_dt;
             float m_frameDeltaTimeFactor;
             uint32_t m_currentImageIndex;
+            bool m_useEditorMode;
             bool m_isRunning;
 
             void BuildTaskGraph();

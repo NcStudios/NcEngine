@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Core.h"
 #include "Ecs.h"
 #include "MainCamera.h"
 #include "camera/MainCameraInternal.h"
@@ -13,52 +12,51 @@
 #include "graphics/resources/ResourceManager.h"
 #include "physics/PhysicsConstants.h"
 
-namespace nc::core
+namespace nc
 {
-    /* Api Function Implementation */
-    namespace internal
+    NcEngine::NcEngine(HINSTANCE hInstance, bool useEditorMode)
+        : m_impl{nullptr}
     {
-        std::unique_ptr<Engine> impl = nullptr;
-    }
-
-    void Initialize(HINSTANCE hInstance)
-    {
-        IF_THROW(internal::impl != nullptr, "core::Initialize - Attempt to reinitialize engine");
         config::Load();
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
-        internal::impl = std::make_unique<Engine>(hInstance);
+        m_impl = std::make_unique<Engine>(hInstance, useEditorMode);
     }
 
-    void Start(std::unique_ptr<scene::Scene> initialScene)
+    NcEngine::~NcEngine() noexcept
+    {
+        if(m_impl)
+            Shutdown();
+    }
+
+    void NcEngine::Start(std::unique_ptr<scene::Scene> initialScene)
     {
         V_LOG("Starting engine");
-        IF_THROW(internal::impl == nullptr, "core::Start - Engine is not initialized");
-        internal::impl->MainLoop(std::move(initialScene));
-    }
-
-    void Quit(bool forceImmediate) noexcept
-    {
-        V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
-        if(internal::impl)
+        
+        if(m_impl->UseEditorMode())
         {
-            internal::impl->DisableRunningFlag();
-            if (forceImmediate)
-                internal::impl->Shutdown();
+            m_impl->EditorLoop(std::move(initialScene));
+        }
+        else
+        {
+            m_impl->MainLoop(std::move(initialScene));
         }
     }
-
-    void Shutdown() noexcept
+    
+    void NcEngine::Quit() noexcept
     {
-        if(!internal::impl)
-            return;
+        m_impl->DisableRunningFlag();
+    }
 
-        internal::impl = nullptr;
+    void NcEngine::Shutdown() noexcept
+    {
+        if(!m_impl) return;
 
         try
         {
+            m_impl = nullptr;
             config::Save();
         }
-        catch(const std::runtime_error& e)
+        catch(const std::exception& e)
         {
             debug::LogException(e);
         }
@@ -66,8 +64,13 @@ namespace nc::core
         debug::internal::CloseLog();
     }
 
+    auto NcEngine::GetImpl() noexcept -> Engine*
+    {
+        return m_impl.get();
+    }
+
     /* Engine */
-    Engine::Engine(HINSTANCE hInstance)
+    Engine::Engine(HINSTANCE hInstance, bool useEditorMode)
         : m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_renderer{&m_graphics},
@@ -83,6 +86,7 @@ namespace nc::core
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},
           m_currentImageIndex{0},
+          m_useEditorMode{useEditorMode},
           m_isRunning{false}
     {
         m_graphics.SetRenderer(&m_renderer);
@@ -114,7 +118,7 @@ namespace nc::core
         #endif
     }
 
-    void Engine::DisableRunningFlag()
+    void Engine::DisableRunningFlag() noexcept
     {
         m_isRunning = false;
     }
@@ -155,10 +159,41 @@ namespace nc::core
         Shutdown();
     }
 
+    void Engine::EditorLoop(std::unique_ptr<scene::Scene> initialScene)
+    {
+        V_LOG("Starting engine loop");
+        m_sceneSystem.QueueSceneChange(std::move(initialScene));
+        m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
+        m_isRunning = true;
+        auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
+
+        while(m_isRunning)
+        {
+            m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            m_window.ProcessSystemMessages();
+            auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
+            FrameLogic(m_dt);
+
+            mainLoopTasksResult.wait();
+            m_tasks.ThrowIfExceptionStored();
+            m_ecs.GetRegistry()->CommitStagedChanges();
+            FrameRender();
+            particleEmitterSystem->ProcessFrameEvents();
+            FrameCleanup();
+        }
+
+        Shutdown();
+    }
+
     void Engine::Shutdown()
     {
         V_LOG("Shutdown EngineImpl");
         ClearState();
+    }
+
+    bool Engine::UseEditorMode() const
+    {
+        return m_useEditorMode;
     }
 
     void Engine::ClearState()
@@ -245,5 +280,6 @@ namespace nc::core
         m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
         m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics::SetClearColor, &m_graphics, _1));
         m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
+        m_window.BindEngineDisableRunningCallback(std::bind(Engine::DisableRunningFlag, this));
     }
 } // end namespace nc::engine

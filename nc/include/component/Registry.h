@@ -161,6 +161,8 @@ namespace nc::ecs
             std::vector<Entity> m_toRemove;
             HandleManager m_handleManager;
 
+            void RemoveEntityWithoutNotifyingParent(Entity entity);
+
             template<Component T>
             auto GetStorageFor() -> PerComponentStorage<T>& { return std::get<PerComponentStorage<T>>(m_storage); }
 
@@ -212,6 +214,26 @@ namespace nc::ecs
     void Registry<TypeList>::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        auto* transform = Get<Transform>(entity);
+        transform->SetParent(Entity::Null());
+        
+        for(auto child : transform->GetChildren())
+            RemoveEntityWithoutNotifyingParent(child);
+
+        auto pos = std::ranges::find(m_active, entity);
+        *pos = m_active.back();
+        m_active.pop_back();
+        m_toRemove.push_back(entity);
+    }
+
+    template<class TypeList>
+    void Registry<TypeList>::RemoveEntityWithoutNotifyingParent(Entity entity)
+    {
+        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        auto* transform = Get<Transform>(entity);
+        for(auto child : transform->GetChildren())
+            RemoveEntityWithoutNotifyingParent(child);
+        
         auto pos = std::ranges::find(m_active, entity);
         *pos = m_active.back();
         m_active.pop_back();

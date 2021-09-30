@@ -44,7 +44,14 @@ namespace nc::window
     /* WindowImpl */
     WindowImpl::WindowImpl(HINSTANCE instance)
         : m_onResizeReceivers{},
-          m_hInstance{instance}
+          m_hwnd{nullptr},
+          m_wndClass{},
+          m_hInstance{instance},
+          m_dimensions{},
+          GraphicsOnResizeCallback{nullptr},
+          GraphicsSetClearColorCallback{nullptr},
+          UIWndMessageCallback{nullptr},
+          EngineDisableRunningCallback{nullptr}
     {
         g_instance = this;
         GraphicsOnResizeCallback = nullptr;
@@ -53,7 +60,6 @@ namespace nc::window
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
 
-        m_wndClass = {};
         m_wndClass.style = WND_CLASS_STYLE_FLAGS;
         m_wndClass.lpfnWndProc = WindowImpl::WndProc;
         m_wndClass.hInstance = instance;
@@ -140,17 +146,22 @@ namespace nc::window
 
     void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept
     {
-        GraphicsOnResizeCallback = callback;
+        GraphicsOnResizeCallback = std::move(callback);
     }
 
     void WindowImpl::BindGraphicsSetClearColorCallback(std::function<void(std::array<float, 4>)> callback) noexcept
     {
-        GraphicsSetClearColorCallback = callback;
+        GraphicsSetClearColorCallback = std::move(callback);
     }
 
     void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
     {
-        UIWndMessageCallback = callback;
+        UIWndMessageCallback = std::move(callback);
+    }
+
+    void WindowImpl::BindEngineDisableRunningCallback(std::function<void()> callback) noexcept
+    {
+        EngineDisableRunningCallback = std::move(callback);
     }
 
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -206,7 +217,7 @@ namespace nc::window
             }
             case WM_CLOSE:
             {
-                core::Quit(false);
+                g_instance->EngineDisableRunningCallback();
                 break;
             }
             case WM_DESTROY:

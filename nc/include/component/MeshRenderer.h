@@ -10,6 +10,8 @@ namespace nc
 {
     class MeshRenderer : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(MeshRenderer)
+        
         public:
             MeshRenderer(Entity entity, std::string meshUid, nc::graphics::Material material, nc::graphics::TechniqueType techniqueType);
             
@@ -19,11 +21,13 @@ namespace nc
 
             #ifdef NC_EDITOR_ENABLED
             auto GetMaterial() -> graphics::Material& { return m_material; }
+            auto GetMeshPath() const -> const std::string& { return m_meshPath; }
             #endif
 
         private:
             #ifdef NC_EDITOR_ENABLED
             graphics::Material m_material;
+            std::string m_meshPath;
             #endif
             graphics::Mesh m_mesh;
             graphics::TextureIndices m_textureIndices;

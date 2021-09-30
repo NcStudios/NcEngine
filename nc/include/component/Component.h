@@ -1,5 +1,6 @@
 #pragma once
 #include "Entity.h"
+#include "EditorMeta.h"
 
 #include <concepts>
 #include <type_traits>

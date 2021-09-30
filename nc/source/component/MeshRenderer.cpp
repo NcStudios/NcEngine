@@ -11,6 +11,7 @@ namespace nc
     : ComponentBase{entity},
       #ifdef NC_EDITOR_ENABLED
       m_material{std::move(material)},
+      m_meshPath{meshUid},
       #endif
       m_mesh{nc::graphics::ResourceManager::GetMeshAccessor(meshUid)},
       m_textureIndices{},
