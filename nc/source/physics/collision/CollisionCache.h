@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Manifold.h"
-#include "../dynamics/Constraint.h"
+#include "physics/dynamics/Constraint.h"
 
 #include <cstdint>
 

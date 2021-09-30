@@ -456,7 +456,7 @@ namespace nc::physics
             XMStoreVector3(&localSupportB, supports.localB);
 
             stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
-            
+
             if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
             {
                 /** In the case where the origin is on or very near a simplex feature we can end up adding
