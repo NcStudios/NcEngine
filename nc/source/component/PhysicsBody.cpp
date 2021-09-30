@@ -90,7 +90,7 @@ namespace nc
         if(!collider)
             throw std::runtime_error("PhysicsBody added to Entity with no Collider");
 
-        if(EntityUtils::IsStatic(entity))
+        if(entity.IsStatic())
         {
             m_properties.mass = 0.0f;
         }
@@ -113,7 +113,7 @@ namespace nc
 
     void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
     {
-        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || GetParentEntity().IsStatic())
             return;
         
         m_linearVelocity += DirectX::XMVectorScale(impulse, m_properties.mass) * m_linearFreedom;
@@ -126,7 +126,7 @@ namespace nc
 
     void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
     {
-        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || GetParentEntity().IsStatic())
             return;
 
         auto restrictedTorque = torque * m_angularFreedom;
@@ -135,7 +135,7 @@ namespace nc
 
     void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
     {
-        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || GetParentEntity().IsStatic())
             return;
         
         m_linearVelocity += delta * m_linearFreedom;
@@ -143,7 +143,7 @@ namespace nc
 
     void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
     {
-        if(m_properties.isKinematic || EntityUtils::IsStatic(GetParentEntity()))
+        if(m_properties.isKinematic || GetParentEntity().IsStatic())
             return;
         
         m_linearVelocity += velDelta * m_linearFreedom;
@@ -152,7 +152,7 @@ namespace nc
 
     void PhysicsBody::UpdateWorldInertia(const Transform* transform)
     {
-        if(EntityUtils::IsStatic(GetParentEntity()))
+        if(GetParentEntity().IsStatic())
             return;
 
         auto rot_v = transform->GetRotationXM();

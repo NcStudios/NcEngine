@@ -29,7 +29,7 @@ namespace nc::sample
         Vector3 rotationAxisRandomRange = Vector3::Zero();
         float thetaRandomRange = 0.0f;
 
-        EntityTraits::layer_type layer = 1u;
+        Entity::layer_type layer = 1u;
         bool spawnAsStaticEntity = false;
     };
 }
