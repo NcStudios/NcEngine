@@ -131,7 +131,7 @@ namespace nc::ecs
     template<Component T>
     bool PerComponentStorage<T>::Contains(Entity entity) const
     {
-        if(Entity::NullIndex != sparseArray.at(entity.Index()))
+        if(sparseArray.at(entity.Index()) != Entity::NullIndex)
             return true;
 
         auto pos = std::ranges::find_if(stagingPool, [entity](const auto& pair)
