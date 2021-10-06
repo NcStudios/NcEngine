@@ -5,6 +5,9 @@
 
 #include "UI.h"
 
+
+#include <iostream>
+
 namespace
 {
     auto CreateProjectCallbacks(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks
@@ -53,7 +56,7 @@ namespace nc::editor
     EditorFramework::EditorFramework(registry_type* registry)
         : m_output{},
           m_editorConfig{ReadConfig("editor/config.ini")},
-          m_assetManifest{},
+          m_assetManifest{m_editorConfig.recentProjectDirectory},
           m_projectManager{registry},
           m_editorUI{registry,
                      &m_output,
@@ -81,12 +84,12 @@ namespace nc::editor
         m_projectManager.DoOpenProject(m_editorConfig.recentProjectDirectory);
     }
 
-    EditorFramework::~EditorFramework()
+    void EditorFramework::SaveProjectData()
     {
         m_editorConfig.recentProjectDirectory = m_projectManager.GetProjectDirectory();
         WriteConfig("editor/config.ini", m_editorConfig);
 
         if(m_projectManager.IsProjectOpen())
-            m_assetManifest.WriteManifest(m_projectManager.GetProjectDirectory());
+            m_assetManifest.Write(m_projectManager.GetProjectDirectory());
     }
 }

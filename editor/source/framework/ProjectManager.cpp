@@ -267,9 +267,14 @@ namespace nc::editor
             return;
         }
 
+        if(m_projectData.scenes.empty())
+        {
+            return;
+        }
+
         m_currentSceneIndex = m_nextSceneIndex;
 
-        SceneReader serialize{m_registry, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};
+        NC_TRACE(SceneReader serialize{m_registry, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
     }
 
     void ProjectManager::DeleteCurrentScene()

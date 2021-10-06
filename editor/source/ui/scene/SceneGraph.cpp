@@ -17,11 +17,15 @@ namespace
 
 namespace nc::editor
 {
-    SceneGraph::SceneGraph(registry_type* registry, SceneCallbacks sceneCallbacks, EntityCallbacks::ChangeTagCallbackType changeTagCallback, std::string projectName)
+    SceneGraph::SceneGraph(registry_type* registry,
+                           AssetManifest* assetManifest,
+                           SceneCallbacks sceneCallbacks,
+                           EntityCallbacks::ChangeTagCallbackType changeTagCallback,
+                           std::string projectName)
         : m_registry{registry},
           m_projectName{std::move(projectName)},
-          m_inspector{registry},
-          m_sceneSelectWidget{std::move(sceneCallbacks)},
+          m_inspector{registry, assetManifest},
+          m_sceneManagementControl{std::move(sceneCallbacks)},
           m_changeTagCallback{std::move(changeTagCallback)},
           m_dimensions{window::GetDimensions()},
           m_selectedEntity{}
@@ -41,7 +45,7 @@ namespace nc::editor
 
     void SceneGraph::UpdateScenes(std::vector<std::string> scenes, int selectedScene)
     {
-        m_sceneSelectWidget.UpdateScenes(std::move(scenes), selectedScene);
+        m_sceneManagementControl.UpdateScenes(std::move(scenes), selectedScene);
     }
 
     void SceneGraph::OnResize(Vector2 dimensions)
@@ -65,7 +69,7 @@ namespace nc::editor
 
             ImGui::Text("Project: %s", m_projectName.c_str());
 
-            m_sceneSelectWidget.Draw();
+            m_sceneManagementControl.Draw();
 
             ImGui::Separator();
             ImGui::Separator();

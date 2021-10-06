@@ -16,12 +16,12 @@ namespace nc::editor
     {
         public:
             EditorFramework(registry_type* registry);
-            ~EditorFramework();
             EditorFramework(const EditorFramework&) = delete;
             EditorFramework(EditorFramework&&) = delete;
             EditorFramework& operator=(const EditorFramework&) = delete;
             EditorFramework& operator=(EditorFramework&&) = delete;
 
+            void SaveProjectData();
             auto GetProjectManager() -> ProjectManager* { return &m_projectManager; }
 
         private:

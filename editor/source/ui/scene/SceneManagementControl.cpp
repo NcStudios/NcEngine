@@ -1,17 +1,16 @@
-#include "SceneSelectWidget.h"
-
+#include "SceneManagementControl.h"
 #include "imgui/imgui.h"
 
 namespace nc::editor
 {
-    SceneSelectWidget::SceneSelectWidget(SceneCallbacks sceneCallbacks)
+    SceneManagementControl::SceneManagementControl(SceneCallbacks sceneCallbacks)
         :  m_scenes{},
            m_callbacks{sceneCallbacks},
            m_selectedScene{-1}
     {
     }
 
-    void SceneSelectWidget::Draw()
+    void SceneManagementControl::Draw()
     {
         bool sceneChanged = false;
         const char* preview = m_selectedScene == -1 ? "No Available Scenes" : m_scenes.at(m_selectedScene).c_str();
@@ -36,9 +35,7 @@ namespace nc::editor
         }
 
         if(ImGui::Button("New Scene"))
-        {
             m_callbacks.newSceneCallback();
-        }
 
         ImGui::SameLine();
 
@@ -54,7 +51,7 @@ namespace nc::editor
             m_callbacks.changeSceneCallback(m_scenes.at(m_selectedScene));
     }
 
-    void SceneSelectWidget::UpdateScenes(std::vector<std::string> scenes, int selectedScene)
+    void SceneManagementControl::UpdateScenes(std::vector<std::string> scenes, int selectedScene)
     {
         m_scenes = std::move(scenes);
         m_selectedScene = m_scenes.empty() ? -1 : selectedScene;

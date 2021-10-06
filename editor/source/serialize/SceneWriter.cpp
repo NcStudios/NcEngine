@@ -212,7 +212,7 @@ namespace nc::editor
                 m_file << "NC_SCENE_ACTION_ADD_BOX_COLLIDER( " 
                        << handleName << " , "
                        << center << " , "
-                       << scale << " < "
+                       << scale << " , "
                        << isTrigger << " )\n";
                 break;
             }

@@ -8,10 +8,11 @@
 
 namespace nc::editor
 {
-    class SceneSelectWidget
+    /** UI control for creating, changing, saving, and deleting scenes. */
+    class SceneManagementControl
     {
         public:
-            SceneSelectWidget(SceneCallbacks sceneCallbacks);
+            SceneManagementControl(SceneCallbacks sceneCallbacks);
 
             void Draw();
             void UpdateScenes(std::vector<std::string> scenes, int selectedScene);

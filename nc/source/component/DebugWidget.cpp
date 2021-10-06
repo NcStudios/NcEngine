@@ -5,9 +5,9 @@ namespace
 {
     using namespace nc;
 
-    const auto CubeMeshPath = std::string{"project/assets/mesh/cube.nca"};
-    const auto SphereMeshPath = std::string{"project/assets/mesh/sphere.nca"};
-    const auto CapsuleMeshPath = std::string{"project/assets/mesh/capsule.nca"};
+    const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.nca"};
+    const auto SphereMeshPath = std::string{"nc/resources/mesh/sphere.nca"};
+    const auto CapsuleMeshPath = std::string{"nc/resources/mesh/capsule.nca"};
 
     std::string GetMeshPathForCollider(ColliderType colliderType)
     {

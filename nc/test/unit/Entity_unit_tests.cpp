@@ -72,8 +72,8 @@ TEST(Entity_unit_tests, IsStatic_FlagSet_ReturnsTrue)
 
 TEST(Entity_unit_tests, IsStatic_FlagNotSet_ReturnsFalse)
 {
-    auto flags = EntityFlags::None;
-    auto handle = Entity{1u, 1u, flags)};
+    auto flags = Entity::Flags::None;
+    auto handle = Entity{1u, 1u, flags};
     EXPECT_FALSE(handle.IsStatic());
 }
 

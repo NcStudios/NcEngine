@@ -27,6 +27,7 @@ namespace nc::editor
           m_dimensions{window::GetDimensions()},
           m_callbacks{std::move(projectCallbacks)},
           m_sceneGraph{registry,
+                       assetManifest,
                        std::move(sceneCallbacks),
                        std::move(changeTagCallback),
                        std::move(projectName)},

@@ -16,6 +16,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
         auto* registry = nc::ActiveRegistry();
         nc::editor::EditorFramework framework{registry};
         engine->Start(std::make_unique<nc::editor::EditorScene>(framework.GetProjectManager()));
+        framework.SaveProjectData();
     }
     catch(std::exception& e)
     {

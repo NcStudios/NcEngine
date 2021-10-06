@@ -196,9 +196,20 @@ namespace nc::editor
 
     void SceneReader::LoadHullCollider(Entity entity, std::stringstream& args)
     {
+        HullProperties properties;
+        bool isTrigger;
+
+        args.ignore(std::numeric_limits<std::streamsize>::max(), '\"');
+        std::getline(args, properties.assetPath, '\"');
+        args >> isTrigger;
+
+        #if PRINT_SERIALIZATION_PROCESS
         std::cerr << "  LoadHullCollider\n";
-        (void)entity;
-        (void)args;
+        std::cerr << "    path: " << properties.assetPath << '\n'
+                  << "    trig: " << isTrigger << '\n';
+        #endif
+
+        m_registry->Add<Collider>(entity, properties, isTrigger);
     }
 
     void SceneReader::LoadSphereCollider(Entity entity, std::stringstream& args)

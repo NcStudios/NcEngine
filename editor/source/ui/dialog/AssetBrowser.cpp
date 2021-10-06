@@ -38,11 +38,11 @@ namespace nc::editor
                 {
                     switch(type)
                     {
-                        case AssetType::AudioClip:       return std::bind(AssetManifest::Add<AssetType::AudioClip>,       assetManifest, std::placeholders::_1);
-                        case AssetType::ConcaveCollider: return std::bind(AssetManifest::Add<AssetType::ConcaveCollider>, assetManifest, std::placeholders::_1);
-                        case AssetType::HullCollider:    return std::bind(AssetManifest::Add<AssetType::HullCollider>,    assetManifest, std::placeholders::_1);
-                        case AssetType::Mesh:            return std::bind(AssetManifest::Add<AssetType::Mesh>,            assetManifest, std::placeholders::_1);
-                        case AssetType::Texture:         return std::bind(AssetManifest::Add<AssetType::Texture>,         assetManifest, std::placeholders::_1);
+                        case AssetType::AudioClip:       return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::AudioClip);
+                        case AssetType::ConcaveCollider: return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::ConcaveCollider);
+                        case AssetType::HullCollider:    return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::HullCollider);
+                        case AssetType::Mesh:            return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::Mesh);
+                        case AssetType::Texture:         return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::Texture);
                     }
 
                     throw std::runtime_error("AssetBrowser - Add - Unknown AssetType");
@@ -88,7 +88,7 @@ namespace nc::editor
 
     bool AssetBrowser::AddAsset(const std::filesystem::path& assetPath)
     {
-        m_assetManifest->Add<AssetType::Mesh>(assetPath);
+        m_assetManifest->Add(assetPath, AssetType::Mesh);
         return true;
     }
 
@@ -105,11 +105,11 @@ namespace nc::editor
 
             if(ImGui::BeginTabBar("AssetTabBar"))
             {
-                AssetTab("Audio Clips",       m_assetManifest->GetAll<AssetType::AudioClip>(),       AssetType::AudioClip);
-                AssetTab("Concave Colliders", m_assetManifest->GetAll<AssetType::ConcaveCollider>(), AssetType::ConcaveCollider);
-                AssetTab("Hull Colliders",    m_assetManifest->GetAll<AssetType::HullCollider>(),    AssetType::HullCollider);
-                AssetTab("Meshes",            m_assetManifest->GetAll<AssetType::Mesh>(),            AssetType::Mesh);
-                AssetTab("Textures",          m_assetManifest->GetAll<AssetType::Texture>(),         AssetType::Texture);
+                AssetTab("Audio Clips",       m_assetManifest->View(AssetType::AudioClip),       AssetType::AudioClip);
+                AssetTab("Concave Colliders", m_assetManifest->View(AssetType::ConcaveCollider), AssetType::ConcaveCollider);
+                AssetTab("Hull Colliders",    m_assetManifest->View(AssetType::HullCollider),    AssetType::HullCollider);
+                AssetTab("Meshes",            m_assetManifest->View(AssetType::Mesh),            AssetType::Mesh);
+                AssetTab("Textures",          m_assetManifest->View(AssetType::Texture),         AssetType::Texture);
 
                 ImGui::EndTabBar();
             }

@@ -20,6 +20,10 @@ namespace nc::debug
     }
 }
 
+#define NC_TRACE(...) \
+try { __VA_ARGS__; } \
+catch(const std::exception& e) { std::throw_with_nested(std::runtime_error(std::string{"Exception in file: "} + std::string{__FILE__} + std::string{" on line: "} + std::to_string(__LINE__))); } \
+
 #ifdef NC_DEBUG_BUILD
 /** Conditionally throw only in debug builds. */
 #define IF_THROW(expr, msg) if(expr) throw std::runtime_error(msg);

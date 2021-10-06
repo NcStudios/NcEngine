@@ -1,5 +1,5 @@
 #include "Inspector.h"
-
+#include "assets/AssetManifest.h"
 #include "directx/math/DirectXMath.h"
 #include "imgui/imgui.h"
 
@@ -82,8 +82,9 @@ namespace
 
 namespace nc::editor
 {
-    Inspector::Inspector(registry_type* registry)
-        : m_registry{registry}
+    Inspector::Inspector(registry_type* registry, AssetManifest* assetManifest)
+        : m_registry{registry},
+          m_assetManifest{assetManifest}
     {
     }
 
@@ -148,20 +149,34 @@ namespace nc::editor
         ImGui::Text("Type   ");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(75);
+
         if(ImGui::BeginCombo("", ToCString(info.type)))
         {
-            if(ImGui::Selectable("Box"))
+            if(ImGui::Selectable("Box") && info.type != ColliderType::Box)
             {
+                collider->SetProperties(BoxProperties{.center = info.offset, .extents = info.scale});
             }
             if(ImGui::Selectable("Capsule"))
             {
-            }
-            if(ImGui::Selectable("Hull"))
-            {
+                collider->SetProperties(CapsuleProperties{.center = info.offset, .height = info.scale.y * 2.0f, .radius = info.scale.x * 0.5f});
             }
             if(ImGui::Selectable("Sphere"))
             {
+                collider->SetProperties(SphereProperties{.center = info.offset, .radius = info.scale.x * 0.5f});
             }
+            if(ImGui::BeginMenu("Hull"))
+            {
+                for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
+                {
+                    if(ImGui::Selectable(asset.name.c_str()))
+                    {
+                        collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                    }
+                }
+
+                ImGui::EndMenu();
+            }
+
             ImGui::EndCombo();
         }
 
@@ -189,6 +204,11 @@ namespace nc::editor
                 bool radiusChanged = floatWidget("Radius", "colliderradius", &radius, 0.01f, 0.01f, height);
                 if(heightChanged || radiusChanged)
                     collider->m_info.scale = Vector3{radius * 2.0f, height * 0.5f, radius * 2.0f};
+                break;
+            }
+            case ColliderType::Hull:
+            {
+                /** @todo */
                 break;
             }
             case ColliderType::Sphere:

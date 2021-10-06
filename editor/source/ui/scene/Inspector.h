@@ -4,15 +4,18 @@
 
 namespace nc::editor
 {
+    class AssetManifest;
+
     /** Drawing of component widgets. */
     class Inspector
     {
         public:
-            Inspector(registry_type* registry);
+            Inspector(registry_type* registry, AssetManifest* assetManifest);
             void InspectEntity(Entity entity);
 
         private:
             registry_type* m_registry;
+            AssetManifest* m_assetManifest;
 
             void DrawAudioSource(AudioSource* audioSource);
             void DrawCollider(Collider* collider);

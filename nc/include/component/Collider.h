@@ -66,6 +66,11 @@ namespace nc
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
 
+            void SetProperties(BoxProperties properties);
+            void SetProperties(CapsuleProperties properties);
+            void SetProperties(HullProperties properties);
+            void SetProperties(SphereProperties properties);
+
             void Wake() { m_awake = true; }
             void Sleep() { m_awake = false; }
 

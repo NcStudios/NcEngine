@@ -9,6 +9,7 @@ namespace nc::editor
 {
     class ProjectManager;
 
+    /** Placeholder scene used for the editor. */
     class EditorScene : public scene::Scene
     {
         public:
