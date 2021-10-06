@@ -8,13 +8,12 @@
 
 #include <iostream>
 
-namespace { constexpr uint32_t MAX_POINT_LIGHTS = 10u; }
-
 namespace nc::ecs
 {
-    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics)
+    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics, uint32_t maxPointLights)
         : m_graphics{graphics},
           m_registry{registry},
+          m_maxPointLights{maxPointLights},
           m_isSystemDirty{true}
     {
         m_registry->RegisterOnAddCallback<PointLight>
@@ -27,7 +26,7 @@ namespace nc::ecs
             [this](Entity) { m_isSystemDirty = true; }
         );
 
-        graphics::ResourceManager::InitializePointLights(graphics, MAX_POINT_LIGHTS);
+        graphics::ResourceManager::InitializePointLights(graphics, m_maxPointLights);
     }
 
     bool PointLightSystem::CheckDirtyAndReset()
@@ -38,6 +37,6 @@ namespace nc::ecs
     void PointLightSystem::Clear()
     {
         m_isSystemDirty = true;
-        graphics::ResourceManager::ResetPointLights(m_graphics, MAX_POINT_LIGHTS);
+        graphics::ResourceManager::ResetPointLights(m_graphics, m_maxPointLights);
     }
 }

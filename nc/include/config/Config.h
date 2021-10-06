@@ -19,6 +19,8 @@ namespace nc::config
         unsigned maxParticleEmitters;
         unsigned maxRenderers;
         unsigned maxTransforms;
+        unsigned maxPointLights;
+        unsigned maxTextures;
     };
 
     struct GraphicsSettings
