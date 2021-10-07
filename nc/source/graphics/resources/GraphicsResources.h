@@ -41,17 +41,17 @@ namespace nc::graphics
             std::unordered_map<std::string, Mesh> m_accessors;
     };
 
+    struct Texture
+    {
+        ImmutableImage image;
+        vk::DescriptorImageInfo imageInfo;
+        std::string uid;
+    };
+
     class TexturesData
     {
         public:
-            TexturesData() = default;
-            TexturesData(std::vector<ImmutableImage> textureBuffers, 
-                         std::vector<vk::DescriptorImageInfo> imageInfos, 
-                         std::unordered_map<std::string, uint32_t> accessors,
-                         vk::UniqueDescriptorSet descriptorSet,
-                         vk::UniqueDescriptorSetLayout descriptorSetLayout,
-                         vk::UniqueSampler sampler,
-                         vk::ImageLayout layout);
+            TexturesData(Graphics* graphics, uint32_t maxTexturesCount);
             ~TexturesData() noexcept;
             TexturesData(TexturesData&&) = default;
             TexturesData& operator=(TexturesData&&) = default;
@@ -63,19 +63,21 @@ namespace nc::graphics
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
             vk::DescriptorSet* GetDescriptorSet() noexcept;
             uint32_t GetAccessor(const std::string& uid) const;
+            void AddTexture(Graphics* graphics, Texture texture);
+            void AddTextures(Graphics* graphics, std::vector<Texture> textures);
             void Clear() noexcept;
 
         private:
-            // Each texture is represented here
-            std::vector<ImmutableImage> m_textureBuffers;
+            void UpdateTextures(Graphics* graphics);
+            std::vector<Texture> m_textures;
             std::vector<vk::DescriptorImageInfo> m_imageInfos;
             std::unordered_map<std::string, uint32_t> m_accessors;
-
-            // Only need one of the below for all textures
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             vk::UniqueSampler m_sampler;
             vk::ImageLayout m_layout;
+            uint32_t m_maxTexturesCount;
+            bool m_texturesInitialized;
     };
 
     class PointLightsData

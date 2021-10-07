@@ -14,4 +14,5 @@ namespace nc::graphics
 
     /** @todo This could use filesystem like the others. */
     void LoadTextures(const std::vector<std::string>& paths);
+    void LoadTexture(const std::string& path);
 }
