@@ -1,9 +1,8 @@
 #include "SceneGraph.h"
-#include "Window.h"
+#include "assets/AssetManifest.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
-
-#include <iostream>
+#include "Window.h"
 
 namespace
 {
@@ -23,6 +22,7 @@ namespace nc::editor
                            EntityCallbacks::ChangeTagCallbackType changeTagCallback,
                            std::string projectName)
         : m_registry{registry},
+          m_assetManifest{assetManifest},
           m_projectName{std::move(projectName)},
           m_inspector{registry, assetManifest},
           m_sceneManagementControl{std::move(sceneCallbacks)},
@@ -179,6 +179,7 @@ namespace nc::editor
     void SceneGraph::EntityContextMenu(Entity entity)
     {
         bool hasCollider = m_registry->Contains<Collider>(entity);
+        bool hasConcaveCollider = m_registry->Contains<ConcaveCollider>(entity);
         bool hasMeshRenderer = m_registry->Contains<MeshRenderer>(entity);
         bool hasPhysicsBody = m_registry->Contains<PhysicsBody>(entity);
         bool hasPointLight = m_registry->Contains<PointLight>(entity);
@@ -195,12 +196,34 @@ namespace nc::editor
 
         if(ImGui::BeginMenu("Add Component"))
         {
-            if(!hasCollider && ImGui::BeginMenu("Collider"))
+            if(!hasCollider && !hasConcaveCollider && ImGui::BeginMenu("Collider"))
             {
                 if(ImGui::Selectable("Box")) m_registry->Add<Collider>(entity, BoxProperties{}, false);
                 if(ImGui::Selectable("Capsule")) m_registry->Add<Collider>(entity, CapsuleProperties{}, false);
-                if(ImGui::Selectable("Hull")) {}
                 if(ImGui::Selectable("Sphere")) m_registry->Add<Collider>(entity, SphereProperties{}, false);
+
+                if(ImGui::BeginMenu("Hull"))
+                {
+                    for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
+                    {
+                        if(ImGui::Selectable(asset.name.c_str()))
+                            m_registry->Add<Collider>(entity, HullProperties{.assetPath = asset.ncaPath.value().string()}, false);
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                ImGui::EndMenu();
+            }
+
+            if(entity.IsStatic() && !hasCollider && !hasConcaveCollider && ImGui::BeginMenu("ConcaveCollider"))
+            {
+                for(const auto& asset : m_assetManifest->View(AssetType::ConcaveCollider))
+                {
+                    if(ImGui::Selectable(asset.name.c_str()))
+                        m_registry->Add<ConcaveCollider>(entity, asset.ncaPath.value().string());
+                }
+
                 ImGui::EndMenu();
             }
 
@@ -230,6 +253,13 @@ namespace nc::editor
             if(hasCollider && ImGui::Selectable("Collider"))
             {
                 m_registry->Remove<Collider>(entity);
+                if(hasPhysicsBody)
+                    m_registry->Remove<PhysicsBody>(entity);
+            }
+
+            if(hasConcaveCollider && ImGui::Selectable("ConcaveCollider"))
+            {
+                m_registry->Remove<ConcaveCollider>(entity);
                 if(hasPhysicsBody)
                     m_registry->Remove<PhysicsBody>(entity);
             }

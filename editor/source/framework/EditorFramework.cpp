@@ -5,9 +5,6 @@
 
 #include "UI.h"
 
-
-#include <iostream>
-
 namespace
 {
     auto CreateProjectCallbacks(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks

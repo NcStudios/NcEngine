@@ -150,7 +150,7 @@ namespace nc::editor
         ImGui::SameLine();
         ImGui::SetNextItemWidth(75);
 
-        if(ImGui::BeginCombo("", ToCString(info.type)))
+        if(ImGui::BeginCombo("##collidertypecombo", ToCString(info.type)))
         {
             if(ImGui::Selectable("Box") && info.type != ColliderType::Box)
             {
@@ -209,6 +209,20 @@ namespace nc::editor
             case ColliderType::Hull:
             {
                 /** @todo */
+
+                if(ImGui::BeginCombo("##colliderhullselectcombo", info.hullAssetPath.c_str()))
+                {
+                    for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
+                    {
+                        if(ImGui::Selectable(asset.name.c_str()))
+                        {
+                            collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                        }
+                    }
+
+                    ImGui::EndCombo();
+                }
+            
                 break;
             }
             case ColliderType::Sphere:

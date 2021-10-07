@@ -29,6 +29,7 @@ namespace nc::editor
             void CreateGeneratedSource();
             void WriteEntity(Entity entity);
             void WriteCollider(Entity entity, const std::string& handleName);
+            void WriteConcaveCollider(Entity entity, const std::string& handleName);
             void WritePhysicsBody(Entity entity, const std::string& handleName);
             void WritePointLight(Entity entity, const std::string& handleName);
             void WriteMeshRenderer(Entity entity, const std::string& handleName);

@@ -88,6 +88,10 @@ namespace nc::editor
         {
             LoadSphereCollider(currentEntity, args);
         }
+        else if(actionDescription == "NC_SCENE_ACTION_ADD_CONCAVE_COLLIDER")
+        {
+            LoadConcaveCollider(currentEntity, args);
+        }
         else if(actionDescription == "NC_SCENE_ACTION_ADD_PHYSICS_BODY")
         {
             LoadPhysicsBody(currentEntity, args);
@@ -214,7 +218,6 @@ namespace nc::editor
 
     void SceneReader::LoadSphereCollider(Entity entity, std::stringstream& args)
     {
-
         SphereProperties properties;
         bool isTrigger;
 
@@ -233,6 +236,15 @@ namespace nc::editor
         #endif
 
         m_registry->Add<Collider>(entity, properties, isTrigger);
+    }
+
+    void SceneReader::LoadConcaveCollider(Entity entity, std::stringstream& args)
+    {
+        [[maybe_unused]] std::string handleName;
+        std::string assetPath;
+
+        args >> handleName >> assetPath;
+        m_registry->Add<ConcaveCollider>(entity, std::move(assetPath));
     }
 
     void SceneReader::LoadPhysicsBody(Entity entity, std::stringstream& args)

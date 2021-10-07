@@ -13,6 +13,8 @@ namespace nc::editor
     class EditorScene : public scene::Scene
     {
         public:
+            inline static std::string EditorCameraTag = "NcEditorCamera";
+
             EditorScene(ProjectManager* projectManager);
             void Load(registry_type* registry) override;
             void Unload() override;

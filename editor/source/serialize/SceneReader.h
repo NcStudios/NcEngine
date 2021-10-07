@@ -25,6 +25,7 @@ namespace nc::editor
             void LoadCapsuleCollider(Entity entity, std::stringstream& args);
             void LoadHullCollider(Entity entity, std::stringstream& args);
             void LoadSphereCollider(Entity entity, std::stringstream& args);
+            void LoadConcaveCollider(Entity entity, std::stringstream& args);
             void LoadPhysicsBody(Entity entity, std::stringstream& args);
             void LoadPointLight(Entity entity, std::stringstream& args);
             void LoadMeshRenderer(Entity entity, std::stringstream& args);

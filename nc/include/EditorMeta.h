@@ -22,6 +22,9 @@ registry->Add<Collider>(handle, HullProperties{.assetPath = assetPath}, isTrigge
 #define NC_SCENE_ACTION_ADD_SPHERE_COLLIDER(handle, center, radius, isTrigger) \
 registry->Add<Collider>(handle, SpherePropertiess{.center = center, .radius = radius}, isTrigger);
 
+#define NC_SCENE_ACTION_ADD_CONCAVE_COLLIDER(handle, assetPath) \
+registry->Add<ConcaveCollider>(handle, assetPath);
+
 #define NC_SCENE_ACTION_ADD_PHYSICS_BODY(handle, mass, drag, angularDrag, restitution, friction, useGravity, isKinematic) \
 registry->Add<PhysicsBody>(handle, PhysicsProperties{.mass = mass, .drag = drag, .angularDrag = angularDrag, .restitution = restitution, .friction = friction, .useGravity = useGravity, .isKinematic = isKinematic});
 

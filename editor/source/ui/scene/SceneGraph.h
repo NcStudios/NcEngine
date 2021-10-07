@@ -30,6 +30,7 @@ namespace nc::editor
 
         private:
             registry_type* m_registry;
+            AssetManifest* m_assetManifest;
             std::string m_projectName;
             Inspector m_inspector;
             SceneManagementControl m_sceneManagementControl;

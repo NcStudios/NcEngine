@@ -1,4 +1,5 @@
 #include "SceneWriter.h"
+#include "EditorScene.h"
 #include "utility/Output.h"
 
 #include <iostream>
@@ -154,6 +155,7 @@ namespace nc::editor
                << "void Init(registry_type* registry)\n"
                << "{\n";
 
+
         for(auto e : m_registry->ViewAll<Entity>())
         {
             WriteEntity(e);
@@ -168,6 +170,10 @@ namespace nc::editor
     void SceneWriter::WriteEntity(Entity entity)
     {
         auto tag = m_registry->Get<Tag>(entity)->Value();
+        
+        if(tag == EditorScene::EditorCameraTag)
+            return;
+
         const auto& handleName = m_handleNames.at(entity.Index());
         auto* transform = m_registry->Get<Transform>(entity);
         auto pos = transform->GetLocalPosition();
@@ -187,6 +193,7 @@ namespace nc::editor
                << static_cast<unsigned>(entity.Flags()) << " )\n";
 
         WriteCollider(entity, handleName);
+        WriteConcaveCollider(entity, handleName);
         WritePhysicsBody(entity, handleName);
         WritePointLight(entity, handleName);
         WriteMeshRenderer(entity, handleName);
@@ -249,6 +256,19 @@ namespace nc::editor
         }
     }
     
+    void SceneWriter::WriteConcaveCollider(Entity entity, const std::string& handleName)
+    {
+        auto* collider = m_registry->Get<ConcaveCollider>(entity);
+
+        if(!collider)
+            return;
+        
+        m_file << "NC_SCENE_ACTION_ADD_CONCAVE_COLLIDER( "
+               << handleName << " , "
+               << collider->GetPath() << " )\n";
+
+    }
+
     void SceneWriter::WritePhysicsBody(Entity entity, const std::string& handleName)
     {
         /** @todo need linear and angular freedoms*/
