@@ -33,6 +33,8 @@ namespace
     const auto MaxParticleEmittersKey = std::string{"max_particle_emitters"};
     const auto MaxRenderersKey = std::string{"max_renderers"};
     const auto MaxTransformsKey = std::string{"max_transforms"};
+    const auto MaxPointLightsKey = std::string{"max_point_lights"};
+    const auto MaxTexturesKey = std::string{"max_textures"};
 
     // physics
     const auto FixedUpdateIntervalKey = std::string{"fixed_update_interval"};
@@ -71,6 +73,10 @@ namespace
             out->memorySettings.maxRenderers = std::stoi(value);
         else if(key == MaxTransformsKey)
             out->memorySettings.maxTransforms = std::stoi(value);
+        else if(key == MaxPointLightsKey)
+            out->memorySettings.maxPointLights = std::stoi(value);
+        else if(key == MaxTexturesKey)
+            out->memorySettings.maxTextures = std::stoi(value);
 
         // physics
         else if (key == FixedUpdateIntervalKey)
@@ -164,6 +170,8 @@ namespace nc::config
                 << MaxParticleEmittersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxParticleEmitters << '\n'
                 << MaxRenderersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxRenderers << '\n'
                 << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxTransforms << '\n'
+                << MaxPointLightsKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxPointLights << '\n'
+                << MaxTexturesKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxTextures << '\n'
                 << "[physics]\n"
                 << FixedUpdateIntervalKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.fixedUpdateInterval << '\n'
                 << WorldspaceExtentKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.worldspaceExtent << '\n'

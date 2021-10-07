@@ -24,7 +24,23 @@ namespace nc::sample
 {
     void VulkanScene::Load(registry_type* registry)
     {
-        m_sceneHelper.Setup(registry, true, true, Widget);
+        m_sceneHelper.Setup(registry, true, false, Widget);
+
+        const std::string defaultTexturesPath = "project/Textures/";
+        const std::string boxBaseColorPath = defaultTexturesPath + "Box/BaseColor.png";
+        const std::string boxNormalPath = defaultTexturesPath + "Box/Normal.png";
+        const std::string boxRoughnessPath = defaultTexturesPath + "Box/Roughness.png";
+
+        nc::graphics::LoadTexture(boxBaseColorPath);
+        nc::graphics::LoadTexture(boxNormalPath);
+        nc::graphics::LoadTexture(boxRoughnessPath);
+
+        auto material =  graphics::Material{ .baseColor = defaultTexturesPath + "Box/BaseColor.png",
+                                             .normal    = defaultTexturesPath + "Box/Normal.png",
+                                             .roughness = defaultTexturesPath + "Box/Roughness.png" };
+
+        auto box = registry->Add<Entity>({.position = Vector3{0.0f, 2.0f, -3.0f}, .tag = "Box"});
+        registry->Add<MeshRenderer>(box, "project/assets/mesh/cube.nca", material, nc::graphics::TechniqueType::PhongAndUi);
 
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});

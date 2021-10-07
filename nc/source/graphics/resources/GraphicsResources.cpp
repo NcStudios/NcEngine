@@ -2,6 +2,7 @@
 #include "graphics/Initializers.h"
 
 #include <iostream>
+#include <cassert>
 
 namespace nc::graphics
 {
@@ -59,31 +60,36 @@ namespace nc::graphics
         m_accessors.clear();
     }
 
-    TexturesData::TexturesData(std::vector<ImmutableImage> textureBuffers, 
-                               std::vector<vk::DescriptorImageInfo> imageInfos, 
-                               std::unordered_map<std::string, uint32_t> accessors,
-                               vk::UniqueDescriptorSet descriptorSet,
-                               vk::UniqueDescriptorSetLayout descriptorSetLayout,
-                               vk::UniqueSampler sampler,
-                               vk::ImageLayout layout)
-        : m_textureBuffers{std::move(textureBuffers)},
-          m_imageInfos{std::move(imageInfos)},
-          m_accessors{std::move(accessors)},
-          m_descriptorSet{std::move(descriptorSet)},
-          m_descriptorSetLayout{std::move(descriptorSetLayout)},
-          m_sampler{std::move(sampler)},
-          m_layout{layout}
+    TexturesData::TexturesData(Graphics* graphics, uint32_t maxTexturesCount)
+        : m_textures{},
+          m_imageInfos{},
+          m_accessors{},
+          m_descriptorSet{},
+          m_descriptorSetLayout{},
+          m_sampler{},
+          m_layout{},
+          m_maxTexturesCount{maxTexturesCount},
+          m_texturesInitialized{false}
     {
+        // Create and bind the descriptor set for the array of textures.
+        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings 
+        { 
+          CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment),
+          CreateDescriptorSetLayoutBinding(1, m_maxTexturesCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
+        };
+
+        m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagBitsEXT::ePartiallyBound );
+        m_descriptorSet = CreateDescriptorSet(graphics, graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
     }
 
     TexturesData::~TexturesData() noexcept
     {
-        for (auto& texture : m_textureBuffers)
+        for (auto& texture : m_textures)
         {
-            texture.Clear();
+            texture.image.Clear();
         }
 
-        m_textureBuffers.resize(0);
+        m_textures.resize(0);
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
         m_sampler.reset();
@@ -122,14 +128,88 @@ namespace nc::graphics
         return m_accessors.at(uid);
     }
 
-    void TexturesData::Clear() noexcept
+    void TexturesData::AddTexture(Graphics* graphics, Texture texture)
     {
-        for (auto& texture : m_textureBuffers)
+        auto index = m_accessors.size();
+
+        if (index + 1 >= m_maxTexturesCount)
         {
-            texture.Clear();
+            throw std::runtime_error("TexturesData::AddTexture - Cannot exceed max texture count.");
         }
 
-        m_textureBuffers.resize(0);
+        m_accessors.emplace(texture.uid, index);
+        m_textures.push_back(std::move(texture));
+
+        UpdateTextures(graphics);
+    }
+
+    void TexturesData::AddTextures(Graphics* graphics, std::vector<Texture> textures)
+    {
+        auto existingTexturesCount = m_accessors.size();
+
+        if (existingTexturesCount + textures.size() >= m_maxTexturesCount)
+        {
+            throw std::runtime_error("TexturesData::AddTexture - Cannot exceed max texture count.");
+        }
+
+        for (auto& texture : textures)
+        {
+            auto index = m_accessors.size();
+            m_accessors.emplace(texture.uid, index);
+            m_textures.push_back(std::move(texture));
+        }
+
+        UpdateTextures(graphics);
+    }
+
+    void TexturesData::UpdateTextures(Graphics* graphics)
+    {
+        assert(m_textures.size() < m_maxTexturesCount);
+
+        m_sampler = graphics->GetBasePtr()->CreateTextureSampler();
+
+        std::array<vk::WriteDescriptorSet, 2> writes;
+        vk::DescriptorImageInfo samplerInfo = {};
+        samplerInfo.sampler = m_sampler.get();
+
+        if (!m_texturesInitialized)
+        {
+            m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxTexturesCount, m_textures.at(0).imageInfo);
+            m_texturesInitialized = true;
+        }
+
+        writes[0].setDstBinding(0);
+        writes[0].setDstArrayElement(0);
+        writes[0].setDescriptorType(vk::DescriptorType::eSampler);
+        writes[0].setDescriptorCount(1);
+        writes[0].setDstSet(m_descriptorSet.get());
+        writes[0].setPBufferInfo(0);
+        writes[0].setPImageInfo(&samplerInfo);
+
+        std::transform(m_textures.cbegin(), m_textures.cend(), m_imageInfos.begin(), [](const auto& texture)
+        {
+            return texture.imageInfo;
+        });
+
+        writes[1].setDstBinding(1);
+        writes[1].setDstArrayElement(0);
+        writes[1].setDescriptorType(vk::DescriptorType::eSampledImage);
+        writes[1].setDescriptorCount(m_maxTexturesCount);
+        writes[1].setDstSet(m_descriptorSet.get());
+        writes[1].setPBufferInfo(0);
+        writes[1].setPImageInfo(m_imageInfos.data());
+
+        graphics->GetBasePtr()->GetDevice().updateDescriptorSets(2, writes.data(), 0, nullptr);
+    }
+
+    void TexturesData::Clear() noexcept
+    {
+        for (auto& texture : m_textures)
+        {
+            texture.image.Clear();
+        }
+
+        m_textures.resize(0);
     }
 
     PointLightsData::PointLightsData(Graphics* graphics, uint32_t maxPointLights)
