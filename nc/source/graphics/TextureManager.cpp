@@ -16,13 +16,13 @@ namespace nc::graphics
 {
     void LoadTextures(const std::vector<std::string>& paths)
     {
-        IF_THROW(!impl, "graphics::LoadMeshAsset - impl is not set");
+        IF_THROW(!impl, "graphics::LoadTextures - impl is not set");
         impl->LoadTextures(paths);
     }
     
     void LoadTexture(const std::string& path)
     {
-        IF_THROW(!impl, "graphics::LoadMeshAsset - impl is not set");
+        IF_THROW(!impl, "graphics::LoadTexture - impl is not set");
         impl->LoadTexture(path);
     }
     
@@ -52,7 +52,7 @@ namespace nc::graphics
 
     void TextureManager::LoadTexture(const std::string& path)
     {
-        auto sampler = m_graphics->GetBasePtr()->CreateTextureSampler();
+        auto sampler = m_graphics->GetBasePtr()->CreateTextureSampler(); /** @todo: Address this as part of refactor of Base and Resources */
 
         // Parse the file into a Vulkan image object
         if (ResourceManager::TextureExists(path)) return;

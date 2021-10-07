@@ -2,6 +2,7 @@
 #include "graphics/Initializers.h"
 
 #include <iostream>
+#include <cassert>
 
 namespace nc::graphics
 {
@@ -130,6 +131,12 @@ namespace nc::graphics
     void TexturesData::AddTexture(Graphics* graphics, Texture texture)
     {
         auto index = m_accessors.size();
+
+        if (index + 1 >= m_maxTexturesCount)
+        {
+            throw std::runtime_error("TexturesData::AddTexture - Cannot exceed max texture count.");
+        }
+
         m_accessors.emplace(texture.uid, index);
         m_textures.push_back(std::move(texture));
 
@@ -138,6 +145,13 @@ namespace nc::graphics
 
     void TexturesData::AddTextures(Graphics* graphics, std::vector<Texture> textures)
     {
+        auto existingTexturesCount = m_accessors.size();
+
+        if (existingTexturesCount + textures.size() >= m_maxTexturesCount)
+        {
+            throw std::runtime_error("TexturesData::AddTexture - Cannot exceed max texture count.");
+        }
+
         for (auto& texture : textures)
         {
             auto index = m_accessors.size();
@@ -150,6 +164,8 @@ namespace nc::graphics
 
     void TexturesData::UpdateTextures(Graphics* graphics)
     {
+        assert(m_textures.size() < m_maxTexturesCount);
+
         m_sampler = graphics->GetBasePtr()->CreateTextureSampler();
 
         std::array<vk::WriteDescriptorSet, 2> writes;
@@ -158,13 +174,7 @@ namespace nc::graphics
 
         if (!m_texturesInitialized)
         {
-            m_imageInfos.reserve(m_maxTexturesCount);
-
-            for (uint32_t i = 0; i < m_maxTexturesCount; i++)
-            {
-                m_imageInfos.push_back(m_textures[0].imageInfo);
-            }
-
+            m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxTexturesCount, m_textures.at(0).imageInfo);
             m_texturesInitialized = true;
         }
 
