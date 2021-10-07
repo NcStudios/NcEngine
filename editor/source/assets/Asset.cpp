@@ -96,7 +96,7 @@ namespace nc::editor
                 case AssetType::ConcaveCollider: { nc::LoadConcaveColliderAsset(asset.ncaPath.value()); break; }
                 case AssetType::HullCollider:    { nc::LoadConvexHullAsset(asset.ncaPath.value()); break; }
                 case AssetType::Mesh:            { /** @todo add once fixed*/ break; }
-                case AssetType::Texture:         { /** @todo add once fixed*/ break; }
+                case AssetType::Texture:         { nc::graphics::LoadTexture(asset.sourcePath.string()); break; }
                 default:                         { return false; }
             }
 

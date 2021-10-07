@@ -107,7 +107,14 @@ namespace nc::editor
 
         /** @todo add once fixed */
         // for(auto& asset : manifestData.meshes) {}
-        // for(auto& asset : manifestData.textures) {}
+
+        for(auto& asset : manifestData.textures)
+        {
+            if(!LoadAsset(asset, AssetType::Texture))
+                Output::Log("AssetManifest::ReadManifest - Failure loading Texture: " + asset.sourcePath.string());
+            
+            m_textures.Add(std::move(asset));
+        }
     }
 
     void AssetManifest::Write(const std::filesystem::path& projectDirectory) const

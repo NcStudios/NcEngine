@@ -10,7 +10,7 @@ namespace
     const auto ConcaveColliderTag = std::string{"ConcaveCollider"};
     const auto HullColliderTag = std::string{"HullCollider"};
     const auto MeshTag = std::string{"MeshTag"};
-    const auto TextureTag = std::string{"TextureTag"};
+    const auto TextureTag = std::string{"Texture"};
 
     auto ReadStandardAsset(std::ifstream& file) -> nc::editor::Asset
     {

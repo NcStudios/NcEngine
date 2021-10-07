@@ -260,18 +260,42 @@ namespace nc::editor
         ImGui::Indent();
         ImGui::Text("Mesh: ???");
         ImGui::Text("Material");
-        
-        ImGui::Text("  Base: ");
-        ImGui::SameLine();
-        ImGui::Text(material.baseColor.c_str());
 
-        ImGui::Text("  Normal: ");
-        ImGui::SameLine();
-        ImGui::Text(material.normal.c_str());
+        ImGui::Text("Base:");
+        if(ImGui::BeginCombo("##meshrendererbaseselectcombo", material.baseColor.c_str()))
+        {
+            for(const auto& asset : m_assetManifest->View(AssetType::Texture))
+            {
+                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
+                    meshRenderer->SetBaseColor(asset.sourcePath.string());
+            }
 
-        ImGui::Text("  Roughness");
-        ImGui::SameLine();
-        ImGui::Text(material.roughness.c_str());
+            ImGui::EndCombo();
+        }
+
+        ImGui::Text("Normal");
+        if(ImGui::BeginCombo("##meshrenderernormalselectcombo", material.normal.c_str()))
+        {
+            for(const auto& asset : m_assetManifest->View(AssetType::Texture))
+            {
+                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
+                    meshRenderer->SetNormal(asset.sourcePath.string());
+            }
+
+            ImGui::EndCombo();
+        }
+
+        ImGui::Text("Roughness");
+        if(ImGui::BeginCombo("##meshrendererroughnessselectcombo", material.roughness.c_str()))
+        {
+            for(const auto& asset : m_assetManifest->View(AssetType::Texture))
+            {
+                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
+                    meshRenderer->SetRoughness(asset.sourcePath.string());
+            }
+
+            ImGui::EndCombo();
+        }
 
         ImGui::Unindent();
         ImGui::EndGroup();

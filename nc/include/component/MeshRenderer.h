@@ -13,11 +13,16 @@ namespace nc
         NC_ENABLE_IN_EDITOR(MeshRenderer)
         
         public:
-            MeshRenderer(Entity entity, std::string meshUid, nc::graphics::Material material, nc::graphics::TechniqueType techniqueType);
+            MeshRenderer(Entity entity, std::string meshUid, graphics::Material material, graphics::TechniqueType techniqueType);
             
             auto GetMesh() const -> const graphics::Mesh& { return m_mesh; }
             auto GetTextureIndices() const -> const graphics::TextureIndices& { return m_textureIndices; }
             auto GetTechniqueType() const -> graphics::TechniqueType { return m_techniqueType; }
+
+            void SetMesh(std::string meshUid);
+            void SetBaseColor(const std::string& texturePath);
+            void SetNormal(const std::string& texturePath);
+            void SetRoughness(const std::string& texturePath);
 
             #ifdef NC_EDITOR_ENABLED
             auto GetMaterial() -> graphics::Material& { return m_material; }
