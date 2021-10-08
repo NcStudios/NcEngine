@@ -6,12 +6,10 @@
 
 namespace nc::graphics
 {
-    MeshesData::MeshesData(ImmutableBuffer<Vertex> vertexBuffer, 
-                           ImmutableBuffer<uint32_t> indexBuffer, 
-                           std::unordered_map<std::string, Mesh> accessors)
-    : m_vertexBuffer{std::move(vertexBuffer)},
-      m_indexBuffer{std::move(indexBuffer)},
-      m_accessors(std::move(accessors))
+    MeshesData::MeshesData()
+    : m_vertexData{},
+      m_indexData{},
+      m_accessors()
     {
     }
 
@@ -38,14 +36,14 @@ namespace nc::graphics
         return m_accessors.contains(uid);
     }
 
-    vk::Buffer* MeshesData::GetVertexBuffer()
+    VertexData& MeshesData::GetVertexData() noexcept
     {
-        return m_vertexBuffer.GetBuffer();
+        return m_vertexData;
     }
 
-    vk::Buffer* MeshesData::GetIndexBuffer()
+    IndexData& MeshesData::GetIndexData() noexcept
     {
-        return m_indexBuffer.GetBuffer();
+        return m_indexData;
     }
 
     const Mesh& MeshesData::GetAccessor(const std::string& uid) const
@@ -53,10 +51,23 @@ namespace nc::graphics
         return m_accessors.at(uid);
     }
 
+    void MeshesData::UpdateMeshes(Graphics* graphics, std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes)
+    {
+        m_vertexData.vertices = std::move(vertices);
+        m_vertexData.buffer.Clear();
+        m_vertexData.buffer = ImmutableBuffer<Vertex>(graphics, m_vertexData.vertices);
+
+        m_indexData.indices = std::move(indices);
+        m_indexData.buffer.Clear();
+        m_indexData.buffer = ImmutableBuffer<uint32_t>(graphics, m_indexData.indices);
+
+        m_accessors.insert(std::move_iterator(std::begin(meshes)), std::move_iterator(std::end(meshes)));
+    }
+
     void MeshesData::Clear() noexcept
     {
-        m_vertexBuffer.Clear();
-        m_indexBuffer.Clear();
+        m_vertexData = {};
+        m_indexData = {};
         m_accessors.clear();
     }
 

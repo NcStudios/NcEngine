@@ -25,4 +25,5 @@ namespace nc::graphics
     };
 
     void LoadMeshes(const std::vector<std::string>& paths);
+    void LoadMesh(const std::string& path);
 }
