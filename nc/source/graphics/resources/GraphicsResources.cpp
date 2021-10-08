@@ -53,11 +53,13 @@ namespace nc::graphics
 
     void MeshesData::UpdateMeshes(Graphics* graphics, std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes)
     {
-        m_vertexData.vertices = std::move(vertices);
+        m_vertexData.vertices.reserve(m_vertexData.vertices.size() + vertices.size());
+        m_vertexData.vertices.insert(m_vertexData.vertices.end(), vertices.begin(), vertices.end());
         m_vertexData.buffer.Clear();
         m_vertexData.buffer = ImmutableBuffer<Vertex>(graphics, m_vertexData.vertices);
 
-        m_indexData.indices = std::move(indices);
+        m_indexData.indices.reserve(m_indexData.indices.size() + indices.size());
+        m_indexData.indices.insert(m_indexData.indices.end(), indices.begin(), indices.end());
         m_indexData.buffer.Clear();
         m_indexData.buffer = ImmutableBuffer<uint32_t>(graphics, m_indexData.indices);
 

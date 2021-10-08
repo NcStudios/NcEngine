@@ -19,7 +19,6 @@ namespace nc::graphics
     Renderer::Renderer(graphics::Graphics* graphics)
         : m_graphics{graphics},
           m_textureManager{graphics},
-          m_meshManager{graphics},
           m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
           m_phongAndUiTechnique{nullptr}
           #ifdef NC_EDITOR_ENABLED

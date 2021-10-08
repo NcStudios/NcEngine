@@ -9,9 +9,9 @@
 #include "graphics/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/ShaderUtilities.h"
-#include "graphics/MeshManager.h"
 #include "graphics/Swapchain.h"
 #include "graphics/Base.h"
+#include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ResourceManager.h"
 
 namespace nc::graphics

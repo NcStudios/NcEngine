@@ -6,10 +6,10 @@
 #include "graphics/Commands.h"
 #include "graphics/Initializers.h"
 #include "graphics/ShaderUtilities.h"
-#include "graphics/MeshManager.h"
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/Swapchain.h"
 #include "graphics/Base.h"
+#include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ResourceManager.h"
 

@@ -2,7 +2,6 @@
 
 #include "Ecs.h"
 #include "component/MeshRenderer.h"
-#include "graphics/MeshManager.h"
 #include "graphics/TextureManager.h"
 
 namespace nc::graphics 

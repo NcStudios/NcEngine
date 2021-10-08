@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphics\TechniqueType.h"
-#include "graphics\MeshManager.h"
 #include "graphics\TextureManager.h"
 #include "graphics\techniques\PhongAndUiTechnique.h"
 #include "graphics\techniques\WireframeTechnique.h"
@@ -42,7 +41,6 @@ namespace nc::graphics
 
             graphics::Graphics* m_graphics;
             TextureManager m_textureManager;
-            MeshManager m_meshManager;
             vk::RenderPass m_mainRenderPass;
 
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;

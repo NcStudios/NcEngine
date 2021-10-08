@@ -24,7 +24,7 @@ namespace nc::graphics
     struct IndexData
     {
         ImmutableBuffer<uint32_t> buffer;
-        std::vector<uint32_t> indices; 
+        std::vector<uint32_t> indices;
     };
 
     class MeshesData

@@ -23,7 +23,4 @@ namespace nc::graphics
         uint32_t indicesCount;
         float maxExtent;
     };
-
-    void LoadMeshes(const std::vector<std::string>& paths);
-    void LoadMesh(const std::string& path);
 }

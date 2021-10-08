@@ -99,7 +99,7 @@ void InitializeResources()
                                                  defaultMeshesPath + "table.nca",
                                                  defaultMeshesPath + "token.nca",
                                                  defaultMeshesPath + "worm.nca" };
-    nc::graphics::LoadMeshes(meshPaths); 
+    nc::LoadMeshes(meshPaths); 
 
     const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto defaultNormal    = std::string{"nc/resources/texture/DefaultNormal.png"};
