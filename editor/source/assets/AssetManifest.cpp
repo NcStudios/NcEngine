@@ -2,9 +2,6 @@
 #include "ManifestSerializer.h"
 #include "utility/Output.h"
 
-
-#include <iostream>
-
 namespace nc::editor
 {
     AssetManifest::AssetManifest(const std::filesystem::path& projectDirectory)
@@ -14,6 +11,7 @@ namespace nc::editor
           m_textures{},
           m_audioClips{}
     {
+        LoadDefaultAssets();
         Read(projectDirectory);
     }
 

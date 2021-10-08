@@ -44,6 +44,10 @@ namespace nc::editor
      *  it should be built before loading. */
     bool LoadAsset(const Asset& asset, AssetType type);
 
+    /** Load resources used by the engine. These are also used as fallbacks when
+     *  loading a resource fails. */
+    void LoadDefaultAssets();
+
     /** Check if a file's extension is valid for an asset type. */
     bool HasValidExtensionForAssetType(const std::filesystem::path& assetPath, AssetType type);
     

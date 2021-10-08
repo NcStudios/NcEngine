@@ -3,6 +3,7 @@
 
 namespace
 {
+    /** @todo this is duplicated in Asset.cpp */
     const auto CubeMeshPath             = std::string{"nc/resources/mesh/cube.nca"};
     const auto CapsuleMeshPath          = std::string{"nc/resources/mesh/capsule.nca"};
     const auto SphereMeshPath           = std::string{"nc/resources/mesh/sphere.nca"};
@@ -17,14 +18,6 @@ namespace
 
 namespace nc::editor
 {
-    void LoadDefaultResources()
-    {
-        graphics::LoadMeshes(std::vector<std::string>{CubeMeshPath, CapsuleMeshPath, SphereMeshPath, PlaneMeshPath});
-        graphics::LoadTextures(std::vector<std::string>{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath});
-        LoadConvexHullAsset(CubeHullColliderPath);
-        LoadConcaveColliderAsset(PlaneConcaveColliderPath);
-    }
-
     void AddDefaultMeshRenderer(registry_type* registry, Entity entity)
     {
         registry->Add<MeshRenderer>(entity, CubeMeshPath, DefaultMaterial, graphics::TechniqueType::PhongAndUi);

@@ -66,7 +66,6 @@ namespace nc::editor
           m_newSceneDialog{std::bind(EditorUI::AddDialog, &m_editorUI, std::placeholders::_1)},
           m_changeTagDialog{registry}
     {
-        nc::editor::LoadDefaultResources();
         nc::editor::SetImGuiStyle();
         nc::ui::Set(&m_editorUI);
 

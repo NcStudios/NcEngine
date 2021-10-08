@@ -176,17 +176,14 @@ namespace nc::editor
 
         const auto& handleName = m_handleNames.at(entity.Index());
         auto* transform = m_registry->Get<Transform>(entity);
-        auto pos = transform->GetLocalPosition();
-        auto rot = transform->GetLocalRotation();
-        auto scl = transform->GetLocalScale();
         auto parent = transform->GetParent();
-        auto parentHandle = parent.Valid() ? m_handleNames.at(entity.Index()) : std::string{"Entity::Null()"};
+        auto parentHandle = parent.Valid() ? m_handleNames.at(parent.Index()) : std::string{"Entity::Null()"};
 
-        m_file << "NC_SCENE_ACTION_ADD_ENTITY( "
+        m_file << AddEntitySceneAction << "( "
                << handleName << " , "
-               << pos << " , "
-               << rot << " , "
-               << scl << " , "
+               << transform->GetLocalPosition() << " , "
+               << transform->GetLocalRotation() << " , "
+               << transform->GetLocalScale() << " , "
                << parentHandle << " , "
                << "\"" << tag << "\" , "
                << static_cast<unsigned>(entity.Layer()) << " , "
@@ -216,41 +213,25 @@ namespace nc::editor
         {
             case ColliderType::Box:
             {
-                m_file << "NC_SCENE_ACTION_ADD_BOX_COLLIDER( " 
-                       << handleName << " , "
-                       << center << " , "
-                       << scale << " , "
-                       << isTrigger << " )\n";
+                m_file << AddBoxColliderSceneAction << "( " << handleName << " , " << center << " , " << scale << " , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Capsule:
             {
                 auto height = scale.y * 2.0f;
                 auto radius = scale.x * 0.5f;
-                m_file << "NC_SCENE_ACTION_ADD_CAPSULE_COLLIDER( "
-                       << handleName << " , "
-                       << center << " , "
-                       << height << " , "
-                       << radius << " , "
-                       << isTrigger << " )\n";
+                m_file << AddCapsuleColliderSceneAction << "( " << handleName << " , " << center << " , " << height << " , " << radius << " , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Hull:
             {
-                m_file << "NC_SCENE_ACTION_ADD_HULL_COLLIDER( "
-                       << handleName << " , "
-                       << "\"" << collider->GetInfo().hullAssetPath << "\" , "
-                       << isTrigger << " )\n";
+                m_file << AddHullColliderSceneAction << "( " << handleName << " , " << "\"" << collider->GetInfo().hullAssetPath << "\" , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Sphere:
             {
                 auto radius = scale.x * 0.5f;
-                m_file << "NC_SCENE_ACTION_ADD_SPHERE_COLLIDER( "
-                       << handleName << " , "
-                       << center << " , "
-                       << radius << " , "
-                       << isTrigger << " )\n";
+                m_file << AddSphereColliderSceneAction << "( " << handleName << " , " << center << " , " << radius << " , " << isTrigger << " )\n";
                 break;
             }
         }
@@ -263,9 +244,7 @@ namespace nc::editor
         if(!collider)
             return;
         
-        m_file << "NC_SCENE_ACTION_ADD_CONCAVE_COLLIDER( "
-               << handleName << " , "
-               << collider->GetPath() << " )\n";
+        m_file << AddConcaveColliderSceneAction << "( " << handleName << " , \"" << collider->GetPath() << "\" )\n";
 
     }
 
@@ -278,7 +257,7 @@ namespace nc::editor
         if(!body)
             return;
 
-        m_file << "NC_SCENE_ACTION_ADD_PHYSICS_BODY( "
+        m_file << AddPhysicsBodySceneAction << "( "
                << handleName << " , "
                << 1.0f / body->GetInverseMass() << " , "
                << body->GetDrag() << " , "
@@ -298,7 +277,7 @@ namespace nc::editor
         
         const auto& info = light->GetInfo();
 
-        m_file << "NC_SCENE_ACTION_ADD_POINT_LIGHT( "
+        m_file << AddPointLightSceneAction << "( "
                << handleName << " , "
                << info.pos << " , "
                << info.ambient << " , "
@@ -319,7 +298,7 @@ namespace nc::editor
         const auto& material = renderer->GetMaterial();
         auto techniqueType = ToString(renderer->GetTechniqueType());
 
-        m_file << "NC_SCENE_ACTION_ADD_MESH_RENDERER( "
+        m_file << AddMeshRendererSceneAction << "( "
                << handleName << " , "
                << "\"" << renderer->GetMeshPath() << "\" , "
                << "\"" << material.baseColor << "\" , "
