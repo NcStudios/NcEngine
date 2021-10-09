@@ -23,7 +23,7 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_renderer{ nullptr },
-          m_resourceManager{std::make_unique<ResourceManager>()},
+          m_resourceManager{std::make_unique<ResourceManager>(this, config::GetMemorySettings().maxPointLights, config::GetMemorySettings().maxTextures)}, //@todo, don't pass in maxPointLights or maxTextures here
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },

@@ -7,7 +7,7 @@ namespace nc::ecs
         : m_registry{memSettings.maxTransforms},
           m_particleEmitterSystem{&m_registry, graphics},
           m_meshRendererSystem{&m_registry, graphics},
-          m_pointLightSystem{&m_registry, graphics}
+          m_pointLightSystem{&m_registry, graphics, memSettings.maxPointLights}
     {
         internal::SetActiveRegistry(&m_registry);
     }

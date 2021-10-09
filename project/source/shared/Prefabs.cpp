@@ -13,8 +13,6 @@ namespace nc::sample::prefab
     {
         switch(resource)
         {
-            case Resource::Beeper:
-                return std::string{"Beeper"};
             case Resource::Capsule:
                 return std::string{"Capsule"};
             case Resource::CapsuleBlue:
@@ -43,8 +41,6 @@ namespace nc::sample::prefab
                 return std::string{"DiscRed"};
             case Resource::RampRed:
                 return std::string{"RampRed"};
-            case Resource::Skeeball:
-                return std::string{"Skeeball"};
             case Resource::Sphere:
                 return std::string{"Sphere"};
             case Resource::SphereBlue:
@@ -67,7 +63,6 @@ namespace nc::sample::prefab
 
     namespace material
     {
-        graphics::Material Beeper{};
         graphics::Material Coin{};
         graphics::Material SolidBlue{};
         graphics::Material SolidGreen{};
@@ -95,8 +90,7 @@ void InitializeResources()
     LoadConcaveColliderAsset("project/assets/mesh_colliders/ramp.nca");
 
     const std::string defaultMeshesPath = "project/assets/mesh/";
-    auto meshPaths = std::vector<std::string> { defaultMeshesPath + "beeper.nca",
-                                                 defaultMeshesPath + "capsule.nca",
+    auto meshPaths = std::vector<std::string> {  defaultMeshesPath + "capsule.nca",
                                                  defaultMeshesPath + "coin.nca",
                                                  defaultMeshesPath + "cube.nca",
                                                  defaultMeshesPath + "planet.nca",
@@ -104,8 +98,7 @@ void InitializeResources()
                                                  defaultMeshesPath + "sphere.nca",
                                                  defaultMeshesPath + "table.nca",
                                                  defaultMeshesPath + "token.nca",
-                                                 defaultMeshesPath + "worm.nca",
-                                                 defaultMeshesPath + "skeeball.nca" };
+                                                 defaultMeshesPath + "worm.nca" };
     nc::graphics::LoadMeshes(meshPaths); 
 
     const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
@@ -136,10 +129,6 @@ void InitializeResources()
                                                   defaultTexturesPath + "Logo/Roughness.png" };
     nc::graphics::LoadTextures(texturePaths); 
 
-    material::Beeper =     graphics::Material{ .baseColor = defaultTexturesPath + "Beeper/BaseColor.png",
-                                                       .normal    = defaultTexturesPath + "Beeper/Normal.png",
-                                                       .roughness = defaultTexturesPath + "Beeper/Roughness.png" };
-    
     material::SolidBlue =  graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
                                                        .normal    = defaultNormal,
                                                        .roughness = defaultRoughness };
@@ -175,13 +164,6 @@ void InitializeResources()
 
 template<Resource Resource_t>
 Entity Create_(registry_type*, EntityInfo);
-
-template<> Entity Create_<Resource::Beeper>(registry_type* registry, EntityInfo info)
-{
-    auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, "project/assets/mesh/beeper.nca", material::Beeper, nc::graphics::TechniqueType::PhongAndUi);
-    return handle;
-}
 
 template<> Entity Create_<Resource::Capsule>(registry_type* registry, EntityInfo info)
 {
@@ -274,12 +256,6 @@ template<> Entity Create_<Resource::DiscRed>(registry_type* registry, EntityInfo
     return handle;
 }
 
-template<> Entity Create_<Resource::Skeeball>(registry_type* registry, EntityInfo info)
-{
-    auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, "project/assets/mesh/skeeball.nca", material::Default, nc::graphics::TechniqueType::PhongAndUi);
-    return handle;
-}
 
 template<> Entity Create_<Resource::RampRed>(registry_type* registry, EntityInfo info)
 {
@@ -348,7 +324,6 @@ using CreateFunc_t = Entity(*)(registry_type* registry, EntityInfo info);
 
 const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
 {
-    std::pair{Resource::Beeper,        Create_<Resource::Beeper>},
     std::pair{Resource::Capsule,       Create_<Resource::Capsule>},
     std::pair{Resource::CapsuleBlue,   Create_<Resource::CapsuleBlue>},
     std::pair{Resource::CapsuleGreen,  Create_<Resource::CapsuleGreen>},
@@ -363,7 +338,6 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::DiscGreen,     Create_<Resource::DiscGreen>},
     std::pair{Resource::DiscRed,       Create_<Resource::DiscRed>},
     std::pair{Resource::RampRed,       Create_<Resource::RampRed>},
-    std::pair{Resource::Skeeball,      Create_<Resource::Skeeball>},
     std::pair{Resource::Sphere,        Create_<Resource::Sphere>},
     std::pair{Resource::SphereBlue,    Create_<Resource::SphereBlue>},
     std::pair{Resource::SphereGreen,   Create_<Resource::SphereGreen>},

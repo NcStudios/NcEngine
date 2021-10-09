@@ -6,7 +6,6 @@ namespace nc::sample::prefab
 {
     enum class Resource : uint32_t
     {
-        Beeper,
         Capsule,
         CapsuleBlue,
         CapsuleGreen,
@@ -21,7 +20,6 @@ namespace nc::sample::prefab
         DiscGreen,
         DiscRed,
         RampRed,
-        Skeeball,
         Sphere,
         SphereBlue,
         SphereGreen,

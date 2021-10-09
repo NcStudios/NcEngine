@@ -5,9 +5,9 @@
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
-#include "job/JobSystem.h"
 #include "physics/PhysicsSystem.h"
 #include "scene/SceneSystem.h"
+#include "task/Task.h"
 #include "time/NcTime.h"
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
@@ -23,9 +23,6 @@ namespace nc::core
             void Shutdown();
 
         private:
-            bool m_isRunning;
-            float m_frameDeltaTimeFactor;
-            job::JobSystem m_jobSystem;
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
             graphics::Renderer m_renderer;
@@ -36,11 +33,16 @@ namespace nc::core
             AssetManager m_assetManager;
             audio::AudioSystem m_audioSystem;
             ui::UIImpl m_ui;
+            tf::Executor m_taskExecutor;
+            TaskGraph m_tasks;
+            float m_dt;
+            float m_frameDeltaTimeFactor;
             uint32_t m_currentImageIndex;
+            bool m_isRunning;
 
+            void BuildTaskGraph();
             void ClearState();
             void DoSceneSwap();
-            void FixedStepLogic(float dt);
             void FrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();

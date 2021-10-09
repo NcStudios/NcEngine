@@ -6,6 +6,7 @@
 #include "debug/Utils.h"
 
 #include <fstream>
+#include <iostream>
 
 namespace
 {
@@ -106,65 +107,84 @@ namespace nc::graphics
         impl->LoadMeshes(meshPaths);
     }
 
+    void LoadMesh(const std::string& meshPath)
+    {
+        IF_THROW(!impl, "graphics::LoadMesh - impl is not set");
+        impl->LoadMesh(meshPath);
+    }
+
     void MeshManager::LoadMeshes(const std::vector<std::string>& meshPaths)
     {
         std::vector<Vertex> allVertices = {};
         std::vector<uint32_t> allIndices = {};
         std::unordered_map<std::string, Mesh> meshes;
-        std::vector<std::string> pathsToLoad;
 
-        auto meshesExist = ResourceManager::HasMeshes();
-        if (meshesExist)
+        auto& vertexData = ResourceManager::GetVertexData();
+        auto& indexData = ResourceManager::GetIndexData();
+
+        allVertices.insert(std::end(allVertices), std::begin(vertexData.vertices), std::end(vertexData.vertices));
+        allIndices.insert(std::end(allIndices), std::begin(indexData.indices), std::end(indexData.indices));
+
+        for (const auto& path : meshPaths)
         {
-            pathsToLoad = ResourceManager::GetMeshPaths();
-            pathsToLoad.insert(meshPaths.end(), meshPaths.begin(), meshPaths.end());
-        }
-        else
-        {
-            pathsToLoad = meshPaths;
-        }
-
-        for (const auto& path : pathsToLoad)
-        {
-            if (ResourceManager::MeshExists(path)) continue;
-
-            if(!HasValidAssetExtension(path))
-                throw std::runtime_error("LoadMeshes - Invalid extension: " + path);
-
-            std::ifstream file{path};
-            if(!file.is_open())
-                throw std::runtime_error("LoadMeshes - Could not open file: " + path);
-
-            float maxExtent;
-            file >> maxExtent;
-            size_t vertexCount = 0;
-            file >> vertexCount;
-            std::vector<Vertex> vertices;
-            vertices.reserve(vertexCount);
-            ReadVerticesFromAsset(&file, &vertices, vertexCount);
-
-            size_t indexCount = 0;
-            file >> indexCount;
-            std::vector<uint32_t> indices;
-            indices.reserve(indexCount);
-            ReadIndicesFromAsset(&file, &indices, indexCount);
-
-            auto mesh = graphics::Mesh
-            {
-                static_cast<uint32_t>(allVertices.size()),
-                static_cast<uint32_t>(allIndices.size()),
-                static_cast<uint32_t>(indices.size()),
-                maxExtent
-            };
-
-            meshes.emplace(path, mesh);
-            allVertices.insert(std::end(allVertices), std::begin(vertices), std::end(vertices));
-            allIndices.insert(std::end(allIndices), std::begin(indices), std::end(indices));
+            CreateMesh(path, meshes, allVertices, allIndices);
         }
 
-        auto vertexBuffer = ImmutableBuffer<Vertex>(m_graphics, std::move(allVertices));
-        auto indexBuffer = ImmutableBuffer<uint32_t>(m_graphics, std::move(allIndices));
-        auto meshesData = std::make_unique<MeshesData>(std::move(vertexBuffer), std::move(indexBuffer), std::move(meshes));
-        ResourceManager::LoadMeshes(std::move(meshesData));
+        ResourceManager::UpdateMeshes(std::move(allVertices), std::move(allIndices), std::move(meshes));
+    }
+
+    void MeshManager::LoadMesh(const std::string& meshPath)
+    {
+        std::vector<Vertex> allVertices = {};
+        std::vector<uint32_t> allIndices = {};
+        std::unordered_map<std::string, Mesh> meshes;
+
+        auto& vertexData = ResourceManager::GetVertexData();
+        auto& indexData = ResourceManager::GetIndexData();
+
+        allVertices.insert(std::end(allVertices), std::begin(vertexData.vertices), std::end(vertexData.vertices));
+        allIndices.insert(std::end(allIndices), std::begin(indexData.indices), std::end(indexData.indices));
+
+        CreateMesh(meshPath, meshes, allVertices, allIndices);
+
+        ResourceManager::UpdateMeshes(std::move(allVertices), std::move(allIndices), std::move(meshes));
+    }
+
+    void MeshManager::CreateMesh(const std::string& meshPath, std::unordered_map<std::string, Mesh>& accessors, std::vector<Vertex>& allVertices, std::vector<uint32_t>& allIndices)
+    {
+        if (ResourceManager::MeshExists(meshPath)) return;
+
+        if(!HasValidAssetExtension(meshPath))
+            throw std::runtime_error("LoadMeshes - Invalid extension: " + meshPath);
+
+        std::ifstream file{meshPath};
+        if(!file.is_open())
+            throw std::runtime_error("LoadMeshes - Could not open file: " + meshPath);
+
+        float maxExtent;
+        file >> maxExtent;
+        size_t vertexCount = 0;
+        file >> vertexCount;
+        std::vector<Vertex> vertices;
+        vertices.reserve(vertexCount);
+        ReadVerticesFromAsset(&file, &vertices, vertexCount);
+
+        size_t indexCount = 0;
+        file >> indexCount;
+        std::vector<uint32_t> indices;
+        indices.reserve(indexCount);
+        ReadIndicesFromAsset(&file, &indices, indexCount);
+
+        auto mesh = graphics::Mesh
+        {
+            static_cast<uint32_t>(allVertices.size()),
+            static_cast<uint32_t>(allIndices.size()),
+            static_cast<uint32_t>(indices.size()),
+            maxExtent
+        };
+
+        accessors.emplace(meshPath, mesh);
+        allVertices.insert(std::end(allVertices), std::begin(vertices), std::end(vertices));
+        allIndices.insert(std::end(allIndices), std::begin(indices), std::end(indices));
     }
 }

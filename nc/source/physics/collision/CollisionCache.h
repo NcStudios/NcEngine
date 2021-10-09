@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Manifold.h"
+#include "physics/dynamics/Constraint.h"
 
 #include <cstdint>
 
@@ -62,12 +63,27 @@ namespace nc::physics
      *  to frame. */
     struct CollisionCache
     {
+        CollisionStepInitData initData;
+        BroadResult broadResults;
+        NarrowPhysicsResult physicsResults;
+        NarrowPhysicsResult staticResults;
+        std::vector<NarrowEvent> currentTrigger;
         std::vector<NarrowEvent> previousPhysics;
         std::vector<NarrowEvent> previousTrigger;
         std::vector<Manifold> manifolds;
+        Constraints constraints;
         size_t previousBroadPhysicsCount;
         size_t previousBroadTriggerCount;
+        double fixedTimeStep;
     };
+
+    inline void UpdateCache(CollisionCache* cache)
+    {
+        cache->previousPhysics = std::move(cache->physicsResults.events);
+        cache->previousTrigger = std::move(cache->currentTrigger);
+        cache->previousBroadPhysicsCount = cache->broadResults.physics.size();
+        cache->previousBroadTriggerCount = cache->broadResults.trigger.size();
+    }
 
     inline bool operator ==(const BroadEvent& lhs, const BroadEvent& rhs)
     {

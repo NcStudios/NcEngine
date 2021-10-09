@@ -15,13 +15,22 @@
 
 namespace nc::graphics
 {
+    struct VertexData
+    {
+        ImmutableBuffer<Vertex> buffer;
+        std::vector<Vertex> vertices;
+    };
+
+    struct IndexData
+    {
+        ImmutableBuffer<uint32_t> buffer;
+        std::vector<uint32_t> indices; 
+    };
+
     class MeshesData
     {
         public:
-            MeshesData() = default;
-            MeshesData(ImmutableBuffer<Vertex> vertexBuffer, 
-                       ImmutableBuffer<uint32_t> indexBuffer, 
-                       std::unordered_map<std::string, Mesh> accessors);
+            MeshesData();
             ~MeshesData() noexcept;
             MeshesData(MeshesData&&) = default;
             MeshesData& operator=(MeshesData&&) = default;
@@ -30,28 +39,30 @@ namespace nc::graphics
 
             const std::vector<std::string> GetMeshPaths() const;
             bool MeshExists(const std::string& uid) const noexcept;
-            vk::Buffer* GetVertexBuffer();
-            vk::Buffer* GetIndexBuffer();
+            VertexData& GetVertexData() noexcept;
+            IndexData& GetIndexData() noexcept;
+
             const Mesh& GetAccessor(const std::string& uid) const;
+            void UpdateMeshes(Graphics* graphics, std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes);
             void Clear() noexcept;
 
         private:
-            ImmutableBuffer<Vertex> m_vertexBuffer;
-            ImmutableBuffer<uint32_t> m_indexBuffer;
+            VertexData m_vertexData;
+            IndexData m_indexData; 
             std::unordered_map<std::string, Mesh> m_accessors;
+    };
+
+    struct Texture
+    {
+        ImmutableImage image;
+        vk::DescriptorImageInfo imageInfo;
+        std::string uid;
     };
 
     class TexturesData
     {
         public:
-            TexturesData() = default;
-            TexturesData(std::vector<ImmutableImage> textureBuffers, 
-                         std::vector<vk::DescriptorImageInfo> imageInfos, 
-                         std::unordered_map<std::string, uint32_t> accessors,
-                         vk::UniqueDescriptorSet descriptorSet,
-                         vk::UniqueDescriptorSetLayout descriptorSetLayout,
-                         vk::UniqueSampler sampler,
-                         vk::ImageLayout layout);
+            TexturesData(Graphics* graphics, uint32_t maxTexturesCount);
             ~TexturesData() noexcept;
             TexturesData(TexturesData&&) = default;
             TexturesData& operator=(TexturesData&&) = default;
@@ -63,19 +74,21 @@ namespace nc::graphics
             vk::DescriptorSetLayout* GetDescriptorLayout() noexcept; 
             vk::DescriptorSet* GetDescriptorSet() noexcept;
             uint32_t GetAccessor(const std::string& uid) const;
+            void AddTexture(Graphics* graphics, Texture texture);
+            void AddTextures(Graphics* graphics, std::vector<Texture> textures);
             void Clear() noexcept;
 
         private:
-            // Each texture is represented here
-            std::vector<ImmutableImage> m_textureBuffers;
+            void UpdateTextures(Graphics* graphics);
+            std::vector<Texture> m_textures;
             std::vector<vk::DescriptorImageInfo> m_imageInfos;
             std::unordered_map<std::string, uint32_t> m_accessors;
-
-            // Only need one of the below for all textures
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             vk::UniqueSampler m_sampler;
             vk::ImageLayout m_layout;
+            uint32_t m_maxTexturesCount;
+            bool m_texturesInitialized;
     };
 
     class PointLightsData

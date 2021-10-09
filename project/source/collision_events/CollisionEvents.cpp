@@ -94,13 +94,13 @@ namespace nc::sample
         auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{50.0f, 1.0f, 50.0f}, .tag = "Ground", .flags = EntityFlags::Static});
         registry->Add<Collider>(ground, BoxProperties{}, false);
 
-        auto redCube = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{3.5f, 0.0f, 4.5f}, .scale = Vector3::Splat(1.0f), .tag = "Big Red Cube", .flags = EntityFlags::Static});
+        auto redCube = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{3.5f, 0.0f, 4.5f}, .scale = Vector3::Splat(1.0f), .tag = "Big Red Cube", .flags = Entity::Flags::Static});
         registry->Add<Collider>(redCube, BoxProperties{}, false);
 
-        auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = EntityFlags::Static});
+        auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
         registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
-        auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = EntityFlags::Static});
+        auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = Entity::Flags::Static});
         registry->Add<Collider>(longRedBox, BoxProperties{}, true);
     }
 

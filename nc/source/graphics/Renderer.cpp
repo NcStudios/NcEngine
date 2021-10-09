@@ -117,8 +117,8 @@ namespace nc::graphics
     void Renderer::BindSharedData(vk::CommandBuffer* cmd)
     {
         vk::DeviceSize offsets[] = { 0 };
-        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexBuffer(), offsets);
-        cmd->bindIndexBuffer(*ResourceManager::GetIndexBuffer(), 0, vk::IndexType::eUint32);
+        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexData().buffer.GetBuffer(), offsets);
+        cmd->bindIndexBuffer(*ResourceManager::GetIndexData().buffer.GetBuffer(), 0, vk::IndexType::eUint32);
     }
 
     void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index)

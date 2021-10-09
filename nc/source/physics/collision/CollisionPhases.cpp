@@ -7,7 +7,7 @@ namespace
     using namespace nc;
     using namespace nc::physics;
 
-    auto GetColliderInteractionType(bool isTrigger, PhysicsBody* body) -> ColliderInteractionType
+    auto GetColliderInteractionType(bool isTrigger, const PhysicsBody* body) -> ColliderInteractionType
     {
         // note: could probably store this in collider... have physics body send message in c'tor
         // to update as it already gets the collider pointer
@@ -101,30 +101,27 @@ namespace
 
 namespace nc::physics
 {
-    auto FetchEstimates(registry_type* registry) -> CollisionStepInitData
+    void FetchEstimates(const registry_type* registry, CollisionStepInitData* out)
     {
         auto colliders = registry->ViewAll<Collider>();
         auto colliderCount = colliders.size();
-        
-        std::vector<DirectX::XMMATRIX> matrices;
-        std::vector<ColliderEstimate> estimates;
-        matrices.reserve(colliderCount);
-        estimates.reserve(colliderCount);
+        out->estimates.clear();
+        out->estimates.reserve(colliderCount);
+        out->matrices.clear();
+        out->matrices.reserve(colliderCount);
 
         for(uint32_t i = 0u; i < colliderCount; ++i)
         {
             const auto& collider = colliders[i];
             auto entity = collider.GetParentEntity();
-            auto* body = registry->Get<PhysicsBody>(entity);
+            const auto* body = registry->Get<PhysicsBody>(entity);
             auto interactionType = GetColliderInteractionType(collider.IsTrigger(), body);
-            matrices.push_back(registry->Get<Transform>(entity)->GetTransformationMatrix());
-            estimates.emplace_back(collider.EstimateBoundingVolume(matrices.back()), i, interactionType, collider.IsAwake());
+            out->matrices.push_back(registry->Get<Transform>(entity)->GetTransformationMatrix());
+            out->estimates.emplace_back(collider.EstimateBoundingVolume(out->matrices.back()), i, interactionType, collider.IsAwake());
         }
-
-        return CollisionStepInitData{ std::move(matrices), std::move(estimates) };
     }
 
-    void UpdateManifolds(registry_type* registry, std::vector<Manifold>& manifolds)
+    void UpdateManifolds(const registry_type* registry, std::vector<Manifold>& manifolds)
     {
         for(auto cur = manifolds.rbegin(); cur != manifolds.rend(); ++cur)
         {
@@ -163,12 +160,13 @@ namespace nc::physics
         }
     }
 
-    auto FindBroadPairs(std::span<const ColliderEstimate> estimates, size_t prevPhysicsCount, size_t prevTriggerCount) -> BroadResult
+    void FindBroadPairs(std::span<const ColliderEstimate> estimates, size_t prevPhysicsCount, size_t prevTriggerCount, BroadResult* out)
     {
-        std::vector<BroadEvent> physicsEvents;
-        std::vector<BroadEvent> triggerEvents;
-        physicsEvents.reserve(prevPhysicsCount);
-        triggerEvents.reserve(prevTriggerCount);
+        out->physics.clear();
+        out->physics.reserve(prevPhysicsCount);
+        out->trigger.clear();
+        out->trigger.reserve(prevTriggerCount);
+
         const auto count = estimates.size();
 
         for(size_t i = 0u; i < count; ++i)
@@ -192,25 +190,23 @@ namespace nc::physics
                 if(Intersect(first.estimate, second.estimate))
                 {
                     if(interactionType == CollisionEventType::Trigger)
-                        triggerEvents.emplace_back(first.index, second.index, interactionType);
+                        out->trigger.emplace_back(first.index, second.index, interactionType);
                     else
-                        physicsEvents.emplace_back(first.index, second.index, interactionType);
+                        out->physics.emplace_back(first.index, second.index, interactionType);
                 }
             }
         }
-
-        return BroadResult{ std::move(physicsEvents), std::move(triggerEvents) };
     }
 
-    auto FindNarrowPhysicsPairs(std::span<Collider> colliders, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadPhysicsEvents) -> NarrowPhysicsResult
+    void FindNarrowPhysicsPairs(registry_type* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadPhysicsEvents, NarrowPhysicsResult* out)
     {
-        std::vector<NarrowEvent> events;
-        std::vector<Contact> contacts;
         const auto broadEventCount = broadPhysicsEvents.size();
-        events.reserve(broadEventCount);
-        contacts.reserve(broadEventCount);
+        out->contacts.clear();
+        out->contacts.reserve(broadEventCount);
+        out->events.clear();
+        out->events.reserve(broadEventCount);
         CollisionState state;
-        [[maybe_unused]] auto* registry = ActiveRegistry();
+        auto colliders = registry->ViewAll<Collider>();
 
         for(auto& [i, j, eventType] : broadPhysicsEvents)
         {
@@ -241,18 +237,17 @@ namespace nc::physics
                     }
                 }
 
-                events.emplace_back(e1, e2, eventType);
-                contacts.push_back(state.contact);
+                out->events.emplace_back(e1, e2, eventType);
+                out->contacts.push_back(state.contact);
             }
         }
-
-        return NarrowPhysicsResult{ std::move(events), std::move(contacts) };
     }
 
-    auto FindNarrowTriggerPairs(std::span<Collider> colliders, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadTriggerEvents) -> std::vector<NarrowEvent>
+    void FindNarrowTriggerPairs(const registry_type* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadTriggerEvents, std::vector<NarrowEvent>* out)
     {
-        std::vector<NarrowEvent> events;
-        events.reserve(broadTriggerEvents.size());
+        out->clear();
+        out->reserve(broadTriggerEvents.size());
+        auto colliders = registry->ViewAll<Collider>();
         CollisionState state;
 
         for(const auto& [i, j, unused] : broadTriggerEvents)
@@ -264,10 +259,8 @@ namespace nc::physics
 
             if(Intersect(v1, v2, m1, m2))
             {
-                events.emplace_back(colliders[i].GetParentEntity(), colliders[j].GetParentEntity());
+                out->emplace_back(colliders[i].GetParentEntity(), colliders[j].GetParentEntity());
             }
         }
-
-        return events;
     }
 }

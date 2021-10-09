@@ -13,4 +13,5 @@ namespace nc::graphics
     };
 
     void LoadTextures(const std::vector<std::string>& paths);
+    void LoadTexture(const std::string& path);
 }

@@ -7,14 +7,20 @@ namespace nc::graphics
     class ResourceManager
     {
         public:
-            ResourceManager()
+            ResourceManager(Graphics* graphics, uint32_t maxPointLights, uint32_t maxTextures) //@todo: don't pass in maxPointLights or maxTextures here
+            : m_graphics(graphics),
+              m_meshResources{std::make_unique<MeshesData>()},
+              m_textureResources{std::make_unique<TexturesData>(graphics, maxTextures)},
+              m_objects{std::make_unique<ObjectsData>(graphics)},
+              m_pointLightResources{std::make_unique<PointLightsData>(graphics, maxPointLights)}
             {
                 m_resourceManager = this;
             }
 
             static std::vector<std::string> GetTexturePaths();
             static bool HasTextures();
-            static void LoadTextures(std::unique_ptr<TexturesData> textures);
+            static void AddTexture(Graphics* graphics, Texture texture);
+            static void AddTextures(Graphics* graphics, std::vector<Texture> textures);
             static bool TextureExists(const std::string& uid);
             static uint32_t GetTextureAccessor(const std::string& uid);
             static vk::DescriptorSet* GetTexturesDescriptorSet();
@@ -22,23 +28,23 @@ namespace nc::graphics
 
             static std::vector<std::string> GetMeshPaths();
             static bool HasMeshes();
-            static void LoadMeshes(std::unique_ptr<MeshesData> meshes);
+            static void UpdateMeshes(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes);
             static bool MeshExists(const std::string& uid);
             static const Mesh& GetMeshAccessor(const std::string& uid);
-            static vk::Buffer* GetVertexBuffer();
-            static vk::Buffer* GetIndexBuffer();
+            static VertexData& GetVertexData();
+            static IndexData& GetIndexData();
 
-            static void InitializePointLights(graphics::Graphics* graphics, uint32_t maxPointLights);
+            static void InitializePointLights(Graphics* graphics, uint32_t maxPointLights);
             static void UpdatePointLights(const std::vector<nc::PointLightInfo>& pointLights);
             static vk::DescriptorSet* GetPointLightsDescriptorSet();
             static vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout();
-            static void ResetPointLights(graphics::Graphics* graphics, uint32_t maxPointLights);
+            static void ResetPointLights(Graphics* graphics, uint32_t maxPointLights);
 
-            static void InitializeObjects(graphics::Graphics* graphics);
+            static void InitializeObjects(Graphics* graphics);
             static void UpdateObjects(const std::vector<ObjectData>& objects);
             static vk::DescriptorSet* GetObjectsDescriptorSet();
             static vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout();
-            static void ResetObjects(graphics::Graphics* graphics);
+            static void ResetObjects(Graphics* graphics);
 
             static void InitializeShadowMap(graphics::Graphics* graphics);
             static void ResizeShadowMap(Vector2 dimensions);
@@ -51,7 +57,8 @@ namespace nc::graphics
         private:
             std::vector<std::string> GetTexturePaths_();
             bool HasTextures_();
-            void LoadTextures_(std::unique_ptr<TexturesData> textures);
+            void AddTexture_(Graphics* graphics, Texture texture);
+            void AddTextures_(Graphics* graphics, std::vector<Texture> textures);
             bool TextureExists_(const std::string& uid);
             uint32_t GetTextureAccessor_(const std::string& uid);
             vk::DescriptorSet* GetTexturesDescriptorSet_();
@@ -59,23 +66,26 @@ namespace nc::graphics
 
             std::vector<std::string> GetMeshPaths_();
             bool HasMeshes_();
+            void UpdateMeshes_(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes);
             void LoadMeshes_(std::unique_ptr<MeshesData> meshes);
             bool MeshExists_(const std::string& uid);
             const Mesh& GetMeshAccessor_(const std::string& uid);
             vk::Buffer* GetVertexBuffer_();
             vk::Buffer* GetIndexBuffer_();
+            VertexData& GetVertexData_();
+            IndexData& GetIndexData_();
 
-            void InitializePointLights_(graphics::Graphics* graphics, uint32_t maxPointLights);
+            void InitializePointLights_(Graphics* graphics, uint32_t maxPointLights);
             void UpdatePointLights_(const std::vector<nc::PointLightInfo>& pointLights);
             vk::DescriptorSet* GetPointLightsDescriptorSet_();
             vk::DescriptorSetLayout* GetPointLightsDescriptorSetLayout_();
-            void ResetPointLights_(graphics::Graphics* graphics, uint32_t maxPointLights);
+            void ResetPointLights_(Graphics* graphics, uint32_t maxPointLights);
 
-            void InitializeObjects_(graphics::Graphics* graphics);
+            void InitializeObjects_(Graphics* graphics);
             void UpdateObjects_(const std::vector<ObjectData>& objects);
             vk::DescriptorSet* GetObjectsDescriptorSet_();
             vk::DescriptorSetLayout* GetObjectsDescriptorSetLayout_();
-            void ResetObjects_(graphics::Graphics* graphics);
+            void ResetObjects_(Graphics* graphics);
 
             void InitializeShadowMap_(graphics::Graphics* graphics);
             void ResizeShadowMap_(Vector2 dimensions);
@@ -88,11 +98,12 @@ namespace nc::graphics
             static ResourceManager& Get();
 
             inline static ResourceManager* m_resourceManager = nullptr;
+            Graphics* m_graphics;
             std::unique_ptr<MeshesData> m_meshResources;
             std::unique_ptr<TexturesData> m_textureResources;
-            std::unique_ptr<PointLightsData> m_pointLightResources;
             std::unique_ptr<ObjectsData> m_objects;
             std::unique_ptr<ShadowMapData> m_shadowMapData;
+            std::unique_ptr<PointLightsData> m_pointLightResources;
     };
 
     inline ResourceManager& ResourceManager::Get()
@@ -111,9 +122,14 @@ namespace nc::graphics
         return Get().HasTextures_();
     }
 
-    inline void ResourceManager::LoadTextures(std::unique_ptr<TexturesData> textures)
+    inline void ResourceManager::AddTexture(Graphics* graphics, Texture texture)
     {
-        Get().LoadTextures_(std::move(textures));
+        Get().AddTexture_(graphics, std::move(texture));
+    }
+
+    inline void ResourceManager::AddTextures(Graphics* graphics, std::vector<Texture> textures)
+    {
+        Get().AddTextures_(graphics, std::move(textures));
     }
 
     inline bool ResourceManager::TextureExists(const std::string& uid)
@@ -146,9 +162,9 @@ namespace nc::graphics
         return Get().HasMeshes_();
     }
 
-    inline void ResourceManager::LoadMeshes(std::unique_ptr<MeshesData> meshes)
+    inline void ResourceManager::UpdateMeshes(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes)
     {
-        Get().LoadMeshes_(std::move(meshes));
+        Get().UpdateMeshes_(std::move(vertices), std::move(indices), std::move(meshes));
     }
 
     inline bool ResourceManager::MeshExists(const std::string& uid)
@@ -161,17 +177,17 @@ namespace nc::graphics
         return Get().GetMeshAccessor_(uid);
     }
 
-    inline vk::Buffer* ResourceManager::GetVertexBuffer()
+    inline VertexData& ResourceManager::GetVertexData()
     {
-        return Get().GetVertexBuffer_();
+        return Get().GetVertexData_();
     }
 
-    inline vk::Buffer* ResourceManager::GetIndexBuffer()
+    inline IndexData& ResourceManager::GetIndexData()
     {
-        return Get().GetIndexBuffer_();
+        return Get().GetIndexData_();
     }
 
-    inline void ResourceManager::InitializePointLights(graphics::Graphics* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::InitializePointLights(Graphics* graphics, uint32_t maxPointLights)
     {
         Get().InitializePointLights_(graphics, maxPointLights);
     }
@@ -191,12 +207,12 @@ namespace nc::graphics
         return Get().GetPointLightsDescriptorSet_();
     }
 
-    inline void ResourceManager::ResetPointLights(graphics::Graphics* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::ResetPointLights(Graphics* graphics, uint32_t maxPointLights)
     {
         return Get().ResetPointLights_(graphics, maxPointLights);
     }
 
-    inline void ResourceManager::InitializeObjects(graphics::Graphics* graphics)
+    inline void ResourceManager::InitializeObjects(Graphics* graphics)
     {
         Get().InitializeObjects_(graphics);
     }
@@ -216,7 +232,7 @@ namespace nc::graphics
         return Get().GetObjectsDescriptorSet_();
     }
 
-    inline void ResourceManager::ResetObjects(graphics::Graphics* graphics)
+    inline void ResourceManager::ResetObjects(Graphics* graphics)
     {
         return Get().ResetObjects_(graphics);
     }
@@ -261,9 +277,14 @@ namespace nc::graphics
         return m_textureResources != nullptr;
     }
 
-    inline void ResourceManager::LoadTextures_(std::unique_ptr<TexturesData> textures)
+    inline void ResourceManager::AddTexture_(Graphics* graphics, Texture texture)
     {
-        m_textureResources = std::move(textures);
+        m_textureResources->AddTexture(graphics, std::move(texture));
+    }
+
+    inline void ResourceManager::AddTextures_(Graphics* graphics, std::vector<Texture> textures)
+    {
+        m_textureResources->AddTextures(graphics, std::move(textures));
     }
 
     inline bool ResourceManager::TextureExists_(const std::string& uid)
@@ -297,9 +318,9 @@ namespace nc::graphics
         return m_meshResources != nullptr;
     }
 
-    inline void ResourceManager::LoadMeshes_(std::unique_ptr<MeshesData> meshes)
+    inline void ResourceManager::UpdateMeshes_(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes)
     {
-        m_meshResources = std::move(meshes);
+        m_meshResources->UpdateMeshes(m_graphics, std::move(vertices), std::move(indices), std::move(meshes));
     }
 
     inline bool ResourceManager::MeshExists_(const std::string& uid)
@@ -313,17 +334,17 @@ namespace nc::graphics
         return m_meshResources->GetAccessor(uid);
     }
 
-    inline vk::Buffer* ResourceManager::GetVertexBuffer_()
+    inline VertexData& ResourceManager::GetVertexData_()
     {
-        return m_meshResources->GetVertexBuffer();
+        return m_meshResources->GetVertexData();
     }
 
-    inline vk::Buffer* ResourceManager::GetIndexBuffer_()
+    inline IndexData& ResourceManager::GetIndexData_()
     {
-        return m_meshResources->GetIndexBuffer();
+        return m_meshResources->GetIndexData();
     }
 
-    inline void ResourceManager::InitializePointLights_(graphics::Graphics* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::InitializePointLights_(Graphics* graphics, uint32_t maxPointLights)
     {
         m_pointLightResources = std::make_unique<PointLightsData>(graphics, maxPointLights);
     }
@@ -333,7 +354,7 @@ namespace nc::graphics
         m_pointLightResources->Update(pointLights);
     }
 
-    inline void ResourceManager::ResetPointLights_(graphics::Graphics* graphics, uint32_t maxPointLights)
+    inline void ResourceManager::ResetPointLights_(Graphics* graphics, uint32_t maxPointLights)
     {
         m_pointLightResources.reset();
         m_pointLightResources = std::make_unique<PointLightsData>(graphics, maxPointLights);
@@ -349,7 +370,7 @@ namespace nc::graphics
         return m_pointLightResources->GetDescriptorSet();
     }
 
-    inline void ResourceManager::InitializeObjects_(graphics::Graphics* graphics)
+    inline void ResourceManager::InitializeObjects_(Graphics* graphics)
     {
         m_objects = std::make_unique<ObjectsData>(graphics);
     }
@@ -359,7 +380,7 @@ namespace nc::graphics
         m_objects->Update(objects);
     }
 
-    inline void ResourceManager::ResetObjects_(graphics::Graphics* graphics)
+    inline void ResourceManager::ResetObjects_(Graphics* graphics)
     {
         m_objects.reset();
         m_objects = std::make_unique<ObjectsData>(graphics);

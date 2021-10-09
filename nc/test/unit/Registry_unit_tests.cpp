@@ -52,11 +52,11 @@ struct FakeAutoComponent : public AutoComponent
     int value;
 };
 
-constexpr auto Handle1 = Entity{EntityUtils::Join(0u, 0u, 0u, 0u)};
-constexpr auto Handle2 = Entity{EntityUtils::Join(1u, 0u, 0u, 0u)};
-constexpr auto Handle3 = Entity{EntityUtils::Join(2u, 0u, 0u, 0u)};
-constexpr auto Handle4 = Entity{EntityUtils::Join(3u, 0u, 0u, 0u)};
-constexpr auto Handle5 = Entity{EntityUtils::Join(4u, 0u, 0u, 0u)};
+constexpr auto Handle1 = Entity{0u, 0u, 0u};
+constexpr auto Handle2 = Entity{1u, 0u, 0u};
+constexpr auto Handle3 = Entity{2u, 0u, 0u};
+constexpr auto Handle4 = Entity{3u, 0u, 0u};
+constexpr auto Handle5 = Entity{4u, 0u, 0u};
 const auto TestInfo = EntityInfo{};
 
 class Registry_unit_tests : public ::testing::Test
@@ -140,7 +140,7 @@ TEST_F(Registry_unit_tests, AddComponent_ValidCall_ConstructsObject)
 
 TEST_F(Registry_unit_tests, AddComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Add<Fake1>(Entity{0u}, 1), std::runtime_error);
+    EXPECT_THROW(registry.Add<Fake1>(Entity{0u, 0u, 0u}, 1), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, AddComponent_ReplaceAfterRemove_ConstructsObject)
@@ -173,7 +173,7 @@ TEST_F(Registry_unit_tests, RemoveComponent_ComponentExists_Removes)
 
 TEST_F(Registry_unit_tests, RemoveComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Remove<Fake1>(Entity{0u}), std::runtime_error);
+    EXPECT_THROW(registry.Remove<Fake1>(Entity{0u, 0u, 0u}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, RemoveComponent_ComponentDoesNotExist_Throws)
@@ -218,7 +218,7 @@ TEST_F(Registry_unit_tests, ContainsComponent_Exists_ReturnsTrue)
 
 TEST_F(Registry_unit_tests, ContainsComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Contains<Fake1>(Entity{0u}), std::runtime_error);
+    EXPECT_THROW(registry.Contains<Fake1>(Entity{0u, 0u, 0u}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsComponent_ExistsStaged_ReturnsTrue)
@@ -259,7 +259,7 @@ TEST_F(Registry_unit_tests, GetComponent_Exists_ReturnsPointer)
 
 TEST_F(Registry_unit_tests, GetComponent_BadEntity_ReturnsNull)
 {
-    auto* actual = registry.Get<Fake1>(Entity{0u});
+    auto* actual = registry.Get<Fake1>(Entity{0u, 0u, 0u});
     EXPECT_EQ(actual, nullptr);
 }
 
@@ -305,7 +305,7 @@ TEST_F(Registry_unit_tests, GetComponentConst_Exists_ReturnsPointer)
 TEST_F(Registry_unit_tests, GetComponentConst_BadEntity_ReturnsNull)
 {
     const auto& constRegistry = registry;
-    const auto* actual = constRegistry.Get<Fake1>(Entity{0u});
+    const auto* actual = constRegistry.Get<Fake1>(Entity{0u, 0u, 0u});
     EXPECT_EQ(actual, nullptr);
 }
 
@@ -349,7 +349,7 @@ TEST_F(Registry_unit_tests, AddAutoComponent_ValidCall_ConstructsObject)
 
 TEST_F(Registry_unit_tests, AddAutoComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Add<FakeAutoComponent>(Entity{0u}, 1), std::runtime_error);
+    EXPECT_THROW(registry.Add<FakeAutoComponent>(Entity{0u, 0u, 0u}, 1), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, AddAutoComponent_ReplaceAfterRemove_ConstructsObject)
@@ -382,7 +382,7 @@ TEST_F(Registry_unit_tests, RemoveAutoComponent_ComponentExists_Removes)
 
 TEST_F(Registry_unit_tests, RemoveAutoComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Remove<FakeAutoComponent>(Entity{0u}), std::runtime_error);
+    EXPECT_THROW(registry.Remove<FakeAutoComponent>(Entity{0u, 0u, 0u}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, RemoveAutoComponent_ComponentDoesNotExist_Throws)
@@ -420,7 +420,7 @@ TEST_F(Registry_unit_tests, ContainsAutoComponent_Exists_ReturnsTrue)
 
 TEST_F(Registry_unit_tests, ContainsAutoComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Contains<FakeAutoComponent>(Entity{0u}), std::runtime_error);
+    EXPECT_THROW(registry.Contains<FakeAutoComponent>(Entity{0u, 0u, 0u}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsAutoComponent_ExistsStaged_ReturnsTrue)
@@ -461,7 +461,7 @@ TEST_F(Registry_unit_tests, GetAutoComponent_Exists_ReturnsPointer)
 
 TEST_F(Registry_unit_tests, GetAutoComponent_BadEntity_Throws)
 {
-    auto* actual = registry.Get<FakeAutoComponent>(Entity{0u});
+    auto* actual = registry.Get<FakeAutoComponent>(Entity{0u, 0u, 0u});
     EXPECT_EQ(actual, nullptr);
 }
 
@@ -507,7 +507,7 @@ TEST_F(Registry_unit_tests, GetAutoComponentConst_Exists_ReturnsPointer)
 TEST_F(Registry_unit_tests, GetAutoComponentConst_BadEntity_ReturnsNull)
 {
     const auto& constRegistry = registry;
-    const auto* actual = constRegistry.Get<FakeAutoComponent>(Entity{8u});
+    const auto* actual = constRegistry.Get<FakeAutoComponent>(Entity{8u, 0u, 0u});
     EXPECT_EQ(actual, nullptr);
 }
 

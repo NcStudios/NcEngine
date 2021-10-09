@@ -13,8 +13,8 @@
 namespace
 {
     std::function<void(nc::physics::LayerMask)> LayerSelectCallback = nullptr;
-    const auto CoinLayer = nc::EntityTraits::layer_type{1u};
-    const auto TokenLayer = nc::EntityTraits::layer_type{2u};
+    const auto CoinLayer = nc::Entity::layer_type{1u};
+    const auto TokenLayer = nc::Entity::layer_type{2u};
     const auto MaskNone = nc::physics::LayerMask32None;
     const auto MaskAll = nc::physics::LayerMask32All;
     const auto MaskCoin = nc::physics::LayerMask32{1u};

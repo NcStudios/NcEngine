@@ -31,7 +31,7 @@ namespace nc
             void ApplyTorqueImpulse(DirectX::FXMVECTOR torque);
             void ApplyVelocity(DirectX::FXMVECTOR delta);
             void ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta);
-            void UpdateWorldInertia(Transform* transform);
+            void UpdateWorldInertia(const Transform* transform);
             auto Integrate(Transform* transform, float dt) -> IntegrationResult;
             void Wake() { m_framesAtThreshold = 0u; m_awake = true; }
             void Sleep() { m_awake = false; }

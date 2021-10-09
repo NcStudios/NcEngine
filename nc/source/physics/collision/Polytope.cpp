@@ -162,9 +162,8 @@ namespace nc::physics
         const auto& cso3 = m_vertices.at(i3);
         auto [u, v, w] = BarycentricProjection(normal * distanceFromOrigin, cso1, cso2, cso3);
 
-        /** @todo This has happened previously, but it seems like it may have been in an already
-         *  problematic case. I'm leaving the check for now, but it should be removed from release
-         *  builds eventually. */
+        /** @todo Still leaving this check. Checking for duplicate vertices in Gjk
+         *  before moving to Epa hopefully fixed this. */
         if(std::isnan(u) || std::isnan(v) || std::isnan(w))
         {
             throw std::runtime_error("Polytope::GetContacts - NaN in Barycentric Projection");
