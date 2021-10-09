@@ -7,7 +7,8 @@ namespace nc::graphics
     {
         public:
             ResourceManager(Graphics* graphics, uint32_t maxPointLights, uint32_t maxTextures) //@todo: don't pass in maxPointLights or maxTextures here
-            : m_meshResources{nullptr},
+            : m_graphics(graphics),
+              m_meshResources{std::make_unique<MeshesData>()},
               m_textureResources{std::make_unique<TexturesData>(graphics, maxTextures)},
               m_objects{std::make_unique<ObjectsData>(graphics)},
               m_pointLightResources{std::make_unique<PointLightsData>(graphics, maxPointLights)}
@@ -26,11 +27,11 @@ namespace nc::graphics
 
             static std::vector<std::string> GetMeshPaths();
             static bool HasMeshes();
-            static void LoadMeshes(std::unique_ptr<MeshesData> meshes);
+            static void UpdateMeshes(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes);
             static bool MeshExists(const std::string& uid);
             static const Mesh& GetMeshAccessor(const std::string& uid);
-            static vk::Buffer* GetVertexBuffer();
-            static vk::Buffer* GetIndexBuffer();
+            static VertexData& GetVertexData();
+            static IndexData& GetIndexData();
 
             static void InitializePointLights(Graphics* graphics, uint32_t maxPointLights);
             static void UpdatePointLights(const std::vector<nc::PointLightInfo>& pointLights);
@@ -58,11 +59,14 @@ namespace nc::graphics
 
             std::vector<std::string> GetMeshPaths_();
             bool HasMeshes_();
+            void UpdateMeshes_(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes);
             void LoadMeshes_(std::unique_ptr<MeshesData> meshes);
             bool MeshExists_(const std::string& uid);
             const Mesh& GetMeshAccessor_(const std::string& uid);
             vk::Buffer* GetVertexBuffer_();
             vk::Buffer* GetIndexBuffer_();
+            VertexData& GetVertexData_();
+            IndexData& GetIndexData_();
 
             void InitializePointLights_(Graphics* graphics, uint32_t maxPointLights);
             void UpdatePointLights_(const std::vector<nc::PointLightInfo>& pointLights);
@@ -81,6 +85,7 @@ namespace nc::graphics
             static ResourceManager& Get();
 
             inline static ResourceManager* m_resourceManager = nullptr;
+            Graphics* m_graphics;
             std::unique_ptr<MeshesData> m_meshResources;
             std::unique_ptr<TexturesData> m_textureResources;
             std::unique_ptr<ObjectsData> m_objects;
@@ -146,9 +151,9 @@ namespace nc::graphics
         return Get().HasMeshes_();
     }
 
-    inline void ResourceManager::LoadMeshes(std::unique_ptr<MeshesData> meshes)
+    inline void ResourceManager::UpdateMeshes(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes)
     {
-        Get().LoadMeshes_(std::move(meshes));
+        Get().UpdateMeshes_(std::move(vertices), std::move(indices), std::move(meshes));
     }
 
     inline bool ResourceManager::MeshExists(const std::string& uid)
@@ -161,14 +166,14 @@ namespace nc::graphics
         return Get().GetMeshAccessor_(uid);
     }
 
-    inline vk::Buffer* ResourceManager::GetVertexBuffer()
+    inline VertexData& ResourceManager::GetVertexData()
     {
-        return Get().GetVertexBuffer_();
+        return Get().GetVertexData_();
     }
 
-    inline vk::Buffer* ResourceManager::GetIndexBuffer()
+    inline IndexData& ResourceManager::GetIndexData()
     {
-        return Get().GetIndexBuffer_();
+        return Get().GetIndexData_();
     }
 
     inline void ResourceManager::InitializePointLights(Graphics* graphics, uint32_t maxPointLights)
@@ -277,9 +282,9 @@ namespace nc::graphics
         return m_meshResources != nullptr;
     }
 
-    inline void ResourceManager::LoadMeshes_(std::unique_ptr<MeshesData> meshes)
+    inline void ResourceManager::UpdateMeshes_(std::vector<Vertex> vertices, std::vector<uint32_t> indices, std::unordered_map<std::string, Mesh> meshes)
     {
-        m_meshResources = std::move(meshes);
+        m_meshResources->UpdateMeshes(m_graphics, std::move(vertices), std::move(indices), std::move(meshes));
     }
 
     inline bool ResourceManager::MeshExists_(const std::string& uid)
@@ -293,14 +298,14 @@ namespace nc::graphics
         return m_meshResources->GetAccessor(uid);
     }
 
-    inline vk::Buffer* ResourceManager::GetVertexBuffer_()
+    inline VertexData& ResourceManager::GetVertexData_()
     {
-        return m_meshResources->GetVertexBuffer();
+        return m_meshResources->GetVertexData();
     }
 
-    inline vk::Buffer* ResourceManager::GetIndexBuffer_()
+    inline IndexData& ResourceManager::GetIndexData_()
     {
-        return m_meshResources->GetIndexBuffer();
+        return m_meshResources->GetIndexData();
     }
 
     inline void ResourceManager::InitializePointLights_(Graphics* graphics, uint32_t maxPointLights)
