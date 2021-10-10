@@ -13,7 +13,7 @@ namespace nc::graphics
         DirectX::XMMATRIX projectionMatrix;
         Vector3 cameraPosition;
         std::vector<ObjectData> objectData;
-        std::vector<Mesh> meshes;
+        std::vector<MeshView> meshes;
         std::vector<PointLightInfo> pointLightInfos;
         bool isPointLightBindRequired;
     };

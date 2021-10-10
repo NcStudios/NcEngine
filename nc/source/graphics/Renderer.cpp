@@ -7,7 +7,6 @@
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
 #include "PerFrameRenderState.h"
-#include "graphics/resources/ResourceManager.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/Swapchain.h"
 #include "graphics/Initializers.h"
@@ -16,9 +15,12 @@
 
 namespace nc::graphics
 {
-    Renderer::Renderer(graphics::Graphics* graphics)
+    Renderer::Renderer(graphics::Graphics* graphics, 
+                       std::function<vk::Buffer*()> getVertexBufferFunc,
+                       std::function<vk::Buffer*()> getIndexBufferFunc)
         : m_graphics{graphics},
-          m_textureManager{graphics},
+          m_getMeshVertexBuffer{std::move(getVertexBufferFunc)},
+          m_getMeshIndexBuffer{std::move(getIndexBufferFunc)},
           m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
           m_phongAndUiTechnique{nullptr}
           #ifdef NC_EDITOR_ENABLED
@@ -101,8 +103,8 @@ namespace nc::graphics
     void Renderer::BindSharedData(vk::CommandBuffer* cmd)
     {
         vk::DeviceSize offsets[] = { 0 };
-        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexData().buffer.GetBuffer(), offsets);
-        cmd->bindIndexBuffer(*ResourceManager::GetIndexData().buffer.GetBuffer(), 0, vk::IndexType::eUint32);
+        cmd->bindVertexBuffers(0, 1, m_getMeshVertexBuffer(), offsets);
+        cmd->bindIndexBuffer(*(m_getMeshIndexBuffer()), 0, vk::IndexType::eUint32);
     }
 
     void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index)

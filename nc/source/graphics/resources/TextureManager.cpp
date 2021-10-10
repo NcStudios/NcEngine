@@ -1,0 +1,92 @@
+#include "TextureManager.h"
+#include "graphics/Initializers.h"
+#include "debug/Utils.h"
+
+namespace nc::graphics
+{
+    TextureManager::TextureManager(Graphics* graphics, uint32_t maxTextures)
+        : m_graphics{graphics},
+          m_imageInfos{},
+          m_descriptorSet{},
+          m_descriptorSetLayout{},
+          m_sampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_layout{},
+          m_maxTexturesCount{maxTextures},
+          m_texturesInitialized{false}
+    {
+        // Create and bind the descriptor set for the array of textures.
+        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings 
+        {
+          CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment),
+          CreateDescriptorSetLayoutBinding(1, m_maxTexturesCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
+        };
+
+        m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagBitsEXT::ePartiallyBound );
+        m_descriptorSet = CreateDescriptorSet(graphics, graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+    }
+
+    TextureManager::~TextureManager() noexcept
+    {
+        m_descriptorSet.reset();
+        m_descriptorSetLayout.reset();
+        m_sampler.reset();
+    }
+
+    void TextureManager::Initialize(Graphics* graphics)
+    {
+        (void)graphics;
+    }
+
+    void TextureManager::Update(const std::vector<Texture>& data)
+    {
+        assert(data.size() < m_maxTexturesCount && !data.empty());
+
+        std::array<vk::WriteDescriptorSet, 2> writes;
+        vk::DescriptorImageInfo samplerInfo = {};
+        samplerInfo.sampler = m_sampler.get();
+
+        if (!m_texturesInitialized)
+        {
+            m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxTexturesCount, data.at(0).imageInfo);
+            m_texturesInitialized = true;
+        }
+
+        writes[0].setDstBinding(0);
+        writes[0].setDstArrayElement(0);
+        writes[0].setDescriptorType(vk::DescriptorType::eSampler);
+        writes[0].setDescriptorCount(1);
+        writes[0].setDstSet(m_descriptorSet.get());
+        writes[0].setPBufferInfo(0);
+        writes[0].setPImageInfo(&samplerInfo);
+
+        std::transform(data.cbegin(), data.cend(), m_imageInfos.begin(), [](const auto& texture)
+        {
+            return texture.imageInfo;
+        });
+
+        writes[1].setDstBinding(1);
+        writes[1].setDstArrayElement(0);
+        writes[1].setDescriptorType(vk::DescriptorType::eSampledImage);
+        writes[1].setDescriptorCount(m_maxTexturesCount);
+        writes[1].setDstSet(m_descriptorSet.get());
+        writes[1].setPBufferInfo(0);
+        writes[1].setPImageInfo(m_imageInfos.data());
+
+        m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(2, writes.data(), 0, nullptr);
+    }
+
+    auto TextureManager::GetDescriptorSet() -> vk::DescriptorSet*
+    {
+        return &m_descriptorSet.get();
+    }
+
+    auto TextureManager::GetDescriptorSetLayout() -> vk::DescriptorSetLayout*
+    {
+        return &m_descriptorSetLayout.get();
+    }
+
+    void TextureManager::Reset(Graphics* graphics)
+    {
+        (void)graphics;
+    }
+}

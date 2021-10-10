@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/Mesh.h"
+#include "math/Vector.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 #include <array>

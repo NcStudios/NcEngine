@@ -32,9 +32,9 @@ namespace nc::sample
         const std::string boxNormalPath = defaultTexturesPath + "Box/Normal.png";
         const std::string boxRoughnessPath = defaultTexturesPath + "Box/Roughness.png";
 
-        nc::graphics::LoadTexture(boxBaseColorPath);
-        nc::graphics::LoadTexture(boxNormalPath);
-        nc::graphics::LoadTexture(boxRoughnessPath);
+        nc::LoadTexture(boxBaseColorPath);
+        nc::LoadTexture(boxNormalPath);
+        nc::LoadTexture(boxRoughnessPath);
 
         auto material =  graphics::Material{ .baseColor = defaultTexturesPath + "Box/BaseColor.png",
                                              .normal    = defaultTexturesPath + "Box/Normal.png",

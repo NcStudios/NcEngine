@@ -1,5 +1,4 @@
 #include "VertexDescriptions.h"
-#include "graphics/Mesh.h"
 
 namespace nc::graphics
 {

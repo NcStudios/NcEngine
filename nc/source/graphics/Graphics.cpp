@@ -7,7 +7,7 @@
 #include "resources/DepthStencil.h"
 #include "Swapchain.h"
 #include "Renderer.h"
-#include "resources/ResourceManager.h"
+#include "resources/ShaderResourceServices.h"
 #include "config/Config.h"
 
 namespace
@@ -23,7 +23,7 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_renderer{ nullptr },
-          m_resourceManager{std::make_unique<ResourceManager>(this, config::GetMemorySettings().maxPointLights, config::GetMemorySettings().maxTextures)}, //@todo, don't pass in maxPointLights or maxTextures here
+          m_serviceFramework{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings()) },
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
@@ -136,7 +136,8 @@ namespace nc::graphics
     {
         WaitIdle();
         m_renderer->Clear();
-        ResourceManager::Clear();
+        ShaderResourceService<ObjectData>::Get()->Reset(this);
+        ShaderResourceService<PointLightInfo>::Get()->Reset(this);
     }
     
     void Graphics::SetClearColor(std::array<float, 4> color)

@@ -12,7 +12,7 @@
 #include "graphics/Swapchain.h"
 #include "graphics/Base.h"
 #include "graphics/VertexDescriptions.h"
-#include "graphics/resources/ResourceManager.h"
+#include "assets/AssetService.h"
 
 namespace nc::graphics
 {
@@ -125,7 +125,7 @@ namespace nc::graphics
 
         if (m_debugWidget.has_value())
         {
-            const auto& meshAccessor = ResourceManager::GetMeshAccessor(m_debugWidget->meshUid);
+            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
             pushConstants.model = m_debugWidget->transformationMatrix;
             cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance

@@ -8,7 +8,6 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/Renderer.cpp
         ${ROOT_DIR}/source/graphics/ShaderUtilities.cpp
         ${ROOT_DIR}/source/graphics/Swapchain.cpp
-        ${ROOT_DIR}/source/graphics/TextureManager.cpp
         ${ROOT_DIR}/source/graphics/VertexDescriptions.cpp
         ${ROOT_DIR}/source/graphics/vma.cpp
 )

@@ -1,7 +1,5 @@
 #include "Prefabs.h"
 #include "Assets.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/Material.h"
 #include "graphics/TechniqueType.h"
 
@@ -127,7 +125,7 @@ void InitializeResources()
                                                   defaultTexturesPath + "Logo/BaseColor.png",
                                                   defaultTexturesPath + "Logo/Normal.png",
                                                   defaultTexturesPath + "Logo/Roughness.png" };
-    nc::graphics::LoadTextures(texturePaths); 
+    nc::LoadTextures(texturePaths); 
 
     material::SolidBlue =  graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
                                                        .normal    = defaultNormal,

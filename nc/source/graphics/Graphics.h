@@ -7,7 +7,12 @@
 
 namespace nc::graphics
 {
-   class Base; class Commands; class Swapchain; class DepthStencil; class Renderer; class ResourceManager;
+    class Base;
+    class Commands;
+    class Swapchain;
+    class DepthStencil;
+    class Renderer;
+    class ShaderResourceServices;
 
     class Graphics
     {
@@ -56,7 +61,7 @@ namespace nc::graphics
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             Renderer* m_renderer;
-            std::unique_ptr<ResourceManager> m_resourceManager; // @todo: This doesn't need to be a unique pointer.
+            std::unique_ptr<ShaderResourceServices> m_serviceFramework;
             uint32_t m_imageIndex;
 
             Vector2 m_dimensions;

@@ -11,10 +11,12 @@
 #include "graphics/Base.h"
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/resources/ResourceManager.h"
+#include "graphics/resources/ShaderResourceService.h"
 
 namespace nc::graphics
 {
+    struct Texture;
+
     PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
@@ -49,7 +51,13 @@ namespace nc::graphics
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(PhongPushConstants)); // PushConstants
-        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetTexturesDescriptorSetLayout(), *ResourceManager::GetPointLightsDescriptorSetLayout(), *ResourceManager::GetObjectsDescriptorSetLayout()};
+        std::vector<vk::DescriptorSetLayout> descriptorLayouts =
+        {
+            *ShaderResourceService<Texture>::Get()->GetDescriptorSetLayout(),
+            *ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSetLayout(),
+            *ShaderResourceService<ObjectData>::Get()->GetDescriptorSetLayout()
+        };
+
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
@@ -95,13 +103,13 @@ namespace nc::graphics
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetTexturesDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ResourceManager::GetPointLightsDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 2, 1, ResourceManager::GetObjectsDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ShaderResourceService<Texture>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 2, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const Mesh> meshes)
+    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const MeshView> meshes)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto pushConstants = PhongPushConstants{};
