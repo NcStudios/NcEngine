@@ -290,7 +290,7 @@ namespace nc::graphics
         return layoutBinding;
     }
 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
     {
         vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
         extendedInfo.setPNext(nullptr);

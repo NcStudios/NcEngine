@@ -44,14 +44,14 @@ namespace nc::graphics
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
 
-        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages =
+        std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(PhongPushConstants)); // PushConstants
-        std::array<vk::DescriptorSetLayout, 3u> descriptorLayouts =
+        std::array<vk::DescriptorSetLayout, 3u> descriptorLayouts
         {
             *ShaderResourceService<Texture>::Get()->GetDescriptorSetLayout(),
             *ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSetLayout(),

@@ -272,6 +272,7 @@ namespace nc::graphics
             throw std::runtime_error("Could not create ImGUI descriptor pool.");
         }
 
+        /** @todo These value need to be configurable (at least sampled images) */
         std::array<vk::DescriptorPoolSize, 3> renderingPoolSizes =
         {
             vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },

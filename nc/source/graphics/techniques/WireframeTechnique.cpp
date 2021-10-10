@@ -69,7 +69,7 @@ namespace nc::graphics
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
 
-        std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages =
+        std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)

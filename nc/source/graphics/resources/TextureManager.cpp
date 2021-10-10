@@ -11,7 +11,7 @@ namespace nc::graphics
           m_imageInfos{},
           m_descriptorSet{},
           m_descriptorSetLayout{},
-          m_sampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_sampler{},
           m_layout{},
           m_maxTexturesCount{maxTextures},
           m_texturesInitialized{false}
@@ -37,6 +37,9 @@ namespace nc::graphics
 
         m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagBitsEXT::ePartiallyBound );
         m_descriptorSet = CreateDescriptorSet(m_graphics, m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+
+        /** @todo Figure out why there are validation errors when creating sampler in the constructor. */
+        m_sampler = m_graphics->GetBasePtr()->CreateTextureSampler();
     }
 
     void TextureManager::Update(const std::vector<Texture>& data)
@@ -74,7 +77,7 @@ namespace nc::graphics
         writes[1].setPBufferInfo(0);
         writes[1].setPImageInfo(m_imageInfos.data());
 
-        m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(2, writes.data(), 0, nullptr);
+        m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
     }
 
     auto TextureManager::GetDescriptorSet() -> vk::DescriptorSet*
