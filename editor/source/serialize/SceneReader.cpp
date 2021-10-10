@@ -155,17 +155,24 @@ namespace nc::editor
 
     Entity SceneReader::LoadEntity(std::stringstream& args)
     {
-        std::string handleName = ReadTokenFromAction(args);
+        auto handleName = ReadTokenFromAction(args);
+        auto position = ReadVector3FromAction(args);
+        auto rotation = ReadQuaternionFromAction(args);
+        auto scale = ReadVector3FromAction(args);
+        auto parent = ReadParentHandleFromAction(args, m_handleNames);
+        auto tag = ReadQuotedStringFromAction(args);
+        auto layer = ReadLayerFromAction(args);
+        auto flags = ReadEntityFlagsFromAction(args);
 
         EntityInfo info
         {
-            info.position = ReadVector3FromAction(args),
-            info.rotation = ReadQuaternionFromAction(args),
-            info.scale = ReadVector3FromAction(args),
-            info.parent = ReadParentHandleFromAction(args, m_handleNames),
-            info.tag = ReadQuotedStringFromAction(args),
-            info.layer = ReadLayerFromAction(args),
-            info.flags = ReadEntityFlagsFromAction(args),
+            .position = position,
+            .rotation = rotation,
+            .scale = scale,
+            .parent = parent,
+            .tag = std::move(tag),
+            .layer = layer,
+            .flags = flags
         };
 
         Entity entity = m_registry->Add<Entity>(std::move(info));
