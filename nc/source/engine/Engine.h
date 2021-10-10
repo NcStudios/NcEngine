@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Core.h"
-#include "assets/AssetManager.h"
+#include "assets/AssetService.h"
+#include "assets/AssetServices.h"
 #include "audio/AudioSystem.h"
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/Graphics.h"
@@ -28,12 +29,12 @@ namespace nc
         private:
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
+            AssetServices m_assetServices;
             graphics::Renderer m_renderer;
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
-            AssetManager m_assetManager;
             audio::AudioSystem m_audioSystem;
             ui::UIImpl m_ui;
             tf::Executor m_taskExecutor;

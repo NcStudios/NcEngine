@@ -1,17 +1,19 @@
 #pragma once
 
 #include "graphics\TechniqueType.h"
-#include "graphics\MeshManager.h"
-#include "graphics\TextureManager.h"
 #include "graphics\techniques\PhongAndUiTechnique.h"
 #include "graphics\techniques\WireframeTechnique.h"
 // #include "graphics\techniques\ParticleTechnique.h"
 
+#include <functional>
 #include <unordered_map>
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc { class MeshRenderer; }
-namespace nc::particle { class ParticleRenderer; }
+namespace nc
+{
+    class MeshRenderer;
+    namespace particle { class ParticleRenderer; }
+}
 
 namespace nc::graphics
 {
@@ -21,7 +23,9 @@ namespace nc::graphics
     class Renderer
     {
         public:
-            Renderer(graphics::Graphics* graphics);
+            Renderer(graphics::Graphics* graphics,
+                     std::function<vk::Buffer*()> getVertexBufferFunc,
+                     std::function<vk::Buffer*()> getIndicexBufferFunc);
             ~Renderer() noexcept;
             
             void BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
@@ -41,8 +45,8 @@ namespace nc::graphics
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics* m_graphics;
-            TextureManager m_textureManager;
-            MeshManager m_meshManager;
+            std::function<vk::Buffer*()> m_getMeshVertexBuffer;
+            std::function<vk::Buffer*()> m_getMeshIndexBuffer;
             vk::RenderPass m_mainRenderPass;
 
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;

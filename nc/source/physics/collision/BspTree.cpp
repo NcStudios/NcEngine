@@ -1,5 +1,5 @@
 #include "BspTree.h"
-#include "assets/AssetManager.h"
+#include "assets/AssetService.h"
 #include "IntersectionQueries.h"
 #include "graphics/DebugRenderer.h"
 
@@ -12,19 +12,19 @@ namespace
 
     auto CreateTriMesh(registry_type* registry, const ConcaveCollider& collider) -> TriMesh
     {
-        const auto& meshFlyweight = AssetManager::AcquireConcaveCollider(collider.GetPath());
+        auto meshView = AssetService<ConcaveColliderView>::Get()->Acquire(collider.GetPath());
         auto entity = collider.GetParentEntity();
         auto* transform = registry->Get<Transform>(entity);
         const auto& m = transform->GetTransformationMatrix();
         const auto& scale = transform->GetScale();
         auto maxScale = math::Max(math::Max(scale.x, scale.y), scale.z);
-        auto estimate = Sphere{transform->GetPosition(), maxScale * meshFlyweight.maxExtent};
+        auto estimate = Sphere{transform->GetPosition(), maxScale * meshView.maxExtent};
 
         std::vector<Triangle> triangles;
-        triangles.reserve(meshFlyweight.triangles.size());
+        triangles.reserve(meshView.triangles.size());
         Vector3 a, b, c;
 
-        for(const auto& triangle : meshFlyweight.triangles)
+        for(const auto& triangle : meshView.triangles)
         {
             /** @todo could just store the xmvecs instead of loading. More of
              *  and issure when checking collisions. */

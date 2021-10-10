@@ -9,10 +9,10 @@
 #include "graphics/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/ShaderUtilities.h"
-#include "graphics/MeshManager.h"
 #include "graphics/Swapchain.h"
 #include "graphics/Base.h"
-#include "graphics/resources/ResourceManager.h"
+#include "graphics/VertexDescriptions.h"
+#include "assets/AssetService.h"
 
 namespace nc::graphics
 {
@@ -69,7 +69,7 @@ namespace nc::graphics
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
 
-        vk::PipelineShaderStageCreateInfo shaderStages[] = 
+        std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
@@ -86,8 +86,8 @@ namespace nc::graphics
 
         // Graphics pipeline
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
-        pipelineCreateInfo.setStageCount(2); // Shader stages
-        pipelineCreateInfo.setPStages(shaderStages); // Shader stages
+        pipelineCreateInfo.setStageCount(shaderStages.size()); // Shader stages
+        pipelineCreateInfo.setPStages(shaderStages.data()); // Shader stages
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
@@ -125,7 +125,7 @@ namespace nc::graphics
 
         if (m_debugWidget.has_value())
         {
-            const auto& meshAccessor = ResourceManager::GetMeshAccessor(m_debugWidget->meshUid);
+            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
             pushConstants.model = m_debugWidget->transformationMatrix;
             cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance

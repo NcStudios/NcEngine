@@ -3,6 +3,7 @@
 #include "graphics/Base.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
+#include "graphics/Vertex.h"
 
 #include <vector>
 #include "vulkan/vk_mem_alloc.hpp"

@@ -4,8 +4,6 @@
 // Engine includes
 #include "Assets.h"
 #include "graphics/Material.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "platform/win32/NcWin32.h"
 
 #include <iostream>
@@ -104,11 +102,11 @@ namespace nc::editor
         {
             switch(type)
             {
-                case AssetType::AudioClip:       { nc::LoadSoundClipAsset(asset.sourcePath); break; }
-                case AssetType::ConcaveCollider: { nc::LoadConcaveColliderAsset(asset.ncaPath.value()); break; }
-                case AssetType::HullCollider:    { nc::LoadConvexHullAsset(asset.ncaPath.value()); break; }
+                case AssetType::AudioClip:       { nc::LoadSoundClipAsset(asset.sourcePath.string()); break; }
+                case AssetType::ConcaveCollider: { nc::LoadConcaveColliderAsset(asset.ncaPath.value().string()); break; }
+                case AssetType::HullCollider:    { nc::LoadConvexHullAsset(asset.ncaPath.value().string()); break; }
                 case AssetType::Mesh:            { /** @todo add once fixed*/ break; }
-                case AssetType::Texture:         { nc::graphics::LoadTexture(asset.sourcePath.string()); break; }
+                case AssetType::Texture:         { nc::LoadTextureAsset(asset.sourcePath.string()); break; }
                 default:                         { return false; }
             }
 
@@ -124,8 +122,8 @@ namespace nc::editor
 
     void LoadDefaultAssets()
     {
-        graphics::LoadMeshes(std::vector<std::string>{CubeMeshPath, CapsuleMeshPath, SphereMeshPath, PlaneMeshPath});
-        graphics::LoadTextures(std::vector<std::string>{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath});
+        LoadMeshAssets(std::vector<std::string>{CubeMeshPath, CapsuleMeshPath, SphereMeshPath, PlaneMeshPath});
+        LoadTextureAssets(std::vector<std::string>{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath});
         LoadConvexHullAsset(CubeHullColliderPath);
         LoadConcaveColliderAsset(PlaneConcaveColliderPath);
     }

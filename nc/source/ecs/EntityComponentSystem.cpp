@@ -6,8 +6,7 @@ namespace nc::ecs
                                                  const config::MemorySettings& memSettings)
         : m_registry{memSettings.maxTransforms},
           m_particleEmitterSystem{&m_registry, graphics},
-          m_meshRendererSystem{&m_registry, graphics},
-          m_pointLightSystem{&m_registry, graphics, memSettings.maxPointLights}
+          m_pointLightSystem{&m_registry, graphics}
     {
         internal::SetActiveRegistry(&m_registry);
     }
@@ -17,6 +16,5 @@ namespace nc::ecs
         m_registry.Clear();
         m_particleEmitterSystem.Clear();
         m_pointLightSystem.Clear();
-        m_meshRendererSystem.Clear();
     }
 } // end namespace nc::ecs

@@ -48,6 +48,10 @@ set CONFIGURATION="%~2"
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DPROFILING_ENABLED=ON
         goto Run
     )
+    if %CONFIGURATION%=="Release-WithValidation" (
+        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DNC_EDITOR_ENABLED=ON -DNC_USE_VALIDATION=ON
+        goto Run
+    )
 
     echo Error: Invalid Configuration - %CONFIGURATION%
     EXIT
