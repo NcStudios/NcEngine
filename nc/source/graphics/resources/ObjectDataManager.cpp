@@ -1,8 +1,18 @@
-#include "ObjectData.h"
+#include "ObjectDataManager.h"
 #include "graphics/Initializers.h"
 
 namespace nc::graphics
 {
+    ObjectDataManager::ObjectDataManager(Graphics* graphics, uint32_t maxRenderers)
+        : m_objectsDataBuffer{},
+          m_descriptorSet{},
+          m_descriptorSetLayout{},
+          m_graphics{graphics},
+          m_maxObjects{maxRenderers}
+    {
+        Initialize();
+    }
+
     ObjectDataManager::~ObjectDataManager() noexcept
     {
         m_objectsDataBuffer.Clear();
@@ -10,18 +20,19 @@ namespace nc::graphics
         m_descriptorSetLayout.reset();
     }
 
-    void ObjectDataManager::Initialize(Graphics* graphics)
+    void ObjectDataManager::Initialize()
     {
-        /** @todo MAX_OBJECTS shouldn't be hardcoded right? */
+        const uint32_t objectsSize = (sizeof(ObjectData) * m_maxObjects);
+        auto base = m_graphics->GetBasePtr();
 
-        const uint32_t MAX_OBJECTS = 100000;
-        const uint32_t objectsSize = (sizeof(ObjectData) * MAX_OBJECTS);
-        auto base = graphics->GetBasePtr();
+        std::array<vk::DescriptorSetLayoutBinding, 1u> layoutBindings
+        {
+            CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)
+        };
 
-        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)};
-        m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
-        m_objectsDataBuffer = WriteableBuffer<ObjectData>(graphics, objectsSize); //@todo: not hard code upper bound
-        m_descriptorSet = CreateDescriptorSet(graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
+        m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_graphics, objectsSize); //@todo: not hard code upper bound
+        m_descriptorSet = CreateDescriptorSet(m_graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
 		vk::DescriptorBufferInfo objectsDataBufferInfo;
 		objectsDataBufferInfo.buffer = *m_objectsDataBuffer.GetBuffer();
@@ -55,11 +66,11 @@ namespace nc::graphics
         return &m_descriptorSetLayout.get();
     }
 
-    void ObjectDataManager::Reset(Graphics* graphics)
+    void ObjectDataManager::Reset()
     {
         m_objectsDataBuffer.Clear();
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
-        Initialize(graphics);
+        Initialize();
     }
 }

@@ -23,7 +23,7 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_renderer{ nullptr },
-          m_serviceFramework{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings()) },
+          m_shaderServices{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings()) },
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
@@ -136,8 +136,8 @@ namespace nc::graphics
     {
         WaitIdle();
         m_renderer->Clear();
-        ShaderResourceService<ObjectData>::Get()->Reset(this);
-        ShaderResourceService<PointLightInfo>::Get()->Reset(this);
+        ShaderResourceService<ObjectData>::Get()->Reset();
+        ShaderResourceService<PointLightInfo>::Get()->Reset();
     }
     
     void Graphics::SetClearColor(std::array<float, 4> color)

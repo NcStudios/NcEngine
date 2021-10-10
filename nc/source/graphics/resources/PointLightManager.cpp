@@ -3,12 +3,14 @@
 
 namespace nc::graphics
 {
-    PointLightManager::PointLightManager(uint32_t maxPointLights)
+    PointLightManager::PointLightManager(Graphics* graphics, uint32_t maxPointLights)
         : m_pointLightsArrayBuffer{},
           m_descriptorSet{},
           m_descriptorSetLayout{},
+          m_graphics{graphics},
           m_maxPointLights{maxPointLights}
     {
+        Initialize();
     }
 
     PointLightManager::~PointLightManager() noexcept
@@ -18,14 +20,18 @@ namespace nc::graphics
         m_descriptorSetLayout.reset();
     }
 
-    void PointLightManager::Initialize(Graphics* graphics)
+    void PointLightManager::Initialize()
     {
-        auto base = graphics->GetBasePtr();
+        auto base = m_graphics->GetBasePtr();
 
-        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment)};
-        m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
-        m_pointLightsArrayBuffer = WriteableBuffer<nc::PointLightInfo>(graphics, (sizeof(nc::PointLightInfo) * m_maxPointLights));
-        m_descriptorSet = CreateDescriptorSet(graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+        std::array<vk::DescriptorSetLayoutBinding, 1u> layoutBindings
+        {
+            CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment)
+        };
+        
+        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
+        m_pointLightsArrayBuffer = WriteableBuffer<nc::PointLightInfo>(m_graphics, (sizeof(nc::PointLightInfo) * m_maxPointLights));
+        m_descriptorSet = CreateDescriptorSet(m_graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
 		vk::DescriptorBufferInfo pointLightArrayInfo;
 		pointLightArrayInfo.buffer = *m_pointLightsArrayBuffer.GetBuffer();
@@ -62,11 +68,11 @@ namespace nc::graphics
         return &m_descriptorSetLayout.get();
     }
 
-    void PointLightManager::Reset(Graphics* graphics)
+    void PointLightManager::Reset()
     {
         m_pointLightsArrayBuffer.Clear();
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
-        Initialize(graphics);
+        Initialize();
     }
 }

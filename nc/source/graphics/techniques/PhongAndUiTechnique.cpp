@@ -44,14 +44,14 @@ namespace nc::graphics
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
 
-        vk::PipelineShaderStageCreateInfo shaderStages[] = 
+        std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages =
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(PhongPushConstants)); // PushConstants
-        std::vector<vk::DescriptorSetLayout> descriptorLayouts =
+        std::array<vk::DescriptorSetLayout, 3u> descriptorLayouts =
         {
             *ShaderResourceService<Texture>::Get()->GetDescriptorSetLayout(),
             *ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSetLayout(),
@@ -68,8 +68,8 @@ namespace nc::graphics
 
         // Graphics pipeline
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
-        pipelineCreateInfo.setStageCount(2); // Shader stages
-        pipelineCreateInfo.setPStages(shaderStages); // Shader stages
+        pipelineCreateInfo.setStageCount(shaderStages.size()); // Shader stages
+        pipelineCreateInfo.setPStages(shaderStages.data()); // Shader stages
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);

@@ -22,11 +22,11 @@ namespace nc::graphics
             TextureManager(Graphics* graphics, uint32_t maxTextures);
             ~TextureManager() noexcept;
 
-            void Initialize(Graphics* graphics) override;
+            void Initialize() override;
             void Update(const std::vector<Texture>& data) override;
             auto GetDescriptorSet() -> vk::DescriptorSet* override;
             auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* override;
-            void Reset(Graphics* graphics) override;
+            void Reset() override;
 
         private:
             Graphics* m_graphics;

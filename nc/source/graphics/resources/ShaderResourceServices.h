@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ObjectData.h"
+#include "ObjectDataManager.h"
 #include "PointLIghtManager.h"
 #include "TextureManager.h"
 #include "config/Config.h"
@@ -11,12 +11,10 @@ namespace nc::graphics
     {
         public:
             ShaderResourceServices(Graphics* graphics, const config::MemorySettings& memorySettings)
-                : m_objectDataManager{},
-                  m_pointLightManager{memorySettings.maxPointLights},
+                : m_objectDataManager{graphics, memorySettings.maxRenderers},
+                  m_pointLightManager{graphics, memorySettings.maxPointLights},
                   m_textureManager{graphics, memorySettings.maxTextures}
             {
-                m_objectDataManager.Initialize(graphics);
-                m_pointLightManager.Initialize(graphics);
             }
         
         private:

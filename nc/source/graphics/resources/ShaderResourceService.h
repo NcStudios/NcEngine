@@ -41,11 +41,11 @@ namespace nc::graphics
             IShaderResourceService();
             virtual ~IShaderResourceService() = default;
             
-            virtual void Initialize(Graphics* graphics) = 0;
+            virtual void Initialize() = 0;
             virtual void Update(const std::vector<data_type>& data) = 0;
             virtual auto GetDescriptorSet() -> vk::DescriptorSet* = 0;
             virtual auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* = 0;
-            virtual void Reset(Graphics* graphics) = 0;
+            virtual void Reset() = 0;
     };
 
     /** Helper alias for locating shader resource services. */

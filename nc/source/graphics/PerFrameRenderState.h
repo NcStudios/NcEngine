@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Ecs.h"
-#include "resources/ObjectData.h"
+#include "resources/ObjectDataManager.h"
 
 namespace nc::graphics
 {

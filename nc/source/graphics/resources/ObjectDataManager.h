@@ -25,18 +25,20 @@ namespace nc::graphics
     class ObjectDataManager : public IShaderResourceService<ObjectData>
     {
         public:
-            ObjectDataManager() = default;
+            ObjectDataManager(Graphics* graphics, uint32_t maxRenderers);
             ~ObjectDataManager() noexcept;
 
-            void Initialize(Graphics* graphics) override;
+            void Initialize() override;
             void Update(const std::vector<ObjectData>& data) override;
             auto GetDescriptorSet() -> vk::DescriptorSet* override;
             auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* override;
-            void Reset(Graphics* graphics) override;
+            void Reset() override;
 
         private:
             WriteableBuffer<ObjectData> m_objectsDataBuffer;
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
+            Graphics* m_graphics;
+            uint32_t m_maxObjects;
     };
 }

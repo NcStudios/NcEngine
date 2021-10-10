@@ -2,6 +2,8 @@
 #include "graphics/Initializers.h"
 #include "debug/Utils.h"
 
+#include <array>
+
 namespace nc::graphics
 {
     TextureManager::TextureManager(Graphics* graphics, uint32_t maxTextures)
@@ -14,15 +16,7 @@ namespace nc::graphics
           m_maxTexturesCount{maxTextures},
           m_texturesInitialized{false}
     {
-        // Create and bind the descriptor set for the array of textures.
-        std::vector<vk::DescriptorSetLayoutBinding> layoutBindings 
-        {
-          CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment),
-          CreateDescriptorSetLayoutBinding(1, m_maxTexturesCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
-        };
-
-        m_descriptorSetLayout = CreateDescriptorSetLayout(graphics, layoutBindings, vk::DescriptorBindingFlagBitsEXT::ePartiallyBound );
-        m_descriptorSet = CreateDescriptorSet(graphics, graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
+        Initialize();
     }
 
     TextureManager::~TextureManager() noexcept
@@ -32,9 +26,17 @@ namespace nc::graphics
         m_sampler.reset();
     }
 
-    void TextureManager::Initialize(Graphics* graphics)
+    void TextureManager::Initialize()
     {
-        (void)graphics;
+        // Create and bind the descriptor set for the array of textures.
+        std::array<vk::DescriptorSetLayoutBinding, 2u> layoutBindings
+        {
+          CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment),
+          CreateDescriptorSetLayoutBinding(1, m_maxTexturesCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
+        };
+
+        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagBitsEXT::ePartiallyBound );
+        m_descriptorSet = CreateDescriptorSet(m_graphics, m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
     }
 
     void TextureManager::Update(const std::vector<Texture>& data)
@@ -85,8 +87,7 @@ namespace nc::graphics
         return &m_descriptorSetLayout.get();
     }
 
-    void TextureManager::Reset(Graphics* graphics)
+    void TextureManager::Reset()
     {
-        (void)graphics;
     }
 }

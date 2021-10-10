@@ -221,12 +221,12 @@ namespace nc::graphics
         return pushConstantRange;
     }
 
-    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, const std::vector<vk::DescriptorSetLayout>& layouts)
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, std::span<const vk::DescriptorSetLayout> layouts)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(layouts.size());  
-        pipelineLayoutInfo.setPSetLayouts(layouts.data());  
-        pipelineLayoutInfo.setPushConstantRangeCount(1); 
+        pipelineLayoutInfo.setSetLayoutCount(layouts.size());
+        pipelineLayoutInfo.setPSetLayouts(layouts.data());
+        pipelineLayoutInfo.setPushConstantRangeCount(1);
         pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);
         return pipelineLayoutInfo;
     }
@@ -234,9 +234,9 @@ namespace nc::graphics
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(0);  
-        pipelineLayoutInfo.setPSetLayouts(nullptr);  
-        pipelineLayoutInfo.setPushConstantRangeCount(1); 
+        pipelineLayoutInfo.setSetLayoutCount(0);
+        pipelineLayoutInfo.setPSetLayouts(nullptr);
+        pipelineLayoutInfo.setPushConstantRangeCount(1);
         pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);
         return pipelineLayoutInfo;
     }
@@ -276,9 +276,9 @@ namespace nc::graphics
         commandBuffer->setScissor(0, 1, &scissor);
     }
 
-    vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, 
-                                                                    uint32_t descriptorCount, 
-                                                                    vk::DescriptorType type, 
+    vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding,
+                                                                    uint32_t descriptorCount,
+                                                                    vk::DescriptorType type,
                                                                     vk::ShaderStageFlags shaderStages)
     {
         vk::DescriptorSetLayoutBinding layoutBinding;
@@ -290,7 +290,7 @@ namespace nc::graphics
         return layoutBinding;
     }
 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::vector<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
     {
         vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
         extendedInfo.setPNext(nullptr);
