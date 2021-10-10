@@ -97,7 +97,7 @@ void InitializeResources()
                                                  defaultMeshesPath + "table.nca",
                                                  defaultMeshesPath + "token.nca",
                                                  defaultMeshesPath + "worm.nca" };
-    nc::LoadMeshes(meshPaths); 
+    nc::LoadMeshAssets(meshPaths);
 
     const auto defaultBaseColor = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto defaultNormal    = std::string{"nc/resources/texture/DefaultNormal.png"};
@@ -125,7 +125,7 @@ void InitializeResources()
                                                   defaultTexturesPath + "Logo/BaseColor.png",
                                                   defaultTexturesPath + "Logo/Normal.png",
                                                   defaultTexturesPath + "Logo/Roughness.png" };
-    nc::LoadTextures(texturePaths); 
+    nc::LoadTextureAssets(texturePaths); 
 
     material::SolidBlue =  graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
                                                        .normal    = defaultNormal,

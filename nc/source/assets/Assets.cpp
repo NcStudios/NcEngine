@@ -18,22 +18,22 @@ namespace nc
         AssetService<ConcaveColliderView>::Get()->Load(path);
     }
 
-    void LoadMesh(const std::string& path)
+    void LoadMeshAsset(const std::string& path)
     {
         AssetService<MeshView>::Get()->Load(path);
     }
 
-    void LoadMeshes(const std::vector<std::string>& paths)
+    void LoadMeshAssets(const std::vector<std::string>& paths)
     {
         AssetService<MeshView>::Get()->Load(paths);
     }
 
-    void LoadTexture(const std::string& path)
+    void LoadTextureAsset(const std::string& path)
     {
         AssetService<TextureView>::Get()->Load(path);
     }
 
-    void LoadTextures(const std::vector<std::string>& paths)
+    void LoadTextureAssets(const std::vector<std::string>& paths)
     {
         AssetService<TextureView>::Get()->Load(paths);
     }

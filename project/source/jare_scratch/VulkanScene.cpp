@@ -32,9 +32,9 @@ namespace nc::sample
         const std::string boxNormalPath = defaultTexturesPath + "Box/Normal.png";
         const std::string boxRoughnessPath = defaultTexturesPath + "Box/Roughness.png";
 
-        nc::LoadTexture(boxBaseColorPath);
-        nc::LoadTexture(boxNormalPath);
-        nc::LoadTexture(boxRoughnessPath);
+        nc::LoadTextureAsset(boxBaseColorPath);
+        nc::LoadTextureAsset(boxNormalPath);
+        nc::LoadTextureAsset(boxRoughnessPath);
 
         auto material =  graphics::Material{ .baseColor = defaultTexturesPath + "Box/BaseColor.png",
                                              .normal    = defaultTexturesPath + "Box/Normal.png",
@@ -43,8 +43,8 @@ namespace nc::sample
         const std::vector<std::string> sceneMeshes = std::vector<std::string>{ "project/assets/mesh/beeper.nca"};
         const std::string skeeballMesh = "project/assets/mesh/skeeball.nca";
 
-        nc::LoadMeshes(sceneMeshes);
-        nc::LoadMesh(skeeballMesh);
+        nc::LoadMeshAssets(sceneMeshes);
+        nc::LoadMeshAsset(skeeballMesh);
 
         auto box = registry->Add<Entity>({.position = Vector3{0.0f, 2.0f, -3.0f}, .tag = "Box"});
         registry->Add<MeshRenderer>(box, "project/assets/mesh/beeper.nca", material, nc::graphics::TechniqueType::PhongAndUi);

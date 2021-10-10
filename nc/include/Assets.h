@@ -20,15 +20,15 @@ namespace nc
     void LoadConvexHullAsset(const std::string& path);
 
     /** Supported file types: .nca */
-    void LoadMesh(const std::string& path);
-    void LoadMeshes(const std::vector<std::string>& paths);
+    void LoadMeshAsset(const std::string& path);
+    void LoadMeshAssets(const std::vector<std::string>& paths);
 
     /** Supported file types: .wav */
     void LoadSoundClipAsset(const std::string& path);
 
     /** Supported file types: .png */
-    void LoadTextures(const std::vector<std::string>& paths);
-    void LoadTexture(const std::string& path);
+    void LoadTextureAsset(const std::string& path);
+    void LoadTextureAssets(const std::vector<std::string>& paths);
 
     struct ConcaveColliderView
     {
