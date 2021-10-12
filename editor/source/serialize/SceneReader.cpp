@@ -1,4 +1,5 @@
 #include "SceneReader.h"
+#include "utility/DefaultComponents.h"
 #include "utility/Output.h"
 
 #include <iostream>
@@ -108,7 +109,7 @@ namespace nc::editor
     {
         if(!m_file.is_open())
         {
-            Output::Log("SceneSerializer::Load - Failure opening file");
+            Output::Log("Failure opening scene:");
             Output::Log(m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
             return;
         }
@@ -121,7 +122,8 @@ namespace nc::editor
         {
             if(m_file.fail())
             {
-                Output::Log("SceneSerializer::Load - Failure reading scene");
+                Output::Log("Failure reading scene:");
+                Output::Log(m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
                 m_file.close();
                 return;
             }
@@ -203,7 +205,18 @@ namespace nc::editor
     {
         ReadTokenFromAction(args);
         HullProperties properties{ .assetPath = ReadQuotedStringFromAction(args) };
-        m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
+        bool isTrigger = ReadBoolFromAction(args);
+
+        /** @todo should have specific exception so we don't mask other failures*/
+        try
+        {
+            m_registry->Add<Collider>(entity, properties, isTrigger);
+        }
+        catch(const std::runtime_error& e)
+        {
+            Output::Log("Failure adding required hull collider: " + properties.assetPath);
+            AddDefaultHullCollider(m_registry, entity, isTrigger);
+        }
     }
 
     void SceneReader::LoadSphereCollider(Entity entity, std::stringstream& args)
@@ -216,7 +229,18 @@ namespace nc::editor
     void SceneReader::LoadConcaveCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-        m_registry->Add<ConcaveCollider>(entity, ReadQuotedStringFromAction(args));
+        auto assetPath = ReadQuotedStringFromAction(args);
+
+        /** @todo should have specific exception so we don't mask other failures*/
+        try
+        {
+            m_registry->Add<ConcaveCollider>(entity, assetPath);
+        }
+        catch(const std::runtime_error& e)
+        {
+            Output::Log("Failure adding required concave collider: " + assetPath);
+            AddDefaultConcaveCollider(m_registry, entity);
+        }
     }
 
     void SceneReader::LoadPhysicsBody(Entity entity, std::stringstream& args)
@@ -264,6 +288,16 @@ namespace nc::editor
             .roughness = ReadQuotedStringFromAction(args)
         };
         auto technique = ToTechniqueType(ReadTokenFromAction(args));
-        m_registry->Add<MeshRenderer>(entity, std::move(mesh), std::move(material), technique);
+
+        /** @todo should have specific exception so we don't mask other failures*/
+        try
+        {
+            m_registry->Add<MeshRenderer>(entity, std::move(mesh), std::move(material), technique);
+        }
+        catch(const std::exception& e)
+        {
+            Output::Log("Failure adding required mesh assets");
+            AddDefaultMeshRenderer(m_registry, entity);
+        }
     }
 }

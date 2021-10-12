@@ -13,6 +13,7 @@ namespace nc::editor
             bool Add(const std::filesystem::path& assetPath, AssetType type);
             bool Remove(const std::filesystem::path& assetPath, AssetType type);
             bool Contains(const std::filesystem::path& assetPath, AssetType type) const;
+            bool ContainsNca(const std::filesystem::path& assetPath, AssetType type) const;
             auto View(AssetType type) const -> std::span<const Asset>;
 
             void Read(const std::filesystem::path& projectDirectory);

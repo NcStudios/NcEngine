@@ -9,7 +9,7 @@ namespace
     const auto AudioClipTag = std::string{"AudioClip"};
     const auto ConcaveColliderTag = std::string{"ConcaveCollider"};
     const auto HullColliderTag = std::string{"HullCollider"};
-    const auto MeshTag = std::string{"MeshTag"};
+    const auto MeshTag = std::string{"Mesh"};
     const auto TextureTag = std::string{"Texture"};
 
     auto ReadStandardAsset(std::ifstream& file) -> nc::editor::Asset
@@ -54,7 +54,7 @@ namespace nc::editor
 
         if(!std::filesystem::directory_entry{manifestPath}.exists())
         {
-            Output::Log("ReadManifest - File doesn't exist: " + manifestPath.string());
+            Output::Log("Manifest doesn't exist: " + manifestPath.string());
             return out;
         }
 
@@ -62,7 +62,7 @@ namespace nc::editor
 
         if(!file.is_open())
         {
-            Output::Log("ReadManifest - Failure opening file: " + manifestPath.string());
+            Output::Log("Failure opening manifest: " + manifestPath.string());
             return out;
         }
 
@@ -73,11 +73,7 @@ namespace nc::editor
             Asset asset;
             std::getline(file, line, '\n');
 
-            if(line.empty())
-            {
-                Output::Log("AssetManifest::ReadManifest - Empty line");
-            }
-            else if(line == AudioClipTag)
+            if(line == AudioClipTag)
             {
                 out.audioClips.push_back(ReadStandardAsset(file));
             }
@@ -99,7 +95,7 @@ namespace nc::editor
             }
             else
             {
-                Output::Log("AssetManifest::ReadManifest - Invalid asset manifest entry: " + line);
+                Output::Log("Invalid manifest entry: " + line);
             }
         }
 
@@ -114,7 +110,7 @@ namespace nc::editor
         std::ofstream file{manifestPath};
         if(!file.is_open())
         {
-            Output::Log("WriteManifest - Failure opening file: " + manifestPath.string());
+            Output::Log("Failure opening manifest: " + manifestPath.string());
             return;
         }
 

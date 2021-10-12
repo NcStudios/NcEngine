@@ -1,8 +1,14 @@
 #pragma once
 
 #ifdef NC_EDITOR_ENABLED
-namespace nc::editor { class Inspector; }
-#define NC_ENABLE_IN_EDITOR(Component) friend ::nc::editor::Inspector;
+namespace nc::editor
+{
+    struct AssetDependencyChecker;
+    class Inspector;
+}
+#define NC_ENABLE_IN_EDITOR(Component) \
+friend ::nc::editor::Inspector; \
+friend ::nc::editor::AssetDependencyChecker;
 #else
 #define NC_ENABLE_IN_EDITOR(Component)
 #endif

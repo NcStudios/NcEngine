@@ -1,4 +1,5 @@
 #include "ProjectManager.h"
+#include "assets/AssetDependencyChecker.h"
 #include "config/ConfigReader.h"
 #include "utility/Output.h"
 #include "serialize/SceneDeleter.h"
@@ -46,8 +47,9 @@ namespace
 
 namespace nc::editor
 {
-    ProjectManager::ProjectManager(registry_type* registry)
+    ProjectManager::ProjectManager(registry_type* registry, AssetManifest* manifest)
         : m_registry{registry},
+          m_manifest{manifest},
           m_projectData{},
           m_currentSceneIndex{0u},
           m_nextSceneIndex{0u},
@@ -59,15 +61,11 @@ namespace nc::editor
 
     void ProjectManager::OpenProject()
     {
-        Output::Log("ProjectManager::OpenProject");
-
         m_openFileBrowser(std::bind(ProjectManager::DoOpenProject, this, std::placeholders::_1));
     }
 
     bool ProjectManager::DoOpenProject(const std::filesystem::path& path)
     {
-        Output::Log("ProjectManager::DoOpenProject");
-
         auto projectDirectory = std::filesystem::directory_entry{path};
 
         if(!projectDirectory.is_directory())
@@ -92,7 +90,7 @@ namespace nc::editor
             return false;
         }
 
-        //read config
+        /** @todo read config */
         
         m_projectData.open = true;
         m_projectData.name = "Sample Project";
@@ -111,15 +109,11 @@ namespace nc::editor
 
     void ProjectManager::CreateProject()
     {
-        Output::Log("ProjectManager::CreateProject");
-
         m_openFileBrowser(std::bind(ProjectManager::DoCreateProject, this, std::placeholders::_1));
     }
 
     bool ProjectManager::DoCreateProject(const std::filesystem::path& path)
     {
-        Output::Log("ProjectManager::DoCreateProject");
-
         /** @todo need to specify name */
         std::string name = "New Project";
 
@@ -177,11 +171,9 @@ namespace nc::editor
 
     void ProjectManager::NewScene()
     {
-        Output::Log("ProjectManager::NewScene");
-
         if(m_projectData.name.empty())
         {
-            Output::Log("ProjectManager::NewScene - No project is open");
+            Output::Log("Cannot create scene: No project is open");
             return;
         }
 
@@ -190,17 +182,15 @@ namespace nc::editor
 
     bool ProjectManager::DoNewScene(const std::string& name)
     {
-        Output::Log("ProjectManager::DoNewScene");
-
         if(name.empty())
         {
-            Output::Log("ProjectManager::DoNewScene - Scene name cannot be empty");
+            Output::Log("Cannot create scene: name cannot be empty");
             return false;
         }
 
         if(!std::isalpha(name[0]))
         {
-            Output::Log("ProjectManager::DoNewScene - Scene name must start with a letter");
+            Output::Log("Cannot create scene: name must start with a letter");
             return false;
         }
 
@@ -216,17 +206,22 @@ namespace nc::editor
 
     void ProjectManager::SaveCurrentScene()
     {
-        Output::Log("ProjectManager::SaveCurrentScene");
-
         if(m_projectData.name.empty())
         {
-            Output::Log("ProjectManager::SaveCurrentScene - No project is open");
+            Output::Log("Cannot save scene: No project is open");
             return;
         }
 
         if(m_projectData.scenes.empty())
         {
-            Output::Log("ProjectManager::SaveCurrentScene - No scene is open");
+            Output::Log("Cannot save scene: No scene is open");
+            return;
+        }
+
+        if(AssetDependencyChecker checkDependencies{m_registry, m_manifest}; !checkDependencies.result)
+        {
+            Output::Log("Cannot save scene: missing asset dependencies");
+            checkDependencies.LogMissingDependencies();
             return;
         }
 
@@ -236,11 +231,9 @@ namespace nc::editor
 
     void ProjectManager::LoadScene(const std::string& name)
     {
-        Output::Log("ProjectManager::LoadScene");
-
         if(m_projectData.name.empty())
         {
-            Output::Log("ProjectManager:LoadScene - No project open");
+            Output::Log("Cannot load scene: No project open");
             return;
         }
 
@@ -254,13 +247,11 @@ namespace nc::editor
             }
         }
 
-        Output::Log("ProjectManager::LoadScene - Could not find scene: " + name);
+        Output::Log("Could not find scene: " + name);
     }
 
     void ProjectManager::ReadNextScene()
     {
-        Output::Log("ProjectManager::ReadNextScene");
-
         if(m_projectData.name.empty())
         {
             Output::Log("ProjectManager:LoadNextScene - No project open");
@@ -281,13 +272,13 @@ namespace nc::editor
     {
         if(m_projectData.name.empty())
         {
-            Output::Log("ProjectManager::DeleteCurrentScene - No project is open");
+            Output::Log("Cannot delete scene: No project is open");
             return;
         }
 
         if(m_projectData.scenes.empty())
         {
-            Output::Log("ProjectManager::DeleteCurrentScene - No scene is open");
+            Output::Log("Cannot delete scene: No scene is open");
             return;
         }
 

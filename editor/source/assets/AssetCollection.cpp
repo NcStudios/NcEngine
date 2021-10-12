@@ -41,6 +41,19 @@ namespace nc::editor
         return pos != m_assets.end();
     }
     
+    bool AssetCollection::ContainsNca(const std::filesystem::path& assetPath) const
+    {
+        auto pos = std::ranges::find_if(m_assets, [&assetPath](const auto& asset)
+        {
+            if(asset.ncaPath.has_value())
+                return asset.ncaPath.value() == assetPath;
+            
+            return false;
+        });
+
+        return pos != m_assets.end();
+    }
+
     auto AssetCollection::View() const -> std::span<const Asset>
     {
         return std::span<const Asset>{m_assets};

@@ -11,6 +11,7 @@
 
 namespace nc::editor
 {
+    class AssetManifest;
     class EditorFramework;
 
     struct ProjectData
@@ -25,7 +26,7 @@ namespace nc::editor
     class ProjectManager
     {
         public:
-            ProjectManager(registry_type* registry);
+            ProjectManager(registry_type* registry, AssetManifest* manifest);
 
             void OpenProject();
             void CreateProject();
@@ -42,6 +43,7 @@ namespace nc::editor
 
         private:
             registry_type* m_registry;
+            AssetManifest* m_manifest;
             ProjectData m_projectData;
             size_t m_currentSceneIndex;
             size_t m_nextSceneIndex;

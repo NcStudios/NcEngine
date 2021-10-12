@@ -1,5 +1,6 @@
 #include "Inspector.h"
 #include "assets/AssetManifest.h"
+#include "utility/DefaultComponents.h"
 #include "directx/math/DirectXMath.h"
 #include "imgui/imgui.h"
 
@@ -96,32 +97,15 @@ namespace nc::editor
         ImGui::Text("Layer   %d", entity.Layer());
         ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
 
-        if (auto* transform = m_registry->Get<Transform>(entity); transform)
-            DrawTransform(transform);
-
-        if (auto* meshRenderer = m_registry->Get<MeshRenderer>(entity))
-            DrawMeshRenderer(meshRenderer);
-
-        if (auto* pointLight = m_registry->Get<PointLight>(entity))
-            DrawPointLight(pointLight);
-
-        if (auto* body = m_registry->Get<PhysicsBody>(entity))
-            DrawPhysicsBody(body);
-
-        if (auto* emitter = m_registry->Get<ParticleEmitter>(entity))
-            DrawParticleEmitter(emitter);
-
-        if (auto* dispatcher = m_registry->Get<NetworkDispatcher>(entity))
-            DrawNetworkDispatcher(dispatcher);
-
-        if (auto* col = m_registry->Get<Collider>(entity); col)
-            DrawCollider(col);
-
-        if(auto* col = m_registry->Get<ConcaveCollider>(entity); col)
-            DrawConcaveCollider(col);
-
-        if(auto* src = m_registry->Get<AudioSource>(entity); src)
-            DrawAudioSource(src);
+        if(auto* transform  = m_registry->Get<Transform>(entity))         { DrawTransform(transform); }
+        if(auto* renderer   = m_registry->Get<MeshRenderer>(entity))      { DrawMeshRenderer(renderer); }
+        if(auto* light      = m_registry->Get<PointLight>(entity))        { DrawPointLight(light); }
+        if(auto* body       = m_registry->Get<PhysicsBody>(entity))       { DrawPhysicsBody(body); }
+        if(auto* emitter    = m_registry->Get<ParticleEmitter>(entity))   { DrawParticleEmitter(emitter); }
+        if(auto* dispatcher = m_registry->Get<NetworkDispatcher>(entity)) { DrawNetworkDispatcher(dispatcher); }
+        if(auto* collider   = m_registry->Get<Collider>(entity))          { DrawCollider(collider); }
+        if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))   { DrawConcaveCollider(collider); }
+        if(auto* source     = m_registry->Get<AudioSource>(entity))       { DrawAudioSource(source); }
         
         // for(const auto& comp : m_registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
         //     AutoComponentElement(comp);
@@ -129,9 +113,23 @@ namespace nc::editor
         ImGui::Separator();
     }
 
-    void Inspector::DrawAudioSource(AudioSource*)
+    void Inspector::DrawAudioSource(AudioSource* audioSource)
     {
         ElementHeader("AudioSource");
+        ImGui::BeginGroup();
+        ImGui::Indent();
+        ImGui::Text("Sound Clip");
+        if(ImGui::BeginCombo("##audioclipcomboselect", audioSource->m_soundClipPath.c_str()))
+        {
+            for(const auto& asset : m_assetManifest->View(AssetType::AudioClip))
+            {
+                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
+                    audioSource->SetClip(asset.sourcePath.string());
+            }
+            ImGui::EndGroup();
+        }
+        ImGui::Unindent();
+        ImGui::EndGroup();
     }
 
     void Inspector::DrawCollider(Collider* collider)
@@ -156,11 +154,11 @@ namespace nc::editor
             {
                 collider->SetProperties(BoxProperties{.center = info.offset, .extents = info.scale});
             }
-            if(ImGui::Selectable("Capsule"))
+            if(ImGui::Selectable("Capsule") && info.type != ColliderType::Capsule)
             {
                 collider->SetProperties(CapsuleProperties{.center = info.offset, .height = info.scale.y * 2.0f, .radius = info.scale.x * 0.5f});
             }
-            if(ImGui::Selectable("Sphere"))
+            if(ImGui::Selectable("Sphere") && info.type != ColliderType::Sphere)
             {
                 collider->SetProperties(SphereProperties{.center = info.offset, .radius = info.scale.x * 0.5f});
             }
@@ -169,9 +167,7 @@ namespace nc::editor
                 for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
                 {
                     if(ImGui::Selectable(asset.name.c_str()))
-                    {
                         collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
-                    }
                 }
 
                 ImGui::EndMenu();
@@ -258,12 +254,35 @@ namespace nc::editor
         ElementHeader("MeshRenderer");
         ImGui::BeginGroup();
         ImGui::Indent();
-        ImGui::Text("Mesh: ???");
-        ImGui::Text("Material");
-
-        ImGui::Text("Base:");
-        if(ImGui::BeginCombo("##meshrendererbaseselectcombo", material.baseColor.c_str()))
+        ImGui::Text("Mesh");
+        if(ImGui::BeginCombo("##meshrenderermeshselectcombo", meshRenderer->GetMeshPath().c_str()))
         {
+            if(ImGui::BeginMenu("Default"))
+            {
+                if(ImGui::Selectable("Cube"))    { meshRenderer->SetMesh(CubeMeshPath);    }
+                if(ImGui::Selectable("Sphere"))  { meshRenderer->SetMesh(SphereMeshPath);  }
+                if(ImGui::Selectable("Capsule")) { meshRenderer->SetMesh(CapsuleMeshPath); }
+                if(ImGui::Selectable("Plane"))   { meshRenderer->SetMesh(PlaneMeshPath);   }
+                ImGui::EndMenu();
+            }
+
+            for(const auto& asset : m_assetManifest->View(AssetType::Mesh))
+            {
+                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
+                    meshRenderer->SetMesh(asset.ncaPath.value().string());
+            }
+
+            ImGui::EndCombo();
+        }
+
+        ImGui::Spacing(); ImGui::Spacing();
+
+        ImGui::Text("Material");
+        if(ImGui::BeginCombo("Base##meshrendererbaseselectcombo", material.baseColor.c_str()))
+        {
+            if(ImGui::Selectable("Default"))
+                meshRenderer->SetBaseColor(DefaultBaseColorPath);
+            
             for(const auto& asset : m_assetManifest->View(AssetType::Texture))
             {
                 if(ImGui::Selectable(asset.sourcePath.string().c_str()))
@@ -273,9 +292,11 @@ namespace nc::editor
             ImGui::EndCombo();
         }
 
-        ImGui::Text("Normal");
-        if(ImGui::BeginCombo("##meshrenderernormalselectcombo", material.normal.c_str()))
+        if(ImGui::BeginCombo("Normal##meshrenderernormalselectcombo", material.normal.c_str()))
         {
+            if(ImGui::Selectable("Default"))
+                meshRenderer->SetBaseColor(DefaultNormalPath);
+
             for(const auto& asset : m_assetManifest->View(AssetType::Texture))
             {
                 if(ImGui::Selectable(asset.sourcePath.string().c_str()))
@@ -285,9 +306,11 @@ namespace nc::editor
             ImGui::EndCombo();
         }
 
-        ImGui::Text("Roughness");
-        if(ImGui::BeginCombo("##meshrendererroughnessselectcombo", material.roughness.c_str()))
+        if(ImGui::BeginCombo("Roughness##meshrendererroughnessselectcombo", material.roughness.c_str()))
         {
+            if(ImGui::Selectable("Default"))
+                meshRenderer->SetBaseColor(DefaultRoughnessPath);
+
             for(const auto& asset : m_assetManifest->View(AssetType::Texture))
             {
                 if(ImGui::Selectable(asset.sourcePath.string().c_str()))

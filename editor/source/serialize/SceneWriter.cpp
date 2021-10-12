@@ -64,7 +64,7 @@ namespace nc::editor
 
         if(DoFilesExist())
         {
-            Output::Log("SceneWriter::WriteNewScene - Scene already exists with name: " + sceneName);
+            Output::Log("Cannot write scene: Scene already exists with name: " + sceneName);
         }
         
         CreateHeader();
@@ -142,7 +142,7 @@ namespace nc::editor
         m_file.open(filePath);
         if(!m_file.is_open())
         {
-            Output::Log("SceneSerializer - Failure opening file");
+            Output::Log("Failure opening scene:");
             Output::Log(m_scenesDirectory.string() + m_sceneName);
         }
 

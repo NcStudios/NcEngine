@@ -1,6 +1,47 @@
 #include "AssetManifest.h"
 #include "ManifestSerializer.h"
+#include "utility/DefaultComponents.h"
 #include "utility/Output.h"
+
+namespace
+{
+    bool IsDefaultAsset(const std::filesystem::path& path, nc::editor::AssetType type)
+    {
+        switch(type)
+        {
+            case nc::editor::AssetType::AudioClip:
+            {
+                /** @todo */
+                return false;
+            }
+            case nc::editor::AssetType::ConcaveCollider:
+            {
+                return path.string() == nc::editor::PlaneConcaveColliderPath;
+            }
+            case nc::editor::AssetType::HullCollider:
+            {
+                return path.string() == nc::editor::CubeHullColliderPath;
+            }
+            case nc::editor::AssetType::Mesh:
+            {
+                auto str = path.string();
+                return str == nc::editor::CubeMeshPath ||
+                       str == nc::editor::CapsuleMeshPath ||
+                       str == nc::editor::SphereMeshPath ||
+                       str == nc::editor::PlaneMeshPath;
+            }
+            case nc::editor::AssetType::Texture:
+            {
+                auto str = path.string();
+                return str == nc::editor::DefaultBaseColorPath ||
+                       str == nc::editor::DefaultNormalPath ||
+                       str == nc::editor::DefaultRoughnessPath;
+            }
+        }
+
+        return false;
+    }
+}
 
 namespace nc::editor
 {
@@ -19,7 +60,7 @@ namespace nc::editor
     {
         if(!HasValidExtensionForAssetType(assetPath, type))
         {
-            Output::Log("AssetManifest::Add - Invalid file extension for this asset type: " + assetPath.string());
+            Output::Log("Invalid asset extension");
             return false;
         }
 
@@ -27,7 +68,7 @@ namespace nc::editor
 
         if(collection.Contains(assetPath))
         {
-            Output::Log("AssetManifest::Add - Manifest already has asset: " + assetPath.string());
+            Output::Log("Asset is alread in the manifest");
             return false;
         }
 
@@ -35,14 +76,13 @@ namespace nc::editor
 
         if(RequiresNcaFile(type) && !BuildNcaFile(assetPath, type))
         {
-            Output::Log("AssetManifest::Add - Failure building nca file from: " + assetPath.string());
+            Output::Log("Failure building nca file from: " + assetPath.string());
             return false;
         }
 
         if(!LoadAsset(asset, type))
         {
-            /** @todo If we fail to load, should we delete the nca file? (if it exists) */
-            Output::Log("AssetManifest::Add - Failure loading asset: " + assetPath.string());
+            Output::Log("Failure loading asset: " + assetPath.string());
             return false;
         }
 
@@ -58,7 +98,12 @@ namespace nc::editor
 
     bool AssetManifest::Contains(const std::filesystem::path& assetPath, AssetType type) const
     {
-        return GetCollection(type).Contains(assetPath);
+        return GetCollection(type).Contains(assetPath) || IsDefaultAsset(assetPath, type);
+    }
+
+    bool AssetManifest::ContainsNca(const std::filesystem::path& assetPath, AssetType type) const
+    {
+        return GetCollection(type).ContainsNca(assetPath) || IsDefaultAsset(assetPath, type);
     }
 
     auto AssetManifest::View(AssetType type) const -> std::span<const Asset>
@@ -103,8 +148,13 @@ namespace nc::editor
             m_hullColliders.Add(std::move(asset));
         }
 
-        /** @todo add once fixed */
-        // for(auto& asset : manifestData.meshes) {}
+        for(auto& asset : manifestData.meshes)
+        {
+            if(!LoadAsset(asset, AssetType::Mesh))
+                Output::Log("AssetManifest::ReadManifest - Failure loading Mesh: " + asset.sourcePath.string());
+            
+            m_meshes.Add(std::move(asset));
+        }
 
         for(auto& asset : manifestData.textures)
         {

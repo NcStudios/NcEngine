@@ -54,7 +54,7 @@ namespace nc::editor
         : m_output{},
           m_editorConfig{ReadConfig("editor/config.ini")},
           m_assetManifest{m_editorConfig.recentProjectDirectory},
-          m_projectManager{registry},
+          m_projectManager{registry, &m_assetManifest},
           m_editorUI{registry,
                      &m_output,
                      &m_assetManifest,
