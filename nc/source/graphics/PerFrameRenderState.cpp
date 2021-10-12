@@ -21,15 +21,16 @@ namespace
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(registry_type* registry, bool isPointLightSystemDirty)
-        : viewMatrix{camera::GetViewMatrix()},
+        : camViewMatrix{camera::GetViewMatrix()},
           projectionMatrix{camera::GetProjectionMatrix()},
           cameraPosition{camera::GetMainCameraTransform()->GetPosition()},
           objectData{},
           pointLightInfos{},
+          pointLightVPs{},
           isPointLightBindRequired{isPointLightSystemDirty}
     {
         const auto frustum = camera::CalculateFrustum();
-        const auto viewProjection = viewMatrix * projectionMatrix;
+        const auto viewProjection = camViewMatrix * projectionMatrix;
         const auto renderers = registry->ViewAll<MeshRenderer>();
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());
@@ -43,17 +44,23 @@ namespace nc::graphics
                 continue;
 
             const auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
-            objectData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
+            objectData.emplace_back(modelMatrix, modelMatrix * camViewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
             meshes.push_back(renderer.GetMesh());
         }
 
         auto pointLights = registry->ViewAll<PointLight>();
+        pointLightVPs.reserve(pointLights.size());
 
         for(auto& pointLight : pointLights)
         {
             auto* transform = registry->Get<Transform>(pointLight.GetParentEntity());
-            if(pointLight.Update(transform->GetPosition(), viewMatrix))
+
+            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix());
+
+            if(pointLight.Update(transform->GetPosition(), camViewMatrix, pointLightVPs.back()))
                 isPointLightBindRequired = true;
+
+            
         }
 
         if(isPointLightBindRequired)

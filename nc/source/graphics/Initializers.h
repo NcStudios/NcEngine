@@ -26,6 +26,13 @@ namespace nc::graphics
         Pixel
     };
 
+    enum class ClearValue
+    {
+        Depth = 0,
+        Color = 1,
+        DepthAndColor = 2
+    };
+
     // Resources
     vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode);
 
@@ -57,7 +64,7 @@ namespace nc::graphics
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
 
     // Render passes
-    vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::array<vk::ClearValue, 2>& clearValues);
+    vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues);
     vk::RenderPassCreateInfo CreateRenderPassCreateInfo(const std::vector<vk::AttachmentDescription>& attachmentDescriptions, const std::vector<vk::SubpassDependency>& subpassDependencies);
 
     // Screen size
@@ -73,4 +80,7 @@ namespace nc::graphics
     vk::WriteDescriptorSet CreateSamplerDescriptorWrite(vk::Sampler* sampler, vk::DescriptorSet* descriptorSet, uint32_t binding);
     vk::WriteDescriptorSet CreateImagesDescriptorWrite(vk::DescriptorSet* descriptorSet, std::vector<vk::DescriptorImageInfo>* imagesInfo, uint32_t imagesCount, uint32_t binding);
     vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler* sampler, const vk::ImageView& imageView, vk::ImageLayout layout);
+
+    // Clear values
+    std::vector<vk::ClearValue> CreateClearValues(ClearValue value, const std::array<float, 4>& clearColor);
 }

@@ -91,7 +91,7 @@ namespace nc::sample
         registry->Add<PhysicsBody>(greenDisc, PhysicsProperties{});
 
         // Static Objects
-        auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{50.0f, 1.0f, 50.0f}, .tag = "Ground", .flags = EntityFlags::Static});
+        auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{50.0f, 1.0f, 50.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
         registry->Add<Collider>(ground, BoxProperties{}, false);
 
         auto redCube = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{3.5f, 0.0f, 4.5f}, .scale = Vector3::Splat(1.0f), .tag = "Big Red Cube", .flags = Entity::Flags::Static});

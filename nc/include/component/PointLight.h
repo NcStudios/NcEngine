@@ -36,14 +36,13 @@ namespace nc
             void SetInfo(PointLightInfo info);
 
         private:
-            DirectX::XMMATRIX CalculateLightViewMatrix();
+            DirectX::XMMATRIX CalculateLightViewProjectionMatrix();
 
             PointLightInfo m_info;
             DirectX::XMMATRIX m_lightProjectionMatrix;
-            alignas(16)Vector3 m_projectedPos;
             bool m_isDirty;
 
-            bool Update(const Vector3& position, const DirectX::XMMATRIX& view);
+            bool Update(const Vector3& position, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& lightViewProj);
 
             friend ecs::PointLightSystem;
             friend graphics::PerFrameRenderState;

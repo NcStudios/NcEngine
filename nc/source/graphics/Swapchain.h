@@ -36,7 +36,7 @@ namespace nc::graphics
 
             // Frame buffers
             void CreateFrameBuffers();
-            const vk::Framebuffer& GetFrameBuffer(uint32_t index) const;
+            vk::Framebuffer& GetFrameBuffer(uint32_t index);
             void DestroyFrameBuffers() noexcept;
             const vk::RenderPass& GetPassDefinition();
 

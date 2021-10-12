@@ -189,7 +189,7 @@ namespace nc::graphics
         m_imagesInFlightFences[imageIndex] = m_framesInFlightFences[m_currentFrameIndex];
     }
 
-    const vk::Framebuffer& Swapchain::GetFrameBuffer(uint32_t index) const
+    vk::Framebuffer& Swapchain::GetFrameBuffer(uint32_t index)
     {
         return m_framebuffers.at(index);
     }

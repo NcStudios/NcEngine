@@ -45,11 +45,10 @@ namespace nc
         : ComponentBase{entity},
           m_info{info},
           m_lightProjectionMatrix{},
-          m_projectedPos{},
           m_isDirty{false}
     {
         const auto& graphicsSettings = config::GetGraphicsSettings();
-        m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip);
+        m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip); // global variable todo anonymous namespace const var. //make clips global constants in source
     }
 
     void PointLight::SetInfo(PointLightInfo info)
@@ -58,30 +57,28 @@ namespace nc
         m_info = info;
     }
 
-    DirectX::XMMATRIX PointLight::CalculateLightViewMatrix()
+    DirectX::XMMATRIX PointLight::CalculateLightViewProjectionMatrix()
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix());
         auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
-        return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
+        return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1) * m_lightProjectionMatrix;
     }
 
-    bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& cameraView)
-    {        
-        const auto& lightViewMatrix = CalculateLightViewMatrix();
-        m_info.viewProjection = lightViewMatrix * m_lightProjectionMatrix;
+    bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& cameraView, const DirectX::XMMATRIX& lightViewProj)
+    {     
+        Vector3 projectedPos;
+        m_info.viewProjection = lightViewProj;
 
         const auto pos_v = DirectX::XMLoadVector3(&position);
-        DirectX::XMStoreVector3(&m_projectedPos, DirectX::XMVector3Transform(pos_v, cameraView));
+        DirectX::XMStoreVector3(&projectedPos, DirectX::XMVector3Transform(pos_v, cameraView));
         
-        if (m_projectedPos.x != m_info.pos.x || m_projectedPos.y != m_info.pos.y || m_projectedPos.z != m_info.pos.z)
+        if (projectedPos.x != m_info.pos.x || projectedPos.y != m_info.pos.y || projectedPos.z != m_info.pos.z)
         {
             m_isDirty = true;
         }
 
-        m_info.pos.x = m_projectedPos.x;
-        m_info.pos.y = m_projectedPos.y;
-        m_info.pos.z = m_projectedPos.z;
+        m_info.pos = projectedPos;
 
         return std::exchange(m_isDirty, false);
     }

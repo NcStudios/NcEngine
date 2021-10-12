@@ -22,7 +22,7 @@ namespace nc::graphics
             ~ShadowMappingTechnique();
 
             void Bind(vk::CommandBuffer* cmd);
-            void Record(vk::CommandBuffer* cmd, std::span<nc::PointLight> pointLights, std::span<nc::MeshRenderer> meshRenderers);
+            void Record(vk::CommandBuffer* cmd, std::span<const DirectX::XMMATRIX> pointLightVPs, std::span<const Mesh> meshes);
 
         private:
             void CreatePipeline(vk::RenderPass* renderPass);

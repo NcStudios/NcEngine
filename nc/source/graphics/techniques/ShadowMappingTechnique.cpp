@@ -106,7 +106,7 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, std::span<nc::PointLight> pointLights, std::span<nc::MeshRenderer> meshRenderers)
+    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, std::span<const DirectX::XMMATRIX> pointLightVPs, std::span<const Mesh> meshes)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
@@ -120,16 +120,15 @@ namespace nc::graphics
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        for (const auto& pointLight : pointLights)
+        for (const auto& pointLightVP : pointLightVPs)
         {
-            pushConstants.lightViewProjection = pointLight.GetInfo().viewProjection;
+            pushConstants.lightViewProjection = pointLightVP;
 
             cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
             uint32_t objectInstance = 0;
-            for (const auto& renderer : meshRenderers)
+            for (const auto& mesh : meshes)
             {
-                auto& mesh = renderer.GetMesh();
                 cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                 objectInstance++;
             }

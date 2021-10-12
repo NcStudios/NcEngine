@@ -6,11 +6,10 @@
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
-#include "PerFrameRenderState.h"
 #include "graphics/resources/ResourceManager.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/Swapchain.h"
-#include "graphics/Initializers.h"
+#include "PerFrameRenderState.h"
 
 #include <span>
 
@@ -67,50 +66,54 @@ namespace nc::graphics
 
         InitializeTechniques();
         
-        std::array<vk::ClearValue, 2> clearValues = {};
         auto swapchain = m_graphics->GetSwapchainPtr();
         swapchain->WaitForFrameFence();
         auto& commandBuffers = *commands->GetCommandBuffers();
         auto* cmd = &commandBuffers[currentSwapChainImageIndex];
-
-        // Begin recording commands to each command buffer.
         cmd->begin(vk::CommandBufferBeginInfo{});
-        BeginRenderPass(cmd, swapchain, &m_mainRenderPass, currentSwapChainImageIndex);
-        BindSharedData(cmd);
 
-        #ifdef NC_EDITOR_ENABLED
-        if (m_wireframeTechnique->HasDebugWidget())
+        // Shadow mapping pass
         {
-            m_wireframeTechnique->Bind(cmd);
-            m_wireframeTechnique->Record(cmd, state.viewMatrix, state.projectionMatrix);
-        }
-        #endif
+            BeginRenderPass(cmd, &m_shadowMappingPass.renderPass.get(), m_shadowMappingPass.frameBuffer.get(), swapchain->GetExtent(), ClearValue::Depth);
 
-        // if (m_particleTechnique)
-        // {
-        //     m_particleTechnique->Bind(cmd);
-        //     m_particleTechnique->Record(cmd);
-        // }
+            m_shadowMappingTechnique->Bind(cmd);
+            m_shadowMappingTechnique->Record(cmd, state.pointLightVPs, state.meshes);
 
-        m_phongAndUiTechnique->Bind(cmd);
-        if(!state.meshes.empty())
-        {
-            m_phongAndUiTechnique->Record(cmd, state.cameraPosition, state.meshes);
+            cmd->endRenderPass();
         }
 
-        RecordUi(cmd);
+        // Lit shading pass
+        {
+            BeginRenderPass(cmd, &m_mainRenderPass, swapchain->GetFrameBuffer(currentSwapChainImageIndex), swapchain->GetExtent(), ClearValue::DepthAndColor);
 
-        // End recording commands to each command buffer.
-        cmd->endRenderPass();
+            #ifdef NC_EDITOR_ENABLED
+            if (m_wireframeTechnique->HasDebugWidget())
+            {
+                m_wireframeTechnique->Bind(cmd);
+                m_wireframeTechnique->Record(cmd, state.camViewMatrix, state.projectionMatrix);
+            }
+            #endif
+
+            m_phongAndUiTechnique->Bind(cmd);
+            if(!state.meshes.empty())
+            {
+                m_phongAndUiTechnique->Record(cmd, state.cameraPosition, state.meshes);
+            }
+
+            RecordUi(cmd);
+
+            #ifdef NC_EDITOR_ENABLED
+            if (m_wireframeTechnique)
+            {
+                m_wireframeTechnique->ClearDebugWidget();
+            }
+            #endif
+
+            // End recording commands to each command buffer.
+            cmd->endRenderPass();
+        }
+
         cmd->end();
-
-        #ifdef NC_EDITOR_ENABLED
-        if (m_wireframeTechnique)
-        {
-            m_wireframeTechnique->ClearDebugWidget();
-        }
-        #endif
-
         NC_PROFILE_END();
     }
 
@@ -121,27 +124,23 @@ namespace nc::graphics
         cmd->bindIndexBuffer(*ResourceManager::GetIndexData().buffer.GetBuffer(), 0, vk::IndexType::eUint32);
     }
 
-    void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index)
+    void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, vk::RenderPass* renderPass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, ClearValue clearValue)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+
+        auto clearValues = CreateClearValues(clearValue, m_graphics->GetClearColor());
+        auto renderPassInfo = CreateRenderPassBeginInfo(*renderPass, 
+                                                        framebuffer, 
+                                                        extent, 
+                                                        clearValues);
+
+        cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+
         auto dimensions = m_graphics->GetDimensions();
-
-        vk::ClearValue clearValues[2];
-		clearValues[0].setColor(vk::ClearColorValue(m_graphics->GetClearColor()));
-		clearValues[1].setDepthStencil({ 1.0f, 0 });
-
-        vk::RenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.setRenderPass(*renderPass); // Specify the render pass and attachments.
-        renderPassInfo.setFramebuffer(swapchain->GetFrameBuffer(index));
-        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
-        renderPassInfo.renderArea.setExtent(swapchain->GetExtent());
-        renderPassInfo.setClearValueCount(2); // Set clear color
-        renderPassInfo.setPClearValues(clearValues);
-
         SetViewportAndScissor(cmd, dimensions);
 
-        // Begin render pass and bind pipeline
-        cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+        BindSharedData(cmd);
+
         NC_PROFILE_END();
     }
 

@@ -317,14 +317,14 @@ namespace nc::graphics
         return pipelineLayoutInfo;
     }
     
-    vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::array<vk::ClearValue, 2>& clearValues)
+    vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues)
     {
         vk::RenderPassBeginInfo renderPassInfo{};
         renderPassInfo.setRenderPass(renderpass); // Specify the render pass and attachments.
         renderPassInfo.setFramebuffer(framebuffer);
         renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
         renderPassInfo.renderArea.setExtent(extent);
-        renderPassInfo.setClearValueCount(1); // Set clear color
+        renderPassInfo.setClearValueCount(clearValues.size()); // Set clear color
         renderPassInfo.setPClearValues(clearValues.data());
         return renderPassInfo;
     }
@@ -457,5 +457,46 @@ namespace nc::graphics
         imageInfo.setImageView(imageView);
         imageInfo.setImageLayout(layout);
         return imageInfo;
+    }
+
+    std::vector<vk::ClearValue> CreateClearValues(ClearValue clearValue, const std::array<float, 4>& clearColor)
+    {
+        std::vector<vk::ClearValue> clearValues = {};
+
+        switch (clearValue)
+        {
+            case ClearValue::Depth:
+            {
+                clearValues.reserve(1);
+                auto value = vk::ClearValue{};
+                value.setDepthStencil({1.0f, 0});
+                clearValues.push_back(value);
+                break;
+            }
+
+            case ClearValue::Color:
+            {
+                clearValues.reserve(1);
+                auto value = vk::ClearValue{};
+                value.setColor(vk::ClearColorValue(clearColor));
+                clearValues.push_back(value);
+                break;
+            }
+
+            case ClearValue::DepthAndColor:
+            {
+                clearValues.reserve(2);
+                auto colorValue = vk::ClearValue{};
+                colorValue.setColor(vk::ClearColorValue(clearColor));
+                clearValues.push_back(colorValue);
+
+                auto depthValue = vk::ClearValue{};
+                depthValue.setDepthStencil({1.0f, 0});
+                clearValues.push_back(depthValue);
+                break;
+            }
+        }
+
+        return clearValues;
     }
 }

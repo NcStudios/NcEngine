@@ -1,13 +1,13 @@
 #pragma once
 
-#include "graphics\TechniqueType.h"
+#include "graphics\Initializers.h"
 #include "graphics\MeshManager.h"
+#include "graphics\TechniqueType.h"
 #include "graphics\TextureManager.h"
 #include "graphics\techniques\PhongAndUiTechnique.h"
 #include "graphics\techniques\WireframeTechnique.h"
 #include "graphics\techniques\ShadowMappingTechnique.h"
 #include "graphics\Resources\DepthStencil.h"
-// #include "graphics\techniques\ParticleTechnique.h"
 
 #include <unordered_map>
 #include "vulkan/vk_mem_alloc.hpp"
@@ -32,6 +32,8 @@ namespace nc::graphics
         vk::UniqueFramebuffer frameBuffer;
     };
 
+
+
     class Renderer
     {
         public:
@@ -39,7 +41,7 @@ namespace nc::graphics
             ~Renderer() noexcept;
             
             void Record(Commands* commands, registry_type* registry);
-            void BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index);
+            void BeginRenderPass(vk::CommandBuffer* cmd, vk::RenderPass* renderPass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, ClearValue clearValue);
             void Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex);
             void BindSharedData(vk::CommandBuffer* cmd);
             void Clear() noexcept;

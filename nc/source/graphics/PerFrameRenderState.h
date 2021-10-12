@@ -9,12 +9,13 @@ namespace nc::graphics
     {
         PerFrameRenderState(registry_type* registry, bool isPointLightSystemDirty);
 
-        DirectX::XMMATRIX viewMatrix;
+        DirectX::XMMATRIX camViewMatrix;
         DirectX::XMMATRIX projectionMatrix;
         Vector3 cameraPosition;
         std::vector<ObjectData> objectData;
         std::vector<Mesh> meshes;
         std::vector<PointLightInfo> pointLightInfos;
+        std::vector<DirectX::XMMATRIX> pointLightVPs;
         bool isPointLightBindRequired;
     };
 
