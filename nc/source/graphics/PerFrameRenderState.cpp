@@ -2,7 +2,7 @@
 #include "MainCamera.h"
 #include "camera/MainCameraInternal.h"
 #include "physics/collision/IntersectionQueries.h"
-#include "resources/ResourceManager.h"
+#include "resources/ShaderResourceService.h"
 
 namespace
 {
@@ -42,8 +42,8 @@ namespace nc::graphics
             if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
 
-            const auto [baseIndex, normalIndex, roughnessIndex] = renderer.GetTextureIndices();
-            objectData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, baseIndex, normalIndex, roughnessIndex, 1);
+            const auto [base, normal, roughness] = renderer.GetTextureIndices();
+            objectData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, base.index, normal.index, roughness.index, 1);
             meshes.push_back(renderer.GetMesh());
         }
 
@@ -69,11 +69,11 @@ namespace nc::graphics
 
     void MapPerFrameRenderState(const PerFrameRenderState& state)
     {
-        ResourceManager::UpdateObjects(state.objectData);
+        ShaderResourceService<ObjectData>::Get()->Update(state.objectData);
         
         if(state.isPointLightBindRequired)
         {
-            ResourceManager::UpdatePointLights(state.pointLightInfos);
+            ShaderResourceService<PointLightInfo>::Get()->Update(state.pointLightInfos);
         }
     }
 }

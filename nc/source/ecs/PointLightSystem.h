@@ -16,7 +16,7 @@ namespace nc::ecs
     class PointLightSystem
     {
         public:
-            PointLightSystem(registry_type* registryType, graphics::Graphics* graphics, uint32_t maxPointLights);
+            PointLightSystem(registry_type* registryType, graphics::Graphics* graphics);
             PointLightSystem(PointLightSystem&&) = delete;
             PointLightSystem(const PointLightSystem&) = delete;
             PointLightSystem& operator = (PointLightSystem&&) = delete;
@@ -28,7 +28,6 @@ namespace nc::ecs
         private:
             graphics::Graphics* m_graphics;
             registry_type* m_registry;
-            uint32_t m_maxPointLights;
             bool m_isSystemDirty;
     };
 }

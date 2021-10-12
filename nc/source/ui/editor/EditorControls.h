@@ -3,7 +3,6 @@
 #include "debug/Profiler.h"
 #include "Ecs.h"
 #include "ecs/EntityComponentSystem.h"
-#include "graphics/resources/ResourceManager.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls

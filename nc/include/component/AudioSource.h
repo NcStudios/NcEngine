@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Component.h"
+#include "Assets.h"
 
 #include <span>
 
@@ -35,9 +36,7 @@ namespace nc
             bool IsSpatial() const { return m_properties.spatialize; }
 
         private:
-            std::span<const double> m_leftChannel;
-            std::span<const double> m_rightChannel;
-            size_t m_samplesPerChannel;
+            SoundClipView m_soundClip;
             size_t m_currentSampleIndex;
             AudioSourceProperties m_properties;
             bool m_playing;

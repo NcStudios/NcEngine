@@ -1,5 +1,5 @@
 #include "Ecs.h"
-#include "graphics/resources/ResourceManager.h"
+#include "assets/AssetService.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -12,18 +12,18 @@ namespace nc
       #ifdef NC_EDITOR_ENABLED
       m_material{std::move(material)},
       #endif
-      m_mesh{nc::graphics::ResourceManager::GetMeshAccessor(meshUid)},
+      m_mesh{AssetService<MeshView>::Get()->Acquire(meshUid)},
       m_textureIndices{},
       m_techniqueType{techniqueType}
     {
         #ifdef NC_EDITOR_ENABLED
-        m_textureIndices.baseColor = nc::graphics::ResourceManager::GetTextureAccessor(m_material.baseColor); // Todo: Make this more generic for materials;
-        m_textureIndices.normal = nc::graphics::ResourceManager::GetTextureAccessor(m_material.normal);       // Todo: Make this more generic for materials;
-        m_textureIndices.roughness = nc::graphics::ResourceManager::GetTextureAccessor(m_material.roughness); // Todo: Make this more generic for materials;
+        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor); // Todo: Make this more generic for materials;
+        m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(m_material.normal);
+        m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(m_material.roughness);
         #else
-        m_textureIndices.baseColor = nc::graphics::ResourceManager::GetTextureAccessor(material.baseColor);
-        m_textureIndices.normal = nc::graphics::ResourceManager::GetTextureAccessor(material.normal);
-        m_textureIndices.roughness = nc::graphics::ResourceManager::GetTextureAccessor(material.roughness);
+        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
+        m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(material.normal);
+        m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(material.roughness);
         #endif
     }
 

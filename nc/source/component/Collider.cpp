@@ -3,7 +3,7 @@
 #include "graphics/Renderer.h"
 #include "Ecs.h"
 #include "debug/Utils.h"
-#include "assets/AssetManager.h"
+#include "assets/AssetService.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -66,7 +66,8 @@ namespace
             }
             case ColliderType::Hull:
             {
-                return { AssetManager::AcquireConvexHull(info.hullAssetPath) };
+                auto hull = AssetService<ConvexHullView>::Get()->Acquire(info.hullAssetPath);
+                return { ConvexHull{.vertices = hull.vertices, .extents = hull.extents, .maxExtent = hull.maxExtent} };
             }
             default:
                 throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");

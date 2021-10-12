@@ -1,5 +1,4 @@
 #include "Base.h"
-#include "graphics/Mesh.h"
 #include "graphics/Commands.h"
 #include "stb/stb_image.h"
 
@@ -273,6 +272,7 @@ namespace nc::graphics
             throw std::runtime_error("Could not create ImGUI descriptor pool.");
         }
 
+        /** @todo These value need to be configurable (at least sampled images) */
         std::array<vk::DescriptorPoolSize, 3> renderingPoolSizes =
         {
             vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
@@ -630,7 +630,7 @@ namespace nc::graphics
         return type == QueueFamilyType::GraphicsFamily ? m_graphicsQueue : m_presentQueue;
     }
 
-    void Base::MapMemory(uint32_t bufferId, std::vector<Vertex> vertices, size_t size)
+    void Base::MapMemory(uint32_t bufferId, const std::vector<Vertex>& vertices, size_t size)
     {
         void* mappedData;
         auto allocation = m_buffers.at(bufferId).second;
@@ -639,7 +639,7 @@ namespace nc::graphics
         m_allocator.unmapMemory(allocation);
     }
 
-    void Base::MapMemory(uint32_t bufferId, std::vector<uint32_t> indices, size_t size)
+    void Base::MapMemory(uint32_t bufferId, const std::vector<uint32_t>& indices, size_t size)
     {
         void* mappedData;
         auto allocation = m_buffers.at(bufferId).second;
