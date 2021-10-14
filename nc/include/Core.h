@@ -4,18 +4,34 @@
 #include "config/Config.h"
 #include "Scene.h"
 
-namespace nc::core
+namespace nc
 {
-    /** Create the engine and all required systems. */
-    void Initialize(HINSTANCE hInstance, const std::string& configPath);
+    class Engine;
 
-    /** Load initialScene and enters the game loop. */
-    void Start(std::unique_ptr<scene::Scene> initialScene);
-    
-    /** Exit the game loop after completing the current frame. If control cannot be returned to the
-     *  loop(e.g. an exception), setting forceImmediate to true will force clearing state data. */
-    void Quit(bool forceImmediate = false) noexcept;
-    
-    /** Destroy the engine instance. */
-    void Shutdown() noexcept;
+    /** Core engine object. */
+    class NcEngine
+    {
+        public:
+            /** Constructing an NcEngine object will initialize all engine state. */
+            NcEngine(HINSTANCE hInstance, const std::string& configPath);
+
+            /** Calls Shutdown. */
+            ~NcEngine() noexcept;
+
+            /** Load initial scene and start game loop. */
+            void Start(std::unique_ptr<scene::Scene> initialScene);
+            
+            /** Stop the game loop after the current frame has finished. Do not call
+             *  if an exception is thrown from Start. */
+            void Quit() noexcept;
+
+            /** Destroy internal state. */
+            void Shutdown() noexcept;
+
+            /** For internal use. */
+            auto GetImpl() noexcept -> Engine*;
+
+        private:
+            std::unique_ptr<Engine> m_impl;
+    };
 }

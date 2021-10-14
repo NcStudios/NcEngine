@@ -117,13 +117,13 @@ The main file will be pretty simple:
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 {
     /** Create the engine instance. */
-    nc::core::Initialize(instance, "example/Config.ini");
+    nc::NcEngine engine(instance, "example/Config.ini");
 
     /** Start the game loop. */
-    nc::core::Start(std::make_unique<MyScene>());
+    engine.Start(std::make_unique<MyScene>());
 
     /** Destroy the engine instance. */
-    nc::core::Shutdown();
+    engine.Shutdown();
 
     return 0;
 }

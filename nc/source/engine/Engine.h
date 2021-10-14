@@ -13,7 +13,7 @@
 #include "ui/UIImpl.h"
 #include "window/WindowImpl.h"
 
-namespace nc::core
+namespace nc
 {
     class Engine
     {

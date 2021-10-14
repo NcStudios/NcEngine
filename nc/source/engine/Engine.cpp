@@ -12,47 +12,85 @@
 #include "graphics/PerFrameRenderState.h"
 #include "physics/PhysicsConstants.h"
 
-namespace nc::core
+namespace nc
 {
-    /* Api Function Implementation */
-    namespace internal
-    {
-        std::unique_ptr<Engine> impl = nullptr;
-    }
+    // /* Api Function Implementation */
+    // namespace internal
+    // {
+    //     std::unique_ptr<Engine> impl = nullptr;
+    // }
 
-    void Initialize(HINSTANCE hInstance, const std::string& configPath)
+    // void Initialize(HINSTANCE hInstance, const std::string& configPath)
+    // {
+    //     IF_THROW(internal::impl != nullptr, "core::Initialize - Attempt to reinitialize engine");
+    //     config::Load(configPath);
+    //     debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
+    //     internal::impl = std::make_unique<Engine>(hInstance);
+    // }
+
+    // void Start(std::unique_ptr<scene::Scene> initialScene)
+    // {
+    //     V_LOG("Starting engine");
+    //     IF_THROW(internal::impl == nullptr, "core::Start - Engine is not initialized");
+    //     internal::impl->MainLoop(std::move(initialScene));
+    // }
+
+    // void Quit(bool forceImmediate) noexcept
+    // {
+    //     V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
+    //     if(internal::impl)
+    //     {
+    //         internal::impl->DisableRunningFlag();
+    //         if (forceImmediate)
+    //             internal::impl->Shutdown();
+    //     }
+    // }
+
+    // void Shutdown() noexcept
+    // {
+    //     if(!internal::impl)
+    //         return;
+
+    //     internal::impl = nullptr;
+    //     debug::internal::CloseLog();
+    // }
+
+    NcEngine::NcEngine(HINSTANCE hInstance, const std::string& configPath)
+        : m_impl{nullptr}
     {
-        IF_THROW(internal::impl != nullptr, "core::Initialize - Attempt to reinitialize engine");
         config::Load(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
-        internal::impl = std::make_unique<Engine>(hInstance);
+        m_impl = std::make_unique<Engine>(hInstance);
     }
 
-    void Start(std::unique_ptr<scene::Scene> initialScene)
+    NcEngine::~NcEngine() noexcept
+    {
+        if(m_impl)
+            Shutdown();
+    }
+
+    void NcEngine::Start(std::unique_ptr<scene::Scene> initialScene)
     {
         V_LOG("Starting engine");
-        IF_THROW(internal::impl == nullptr, "core::Start - Engine is not initialized");
-        internal::impl->MainLoop(std::move(initialScene));
+        m_impl->MainLoop(std::move(initialScene));
+    }
+    
+    void NcEngine::Quit() noexcept
+    {
+        m_impl->DisableRunningFlag();
     }
 
-    void Quit(bool forceImmediate) noexcept
+    void NcEngine::Shutdown() noexcept
     {
-        V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
-        if(internal::impl)
-        {
-            internal::impl->DisableRunningFlag();
-            if (forceImmediate)
-                internal::impl->Shutdown();
-        }
-    }
-
-    void Shutdown() noexcept
-    {
-        if(!internal::impl)
+        if(!m_impl)
             return;
 
-        internal::impl = nullptr;
         debug::internal::CloseLog();
+    }
+
+    auto NcEngine::GetImpl() noexcept -> Engine*
+    {
+        return m_impl.get();
     }
 
     /* Engine */
@@ -237,5 +275,6 @@ namespace nc::core
         m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
         m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics::SetClearColor, &m_graphics, _1));
         m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
+        m_window.BindEngineDisableRunningCallback(std::bind(Engine::DisableRunningFlag, this));
     }
 } // end namespace nc::engine
