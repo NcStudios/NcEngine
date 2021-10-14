@@ -19,8 +19,7 @@ namespace
     };
 
     std::unique_ptr<Config> g_config = nullptr;
-
-    const auto ConfigPath = std::string{"nc/source/config/config.ini"};
+    std::string g_configPath = "";
 
     // project
     const auto ProjectNameKey = std::string{"project_name"};
@@ -141,10 +140,11 @@ namespace nc::config
     }
 
     /* Internal function implementation */
-    void Load()
+    void Load(const std::string& configPath)
     {
+        g_configPath = configPath;
         g_config = std::make_unique<Config>();
-        nc::config::Read(ConfigPath, MapKeyValue, g_config.get());
+        nc::config::Read(configPath, MapKeyValue, g_config.get());
         if(!Validate())
             throw std::runtime_error("config::Load - Failed to validate config");
     }
@@ -156,7 +156,7 @@ namespace nc::config
             throw std::runtime_error("config::Save - failed to validate config");
 
         std::ofstream outFile;
-        outFile.open(ConfigPath);
+        outFile.open(g_configPath);
         if(!outFile.is_open())
             throw std::runtime_error("config::Save - failed to open file");
 

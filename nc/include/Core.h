@@ -7,7 +7,7 @@
 namespace nc::core
 {
     /** Create the engine and all required systems. */
-    void Initialize(HINSTANCE hInstance);
+    void Initialize(HINSTANCE hInstance, const std::string& configPath);
 
     /** Load initialScene and enters the game loop. */
     void Start(std::unique_ptr<scene::Scene> initialScene);

@@ -20,10 +20,10 @@ namespace nc::core
         std::unique_ptr<Engine> impl = nullptr;
     }
 
-    void Initialize(HINSTANCE hInstance)
+    void Initialize(HINSTANCE hInstance, const std::string& configPath)
     {
         IF_THROW(internal::impl != nullptr, "core::Initialize - Attempt to reinitialize engine");
-        config::Load();
+        config::Load(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         internal::impl = std::make_unique<Engine>(hInstance);
     }
@@ -123,6 +123,7 @@ namespace nc::core
     void Engine::MainLoop(std::unique_ptr<scene::Scene> initialScene)
     {
         V_LOG("Starting engine loop");
+        m_ecs.GetRegistry()->VerifyCallbacks();
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
         m_isRunning = true;

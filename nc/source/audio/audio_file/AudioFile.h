@@ -180,6 +180,8 @@ private:
     
     //=============================================================
     int32_t fourBytesToInt (std::vector<uint8_t>& source, int startIndex, Endianness endianness = Endianness::LittleEndian);
+    float fourBytesToFloat (std::vector<uint8_t>& source, int startIndex, Endianness endianness = Endianness::LittleEndian);
+
     int16_t twoBytesToInt (std::vector<uint8_t>& source, int startIndex, Endianness endianness = Endianness::LittleEndian);
     int getIndexOfString (std::vector<uint8_t>& source, std::string s);
     int getIndexOfChunk (std::vector<uint8_t>& source, const std::string& chunkHeaderID, int startIndex, Endianness endianness = Endianness::LittleEndian);
@@ -611,15 +613,30 @@ bool AudioFile<T>::decodeWaveFile (std::vector<uint8_t>& fileData)
             }
             else if (bitDepth == 32)
             {
-                int32_t sampleAsInt = fourBytesToInt (fileData, sampleIndex);
+                // int32_t sampleAsInt = fourBytesToInt (fileData, sampleIndex);
+                // T sample;
+                
+                // if (audioFormat == WavAudioFormat::IEEEFloat)
+                //     sample = (T)reinterpret_cast<float&> (sampleAsInt);
+                // else // assume PCM
+                //     sample = (T) sampleAsInt / static_cast<float> (std::numeric_limits<std::int32_t>::max());
+                
+                // samples[channel].push_back (sample);
+
                 T sample;
-                
-                if (audioFormat == WavAudioFormat::IEEEFloat)
-                    sample = (T)reinterpret_cast<float&> (sampleAsInt);
-                else // assume PCM
-                    sample = (T) sampleAsInt / static_cast<float> (std::numeric_limits<std::int32_t>::max());
-                
-                samples[channel].push_back (sample);
+
+                if(audioFormat == WavAudioFormat::IEEEFloat)
+                {
+                    sample = static_cast<T>(fourBytesToFloat(fileData, sampleIndex));
+                }
+                else
+                {
+                    sample = static_cast<T>(fourBytesToInt(fileData, sampleIndex) / static_cast<float> (std::numeric_limits<std::int32_t>::max()));
+
+                }
+
+                samples[channel].push_back(sample);
+
             }
             else
             {
@@ -756,14 +773,21 @@ bool AudioFile<T>::decodeAiffFile (std::vector<uint8_t>& fileData)
             }
             else if (bitDepth == 32)
             {
-                int32_t sampleAsInt = fourBytesToInt (fileData, sampleIndex, Endianness::BigEndian);
-                T sample;
+                // int32_t sampleAsInt = fourBytesToInt (fileData, sampleIndex, Endianness::BigEndian);
+                // T sample;
                 
-                if (audioFormat == AIFFAudioFormat::Compressed)
-                    sample = (T)reinterpret_cast<float&> (sampleAsInt);
-                else // assume uncompressed
-                    sample = (T) sampleAsInt / static_cast<float> (std::numeric_limits<std::int32_t>::max());
+                // if (audioFormat == AIFFAudioFormat::Compressed)
+                //     sample = (T)reinterpret_cast<float&> (sampleAsInt);
+                // else // assume uncompressed
+                //     sample = (T) sampleAsInt / static_cast<float> (std::numeric_limits<std::int32_t>::max());
                     
+
+                T sample;
+                if(audioFormat == AIFFAudioFormat::Compressed)
+                    sample = static_cast<T>(fourBytesToFloat(fileData, sampleIndex, Endianness::BigEndian));
+                else
+                    sample = (T) fourBytesToInt(fileData, sampleIndex, Endianness::BigEndian) / static_cast<float> (std::numeric_limits<std::int32_t>::max());
+
                 samples[channel].push_back (sample);
             }
             else
@@ -1166,6 +1190,20 @@ template <class T>
 int32_t AudioFile<T>::fourBytesToInt (std::vector<uint8_t>& source, int startIndex, Endianness endianness)
 {
     int32_t result;
+    
+    if (endianness == Endianness::LittleEndian)
+        result = (source[startIndex + 3] << 24) | (source[startIndex + 2] << 16) | (source[startIndex + 1] << 8) | source[startIndex];
+    else
+        result = (source[startIndex] << 24) | (source[startIndex + 1] << 16) | (source[startIndex + 2] << 8) | source[startIndex + 3];
+    
+    return result;
+}
+
+//=============================================================
+template <class T>
+float AudioFile<T>::fourBytesToFloat (std::vector<uint8_t>& source, int startIndex, Endianness endianness)
+{
+    float result;
     
     if (endianness == Endianness::LittleEndian)
         result = (source[startIndex + 3] << 24) | (source[startIndex + 2] << 16) | (source[startIndex + 1] << 8) | source[startIndex];

@@ -9,7 +9,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 {
     try
     {
-        nc::core::Initialize(instance);
+        nc::core::Initialize(instance, "project/config.ini");
         nc::core::Start(std::make_unique<nc::sample::Worms>());
     }
     catch(std::exception& e)
