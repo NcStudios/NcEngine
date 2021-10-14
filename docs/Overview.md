@@ -8,6 +8,7 @@ Overview
 * [Scenes](#scenes)
 * [Assets](#assets)
 * [UI](#ui)
+* [Config File](#config)
 
 ## Entities
 ------------

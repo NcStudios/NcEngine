@@ -5,6 +5,5 @@
 namespace nc::config
 {
     void Load(const std::string& configPath);
-    void Save();
     bool Validate();
 }

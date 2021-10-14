@@ -52,16 +52,6 @@ namespace nc::core
             return;
 
         internal::impl = nullptr;
-
-        try
-        {
-            config::Save();
-        }
-        catch(const std::runtime_error& e)
-        {
-            debug::LogException(e);
-        }
-
         debug::internal::CloseLog();
     }
 
