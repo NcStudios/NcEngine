@@ -1,6 +1,6 @@
 #include "component/AudioSource.h"
 #include "Ecs.h"
-#include "assets/AssetManager.h"
+#include "assets/AssetService.h"
 
 namespace
 {
@@ -29,18 +29,11 @@ namespace nc
 {
     AudioSource::AudioSource(Entity entity, const std::string& path, AudioSourceProperties properties)
         : ComponentBase{entity},
-          m_leftChannel{},
-          m_rightChannel{},
-          m_samplesPerChannel{},
+          m_soundClip{AssetService<SoundClipView>::Get()->Acquire(path)},
           m_currentSampleIndex{0u},
           m_properties{properties},
           m_playing{false}
     {
-        const auto& soundClip = AssetManager::AcquireSoundClip(path);
-        m_leftChannel = std::span<const double>{soundClip.leftChannel};
-        m_rightChannel = std::span<const double>{soundClip.rightChannel};
-        m_samplesPerChannel = soundClip.samplesPerChannel;
-
         m_properties.gain = math::Clamp(properties.gain, 0.0f, 1.0f);
     }
 
@@ -63,12 +56,12 @@ namespace nc
 
         for(size_t i = 0u; i < frames; ++i)
         {
-            const double sample = gain * (m_leftChannel[m_currentSampleIndex] + m_rightChannel[m_currentSampleIndex]);
+            const double sample = gain * (m_soundClip.leftChannel[m_currentSampleIndex] + m_soundClip.rightChannel[m_currentSampleIndex]);
 
             *buffer++ += sample * leftPresence;
             *buffer++ += sample * rightPresence;
 
-            if(++m_currentSampleIndex >= m_samplesPerChannel)
+            if(++m_currentSampleIndex >= m_soundClip.samplesPerChannel)
             {
                 m_currentSampleIndex = 0;
                 if(!m_properties.loop)
@@ -86,10 +79,10 @@ namespace nc
 
         for(size_t i = 0u; i < frames; ++i)
         {
-            *buffer++ += gain * m_leftChannel[m_currentSampleIndex];
-            *buffer++ += gain * m_rightChannel[m_currentSampleIndex];
+            *buffer++ += gain * m_soundClip.leftChannel[m_currentSampleIndex];
+            *buffer++ += gain * m_soundClip.rightChannel[m_currentSampleIndex];
 
-            if(++m_currentSampleIndex >= m_samplesPerChannel)
+            if(++m_currentSampleIndex >= m_soundClip.samplesPerChannel)
             {
                 m_currentSampleIndex = 0;
                 if(!m_properties.loop)

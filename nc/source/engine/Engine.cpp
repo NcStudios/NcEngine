@@ -10,7 +10,6 @@
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/resources/ResourceManager.h"
 #include "physics/PhysicsConstants.h"
 
 namespace nc::core
@@ -70,12 +69,14 @@ namespace nc::core
     Engine::Engine(HINSTANCE hInstance)
         : m_window{ hInstance },
           m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_renderer{&m_graphics},
+          m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
+          m_renderer{&m_graphics,
+                    [&manager = m_assetServices.meshManager] { return manager.GetVertexBuffer(); },
+                    [&manager = m_assetServices.meshManager] { return manager.GetIndexBuffer(); }},
           m_ecs{&m_graphics, config::GetMemorySettings()},
           m_physics{m_ecs.GetRegistry(), &m_graphics},
           m_sceneSystem{},
           m_time{},
-          m_assetManager{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_ui{m_window.GetHWND(), &m_graphics},
           m_taskExecutor{6u}, // @todo probably add to config

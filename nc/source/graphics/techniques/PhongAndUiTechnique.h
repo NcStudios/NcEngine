@@ -7,9 +7,11 @@
 #include <vector>
 #include <span>
 
+namespace nc { struct MeshView; }
+
 namespace nc::graphics
 {
-    class Graphics; class Commands; class Base; class Swapchain; struct Mesh;
+    class Graphics; class Commands; class Base; class Swapchain;
 
     struct PhongPushConstants
     {
@@ -25,7 +27,7 @@ namespace nc::graphics
             ~PhongAndUiTechnique() noexcept;
             
             void Bind(vk::CommandBuffer* cmd);
-            void Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const Mesh> meshes);
+            void Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const MeshView> meshes);
             void Clear() noexcept;
 
         private:

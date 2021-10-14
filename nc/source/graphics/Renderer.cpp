@@ -6,7 +6,7 @@
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
-#include "graphics/resources/ResourceManager.h"
+#include "PerFrameRenderState.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/Swapchain.h"
 #include "PerFrameRenderState.h"
@@ -15,10 +15,12 @@
 
 namespace nc::graphics
 {
-    Renderer::Renderer(graphics::Graphics* graphics)
+    Renderer::Renderer(graphics::Graphics* graphics, 
+                       std::function<vk::Buffer*()> getVertexBufferFunc,
+                       std::function<vk::Buffer*()> getIndexBufferFunc)
         : m_graphics{graphics},
-          m_textureManager{graphics},
-          m_meshManager{graphics},
+          m_getMeshVertexBuffer{std::move(getVertexBufferFunc)},
+          m_getMeshIndexBuffer{std::move(getIndexBufferFunc)},
           m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
           m_shadowMappingPass{},
           m_phongAndUiTechnique{nullptr}
@@ -120,8 +122,8 @@ namespace nc::graphics
     void Renderer::BindSharedData(vk::CommandBuffer* cmd)
     {
         vk::DeviceSize offsets[] = { 0 };
-        cmd->bindVertexBuffers(0, 1, ResourceManager::GetVertexData().buffer.GetBuffer(), offsets);
-        cmd->bindIndexBuffer(*ResourceManager::GetIndexData().buffer.GetBuffer(), 0, vk::IndexType::eUint32);
+        cmd->bindVertexBuffers(0, 1, m_getMeshVertexBuffer(), offsets);
+        cmd->bindIndexBuffer(*(m_getMeshIndexBuffer()), 0, vk::IndexType::eUint32);
     }
 
     void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, vk::RenderPass* renderPass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, ClearValue clearValue)
@@ -146,44 +148,19 @@ namespace nc::graphics
 
     void Renderer::InitializeShadowMappingRenderPass()
     {
+        std::array<Attachment, 1> attachmentSlots
+        {
+            CreateAttachmentSlot(0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore)
+        };
+
+        std::array<Subpass, 1> subpasses
+        {
+            CreateSubpass(attachmentSlots.at(0))
+        };
+
+        m_shadowMappingPass.renderPass = CreateRenderpass(m_graphics->GetBasePtr(), attachmentSlots, subpasses);
+
         auto device = m_graphics->GetBasePtr()->GetDevice();
-
-        std::array<vk::AttachmentDescription, 1> renderPassAttachments = 
-        {
-            CreateAttachmentDescription(AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore)
-        };
-
-        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 0);
-        vk::SubpassDescription subpass = CreateSubpassDescription(depthReference);
-
-        std::array<vk::SubpassDependency, 2> subpassDependencies =
-        {
-            CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
-                                    0,
-                                    vk::PipelineStageFlagBits::eFragmentShader,
-                                    vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                                    vk::AccessFlagBits::eShaderRead,
-                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-                                    vk::DependencyFlagBits::eByRegion),
-
-            CreateSubpassDependency(0,
-                                    VK_SUBPASS_EXTERNAL,
-                                    vk::PipelineStageFlagBits::eLateFragmentTests,
-                                    vk::PipelineStageFlagBits::eFragmentShader,
-                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-                                    vk::AccessFlagBits::eShaderRead,
-                                    vk::DependencyFlagBits::eByRegion),
-        };
-
-        vk::RenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.setAttachmentCount(1);
-        renderPassInfo.setPAttachments(renderPassAttachments.data());
-        renderPassInfo.setSubpassCount(1);
-        renderPassInfo.setPSubpasses(&subpass);
-        renderPassInfo.setDependencyCount(static_cast<uint32_t>(subpassDependencies.size()));
-        renderPassInfo.setPDependencies(subpassDependencies.data());
-
-        m_shadowMappingPass.renderPass = device.createRenderPassUnique(renderPassInfo);
 
         // Create frame buffer
         std::array<vk::ImageView, 1> attachments;
@@ -192,7 +169,7 @@ namespace nc::graphics
 
         vk::FramebufferCreateInfo framebufferInfo{};
         framebufferInfo.setRenderPass(m_shadowMappingPass.renderPass.get());
-        framebufferInfo.setAttachmentCount(1);
+        framebufferInfo.setAttachmentCount(attachments.size());
         framebufferInfo.setPAttachments(attachments.data());
         framebufferInfo.setWidth(dimensions.x);
         framebufferInfo.setHeight(dimensions.y);

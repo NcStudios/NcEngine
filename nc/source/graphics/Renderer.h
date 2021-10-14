@@ -1,19 +1,21 @@
 #pragma once
 
 #include "graphics\Initializers.h"
-#include "graphics\MeshManager.h"
 #include "graphics\TechniqueType.h"
-#include "graphics\TextureManager.h"
 #include "graphics\techniques\PhongAndUiTechnique.h"
 #include "graphics\techniques\WireframeTechnique.h"
 #include "graphics\techniques\ShadowMappingTechnique.h"
 #include "graphics\Resources\DepthStencil.h"
 
+#include <functional>
 #include <unordered_map>
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc { class MeshRenderer; }
-namespace nc::particle { class ParticleRenderer; }
+namespace nc
+{
+    class MeshRenderer;
+    namespace particle { class ParticleRenderer; }
+}
 
 namespace nc::graphics
 {
@@ -32,12 +34,12 @@ namespace nc::graphics
         vk::UniqueFramebuffer frameBuffer;
     };
 
-
-
     class Renderer
     {
         public:
-            Renderer(graphics::Graphics* graphics);
+            Renderer(graphics::Graphics* graphics,
+                     std::function<vk::Buffer*()> getVertexBufferFunc,
+                     std::function<vk::Buffer*()> getIndicexBufferFunc);
             ~Renderer() noexcept;
             
             void Record(Commands* commands, registry_type* registry);
@@ -60,9 +62,10 @@ namespace nc::graphics
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics* m_graphics;
-            TextureManager m_textureManager;
-            MeshManager m_meshManager;
-            vk::RenderPass m_mainRenderPass;        
+            std::function<vk::Buffer*()> m_getMeshVertexBuffer;
+            std::function<vk::Buffer*()> m_getMeshIndexBuffer;
+            
+            vk::RenderPass m_mainRenderPass;
             ShadowMappingPass m_shadowMappingPass;
 
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;

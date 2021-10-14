@@ -1,19 +1,17 @@
+#include "PointLightSystem.h"
 #include "ECS.h"
 #include "EntityComponentSystem.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
-#include "graphics/resources/ResourceManager.h"
-#include "PointLightSystem.h"
 
 #include <iostream>
 
 namespace nc::ecs
 {
-    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics, uint32_t maxPointLights)
+    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics)
         : m_graphics{graphics},
           m_registry{registry},
-          m_maxPointLights{maxPointLights},
           m_isSystemDirty{true}
     {
         m_registry->RegisterOnAddCallback<PointLight>
@@ -25,8 +23,6 @@ namespace nc::ecs
         (
             [this](Entity) { m_isSystemDirty = true; }
         );
-
-        graphics::ResourceManager::InitializePointLights(graphics, m_maxPointLights);
     }
 
     bool PointLightSystem::CheckDirtyAndReset()
@@ -37,6 +33,5 @@ namespace nc::ecs
     void PointLightSystem::Clear()
     {
         m_isSystemDirty = true;
-        graphics::ResourceManager::ResetPointLights(m_graphics, m_maxPointLights);
     }
 }

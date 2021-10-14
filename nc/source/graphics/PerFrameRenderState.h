@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Ecs.h"
-#include "resources/ObjectData.h"
+#include "resources/ObjectDataManager.h"
 
 namespace nc::graphics
 {
@@ -13,7 +13,7 @@ namespace nc::graphics
         DirectX::XMMATRIX projectionMatrix;
         Vector3 cameraPosition;
         std::vector<ObjectData> objectData;
-        std::vector<Mesh> meshes;
+        std::vector<MeshView> meshes;
         std::vector<PointLightInfo> pointLightInfos;
         std::vector<DirectX::XMMATRIX> pointLightVPs;
         bool isPointLightBindRequired;
