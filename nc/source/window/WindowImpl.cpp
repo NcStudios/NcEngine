@@ -158,7 +158,6 @@ namespace nc::window
         EngineDisableRunningCallback = std::move(callback);
     }
 
-
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
         m_onResizeReceivers.push_back(receiver);

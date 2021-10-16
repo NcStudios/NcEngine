@@ -136,13 +136,13 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 }
 ```
 
-Between calls to Initialize and Shutdown, the NcEngine is fully initialized, and any functions may be called even if the game loop hasn't started. For instance, the assets for the box could have been loaded here instead of on scene load.
+NcEngine is fully initialized after construction until Shutdown is called, and any functions may be called even if the game loop isn't running. For instance, the assets for the box could have been loaded before Start() instead of on scene load.
 
 One thing that isn't obvious in this example is how control is given back to WinMain. The Quit() function (Core.h) needs to be called to exit the game loop, however, NcEngine will internally call Quit() upon receiving a WM_CLOSE message.
 
 ## Setting up the config file
 -------------------------
-For the config file, start by copying the defaults from [nc/source/config/default_config.ini](../nc/source/config/default_config.ini). Most of these values will be sufficient, but writing shaders it outside the scope of this guide, so we'll just point to the ones in the sample project:
+For the config file, start by copying the defaults from [nc/source/config/default_config.ini](../nc/source/config/default_config.ini). Most of these values will be sufficient, but writing shaders is outside the scope of this guide, so we'll just point to the ones in the sample project:
 
 ```
 shaders_path=project/shaders/Compiled/

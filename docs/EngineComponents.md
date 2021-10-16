@@ -35,7 +35,7 @@ When creating a Collider, the type of properties struct passed will determine th
 3. Capsule
     * Defined by a center, height, and radius
 4. Hull
-    * Described by an [asset](Overview.md#assets) file containing a vertex list for a convex hull. As this is an asset, it must be loaded before attempting to created one.
+    * Described by an [asset](Overview.md#assets) file containing a vertex list for a convex hull. As this is an asset, it must be loaded before attempting to create one.
 
 These values describing a shape cannot be modified after construction, but the shapes will be affected by the object's transform. For example, dynamically scaling a transform's scale will propagate to the collider. Transforms should always have a positive scale in each axis. Also, sphere colliders always assume uniform scaling.
 
