@@ -11,7 +11,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 
     try
     {
-        engine = std::make_unique<nc::NcEngine>(instance);
+        engine = std::make_unique<nc::NcEngine>(instance, "project/config.ini");
         engine->Start(std::make_unique<nc::sample::Worms>());
     }
     catch(std::exception& e)
@@ -24,8 +24,11 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
         nc::debug::LogToDiagnostics("WinMain.cpp - unkown exception");
     }
 
-    if(engine) engine->Shutdown();
-    engine = nullptr;
+    if(engine)
+    {
+        engine->Shutdown();
+        engine = nullptr;
+    }
 
 	return 0;
 }

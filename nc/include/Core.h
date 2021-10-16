@@ -14,7 +14,7 @@ namespace nc
         public:
             /** Constructing an NcEngine object will initialize all engine state. Editor
              *  mode should not be used by games. */
-            NcEngine(HINSTANCE hInstance, bool useEditorMode = false);
+            NcEngine(HINSTANCE hInstance,  const std::string& configPath, bool useEditorMode = false);
 
             /** Calls Shutdown. */
             ~NcEngine() noexcept;
@@ -26,7 +26,7 @@ namespace nc
              *  if an exception is thrown from Start. */
             void Quit() noexcept;
 
-            /** Save configuration and destroy internal state. */
+            /** Destroy internal state. */
             void Shutdown() noexcept;
 
             /** For internal use. */

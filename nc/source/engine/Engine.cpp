@@ -13,10 +13,10 @@
 
 namespace nc
 {
-    NcEngine::NcEngine(HINSTANCE hInstance, bool useEditorMode)
+    NcEngine::NcEngine(HINSTANCE hInstance, const std::string& configPath, bool useEditorMode)
         : m_impl{nullptr}
     {
-        config::Load();
+        config::Load(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         m_impl = std::make_unique<Engine>(hInstance, useEditorMode);
     }
@@ -48,18 +48,8 @@ namespace nc
 
     void NcEngine::Shutdown() noexcept
     {
-        if(!m_impl) return;
-
-        try
-        {
-            m_impl = nullptr;
-            config::Save();
-        }
-        catch(const std::exception& e)
-        {
-            debug::LogException(e);
-        }
-
+        if(!m_impl)
+            return;
         debug::internal::CloseLog();
     }
 
@@ -127,6 +117,7 @@ namespace nc
     void Engine::MainLoop(std::unique_ptr<scene::Scene> initialScene)
     {
         V_LOG("Starting engine loop");
+        m_ecs.GetRegistry()->VerifyCallbacks();
         m_sceneSystem.QueueSceneChange(std::move(initialScene));
         m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
         m_isRunning = true;
