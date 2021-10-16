@@ -9,6 +9,10 @@ namespace nc
     namespace ecs { class PointLightSystem; }
     namespace graphics { struct PerFrameRenderState; }
 
+    /** @todo As this is a shader resource, we should be using a different
+     *  type for initializing point lights. It would be reasonable to assume
+     *  that 'pos' controls the position or an offset for the light, when in
+     *  reality it is just overwritten with the transform position. */
     struct PointLightInfo
     {
         alignas(16)Vector3 pos = Vector3::Zero();
