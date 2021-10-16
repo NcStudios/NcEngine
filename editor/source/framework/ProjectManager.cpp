@@ -55,7 +55,8 @@ namespace nc::editor
           m_nextSceneIndex{0u},
           m_uiCallbacks{},
           m_openFileBrowser{},
-          m_openNewSceneDialog{}
+          m_openNewSceneDialog{},
+          m_openNewProjectDialog{}
     {
     }
 
@@ -70,7 +71,7 @@ namespace nc::editor
 
         if(!projectDirectory.is_directory())
         {
-            Output::Log("ProjectManager::OpenProject - Invalid path: " + path.string());
+            Output::LogError("Failure opening project - Invalid path:", path.string());
             return false;
         }
 
@@ -78,15 +79,15 @@ namespace nc::editor
 
         if(!sceneDirectory.exists())
         {
-            Output::Log("ProjectManager::OpenProject - Directory does not have \"scenes\" directory");
-            return false;
+            Output::Log("Project doesn't have \"scenes\" directory. One will be created.");
+            std::filesystem::create_directory(sceneDirectory.path());
         }
 
         auto configEntry = std::filesystem::directory_entry{path / "config.ini"};
 
         if(!configEntry.exists())
         {
-            Output::Log("ProjectManager::OpenProject - Could not find config.ini");
+            Output::LogError("Failure opening project - Could not find config.ini");
             return false;
         }
 
@@ -109,28 +110,23 @@ namespace nc::editor
 
     void ProjectManager::CreateProject()
     {
-        m_openFileBrowser(std::bind(ProjectManager::DoCreateProject, this, std::placeholders::_1));
+        m_openNewProjectDialog(std::bind(ProjectManager::DoCreateProject, this, std::placeholders::_1, std::placeholders::_2));
     }
 
-    bool ProjectManager::DoCreateProject(const std::filesystem::path& path)
+    bool ProjectManager::DoCreateProject(const std::string& name, const std::filesystem::path& path)
     {
-        /** @todo need to specify name */
-        std::string name = "New Project";
-
         {
             auto pathEntry = std::filesystem::directory_entry{path};
 
             if(!pathEntry.exists())
             {
-                Output::Log("ProjectManager::CreateProject - Invalid path");
-                Output::Log(path.string());
+                Output::LogError("Failure creating project - Invalid path:", path.string());
                 return false;
             }
 
             if(!pathEntry.is_directory())
             {
-                Output::Log("ProjectManager::CreatProject - Path is not a directory");
-                Output::Log(path.string());
+                Output::Log("Failure creating project - Path is not a directory:", path.string());
                 return false;
             }
         }
@@ -141,14 +137,12 @@ namespace nc::editor
             std::filesystem::directory_entry directoryEntry{directoryPath};
             if(directoryEntry.exists())
             {
-                Output::Log("ProjectManager::CreateProject - Project with this name already exists in this directory");
-                Output::Log(path.string());
+                Output::Log("Failure creating project - Project with this name already exists in this directory:", path.string());
                 return false;
             }
         }
 
-        Output::Log("Creating Project:");
-        Output::Log(directoryPath.string());
+        Output::Log("Creating Project:", directoryPath.string());
 
         CreateProjectDirectories(directoryPath);
         
@@ -167,13 +161,14 @@ namespace nc::editor
         m_uiCallbacks = std::move(uiCallbacks);
         m_openFileBrowser = std::move(dialogCallbacks.openFileBrowser);
         m_openNewSceneDialog = std::move(dialogCallbacks.openNewSceneDialog);
+        m_openNewProjectDialog = std::move(dialogCallbacks.openNewProjectDialog);
     }
 
     void ProjectManager::NewScene()
     {
         if(m_projectData.name.empty())
         {
-            Output::Log("Cannot create scene: No project is open");
+            Output::LogError("Failure creating scene: No project is open");
             return;
         }
 
@@ -184,13 +179,14 @@ namespace nc::editor
     {
         if(name.empty())
         {
-            Output::Log("Cannot create scene: name cannot be empty");
+            Output::LogError("Failure creating scene: name cannot be empty");
             return false;
         }
 
+        /** @todo we need to enforce scene name is a valid c++ identifier or change how that is handled. */
         if(!std::isalpha(name[0]))
         {
-            Output::Log("Cannot create scene: name must start with a letter");
+            Output::LogError("Failure creating scene: name must start with a letter");
             return false;
         }
 
@@ -208,19 +204,19 @@ namespace nc::editor
     {
         if(m_projectData.name.empty())
         {
-            Output::Log("Cannot save scene: No project is open");
+            Output::LogError("Failure saving scene: No project is open");
             return;
         }
 
         if(m_projectData.scenes.empty())
         {
-            Output::Log("Cannot save scene: No scene is open");
+            Output::Log("Failure saving scene: No scene is open");
             return;
         }
 
         if(AssetDependencyChecker checkDependencies{m_registry, m_manifest}; !checkDependencies.result)
         {
-            Output::Log("Cannot save scene: missing asset dependencies");
+            Output::Log("Failure saving scene: Missing asset dependencies");
             checkDependencies.LogMissingDependencies();
             return;
         }
@@ -233,7 +229,7 @@ namespace nc::editor
     {
         if(m_projectData.name.empty())
         {
-            Output::Log("Cannot load scene: No project open");
+            Output::LogError("Failure loading scene: No project open");
             return;
         }
 
@@ -242,19 +238,20 @@ namespace nc::editor
             if(m_projectData.scenes.at(i) == name)
             {
                 m_nextSceneIndex = i;
+                Output::Log("Loading scene: " + name);
                 scene::Change(std::make_unique<EditorScene>(this));
                 return;
             }
         }
 
-        Output::Log("Could not find scene: " + name);
+        Output::LogError("Could not find scene: " + name);
     }
 
     void ProjectManager::ReadNextScene()
     {
         if(m_projectData.name.empty())
         {
-            Output::Log("ProjectManager:LoadNextScene - No project open");
+            Output::LogError("ProjectManager:LoadNextScene - No project open");
             return;
         }
 
@@ -272,13 +269,13 @@ namespace nc::editor
     {
         if(m_projectData.name.empty())
         {
-            Output::Log("Cannot delete scene: No project is open");
+            Output::LogError("Failure deleting scene: No project is open");
             return;
         }
 
         if(m_projectData.scenes.empty())
         {
-            Output::Log("Cannot delete scene: No scene is open");
+            Output::LogError("Failure deleting scene: No scene is open");
             return;
         }
 

@@ -64,7 +64,7 @@ namespace nc::editor
 
         if(DoFilesExist())
         {
-            Output::Log("Cannot write scene: Scene already exists with name: " + sceneName);
+            Output::LogError("Failure writing scene: Scene already exists with name: " + sceneName);
         }
         
         CreateHeader();
@@ -142,8 +142,7 @@ namespace nc::editor
         m_file.open(filePath);
         if(!m_file.is_open())
         {
-            Output::Log("Failure opening scene:");
-            Output::Log(m_scenesDirectory.string() + m_sceneName);
+            Output::LogError("Failure opening scene:", m_scenesDirectory.string() + m_sceneName);
         }
 
         m_file << "/** Generated source code for scene: " << m_sceneName << " - DO NOT MODIFY */\n"

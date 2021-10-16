@@ -4,5 +4,6 @@ target_sources(${EDITOR_EXE}
         ${ROOT_DIR}/source/ui/dialog/ChangeTagDialog.cpp
         ${ROOT_DIR}/source/ui/dialog/Dialog.cpp
         ${ROOT_DIR}/source/ui/dialog/FileBrowser.cpp
+        ${ROOT_DIR}/source/ui/dialog/NewProjectDialog.cpp
         ${ROOT_DIR}/source/ui/dialog/NewSceneDialog.cpp
 )

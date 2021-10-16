@@ -24,12 +24,12 @@ namespace nc::graphics
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
         if (!file.is_open() || file.tellg() == -1)
         {
-            throw std::runtime_error("Failed to open file.");
+            throw std::runtime_error("Failed to open shader file: " + filename);
         }
         auto fileSize = static_cast<uint32_t>(file.tellg());
         if (fileSize % 4 != 0)
         {
-            throw std::runtime_error("The file of shader byte code was not uint32_t aligned.");
+            throw std::runtime_error("Shader byte code was not uint32_t aligned: " + filename);
         }
 
         auto bufferSize = fileSize/sizeof(uint32_t);
@@ -40,7 +40,7 @@ namespace nc::graphics
         if (file.fail())
         {
             file.close();
-            throw std::runtime_error("The file was wonky. (failbit set)");
+            throw std::runtime_error("Failure reading shader: " + filename);
         }
         file.close();
         return buffer;

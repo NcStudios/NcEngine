@@ -12,7 +12,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 
     try
     {
-        engine = std::make_unique<nc::NcEngine>(instance, true);
+        engine = std::make_unique<nc::NcEngine>(instance, "editor/engine_config.ini", true);
         auto* registry = nc::ActiveRegistry();
         nc::editor::EditorFramework framework{registry};
         engine->Start(std::make_unique<nc::editor::EditorScene>(framework.GetProjectManager()));

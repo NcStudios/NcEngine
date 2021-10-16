@@ -8,6 +8,13 @@ namespace nc::editor
     /** Editor log */
     class Output
     {
+        struct LogItem
+        {
+            std::string text;
+            std::string description;
+            bool isError;
+        };
+
         public:
             static const unsigned DefaultItemCount = 50u;
 
@@ -15,14 +22,14 @@ namespace nc::editor
             ~Output() noexcept;
             void SetItemCount(unsigned count);
             void Clear();
-            const std::deque<std::string>& GetItems();
-            static void Log(std::string item);
+            static void Log(std::string item, std::string description = "", bool isError = false);
+            static void LogError(std::string item, std::string description = "");
 
             void Draw();
 
         private:
             static Output* m_instance;
-            std::deque<std::string> m_items;
+            std::deque<LogItem> m_items;
             unsigned m_itemCount = DefaultItemCount;
     };
 }

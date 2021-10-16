@@ -50,9 +50,10 @@ namespace nc::editor
             UICallbacks m_uiCallbacks;
             DialogCallbacks::OpenFileBrowserCallbackType m_openFileBrowser;
             DialogCallbacks::OpenNewSceneDialogCallbackType m_openNewSceneDialog;
+            DialogCallbacks::OpenNewProjectDialogCallbackType m_openNewProjectDialog;
 
             bool DoOpenProject(const std::filesystem::path& path);
-            bool DoCreateProject(const std::filesystem::path& path);
+            bool DoCreateProject(const std::string& name, const std::filesystem::path& path);
             bool DoNewScene(const std::string& name);
     
             friend EditorFramework;

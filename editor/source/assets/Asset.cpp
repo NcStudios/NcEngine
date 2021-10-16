@@ -102,8 +102,7 @@ namespace nc::editor
         }
         catch(const std::exception& e)
         {
-            Output::Log("Exception: " + std::string{e.what()});
-            Output::Log("Failure loading asset: " + asset.sourcePath.string());
+            Output::LogError("Failure loading asset:", "Exception: " + std::string{e.what()});
         }
 
         return false;

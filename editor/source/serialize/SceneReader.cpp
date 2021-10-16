@@ -109,8 +109,7 @@ namespace nc::editor
     {
         if(!m_file.is_open())
         {
-            Output::Log("Failure opening scene:");
-            Output::Log(m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
+            Output::LogError("Failure opening scene:", m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
             return;
         }
 
@@ -122,8 +121,7 @@ namespace nc::editor
         {
             if(m_file.fail())
             {
-                Output::Log("Failure reading scene:");
-                Output::Log(m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
+                Output::LogError("Failure reading scene:", m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
                 m_file.close();
                 return;
             }
@@ -214,7 +212,7 @@ namespace nc::editor
         }
         catch(const std::runtime_error& e)
         {
-            Output::Log("Failure adding required hull collider: " + properties.assetPath);
+            Output::LogError("Failure adding required hull collider:", properties.assetPath);
             AddDefaultHullCollider(m_registry, entity, isTrigger);
         }
     }
@@ -238,7 +236,7 @@ namespace nc::editor
         }
         catch(const std::runtime_error& e)
         {
-            Output::Log("Failure adding required concave collider: " + assetPath);
+            Output::LogError("Failure adding required concave collider:", assetPath);
             AddDefaultConcaveCollider(m_registry, entity);
         }
     }
@@ -296,7 +294,7 @@ namespace nc::editor
         }
         catch(const std::exception& e)
         {
-            Output::Log("Failure adding required mesh assets");
+            Output::LogError("Failure adding required mesh assets");
             AddDefaultMeshRenderer(m_registry, entity);
         }
     }

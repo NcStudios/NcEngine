@@ -29,13 +29,16 @@ namespace nc::config
         std::ifstream inFile;
         inFile.open(filePath);
         if(!inFile.is_open())
-            throw std::runtime_error("Failed to load config file.");
+            throw std::runtime_error("Failed to load config file: " + filePath);
 
         std::string line{}, key{}, value{};
         while(!inFile.eof())
         {
             if(inFile.fail())
+            {
+                inFile.close();
                 throw std::runtime_error("Stream failure while reading config");
+            }
 
             std::getline(inFile, line, '\n');
             if(ParseLine(line, key, value))

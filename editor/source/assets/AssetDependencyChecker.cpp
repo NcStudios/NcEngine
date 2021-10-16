@@ -52,7 +52,7 @@ namespace nc::editor
     {
         for(const auto& path : missingDependencies)
         {
-            Output::Log("Missing asset: " + path);
+            Output::LogError("Missing asset: " + path);
         }
     }
 }

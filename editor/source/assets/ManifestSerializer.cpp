@@ -54,7 +54,7 @@ namespace nc::editor
 
         if(!std::filesystem::directory_entry{manifestPath}.exists())
         {
-            Output::Log("Manifest doesn't exist: " + manifestPath.string());
+            Output::LogError("Manifest doesn't exist: " + manifestPath.string());
             return out;
         }
 
@@ -62,7 +62,7 @@ namespace nc::editor
 
         if(!file.is_open())
         {
-            Output::Log("Failure opening manifest: " + manifestPath.string());
+            Output::LogError("Failure opening manifest: " + manifestPath.string());
             return out;
         }
 
@@ -92,10 +92,6 @@ namespace nc::editor
             else if(line == TextureTag)
             {
                 out.textures.push_back(ReadStandardAsset(file));
-            }
-            else
-            {
-                Output::Log("Invalid manifest entry: " + line);
             }
         }
 

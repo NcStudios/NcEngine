@@ -272,6 +272,7 @@ namespace nc
 
                 break;
             }
+            default: break;
         }
 
         /** @todo put widgets back */

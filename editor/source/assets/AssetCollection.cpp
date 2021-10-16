@@ -20,7 +20,7 @@ namespace nc::editor
 
         if(pos == m_assets.end())
         {
-            Output::Log("AssetCollection::Remove - Asset does not exist: " + assetPath.string());
+            Output::LogError("Could not find asset in manifest:",  assetPath.string());
             return false;
         }
 

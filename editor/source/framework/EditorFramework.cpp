@@ -38,12 +38,14 @@ namespace
     }
 
     auto CreateDialogCallbacks(nc::editor::FileBrowser* fileBrowser,
-                               nc::editor::NewSceneDialog* newSceneDialog) -> nc::editor::DialogCallbacks
+                               nc::editor::NewSceneDialog* newSceneDialog,
+                               nc::editor::NewProjectDialog* newProjectDialog) -> nc::editor::DialogCallbacks
     {
         return nc::editor::DialogCallbacks
         {
             .openFileBrowser = std::bind(nc::editor::FileBrowser::Open, fileBrowser, std::placeholders::_1),
-            .openNewSceneDialog = std::bind(nc::editor::NewSceneDialog::Open, newSceneDialog, std::placeholders::_1)
+            .openNewSceneDialog = std::bind(nc::editor::NewSceneDialog::Open, newSceneDialog, std::placeholders::_1),
+            .openNewProjectDialog = std::bind(nc::editor::NewProjectDialog::Open, newProjectDialog, std::placeholders::_1)
         };
     }
 }
@@ -64,6 +66,7 @@ namespace nc::editor
                      std::string{}},
           m_fileBrowser{std::bind(EditorUI::AddDialog, &m_editorUI, std::placeholders::_1)},
           m_newSceneDialog{std::bind(EditorUI::AddDialog, &m_editorUI, std::placeholders::_1)},
+          m_newProjectDialog{std::bind(EditorUI::AddDialog, &m_editorUI, std::placeholders::_1)},
           m_changeTagDialog{registry}
     {
         nc::editor::SetImGuiStyle();
@@ -72,7 +75,7 @@ namespace nc::editor
         auto uiCallbacks = CreateUICallbacks(&m_editorUI);
         m_changeTagDialog.RegisterAddDialogCallback(uiCallbacks.addDialogCallback);
 
-        auto dialogCallbacks = CreateDialogCallbacks(&m_fileBrowser, &m_newSceneDialog);
+        auto dialogCallbacks = CreateDialogCallbacks(&m_fileBrowser, &m_newSceneDialog, &m_newProjectDialog);
         m_editorUI.RegisterCallbacks(dialogCallbacks.openFileBrowser);
         
         m_projectManager.RegisterCallbacks(std::move(uiCallbacks), std::move(dialogCallbacks));

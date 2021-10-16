@@ -60,7 +60,7 @@ namespace nc::editor
     {
         if(!HasValidExtensionForAssetType(assetPath, type))
         {
-            Output::Log("Invalid asset extension");
+            Output::LogError("Invalid asset extension");
             return false;
         }
 
@@ -68,7 +68,7 @@ namespace nc::editor
 
         if(collection.Contains(assetPath))
         {
-            Output::Log("Asset is alread in the manifest");
+            Output::LogError("Asset is alread in the manifest");
             return false;
         }
 
@@ -76,13 +76,13 @@ namespace nc::editor
 
         if(RequiresNcaFile(type) && !BuildNcaFile(assetPath, type))
         {
-            Output::Log("Failure building nca file from: " + assetPath.string());
+            Output::LogError("Failure building nca file from:", assetPath.string());
             return false;
         }
 
         if(!LoadAsset(asset, type))
         {
-            Output::Log("Failure loading asset: " + assetPath.string());
+            Output::LogError("Failure loading asset:", assetPath.string());
             return false;
         }
 
@@ -118,7 +118,7 @@ namespace nc::editor
 
         if(!manifestData.readSuccessfully)
         {
-            Output::Log("AssetManifest::ReadManifest - Failure reading manifest: " + manifestPath.string());
+            Output::LogError("AssetManifest::ReadManifest - Failure reading manifest:", manifestPath.string());
             return;
         }
 
@@ -126,7 +126,7 @@ namespace nc::editor
         {
             if(!LoadAsset(asset, AssetType::AudioClip))
             {
-                Output::Log("AssetManifest::ReadManifest - Failure loading AudioClip: " + asset.sourcePath.string());
+                Output::LogError("AssetManifest::ReadManifest - Failure loading AudioClip:",  asset.sourcePath.string());
             }
 
             m_audioClips.Add(std::move(asset));
@@ -135,7 +135,7 @@ namespace nc::editor
         for(auto& asset : manifestData.concaveColliders)
         {
             if(!LoadAsset(asset, AssetType::ConcaveCollider))
-                Output::Log("AssetManifest::ReadManifest - Failure loading ConcaveCollider: " + asset.sourcePath.string());
+                Output::LogError("AssetManifest::ReadManifest - Failure loading ConcaveCollider:", asset.sourcePath.string());
             
             m_concaveColliders.Add(std::move(asset));
         }
@@ -143,7 +143,7 @@ namespace nc::editor
         for(auto& asset : manifestData.hullColliders)
         {
             if(!LoadAsset(asset, AssetType::HullCollider))
-                Output::Log("AssetManifest::ReadManifest - Failure loading HullCollider: " + asset.sourcePath.string());
+                Output::LogError("AssetManifest::ReadManifest - Failure loading HullCollider:", asset.sourcePath.string());
 
             m_hullColliders.Add(std::move(asset));
         }
@@ -151,7 +151,7 @@ namespace nc::editor
         for(auto& asset : manifestData.meshes)
         {
             if(!LoadAsset(asset, AssetType::Mesh))
-                Output::Log("AssetManifest::ReadManifest - Failure loading Mesh: " + asset.sourcePath.string());
+                Output::LogError("AssetManifest::ReadManifest - Failure loading Mesh:", asset.sourcePath.string());
             
             m_meshes.Add(std::move(asset));
         }
@@ -159,7 +159,7 @@ namespace nc::editor
         for(auto& asset : manifestData.textures)
         {
             if(!LoadAsset(asset, AssetType::Texture))
-                Output::Log("AssetManifest::ReadManifest - Failure loading Texture: " + asset.sourcePath.string());
+                Output::LogError("AssetManifest::ReadManifest - Failure loading Texture:", asset.sourcePath.string());
             
             m_textures.Add(std::move(asset));
         }

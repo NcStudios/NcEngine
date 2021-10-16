@@ -8,6 +8,7 @@
 #include "ui/dialog/ChangeTagDialog.h"
 #include "ui/dialog/FileBrowser.h"
 #include "ui/dialog/NewSceneDialog.h"
+#include "ui/dialog/NewProjectDialog.h"
 
 namespace nc::editor
 {
@@ -32,6 +33,7 @@ namespace nc::editor
             EditorUI m_editorUI;
             FileBrowser m_fileBrowser;
             NewSceneDialog m_newSceneDialog;
+            NewProjectDialog m_newProjectDialog;
             ChangeTagDialog m_changeTagDialog;
     };
 }
