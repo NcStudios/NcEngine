@@ -14,47 +14,6 @@
 
 namespace nc
 {
-    // /* Api Function Implementation */
-    // namespace internal
-    // {
-    //     std::unique_ptr<Engine> impl = nullptr;
-    // }
-
-    // void Initialize(HINSTANCE hInstance, const std::string& configPath)
-    // {
-    //     IF_THROW(internal::impl != nullptr, "core::Initialize - Attempt to reinitialize engine");
-    //     config::Load(configPath);
-    //     debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
-    //     internal::impl = std::make_unique<Engine>(hInstance);
-    // }
-
-    // void Start(std::unique_ptr<scene::Scene> initialScene)
-    // {
-    //     V_LOG("Starting engine");
-    //     IF_THROW(internal::impl == nullptr, "core::Start - Engine is not initialized");
-    //     internal::impl->MainLoop(std::move(initialScene));
-    // }
-
-    // void Quit(bool forceImmediate) noexcept
-    // {
-    //     V_LOG("Shutting down engine - forceImmediate=" + std::to_string(forceImmediate));
-    //     if(internal::impl)
-    //     {
-    //         internal::impl->DisableRunningFlag();
-    //         if (forceImmediate)
-    //             internal::impl->Shutdown();
-    //     }
-    // }
-
-    // void Shutdown() noexcept
-    // {
-    //     if(!internal::impl)
-    //         return;
-
-    //     internal::impl = nullptr;
-    //     debug::internal::CloseLog();
-    // }
-
     NcEngine::NcEngine(HINSTANCE hInstance, const std::string& configPath)
         : m_impl{nullptr}
     {
