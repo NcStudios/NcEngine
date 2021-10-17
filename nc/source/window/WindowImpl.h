@@ -30,6 +30,7 @@ namespace nc::window
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept;
             void BindGraphicsSetClearColorCallback(std::function<void(std::array<float, 4>)> callback) noexcept;
             void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept;
+            void BindEngineDisableRunningCallback(std::function<void()> callback) noexcept;
 
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
@@ -50,5 +51,6 @@ namespace nc::window
             std::function<void(float,float,float,float,WPARAM)> GraphicsOnResizeCallback;
             std::function<void(std::array<float, 4>)> GraphicsSetClearColorCallback;
             std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> UIWndMessageCallback;
+            std::function<void()> EngineDisableRunningCallback;
     };
 } // end namespace nc::window

@@ -19,11 +19,11 @@ set CONFIGURATION="%~2"
     EXIT
 
 :CheckConfiguration
-    if %CONFIGURATION%=="Debug-NoValidation" (
+    if %CONFIGURATION%=="Debug" (
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Debug -DNC_EDITOR_ENABLED=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON
         goto Run
     )
-    if %CONFIGURATION%=="Debug" (
+    if %CONFIGURATION%=="Debug-WithValidation" (
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Debug -DNC_EDITOR_ENABLED=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON -DNC_USE_VALIDATION=ON
         goto Run
     )

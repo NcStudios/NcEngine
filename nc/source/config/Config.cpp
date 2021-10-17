@@ -19,8 +19,7 @@ namespace
     };
 
     std::unique_ptr<Config> g_config = nullptr;
-
-    const auto ConfigPath = std::string{"nc/source/config/config.ini"};
+    std::string g_configPath = "";
 
     // project
     const auto ProjectNameKey = std::string{"project_name"};
@@ -141,53 +140,13 @@ namespace nc::config
     }
 
     /* Internal function implementation */
-    void Load()
+    void Load(const std::string& configPath)
     {
+        g_configPath = configPath;
         g_config = std::make_unique<Config>();
-        nc::config::Read(ConfigPath, MapKeyValue, g_config.get());
+        nc::config::Read(configPath, MapKeyValue, g_config.get());
         if(!Validate())
             throw std::runtime_error("config::Load - Failed to validate config");
-    }
-
-    void Save()
-    {
-        IF_THROW(!g_config, "config::Save - No config loaded");
-        if (!Validate())
-            throw std::runtime_error("config::Save - failed to validate config");
-
-        std::ofstream outFile;
-        outFile.open(ConfigPath);
-        if(!outFile.is_open())
-            throw std::runtime_error("config::Save - failed to open file");
-
-        outFile << "[project]\n"
-                << ProjectNameKey << INI_KEY_VALUE_DELIM << g_config->projectSettings.projectName << '\n'
-                << LogFilePathKey << INI_KEY_VALUE_DELIM << g_config->projectSettings.logFilePath << '\n'
-                << "[memory]\n"
-                << MaxDynamicCollidersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxDynamicColliders << '\n'
-                << MaxStaticCollidersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxStaticColliders << '\n'
-                << MaxNetworkDispatchersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxNetworkDispatchers << '\n'
-                << MaxParticleEmittersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxParticleEmitters << '\n'
-                << MaxRenderersKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxRenderers << '\n'
-                << MaxTransformsKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxTransforms << '\n'
-                << MaxPointLightsKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxPointLights << '\n'
-                << MaxTexturesKey << INI_KEY_VALUE_DELIM << g_config->memorySettings.maxTextures << '\n'
-                << "[physics]\n"
-                << FixedUpdateIntervalKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.fixedUpdateInterval << '\n'
-                << WorldspaceExtentKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.worldspaceExtent << '\n'
-                << OctreeDensityThresholdKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.octreeDensityThreshold << '\n'
-                << OctreeMinimumExtentKey << INI_KEY_VALUE_DELIM << g_config->physicsSettings.octreeMinimumExtent << '\n'
-                << "[graphics]\n"
-                << UseNativeResolutionKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.useNativeResolution << '\n'
-                << LaunchInFullscreenKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.launchInFullscreen << '\n'
-                << ScreenWidthKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.screenWidth << '\n'
-                << ScreenHeightKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.screenHeight << '\n'
-                << TargetFpsKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.targetFPS << '\n'
-                << NearClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.nearClip << '\n'
-                << FarClipKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.farClip << '\n'
-                << ShadersPathKey << INI_KEY_VALUE_DELIM << g_config->graphicsSettings.shadersPath;
-
-        outFile.close();
     }
 
     bool Validate()
