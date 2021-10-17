@@ -78,22 +78,29 @@ class ExampleScene : public nc::scene::Scene
                                    DefaultMaterial.roughness});
 
             /** Create and register a camera. */
-            auto cameraInfo = nc::EntityInfo
+            auto cameraInit = nc::EntityInfo
             {
                 .position = nc::Vector3{0.0f, 3.0f, -10.0f},
-                .rotation = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, 45.0f)
+                .rotation = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, 45.0f),
+                .tag = "Camera"
             };
 
-            auto cameraHandle = registry->Add<nc::Entity>(cameraInfo);
+            auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
             nc::camera::SetMainCamera(camera);
 
             /** Add a PointLight. */
-            auto pointLightHandle = registry->Add<nc::Entity>(nc::EntityInfo{.position = nc::Vector3::Up()});
+            auto pointLightInit = nc::EntityInfo
+            {
+                .position = nc::Vector3::Up(),
+                .tag = "Point Light"
+            };
+
+            auto pointLightHandle = registry->Add<nc::Entity>(pointLightInit);
             registry->Add<nc::PointLight>(pointLightHandle, nc::PointLightInfo{});
 
             /** Add the box. */
-            auto cubeHandle = registry->Add<nc::Entity>(nc::EntityInfo{});
+            auto cubeHandle = registry->Add<nc::Entity>(nc::EntityInfo{.tag = "Box"});
             registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::graphics::TechniqueType::PhongAndUi);
 
             /** Add the movement controller to the cube. */
@@ -120,7 +127,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     nc::NcEngine engine(instance, "example/Config.ini");
 
     /** Start the game loop. */
-    engine.Start(std::make_unique<MyScene>());
+    engine.Start(std::make_unique<ExampleScene>());
 
     /** Destroy the engine instance. */
     engine.Shutdown();
@@ -129,13 +136,13 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 }
 ```
 
-Between calls to Initialize and Shutdown, the NcEngine is fully initialized, and any functions may be called even if the game loop hasn't started. For instance, the assets for the box could have been loaded here instead of on scene load.
+NcEngine is fully initialized after construction until Shutdown is called, and any functions may be called even if the game loop isn't running. For instance, the assets for the box could have been loaded before Start() instead of on scene load.
 
 One thing that isn't obvious in this example is how control is given back to WinMain. The Quit() function (Core.h) needs to be called to exit the game loop, however, NcEngine will internally call Quit() upon receiving a WM_CLOSE message.
 
 ## Setting up the config file
 -------------------------
-For the config file, start by copying the defaults from [nc/source/config/default_config.ini](../nc/source/config/default_config.ini). Most of these values will be sufficient, but writing shaders it outside the scope of this guide, so we'll just point to the ones in the sample project:
+For the config file, start by copying the defaults from [nc/source/config/default_config.ini](../nc/source/config/default_config.ini). Most of these values will be sufficient, but writing shaders is outside the scope of this guide, so we'll just point to the ones in the sample project:
 
 ```
 shaders_path=project/shaders/Compiled/
@@ -157,6 +164,8 @@ find_package(Vulkan REQUIRED)
 
 add_executable(${ExampleGame} ${PROJECT_SOURCE_DIR}/Main.cpp)
 
+add_definitions(-DNC_EDITOR_ENABLED)
+
 set_target_properties(${ExampleGame}
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${NCENGINE_REPOSITORY_DIRECTORY}
@@ -177,10 +186,10 @@ target_link_libraries(${ExampleGame}
 )
 ```
 
-If necessary, generate engine build files and/or library:
+Because we're defining NC_EDITOR_ENABLED in the CMake, we'll need to build the engine with the editor enabled:
 ```
->tools/cmake Engine Release
->ninja -C build/engine/release
+>tools/cmake Engine Release-WithEditor
+>ninja -C build/Engine/Release-WithEditor
 ```
 
 Then build the example:
@@ -188,7 +197,8 @@ Then build the example:
 >mkdir build/example_project
 >cmake -G Ninja -B build/example_project -S example
 >ninja -C build/example_project
->./Example.exe
 ```
 
-That's it! You should be able to run Example.exe and move the cube around. For ideas on where to go from here, check out the [sample project](../project/source). It has examples showing how to use audio, colliders, physics, joints, transform hierarchies, and more.
+That's it! You should be able to run Example.exe and move the cube around. Pressing ` will toggle the editor, where you can tinker with the camera or point light properties. The editor has a pretty limited set of features, but there is an improved standalone version coming soon.
+
+For ideas on where to go from here, check out the [sample project](../project/source). It has examples showing how to use audio, colliders, physics, joints, transform hierarchies, and more.

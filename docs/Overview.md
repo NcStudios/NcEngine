@@ -63,7 +63,7 @@ Most engine-provided Components are implemented using an Ecs-oriented approach w
 -----------
 The registry contains storage for all entities and components and manages the associations between them. In order for objects of these types to be recognized by NcEngine, they must be created through one of the registry's Add member functions. There are also functions for retreiving, removing, and viewing ranges of objects, among other things.
 
-A pointer to the registry is passed to each scene's Load() function using the alias registy_type. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
+A pointer to the registry is passed to each scene's Load() function using the alias registry_type. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
 
 Generally, don't store return values from the registry, except for Entities. Calls to Add, Remove, ViewGroup, and ReserveHeadroom for a type T may invalidate any existing span\<T\> or pointers/references to other Ts except:
 * if T is derived from AutoComponent, which is guaranteed to be pointer stable.
