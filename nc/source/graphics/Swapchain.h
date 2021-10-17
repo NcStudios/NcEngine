@@ -66,7 +66,7 @@ namespace nc::graphics
             vk::Extent2D m_swapChainExtent;
             std::vector<vk::ImageView> m_swapChainImageViews;
             std::vector<vk::Framebuffer> m_framebuffers;
-            vk::RenderPass m_defaultPass;
+            vk::UniqueRenderPass m_defaultPass;
 
             // Synchronization
             std::vector<vk::Fence> m_imagesInFlightFences;

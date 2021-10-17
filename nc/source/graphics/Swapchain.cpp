@@ -59,56 +59,40 @@ namespace nc::graphics
 
     void Swapchain::CreateFrameBuffers()
     {
-        std::array<vk::AttachmentDescription, 2> renderPassAttachments = 
+        std::array<Attachment, 2> attachmentSlots
         {
-            CreateAttachmentDescription(AttachmentType::Color, GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
-            CreateAttachmentDescription(AttachmentType::Depth, m_base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare),
+            CreateAttachmentSlot(0, AttachmentType::Color, GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
+            CreateAttachmentSlot(1, AttachmentType::Depth, m_base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare)
         };
 
-        vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
-        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
-        vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
-
-        vk::SubpassDependency subpassDependency = CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
-                                                                          0,
-                                                                          vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                                                                          vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                                                                          vk::AccessFlags(),
-                                                                          vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
-
-        vk::RenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.setAttachmentCount(static_cast<uint32_t>(renderPassAttachments.size()));
-        renderPassInfo.setPAttachments(renderPassAttachments.data());
-        renderPassInfo.setSubpassCount(1);
-        renderPassInfo.setPSubpasses(&subpass);
-        renderPassInfo.setDependencyCount(1);
-        renderPassInfo.setPDependencies(&subpassDependency);
-
-        if (m_base->GetDevice().createRenderPass(&renderPassInfo, nullptr, &m_defaultPass) != vk::Result::eSuccess)
+        std::array<Subpass, 1> subpasses
         {
-            throw std::runtime_error("Could not create render pass.");
-        }
+            CreateSubpass(attachmentSlots.at(1), attachmentSlots.at(0))
+        };
 
-        vk::ImageView attachments[2];
-        
-        attachments[1] = m_depthStencil.GetImageView();
+        m_defaultPass = CreateRenderpass(m_base, attachmentSlots, subpasses);
 
         auto swapChainDimensions = GetExtentDimensions();
-
-        vk::FramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.setRenderPass(m_defaultPass);
-        framebufferInfo.setAttachmentCount(2);
-        framebufferInfo.setPAttachments(attachments);
-        framebufferInfo.setWidth(swapChainDimensions.x);
-        framebufferInfo.setHeight(swapChainDimensions.y);
-        framebufferInfo.setLayers(1);
-
         auto swapChainImageViewsCount = m_swapChainImageViews.size();
-        m_framebuffers.resize(swapChainImageViewsCount);
+        m_framebuffers.reserve(swapChainImageViewsCount);
+
         for (size_t i = 0; i < swapChainImageViewsCount; i++)
         {
-            attachments[0] = m_swapChainImageViews.at(i);
-            m_framebuffers[i] = m_base->GetDevice().createFramebuffer(framebufferInfo);
+            std::array<vk::ImageView, 2> attachments
+            {
+                m_swapChainImageViews.at(i),
+                m_depthStencil.GetImageView()
+            };
+
+            vk::FramebufferCreateInfo framebufferInfo{};
+            framebufferInfo.setRenderPass(m_defaultPass.get());
+            framebufferInfo.setAttachmentCount(attachments.size());
+            framebufferInfo.setPAttachments(attachments.data());
+            framebufferInfo.setWidth(swapChainDimensions.x);
+            framebufferInfo.setHeight(swapChainDimensions.y);
+            framebufferInfo.setLayers(1);
+
+            m_framebuffers.emplace_back(std::move(m_base->GetDevice().createFramebuffer(framebufferInfo)));
         }
     }
 
@@ -196,7 +180,7 @@ namespace nc::graphics
 
     const vk::RenderPass& Swapchain::GetPassDefinition()
     {
-        return m_defaultPass;
+        return m_defaultPass.get();
     }
 
     const vk::Format& Swapchain::GetFormat() const noexcept

@@ -5,6 +5,8 @@
 #include "directx/math/DirectXMath.h"
 #include <memory>
 
+namespace nc { struct AssetServices; }
+
 namespace nc::graphics
 {
     class Base;
@@ -12,12 +14,15 @@ namespace nc::graphics
     class Swapchain;
     class DepthStencil;
     class Renderer;
-    class ShaderResourceServices;
+    struct ShaderResourceServices;
 
     class Graphics
     {
         public:
-            Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(HWND hwnd, 
+                     HINSTANCE hinstance, 
+                     Vector2 dimensions, 
+                     AssetServices* assets);
             ~Graphics() noexcept;
             Graphics(const Graphics&) = delete;
             Graphics(Graphics&&) = delete;
@@ -28,7 +33,6 @@ namespace nc::graphics
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
             void ToggleFullscreen();
             void SetClearColor(std::array<float, 4> color);
-            void SetRenderer(Renderer* renderer);
 
             Base* GetBasePtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
@@ -60,10 +64,10 @@ namespace nc::graphics
             std::unique_ptr<DepthStencil> m_depthStencil;
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
-            Renderer* m_renderer;
-            std::unique_ptr<ShaderResourceServices> m_shaderServices;
-            uint32_t m_imageIndex;
+            std::unique_ptr<ShaderResourceServices> m_shaderResources;
+            std::unique_ptr<Renderer> m_renderer;
 
+            uint32_t m_imageIndex;
             Vector2 m_dimensions;
             bool m_isMinimized;
             bool m_isFullscreen;

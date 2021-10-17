@@ -1,6 +1,5 @@
 #include "Base.h"
 #include "graphics/Initializers.h"
-#include "graphics/Mesh.h"
 #include "graphics/Commands.h"
 #include "stb/stb_image.h"
 

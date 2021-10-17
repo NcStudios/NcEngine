@@ -1,17 +1,13 @@
 #include "ShadowMappingTechnique.h"
 #include "config/Config.h"
 #include "Ecs.h"
-#include "component/MeshRenderer.h"
-#include "component/PointLight.h"
-#include "component/Transform.h"
 #include "debug/Profiler.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
-#include "graphics/MeshManager.h"
 #include "graphics/ShaderUtilities.h"
-#include "graphics/Swapchain.h"
-#include "graphics/resources/ResourceManager.h"
+#include "graphics/resources/ShaderResourceService.h"
+#include "graphics/VertexDescriptions.h"
 
 namespace
 {
@@ -47,7 +43,7 @@ namespace nc::graphics
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ResourceManager::GetObjectsDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 
@@ -56,28 +52,33 @@ namespace nc::graphics
         // Shaders
         auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
-
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
 
-        vk::PipelineShaderStageCreateInfo shaderStages[] = 
+        std::array<vk::PipelineShaderStageCreateInfo, 1u> shaderStages
         {
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule)
         };
 
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(ShadowMappingPushConstants)); // PushConstants
-        std::vector<vk::DescriptorSetLayout> descriptorLayouts = {*ResourceManager::GetObjectsDescriptorSetLayout()};
+        // Shader data
+        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(ShadowMappingPushConstants)); // Push Constants
+
+        std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
+        {
+            *ShaderResourceService<ObjectData>::Get()->GetDescriptorSetLayout()
+        };
+
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
 
+        // Graphics pipeline
         std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
         dynamicStateInfo.setDynamicStateCount(dynamicStates.size());
         dynamicStateInfo.setDynamicStates(dynamicStates);
 
-        // Graphics pipeline
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
         pipelineCreateInfo.setStageCount(1); // Shader stages
-        pipelineCreateInfo.setPStages(shaderStages); // Shader stages
+        pipelineCreateInfo.setPStages(shaderStages.data()); // Shader stages
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
@@ -106,7 +107,7 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, std::span<const DirectX::XMMATRIX> pointLightVPs, std::span<const Mesh> meshes)
+    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, std::span<const DirectX::XMMATRIX> pointLightVPs, std::span<const MeshView> meshes)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 

@@ -10,17 +10,21 @@
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/Swapchain.h"
 #include "PerFrameRenderState.h"
+#include "assets/AssetServices.h"
+#include "resources/ShaderResourceServices.h"
 
 #include <span>
 
 namespace nc::graphics
 {
-    Renderer::Renderer(graphics::Graphics* graphics, 
-                       std::function<vk::Buffer*()> getVertexBufferFunc,
-                       std::function<vk::Buffer*()> getIndexBufferFunc)
+    Renderer::Renderer(Graphics* graphics, 
+                       AssetServices* assets, 
+                       ShaderResourceServices* shaderResources,
+                       Vector2 dimensions)
         : m_graphics{graphics},
-          m_getMeshVertexBuffer{std::move(getVertexBufferFunc)},
-          m_getMeshIndexBuffer{std::move(getIndexBufferFunc)},
+          m_assets{assets},
+          m_shaderResources{shaderResources},
+          m_dimensions{dimensions},
           m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
           m_shadowMappingPass{},
           m_phongAndUiTechnique{nullptr}
@@ -30,7 +34,6 @@ namespace nc::graphics
           #endif
           //m_particleTechnique{nullptr}
     {
-        graphics::ResourceManager::InitializeShadowMap(graphics);
         InitializeShadowMappingRenderPass();
     }
 
@@ -122,8 +125,8 @@ namespace nc::graphics
     void Renderer::BindSharedData(vk::CommandBuffer* cmd)
     {
         vk::DeviceSize offsets[] = { 0 };
-        cmd->bindVertexBuffers(0, 1, m_getMeshVertexBuffer(), offsets);
-        cmd->bindIndexBuffer(*(m_getMeshIndexBuffer()), 0, vk::IndexType::eUint32);
+        cmd->bindVertexBuffers(0, 1, m_assets->meshManager.GetVertexBuffer(), offsets);
+        cmd->bindIndexBuffer(*(m_assets->meshManager.GetIndexBuffer()), 0, vk::IndexType::eUint32);
     }
 
     void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, vk::RenderPass* renderPass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, ClearValue clearValue)
@@ -137,9 +140,7 @@ namespace nc::graphics
                                                         clearValues);
 
         cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-
-        auto dimensions = m_graphics->GetDimensions();
-        SetViewportAndScissor(cmd, dimensions);
+        SetViewportAndScissor(cmd, m_dimensions);
 
         BindSharedData(cmd);
 
@@ -164,15 +165,14 @@ namespace nc::graphics
 
         // Create frame buffer
         std::array<vk::ImageView, 1> attachments;
-        attachments[0] = ResourceManager::GetShadowMapImageView(); // Depth Stencil image view
-        auto dimensions = m_graphics->GetDimensions();
+        attachments[0] = m_shaderResources->GetShadowMapManager().GetImageView(); // Depth Stencil image view
 
         vk::FramebufferCreateInfo framebufferInfo{};
         framebufferInfo.setRenderPass(m_shadowMappingPass.renderPass.get());
         framebufferInfo.setAttachmentCount(attachments.size());
         framebufferInfo.setPAttachments(attachments.data());
-        framebufferInfo.setWidth(dimensions.x);
-        framebufferInfo.setHeight(dimensions.y);
+        framebufferInfo.setWidth(m_dimensions.x);
+        framebufferInfo.setHeight(m_dimensions.y);
         framebufferInfo.setLayers(1);
 
         m_shadowMappingPass.frameBuffer = device.createFramebufferUnique(framebufferInfo);

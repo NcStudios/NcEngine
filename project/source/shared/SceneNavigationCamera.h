@@ -58,18 +58,18 @@ namespace nc::sample
 
     inline void SceneNavigationCamera::Look(float dt, Transform* transform)
     {
-        // if(input::GetKeyDown(input::KeyCode::RightButton))
-        //     m_lookPivot = input::MousePos();
-        // else if(input::GetKeyUp(input::KeyCode::RightButton))
-        //     m_lookPivot = Vector2::Zero();
+        if(input::GetKeyDown(input::KeyCode::RightButton))
+            m_lookPivot = input::MousePos();
+        else if(input::GetKeyUp(input::KeyCode::RightButton))
+            m_lookPivot = Vector2::Zero();
 
-        // if(m_lookPivot != Vector2::Zero())
-        // {
-        //     auto mouseDelta = input::MousePos() - m_lookPivot;
-        //     auto [horizontalLook, verticalLook] = mouseDelta * m_lookDampen * dt;
-        //     transform->Rotate(Vector3::Up(), horizontalLook);
-        //     transform->Rotate(transform->Right(), verticalLook);
-        // }
+        if(m_lookPivot != Vector2::Zero())
+        {
+            auto mouseDelta = input::MousePos() - m_lookPivot;
+            auto [horizontalLook, verticalLook] = mouseDelta * m_lookDampen * dt;
+            transform->Rotate(Vector3::Up(), horizontalLook);
+            transform->Rotate(transform->Right(), verticalLook);
+        }
     }
 
     inline void SceneNavigationCamera::Zoom(float dt, Transform* transform)

@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class Graphics; class Base;
 }
 
 namespace nc::graphics
@@ -34,18 +34,34 @@ namespace nc::graphics
         DepthAndColor = 2
     };
 
+    struct Attachment
+    {
+        vk::AttachmentDescription description;
+        vk::AttachmentReference reference;
+        AttachmentType type;
+    };
+
+    struct Subpass
+    {
+        vk::SubpassDescription description;
+        std::vector<vk::SubpassDependency> dependencies;
+    };
+
     // Resources
     vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode);
 
     // Attachments
     vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
     vk::AttachmentReference CreateAttachmentReference(AttachmentType type, uint32_t attachmentIndex);
-    
+    Attachment CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
+
     // Subpasses
-    vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& depthReference);
-    vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& colorReference, const vk::AttachmentReference& depthReference);
+    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment);
+    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment, const Attachment& colorAttachment);
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask);
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags);
+    Subpass CreateSubpass(const Attachment& depthAttachment);
+    Subpass CreateSubpass(const Attachment& depthAttachment, const Attachment& colorAttachment);
     
     //Pipelines
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
@@ -66,7 +82,7 @@ namespace nc::graphics
 
     // Render passes
     vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues);
-    vk::RenderPassCreateInfo CreateRenderPassCreateInfo(const std::vector<vk::AttachmentDescription>& attachmentDescriptions, const std::vector<vk::SubpassDependency>& subpassDependencies);
+    vk::UniqueRenderPass CreateRenderpass(Base* base, std::span<const Attachment> attachments, std::span<const Subpass> subpasses);
 
     // Screen size
     vk::Viewport CreateViewport(const Vector2& dimensions);
@@ -76,7 +92,7 @@ namespace nc::graphics
 
     // Descriptor sets
     vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, uint32_t descriptorCount, vk::DescriptorType type, vk::ShaderStageFlags shaderStages); 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags);
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags);
     vk::UniqueDescriptorSet CreateDescriptorSet(Graphics* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout);
     vk::WriteDescriptorSet CreateSamplerDescriptorWrite(vk::Sampler* sampler, vk::DescriptorSet* descriptorSet, uint32_t binding);
     vk::WriteDescriptorSet CreateImagesDescriptorWrite(vk::DescriptorSet* descriptorSet, std::vector<vk::DescriptorImageInfo>* imagesInfo, uint32_t imagesCount, uint32_t binding);

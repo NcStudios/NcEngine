@@ -27,7 +27,6 @@ namespace nc::core
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
             AssetServices m_assetServices;
-            graphics::Renderer m_renderer;
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystem m_physics;
             scene::SceneSystem m_sceneSystem;

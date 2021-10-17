@@ -1,4 +1,5 @@
 #include "Graphics.h"
+#include "assets/AssetServices.h"
 #include "camera/MainCameraInternal.h"
 #include "debug/Profiler.h"
 #include "debug/Utils.h"
@@ -17,13 +18,13 @@ namespace
 
 namespace nc::graphics
 {
-    Graphics::Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    Graphics::Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions, AssetServices* assets)
         : m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
-          m_renderer{ nullptr },
-          m_shaderServices{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings()) },
+          m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
+          m_renderer{ std::make_unique<Renderer>(this, assets, m_shaderResources.get(), dimensions) },
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
@@ -57,7 +58,7 @@ namespace nc::graphics
         m_swapchain.reset();
         m_depthStencil.reset();
 
-        ResourceManager::ResizeShadowMap(dimensions);
+        /** @todo ResourceManager::ResizeShadowMap(dimensions); */
         m_renderer->InitializeShadowMappingRenderPass();
 
         // Recreate swapchain and resources
@@ -113,7 +114,7 @@ namespace nc::graphics
 
     Renderer* Graphics::GetRendererPtr() const noexcept
     {
-        return m_renderer;
+        return m_renderer.get();
     }
 
     const Vector2 Graphics::GetDimensions() const noexcept
@@ -145,11 +146,6 @@ namespace nc::graphics
     void Graphics::SetClearColor(std::array<float, 4> color)
     {
         m_clearColor = color;
-    }
-
-    void Graphics::SetRenderer(Renderer* renderer)
-    {
-        m_renderer = renderer;
     }
 
     const std::array<float, 4>& Graphics::GetClearColor() const noexcept

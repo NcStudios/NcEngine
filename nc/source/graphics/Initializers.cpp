@@ -2,6 +2,8 @@
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 
+#include <iostream>
+
 namespace nc::graphics
 {
     vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode)
@@ -76,13 +78,22 @@ namespace nc::graphics
         return attachmentReference;
     }
 
-    vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& colorReference, const vk::AttachmentReference& depthReference)
+    Attachment CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
+    {
+        Attachment attachment{};
+        attachment.reference = CreateAttachmentReference(type, attachmentIndex);
+        attachment.description = CreateAttachmentDescription(type, format, loadOp, storeOp);
+        attachment.type = type;
+        return attachment;
+    }
+
+    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment, const Attachment& colorAttachment)
     {
         vk::SubpassDescription subpassDescription{};
         subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
         subpassDescription.setColorAttachmentCount(1);
-        subpassDescription.setPColorAttachments(&colorReference);
-        subpassDescription.setPDepthStencilAttachment(&depthReference);
+        subpassDescription.setPColorAttachments(&colorAttachment.reference);
+        subpassDescription.setPDepthStencilAttachment(&depthAttachment.reference);
         subpassDescription.setInputAttachmentCount(0);
         subpassDescription.setPreserveAttachmentCount(0);
         subpassDescription.setPPreserveAttachments(nullptr);
@@ -90,12 +101,12 @@ namespace nc::graphics
         return subpassDescription;
     }
 
-    vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& depthReference)
+    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment)
     {
         vk::SubpassDescription subpassDescription{};
         subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
         subpassDescription.setColorAttachmentCount(0);
-        subpassDescription.setPDepthStencilAttachment(&depthReference);
+        subpassDescription.setPDepthStencilAttachment(&depthAttachment.reference);
         return subpassDescription;
     }
 
@@ -118,6 +129,47 @@ namespace nc::graphics
         subpassDependency.setDstAccessMask(destAccessMask);  // Specifies the specific operation that should do the waiting
         
         return subpassDependency;      
+    }
+
+    Subpass CreateSubpass(const Attachment& depthAttachment)
+    {
+        Subpass subpass{};
+        subpass.description = CreateSubpassDescription(depthAttachment);
+        subpass.dependencies =
+        {
+            CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
+                                    0,
+                                    vk::PipelineStageFlagBits::eFragmentShader,
+                                    vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                    vk::AccessFlagBits::eShaderRead,
+                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+                                    vk::DependencyFlagBits::eByRegion),
+
+            CreateSubpassDependency(0,
+                                    VK_SUBPASS_EXTERNAL,
+                                    vk::PipelineStageFlagBits::eLateFragmentTests,
+                                    vk::PipelineStageFlagBits::eFragmentShader,
+                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+                                    vk::AccessFlagBits::eShaderRead,
+                                    vk::DependencyFlagBits::eByRegion),
+        };
+        return subpass;
+    }
+
+    Subpass CreateSubpass(const Attachment& depthAttachment, const Attachment& colorAttachment)
+    {
+        Subpass subpass{};
+        subpass.description = CreateSubpassDescription(depthAttachment, colorAttachment);
+        subpass.dependencies =
+        {
+            CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
+                                    0,
+                                    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                    vk::AccessFlags(),
+                                    vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+        };
+        return subpass;
     }
 
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader)
@@ -296,7 +348,7 @@ namespace nc::graphics
         return pipelineLayoutInfo;
     }
 
-    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const std::vector<vk::DescriptorSetLayout>& layouts)
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.setSetLayoutCount(layouts.size());  
@@ -328,16 +380,42 @@ namespace nc::graphics
         return renderPassInfo;
     }
 
-    vk::RenderPassCreateInfo CreateRenderPassCreateInfo(const std::vector<vk::AttachmentDescription>& attachmentDescriptions, const std::vector<vk::SubpassDescription>& subpassDescriptions, const std::vector<vk::SubpassDependency>& subpassDependencies)
+    vk::UniqueRenderPass CreateRenderpass(Base* base, std::span<const Attachment> attachments, std::span<const Subpass> subpasses)
     {
+        std::vector<vk::AttachmentDescription> attachmentDescriptions{};
+        attachmentDescriptions.reserve(attachments.size());
+        std::transform(attachments.begin(), attachments.end(), std::back_inserter(attachmentDescriptions), [](const auto& attachment)
+        {
+            return attachment.description;
+        });
+
+        std::vector<vk::SubpassDescription> subpassDescriptions{};
+        subpassDescriptions.reserve(subpasses.size());
+        uint32_t subpassDependenciesCount = 0;
+
+        for (const auto& subpass : subpasses)
+        {
+            subpassDescriptions.push_back(subpass.description);
+            subpassDependenciesCount += subpass.dependencies.size();
+        }
+
+        std::vector<vk::SubpassDependency> subpassDependencies{};
+        subpassDependencies.reserve(subpassDependenciesCount);
+
+        for (const auto& subpass : subpasses)
+        {
+            subpassDependencies.insert(subpassDependencies.cend(), subpass.dependencies.cbegin(), subpass.dependencies.cend());
+        }
+
         vk::RenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.setAttachmentCount(1);
+        renderPassInfo.setAttachmentCount(static_cast<uint32_t>(attachmentDescriptions.size()));
         renderPassInfo.setPAttachments(attachmentDescriptions.data());
         renderPassInfo.setSubpassCount(static_cast<uint32_t>(subpassDescriptions.size()));
         renderPassInfo.setPSubpasses(subpassDescriptions.data());
         renderPassInfo.setDependencyCount(static_cast<uint32_t>(subpassDependencies.size()));
         renderPassInfo.setPDependencies(subpassDependencies.data());
-        return renderPassInfo;
+
+        return base->GetDevice().createRenderPassUnique(renderPassInfo);
     }
 
     vk::Viewport CreateViewport(const Vector2& dimensions)
@@ -389,12 +467,12 @@ namespace nc::graphics
         return layoutBinding;
     }
 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
     {
         vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
         extendedInfo.setPNext(nullptr);
         extendedInfo.setBindingCount(layoutBindings.size());
-        extendedInfo.setPBindingFlags(&bindingFlags);
+        extendedInfo.setPBindingFlags(bindingFlags.data());
 
         vk::DescriptorSetLayoutCreateInfo setInfo{};
         setInfo.setBindingCount(layoutBindings.size());

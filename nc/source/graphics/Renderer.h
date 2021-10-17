@@ -14,14 +14,16 @@
 namespace nc
 {
     class MeshRenderer;
+    struct AssetServices;
     namespace particle { class ParticleRenderer; }
 }
 
 namespace nc::graphics
 {
     class Commands;
+    class ShaderResourceServices;
     struct PerFrameRenderState;
-    
+
     struct ShadowMappingPass
     {
         ShadowMappingPass()
@@ -38,8 +40,10 @@ namespace nc::graphics
     {
         public:
             Renderer(graphics::Graphics* graphics,
-                     std::function<vk::Buffer*()> getVertexBufferFunc,
-                     std::function<vk::Buffer*()> getIndicexBufferFunc);
+                     AssetServices* assets, 
+                     ShaderResourceServices* shaderResources,
+                     Vector2 dimensions);
+
             ~Renderer() noexcept;
             
             void Record(Commands* commands, registry_type* registry);
@@ -62,8 +66,9 @@ namespace nc::graphics
             void RecordUi(vk::CommandBuffer* cmd);
 
             graphics::Graphics* m_graphics;
-            std::function<vk::Buffer*()> m_getMeshVertexBuffer;
-            std::function<vk::Buffer*()> m_getMeshIndexBuffer;
+            AssetServices* m_assets;
+            ShaderResourceServices* m_shaderResources;
+            Vector2 m_dimensions;
             
             vk::RenderPass m_mainRenderPass;
             ShadowMappingPass m_shadowMappingPass;

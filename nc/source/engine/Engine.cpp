@@ -68,11 +68,8 @@ namespace nc::core
     /* Engine */
     Engine::Engine(HINSTANCE hInstance)
         : m_window{ hInstance },
-          m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
+          m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions(), &m_assetServices },
           m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
-          m_renderer{&m_graphics,
-                    [&manager = m_assetServices.meshManager] { return manager.GetVertexBuffer(); },
-                    [&manager = m_assetServices.meshManager] { return manager.GetIndexBuffer(); }},
           m_ecs{&m_graphics, config::GetMemorySettings()},
           m_physics{m_ecs.GetRegistry(), &m_graphics},
           m_sceneSystem{},
@@ -86,7 +83,6 @@ namespace nc::core
           m_currentImageIndex{0},
           m_isRunning{false}
     {
-        m_graphics.SetRenderer(&m_renderer);
         SetBindings();
         BuildTaskGraph();
         V_LOG("Engine initialized");
