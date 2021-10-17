@@ -243,6 +243,14 @@ namespace nc::ecs
         }
 
         stagingPool.clear();
+
+        if constexpr(std::same_as<T, AutoComponentGroup>)
+        {
+            for(auto& group : componentPool)
+            {
+                group.CommitStagedComponents();
+            }
+        }
     }
 
     template<Component T>

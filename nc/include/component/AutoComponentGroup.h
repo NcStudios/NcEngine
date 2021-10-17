@@ -33,6 +33,7 @@ namespace nc
             T* Get() const noexcept; 
 
             auto GetAutoComponents() const noexcept -> std::vector<AutoComponent*>;
+            void CommitStagedComponents();
 
             void SendFrameUpdate(float dt);
             void SendFixedUpdate();
@@ -46,26 +47,26 @@ namespace nc
 
         private:
             std::vector<std::unique_ptr<AutoComponent>> m_components;
+            std::vector<std::unique_ptr<AutoComponent>> m_toAdd;
     };
 
     template<std::derived_from<AutoComponent> T, class ... Args>
     T* AutoComponentGroup::Add(Args&& ... args)
     {
         IF_THROW(Contains<T>(), std::string{"Entity already has component of this type\n   "} + __PRETTY_FUNCTION__);
-        m_components.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
-        return dynamic_cast<T*>(m_components.back().get());
+        m_toAdd.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+        return dynamic_cast<T*>(m_toAdd.back().get());
     }
 
     template<std::derived_from<AutoComponent> T>
     void AutoComponentGroup::Remove()
     {
         const std::type_info &targetType(typeid(T));
-        for(std::vector<AutoComponent>::size_type i = 0; i < m_components.size(); ++i)
+        for(auto& comp : m_components)
         {
-            if (typeid(*m_components.at(i)) == targetType)
+            if(typeid(*comp) == targetType)
             {
-                m_components.at(i) = std::move(m_components.back());
-                m_components.pop_back();
+                comp = nullptr;
                 return;
             }
         }
