@@ -16,8 +16,6 @@ if(NOT DEFINED NC_BUILD_TYPE)
     message(FATAL_ERROR "NC_BUILD_TYPE is not defined. This is required in NcEngine and all projects for archive selection.")
 endif()
 
-message(${NC_BUILD_TYPE})
-
 #VARIABLES
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
