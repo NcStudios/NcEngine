@@ -5,6 +5,7 @@
 
 #include <concepts>
 #include <memory>
+#include <set>
 #include <vector>
 
 namespace nc
@@ -48,27 +49,31 @@ namespace nc
         private:
             std::vector<std::unique_ptr<AutoComponent>> m_components;
             std::vector<std::unique_ptr<AutoComponent>> m_toAdd;
+            std::set<size_t> m_toRemove;
     };
 
     template<std::derived_from<AutoComponent> T, class ... Args>
     T* AutoComponentGroup::Add(Args&& ... args)
     {
         IF_THROW(Contains<T>(), "Entity already has component of this type");
-        m_toAdd.push_back(std::make_unique<T>(std::forward<Args>(args)...));
-        return dynamic_cast<T*>(m_toAdd.back().get());
+        auto newComponent = std::make_unique<T>(std::forward<Args>(args)...);
+        auto* out = newComponent.get();
+        m_toAdd.push_back(std::move(newComponent));
+        return out;
     }
 
     template<std::derived_from<AutoComponent> T>
     void AutoComponentGroup::Remove()
     {
-        const std::type_info &targetType(typeid(T));
-        for(auto& comp : m_components)
+        for(size_t i = 0; auto& component : m_components)
         {
-            if(typeid(*comp) == targetType)
+            if(dynamic_cast<T*>(component.get()))
             {
-                comp = nullptr;
+                m_toRemove.insert(i);
                 return;
             }
+
+            ++i;
         }
 
         throw NcError("Component does not exist");
@@ -77,23 +82,17 @@ namespace nc
     template<std::derived_from<AutoComponent> T>
     bool AutoComponentGroup::Contains() const noexcept
     {
-        const std::type_info &targetType(typeid(T));
-        for(auto& item : m_components)
-        {
-            if (typeid(*item) == targetType) 
-                return true;
-        }
-        return false;
+        return Get<T>() != nullptr;
     }
 
     template<std::derived_from<AutoComponent> T>
     T* AutoComponentGroup::Get() const noexcept
     {
-        const std::type_info &targetType(typeid(T));
         for(auto& item : m_components)
         {
-            if (typeid(*item) == targetType)
-                return dynamic_cast<T*>(item.get());
+            auto* ptr = dynamic_cast<T*>(item.get());
+            if(ptr)
+                return ptr;
         }
 
         return nullptr;

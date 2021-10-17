@@ -4,7 +4,8 @@ namespace nc
 {
     AutoComponentGroup::AutoComponentGroup(Entity)
         : m_components{},
-          m_toAdd{}
+          m_toAdd{},
+          m_toRemove{}
     {}
 
     auto AutoComponentGroup::GetAutoComponents() const noexcept -> std::vector<AutoComponent*>
@@ -21,7 +22,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->FrameUpdate(dt);
+            comp->FrameUpdate(dt);
         }
     }
 
@@ -29,7 +30,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->FixedUpdate();
+            comp->FixedUpdate();
         }
     }
 
@@ -37,7 +38,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->OnDestroy();
+            comp->OnDestroy();
         }
     }
 
@@ -45,7 +46,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->OnCollisionEnter(hit);
+            comp->OnCollisionEnter(hit);
         }
     }
 
@@ -53,7 +54,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->OnCollisionStay(hit);
+            comp->OnCollisionStay(hit);
         }
     }
 
@@ -61,7 +62,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->OnCollisionExit(hit);
+            comp->OnCollisionExit(hit);
         }
     }
 
@@ -69,7 +70,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->OnTriggerEnter(hit);
+            comp->OnTriggerEnter(hit);
         }
     }
 
@@ -77,7 +78,7 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->OnTriggerStay(hit);
+            comp->OnTriggerStay(hit);
         }
     }
 
@@ -85,13 +86,19 @@ namespace nc
     {
         for(auto& comp : m_components)
         {
-            if(comp) comp->OnTriggerExit(hit);
+            comp->OnTriggerExit(hit);
         }
     }
 
     void AutoComponentGroup::CommitStagedComponents()
     {
-        std::erase(m_components, nullptr);
+        for(auto i : m_toRemove)
+        {
+            m_components.at(i) = std::move(m_components.back());
+            m_components.pop_back();
+        }
+
+        m_toRemove.clear();
 
         for(auto& toAdd : m_toAdd)
             m_components.push_back(std::move(toAdd));
