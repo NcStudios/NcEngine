@@ -2,7 +2,7 @@
 
 namespace
 {
-    constexpr nc::Vector2 NewProjectDialogSize{300.0f, 200.0f};
+    constexpr nc::Vector2 NewProjectDialogSize{350.0f, 120.0f};
 }
 
 namespace nc::editor
@@ -33,16 +33,20 @@ namespace nc::editor
             ImGui::Text("Project Name:");
             ImGui::SameLine();
             ImGui::InputText("##newprojectname", m_nameBuffer, TextEntryBufferSize);
-            
+            ImGui::Spacing();
+
             ImGui::Text("Directory:   ");
             ImGui::SameLine();
             ImGui::InputText("##newprojectpath", m_pathBuffer, TextEntryBufferSize);
-        
+            ImGui::Spacing();
+
             if(ImGui::Button("Ok"))
             {
                 if(m_callback(std::string{m_nameBuffer}, std::filesystem::path{m_pathBuffer}))
                     isOpen = false;
             }
+
+            ImGui::SameLine();
 
             if(ImGui::Button("Cancel"))
             {

@@ -15,8 +15,8 @@ namespace nc::editor
         bool sceneChanged = false;
         const char* preview = m_selectedScene == -1 ? "No Available Scenes" : m_scenes.at(m_selectedScene).c_str();
 
-        ImGui::SetNextItemWidth(200.0f);
-        if(ImGui::BeginCombo("", preview))
+        ImGui::SetNextItemWidth(218.0f);
+        if(ImGui::BeginCombo("Scene", preview))
         {
             int current = 0;
 
@@ -55,5 +55,10 @@ namespace nc::editor
     {
         m_scenes = std::move(scenes);
         m_selectedScene = m_scenes.empty() ? -1 : selectedScene;
+    }
+
+    bool SceneManagementControl::HasScenes() const
+    {
+        return !m_scenes.empty();
     }
 }

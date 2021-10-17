@@ -109,7 +109,7 @@ namespace
             out->graphicsSettings.shadersPath = value;
         else
             throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
-    };
+    }
 } //end anonymous namespace
 
 namespace nc::config

@@ -28,7 +28,6 @@ namespace nc::editor
         auto SceneGraphPanelWidth = 300;
         auto Padding = 2;
 
-
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
         auto panelWidth = m_dimensions.x - xPos;
         ImGui::SetNextWindowPos({xPos, m_dimensions.y - UtilitiesPanelHeight});
@@ -52,7 +51,9 @@ namespace nc::editor
                 ImGui::EndTabBar();
             }
         }
-        ImGui::EndChild();
+
+        //ImGui::EndChild();
+        ImGui::End();
     }
 
     void UtilitiesPanel::OnResize(Vector2 dimensions)

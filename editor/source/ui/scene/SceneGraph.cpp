@@ -8,7 +8,7 @@ namespace
 {
     using namespace nc;
 
-    const auto TitleBarHeight = 40.0f;
+    const auto TitleBarHeight = 19.0f;
     const auto DefaultItemWidth = 60.0f;
     const auto SceneGraphPanelWidth = 300;
     const auto Padding = 4.0f;
@@ -56,6 +56,8 @@ namespace nc::editor
     void SceneGraph::Draw()
     {
         ImGui::SetNextWindowPos({Padding, TitleBarHeight});
+        //ImGui::SetNextWindowPos({0, TitleBarHeight});
+
         auto sceneGraphHeight = m_dimensions.y - TitleBarHeight;
 
         if(ImGui::BeginChild("ScenePanel", {SceneGraphPanelWidth, sceneGraphHeight}, true))
@@ -74,6 +76,13 @@ namespace nc::editor
             ImGui::Separator();
             ImGui::Separator();
             ImGui::Spacing();
+
+            if(!m_sceneManagementControl.HasScenes())
+            {
+                ImGui::Text("No Scene Open");
+                ImGui::EndChild();
+                return;
+            }
 
             if(ImGui::BeginChild("EntityList", {0, sceneGraphHeight / 2}, true))
             {

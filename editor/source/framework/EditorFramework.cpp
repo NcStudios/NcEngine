@@ -54,7 +54,7 @@ namespace nc::editor
 {
     EditorFramework::EditorFramework(registry_type* registry)
         : m_output{},
-          m_editorConfig{ReadConfig("editor/config.ini")},
+          m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
           m_assetManifest{m_editorConfig.recentProjectDirectory},
           m_projectManager{registry, &m_assetManifest},
           m_editorUI{registry,
@@ -80,13 +80,14 @@ namespace nc::editor
         
         m_projectManager.RegisterCallbacks(std::move(uiCallbacks), std::move(dialogCallbacks));
 
-        m_projectManager.DoOpenProject(m_editorConfig.recentProjectDirectory);
+        m_projectManager.DoOpenProject(m_editorConfig.recentProjectFilePath);
     }
 
     void EditorFramework::SaveProjectData()
     {
         m_editorConfig.recentProjectDirectory = m_projectManager.GetProjectDirectory();
-        WriteConfig("editor/config.ini", m_editorConfig);
+        m_editorConfig.recentProjectFilePath = m_projectManager.GetProjectFilePath();
+        WriteConfig("editor/config/editor_config.ini", m_editorConfig);
 
         if(m_projectManager.IsProjectOpen())
             m_assetManifest.Write(m_projectManager.GetProjectDirectory());

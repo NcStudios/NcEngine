@@ -1,4 +1,5 @@
 #include "ProjectManager.h"
+#include "ProjectCreation.h"
 #include "assets/AssetDependencyChecker.h"
 #include "config/ConfigReader.h"
 #include "utility/Output.h"
@@ -14,20 +15,6 @@
 
 namespace
 {
-    void CreateProjectDirectories(const std::filesystem::path& path)
-    {
-        std::filesystem::create_directories(path);
-        std::filesystem::create_directory(path / "assets");
-        std::filesystem::create_directory(path / "assets" / "mesh");
-        std::filesystem::create_directory(path / "assets" / "mesh_colliders");
-        std::filesystem::create_directory(path / "assets" / "sounds");
-        std::filesystem::create_directory(path / "models");
-        std::filesystem::create_directory(path / "scenes");
-        std::filesystem::create_directory(path / "shaders");
-        std::filesystem::create_directory(path / "source");
-        std::filesystem::create_directory(path / "textures");
-    }
-
     auto ReadScenes(const std::filesystem::path& scenesPath) -> std::vector<std::string>
     {
         std::vector<std::string> out;
@@ -67,38 +54,38 @@ namespace nc::editor
 
     bool ProjectManager::DoOpenProject(const std::filesystem::path& path)
     {
-        auto projectDirectory = std::filesystem::directory_entry{path};
-
-        if(!projectDirectory.is_directory())
+        auto projectEntry = std::filesystem::directory_entry{path};
+        
+        if(!projectEntry.exists() || !projectEntry.is_regular_file())
         {
             Output::LogError("Failure opening project - Invalid path:", path.string());
             return false;
         }
 
-        auto sceneDirectory = std::filesystem::directory_entry{path / "scenes"};
-
-        if(!sceneDirectory.exists())
+        if(path.extension() != std::filesystem::path{".ncproj"})
         {
-            Output::Log("Project doesn't have \"scenes\" directory. One will be created.");
-            std::filesystem::create_directory(sceneDirectory.path());
-        }
-
-        auto configEntry = std::filesystem::directory_entry{path / "config.ini"};
-
-        if(!configEntry.exists())
-        {
-            Output::LogError("Failure opening project - Could not find config.ini");
+            Output::LogError("Failure opening project - Invalid project extension:", path.string());
             return false;
         }
 
-        /** @todo read config */
-        
+        /** @todo read project file */
+
+        auto projectDirectoryPath = path.parent_path();
+
+        auto sceneDirectoryEntry = std::filesystem::directory_entry{projectDirectoryPath / "scenes"};
+        if(!sceneDirectoryEntry.exists())
+        {
+            Output::Log("Project doesn't have \"scenes\" directory. One will be created.");
+            std::filesystem::create_directory(sceneDirectoryEntry.path());
+        }
+
         m_projectData.open = true;
-        m_projectData.name = "Sample Project";
-        m_projectData.projectDirectory = path;
+        m_projectData.name = path.stem().string();
+        m_projectData.projectDirectory = projectDirectoryPath;
+        m_projectData.projectFile = path;
         m_projectData.scenes.clear();
 
-        m_projectData.scenes = ReadScenes(sceneDirectory.path());
+        m_projectData.scenes = ReadScenes(sceneDirectoryEntry.path());
         m_uiCallbacks.updateScenesCallback(m_projectData.scenes, 0);
         m_uiCallbacks.setProjectNameCallback(m_projectData.name);
 
@@ -115,44 +102,30 @@ namespace nc::editor
 
     bool ProjectManager::DoCreateProject(const std::string& name, const std::filesystem::path& path)
     {
+        /** @todo save scene/project, if open */
+
+        if(!IsValidProjectParentDirectory(path))
         {
-            auto pathEntry = std::filesystem::directory_entry{path};
-
-            if(!pathEntry.exists())
-            {
-                Output::LogError("Failure creating project - Invalid path:", path.string());
-                return false;
-            }
-
-            if(!pathEntry.is_directory())
-            {
-                Output::Log("Failure creating project - Path is not a directory:", path.string());
-                return false;
-            }
+            Output::LogError("Failure creating project - Invalid directory:", path.string());
+            return false;
         }
 
         auto directoryPath = path / name;
 
+        if(std::filesystem::directory_entry{directoryPath}.exists())
         {
-            std::filesystem::directory_entry directoryEntry{directoryPath};
-            if(directoryEntry.exists())
-            {
-                Output::Log("Failure creating project - Project with this name already exists in this directory:", path.string());
-                return false;
-            }
+            Output::Log("Failure creating project - Project with this name already exists in this directory:", path.string());
+            return false;
         }
 
         Output::Log("Creating Project:", directoryPath.string());
-
         CreateProjectDirectories(directoryPath);
-        
-        std::ofstream projectConfig{directoryPath / "config.ini"};
-        projectConfig << "name=" << name << '\n'
-                      << "initial_scene=" << "SampleScene";
-        projectConfig.close();
+        auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
+        CreateProjectFile(projectFilePath);
 
-        DoOpenProject(directoryPath);
+        /** @todo create engine config, copy default assets, CMakeLists?, default scene? */
 
+        DoOpenProject(projectFilePath);
         return true;
     }
 
@@ -190,6 +163,8 @@ namespace nc::editor
             return false;
         }
 
+        Output::Log("Creating scene: " + name);
+
         SceneWriter writer{m_registry, m_projectData.projectDirectory / "scenes"};
         writer.WriteNewScene(name);
 
@@ -202,7 +177,8 @@ namespace nc::editor
 
     void ProjectManager::SaveCurrentScene()
     {
-        if(m_projectData.name.empty())
+        if(!m_projectData.open)
+        //if(m_projectData.name.empty())
         {
             Output::LogError("Failure saving scene: No project is open");
             return;

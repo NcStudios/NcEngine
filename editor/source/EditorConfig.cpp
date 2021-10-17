@@ -8,11 +8,14 @@ namespace
 {
     const auto KeyValueSeparator = '=';
     const auto RecentProjectDirectoryTag = "recent_project_directory";
+    const auto RecentProjectFilePathTag = "recent_project_file_path";
 
     void MapConfigKeyValue(const std::string& key, const std::string& value, nc::editor::EditorConfig* out)
     {
         if(key == RecentProjectDirectoryTag)
             out->recentProjectDirectory = value;
+        else if(key == RecentProjectFilePathTag)
+            out->recentProjectFilePath = value;
         else
             throw std::runtime_error("MapManifestKeyValue - Unknown key: " + key);
     }
@@ -46,6 +49,7 @@ namespace nc::editor
             return;
         }
 
-        file << RecentProjectDirectoryTag << KeyValueSeparator << config.recentProjectDirectory.string();
+        file << RecentProjectDirectoryTag << KeyValueSeparator << config.recentProjectDirectory.string() << '\n'
+             << RecentProjectFilePathTag  << KeyValueSeparator << config.recentProjectFilePath.string();
     }
 }

@@ -16,6 +16,7 @@ namespace nc::editor
 
             void Draw();
             void UpdateScenes(std::vector<std::string> scenes, int selectedScene);
+            bool HasScenes() const;
             
         private:
             std::vector<std::string> m_scenes;

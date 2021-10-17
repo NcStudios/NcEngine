@@ -8,6 +8,7 @@
 namespace
 {
     constexpr auto MainWindowFlags = ImGuiWindowFlags_NoBackground |
+                                     ImGuiWindowFlags_NoTitleBar |
                                      ImGuiWindowFlags_MenuBar |
                                      ImGuiWindowFlags_NoResize |
                                      ImGuiWindowFlags_NoScrollbar |

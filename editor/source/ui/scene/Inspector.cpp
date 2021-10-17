@@ -433,9 +433,9 @@ namespace nc::editor
         ImGui::BeginGroup();
         ImGui::Indent();
         xyzWidgetHeader("   ");
-        auto posResult = xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z);
+        auto posResult = xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z, -5000.0f, 5000.0f);
         auto rotResult = xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
-        auto sclResult = xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
+        auto sclResult = xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z, 0.01f, 1000.0f);
         ImGui::Unindent();
         ImGui::EndGroup();
 

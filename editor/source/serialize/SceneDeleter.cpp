@@ -7,7 +7,7 @@ namespace nc::editor
     {
         try
         {
-            Output::Log("Deleting Scene deleted " + sceneName);
+            Output::Log("Deleting Scene: " + sceneName);
 
             auto headerPath = scenesDirectory / (sceneName + HeaderExtension);
             auto sourcePath = scenesDirectory / (sceneName + SourceExtension);

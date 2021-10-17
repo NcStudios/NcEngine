@@ -9,6 +9,7 @@ namespace nc::editor
     {
         std::string projectName;
         std::filesystem::path recentProjectDirectory;
+        std::filesystem::path recentProjectFilePath;
     };
 
     auto ReadConfig(const std::filesystem::path& filePath) -> EditorConfig;

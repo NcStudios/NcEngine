@@ -18,6 +18,7 @@ namespace nc::editor
     {
         std::string name;
         std::filesystem::path projectDirectory;
+        std::filesystem::path projectFile;
         std::vector<std::string> scenes;
         bool open = false;
     };
@@ -32,6 +33,7 @@ namespace nc::editor
             void CreateProject();
             bool IsProjectOpen() const { return m_projectData.open; }
             auto GetProjectDirectory() const -> const std::filesystem::path& { return m_projectData.projectDirectory; }
+            auto GetProjectFilePath() const -> const std::filesystem::path& { return m_projectData.projectFile; }
 
             void NewScene();
             void SaveCurrentScene();
