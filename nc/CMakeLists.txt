@@ -12,6 +12,12 @@ option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior santizer" OFF)
 
+if(NOT DEFINED NC_BUILD_TYPE)
+    message(FATAL_ERROR "NC_BUILD_TYPE is not defined. This is required in NcEngine and all projects for archive selection.")
+endif()
+
+message(${NC_BUILD_TYPE})
+
 #VARIABLES
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -32,7 +38,7 @@ set(GCC_WARNING_FLAGS
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
 set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 
-set(ENGINE_LIB "NcEngine-${CMAKE_BUILD_TYPE}")
+set(ENGINE_LIB "NcEngine-${NC_BUILD_TYPE}")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
 

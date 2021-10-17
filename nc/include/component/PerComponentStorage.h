@@ -100,7 +100,7 @@ namespace nc::ecs
         auto sparseIndex = entity.Index();
         auto poolIndex = sparseArray.at(sparseIndex);
 
-        IF_THROW(poolIndex == Entity::NullIndex, std::string{"Entity does not have component\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(poolIndex == Entity::NullIndex, "Entity does not have component");
         
         componentPool.at(poolIndex) = std::move(componentPool.back());
         componentPool.pop_back();
@@ -202,13 +202,13 @@ namespace nc::ecs
         if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
         {
             if(!callbacks.OnAdd)
-                throw std::runtime_error("OnAdd callback required but not set\n   " + std::string{__PRETTY_FUNCTION__});
+                throw NcError("OnAdd callback required but not set");
         }
 
         if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
         {
             if(!callbacks.OnRemove)
-                throw std::runtime_error("OnRemove callback required but not set\n   " + std::string{__PRETTY_FUNCTION__});
+                throw NcError("OnRemove callback required but not set");
         }
     }
 

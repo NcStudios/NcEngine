@@ -12,6 +12,10 @@ option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior sanitizer" OFF)
 
+if(NOT DEFINED NC_BUILD_TYPE)
+    message(FATAL_ERROR "NC_BUILD_TYPE is not defined. This is required in NcEngine and all projects for archive selection.")
+endif()
+
 #Variables
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -31,7 +35,7 @@ set(NC_INCLUDE_DIR ${ROOT_DIR}/../nc/include)
 set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
 
 set(LIB_DIR ${ROOT_DIR}/../nc/lib)
-set(ENGINE_LIB "libNcEngine-${CMAKE_BUILD_TYPE}.a")
+set(ENGINE_LIB "libNcEngine-${NC_BUILD_TYPE}.a")
 set(IMGUI_LIB "libimgui-${CMAKE_BUILD_TYPE}.a")
 set(ENET_LIB "libenet-${CMAKE_BUILD_TYPE}.a")
 

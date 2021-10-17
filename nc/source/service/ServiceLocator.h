@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdexcept>
+#include "debug/NcError.h"
 
 namespace nc
 {
@@ -18,7 +18,7 @@ namespace nc
             static auto Get() -> service_type*
             {
                 if(!m_service)
-                    throw std::runtime_error("ServiceLocator - No service registered: " + std::string{__PRETTY_FUNCTION__});
+                    throw NcError("No service registered");
                 
                 return m_service;
             }

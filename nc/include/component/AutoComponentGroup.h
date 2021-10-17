@@ -53,7 +53,7 @@ namespace nc
     template<std::derived_from<AutoComponent> T, class ... Args>
     T* AutoComponentGroup::Add(Args&& ... args)
     {
-        IF_THROW(Contains<T>(), std::string{"Entity already has component of this type\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(Contains<T>(), "Entity already has component of this type");
         m_toAdd.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         return dynamic_cast<T*>(m_toAdd.back().get());
     }
@@ -71,7 +71,7 @@ namespace nc
             }
         }
 
-        throw std::runtime_error(std::string{"Component does not exist\n   "} + __PRETTY_FUNCTION__);
+        throw NcError("Component does not exist");
     }
 
     template<std::derived_from<AutoComponent> T>
