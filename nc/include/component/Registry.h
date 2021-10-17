@@ -194,7 +194,7 @@ namespace nc::ecs
     template<Component T, class... Args>
     auto Registry<TypeList>::Add(Entity entity, Args&&... args) -> T*
     {
-        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         return GetStorageFor<T>().Add(entity, std::forward<Args>(args)...);
     }
 
@@ -202,7 +202,7 @@ namespace nc::ecs
     template<std::derived_from<AutoComponent> T, class... Args>
     auto Registry<TypeList>::Add(Entity entity, Args&&... args) -> T*
     {
-        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
         return group->Add<T>(entity, std::forward<Args>(args)...);
     }
@@ -211,7 +211,7 @@ namespace nc::ecs
     template<std::same_as<Entity> T>
     void Registry<TypeList>::Remove(Entity entity)
     {
-        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         auto pos = std::ranges::find(m_active, entity);
         *pos = m_active.back();
         m_active.pop_back();
@@ -222,7 +222,7 @@ namespace nc::ecs
     template<Component T>
     void Registry<TypeList>::Remove(Entity entity)
     {
-        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         GetStorageFor<T>().Remove(entity);
     }
 
@@ -230,7 +230,7 @@ namespace nc::ecs
     template<std::derived_from<AutoComponent> T>
     void Registry<TypeList>::Remove(Entity entity)
     {
-        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         AutoComponentGroup* group = GetStorageFor<AutoComponentGroup>().Get(entity);
         group->Remove<T>();
     }
@@ -247,7 +247,7 @@ namespace nc::ecs
     template<Component T>
     bool Registry<TypeList>::Contains(Entity entity) const
     {
-        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         return GetStorageFor<T>().Contains(entity);
     }
 
@@ -255,7 +255,7 @@ namespace nc::ecs
     template<std::derived_from<AutoComponent> T>
     bool Registry<TypeList>::Contains(Entity entity) const
     {
-        IF_THROW(!Contains<Entity>(entity), std::string{"Bad Entity\n   "} + __PRETTY_FUNCTION__);
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         const AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
         return group->Contains<T>();
     }
