@@ -1,6 +1,7 @@
 #include "Inspector.h"
 #include "assets/AssetManifest.h"
 #include "utility/DefaultComponents.h"
+#include "utility/Output.h"
 #include "directx/math/DirectXMath.h"
 #include "imgui/imgui.h"
 
@@ -167,7 +168,16 @@ namespace nc::editor
                 for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
                 {
                     if(ImGui::Selectable(asset.name.c_str()))
-                        collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                    {
+                        try
+                        {
+                            collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                        }
+                        catch(const std::runtime_error& e)
+                        {
+                            Output::LogError("Failure loading: " + asset.ncaPath.value().string(), "Exception: " + std::string{e.what()});
+                        }
+                    }
                 }
 
                 ImGui::EndMenu();
@@ -212,7 +222,14 @@ namespace nc::editor
                     {
                         if(ImGui::Selectable(asset.name.c_str()))
                         {
-                            collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                            try
+                            {
+                                collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                            }
+                            catch(const std::runtime_error& e)
+                            {
+                                Output::LogError("Failure loading: " + asset.ncaPath.value().string(), "Exception: " + std::string{e.what()});
+                            }
                         }
                     }
 
@@ -238,6 +255,7 @@ namespace nc::editor
 
     void Inspector::DrawConcaveCollider(ConcaveCollider* concaveCollider)
     {
+        /** @todo Currently there is no way to change the asset for a conave collider */
         ElementHeader("ConcaveCollider");
         ImGui::BeginGroup();
         ImGui::Indent();
@@ -269,7 +287,16 @@ namespace nc::editor
             for(const auto& asset : m_assetManifest->View(AssetType::Mesh))
             {
                 if(ImGui::Selectable(asset.sourcePath.string().c_str()))
-                    meshRenderer->SetMesh(asset.ncaPath.value().string());
+                {
+                    try
+                    {
+                        meshRenderer->SetMesh(asset.ncaPath.value().string());
+                    }
+                    catch(const std::runtime_error& e)
+                    {
+                        Output::LogError("Failure loading: " + asset.ncaPath.value().string(), "Exception: " + std::string{e.what()});
+                    }
+                }
             }
 
             ImGui::EndCombo();
@@ -286,7 +313,16 @@ namespace nc::editor
             for(const auto& asset : m_assetManifest->View(AssetType::Texture))
             {
                 if(ImGui::Selectable(asset.sourcePath.string().c_str()))
-                    meshRenderer->SetBaseColor(asset.sourcePath.string());
+                {
+                    try
+                    {
+                        meshRenderer->SetBaseColor(asset.sourcePath.string());
+                    }
+                    catch(const std::runtime_error& e)
+                    {
+                        Output::LogError("Failure loading: " + asset.sourcePath.string(), "Exception: " + std::string{e.what()});
+                    }
+                }
             }
 
             ImGui::EndCombo();
@@ -300,7 +336,16 @@ namespace nc::editor
             for(const auto& asset : m_assetManifest->View(AssetType::Texture))
             {
                 if(ImGui::Selectable(asset.sourcePath.string().c_str()))
-                    meshRenderer->SetNormal(asset.sourcePath.string());
+                {
+                    try
+                    {
+                        meshRenderer->SetNormal(asset.sourcePath.string());
+                    }
+                    catch(const std::runtime_error& e)
+                    {
+                        Output::LogError("Failure loading: " + asset.sourcePath.string(), "Exception: " + std::string{e.what()});
+                    }
+                }
             }
 
             ImGui::EndCombo();
@@ -314,7 +359,16 @@ namespace nc::editor
             for(const auto& asset : m_assetManifest->View(AssetType::Texture))
             {
                 if(ImGui::Selectable(asset.sourcePath.string().c_str()))
-                    meshRenderer->SetRoughness(asset.sourcePath.string());
+                {
+                    try
+                    {
+                        meshRenderer->SetRoughness(asset.sourcePath.string());
+                    }
+                    catch(const std::runtime_error& e)
+                    {
+                        Output::LogError("Failure loading: " + asset.sourcePath.string(), "Exception: " + std::string{e.what()});
+                    }
+                }
             }
 
             ImGui::EndCombo();

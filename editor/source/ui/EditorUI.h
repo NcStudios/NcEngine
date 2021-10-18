@@ -3,10 +3,9 @@
 #include "Ecs.h"
 #include "ui/IUI.h"
 #include "window/IOnResizeReceiver.h"
-
 #include "framework/Callbacks.h"
 #include "ui/dialog/Dialog.h"
-#include "ui/dialog/AssetBrowser.h"
+#include "ui/dialog/ActiveDialogs.h"
 #include "scene/SceneGraph.h"
 #include "UtilitiesPanel.h"
 
@@ -25,7 +24,7 @@ namespace nc::editor
                      AssetManifest* assetManifest,
                      ProjectCallbacks projectCallbacks,
                      SceneCallbacks sceneCallbacks,
-                     EntityCallbacks::ChangeTagCallbackType changeTagCallback,
+                     EntityCallbacks::ChangeTagCallbackType changeTag,
                      std::string projectName);
             ~EditorUI();
 
@@ -33,11 +32,12 @@ namespace nc::editor
             bool IsHovered() override;
             void OnResize(Vector2 dimensions) override;
 
-            void RegisterCallbacks(DialogCallbacks::OpenFileBrowserCallbackType callback);
+            void RegisterCallbacks(DialogCallbacks::OpenAssetBrowserCallbackType callback);
 
-            void AddDialog(DialogBase* dialog);
             void SetProjectName(std::string name);
             void UpdateScenes(std::vector<std::string> scenes, int selectedScene);
+
+            auto GetRegisterDialogCallback() -> UICallbacks::RegisterDialogCallbackType;
 
         private:
             registry_type* m_registry;
@@ -45,8 +45,8 @@ namespace nc::editor
             ProjectCallbacks m_callbacks;
             SceneGraph m_sceneGraph;
             UtilitiesPanel m_utilitiesPanel;
-            AssetBrowser m_assetBrowser;
-            std::vector<DialogBase*> m_dialogs;
+            ActiveDialogs m_activeDialogs;
+            DialogCallbacks::OpenAssetBrowserCallbackType m_openAssetBrowser;
             void Menu();
     };
 }

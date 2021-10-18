@@ -7,9 +7,10 @@ namespace
 
 namespace nc::editor
 {
-    AssetBrowser::AssetBrowser(AssetManifest* manifest)
-        : DialogFixedCentered{DialogSize},
+    AssetBrowser::AssetBrowser(UICallbacks::RegisterDialogCallbackType registerDialog, AssetManifest* manifest)
+        : DialogFixedCentered{"Asset Browser", DialogSize},
           m_assetManifest{manifest},
+          m_registerDialog{std::move(registerDialog)},
           m_openFileBrowser{}
     {
     }
@@ -21,7 +22,8 @@ namespace nc::editor
 
     void AssetBrowser::Open()
     {
-        isOpen = true;
+        m_isOpen = true;
+        m_registerDialog(this);
     }
 
     void AssetBrowser::AssetTab(const char* label, std::span<const Asset> assets, AssetType type)
@@ -34,21 +36,7 @@ namespace nc::editor
 
             if(ImGui::Button("Add"))
             {
-                auto callback = [type, assetManifest = m_assetManifest]
-                {
-                    switch(type)
-                    {
-                        case AssetType::AudioClip:       return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::AudioClip);
-                        case AssetType::ConcaveCollider: return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::ConcaveCollider);
-                        case AssetType::HullCollider:    return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::HullCollider);
-                        case AssetType::Mesh:            return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::Mesh);
-                        case AssetType::Texture:         return std::bind(AssetManifest::Add, assetManifest, std::placeholders::_1, AssetType::Texture);
-                    }
-
-                    throw std::runtime_error("AssetBrowser - Add - Unknown AssetType");
-                }();
-
-                m_openFileBrowser(std::move(callback));
+                m_openFileBrowser([manifest = m_assetManifest, type](const std::filesystem::path& path){ return manifest->Add(path, type)});
             }
 
             ImGui::SameLine();
@@ -94,12 +82,9 @@ namespace nc::editor
 
     void AssetBrowser::Draw()
     {
-        if(!isOpen) return;
+        if(!m_isOpen) return;
 
-        ImGui::SetNextWindowPos(GetPosition(), ImGuiCond_Always, ImVec2{0.5f, 0.5f});
-        ImGui::SetNextWindowSize(GetSize());
-
-        if(ImGui::Begin("Asset Browser", &isOpen))
+        if(BeginWindow())
         {
             ImGui::SetWindowFocus();
 
@@ -115,6 +100,6 @@ namespace nc::editor
             }
         }
 
-        ImGui::End();
+        EndWindow();
     }
 }

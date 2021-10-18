@@ -16,8 +16,8 @@ namespace nc::editor
         using CreateProjectCallbackType = std::function<void()>;
         using OpenProjectCallbackType = std::function<void()>;
 
-        CreateProjectCallbackType createProjectCallback;
-        OpenProjectCallbackType openProjectCallback;
+        CreateProjectCallbackType createProject;
+        OpenProjectCallbackType openProject;
     };
 
     struct SceneCallbacks
@@ -27,28 +27,28 @@ namespace nc::editor
         using ChangeSceneCallbackType = std::function<void(const std::string&)>;
         using DeleteCurrentSceneCallbackType = std::function<void()>;
 
-        NewSceneCallbackType newSceneCallback;
-        SaveSceneCallbackType saveSceneCallback;
-        ChangeSceneCallbackType changeSceneCallback;
-        DeleteCurrentSceneCallbackType deleteCurrentSceneCallback;
+        NewSceneCallbackType newScene;
+        SaveSceneCallbackType saveScene;
+        ChangeSceneCallbackType changeScene;
+        DeleteCurrentSceneCallbackType deleteCurrentScene;
     };
 
     struct EntityCallbacks
     {
         using ChangeTagCallbackType = std::function<void(Entity)>;
 
-        ChangeTagCallbackType changeTagCallback;
+        ChangeTagCallbackType changeTag;
     };
 
     struct UICallbacks
     {
-        using AddDialogCallbackType = std::function<void(DialogBase*)>;
+        using RegisterDialogCallbackType = std::function<void(DialogBase*)>;
         using UpdateScenesCallbackType = std::function<void(std::vector<std::string>, int)>;
         using SetProjectNameCallbackType = std::function<void(std::string)>;
 
-        AddDialogCallbackType addDialogCallback;
-        UpdateScenesCallbackType updateScenesCallback;
-        SetProjectNameCallbackType setProjectNameCallback;
+        RegisterDialogCallbackType registerDialog;
+        UpdateScenesCallbackType updateScenes;
+        SetProjectNameCallbackType setProjectName;
     };
 
     struct DialogCallbacks
@@ -60,9 +60,11 @@ namespace nc::editor
         using OpenFileBrowserCallbackType = std::function<void(FileBrowserOnConfirmCallbackType)>;
         using OpenNewSceneDialogCallbackType = std::function<void(NewSceneOnConfirmCallbackType)>;
         using OpenNewProjectDialogCallbackType = std::function<void(NewProjectOnConfirmCallbackType)>;
+        using OpenAssetBrowserCallbackType = std::function<void()>;
 
         OpenFileBrowserCallbackType openFileBrowser;
         OpenNewSceneDialogCallbackType openNewSceneDialog;
         OpenNewProjectDialogCallbackType openNewProjectDialog;
+        OpenAssetBrowserCallbackType openAssetBrowser;
     };
 }

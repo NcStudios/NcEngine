@@ -5,6 +5,7 @@
 #include "assets/AssetManifest.h"
 #include "framework/ProjectManager.h"
 #include "ui/EditorUI.h"
+#include "ui/dialog/AssetBrowser.h"
 #include "ui/dialog/ChangeTagDialog.h"
 #include "ui/dialog/FileBrowser.h"
 #include "ui/dialog/NewSceneDialog.h"
@@ -32,6 +33,7 @@ namespace nc::editor
             ProjectManager m_projectManager;
             EditorUI m_editorUI;
             FileBrowser m_fileBrowser;
+            AssetBrowser m_assetBrowser;
             NewSceneDialog m_newSceneDialog;
             NewProjectDialog m_newProjectDialog;
             ChangeTagDialog m_changeTagDialog;

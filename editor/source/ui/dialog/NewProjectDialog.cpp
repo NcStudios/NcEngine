@@ -7,9 +7,9 @@ namespace
 
 namespace nc::editor
 {
-    NewProjectDialog::NewProjectDialog(UICallbacks::AddDialogCallbackType addDialogCallback)
-        : DialogFixedCentered{NewProjectDialogSize},
-          m_addDialog{std::move(addDialogCallback)},
+    NewProjectDialog::NewProjectDialog(UICallbacks::RegisterDialogCallbackType registerDialog)
+        : DialogFixedCentered{"Create Project", NewProjectDialogSize},
+          m_addDialog{std::move(registerDialog)},
           m_callback{}
     {
     }
@@ -17,18 +17,15 @@ namespace nc::editor
     void NewProjectDialog::Open(DialogCallbacks::NewProjectOnConfirmCallbackType callback)
     {
         m_callback = std::move(callback);
-        isOpen = true;
+        m_isOpen = true;
         m_addDialog(this);
     }
 
     void NewProjectDialog::Draw()
     {
-        if(!isOpen) return;
+        if(!m_isOpen) return;
 
-        ImGui::SetNextWindowPos(GetPosition(), ImGuiCond_Always, ImVec2{0.5f, 0.5f});
-        ImGui::SetNextWindowSize(GetSize());
-
-        if(ImGui::Begin("Create Project", &isOpen))
+        if(BeginWindow())
         {
             ImGui::Text("Project Name:");
             ImGui::SameLine();
@@ -43,17 +40,17 @@ namespace nc::editor
             if(ImGui::Button("Ok"))
             {
                 if(m_callback(std::string{m_nameBuffer}, std::filesystem::path{m_pathBuffer}))
-                    isOpen = false;
+                    m_isOpen = false;
             }
 
             ImGui::SameLine();
 
             if(ImGui::Button("Cancel"))
             {
-                isOpen = false;
+                m_isOpen = false;
             }
         }
 
-        ImGui::End();
+        EndWindow();
     }
 }

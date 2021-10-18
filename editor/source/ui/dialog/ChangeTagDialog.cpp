@@ -8,7 +8,7 @@ namespace
 namespace nc::editor
 {
     ChangeTagDialog::ChangeTagDialog(registry_type* registry)
-        : DialogFixedCentered{ChangeTagDialogSize},
+        : DialogFixedCentered{"Change Entity Tag", ChangeTagDialogSize},
           m_registry{registry},
           m_addDialog{},
           m_entity{Entity::Null()}
@@ -17,7 +17,7 @@ namespace nc::editor
 
     void ChangeTagDialog::Open(Entity entity)
     {
-        isOpen = true;
+        m_isOpen = true;
         m_entity = entity;
         m_buffer[0] = '\0';
         m_addDialog(this);
@@ -25,24 +25,24 @@ namespace nc::editor
 
     void ChangeTagDialog::Draw()
     {
-        if(!isOpen) return;
-
-        ImGui::SetNextWindowPos(GetPosition(), ImGuiCond_Always, ImVec2{0.5f, 0.5f});
-        ImGui::SetNextWindowSize(GetSize());
-        if(ImGui::Begin("Change Entity Tag", &isOpen))
+        if(!m_isOpen) return;
+        
+        if(BeginWindow())
         {
             ImGui::InputText("", m_buffer, BufferSize);
             if(ImGui::Button("Save"))
             {
                 m_registry->Get<Tag>(m_entity)->Set(std::string{m_buffer});
-                isOpen = false;
+                m_isOpen = false;
                 m_entity = Entity::Null();
             }
-        } ImGui::End();
+        }
+
+        EndWindow();
     }
 
-    void ChangeTagDialog::RegisterAddDialogCallback(UICallbacks::AddDialogCallbackType addDialogCallback)
+    void ChangeTagDialog::RegisterregisterDialog(UICallbacks::RegisterDialogCallbackType registerDialog)
     {
-        m_addDialog = std::move(addDialogCallback);
+        m_addDialog = std::move(registerDialog);
     }
 }

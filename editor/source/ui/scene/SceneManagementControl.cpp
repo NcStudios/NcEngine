@@ -35,20 +35,20 @@ namespace nc::editor
         }
 
         if(ImGui::Button("New Scene"))
-            m_callbacks.newSceneCallback();
+            m_callbacks.newScene();
 
         ImGui::SameLine();
 
         if(ImGui::Button("Save Scene"))
-            m_callbacks.saveSceneCallback();
+            m_callbacks.saveScene();
         
         ImGui::SameLine();
 
         if(ImGui::Button("Delete Scene"))
-            m_callbacks.deleteCurrentSceneCallback();
+            m_callbacks.deleteCurrentScene();
 
         if(sceneChanged)
-            m_callbacks.changeSceneCallback(m_scenes.at(m_selectedScene));
+            m_callbacks.changeScene(m_scenes.at(m_selectedScene));
     }
 
     void SceneManagementControl::UpdateScenes(std::vector<std::string> scenes, int selectedScene)

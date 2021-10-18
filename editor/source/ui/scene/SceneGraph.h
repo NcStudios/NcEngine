@@ -19,7 +19,7 @@ namespace nc::editor
             SceneGraph(registry_type* registry,
                        AssetManifest* assetManifest,
                        SceneCallbacks sceneCallbacks,
-                       EntityCallbacks::ChangeTagCallbackType changeTagCallback,
+                       EntityCallbacks::ChangeTagCallbackType changeTag,
                        std::string projectName);
             ~SceneGraph();
             void Draw();
@@ -34,7 +34,7 @@ namespace nc::editor
             std::string m_projectName;
             Inspector m_inspector;
             SceneManagementControl m_sceneManagementControl;
-            EntityCallbacks::ChangeTagCallbackType m_changeTagCallback;
+            EntityCallbacks::ChangeTagCallbackType m_changeTag;
             Vector2 m_dimensions;
             Entity m_selectedEntity;
 

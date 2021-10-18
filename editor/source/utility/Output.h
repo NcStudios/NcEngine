@@ -31,5 +31,6 @@ namespace nc::editor
             static Output* m_instance;
             std::deque<LogItem> m_items;
             unsigned m_itemCount = DefaultItemCount;
+            bool m_needScroll = false;
     };
 }

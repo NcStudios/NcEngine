@@ -65,7 +65,7 @@ namespace nc::editor
 
         if(!result)
         {
-            std::cerr << "BuildNcaFile - error: " << result << '\n';
+            Output::LogError("Failure building asset file");
             return false;
         }
 
@@ -77,7 +77,7 @@ namespace nc::editor
 
         if(!result)
         {
-            std::cerr << "BuildNcaFile - error: couldn't get exit code\n";
+            Output::LogError("Failure building asset file");
             return false;
         }
         

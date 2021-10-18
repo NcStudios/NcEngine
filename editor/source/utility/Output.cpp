@@ -37,6 +37,7 @@ namespace nc::editor
 
     void Output::Log(std::string item, std::string description, bool isError)
     {
+        Output::m_instance->m_needScroll = true;
         auto& items = Output::m_instance->m_items;
         auto itemCount = Output::m_instance->m_itemCount;
         items.emplace_back(std::move(item), description, isError);
@@ -80,6 +81,12 @@ namespace nc::editor
             }
 
             ImGui::Separator();
+        }
+
+        if(m_needScroll)
+        {
+            m_needScroll = false;
+            ImGui::SetScrollHereY();
         }
 
         ImGui::PopStyleColor(3);

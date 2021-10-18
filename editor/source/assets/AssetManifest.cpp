@@ -87,12 +87,14 @@ namespace nc::editor
         }
 
         collection.Add(std::move(asset));
+        Output::Log("Added asset: " + assetPath.string());
         return true;
     }
 
     bool AssetManifest::Remove(const std::filesystem::path& assetPath, AssetType type)
     {
         /** @todo unload assets once implemented */
+        Output::Log("Removed asset: " + assetPath.string());
         return GetCollection(type).Remove(assetPath);
     }
 

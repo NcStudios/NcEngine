@@ -9,7 +9,7 @@ namespace nc::editor
     class AssetBrowser : public DialogFixedCentered
     {
         public:
-            AssetBrowser(AssetManifest* manifest);
+            AssetBrowser(UICallbacks::RegisterDialogCallbackType registerDialog, AssetManifest* manifest);
 
             void Open();
             void Draw() override;
@@ -18,6 +18,7 @@ namespace nc::editor
 
         private:
             AssetManifest* m_assetManifest;
+            UICallbacks::RegisterDialogCallbackType m_registerDialog;
             DialogCallbacks::OpenFileBrowserCallbackType m_openFileBrowser;
 
             void AssetTab(const char* label, std::span<const Asset> assets, AssetType type);

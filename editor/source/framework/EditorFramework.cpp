@@ -7,12 +7,12 @@
 
 namespace
 {
-    auto CreateProjectCallbacks(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks
+    auto createProjects(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks
     {
         return nc::editor::ProjectCallbacks
         {
-            .createProjectCallback = std::bind(nc::editor::ProjectManager::CreateProject, projectManager),
-            .openProjectCallback = std::bind(nc::editor::ProjectManager::OpenProject, projectManager)
+            .createProject = [projectManager]{ return projectManager->CreateProject(); },
+            .openProject = [projectManager]{ return projectManager->OpenProject(); }
         };
     }
 
@@ -20,10 +20,10 @@ namespace
     {
         return nc::editor::SceneCallbacks
         {
-            .newSceneCallback = std::bind(nc::editor::ProjectManager::NewScene, projectManager),
-            .saveSceneCallback = std::bind(nc::editor::ProjectManager::SaveCurrentScene, projectManager),
-            .changeSceneCallback = std::bind(nc::editor::ProjectManager::LoadScene, projectManager, std::placeholders::_1),
-            .deleteCurrentSceneCallback = std::bind(nc::editor::ProjectManager::DeleteCurrentScene, projectManager)
+            .newScene = [projectManager]{ return projectManager->NewScene(); },
+            .saveScene = [projectManager]{ return projectManager->SaveCurrentScene(); },
+            .changeScene = [projectManager](const std::string& name){ return projectManager->LoadScene(name); },
+            .deleteCurrentScene = [projectManager]{ return projectManager->DeleteCurrentScene(); }
         };
     }
 
@@ -31,21 +31,27 @@ namespace
     {
         return nc::editor::UICallbacks
         {
-            .addDialogCallback = std::bind(nc::editor::EditorUI::AddDialog, ui, std::placeholders::_1),
-            .updateScenesCallback = std::bind(nc::editor::EditorUI::UpdateScenes, ui, std::placeholders::_1, std::placeholders::_2),
-            .setProjectNameCallback = std::bind(nc::editor::EditorUI::SetProjectName, ui, std::placeholders::_1)
+            .registerDialog = ui->GetRegisterDialogCallback(),
+            .updateScenes = [ui](std::vector<std::string> scenes, int selectedScene){ return ui->UpdateScenes(std::move(scenes), selectedScene); },
+            .setProjectName = [ui](std::string name){ return ui->SetProjectName(std::move(name)); }
         };
     }
 
     auto CreateDialogCallbacks(nc::editor::FileBrowser* fileBrowser,
                                nc::editor::NewSceneDialog* newSceneDialog,
-                               nc::editor::NewProjectDialog* newProjectDialog) -> nc::editor::DialogCallbacks
+                               nc::editor::NewProjectDialog* newProjectDialog,
+                               nc::editor::AssetBrowser* assetBrowser) -> nc::editor::DialogCallbacks
     {
+        using FileBrowserCallback = nc::editor::DialogCallbacks::FileBrowserOnConfirmCallbackType;
+        using newScene = nc::editor::DialogCallbacks::NewSceneOnConfirmCallbackType;
+        using OpenProjectCallback = nc::editor::DialogCallbacks::NewProjectOnConfirmCallbackType;
+
         return nc::editor::DialogCallbacks
         {
-            .openFileBrowser = std::bind(nc::editor::FileBrowser::Open, fileBrowser, std::placeholders::_1),
-            .openNewSceneDialog = std::bind(nc::editor::NewSceneDialog::Open, newSceneDialog, std::placeholders::_1),
-            .openNewProjectDialog = std::bind(nc::editor::NewProjectDialog::Open, newProjectDialog, std::placeholders::_1)
+            .openFileBrowser = [fileBrowser](FileBrowserCallback callback){ fileBrowser->Open(std::move(callback)); },
+            .openNewSceneDialog = [newSceneDialog](newScene callback){ newSceneDialog->Open(std::move(callback)); },
+            .openNewProjectDialog = [newProjectDialog](OpenProjectCallback callback){ newProjectDialog->Open(std::move(callback)); },
+            .openAssetBrowser = [assetBrowser](){ return assetBrowser->Open(); }
         };
     }
 }
@@ -60,23 +66,25 @@ namespace nc::editor
           m_editorUI{registry,
                      &m_output,
                      &m_assetManifest,
-                     CreateProjectCallbacks(&m_projectManager),
+                     createProjects(&m_projectManager),
                      CreateSceneCallbacks(&m_projectManager),
                      std::bind(ChangeTagDialog::Open, &m_changeTagDialog, std::placeholders::_1),
                      std::string{}},
-          m_fileBrowser{std::bind(EditorUI::AddDialog, &m_editorUI, std::placeholders::_1)},
-          m_newSceneDialog{std::bind(EditorUI::AddDialog, &m_editorUI, std::placeholders::_1)},
-          m_newProjectDialog{std::bind(EditorUI::AddDialog, &m_editorUI, std::placeholders::_1)},
+          m_fileBrowser{m_editorUI.GetRegisterDialogCallback()},
+          m_assetBrowser{m_editorUI.GetRegisterDialogCallback(), &m_assetManifest},
+          m_newSceneDialog{m_editorUI.GetRegisterDialogCallback()},
+          m_newProjectDialog{m_editorUI.GetRegisterDialogCallback()},
           m_changeTagDialog{registry}
     {
         nc::editor::SetImGuiStyle();
         nc::ui::Set(&m_editorUI);
 
         auto uiCallbacks = CreateUICallbacks(&m_editorUI);
-        m_changeTagDialog.RegisterAddDialogCallback(uiCallbacks.addDialogCallback);
+        m_changeTagDialog.RegisterregisterDialog(uiCallbacks.registerDialog);
 
-        auto dialogCallbacks = CreateDialogCallbacks(&m_fileBrowser, &m_newSceneDialog, &m_newProjectDialog);
-        m_editorUI.RegisterCallbacks(dialogCallbacks.openFileBrowser);
+        auto dialogCallbacks = CreateDialogCallbacks(&m_fileBrowser, &m_newSceneDialog, &m_newProjectDialog, &m_assetBrowser);
+        m_assetBrowser.RegisterCallback(dialogCallbacks.openFileBrowser);
+        m_editorUI.RegisterCallbacks(dialogCallbacks.openAssetBrowser);
         
         m_projectManager.RegisterCallbacks(std::move(uiCallbacks), std::move(dialogCallbacks));
 

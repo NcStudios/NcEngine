@@ -1,5 +1,7 @@
 #include "NewSceneDialog.h"
 
+#include <cstring>
+
 namespace
 {
     constexpr nc::Vector2 WindowSize{400.0f, 300.0f};
@@ -7,9 +9,9 @@ namespace
 
 namespace nc::editor
 {
-    NewSceneDialog::NewSceneDialog(UICallbacks::AddDialogCallbackType addDialogCallback)
-        : DialogFixedCentered{WindowSize},
-          m_addDialog{std::move(addDialogCallback)},
+    NewSceneDialog::NewSceneDialog(UICallbacks::RegisterDialogCallbackType registerDialog)
+        : DialogFixedCentered{"Create New Scene", WindowSize},
+          m_addDialog{std::move(registerDialog)},
           m_onConfirm{}
     {
     }
@@ -18,18 +20,15 @@ namespace nc::editor
     {
         m_onConfirm = std::move(onConfirmCallback);
         m_addDialog(this);
-        isOpen = true;
-        m_buffer[0] = '\0';
+        m_isOpen = true;
+        std::memset(m_buffer, '\0', BufferSize);
     }
 
     void NewSceneDialog::Draw()
     {
-        if(!isOpen) return;
+        if(!m_isOpen) return;
 
-        ImGui::SetNextWindowPos(GetPosition(), ImGuiCond_Always, ImVec2{0.5f, 0.5f});
-        ImGui::SetNextWindowSize(GetSize());
-
-        if(ImGui::Begin("Create New Scene"), &isOpen)
+        if(BeginWindow())
         {
             ImGui::SetWindowFocus();
             ImGui::Text("Scene Name: ");
@@ -39,15 +38,17 @@ namespace nc::editor
             if(ImGui::Button("Create"))
             {
                 if(m_onConfirm(std::string{m_buffer}))
-                    isOpen = false;
+                    m_isOpen = false;
             }
 
             ImGui::SameLine();
 
             if(ImGui::Button("Cancel"))
             {
-                isOpen = false;
+                m_isOpen = false;
             }
         }
+
+        EndWindow();
     }
 }

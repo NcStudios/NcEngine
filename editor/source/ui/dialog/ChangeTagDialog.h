@@ -15,11 +15,11 @@ namespace nc::editor
             void Open(Entity entity);
             void Draw() override;
 
-            void RegisterAddDialogCallback(UICallbacks::AddDialogCallbackType addDialogCallback);
+            void RegisterregisterDialog(UICallbacks::RegisterDialogCallbackType registerDialog);
 
         private:
             registry_type* m_registry;
-            UICallbacks::AddDialogCallbackType m_addDialog;
+            UICallbacks::RegisterDialogCallbackType m_addDialog;
             Entity m_entity;
             char m_buffer[BufferSize];
     };

@@ -10,13 +10,13 @@ namespace nc::editor
         inline static constexpr size_t TextEntryBufferSize = 256;
 
         public:
-            NewProjectDialog(UICallbacks::AddDialogCallbackType addDialogCallback);
+            NewProjectDialog(UICallbacks::RegisterDialogCallbackType registerDialog);
 
             void Open(DialogCallbacks::NewProjectOnConfirmCallbackType callback);
             void Draw() override;
 
         private:
-            UICallbacks::AddDialogCallbackType m_addDialog;
+            UICallbacks::RegisterDialogCallbackType m_addDialog;
             DialogCallbacks::NewProjectOnConfirmCallbackType m_callback;
             char m_nameBuffer[TextEntryBufferSize];
             char m_pathBuffer[TextEntryBufferSize];

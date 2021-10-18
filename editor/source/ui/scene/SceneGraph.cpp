@@ -19,14 +19,14 @@ namespace nc::editor
     SceneGraph::SceneGraph(registry_type* registry,
                            AssetManifest* assetManifest,
                            SceneCallbacks sceneCallbacks,
-                           EntityCallbacks::ChangeTagCallbackType changeTagCallback,
+                           EntityCallbacks::ChangeTagCallbackType changeTag,
                            std::string projectName)
         : m_registry{registry},
           m_assetManifest{assetManifest},
           m_projectName{std::move(projectName)},
           m_inspector{registry, assetManifest},
           m_sceneManagementControl{std::move(sceneCallbacks)},
-          m_changeTagCallback{std::move(changeTagCallback)},
+          m_changeTag{std::move(changeTag)},
           m_dimensions{window::GetDimensions()},
           m_selectedEntity{}
     {
@@ -55,12 +55,12 @@ namespace nc::editor
 
     void SceneGraph::Draw()
     {
-        ImGui::SetNextWindowPos({Padding, TitleBarHeight});
-        //ImGui::SetNextWindowPos({0, TitleBarHeight});
-
         auto sceneGraphHeight = m_dimensions.y - TitleBarHeight;
 
-        if(ImGui::BeginChild("ScenePanel", {SceneGraphPanelWidth, sceneGraphHeight}, true))
+        ImGui::SetNextWindowPos(ImVec2{0,TitleBarHeight}, ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2{SceneGraphPanelWidth, sceneGraphHeight}, ImGuiCond_Once);
+
+        if(ImGui::Begin("Scene Graph"))
         {
             if(m_projectName.empty())
             {
@@ -110,7 +110,9 @@ namespace nc::editor
 
             } ImGui::EndChild();
 
-        } ImGui::EndChild();
+        }
+        
+        ImGui::End();
     }
 
     void SceneGraph::SceneGraphNode(Entity entity, Tag* tag, Transform* transform)
@@ -195,7 +197,7 @@ namespace nc::editor
 
         if(ImGui::Selectable("Edit Tag"))
         {
-            m_changeTagCallback(entity);
+            m_changeTag(entity);
         }
 
         if(ImGui::Selectable("Add Child"))

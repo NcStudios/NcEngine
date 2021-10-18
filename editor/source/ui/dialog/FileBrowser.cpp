@@ -123,9 +123,9 @@ namespace nc::editor
         return m_directoryEntries.at(index).is_regular_file();
     }
 
-    FileBrowser::FileBrowser(UICallbacks::AddDialogCallbackType addDialogCallback, std::filesystem::path initialDirectory)
-        : DialogFixedCentered{FileBrowserSize},
-          m_addDialog{std::move(addDialogCallback)},
+    FileBrowser::FileBrowser(UICallbacks::RegisterDialogCallbackType registerDialog, std::filesystem::path initialDirectory)
+        : DialogFixedCentered{"File Browser", FileBrowserSize},
+          m_addDialog{std::move(registerDialog)},
           m_callback{},
           m_directoryContents{std::move(initialDirectory)}
     {
@@ -134,7 +134,7 @@ namespace nc::editor
     void FileBrowser::Open(DialogCallbacks::FileBrowserOnConfirmCallbackType callback)
     {
         m_callback = std::move(callback);
-        isOpen = true;
+        m_isOpen = true;
         m_addDialog(this);
         ResetTextEntryBuffer();
         m_directoryContents.OpenDirectory(m_directoryContents.CurrentDirectory());
@@ -142,12 +142,9 @@ namespace nc::editor
 
     void FileBrowser::Draw()
     {
-        if(!isOpen) return;
+        if(!m_isOpen) return;
 
-        ImGui::SetNextWindowPos(GetPosition(), ImGuiCond_Always, ImVec2{0.5f, 0.5f});
-        ImGui::SetNextWindowSize(GetSize());
-
-        if(ImGui::Begin("File Browser", &isOpen))
+        if(BeginWindow())
         {
             ImGui::SetWindowFocus();
             DrawCurrentDirectoryWidget();
@@ -157,8 +154,8 @@ namespace nc::editor
             ImGui::Spacing();
             DrawFileSelectWidget();
         }
-        
-        ImGui::End();
+
+        EndWindow();
     }
 
     void FileBrowser::DrawCurrentDirectoryWidget()
@@ -227,12 +224,12 @@ namespace nc::editor
             {
                 auto path = m_directoryContents.CurrentDirectory() / std::filesystem::path{m_textEntryBuffer};
                 if(m_callback(path))
-                    isOpen = false;
+                    m_isOpen = false;
             }
             else
             {
                 if(m_callback(m_directoryContents.Entry(selectedIndex)))
-                    isOpen = false;
+                    m_isOpen = false;
             }
         }
 
@@ -240,7 +237,7 @@ namespace nc::editor
 
         if(ImGui::Button("Cancel"))
         {
-            isOpen = false;
+            m_isOpen = false;
         }
     }
 

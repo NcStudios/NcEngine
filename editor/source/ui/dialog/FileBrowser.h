@@ -40,13 +40,13 @@ namespace nc::editor
         inline static constexpr size_t TextEntryBufferSize = 128;
 
         public:
-            FileBrowser(UICallbacks::AddDialogCallbackType addDialogCallback, std::filesystem::path initialDirectory = std::filesystem::current_path());
+            FileBrowser(UICallbacks::RegisterDialogCallbackType registerDialog, std::filesystem::path initialDirectory = std::filesystem::current_path());
 
             void Open(DialogCallbacks::FileBrowserOnConfirmCallbackType callback);
             void Draw() override;
 
         private:
-            UICallbacks::AddDialogCallbackType m_addDialog;
+            UICallbacks::RegisterDialogCallbackType m_addDialog;
             DialogCallbacks::FileBrowserOnConfirmCallbackType m_callback;
             DirectoryContents m_directoryContents;
             char m_textEntryBuffer[TextEntryBufferSize];

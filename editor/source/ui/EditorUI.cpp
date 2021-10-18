@@ -22,7 +22,7 @@ namespace nc::editor
                        AssetManifest* assetManifest,
                        ProjectCallbacks projectCallbacks,
                        SceneCallbacks sceneCallbacks,
-                       EntityCallbacks::ChangeTagCallbackType changeTagCallback,
+                       EntityCallbacks::ChangeTagCallbackType changeTag,
                        std::string projectName)
         : m_registry{registry},
           m_dimensions{window::GetDimensions()},
@@ -30,11 +30,9 @@ namespace nc::editor
           m_sceneGraph{registry,
                        assetManifest,
                        std::move(sceneCallbacks),
-                       std::move(changeTagCallback),
+                       std::move(changeTag),
                        std::move(projectName)},
-          m_utilitiesPanel{output},
-          m_assetBrowser{assetManifest},
-          m_dialogs{}
+          m_utilitiesPanel{output}
     {
         window::RegisterOnResizeReceiver(this);
     }
@@ -44,9 +42,9 @@ namespace nc::editor
         window::UnregisterOnResizeReceiver(this);
     }
 
-    void EditorUI::RegisterCallbacks(DialogCallbacks::OpenFileBrowserCallbackType callback)
+    void EditorUI::RegisterCallbacks(DialogCallbacks::OpenAssetBrowserCallbackType callback)
     {
-        m_assetBrowser.RegisterCallback(std::move(callback));
+        m_openAssetBrowser = std::move(callback);
     }
 
     void EditorUI::SetProjectName(std::string name)
@@ -57,33 +55,23 @@ namespace nc::editor
     void EditorUI::Draw()
     {
         ImGui::SetNextWindowPos({0,0});
-        ImGui::SetNextWindowSize({m_dimensions.x, m_dimensions.y});
+        ImGui::SetNextWindowSize({m_dimensions.x, 20.0f});
+
         if(ImGui::Begin("NcEngine Editor", nullptr, MainWindowFlags))
         {
             Menu();
-            m_sceneGraph.Draw();
-            m_utilitiesPanel.Draw();
-
-            m_assetBrowser.Draw();
-
-            for(auto cur = m_dialogs.rbegin(); cur != m_dialogs.rend(); ++ cur)
-            {
-                if(!(*cur)->isOpen)
-                {
-                    *cur = m_dialogs.back();
-                    m_dialogs.pop_back();
-                    continue;
-                }
-
-                (*cur)->Draw();
-            }
         }
         ImGui::End();
+
+        m_sceneGraph.Draw();
+        m_utilitiesPanel.Draw();
+        m_activeDialogs.Draw();
+
     }
 
-    void EditorUI::AddDialog(DialogBase* dialog)
+    auto EditorUI::GetRegisterDialogCallback() -> UICallbacks::RegisterDialogCallbackType
     {
-        m_dialogs.push_back(dialog);
+        return [active = &m_activeDialogs](DialogBase* dialog){ return active->Register(dialog); };
     }
 
     void EditorUI::UpdateScenes(std::vector<std::string> scenes, int selectedScene)
@@ -108,15 +96,15 @@ namespace nc::editor
             if(ImGui::BeginMenu("Project"))
             {
                 if(ImGui::MenuItem("Open"))
-                    m_callbacks.openProjectCallback();
+                    m_callbacks.openProject();
                 if(ImGui::MenuItem("Create"))
-                    m_callbacks.createProjectCallback();
+                    m_callbacks.createProject();
                 ImGui::EndMenu();
             }
             if(ImGui::BeginMenu("Assets"))
             {
                 if(ImGui::MenuItem("Edit"))
-                    m_assetBrowser.Open();
+                    m_openAssetBrowser();
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();

@@ -26,13 +26,12 @@ namespace nc::editor
     {
         // yikes
         auto SceneGraphPanelWidth = 300;
-        auto Padding = 2;
+        auto panelWidth = m_dimensions.x - SceneGraphPanelWidth;
 
-        const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
-        auto panelWidth = m_dimensions.x - xPos;
-        ImGui::SetNextWindowPos({xPos, m_dimensions.y - UtilitiesPanelHeight});
+        ImGui::SetNextWindowPos(ImVec2{m_dimensions.x, m_dimensions.y}, ImGuiCond_Always, ImVec2{1.0f, 1.0f});
+        ImGui::SetNextWindowSize(ImVec2{panelWidth, UtilitiesPanelHeight}, ImGuiCond_Once);
 
-        if(ImGui::BeginChild("UtilitiesPanel", {panelWidth, UtilitiesPanelHeight}, true))
+        if(ImGui::Begin("Utilities"))
         {
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
@@ -52,7 +51,6 @@ namespace nc::editor
             }
         }
 
-        //ImGui::EndChild();
         ImGui::End();
     }
 

@@ -11,13 +11,13 @@ namespace nc::editor
         static constexpr size_t BufferSize = 64u;
 
         public:
-            NewSceneDialog(UICallbacks::AddDialogCallbackType addDialogCallback);
+            NewSceneDialog(UICallbacks::RegisterDialogCallbackType registerDialog);
 
             void Open(DialogCallbacks::NewSceneOnConfirmCallbackType onConfirmCallback);
             void Draw() override;
 
         private:
-            UICallbacks::AddDialogCallbackType m_addDialog;
+            UICallbacks::RegisterDialogCallbackType m_addDialog;
             DialogCallbacks::NewSceneOnConfirmCallbackType m_onConfirm;
             char m_buffer[BufferSize];
     };
