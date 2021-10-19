@@ -36,9 +36,9 @@ namespace nc::sample
         nc::LoadTextureAsset(boxNormalPath);
         nc::LoadTextureAsset(boxRoughnessPath);
 
-        auto material =  graphics::Material{ .baseColor = defaultTexturesPath + "Box/BaseColor.png",
-                                             .normal    = defaultTexturesPath + "Box/Normal.png",
-                                             .roughness = defaultTexturesPath + "Box/Roughness.png" };
+        auto material =  Material{ .baseColor = defaultTexturesPath + "Box/BaseColor.png",
+                                   .normal    = defaultTexturesPath + "Box/Normal.png",
+                                   .roughness = defaultTexturesPath + "Box/Roughness.png" };
 
         const std::vector<std::string> sceneMeshes = std::vector<std::string>{ "project/assets/mesh/beeper.nca"};
         const std::string skeeballMesh = "project/assets/mesh/skeeball.nca";
@@ -47,7 +47,7 @@ namespace nc::sample
         nc::LoadMeshAsset(skeeballMesh);
 
         auto box = registry->Add<Entity>({.position = Vector3{0.0f, 2.0f, -3.0f}, .tag = "Box"});
-        registry->Add<MeshRenderer>(box, "project/assets/mesh/beeper.nca", material, nc::graphics::TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(box, "project/assets/mesh/beeper.nca", material, TechniqueType::PhongAndUi);
 
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
@@ -60,7 +60,7 @@ namespace nc::sample
             {.position = Vector3{0.0f, 1.0f, 2.0f},
              .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
              .tag = "Skeeball"});
-        registry->Add<MeshRenderer>(skeeball, "project/assets/mesh/skeeball.nca", material, nc::graphics::TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(skeeball, "project/assets/mesh/skeeball.nca", material, TechniqueType::PhongAndUi);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});

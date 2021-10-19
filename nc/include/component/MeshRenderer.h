@@ -17,23 +17,23 @@ namespace nc
     class MeshRenderer : public ComponentBase
     {
         public:
-            MeshRenderer(Entity entity, std::string meshUid, nc::graphics::Material material, nc::graphics::TechniqueType techniqueType);
-            
+            MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType);
+
             auto GetMesh() const -> const MeshView& { return m_mesh; }
             auto GetTextureIndices() const -> const TextureIndices& { return m_textureIndices; }
-            auto GetTechniqueType() const -> graphics::TechniqueType { return m_techniqueType; }
+            auto GetTechniqueType() const -> TechniqueType { return m_techniqueType; }
 
             #ifdef NC_EDITOR_ENABLED
-            auto GetMaterial() -> graphics::Material& { return m_material; }
+            auto GetMaterial() -> Material& { return m_material; }
             #endif
 
         private:
             #ifdef NC_EDITOR_ENABLED
-            graphics::Material m_material;
+            Material m_material;
             #endif
             MeshView m_mesh;
             TextureIndices m_textureIndices;
-            graphics::TechniqueType m_techniqueType;
+            TechniqueType m_techniqueType;
     };
     
     #ifdef NC_EDITOR_ENABLED

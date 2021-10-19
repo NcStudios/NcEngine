@@ -59,7 +59,7 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 
 /** Default assets from the nc/resources directory. */
 const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.nca"};
-const auto DefaultMaterial = nc::graphics::Material
+const auto DefaultMaterial = nc::Material
 {
     .baseColor = "nc/resources/texture/DefaultBaseColor.png",
     .normal = "nc/resources/texture/DefaultNormal.png",
@@ -101,7 +101,7 @@ class ExampleScene : public nc::Scene
 
             /** Add the box. */
             auto cubeHandle = registry->Add<nc::Entity>(nc::EntityInfo{.tag = "Box"});
-            registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::graphics::TechniqueType::PhongAndUi);
+            registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::TechniqueType::PhongAndUi);
 
             /** Add the movement controller to the cube. */
             registry->Add<Controller>(cubeHandle, registry);

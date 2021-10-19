@@ -182,7 +182,7 @@
 //         camera::SetMainCamera(camera);
 
 //         auto sun = registry->Add<Entity>({.scale = Vector3::Splat(2.0f), .tag = "Sun"});
-//         registry->Add<MeshRenderer>(sun, meshPaths[0], sunMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(sun, meshPaths[0], sunMaterial, TechniqueType::PhongAndUi);
 
 //         // Planet Orbits
 //         auto mercuryPivot = registry->Add<Entity>({.parent = sun, .tag = "Mercury Pivot"});
@@ -205,31 +205,31 @@
 //         registry->Add<ConstantRotation>(plutoPivot, registry, Vector3::Up(), PlutoOrbitSpeed);
 
 //         auto mercury = registry->Add<Entity>({.position = Vector3::Right() * MercuryDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), MercuryTilt), .scale = Vector3::Splat(MercurySize), .parent = mercuryPivot, .tag = "Mercury"});
-//         registry->Add<MeshRenderer>(mercury, meshPaths[0], mercuryMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(mercury, meshPaths[0], mercuryMaterial, TechniqueType::PhongAndUi);
 
 //         auto venus = registry->Add<Entity>({.position = Vector3::Right() * VenusDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), VenusTilt), .scale = Vector3::Splat(VenusSize), .parent = venusPivot, .tag = "Venus"});
-//         registry->Add<MeshRenderer>(venus, meshPaths[0], venusMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(venus, meshPaths[0], venusMaterial, TechniqueType::PhongAndUi);
 
 //         auto earth = registry->Add<Entity>({.position = Vector3::Right() * EarthDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), EarthTilt), .scale = Vector3::Splat(EarthSize), .parent = earthPivot, .tag = "Earth"});
-//         registry->Add<MeshRenderer>(earth, meshPaths[0], earthMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(earth, meshPaths[0], earthMaterial, TechniqueType::PhongAndUi);
 
 //         auto mars = registry->Add<Entity>({.position = Vector3::Right() * MarsDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), MarsTilt), .scale = Vector3::Splat(MarsSize), .parent = marsPivot, .tag = "Mars"});
-//         registry->Add<MeshRenderer>(mars, meshPaths[0], marsMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(mars, meshPaths[0], marsMaterial, TechniqueType::PhongAndUi);
 
 //         auto jupiter = registry->Add<Entity>({.position = Vector3::Right() * JupiterDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), JupiterTilt), .scale = Vector3::Splat(JupiterSize), .parent = jupiterPivot, .tag = "Jupiter"});
-//         registry->Add<MeshRenderer>(jupiter, meshPaths[0], jupiterMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(jupiter, meshPaths[0], jupiterMaterial, TechniqueType::PhongAndUi);
 
 //         auto saturn = registry->Add<Entity>({.position = Vector3::Right() * SaturnDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), SaturnTilt), .scale = Vector3::Splat(SaturnSize), .parent = saturnPivot, .tag = "Saturn"});
-//         registry->Add<MeshRenderer>(saturn, meshPaths[0], saturnMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(saturn, meshPaths[0], saturnMaterial, TechniqueType::PhongAndUi);
     
 //         auto uranus = registry->Add<Entity>({.position = Vector3::Right() * UranusDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), UranusTilt), .scale = Vector3::Splat(UranusSize), .parent = uranusPivot, .tag = "Uranus"});
-//         registry->Add<MeshRenderer>(uranus, meshPaths[0], uranusMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(uranus, meshPaths[0], uranusMaterial, TechniqueType::PhongAndUi);
 
 //         auto neptune = registry->Add<Entity>({.position = Vector3::Right() * NeptuneDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), NeptuneTilt), .scale = Vector3::Splat(NeptuneSize), .parent = neptunePivot, .tag = "Neptune"});
-//         registry->Add<MeshRenderer>(neptune, meshPaths[0], neptuneMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(neptune, meshPaths[0], neptuneMaterial, TechniqueType::PhongAndUi);
 
 //         auto pluto = registry->Add<Entity>({.position = Vector3::Right() * PlutoDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), PlutoTilt), .scale = Vector3::Splat(PlutoSize), .parent = plutoPivot, .tag = "Pluto"});
-//         registry->Add<MeshRenderer>(pluto, meshPaths[0], plutoMaterial, nc::graphics::TechniqueType::PhongAndUi);
+//         registry->Add<MeshRenderer>(pluto, meshPaths[0], plutoMaterial, TechniqueType::PhongAndUi);
         
 //         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 0.0f, 0.0f}, .tag = "Point Light 1"});
 //         registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector4{1.0f, 1.0f, 1.0f, 0.0f},

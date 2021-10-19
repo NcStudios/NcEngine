@@ -7,7 +7,7 @@
 
 namespace nc
 {
-    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, nc::graphics::Material material, nc::graphics::TechniqueType techniqueType)
+    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType)
     : ComponentBase{entity},
       #ifdef NC_EDITOR_ENABLED
       m_material{std::move(material)},

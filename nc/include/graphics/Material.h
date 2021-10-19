@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace nc::graphics
+namespace nc
 {
     struct Material
     {

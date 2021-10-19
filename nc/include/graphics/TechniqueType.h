@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace nc::graphics
+namespace nc
 {
     enum class TechniqueType : uint8_t
     {

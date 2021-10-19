@@ -4,7 +4,7 @@
 #include "ui/editor/Widgets.h"
 #endif
 
-namespace nc::graphics
+namespace nc
 {
     #ifdef NC_EDITOR_ENABLED
     void Material::EditorGuiElement()
