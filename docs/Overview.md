@@ -85,7 +85,7 @@ When removing a Component:
 
 ## Scenes
 ---------
-Scenes manage initialization of the game world. Scenes should derive from the abstract base scene::Scene and overload two functions:
+Scenes manage initialization of the game world. Scenes should derive from the abstract base Scene and overload two functions:
 
 ```cpp
 /** Scene.h */

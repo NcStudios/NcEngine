@@ -5,7 +5,7 @@
 
 namespace nc::sample
 {
-    class ClickEvents : public scene::Scene
+    class ClickEvents : public Scene
     {
         public:
             void Load(registry_type* registry) override;

@@ -5,7 +5,7 @@
 
 namespace nc::sample
 {
-    class Worms : public scene::Scene
+    class Worms : public Scene
     {
         public:
             void Load(registry_type* registry) override;

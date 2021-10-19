@@ -66,7 +66,7 @@ const auto DefaultMaterial = nc::graphics::Material
     .roughness = "nc/resources/texture/DefaultMetallic.png"
 };
 
-class ExampleScene : public nc::scene::Scene
+class ExampleScene : public nc::Scene
 {
     public:
         void Load(nc::registry_type* registry) override

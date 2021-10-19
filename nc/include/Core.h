@@ -3,6 +3,7 @@
 #include "platform/win32/HInstanceForwardDecl.h"
 #include "config/Config.h"
 #include "Scene.h"
+#include "Ecs.h"
 
 namespace nc
 {
@@ -19,7 +20,7 @@ namespace nc
             ~NcEngine() noexcept;
 
             /** Load initial scene and start game loop. */
-            void Start(std::unique_ptr<scene::Scene> initialScene);
+            void Start(std::unique_ptr<Scene> initialScene);
             
             /** Stop the game loop after the current frame has finished. Do not call
              *  if an exception is thrown from Start. */
@@ -27,6 +28,8 @@ namespace nc
 
             /** Destroy internal state. */
             void Shutdown() noexcept;
+
+            auto GetRegistry() noexcept -> registry_type*;
 
             /** For internal use. */
             auto GetImpl() noexcept -> Engine*;

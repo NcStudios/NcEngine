@@ -28,7 +28,7 @@ namespace nc
             Shutdown();
     }
 
-    void NcEngine::Start(std::unique_ptr<scene::Scene> initialScene)
+    void NcEngine::Start(std::unique_ptr<Scene> initialScene)
     {
         V_LOG("Starting engine");
         m_impl->MainLoop(std::move(initialScene));
@@ -45,6 +45,11 @@ namespace nc
             return;
 
         debug::internal::CloseLog();
+    }
+
+    auto NcEngine::GetRegistry() noexcept -> registry_type*
+    {
+        return m_impl->GetRegistry();
     }
 
     auto NcEngine::GetImpl() noexcept -> Engine*
@@ -107,7 +112,7 @@ namespace nc
         m_isRunning = false;
     }
 
-    void Engine::MainLoop(std::unique_ptr<scene::Scene> initialScene)
+    void Engine::MainLoop(std::unique_ptr<Scene> initialScene)
     {
         V_LOG("Starting engine loop");
         m_ecs.GetRegistry()->VerifyCallbacks();
@@ -148,6 +153,11 @@ namespace nc
     {
         V_LOG("Shutdown EngineImpl");
         ClearState();
+    }
+
+    auto Engine::GetRegistry() noexcept -> registry_type*
+    {
+        return m_ecs.GetRegistry();
     }
 
     void Engine::ClearState()

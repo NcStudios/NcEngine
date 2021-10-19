@@ -110,31 +110,31 @@ namespace nc::sample
         {
             auto buttonSize = ImVec2{ImGui::GetWindowWidth() - 20, 18};
             if(ImGui::Button("Worms", buttonSize))
-                scene::Change(std::make_unique<Worms>());
+                ChangeScene(std::make_unique<Worms>());
 
             if(ImGui::Button("Click Events", buttonSize))
-                scene::Change(std::make_unique<ClickEvents>());
+                ChangeScene(std::make_unique<ClickEvents>());
 
             if(ImGui::Button("Collision Events", buttonSize))
-                scene::Change(std::make_unique<CollisionEvents>());
+                ChangeScene(std::make_unique<CollisionEvents>());
 
             if(ImGui::Button("Joints Test", buttonSize))
-                scene::Change(std::make_unique<JointsTest>());
+                ChangeScene(std::make_unique<JointsTest>());
 
             if(ImGui::Button("Spawn Test", buttonSize))
-                scene::Change(std::make_unique<SpawnTest>());
+                ChangeScene(std::make_unique<SpawnTest>());
 
             if(ImGui::Button("Rendering Benchmark", buttonSize))
-                scene::Change(std::make_unique<RenderingBenchmark>());
+                ChangeScene(std::make_unique<RenderingBenchmark>());
                 
             if(ImGui::Button("Collision Benchmark", buttonSize))
-                scene::Change(std::make_unique<CollisionBenchmark>());
+                ChangeScene(std::make_unique<CollisionBenchmark>());
 
             if(ImGui::Button("Jare Scratch", buttonSize))
-                scene::Change(std::make_unique<VulkanScene>());
+                ChangeScene(std::make_unique<VulkanScene>());
 
             // if(ImGui::Button("Solar System", buttonSize))
-            //     scene::Change(std::make_unique<SolarSystem>());
+            //     ChangeScene(std::make_unique<SolarSystem>());
         } ImGui::EndChild();
     }
 

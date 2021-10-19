@@ -20,8 +20,9 @@ namespace nc
         public:
             Engine(HINSTANCE hInstance);
             void DisableRunningFlag();
-            void MainLoop(std::unique_ptr<scene::Scene> initialScene);
+            void MainLoop(std::unique_ptr<Scene> initialScene);
             void Shutdown();
+            auto GetRegistry() noexcept -> registry_type*;
 
         private:
             window::WindowImpl m_window;
@@ -30,7 +31,7 @@ namespace nc
             graphics::Renderer m_renderer;
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystem m_physics;
-            scene::SceneSystem m_sceneSystem;
+            SceneSystem m_sceneSystem;
             time::Time m_time;
             audio::AudioSystem m_audioSystem;
             ui::UIImpl m_ui;

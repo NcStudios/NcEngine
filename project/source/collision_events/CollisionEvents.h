@@ -5,7 +5,7 @@
 
 namespace nc::sample
 {
-    class CollisionEvents : public scene::Scene
+    class CollisionEvents : public Scene
     {
         public:
             void Load(registry_type* registry) override;

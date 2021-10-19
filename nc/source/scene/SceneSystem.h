@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace nc::scene
+namespace nc
 {
     class SceneSystem
     {

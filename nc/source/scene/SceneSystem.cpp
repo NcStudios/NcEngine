@@ -4,16 +4,16 @@
 
 namespace
 {
-    nc::scene::SceneSystem* g_instance = nullptr;
+    nc::SceneSystem* g_instance = nullptr;
 }
 
-namespace nc::scene
+namespace nc
 {
     /* Api Function Implementation */
-    void Change(std::unique_ptr<scene::Scene> scene)
+    void ChangeScene(std::unique_ptr<Scene> scene)
     {
         V_LOG("Changing scene");
-        IF_THROW(!g_instance, "scene::Change - No SceneSystem instance set");
+        IF_THROW(!g_instance, "ChangeScene - No SceneSystem instance set");
         g_instance->QueueSceneChange(std::move(scene));
     }
 
