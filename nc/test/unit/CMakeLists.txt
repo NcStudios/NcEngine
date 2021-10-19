@@ -151,9 +151,8 @@ add_test(Registry_unit_tests Registry_unit_tests)
 ### Transform Tests ###
 add_executable(Transform_unit_tests
     ${ROOT_DIR}/test/unit/Transform_unit_tests.cpp
-    #${ROOT_DIR}/source/component/Component.cpp
-    #${ROOT_DIR}/source/component/Transform.cpp
-    #${ROOT_DIR}/source/math/Quaternion.cpp
+    ${ROOT_DIR}/source/component/Transform.cpp
+    ${ROOT_DIR}/source/math/Quaternion.cpp
 )
 
 target_include_directories(Transform_unit_tests
