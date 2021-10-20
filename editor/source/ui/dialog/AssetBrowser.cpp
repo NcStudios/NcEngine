@@ -36,7 +36,7 @@ namespace nc::editor
 
             if(ImGui::Button("Add"))
             {
-                m_openFileBrowser([manifest = m_assetManifest, type](const std::filesystem::path& path){ return manifest->Add(path, type)});
+                m_openFileBrowser([manifest = m_assetManifest, type](const std::filesystem::path& path){ return manifest->Add(path, type); });
             }
 
             ImGui::SameLine();

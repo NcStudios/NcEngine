@@ -27,7 +27,7 @@ set(NC_INCLUDE_DIR ${ROOT_DIR}/../nc/include)
 set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
 
 set(LIB_DIR ${ROOT_DIR}/../nc/lib)
-set(ENGINE_LIB "libNcEngine-${CMAKE_BUILD_TYPE}.a")
+set(ENGINE_LIB "libNcEngine-${NC_BUILD_TYPE}.a")
 set(IMGUI_LIB "libimgui-${CMAKE_BUILD_TYPE}.a")
 set(ENET_LIB "libenet-${CMAKE_BUILD_TYPE}.a")
 
