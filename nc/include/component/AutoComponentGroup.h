@@ -5,6 +5,7 @@
 
 #include <concepts>
 #include <memory>
+#include <set>
 #include <vector>
 
 namespace nc
@@ -33,6 +34,7 @@ namespace nc
             T* Get() const noexcept; 
 
             auto GetAutoComponents() const noexcept -> std::vector<AutoComponent*>;
+            void CommitStagedComponents();
 
             void SendFrameUpdate(float dt);
             void SendFixedUpdate();
@@ -46,53 +48,51 @@ namespace nc
 
         private:
             std::vector<std::unique_ptr<AutoComponent>> m_components;
+            std::vector<std::unique_ptr<AutoComponent>> m_toAdd;
+            std::set<size_t> m_toRemove;
     };
 
     template<std::derived_from<AutoComponent> T, class ... Args>
     T* AutoComponentGroup::Add(Args&& ... args)
     {
-        IF_THROW(Contains<T>(), std::string{"Entity already has component of this type\n   "} + __PRETTY_FUNCTION__);
-        m_components.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
-        return dynamic_cast<T*>(m_components.back().get());
+        IF_THROW(Contains<T>(), "Entity already has component of this type");
+        auto newComponent = std::make_unique<T>(std::forward<Args>(args)...);
+        auto* out = newComponent.get();
+        m_toAdd.push_back(std::move(newComponent));
+        return out;
     }
 
     template<std::derived_from<AutoComponent> T>
     void AutoComponentGroup::Remove()
     {
-        const std::type_info &targetType(typeid(T));
-        for(std::vector<AutoComponent>::size_type i = 0; i < m_components.size(); ++i)
+        for(size_t i = 0; auto& component : m_components)
         {
-            if (typeid(*m_components.at(i)) == targetType)
+            if(dynamic_cast<T*>(component.get()))
             {
-                m_components.at(i) = std::move(m_components.back());
-                m_components.pop_back();
+                m_toRemove.insert(i);
                 return;
             }
+
+            ++i;
         }
 
-        throw std::runtime_error(std::string{"Component does not exist\n   "} + __PRETTY_FUNCTION__);
+        throw NcError("Component does not exist");
     }
 
     template<std::derived_from<AutoComponent> T>
     bool AutoComponentGroup::Contains() const noexcept
     {
-        const std::type_info &targetType(typeid(T));
-        for(auto& item : m_components)
-        {
-            if (typeid(*item) == targetType) 
-                return true;
-        }
-        return false;
+        return Get<T>() != nullptr;
     }
 
     template<std::derived_from<AutoComponent> T>
     T* AutoComponentGroup::Get() const noexcept
     {
-        const std::type_info &targetType(typeid(T));
         for(auto& item : m_components)
         {
-            if (typeid(*item) == targetType)
-                return dynamic_cast<T*>(item.get());
+            auto* ptr = dynamic_cast<T*>(item.get());
+            if(ptr)
+                return ptr;
         }
 
         return nullptr;

@@ -1,12 +1,10 @@
 #pragma once
 
-/** @note __PRETTY_FUNCTION__ is not portable and source_location does not produce
- *  a sufficiently unique name(in gcc at least). When the cross-platform reckoning
- *  comes, we'll have to do some fiddling here. */
+#include "platform/SourceLocation.h"
 
 #ifdef NC_EDITOR_ENABLED
     #define NC_PROFILE_BEGIN(filter); \
-        static const auto NC_FUNCTION_ID = nc::debug::profiler::Register(__PRETTY_FUNCTION__, filter); \
+        static const auto NC_FUNCTION_ID = nc::debug::profiler::Register(NC_SOURCE_FUNCTION, filter); \
         nc::debug::profiler::Push(NC_FUNCTION_ID);
     #define NC_PROFILE_END(); \
         nc::debug::profiler::Pop();
