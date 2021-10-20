@@ -25,12 +25,6 @@ namespace nc
         const auto& m = transform->GetTransformationMatrix();
         const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m);
         m_view = DirectX::XMMatrixLookAtRH(m.r[3], look, DirectX::g_XMNegIdentityR1);
-
-        // DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        // DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform->GetTransformationMatrix());
-        // //auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
-        // auto look_v = DirectX::XMVector3Rotate(DirectX::g_XMIdentityR2, rot_v);
-        // m_view = DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1);
     }
 
     void Camera::UpdateProjectionMatrix(float width, float height, float nearZ, float farZ)

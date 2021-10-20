@@ -1,7 +1,7 @@
 #include "SceneSystemImpl.h"
 #include "debug/Utils.h"
 
-namespace nc
+namespace nc::scene
 {
     SceneSystemImpl::SceneSystemImpl()
         : m_activeScene{ nullptr },

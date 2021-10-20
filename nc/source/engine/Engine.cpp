@@ -152,7 +152,6 @@ namespace nc
         m_physicsSystem.ClearState();
         m_audioSystem.Clear();
         m_mainCamera.Set(nullptr);
-        //camera::ClearMainCamera();
         m_time.ResetFrameDeltaTime();
         m_time.ResetAccumulatedTime();
         // SceneSystem state is never cleared
@@ -179,12 +178,11 @@ namespace nc
     void Engine::FrameRender()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        auto* registry = m_ecs.GetRegistry();
-        //auto* mainCamera = GetMainCamera();
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
         m_currentImageIndex = m_graphics.FrameBegin();
         m_uiSystem.FrameBegin();
+        auto* registry = m_ecs.GetRegistry();
 
         #ifdef NC_EDITOR_ENABLED
         m_uiSystem.Frame(&m_frameDeltaTimeFactor, registry);

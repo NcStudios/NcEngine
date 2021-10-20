@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Entity.h"
-#include "SystemBase.h"
+#include "utility/SystemBase.h"
 
 namespace nc
 {

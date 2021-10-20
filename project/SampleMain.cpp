@@ -12,7 +12,6 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     try
     {
         engine = nc::InitializeNcEngine(instance, "project/config.ini");
-        //engine = std::make_unique<nc::NcEngine>(instance, "project/config.ini");
         engine->Start(std::make_unique<nc::sample::Worms>());
     }
     catch(std::exception& e)

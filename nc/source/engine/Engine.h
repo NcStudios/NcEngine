@@ -1,7 +1,6 @@
 #pragma once
 
 #include "NcEngine.h"
-#include "assets/AssetService.h"
 #include "assets/AssetServices.h"
 #include "audio/AudioSystemImpl.h"
 #include "camera/MainCameraImpl.h"
@@ -42,7 +41,7 @@ namespace nc
             graphics::Renderer m_renderer;
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystemImpl m_physicsSystem;
-            SceneSystemImpl m_sceneSystem;
+            scene::SceneSystemImpl m_sceneSystem;
             time::Time m_time;
             audio::AudioSystemImpl m_audioSystem;
             ui::UISystemImpl m_uiSystem;

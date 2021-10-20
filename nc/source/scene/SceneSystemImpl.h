@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace nc
+namespace nc::scene
 {
     class SceneSystemImpl final : public SceneSystem
     {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Ecs.h"
-#include "SystemBase.h"
+#include "utility/SystemBase.h"
 #include "physics/IClickable.h"
 
 namespace nc
