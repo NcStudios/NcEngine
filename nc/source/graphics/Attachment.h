@@ -5,7 +5,7 @@
 
 namespace nc::graphics
 {
-    struct Attachment
+    struct AttachmentSlot
     {
         vk::AttachmentDescription description;
         vk::UniqueImageView imageView;

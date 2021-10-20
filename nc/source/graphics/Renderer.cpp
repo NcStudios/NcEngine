@@ -12,6 +12,7 @@
 #include "PerFrameRenderState.h"
 #include "assets/AssetServices.h"
 #include "resources/ShaderResourceServices.h"
+#include "resources/RenderPassManager.h"
 
 #include <span>
 
@@ -20,57 +21,70 @@ namespace nc::graphics
     Renderer::Renderer(Graphics* graphics, 
                        AssetServices* assets, 
                        ShaderResourceServices* shaderResources,
+                       RenderPassManager* renderPasses,
                        Vector2 dimensions)
         : m_graphics{graphics},
           m_assets{assets},
           m_shaderResources{shaderResources},
+          m_renderPasses{renderPasses},
           m_dimensions{dimensions},
-          m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
-          m_shadowMappingPass{},
-          m_phongAndUiTechnique{nullptr}
+          m_phongAndUiTechnique{std::make_unique<PhongAndUiTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get())},
+          m_shadowMappingTechnique{std::make_unique<ShadowMappingTechnique>(m_graphics, &m_renderPasses->Acquire("Shadow Mapping Pass").renderpass.get())}
           #ifdef NC_EDITOR_ENABLED
           ,
-          m_wireframeTechnique{nullptr}
+          m_wireframeTechnique{std::make_unique<WireframeTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get())}
           #endif
-          //m_particleTechnique{nullptr}
     {
-        InitializeShadowMappingRenderPass();
+        RegisterTechniques();
     }
 
     Renderer::~Renderer() noexcept
     {
-        m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
     }
 
-    void Renderer::InitializeTechniques()
+    /** @todo Tie techniques to renderPasses via some fancy way here. This is currently a misnomer placeholder for the last part of the system (in progress), and should be parameterized. */
+    void Renderer::RegisterTechniques()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        
-        //@todo: these don't belong here.  
-        if (m_phongAndUiTechnique == nullptr)
+        auto* swapchain = m_graphics->GetSwapchainPtr();
+
+        /** Shadow mapping pass */
         {
-            m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
+            m_shadowMappingTechnique.reset();
+            m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(m_graphics, &m_renderPasses->Acquire("Shadow Mapping Pass").renderpass.get());
+
+            const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
+            m_renderPasses->RegisterAttachment(shadowDepthImageView, "Shadow Mapping Pass");
         }
 
-        #ifdef NC_EDITOR_ENABLED
-        if (m_wireframeTechnique == nullptr)
+        /** Lit shading pass */
         {
-            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
-        }
-        #endif
+            m_phongAndUiTechnique.reset();
+            m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get());
 
-        if (m_shadowMappingTechnique == nullptr)
-        {
-            m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(m_graphics, &m_shadowMappingPass.renderPass.get());
+            #ifdef NC_EDITOR_ENABLED
+            m_wireframeTechnique.reset();
+            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get());
+            #endif
+
+            auto& colorImageViews = swapchain->GetColorImageViews();
+            auto& depthImageView = m_graphics->GetDepthStencil().GetImageView();
+
+            uint32_t index = 0;
+            for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, "Lit Pass", index++); }
         }
+
+        /** ImGui (Implicit, doesn't follow other rules) */
+        {
+            ImGui::CreateContext();
+            m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire("Lit Pass").renderpass.get());
+        }
+
     }
 
     void Renderer::Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
-        InitializeTechniques();
-        
         auto swapchain = m_graphics->GetSwapchainPtr();
         swapchain->WaitForFrameFence();
         auto& commandBuffers = *commands->GetCommandBuffers();
@@ -79,17 +93,23 @@ namespace nc::graphics
 
         // Shadow mapping pass
         {
-            BeginRenderPass(cmd, &m_shadowMappingPass.renderPass.get(), m_shadowMappingPass.frameBuffer.get(), swapchain->GetExtent(), ClearValue::Depth);
+            m_renderPasses->Begin("Shadow Mapping Pass", cmd, 0);
+
+            SetViewportAndScissor(cmd, m_dimensions);
+            BindSharedData(cmd);
 
             m_shadowMappingTechnique->Bind(cmd);
             m_shadowMappingTechnique->Record(cmd, state.pointLightVPs, state.meshes);
 
-            cmd->endRenderPass();
+            m_renderPasses->End(cmd);
         }
 
         // Lit shading pass
         {
-            BeginRenderPass(cmd, &m_mainRenderPass, swapchain->GetFrameBuffer(currentSwapChainImageIndex), swapchain->GetExtent(), ClearValue::DepthAndColor);
+            m_renderPasses->Begin("Lit Pass", cmd, currentSwapChainImageIndex);
+
+            SetViewportAndScissor(cmd, m_dimensions);
+            BindSharedData(cmd);
 
             #ifdef NC_EDITOR_ENABLED
             if (m_wireframeTechnique->HasDebugWidget())
@@ -114,8 +134,7 @@ namespace nc::graphics
             }
             #endif
 
-            // End recording commands to each command buffer.
-            cmd->endRenderPass();
+            m_renderPasses->End(cmd);
         }
 
         cmd->end();
@@ -128,64 +147,6 @@ namespace nc::graphics
         cmd->bindVertexBuffers(0, 1, m_assets->meshManager.GetVertexBuffer(), offsets);
         cmd->bindIndexBuffer(*(m_assets->meshManager.GetIndexBuffer()), 0, vk::IndexType::eUint32);
     }
-
-    void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, vk::RenderPass* renderPass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, ClearValue clearValue)
-    {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
-        auto clearValues = CreateClearValues(clearValue, m_graphics->GetClearColor());
-        auto renderPassInfo = CreateRenderPassBeginInfo(*renderPass, 
-                                                        framebuffer, 
-                                                        extent, 
-                                                        clearValues);
-
-        cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-        SetViewportAndScissor(cmd, m_dimensions);
-
-        BindSharedData(cmd);
-
-        NC_PROFILE_END();
-    }
-
-    void Renderer::InitializeShadowMappingRenderPass()
-    {
-        std::array<Attachment, 1> attachmentSlots
-        {
-            CreateAttachmentSlot(0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore)
-        };
-
-        std::array<Subpass, 1> subpasses
-        {
-            CreateSubpass(attachmentSlots.at(0))
-        };
-
-        m_shadowMappingPass.renderPass = CreateRenderpass(m_graphics->GetBasePtr(), attachmentSlots, subpasses);
-
-        auto device = m_graphics->GetBasePtr()->GetDevice();
-
-        // Create frame buffer
-        std::array<vk::ImageView, 1> attachments;
-        attachments[0] = m_shaderResources->GetShadowMapManager().GetImageView(); // Depth Stencil image view
-
-        vk::FramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.setRenderPass(m_shadowMappingPass.renderPass.get());
-        framebufferInfo.setAttachmentCount(attachments.size());
-        framebufferInfo.setPAttachments(attachments.data());
-        framebufferInfo.setWidth(m_dimensions.x);
-        framebufferInfo.setHeight(m_dimensions.y);
-        framebufferInfo.setLayers(1);
-
-        m_shadowMappingPass.frameBuffer = device.createFramebufferUnique(framebufferInfo);
-    }
-
-    // void Renderer::RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates)
-    // {
-    //     if (!m_particleTechnique)
-    //     {
-    //         m_particleTechnique = std::make_unique<ParticleTechnique>(m_graphics, &m_mainRenderPass);
-    //     }
-    //     m_particleTechnique->RegisterEmitters(m_emitterStates);
-    // }
 
     #ifdef NC_EDITOR_ENABLED
     void Renderer::RegisterDebugWidget(nc::DebugWidget widget)
@@ -208,14 +169,6 @@ namespace nc::graphics
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
         NC_PROFILE_END();
     }
-
-    // void Renderer::ClearParticleEmitters()
-    // {
-    //     if (m_particleTechnique)
-    //     {
-    //         m_particleTechnique->Clear();
-    //     }
-    // }
 
     void Renderer::Clear() noexcept
     {

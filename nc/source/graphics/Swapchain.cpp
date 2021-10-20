@@ -5,16 +5,13 @@
 
 namespace nc::graphics
 {
-    Swapchain::Swapchain(Base* base, const DepthStencil& depthStencil, Vector2 dimensions)
+    Swapchain::Swapchain(Base* base, Vector2 dimensions)
         : m_base{ base },
-          m_depthStencil{ depthStencil },
           m_swapChain{},
           m_swapChainImages{},
           m_swapChainImageFormat{},
           m_swapChainExtent{},
           m_swapChainImageViews{},
-          m_framebuffers{},
-          m_defaultPass{},
           m_imagesInFlightFences{},
           m_framesInFlightFences{},
           m_imageAvailableSemaphores{},
@@ -23,7 +20,6 @@ namespace nc::graphics
     {
         Create(dimensions);
         CreateSynchronizationObjects();
-        CreateFrameBuffers();
     }
     
     Swapchain::~Swapchain() noexcept
@@ -47,7 +43,6 @@ namespace nc::graphics
     void Swapchain::Cleanup() noexcept
     {
         auto device = m_base->GetDevice();
-        DestroyFrameBuffers();
 
         for (auto& imageView : m_swapChainImageViews)
         {
@@ -55,45 +50,6 @@ namespace nc::graphics
         }
 
        device.destroySwapchainKHR(m_swapChain);
-    }
-
-    void Swapchain::CreateFrameBuffers()
-    {
-        std::array<Attachment, 2> attachmentSlots
-        {
-            CreateAttachmentSlot(0, AttachmentType::Color, GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
-            CreateAttachmentSlot(1, AttachmentType::Depth, m_base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare)
-        };
-
-        std::array<Subpass, 1> subpasses
-        {
-            CreateSubpass(attachmentSlots.at(1), attachmentSlots.at(0))
-        };
-
-        m_defaultPass = CreateRenderpass(m_base, attachmentSlots, subpasses);
-
-        auto swapChainDimensions = GetExtentDimensions();
-        auto swapChainImageViewsCount = m_swapChainImageViews.size();
-        m_framebuffers.reserve(swapChainImageViewsCount);
-
-        for (size_t i = 0; i < swapChainImageViewsCount; i++)
-        {
-            std::array<vk::ImageView, 2> attachments
-            {
-                m_swapChainImageViews.at(i),
-                m_depthStencil.GetImageView()
-            };
-
-            vk::FramebufferCreateInfo framebufferInfo{};
-            framebufferInfo.setRenderPass(m_defaultPass.get());
-            framebufferInfo.setAttachmentCount(attachments.size());
-            framebufferInfo.setPAttachments(attachments.data());
-            framebufferInfo.setWidth(swapChainDimensions.x);
-            framebufferInfo.setHeight(swapChainDimensions.y);
-            framebufferInfo.setLayers(1);
-
-            m_framebuffers.emplace_back(std::move(m_base->GetDevice().createFramebuffer(framebufferInfo)));
-        }
     }
 
     // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
@@ -171,16 +127,6 @@ namespace nc::graphics
     void Swapchain::SyncImageAndFrameFence(uint32_t imageIndex)
     {
         m_imagesInFlightFences[imageIndex] = m_framesInFlightFences[m_currentFrameIndex];
-    }
-
-    vk::Framebuffer& Swapchain::GetFrameBuffer(uint32_t index)
-    {
-        return m_framebuffers.at(index);
-    }
-
-    const vk::RenderPass& Swapchain::GetPassDefinition()
-    {
-        return m_defaultPass.get();
     }
 
     const vk::Format& Swapchain::GetFormat() const noexcept
@@ -320,15 +266,6 @@ namespace nc::graphics
         }
     }
 
-    void Swapchain::DestroyFrameBuffers() noexcept
-    {
-        auto device = m_base->GetDevice();
-        for (auto& frameBuffer : m_framebuffers)
-        {
-            device.destroyFramebuffer(frameBuffer);
-        }
-    }
-
     void Swapchain::WaitForFrameFence() const
     {
         if (m_base->GetDevice().waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
@@ -357,7 +294,7 @@ namespace nc::graphics
         return m_swapChainExtent;
     }
 
-    const std::vector<vk::ImageView>& Swapchain::GetImageViews() const noexcept
+    const std::vector<vk::ImageView>& Swapchain::GetColorImageViews() const noexcept
     {
         return m_swapChainImageViews;
     }

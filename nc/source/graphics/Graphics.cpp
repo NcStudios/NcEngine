@@ -9,6 +9,7 @@
 #include "Swapchain.h"
 #include "Renderer.h"
 #include "resources/ShaderResourceServices.h"
+#include "resources/RenderPassManager.h"
 #include "config/Config.h"
 
 namespace
@@ -21,10 +22,11 @@ namespace nc::graphics
     Graphics::Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions, AssetServices* assets)
         : m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
-          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
-          m_renderer{ std::make_unique<Renderer>(this, assets, m_shaderResources.get(), dimensions) },
+          m_renderPasses{std::make_unique<RenderPassManager>(this, dimensions)},
+          m_renderer{ std::make_unique<Renderer>(this, assets, m_shaderResources.get(), m_renderPasses.get(), dimensions) },
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
@@ -58,13 +60,19 @@ namespace nc::graphics
         m_swapchain.reset();
         m_depthStencil.reset();
 
-        /** @todo ResourceManager::ResizeShadowMap(dimensions); */
-        m_renderer->InitializeShadowMappingRenderPass();
-
         // Recreate swapchain and resources
         m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
-        m_swapchain = std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_base.get(), dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
+
+        auto shadowMap = ShadowMap
+        {
+            .dimensions = dimensions
+        };
+
+        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
+        m_renderer->RegisterTechniques();
+        m_renderPasses->Resize(dimensions);
     }
 
     void Graphics::ToggleFullscreen()
@@ -135,6 +143,11 @@ namespace nc::graphics
         return true;
     }
     
+    const DepthStencil& Graphics::GetDepthStencil() const noexcept
+    {
+        return *(m_depthStencil.get());
+    }
+
     void Graphics::Clear()
     {
         WaitIdle();

@@ -56,7 +56,7 @@ namespace nc::graphics
             *ShaderResourceService<Texture>::Get()->GetDescriptorSetLayout(),
             *ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSetLayout(),
             *ShaderResourceService<ObjectData>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<Tag>::Get()->GetDescriptorSetLayout()
+            *ShaderResourceService<ShadowMap>::Get()->GetDescriptorSetLayout()
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
@@ -107,7 +107,7 @@ namespace nc::graphics
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ShaderResourceService<Texture>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 2, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 3, 1, ShaderResourceService<Tag>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 3, 1, ShaderResourceService<ShadowMap>::Get()->GetDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 

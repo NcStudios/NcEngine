@@ -9,19 +9,19 @@ namespace nc::graphics
 {
     class Graphics;
 
-    class Tag
+    struct ShadowMap
     {
-        std::string tag;
+        Vector2 dimensions;
     };
 
-    class ShadowMapManager : public IShaderResourceService<Tag>
+    class ShadowMapManager : public IShaderResourceService<ShadowMap>
     {
         public:
             ShadowMapManager(Graphics* graphics, Vector2 dimensions);
             ~ShadowMapManager() noexcept;
 
             void Initialize() override;
-            void Update(const std::vector<Tag>& data) override;
+            void Update(const std::vector<ShadowMap>& data) override;
             auto GetDescriptorSet() -> vk::DescriptorSet* override;
             auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* override;
             void Reset() override;

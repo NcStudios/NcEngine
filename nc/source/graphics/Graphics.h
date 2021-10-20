@@ -14,6 +14,7 @@ namespace nc::graphics
     class Swapchain;
     class DepthStencil;
     class Renderer;
+    class RenderPassManager;
     struct ShaderResourceServices;
 
     class Graphics
@@ -39,6 +40,7 @@ namespace nc::graphics
             Commands* GetCommandsPtr() const noexcept;
             Renderer* GetRendererPtr() const noexcept;
             const Vector2 GetDimensions() const noexcept;
+            const DepthStencil& GetDepthStencil() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 
             // Blocks the current thread until all operations in the command queues on the device are completed. 
@@ -65,6 +67,7 @@ namespace nc::graphics
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
+            std::unique_ptr<RenderPassManager> m_renderPasses;
             std::unique_ptr<Renderer> m_renderer;
 
             uint32_t m_imageIndex;

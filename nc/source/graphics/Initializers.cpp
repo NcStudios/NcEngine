@@ -78,16 +78,16 @@ namespace nc::graphics
         return attachmentReference;
     }
 
-    Attachment CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
+    AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
     {
-        Attachment attachment{};
-        attachment.reference = CreateAttachmentReference(type, attachmentIndex);
-        attachment.description = CreateAttachmentDescription(type, format, loadOp, storeOp);
-        attachment.type = type;
-        return attachment;
+        AttachmentSlot AttachmentSlot{};
+        AttachmentSlot.reference = CreateAttachmentReference(type, attachmentIndex);
+        AttachmentSlot.description = CreateAttachmentDescription(type, format, loadOp, storeOp);
+        AttachmentSlot.type = type;
+        return AttachmentSlot;
     }
 
-    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment, const Attachment& colorAttachment)
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment)
     {
         vk::SubpassDescription subpassDescription{};
         subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
@@ -101,7 +101,7 @@ namespace nc::graphics
         return subpassDescription;
     }
 
-    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment)
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment)
     {
         vk::SubpassDescription subpassDescription{};
         subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
@@ -131,7 +131,7 @@ namespace nc::graphics
         return subpassDependency;      
     }
 
-    Subpass CreateSubpass(const Attachment& depthAttachment)
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment)
     {
         Subpass subpass{};
         subpass.description = CreateSubpassDescription(depthAttachment);
@@ -156,7 +156,7 @@ namespace nc::graphics
         return subpass;
     }
 
-    Subpass CreateSubpass(const Attachment& depthAttachment, const Attachment& colorAttachment)
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment)
     {
         Subpass subpass{};
         subpass.description = CreateSubpassDescription(depthAttachment, colorAttachment);
@@ -380,13 +380,13 @@ namespace nc::graphics
         return renderPassInfo;
     }
 
-    vk::UniqueRenderPass CreateRenderpass(Base* base, std::span<const Attachment> attachments, std::span<const Subpass> subpasses)
+    vk::UniqueRenderPass CreateRenderPass(Base* base, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses)
     {
         std::vector<vk::AttachmentDescription> attachmentDescriptions{};
-        attachmentDescriptions.reserve(attachments.size());
-        std::transform(attachments.begin(), attachments.end(), std::back_inserter(attachmentDescriptions), [](const auto& attachment)
+        attachmentDescriptions.reserve(attachmentSlots.size());
+        std::transform(attachmentSlots.begin(), attachmentSlots.end(), std::back_inserter(attachmentDescriptions), [](const auto& attachmentSlot)
         {
-            return attachment.description;
+            return attachmentSlot.description;
         });
 
         std::vector<vk::SubpassDescription> subpassDescriptions{};

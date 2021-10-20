@@ -38,9 +38,27 @@ namespace nc::graphics
     {
     }
 
-    void ShadowMapManager::Update(const std::vector<Tag>& data)
+    void ShadowMapManager::Update(const std::vector<ShadowMap>& data)
     {
-        (void)data;
+        m_dimensions = data.at(0).dimensions;
+        auto* base = m_graphics->GetBasePtr();
+        m_depthStencil = std::make_unique<DepthStencil>(base, m_dimensions, vk::Format::eD16Unorm);
+        
+        vk::DescriptorImageInfo imageSamplerInfo;
+        imageSamplerInfo.setSampler(m_sampler.get());
+        imageSamplerInfo.setImageView(m_depthStencil->GetImageView());
+        imageSamplerInfo.setImageLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+
+        vk::WriteDescriptorSet write{};
+        write.setDstBinding(0);
+        write.setDstArrayElement(0);
+        write.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+        write.setDescriptorCount(1);
+        write.setDstSet(m_descriptorSet.get());
+        write.setPBufferInfo(0);
+        write.setPImageInfo(&imageSamplerInfo);
+ 
+        base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
     }
 
     void ShadowMapManager::Initialize()

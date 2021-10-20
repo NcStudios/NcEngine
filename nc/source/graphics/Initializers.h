@@ -34,7 +34,7 @@ namespace nc::graphics
         DepthAndColor = 2
     };
 
-    struct Attachment
+    struct AttachmentSlot
     {
         vk::AttachmentDescription description;
         vk::AttachmentReference reference;
@@ -47,21 +47,36 @@ namespace nc::graphics
         std::vector<vk::SubpassDependency> dependencies;
     };
 
+    struct RenderTargetSize
+    {
+        Vector2 dimensions;
+        vk::Extent2D extent;
+    };
+
+    struct RenderPass
+    {
+        std::string uid;
+        RenderTargetSize renderTargetSize;
+        vk::UniqueRenderPass renderpass;
+        ClearValue valuesToClear;
+    };
+
+
     // Resources
     vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode);
 
     // Attachments
     vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
     vk::AttachmentReference CreateAttachmentReference(AttachmentType type, uint32_t attachmentIndex);
-    Attachment CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
+    AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
 
     // Subpasses
-    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment);
-    vk::SubpassDescription CreateSubpassDescription(const Attachment& depthAttachment, const Attachment& colorAttachment);
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment);
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment);
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask);
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags);
-    Subpass CreateSubpass(const Attachment& depthAttachment);
-    Subpass CreateSubpass(const Attachment& depthAttachment, const Attachment& colorAttachment);
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment);
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment);
     
     //Pipelines
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
@@ -82,7 +97,7 @@ namespace nc::graphics
 
     // Render passes
     vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues);
-    vk::UniqueRenderPass CreateRenderpass(Base* base, std::span<const Attachment> attachments, std::span<const Subpass> subpasses);
+    vk::UniqueRenderPass CreateRenderPass(Base* base, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses);
 
     // Screen size
     vk::Viewport CreateViewport(const Vector2& dimensions);
