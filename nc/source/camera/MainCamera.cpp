@@ -10,7 +10,7 @@ namespace
     DirectX::XMMATRIX g_projectionMatrix;
 }
 
-namespace nc::camera
+namespace nc
 {
     /** Api Functions */
     void SetMainCamera(Camera* camera)
@@ -21,10 +21,13 @@ namespace nc::camera
 
     Transform* GetMainCameraTransform()
     {
-        IF_THROW(!g_mainCamera.Valid(), "camera::GetMainCameraTransform - No camera is set");
+        IF_THROW(!g_mainCamera.Valid(), "GetMainCameraTransform - No camera is set");
         return ActiveRegistry()->Get<Transform>(g_mainCamera);
     }
+}
 
+namespace nc::camera
+{
     /** Internal Functions */
     void ClearMainCamera()
     {

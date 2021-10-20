@@ -1,7 +1,5 @@
 #include "Prefabs.h"
 #include "Assets.h"
-#include "graphics/Material.h"
-#include "graphics/TechniqueType.h"
 
 namespace nc::sample::prefab
 {

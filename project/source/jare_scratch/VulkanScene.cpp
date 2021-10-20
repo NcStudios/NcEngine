@@ -65,7 +65,7 @@ namespace nc::sample
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
-        camera::SetMainCamera(camera);
+        SetMainCamera(camera);
     }
 
     void VulkanScene::Unload()

@@ -27,14 +27,17 @@ namespace
     }
 }
 
-namespace nc::audio
+namespace nc
 {
-    void RegisterListener(Entity entity)
+    void RegisterAudioListener(Entity entity)
     {
         IF_THROW(!g_audioSystem, "RegisterAudioListener - AudioSystem is not set");
         g_audioSystem->RegisterListener(entity);
     }
+}
 
+namespace nc::audio
+{
     AudioSystem::AudioSystem(registry_type* registry)
         : m_registry{registry},
           m_rtAudio{},

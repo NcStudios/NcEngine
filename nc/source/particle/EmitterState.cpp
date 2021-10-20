@@ -74,7 +74,7 @@ namespace nc::particle
         const auto velOverTimeFactor = m_info.kinematic.velocityOverTimeFactor * dt;
         const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
         const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
-        auto* camera = camera::GetMainCameraTransform();
+        auto* camera = GetMainCameraTransform();
         auto camRotation = camera->GetRotation();
         auto camForward = camera->Forward();
         auto [index, particles, matrices] = m_soa.View<ParticlesIndex, MvpMatricesIndex>();

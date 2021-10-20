@@ -23,7 +23,7 @@ namespace nc::graphics
     PerFrameRenderState::PerFrameRenderState(registry_type* registry, bool isPointLightSystemDirty)
         : viewMatrix{camera::GetViewMatrix()},
           projectionMatrix{camera::GetProjectionMatrix()},
-          cameraPosition{camera::GetMainCameraTransform()->GetPosition()},
+          cameraPosition{GetMainCameraTransform()->GetPosition()},
           objectData{},
           pointLightInfos{},
           isPointLightBindRequired{isPointLightSystemDirty}

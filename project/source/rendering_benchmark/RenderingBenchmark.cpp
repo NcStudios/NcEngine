@@ -50,7 +50,7 @@ namespace nc::sample
 
         // Camera
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        nc::camera::SetMainCamera(camera);
+        SetMainCamera(camera);
 
         // Spawner
         SpawnBehavior spawnBehavior

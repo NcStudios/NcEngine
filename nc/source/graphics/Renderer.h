@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics\TechniqueType.h"
 #include "graphics\techniques\PhongAndUiTechnique.h"
 #include "graphics\techniques\WireframeTechnique.h"
 // #include "graphics\techniques\ParticleTechnique.h"

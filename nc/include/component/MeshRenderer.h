@@ -2,11 +2,26 @@
 
 #include "component/Component.h"
 #include "Assets.h"
-#include "graphics/Material.h"
-#include "graphics/TechniqueType.h"
 
 namespace nc
 {
+    struct Material
+    {
+        std::string baseColor;
+        std::string normal;
+        std::string roughness;
+
+        #ifdef NC_EDITOR_ENABLED
+        void EditorGuiElement();
+        #endif
+    };
+
+    enum class TechniqueType : uint8_t
+    {
+        None = 0,
+        PhongAndUi = 1,
+    };
+
     struct TextureIndices
     {
         TextureView baseColor;

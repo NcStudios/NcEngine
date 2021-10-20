@@ -43,6 +43,6 @@ namespace nc::sample
             translation = Vector3::Zero();
         m_lastFrameTranslation = translation;
         translation = translation * dt;
-        camera::GetMainCameraTransform()->Translate(translation);
+        GetMainCameraTransform()->Translate(translation);
     }
 }

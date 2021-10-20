@@ -16,8 +16,8 @@ namespace nc::sample
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
-        camera::SetMainCamera(camera);
-        audio::RegisterListener(cameraHandle);
+        SetMainCamera(camera);
+        RegisterAudioListener(cameraHandle);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});

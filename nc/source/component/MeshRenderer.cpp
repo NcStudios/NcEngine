@@ -33,5 +33,18 @@ namespace nc
         ImGui::Text("Mesh Renderer");
         meshRenderer->GetMaterial().EditorGuiElement();
     }
+
+    void Material::EditorGuiElement()
+    {
+        ImGui::SameLine();
+        ImGui::Text("Material");
+        ImGui::Spacing();
+        ImGui::Text("Base Color:");
+        ImGui::Text(baseColor.c_str());
+        ImGui::Text("Normal:");
+        ImGui::Text(normal.c_str());
+        ImGui::Text("Roughness:");
+        ImGui::Text(roughness.c_str());
+    }
     #endif
 }

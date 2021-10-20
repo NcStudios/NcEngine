@@ -58,7 +58,7 @@ namespace nc::sample
 
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
-        camera::SetMainCamera(camera);
+        SetMainCamera(camera);
         auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll);
         LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
