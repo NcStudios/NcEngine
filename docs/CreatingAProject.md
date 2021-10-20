@@ -179,7 +179,7 @@ target_include_directories(${ExampleGame}
 
 target_link_libraries(${ExampleGame}
     PRIVATE
-        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libNcEngine-Release.a
+        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libNcEngine-ReleaseWithEditor.a
         ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libimgui-Release.a
         ${RTAUDIO_LINK_FLAGS}
         Vulkan::Vulkan
