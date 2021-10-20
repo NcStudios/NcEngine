@@ -1,5 +1,4 @@
-#include "PhysicsSystem.h"
-#include "Physics.h"
+#include "PhysicsSystemImpl.h"
 #include "PhysicsConstants.h"
 #include "collision/CollisionPhases.h"
 #include "collision/CollisionNotification.h"
@@ -8,29 +7,9 @@
 #include "dynamics/Solver.h"
 #include "debug/Profiler.h"
 
-namespace
-{
-    nc::physics::PhysicsSystem* g_physicsSystem = nullptr;
-}
-
 namespace nc::physics
 {
-    void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness)
-    {
-        g_physicsSystem->AddJoint(entityA, entityB, anchorA, anchorB, bias, softness);
-    }
-
-    void RemoveJoint(Entity entityA, Entity entityB)
-    {
-        g_physicsSystem->RemoveJoint(entityA, entityB);
-    }
-
-    void RemoveAllJoints(Entity entity)
-    {
-        g_physicsSystem->RemoveAllJoints(entity);
-    }
-
-    PhysicsSystem::PhysicsSystem(registry_type* registry, graphics::Graphics* graphics)
+    PhysicsSystemImpl::PhysicsSystemImpl(registry_type* registry, graphics::Graphics* graphics)
         : m_cache{},
           m_joints{},
           m_bspTree{registry},
@@ -40,12 +19,11 @@ namespace nc::physics
           , m_debugRenderer{graphics}
           #endif
     {
-        g_physicsSystem = this;
         m_cache.fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         BuildTaskGraph(registry);
     }
 
-    void PhysicsSystem::AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness)
+    void PhysicsSystemImpl::AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness)
     {
         m_joints.emplace_back
         (
@@ -65,7 +43,7 @@ namespace nc::physics
         );
     }
 
-    void PhysicsSystem::RemoveJoint(Entity entityA, Entity entityB)
+    void PhysicsSystemImpl::RemoveJoint(Entity entityA, Entity entityB)
     {
         for(auto& joint : m_joints)
         {
@@ -78,7 +56,7 @@ namespace nc::physics
         }
     }
 
-    void PhysicsSystem::RemoveAllJoints(Entity entity)
+    void PhysicsSystemImpl::RemoveAllJoints(Entity entity)
     {
         auto beg = m_joints.rbegin();
         auto end = m_joints.rend();
@@ -92,14 +70,29 @@ namespace nc::physics
         }
     }
 
+    void PhysicsSystemImpl::RegisterClickable(IClickable* clickable)
+    {
+        m_clickableSystem.RegisterClickable(clickable);
+    }
+    
+    void PhysicsSystemImpl::UnregisterClickable(IClickable* clickable) noexcept
+    {
+        m_clickableSystem.UnregisterClickable(clickable);
+    }
+
+    auto PhysicsSystemImpl::RaycastToClickables(LayerMask mask) -> IClickable*
+    {
+        return m_clickableSystem.RaycastToClickables(mask);
+    }
+
     #ifdef NC_DEBUG_RENDERING
-    void PhysicsSystem::DebugRender()
+    void PhysicsSystemImpl::DebugRender()
     {
         m_debugRenderer.Render();
     }
     #endif
 
-    void PhysicsSystem::ClearState()
+    void PhysicsSystemImpl::ClearState()
     {
         m_joints.clear();
         m_bspTree.Clear();
@@ -109,7 +102,7 @@ namespace nc::physics
         m_cache.manifolds.clear();
     }
 
-    void PhysicsSystem::BuildTaskGraph(registry_type* registry)
+    void PhysicsSystemImpl::BuildTaskGraph(registry_type* registry)
     {
         auto& cache = m_cache;
 
@@ -270,7 +263,7 @@ namespace nc::physics
         #endif
     }
 
-    void PhysicsSystem::DoPhysicsStep(tf::Executor& taskExecutor)
+    void PhysicsSystemImpl::DoPhysicsStep(tf::Executor& taskExecutor)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
 

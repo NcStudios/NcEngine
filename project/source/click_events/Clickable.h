@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Ecs.h"
-#include "Physics.h"
+#include "physics/PhysicsSystem.h"
 #include "Entity.h"
 #include "shared/GameLog.h"
 
@@ -9,30 +9,33 @@
 
 namespace nc::sample
 {
-    class Clickable : public AutoComponent, public physics::IClickable
+    class Clickable : public AutoComponent, public IClickable
     {
         public:
-            Clickable(Entity entity, std::string tag);
+            Clickable(Entity entity, std::string tag, PhysicsSystem* physicsSystem);
             ~Clickable() noexcept;
             void OnClick() override;
         
         private:
             std::string m_Tag;
+            PhysicsSystem* m_physicsSystem;
     };
 
-    inline Clickable::Clickable(Entity entity, std::string tag)
+    inline Clickable::Clickable(Entity entity, std::string tag, PhysicsSystem* physicsSystem)
         : AutoComponent(entity),
-          physics::IClickable(entity, 40.0f),
-          m_Tag{std::move(tag)}
+          IClickable(entity, 40.0f),
+          m_Tag{std::move(tag)},
+          m_physicsSystem{physicsSystem}
+
     {
-        physics::RegisterClickable(this);
+        m_physicsSystem->RegisterClickable(this);
         auto layer = entity.Layer();
-        IClickable::layers = physics::ToLayerMask(layer);
+        IClickable::layers = ToLayerMask(layer);
     }
 
     inline Clickable::~Clickable() noexcept
     {
-        physics::UnregisterClickable(this);
+        m_physicsSystem->UnregisterClickable(this);
     }
 
     inline void Clickable::OnClick()

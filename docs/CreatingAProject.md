@@ -69,13 +69,15 @@ const auto DefaultMaterial = nc::Material
 class ExampleScene : public nc::Scene
 {
     public:
-        void Load(nc::registry_type* registry) override
+        void Load(nc::NcEngine* engine) override
         {
             /** Load box assets. */
             nc::LoadMeshAsset(CubeMeshPath);
             nc::LoadTextureAssets({DefaultMaterial.baseColor,
                                    DefaultMaterial.normal,
                                    DefaultMaterial.roughness});
+
+            auto registry = engine->Registry();
 
             /** Create and register a camera. */
             auto cameraInit = nc::EntityInfo
@@ -87,7 +89,7 @@ class ExampleScene : public nc::Scene
 
             auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
-            nc::SetMainCamera(camera);
+            engine->MainCamera()->Set(camera);
 
             /** Add a PointLight. */
             auto pointLightInit = nc::EntityInfo
@@ -124,13 +126,13 @@ The main file will be pretty simple:
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 {
     /** Create the engine instance. */
-    nc::NcEngine engine(instance, "example/Config.ini");
+    auto engine = nc::InitializeEngine(instance, "example/Config.ini");
 
     /** Start the game loop. */
-    engine.Start(std::make_unique<ExampleScene>());
+    engine->Start(std::make_unique<ExampleScene>());
 
     /** Destroy the engine instance. */
-    engine.Shutdown();
+    engine->Shutdown();
 
     return 0;
 }

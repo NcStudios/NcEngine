@@ -1,21 +1,20 @@
 #pragma once
 
 #include "Scene.h"
-#include "Ecs.h"
 
 #include <memory>
 
 namespace nc
 {
-    class SceneSystem
+    class SceneSystemImpl final : public SceneSystem
     {
         public:
-            SceneSystem();
-            
-            void QueueSceneChange(std::unique_ptr<Scene> swapScene);
+            SceneSystemImpl();
+
+            void ChangeScene(std::unique_ptr<Scene> swapScene) override;
             bool IsSceneChangeScheduled() const;
             void UnloadActiveScene();
-            void DoSceneChange(registry_type* registry);
+            void DoSceneChange(NcEngine* engine);
 
         private:
             std::unique_ptr<Scene> m_activeScene;

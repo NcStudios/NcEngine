@@ -1,23 +1,25 @@
 #include "JointsTest.h"
-#include "Ecs.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
 #include "shared/Prefabs.h"
 #include "ForceBasedController.h"
 #include "shared/SceneNavigationCamera.h"
-#include "Physics.h"
-#include "Audio.h"
+#include "physics/PhysicsSystem.h"
+#include "AudioSystem.h"
 
 namespace nc::sample
 {
-    void JointsTest::Load(registry_type* registry)
+    void JointsTest::Load(NcEngine* engine)
     {
-        m_sceneHelper.Setup(registry, false, false, nullptr);
+        auto* registry = engine->Registry();
+        auto* physics = engine->Physics();
+
+        m_sceneHelper.Setup(engine, false, false, nullptr);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
-        SetMainCamera(camera);
-        RegisterAudioListener(cameraHandle);
+        engine->MainCamera()->Set(camera);
+        engine->Audio()->RegisterListener(cameraHandle);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
@@ -53,9 +55,9 @@ namespace nc::sample
             float bias = 0.2f;
             float softness = 0.1f;
 
-            physics::AddJoint(head, segment1, Vector3{0.0f, 0.0f, -0.6f}, Vector3{0.0f, 0.0f, 0.5f}, bias, softness);
-            physics::AddJoint(segment1, segment2, Vector3{0.0f, 0.0f, -0.5f}, Vector3{0.0f, 0.0f, 0.4f}, bias, softness);
-            physics::AddJoint(segment2, segment3, Vector3{0.0f, 0.0f, -0.4f}, Vector3{0.0f, 0.0f, 0.3f}, bias, softness);
+            physics->AddJoint(head, segment1, Vector3{0.0f, 0.0f, -0.6f}, Vector3{0.0f, 0.0f, 0.5f}, bias, softness);
+            physics->AddJoint(segment1, segment2, Vector3{0.0f, 0.0f, -0.5f}, Vector3{0.0f, 0.0f, 0.4f}, bias, softness);
+            physics->AddJoint(segment2, segment3, Vector3{0.0f, 0.0f, -0.4f}, Vector3{0.0f, 0.0f, 0.3f}, bias, softness);
         }
 
         // Ground
@@ -83,8 +85,8 @@ namespace nc::sample
             registry->Add<Collider>(panel, BoxProperties{}, false);
             registry->Add<PhysicsBody>(panel, PhysicsProperties{});
 
-            physics::AddJoint(anchor, panel, Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
-            physics::AddJoint(anchor, panel, Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
+            physics->AddJoint(anchor, panel, Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
+            physics->AddJoint(anchor, panel, Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
         }
 
         // Balance platform
@@ -97,7 +99,7 @@ namespace nc::sample
             registry->Add<Collider>(balancePlatform, BoxProperties{}, false);
             registry->Add<PhysicsBody>(balancePlatform, PhysicsProperties{.mass = 5.0f});
 
-            physics::AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
+            physics->AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
         }
 
         // Swinging bars
@@ -114,8 +116,8 @@ namespace nc::sample
             registry->Add<Collider>(bar2, BoxProperties{}, false);
             registry->Add<PhysicsBody>(bar2, PhysicsProperties{}, Vector3::One(), Vector3::Up());
 
-            physics::AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
-            physics::AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
+            physics->AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
+            physics->AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
         }
 
         // Bridge
@@ -143,23 +145,23 @@ namespace nc::sample
             float bias = 0.2f;
             float softness = 0.5f;
 
-            physics::AddJoint(platform1, plank1, Vector3{5.0f, 0.0f, 15.1f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics::AddJoint(platform1, plank1, Vector3{11.0f, 0.0f, 15.1f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(platform1, plank1, Vector3{5.0f, 0.0f, 15.1f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(platform1, plank1, Vector3{11.0f, 0.0f, 15.1f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics::AddJoint(plank1, plank2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics::AddJoint(plank1, plank2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank1, plank2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank1, plank2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics::AddJoint(plank2, plank3, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics::AddJoint(plank2, plank3, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank2, plank3, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank2, plank3, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics::AddJoint(plank3, plank4, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics::AddJoint(plank3, plank4, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank3, plank4, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank3, plank4, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics::AddJoint(plank4, plank5, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics::AddJoint(plank4, plank5, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank4, plank5, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank4, plank5, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics::AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
-            physics::AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
+            physics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
+            physics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
         }
     }
 

@@ -1,6 +1,4 @@
 #include "PerFrameRenderState.h"
-#include "MainCamera.h"
-#include "camera/MainCameraInternal.h"
 #include "physics/collision/IntersectionQueries.h"
 #include "resources/ShaderResourceService.h"
 
@@ -20,15 +18,15 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(registry_type* registry, bool isPointLightSystemDirty)
-        : viewMatrix{camera::GetViewMatrix()},
-          projectionMatrix{camera::GetProjectionMatrix()},
-          cameraPosition{GetMainCameraTransform()->GetPosition()},
+    PerFrameRenderState::PerFrameRenderState(registry_type* registry, Camera* camera, bool isPointLightSystemDirty)
+        : viewMatrix{camera->GetViewMatrix()},
+          projectionMatrix{camera->GetProjectionMatrix()},
+          cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
           objectData{},
           pointLightInfos{},
           isPointLightBindRequired{isPointLightSystemDirty}
     {
-        const auto frustum = camera::CalculateFrustum();
+        const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = viewMatrix * projectionMatrix;
         const auto renderers = registry->ViewAll<MeshRenderer>();
         objectData.reserve(renderers.size());

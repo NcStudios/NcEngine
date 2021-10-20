@@ -2,7 +2,7 @@
 
 #include "LayerMask.h"
 
-namespace nc::physics
+namespace nc
 {
     class IClickable
     {

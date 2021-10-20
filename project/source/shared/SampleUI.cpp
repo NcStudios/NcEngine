@@ -31,8 +31,9 @@ namespace
 
 namespace nc::sample
 {
-    SampleUI::SampleUI(GameLog* gameLog, std::function<void()> widgetCallback)
-        : m_gameLog{ gameLog },
+    SampleUI::SampleUI(SceneSystem* sceneSystem, GameLog* gameLog, std::function<void()> widgetCallback)
+        : m_sceneSystem{sceneSystem},
+          m_gameLog{ gameLog },
           m_widgetCallback{ widgetCallback },
           m_windowDimensions{ window::GetDimensions() }
     {
@@ -110,31 +111,31 @@ namespace nc::sample
         {
             auto buttonSize = ImVec2{ImGui::GetWindowWidth() - 20, 18};
             if(ImGui::Button("Worms", buttonSize))
-                ChangeScene(std::make_unique<Worms>());
+                m_sceneSystem->ChangeScene(std::make_unique<Worms>());
 
             if(ImGui::Button("Click Events", buttonSize))
-                ChangeScene(std::make_unique<ClickEvents>());
+                m_sceneSystem->ChangeScene(std::make_unique<ClickEvents>());
 
             if(ImGui::Button("Collision Events", buttonSize))
-                ChangeScene(std::make_unique<CollisionEvents>());
+                m_sceneSystem->ChangeScene(std::make_unique<CollisionEvents>());
 
             if(ImGui::Button("Joints Test", buttonSize))
-                ChangeScene(std::make_unique<JointsTest>());
+                m_sceneSystem->ChangeScene(std::make_unique<JointsTest>());
 
             if(ImGui::Button("Spawn Test", buttonSize))
-                ChangeScene(std::make_unique<SpawnTest>());
+                m_sceneSystem->ChangeScene(std::make_unique<SpawnTest>());
 
             if(ImGui::Button("Rendering Benchmark", buttonSize))
-                ChangeScene(std::make_unique<RenderingBenchmark>());
+                m_sceneSystem->ChangeScene(std::make_unique<RenderingBenchmark>());
                 
             if(ImGui::Button("Collision Benchmark", buttonSize))
-                ChangeScene(std::make_unique<CollisionBenchmark>());
+                m_sceneSystem->ChangeScene(std::make_unique<CollisionBenchmark>());
 
             if(ImGui::Button("Jare Scratch", buttonSize))
-                ChangeScene(std::make_unique<VulkanScene>());
+                m_sceneSystem->ChangeScene(std::make_unique<VulkanScene>());
 
             // if(ImGui::Button("Solar System", buttonSize))
-            //     ChangeScene(std::make_unique<SolarSystem>());
+            //     m_sceneSystem->ChangeScene(std::make_unique<SolarSystem>());
         } ImGui::EndChild();
     }
 

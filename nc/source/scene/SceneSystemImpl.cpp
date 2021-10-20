@@ -1,43 +1,27 @@
-#include "SceneSystem.h"
-#include "Scene.h"
+#include "SceneSystemImpl.h"
 #include "debug/Utils.h"
-
-namespace
-{
-    nc::SceneSystem* g_instance = nullptr;
-}
 
 namespace nc
 {
-    /* Api Function Implementation */
-    void ChangeScene(std::unique_ptr<Scene> scene)
-    {
-        V_LOG("Changing scene");
-        IF_THROW(!g_instance, "ChangeScene - No SceneSystem instance set");
-        g_instance->QueueSceneChange(std::move(scene));
-    }
-
-    /* SceneSystem */
-    SceneSystem::SceneSystem()
+    SceneSystemImpl::SceneSystemImpl()
         : m_activeScene{ nullptr },
           m_swapScene{ nullptr },
           m_isSceneChangeScheduled{ false }
     {
-        g_instance = this;
     }
 
-    void SceneSystem::QueueSceneChange(std::unique_ptr<Scene> swapScene)
+    void SceneSystemImpl::ChangeScene(std::unique_ptr<Scene> swapScene)
     {
         m_swapScene = std::move(swapScene);
         m_isSceneChangeScheduled = true;
     }
 
-    bool SceneSystem::IsSceneChangeScheduled() const
+    bool SceneSystemImpl::IsSceneChangeScheduled() const
     {
         return m_isSceneChangeScheduled;
     }
 
-    void SceneSystem::UnloadActiveScene()
+    void SceneSystemImpl::UnloadActiveScene()
     {
         if(!m_activeScene)
         {
@@ -47,15 +31,16 @@ namespace nc
         m_activeScene = nullptr;
     }
 
-    void SceneSystem::DoSceneChange(registry_type* registry)
+    void SceneSystemImpl::DoSceneChange(NcEngine* engine)
     {
         if(!m_swapScene)
         {
             throw std::runtime_error("Attempt to swap null scene");
         }
+        
         m_activeScene = std::move(m_swapScene);
         m_swapScene = nullptr;
         m_isSceneChangeScheduled = false;
-        m_activeScene->Load(registry);
+        m_activeScene->Load(engine);
     }
 }

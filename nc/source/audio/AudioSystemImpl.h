@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AudioSystem.h"
 #include "Ecs.h"
 #include "rtaudio/RtAudio.h"
 
@@ -8,13 +9,13 @@
 
 namespace nc::audio
 {
-    class AudioSystem
+    class AudioSystemImpl final : public AudioSystem
     {
         public:
-            AudioSystem(registry_type* registry);
-            ~AudioSystem();
+            AudioSystemImpl(registry_type* registry);
+            ~AudioSystemImpl();
 
-            void RegisterListener(Entity listener);
+            void RegisterListener(Entity listener) override;
             int WriteToDeviceBuffer(double* output);
             void Update();
             auto ProbeDevices() -> std::vector<RtAudio::DeviceInfo>;

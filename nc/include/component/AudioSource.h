@@ -7,7 +7,7 @@
 
 namespace nc
 {
-    namespace audio { class AudioSystem; }
+    namespace audio { class AudioSystemImpl; }
 
     /** @todo InverseSquareLaw, Log? */
     enum class AttenuationFunction
@@ -44,6 +44,6 @@ namespace nc
             void WriteSpatialSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar);
             void WriteNonSpatialSamples(double* buffer, size_t frames);
 
-            friend audio::AudioSystem;
+            friend audio::AudioSystemImpl;
     };
 }
