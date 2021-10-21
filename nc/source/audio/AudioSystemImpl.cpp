@@ -85,7 +85,7 @@ namespace nc::audio
             throw std::runtime_error("AudioSystemImpl - Invalid number of buffer frames specified");
     }
 
-    AudioSystemImpl::~AudioSystemImpl()
+    AudioSystemImpl::~AudioSystemImpl() noexcept
     {
         Clear();
 
@@ -114,7 +114,7 @@ namespace nc::audio
         }
     }
 
-    void AudioSystemImpl::RegisterListener(Entity listener)
+    void AudioSystemImpl::RegisterListener(Entity listener) noexcept
     {
         m_listener = listener;
     }

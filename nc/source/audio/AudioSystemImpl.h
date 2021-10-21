@@ -13,9 +13,9 @@ namespace nc::audio
     {
         public:
             AudioSystemImpl(registry_type* registry);
-            ~AudioSystemImpl();
+            ~AudioSystemImpl() noexcept;
 
-            void RegisterListener(Entity listener) override;
+            void RegisterListener(Entity listener) noexcept override;
             int WriteToDeviceBuffer(double* output);
             void Update();
             auto ProbeDevices() -> std::vector<RtAudio::DeviceInfo>;

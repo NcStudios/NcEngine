@@ -40,7 +40,6 @@ namespace nc::sample
             translation = Vector3::Zero();
         m_lastFrameTranslation = translation;
         translation = translation * dt;
-        //GetMainCameraTransform()->Translate(translation);
         ActiveRegistry()->Get<Transform>(GetParentEntity())->Translate(translation);
     }
 }

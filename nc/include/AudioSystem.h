@@ -12,6 +12,6 @@ namespace nc
             *  registered listener's position will be used for spatial audio. A listener must not
             *  be destroyed, except on a scene change. Entity::Null() may be passed to disable
             *  audio. */
-            virtual void RegisterListener(Entity entity) = 0;
+            virtual void RegisterListener(Entity entity) noexcept = 0;
     };
 }

@@ -30,19 +30,19 @@ namespace
         };
     }
 
-    void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
-    {
-        auto& vel = particle->linearVelocity;
-        vel = vel + vel * velOverTimeFactor;
-        particle->position = particle->position + vel * dt;
+    // void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
+    // {
+    //     auto& vel = particle->linearVelocity;
+    //     vel = vel + vel * velOverTimeFactor;
+    //     particle->position = particle->position + vel * dt;
 
-        auto& angVel = particle->angularVelocity;
-        angVel += angVel * rotOverTimeFactor;
-        particle->rotation += angVel * dt;
+    //     auto& angVel = particle->angularVelocity;
+    //     angVel += angVel * rotOverTimeFactor;
+    //     particle->rotation += angVel * dt;
 
-        auto& scale = particle->scale;
-        scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
-    }
+    //     auto& scale = particle->scale;
+    //     scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
+    // }
 }
 
 namespace nc::particle
