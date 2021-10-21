@@ -59,23 +59,25 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 
 /** Default assets from the nc/resources directory. */
 const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.nca"};
-const auto DefaultMaterial = nc::graphics::Material
+const auto DefaultMaterial = nc::Material
 {
     .baseColor = "nc/resources/texture/DefaultBaseColor.png",
     .normal = "nc/resources/texture/DefaultNormal.png",
     .roughness = "nc/resources/texture/DefaultMetallic.png"
 };
 
-class ExampleScene : public nc::scene::Scene
+class ExampleScene : public nc::Scene
 {
     public:
-        void Load(nc::registry_type* registry) override
+        void Load(nc::NcEngine* engine) override
         {
             /** Load box assets. */
             nc::LoadMeshAsset(CubeMeshPath);
             nc::LoadTextureAssets({DefaultMaterial.baseColor,
                                    DefaultMaterial.normal,
                                    DefaultMaterial.roughness});
+
+            auto registry = engine->Registry();
 
             /** Create and register a camera. */
             auto cameraInit = nc::EntityInfo
@@ -87,7 +89,7 @@ class ExampleScene : public nc::scene::Scene
 
             auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
-            nc::camera::SetMainCamera(camera);
+            engine->MainCamera()->Set(camera);
 
             /** Add a PointLight. */
             auto pointLightInit = nc::EntityInfo
@@ -101,7 +103,7 @@ class ExampleScene : public nc::scene::Scene
 
             /** Add the box. */
             auto cubeHandle = registry->Add<nc::Entity>(nc::EntityInfo{.tag = "Box"});
-            registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::graphics::TechniqueType::PhongAndUi);
+            registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::TechniqueType::PhongAndUi);
 
             /** Add the movement controller to the cube. */
             registry->Add<Controller>(cubeHandle, registry);
@@ -124,13 +126,13 @@ The main file will be pretty simple:
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 {
     /** Create the engine instance. */
-    nc::NcEngine engine(instance, "example/Config.ini");
+    auto engine = nc::InitializeEngine(instance, "example/Config.ini");
 
     /** Start the game loop. */
-    engine.Start(std::make_unique<ExampleScene>());
+    engine->Start(std::make_unique<ExampleScene>());
 
     /** Destroy the engine instance. */
-    engine.Shutdown();
+    engine->Shutdown();
 
     return 0;
 }

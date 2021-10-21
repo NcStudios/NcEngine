@@ -1,12 +1,10 @@
-#include "AudioSystem.h"
-#include "Audio.h"
+#include "AudioSystemImpl.h"
 
 #include <cstring>
 #include <iostream>
 
 namespace
 {
-    nc::audio::AudioSystem* g_audioSystem = nullptr;
     constexpr unsigned OutputChannelCount = 2u;
     constexpr unsigned SampleRate = 44100u;
     constexpr unsigned BufferCount = 4u;
@@ -22,20 +20,14 @@ namespace
          *  quickly see when they happen. */
         if(status) std::cerr << "Audio stream underflow\n";
 
-        auto* system = static_cast<nc::audio::AudioSystem*>(userData);
+        auto* system = static_cast<nc::audio::AudioSystemImpl*>(userData);
         return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer));
     }
 }
 
 namespace nc::audio
 {
-    void RegisterListener(Entity entity)
-    {
-        IF_THROW(!g_audioSystem, "RegisterAudioListener - AudioSystem is not set");
-        g_audioSystem->RegisterListener(entity);
-    }
-
-    AudioSystem::AudioSystem(registry_type* registry)
+    AudioSystemImpl::AudioSystemImpl(registry_type* registry)
         : m_registry{registry},
           m_rtAudio{},
           m_readyBuffers{},
@@ -45,8 +37,6 @@ namespace nc::audio
           m_staleMutex{},
           m_listener{Entity::Null()}
     {
-        g_audioSystem = this;
-
         for(size_t i = 0u; i < BufferCount; ++i)
         {
             auto begin = m_bufferMemory.begin() + i * BufferLength;
@@ -88,14 +78,14 @@ namespace nc::audio
         catch(const RtAudioError& e)
         {
             e.printMessage();
-            throw std::runtime_error("AudioSystem - Failure starting audio stream");
+            throw std::runtime_error("AudioSystemImpl - Failure starting audio stream");
         }
 
         if(bufferFrames != BufferFrames)
-            throw std::runtime_error("AudioSystem - Invalid number of buffer frames specified");
+            throw std::runtime_error("AudioSystemImpl - Invalid number of buffer frames specified");
     }
 
-    AudioSystem::~AudioSystem()
+    AudioSystemImpl::~AudioSystemImpl() noexcept
     {
         Clear();
 
@@ -112,7 +102,7 @@ namespace nc::audio
             m_rtAudio.closeStream();
     }
 
-    void AudioSystem::Clear() noexcept
+    void AudioSystemImpl::Clear() noexcept
     {
         m_listener = Entity::Null();
 
@@ -124,12 +114,12 @@ namespace nc::audio
         }
     }
 
-    void AudioSystem::RegisterListener(Entity listener)
+    void AudioSystemImpl::RegisterListener(Entity listener) noexcept
     {
         m_listener = listener;
     }
 
-    int AudioSystem::WriteToDeviceBuffer(double* output)
+    int AudioSystemImpl::WriteToDeviceBuffer(double* output)
     {
         // empty check before lock is only safe with 1 consumer
         if(m_readyBuffers.empty())
@@ -156,7 +146,7 @@ namespace nc::audio
         return 0;
     }
 
-    void AudioSystem::Update()
+    void AudioSystemImpl::Update()
     {
         if(!m_listener.Valid())
             return;
@@ -183,13 +173,13 @@ namespace nc::audio
         }
     }
 
-    void AudioSystem::MixToBuffer(double* buffer)
+    void AudioSystemImpl::MixToBuffer(double* buffer)
     {
         std::memset(buffer, 0, BufferSizeInBytes);
 
         const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
         if(!listenerTransform)
-            throw std::runtime_error("AudioSystem::MixToBuffer - Invalid listener registered");
+            throw std::runtime_error("AudioSystemImpl::MixToBuffer - Invalid listener registered");
         
         const auto listenerPosition = listenerTransform->GetPosition();
         const auto rightEar = listenerTransform->Right();
@@ -211,7 +201,7 @@ namespace nc::audio
         }
     }
 
-    auto AudioSystem::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
+    auto AudioSystemImpl::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
     {
         unsigned deviceCount = m_rtAudio.getDeviceCount();
         std::vector<RtAudio::DeviceInfo> out;

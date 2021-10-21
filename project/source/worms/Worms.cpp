@@ -1,6 +1,5 @@
 #include "Worms.h"
-#include "Ecs.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
 #include "shared/ConstantRotation.h"
 #include "shared/spawner/Spawner.h"
 #include "MouseFollower.h"
@@ -9,16 +8,18 @@
 
 namespace nc::sample
 {
-    void Worms::Load(registry_type* registry)
+    void Worms::Load(NcEngine* engine)
     {
+        auto* registry = engine->Registry();
+        
         // Setup
-        m_sceneHelper.Setup(registry, false, false);
+        m_sceneHelper.Setup(engine, false, false);
         prefab::InitializeResources();
 
         // Camera
         auto cameraEntity = registry->Add<Entity>({.tag = "Main Camera"});
         auto camera = registry->Add<Camera>(cameraEntity);
-        camera::SetMainCamera(camera);
+        engine->MainCamera()->Set(camera);
 
         // Window
         window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});

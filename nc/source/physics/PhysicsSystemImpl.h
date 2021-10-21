@@ -1,5 +1,6 @@
 #pragma once
 
+#include "physics/PhysicsSystem.h"
 #include "ClickableSystem.h"
 #include "collision/CollisionCache.h"
 #include "collision/BspTree.h"
@@ -7,21 +8,20 @@
 #include "graphics/DebugRenderer.h"
 #include "task/Task.h"
 
-namespace nc
-{
-    namespace graphics { class FrameManager; }
-}
-
 namespace nc::physics
 {
-    class PhysicsSystem
+    class PhysicsSystemImpl final : public PhysicsSystem
     {
         public:
-            PhysicsSystem(registry_type* registry, graphics::Graphics* graphics);
+            PhysicsSystemImpl(registry_type* registry, graphics::Graphics* graphics);
 
-            void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness);
-            void RemoveJoint(Entity entityA, Entity entityB);
-            void RemoveAllJoints(Entity entity);
+            void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
+            void RemoveJoint(Entity entityA, Entity entityB) override;
+            void RemoveAllJoints(Entity entity) override;
+
+            void RegisterClickable(IClickable* clickable) override;
+            void UnregisterClickable(IClickable* clickable) noexcept override;
+            auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
 
             void DoPhysicsStep(tf::Executor& taskExecutor);
             void ClearState();

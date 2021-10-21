@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CollisionCache.h"
-#include "../PhysicsSystem.h"
 
 namespace nc::physics
 {

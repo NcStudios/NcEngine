@@ -7,7 +7,7 @@
 
 namespace nc
 {
-    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, nc::graphics::Material material, nc::graphics::TechniqueType techniqueType)
+    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType)
     : ComponentBase{entity},
       #ifdef NC_EDITOR_ENABLED
       m_material{std::move(material)},
@@ -32,6 +32,19 @@ namespace nc
     {
         ImGui::Text("Mesh Renderer");
         meshRenderer->GetMaterial().EditorGuiElement();
+    }
+
+    void Material::EditorGuiElement()
+    {
+        ImGui::SameLine();
+        ImGui::Text("Material");
+        ImGui::Spacing();
+        ImGui::Text("Base Color:");
+        ImGui::Text(baseColor.c_str());
+        ImGui::Text("Normal:");
+        ImGui::Text(normal.c_str());
+        ImGui::Text("Roughness:");
+        ImGui::Text(roughness.c_str());
     }
     #endif
 }

@@ -2,7 +2,7 @@
 
 #include "Entity.h"
 
-namespace nc::physics
+namespace nc
 {
     /** Defined layers in project code as powers of 2 however desired - enum, constants, etc. */
     using LayerMask = uint64_t;

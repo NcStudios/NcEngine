@@ -1,6 +1,5 @@
 #include "ClickEvents.h"
-#include "Ecs.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
 #include "imgui/imgui.h"
 #include "shared/Prefabs.h"
 #include "shared/EdgePanCamera.h"
@@ -12,13 +11,13 @@
 
 namespace
 {
-    std::function<void(nc::physics::LayerMask)> LayerSelectCallback = nullptr;
+    std::function<void(nc::LayerMask)> LayerSelectCallback = nullptr;
     const auto CoinLayer = nc::Entity::layer_type{1u};
     const auto TokenLayer = nc::Entity::layer_type{2u};
-    const auto MaskNone = nc::physics::LayerMask32None;
-    const auto MaskAll = nc::physics::LayerMask32All;
-    const auto MaskCoin = nc::physics::LayerMask32{1u};
-    const auto MaskToken = nc::physics::LayerMask32{2u};
+    const auto MaskNone = nc::LayerMask32None;
+    const auto MaskAll = nc::LayerMask32All;
+    const auto MaskCoin = nc::LayerMask32{1u};
+    const auto MaskToken = nc::LayerMask32{2u};
 
     void Widget()
     {
@@ -51,15 +50,17 @@ namespace
 
 namespace nc::sample
 {
-    void ClickEvents::Load(registry_type* registry)
+    void ClickEvents::Load(NcEngine* engine)
     {
+        auto* registry = engine->Registry();
+        
         // Setup
-        m_sceneHelper.Setup(registry, true, false, Widget);
+        m_sceneHelper.Setup(engine, true, false, Widget);
 
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
-        camera::SetMainCamera(camera);
-        auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll);
+        engine->MainCamera()->Set(camera);
+        auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, engine->Physics());
         LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
@@ -88,10 +89,10 @@ namespace nc::sample
             .layer = CoinLayer
         };
         
-        auto spawnExtension = [registry](Entity handle)
+        auto spawnExtension = [registry, physicsSystem = engine->Physics()](Entity handle)
         {
             registry->Get<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
-            registry->Add<Clickable>(handle, registry->Get<Tag>(handle)->Value().data());
+            registry->Add<Clickable>(handle, registry->Get<Tag>(handle)->Value().data(), physicsSystem);
         };
 
         auto coinSpawnerHandle = registry->Add<Entity>({.tag = "Coin Spawner"});

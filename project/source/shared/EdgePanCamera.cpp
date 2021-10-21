@@ -1,7 +1,7 @@
 #include "EdgePanCamera.h"
+#include "Ecs.h"
 #include "MainCamera.h"
 #include "Input.h"
-#include "UI.h"
 #include "Window.h"
 
 namespace
@@ -24,14 +24,11 @@ namespace nc::sample
 {
     EdgePanCamera::EdgePanCamera(Entity entity)
         : Camera(entity),
-        m_lastFrameZoom{0.0f}
+          m_lastFrameZoom{0.0f}
     {}
 
     void EdgePanCamera::FrameUpdate(float dt)
     {
-        if (ui::IsHovered())
-            return;
-
         auto [screenWidth, screenHeight] = window::GetDimensions();
         auto [x, y] = input::MousePos();
         auto xPan = GetPan(x, EdgePanWidth, screenWidth - EdgePanWidth);
@@ -43,6 +40,6 @@ namespace nc::sample
             translation = Vector3::Zero();
         m_lastFrameTranslation = translation;
         translation = translation * dt;
-        camera::GetMainCameraTransform()->Translate(translation);
+        ActiveRegistry()->Get<Transform>(GetParentEntity())->Translate(translation);
     }
 }

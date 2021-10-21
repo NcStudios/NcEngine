@@ -35,7 +35,7 @@ namespace nc::sample
 
     inline void SceneNavigationCamera::FrameUpdate(float dt)
     {
-        auto* transform = camera::GetMainCameraTransform();
+        auto* transform = ActiveRegistry()->Get<Transform>(GetParentEntity());
         Pan(dt, transform);
         Look(dt, transform);
         Zoom(dt, transform);

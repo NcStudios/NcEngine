@@ -1,8 +1,4 @@
 #include "Engine.h"
-#include "Core.h"
-#include "Ecs.h"
-#include "MainCamera.h"
-#include "camera/MainCameraInternal.h"
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
@@ -14,58 +10,29 @@
 
 namespace nc
 {
-    NcEngine::NcEngine(HINSTANCE hInstance, const std::string& configPath)
-        : m_impl{nullptr}
+    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath) -> std::unique_ptr<NcEngine>
     {
         config::Load(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
-        m_impl = std::make_unique<Engine>(hInstance);
-    }
-
-    NcEngine::~NcEngine() noexcept
-    {
-        if(m_impl)
-            Shutdown();
-    }
-
-    void NcEngine::Start(std::unique_ptr<scene::Scene> initialScene)
-    {
-        V_LOG("Starting engine");
-        m_impl->MainLoop(std::move(initialScene));
-    }
-    
-    void NcEngine::Quit() noexcept
-    {
-        m_impl->DisableRunningFlag();
-    }
-
-    void NcEngine::Shutdown() noexcept
-    {
-        if(!m_impl)
-            return;
-
-        debug::internal::CloseLog();
-    }
-
-    auto NcEngine::GetImpl() noexcept -> Engine*
-    {
-        return m_impl.get();
+        V_LOG("Constructing Engine Instance");
+        return std::make_unique<Engine>(hInstance);
     }
 
     /* Engine */
     Engine::Engine(HINSTANCE hInstance)
-        : m_window{ hInstance },
-          m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
+        : m_mainCamera{},
+          m_window{ hInstance },
+          m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
           m_renderer{&m_graphics,
                     [&manager = m_assetServices.meshManager] { return manager.GetVertexBuffer(); },
                     [&manager = m_assetServices.meshManager] { return manager.GetIndexBuffer(); }},
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physics{m_ecs.GetRegistry(), &m_graphics},
+          m_physicsSystem{m_ecs.GetRegistry(), &m_graphics},
           m_sceneSystem{},
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
-          m_ui{m_window.GetHWND(), &m_graphics},
+          m_uiSystem{m_window.GetHWND(), &m_graphics},
           m_taskExecutor{6u}, // @todo probably add to config
           m_tasks{},
           m_dt{0.0f},
@@ -76,11 +43,47 @@ namespace nc
         m_graphics.SetRenderer(&m_renderer);
         SetBindings();
         BuildTaskGraph();
-        V_LOG("Engine initialized");
+        V_LOG("Engine constructed");
     }
+
+    Engine::~Engine() noexcept
+    {
+        Shutdown();
+    }
+
+    void Engine::Start(std::unique_ptr<Scene> initialScene)
+    {
+        V_LOG("Starting NcEngine");
+        m_ecs.GetRegistry()->VerifyCallbacks();
+        m_sceneSystem.ChangeScene(std::move(initialScene));
+        m_sceneSystem.DoSceneChange(this);
+        m_isRunning = true;
+        MainLoop();
+    }
+
+    void Engine::Quit() noexcept
+    {
+        V_LOG("Quit NcEngine");
+        DisableRunningFlag();
+    }
+
+    void Engine::Shutdown() noexcept
+    {
+        V_LOG("Shutdown NcEngine");
+        ClearState();
+        debug::internal::CloseLog();
+    }
+
+    auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
+    auto Engine::Registry()    noexcept -> registry_type*   { return m_ecs.GetRegistry(); }
+    auto Engine::MainCamera()  noexcept -> nc::MainCamera*  { return &m_mainCamera;       }
+    auto Engine::Physics()     noexcept -> PhysicsSystem*   { return &m_physicsSystem;    }
+    auto Engine::SceneSystem() noexcept -> nc::SceneSystem* { return &m_sceneSystem;      }
+    auto Engine::UI()          noexcept -> UISystem*        { return &m_uiSystem;         }
 
     void Engine::BuildTaskGraph()
     {
+        V_LOG("Building Task Graph");
         [[maybe_unused]] auto writeAudioBuffersTask = m_tasks.AddGuardedTask(
             [&audioSystem = m_audioSystem]
         {
@@ -107,13 +110,9 @@ namespace nc
         m_isRunning = false;
     }
 
-    void Engine::MainLoop(std::unique_ptr<scene::Scene> initialScene)
+    void Engine::MainLoop()
     {
-        V_LOG("Starting engine loop");
-        m_ecs.GetRegistry()->VerifyCallbacks();
-        m_sceneSystem.QueueSceneChange(std::move(initialScene));
-        m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
-        m_isRunning = true;
+        V_LOG("Starting Game Loop");
         const auto fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
 
@@ -128,7 +127,7 @@ namespace nc
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
             {
                 /** @todo need to store prev transforms for interpolation */
-                m_physics.DoPhysicsStep(m_taskExecutor);
+                m_physicsSystem.DoPhysicsStep(m_taskExecutor);
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
@@ -144,21 +143,15 @@ namespace nc
         Shutdown();
     }
 
-    void Engine::Shutdown()
-    {
-        V_LOG("Shutdown EngineImpl");
-        ClearState();
-    }
-
     void Engine::ClearState()
     {
         V_LOG("Clearing engine state");
 
         m_graphics.Clear();
         m_ecs.Clear();
-        m_physics.ClearState();
+        m_physicsSystem.ClearState();
         m_audioSystem.Clear();
-        camera::ClearMainCamera();
+        m_mainCamera.Set(nullptr);
         m_time.ResetFrameDeltaTime();
         m_time.ResetAccumulatedTime();
         // SceneSystem state is never cleared
@@ -169,7 +162,7 @@ namespace nc
         V_LOG("Swapping scene");
         m_sceneSystem.UnloadActiveScene();
         ClearState();
-        m_sceneSystem.DoSceneChange(m_ecs.GetRegistry());
+        m_sceneSystem.DoSceneChange(this);
     }
 
     void Engine::FrameLogic(float dt)
@@ -185,20 +178,21 @@ namespace nc
     void Engine::FrameRender()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        auto* registry = m_ecs.GetRegistry();
-        camera::UpdateViewMatrix();
+        auto* mainCamera = m_mainCamera.Get();
+        mainCamera->UpdateViewMatrix();
         m_currentImageIndex = m_graphics.FrameBegin();
-        m_ui.FrameBegin();
+        m_uiSystem.FrameBegin();
+        auto* registry = m_ecs.GetRegistry();
 
         #ifdef NC_EDITOR_ENABLED
-        m_ui.Frame(&m_frameDeltaTimeFactor, registry);
+        m_uiSystem.Frame(&m_frameDeltaTimeFactor, registry);
         #else
-        m_ui.Frame();
+        m_uiSystem.Frame();
         #endif
 
-        m_ui.FrameEnd();
+        m_uiSystem.FrameEnd();
 
-        auto state = graphics::PerFrameRenderState{registry, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
+        auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
         graphics::MapPerFrameRenderState(state);
 
         auto* renderer = m_graphics.GetRendererPtr();
@@ -233,7 +227,7 @@ namespace nc
 
         m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
         m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics::SetClearColor, &m_graphics, _1));
-        m_window.BindUICallback(std::bind(ui::UIImpl::WndProc, &m_ui, _1, _2, _3, _4));
+        m_window.BindUICallback(std::bind(ui::UISystemImpl::WndProc, &m_uiSystem, _1, _2, _3, _4));
         m_window.BindEngineDisableRunningCallback(std::bind(Engine::DisableRunningFlag, this));
     }
 } // end namespace nc::engine
