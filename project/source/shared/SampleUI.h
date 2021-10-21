@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Scene.h"
 #include "ui/IUI.h"
 #include "Window.h"
 #include "shared/GameLog.h"
@@ -11,13 +12,14 @@ namespace nc::sample
     class SampleUI : public ui::IUI, public window::IOnResizeReceiver
     {
         public:
-            SampleUI(GameLog* gameLog = nullptr, std::function<void()> widgetCallback = nullptr);
+            SampleUI(SceneSystem* sceneSystem, GameLog* gameLog = nullptr, std::function<void()> widgetCallback = nullptr);
             ~SampleUI() noexcept;
             void Draw() override;
             bool IsHovered() override;
             void OnResize(Vector2 dimensions) override;
 
         private:
+            SceneSystem* m_sceneSystem;
             GameLog* m_gameLog;
             std::function<void()> m_widgetCallback;
             Vector2 m_windowDimensions;

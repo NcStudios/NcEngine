@@ -1,5 +1,5 @@
 #include "CollisionBenchmark.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
 #include "imgui/imgui.h"
 #include "shared/FPSTracker.h"
 #include "shared/spawner/Spawner.h"
@@ -64,13 +64,15 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionBenchmark::Load(registry_type* registry)
+    void CollisionBenchmark::Load(NcEngine* engine)
     {
+        auto* registry = engine->Registry();
+        
         // Setup
-        m_sceneHelper.Setup(registry, false, true, Widget);
+        m_sceneHelper.Setup(engine, false, true, Widget);
 
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        camera::SetMainCamera(camera);
+        engine->MainCamera()->Set(camera);
 
         // Cube Spawner Options
         SpawnBehavior spawnBehavior

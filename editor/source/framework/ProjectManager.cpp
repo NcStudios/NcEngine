@@ -34,8 +34,8 @@ namespace
 
 namespace nc::editor
 {
-    ProjectManager::ProjectManager(registry_type* registry, AssetManifest* manifest)
-        : m_registry{registry},
+    ProjectManager::ProjectManager(NcEngine* engine, AssetManifest* manifest)
+        : m_engine{engine},
           m_manifest{manifest},
           m_projectData{},
           m_currentSceneIndex{0u},
@@ -183,7 +183,7 @@ namespace nc::editor
 
         Output::Log("Creating scene: " + name);
 
-        SceneWriter writer{m_registry, m_projectData.projectDirectory / "scenes"};
+        SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
         writer.WriteNewScene(name);
 
         m_projectData.scenes.push_back(name);
@@ -207,14 +207,14 @@ namespace nc::editor
             return;
         }
 
-        if(AssetDependencyChecker checkDependencies{m_registry, m_manifest}; !checkDependencies.result)
+        if(AssetDependencyChecker checkDependencies{m_engine->Registry(), m_manifest}; !checkDependencies.result)
         {
             Output::Log("Failure saving scene: Missing asset dependencies");
             checkDependencies.LogMissingDependencies();
             return;
         }
 
-        SceneWriter writer{m_registry, m_projectData.projectDirectory / "scenes"};
+        SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
         writer.WriteCurrentScene(m_projectData.scenes.at(m_currentSceneIndex));
     }
 
@@ -232,7 +232,7 @@ namespace nc::editor
             {
                 m_nextSceneIndex = i;
                 Output::Log("Loading scene: " + name);
-                scene::Change(std::make_unique<EditorScene>(this));
+                m_engine->SceneSystem()->ChangeScene(std::make_unique<EditorScene>(this));
                 return;
             }
         }
@@ -255,7 +255,7 @@ namespace nc::editor
 
         m_currentSceneIndex = m_nextSceneIndex;
 
-        NC_TRACE(SceneReader serialize{m_registry, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
+        NC_TRACE(SceneReader serialize{m_engine->Registry(), m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
     }
 
     void ProjectManager::DeleteCurrentScene()

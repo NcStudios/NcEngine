@@ -3,7 +3,7 @@
 #include "ui/UIStyle.h"
 #include "utility/DefaultComponents.h"
 
-#include "UI.h"
+#include "ui/UISystem.h"
 
 namespace
 {
@@ -58,12 +58,12 @@ namespace
 
 namespace nc::editor
 {
-    EditorFramework::EditorFramework(registry_type* registry)
+    EditorFramework::EditorFramework(NcEngine* engine)
         : m_output{},
           m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
           m_assetManifest{m_editorConfig.recentProjectDirectory},
-          m_projectManager{registry, &m_assetManifest},
-          m_editorUI{registry,
+          m_projectManager{engine, &m_assetManifest},
+          m_editorUI{engine->Registry(),
                      &m_output,
                      &m_assetManifest,
                      CreateProjects(&m_projectManager),
@@ -74,10 +74,10 @@ namespace nc::editor
           m_assetBrowser{m_editorUI.GetRegisterDialogCallback(), &m_assetManifest},
           m_newSceneDialog{m_editorUI.GetRegisterDialogCallback()},
           m_newProjectDialog{m_editorUI.GetRegisterDialogCallback()},
-          m_changeTagDialog{registry}
+          m_changeTagDialog{engine->Registry()}
     {
         nc::editor::SetImGuiStyle();
-        nc::ui::Set(&m_editorUI);
+        engine->UI()->Set(&m_editorUI);
 
         auto uiCallbacks = CreateUICallbacks(&m_editorUI);
         m_changeTagDialog.RegisterDialog(uiCallbacks.registerDialog);

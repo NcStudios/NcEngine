@@ -13,7 +13,7 @@ namespace nc::editor
     const auto DefaultBaseColorPath     = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto DefaultNormalPath        = std::string{"nc/resources/texture/DefaultNormal.png"};
     const auto DefaultRoughnessPath     = std::string{"nc/resources/texture/DefaultMetallic.png"};
-    const auto DefaultMaterial          = nc::graphics::Material{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath};
+    const auto DefaultMaterial          = nc::Material{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath};
 
     /** Helper to create a mesh renderer using only default resources. */
     void AddDefaultMeshRenderer(registry_type* registry, Entity entity);

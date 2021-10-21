@@ -1,42 +1,50 @@
 #pragma once
 
-#include "Core.h"
-#include "assets/AssetService.h"
+#include "NcEngine.h"
 #include "assets/AssetServices.h"
-#include "audio/AudioSystem.h"
+#include "audio/AudioSystemImpl.h"
+#include "camera/MainCameraImpl.h"
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
-#include "physics/PhysicsSystem.h"
-#include "scene/SceneSystem.h"
+#include "physics/PhysicsSystemImpl.h"
+#include "scene/SceneSystemImpl.h"
 #include "task/Task.h"
 #include "time/NcTime.h"
-#include "ui/UIImpl.h"
+#include "ui/UISystemImpl.h"
 #include "window/WindowImpl.h"
 
 namespace nc
 {
-    class Engine
+    class Engine final : public NcEngine
     {
         public:
             Engine(HINSTANCE hInstance, bool useEditorMode);
-            void MainLoop(std::unique_ptr<scene::Scene> initialScene);
-            void EditorLoop(std::unique_ptr<scene::Scene> initialScene);
-            void DisableRunningFlag() noexcept;
-            void Shutdown();
-            bool UseEditorMode() const;
+            ~Engine() noexcept;
+
+            void Start(std::unique_ptr<Scene> initialScene) override;
+            void Quit() noexcept override;
+            void Shutdown() noexcept override;
+
+            auto Audio() noexcept -> AudioSystem* override;
+            auto MainCamera() noexcept -> nc::MainCamera* override;
+            auto Registry() noexcept -> registry_type* override;
+            auto Physics() noexcept -> PhysicsSystem* override;
+            auto SceneSystem() noexcept -> nc::SceneSystem* override;
+            auto UI() noexcept -> UISystem* override;
 
         private:
+            camera::MainCameraImpl m_mainCamera;
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
             AssetServices m_assetServices;
             graphics::Renderer m_renderer;
             ecs::EntityComponentSystem m_ecs;
-            physics::PhysicsSystem m_physics;
-            scene::SceneSystem m_sceneSystem;
+            physics::PhysicsSystemImpl m_physicsSystem;
+            scene::SceneSystemImpl m_sceneSystem;
             time::Time m_time;
-            audio::AudioSystem m_audioSystem;
-            ui::UIImpl m_ui;
+            audio::AudioSystemImpl m_audioSystem;
+            ui::UISystemImpl m_uiSystem;
             tf::Executor m_taskExecutor;
             TaskGraph m_tasks;
             float m_dt;
@@ -46,6 +54,9 @@ namespace nc
             bool m_isRunning;
 
             void BuildTaskGraph();
+            void MainLoop();
+            void EditorLoop();
+            void DisableRunningFlag() noexcept;
             void ClearState();
             void DoSceneSwap();
             void FrameLogic(float dt);

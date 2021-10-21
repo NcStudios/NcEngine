@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platform/win32/NCWinDef.h"
-#include "ui/IUI.h"
+#include "ui/UISystem.h"
 #include "editor/Editor.h"
 
 namespace nc::graphics 
@@ -11,17 +11,17 @@ namespace nc::graphics
 
 namespace nc::ui
 {
-    class UIImpl
+    class UISystemImpl final : public UISystem
     {
         public:
-            UIImpl(HWND hwnd, graphics::Graphics* graphics);
+            UISystemImpl(HWND hwnd, graphics::Graphics* graphics);
 
-            ~UIImpl() noexcept;
+            ~UISystemImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-            void BindProjectUI(IUI* ui);
-            bool IsProjectUIHovered();
+            void Set(IUI* ui) noexcept override;
+            bool IsHovered() const noexcept override;
 
             void FrameBegin();
 

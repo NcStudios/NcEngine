@@ -1,5 +1,4 @@
 #include "ClickableSystem.h"
-#include "Physics.h"
 #include "Ecs.h"
 #include "debug/Utils.h"
 #include "Input.h"
@@ -11,40 +10,13 @@
 #include <algorithm>
 #include <limits>
 
-namespace
-{
-    nc::physics::ClickableSystem* impl = nullptr;
-}
-
 namespace nc::physics
 {
-    /* Api Implementation */
-    void RegisterClickable(IClickable* clickable)
-    {
-        IF_THROW(!impl, "physics::RegisterClickable - impl is not set");
-        impl->RegisterClickable(clickable);
-    }
-
-    void UnregisterClickable(IClickable* clickable) noexcept
-    {
-        impl->UnregisterClickable(clickable);
-    }
-
-    IClickable* RaycastToClickables(LayerMask mask)
-    {
-        IF_THROW(!impl, "physics::RaycastToClickables - impl is not set");
-        return impl->RaycastToClickables(mask);
-    }
-
     /** System Implementation */
-    ClickableSystem::ClickableSystem
-    (
-        graphics::Graphics* graphics
-    )
+    ClickableSystem::ClickableSystem(graphics::Graphics* graphics)
         : m_clickableComponents{},
           m_graphics{graphics}
     {
-        impl = this;
     }
 
     void ClickableSystem::RegisterClickable(IClickable* toAdd)

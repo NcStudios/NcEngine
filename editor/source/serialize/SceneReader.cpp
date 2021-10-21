@@ -9,12 +9,12 @@ namespace
 {
     using namespace nc;
 
-    graphics::TechniqueType ToTechniqueType(const std::string& name)
+    TechniqueType ToTechniqueType(const std::string& name)
     {
-        if(name == "graphics::TechniqueType::PhongAndUi")
-            return graphics::TechniqueType::PhongAndUi;
+        if(name == "TechniqueType::PhongAndUi")
+            return TechniqueType::PhongAndUi;
         
-        return graphics::TechniqueType::None;
+        return TechniqueType::None;
     }
 
     std::string SplitLineToActionDescriptionAndArgs(std::string line, std::stringstream& argsOut)
@@ -279,7 +279,7 @@ namespace nc::editor
     {
         ReadTokenFromAction(args);
         std::string mesh = ReadQuotedStringFromAction(args);
-        graphics::Material material
+        Material material
         {
             .baseColor = ReadQuotedStringFromAction(args),
             .normal = ReadQuotedStringFromAction(args),

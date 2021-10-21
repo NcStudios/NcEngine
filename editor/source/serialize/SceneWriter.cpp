@@ -8,12 +8,12 @@ namespace
 {
     constexpr char TAB[5]{"    "};
 
-    std::string ToString(nc::graphics::TechniqueType type)
+    std::string ToString(nc::TechniqueType type)
     {
-        if(type == nc::graphics::TechniqueType::PhongAndUi)
-            return "graphics::TechniqueType::PhongAndUi";
+        if(type == nc::TechniqueType::PhongAndUi)
+            return "TechniqueType::PhongAndUi";
         
-        return "graphics::TechniqueType::None";
+        return "TechniqueType::None";
     }
 }
 
@@ -105,14 +105,13 @@ namespace nc::editor
         auto filePath = m_scenesDirectory / (m_sceneName + HeaderExtension);
         std::ofstream file{filePath};
         file << "#pragma once\n\n"
-             << "#include \"Ecs.h\"\n"
-             << "#include \"scene/Scene.h\"\n\n"
+             << "#include \"NcEngine.h\"\n\n"
              << "namespace project\n"
              << "{\n"
-             << TAB << "class " << m_sceneName << " : public nc::scene::Scene\n"
+             << TAB << "class " << m_sceneName << " : public nc::Scene\n"
              << TAB << "{\n"
              << TAB << TAB << "public:\n"
-             << TAB << TAB << TAB << "void Load(nc::registry_type* registry) override;\n"
+             << TAB << TAB << TAB << "void Load(nc::NcEngine* engine) override;\n"
              << TAB << TAB << TAB << "void Unload() override;\n"
              << TAB << "}\n"
              << "}";
@@ -126,9 +125,9 @@ namespace nc::editor
              << "#include \"" << m_sceneName << GeneratedSourceExtension << "\"\n\n"
              << "namespace project\n"
              << "{\n"
-             << TAB << "void " << m_sceneName << "::Load(nc::registry_type* registry)\n"
+             << TAB << "void " << m_sceneName << "::Load(nc::NcEngine* engine)\n"
              << TAB << "{\n"
-             << TAB << TAB << "nc::generated::" << m_sceneName << "::Init(registry);\n"
+             << TAB << TAB << "nc::generated::" << m_sceneName << "::Init(engine);\n"
              << TAB << "}\n\n"
              << TAB << "void " << m_sceneName << "::Unload()\n"
              << TAB << "{\n"
@@ -147,12 +146,13 @@ namespace nc::editor
 
         m_file << "/** Generated source code for scene: " << m_sceneName << " - DO NOT MODIFY */\n"
                << "#pragma once\n\n"
-               << "#include \"Ecs.h\"\n\n"
+               << "#include \"NcEngine.h\"\n\n"
                << "namespace nc::generated::" << m_sceneName << '\n'
                << "{\n"
                << "using namespace nc;\n"
-               << "void Init(registry_type* registry)\n"
-               << "{\n";
+               << "void Init(NcEngine* engine)\n"
+               << "{\n"
+               << "    auto* registry = engine->Registry()\n";
 
 
         for(auto e : m_registry->ViewAll<Entity>())

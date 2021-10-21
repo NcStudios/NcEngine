@@ -1,5 +1,4 @@
 #include "Graphics.h"
-#include "camera/MainCameraInternal.h"
 #include "debug/Profiler.h"
 #include "debug/Utils.h"
 #include "Base.h"
@@ -17,8 +16,9 @@ namespace
 
 namespace nc::graphics
 {
-    Graphics::Graphics(HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
-        : m_base{ std::make_unique<Base>(hwnd, hinstance) },
+    Graphics::Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+        : m_mainCamera{mainCamera},
+          m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
@@ -31,7 +31,6 @@ namespace nc::graphics
           m_clearColor{DefaultClearColor},
           m_drawCallCount{0}
     {
-        camera::UpdateProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
     }
 
     Graphics::~Graphics() noexcept
@@ -85,7 +84,7 @@ namespace nc::graphics
         (void)farZ;
 
         m_dimensions = Vector2{ width, height };
-        camera::UpdateProjectionMatrix(width, height, nearZ, farZ);
+        m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
     }
 

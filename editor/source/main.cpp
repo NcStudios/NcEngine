@@ -1,5 +1,5 @@
 #include "platform/win32/NcWin32.h"
-#include "Core.h"
+#include "NcEngine.h"
 #include "debug/Utils.h"
 #include "EditorScene.h"
 #include "framework/EditorFramework.h"
@@ -12,9 +12,8 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 
     try
     {
-        engine = std::make_unique<nc::NcEngine>(instance, "editor/config/engine_config.ini", true);
-        auto* registry = nc::ActiveRegistry();
-        nc::editor::EditorFramework framework{registry};
+        engine = nc::InitializeNcEngine(instance, "editor/config/engine_config.ini", true);
+        nc::editor::EditorFramework framework{engine.get()};
         engine->Start(std::make_unique<nc::editor::EditorScene>(framework.GetProjectManager()));
         framework.SaveProjectData();
     }

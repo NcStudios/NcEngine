@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "NcEngine.h"
 #include "EditorConfig.h"
 #include "assets/AssetManifest.h"
 #include "framework/ProjectManager.h"
@@ -17,7 +17,7 @@ namespace nc::editor
     class EditorFramework
     {
         public:
-            EditorFramework(registry_type* registry);
+            EditorFramework(NcEngine* engine);
             EditorFramework(const EditorFramework&) = delete;
             EditorFramework(EditorFramework&&) = delete;
             EditorFramework& operator=(const EditorFramework&) = delete;

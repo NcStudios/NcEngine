@@ -1,5 +1,5 @@
 #include "SpawnTest.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
 #include "random/Random.h"
 #include "imgui/imgui.h"
 #include "KillBox.h"
@@ -35,10 +35,12 @@ namespace
 
 namespace nc::sample
 {
-    void SpawnTest::Load(registry_type* registry)
+    void SpawnTest::Load(NcEngine* engine)
     {
+        auto* registry = engine->Registry();
+        
         // Setup
-        m_sceneHelper.Setup(registry, true, false, Widget);
+        m_sceneHelper.Setup(engine, true, false, Widget);
 
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
@@ -48,7 +50,7 @@ namespace nc::sample
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, -15.0f, -20.0f}, .rotation = Quaternion::FromEulerAngles(0.25f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.25f, 0.005f, 1.4f);
-        camera::SetMainCamera(camera);
+        engine->MainCamera()->Set(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});

@@ -1,3 +1,4 @@
+#include "UISystemImpl.h"
 #include "debug/Utils.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
@@ -6,43 +7,20 @@
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
-#include "UI.h"
-#include "UIImpl.h"
-
-namespace
-{
-    nc::ui::UIImpl* g_instance = nullptr;
-}
 
 namespace nc::ui
 {
-    /* Api Function Implementation */
-    void Set(IUI* ui)
-    {
-        V_LOG("Registering project UI");
-        IF_THROW(!g_instance, "ui::Set - No UIImpl instance set");
-        g_instance->BindProjectUI(ui);
-    }
-
-    bool IsHovered()
-    {
-        IF_THROW(!g_instance, "ui::IsHovered - No UIImpl instance set");
-        return g_instance->IsProjectUIHovered();
-    }
-
-    /* UIImpl */
     #ifdef NC_EDITOR_ENABLED
-    UIImpl::UIImpl(HWND hwnd, graphics::Graphics* graphics)
+    UISystemImpl::UISystemImpl(HWND hwnd, graphics::Graphics* graphics)
     : m_editor{graphics},
       m_projectUI{nullptr},
       m_graphics{graphics}
     #else
-    UIImpl::UIImpl(HWND hwnd, graphics::Graphics* graphics)
+    UISystemImpl::UISystemImpl(HWND hwnd, graphics::Graphics* graphics)
     : m_projectUI{nullptr},
       m_graphics{graphics}
     #endif
     {
-        g_instance = this;
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
@@ -51,32 +29,31 @@ namespace nc::ui
         m_graphics->GetBasePtr()->InitializeImgui(uiPassDefinition);
     }
 
-    UIImpl::~UIImpl() noexcept
+    UISystemImpl::~UISystemImpl() noexcept
     {
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
     }
 
-    LRESULT UIImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT UISystemImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         return ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam);
     }
 
-    void UIImpl::BindProjectUI(IUI* ui)
+    void UISystemImpl::Set(IUI* ui) noexcept
     {
         m_projectUI = ui;
     }
 
-    bool UIImpl::IsProjectUIHovered()
+    bool UISystemImpl::IsHovered() const noexcept
     {
-        if (!m_projectUI)
-            throw std::runtime_error("UIImpl::IsProjectUIHovered - No project UI registered");
+        if (!m_projectUI) return false;
 
         return m_projectUI->IsHovered();
     }
 
-    void UIImpl::FrameBegin()
+    void UISystemImpl::FrameBegin()
     {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplWin32_NewFrame();
@@ -84,7 +61,7 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UIImpl::Frame(float* dt, registry_type* registry)
+    void UISystemImpl::Frame(float* dt, registry_type* registry)
     {
         m_editor.Frame(dt, registry);
         if(m_projectUI)
@@ -93,7 +70,7 @@ namespace nc::ui
         }
     }
     #else
-    void UIImpl::Frame()
+    void UISystemImpl::Frame()
     {
         if(m_projectUI)
         {
@@ -102,7 +79,7 @@ namespace nc::ui
     }
     #endif
 
-    void UIImpl::FrameEnd()
+    void UISystemImpl::FrameEnd()
     {
         ImGui::Render();
     }

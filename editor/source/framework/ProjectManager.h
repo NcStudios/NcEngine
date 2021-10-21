@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "NcEngine.h"
 #include "framework/Callbacks.h"
 #include "ui/dialog/Dialog.h"
 #include "ui/dialog/NewSceneDialog.h"
@@ -27,7 +27,7 @@ namespace nc::editor
     class ProjectManager
     {
         public:
-            ProjectManager(registry_type* registry, AssetManifest* manifest);
+            ProjectManager(NcEngine* engine, AssetManifest* manifest);
 
             void OpenProject();
             void CreateProject();
@@ -44,7 +44,7 @@ namespace nc::editor
             void RegisterCallbacks(UICallbacks uiCallbacks, DialogCallbacks dialogCallbacks);
 
         private:
-            registry_type* m_registry;
+            NcEngine* m_engine;
             AssetManifest* m_manifest;
             ProjectData m_projectData;
             size_t m_currentSceneIndex;
