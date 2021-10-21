@@ -95,6 +95,13 @@ namespace nc
                 return ptr;
         }
 
+        for(auto& item : m_toAdd)
+        {
+            auto* ptr = dynamic_cast<T*>(item.get());
+            if(ptr)
+                return ptr;
+        }
+
         return nullptr;
     }
 }

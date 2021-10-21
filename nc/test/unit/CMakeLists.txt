@@ -25,6 +25,31 @@ target_link_libraries(Allocator_unit_tests
 
 add_test(Allocator_unit_tests Allocator_unit_tests)
 
+### AutoComponentGroup Tests ###
+add_executable(AutoComponentGroup_unit_tests
+    ${ROOT_DIR}/test/unit/AutoComponentGroup_unit_tests.cpp
+    ${ROOT_DIR}/source/component/AutoComponentGroup.cpp
+)
+
+target_include_directories(AutoComponentGroup_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(AutoComponentGroup_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(AutoComponentGroup_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(AutoComponentGroup_unit_tests AutoComponentGroup_unit_tests)
+
 ### Entity Tests ###
 add_executable(Entity_unit_tests
     ${ROOT_DIR}/test/unit/Entity_unit_tests.cpp
