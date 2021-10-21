@@ -7,7 +7,7 @@
 
 namespace
 {
-    auto createProjects(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks
+    auto CreateProjects(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks
     {
         return nc::editor::ProjectCallbacks
         {
@@ -66,7 +66,7 @@ namespace nc::editor
           m_editorUI{registry,
                      &m_output,
                      &m_assetManifest,
-                     createProjects(&m_projectManager),
+                     CreateProjects(&m_projectManager),
                      CreateSceneCallbacks(&m_projectManager),
                      std::bind(ChangeTagDialog::Open, &m_changeTagDialog, std::placeholders::_1),
                      std::string{}},
@@ -80,7 +80,7 @@ namespace nc::editor
         nc::ui::Set(&m_editorUI);
 
         auto uiCallbacks = CreateUICallbacks(&m_editorUI);
-        m_changeTagDialog.RegisterregisterDialog(uiCallbacks.registerDialog);
+        m_changeTagDialog.RegisterDialog(uiCallbacks.registerDialog);
 
         auto dialogCallbacks = CreateDialogCallbacks(&m_fileBrowser, &m_newSceneDialog, &m_newProjectDialog, &m_assetBrowser);
         m_assetBrowser.RegisterCallback(dialogCallbacks.openFileBrowser);

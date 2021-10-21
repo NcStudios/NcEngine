@@ -15,7 +15,7 @@ namespace nc::editor
             void Open(Entity entity);
             void Draw() override;
 
-            void RegisterregisterDialog(UICallbacks::RegisterDialogCallbackType registerDialog);
+            void RegisterDialog(UICallbacks::RegisterDialogCallbackType registerDialog);
 
         private:
             registry_type* m_registry;

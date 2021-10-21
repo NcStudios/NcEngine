@@ -120,7 +120,7 @@ namespace nc::editor
 
         if(!manifestData.readSuccessfully)
         {
-            Output::LogError("AssetManifest::ReadManifest - Failure reading manifest:", manifestPath.string());
+            Output::LogError("Failure reading manifest:", manifestPath.string());
             return;
         }
 
@@ -128,7 +128,7 @@ namespace nc::editor
         {
             if(!LoadAsset(asset, AssetType::AudioClip))
             {
-                Output::LogError("AssetManifest::ReadManifest - Failure loading AudioClip:",  asset.sourcePath.string());
+                Output::LogError("Failure loading AudioClip:",  asset.sourcePath.string());
             }
 
             m_audioClips.Add(std::move(asset));
@@ -137,7 +137,7 @@ namespace nc::editor
         for(auto& asset : manifestData.concaveColliders)
         {
             if(!LoadAsset(asset, AssetType::ConcaveCollider))
-                Output::LogError("AssetManifest::ReadManifest - Failure loading ConcaveCollider:", asset.sourcePath.string());
+                Output::LogError("Failure loading ConcaveCollider:", asset.sourcePath.string());
             
             m_concaveColliders.Add(std::move(asset));
         }
@@ -145,7 +145,7 @@ namespace nc::editor
         for(auto& asset : manifestData.hullColliders)
         {
             if(!LoadAsset(asset, AssetType::HullCollider))
-                Output::LogError("AssetManifest::ReadManifest - Failure loading HullCollider:", asset.sourcePath.string());
+                Output::LogError("Failure loading HullCollider:", asset.sourcePath.string());
 
             m_hullColliders.Add(std::move(asset));
         }
@@ -153,7 +153,7 @@ namespace nc::editor
         for(auto& asset : manifestData.meshes)
         {
             if(!LoadAsset(asset, AssetType::Mesh))
-                Output::LogError("AssetManifest::ReadManifest - Failure loading Mesh:", asset.sourcePath.string());
+                Output::LogError("Failure loading Mesh:", asset.sourcePath.string());
             
             m_meshes.Add(std::move(asset));
         }
@@ -161,7 +161,7 @@ namespace nc::editor
         for(auto& asset : manifestData.textures)
         {
             if(!LoadAsset(asset, AssetType::Texture))
-                Output::LogError("AssetManifest::ReadManifest - Failure loading Texture:", asset.sourcePath.string());
+                Output::LogError("Failure loading Texture:", asset.sourcePath.string());
             
             m_textures.Add(std::move(asset));
         }

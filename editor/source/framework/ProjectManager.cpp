@@ -76,7 +76,15 @@ namespace nc::editor
         if(!sceneDirectoryEntry.exists())
         {
             Output::Log("Project doesn't have \"scenes\" directory. One will be created.");
-            std::filesystem::create_directory(sceneDirectoryEntry.path());
+            try
+            {
+                std::filesystem::create_directory(sceneDirectoryEntry.path());
+            }
+            catch(const std::filesystem::filesystem_error& e)
+            {
+                Output::LogError("Failed to create \"scenes\" directory:", e.what());
+                return false;
+            }
         }
 
         m_projectData.open = true;
@@ -119,7 +127,17 @@ namespace nc::editor
         }
 
         Output::Log("Creating Project:", directoryPath.string());
-        CreateProjectDirectories(directoryPath);
+
+        try
+        {
+            CreateProjectDirectories(directoryPath);
+        }
+        catch(const std::filesystem::filesystem_error& e)
+        {
+            Output::LogError("Failure creating project directories:", e.what());
+            return false;
+        }
+        
         auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
         CreateProjectFile(projectFilePath);
 
@@ -178,7 +196,6 @@ namespace nc::editor
     void ProjectManager::SaveCurrentScene()
     {
         if(!m_projectData.open)
-        //if(m_projectData.name.empty())
         {
             Output::LogError("Failure saving scene: No project is open");
             return;

@@ -12,7 +12,7 @@ namespace
     const auto MeshTag = std::string{"Mesh"};
     const auto TextureTag = std::string{"Texture"};
 
-    auto ReadStandardAsset(std::ifstream& file) -> nc::editor::Asset
+    auto ReadNonNcaAsset(std::ifstream& file) -> nc::editor::Asset
     {
         nc::editor::Asset out;
         std::string path;
@@ -75,7 +75,7 @@ namespace nc::editor
 
             if(line == AudioClipTag)
             {
-                out.audioClips.push_back(ReadStandardAsset(file));
+                out.audioClips.push_back(ReadNonNcaAsset(file));
             }
             else if(line == ConcaveColliderTag)
             {
@@ -91,7 +91,7 @@ namespace nc::editor
             }
             else if(line == TextureTag)
             {
-                out.textures.push_back(ReadStandardAsset(file));
+                out.textures.push_back(ReadNonNcaAsset(file));
             }
         }
 

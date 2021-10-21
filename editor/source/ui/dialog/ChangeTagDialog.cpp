@@ -41,7 +41,7 @@ namespace nc::editor
         EndWindow();
     }
 
-    void ChangeTagDialog::RegisterregisterDialog(UICallbacks::RegisterDialogCallbackType registerDialog)
+    void ChangeTagDialog::RegisterDialog(UICallbacks::RegisterDialogCallbackType registerDialog)
     {
         m_addDialog = std::move(registerDialog);
     }
