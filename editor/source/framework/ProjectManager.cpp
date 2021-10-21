@@ -216,6 +216,7 @@ namespace nc::editor
 
         SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
         writer.WriteCurrentScene(m_projectData.scenes.at(m_currentSceneIndex));
+        Output::Log("Saved scene: " + m_projectData.scenes.at(m_currentSceneIndex));
     }
 
     void ProjectManager::LoadScene(const std::string& name)

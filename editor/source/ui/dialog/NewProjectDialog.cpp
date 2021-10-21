@@ -1,5 +1,7 @@
 #include "NewProjectDialog.h"
 
+#include <cstring>
+
 namespace
 {
     constexpr nc::Vector2 NewProjectDialogSize{350.0f, 120.0f};
@@ -19,6 +21,8 @@ namespace nc::editor
         m_callback = std::move(callback);
         m_isOpen = true;
         m_addDialog(this);
+        std::memset(m_nameBuffer, '\0', TextEntryBufferSize);
+        std::memset(m_pathBuffer, '\0', TextEntryBufferSize);
     }
 
     void NewProjectDialog::Draw()
