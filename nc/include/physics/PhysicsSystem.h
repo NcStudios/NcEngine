@@ -15,8 +15,8 @@ namespace nc
             virtual void RemoveJoint(Entity entityA, Entity entityB) = 0;
             virtual void RemoveAllJoints(Entity entity) = 0;
 
-            virtual void RegisterClickable(IClickable* clickable);
-            virtual void UnregisterClickable(IClickable* clickable) noexcept;
-            virtual auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable*;
+            virtual void RegisterClickable(IClickable* clickable) = 0;
+            virtual void UnregisterClickable(IClickable* clickable) noexcept = 0;
+            virtual auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* = 0;
     };
 }
