@@ -34,18 +34,30 @@ namespace nc
         return true;
     }
 
-    bool ConvexHullAssetManager::Load(const std::vector<std::string>& paths)
+    bool ConvexHullAssetManager::Load(std::span<const std::string> paths)
     {
-        /** @todo */
-        (void)paths;
-        return false;
+        bool anyLoaded = false;
+
+        for(const auto& path : paths)
+        {
+            if(IsLoaded(path))
+                continue;
+            
+            if(Load(path))
+                anyLoaded = true;
+        }
+
+        return anyLoaded;
     }
 
     bool ConvexHullAssetManager::Unload(const std::string& path)
     {
-        /** @todo */
-        (void)path;
-        return false;
+        return static_cast<bool>(m_hullColliders.erase(path));
+    }
+
+    void ConvexHullAssetManager::UnloadAll()
+    {
+        m_hullColliders.clear();
     }
 
     auto ConvexHullAssetManager::Acquire(const std::string& path) const -> ConvexHullView

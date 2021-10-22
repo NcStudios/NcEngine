@@ -128,7 +128,7 @@ namespace nc::graphics
             const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
             pushConstants.model = m_debugWidget->transformationMatrix;
             cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
-            cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
         NC_PROFILE_END();
     }

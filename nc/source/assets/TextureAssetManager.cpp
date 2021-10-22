@@ -6,6 +6,7 @@
 #include "stb/stb_image.h"
 #undef STB_IMAGE_IMPLEMENATION
 
+#include <cassert>
 #include <fstream>
 
 namespace
@@ -66,7 +67,7 @@ namespace nc
         return true;
     }
 
-    bool TextureAssetManager::Load(const std::vector<std::string>& paths)
+    bool TextureAssetManager::Load(std::span<const std::string> paths)
     {
         const auto newTextureCount = paths.size();
         auto nextTextureIndex = m_textures.size();
@@ -88,9 +89,33 @@ namespace nc
 
     bool TextureAssetManager::Unload(const std::string& path)
     {
-        /** @todo */
-        (void)path;
-        return false;
+        auto removed = static_cast<bool>(m_accessors.erase(path));
+        if(!removed)
+            return false;
+        
+        auto pos = std::ranges::find_if(m_textures, [&path](const auto& texture)
+        {
+            return texture.uid == path;
+        });
+
+        assert(pos != m_textures.end());
+        auto index = std::distance(m_textures.begin(), pos);
+        m_textures.erase(pos);
+
+        for(auto& [path, textureView] : m_accessors)
+        {
+            if(textureView.index > index)
+                --textureView.index;
+        }
+
+        graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
+        return true;
+    }
+
+    void TextureAssetManager::UnloadAll()
+    {
+        m_accessors.clear();
+        m_textures.clear();
     }
 
     auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
