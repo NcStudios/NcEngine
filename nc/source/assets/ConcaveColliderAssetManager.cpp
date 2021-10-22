@@ -11,7 +11,7 @@ namespace nc
         
         std::ifstream file{path};
         if(!file.is_open())
-            throw std::runtime_error("ConcaveColliderAssetManager - Could not open file: " + path);
+            throw NcError("Failure opening file: " + path);
 
         size_t triangleCount;
         float maxExtent;
@@ -24,7 +24,7 @@ namespace nc
         for(size_t i = 0u; i < triangleCount; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("ConcaveColliderAssetManager - Failure reading file: " + path);
+                throw NcError("Failure reading file: " + path);
 
             file >> a.x >> a.y >> a.z
                  >> b.x >> b.y >> b.z
@@ -55,7 +55,7 @@ namespace nc
     {
         const auto it = m_concaveColliders.find(path);
         if(it == m_concaveColliders.end())
-            throw std::runtime_error("ConcaveColliderAssetManager::Acquire - asset is not loaded: " + path);
+            throw NcError("Asset is not loaded: " + path);
         
         return ConcaveColliderView
         {

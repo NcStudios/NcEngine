@@ -52,7 +52,7 @@ namespace nc::audio
         unsigned devices = m_rtAudio.getDeviceCount();
         if(devices < 1)
         {
-            throw std::runtime_error("AudioSystem - No devices found");
+            throw NcError("No audio devices found");
         }
 
         RtAudio::StreamParameters parameters
@@ -78,11 +78,11 @@ namespace nc::audio
         catch(const RtAudioError& e)
         {
             e.printMessage();
-            throw std::runtime_error("AudioSystemImpl - Failure starting audio stream");
+            throw NcError("Failure starting audio stream");
         }
 
         if(bufferFrames != BufferFrames)
-            throw std::runtime_error("AudioSystemImpl - Invalid number of buffer frames specified");
+            throw NcError("Invalid number of buffer frames specified");
     }
 
     AudioSystemImpl::~AudioSystemImpl() noexcept
@@ -179,7 +179,7 @@ namespace nc::audio
 
         const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
         if(!listenerTransform)
-            throw std::runtime_error("AudioSystemImpl::MixToBuffer - Invalid listener registered");
+            throw NcError("Invalid listener registered");
         
         const auto listenerPosition = listenerTransform->GetPosition();
         const auto rightEar = listenerTransform->Right();

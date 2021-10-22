@@ -1,6 +1,6 @@
 #include "ui/UIPosition.h"
 
-#include <stdexcept>
+#include "debug/NcError.h"
 
 namespace nc::ui::utils
 {
@@ -49,7 +49,7 @@ namespace nc::ui::utils
                                 screenDimensions.y - elementDimensions.y };
             }
             default:
-                throw std::runtime_error("Invalid UIPosition");
+                throw NcError("Invalid UIPosition");
         }
     }
 } // end namespace nc::ui::utils

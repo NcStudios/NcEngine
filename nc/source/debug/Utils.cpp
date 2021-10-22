@@ -23,7 +23,7 @@ namespace nc::debug
             internal::file.open(path);
             if(!internal::file.is_open())
             {
-                throw std::runtime_error("internal::OpenLog - failed to open log file: " + path);
+                throw NcError("Failed to open log file: " + path);
             }
             internal::file << "Log started: " << GetTime();
         }
@@ -45,14 +45,12 @@ namespace nc::debug
             internal::file << item << '\n';
             return;
         }
-        
-        std::cerr << "LogToDiangostics - No log file open\n"
-                  << "Attempt to log:\n"
-                  << "    " << item << '\n';
     }
 
     void LogException(const std::exception& e) noexcept
     {
+        std::cerr << e.what();
+
         LogToDiagnostics("***Exception***");
         LogToDiagnostics(e.what());
 

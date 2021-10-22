@@ -54,7 +54,7 @@ namespace nc::sample::prefab
             case Resource::Worm:
                 return std::string{"Worm"};
         }
-        throw std::runtime_error("prefab::ToString(resource) - Unknown resource");
+        throw NcError("prefab::ToString(resource) - Unknown resource");
     }
 
     namespace material

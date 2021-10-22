@@ -155,7 +155,7 @@ namespace nc::alloc
     {
         auto pos = std::ranges::find_if(m_data, predicate);
         if(pos == m_data.end())
-            throw std::runtime_error("PoolAdapter::Extract - Item does not exist");
+            throw NcError("Item does not exist");
 
         T out{std::move(**pos)};
         m_allocator.deallocate(*pos, 1);

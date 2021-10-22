@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <functional>
 #include <span>
-#include <stdexcept>
 #include <vector>
 
 namespace nc::ecs

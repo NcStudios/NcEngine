@@ -82,7 +82,7 @@ namespace nc::ecs
         {
             pos = std::ranges::find_if(m_toAdd, findPred);
             if(pos == m_toAdd.end())
-                throw std::runtime_error("ParticleEmitterSystem::Emit - Particle emitter does not exist");
+                throw NcError("Particle emitter does not exist");
         }
 
         pos->Emit(count);

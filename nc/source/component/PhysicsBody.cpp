@@ -62,7 +62,7 @@ namespace
             }
             default:
             {
-                throw std::runtime_error("GetInverseInertiaTensor - Unknown ColliderType");
+                throw NcError("Unknown ColliderType");
             }
         }
 
@@ -86,9 +86,9 @@ namespace nc
     {
         auto* registry = ActiveRegistry();
         auto* collider = registry->Get<Collider>(entity);
-        
+
         if(!collider)
-            throw std::runtime_error("PhysicsBody added to Entity with no Collider");
+            throw NcError("PhysicsBody added to Entity with no Collider");
 
         if(entity.IsStatic())
         {
