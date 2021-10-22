@@ -60,7 +60,7 @@ namespace nc
         m_sceneSystem.DoSceneChange(this);
         m_isRunning = true;
 
-        if(m_useEditorMode)
+        if(!m_useEditorMode)
             MainLoop();
         else
             EditorLoop();
