@@ -49,7 +49,7 @@ namespace nc
 
     Engine::~Engine() noexcept
     {
-        Shutdown();
+        debug::internal::CloseLog();
     }
 
     void Engine::Start(std::unique_ptr<Scene> initialScene)
@@ -76,7 +76,6 @@ namespace nc
     {
         V_LOG("Shutdown NcEngine");
         ClearState();
-        debug::internal::CloseLog();
     }
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
