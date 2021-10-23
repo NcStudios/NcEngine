@@ -8,8 +8,17 @@
 #include <span>
 #include <vector>
 
-namespace nc::ecs
+namespace nc
 {
+    class PerComponentStorageBase
+    {
+        public:
+            virtual ~PerComponentStorageBase() = default;
+            virtual void Clear() = 0;
+            virtual void CommitStagedComponents(const std::vector<Entity>& removed) = 0;
+            virtual void VerifyCallbacks() = 0;
+    };
+
     template<Component T>
     struct SystemCallbacks
     {
@@ -20,11 +29,11 @@ namespace nc::ecs
     };
 
     template<Component T>
-    class PerComponentStorage
+    class PerComponentStorage : public PerComponentStorageBase
     {
         using value_type = T;
         using index_type = Entity::index_type;
-        
+
         struct StagedComponent
         {
             Entity entity;
@@ -57,11 +66,12 @@ namespace nc::ecs
 
             void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
             void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
-            void VerifyCallbacks();
             void Swap(index_type firstEntity, index_type secondEntity);
             void ReserveHeadroom(size_t additionalRequiredCount);
-            void CommitStagedComponents();
-            void Clear();
+            
+            void Clear() override;
+            void CommitStagedComponents(const std::vector<Entity>& removed) override;
+            void VerifyCallbacks() override;
 
         private:
             std::vector<index_type> sparseArray;
@@ -231,8 +241,11 @@ namespace nc::ecs
     }
 
     template<Component T>
-    void PerComponentStorage<T>::CommitStagedComponents()
+    void PerComponentStorage<T>::CommitStagedComponents(const std::vector<Entity>& removed)
     {
+        for(auto entity : removed)
+            TryRemove(entity);
+
         for(auto& [entity, component] : stagingPool)
         {
             componentPool.push_back(std::move(component));

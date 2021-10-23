@@ -16,19 +16,7 @@
 
 namespace nc
 {
-    using registry_type_list = ecs::RegistryTypeList<AudioSource,
-                                                     AutoComponentGroup,
-                                                     Collider,
-                                                     ConcaveCollider,
-                                                     NetworkDispatcher,
-                                                     ParticleEmitter,
-                                                     PhysicsBody,
-                                                     Tag,
-                                                     Transform,
-                                                     MeshRenderer,
-                                                     PointLight>;
-                                                     
-    using registry_type = ecs::Registry<registry_type_list>;
+    using registry_type = Registry;
 
     auto ActiveRegistry() -> registry_type*;
 

@@ -5,7 +5,6 @@
 #include "component/Transform.h"
 
 using namespace nc;
-using namespace nc::ecs;
 
 namespace nc
 {
@@ -58,16 +57,19 @@ constexpr auto Handle4 = Entity{3u, 0u, 0u};
 constexpr auto Handle5 = Entity{4u, 0u, 0u};
 const auto TestInfo = EntityInfo{};
 
+Registry g_registry{10u};
+
 class Registry_unit_tests : public ::testing::Test
 {
     public:
-        size_t maxEntities = 10u;
-        using type_list = RegistryTypeList<Transform, AutoComponentGroup, Tag, Fake1, Fake2>;
-        Registry<type_list> registry;
+        Registry& registry;
 
         Registry_unit_tests()
-            : registry{maxEntities}
-        {}
+            : registry{g_registry}
+        {
+            registry.RegisterComponentType<Fake1>();
+            registry.RegisterComponentType<Fake2>();
+        }
 
         ~Registry_unit_tests()
         {

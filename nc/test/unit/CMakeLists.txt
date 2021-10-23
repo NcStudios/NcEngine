@@ -150,6 +150,7 @@ add_test(PacketBuffer_unit_tests PacketBuffer_unit_tests)
 ### Registry Tests ###
 add_executable(Registry_unit_tests
     ${ROOT_DIR}/test/unit/Registry_unit_tests.cpp
+    ${ROOT_DIR}/source/component/Registry.cpp
 )
 
 target_include_directories(Registry_unit_tests
