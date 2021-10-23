@@ -18,10 +18,7 @@ namespace nc::graphics
 
     ShadowMapManager::~ShadowMapManager()
     {
-        m_sampler.reset();
-        m_depthStencil.reset();
-        m_descriptorSet.reset();
-        m_descriptorSetLayout.reset();
+        Reset();
     }
 
     auto ShadowMapManager::GetDescriptorSet() -> vk::DescriptorSet*
@@ -36,12 +33,19 @@ namespace nc::graphics
 
     void ShadowMapManager::Reset()
     {
+        // m_sampler.reset();
+        // m_depthStencil.reset();
+        // m_descriptorSet.reset();
+        // m_descriptorSetLayout.reset();
+        // Initialize();
     }
 
     void ShadowMapManager::Update(const std::vector<ShadowMap>& data)
     {
         m_dimensions = data.at(0).dimensions;
         auto* base = m_graphics->GetBasePtr();
+
+        m_depthStencil.reset();
         m_depthStencil = std::make_unique<DepthStencil>(base, m_dimensions, vk::Format::eD16Unorm);
         
         vk::DescriptorImageInfo imageSamplerInfo;

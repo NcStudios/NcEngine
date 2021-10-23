@@ -59,8 +59,6 @@ namespace nc::graphics
                                                         renderpass.renderTargetSize.extent, 
                                                         clearValues);
 
-        std::cout << "m_renderTargets.size() " << m_renderTargets.size() << std::endl;
-
         cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
     }
 
@@ -110,15 +108,14 @@ namespace nc::graphics
         m_renderPasses.push_back(std::move(renderpass));
     }
 
-    void RenderPassManager::Resize(const Vector2& dimensions)
+    void RenderPassManager::Resize(const Vector2& dimensions, vk::Extent2D extent)
     {
-        auto* swapchain = m_graphics->GetSwapchainPtr();
         auto* base = m_graphics->GetBasePtr();
 
         for (auto& renderPass : m_renderPasses)
         {
             renderPass.renderTargetSize.dimensions = dimensions;
-            renderPass.renderTargetSize.extent = swapchain->GetExtent();
+            renderPass.renderTargetSize.extent = extent;
         }
 
         for (auto& renderTarget : m_renderTargets)
@@ -129,10 +126,11 @@ namespace nc::graphics
             framebufferInfo.setRenderPass(renderPass.renderpass.get());
             framebufferInfo.setAttachmentCount(renderTarget.attachmentHandles.size());
             framebufferInfo.setPAttachments(renderTarget.attachmentHandles.data());
-            framebufferInfo.setWidth(renderPass.renderTargetSize.dimensions.x);
-            framebufferInfo.setHeight(renderPass.renderTargetSize.dimensions.y);
+            framebufferInfo.setWidth(dimensions.x);
+            framebufferInfo.setHeight(dimensions.y);
             framebufferInfo.setLayers(1);
 
+            renderTarget.frameBuffer.reset();
             renderTarget.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
         }
     }

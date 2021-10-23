@@ -16,11 +16,10 @@ namespace nc::ui::editor
     class Editor
     {
         public:
-            Editor(graphics::Graphics* graphics);
+            Editor();
             void Frame(float* dt, registry_type* registry);
 
         private:
-            nc::graphics::Graphics* m_graphics;
             bool m_openState_Editor;
             bool m_openState_UtilitiesPanel;
 

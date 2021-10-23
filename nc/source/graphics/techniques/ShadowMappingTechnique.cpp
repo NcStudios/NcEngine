@@ -9,6 +9,8 @@
 #include "graphics/resources/ShaderResourceService.h"
 #include "graphics/VertexDescriptions.h"
 
+#include <iostream>
+
 namespace
 {
     // Depth bias (and slope) are used to avoid shadowing artifacts
@@ -26,24 +28,26 @@ namespace nc::graphics
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
-      m_pipeline{},
-      m_pipelineLayout{}
+      m_pipeline{nullptr},
+      m_pipelineLayout{nullptr}
     {
         CreatePipeline(renderPass);
     }
 
     ShadowMappingTechnique::~ShadowMappingTechnique()
     {
-        auto device = m_base->GetDevice();
-        device.destroyPipelineLayout(m_pipelineLayout);
-        device.destroyPipeline(m_pipeline);
+        // std::cout << "Destroying ShadowMappingTechnique: " << m_pipeline.get() << std:: endl;
+        m_pipeline.reset();
+        m_pipelineLayout.reset();
+        // m_base->GetDevice().destroyPipelineLayout(m_pipelineLayout.get());
+        // m_base->GetDevice().destroyPipeline(m_pipeline.get());
     }
 
     void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 
@@ -68,7 +72,7 @@ namespace nc::graphics
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
-        m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
+        m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         // Graphics pipeline
         std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
@@ -97,13 +101,15 @@ namespace nc::graphics
         auto colorBlending = CreateColorBlendStateCreateInfo();
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
-        pipelineCreateInfo.setLayout(m_pipelineLayout);
+        pipelineCreateInfo.setLayout(m_pipelineLayout.get());
         pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
+        m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        // std::cout << "Creating ShadowMappingTechnique: " << m_pipeline.get() << std:: endl;
+
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
@@ -125,7 +131,7 @@ namespace nc::graphics
         {
             pushConstants.lightViewProjection = pointLightVP;
 
-            cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
             uint32_t objectInstance = 0;
             for (const auto& mesh : meshes)

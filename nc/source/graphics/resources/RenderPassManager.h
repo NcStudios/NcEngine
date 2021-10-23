@@ -25,7 +25,7 @@ namespace nc::graphics
 
             RenderPass& Acquire(const std::string& uid);
             void Create(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValue valuesToClear, const Vector2& dimensions);
-            void Resize(const Vector2& dimensions);
+            void Resize(const Vector2& dimensions, vk::Extent2D extent);
 
             void Begin(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex);
             void End(vk::CommandBuffer* cmd);

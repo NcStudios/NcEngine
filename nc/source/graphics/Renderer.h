@@ -31,14 +31,16 @@ namespace nc::graphics
             Renderer(graphics::Graphics* graphics,
                      AssetServices* assets, 
                      ShaderResourceServices* shaderResources,
-                     RenderPassManager* renderPasses,
                      Vector2 dimensions);
 
             ~Renderer() noexcept;
             
-            void RegisterTechniques(); /** @todo Tie techniques to renderPasses via some fancy way here */
+            void Resize(Vector2 dimensions, vk::Extent2D extent);
+            void RegisterTechniques();
+            void RegisterRenderPasses();
             void Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex);
             void Clear() noexcept;
+            void InitializeImgui();
 
             #ifdef NC_EDITOR_ENABLED
             void RegisterDebugWidget(nc::DebugWidget widget);
@@ -48,11 +50,10 @@ namespace nc::graphics
         private:
             void BindSharedData(vk::CommandBuffer* cmd);
             void RecordUi(vk::CommandBuffer* cmd);
-
             graphics::Graphics* m_graphics;
             AssetServices* m_assets;
             ShaderResourceServices* m_shaderResources;
-            RenderPassManager* m_renderPasses;
+            std::unique_ptr<RenderPassManager> m_renderPasses;
             Vector2 m_dimensions;
             
             std::unique_ptr<PhongAndUiTechnique> m_phongAndUiTechnique;

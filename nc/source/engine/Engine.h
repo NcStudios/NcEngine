@@ -25,6 +25,7 @@ namespace nc
 
         private:
             window::WindowImpl m_window;
+            ui::UIImpl m_ui;
             graphics::Graphics m_graphics;
             AssetServices m_assetServices;
             ecs::EntityComponentSystem m_ecs;
@@ -32,7 +33,6 @@ namespace nc
             scene::SceneSystem m_sceneSystem;
             time::Time m_time;
             audio::AudioSystem m_audioSystem;
-            ui::UIImpl m_ui;
             tf::Executor m_taskExecutor;
             TaskGraph m_tasks;
             float m_dt;

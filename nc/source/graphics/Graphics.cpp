@@ -12,6 +12,8 @@
 #include "resources/RenderPassManager.h"
 #include "config/Config.h"
 
+#include <iostream>
+
 namespace
 {
     constexpr std::array<float, 4> DefaultClearColor = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -25,22 +27,26 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
-          m_renderPasses{std::make_unique<RenderPassManager>(this, dimensions)},
-          m_renderer{ std::make_unique<Renderer>(this, assets, m_shaderResources.get(), m_renderPasses.get(), dimensions) },
+          m_renderer{ std::make_unique<Renderer>(this, assets, m_shaderResources.get(), dimensions) },
+          m_assets{assets},
+          m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
           m_isFullscreen{ false },
+          m_isResizing{ false },
           m_clearColor{DefaultClearColor},
           m_drawCallCount{0}
     {
         camera::UpdateProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
+        m_renderer->InitializeImgui();
     }
 
     Graphics::~Graphics() noexcept
     {
         try
         {
+            WaitIdle();
             Clear();
         }
         catch(const std::runtime_error& e) // from WaitIdle()
@@ -51,11 +57,28 @@ namespace nc::graphics
 
     void Graphics::RecreateSwapchain(Vector2 dimensions)
     {
+        if (m_isMinimized)
+        {
+            return;
+        }
+
+        std::lock_guard lock{m_resizingMutex};
+        m_isResizing = true;
+
         // Wait for all current commands to complete execution
         WaitIdle();
 
-        // Destroy all resources used by the swapchain
         m_dimensions = dimensions;
+
+        auto shadowMap = ShadowMap
+        {
+            .dimensions = dimensions
+        };
+
+        // Destroy all resources used by the swapchain
+        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
+
+        m_renderer.reset();
         m_commands.reset();
         m_swapchain.reset();
         m_depthStencil.reset();
@@ -64,15 +87,9 @@ namespace nc::graphics
         m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
         m_swapchain = std::make_unique<Swapchain>(m_base.get(), dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
+        m_renderer = std::make_unique<Renderer>(this, m_assets, m_shaderResources.get(), dimensions);
 
-        auto shadowMap = ShadowMap
-        {
-            .dimensions = dimensions
-        };
-
-        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
-        m_renderer->RegisterTechniques();
-        m_renderPasses->Resize(dimensions);
+        m_isResizing = false;
     }
 
     void Graphics::ToggleFullscreen()
@@ -98,6 +115,13 @@ namespace nc::graphics
         m_dimensions = Vector2{ width, height };
         camera::UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
+
+        if (m_isMinimized)
+        {
+            return;
+        }
+
+        RecreateSwapchain(m_dimensions);
     }
 
     void Graphics::WaitIdle()
@@ -154,8 +178,9 @@ namespace nc::graphics
         m_renderer->Clear();
         ShaderResourceService<ObjectData>::Get()->Reset();
         ShaderResourceService<PointLightInfo>::Get()->Reset();
+        ShaderResourceService<ShadowMap>::Get()->Reset();
     }
-    
+
     void Graphics::SetClearColor(std::array<float, 4> color)
     {
         m_clearColor = color;
@@ -190,6 +215,8 @@ namespace nc::graphics
     {
         m_drawCallCount = 0;
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        if (m_isMinimized) return UINT32_MAX;
+
         uint32_t imageIndex = UINT32_MAX;
 
         // Gets the next image in the swapchain

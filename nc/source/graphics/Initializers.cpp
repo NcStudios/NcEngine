@@ -446,7 +446,7 @@ namespace nc::graphics
 
     void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions)
     {
-         auto viewport = CreateViewport(dimensions);
+        auto viewport = CreateViewport(dimensions);
         auto extent = CreateExtent(dimensions);
         auto scissor = CreateScissor(extent);
         commandBuffer->setViewport(0, 1, &viewport);

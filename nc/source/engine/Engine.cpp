@@ -55,6 +55,7 @@ namespace nc
     /* Engine */
     Engine::Engine(HINSTANCE hInstance)
         : m_window{ hInstance },
+          m_ui{m_window.GetHWND()},
           m_graphics{ m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions(), &m_assetServices },
           m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
           m_ecs{&m_graphics, config::GetMemorySettings()},
@@ -62,7 +63,6 @@ namespace nc
           m_sceneSystem{},
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
-          m_ui{m_window.GetHWND(), &m_graphics},
           m_taskExecutor{6u}, // @todo probably add to config
           m_tasks{},
           m_dt{0.0f},
@@ -184,6 +184,12 @@ namespace nc
         auto* registry = m_ecs.GetRegistry();
         camera::UpdateViewMatrix();
         m_currentImageIndex = m_graphics.FrameBegin();
+
+        if (m_currentImageIndex == UINT32_MAX)
+        {
+            return;
+        }
+
         m_ui.FrameBegin();
 
         #ifdef NC_EDITOR_ENABLED

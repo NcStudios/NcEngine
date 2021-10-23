@@ -3,7 +3,9 @@
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "directx/math/DirectXMath.h"
+
 #include <memory>
+#include <mutex>
 
 namespace nc { struct AssetServices; }
 
@@ -67,14 +69,17 @@ namespace nc::graphics
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
-            std::unique_ptr<RenderPassManager> m_renderPasses;
             std::unique_ptr<Renderer> m_renderer;
 
+            AssetServices* m_assets;
+
+            std::mutex m_resizingMutex;
             uint32_t m_imageIndex;
             Vector2 m_dimensions;
             bool m_isMinimized;
             bool m_isFullscreen;
             bool m_isResized;
+            bool m_isResizing;
             std::array<float, 4> m_clearColor;
             uint32_t m_drawCallCount = 0;
     };

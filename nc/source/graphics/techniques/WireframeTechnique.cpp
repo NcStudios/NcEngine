@@ -14,6 +14,8 @@
 #include "graphics/VertexDescriptions.h"
 #include "assets/AssetService.h"
 
+#include <iostream>
+
 namespace nc::graphics
 {
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
@@ -24,23 +26,26 @@ namespace nc::graphics
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
-      m_pipeline{},
-      m_pipelineLayout{}
+      m_pipeline{nullptr},
+      m_pipelineLayout{nullptr}
     {
         CreatePipeline(renderPass);
     }
 
     WireframeTechnique::~WireframeTechnique() noexcept
     {
-        auto device = m_base->GetDevice();
-        device.destroyPipelineLayout(m_pipelineLayout);
-        device.destroyPipeline(m_pipeline);
+        // std::cout << "Destroying WireframeTechnique: " << m_pipeline.get() << std::endl << std::endl;
+        
+        m_pipeline.reset();
+        m_pipelineLayout.reset();
+        // m_base->GetDevice().destroyPipelineLayout(m_pipelineLayout.get());
+        // m_base->GetDevice().destroyPipeline(m_pipeline.get());
     }
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         NC_PROFILE_END();
     }
 
@@ -77,7 +82,7 @@ namespace nc::graphics
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
-        m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
+        m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
@@ -106,13 +111,16 @@ namespace nc::graphics
         auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
-        pipelineCreateInfo.setLayout(m_pipelineLayout);
+        pipelineCreateInfo.setLayout(m_pipelineLayout.get());
         pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
+        m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+
+        // std::cout << "Creating WireframeTechnique: " << m_pipeline.get() << std:: endl;
+
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
@@ -127,7 +135,7 @@ namespace nc::graphics
         {
             const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
             pushConstants.model = m_debugWidget->transformationMatrix;
-            cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
         NC_PROFILE_END();

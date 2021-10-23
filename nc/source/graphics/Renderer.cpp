@@ -15,70 +15,89 @@
 #include "resources/RenderPassManager.h"
 
 #include <span>
+#include <iostream>
 
 namespace nc::graphics
 {
     Renderer::Renderer(Graphics* graphics, 
                        AssetServices* assets, 
                        ShaderResourceServices* shaderResources,
-                       RenderPassManager* renderPasses,
                        Vector2 dimensions)
         : m_graphics{graphics},
           m_assets{assets},
           m_shaderResources{shaderResources},
-          m_renderPasses{renderPasses},
+          m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
           m_dimensions{dimensions},
-          m_phongAndUiTechnique{std::make_unique<PhongAndUiTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get())},
-          m_shadowMappingTechnique{std::make_unique<ShadowMappingTechnique>(m_graphics, &m_renderPasses->Acquire("Shadow Mapping Pass").renderpass.get())}
+          m_phongAndUiTechnique{nullptr},
+          m_shadowMappingTechnique{nullptr}
           #ifdef NC_EDITOR_ENABLED
           ,
-          m_wireframeTechnique{std::make_unique<WireframeTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get())}
+          m_wireframeTechnique{nullptr}
           #endif
     {
+        RegisterRenderPasses();
         RegisterTechniques();
     }
 
     Renderer::~Renderer() noexcept
     {
+        m_renderPasses.reset();
+        m_phongAndUiTechnique.reset();
+        m_shadowMappingTechnique.reset();
+        #ifdef NC_EDITOR_ENABLED
+        m_wireframeTechnique.reset();
+        #endif
     }
 
-    /** @todo Tie techniques to renderPasses via some fancy way here. This is currently a misnomer placeholder for the last part of the system (in progress), and should be parameterized. */
-    void Renderer::RegisterTechniques()
+    void Renderer::InitializeImgui()
+    {
+        m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire("Lit Pass").renderpass.get());
+    }
+
+    void Renderer::RegisterRenderPasses()
     {
         auto* swapchain = m_graphics->GetSwapchainPtr();
 
         /** Shadow mapping pass */
         {
-            m_shadowMappingTechnique.reset();
-            m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(m_graphics, &m_renderPasses->Acquire("Shadow Mapping Pass").renderpass.get());
-
             const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
             m_renderPasses->RegisterAttachment(shadowDepthImageView, "Shadow Mapping Pass");
         }
 
         /** Lit shading pass */
         {
-            m_phongAndUiTechnique.reset();
-            m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get());
-
-            #ifdef NC_EDITOR_ENABLED
-            m_wireframeTechnique.reset();
-            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get());
-            #endif
-
             auto& colorImageViews = swapchain->GetColorImageViews();
             auto& depthImageView = m_graphics->GetDepthStencil().GetImageView();
 
             uint32_t index = 0;
             for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, "Lit Pass", index++); }
         }
+    }
 
-        /** ImGui (Implicit, doesn't follow other rules) */
+    /** @todo Tie techniques to renderPasses via some fancy way here. This is currently a misnomer placeholder for the last part of the system (in progress), and should be parameterized. */
+    void Renderer::RegisterTechniques()
+    {
+        /** Shadow mapping pass */
         {
-            ImGui::CreateContext();
-            m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire("Lit Pass").renderpass.get());
+            m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(m_graphics, &m_renderPasses->Acquire("Shadow Mapping Pass").renderpass.get());
         }
 
+        /** Lit shading pass */
+        {
+            m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get());
+
+            #ifdef NC_EDITOR_ENABLED
+            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_renderPasses->Acquire("Lit Pass").renderpass.get());
+            #endif
+        }
+    }
+
+    void Renderer::Resize(Vector2 dimensions, vk::Extent2D extent)
+    {
+        m_dimensions = dimensions;
+        RegisterRenderPasses();
+        m_renderPasses->Resize(dimensions, extent);
+        RegisterTechniques();
     }
 
     void Renderer::Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex)
@@ -91,25 +110,20 @@ namespace nc::graphics
         auto* cmd = &commandBuffers[currentSwapChainImageIndex];
         cmd->begin(vk::CommandBufferBeginInfo{});
 
+        SetViewportAndScissor(cmd, m_dimensions);
+        BindSharedData(cmd);
+
         // Shadow mapping pass
         {
             m_renderPasses->Begin("Shadow Mapping Pass", cmd, 0);
-
-            SetViewportAndScissor(cmd, m_dimensions);
-            BindSharedData(cmd);
-
             m_shadowMappingTechnique->Bind(cmd);
             m_shadowMappingTechnique->Record(cmd, state.pointLightVPs, state.meshes);
-
             m_renderPasses->End(cmd);
         }
 
         // Lit shading pass
         {
             m_renderPasses->Begin("Lit Pass", cmd, currentSwapChainImageIndex);
-
-            SetViewportAndScissor(cmd, m_dimensions);
-            BindSharedData(cmd);
 
             #ifdef NC_EDITOR_ENABLED
             if (m_wireframeTechnique->HasDebugWidget())
