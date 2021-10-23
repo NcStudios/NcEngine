@@ -11,7 +11,7 @@ namespace nc
         
         std::ifstream file{path};
         if(!file.is_open())
-            throw std::runtime_error("ConvexHullAssetManager::Load - Could not open file: " + path);
+            throw NcError("Failure opening file: " + path);
         
         Vector3 extents;
         float maxExtent;
@@ -24,7 +24,7 @@ namespace nc
         for(size_t i = 0u; i < vertexCount; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("LoadConvexHullAsset - Failure reading file: " + path);
+                throw NcError("Failure reading file: " + path);
 
             file >> vertex.x >> vertex.y >> vertex.z;
             vertices.push_back(vertex);
@@ -64,7 +64,7 @@ namespace nc
     {
         const auto it = m_hullColliders.find(path);
         if(it == m_hullColliders.end())
-            throw std::runtime_error("ConvexHullAssetManager::Acquire - asset is not loaded: " + path);
+            throw NcError("Asset is not loaded: " + path);
         
         return ConvexHullView
         {

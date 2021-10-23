@@ -1,6 +1,5 @@
 #include "component/ConcaveCollider.h"
-
-#include <stdexcept>
+#include "debug/NcError.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
@@ -13,7 +12,7 @@ namespace nc
           m_path{std::move(assetPath)}
     {
         if(!entity.IsStatic())
-            throw std::runtime_error("ConcaveCollider - Cannot be added to a non-static entity");
+            throw NcError("Cannot add ConcaveCollider to a non-static entity");
     }
 
     #ifdef NC_EDITOR_ENABLED

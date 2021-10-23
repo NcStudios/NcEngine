@@ -70,7 +70,7 @@ namespace
                 return { ConvexHull{.vertices = hull.vertices, .extents = hull.extents, .maxExtent = hull.maxExtent} };
             }
             default:
-                throw std::runtime_error("CreateBoundingVolume - Unknown ColliderType");
+                throw NcError("Unknown ColliderType");
         }
     }
 }
@@ -164,7 +164,7 @@ namespace nc
             case ColliderType::Capsule: return "Capsule";
             case ColliderType::Sphere:  return "Sphere";
             case ColliderType::Hull:    return "Hull";
-            default: throw std::runtime_error("ToCString - Unknown ColliderType");
+            default: throw NcError("Unknown ColliderType");
         }
     }
 

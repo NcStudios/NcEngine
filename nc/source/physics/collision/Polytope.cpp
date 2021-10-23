@@ -166,7 +166,7 @@ namespace nc::physics
          *  before moving to Epa hopefully fixed this. */
         if(std::isnan(u) || std::isnan(v) || std::isnan(w))
         {
-            throw std::runtime_error("Polytope::GetContacts - NaN in Barycentric Projection");
+            throw NcError("NaN in Barycentric Projection");
         }
 
         const auto& [worldA1, worldB1] = m_worldSupports.at(i1);

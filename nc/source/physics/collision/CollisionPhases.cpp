@@ -95,7 +95,7 @@ namespace
             return CollisionEventType::Trigger;
         }
 
-        throw std::runtime_error("GetInteractionType - Unknown ColliderInteractionType");
+        throw NcError("Unknown ColliderInteractionType");
     }
 }
 

@@ -17,7 +17,7 @@ namespace
         stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
 
         if(!pixels)
-            throw std::runtime_error("Failed to load texture file: " + path);
+            throw nc::NcError("Failed to load texture file: " + path);
 
         nc::graphics::Texture texture
         {
@@ -56,7 +56,7 @@ namespace nc
         const auto index = m_accessors.size();
 
         if (index + 1 >= m_maxTextureCount)
-            throw std::runtime_error("TextureAssetManager::AddTexture - Cannot exceed max texture count.");
+            throw NcError("Cannot exceed max texture count.");
 
         if(IsLoaded(path))
             return false;
@@ -72,7 +72,7 @@ namespace nc
         const auto newTextureCount = paths.size();
         auto nextTextureIndex = m_textures.size();
         if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
-            throw std::runtime_error("TextureAssetManager::AddTexture - Cannot exceed max texture count.");
+            throw NcError("Cannot exceed max texture count.");
 
         for (const auto& path : paths)
         {
@@ -122,7 +122,7 @@ namespace nc
     {
         const auto it = m_accessors.find(path);
         if(it == m_accessors.cend())
-            throw std::runtime_error("TextureAssetManager::Acquire - asset is not loaded: " + path);
+            throw NcError("Asset is not loaded: " + path);
         
         return it->second;
     }

@@ -21,7 +21,7 @@ namespace
             }
         }
 
-        throw std::runtime_error("CalculateAttenuation - Unknown AttenuationFunction");
+        throw NcError("Unknown AttenuationFunction");
     }
 }
 

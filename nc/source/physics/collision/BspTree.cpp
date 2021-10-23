@@ -103,7 +103,7 @@ namespace nc::physics
         });
 
         if(pos == m_triMeshes.end())
-            throw std::runtime_error("BspTree::OnRemove - Tree does not have a collider for entity");
+            throw NcError("Tree does not have a collider for entity");
 
         /** @todo We don't actually remove anything because it would mess
          *  up stored indices. We could use a free list, but removing static
@@ -340,7 +340,7 @@ namespace nc::physics
         const auto indexCount = meshIndices.size();
 
         if(indexCount == 0u)
-            throw std::runtime_error("BspTree::ComputepartitionData - Called with empty vector");
+            throw NcError("Empty vector");
 
         auto averageCenter = Vector3::Zero();
 

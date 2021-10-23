@@ -42,7 +42,7 @@ namespace
         for(size_t i = 0; i < count; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("ReadVerticesFromAsset - Failure");
+                throw nc::NcError("Failure reading file");
             
             file >> ver >> nrm >> tex >> tan >> bit;
             vertices.emplace_back(ver, nrm, tex, tan, bit);
@@ -56,7 +56,7 @@ namespace
         for(size_t i = 0; i < count; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("ReadIndicesFromAsset - Failure");
+                throw nc::NcError("Failure reading file");
 
             file >> index;
             indices.push_back(index);
@@ -66,11 +66,11 @@ namespace
     auto ReadMesh(const std::string& meshPath, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
     {
         if(!HasValidAssetExtension(meshPath))
-            throw std::runtime_error("LoadMeshes - Invalid extension: " + meshPath);
+            throw nc::NcError("Invalid extension: " + meshPath);
 
         std::ifstream file{meshPath};
         if(!file.is_open())
-            throw std::runtime_error("LoadMeshes - Could not open file: " + meshPath);
+            throw nc::NcError("Could not open file: " + meshPath);
 
         float maxExtent;
         size_t vertexCount, indexCount;
@@ -205,7 +205,7 @@ namespace nc
     {
         const auto it = m_accessors.find(path);
         if(it == m_accessors.cend())
-            throw std::runtime_error("MeshAssetManager::Acquire - asset not loaded: " + path);
+            throw NcError("Asset not loaded: " + path);
         
         return it->second;
     }

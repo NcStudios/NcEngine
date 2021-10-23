@@ -25,7 +25,7 @@ namespace nc::scene
     {
         if(!m_activeScene)
         {
-            throw std::runtime_error("Attempt to unload null scene");
+            throw NcError("Attempt to unload null scene");
         }
         m_activeScene->Unload();
         m_activeScene = nullptr;
@@ -35,7 +35,7 @@ namespace nc::scene
     {
         if(!m_swapScene)
         {
-            throw std::runtime_error("Attempt to swap null scene");
+            throw NcError("Attempt to swap null scene");
         }
         
         m_activeScene = std::move(m_swapScene);

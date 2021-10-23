@@ -3,6 +3,8 @@
 #include "graphics/DebugRenderer.h"
 #include "debug/Profiler.h"
 
+#include <cassert>
+
 using namespace DirectX;
 
 namespace
@@ -447,13 +449,8 @@ namespace nc::physics
         {
             for(auto& contact : manifold.contacts)
             {
-                #if NC_PHSYICS_DEBUGGING
-                if(index >= constraints.size())
-                    throw std::runtime_error("CacheImpulses - Invalid index");
-
-                if(manifold.entityA != constraints[index].entityA || manifold.entityB != constraints[index].entityB)
-                    throw std::runtime_error("CacheImpulses - Entity mismatch");
-                #endif
+                assert(index < constraints.size());
+                assert(manifold.entityA == constraints[index].entityA && manifold.entityB == constraints[index].entityB);
 
                 const auto& constraint = constraints[index];
                 contact.lambda = constraint.totalLambda;

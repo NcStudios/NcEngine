@@ -1,10 +1,10 @@
 #ifdef NC_EDITOR_ENABLED
 
 #include "debug/Profiler.h"
+#include "debug/NcError.h"
 
 #include <algorithm>
 #include <numeric>
-#include <stdexcept>
 #include <vector>
 
 namespace nc::debug::profiler
@@ -33,7 +33,7 @@ namespace nc::debug::profiler
             case Filter::User:
                 return "User";
             default:
-                throw std::runtime_error("ToCString - Unknown Filter value");
+                throw NcError("Unknown Filter value");
         }
     }
 
@@ -77,7 +77,7 @@ namespace nc::debug::profiler
         auto [it, result] = internal::data.emplace(internal::currentId, FunctionMetrics{name, filter});
 
         if(!result)
-            throw std::runtime_error("profiler::Register - Failed to emplace FunctionMetrics");
+            throw NcError("Failed to emplace FunctionMetrics");
 
         return internal::currentId++;
     }
@@ -93,14 +93,14 @@ namespace nc::debug::profiler
         }
         catch(const std::exception& e)
         {
-            std::throw_with_nested(std::runtime_error("profiler::Push - invalid FuncId"));
+            std::throw_with_nested(NcError("Invalid FuncId"));
         }
     }
 
     void Pop()
     {
         if(internal::openProfiles.empty())
-            throw std::runtime_error("profiler::Pop - Push/Pop mismatch");
+            throw NcError("Push/Pop mismatch");
 
         auto mostRecent = internal::openProfiles.back();
         internal::openProfiles.pop_back();
@@ -112,7 +112,7 @@ namespace nc::debug::profiler
         }
         catch(const std::exception& e)
         {
-            std::throw_with_nested(std::runtime_error("profiler::Pop - invalid FuncId"));
+            std::throw_with_nested(NcError("Invalid FuncId"));
         }
     }
 
