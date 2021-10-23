@@ -1,6 +1,5 @@
 #include "component/NetworkDispatcher.h"
-
-#include <stdexcept>
+#include "debug/NcError.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
@@ -21,7 +20,7 @@ namespace nc
         }
         catch(std::out_of_range& e)
         {
-            throw std::runtime_error("NetworkDispatcher::Dispatch - Unknown packet type");
+            throw NcError("Unknown PacketType");
         }
     }
 

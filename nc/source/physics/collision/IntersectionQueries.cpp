@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <array>
-#include <stdexcept>
 
 #include <iostream> // remove once minDistance error is figured out
 

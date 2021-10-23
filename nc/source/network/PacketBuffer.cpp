@@ -1,7 +1,7 @@
 #include "network/PacketBuffer.h"
+#include "debug/NcError.h"
 
 #include <cstring>
-#include <stdexcept>
 
 namespace nc::net
 {

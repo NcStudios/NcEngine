@@ -10,7 +10,7 @@ namespace nc
         
         AudioFile<double> asset;
         if(!asset.load(path))
-            throw std::runtime_error("SoundClipAssetManager::DoLoad - Failure opening file: " + path);
+            throw NcError("Failure opening file: " + path);
 
         size_t samplesPerChannel = asset.samples.at(0).size();
 
@@ -43,7 +43,7 @@ namespace nc
     {
         const auto it = m_soundClips.find(path);
         if(it == m_soundClips.end())
-            throw std::runtime_error("SoundClipAssetManager::DoGet - asset is not loaded: " + path);
+            throw NcError("Asset is not loaded: " + path);
         
         return SoundClipView
         {

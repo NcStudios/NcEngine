@@ -353,9 +353,8 @@ namespace nc::ecs
         auto& referenceComponents = referenceStorage.GetComponentPool();
         auto& targetComponents = targetStorage.GetComponentPool();
 
-        // changes
         if(referenceComponents.size() < current || targetComponents.size() < current)
-            throw std::runtime_error("ViewGroup - Invalid size");
+            throw NcError("ViewGroup - Invalid size");
 
         auto sharedRangeSize = current > end ? current : end;
 

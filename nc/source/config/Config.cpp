@@ -108,7 +108,7 @@ namespace
         else if (key == ShadersPathKey)
             out->graphicsSettings.shadersPath = value;
         else
-            throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
+            throw nc::NcError("Unknown config key");
     };
 } //end anonymous namespace
 
@@ -146,7 +146,7 @@ namespace nc::config
         g_config = std::make_unique<Config>();
         nc::config::Read(configPath, MapKeyValue, g_config.get());
         if(!Validate())
-            throw std::runtime_error("config::Load - Failed to validate config");
+            throw NcError("Failed to validate config");
     }
 
     bool Validate()

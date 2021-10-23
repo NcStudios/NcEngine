@@ -3,15 +3,14 @@
 #include "enet/enet.h"
 #include "NetworkDetails.h"
 #include "PacketBuffer.h"
-
-#include <stdexcept>
+#include "debug/NcError.h"
 
 namespace nc::net
 {
     class Endpoint
     {
         public:
-            Endpoint() { if(enet_initialize()) throw std::runtime_error("Failed to initialize Enet"); }
+            Endpoint() { if(enet_initialize()) throw NcError("Failed to initialize Enet"); }
             virtual ~Endpoint() { enet_deinitialize(); }
 
             virtual void Poll(uint32_t timeout = 0u) = 0;

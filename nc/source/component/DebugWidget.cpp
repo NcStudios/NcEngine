@@ -1,5 +1,5 @@
 #include "component/DebugWidget.h"
-#include <stdexcept>
+#include "debug/NcError.h"
 
 namespace
 {
@@ -32,7 +32,7 @@ namespace
             }
             default:
             {
-                throw std::runtime_error("DebugWidget::GetMeshPathForCollider - The given colliderType was not a valid ColliderType.");
+                throw NcError("Unknown ColliderType");
             }
         }
     }
