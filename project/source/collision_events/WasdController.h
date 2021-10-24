@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "Input.h"
 
 #include <iostream>
@@ -10,15 +10,15 @@ namespace nc::sample
     class WasdController : public AutoComponent
     {
         public:
-            WasdController(Entity entity, registry_type* registry, float speed);
+            WasdController(Entity entity, Registry* registry, float speed);
             void FrameUpdate(float dt) override;
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             float m_speed;
     };
 
-    inline WasdController::WasdController(Entity entity, registry_type* registry, float speed)
+    inline WasdController::WasdController(Entity entity, Registry* registry, float speed)
         : AutoComponent{entity},
           m_registry{registry},
           m_speed{speed}

@@ -1,5 +1,6 @@
 #include "MeshAssetManager.h"
 
+#include <cassert>
 #include <fstream>
 
 namespace
@@ -113,8 +114,9 @@ namespace nc
         MeshView mesh
         {
             .firstVertex = existingVertexCount,
+            .vertexCount = verticesRead,
             .firstIndex = existingIndexCount,
-            .indicesCount = indicesRead,
+            .indexCount = indicesRead,
             .maxExtent = maxExtent
         };
 
@@ -123,7 +125,7 @@ namespace nc
         return true;
     }
 
-    bool MeshAssetManager::Load(const std::vector<std::string>& paths)
+    bool MeshAssetManager::Load(std::span<const std::string> paths)
     {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
@@ -142,8 +144,9 @@ namespace nc
             MeshView mesh
             {
                 .firstVertex = totalVertexCount,
+                .vertexCount = verticesRead,
                 .firstIndex = totalIndexCount,
-                .indicesCount = indicesRead,
+                .indexCount = indicesRead,
                 .maxExtent = maxExtent
             };
 
@@ -158,9 +161,44 @@ namespace nc
 
     bool MeshAssetManager::Unload(const std::string& path)
     {
-        /** @todo */
-        (void)path;
-        return false;
+        auto pos = m_accessors.find(path);
+        if(pos == m_accessors.end())
+            return false;
+
+        const auto [firstVertex, vertexCount, firstIndex, indexCount, unused] = pos->second;
+        m_accessors.erase(path);
+
+        auto indBeg = m_indexData.indices.begin() + firstIndex;
+        auto indEnd = indBeg + indexCount;
+        assert(indEnd <= m_indexData.indices.end());
+        m_indexData.indices.erase(indBeg, indEnd);
+
+        auto vertBeg = m_vertexData.vertices.begin() + firstVertex;
+        auto vertEnd = vertBeg + vertexCount;
+        assert(vertEnd <= m_vertexData.vertices.end());
+        m_vertexData.vertices.erase(vertBeg, vertEnd);
+
+        for(auto& [path, accessor] : m_accessors)
+        {
+            if(accessor.firstVertex > firstVertex)
+                accessor.firstVertex -= vertexCount;
+
+            if(accessor.firstIndex > firstIndex)
+                accessor.firstIndex -= indexCount;
+        }
+
+        if(m_vertexData.vertices.size() != 0)
+            UpdateBuffers();
+
+        return true;
+    }
+
+    void MeshAssetManager::UnloadAll()
+    {
+        m_accessors.clear();
+        m_vertexData.vertices.clear();
+        m_indexData.indices.clear();
+        // Don't call UpdateBuffers() with empty data.
     }
 
     auto MeshAssetManager::Acquire(const std::string& path) const -> MeshView

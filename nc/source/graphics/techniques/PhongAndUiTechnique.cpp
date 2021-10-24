@@ -1,5 +1,5 @@
 #include "PhongAndUiTechnique.h"
-#include "Ecs.h"
+#include "Assets.h"
 #include "config/Config.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
@@ -119,7 +119,7 @@ namespace nc::graphics
         uint32_t objectInstance = 0;
         for(const auto& mesh : meshes)
         {
-            cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             
             #ifdef NC_EDITOR_ENABLED
             m_graphics->IncrementDrawCallCount();

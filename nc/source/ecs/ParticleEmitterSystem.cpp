@@ -20,7 +20,7 @@
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics)
+    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, graphics::Graphics* graphics)
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},

@@ -1,5 +1,5 @@
 // #include "ParticleTechnique.h"
-// #include "Ecs.h"
+// #include "ecs/Registry.h"
 // #include "config/Config.h"
 // #include "component/Transform.h"
 // #include "debug/Profiler.h"

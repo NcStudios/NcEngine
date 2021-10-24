@@ -3,8 +3,8 @@
 #include "physics/Geometry.h"
 
 #include <concepts>
+#include <span>
 #include <string>
-#include <vector>
 
 namespace nc
 {
@@ -14,21 +14,38 @@ namespace nc
      *  objects are created and should be unloaded only when they are no longer in use. */
 
     /** Supported file types: .nca */
-    void LoadConcaveColliderAsset(const std::string& path);
-    
-    /** Supported file types: .nca */
-    void LoadConvexHullAsset(const std::string& path);
+    bool LoadConcaveColliderAsset(const std::string& path);
+    bool LoadConcaveColliderAssets(std::span<const std::string> paths);
+    bool UnloadConcaveColliderAsset(const std::string& path);
+    void UnloadAllConcaveColliderAssets();
 
     /** Supported file types: .nca */
-    void LoadMeshAsset(const std::string& path);
-    void LoadMeshAssets(const std::vector<std::string>& paths);
+    bool LoadConvexHullAsset(const std::string& path);
+    bool LoadConvexHullAssets(std::span<const std::string> paths);
+    bool UnloadConvexHullAsset(const std::string& path);
+    void UnloadAllConvexHullAssets();
+
+    /** Supported file types: .nca 
+     *  @note Unloading meshes invalidates all MeshViews. It is intended
+     *  to be done on scene change. */
+    bool LoadMeshAsset(const std::string& path);
+    bool LoadMeshAssets(std::span<const std::string> paths);
+    bool UnloadMeshAsset(const std::string& path);
+    void UnloadAllMeshAssets();
 
     /** Supported file types: .wav */
-    void LoadSoundClipAsset(const std::string& path);
+    bool LoadSoundClipAsset(const std::string& path);
+    bool LoadSoundClipAssets(std::span<const std::string> paths);
+    bool UnloadSoundClipAsset(const std::string& path);
+    void UnloadAllSoundClipAssets();
 
-    /** Supported file types: .png */
-    void LoadTextureAsset(const std::string& path);
-    void LoadTextureAssets(const std::vector<std::string>& paths);
+    /** Supported file types: .png 
+     *  @note Unloading textures invalidates all TextureViews. It is intended
+     *  to be done on scene change. */
+    bool LoadTextureAsset(const std::string& path);
+    bool LoadTextureAssets(std::span<const std::string> paths);
+    bool UnloadTextureAsset(const std::string& path);
+    void UnloadAllTextureAssets();
 
     struct ConcaveColliderView
     {
@@ -46,8 +63,9 @@ namespace nc
     struct MeshView
     {
         uint32_t firstVertex;
+        uint32_t vertexCount;
         uint32_t firstIndex;
-        uint32_t indicesCount;
+        uint32_t indexCount;
         float maxExtent;
     };
 

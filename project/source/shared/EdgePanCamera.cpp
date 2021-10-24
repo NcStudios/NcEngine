@@ -1,5 +1,6 @@
 #include "EdgePanCamera.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
+#include "ecs/component/Transform.h"
 #include "MainCamera.h"
 #include "Input.h"
 #include "Window.h"

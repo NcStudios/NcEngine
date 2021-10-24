@@ -1,5 +1,5 @@
 #include "ClickableSystem.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "debug/Utils.h"
 #include "Input.h"
 #include "MainCamera.h"

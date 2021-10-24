@@ -1,5 +1,5 @@
 // #include "SolarSystem.h"
-// #include "Ecs.h"
+// #include "ecs/Registry.h"
 // #include "MainCamera.h"
 // #include "graphics/Mesh.h"
 // #include "graphics/Texture.h"
@@ -66,7 +66,7 @@
 
 // namespace nc::sample
 // {
-//     void SolarSystem::Load(registry_type* registry)
+//     void SolarSystem::Load(Registry* registry)
 //     {
 //         m_sceneHelper.Setup(registry, false, true);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Collider.h"
+#include "ecs/component/Collider.h"
 #include "Simplex.h"
 #include "Polytope.h"
 

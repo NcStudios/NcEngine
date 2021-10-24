@@ -28,7 +28,7 @@ namespace nc
 
             auto Audio() noexcept -> AudioSystem* override;
             auto MainCamera() noexcept -> nc::MainCamera* override;
-            auto Registry() noexcept -> registry_type* override;
+            auto Registry() noexcept -> nc::Registry* override;
             auto Physics() noexcept -> PhysicsSystem* override;
             auto SceneSystem() noexcept -> nc::SceneSystem* override;
             auto UI() noexcept -> UISystem* override;

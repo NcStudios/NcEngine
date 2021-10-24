@@ -2,7 +2,7 @@
 
 #include "ShaderResourceService.h"
 #include "WriteableBuffer.h"
-#include "component/PointLight.h"
+#include "ecs/component/PointLight.h"
 
 namespace nc::graphics
 {

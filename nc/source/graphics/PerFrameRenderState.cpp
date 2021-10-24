@@ -1,4 +1,8 @@
 #include "PerFrameRenderState.h"
+#include "ecs/Registry.h"
+#include "ecs/component/Camera.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/Transform.h"
 #include "physics/collision/IntersectionQueries.h"
 #include "resources/ShaderResourceService.h"
 
@@ -18,7 +22,7 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(registry_type* registry, Camera* camera, bool isPointLightSystemDirty)
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
         : viewMatrix{camera->GetViewMatrix()},
           projectionMatrix{camera->GetProjectionMatrix()},
           cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},

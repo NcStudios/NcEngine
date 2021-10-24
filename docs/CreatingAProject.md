@@ -16,17 +16,17 @@ Create a directory called 'example' in the repository directory with a few files
 Controller.h will define a component that handles movement of the box:
 ```cpp
 /** Controller.h */
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "Input.h"
 
 /** Deriving from AutoComponent allows us to run logic each frame with FrameUpdate. */
 class Controller : public nc::AutoComponent
 {
     constexpr static auto Speed = 5.0f;
-    nc::registry_type* m_registry;
+    nc::Registry* m_registry;
 
     public:
-        Controller(nc::Entity entity, nc::registry_type* registry)
+        Controller(nc::Entity entity, nc::Registry* registry)
             : nc::AutoComponent{entity},
               m_registry{registry}
         {
@@ -53,8 +53,7 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 ```cpp
 /** ExampleScene.h */
 #include "Assets.h"
-#include "MainCamera.h"
-#include "Scene.h"
+#include "NcEngine.h"
 #include "Controller.h"
 
 /** Default assets from the nc/resources directory. */
@@ -119,7 +118,7 @@ class ExampleScene : public nc::Scene
 The main file will be pretty simple:
 ```cpp
 /** Main.cpp */
-#include "Core.h"
+#include "NcEngine.h"
 #include "platform/win32/NcWin32.h"
 #include "ExampleScene.h"
 

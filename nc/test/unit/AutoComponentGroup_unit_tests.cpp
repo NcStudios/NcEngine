@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "component/AutoComponentGroup.h"
+#include "ecs/component/AutoComponentGroup.h"
 
 using namespace nc;
 

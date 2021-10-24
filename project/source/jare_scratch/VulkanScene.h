@@ -10,7 +10,7 @@ namespace nc::sample
         public:
             void Load(NcEngine* engine) override;
             void Unload() override;
-            void GenerateFloor(registry_type* registry, const std::vector<std::string>& meshPaths);
+            void GenerateFloor(Registry* registry, const std::vector<std::string>& meshPaths);
         private:
             SceneHelper m_sceneHelper;
     };

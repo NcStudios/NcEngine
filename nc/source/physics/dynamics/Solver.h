@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "Constraint.h"
 #include "Joint.h"
 #include "physics/collision/Manifold.h"
@@ -9,11 +9,11 @@ namespace nc::physics
 {
     /** Create contact constraints for every contact point in each manifold. Also creates
      *  position constraints for each manifold if EnableDirectPositionCorrection == true. */
-    void GenerateConstraints(registry_type* registry, std::span<const Manifold> persistentManifolds, Constraints* out);
+    void GenerateConstraints(Registry* registry, std::span<const Manifold> persistentManifolds, Constraints* out);
     
     /** Prepare joints for resolution. Applies worldpsace transformations and 
      *  precomputes bias/effective mass matrix. */
-    void UpdateJoints(registry_type* registry, std::span<Joint> joints, float dt);
+    void UpdateJoints(Registry* registry, std::span<Joint> joints, float dt);
 
     /** Resolve contact, position, and joint constraints. For contacts and joints, linear
      *  and angular velocities will be updated, but positions must be integrated separately.

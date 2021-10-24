@@ -1,7 +1,6 @@
 #pragma once
 
-#include "component/Transform.h"
-#include "component/Camera.h"
+#include "ecs/component/Camera.h"
 
 namespace nc::sample
 {

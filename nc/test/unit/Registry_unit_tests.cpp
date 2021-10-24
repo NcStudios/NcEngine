@@ -1,8 +1,5 @@
 #include "gtest/gtest.h"
-#include "component/AutoComponentGroup.h"
-#include "component/Registry.h"
-#include "component/Tag.h"
-#include "component/Transform.h"
+#include "ecs/Registry.h"
 
 using namespace nc;
 

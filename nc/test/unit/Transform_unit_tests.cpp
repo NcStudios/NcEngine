@@ -1,7 +1,5 @@
 #include "gtest/gtest.h"
-#include "component/Transform.h"
-#include "component/AutoComponentGroup.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 using namespace nc;
 
@@ -9,7 +7,7 @@ namespace nc
 {
     Registry g_registry{10u};
 
-    registry_type* ActiveRegistry()
+    Registry* ActiveRegistry()
     {
         return &g_registry;
     }

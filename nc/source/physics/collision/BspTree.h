@@ -1,7 +1,10 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
+#include "ecs/component/ConcaveCollider.h"
 #include "CollisionCache.h"
+
+#include <variant>
 
 namespace nc::physics
 {
@@ -48,7 +51,7 @@ namespace nc::physics
         static constexpr float PlaneEpsilon = 0.01f;
 
         public:
-            BspTree(registry_type* registry);
+            BspTree(Registry* registry);
             void OnAdd(ConcaveCollider& collider);
             void OnRemove(Entity entity);
             void Clear();
@@ -59,7 +62,7 @@ namespace nc::physics
         private:
             std::vector<node_type> m_nodes;
             std::vector<TriMesh> m_triMeshes;
-            registry_type* m_registry;
+            Registry* m_registry;
             size_t m_previousContactCount;
 
             void AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex);

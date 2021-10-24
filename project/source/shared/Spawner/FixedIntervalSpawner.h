@@ -8,7 +8,7 @@ namespace nc::sample
     {
         public:
             FixedIntervalSpawner(Entity entity,
-                                 registry_type* registry,
+                                 Registry* registry,
                                  prefab::Resource resource,
                                  SpawnBehavior behavior,
                                  float spawnRate,
@@ -23,7 +23,7 @@ namespace nc::sample
     };
 
     inline FixedIntervalSpawner::FixedIntervalSpawner(Entity entity,
-                                                      registry_type* registry,
+                                                      Registry* registry,
                                                       prefab::Resource resource,
                                                       SpawnBehavior behavior,
                                                       float spawnRate,

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Ecs.h"
 #include "utility/SystemBase.h"
 #include "physics/IClickable.h"
 

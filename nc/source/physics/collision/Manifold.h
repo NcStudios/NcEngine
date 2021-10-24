@@ -1,6 +1,11 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Entity.h"
+#include "math/Vector.h"
+
+#include <vector>
+
+namespace nc { class Registry; }
 
 namespace nc::physics
 {
@@ -52,7 +57,7 @@ namespace nc::physics
 
         int AddContact(const Contact& contact);
         int SortPoints(const Contact& contact);
-        void UpdateWorldPoints(const registry_type* registry);
+        void UpdateWorldPoints(const Registry* registry);
         const Contact& GetDeepestContact() const;
     };
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Component.h"
+#include "ecs/component/Component.h"
 #include "Input.h"
 #include "physics/PhysicsSystem.h"
 
