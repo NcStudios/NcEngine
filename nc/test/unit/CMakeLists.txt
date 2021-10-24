@@ -201,3 +201,88 @@ target_link_libraries(Transform_unit_tests
 add_test(Transform_unit_tests Transform_unit_tests)
 
 add_subdirectory(assets)
+
+### Key Tests ###
+add_executable(Key_unit_tests
+    ${ROOT_DIR}/test/unit/Key_unit_tests.cpp
+    ${ROOT_DIR}/source/utility/Key.cpp
+)
+
+target_include_directories(Key_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${EXTERNAL_INCLUDE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(Key_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(Key_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(Key_unit_tests Key_unit_tests)
+
+
+### Easing Tests ###
+add_executable(Easing_unit_tests
+    ${ROOT_DIR}/test/unit/Easing_unit_tests.cpp
+    ${ROOT_DIR}/source/animation/Ease.cpp
+)
+
+target_include_directories(Easing_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${EXTERNAL_INCLUDE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(Easing_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(Easing_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(Easing_unit_tests Easing_unit_tests)
+
+
+### Types Tests ###
+add_executable(Types_unit_tests
+    ${ROOT_DIR}/test/unit/Types_unit_tests.cpp
+    ${ROOT_DIR}/source/utility/Key.cpp
+    ${ROOT_DIR}/source/utility/Match.cpp
+    ${ROOT_DIR}/source/types/Types.cpp
+    ${ROOT_DIR}/source/types/EngineTypes.cpp
+    ${ROOT_DIR}/source/math/Quaternion.cpp
+    ${ROOT_DIR}/source/component/Transform.cpp
+    ${ROOT_DIR}/source/component/AutoComponentGroup.cpp
+    ${ROOT_DIR}/source/ecs/EcsApiImpl.cpp
+)
+
+target_include_directories(Types_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${EXTERNAL_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${ROOT_DIR}/external/gtest/googletest/include
+)
+
+target_compile_options(Types_unit_tests
+    PUBLIC
+        ${GCC_WARNING_FLAGS}
+)
+
+target_link_libraries(Types_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(Types_unit_tests Types_unit_tests)

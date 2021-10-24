@@ -2,51 +2,44 @@
 
 #include <random>
 
-namespace
-{
-    class FloatDistribution
-    {
-        public:
-            FloatDistribution()
-                : m_device{},
-                  m_gen{m_device()},
-                  m_distribution{-1.0f, std::nextafter(1.0f, std::numeric_limits<float>::max())}
-            {
-            }
-
-        float Generate()
-        {
-            return m_distribution(m_gen);
-        }
-
-        private:
-            std::random_device m_device;
-            std::mt19937 m_gen;
-            std::uniform_real_distribution<float> m_distribution;
-    };
-
-    FloatDistribution g_floatDistribution;
-}
 
 namespace nc::random
 {
-    float Float()
+
+    /** Random Implementation */
+
+    Random::Random(unsigned int seed) 
+        : m_seed(seed),
+          m_gen{seed},
+          m_distribution{0.0f, 1.0f}
+    { }
+
+    Random::Random(): Random(std::random_device{}()) {}
+
+    float Random::Get()
     {
-        return g_floatDistribution.Generate();
+        return m_distribution(m_gen);
     }
 
-    float Float(float offset, float range)
+    float Random::After(float offset, float range)
     {
-        return offset + Float() * range;
+        return Get() * range + offset;
     }
 
-    Vector3 Vec3()
+    float Random::Between(float min, float max)
     {
-        return Vector3{Float(), Float(), Float()};
+        return Get() * (max - min) + min;
     }
 
-    Vector3 Vec3(Vector3 offset, Vector3 range)
+    unsigned int Random::GetSeed() const
     {
-        return offset + HadamardProduct(Vec3(), range);
+        return m_seed;
     }
+
+    void Random::SetSeed(unsigned int seed)
+    {
+        m_seed = seed;
+        m_gen.seed(seed);
+    }
+
 }

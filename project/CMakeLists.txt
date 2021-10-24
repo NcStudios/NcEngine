@@ -8,7 +8,7 @@ endif()
 #Options
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
-option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
+option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" ON)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior sanitizer" OFF)
 

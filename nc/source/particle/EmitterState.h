@@ -39,7 +39,7 @@ namespace nc::particle
             static constexpr size_t ParticlesIndex = 0u;
             static constexpr size_t MvpMatricesIndex = 1u;
 
-            EmitterState(Entity entity, const ParticleInfo& info);
+            EmitterState(Entity entity, const ParticleInfo& info, random::Random* random);
 
             void Emit(size_t count);
             void Update(float dt);
@@ -53,6 +53,7 @@ namespace nc::particle
             
             ParticleSoA m_soa;
             ParticleInfo m_info;
+            random::Random* m_random;
             //GraphicsData* m_graphicsData;
             Entity m_entity;
             float m_emissionCounter;

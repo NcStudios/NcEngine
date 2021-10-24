@@ -14,7 +14,7 @@ namespace
     //            DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
     // }
 
-    particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset)
+    particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset, random::Random* random)
     {
         const auto& [emission, init, kinematic] = info;
 
@@ -22,11 +22,11 @@ namespace
         {
             .maxLifetime = init.lifetime,
             .currentLifetime = 0.0f,
-            .position = positionOffset + random::Vec3(init.position, init.positionRange),
-            .linearVelocity = random::Vec3(kinematic.velocity, kinematic.velocityRange),
-            .rotation = random::Float(init.rotation, init.rotationRange), //.rotation + g_random.Float() * init.rotationRange,
-            .angularVelocity = random::Float(kinematic.rotation, kinematic.rotationRange), //kinematic.rotation + g_random.Float() * kinematic.rotationRange,
-            .scale = random::Float(init.scale, init.scaleRange) //g_random.Float() * init.scaleRange + init.scale
+            .position = positionOffset + init.position.At(random->Get()),
+            .linearVelocity = kinematic.velocity.At(random->Get()),
+            .rotation = init.rotation.At(random->Get()),
+            .angularVelocity = kinematic.rotation.At(random->Get()),
+            .scale = init.scale.At(random->Get()),
         };
     }
 
@@ -37,8 +37,8 @@ namespace
     //     particle->position = particle->position + vel * dt;
 
     //     auto& angVel = particle->angularVelocity;
-    //     angVel += angVel * rotOverTimeFactor;
-    //     particle->rotation += angVel * dt;
+    //     angVel += angVel * rotOv;
+    //     particle->rotation += angVel * dt;erTimeFactor
 
     //     auto& scale = particle->scale;
     //     scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
@@ -47,9 +47,10 @@ namespace
 
 namespace nc::particle
 {
-    EmitterState::EmitterState(Entity entity, const ParticleInfo& info)
+    EmitterState::EmitterState(Entity entity, const ParticleInfo& info, random::Random* random)
         : m_soa{info.emission.maxParticleCount},
           m_info{info},
+          m_random{random},
           m_entity{entity},
           m_emissionCounter{0.0f}
     {
@@ -62,7 +63,7 @@ namespace nc::particle
         auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
         for(size_t i = 0; i < particleCount; ++i)
         {
-            m_soa.Add(CreateParticle(m_info, parentPosition), {});
+            m_soa.Add(CreateParticle(m_info, parentPosition, m_random), {});
         }
     }
 

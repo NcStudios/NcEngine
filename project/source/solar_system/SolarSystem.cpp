@@ -70,6 +70,8 @@
 //     {
 //         m_sceneHelper.Setup(registry, false, true);
 
+//         auto rnd = new Random();
+
 //         // Load all scene meshes
 //         const std::string defaultMeshesPath = "project/assets/mesh/";
 //         const std::vector<std::string> meshPaths { defaultMeshesPath + "planet.nca",
@@ -262,21 +264,20 @@
 //             .init =
 //             {
 //                 .lifetime = 45.0f,
-//                 .positionRange = Vector3::Splat(500.0f),
-//                 .rotationRange = 180.0f,
-//                 .scale = 1.0f,
-//                 .scaleRange = 0.5f,
+//                 .position = { Vector3::Splat(-500.0f), Vector3::Splat(500.0f) },
+//                 .rotation = { -180.0f, 180.0f },
+//                 .scale = { 0.5f, 1.5f },
 //                 .particleTexturePath = "nc/resources/texture/DefaultParticle.png"
 //             },
 //             .kinematic =
 //             {
-//                 .rotationRange = 5.0f,
+//                 .rotation = { -5.0f, 5.0f },
 //                 .rotationOverTimeFactor = 0.0f
 //             }
 //         };
 
 //         auto starEmitter = registry->Add<Entity>({.tag = "Stars"});
-//         registry->Add<ParticleEmitter>(starEmitter, particleInfo);
+//         registry->Add<ParticleEmitter>(starEmitter, particleInfo, rnd);
 //     }
 
 //     void SolarSystem::Unload()

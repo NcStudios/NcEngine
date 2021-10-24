@@ -3,6 +3,8 @@
 #include "Component.h"
 #include "math/Vector.h"
 #include "math/Quaternion.h"
+#include "utility/Range.h"
+#include "random/Random.h"
 
 #include <string>
 
@@ -21,22 +23,18 @@ namespace nc
     struct ParticleInitInfo
     {
         float lifetime = 5.0f;
-        Vector3 position = Vector3::Zero();
-        Vector3 positionRange = Vector3::Zero();
-        float rotation = 0.0f;
-        float rotationRange = 0.0f;
-        float scale = 1.0f;
-        float scaleRange = 0.0f;
+
+        Range<Vector3> position = Vector3::Zero();
+        Range<float> rotation = 0.0f;
+        Range<float> scale = 1.0f;
         std::string particleTexturePath = "";
     };
 
     struct ParticleKinematicInfo
     {
-        Vector3 velocity = Vector3::Zero();
-        Vector3 velocityRange = Vector3::Zero();
+        Range<Vector3> velocity = Vector3::Zero();
         float velocityOverTimeFactor = 0.5f;
-        float rotation = 0.0f;
-        float rotationRange = 0.0f;
+        Range<float> rotation = 0.0f;
         float rotationOverTimeFactor = 0.5f;
         float scaleOverTimeFactor = 0.0f;
     };
