@@ -10,7 +10,7 @@ namespace
     using namespace nc;
     using namespace nc::physics;
 
-    auto CreateTriMesh(registry_type* registry, const ConcaveCollider& collider) -> TriMesh
+    auto CreateTriMesh(Registry* registry, const ConcaveCollider& collider) -> TriMesh
     {
         auto meshView = AssetService<ConcaveColliderView>::Get()->Acquire(collider.GetPath());
         auto entity = collider.GetParentEntity();
@@ -69,7 +69,7 @@ namespace
 
 namespace nc::physics
 {
-    BspTree::BspTree(registry_type* registry)
+    BspTree::BspTree(Registry* registry)
         : m_nodes{},
           m_triMeshes{},
           m_registry{registry},

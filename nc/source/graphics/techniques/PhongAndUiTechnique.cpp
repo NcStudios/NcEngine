@@ -1,5 +1,5 @@
 #include "PhongAndUiTechnique.h"
-#include "Ecs.h"
+#include "Assets.h"
 #include "config/Config.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"

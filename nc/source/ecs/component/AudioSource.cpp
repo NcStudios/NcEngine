@@ -1,5 +1,5 @@
-#include "component/AudioSource.h"
-#include "Ecs.h"
+#include "ecs/component/AudioSource.h"
+#include "ecs/Registry.h"
 #include "assets/AssetService.h"
 
 namespace

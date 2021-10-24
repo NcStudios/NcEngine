@@ -28,7 +28,7 @@ add_test(Allocator_unit_tests Allocator_unit_tests)
 ### AutoComponentGroup Tests ###
 add_executable(AutoComponentGroup_unit_tests
     ${ROOT_DIR}/test/unit/AutoComponentGroup_unit_tests.cpp
-    ${ROOT_DIR}/source/component/AutoComponentGroup.cpp
+    ${ROOT_DIR}/source/ecs/component/AutoComponentGroup.cpp
 )
 
 target_include_directories(AutoComponentGroup_unit_tests
@@ -150,7 +150,7 @@ add_test(PacketBuffer_unit_tests PacketBuffer_unit_tests)
 ### Registry Tests ###
 add_executable(Registry_unit_tests
     ${ROOT_DIR}/test/unit/Registry_unit_tests.cpp
-    ${ROOT_DIR}/source/component/Registry.cpp
+    ${ROOT_DIR}/source/ecs/Registry.cpp
 )
 
 target_include_directories(Registry_unit_tests
@@ -177,7 +177,7 @@ add_test(Registry_unit_tests Registry_unit_tests)
 ### Transform Tests ###
 add_executable(Transform_unit_tests
     ${ROOT_DIR}/test/unit/Transform_unit_tests.cpp
-    ${ROOT_DIR}/source/component/Transform.cpp
+    ${ROOT_DIR}/source/ecs/component/Transform.cpp
     ${ROOT_DIR}/source/math/Quaternion.cpp
 )
 

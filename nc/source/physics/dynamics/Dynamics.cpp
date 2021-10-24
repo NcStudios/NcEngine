@@ -1,5 +1,7 @@
 #include "Dynamics.h"
-#include "../PhysicsConstants.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/PhysicsBody.h"
+#include "physics/PhysicsConstants.h"
 #include "debug/Profiler.h"
 
 namespace
@@ -9,7 +11,7 @@ namespace
 
 namespace nc::physics
 {
-    void UpdateWorldInertiaTensors(registry_type* registry)
+    void UpdateWorldInertiaTensors(Registry* registry)
     {
         for(auto& body : registry->ViewAll<PhysicsBody>())
         {
@@ -18,7 +20,7 @@ namespace nc::physics
         }
     }
 
-    void ApplyGravity(registry_type* registry, float dt)
+    void ApplyGravity(Registry* registry, float dt)
     {
         const auto g = DirectX::XMVectorScale(GravityVector, dt);
 
@@ -31,7 +33,7 @@ namespace nc::physics
         }
     }
 
-    void Integrate(registry_type* registry, float dt)
+    void Integrate(Registry* registry, float dt)
     {
         for(auto& body : registry->ViewAll<PhysicsBody>())
         {

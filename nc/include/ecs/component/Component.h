@@ -1,5 +1,5 @@
 #pragma once
-#include "Entity.h"
+#include "ecs/Entity.h"
 
 #include <concepts>
 #include <type_traits>

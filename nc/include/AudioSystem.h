@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "ecs/Entity.h"
 #include "utility/SystemBase.h"
 
 namespace nc

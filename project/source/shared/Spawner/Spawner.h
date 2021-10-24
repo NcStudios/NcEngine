@@ -16,7 +16,7 @@ namespace nc::sample
             using SpawnExtension = std::function<void(Entity)>;
 
             Spawner(Entity entity,
-                    registry_type* registry,
+                    Registry* registry,
                     prefab::Resource resource,
                     SpawnBehavior behavior,
                     SpawnExtension extension = nullptr);
@@ -30,7 +30,7 @@ namespace nc::sample
             int GetObjectCount() const;
         
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             SpawnExtension m_extension;
             std::vector<Entity> m_entities;
             SpawnPropertyGenerator m_generator;
@@ -44,7 +44,7 @@ namespace nc::sample
     };
 
     inline Spawner::Spawner(Entity entity,
-                            registry_type* registry,
+                            Registry* registry,
                             prefab::Resource resource,
                             SpawnBehavior behavior,
                             SpawnExtension extension)

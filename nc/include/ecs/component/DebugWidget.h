@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Collider.h"
+#include "Collider.h"
 #include "directx/math/DirectXMath.h"
 
 namespace nc

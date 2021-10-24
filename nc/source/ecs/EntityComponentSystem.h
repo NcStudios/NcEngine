@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "ParticleEmitterSystem.h"
 #include "PointLightSystem.h"
 #include "config/Config.h"
@@ -21,7 +21,7 @@ namespace nc::ecs
             void Clear();
 
         private:
-            registry_type m_registry;
+            Registry m_registry;
             ParticleEmitterSystem m_particleEmitterSystem;
             PointLightSystem m_pointLightSystem;
     };

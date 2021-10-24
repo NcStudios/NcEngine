@@ -1,10 +1,10 @@
 #pragma once
 
-#include "AutoComponentGroup.h"
 #include "HandleManager.h"
 #include "PerComponentStorage.h"
-#include "Tag.h"
-#include "Transform.h"
+#include "component/AutoComponentGroup.h"
+#include "component/Tag.h"
+#include "component/Transform.h"
 
 /** The regsitry is a collection of entity and component state.
  * 
@@ -59,6 +59,11 @@
 
 namespace nc
 {
+    class Registry;
+
+    /** @deprecated Use NcEngine::Registry() instead. */
+    auto ActiveRegistry() -> Registry*;
+
     class Registry
     {
         using index_type = Entity::index_type;

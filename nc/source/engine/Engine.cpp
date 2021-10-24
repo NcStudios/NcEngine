@@ -74,7 +74,7 @@ namespace nc
     }
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
-    auto Engine::Registry()    noexcept -> registry_type*   { return m_ecs.GetRegistry(); }
+    auto Engine::Registry()    noexcept -> nc::Registry*    { return m_ecs.GetRegistry(); }
     auto Engine::MainCamera()  noexcept -> nc::MainCamera*  { return &m_mainCamera;       }
     auto Engine::Physics()     noexcept -> PhysicsSystem*   { return &m_physicsSystem;    }
     auto Engine::SceneSystem() noexcept -> nc::SceneSystem* { return &m_sceneSystem;      }

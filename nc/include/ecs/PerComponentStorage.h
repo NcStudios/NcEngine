@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Component.h"
+#include "ecs/component/Component.h"
+#include "ecs/component/AutoComponentGroup.h"
 #include "debug/Utils.h"
 
 #include <algorithm>

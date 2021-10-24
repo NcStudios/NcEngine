@@ -29,7 +29,7 @@ namespace nc::ui::editor
     {
     }
 
-    void Editor::Frame(float* dt, registry_type* registry)
+    void Editor::Frame(float* dt, Registry* registry)
     {
         if(input::GetKeyDown(hotkey::Editor))
             m_openState_Editor = !m_openState_Editor;

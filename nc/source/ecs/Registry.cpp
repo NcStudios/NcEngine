@@ -1,19 +1,29 @@
-#include "component/Registry.h"
-#include "component/AudioSource.h"
-#include "component/AutoComponentGroup.h"
-#include "component/Collider.h"
-#include "component/ConcaveCollider.h"
-#include "component/NetworkDispatcher.h"
-#include "component/ParticleEmitter.h"
-#include "component/PhysicsBody.h"
-#include "component/Registry.h"
-#include "component/Tag.h"
-#include "component/Transform.h"
-#include "component/MeshRenderer.h"
-#include "component/PointLight.h"
+#include "ecs/Registry.h"
+#include "ecs/component/AudioSource.h"
+#include "ecs/component/AutoComponentGroup.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/ConcaveCollider.h"
+#include "ecs/component/NetworkDispatcher.h"
+#include "ecs/component/ParticleEmitter.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/Tag.h"
+#include "ecs/component/Transform.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/PointLight.h"
+
+/** @todo This needs to go away. */
+namespace
+{
+    nc::Registry* g_registry = nullptr;
+}
 
 namespace nc
 {
+    auto ActiveRegistry() -> Registry*
+    {
+        return g_registry;
+    }
+
     Registry::Registry(size_t maxEntities)
         : m_registeredStorage{},
           m_active{},
@@ -22,6 +32,7 @@ namespace nc
           m_handleManager{},
           m_maxEntities{maxEntities}
     {
+        g_registry = this;
         RegisterComponentType<AudioSource>();
         RegisterComponentType<AutoComponentGroup>();
         RegisterComponentType<Collider>();

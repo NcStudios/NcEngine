@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
+#include "ecs/component/PhysicsBody.h"
 #include "Input.h"
 
 namespace nc::sample
@@ -8,14 +9,14 @@ namespace nc::sample
     class ForceBasedController : public AutoComponent
     {
         public:
-            ForceBasedController(Entity entity, registry_type* registry);
+            ForceBasedController(Entity entity, Registry* registry);
             void FixedUpdate() override;
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
     };
 
-    inline ForceBasedController::ForceBasedController(Entity entity, registry_type* registry)
+    inline ForceBasedController::ForceBasedController(Entity entity, Registry* registry)
         : AutoComponent{entity},
           m_registry{registry}
     {

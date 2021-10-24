@@ -1,14 +1,20 @@
 #pragma once
 
-#include "Ecs.h"
-#include "component/Camera.h"
+#include "Assets.h"
+#include "ecs/component/PointLight.h"
 #include "resources/ObjectDataManager.h"
+
+namespace nc
+{
+    class Camera;
+    class Registry;
+}
 
 namespace nc::graphics
 {
     struct PerFrameRenderState
     {
-        PerFrameRenderState(registry_type* registry, Camera* camera, bool isPointLightSystemDirty);
+        PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty);
 
         DirectX::XMMATRIX viewMatrix;
         DirectX::XMMATRIX projectionMatrix;

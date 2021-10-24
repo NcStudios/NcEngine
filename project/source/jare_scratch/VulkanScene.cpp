@@ -1,6 +1,7 @@
 #include "VulkanScene.h"
 #include "Assets.h"
 #include "NcEngine.h"
+#include "ecs/component/MeshRenderer.h"
 #include "shared/SceneNavigationCamera.h"
 #include "collision_events/WasdController.h"
 #include "imgui/imgui.h"

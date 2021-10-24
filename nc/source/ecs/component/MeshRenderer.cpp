@@ -1,4 +1,5 @@
-#include "Ecs.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/Registry.h"
 #include "assets/AssetService.h"
 
 #ifdef NC_EDITOR_ENABLED

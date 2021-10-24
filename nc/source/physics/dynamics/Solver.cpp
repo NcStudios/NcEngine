@@ -17,7 +17,7 @@ namespace
     const auto g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
 
     auto CreateContactConstraint(const Contact&, Entity, Entity, Transform*, Transform*, PhysicsBody*, PhysicsBody*) -> ContactConstraint;
-    void UpdateJoint(registry_type* registry, Joint& joint, float dt);
+    void UpdateJoint(Registry* registry, Joint& joint, float dt);
     void ResolveContactConstraint(ContactConstraint& constraint, float dt);
     void ResolvePositionConstraint(PositionConstraint& constraint);
     void ResolveJoint(Joint& joint);
@@ -303,7 +303,7 @@ namespace
         );
     }
 
-    void UpdateJoint(registry_type* registry, Joint& joint, float dt)
+    void UpdateJoint(Registry* registry, Joint& joint, float dt)
     {
         // Get anchor world space positions
         XMVECTOR pA, pB;
@@ -394,7 +394,7 @@ namespace nc::physics
         }
     }
 
-    void GenerateConstraints(registry_type* registry, std::span<const Manifold> manifolds, Constraints* out)
+    void GenerateConstraints(Registry* registry, std::span<const Manifold> manifolds, Constraints* out)
     {
         const auto manifoldCount = manifolds.size();
         out->contact.clear();
@@ -433,7 +433,7 @@ namespace nc::physics
         }
     }
 
-    void UpdateJoints(registry_type* registry, std::span<Joint> joints, float dt)
+    void UpdateJoints(Registry* registry, std::span<Joint> joints, float dt)
     {
         for(auto& joint : joints)
         {

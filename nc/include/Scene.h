@@ -1,7 +1,6 @@
 #pragma once
 
 #include "utility/SystemBase.h"
-#include "Ecs.h"
 
 #include <memory>
 
