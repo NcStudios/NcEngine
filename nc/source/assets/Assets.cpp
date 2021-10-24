@@ -3,38 +3,103 @@
 
 namespace nc
 {
-    void LoadSoundClipAsset(const std::string& path)
+    bool LoadSoundClipAsset(const std::string& path)
     {
-        AssetService<SoundClipView>::Get()->Load(path);
+        return AssetService<SoundClipView>::Get()->Load(path);
     }
 
-    void LoadConvexHullAsset(const std::string& path)
+    bool LoadSoundClipAssets(std::span<const std::string> paths)
     {
-        AssetService<ConvexHullView>::Get()->Load(path);
+        return AssetService<SoundClipView>::Get()->Load(paths);
     }
 
-    void LoadConcaveColliderAsset(const std::string& path)
+    bool UnloadSoundClipAsset(const std::string& path)
     {
-        AssetService<ConcaveColliderView>::Get()->Load(path);
+        return AssetService<SoundClipView>::Get()->Unload(path);
     }
 
-    void LoadMeshAsset(const std::string& path)
+    void UnloadAllSoundClipAssets()
     {
-        AssetService<MeshView>::Get()->Load(path);
+        AssetService<SoundClipView>::Get()->UnloadAll();
     }
 
-    void LoadMeshAssets(const std::vector<std::string>& paths)
+    bool LoadConvexHullAsset(const std::string& path)
     {
-        AssetService<MeshView>::Get()->Load(paths);
+        return AssetService<ConvexHullView>::Get()->Load(path);
     }
 
-    void LoadTextureAsset(const std::string& path)
+    bool LoadConvexHullAssets(std::span<const std::string> paths)
     {
-        AssetService<TextureView>::Get()->Load(path);
+        return AssetService<ConvexHullView>::Get()->Load(paths);
     }
 
-    void LoadTextureAssets(const std::vector<std::string>& paths)
+    bool UnloadConvexHullAssets(const std::string& path)
     {
-        AssetService<TextureView>::Get()->Load(paths);
+        return AssetService<ConvexHullView>::Get()->Unload(path);
+    }
+
+    void UnloadAllConvexHullAsset()
+    {
+        AssetService<ConvexHullView>::Get()->UnloadAll();
+    }
+
+    bool LoadConcaveColliderAsset(const std::string& path)
+    {
+        return AssetService<ConcaveColliderView>::Get()->Load(path);
+    }
+
+    bool LoadConcaveColliderAssets(std::span<const std::string> paths)
+    {
+        return AssetService<ConcaveColliderView>::Get()->Load(paths);
+    }
+
+    bool UnloadConcaveColliderAsset(const std::string& path)
+    {
+        return AssetService<ConcaveColliderView>::Get()->Unload(path);
+    }
+
+    void UnloadAllConcaveColliderAssets()
+    {
+        AssetService<ConcaveColliderView>::Get()->UnloadAll();
+    }
+
+    bool LoadMeshAsset(const std::string& path)
+    {
+        return AssetService<MeshView>::Get()->Load(path);
+    }
+
+    bool LoadMeshAssets(std::span<const std::string> paths)
+    {
+        return AssetService<MeshView>::Get()->Load(paths);
+    }
+
+    bool UnloadMeshAsset(const std::string& path)
+    {
+        return AssetService<MeshView>::Get()->Unload(path);
+    }
+
+    void UnloadAllMeshAssets()
+    {
+        AssetService<MeshView>::Get()->UnloadAll();
+    }
+
+    bool LoadTextureAsset(const std::string& path)
+    {
+        return AssetService<TextureView>::Get()->Load(path);
+    }
+
+    bool LoadTextureAssets(std::span<const std::string> paths)
+    {
+        return AssetService<TextureView>::Get()->Load(paths);
+    }
+
+    bool UnloadTextureAsset(const std::string& path)
+    {
+        return AssetService<TextureView>::Get()->Unload(path);
+    }
+
+    void UnloadAllTextureAssets()
+    {
+        return AssetService<TextureView>::Get()->UnloadAll();
     }
 } // namespace nc

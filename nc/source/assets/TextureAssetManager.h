@@ -2,8 +2,8 @@
 
 #include "assets/AssetService.h"
 
-#include <string>
 #include <unordered_map>
+#include <vector>
 #include <vulkan/vulkan.hpp>
 
 namespace nc
@@ -21,8 +21,9 @@ namespace nc
             ~TextureAssetManager() noexcept;
 
             bool Load(const std::string& path) override;
-            bool Load(const std::vector<std::string>& paths) override;
+            bool Load(std::span<const std::string> paths) override;
             bool Unload(const std::string& path) override;
+            void UnloadAll() override;
             auto Acquire(const std::string& path) const -> TextureView override;
             bool IsLoaded(const std::string& path) const override;
 
