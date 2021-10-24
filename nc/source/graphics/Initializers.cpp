@@ -243,6 +243,22 @@ namespace nc::graphics
         return rasterizer;
     }
 
+    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, vk::CullModeFlags cullMode, float lineWidth, bool depthBiasEnable)
+    {
+        vk::PipelineRasterizationStateCreateInfo rasterizer{};
+        rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
+        rasterizer.setRasterizerDiscardEnable(static_cast<vk::Bool32>(false));
+        rasterizer.setPolygonMode(polygonMode);
+        rasterizer.setLineWidth(lineWidth);
+        rasterizer.setCullMode(cullMode);
+        rasterizer.setFrontFace(vk::FrontFace::eClockwise);
+        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(depthBiasEnable));
+        rasterizer.setDepthBiasConstantFactor(0.0f);
+        rasterizer.setDepthBiasClamp(0.0f);
+        rasterizer.setDepthBiasSlopeFactor(0.0f);
+        return rasterizer;
+    }
+
     vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo()
     {
         vk::PipelineMultisampleStateCreateInfo multisampling{};

@@ -31,12 +31,8 @@ namespace nc::graphics
 
     PhongAndUiTechnique::~PhongAndUiTechnique() noexcept
     {
-        // std::cout << "Destroying PhongAndUiTechnique: " << m_pipeline.get() << std:: endl;
-        
         m_pipeline.reset();
         m_pipelineLayout.reset();
-        // m_base->GetDevice().destroyPipelineLayout(m_pipelineLayout.get());
-        // m_base->GetDevice().destroyPipeline(m_pipeline.get());
     }
 
     void PhongAndUiTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -99,13 +95,17 @@ namespace nc::graphics
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
-
         
         m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        // std::cout << "Creating PhongAndUiTechnique: " << m_pipeline.get() << std:: endl;
        
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+    }
+
+    bool PhongAndUiTechnique::CanBind(const PerFrameRenderState& frameData)
+    {
+        (void)frameData;
+        return true;
     }
 
     void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
@@ -119,15 +119,20 @@ namespace nc::graphics
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const MeshView> meshes)
+    bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
+    {
+        return !frameData.meshes.empty();
+    }
+
+    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto pushConstants = PhongPushConstants{};
-        pushConstants.cameraPos = cameraPosition;
+        pushConstants.cameraPos = frameData.cameraPosition;
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
 
         uint32_t objectInstance = 0;
-        for(const auto& mesh : meshes)
+        for(const auto& mesh : frameData.meshes)
         {
             cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             
@@ -137,6 +142,8 @@ namespace nc::graphics
             
             ++objectInstance;
         }
+
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
         NC_PROFILE_END();
     }
 

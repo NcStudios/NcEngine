@@ -50,11 +50,11 @@ layout (std140, set=1, binding=0) readonly buffer PointLightsArray
 } pointLights;
 
 layout (location = 0) in vec3 inViewPosition;
-layout (location = 1) in vec4 inLightSpacePosition;
-layout (location = 2) in vec3 inNormal;
-layout (location = 3) in vec2 inUV;
-layout (location = 4) in mat3 inTBN;
-layout (location = 7) in flat int inObjectInstance;
+layout (location = 1) in vec3 inNormal;
+layout (location = 2) in vec2 inUV;
+layout (location = 3) in mat3 inTBN;
+layout (location = 6) in flat int inObjectInstance;
+layout (location = 7) in vec4[8] inLightSpacePosition;
 
 layout (location = 0) out vec4 outFragColor;
 
@@ -112,8 +112,10 @@ float filterPCF(vec4 sc, float ambientIntensity)
 	return shadowFactor / count;
 }
 
-vec3 CalculatePointLight(PointLight light, vec3 calculatedNormal, vec3 baseColor, vec3 roughnessColor)
+vec3 CalculatePointLight(int lightIndex, vec3 calculatedNormal, vec3 baseColor, vec3 roughnessColor)
 {
+    PointLight light = pointLights.lights[lightIndex];
+
     const vec3 vToL = light.lightPos - inViewPosition;
     const float distToL = length(vToL);
     const vec3 dirToL = vToL / distToL;
@@ -131,7 +133,7 @@ vec3 CalculatePointLight(PointLight light, vec3 calculatedNormal, vec3 baseColor
     const vec3 specular = att * light.diffuseColor * roughnessColor.rrr * light.diffuseIntensity * pow(max(0.0, dot(-r, viewCamToFrag)), specularPower);
 
     float ambientIntensity = (light.ambientColor.x + light.ambientColor.y + light.ambientColor.z) / 3;
-    const float shadow = clamp(filterPCF((inLightSpacePosition / inLightSpacePosition.w), ambientIntensity), 0.3, 1.0);
+    const float shadow = clamp(filterPCF((inLightSpacePosition[lightIndex] / inLightSpacePosition[lightIndex].w), ambientIntensity), 0.3, 1.0);
 
 
     return (clamp(((diffuse + light.ambientColor * 0.75) * baseColor + specular) * shadow, 0.0, 1.0));
@@ -159,7 +161,7 @@ void main()
             break;
         }
 
-        result += CalculatePointLight(pointLights.lights[i], calculatedNormal, baseColor, roughnessColor);
+        result += CalculatePointLight(i, calculatedNormal, baseColor, roughnessColor);
     }
 
     outFragColor = vec4(result, 1.0);

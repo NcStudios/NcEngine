@@ -34,6 +34,7 @@ namespace nc::config
         float farClip;
         float frameUpdateInterval;
         std::string shadersPath;
+        bool useShadows;
     };
 
     struct PhysicsSettings

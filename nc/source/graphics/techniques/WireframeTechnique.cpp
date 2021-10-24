@@ -34,12 +34,13 @@ namespace nc::graphics
 
     WireframeTechnique::~WireframeTechnique() noexcept
     {
-        // std::cout << "Destroying WireframeTechnique: " << m_pipeline.get() << std::endl << std::endl;
-        
         m_pipeline.reset();
         m_pipelineLayout.reset();
-        // m_base->GetDevice().destroyPipelineLayout(m_pipelineLayout.get());
-        // m_base->GetDevice().destroyPipeline(m_pipeline.get());
+    }
+
+    bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
+    {
+        return frameData.colliderDebugWidget.has_value();
     }
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
@@ -47,21 +48,6 @@ namespace nc::graphics
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         NC_PROFILE_END();
-    }
-
-    void WireframeTechnique::RegisterDebugWidget(nc::DebugWidget debugWidget)
-    {
-        m_debugWidget = std::move(debugWidget);
-    }
-
-    void WireframeTechnique::ClearDebugWidget()
-    {
-        m_debugWidget = std::nullopt;
-    }
-
-    bool WireframeTechnique::HasDebugWidget() const
-    {
-        return m_debugWidget.has_value();
     }
 
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -125,19 +111,21 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    void WireframeTechnique::Record(vk::CommandBuffer* cmd, DirectX::FXMMATRIX viewMatrix, DirectX::FXMMATRIX projectionMatrix)
+    bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
+    {
+        return frameData.colliderDebugWidget.has_value();
+    }
+
+    void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto pushConstants = WireframePushConstants{};
-        pushConstants.viewProjection = viewMatrix * projectionMatrix;
+        pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
 
-        if (m_debugWidget.has_value())
-        {
-            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
-            pushConstants.model = m_debugWidget->transformationMatrix;
-            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
-            cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-        }
+        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
+        pushConstants.model = m_debugWidget->transformationMatrix;
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+        cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         NC_PROFILE_END();
     }
 }

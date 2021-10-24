@@ -29,18 +29,21 @@ namespace nc::graphics
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{nullptr},
-      m_pipelineLayout{nullptr}
+      m_pipelineLayout{nullptr},
+      m_enabled{false}
     {
         CreatePipeline(renderPass);
     }
 
     ShadowMappingTechnique::~ShadowMappingTechnique()
     {
-        // std::cout << "Destroying ShadowMappingTechnique: " << m_pipeline.get() << std:: endl;
         m_pipeline.reset();
         m_pipelineLayout.reset();
-        // m_base->GetDevice().destroyPipelineLayout(m_pipelineLayout.get());
-        // m_base->GetDevice().destroyPipeline(m_pipeline.get());
+    }
+
+    bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
+    {
+        return m_enabled = nc::config::GetGraphicsSettings().useShadows && !frameData.pointLightVPs.empty();
     }
 
     void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
@@ -92,7 +95,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
         auto viewportState = CreateViewportCreateInfo();
         pipelineCreateInfo.setPViewportState(&viewportState);
-        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f, true);
+        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, vk::CullModeFlagBits::eFront, 1.0f, true);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
         auto multisampling = CreateMulitsampleCreateInfo();
         pipelineCreateInfo.setPMultisampleState(&multisampling);
@@ -113,7 +116,13 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, std::span<const DirectX::XMMATRIX> pointLightVPs, std::span<const MeshView> meshes)
+    bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)
+    {
+        (void)frameData;
+        return m_enabled;
+    }
+
+    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
@@ -127,14 +136,14 @@ namespace nc::graphics
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        for (const auto& pointLightVP : pointLightVPs)
+        for (const auto& pointLightVP : frameData.pointLightVPs)
         {
             pushConstants.lightViewProjection = pointLightVP;
 
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
             uint32_t objectInstance = 0;
-            for (const auto& mesh : meshes)
+            for (const auto& mesh : frameData.meshes)
             {
                 cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                 objectInstance++;

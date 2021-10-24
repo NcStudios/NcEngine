@@ -49,14 +49,32 @@ namespace nc::graphics
         m_renderTargets.clear();
     }
 
-    void RenderPassManager::Begin(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
+    void RenderPassManager::Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData)
     {
-        auto& renderpass = Acquire(uid);
+        auto& renderPass = Acquire(uid);
+       
+        Begin(&renderPass, cmd, renderTargetIndex);
 
-        auto clearValues = CreateClearValues(renderpass.valuesToClear, m_graphics->GetClearColor());
-        auto renderPassInfo = CreateRenderPassBeginInfo(renderpass.renderpass.get(), 
-                                                        GetRenderTarget(uid, renderTargetIndex).frameBuffer.get(), 
-                                                        renderpass.renderTargetSize.extent, 
+        for (auto& technique : renderPass.techniques)
+        {
+            if (!technique->CanBind(frameData)) continue;
+
+            technique->Bind(cmd);
+
+            if (!technique->CanRecord(frameData)) continue;
+
+            technique->Record(cmd, frameData);
+        }
+        
+        End(cmd);
+    }   
+
+    void RenderPassManager::Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
+    {
+        auto clearValues = CreateClearValues(renderPass->valuesToClear, m_graphics->GetClearColor());
+        auto renderPassInfo = CreateRenderPassBeginInfo(renderPass->renderpass.get(), 
+                                                        GetRenderTarget(renderPass->uid, renderTargetIndex).frameBuffer.get(), 
+                                                        renderPass->renderTargetSize.extent, 
                                                         clearValues);
 
         cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
@@ -103,6 +121,7 @@ namespace nc::graphics
             .renderTargetSize = renderTargetSize,
             .renderpass = std::move(CreateRenderPass(base, attachmentSlots, subpasses)),
             .valuesToClear = valuesToClear,
+            .techniques = {}
         };
 
         m_renderPasses.push_back(std::move(renderpass));
@@ -222,4 +241,5 @@ namespace nc::graphics
 
         m_renderTargets.push_back(std::move(renderTarget));
     }
+
 }

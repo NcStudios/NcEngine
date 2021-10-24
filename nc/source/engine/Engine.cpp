@@ -204,17 +204,17 @@ namespace nc
         graphics::MapPerFrameRenderState(state);
 
         auto* renderer = m_graphics.GetRendererPtr();
-        
-        #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : registry->ViewAll<Collider>())
-            collider.UpdateWidget(renderer);
-        #endif
 
         // @todo: conditionally update based on changes
         renderer->Record(m_graphics.GetCommandsPtr(), state, m_currentImageIndex);
 
         m_graphics.Draw();
         m_graphics.FrameEnd();
+
+        #ifdef NC_EDITOR_ENABLED
+        state.colliderDebugWidget = std::nullopt;
+        #endif
+
         NC_PROFILE_END();
     }
 

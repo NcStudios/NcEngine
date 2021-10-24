@@ -6,10 +6,13 @@
 #include "math/DirectXMathUtility.h"
 
 #include <variant>
+#include <optional>
 
 namespace nc
 {
-    namespace graphics { class Renderer; }
+    #ifdef NC_EDITOR_ENABLED
+    struct DebugWidget;
+    #endif
 
     enum class ColliderType : uint8_t
     {
@@ -75,7 +78,7 @@ namespace nc
             auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
            #ifdef NC_EDITOR_ENABLED
-            void UpdateWidget(graphics::Renderer* renderer);
+            std::optional<nc::DebugWidget> UpdateWidget();
             void SetEditorSelection(bool state);
            #endif
 

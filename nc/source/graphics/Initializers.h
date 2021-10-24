@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Base;
+    class Graphics; class Base; class ITechnique;
 }
 
 namespace nc::graphics
@@ -59,6 +59,7 @@ namespace nc::graphics
         RenderTargetSize renderTargetSize;
         vk::UniqueRenderPass renderpass;
         ClearValue valuesToClear;
+        std::vector<std::unique_ptr<ITechnique>> techniques;
     };
 
 
@@ -85,6 +86,7 @@ namespace nc::graphics
     vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo();
     vk::PipelineViewportStateCreateInfo CreateViewportCreateInfo();
     vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth, bool depthBiasEnable = false);
+    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, vk::CullModeFlags cullMode, float lineWidth, bool depthBiasEnable = false);
     vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo();
     vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo(bool shadowMapping = false);
     vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo(bool useAlphaBlending);

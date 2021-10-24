@@ -10,3 +10,4 @@ mesh project/models/skeeball.fbx
 mesh project/models/table.fbx
 mesh project/models/token.fbx
 mesh project/models/worm.fbx
+mesh project/models/snail.fbx

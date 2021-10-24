@@ -26,6 +26,9 @@ namespace nc::graphics
           cameraPosition{camera::GetMainCameraTransform()->GetPosition()},
           objectData{},
           pointLightInfos{},
+          #ifdef NC_EDITOR_ENABLED
+          colliderDebugWidget{std::nullopt},
+          #endif
           pointLightVPs{},
           isPointLightBindRequired{isPointLightSystemDirty}
     {
@@ -48,6 +51,11 @@ namespace nc::graphics
             meshes.push_back(renderer.GetMesh());
         }
 
+        #ifdef NC_EDITOR_ENABLED
+        for(auto& collider : registry->ViewAll<Collider>())
+            colliderDebugWidget = collider.UpdateWidget();
+        #endif
+
         auto pointLights = registry->ViewAll<PointLight>();
         pointLightVPs.reserve(pointLights.size());
 
@@ -59,8 +67,6 @@ namespace nc::graphics
 
             if(pointLight.Update(transform->GetPosition(), camViewMatrix, pointLightVPs.back()))
                 isPointLightBindRequired = true;
-
-            
         }
 
         if(isPointLightBindRequired)

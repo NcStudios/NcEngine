@@ -2,6 +2,7 @@
 
 #include "Ecs.h"
 #include "resources/ObjectDataManager.h"
+#include "component/DebugWidget.h"
 
 namespace nc::graphics
 {
@@ -15,6 +16,9 @@ namespace nc::graphics
         std::vector<ObjectData> objectData;
         std::vector<MeshView> meshes;
         std::vector<PointLightInfo> pointLightInfos;
+        #ifdef NC_EDITOR_ENABLED
+        std::optional<nc::DebugWidget> colliderDebugWidget;
+        #endif
         std::vector<DirectX::XMMATRIX> pointLightVPs;
         bool isPointLightBindRequired;
     };

@@ -50,6 +50,7 @@ namespace
     const auto NearClipKey = std::string{"near_clip"};
     const auto FarClipKey = std::string{"far_clip"};
     const auto ShadersPathKey = std::string{"shaders_path"};
+    const auto UseShadowsKey = std::string{"use_shadows"}; /** @todo: Make this a property of the material */
 
     void MapKeyValue(const std::string& key, const std::string& value, Config* out)
     {
@@ -107,6 +108,8 @@ namespace
             out->graphicsSettings.farClip = std::stof(value);
         else if (key == ShadersPathKey)
             out->graphicsSettings.shadersPath = value;
+        else if (key == UseShadowsKey)
+            out->graphicsSettings.useShadows = std::stoi(value);
         else
             throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
     };
