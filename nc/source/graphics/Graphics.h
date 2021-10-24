@@ -45,9 +45,11 @@ namespace nc::graphics
             const DepthStencil& GetDepthStencil() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 
+
             // Blocks the current thread until all operations in the command queues on the device are completed. 
             void WaitIdle();
             void Clear();
+            void InitializeUI();
 
             uint32_t FrameBegin();
             void Draw();

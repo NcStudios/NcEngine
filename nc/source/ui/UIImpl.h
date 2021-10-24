@@ -14,7 +14,7 @@ namespace nc::ui
     class UIImpl
     {
         public:
-            UIImpl(HWND hwnd);
+            UIImpl(HWND hwnd, graphics::Graphics* graphics);
 
             ~UIImpl() noexcept;
 
@@ -39,5 +39,8 @@ namespace nc::ui
             #endif
             
             IUI* m_projectUI;
+            
+            graphics::Graphics* m_graphics;
+
     };
 } // namespace nc::ui

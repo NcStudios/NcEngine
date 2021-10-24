@@ -39,7 +39,6 @@ namespace nc::graphics
           m_drawCallCount{0}
     {
         camera::UpdateProjectionMatrix(dimensions.x, dimensions.y, config::GetGraphicsSettings().nearClip, config::GetGraphicsSettings().farClip);
-        m_renderer->InitializeImgui();
     }
 
     Graphics::~Graphics() noexcept
@@ -209,6 +208,11 @@ namespace nc::graphics
             return false;
         }
         return true;
+    }
+
+    void Graphics::InitializeUI()
+    {
+        m_renderer->InitializeImgui();
     }
 
     uint32_t Graphics::FrameBegin()

@@ -74,7 +74,6 @@ namespace nc::graphics
         }
     }
 
-    /** @todo Tie techniques to renderPasses via some fancy way here. This is currently a misnomer placeholder for the last part of the system (in progress), and should be parameterized. */
     void Renderer::RegisterTechniques()
     {
         /** Shadow mapping pass */
@@ -113,7 +112,7 @@ namespace nc::graphics
         SetViewportAndScissor(cmd, m_dimensions);
         BindSharedData(cmd);
 
-        // Shadow mapping pass
+        /** Shadow mapping pass */
         {
             m_renderPasses->Begin("Shadow Mapping Pass", cmd, 0);
             m_shadowMappingTechnique->Bind(cmd);
@@ -121,7 +120,7 @@ namespace nc::graphics
             m_renderPasses->End(cmd);
         }
 
-        // Lit shading pass
+        /** Lit shading pass */
         {
             m_renderPasses->Begin("Lit Pass", cmd, currentSwapChainImageIndex);
 
