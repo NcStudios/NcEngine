@@ -7,41 +7,9 @@ namespace nc
 {
     Registry g_registry{10u};
 
-    Registry* ActiveRegistry()
-    {
-        return &g_registry;
-    }
-
-    Registry::Registry(size_t maxEntities)
-        : m_registeredStorage{},
-          m_active{},
-          m_toAdd{},
-          m_toRemove{},
-          m_handleManager{},
-          m_maxEntities{maxEntities}
-    {
-        RegisterComponentType<AutoComponentGroup>();
-        RegisterComponentType<Tag>();
-        RegisterComponentType<Transform>();
-    }
-
-    void Registry::Clear()
-    {
-        m_active.clear();
-        m_active.shrink_to_fit();
-        m_toAdd.clear();
-        m_toAdd.shrink_to_fit();
-        m_toRemove.clear();
-        m_toRemove.shrink_to_fit();
-
-        for(auto& storage : m_registeredStorage)
-            storage->Clear();
-        
-        m_handleManager.Reset();
-    }
-
     AutoComponentGroup::AutoComponentGroup(Entity) : m_components{} {}
     void AutoComponentGroup::CommitStagedComponents() {}
+    void AutoComponentGroup::SendOnDestroy() {}
 }
 
 constexpr auto TestLayer = Entity::layer_type{0u};
@@ -72,6 +40,7 @@ class Transform_unit_tests : public ::testing::Test
 
         ~Transform_unit_tests()
         {
+            registry->CommitStagedChanges();
             registry->Clear();
         }
 };

@@ -70,7 +70,14 @@ namespace nc
     void Engine::Shutdown() noexcept
     {
         V_LOG("Shutdown NcEngine");
-        ClearState();
+        try
+        {
+            ClearState();
+        }
+        catch(const std::exception& e)
+        {
+            debug::LogException(e);
+        }
     }
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }

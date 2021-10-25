@@ -51,7 +51,7 @@ namespace nc
             PerComponentStorage& operator=(const PerComponentStorage&) = delete;
 
             auto GetSparseArray() -> std::vector<index_type>& { return sparseArray; }
-            auto GetEntityPool() -> std::vector<index_type>& { return entityPool; }
+            auto GetEntityPool() -> std::vector<Entity>& { return entityPool; }
             auto GetComponentPool() -> std::vector<T>& { return componentPool; }
 
             template<class... Args>
@@ -76,7 +76,7 @@ namespace nc
 
         private:
             std::vector<index_type> sparseArray;
-            std::vector<index_type> entityPool;
+            std::vector<Entity> entityPool;
             std::vector<T> componentPool;
             std::vector<StagedComponent> stagingPool;
             SystemCallbacks<T> callbacks;
@@ -115,14 +115,14 @@ namespace nc
         componentPool.at(poolIndex) = std::move(componentPool.back());
         componentPool.pop_back();
 
-        auto movedIndex = entityPool.back(); // need to store in case we're removing the last element
-        entityPool.at(poolIndex) = movedIndex;
+        auto movedEntity = entityPool.back(); // need to store in case we're removing the last element
+        entityPool.at(poolIndex) = movedEntity;
         entityPool.pop_back();
 
         sparseArray.at(sparseIndex) = Entity::NullIndex;
 
-        if(sparseIndex != movedIndex)
-            sparseArray.at(movedIndex) = poolIndex;
+        if(sparseIndex != movedEntity.Index())
+            sparseArray.at(movedEntity.Index()) = poolIndex;
 
         if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
             callbacks.OnRemove(entity);
@@ -251,7 +251,7 @@ namespace nc
         {
             componentPool.push_back(std::move(component));
             auto sparseIndex = entity.Index();
-            entityPool.push_back(sparseIndex);
+            entityPool.push_back(entity);
             sparseArray.at(sparseIndex) = componentPool.size() - 1;
         }
 
@@ -269,12 +269,28 @@ namespace nc
     template<Component T>
     void PerComponentStorage<T>::Clear()
     {
-        std::ranges::fill(sparseArray, Entity::NullIndex);
-        entityPool.clear();
-        entityPool.shrink_to_fit();
-        componentPool.clear();
-        componentPool.shrink_to_fit();
-        stagingPool.clear();
+        assert(stagingPool.empty());
         stagingPool.shrink_to_fit();
+
+        std::ranges::fill(sparseArray, Entity::NullIndex);
+
+        size_t swapToIndex = 0u;
+        for(size_t denseIndex = 0u; denseIndex < entityPool.size(); ++denseIndex)
+        {
+            //auto entity = componentPool[denseIndex].GetParentEntity();
+            auto entity = entityPool[denseIndex];
+            if(!entity.IsPersistent())
+                continue;
+            
+            sparseArray.at(entity.Index()) = swapToIndex;
+            entityPool.at(swapToIndex) = entityPool.at(denseIndex);
+            componentPool.at(swapToIndex) = std::move(componentPool.at(denseIndex));
+            ++swapToIndex;
+        }
+
+        entityPool.erase(entityPool.begin() + swapToIndex, entityPool.end());
+        entityPool.shrink_to_fit();
+        componentPool.erase(componentPool.begin() + swapToIndex, componentPool.end());
+        componentPool.shrink_to_fit();
     }
 }

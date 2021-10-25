@@ -178,6 +178,7 @@ add_test(Registry_unit_tests Registry_unit_tests)
 add_executable(Transform_unit_tests
     ${ROOT_DIR}/test/unit/Transform_unit_tests.cpp
     ${ROOT_DIR}/source/ecs/component/Transform.cpp
+    ${ROOT_DIR}/source/ecs/Registry.cpp
     ${ROOT_DIR}/source/math/Quaternion.cpp
 )
 

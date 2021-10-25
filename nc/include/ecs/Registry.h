@@ -315,7 +315,7 @@ namespace nc
 
         while(current <= end)
         {
-            auto entityIndex = referenceEntities.at(current);
+            auto entityIndex = referenceEntities.at(current).Index();
             auto indexInTarget = targetSparseArray.at(entityIndex);
 
             if(indexInTarget != Entity::NullIndex) // Entity has both components
@@ -323,14 +323,14 @@ namespace nc
                 if(indexInTarget != current)
                 {
                     auto swapEntity = targetEntities.at(current);
-                    targetStorage.Swap(entityIndex, swapEntity);
+                    targetStorage.Swap(entityIndex, swapEntity.Index());
                 }
 
                 ++current;
             }
             else // Entity does not have target component
             {
-                auto swapEntity = referenceEntities.at(end);
+                auto swapEntity = referenceEntities.at(end).Index();
                 referenceStorage.Swap(entityIndex, swapEntity);
                 --end;
             }

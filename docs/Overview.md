@@ -23,7 +23,11 @@ An entitiy's index is determined and used internally. It can be useful to create
 Layers are underused and are reserved for future use.
 
 ### Flags
-At the moment, the only Entity flag is Entity::Flags::Static. This is used to specify that an Entity will not be moved after construction. This is used for various optimizations and is required in certain cases ([ConcaveCollider](EngineComponents.md#concavecollider)).
+
+* Entity::Flags::Static: Specifies an Entity will not be moved after construction. This is used for various optimizations and is required in certain cases ([ConcaveCollider](EngineComponents.md#concavecollider)).
+* Entity::Flags::Persistent: Persistent entities and their attached components are not destroyed on scene changes.
+
+Entities do not inherit flags from their parents.
 
 When creating an Entity through the [registry](#registry), an EntityInfo struct is required, which has more information than is actually stored in the Entity. This is because the registry automatically adds a [Transform](EngineComponents.md#transform) and [Tag](EngineComponents.md#tag) to each new Entity, initialized with data from the EntityInfo.
 

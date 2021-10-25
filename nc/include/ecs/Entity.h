@@ -22,8 +22,9 @@ namespace nc
 
             struct Flags
             {
-                static constexpr Entity::flags_type None = 0b00000000;
-                static constexpr Entity::flags_type Static = 0b00000001;
+                static constexpr Entity::flags_type None       = 0b00000000;
+                static constexpr Entity::flags_type Static     = 0b00000001;
+                static constexpr Entity::flags_type Persistent = 0b00000010;
             };
 
             explicit constexpr Entity() noexcept
@@ -42,10 +43,11 @@ namespace nc
             constexpr auto Layer() const noexcept { return m_layer; }
             constexpr auto Flags() const noexcept { return m_flags; }
             constexpr auto IsStatic() const noexcept { return m_flags & Flags::Static; }
+            constexpr auto IsPersistent() const noexcept { return m_flags & Flags::Persistent; }
             explicit constexpr operator index_type() const noexcept { return m_index; }
             friend bool constexpr operator==(const Entity& a, const Entity& b) { return a.Index() == b.Index(); }
             friend bool constexpr operator!=(const Entity& a, const Entity& b) { return !(a == b); }
-            
+
         private:
             index_type m_index;
             layer_type m_layer;
