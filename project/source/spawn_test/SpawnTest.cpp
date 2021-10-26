@@ -7,6 +7,7 @@
 #include "shared/spawner/FixedIntervalSpawner.h"
 #include "shared/FPSTracker.h"
 #include "shared/SceneNavigationCamera.h"
+#include "collision_events/WasdController.h"
 
 namespace
 {
@@ -54,31 +55,25 @@ namespace nc::sample
         engine->MainCamera()->Set(camera);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(1.0f, 0.7f, 1.0f),
-                                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
-                                                                           .diffuseIntensity = 5.0f
-                                                                          });
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, -18.0f, 0.0f}, .tag = "Point Light 1"});
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.275f, 0.27f, 0.27f),
+                                                           .diffuseColor = Vector3(0.99f, 1.0f, 0.76f),
+                                                           .diffuseIntensity = 5.0f});
 
         // Collider that destroys anything leaving its bounded area
         auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(100.0f), .tag = "KillBox", .flags = Entity::Flags::Static});
         registry->Add<Collider>(killBox, BoxProperties{}, true);
         registry->Add<KillBox>(killBox, registry);
 
-        auto platform = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{0.0f, -25.0f, 0.0f}, .scale = Vector3{35.0f, 6.0f, 35.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
+        // Ground
+        auto platform = prefab::Create(registry, prefab::Resource::Ground, {.position = Vector3{0.0f, -25.0f, 0.0f}, .scale = Vector3{35.0f, 6.0f, 35.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
         registry->Add<Collider>(platform, BoxProperties{}, false);
 
-        auto bottomBox = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, 0.0f}, .scale = Vector3::Splat(2.0f), .flags = Entity::Flags::None});
+        // Moveable box
+        auto bottomBox = prefab::Create(registry, prefab::Resource::CubeTextured, {.position = Vector3{0.0f, 0.0f, 0.0f}, .scale = Vector3::Splat(2.0f), .flags = Entity::Flags::None});
         registry->Add<Collider>(bottomBox, BoxProperties{}, false);
         registry->Add<PhysicsBody>(bottomBox, PhysicsProperties{.mass = 4.0f, .useGravity = true});
-
-        auto topBox = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{1.0f, 7.0f, 1.0f}, .scale = Vector3::Splat(2.0f)});
-        registry->Add<Collider>(topBox, BoxProperties{}, false);
-        registry->Add<PhysicsBody>(topBox, PhysicsProperties{.mass = 4.0f});
-
-        auto topSphere = prefab::Create(registry, prefab::Resource::SphereGreen, {.position = Vector3{1.0f, 2.0f, 1.0f}, .scale = Vector3::Splat(2.0f)});
-        registry->Add<Collider>(topSphere, SphereProperties{}, false);
-        registry->Add<PhysicsBody>(topSphere, PhysicsProperties{.mass = 4.0f});
+        registry->Add<WasdController>(bottomBox, registry, 4.0f);
 
         // Fixed interval spawner for moving cubes
         SpawnBehavior dynamicCubeBehavior
@@ -94,7 +89,7 @@ namespace nc::sample
         };
         
         auto dynamicCubeSpawnerHandle = registry->Add<Entity>({.tag = "Dynamic Cube Spawner"});
-        auto* intervalSpawner = registry->Add<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, registry, prefab::Resource::CubeGreen, dynamicCubeBehavior, spawnRate, dynamicCubeExtension);
+        auto* intervalSpawner = registry->Add<FixedIntervalSpawner>(dynamicCubeSpawnerHandle, registry, prefab::Resource::CubeTextured, dynamicCubeBehavior, spawnRate, dynamicCubeExtension);
     
         SetSpawnRateFunc = std::bind(FixedIntervalSpawner::SetSpawnRate, intervalSpawner, std::placeholders::_1);
     }

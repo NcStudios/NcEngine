@@ -24,6 +24,8 @@ namespace nc::sample::prefab
                 return std::string{"CapsuleGreen"};
             case Resource::CapsuleRed:
                 return std::string{"CapsuleRed"};
+            case Resource::CubeTextured:
+                return std::string{"CubeTextured"};
             case Resource::Coin:
                 return std::string{"Coin"};
             case Resource::Cube:
@@ -42,6 +44,8 @@ namespace nc::sample::prefab
                 return std::string{"DiscGreen"};
             case Resource::DiscRed:
                 return std::string{"DiscRed"};
+            case Resource::Ground:
+                return std::string{"Ground"};
             case Resource::RampRed:
                 return std::string{"RampRed"};
             case Resource::Sphere:
@@ -66,7 +70,9 @@ namespace nc::sample::prefab
 
     namespace material
     {
+        Material Box{};
         Material Coin{};
+        Material Ground{};
         Material SolidBlue{};
         Material SolidGreen{};
         Material SolidRed{};
@@ -114,7 +120,13 @@ void InitializeResources()
                                                   defaultRoughness,
                                                   defaultTexturesPath + "Beeper/BaseColor.png",
                                                   defaultTexturesPath + "Beeper/Normal.png",
+                                                  defaultTexturesPath + "Box/BaseColor.png",
+                                                  defaultTexturesPath + "Box/Normal.png",
+                                                  defaultTexturesPath + "Box/Roughness.png",
                                                   defaultTexturesPath + "Beeper/Roughness.png",
+                                                  defaultTexturesPath + "Floor/BaseColor.png",
+                                                  defaultTexturesPath + "Floor/Normal.png",
+                                                  defaultTexturesPath + "Floor/Roughness.png",
                                                   defaultTexturesPath + "SolidColor/Blue.png",
                                                   defaultTexturesPath + "SolidColor/Green.png",
                                                   defaultTexturesPath + "SolidColor/Red.png",
@@ -144,6 +156,10 @@ void InitializeResources()
                                      .normal    = defaultNormal,
                                      .roughness = defaultRoughness };
 
+    material::Box =        Material{ .baseColor = defaultTexturesPath + "Box/BaseColor.png",
+                                     .normal    = defaultTexturesPath + "Box/Normal.png",
+                                     .roughness = defaultTexturesPath + "Box/Roughness.png"};
+
     material::Coin =       Material{ .baseColor = defaultTexturesPath + "Coin/BaseColor.png",
                                      .normal    = defaultTexturesPath + "Coin/Normal.png",
                                      .roughness = defaultTexturesPath + "Coin/Roughness.png" };
@@ -151,6 +167,10 @@ void InitializeResources()
     material::Default =    Material{ .baseColor = defaultBaseColor,
                                      .normal    = defaultNormal,
                                      .roughness = defaultRoughness };
+
+    material::Ground =     Material{ .baseColor = defaultTexturesPath + "Floor/BaseColor.png",
+                                     .normal    = defaultTexturesPath + "Floor/Normal.png",
+                                     .roughness = defaultTexturesPath + "Floor/Roughness.png"};
 
     material::Table =      Material{ .baseColor = defaultTexturesPath + "Table/BaseColor.png",
                                      .normal    = defaultTexturesPath + "Table/Normal.png",
@@ -192,7 +212,7 @@ template<> Entity Create_<Resource::CapsuleGreen>(Registry* registry, EntityInfo
 template<> Entity Create_<Resource::CapsuleRed>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
-    registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule", material::SolidRed, TechniqueType::PhongAndUi);
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule.nca", material::SolidRed, TechniqueType::PhongAndUi);
     return handle;
 }
 
@@ -231,6 +251,13 @@ template<> Entity Create_<Resource::CubeRed>(Registry* registry, EntityInfo info
     return handle;
 }
 
+template<> Entity Create_<Resource::CubeTextured>(Registry* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::Box, TechniqueType::PhongAndUi);
+    return handle;
+}
+
 template<> Entity Create_<Resource::Disc>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
@@ -259,6 +286,12 @@ template<> Entity Create_<Resource::DiscRed>(Registry* registry, EntityInfo info
     return handle;
 }
 
+template<> Entity Create_<Resource::Ground>(Registry* registry, EntityInfo info)
+{
+    auto handle = registry->Add<Entity>(std::move(info));
+    registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::Ground, TechniqueType::PhongAndUi);
+    return handle;
+}
 
 template<> Entity Create_<Resource::RampRed>(Registry* registry, EntityInfo info)
 {
@@ -336,10 +369,12 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::CubeBlue,      Create_<Resource::CubeBlue>},
     std::pair{Resource::CubeGreen,     Create_<Resource::CubeGreen>},
     std::pair{Resource::CubeRed,       Create_<Resource::CubeRed>},
+    std::pair{Resource::CubeTextured,  Create_<Resource::CubeTextured>},
     std::pair{Resource::Disc,          Create_<Resource::Disc>},
     std::pair{Resource::DiscBlue,      Create_<Resource::DiscBlue>},
     std::pair{Resource::DiscGreen,     Create_<Resource::DiscGreen>},
     std::pair{Resource::DiscRed,       Create_<Resource::DiscRed>},
+    std::pair{Resource::Ground,        Create_<Resource::Ground>},
     std::pair{Resource::RampRed,       Create_<Resource::RampRed>},
     std::pair{Resource::Sphere,        Create_<Resource::Sphere>},
     std::pair{Resource::SphereBlue,    Create_<Resource::SphereBlue>},
