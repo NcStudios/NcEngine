@@ -44,7 +44,7 @@ namespace nc
             DirectX::XMMATRIX m_lightProjectionMatrix;
             bool m_isDirty;
 
-            bool Update(const Vector3& position, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& lightViewProj);
+            bool Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj);
 
             friend ecs::PointLightSystem;
             friend graphics::PerFrameRenderState;

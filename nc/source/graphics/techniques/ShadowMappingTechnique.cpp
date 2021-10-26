@@ -15,10 +15,10 @@ namespace
 {
     // Depth bias (and slope) are used to avoid shadowing artifacts
     // Constant depth bias factor (always applied)
-    constexpr float DEPTH_BIAS_CONSTANT = 4.0f;
+    constexpr float DEPTH_BIAS_CONSTANT = 0.1f;
 
     // Slope depth bias factor, applied depending on polygon's slope
-    constexpr float DEPTH_BIAS_SLOPE = 1.5f;
+    constexpr float DEPTH_BIAS_SLOPE = 0.1f;
 }
 
 namespace nc::graphics
@@ -111,8 +111,6 @@ namespace nc::graphics
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
         m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        // std::cout << "Creating ShadowMappingTechnique: " << m_pipeline.get() << std:: endl;
-
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 

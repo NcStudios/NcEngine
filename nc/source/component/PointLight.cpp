@@ -15,9 +15,13 @@
 namespace
 {
     // Angle of light's field of view.
-    constexpr float LIGHT_FIELD_OF_VIEW = 45.0f;
+    constexpr float LIGHT_FIELD_OF_VIEW = 60.0f;
 
+    // Near clip of light's frustrum
+    constexpr float NEAR_CLIP = 0.25f;
 
+    // Far clip of light's frustrum
+    constexpr float FAR_CLIP = 96.0f;
 }
 
 namespace nc
@@ -44,11 +48,9 @@ namespace nc
     PointLight::PointLight(Entity entity, PointLightInfo info)
         : ComponentBase{entity},
           m_info{info},
-          m_lightProjectionMatrix{},
+          m_lightProjectionMatrix{DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, NEAR_CLIP, FAR_CLIP)},
           m_isDirty{false}
     {
-        const auto& graphicsSettings = config::GetGraphicsSettings();
-        m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, graphicsSettings.nearClip, graphicsSettings.farClip); // global variable todo anonymous namespace const var. //make clips global constants in source
     }
 
     void PointLight::SetInfo(PointLightInfo info)
@@ -65,7 +67,7 @@ namespace nc
         return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1) * m_lightProjectionMatrix;
     }
 
-    bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& cameraView, const DirectX::XMMATRIX& lightViewProj)
+    bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj)
     {     
         m_info.viewProjection = lightViewProj;
 

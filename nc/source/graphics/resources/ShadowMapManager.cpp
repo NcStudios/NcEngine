@@ -72,7 +72,23 @@ namespace nc::graphics
         m_depthStencil = std::make_unique<DepthStencil>(base, m_dimensions, vk::Format::eD16Unorm);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
-        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToBorder);
+        vk::SamplerCreateInfo samplerInfo = {};
+        samplerInfo.setMagFilter(vk::Filter::eNearest);
+        samplerInfo.setMinFilter(vk::Filter::eNearest);
+        samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+        samplerInfo.setAddressModeU(vk::SamplerAddressMode::eClampToBorder);
+        samplerInfo.setAddressModeV(vk::SamplerAddressMode::eClampToBorder);
+        samplerInfo.setAddressModeW(vk::SamplerAddressMode::eClampToBorder);
+        samplerInfo.setAnisotropyEnable(VK_TRUE);
+        samplerInfo.setMaxAnisotropy(1.0f);
+        samplerInfo.setBorderColor(vk::BorderColor::eFloatOpaqueWhite);
+        samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
+        samplerInfo.setCompareEnable(VK_FALSE);
+        samplerInfo.setCompareOp(vk::CompareOp::eAlways);
+        samplerInfo.setMipLodBias(0.0f);
+        samplerInfo.setMinLod(0.0f);
+        samplerInfo.setMaxLod(1.0f);
+
         m_sampler = base->GetDevice().createSamplerUnique(samplerInfo);
         
         std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = 

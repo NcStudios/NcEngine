@@ -64,7 +64,7 @@ namespace nc::sample
         nc::LoadMeshAssets(sceneMeshes);
 
         //Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, -0.5f, 4.0f}, .tag = "Point Light 1"});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 4.0f, -0.5f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.1f, 0.1f, 0.1f),
                                                             .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
                                                             .diffuseIntensity = 2.0f

@@ -76,7 +76,7 @@ namespace nc::graphics
 
             pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix());
 
-            if(pointLight.Update(transform->GetPosition(), camViewMatrix, pointLightVPs.back()))
+            if(pointLight.Update(transform->GetPosition(), pointLightVPs.back()))
                 isPointLightBindRequired = true;
         }
 

@@ -64,42 +64,38 @@ vec3 MaterialColor(int textureIndex)
    return vec3(texture(sampler2D(textures[textureIndex], smplr), inUV));
 }
 
-const float specularPower = 32.0;
-const float specularIntensity = 0.6;
-
 layout (set = 3, binding = 0) uniform sampler2D shadowMap;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
-    // // perform perspective divide
-    // vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
-    // // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    // float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
 
-    // // get depth of current fragment from light's perspective
-    // float currentDepth = projCoords.z;
-
-    // // check whether current frag pos is in shadow
-    // float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    // check whether current frag pos is in shadow
     float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 
-    if (projCoords.z > 1.0 || projCoords.z < -1.0)
+    for(int x = 0; x <=1; ++x)
+    {
+        for(int y = 0; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;  
+
+    if (projCoords.z > 1.0 || projCoords.z < 0)
     {
         shadow = 0.0;
     }
 
     return shadow;
-}
-
-float sRGB(float x) {
-    if (x <= 0.00031308)
-        return 12.92 * x;
-    else
-        return 1.055*pow(x,(1.0 / 2.4) ) - 0.055;
-}
-vec3 sRGB_v3(vec3 c) {
-    return vec3(sRGB(c.x),sRGB(c.y),sRGB(c.z));
 }
 
 vec3 CalculatePointLight(int lightIndex, vec3 normal, vec3 baseColor, vec3 roughnessColor)
