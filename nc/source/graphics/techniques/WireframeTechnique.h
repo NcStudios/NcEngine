@@ -43,7 +43,6 @@ namespace nc::graphics
         private:
             void CreatePipeline(vk::RenderPass* renderPass);
 
-            std::optional<nc::DebugWidget> m_debugWidget;
             nc::graphics::Graphics* m_graphics;
             Base* m_base;
             Swapchain* m_swapchain;

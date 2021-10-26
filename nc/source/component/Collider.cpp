@@ -168,14 +168,18 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    std::optional<nc::DebugWidget> Collider::UpdateWidget()
+    void Collider::SetEditorSelection(bool state)
     {
-        // Expire to false to avoid state management in editor (it sets this to true as needed)
-        if(!std::exchange(m_selectedInEditor, false))
-        {
-            return std::nullopt;
-        }
+        m_selectedInEditor = state;
+    }
 
+    bool Collider::GetEditorSelection()
+    {
+        return m_selectedInEditor;
+    }
+
+    DebugWidget Collider::GetDebugWidget()
+    {
         const auto& scale = m_info.scale;
         const auto& offset = m_info.offset; 
 
@@ -187,11 +191,6 @@ namespace nc
         );
 
         return DebugWidget(m_info.type, transformationMatrix);
-    }
-
-    void Collider::SetEditorSelection(bool state)
-    {
-        m_selectedInEditor = state;
     }
 
     template<> void ComponentGuiElement<Collider>(Collider* collider)

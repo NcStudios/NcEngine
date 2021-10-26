@@ -67,18 +67,14 @@ namespace nc
 
     bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& cameraView, const DirectX::XMMATRIX& lightViewProj)
     {     
-        Vector3 projectedPos;
         m_info.viewProjection = lightViewProj;
 
-        const auto pos_v = DirectX::XMLoadVector3(&position);
-        DirectX::XMStoreVector3(&projectedPos, DirectX::XMVector3Transform(pos_v, cameraView));
-        
-        if (projectedPos.x != m_info.pos.x || projectedPos.y != m_info.pos.y || projectedPos.z != m_info.pos.z)
+        if (position.x != m_info.pos.x || position.y != m_info.pos.y || position.z != m_info.pos.z)
         {
             m_isDirty = true;
         }
 
-        m_info.pos = projectedPos;
+        m_info.pos = position;
 
         return std::exchange(m_isDirty, false);
     }

@@ -17,7 +17,7 @@ namespace nc::graphics
         samplerInfo.setAddressModeW(addressMode);
         samplerInfo.setAnisotropyEnable(VK_TRUE);
         samplerInfo.setMaxAnisotropy(1.0f);
-        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueBlack);
+        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueWhite);
         samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
         samplerInfo.setCompareEnable(VK_FALSE);
         samplerInfo.setCompareOp(vk::CompareOp::eAlways);

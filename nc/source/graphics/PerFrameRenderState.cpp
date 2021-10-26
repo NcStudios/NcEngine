@@ -4,6 +4,8 @@
 #include "physics/collision/IntersectionQueries.h"
 #include "resources/ShaderResourceService.h"
 
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -52,8 +54,17 @@ namespace nc::graphics
         }
 
         #ifdef NC_EDITOR_ENABLED
+        auto colliderIsSelected = false;
         for(auto& collider : registry->ViewAll<Collider>())
-            colliderDebugWidget = collider.UpdateWidget();
+        {
+            if (collider.GetEditorSelection())
+            {
+                colliderDebugWidget = collider.GetDebugWidget();
+                colliderIsSelected = true;
+            }
+        }
+
+        if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
         #endif
 
         auto pointLights = registry->ViewAll<PointLight>();

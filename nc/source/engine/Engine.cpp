@@ -208,12 +208,15 @@ namespace nc
         // @todo: conditionally update based on changes
         renderer->Record(m_graphics.GetCommandsPtr(), state, m_currentImageIndex);
 
+        #ifdef NC_EDITOR_ENABLED
+        for(auto& collider : registry->ViewAll<Collider>())
+        {
+            collider.SetEditorSelection(false);
+        }
+        #endif
+
         m_graphics.Draw();
         m_graphics.FrameEnd();
-
-        #ifdef NC_EDITOR_ENABLED
-        state.colliderDebugWidget = std::nullopt;
-        #endif
 
         NC_PROFILE_END();
     }

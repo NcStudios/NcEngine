@@ -47,11 +47,12 @@ layout (location = 3) in vec3 inTangent;
 layout (location = 4) in vec3 inBitangent;
 
 layout (location = 0) out vec3 outViewPosition;
-layout (location = 1) out vec3 outNormal;
-layout (location = 2) out vec2 outUV;
-layout (location = 3) out mat3 outTBN;
-layout (location = 6) out int  outObjectInstance;
-layout (location = 7) out vec4[8] outLightSpacePos;
+layout (location = 1) out vec3 outFragPosition;
+layout (location = 2) out vec3 outNormal;
+layout (location = 3) out vec2 outUV;
+layout (location = 4) out mat3 outTBN;
+layout (location = 7) out int  outObjectInstance;
+layout (location = 8) out vec4 outLightSpacePos;
 
 out gl_PerVertex {
 	vec4 gl_Position;
@@ -66,18 +67,12 @@ const mat4 biasMat = mat4(
 
 void main() 
 {
-    mat4 mvMatrix = objectBuffer.objects[gl_BaseInstance].modelView;
-    mat3 vpMatrix = mat3(objectBuffer.objects[gl_BaseInstance].viewProjection);
+    ObjectData object = objectBuffer.objects[gl_BaseInstance];
 
-    outViewPosition = vec3(mvMatrix * vec4(inPos, 1.0));
-    outNormal       = mat3(mvMatrix) * inNormal;
+    outFragPosition = vec3(object.model * vec4(inPos, 1.0));
+    outNormal = transpose(inverse(mat3(object.model))) * inNormal;
     outUV = inUV;
-
     outObjectInstance = gl_BaseInstance;
-    for (int i = 0; i < pointLights.lights.length(); i++)
-    {
-        outLightSpacePos[i] = biasMat * pointLights.lights[i].lightViewProj * objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
-    }
-
-    gl_Position = objectBuffer.objects[gl_BaseInstance].viewProjection * objectBuffer.objects[gl_BaseInstance].model * vec4(inPos, 1.0);
+    outLightSpacePos = biasMat * pointLights.lights[0].lightViewProj * vec4(outFragPosition, 1.0);
+    gl_Position = object.viewProjection * object.model * vec4(inPos, 1.0);
 }

@@ -17,7 +17,7 @@ struct PointLight
     float attLin;
     vec3 diffuseColor;
     float attQuad;
-    float diffuseIntensity;
+    float specularIntensity;
     int isInitialized;
 };
 
@@ -50,11 +50,12 @@ layout (std140, set=1, binding=0) readonly buffer PointLightsArray
 } pointLights;
 
 layout (location = 0) in vec3 inViewPosition;
-layout (location = 1) in vec3 inNormal;
-layout (location = 2) in vec2 inUV;
-layout (location = 3) in mat3 inTBN;
-layout (location = 6) in flat int inObjectInstance;
-layout (location = 7) in vec4[8] inLightSpacePosition;
+layout (location = 1) in vec3 inFragPosition;
+layout (location = 2) in vec3 inNormal;
+layout (location = 3) in vec2 inUV;
+layout (location = 4) in mat3 inTBN;
+layout (location = 7) in flat int inObjectInstance;
+layout (location = 8) in vec4 inLightSpacePosition;
 
 layout (location = 0) out vec4 outFragColor;
 
@@ -68,75 +69,65 @@ const float specularIntensity = 0.6;
 
 layout (set = 3, binding = 0) uniform sampler2D shadowMap;
 
-float textureProj(vec4 shadowCoord, vec2 off, float ambientIntensity)
+float ShadowCalculation(vec4 fragPosLightSpace)
 {
-	float shadow = 1.0;
-	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) 
-	{
-		float dist = texture( shadowMap, (shadowCoord.st + off) ).r;
-		if ( shadowCoord.w > 0.0 && dist < shadowCoord.z ) 
-		{
-			shadow = ambientIntensity;
-		}
-	}
-	return shadow;
+    // // perform perspective divide
+    // vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    // // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    // float closestDepth = texture(shadowMap, projCoords.xy).r; 
+
+    // // get depth of current fragment from light's perspective
+    // float currentDepth = projCoords.z;
+
+    // // check whether current frag pos is in shadow
+    // float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    float shadow = 0.0;
+
+    if (projCoords.z > 1.0 || projCoords.z < -1.0)
+    {
+        shadow = 0.0;
+    }
+
+    return shadow;
 }
 
-float filterPCF(vec4 sc, float ambientIntensity)
-{
-   vec3 light_space_ndc = sc.xyz /= sc.w;
- 
-   if (abs(light_space_ndc.x) > 1.0 ||
-       abs(light_space_ndc.y) > 1.0 ||
-       abs(light_space_ndc.z) > 1.0)
-      return 1.0;
-
-	ivec2 texDim = textureSize(shadowMap, 0);
-	float scale = 1.5;
-	float dx = scale * 1.0 / float(texDim.x);
-	float dy = scale * 1.0 / float(texDim.y);
-
-	float shadowFactor = 0.0;
-	int count = 0;
-	int range = 3;
-	
-	for (int x = -range; x <= range; x++)
-	{
-		for (int y = -range; y <= range; y++)
-		{
-			shadowFactor += textureProj(sc, vec2(0.0, 0.0), ambientIntensity);
-			count++;
-		}
-	
-	}
-	return shadowFactor / count;
+float sRGB(float x) {
+    if (x <= 0.00031308)
+        return 12.92 * x;
+    else
+        return 1.055*pow(x,(1.0 / 2.4) ) - 0.055;
+}
+vec3 sRGB_v3(vec3 c) {
+    return vec3(sRGB(c.x),sRGB(c.y),sRGB(c.z));
 }
 
-vec3 CalculatePointLight(int lightIndex, vec3 calculatedNormal, vec3 baseColor, vec3 roughnessColor)
+vec3 CalculatePointLight(int lightIndex, vec3 normal, vec3 baseColor, vec3 roughnessColor)
 {
     PointLight light = pointLights.lights[lightIndex];
 
-    const vec3 vToL = light.lightPos - inViewPosition;
-    const float distToL = length(vToL);
-    const vec3 dirToL = vToL / distToL;
+    vec3 lightColor = light.diffuseColor;
 
-    // Attenuation
-    const float att = 1.0 / (light.attConst + light.attLin * distToL + light.attQuad * (distToL * distToL));
+    // Ambient
+    vec3 ambientColor = light.ambientColor;
 
     // Diffuse
-    const vec3 diffuse = light.diffuseColor.rgb * att * max(0.0, dot(dirToL, calculatedNormal));
-    const vec3 w = calculatedNormal * dot(vToL, calculatedNormal);
-    const vec3 r = normalize(w * 2.0 - vToL);
+    vec3 lightDir = normalize(light.lightPos - inFragPosition);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * lightColor;
 
     // Specular
-    const vec3 viewCamToFrag = normalize(inViewPosition);
-    const vec3 specular = att * light.diffuseColor * roughnessColor.rrr * light.diffuseIntensity * pow(max(0.0, dot(-r, viewCamToFrag)), specularPower);
+    vec3 viewDir = normalize(pc.cameraPos - inFragPosition);
+    vec3 reflectDir = (-lightDir, normal);
+    float spec = 0.0;
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
+    vec3 specular = spec * lightColor;
 
-    float ambientIntensity = (light.ambientColor.x + light.ambientColor.y + light.ambientColor.z) / 3;
-    const float shadow = clamp(filterPCF((inLightSpacePosition[lightIndex] / inLightSpacePosition[lightIndex].w), ambientIntensity), 0.3, 1.0);
-
-
-    return (clamp(((diffuse + light.ambientColor * 0.75) * baseColor + specular) * shadow, 0.0, 1.0));
+    // Shadow
+    float shadow = ShadowCalculation(inLightSpacePosition);
+    vec3 lighting = (ambientColor + (1.0 - shadow) * (diffuse + specular)) * baseColor;
+    return lighting;
 }
 
 void main() 
@@ -145,12 +136,8 @@ void main()
     vec3 normalColor = MaterialColor(objectBuffer.objects[inObjectInstance].normalIndex);
     vec3 roughnessColor = MaterialColor(objectBuffer.objects[inObjectInstance].roughnessIndex);
 
-    vec3 calculatedNormal =  inNormal;
-    calculatedNormal.x = normalColor.x * 2.0 - 1.0;
-    calculatedNormal.y = -normalColor.y * 2.0 + 1.0;
-    calculatedNormal.z = normalColor.z;
-
-    calculatedNormal = (calculatedNormal + inNormal) / 2;
+    vec3 calculatedNormal = normalize(inNormal);
+    // vec3 calculatedNormal = sRGB_v3(normalColor);
 
     vec3 result = vec3(0.0);
 

@@ -78,8 +78,9 @@ namespace nc
             auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
            #ifdef NC_EDITOR_ENABLED
-            std::optional<nc::DebugWidget> UpdateWidget();
             void SetEditorSelection(bool state);
+            bool GetEditorSelection();
+            nc::DebugWidget GetDebugWidget();
            #endif
 
         private:

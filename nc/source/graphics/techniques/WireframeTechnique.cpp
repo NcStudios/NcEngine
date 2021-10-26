@@ -20,9 +20,6 @@ namespace nc::graphics
 {
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : 
-      #ifdef NC_EDITOR_ENABLED
-      m_debugWidget{},
-      #endif
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
@@ -122,8 +119,8 @@ namespace nc::graphics
         auto pushConstants = WireframePushConstants{};
         pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
 
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
-        pushConstants.model = m_debugWidget->transformationMatrix;
+        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
+        pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
         cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         NC_PROFILE_END();

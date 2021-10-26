@@ -72,7 +72,7 @@ namespace nc::graphics
         m_depthStencil = std::make_unique<DepthStencil>(base, m_dimensions, vk::Format::eD16Unorm);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
-        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToEdge);
+        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eClampToBorder);
         m_sampler = base->GetDevice().createSamplerUnique(samplerInfo);
         
         std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = 
