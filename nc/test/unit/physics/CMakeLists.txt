@@ -1,6 +1,7 @@
 ### UnionFind Tests ###
 add_executable(IslandBuilder_unit_tests
     ${ROOT_DIR}/test/unit/physics/IslandBuilder_unit_tests.cpp
+    ${ROOT_DIR}/source/physics/IslandBuilder.cpp
 )
 
 target_include_directories(IslandBuilder_unit_tests
