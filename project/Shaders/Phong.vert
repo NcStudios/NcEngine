@@ -70,7 +70,7 @@ void main()
     ObjectData object = objectBuffer.objects[gl_BaseInstance];
 
     outFragPosition = vec3(object.model * vec4(inPos, 1.0));
-    outNormal = transpose(inverse(mat3(object.model))) * inNormal;
+    outNormal = mat3(object.model) * inNormal;
     outUV = inUV;
     outObjectInstance = gl_BaseInstance;
     outLightSpacePos = biasMat * pointLights.lights[0].lightViewProj * vec4(outFragPosition, 1.0);

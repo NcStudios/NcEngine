@@ -66,6 +66,49 @@ vec3 MaterialColor(int textureIndex)
 
 layout (set = 3, binding = 0) uniform sampler2D shadowMap;
 
+const float PI = 3.14159265359;
+// ----------------------------------------------------------------------------
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a = roughness*roughness;
+    float a2 = a*a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return nom / denom;
+}
+// ----------------------------------------------------------------------------
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+
+    return nom / denom;
+}
+// ----------------------------------------------------------------------------
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+    return ggx1 * ggx2;
+}
+// ----------------------------------------------------------------------------
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+// ----------------------------------------------------------------------------
+
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
     // perform perspective divide
@@ -97,33 +140,38 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 
     return shadow;
 }
-
-vec3 CalculatePointLight(int lightIndex, vec3 normal, vec3 baseColor, vec3 roughnessColor)
+vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor, float roughness, float metallic)
 {
     PointLight light = pointLights.lights[lightIndex];
 
-    vec3 lightColor = light.diffuseColor;
+    // Per light radiance
+    vec3 L = normalize(light.lightPos - inFragPosition);
+    vec3 H = normalize(V + L);
+    float distance = length(light.lightPos - inFragPosition);
+    float attenuation = (1.0 / (distance * distance)) * light.specularIntensity;
+    vec3 radiance = light.diffuseColor * attenuation;
 
-    // Ambient
-    vec3 ambientColor = light.ambientColor;
+    // Cook-Torrance BRDF
+    float NDF = DistributionGGX(N, H, roughness);
+    float G = GeometrySmith(N, V, L, roughness);
+    vec3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
 
-    // Diffuse
-    vec3 lightDir = normalize(light.lightPos - inFragPosition);
-    float diff = max(dot(lightDir, normal), 0.0);
-    vec3 diffuse = diff * lightColor;
+    vec3 numerator = NDF * G * F;
+    float denominator = 4 * max(dot(N,V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+    vec3 specular = numerator / denominator;
 
-    // Specular
-    vec3 viewDir = normalize(pc.cameraPos - inFragPosition);
-    vec3 reflectDir = (-lightDir, normal);
-    float spec = 0.0;
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
-    vec3 specular = spec * lightColor;
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;
+
+    float NdotL = max(dot(N, L), 0.0);
+
+    vec3 colorTotal = (kD * baseColor / PI + specular) * radiance * NdotL;
 
     // Shadow
     float shadow = ShadowCalculation(inLightSpacePosition);
-    vec3 lighting = (ambientColor + (1.0 - shadow) * (diffuse + specular)) * baseColor;
-    return lighting;
+
+    return (light.ambientColor + (1.0 - shadow)) * colorTotal;
 }
 
 void main() 
@@ -131,9 +179,15 @@ void main()
     vec3 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex);
     vec3 normalColor = MaterialColor(objectBuffer.objects[inObjectInstance].normalIndex);
     vec3 roughnessColor = MaterialColor(objectBuffer.objects[inObjectInstance].roughnessIndex);
+    vec3 metallicColor = roughnessColor;
 
-    vec3 calculatedNormal = normalize(inNormal);
-    // vec3 calculatedNormal = sRGB_v3(normalColor);
+    vec3 N = normalize(inNormal);
+    vec3 V = normalize(pc.cameraPos - inFragPosition);
+
+    // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, baseColor, metallicColor.r);
 
     vec3 result = vec3(0.0);
 
@@ -144,7 +198,7 @@ void main()
             break;
         }
 
-        result += CalculatePointLight(i, calculatedNormal, baseColor, roughnessColor);
+        result += CalculatePointLight(i, N, V, F0, baseColor, roughnessColor.r, metallicColor.r);
     }
 
     outFragColor = vec4(result, 1.0);
