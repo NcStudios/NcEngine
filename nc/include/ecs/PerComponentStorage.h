@@ -277,7 +277,6 @@ namespace nc
         size_t swapToIndex = 0u;
         for(size_t denseIndex = 0u; denseIndex < entityPool.size(); ++denseIndex)
         {
-            //auto entity = componentPool[denseIndex].GetParentEntity();
             auto entity = entityPool[denseIndex];
             if(!entity.IsPersistent())
                 continue;
