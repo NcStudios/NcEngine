@@ -9,7 +9,7 @@
 
 namespace nc::physics
 {
-    struct UnionElement
+    struct IslandElement
     {
         /** Index of the element's parent. This is self-referential for root
          *  nodes. After sorting, this will point directly to the root. */
@@ -21,23 +21,26 @@ namespace nc::physics
 
     /** @todo Look into what it would take to return vector<span> over the input data. */
 
+    /** A union find implementation. By treating a broad phase event as a graph edge, we can
+     *  view colliders as disjoint sets, each corresponding to a physically separate simulation
+     *  island. */
     class IslandBuilder
     {
         public:
-            auto FindIslands(uint32_t totalColliderCount, std::span<const BroadEvent> broadPhysicsEvents) -> std::vector<std::span<UnionElement>>;
+            auto FindIslands(uint32_t totalColliderCount, std::span<const BroadEvent> broadPhysicsEvents) -> std::vector<std::span<IslandElement>>;
 
         private:
-            std::vector<UnionElement> m_elements;
+            std::vector<IslandElement> m_elements;
             size_t m_islandCountHint = 0u;
 
             void Initialize(uint32_t colliderCount);
             void AddPair(uint32_t indexA, uint32_t indexB);
             auto FindRoot(uint32_t a) -> uint32_t;
             void Sort();
-            auto BuildIslands() -> std::vector<std::span<UnionElement>>;
+            auto BuildIslands() -> std::vector<std::span<IslandElement>>;
     };
 
-    inline auto IslandBuilder::FindIslands(uint32_t totalColliderCount, std::span<const BroadEvent> broadPhysicsEvents) -> std::vector<std::span<UnionElement>>
+    inline auto IslandBuilder::FindIslands(uint32_t totalColliderCount, std::span<const BroadEvent> broadPhysicsEvents) -> std::vector<std::span<IslandElement>>
     {
         Initialize(totalColliderCount);
 
@@ -57,7 +60,7 @@ namespace nc::physics
         m_elements.resize(colliderCount);
         for(auto i = 0u; i < colliderCount; ++i)
         {
-            m_elements[i] = UnionElement{i, i};
+            m_elements[i] = IslandElement{i, i};
         }
     }
 
@@ -103,13 +106,13 @@ namespace nc::physics
         std::sort(m_elements.begin(), m_elements.end(), [](const auto& a, const auto& b) { return a.id < b.id; });
     }
 
-    auto IslandBuilder::BuildIslands() -> std::vector<std::span<UnionElement>>
+    auto IslandBuilder::BuildIslands() -> std::vector<std::span<IslandElement>>
     {
-        /** Build views over each disjoint set.
+        /** Build views over each set.
          *  @todo With lots of small sets, we will end up islands that are too small be
          *  processed as a distinct task. Maybe we should combine those here? */
 
-        std::vector<std::span<UnionElement>> islands;
+        std::vector<std::span<IslandElement>> islands;
         islands.reserve(m_islandCountHint);
         size_t elementCount = m_elements.size();
         if(elementCount == 0u)
@@ -126,7 +129,7 @@ namespace nc::physics
             {
                 id = element.id;
                 auto beg = m_elements.begin() + islandStartIndex;
-                islands.push_back(std::span<UnionElement>(beg, index - islandStartIndex));
+                islands.push_back(std::span<IslandElement>(beg, index - islandStartIndex));
                 islandStartIndex = index;
             }
 
@@ -134,7 +137,7 @@ namespace nc::physics
         }
 
         auto beg = m_elements.begin() + islandStartIndex;
-        islands.push_back(std::span<UnionElement>(beg, index - islandStartIndex));
+        islands.push_back(std::span<IslandElement>(beg, index - islandStartIndex));
         m_islandCountHint = islands.size();
         return islands;
     }
