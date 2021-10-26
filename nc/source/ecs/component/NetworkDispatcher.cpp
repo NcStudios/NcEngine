@@ -1,4 +1,4 @@
-#include "component/NetworkDispatcher.h"
+#include "ecs/component/NetworkDispatcher.h"
 #include "debug/NcError.h"
 
 #ifdef NC_EDITOR_ENABLED

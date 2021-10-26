@@ -1,9 +1,9 @@
 #ifdef NC_EDITOR_ENABLED
 #include "WireframeTechnique.h"
-#include "Ecs.h"
 #include "config/Config.h"
-#include "component/Transform.h"
-#include "component/MeshRenderer.h"
+#include "ecs/Registry.h"
+#include "ecs/component/Transform.h"
+#include "ecs/component/MeshRenderer.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"

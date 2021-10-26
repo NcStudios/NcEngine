@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utility/SystemBase.h"
-#include "component/Camera.h"
+#include "ecs/component/Camera.h"
 
 namespace nc
 {

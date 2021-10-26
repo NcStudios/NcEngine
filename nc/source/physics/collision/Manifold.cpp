@@ -1,4 +1,5 @@
 #include "Manifold.h"
+#include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 #include "debug/Utils.h"
 
@@ -121,7 +122,7 @@ namespace nc::physics
         return biggestArea;
     }
 
-    void Manifold::UpdateWorldPoints(const registry_type* registry)
+    void Manifold::UpdateWorldPoints(const Registry* registry)
     {
         /** @todo Manifolds can linger after objects are destroyed. The check below prevents problems,
          *  but the caller then has to destroy this manifold upon detecting it is empty. It would be

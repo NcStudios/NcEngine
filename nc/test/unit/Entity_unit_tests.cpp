@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Entity.h"
+#include "ecs/Entity.h"
 
 using namespace nc;
 

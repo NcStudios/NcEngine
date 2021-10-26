@@ -1,7 +1,6 @@
 add_subdirectory(audio)
 add_subdirectory(assets)
 add_subdirectory(camera)
-add_subdirectory(component)
 add_subdirectory(config)
 add_subdirectory(debug)
 add_subdirectory(ecs)

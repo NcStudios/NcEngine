@@ -1,4 +1,5 @@
 #include "Polytope.h"
+#include "debug/NcError.h"
 
 #include <algorithm>
 #include <iostream>

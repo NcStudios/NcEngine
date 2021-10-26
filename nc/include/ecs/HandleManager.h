@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace nc::ecs
+namespace nc
 {
     class HandleManager
     {

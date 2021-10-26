@@ -1,8 +1,19 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
 #include "debug/Profiler.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "ecs/EntityComponentSystem.h"
+#include "ecs/component/AudioSource.h"
+#include "ecs/component/Camera.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/ConcaveCollider.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/NetworkDispatcher.h"
+#include "ecs/component/ParticleEmitter.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/PointLight.h"
+#include "ecs/component/Tag.h"
+#include "ecs/component/Transform.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls
@@ -15,20 +26,20 @@ namespace nc::ui::editor::controls
     const auto GraphSize = ImVec2{128, 32};
     const auto Padding = 4.0f;
 
-    inline void SceneGraphPanel(registry_type* registry, float windowHeight);
-    inline void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform);
-    inline void EntityPanel(registry_type* registry, Entity entity);
+    inline void SceneGraphPanel(Registry* registry, float windowHeight);
+    inline void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform);
+    inline void EntityPanel(Registry* registry, Entity entity);
     inline void AutoComponentElement(AutoComponent* comp);
-    inline void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
+    inline void UtilitiesPanel(float* dtMult, Registry* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
     inline void FrameData(float* dtMult, unsigned drawCallCount);
     inline void Profiler();
-    inline void ComponentSystems(registry_type* registry);
+    inline void ComponentSystems(Registry* registry);
     inline void PhysicsMetrics();
 
     /**
      * Scene Graph Controls
      */
-    void SceneGraphPanel(registry_type* registry, float windowHeight)
+    void SceneGraphPanel(Registry* registry, float windowHeight)
     {
         ImGui::SetNextWindowPos({Padding, TitleBarHeight});
         auto sceneGraphHeight = windowHeight - TitleBarHeight;
@@ -69,7 +80,7 @@ namespace nc::ui::editor::controls
         } ImGui::EndChild();
     }
 
-    void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform)
+    void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform)
     {
         ImGui::PushID(entity.Index());
 
@@ -92,7 +103,7 @@ namespace nc::ui::editor::controls
         ImGui::PopID();
     }
 
-    void EntityPanel(registry_type* registry, Entity entity)
+    void EntityPanel(Registry* registry, Entity entity)
     {
         if(!registry->Contains<Entity>(entity)) // entity may have been deleted
         {
@@ -128,7 +139,6 @@ namespace nc::ui::editor::controls
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
-        
         }
 
         if (auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
@@ -182,7 +192,7 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight)
+    void UtilitiesPanel(float* dtMult, Registry* registry, unsigned drawCallCount, float windowWidth, float windowHeight)
     {
         static auto initColumnWidth = false;
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
@@ -304,7 +314,7 @@ namespace nc::ui::editor::controls
     }
 
     /** @todo this will eventually need to be generic */
-    void ComponentSystems(registry_type* registry)
+    void ComponentSystems(Registry* registry)
     {
         ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());

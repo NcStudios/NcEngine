@@ -13,7 +13,7 @@ namespace nc::physics
     class PhysicsSystemImpl final : public PhysicsSystem
     {
         public:
-            PhysicsSystemImpl(registry_type* registry, graphics::Graphics* graphics);
+            PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics);
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
             void RemoveJoint(Entity entityA, Entity entityB) override;
@@ -40,6 +40,6 @@ namespace nc::physics
             graphics::DebugRenderer m_debugRenderer;
             #endif
 
-            void BuildTaskGraph(registry_type* registry);
+            void BuildTaskGraph(Registry* registry);
     };
 } // namespace nc::physics

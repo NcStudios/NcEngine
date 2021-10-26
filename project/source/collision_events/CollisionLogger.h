@@ -8,7 +8,7 @@ namespace nc::sample
     class CollisionLogger : public AutoComponent
     {
         public:
-            CollisionLogger(Entity entity, registry_type* registry);
+            CollisionLogger(Entity entity, Registry* registry);
             void OnCollisionEnter(Entity hit) override;
             void OnCollisionStay(Entity hit) override;
             void OnCollisionExit(Entity hit) override;
@@ -17,10 +17,10 @@ namespace nc::sample
             void OnTriggerExit(Entity hit) override;
         
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
     };
 
-    inline CollisionLogger::CollisionLogger(Entity entity, registry_type* registry)
+    inline CollisionLogger::CollisionLogger(Entity entity, Registry* registry)
         : AutoComponent{entity},
           m_registry{registry}
     {

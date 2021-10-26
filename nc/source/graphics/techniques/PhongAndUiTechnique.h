@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Component.h"
+#include "ecs/component/Component.h"
 #include "vulkan/vk_mem_alloc.hpp"
 #include "directx/math/DirectXMath.h"
 

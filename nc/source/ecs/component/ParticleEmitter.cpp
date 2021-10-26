@@ -1,4 +1,4 @@
-#include "component/ParticleEmitter.h"
+#include "ecs/component/ParticleEmitter.h"
 #include "ecs/ParticleEmitterSystem.h"
 
 #ifdef NC_EDITOR_ENABLED

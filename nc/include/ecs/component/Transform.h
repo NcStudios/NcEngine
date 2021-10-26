@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Component.h"
+#include "Component.h"
 #include "math/Vector.h"
 #include "math/Quaternion.h"
 #include "directx/math/DirectXMath.h"

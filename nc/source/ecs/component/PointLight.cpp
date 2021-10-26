@@ -1,6 +1,6 @@
-#include "component/PointLight.h"
-#include "component/Transform.h"
-#include "Ecs.h"
+#include "ecs/component/PointLight.h"
+#include "ecs/component/Transform.h"
+#include "ecs/Registry.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"

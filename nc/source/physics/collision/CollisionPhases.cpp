@@ -1,5 +1,7 @@
 #include "CollisionPhases.h"
 #include "IntersectionQueries.h"
+#include "debug/NcError.h"
+#include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 
 namespace
@@ -101,7 +103,7 @@ namespace
 
 namespace nc::physics
 {
-    void FetchEstimates(const registry_type* registry, CollisionStepInitData* out)
+    void FetchEstimates(const Registry* registry, CollisionStepInitData* out)
     {
         auto colliders = registry->ViewAll<Collider>();
         auto colliderCount = colliders.size();
@@ -121,7 +123,7 @@ namespace nc::physics
         }
     }
 
-    void UpdateManifolds(const registry_type* registry, std::vector<Manifold>& manifolds)
+    void UpdateManifolds(const Registry* registry, std::vector<Manifold>& manifolds)
     {
         for(auto cur = manifolds.rbegin(); cur != manifolds.rend(); ++cur)
         {
@@ -198,7 +200,7 @@ namespace nc::physics
         }
     }
 
-    void FindNarrowPhysicsPairs(registry_type* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadPhysicsEvents, NarrowPhysicsResult* out)
+    void FindNarrowPhysicsPairs(Registry* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadPhysicsEvents, NarrowPhysicsResult* out)
     {
         const auto broadEventCount = broadPhysicsEvents.size();
         out->contacts.clear();
@@ -243,7 +245,7 @@ namespace nc::physics
         }
     }
 
-    void FindNarrowTriggerPairs(const registry_type* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadTriggerEvents, std::vector<NarrowEvent>* out)
+    void FindNarrowTriggerPairs(const Registry* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadTriggerEvents, std::vector<NarrowEvent>* out)
     {
         out->clear();
         out->reserve(broadTriggerEvents.size());

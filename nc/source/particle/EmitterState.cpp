@@ -1,5 +1,5 @@
 #include "EmitterState.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "MainCamera.h"
 #include "random/Random.h"
 

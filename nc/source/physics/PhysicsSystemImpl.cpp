@@ -9,7 +9,7 @@
 
 namespace nc::physics
 {
-    PhysicsSystemImpl::PhysicsSystemImpl(registry_type* registry, graphics::Graphics* graphics)
+    PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics)
         : m_cache{},
           m_joints{},
           m_bspTree{registry},
@@ -102,7 +102,7 @@ namespace nc::physics
         m_cache.manifolds.clear();
     }
 
-    void PhysicsSystemImpl::BuildTaskGraph(registry_type* registry)
+    void PhysicsSystemImpl::BuildTaskGraph(Registry* registry)
     {
         auto& cache = m_cache;
 

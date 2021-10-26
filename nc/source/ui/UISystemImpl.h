@@ -26,7 +26,7 @@ namespace nc::ui
             void FrameBegin();
 
             #ifdef NC_EDITOR_ENABLED
-            void Frame(float* dt, registry_type* registry);
+            void Frame(float* dt, Registry* registry);
             #else
             void Frame();
             #endif

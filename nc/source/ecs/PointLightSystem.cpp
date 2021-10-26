@@ -1,15 +1,10 @@
 #include "PointLightSystem.h"
-#include "ECS.h"
-#include "EntityComponentSystem.h"
-#include "graphics/Commands.h"
-#include "graphics/Graphics.h"
-#include "graphics/Renderer.h"
-
-#include <iostream>
+#include "ecs/Registry.h"
+#include "ecs/component/PointLight.h"
 
 namespace nc::ecs
 {
-    PointLightSystem::PointLightSystem(registry_type* registry, graphics::Graphics* graphics)
+    PointLightSystem::PointLightSystem(Registry* registry, graphics::Graphics* graphics)
         : m_graphics{graphics},
           m_registry{registry},
           m_isSystemDirty{true}

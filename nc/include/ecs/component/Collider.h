@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Component.h"
+#include "Component.h"
 #include "physics/Geometry.h"
 #include "physics/LayerMask.h"
 #include "math/DirectXMathUtility.h"

@@ -1,5 +1,5 @@
-#include "component/Transform.h"
-#include "Ecs.h"
+#include "ecs/component/Transform.h"
+#include "ecs/Registry.h"
 #include "debug/Utils.h"
 
 #ifdef NC_EDITOR_ENABLED

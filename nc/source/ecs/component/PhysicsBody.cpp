@@ -1,5 +1,7 @@
-#include "component/PhysicsBody.h"
-#include "Ecs.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/Transform.h"
+#include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 
 #ifdef NC_EDITOR_ENABLED

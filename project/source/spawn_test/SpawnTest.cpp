@@ -1,5 +1,6 @@
 #include "SpawnTest.h"
 #include "NcEngine.h"
+#include "ecs/component/PhysicsBody.h"
 #include "random/Random.h"
 #include "imgui/imgui.h"
 #include "KillBox.h"

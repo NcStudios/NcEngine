@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ecs/Registry.h"
+#include "ecs/component/Collider.h"
 #include "shared/Prefabs.h"
 #include "WasdController.h"
 #include "CollisionLogger.h"
@@ -9,19 +11,19 @@ namespace nc::sample
     class PrefabSelector : public AutoComponent
     {
         public:
-            PrefabSelector(Entity entity, registry_type* registry);
-            
+            PrefabSelector(Entity entity, Registry* registry);
+
             void FrameUpdate(float) override;
             void Select(ColliderType type);
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             Entity m_currentObject;
             ColliderType m_typeToSpawn;
             bool m_doSpawn;
     };
 
-    PrefabSelector::PrefabSelector(Entity entity, registry_type* registry)
+    PrefabSelector::PrefabSelector(Entity entity, Registry* registry)
         : AutoComponent{entity},
           m_registry{registry},
           m_currentObject{Entity::Null()},

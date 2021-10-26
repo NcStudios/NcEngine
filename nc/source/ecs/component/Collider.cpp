@@ -1,7 +1,7 @@
-#include "component/Collider.h"
-#include "component/DebugWidget.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/DebugWidget.h"
 #include "graphics/Renderer.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "debug/Utils.h"
 #include "assets/AssetService.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/ParticleEmitter.h"
+#include "ecs/component/ParticleEmitter.h"
 #include "ecs/SoA.h"
 #include "graphics/MvpMatrices.h"
 

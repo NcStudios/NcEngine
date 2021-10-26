@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component/Transform.h"
+#include "Transform.h"
 
 namespace nc
 {

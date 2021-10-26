@@ -1,4 +1,4 @@
-#include "component/AutoComponentGroup.h"
+#include "ecs/component/AutoComponentGroup.h"
 
 namespace nc
 {

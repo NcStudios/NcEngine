@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "component/Component.h"
+#include "ecs/component/Component.h"
 #include "vulkan/vk_mem_alloc.hpp"
 #include "directx/math/DirectXMath.h"
-#include "component/DebugWidget.h"
+#include "ecs/component/DebugWidget.h"
 
 #include <vector>
 #include <span>
@@ -13,7 +13,7 @@
 
 namespace nc
 {
-    class MeshRenderer; 
+    class MeshRenderer;
 }
 
 namespace nc::graphics

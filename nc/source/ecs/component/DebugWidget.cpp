@@ -1,4 +1,4 @@
-#include "component/DebugWidget.h"
+#include "ecs/component/DebugWidget.h"
 #include "debug/NcError.h"
 
 namespace

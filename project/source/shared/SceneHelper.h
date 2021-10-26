@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NcEngine.h"
+#include "ecs/component/PointLight.h"
 #include "GameLog.h"
 #include "SampleUI.h"
 #include "FrameTimer.h"

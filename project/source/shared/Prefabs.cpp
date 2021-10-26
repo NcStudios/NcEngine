@@ -1,5 +1,12 @@
 #include "Prefabs.h"
 #include "Assets.h"
+#include "ecs/Registry.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/ConcaveCollider.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/PointLight.h"
+#include "ecs/component/Transform.h"
 
 namespace nc::sample::prefab
 {
@@ -159,93 +166,93 @@ void InitializeResources()
 }
 
 template<Resource Resource_t>
-Entity Create_(registry_type*, EntityInfo);
+Entity Create_(Registry*, EntityInfo);
 
-template<> Entity Create_<Resource::Capsule>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Capsule>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule.nca", material::Default, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::CapsuleBlue>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::CapsuleBlue>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule.nca", material::SolidBlue, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::CapsuleGreen>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::CapsuleGreen>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule.nca", material::SolidGreen, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::CapsuleRed>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::CapsuleRed>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/capsule", material::SolidRed, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::Coin>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Coin>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::Coin, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::Cube>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Cube>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::Default, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::CubeBlue>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::CubeBlue>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::SolidBlue, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::CubeGreen>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::CubeGreen>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::SolidGreen, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::CubeRed>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::CubeRed>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/cube.nca", material::SolidRed, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::Disc>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Disc>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::Default, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::DiscBlue>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::DiscBlue>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::SolidBlue, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::DiscGreen>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::DiscGreen>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::SolidGreen, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::DiscRed>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::DiscRed>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::SolidRed, TechniqueType::PhongAndUi);
@@ -253,70 +260,70 @@ template<> Entity Create_<Resource::DiscRed>(registry_type* registry, EntityInfo
 }
 
 
-template<> Entity Create_<Resource::RampRed>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::RampRed>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/ramp.nca", material::SolidRed, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::Sphere>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Sphere>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::Default, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::SphereBlue>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::SphereBlue>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::SolidBlue, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::SphereGreen>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::SphereGreen>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::SolidGreen, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::SphereRed>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::SphereRed>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/sphere.nca", material::SolidRed, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::PlaneGreen>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::PlaneGreen>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/plane.nca", material::SolidGreen, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::Table>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Table>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/table.nca", material::Table, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::Token>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Token>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/token.nca", material::Token, TechniqueType::PhongAndUi);
     return handle;
 }
 
-template<> Entity Create_<Resource::Worm>(registry_type* registry, EntityInfo info)
+template<> Entity Create_<Resource::Worm>(Registry* registry, EntityInfo info)
 {
     auto handle = registry->Add<Entity>(std::move(info));
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/worm.nca", material::Worm, TechniqueType::PhongAndUi);
     return handle;
 }
 
-using CreateFunc_t = Entity(*)(registry_type* registry, EntityInfo info);
+using CreateFunc_t = Entity(*)(Registry* registry, EntityInfo info);
 
 const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
 {
@@ -344,7 +351,7 @@ const auto dispatch = std::unordered_map<prefab::Resource, CreateFunc_t>
     std::pair{Resource::Worm,          Create_<Resource::Worm>}
 };
 
-nc::Entity Create(registry_type* registry, Resource resource, EntityInfo info)
+nc::Entity Create(Registry* registry, Resource resource, EntityInfo info)
 {
     return dispatch.at(resource)(registry, std::move(info));
 }

@@ -1,4 +1,5 @@
 #include "AudioSystemImpl.h"
+#include "ecs/component/AudioSource.h"
 
 #include <cstring>
 #include <iostream>
@@ -27,7 +28,7 @@ namespace
 
 namespace nc::audio
 {
-    AudioSystemImpl::AudioSystemImpl(registry_type* registry)
+    AudioSystemImpl::AudioSystemImpl(Registry* registry)
         : m_registry{registry},
           m_rtAudio{},
           m_readyBuffers{},

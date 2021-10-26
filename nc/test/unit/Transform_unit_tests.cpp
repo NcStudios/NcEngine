@@ -1,23 +1,47 @@
 #include "gtest/gtest.h"
-#include "component/Transform.h"
-#include "component/AutoComponentGroup.h"
-#include "Ecs.h"
-
-#include <iostream>
+#include "ecs/Registry.h"
 
 using namespace nc;
 
 namespace nc
 {
-    registry_type* g_registry = nullptr;
+    Registry g_registry{10u};
 
-    registry_type* ActiveRegistry()
+    Registry* ActiveRegistry()
     {
-        return g_registry;
+        return &g_registry;
+    }
+
+    Registry::Registry(size_t maxEntities)
+        : m_registeredStorage{},
+          m_active{},
+          m_toAdd{},
+          m_toRemove{},
+          m_handleManager{},
+          m_maxEntities{maxEntities}
+    {
+        RegisterComponentType<AutoComponentGroup>();
+        RegisterComponentType<Tag>();
+        RegisterComponentType<Transform>();
+    }
+
+    void Registry::Clear()
+    {
+        m_active.clear();
+        m_active.shrink_to_fit();
+        m_toAdd.clear();
+        m_toAdd.shrink_to_fit();
+        m_toRemove.clear();
+        m_toRemove.shrink_to_fit();
+
+        for(auto& storage : m_registeredStorage)
+            storage->Clear();
+        
+        m_handleManager.Reset();
     }
 
     AutoComponentGroup::AutoComponentGroup(Entity) : m_components{} {}
-    void AutoComponentGroup::SendOnDestroy() {}
+    void AutoComponentGroup::CommitStagedComponents() {}
 }
 
 constexpr auto TestLayer = Entity::layer_type{0u};
@@ -35,23 +59,20 @@ const auto TestRotQuat1 = Quaternion::FromEulerAngles(0.0f, 0.0f, 90.0f);
 const auto TestRotQuat2 = Quaternion::FromEulerAngles(1.5f, 1.5f, 1.5f);
 const auto TestRotQuat3 = Quaternion::FromEulerAngles(2.5, 0.0f, 1.0f);
 
+
 class Transform_unit_tests : public ::testing::Test
 {
     public:
-        std::unique_ptr<registry_type> registry;
+        Registry* registry;
 
-    protected:
-        void SetUp() override
+        Transform_unit_tests()
+            : registry{&g_registry}
         {
-            registry = std::make_unique<registry_type>(100u);
-            g_registry = registry.get();
         }
 
-        void TearDown() override
+        ~Transform_unit_tests()
         {
             registry->Clear();
-            g_registry = nullptr;
-            registry = nullptr;
         }
 };
 

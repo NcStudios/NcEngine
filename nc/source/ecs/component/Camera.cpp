@@ -1,6 +1,6 @@
-#include "component/Camera.h"
+#include "ecs/component/Camera.h"
 #include "config/Config.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "Window.h"
 
 #ifdef NC_EDITOR_ENABLED
