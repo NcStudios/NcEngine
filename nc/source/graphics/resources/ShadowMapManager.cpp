@@ -33,11 +33,6 @@ namespace nc::graphics
 
     void ShadowMapManager::Reset()
     {
-        // m_sampler.reset();
-        // m_depthStencil.reset();
-        // m_descriptorSet.reset();
-        // m_descriptorSetLayout.reset();
-        // Initialize();
     }
 
     void ShadowMapManager::Update(const std::vector<ShadowMap>& data)

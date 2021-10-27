@@ -28,11 +28,11 @@ namespace nc::sample
         {
             .pos = Vector3{0.05f, 3.0f, -5.0f},
             .attConst = 0.0f,
-            .ambient = Vector3{0.05f, 0.05f, 0.05f},
+            .ambient = Vector3{0.3f, 0.3f, 0.3f},
             .attLin = 0.05f,
             .diffuseColor = Vector3{0.3, 0.3, 0.3},
             .attQuad = 0.0f,
-            .diffuseIntensity = 10.56
+            .diffuseIntensity = 1200.0f
         };
 
         auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});

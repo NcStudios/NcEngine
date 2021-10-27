@@ -34,9 +34,18 @@ namespace nc::sample
             defaultTexturesPath + "Floor/BaseColor.png",
             defaultTexturesPath + "Floor/Normal.png",
             defaultTexturesPath + "Floor/Roughness.png",
-            defaultTexturesPath + "Snail/BaseColor.png",
-            defaultTexturesPath + "Snail/Normal.png",
-            defaultTexturesPath + "Snail/Roughness.png"
+            defaultTexturesPath + "Blacktop/BaseColor.png",
+            defaultTexturesPath + "Blacktop/Normal.png",
+            defaultTexturesPath + "Blacktop/Roughness.png",
+            defaultTexturesPath + "Blacktop/Metallic.png",
+            defaultTexturesPath + "Spheres/Blue/BaseColor.png",
+            defaultTexturesPath + "Spheres/Blue/Normal.png",
+            defaultTexturesPath + "Spheres/Blue/Roughness.png",
+            defaultTexturesPath + "Spheres/Blue/Metallic.png",
+            defaultTexturesPath + "Spheres/Gray/BaseColor.png",
+            defaultTexturesPath + "Spheres/Gray/Normal.png",
+            defaultTexturesPath + "Spheres/Gray/Roughness.png",
+            defaultTexturesPath + "Spheres/Gray/Metallic.png",
         };
 
         nc::LoadTextureAssets(texturePaths);
@@ -45,36 +54,48 @@ namespace nc::sample
         { 
             .baseColor = defaultTexturesPath + "Floor/BaseColor.png",
             .normal    = defaultTexturesPath + "Floor/Normal.png",
-            .roughness = defaultTexturesPath + "Floor/Roughness.png" 
+            .roughness = defaultTexturesPath + "Floor/Roughness.png",
+            .metallic  = defaultTexturesPath + "Floor/Roughness.png"
         };
 
-        auto snailMaterial =  graphics::Material
+        auto blacktopMaterial =  graphics::Material
         { 
-            .baseColor = defaultTexturesPath + "Snail/BaseColor.png",
-            .normal    = defaultTexturesPath + "Snail/Normal.png",
-            .roughness = defaultTexturesPath + "Snail/Roughness.png" 
+            .baseColor = defaultTexturesPath + "Blacktop/BaseColor.png",
+            .normal    = defaultTexturesPath + "Blacktop/Normal.png",
+            .roughness = defaultTexturesPath + "Blacktop/Roughness.png",
+            .metallic  = defaultTexturesPath + "Blacktop/Metallic.png"
+        };
+
+        auto blueMaterial =  graphics::Material
+        { 
+            .baseColor = defaultTexturesPath + "Spheres/Blue/BaseColor.png",
+            .normal    = defaultTexturesPath + "Spheres/Blue/Normal.png",
+            .roughness = defaultTexturesPath + "Spheres/Blue/Roughness.png",
+            .metallic  = defaultTexturesPath + "Spheres/Blue/Metallic.png"
+        };
+
+        auto grayMaterial =  graphics::Material
+        { 
+            .baseColor = defaultTexturesPath + "Spheres/Gray/BaseColor.png",
+            .normal    = defaultTexturesPath + "Spheres/Gray/Normal.png",
+            .roughness = defaultTexturesPath + "Spheres/Gray/Roughness.png",
+            .metallic  = defaultTexturesPath + "Spheres/Gray/Metallic.png"
         };
 
         const std::vector<std::string> sceneMeshes = std::vector<std::string>
         { 
             "project/assets/mesh/plane.nca",
-            "project/assets/mesh/snail.nca"
+            "project/assets/mesh/sphere.nca",
+            "project/assets/mesh/cube.nca"
         };
 
         nc::LoadMeshAssets(sceneMeshes);
 
         //Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 4.0f, -0.5f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.1f, 0.1f, 0.1f),
-                                                            .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
-                                                            .diffuseIntensity = 2.0f
-                                                            });
-
-        // auto lvHandle2 = registry->Add<Entity>({.position = Vector3{1.1f, 4.1f, -8.0f}, .tag = "Point Light 1"});
-        // registry->Add<PointLight>(lvHandle2, PointLightInfo{.ambient = Vector3(0.1f, 0.1f, 0.1f),
-        //                                                     .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
-        //                                                     .diffuseIntensity = 2.0f
-        //                                                     });
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),
+                                                           .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
+                                                           .diffuseIntensity = 88.0f});
 
         auto floor = registry->Add<Entity>(
             {.position = Vector3{0.0f, 0.0f, 0.0f},
@@ -84,13 +105,29 @@ namespace nc::sample
 
         registry->Add<MeshRenderer>(floor, "project/assets/mesh/plane.nca", floorMaterial, nc::graphics::TechniqueType::PhongAndUi);
 
-        auto snail = registry->Add<Entity>(
-            {.position = Vector3{0.0f, 0.0f, 2.0f},
-             .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 0.0f),
-             .scale = Vector3{1.0f, 1.0f, 1.0f},
-             .tag = "Snail"});
+        auto blueSphere = registry->Add<Entity>(
+        {.position = Vector3{0.0f, 1.0f, 2.0f},
+        .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
+        .scale = Vector3{2.0f, 2.0f,2.0f},
+        .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(snail, "project/assets/mesh/snail.nca", snailMaterial, nc::graphics::TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blueSphere, "project/assets/mesh/sphere.nca", blueMaterial, nc::graphics::TechniqueType::PhongAndUi);
+
+        auto blackSphere = registry->Add<Entity>(
+        {.position = Vector3{3.0f, 1.0f, 2.0f},
+         .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
+         .scale = Vector3{2.0f, 2.0f,2.0f},
+         .tag = "Sphere"});
+
+        registry->Add<MeshRenderer>(blackSphere, "project/assets/mesh/cube.nca", grayMaterial, nc::graphics::TechniqueType::PhongAndUi);
+
+        auto blackBox = registry->Add<Entity>(
+        {.position = Vector3{-3.0f, 1.0f, 2.0f},
+         .rotation = Quaternion::FromEulerAngles(0.2, 0.7f, 0.4f),
+         .scale = Vector3{2.0f, 2.0f,2.0f},
+         .tag = "Box"});
+
+        registry->Add<MeshRenderer>(blackBox, "project/assets/mesh/cube.nca", blacktopMaterial, nc::graphics::TechniqueType::PhongAndUi);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});

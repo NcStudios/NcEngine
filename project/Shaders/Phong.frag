@@ -32,8 +32,7 @@ struct ObjectData
     int baseColorIndex;
     int normalIndex;
     int roughnessIndex;
-
-    int isInitialized;
+    int metallicIndex;
 };
 
 layout(std140, set=2, binding=0) readonly buffer ObjectBuffer
@@ -164,7 +163,7 @@ vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - metallic;
 
-    float NdotL = max(dot(N, L), 0.0);
+    float NdotL = max(dot(N, L), light.ambientColor.x);
 
     vec3 colorTotal = (kD * baseColor / PI + specular) * radiance * NdotL;
 
@@ -179,9 +178,11 @@ void main()
     vec3 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex);
     vec3 normalColor = MaterialColor(objectBuffer.objects[inObjectInstance].normalIndex);
     vec3 roughnessColor = MaterialColor(objectBuffer.objects[inObjectInstance].roughnessIndex);
-    vec3 metallicColor = roughnessColor;
+    vec3 metallicColor = MaterialColor(objectBuffer.objects[inObjectInstance].metallicIndex);
 
-    vec3 N = normalize(inNormal);
+    vec3 normal = normalColor;
+    vec3 N = (normalize(inTBN * normal));
+    // vec3 N = normalize(inNormal);
     vec3 V = normalize(pc.cameraPos - inFragPosition);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 

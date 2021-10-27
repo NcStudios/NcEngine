@@ -14,6 +14,7 @@ layout(push_constant) uniform PER_OBJECT
     int baseColorIndex;
     int normalIndex;
     int roughnessIndex;
+    int metallicIndex;
 } pc;
 
 struct PointLight

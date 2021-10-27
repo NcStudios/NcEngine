@@ -121,7 +121,8 @@ namespace nc::graphics
 
     bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return !frameData.meshes.empty() && ImGui::GetDrawData() != nullptr;
+        (void)frameData;
+        return true;
     }
 
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)

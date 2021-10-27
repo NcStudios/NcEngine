@@ -129,35 +129,49 @@ void InitializeResources()
 
     material::SolidBlue =  graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
                                                        .normal    = defaultNormal,
-                                                       .roughness = defaultRoughness };
+                                                       .roughness = defaultRoughness,
+                                                       .metallic = defaultRoughness};
+                                                        
 
     material::SolidGreen = graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Green.png",
                                                        .normal    = defaultNormal,
-                                                       .roughness = defaultRoughness };
+                                                       .roughness = defaultRoughness,
+                                                       .metallic = defaultRoughness };
 
     material::SolidRed =   graphics::Material{ .baseColor = defaultTexturesPath + "SolidColor/Red.png",
                                                        .normal    = defaultNormal,
-                                                       .roughness = defaultRoughness };
+                                                       .roughness = defaultRoughness,
+                                                       .metallic = defaultRoughness };
 
     material::Coin =       graphics::Material{ .baseColor = defaultTexturesPath + "Coin/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Coin/Normal.png",
-                                                       .roughness = defaultTexturesPath + "Coin/Roughness.png" };
+                                                       .roughness = defaultTexturesPath + "Coin/Roughness.png",
+                                                       .metallic = defaultRoughness };
+
 
     material::Default =    graphics::Material{ .baseColor = defaultBaseColor,
                                                        .normal    = defaultNormal,
-                                                       .roughness = defaultRoughness };
+                                                       .roughness = defaultRoughness,
+                                                       .metallic = defaultRoughness };
+
 
     material::Table =      graphics::Material{ .baseColor = defaultTexturesPath + "Table/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Table/Normal.png",
-                                                       .roughness = defaultTexturesPath + "Table/Roughness.png" };
+                                                       .roughness = defaultTexturesPath + "Table/Roughness.png",
+                                                       .metallic = defaultRoughness };
+
      
     material::Token =      graphics::Material{ .baseColor = defaultTexturesPath + "Token/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Token/Normal.png",
-                                                       .roughness = defaultTexturesPath + "Token/Roughness.png" };
+                                                       .roughness = defaultTexturesPath + "Token/Roughness.png",
+                                                       .metallic = defaultRoughness };
+
 
     material::Worm =       graphics::Material{ .baseColor = defaultTexturesPath + "Logo/BaseColor.png",
                                                        .normal    = defaultTexturesPath + "Logo/Normal.png",
-                                                       .roughness = defaultTexturesPath + "Logo/Roughness.png" };
+                                                       .roughness = defaultTexturesPath + "Logo/Roughness.png",
+                                                       .metallic = defaultRoughness };
+
 }
 
 template<Resource Resource_t>

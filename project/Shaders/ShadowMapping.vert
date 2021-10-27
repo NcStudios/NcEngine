@@ -15,8 +15,7 @@ struct ObjectData
     int baseColorIndex;
     int normalIndex;
     int roughnessIndex;
-
-    int isInitialized;
+    int metallicIndex;
 };
 
 layout(push_constant) uniform PER_OBJECT

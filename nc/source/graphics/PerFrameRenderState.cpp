@@ -48,8 +48,8 @@ namespace nc::graphics
             if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
 
-            const auto [base, normal, roughness] = renderer.GetTextureIndices();
-            objectData.emplace_back(modelMatrix, modelMatrix * camViewMatrix, viewProjection, base.index, normal.index, roughness.index, 1);
+            const auto [base, normal, roughness, metallic] = renderer.GetTextureIndices();
+            objectData.emplace_back(modelMatrix, modelMatrix * camViewMatrix, viewProjection, base.index, normal.index, roughness.index, metallic.index);
             meshes.push_back(renderer.GetMesh());
         }
 

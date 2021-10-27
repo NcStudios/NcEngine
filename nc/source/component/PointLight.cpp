@@ -103,7 +103,7 @@ namespace nc
             ImGui::Text("Diffuse    ");
             ImGui::Indent();  
                 ImGui::Text("Color      ");   ImGui::SameLine(); auto diffuseResult = ImGui::ColorEdit3("##difcolor", &diffuse.x, ImGuiColorEditFlags_NoInputs);
-                auto diffuseIntensityResult = ui::editor::floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 600.0f, "%.2f");
+                auto diffuseIntensityResult = ui::editor::floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 1200.0f, "%.2f");
             ImGui::Unindent();
             ImGui::Text("Attenuation");
                 ui::editor::columnHeaderWidget("", "Const", "Lin", "Quad");

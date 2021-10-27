@@ -63,7 +63,8 @@ const auto DefaultMaterial = nc::graphics::Material
 {
     .baseColor = "nc/resources/texture/DefaultBaseColor.png",
     .normal = "nc/resources/texture/DefaultNormal.png",
-    .roughness = "nc/resources/texture/DefaultMetallic.png"
+    .roughness = "nc/resources/texture/DefaultMetallic.png",
+    .metallic = "nc/resources/texture/DefaultMetallic.png",
 };
 
 class ExampleScene : public nc::scene::Scene
@@ -75,7 +76,8 @@ class ExampleScene : public nc::scene::Scene
             nc::LoadMeshAsset(CubeMeshPath);
             nc::LoadTextureAssets({DefaultMaterial.baseColor,
                                    DefaultMaterial.normal,
-                                   DefaultMaterial.roughness});
+                                   DefaultMaterial.roughness,
+                                   DefaultMaterial.metallic});
 
             /** Create and register a camera. */
             auto cameraInit = nc::EntityInfo

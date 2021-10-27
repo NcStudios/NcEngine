@@ -71,6 +71,10 @@ void main()
 
     outFragPosition = vec3(object.model * vec4(inPos, 1.0));
     outNormal = mat3(object.model) * inNormal;
+    vec3 N = normalize(vec3(object.model * vec4(inNormal,    0.0)));
+    vec3 T = normalize(vec3(object.model * vec4(inTangent,   0.0)));
+    vec3 B = normalize(cross(N, T));
+    outTBN = mat3(T, B, N);
     outUV = inUV;
     outObjectInstance = gl_BaseInstance;
     outLightSpacePos = biasMat * pointLights.lights[0].lightViewProj * vec4(outFragPosition, 1.0);

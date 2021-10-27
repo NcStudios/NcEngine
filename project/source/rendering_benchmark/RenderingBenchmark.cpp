@@ -68,7 +68,7 @@ namespace nc::sample
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.3f, 0.3f, 0.3f),
                                                            .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
-                                                           .diffuseIntensity = 2.0f});
+                                                           .diffuseIntensity = 1200.0f});
 
         // UI Callbacks
         GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);

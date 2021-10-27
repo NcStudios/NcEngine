@@ -15,10 +15,10 @@ namespace
 {
     // Depth bias (and slope) are used to avoid shadowing artifacts
     // Constant depth bias factor (always applied)
-    constexpr float DEPTH_BIAS_CONSTANT = 0.1f;
+    constexpr float DEPTH_BIAS_CONSTANT = 1.25f;
 
     // Slope depth bias factor, applied depending on polygon's slope
-    constexpr float DEPTH_BIAS_SLOPE = 0.1f;
+    constexpr float DEPTH_BIAS_SLOPE = 1.75f;
 }
 
 namespace nc::graphics

@@ -9,6 +9,7 @@ namespace nc::graphics
         std::string baseColor; // Slot 0
         std::string normal; // Slot 1
         std::string roughness; // Slot 2
+        std::string metallic; // Slot 3
 
         #ifdef NC_EDITOR_ENABLED
         void EditorGuiElement();

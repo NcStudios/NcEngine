@@ -18,6 +18,8 @@ namespace nc::graphics
         ImGui::Text(normal.c_str());
         ImGui::Text("Roughness:");
         ImGui::Text(roughness.c_str());
+        ImGui::Text("Metallic:");
+        ImGui::Text(metallic.c_str());
     }
     #endif
 }

@@ -12,6 +12,7 @@ namespace nc
         TextureView baseColor;
         TextureView normal;
         TextureView roughness;
+        TextureView metallic;
     };
 
     class MeshRenderer : public ComponentBase
