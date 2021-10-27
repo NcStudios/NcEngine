@@ -24,11 +24,8 @@ namespace nc::sample
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
-                                                           .attConst = 0.0f,
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-                                                           .attLin = 0.05f,
                                                            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .attQuad = 0.0f,
                                                            .diffuseIntensity = 600});
 
         // Movable object

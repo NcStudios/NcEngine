@@ -21,7 +21,7 @@ struct PointLight
 {
     mat4 lightViewProj;
     vec3 lightPos;
-    float attConst;
+    int castShadows;
     vec3 ambientColor;
     float attLin;
     vec3 diffuseColor;
@@ -77,6 +77,14 @@ void main()
     outTBN = mat3(T, B, N);
     outUV = inUV;
     outObjectInstance = gl_BaseInstance;
-    outLightSpacePos = biasMat * pointLights.lights[0].lightViewProj * vec4(outFragPosition, 1.0);
+
+    if (pointLights.lights[0].castShadows == 1)
+    {
+        outLightSpacePos = biasMat * pointLights.lights[0].lightViewProj * vec4(outFragPosition, 1.0);
+    }
+    else
+    {
+        outLightSpacePos = vec4(1.0);
+    }
     gl_Position = object.viewProjection * object.model * vec4(inPos, 1.0);
 }

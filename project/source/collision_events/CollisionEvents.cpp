@@ -53,11 +53,8 @@ namespace nc::sample
 
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.1f, 4.2f, -5.8f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
-                                                           .attConst = 0.0f,
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-                                                           .attLin = 0.05f,
                                                            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .attQuad = 0.0f,
                                                            .diffuseIntensity = 200.0});
 
         // Camera

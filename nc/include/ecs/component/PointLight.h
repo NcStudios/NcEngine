@@ -18,11 +18,11 @@ namespace nc
     {
         DirectX::XMMATRIX viewProjection = {};
         Vector3 pos = Vector3::Zero();
-        float attConst = 2.61f;
+        int castShadows = 1;
         Vector3 ambient = Vector3::Splat(0.35f);
-        float attLin = 0.1819f;
+        float paddingA = 0.0f; /** todo - Remove */
         Vector3 diffuseColor = Vector3::One();
-        float attQuad = 0.0000001f;
+        float paddingB = 0.0f;  /** todo - Remove */
         float diffuseIntensity = 2.5f;
         int isInitialized = 1;
         float padding[2] = {};

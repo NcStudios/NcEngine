@@ -28,11 +28,8 @@ namespace nc::sample
         auto lightOneProperties = PointLightInfo
         {
             .pos = Vector3{0.05f, 3.0f, -5.0f},
-            .attConst = 0.0f,
             .ambient = Vector3{0.3f, 0.3f, 0.3f},
-            .attLin = 0.05f,
             .diffuseColor = Vector3{0.3, 0.3, 0.3},
-            .attQuad = 0.0f,
             .diffuseIntensity = 1200.0f
         };
 

@@ -12,7 +12,7 @@ struct PointLight
 {
     mat4 lightViewProj;
     vec3 lightPos;
-    float attConst;
+    int castShadows;
     vec3 ambientColor;
     float attLin;
     vec3 diffuseColor;
@@ -167,8 +167,13 @@ vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor
 
     vec3 colorTotal = (kD * baseColor / PI + specular) * radiance * NdotL;
 
+    float shadow = 0.0;
+    
     // Shadow
-    float shadow = ShadowCalculation(inLightSpacePosition);
+    if (light.castShadows == 1)
+    {
+        shadow = ShadowCalculation(inLightSpacePosition);
+    }
 
     return (light.ambientColor + (1.0 - shadow)) * colorTotal;
 }

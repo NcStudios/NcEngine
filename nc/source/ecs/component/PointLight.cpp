@@ -32,6 +32,7 @@ namespace nc
           m_lightProjectionMatrix{DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, NEAR_CLIP, FAR_CLIP)},
           m_isDirty{false}
     {
+        m_info.castShadows = config::GetGraphicsSettings().useShadows;
     }
 
     void PointLight::SetInfo(PointLightInfo info)
