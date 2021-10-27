@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "shared/GameLog.h"
 
 namespace nc::sample
@@ -9,15 +9,15 @@ namespace nc::sample
     class KillBox : public AutoComponent
     {
         public:
-            KillBox(Entity entity, registry_type* registry, bool logOnDestroy = false);
+            KillBox(Entity entity, Registry* registry, bool logOnDestroy = false);
             void OnTriggerExit(Entity hit) override;
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             bool m_logOnDestroy;
     };
 
-    inline KillBox::KillBox(Entity entity, registry_type* registry, bool logOnDestroy)
+    inline KillBox::KillBox(Entity entity, Registry* registry, bool logOnDestroy)
         : AutoComponent{entity},
           m_registry{registry},
           m_logOnDestroy{logOnDestroy}

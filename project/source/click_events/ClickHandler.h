@@ -1,8 +1,8 @@
 #pragma once
 
-#include "component/Component.h"
+#include "ecs/component/Component.h"
 #include "Input.h"
-#include "Physics.h"
+#include "physics/PhysicsSystem.h"
 
 namespace nc::sample
 {
@@ -10,17 +10,19 @@ namespace nc::sample
     class ClickHandler : public AutoComponent
     {
         public:
-            ClickHandler(Entity entity, physics::LayerMask mask);
+            ClickHandler(Entity entity, LayerMask mask, PhysicsSystem* physicsSystem);
             void FrameUpdate(float) override;
-            void SetLayer(physics::LayerMask mask);
+            void SetLayer(LayerMask mask);
 
         private:
-            physics::LayerMask m_mask;
+            LayerMask m_mask;
+            PhysicsSystem* m_physicsSystem;
     };
 
-    inline ClickHandler::ClickHandler(Entity entity, physics::LayerMask mask)
+    inline ClickHandler::ClickHandler(Entity entity, LayerMask mask, PhysicsSystem* physicsSystem)
         : AutoComponent{entity},
-          m_mask{mask}
+          m_mask{mask},
+          m_physicsSystem{physicsSystem}
     {
     }
 
@@ -28,13 +30,13 @@ namespace nc::sample
     {
         if(GetKeyDown(input::KeyCode::LeftButton))
         {
-            auto hit = physics::RaycastToClickables(m_mask);
+            auto hit = m_physicsSystem->RaycastToClickables(m_mask);
             if(hit)
                 hit->OnClick();
         }
     }
 
-    inline void ClickHandler::SetLayer(physics::LayerMask mask)
+    inline void ClickHandler::SetLayer(LayerMask mask)
     {
         m_mask = mask;
     }

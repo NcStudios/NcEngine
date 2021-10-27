@@ -4,10 +4,10 @@
 
 // namespace nc::sample
 // {
-//     class SolarSystem : public scene::Scene
+//     class SolarSystem : public Scene
 //     {
 //         public:
-//             void Load(registry_type* registry) override;
+//             void Load(Registry* registry) override;
 //             void Unload() override;
         
 //         private:

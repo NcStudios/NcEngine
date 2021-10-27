@@ -1,9 +1,8 @@
 #ifdef NC_EDITOR_ENABLED
-
 #pragma once
 
-#include "component/Component.h"
-#include "component/DebugWidget.h"
+#include "ecs/component/Component.h"
+#include "ecs/component/DebugWidget.h"
 #include "directx/math/DirectXMath.h"
 #include "ITechnique.h"
 
@@ -14,7 +13,7 @@
 
 namespace nc
 {
-    class MeshRenderer; 
+    class MeshRenderer;
 }
 
 namespace nc::graphics

@@ -1,5 +1,5 @@
 #include "EmitterState.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "MainCamera.h"
 #include "random/Random.h"
 
@@ -30,19 +30,19 @@ namespace
         };
     }
 
-    void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
-    {
-        auto& vel = particle->linearVelocity;
-        vel = vel + vel * velOverTimeFactor;
-        particle->position = particle->position + vel * dt;
+    // void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
+    // {
+    //     auto& vel = particle->linearVelocity;
+    //     vel = vel + vel * velOverTimeFactor;
+    //     particle->position = particle->position + vel * dt;
 
-        auto& angVel = particle->angularVelocity;
-        angVel += angVel * rotOverTimeFactor;
-        particle->rotation += angVel * dt;
+    //     auto& angVel = particle->angularVelocity;
+    //     angVel += angVel * rotOverTimeFactor;
+    //     particle->rotation += angVel * dt;
 
-        auto& scale = particle->scale;
-        scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
-    }
+    //     auto& scale = particle->scale;
+    //     scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
+    // }
 }
 
 namespace nc::particle
@@ -66,34 +66,34 @@ namespace nc::particle
         }
     }
 
-    void EmitterState::Update(float dt)
+    void EmitterState::Update(float)
     {
-        PeriodicEmission(dt);
+        // PeriodicEmission(dt);
 
-        std::vector<unsigned> toRemove; // linear allocator?
-        const auto velOverTimeFactor = m_info.kinematic.velocityOverTimeFactor * dt;
-        const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
-        const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
-        auto* camera = camera::GetMainCameraTransform();
-        auto camRotation = camera->GetRotation();
-        auto camForward = camera->Forward();
-        auto [index, particles, matrices] = m_soa.View<ParticlesIndex, MvpMatricesIndex>();
+        // std::vector<unsigned> toRemove; // linear allocator?
+        // const auto velOverTimeFactor = m_info.kinematic.velocityOverTimeFactor * dt;
+        // const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
+        // const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
+        // auto* camera = GetMainCameraTransform();
+        // auto camRotation = camera->GetRotation();
+        // auto camForward = camera->Forward();
+        // auto [index, particles, matrices] = m_soa.View<ParticlesIndex, MvpMatricesIndex>();
 
-        for(; index.Valid(); ++index)
-        {
-            auto& particle = particles[index];
-            particle.currentLifetime += dt;
-            if(particle.currentLifetime >= particle.maxLifetime)
-                toRemove.push_back(index);
-            else
-            {
-                ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
-                matrices[index] = ComputeMvp(particle, camRotation, camForward);
-            }
-        }
+        // for(; index.Valid(); ++index)
+        // {
+        //     auto& particle = particles[index];
+        //     particle.currentLifetime += dt;
+        //     if(particle.currentLifetime >= particle.maxLifetime)
+        //         toRemove.push_back(index);
+        //     else
+        //     {
+        //         ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
+        //         matrices[index] = ComputeMvp(particle, camRotation, camForward);
+        //     }
+        // }
 
-        for(auto i : toRemove)
-            m_soa.RemoveAtIndex(i);
+        // for(auto i : toRemove)
+        //     m_soa.RemoveAtIndex(i);
     }
 
     ParticleInfo* EmitterState::GetInfo()

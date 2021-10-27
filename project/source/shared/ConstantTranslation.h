@@ -1,21 +1,21 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 namespace nc::sample
 {
     class ConstantTranslation : public AutoComponent
     {
         public:
-            ConstantTranslation(Entity entity, registry_type* registry, Vector3 velocity);
+            ConstantTranslation(Entity entity, Registry* registry, Vector3 velocity);
             void FrameUpdate(float dt) override;
         
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             Vector3 m_velocity;
     };
 
-    inline ConstantTranslation::ConstantTranslation(Entity entity, registry_type* registry, Vector3 velocity)
+    inline ConstantTranslation::ConstantTranslation(Entity entity, Registry* registry, Vector3 velocity)
         : AutoComponent{entity},
           m_registry{registry},
           m_velocity{velocity}

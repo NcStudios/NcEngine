@@ -5,10 +5,10 @@
 
 namespace nc::sample
 {
-    class SpawnTest : public scene::Scene
+    class SpawnTest : public Scene
     {
         public:
-            void Load(registry_type* registry) override;
+            void Load(NcEngine* engine) override;
             void Unload() override;
         
         public:

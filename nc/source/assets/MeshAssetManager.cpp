@@ -1,5 +1,6 @@
 #include "MeshAssetManager.h"
 
+#include <cassert>
 #include <fstream>
 
 namespace
@@ -41,7 +42,7 @@ namespace
         for(size_t i = 0; i < count; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("ReadVerticesFromAsset - Failure");
+                throw nc::NcError("Failure reading file");
             
             file >> ver >> nrm >> tex >> tan >> bit;
             vertices.emplace_back(ver, nrm, tex, tan, bit);
@@ -55,7 +56,7 @@ namespace
         for(size_t i = 0; i < count; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("ReadIndicesFromAsset - Failure");
+                throw nc::NcError("Failure reading file");
 
             file >> index;
             indices.push_back(index);
@@ -65,11 +66,11 @@ namespace
     auto ReadMesh(const std::string& meshPath, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
     {
         if(!HasValidAssetExtension(meshPath))
-            throw std::runtime_error("LoadMeshes - Invalid extension: " + meshPath);
+            throw nc::NcError("Invalid extension: " + meshPath);
 
         std::ifstream file{meshPath};
         if(!file.is_open())
-            throw std::runtime_error("LoadMeshes - Could not open file: " + meshPath);
+            throw nc::NcError("Could not open file: " + meshPath);
 
         float maxExtent;
         size_t vertexCount, indexCount;
@@ -113,8 +114,9 @@ namespace nc
         MeshView mesh
         {
             .firstVertex = existingVertexCount,
+            .vertexCount = verticesRead,
             .firstIndex = existingIndexCount,
-            .indicesCount = indicesRead,
+            .indexCount = indicesRead,
             .maxExtent = maxExtent
         };
 
@@ -123,7 +125,7 @@ namespace nc
         return true;
     }
 
-    bool MeshAssetManager::Load(const std::vector<std::string>& paths)
+    bool MeshAssetManager::Load(std::span<const std::string> paths)
     {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
@@ -142,8 +144,9 @@ namespace nc
             MeshView mesh
             {
                 .firstVertex = totalVertexCount,
+                .vertexCount = verticesRead,
                 .firstIndex = totalIndexCount,
-                .indicesCount = indicesRead,
+                .indexCount = indicesRead,
                 .maxExtent = maxExtent
             };
 
@@ -158,16 +161,51 @@ namespace nc
 
     bool MeshAssetManager::Unload(const std::string& path)
     {
-        /** @todo */
-        (void)path;
-        return false;
+        auto pos = m_accessors.find(path);
+        if(pos == m_accessors.end())
+            return false;
+
+        const auto [firstVertex, vertexCount, firstIndex, indexCount, unused] = pos->second;
+        m_accessors.erase(path);
+
+        auto indBeg = m_indexData.indices.begin() + firstIndex;
+        auto indEnd = indBeg + indexCount;
+        assert(indEnd <= m_indexData.indices.end());
+        m_indexData.indices.erase(indBeg, indEnd);
+
+        auto vertBeg = m_vertexData.vertices.begin() + firstVertex;
+        auto vertEnd = vertBeg + vertexCount;
+        assert(vertEnd <= m_vertexData.vertices.end());
+        m_vertexData.vertices.erase(vertBeg, vertEnd);
+
+        for(auto& [path, accessor] : m_accessors)
+        {
+            if(accessor.firstVertex > firstVertex)
+                accessor.firstVertex -= vertexCount;
+
+            if(accessor.firstIndex > firstIndex)
+                accessor.firstIndex -= indexCount;
+        }
+
+        if(m_vertexData.vertices.size() != 0)
+            UpdateBuffers();
+
+        return true;
+    }
+
+    void MeshAssetManager::UnloadAll()
+    {
+        m_accessors.clear();
+        m_vertexData.vertices.clear();
+        m_indexData.indices.clear();
+        // Don't call UpdateBuffers() with empty data.
     }
 
     auto MeshAssetManager::Acquire(const std::string& path) const -> MeshView
     {
         const auto it = m_accessors.find(path);
         if(it == m_accessors.cend())
-            throw std::runtime_error("MeshAssetManager::Acquire - asset not loaded: " + path);
+            throw NcError("Asset not loaded: " + path);
         
         return it->second;
     }

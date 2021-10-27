@@ -16,17 +16,17 @@ Create a directory called 'example' in the repository directory with a few files
 Controller.h will define a component that handles movement of the box:
 ```cpp
 /** Controller.h */
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "Input.h"
 
 /** Deriving from AutoComponent allows us to run logic each frame with FrameUpdate. */
 class Controller : public nc::AutoComponent
 {
     constexpr static auto Speed = 5.0f;
-    nc::registry_type* m_registry;
+    nc::Registry* m_registry;
 
     public:
-        Controller(nc::Entity entity, nc::registry_type* registry)
+        Controller(nc::Entity entity, nc::Registry* registry)
             : nc::AutoComponent{entity},
               m_registry{registry}
         {
@@ -53,13 +53,12 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 ```cpp
 /** ExampleScene.h */
 #include "Assets.h"
-#include "MainCamera.h"
-#include "Scene.h"
+#include "NcEngine.h"
 #include "Controller.h"
 
 /** Default assets from the nc/resources directory. */
 const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.nca"};
-const auto DefaultMaterial = nc::graphics::Material
+const auto DefaultMaterial = nc::Material
 {
     .baseColor = "nc/resources/texture/DefaultBaseColor.png",
     .normal = "nc/resources/texture/DefaultNormal.png",
@@ -67,10 +66,10 @@ const auto DefaultMaterial = nc::graphics::Material
     .metallic = "nc/resources/texture/DefaultMetallic.png",
 };
 
-class ExampleScene : public nc::scene::Scene
+class ExampleScene : public nc::Scene
 {
     public:
-        void Load(nc::registry_type* registry) override
+        void Load(nc::NcEngine* engine) override
         {
             /** Load box assets. */
             nc::LoadMeshAsset(CubeMeshPath);
@@ -78,6 +77,8 @@ class ExampleScene : public nc::scene::Scene
                                    DefaultMaterial.normal,
                                    DefaultMaterial.roughness,
                                    DefaultMaterial.metallic});
+
+            auto registry = engine->Registry();
 
             /** Create and register a camera. */
             auto cameraInit = nc::EntityInfo
@@ -89,7 +90,7 @@ class ExampleScene : public nc::scene::Scene
 
             auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
-            nc::camera::SetMainCamera(camera);
+            engine->MainCamera()->Set(camera);
 
             /** Add a PointLight. */
             auto pointLightInit = nc::EntityInfo
@@ -103,7 +104,7 @@ class ExampleScene : public nc::scene::Scene
 
             /** Add the box. */
             auto cubeHandle = registry->Add<nc::Entity>(nc::EntityInfo{.tag = "Box"});
-            registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::graphics::TechniqueType::PhongAndUi);
+            registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::TechniqueType::PhongAndUi);
 
             /** Add the movement controller to the cube. */
             registry->Add<Controller>(cubeHandle, registry);
@@ -119,20 +120,20 @@ class ExampleScene : public nc::scene::Scene
 The main file will be pretty simple:
 ```cpp
 /** Main.cpp */
-#include "Core.h"
+#include "NcEngine.h"
 #include "platform/win32/NcWin32.h"
 #include "ExampleScene.h"
 
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 {
     /** Create the engine instance. */
-    nc::NcEngine engine(instance, "example/Config.ini");
+    auto engine = nc::InitializeEngine(instance, "example/Config.ini");
 
     /** Start the game loop. */
-    engine.Start(std::make_unique<ExampleScene>());
+    engine->Start(std::make_unique<ExampleScene>());
 
     /** Destroy the engine instance. */
-    engine.Shutdown();
+    engine->Shutdown();
 
     return 0;
 }
@@ -181,7 +182,7 @@ target_include_directories(${ExampleGame}
 
 target_link_libraries(${ExampleGame}
     PRIVATE
-        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libNcEngine-Release.a
+        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libNcEngine-ReleaseWithEditor.a
         ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libimgui-Release.a
         ${RTAUDIO_LINK_FLAGS}
         Vulkan::Vulkan

@@ -8,7 +8,6 @@ namespace nc::ecs
           m_particleEmitterSystem{&m_registry, graphics},
           m_pointLightSystem{&m_registry, graphics}
     {
-        internal::SetActiveRegistry(&m_registry);
     }
 
     void EntityComponentSystem::Clear()

@@ -1,11 +1,6 @@
 #pragma once
 
 #include "graphics\Initializers.h"
-#include "graphics\TechniqueType.h"
-#include "graphics\techniques\PhongAndUiTechnique.h"
-#include "graphics\techniques\WireframeTechnique.h"
-#include "graphics\techniques\ShadowMappingTechnique.h"
-#include "graphics\Resources\DepthStencil.h"
 
 #include <functional>
 #include <unordered_map>

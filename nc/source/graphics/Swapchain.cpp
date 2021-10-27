@@ -2,6 +2,7 @@
 #include "resources/DepthStencil.h"
 #include "Initializers.h"
 #include "Base.h"
+#include "debug/NcError.h"
 
 namespace nc::graphics
 {
@@ -104,7 +105,7 @@ namespace nc::graphics
         
         if (result != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Could not present to the swapchain.");
+            throw NcError("Could not present to the swapchain.");
         }
     }
     
@@ -119,7 +120,7 @@ namespace nc::graphics
         {
             if (m_base->GetDevice().waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Could not wait for fences to complete.");
+                throw NcError("Could not wait for fences to complete.");
             }
         }
     }
@@ -222,13 +223,13 @@ namespace nc::graphics
         uint32_t swapChainImageCount;
         if (device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Error getting swapchain images count.");
+            throw NcError("Error getting swapchain images count.");
         }
 
         m_swapChainImages.resize(swapChainImageCount);
         if (device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Error getting swapchain images.");
+            throw NcError("Error getting swapchain images.");
         }
 
         m_swapChainImageFormat = surfaceFormat.format;
@@ -261,7 +262,7 @@ namespace nc::graphics
 
             if (device.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Failed to create image view");
+                throw NcError("Failed to create image view");
             }
         }
     }
@@ -270,7 +271,7 @@ namespace nc::graphics
     {
         if (m_base->GetDevice().waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Could not wait for fences to complete.");
+            throw NcError("Could not wait for fences to complete.");
         }
     }
 

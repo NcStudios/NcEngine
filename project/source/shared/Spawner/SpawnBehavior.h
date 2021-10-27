@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "ecs/Entity.h"
 #include "math/Vector.h"
 
 namespace nc::sample

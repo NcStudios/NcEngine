@@ -4,10 +4,10 @@
 
 namespace nc::sample
 {
-    class RenderingBenchmark : public scene::Scene
+    class RenderingBenchmark : public Scene
     {
         public:
-            void Load(registry_type* registry) override;
+            void Load(NcEngine* engine) override;
             void Unload() override;
         
         private:

@@ -1,6 +1,8 @@
 #include "PerFrameRenderState.h"
-#include "MainCamera.h"
-#include "camera/MainCameraInternal.h"
+#include "ecs/Registry.h"
+#include "ecs/component/Camera.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/Transform.h"
 #include "physics/collision/IntersectionQueries.h"
 #include "resources/ShaderResourceService.h"
 
@@ -22,10 +24,10 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(registry_type* registry, bool isPointLightSystemDirty)
-        : camViewMatrix{camera::GetViewMatrix()},
-          projectionMatrix{camera::GetProjectionMatrix()},
-          cameraPosition{camera::GetMainCameraTransform()->GetPosition()},
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
+        : viewMatrix{camera->GetViewMatrix()},
+          projectionMatrix{camera->GetProjectionMatrix()},
+          cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
           objectData{},
           pointLightInfos{},
           #ifdef NC_EDITOR_ENABLED
@@ -34,8 +36,8 @@ namespace nc::graphics
           pointLightVPs{},
           isPointLightBindRequired{isPointLightSystemDirty}
     {
-        const auto frustum = camera::CalculateFrustum();
-        const auto viewProjection = camViewMatrix * projectionMatrix;
+        const auto frustum = camera->CalculateFrustum();
+        const auto viewProjection = viewMatrix * projectionMatrix;
         const auto renderers = registry->ViewAll<MeshRenderer>();
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());

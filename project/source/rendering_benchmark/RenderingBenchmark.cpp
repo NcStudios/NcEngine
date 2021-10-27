@@ -1,5 +1,5 @@
 #include "RenderingBenchmark.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
 #include "imgui/imgui.h"
 #include "shared/FPSTracker.h"
 #include "shared/spawner/Spawner.h"
@@ -43,14 +43,16 @@ namespace
 
 namespace nc::sample
 {
-    void RenderingBenchmark::Load(registry_type* registry)
+    void RenderingBenchmark::Load(NcEngine* engine)
     {
+        auto* registry = engine->Registry();
+        
         // Setup
-        m_sceneHelper.Setup(registry, false, false, Widget);
+        m_sceneHelper.Setup(engine, false, false, Widget);
 
         // Camera
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        nc::camera::SetMainCamera(camera);
+        engine->MainCamera()->Set(camera);
 
         // Spawner
         SpawnBehavior spawnBehavior

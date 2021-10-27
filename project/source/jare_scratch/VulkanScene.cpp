@@ -1,11 +1,8 @@
 #include "VulkanScene.h"
 #include "Assets.h"
-#include "Ecs.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
+#include "ecs/component/MeshRenderer.h"
 #include "shared/SceneNavigationCamera.h"
-#include "collision_events/WasdController.h"
-#include "imgui/imgui.h"
-#include "shared/Prefabs.h"
 
 #include <string>
 
@@ -23,9 +20,11 @@ namespace
 
 namespace nc::sample
 {
-    void VulkanScene::Load(registry_type* registry)
+    void VulkanScene::Load(NcEngine* engine)
     {
-        m_sceneHelper.Setup(registry, true, false, Widget);
+        auto* registry = engine->Registry();
+        
+        m_sceneHelper.Setup(engine, true, false, Widget);
 
         const std::string defaultTexturesPath = "project/Textures/";
 
@@ -132,7 +131,7 @@ namespace nc::sample
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
-        camera::SetMainCamera(camera);
+        engine->MainCamera()->Set(camera);
     }
 
     void VulkanScene::Unload()

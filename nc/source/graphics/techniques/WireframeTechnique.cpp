@@ -1,9 +1,8 @@
 #ifdef NC_EDITOR_ENABLED
 #include "WireframeTechnique.h"
-#include "Ecs.h"
 #include "config/Config.h"
-#include "component/Transform.h"
-#include "component/MeshRenderer.h"
+#include "ecs/Registry.h"
+#include "ecs/component/Transform.h"
 #include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
@@ -101,9 +100,6 @@ namespace nc::graphics
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
         m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-
-        // std::cout << "Creating WireframeTechnique: " << m_pipeline.get() << std:: endl;
-
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
@@ -116,13 +112,14 @@ namespace nc::graphics
     void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+
         auto pushConstants = WireframePushConstants{};
         pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
-
         const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
         pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
         cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+
         NC_PROFILE_END();
     }
 }

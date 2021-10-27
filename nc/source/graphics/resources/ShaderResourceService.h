@@ -2,7 +2,6 @@
 
 #include "service/ServiceLocator.h"
 
-#include <stdexcept>
 #include <vector>
 
 namespace nc

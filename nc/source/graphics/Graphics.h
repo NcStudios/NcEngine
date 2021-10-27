@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MainCamera.h"
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "directx/math/DirectXMath.h"
@@ -22,10 +23,7 @@ namespace nc::graphics
     class Graphics
     {
         public:
-            Graphics(HWND hwnd, 
-                     HINSTANCE hinstance, 
-                     Vector2 dimensions, 
-                     AssetServices* assets);
+            Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions, AssetServices* assets);
             ~Graphics() noexcept;
             Graphics(const Graphics&) = delete;
             Graphics(Graphics&&) = delete;
@@ -65,6 +63,7 @@ namespace nc::graphics
             void RenderToImage(uint32_t imageIndex);
             bool PresentImage(uint32_t imageIndex);
 
+            MainCamera* m_mainCamera;
             std::unique_ptr<Base> m_base;
             std::unique_ptr<DepthStencil> m_depthStencil;
             std::unique_ptr<Swapchain> m_swapchain;

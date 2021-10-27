@@ -1,11 +1,11 @@
 #include "MouseFollower.h"
 #include "Input.h"
 #include "config/Config.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 namespace nc::sample
 {
-    MouseFollower::MouseFollower(Entity entity, registry_type* registry)
+    MouseFollower::MouseFollower(Entity entity, Registry* registry)
     : AutoComponent(entity),
       m_registry{registry},
       m_screenDimensions { window::GetDimensions() },

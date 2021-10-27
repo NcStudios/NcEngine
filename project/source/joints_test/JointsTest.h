@@ -5,10 +5,10 @@
 
 namespace nc::sample
 {
-    class JointsTest : public scene::Scene
+    class JointsTest : public Scene
     {
         public:
-            void Load(registry_type* registry) override;
+            void Load(NcEngine* registry) override;
             void Unload() override;
         
         private:

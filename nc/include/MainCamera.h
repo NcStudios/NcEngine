@@ -1,14 +1,14 @@
 #pragma once
 
-#include "component/Camera.h"
-#include "component/Transform.h"
+#include "utility/SystemBase.h"
+#include "ecs/component/Camera.h"
 
-namespace nc::camera
+namespace nc
 {
-    /** Specifies the camera to use for view and projection calculations.
-     *  A valid camera must be set during frame execution. */
-    void SetMainCamera(Camera* camera);
-
-    /** Get the transform of the current main camera */
-    [[nodiscard]] Transform* GetMainCameraTransform();
+    class MainCamera : SystemBase
+    {
+        public:
+            virtual void Set(Camera* camera) = 0;
+            virtual auto Get() -> Camera* = 0;
+    };
 }

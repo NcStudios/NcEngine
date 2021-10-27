@@ -1,14 +1,12 @@
 #pragma once
 
-#include "component/Component.h"
 #include "directx/math/DirectXMath.h"
+#include "ecs/component/Component.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 #include <vector>
 #include <span>
-
-namespace nc { struct MeshView; }
 
 namespace nc::graphics
 {

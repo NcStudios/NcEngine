@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Ecs.h"
-#include "UI.h"
+#include "NcEngine.h"
+#include "ecs/component/PointLight.h"
 #include "GameLog.h"
 #include "SampleUI.h"
 #include "FrameTimer.h"
@@ -15,16 +15,20 @@ namespace nc::sample
     class SceneHelper
     {
         public:
-            void Setup(registry_type* registry, bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
+            void Setup(NcEngine* engine, bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
             void TearDown();
 
         private:
             std::unique_ptr<SampleUI> m_ui;
             std::unique_ptr<GameLog> m_log;
+            NcEngine* m_engine;
     };
 
-    inline void SceneHelper::Setup(registry_type* registry, bool enableLog, bool createLight, std::function<void()> widgetCallback)
+    inline void SceneHelper::Setup(NcEngine* engine, bool enableLog, bool createLight, std::function<void()> widgetCallback)
     {
+        m_engine = engine;
+        auto* registry = engine->Registry();
+
         if(enableLog)
         {
             m_log = std::make_unique<GameLog>();
@@ -32,8 +36,8 @@ namespace nc::sample
             registry->Add<FrameTimer>(timerHandle);
         }
 
-        m_ui = std::make_unique<SampleUI>(m_log.get(), widgetCallback);
-        ui::Set(m_ui.get());
+        m_ui = std::make_unique<SampleUI>(engine->SceneSystem(), m_log.get(), widgetCallback);
+        engine->UI()->Set(m_ui.get());
 
         if(createLight)
         {
@@ -46,7 +50,7 @@ namespace nc::sample
 
     inline void SceneHelper::TearDown()
     {
-        ui::Set(nullptr);
+        m_engine->UI()->Set(nullptr);
         m_ui = nullptr;
         m_log = nullptr;
     }

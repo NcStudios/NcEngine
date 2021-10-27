@@ -54,10 +54,7 @@ virtual void OnTriggerExit(Entity other);
 
 The most common uses for components are handled by the included types or by adding logic with FrameUpdate(). See [creating a project](CreatingAProject.md) or the [sample project](../project/source) for examples.
 
-Most engine-provided Components are implemented using an Ecs-oriented approach which is, currently, impossible to extend to user-defined types without rebuilding the engine. To do so:
-* Create a type derived from ComponentBase that satisfies the Component concept.
-* Add the type to registry_type_list (Ecs.h)
-* If there is a system associated with the new type, provide a specialization of StoragePolicy enabling add/remove callbacks. These callbacks need to be set in the registry before calling Start().
+Most engine-provided Components are implemented using an Ecs-oriented approach which can be extended to custom types through Registry::RegisterComponentType\<T\>(). These types should derive from ComponentBase rather than AutoComponent.
 
 ## Registry
 -----------
@@ -85,11 +82,11 @@ When removing a Component:
 
 ## Scenes
 ---------
-Scenes manage initialization of the game world. Scenes should derive from the abstract base scene::Scene and overload two functions:
+Scenes manage initialization of the game world. Scenes should derive from the abstract base Scene and overload two functions:
 
 ```cpp
 /** Scene.h */
-virtual void Load(registry_type* registry) = 0;
+virtual void Load(NcEngine* engine) = 0;
 virtual void Unload() = 0;
 ```
 
@@ -97,10 +94,10 @@ A scene will do most of its work during Load: adding to the registry, loading as
 
 Scenes may hold any required data as members and are guaranteed to have stable addresses.
 
-Scenes may be changed using:
+Scenes may be changed through the SceneSystem interface:
 ```cpp
 /** Scene.h */
-void Change(std::unique_ptr<Scene> scene);
+virtual void SceneSystem::ChangeScene(std::unique_ptr<Scene> scene);
 ```
 
 This may be called from anywhere, but the scene change will not happen until all running tasks have finished. The scene change process is as follows:
@@ -127,7 +124,7 @@ Assets related to 3d meshes can only be loaded from .nca files. This includes me
 NcEngine does not have an proper solution for UI. [Dear ImGui](https://github.com/ocornut/imgui) is used internally, and, as a temporary stand-in, a method for hooking into the internal frame is provided:
 
 ```cpp
-#include "UI.h"
+#include "ui/UISystem.h"
 
 /** Implement the required interface */
 class MyUI : nc::ui::UIFlexible
@@ -137,9 +134,9 @@ class MyUI : nc::ui::UIFlexible
         bool IsHovered() const override { ... }
 };
 
-/** Elsewhere */
+/** Elsewhere - engine is a pointer to NcEngine */
 MyUI uiInstance;
-nc::ui::Set(&uiInstance)
+engine->UI()->Set(&uiInstance)
 ```
 
 While registered, Draw() will be called when rendering between ImGui::NewFrame() and ImGui::Render(). The intention is simply to inject ImGui functions into the current frame, but Draw() can be as complicated as needed.

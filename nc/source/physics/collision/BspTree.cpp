@@ -10,7 +10,7 @@ namespace
     using namespace nc;
     using namespace nc::physics;
 
-    auto CreateTriMesh(registry_type* registry, const ConcaveCollider& collider) -> TriMesh
+    auto CreateTriMesh(Registry* registry, const ConcaveCollider& collider) -> TriMesh
     {
         auto meshView = AssetService<ConcaveColliderView>::Get()->Acquire(collider.GetPath());
         auto entity = collider.GetParentEntity();
@@ -69,7 +69,7 @@ namespace
 
 namespace nc::physics
 {
-    BspTree::BspTree(registry_type* registry)
+    BspTree::BspTree(Registry* registry)
         : m_nodes{},
           m_triMeshes{},
           m_registry{registry},
@@ -103,7 +103,7 @@ namespace nc::physics
         });
 
         if(pos == m_triMeshes.end())
-            throw std::runtime_error("BspTree::OnRemove - Tree does not have a collider for entity");
+            throw NcError("Tree does not have a collider for entity");
 
         /** @todo We don't actually remove anything because it would mess
          *  up stored indices. We could use a free list, but removing static
@@ -340,7 +340,7 @@ namespace nc::physics
         const auto indexCount = meshIndices.size();
 
         if(indexCount == 0u)
-            throw std::runtime_error("BspTree::ComputepartitionData - Called with empty vector");
+            throw NcError("Empty vector");
 
         auto averageCenter = Vector3::Zero();
 

@@ -1,16 +1,15 @@
 #pragma once
 
-#include "Ecs.h"
-#include "../collision/Manifold.h"
+#include "ecs/Registry.h"
 
 namespace nc::physics
 {
     /** Transform inertia tensors into updated world space. */
-    void UpdateWorldInertiaTensors(registry_type* registry);
+    void UpdateWorldInertiaTensors(Registry* registry);
     
     /** Apply gravity to linear velocity of each body. */
-    void ApplyGravity(registry_type* registry, float dt);
+    void ApplyGravity(Registry* registry, float dt);
     
     /** Apply linear and angular velocities of each body to transforms. */
-    void Integrate(registry_type* registry, float dt);
+    void Integrate(Registry* registry, float dt);
 }

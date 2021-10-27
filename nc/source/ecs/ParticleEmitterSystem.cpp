@@ -20,7 +20,7 @@
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics)
+    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, graphics::Graphics* graphics)
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
@@ -82,7 +82,7 @@ namespace nc::ecs
         {
             pos = std::ranges::find_if(m_toAdd, findPred);
             if(pos == m_toAdd.end())
-                throw std::runtime_error("ParticleEmitterSystem::Emit - Particle emitter does not exist");
+                throw NcError("Particle emitter does not exist");
         }
 
         pos->Emit(count);

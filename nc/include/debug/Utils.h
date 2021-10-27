@@ -1,6 +1,7 @@
 #pragma once
 
-#include <stdexcept>
+#include "NcError.h"
+
 #include <string>
 
 namespace nc::debug
@@ -22,7 +23,7 @@ namespace nc::debug
 
 #ifdef NC_DEBUG_BUILD
 /** Conditionally throw only in debug builds. */
-#define IF_THROW(expr, msg) if(expr) throw std::runtime_error(msg);
+#define IF_THROW(expr, msg) if(expr) throw nc::NcError(msg);
 #else
 #define IF_THROW(expr, msg)
 #endif
@@ -31,9 +32,9 @@ namespace nc::debug
 /** Log an item with source location data. */
 #define V_LOG(item); \
         nc::debug::LogToDiagnostics(item); \
-        nc::debug::LogToDiagnostics(std::string("    Func: ") + __PRETTY_FUNCTION__); \
-        nc::debug::LogToDiagnostics(std::string("    File: ") + __FILE__); \
-        nc::debug::LogToDiagnostics(std::string("    Line: ") + std::to_string(__LINE__));
+        nc::debug::LogToDiagnostics(std::string("    Func: ") + NC_SOURCE_FUNCTION); \
+        nc::debug::LogToDiagnostics(std::string("    File: ") + NC_SOURCE_FILE); \
+        nc::debug::LogToDiagnostics(std::string("    Line: ") + std::to_string(NC_SOURCE_LINE));
 #else
     #define V_LOG(item);
 #endif
