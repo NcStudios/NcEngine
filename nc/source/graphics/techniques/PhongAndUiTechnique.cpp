@@ -13,8 +13,6 @@
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ShaderResourceService.h"
 
-#include <iostream>
-
 namespace nc::graphics
 {
     struct Texture;
