@@ -25,7 +25,7 @@ namespace
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
-        : viewMatrix{camera->GetViewMatrix()},
+        : camViewMatrix{camera->GetViewMatrix()},
           projectionMatrix{camera->GetProjectionMatrix()},
           cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
           objectData{},
@@ -37,7 +37,7 @@ namespace nc::graphics
           isPointLightBindRequired{isPointLightSystemDirty}
     {
         const auto frustum = camera->CalculateFrustum();
-        const auto viewProjection = viewMatrix * projectionMatrix;
+        const auto viewProjection = camViewMatrix * projectionMatrix;
         const auto renderers = registry->ViewAll<MeshRenderer>();
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());

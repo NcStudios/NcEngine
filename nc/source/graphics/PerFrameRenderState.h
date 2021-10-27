@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Assets.h"
+#include "ecs/component/DebugWidget.h"
 #include "ecs/component/PointLight.h"
+#include "ecs/Registry.h"
 #include "resources/ObjectDataManager.h"
-#include "component/DebugWidget.h"
 
 namespace nc
 {

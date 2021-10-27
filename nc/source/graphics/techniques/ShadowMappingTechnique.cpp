@@ -1,12 +1,13 @@
 #include "ShadowMappingTechnique.h"
 #include "config/Config.h"
-#include "Ecs.h"
 #include "debug/Profiler.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/Registry.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
-#include "graphics/ShaderUtilities.h"
 #include "graphics/resources/ShaderResourceService.h"
+#include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
 
 #include <iostream>
@@ -143,7 +144,7 @@ namespace nc::graphics
             uint32_t objectInstance = 0;
             for (const auto& mesh : frameData.meshes)
             {
-                cmd->drawIndexed(mesh.indicesCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                 objectInstance++;
             }
         }

@@ -31,7 +31,6 @@ namespace nc::graphics
             ~Renderer() noexcept;
             
             void Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex);
-
             void Clear() noexcept;
             void InitializeImgui();
 

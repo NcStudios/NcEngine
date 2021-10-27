@@ -10,6 +10,7 @@ namespace nc
         std::string baseColor;
         std::string normal;
         std::string roughness;
+        std::string metallic;
 
         #ifdef NC_EDITOR_ENABLED
         void EditorGuiElement();

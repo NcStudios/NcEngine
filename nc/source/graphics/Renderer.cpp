@@ -1,18 +1,22 @@
 #include "Renderer.h"
-#include "ecs/Registry.h"
+#include "assets/AssetServices.h"
+#include "debug/Profiler.h"
 #include "ecs/component/DebugWidget.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
-#include "debug/Profiler.h"
-#include "graphics/Graphics.h"
+#include "ecs/Registry.h"
 #include "graphics/Commands.h"
-#include "PerFrameRenderState.h"
-#include "graphics/techniques/PhongAndUiTechnique.h"
+#include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
+#include "graphics/techniques/PhongAndUiTechnique.h"
+#include "graphics/techniques/ShadowMappingTechnique.h"
 #include "PerFrameRenderState.h"
-#include "assets/AssetServices.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
+
+#ifdef NC_EDITOR_ENABLED
+#include "graphics/techniques/WireframeTechnique.h"
+#endif
 
 #include <span>
 #include <iostream>

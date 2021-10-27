@@ -1,25 +1,24 @@
 #ifdef NC_EDITOR_ENABLED
 #include "WireframeTechnique.h"
+#include "assets/AssetService.h"
 #include "config/Config.h"
-#include "ecs/Registry.h"
-#include "ecs/component/Transform.h"
 #include "debug/Profiler.h"
+#include "ecs/component/Transform.h"
+#include "ecs/Registry.h"
+#include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/Swapchain.h"
-#include "graphics/Base.h"
 #include "graphics/VertexDescriptions.h"
-#include "assets/AssetService.h"
 
 #include <iostream>
 
 namespace nc::graphics
 {
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
-    : 
-      m_graphics{graphics},
+    : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{nullptr},
@@ -115,10 +114,11 @@ namespace nc::graphics
 
         auto pushConstants = WireframePushConstants{};
         pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
         pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
+
+        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
-        cmd->drawIndexed(meshAccessor.indicesCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
 
         NC_PROFILE_END();
     }

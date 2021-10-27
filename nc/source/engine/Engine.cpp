@@ -182,7 +182,6 @@ namespace nc
             return;
         }
         
-        m_ui.FrameBegin();
         m_uiSystem.FrameBegin();
         auto* registry = m_ecs.GetRegistry();
 

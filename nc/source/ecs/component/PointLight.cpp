@@ -58,7 +58,6 @@ namespace nc
         }
 
         m_info.pos = position;
-
         return std::exchange(m_isDirty, false);
     }
 
@@ -71,9 +70,6 @@ namespace nc
         Vector3 ambient = info.ambient;
         Vector3 diffuse = info.diffuseColor;
         float diffuseIntensity = info.diffuseIntensity;
-        float attConst = info.attConst;
-        float attLin = info.attLin;
-        float attQuad = info.attQuad;
 
         ImGui::Text("Point Light");
         ImGui::Indent();
@@ -86,11 +82,6 @@ namespace nc
                 ImGui::Text("Color      ");   ImGui::SameLine(); auto diffuseResult = ImGui::ColorEdit3("##difcolor", &diffuse.x, ImGuiColorEditFlags_NoInputs);
                 auto diffuseIntensityResult = ui::editor::floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 1200.0f, "%.2f");
             ImGui::Unindent();
-            ImGui::Text("Attenuation");
-                ui::editor::columnHeaderWidget("", "Const", "Lin", "Quad");
-                ui::editor::xyzWidget("", "att", &attConst, &attLin, &attQuad, 0.01f, 1.0f);
-                
-            auto buttonSize = ImVec2{ImGui::GetWindowWidth() - 20, 18};
         ImGui::Unindent();
 
         auto pointLightInfo = info;

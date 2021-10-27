@@ -1,7 +1,9 @@
 #include "VulkanScene.h"
 #include "Assets.h"
-#include "NcEngine.h"
+#include "collision_events/WasdController.h"
 #include "ecs/component/MeshRenderer.h"
+#include "imgui/imgui.h"
+#include "NcEngine.h"
 #include "shared/SceneNavigationCamera.h"
 
 #include <string>
@@ -49,7 +51,7 @@ namespace nc::sample
 
         nc::LoadTextureAssets(texturePaths);
 
-        auto floorMaterial =  graphics::Material
+        auto floorMaterial = Material
         { 
             .baseColor = defaultTexturesPath + "Floor/BaseColor.png",
             .normal    = defaultTexturesPath + "Floor/Normal.png",
@@ -57,7 +59,7 @@ namespace nc::sample
             .metallic  = defaultTexturesPath + "Floor/Roughness.png"
         };
 
-        auto blacktopMaterial =  graphics::Material
+        auto blacktopMaterial = Material
         { 
             .baseColor = defaultTexturesPath + "Blacktop/BaseColor.png",
             .normal    = defaultTexturesPath + "Blacktop/Normal.png",
@@ -65,7 +67,7 @@ namespace nc::sample
             .metallic  = defaultTexturesPath + "Blacktop/Metallic.png"
         };
 
-        auto blueMaterial =  graphics::Material
+        auto blueMaterial = Material
         { 
             .baseColor = defaultTexturesPath + "Spheres/Blue/BaseColor.png",
             .normal    = defaultTexturesPath + "Spheres/Blue/Normal.png",
@@ -73,7 +75,7 @@ namespace nc::sample
             .metallic  = defaultTexturesPath + "Spheres/Blue/Metallic.png"
         };
 
-        auto grayMaterial =  graphics::Material
+        auto grayMaterial = Material
         { 
             .baseColor = defaultTexturesPath + "Spheres/Gray/BaseColor.png",
             .normal    = defaultTexturesPath + "Spheres/Gray/Normal.png",
@@ -97,12 +99,12 @@ namespace nc::sample
                                                            .diffuseIntensity = 88.0f});
 
         auto floor = registry->Add<Entity>(
-            {.position = Vector3{0.0f, 0.0f, 0.0f},
-             .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
-             .scale = Vector3{30.0f, 30.0f, 1.0f},
-             .tag = "Floor"});
+        {.position = Vector3{0.0f, 0.0f, 0.0f},
+         .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
+         .scale = Vector3{30.0f, 30.0f, 1.0f},
+         .tag = "Floor"});
 
-        registry->Add<MeshRenderer>(floor, "project/assets/mesh/plane.nca", floorMaterial, nc::graphics::TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(floor, "project/assets/mesh/plane.nca", floorMaterial, TechniqueType::PhongAndUi);
 
         auto blueSphere = registry->Add<Entity>(
         {.position = Vector3{0.0f, 1.0f, 2.0f},
@@ -110,7 +112,7 @@ namespace nc::sample
         .scale = Vector3{2.0f, 2.0f,2.0f},
         .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blueSphere, "project/assets/mesh/sphere.nca", blueMaterial, nc::graphics::TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blueSphere, "project/assets/mesh/sphere.nca", blueMaterial, TechniqueType::PhongAndUi);
 
         auto blackSphere = registry->Add<Entity>(
         {.position = Vector3{3.0f, 1.0f, 2.0f},
@@ -118,7 +120,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blackSphere, "project/assets/mesh/cube.nca", grayMaterial, nc::graphics::TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blackSphere, "project/assets/mesh/cube.nca", grayMaterial, TechniqueType::PhongAndUi);
 
         auto blackBox = registry->Add<Entity>(
         {.position = Vector3{-3.0f, 1.0f, 2.0f},
@@ -126,7 +128,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Box"});
 
-        registry->Add<MeshRenderer>(blackBox, "project/assets/mesh/cube.nca", blacktopMaterial, nc::graphics::TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blackBox, "project/assets/mesh/cube.nca", blacktopMaterial, TechniqueType::PhongAndUi);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});

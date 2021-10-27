@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ECS.h"
 #include "ITechnique.h"
 
 #include "directx/math/DirectXMath.h"
