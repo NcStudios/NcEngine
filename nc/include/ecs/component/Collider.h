@@ -80,7 +80,7 @@ namespace nc
            #ifdef NC_EDITOR_ENABLED
             void SetEditorSelection(bool state);
             bool GetEditorSelection();
-            nc::DebugWidget GetDebugWidget();
+            DebugWidget GetDebugWidget();
            #endif
 
         private:

@@ -49,10 +49,10 @@ namespace nc::graphics
         auto* cmd = BeginFrame(commands, currentSwapChainImageIndex);
 
         /** Shadow mapping pass */
-        m_renderPasses->Execute("Shadow Mapping Pass", cmd, 0u, state);
+        m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
 
         /** Lit shading pass */
-        m_renderPasses->Execute("Lit Pass", cmd, currentSwapChainImageIndex, state);
+        m_renderPasses->Execute(RenderPassManager::LitShadingPass, cmd, currentSwapChainImageIndex, state);
 
         cmd->end();
         NC_PROFILE_END();
@@ -60,7 +60,7 @@ namespace nc::graphics
 
     void Renderer::InitializeImgui()
     {
-        m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire("Lit Pass").renderpass.get());
+        m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire(RenderPassManager::LitShadingPass).renderpass.get());
     }
 
     void Renderer::RegisterRenderPasses()
@@ -69,24 +69,24 @@ namespace nc::graphics
 
         /** Shadow mapping pass */
         const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
-        m_renderPasses->RegisterAttachment(shadowDepthImageView, "Shadow Mapping Pass");
+        m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
 
         /** Lit shading pass */
         auto& colorImageViews = swapchain->GetColorImageViews();
         auto& depthImageView = m_graphics->GetDepthStencil().GetImageView();
         uint32_t index = 0;
-        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, "Lit Pass", index++); }
+        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, RenderPassManager::LitShadingPass, index++); }
     }
 
     void Renderer::RegisterTechniques()
     {
-        m_renderPasses->RegisterTechnique<ShadowMappingTechnique>("Shadow Mapping Pass");
+        m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
 
         #ifdef NC_EDITOR_ENABLED
-        m_renderPasses->RegisterTechnique<WireframeTechnique>("Lit Pass");
+        m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
         #endif
 
-        m_renderPasses->RegisterTechnique<PhongAndUiTechnique>("Lit Pass");
+        m_renderPasses->RegisterTechnique<PhongAndUiTechnique>(RenderPassManager::LitShadingPass);
     }
 
     vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, uint32_t currentSwapChainImageIndex)

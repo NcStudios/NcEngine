@@ -23,6 +23,9 @@ namespace nc::graphics
     class RenderPassManager
     {
         public:
+            inline static const std::string LitShadingPass = "Lit Pass";
+            inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
+            
             RenderPassManager(Graphics* graphics, const Vector2& dimensions);
             ~RenderPassManager();
 

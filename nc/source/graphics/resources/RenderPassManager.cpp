@@ -26,7 +26,7 @@ namespace nc::graphics
             CreateSubpass(shadowAttachmentSlots.at(0))
         };
 
-        Create("Shadow Mapping Pass", shadowAttachmentSlots, shadowSubpasses, ClearValue::Depth, dimensions);
+        Create(RenderPassManager::ShadowMappingPass, shadowAttachmentSlots, shadowSubpasses, ClearValue::Depth, dimensions);
 
         /** Lit shading pass */
         std::array<AttachmentSlot, 2> litAttachmentSlots
@@ -40,7 +40,7 @@ namespace nc::graphics
             CreateSubpass(litAttachmentSlots.at(1), litAttachmentSlots.at(0))
         };
         
-        Create("Lit Pass", litAttachmentSlots, litSubpasses, ClearValue::DepthAndColor, dimensions);
+        Create(RenderPassManager::LitShadingPass, litAttachmentSlots, litSubpasses, ClearValue::DepthAndColor, dimensions);
     }
 
     RenderPassManager::~RenderPassManager()
