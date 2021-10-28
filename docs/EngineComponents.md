@@ -75,7 +75,7 @@ Degrees of freedom may be restricted with the constructor's linear and angular f
 
 ### MeshRenderer
 ---------------
-Mesh renderers allows a mesh to be rendered using a material. They rely on multiple [assets](Overview.md#assets): one the mesh and three for the material's textures. They also require a technique type, but only one type is currently exposed in the API. Rendering will use the associated entity's transform for vertex transformations.
+Mesh renderers allows a mesh to be rendered using a material. They rely on multiple [assets](Overview.md#assets): one the mesh and four for the material's textures. They also require a technique type, but only one type is currently exposed in the API. Rendering will use the associated entity's transform for vertex transformations.
 
 ### PointLight
 -------------

@@ -132,37 +132,45 @@ void InitializeResources()
                                                   defaultTexturesPath + "Logo/Roughness.png" };
     nc::LoadTextureAssets(texturePaths); 
 
-    material::SolidBlue =  Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
-                                     .normal    = defaultNormal,
-                                     .roughness = defaultRoughness };
-
+    material::SolidBlue = Material{ .baseColor = defaultTexturesPath + "SolidColor/Blue.png",
+                                    .normal    = defaultNormal,
+                                    .roughness = defaultRoughness,
+                                    .metallic  = defaultRoughness};
+                                                        
     material::SolidGreen = Material{ .baseColor = defaultTexturesPath + "SolidColor/Green.png",
                                      .normal    = defaultNormal,
-                                     .roughness = defaultRoughness };
+                                     .roughness = defaultRoughness,
+                                     .metallic  = defaultRoughness };
 
-    material::SolidRed =   Material{ .baseColor = defaultTexturesPath + "SolidColor/Red.png",
-                                     .normal    = defaultNormal,
-                                     .roughness = defaultRoughness };
+    material::SolidRed = Material{ .baseColor = defaultTexturesPath + "SolidColor/Red.png",
+                                   .normal    = defaultNormal,
+                                   .roughness = defaultRoughness,
+                                   .metallic  = defaultRoughness };
 
-    material::Coin =       Material{ .baseColor = defaultTexturesPath + "Coin/BaseColor.png",
-                                     .normal    = defaultTexturesPath + "Coin/Normal.png",
-                                     .roughness = defaultTexturesPath + "Coin/Roughness.png" };
+    material::Coin = Material{ .baseColor = defaultTexturesPath + "Coin/BaseColor.png",
+                               .normal    = defaultTexturesPath + "Coin/Normal.png",
+                               .roughness = defaultTexturesPath + "Coin/Roughness.png",
+                               .metallic  = defaultRoughness };
 
-    material::Default =    Material{ .baseColor = defaultBaseColor,
-                                     .normal    = defaultNormal,
-                                     .roughness = defaultRoughness };
+    material::Default = Material{ .baseColor = defaultBaseColor,
+                                  .normal    = defaultNormal,
+                                  .roughness = defaultRoughness,
+                                  .metallic  = defaultRoughness };
 
-    material::Table =      Material{ .baseColor = defaultTexturesPath + "Table/BaseColor.png",
-                                     .normal    = defaultTexturesPath + "Table/Normal.png",
-                                     .roughness = defaultTexturesPath + "Table/Roughness.png" };
+    material::Table = Material{ .baseColor = defaultTexturesPath + "Table/BaseColor.png",
+                                .normal    = defaultTexturesPath + "Table/Normal.png",
+                                .roughness = defaultTexturesPath + "Table/Roughness.png",
+                                .metallic  = defaultRoughness };
      
-    material::Token =      Material{ .baseColor = defaultTexturesPath + "Token/BaseColor.png",
-                                     .normal    = defaultTexturesPath + "Token/Normal.png",
-                                     .roughness = defaultTexturesPath + "Token/Roughness.png" };
+    material::Token = Material{ .baseColor = defaultTexturesPath + "Token/BaseColor.png",
+                                .normal    = defaultTexturesPath + "Token/Normal.png",
+                                .roughness = defaultTexturesPath + "Token/Roughness.png",
+                                .metallic  = defaultRoughness };
 
-    material::Worm =       Material{ .baseColor = defaultTexturesPath + "Logo/BaseColor.png",
-                                     .normal    = defaultTexturesPath + "Logo/Normal.png",
-                                     .roughness = defaultTexturesPath + "Logo/Roughness.png" };
+    material::Worm = Material{ .baseColor = defaultTexturesPath + "Logo/BaseColor.png",
+                               .normal    = defaultTexturesPath + "Logo/Normal.png",
+                               .roughness = defaultTexturesPath + "Logo/Roughness.png",
+                               .metallic  = defaultRoughness };
 }
 
 template<Resource Resource_t>
@@ -258,7 +266,6 @@ template<> Entity Create_<Resource::DiscRed>(Registry* registry, EntityInfo info
     registry->Add<MeshRenderer>(handle, "project/assets/mesh/coin.nca", material::SolidRed, TechniqueType::PhongAndUi);
     return handle;
 }
-
 
 template<> Entity Create_<Resource::RampRed>(Registry* registry, EntityInfo info)
 {

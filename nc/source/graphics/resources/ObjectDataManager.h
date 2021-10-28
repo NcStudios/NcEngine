@@ -18,8 +18,7 @@ namespace nc::graphics
         uint32_t baseColorIndex; // Todo: Make this more generic for materials
         uint32_t normalIndex;  // Todo: Make this more generic for materials
         uint32_t roughnessIndex;  // Todo: Make this more generic for materials
-
-        uint32_t isInitialized = 0;
+        uint32_t metallicIndex;  // Todo: Make this more generic for materials
     };
 
     class ObjectDataManager : public IShaderResourceService<ObjectData>

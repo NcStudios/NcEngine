@@ -21,10 +21,12 @@ namespace nc
         m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor); // Todo: Make this more generic for materials;
         m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(m_material.normal);
         m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(m_material.roughness);
+        m_textureIndices.metallic = AssetService<TextureView>::Get()->Acquire(m_material.metallic);
         #else
         m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
         m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(material.normal);
         m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(material.roughness);
+        m_textureIndices.metallic = AssetService<TextureView>::Get()->Acquire(material.metallic);
         #endif
     }
 

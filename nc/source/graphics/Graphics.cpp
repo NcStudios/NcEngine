@@ -1,13 +1,17 @@
 #include "Graphics.h"
-#include "debug/Profiler.h"
-#include "debug/Utils.h"
+#include "assets/AssetServices.h"
 #include "Base.h"
 #include "Commands.h"
-#include "resources/DepthStencil.h"
-#include "Swapchain.h"
-#include "Renderer.h"
-#include "resources/ShaderResourceServices.h"
 #include "config/Config.h"
+#include "debug/Profiler.h"
+#include "debug/Utils.h"
+#include "Renderer.h"
+#include "resources/DepthStencil.h"
+#include "resources/ShaderResourceServices.h"
+#include "resources/RenderPassManager.h"
+#include "Swapchain.h"
+
+#include <iostream>
 
 namespace
 {
@@ -20,14 +24,14 @@ namespace nc::graphics
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
-          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions) },
+          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
-          m_renderer{ nullptr },
-          m_shaderServices{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings()) },
+          m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
+          m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
+          m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
-          m_isFullscreen{ false },
           m_clearColor{DefaultClearColor},
           m_drawCallCount{0}
     {
@@ -37,6 +41,7 @@ namespace nc::graphics
     {
         try
         {
+            WaitIdle();
             Clear();
         }
         catch(const std::runtime_error& e) // from WaitIdle()
@@ -47,20 +52,36 @@ namespace nc::graphics
 
     void Graphics::RecreateSwapchain(Vector2 dimensions)
     {
+        if (m_isMinimized)
+        {
+            return;
+        }
+
+        std::lock_guard lock{m_resizingMutex};
+
         // Wait for all current commands to complete execution
         WaitIdle();
 
-        // Destroy all resources used by the swapchain
         m_dimensions = dimensions;
-        m_depthStencil.reset();
+
+        auto shadowMap = ShadowMap
+        {
+            .dimensions = dimensions
+        };
+
+        // Destroy all resources used by the swapchain
+        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
+
+        m_renderer.reset();
         m_commands.reset();
         m_swapchain.reset();
         m_depthStencil.reset();
 
         // Recreate swapchain and resources
         m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
-        m_swapchain = std::make_unique<Swapchain>(m_base.get(), *m_depthStencil, dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_base.get(), dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
+        m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions);
     }
 
     void Graphics::ToggleFullscreen()
@@ -78,14 +99,16 @@ namespace nc::graphics
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
-        (void)width;
-        (void)height;
-        (void)nearZ;
-        (void)farZ;
-
         m_dimensions = Vector2{ width, height };
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
+
+        if (m_isMinimized)
+        {
+            return;
+        }
+
+        RecreateSwapchain(m_dimensions);
     }
 
     void Graphics::WaitIdle()
@@ -110,7 +133,7 @@ namespace nc::graphics
 
     Renderer* Graphics::GetRendererPtr() const noexcept
     {
-        return m_renderer;
+        return m_renderer.get();
     }
 
     const Vector2 Graphics::GetDimensions() const noexcept
@@ -131,22 +154,23 @@ namespace nc::graphics
         return true;
     }
     
+    const DepthStencil& Graphics::GetDepthStencil() const noexcept
+    {
+        return *(m_depthStencil.get());
+    }
+
     void Graphics::Clear()
     {
         WaitIdle();
         m_renderer->Clear();
         ShaderResourceService<ObjectData>::Get()->Reset();
         ShaderResourceService<PointLightInfo>::Get()->Reset();
+        ShaderResourceService<ShadowMap>::Get()->Reset();
     }
-    
+
     void Graphics::SetClearColor(std::array<float, 4> color)
     {
         m_clearColor = color;
-    }
-
-    void Graphics::SetRenderer(Renderer* renderer)
-    {
-        m_renderer = renderer;
     }
 
     const std::array<float, 4>& Graphics::GetClearColor() const noexcept
@@ -174,10 +198,17 @@ namespace nc::graphics
         return true;
     }
 
+    void Graphics::InitializeUI()
+    {
+        m_renderer->InitializeImgui();
+    }
+
     uint32_t Graphics::FrameBegin()
     {
         m_drawCallCount = 0;
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        if (m_isMinimized) return UINT32_MAX;
+
         uint32_t imageIndex = UINT32_MAX;
 
         // Gets the next image in the swapchain

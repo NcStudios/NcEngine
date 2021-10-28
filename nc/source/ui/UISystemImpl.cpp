@@ -25,8 +25,7 @@ namespace nc::ui
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
 
-        auto& uiPassDefinition = m_graphics->GetSwapchainPtr()->GetPassDefinition();
-        m_graphics->GetBasePtr()->InitializeImgui(uiPassDefinition);
+        m_graphics->InitializeUI();
     }
 
     UISystemImpl::~UISystemImpl() noexcept

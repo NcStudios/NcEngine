@@ -105,7 +105,6 @@ namespace nc::graphics
     void WriteableBuffer<T>::Map(const std::vector<T>& dataToMap, Func&& myNuller)
     {
         auto allocation = *(m_base->GetBufferAllocation(m_memoryIndex));
-        
         void* dataContainer;
         m_base->GetAllocator()->mapMemory(allocation, &dataContainer);
 
@@ -132,6 +131,7 @@ namespace nc::graphics
             myNuller(mappedContainerHandle[dataToMapSize]);
         }
 
+        m_memorySize = dataToMapSize;
         m_base->GetAllocator()->unmapMemory(allocation);
     }
 

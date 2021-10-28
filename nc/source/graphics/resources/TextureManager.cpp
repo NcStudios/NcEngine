@@ -35,7 +35,13 @@ namespace nc::graphics
           CreateDescriptorSetLayoutBinding(1, m_maxTexturesCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
         };
 
-        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagBitsEXT::ePartiallyBound );
+        std::array<vk::DescriptorBindingFlagsEXT, 2> layoutBindingFlags
+        {  
+            vk::DescriptorBindingFlagsEXT(),
+            vk::DescriptorBindingFlagBitsEXT::ePartiallyBound 
+        };
+
+        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, layoutBindingFlags);
         m_descriptorSet = CreateDescriptorSet(m_graphics, m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
         /** @todo Figure out why there are validation errors when creating sampler in the constructor. */

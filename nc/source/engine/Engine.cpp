@@ -24,9 +24,6 @@ namespace nc
           m_window{ hInstance },
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
-          m_renderer{&m_graphics,
-                    [&manager = m_assetServices.meshManager] { return manager.GetVertexBuffer(); },
-                    [&manager = m_assetServices.meshManager] { return manager.GetIndexBuffer(); }},
           m_ecs{&m_graphics, config::GetMemorySettings()},
           m_physicsSystem{m_ecs.GetRegistry(), &m_graphics},
           m_sceneSystem{},
@@ -40,7 +37,6 @@ namespace nc
           m_currentImageIndex{0},
           m_isRunning{false}
     {
-        m_graphics.SetRenderer(&m_renderer);
         SetBindings();
         BuildTaskGraph();
         V_LOG("Engine constructed");
@@ -180,6 +176,12 @@ namespace nc
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
         m_currentImageIndex = m_graphics.FrameBegin();
+
+        if (m_currentImageIndex == UINT32_MAX)
+        {
+            return;
+        }
+        
         m_uiSystem.FrameBegin();
         auto* registry = m_ecs.GetRegistry();
 
@@ -195,18 +197,20 @@ namespace nc
         graphics::MapPerFrameRenderState(state);
 
         auto* renderer = m_graphics.GetRendererPtr();
-        
-        #ifdef NC_EDITOR_ENABLED
-
-        for(auto& collider : registry->ViewAll<Collider>())
-            collider.UpdateWidget(renderer);
-        #endif
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr(), state, m_currentImageIndex);
+        renderer->Record(m_graphics.GetCommandsPtr(), state, &m_assetServices, m_currentImageIndex);
+
+        #ifdef NC_EDITOR_ENABLED
+        for(auto& collider : registry->ViewAll<Collider>())
+        {
+            collider.SetEditorSelection(false);
+        }
+        #endif
 
         m_graphics.Draw();
         m_graphics.FrameEnd();
+
         NC_PROFILE_END();
     }
 

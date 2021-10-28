@@ -51,14 +51,11 @@ namespace nc::sample
         // Setup
         m_sceneHelper.Setup(engine, true, false, Widget);
 
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 5.0f, 0.0f}, .tag = "Point Light 1"});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.1f, 4.2f, -5.8f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
                                                            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .diffuseIntensity = 3.0,
-                                                           .attConst = 0.0f,
-                                                           .attLin = 0.05f,
-                                                           .attQuad = 0.0f});
+                                                           .diffuseIntensity = 200.0});
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
@@ -92,7 +89,7 @@ namespace nc::sample
         registry->Add<PhysicsBody>(greenDisc, PhysicsProperties{});
 
         // Static Objects
-        auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{25.0f, 1.0f, 25.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
+        auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{50.0f, 1.0f, 50.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
         registry->Add<Collider>(ground, BoxProperties{}, false);
 
         auto redCube = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{3.5f, 0.0f, 4.5f}, .scale = Vector3::Splat(1.0f), .tag = "Big Red Cube", .flags = Entity::Flags::Static});

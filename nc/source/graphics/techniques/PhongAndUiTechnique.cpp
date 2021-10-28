@@ -21,17 +21,16 @@ namespace nc::graphics
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
-      m_pipeline{},
-      m_pipelineLayout{}
+      m_pipeline{nullptr},
+      m_pipelineLayout{nullptr}
     {
         CreatePipeline(renderPass);
     }
 
     PhongAndUiTechnique::~PhongAndUiTechnique() noexcept
     {
-        auto device = m_base->GetDevice();
-        device.destroyPipelineLayout(m_pipelineLayout);
-        device.destroyPipeline(m_pipeline);
+        m_pipeline.reset();
+        m_pipelineLayout.reset();
     }
 
     void PhongAndUiTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -51,15 +50,16 @@ namespace nc::graphics
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(PhongPushConstants)); // PushConstants
-        std::array<vk::DescriptorSetLayout, 3u> descriptorLayouts
+        std::array<vk::DescriptorSetLayout, 4u> descriptorLayouts
         {
             *ShaderResourceService<Texture>::Get()->GetDescriptorSetLayout(),
             *ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<ObjectData>::Get()->GetDescriptorSetLayout()
+            *ShaderResourceService<ObjectData>::Get()->GetDescriptorSetLayout(),
+            *ShaderResourceService<ShadowMap>::Get()->GetDescriptorSetLayout()
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
-        m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
+        m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
@@ -88,36 +88,50 @@ namespace nc::graphics
         auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
-        pipelineCreateInfo.setLayout(m_pipelineLayout);
+        pipelineCreateInfo.setLayout(m_pipelineLayout.get());
         pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
-
-        m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
+        
+        m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+       
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+    }
+
+    bool PhongAndUiTechnique::CanBind(const PerFrameRenderState& frameData)
+    {
+        (void)frameData;
+        return true;
     }
 
     void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 0, 1, ShaderResourceService<Texture>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 1, 1, ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout, 2, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 1, ShaderResourceService<Texture>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 1, 1, ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 2, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 3, 1, ShaderResourceService<ShadowMap>::Get()->GetDescriptorSet(), 0, 0);
         NC_PROFILE_END();
     }
 
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const MeshView> meshes)
+    bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
+    {
+        (void)frameData;
+        return true;
+    }
+
+    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto pushConstants = PhongPushConstants{};
-        pushConstants.cameraPos = cameraPosition;
-        cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
+        pushConstants.cameraPos = frameData.cameraPosition;
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
 
         uint32_t objectInstance = 0;
-        for(const auto& mesh : meshes)
+        for(const auto& mesh : frameData.meshes)
         {
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             
@@ -127,6 +141,8 @@ namespace nc::graphics
             
             ++objectInstance;
         }
+
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
         NC_PROFILE_END();
     }
 

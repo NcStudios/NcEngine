@@ -1,174 +1,108 @@
 #include "Renderer.h"
-#include "ecs/Registry.h"
+#include "assets/AssetServices.h"
+#include "debug/Profiler.h"
 #include "ecs/component/DebugWidget.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
-#include "debug/Profiler.h"
-#include "graphics/Graphics.h"
+#include "ecs/Registry.h"
 #include "graphics/Commands.h"
-#include "PerFrameRenderState.h"
-#include "graphics/techniques/PhongAndUiTechnique.h"
+#include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
-#include "graphics/Initializers.h"
+#include "graphics/techniques/PhongAndUiTechnique.h"
+#include "graphics/techniques/ShadowMappingTechnique.h"
+#include "PerFrameRenderState.h"
+#include "resources/ShaderResourceServices.h"
+#include "resources/RenderPassManager.h"
+
+#ifdef NC_EDITOR_ENABLED
+#include "graphics/techniques/WireframeTechnique.h"
+#endif
 
 #include <span>
+#include <iostream>
 
 namespace nc::graphics
 {
-    Renderer::Renderer(graphics::Graphics* graphics, 
-                       std::function<vk::Buffer*()> getVertexBufferFunc,
-                       std::function<vk::Buffer*()> getIndexBufferFunc)
+    Renderer::Renderer(Graphics* graphics, 
+                       ShaderResourceServices* shaderResources,
+                       Vector2 dimensions)
         : m_graphics{graphics},
-          m_getMeshVertexBuffer{std::move(getVertexBufferFunc)},
-          m_getMeshIndexBuffer{std::move(getIndexBufferFunc)},
-          m_mainRenderPass{m_graphics->GetSwapchainPtr()->GetPassDefinition()},
-          m_phongAndUiTechnique{nullptr}
-          #ifdef NC_EDITOR_ENABLED
-          ,
-          m_wireframeTechnique{nullptr}
-          #endif
-          //m_particleTechnique{nullptr}
+          m_shaderResources{shaderResources},
+          m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
+          m_dimensions{dimensions}
     {
+        RegisterRenderPasses();
+        RegisterTechniques();
     }
 
     Renderer::~Renderer() noexcept
     {
-        m_graphics->GetBasePtr()->GetDevice().destroyRenderPass(m_mainRenderPass);
+        m_renderPasses.reset();
+    }
+    
+    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex)
+    {
+        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+
+        auto* cmd = BeginFrame(commands, assetServices, currentSwapChainImageIndex);
+
+        /** Shadow mapping pass */
+        m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
+
+        /** Lit shading pass */
+        m_renderPasses->Execute(RenderPassManager::LitShadingPass, cmd, currentSwapChainImageIndex, state);
+
+        cmd->end();
+        NC_PROFILE_END();
     }
 
-    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex)
+    void Renderer::InitializeImgui()
     {
+        m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire(RenderPassManager::LitShadingPass).renderpass.get());
+    }
 
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        
-        //@todo: these don't belong here.  
-        if (m_phongAndUiTechnique == nullptr)
-        {
-            m_phongAndUiTechnique = std::make_unique<PhongAndUiTechnique>(m_graphics, &m_mainRenderPass);
-        }
+    void Renderer::RegisterRenderPasses()
+    {
+        auto* swapchain = m_graphics->GetSwapchainPtr();
+
+        /** Shadow mapping pass */
+        const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
+        m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
+
+        /** Lit shading pass */
+        auto& colorImageViews = swapchain->GetColorImageViews();
+        auto& depthImageView = m_graphics->GetDepthStencil().GetImageView();
+        uint32_t index = 0;
+        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, RenderPassManager::LitShadingPass, index++); }
+    }
+
+    void Renderer::RegisterTechniques()
+    {
+        m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
 
         #ifdef NC_EDITOR_ENABLED
-        if (m_wireframeTechnique == nullptr)
-        {
-            m_wireframeTechnique = std::make_unique<WireframeTechnique>(m_graphics, &m_mainRenderPass);
-        }
+        m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
         #endif
 
+        m_renderPasses->RegisterTechnique<PhongAndUiTechnique>(RenderPassManager::LitShadingPass);
+    }
+
+    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, uint32_t currentSwapChainImageIndex)
+    {
         auto swapchain = m_graphics->GetSwapchainPtr();
         swapchain->WaitForFrameFence();
         auto& commandBuffers = *commands->GetCommandBuffers();
         auto* cmd = &commandBuffers[currentSwapChainImageIndex];
-
-        // Begin recording commands to each command buffer.
         cmd->begin(vk::CommandBufferBeginInfo{});
-        BeginRenderPass(cmd, swapchain, &m_mainRenderPass, currentSwapChainImageIndex);
-        BindSharedData(cmd);
 
-        #ifdef NC_EDITOR_ENABLED
-        if (m_wireframeTechnique->HasDebugWidget())
-        {
-            m_wireframeTechnique->Bind(cmd);
-            m_wireframeTechnique->Record(cmd, state.viewMatrix, state.projectionMatrix);
-        }
-        #endif
+        SetViewportAndScissor(cmd, m_dimensions);
 
-        // if (m_particleTechnique)
-        // {
-        //     m_particleTechnique->Bind(cmd);
-        //     m_particleTechnique->Record(cmd);
-        // }
-
-        m_phongAndUiTechnique->Bind(cmd);
-        if(!state.meshes.empty())
-        {
-            m_phongAndUiTechnique->Record(cmd, state.cameraPosition, state.meshes);
-        }
-
-        RecordUi(cmd);
-
-        // End recording commands to each command buffer.
-        cmd->endRenderPass();
-        cmd->end();
-
-        #ifdef NC_EDITOR_ENABLED
-        if (m_wireframeTechnique)
-        {
-            m_wireframeTechnique->ClearDebugWidget();
-        }
-        #endif
-
-        NC_PROFILE_END();
-    }
-
-    void Renderer::BindSharedData(vk::CommandBuffer* cmd)
-    {
         vk::DeviceSize offsets[] = { 0 };
-        cmd->bindVertexBuffers(0, 1, m_getMeshVertexBuffer(), offsets);
-        cmd->bindIndexBuffer(*(m_getMeshIndexBuffer()), 0, vk::IndexType::eUint32);
+        cmd->bindVertexBuffers(0, 1, assetServices->meshManager.GetVertexBuffer(), offsets);
+        cmd->bindIndexBuffer(*(assetServices->meshManager.GetIndexBuffer()), 0, vk::IndexType::eUint32);
+
+        return cmd;
     }
-
-    void Renderer::BeginRenderPass(vk::CommandBuffer* cmd, Swapchain* swapchain, vk::RenderPass* renderPass, uint32_t index)
-    {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        auto dimensions = m_graphics->GetDimensions();
-
-        vk::ClearValue clearValues[2];
-		clearValues[0].setColor(vk::ClearColorValue(m_graphics->GetClearColor()));
-		clearValues[1].setDepthStencil({ 1.0f, 0 });
-
-        vk::RenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.setRenderPass(*renderPass); // Specify the render pass and attachments.
-        renderPassInfo.setFramebuffer(swapchain->GetFrameBuffer(index));
-        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
-        renderPassInfo.renderArea.setExtent(swapchain->GetExtent());
-        renderPassInfo.setClearValueCount(2); // Set clear color
-        renderPassInfo.setPClearValues(clearValues);
-
-        SetViewportAndScissor(cmd, dimensions);
-
-        // Begin render pass and bind pipeline
-        cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-        NC_PROFILE_END();
-    }
-
-    // void Renderer::RegisterParticleEmitter(std::vector<particle::EmitterState>* m_emitterStates)
-    // {
-    //     if (!m_particleTechnique)
-    //     {
-    //         m_particleTechnique = std::make_unique<ParticleTechnique>(m_graphics, &m_mainRenderPass);
-    //     }
-    //     m_particleTechnique->RegisterEmitters(m_emitterStates);
-    // }
-
-    #ifdef NC_EDITOR_ENABLED
-    void Renderer::RegisterDebugWidget(nc::DebugWidget widget)
-    {
-        m_wireframeTechnique->RegisterDebugWidget(std::move(widget));
-    }
-
-    void Renderer::ClearDebugWidget()
-    {
-        if (m_wireframeTechnique)
-        {
-            m_wireframeTechnique->ClearDebugWidget();
-        }
-    }
-    #endif
-
-    void Renderer::RecordUi(vk::CommandBuffer* cmd)
-    {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
-        NC_PROFILE_END();
-    }
-
-    // void Renderer::ClearParticleEmitters()
-    // {
-    //     if (m_particleTechnique)
-    //     {
-    //         m_particleTechnique->Clear();
-    //     }
-    // }
 
     void Renderer::Clear() noexcept
     {

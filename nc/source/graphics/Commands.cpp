@@ -14,7 +14,7 @@ namespace nc::graphics
       m_commandBuffers{} 
     {
         // Create the command buffers.
-        m_commandBuffers.resize(m_swapchain.GetImageViews().size()); // Need to have one command buffer per frame buffer, which have the same count as the image views.
+        m_commandBuffers.resize(m_swapchain.GetColorImageViews().size()); // Need to have one command buffer per frame buffer, which have the same count as the image views.
         vk::CommandBufferAllocateInfo allocInfo{};
         allocInfo.setCommandPool(m_base->GetCommandPool());
         allocInfo.setLevel(vk::CommandBufferLevel::ePrimary); // Primary means the command buffer can be submitted to a queue for execution, but not called from other command buffers. Alternative is Secondary, which cant be submitted directly but can be called from other primary command buffers.

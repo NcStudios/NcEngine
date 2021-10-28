@@ -1,4 +1,5 @@
 #include "Base.h"
+#include "graphics/Initializers.h"
 #include "graphics/Commands.h"
 #include "stb/stb_image.h"
 #include "debug/NcError.h"
@@ -273,11 +274,11 @@ namespace nc::graphics
             throw NcError("Could not create ImGUI descriptor pool.");
         }
 
-        /** @todo These value need to be configurable (at least sampled images) */
-        std::array<vk::DescriptorPoolSize, 3> renderingPoolSizes =
+        std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
         {
             vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 }
         };
         
@@ -465,22 +466,7 @@ namespace nc::graphics
         vk::PhysicalDeviceProperties properties{};
         m_physicalDevice.getProperties(&properties);
 
-        vk::SamplerCreateInfo samplerInfo{};
-        samplerInfo.setMagFilter(vk::Filter::eLinear);
-        samplerInfo.setMinFilter(vk::Filter::eLinear);
-        samplerInfo.setAddressModeU(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeV(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeW(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAnisotropyEnable(VK_TRUE);
-        samplerInfo.setMaxAnisotropy(properties.limits.maxSamplerAnisotropy);
-        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueBlack);
-        samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
-        samplerInfo.setCompareEnable(VK_FALSE);
-        samplerInfo.setCompareOp(vk::CompareOp::eAlways);
-        samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
-        samplerInfo.setMipLodBias(0.0f);
-        samplerInfo.setMinLod(0.0f);
-        samplerInfo.setMaxLod(0.0f);
+        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
 
         return m_logicalDevice.createSamplerUnique(samplerInfo);
     }
