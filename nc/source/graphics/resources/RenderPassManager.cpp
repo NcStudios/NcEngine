@@ -156,9 +156,9 @@ namespace nc::graphics
 
     RenderTarget& RenderPassManager::GetRenderTarget(const std::string& uid, uint32_t index)
     {
-        auto renderTargetPos = std::ranges::find_if(m_renderTargets, [uid, index](const auto& aRenderTarget)
+        auto renderTargetPos = std::ranges::find_if(m_renderTargets, [&uid, index](const auto& aRenderTarget)
         {
-            return (aRenderTarget.renderPassUid == uid && aRenderTarget.index == index);
+            return (aRenderTarget.index == index && aRenderTarget.renderPassUid == uid);
         });
 
         if (renderTargetPos == m_renderTargets.end())
@@ -171,9 +171,9 @@ namespace nc::graphics
 
     void RenderPassManager::RegisterAttachments(std::vector<vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index)
     {
-        auto renderTargetPos = std::ranges::find_if(m_renderTargets, [uid, index](auto& aRenderTarget)
+        auto renderTargetPos = std::ranges::find_if(m_renderTargets, [&uid, index](auto& aRenderTarget)
         {
-            return (aRenderTarget.renderPassUid == uid && aRenderTarget.index == index);
+            return (aRenderTarget.index == index && aRenderTarget.renderPassUid == uid);
         });
 
         if (renderTargetPos != m_renderTargets.end())
@@ -185,11 +185,7 @@ namespace nc::graphics
         auto* base = m_graphics->GetBasePtr();
         auto renderTarget = RenderTarget{};
 
-        renderTarget.attachmentHandles.reserve(attachmentHandles.size());
-        for (auto attachmentHandle : attachmentHandles)
-        {
-            renderTarget.attachmentHandles.push_back(attachmentHandle);
-        }
+        renderTarget.attachmentHandles = std::move(attachmentHandles);
         renderTarget.renderPassUid = uid;
         renderTarget.index = index;
 
@@ -203,7 +199,6 @@ namespace nc::graphics
         framebufferInfo.setLayers(1);
 
         renderTarget.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
-
         m_renderTargets.push_back(std::move(renderTarget));
     }
 
