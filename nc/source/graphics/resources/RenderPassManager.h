@@ -27,7 +27,7 @@ namespace nc::graphics
             inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
             
             RenderPassManager(Graphics* graphics, const Vector2& dimensions);
-            ~RenderPassManager();
+            ~RenderPassManager() noexcept;
 
             void Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData);
             RenderPass& Acquire(const std::string& uid);

@@ -19,7 +19,7 @@ namespace nc::graphics
     {
         public:
             ShadowMappingTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
-            ~ShadowMappingTechnique();
+            ~ShadowMappingTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
             void Bind(vk::CommandBuffer* cmd) override;

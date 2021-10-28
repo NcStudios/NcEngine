@@ -24,23 +24,21 @@ namespace nc::graphics
     {
         public:
             Renderer(graphics::Graphics* graphics,
-                     AssetServices* assets, 
                      ShaderResourceServices* shaderResources,
                      Vector2 dimensions);
 
             ~Renderer() noexcept;
             
-            void Record(Commands* commands, const PerFrameRenderState& state, uint32_t currentSwapChainImageIndex);
+            void Record(Commands* commands, const PerFrameRenderState& state, AssetServices* m_assetServices, uint32_t currentSwapChainImageIndex);
             void Clear() noexcept;
             void InitializeImgui();
 
         private:
             void RegisterTechniques();
             void RegisterRenderPasses();
-            vk::CommandBuffer* BeginFrame(Commands* commands, uint32_t currentSwapChainImageIndex);
+            vk::CommandBuffer* BeginFrame(Commands* commands, AssetServices* m_assetServices, uint32_t currentSwapChainImageIndex);
 
             graphics::Graphics* m_graphics;
-            AssetServices* m_assets;
             ShaderResourceServices* m_shaderResources;
             std::unique_ptr<RenderPassManager> m_renderPasses;
             Vector2 m_dimensions;

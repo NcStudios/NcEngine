@@ -105,7 +105,6 @@ namespace nc::graphics
     void WriteableBuffer<T>::Map(const std::vector<T>& dataToMap, Func&& myNuller)
     {
         auto allocation = *(m_base->GetBufferAllocation(m_memoryIndex));
-        
         void* dataContainer;
         m_base->GetAllocator()->mapMemory(allocation, &dataContainer);
 
@@ -127,11 +126,12 @@ namespace nc::graphics
 
         // Note: WriteableBuffer can have a dynamic array. This block handles the case where we are mapping less data than has been previously mapped.
         // We must set the first "unmapped" item to "null" via myNuller which needs to be handled by the object being mapped.
-        if (dataToMapSize < sizeof(m_writeableBuffer))
+        if (dataToMapSize < m_memorySize)
         {
             myNuller(mappedContainerHandle[dataToMapSize]);
         }
 
+        m_memorySize = dataToMapSize;
         m_base->GetAllocator()->unmapMemory(allocation);
     }
 

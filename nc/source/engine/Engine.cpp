@@ -22,7 +22,7 @@ namespace nc
     Engine::Engine(HINSTANCE hInstance)
         : m_mainCamera{},
           m_window{ hInstance },
-          m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions(), &m_assetServices },
+          m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
           m_ecs{&m_graphics, config::GetMemorySettings()},
           m_physicsSystem{m_ecs.GetRegistry(), &m_graphics},
@@ -199,7 +199,7 @@ namespace nc
         auto* renderer = m_graphics.GetRendererPtr();
 
         // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr(), state, m_currentImageIndex);
+        renderer->Record(m_graphics.GetCommandsPtr(), state, &m_assetServices, m_currentImageIndex);
 
         #ifdef NC_EDITOR_ENABLED
         for(auto& collider : registry->ViewAll<Collider>())

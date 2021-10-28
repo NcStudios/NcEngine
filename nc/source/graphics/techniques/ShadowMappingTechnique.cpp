@@ -36,7 +36,7 @@ namespace nc::graphics
         CreatePipeline(renderPass);
     }
 
-    ShadowMappingTechnique::~ShadowMappingTechnique()
+    ShadowMappingTechnique::~ShadowMappingTechnique() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();

@@ -14,10 +14,5 @@ namespace nc::graphics
 
             virtual bool CanRecord(const PerFrameRenderState& frameData) = 0;
             virtual void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) = 0;
-
-            auto GetUid() ->const std::string& { return m_uid; }
-
-        private:
-            std::string m_uid;
     };
 }

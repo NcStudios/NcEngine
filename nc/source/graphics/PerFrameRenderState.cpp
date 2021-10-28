@@ -76,7 +76,7 @@ namespace nc::graphics
         {
             auto* transform = registry->Get<Transform>(pointLight.GetParentEntity());
 
-            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix());
+            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->GetTransformationMatrix()));
 
             if(pointLight.Update(transform->GetPosition(), pointLightVPs.back()))
                 isPointLightBindRequired = true;

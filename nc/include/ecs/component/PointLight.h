@@ -38,7 +38,7 @@ namespace nc
             void SetInfo(PointLightInfo info);
 
         private:
-            DirectX::XMMATRIX CalculateLightViewProjectionMatrix();
+            DirectX::XMMATRIX CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix);
 
             PointLightInfo m_info;
             DirectX::XMMATRIX m_lightProjectionMatrix;

@@ -4,7 +4,7 @@
 namespace nc::graphics
 {
     PointLightManager::PointLightManager(Graphics* graphics, uint32_t maxPointLights)
-        : m_pointLightsArrayBuffer{},
+        : m_pointLightsArrayBuffer{nullptr},
           m_descriptorSet{},
           m_descriptorSetLayout{},
           m_graphics{graphics},
@@ -15,7 +15,7 @@ namespace nc::graphics
 
     PointLightManager::~PointLightManager() noexcept
     {
-        m_pointLightsArrayBuffer.Clear();
+        m_pointLightsArrayBuffer->Clear();
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
     }
@@ -35,11 +35,14 @@ namespace nc::graphics
         };
 
         m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, layoutBindingFlags);
-        m_pointLightsArrayBuffer = WriteableBuffer<nc::PointLightInfo>(m_graphics, (sizeof(nc::PointLightInfo) * m_maxPointLights));
+        if (m_pointLightsArrayBuffer == nullptr)
+        {
+            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, (sizeof(nc::PointLightInfo) * m_maxPointLights));
+        }
         m_descriptorSet = CreateDescriptorSet(m_graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
 		vk::DescriptorBufferInfo pointLightArrayInfo;
-		pointLightArrayInfo.buffer = *m_pointLightsArrayBuffer.GetBuffer();
+		pointLightArrayInfo.buffer = *m_pointLightsArrayBuffer->GetBuffer();
 		pointLightArrayInfo.offset = 0;
 		pointLightArrayInfo.range = sizeof(nc::PointLightInfo) * m_maxPointLights;
 
@@ -57,7 +60,7 @@ namespace nc::graphics
 
     void PointLightManager::Update(const std::vector<PointLightInfo>& data)
     {
-        m_pointLightsArrayBuffer.Map(data, [](PointLightInfo& info)
+        m_pointLightsArrayBuffer->Map(data, [](PointLightInfo& info)
         {
             info.isInitialized = false;
         });
@@ -75,7 +78,7 @@ namespace nc::graphics
 
     void PointLightManager::Reset()
     {
-        m_pointLightsArrayBuffer.Clear();
+        // // m_pointLightsArrayBuffer.Clear();
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
         Initialize();

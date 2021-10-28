@@ -43,7 +43,7 @@ namespace nc::graphics
         Create(RenderPassManager::LitShadingPass, litAttachmentSlots, litSubpasses, ClearValue::DepthAndColor, dimensions);
     }
 
-    RenderPassManager::~RenderPassManager()
+    RenderPassManager::~RenderPassManager() noexcept
     {
         m_renderPasses.clear();
         m_renderTargets.clear();
@@ -119,7 +119,7 @@ namespace nc::graphics
         {
             .uid = uid,
             .renderTargetSize = renderTargetSize,
-            .renderpass = std::move(CreateRenderPass(base, attachmentSlots, subpasses)),
+            .renderpass = CreateRenderPass(base, attachmentSlots, subpasses),
             .valuesToClear = valuesToClear,
             .techniques = {}
         };

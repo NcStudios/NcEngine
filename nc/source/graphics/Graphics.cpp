@@ -20,21 +20,18 @@ namespace
 
 namespace nc::graphics
 {
-    Graphics::Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions, AssetServices* assets)
+    Graphics::Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
-          m_renderer{ std::make_unique<Renderer>(this, assets, m_shaderResources.get(), dimensions) },
-          m_assets{assets},
+          m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
-          m_isFullscreen{ false },
-          m_isResizing{ false },
           m_clearColor{DefaultClearColor},
           m_drawCallCount{0}
     {
@@ -61,7 +58,6 @@ namespace nc::graphics
         }
 
         std::lock_guard lock{m_resizingMutex};
-        m_isResizing = true;
 
         // Wait for all current commands to complete execution
         WaitIdle();
@@ -85,9 +81,7 @@ namespace nc::graphics
         m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
         m_swapchain = std::make_unique<Swapchain>(m_base.get(), dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
-        m_renderer = std::make_unique<Renderer>(this, m_assets, m_shaderResources.get(), dimensions);
-
-        m_isResizing = false;
+        m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions);
     }
 
     void Graphics::ToggleFullscreen()
@@ -105,11 +99,6 @@ namespace nc::graphics
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
-        (void)width;
-        (void)height;
-        (void)nearZ;
-        (void)farZ;
-
         m_dimensions = Vector2{ width, height };
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;

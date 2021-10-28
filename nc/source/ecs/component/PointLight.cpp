@@ -41,11 +41,11 @@ namespace nc
         m_info = info;
     }
 
-    DirectX::XMMATRIX PointLight::CalculateLightViewProjectionMatrix()
+    DirectX::XMMATRIX PointLight::CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix)
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix());
-        auto look_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, DirectX::XMMatrixRotationQuaternion(rot_v));
+        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transformMatrix);
+        auto look_v = DirectX::XMVector3Rotate(DirectX::g_XMIdentityR2, rot_v);
         return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1) * m_lightProjectionMatrix;
     }
 
