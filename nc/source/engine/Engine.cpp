@@ -34,7 +34,6 @@ namespace nc
           m_tasks{},
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},
-          m_currentImageIndex{0},
           m_isRunning{false}
     {
         SetBindings();
@@ -173,42 +172,33 @@ namespace nc
     void Engine::FrameRender()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+
+        /** Update the view matrix for the camera */
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
-        m_currentImageIndex = m_graphics.FrameBegin();
 
-        if (m_currentImageIndex == UINT32_MAX)
-        {
-            return;
-        }
-        
+        /** Setup the frame */
+        if (m_graphics.FrameBegin() == UINT32_MAX) return;
         m_uiSystem.FrameBegin();
+
+        /** Get the frame data */
         auto* registry = m_ecs.GetRegistry();
-
-        #ifdef NC_EDITOR_ENABLED
-        m_uiSystem.Frame(&m_frameDeltaTimeFactor, registry);
-        #else
-        m_uiSystem.Frame();
-        #endif
-
-        m_uiSystem.FrameEnd();
-
         auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
         graphics::MapPerFrameRenderState(state);
 
-        auto* renderer = m_graphics.GetRendererPtr();
-
-        // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr(), state, &m_assetServices, m_currentImageIndex);
+        /** Draw the frame */
+        #ifdef NC_EDITOR_ENABLED
+        m_uiSystem.Draw(&m_frameDeltaTimeFactor, registry);
+        #else
+        m_uiSystem.Draw();
+        #endif
+        m_graphics.Draw(&state, &m_assetServices);
 
         #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : registry->ViewAll<Collider>())
-        {
-            collider.SetEditorSelection(false);
-        }
+        for(auto& collider : registry->ViewAll<Collider>()) collider.SetEditorSelection(false);
         #endif
 
-        m_graphics.Draw();
+        /** End the frame */
         m_graphics.FrameEnd();
 
         NC_PROFILE_END();

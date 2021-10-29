@@ -20,7 +20,6 @@ namespace nc::graphics
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
     {
@@ -33,9 +32,9 @@ namespace nc::graphics
         m_pipelineLayout.reset();
     }
 
-    bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
+    bool WireframeTechnique::CanBind(PerFrameRenderState* frameData)
     {
-        return frameData.colliderDebugWidget.has_value();
+        return frameData->colliderDebugWidget.has_value();
     }
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
@@ -103,20 +102,20 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
+    bool WireframeTechnique::CanRecord(PerFrameRenderState* frameData)
     {
-        return frameData.colliderDebugWidget.has_value();
+        return frameData->colliderDebugWidget.has_value();
     }
 
-    void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+    void WireframeTechnique::Record(vk::CommandBuffer* cmd, PerFrameRenderState* frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
         auto pushConstants = WireframePushConstants{};
-        pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
-        pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
+        pushConstants.viewProjection = frameData->camViewMatrix * frameData->projectionMatrix;
+        pushConstants.model = frameData->colliderDebugWidget->transformationMatrix;
 
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
+        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData->colliderDebugWidget->meshUid);
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
         cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
 

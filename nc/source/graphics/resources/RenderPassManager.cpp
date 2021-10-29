@@ -49,7 +49,7 @@ namespace nc::graphics
         m_renderTargets.clear();
     }
 
-    void RenderPassManager::Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData)
+    void RenderPassManager::Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, PerFrameRenderState* frameData)
     {
         auto& renderPass = Acquire(uid);
        
@@ -236,5 +236,4 @@ namespace nc::graphics
 
         m_renderTargets.push_back(std::move(renderTarget));
     }
-
 }

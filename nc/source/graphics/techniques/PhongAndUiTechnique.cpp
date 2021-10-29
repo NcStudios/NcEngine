@@ -20,7 +20,6 @@ namespace nc::graphics
     PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
     {
@@ -100,7 +99,7 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    bool PhongAndUiTechnique::CanBind(const PerFrameRenderState& frameData)
+    bool PhongAndUiTechnique::CanBind(PerFrameRenderState* frameData)
     {
         (void)frameData;
         return true;
@@ -117,28 +116,23 @@ namespace nc::graphics
         NC_PROFILE_END();
     }
 
-    bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
+    bool PhongAndUiTechnique::CanRecord(PerFrameRenderState* frameData)
     {
         (void)frameData;
         return true;
     }
 
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, PerFrameRenderState* frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         auto pushConstants = PhongPushConstants{};
-        pushConstants.cameraPos = frameData.cameraPosition;
+        pushConstants.cameraPos = frameData->cameraPosition;
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
 
         uint32_t objectInstance = 0;
-        for(const auto& mesh : frameData.meshes)
+        for(const auto& mesh : frameData->meshes)
         {
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            
-            #ifdef NC_EDITOR_ENABLED
-            m_graphics->IncrementDrawCallCount();
-            #endif
-            
             ++objectInstance;
         }
 

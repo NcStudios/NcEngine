@@ -29,14 +29,14 @@ namespace nc::graphics
 
             ~Renderer() noexcept;
             
-            void Record(Commands* commands, const PerFrameRenderState& state, AssetServices* m_assetServices, uint32_t currentSwapChainImageIndex);
+            void Record(Commands* commands, PerFrameRenderState* state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex);
             void Clear() noexcept;
             void InitializeImgui();
 
         private:
             void RegisterTechniques();
             void RegisterRenderPasses();
-            vk::CommandBuffer* BeginFrame(Commands* commands, AssetServices* m_assetServices, uint32_t currentSwapChainImageIndex);
+            vk::CommandBuffer* BeginFrame(Commands* commands, AssetServices* assetServices, uint32_t currentSwapChainImageIndex);
 
             graphics::Graphics* m_graphics;
             ShaderResourceServices* m_shaderResources;

@@ -30,8 +30,8 @@ namespace nc::ui::editor::controls
     inline void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform);
     inline void EntityPanel(Registry* registry, Entity entity);
     inline void AutoComponentElement(AutoComponent* comp);
-    inline void UtilitiesPanel(float* dtMult, Registry* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
-    inline void FrameData(float* dtMult, unsigned drawCallCount);
+    inline void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight);
+    inline void FrameData(float* dtMult);
     inline void Profiler();
     inline void ComponentSystems(Registry* registry);
     inline void PhysicsMetrics();
@@ -192,7 +192,7 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void UtilitiesPanel(float* dtMult, Registry* registry, unsigned drawCallCount, float windowWidth, float windowHeight)
+    void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight)
     {
         static auto initColumnWidth = false;
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
@@ -217,7 +217,7 @@ namespace nc::ui::editor::controls
             ImGui::NextColumn();
             if(ImGui::BeginTabBar("UtilitiesRightTabBar"))
             {
-                WrapTabItem("Frame Data", FrameData, dtMult, drawCallCount);
+                WrapTabItem("Frame Data", FrameData, dtMult);
                 WrapTabItem("UI Style", ImGui::ShowStyleEditor, nullptr);
                 WrapTabItem("UI Metrics", ImGui::ShowMetricsWindow, nullptr);
                 ImGui::EndTabBar();
@@ -226,14 +226,13 @@ namespace nc::ui::editor::controls
         ImGui::EndChild();
     }
 
-    void FrameData(float* dtMult, unsigned drawCallCount)
+    void FrameData(float* dtMult)
     {
         float frameRate = ImGui::GetIO().Framerate;
         ImGui::SetNextItemWidth(DefaultItemWidth);
         ImGui::DragFloat("dtX", dtMult, 0.1f, 0.0f, 5.0f, "%.1f");
         ImGui::Text("%.1f fps", frameRate);
         ImGui::Text("%.1f ms/frame", 1000.0f / frameRate);
-        ImGui::Text("%u Draw Calls", drawCallCount);
     }
 
     void Profiler()

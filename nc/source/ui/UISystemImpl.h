@@ -26,13 +26,11 @@ namespace nc::ui
             void FrameBegin();
 
             #ifdef NC_EDITOR_ENABLED
-            void Frame(float* dt, Registry* registry);
+            void Draw(float* dt, Registry* registry);
             #else
-            void Frame();
+            void Draw();
             #endif
             
-            void FrameEnd();
-
         private:
             #ifdef NC_EDITOR_ENABLED
             editor::Editor m_editor;

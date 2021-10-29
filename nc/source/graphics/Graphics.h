@@ -16,6 +16,7 @@ namespace nc::graphics
     class Commands;
     class Swapchain;
     class DepthStencil;
+    class PerFrameRenderState;
     class Renderer;
     class RenderPassManager;
     struct ShaderResourceServices;
@@ -30,32 +31,22 @@ namespace nc::graphics
             Graphics& operator=(const Graphics&) = delete;
             Graphics& operator=(Graphics&&) = delete;
 
-            void ResizeTarget(float width, float height);
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
-            void ToggleFullscreen();
             void SetClearColor(std::array<float, 4> color);
-
-            Base* GetBasePtr() const noexcept;
-            Swapchain* GetSwapchainPtr() const noexcept;
-            Commands* GetCommandsPtr() const noexcept;
-            Renderer* GetRendererPtr() const noexcept;
-            const Vector2 GetDimensions() const noexcept;
-            const DepthStencil& GetDepthStencil() const noexcept;
-            const std::array<float, 4>& GetClearColor() const noexcept;
-
-            // Blocks the current thread until all operations in the command queues on the device are completed. 
             void WaitIdle();
             void Clear();
             void InitializeUI();
 
-            uint32_t FrameBegin();
-            void Draw();
-            void FrameEnd();
+            Base* GetBasePtr() const noexcept;
+            Swapchain* GetSwapchainPtr() const noexcept;
+            Commands* GetCommandsPtr() const noexcept;
+            const Vector2 GetDimensions() const noexcept;
+            const DepthStencil& GetDepthStencil() const noexcept;
+            const std::array<float, 4>& GetClearColor() const noexcept;
 
-    #ifdef NC_EDITOR_ENABLED
-            uint32_t GetDrawCallCount() const;
-            void IncrementDrawCallCount();
-    #endif
+            uint32_t FrameBegin();
+            void Draw(PerFrameRenderState* state, AssetServices* assets);
+            void FrameEnd();
 
         private:
             void RecreateSwapchain(Vector2 dimensions);
@@ -76,6 +67,5 @@ namespace nc::graphics
             Vector2 m_dimensions;
             bool m_isMinimized;
             std::array<float, 4> m_clearColor;
-            uint32_t m_drawCallCount = 0;
     };
 }

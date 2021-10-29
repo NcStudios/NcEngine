@@ -48,7 +48,6 @@ namespace nc
             TaskGraph m_tasks;
             float m_dt;
             float m_frameDeltaTimeFactor;
-            uint32_t m_currentImageIndex;
             bool m_isRunning;
 
             void BuildTaskGraph();

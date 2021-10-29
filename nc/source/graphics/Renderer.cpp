@@ -40,7 +40,7 @@ namespace nc::graphics
         m_renderPasses.reset();
     }
     
-    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex)
+    void Renderer::Record(Commands* commands, PerFrameRenderState* state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 

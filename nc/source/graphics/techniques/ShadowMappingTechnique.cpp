@@ -28,7 +28,6 @@ namespace nc::graphics
     : 
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr},
       m_enabled{false}
@@ -42,9 +41,9 @@ namespace nc::graphics
         m_pipelineLayout.reset();
     }
 
-    bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
+    bool ShadowMappingTechnique::CanBind(PerFrameRenderState* frameData)
     {
-        return m_enabled = nc::config::GetGraphicsSettings().useShadows && !frameData.pointLightVPs.empty();
+        return m_enabled = nc::config::GetGraphicsSettings().useShadows && !frameData->pointLightVPs.empty();
     }
 
     void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
@@ -115,13 +114,13 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)
+    bool ShadowMappingTechnique::CanRecord(PerFrameRenderState* frameData)
     {
         (void)frameData;
         return m_enabled;
     }
 
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, PerFrameRenderState* frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
@@ -135,14 +134,14 @@ namespace nc::graphics
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        for (const auto& pointLightVP : frameData.pointLightVPs)
+        for (const auto& pointLightVP : frameData->pointLightVPs)
         {
             pushConstants.lightViewProjection = pointLightVP;
 
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
             uint32_t objectInstance = 0;
-            for (const auto& mesh : frameData.meshes)
+            for (const auto& mesh : frameData->meshes)
             {
                 cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
                 objectInstance++;

@@ -25,11 +25,11 @@ namespace nc::graphics
             PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
             ~PhongAndUiTechnique() noexcept;
             
-            bool CanBind(const PerFrameRenderState& frameData) override;
+            bool CanBind(PerFrameRenderState* frameData) override;
             void Bind(vk::CommandBuffer* cmd) override;
 
-            bool CanRecord(const PerFrameRenderState& frameData) override;
-            void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
+            bool CanRecord(PerFrameRenderState* frameData) override;
+            void Record(vk::CommandBuffer* cmd, PerFrameRenderState* frameData) override;
             
             void Clear() noexcept;
 
@@ -38,7 +38,6 @@ namespace nc::graphics
 
             nc::graphics::Graphics* m_graphics;
             Base* m_base;
-            Swapchain* m_swapchain;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };
