@@ -9,6 +9,7 @@ endif()
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
+option(NC_DEBUG_RENDERING "Enable wireframe primitive rendering" OFF)
 option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
 option(SANITIZE_UB "Use undefined behavior sanitizer" OFF)
 
@@ -61,6 +62,10 @@ endif()
 
 if(NC_EDITOR_ENABLED)
     add_definitions(-DNC_EDITOR_ENABLED)
+endif()
+
+if(NC_DEBUG_RENDERING)
+    add_definitions(-DNC_DEBUG_RENDERING)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -23,7 +23,6 @@ namespace nc
         : m_mainCamera{},
           m_window{ hInstance },
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
           m_ecs{&m_graphics, config::GetMemorySettings()},
           m_physicsSystem{m_ecs.GetRegistry(), &m_graphics},
           m_sceneSystem{},
@@ -181,18 +180,24 @@ namespace nc
         if (m_graphics.FrameBegin() == UINT32_MAX) return;
         m_uiSystem.FrameBegin();
 
-        /** Get the frame data */
         auto* registry = m_ecs.GetRegistry();
-        auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
-        graphics::MapPerFrameRenderState(state);
 
-        /** Draw the frame */
         #ifdef NC_EDITOR_ENABLED
         m_uiSystem.Draw(&m_frameDeltaTimeFactor, registry);
         #else
         m_uiSystem.Draw();
         #endif
-        m_graphics.Draw(&state, &m_assetServices);
+
+        /** Get the frame data */
+        #ifdef NC_DEBUG_RENDERING
+        auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset(), &m_physicsSystem};
+        #else
+        auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
+        #endif
+        graphics::MapPerFrameRenderState(state);
+
+        /** Draw the frame */
+        m_graphics.Draw(&state);
 
         #ifdef NC_EDITOR_ENABLED
         for(auto& collider : registry->ViewAll<Collider>()) collider.SetEditorSelection(false);

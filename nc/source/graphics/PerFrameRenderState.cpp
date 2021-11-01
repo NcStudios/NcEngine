@@ -4,6 +4,9 @@
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
 #include "physics/collision/IntersectionQueries.h"
+#ifdef NC_EDITOR_ENABLED
+#include "physics/PhysicsSystemImpl.h"
+#endif
 #include "resources/ShaderResourceService.h"
 
 #include <iostream>
@@ -24,7 +27,21 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
+    #ifdef NC_DEBUG_RENDERING
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, physics::PhysicsSystemImpl* physicsSystem)
+        : camViewMatrix{camera->GetViewMatrix()},
+          projectionMatrix{camera->GetProjectionMatrix()},
+          cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
+          objectData{},
+          pointLightInfos{},
+          #ifdef NC_EDITOR_ENABLED
+          colliderDebugWidget{std::nullopt},
+          #endif
+          debugData{},
+          pointLightVPs{},
+          isPointLightBindRequired{isPointLightSystemDirty}
+    #else
+        PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
         : camViewMatrix{camera->GetViewMatrix()},
           projectionMatrix{camera->GetProjectionMatrix()},
           cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
@@ -35,6 +52,7 @@ namespace nc::graphics
           #endif
           pointLightVPs{},
           isPointLightBindRequired{isPointLightSystemDirty}
+    #endif
     {
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;
@@ -67,6 +85,10 @@ namespace nc::graphics
         }
 
         if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
+        #endif
+
+        #ifdef NC_DEBUG_RENDERING
+        debugData = physicsSystem->GetDebugData();
         #endif
 
         auto pointLights = registry->ViewAll<PointLight>();

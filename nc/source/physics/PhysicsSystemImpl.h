@@ -27,18 +27,18 @@ namespace nc::physics
             void ClearState();
 
             #ifdef NC_DEBUG_RENDERING
-            void DebugRender();
+            graphics::DebugData* GetDebugData();
             #endif
 
         private:
             CollisionCache m_cache;
             std::vector<Joint> m_joints;
-            BspTree m_bspTree;
-            ClickableSystem m_clickableSystem;
-            TaskGraph m_tasks;
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugRenderer m_debugRenderer;
             #endif
+            BspTree m_bspTree;
+            ClickableSystem m_clickableSystem;
+            TaskGraph m_tasks;
 
             void BuildTaskGraph(Registry* registry);
     };

@@ -45,7 +45,7 @@ namespace nc::graphics
             const std::array<float, 4>& GetClearColor() const noexcept;
 
             uint32_t FrameBegin();
-            void Draw(PerFrameRenderState* state, AssetServices* assets);
+            void Draw(PerFrameRenderState* state);
             void FrameEnd();
 
         private:
@@ -60,6 +60,7 @@ namespace nc::graphics
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
+            std::unique_ptr<AssetServices> m_assetServices;
             std::unique_ptr<Renderer> m_renderer;
 
             std::mutex m_resizingMutex;

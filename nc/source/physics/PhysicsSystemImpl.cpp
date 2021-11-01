@@ -12,12 +12,12 @@ namespace nc::physics
     PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics)
         : m_cache{},
           m_joints{},
+          #ifdef NC_DEBUG_RENDERING
+          m_debugRenderer{},
+          #endif
           m_bspTree{registry},
           m_clickableSystem{graphics},
           m_tasks{}
-          #ifdef NC_DEBUG_RENDERING
-          , m_debugRenderer{graphics}
-          #endif
     {
         m_cache.fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         BuildTaskGraph(registry);
@@ -86,9 +86,9 @@ namespace nc::physics
     }
 
     #ifdef NC_DEBUG_RENDERING
-    void PhysicsSystemImpl::DebugRender()
+    graphics::DebugData* PhysicsSystemImpl::GetDebugData()
     {
-        m_debugRenderer.Render();
+        return m_debugRenderer.GetData();
     }
     #endif
 

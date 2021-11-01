@@ -27,6 +27,7 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
+          m_assetServices{ std::make_unique<AssetServices>(this, config::GetMemorySettings().maxTextures) },
           m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
@@ -194,12 +195,12 @@ namespace nc::graphics
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
     // See Device.cpp for synchronization of these calls.
-    void Graphics::Draw(PerFrameRenderState* state, AssetServices* assets)
+    void Graphics::Draw(PerFrameRenderState* state)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         if (m_isMinimized) return;
 
-        m_renderer->Record(m_commands.get(), state, assets, m_imageIndex);
+        m_renderer->Record(m_commands.get(), state, m_assetServices.get(), m_imageIndex);
 
         // Executes the command buffer to render to the image
         RenderToImage(m_imageIndex);

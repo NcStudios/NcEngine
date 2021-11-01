@@ -37,7 +37,6 @@ namespace nc
             camera::MainCameraImpl m_mainCamera;
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
-            AssetServices m_assetServices;
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystemImpl m_physicsSystem;
             scene::SceneSystemImpl m_sceneSystem;
