@@ -1,62 +1,48 @@
 #ifdef NC_EDITOR_ENABLED
 #include "WireframeTechnique.h"
+#include "assets/AssetService.h"
 #include "config/Config.h"
-#include "ecs/Registry.h"
-#include "ecs/component/Transform.h"
-#include "ecs/component/MeshRenderer.h"
 #include "debug/Profiler.h"
+#include "ecs/component/Transform.h"
+#include "ecs/Registry.h"
+#include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/Swapchain.h"
-#include "graphics/Base.h"
 #include "graphics/VertexDescriptions.h"
-#include "assets/AssetService.h"
+
+#include <iostream>
 
 namespace nc::graphics
 {
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
-    : 
-      #ifdef NC_EDITOR_ENABLED
-      m_debugWidget{},
-      #endif
-      m_graphics{graphics},
+    : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
       m_swapchain{graphics->GetSwapchainPtr()},
-      m_pipeline{},
-      m_pipelineLayout{}
+      m_pipeline{nullptr},
+      m_pipelineLayout{nullptr}
     {
         CreatePipeline(renderPass);
     }
 
     WireframeTechnique::~WireframeTechnique() noexcept
     {
-        auto device = m_base->GetDevice();
-        device.destroyPipelineLayout(m_pipelineLayout);
-        device.destroyPipeline(m_pipeline);
+        m_pipeline.reset();
+        m_pipelineLayout.reset();
+    }
+
+    bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
+    {
+        return frameData.colliderDebugWidget.has_value();
     }
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline);
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         NC_PROFILE_END();
-    }
-
-    void WireframeTechnique::RegisterDebugWidget(nc::DebugWidget debugWidget)
-    {
-        m_debugWidget = std::move(debugWidget);
-    }
-
-    void WireframeTechnique::ClearDebugWidget()
-    {
-        m_debugWidget = std::nullopt;
-    }
-
-    bool WireframeTechnique::HasDebugWidget() const
-    {
-        return m_debugWidget.has_value();
     }
 
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -77,7 +63,7 @@ namespace nc::graphics
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
-        m_pipelineLayout = m_base->GetDevice().createPipelineLayout(pipelineLayoutInfo);
+        m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
@@ -106,30 +92,34 @@ namespace nc::graphics
         auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
-        pipelineCreateInfo.setLayout(m_pipelineLayout);
+        pipelineCreateInfo.setLayout(m_pipelineLayout.get());
         pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = m_base->GetDevice().createGraphicsPipeline(nullptr, pipelineCreateInfo).value;
+        m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    void WireframeTechnique::Record(vk::CommandBuffer* cmd, DirectX::FXMMATRIX viewMatrix, DirectX::FXMMATRIX projectionMatrix)
+    bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
+    {
+        return frameData.colliderDebugWidget.has_value();
+    }
+
+    void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-        auto pushConstants = WireframePushConstants{};
-        pushConstants.viewProjection = viewMatrix * projectionMatrix;
 
-        if (m_debugWidget.has_value())
-        {
-            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(m_debugWidget->meshUid);
-            pushConstants.model = m_debugWidget->transformationMatrix;
-            cmd->pushConstants(m_pipelineLayout, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
-            cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-        }
+        auto pushConstants = WireframePushConstants{};
+        pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
+        pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
+
+        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+        cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+
         NC_PROFILE_END();
     }
 }

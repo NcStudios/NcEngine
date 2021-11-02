@@ -22,14 +22,11 @@ namespace nc::sample
         engine->Audio()->RegisterListener(cameraHandle);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
                                                            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .diffuseIntensity = 3.0,
-                                                           .attConst = 0.0f,
-                                                           .attLin = 0.05f,
-                                                           .attQuad = 0.0f});
+                                                           .diffuseIntensity = 600});
 
         // Movable object
         {

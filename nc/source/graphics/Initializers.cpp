@@ -2,8 +2,32 @@
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 
+#include <iostream>
+
 namespace nc::graphics
 {
+    vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode)
+    {
+        vk::SamplerCreateInfo samplerInfo{};
+        samplerInfo.setMagFilter(vk::Filter::eLinear);
+        samplerInfo.setMinFilter(vk::Filter::eLinear);
+        samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+        samplerInfo.setAddressModeU(addressMode);
+        samplerInfo.setAddressModeV(addressMode);
+        samplerInfo.setAddressModeW(addressMode);
+        samplerInfo.setAnisotropyEnable(VK_TRUE);
+        samplerInfo.setMaxAnisotropy(1.0f);
+        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueWhite);
+        samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
+        samplerInfo.setCompareEnable(VK_FALSE);
+        samplerInfo.setCompareOp(vk::CompareOp::eAlways);
+        samplerInfo.setMipLodBias(0.0f);
+        samplerInfo.setMinLod(0.0f);
+        samplerInfo.setMaxLod(0.0f);
+
+        return samplerInfo;
+    }
+
     vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
     {
         vk::AttachmentDescription attachmentDescription{};
@@ -18,7 +42,6 @@ namespace nc::graphics
             case AttachmentType::Color:
                 attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
                 attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-                attachmentDescription.setInitialLayout(vk::ImageLayout::eUndefined);
                 attachmentDescription.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
                 break;
 
@@ -26,6 +49,11 @@ namespace nc::graphics
                 attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eClear);
                 attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
                 attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+                break;
+            case AttachmentType::ShadowDepth:
+                attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+                attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+                attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
                 break;
         }
         return attachmentDescription;
@@ -43,19 +71,29 @@ namespace nc::graphics
                 break;
 
             case AttachmentType::Depth:
+            case AttachmentType::ShadowDepth:
                 attachmentReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
                 break;
         }
         return attachmentReference;
     }
 
-    vk::SubpassDescription CreateSubpassDescription(const vk::AttachmentReference& colorReference, const vk::AttachmentReference& depthReference)
+    AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
+    {
+        AttachmentSlot AttachmentSlot{};
+        AttachmentSlot.reference = CreateAttachmentReference(type, attachmentIndex);
+        AttachmentSlot.description = CreateAttachmentDescription(type, format, loadOp, storeOp);
+        AttachmentSlot.type = type;
+        return AttachmentSlot;
+    }
+
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment)
     {
         vk::SubpassDescription subpassDescription{};
         subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
         subpassDescription.setColorAttachmentCount(1);
-        subpassDescription.setPColorAttachments(&colorReference);
-        subpassDescription.setPDepthStencilAttachment(&depthReference);
+        subpassDescription.setPColorAttachments(&colorAttachment.reference);
+        subpassDescription.setPDepthStencilAttachment(&depthAttachment.reference);
         subpassDescription.setInputAttachmentCount(0);
         subpassDescription.setPreserveAttachmentCount(0);
         subpassDescription.setPPreserveAttachments(nullptr);
@@ -63,18 +101,75 @@ namespace nc::graphics
         return subpassDescription;
     }
 
-    vk::SubpassDependency CreateSubpassDependency()
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment)
+    {
+        vk::SubpassDescription subpassDescription{};
+        subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
+        subpassDescription.setColorAttachmentCount(0);
+        subpassDescription.setPDepthStencilAttachment(&depthAttachment.reference);
+        return subpassDescription;
+    }
+
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags)
+    {
+        vk::SubpassDependency subpassDependency = CreateSubpassDependency(sourceSubpassIndex, destSubpassIndex, sourceStageMask, destStageMask, sourceAccessMask, destAccessMask);
+        subpassDependency.setDependencyFlags(dependencyFlags);
+        return subpassDependency;      
+    }
+
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask, vk::AccessFlags destAccessMask)
     {
         vk::SubpassDependency subpassDependency;
 
-        subpassDependency.setSrcSubpass(VK_SUBPASS_EXTERNAL); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        subpassDependency.setDstSubpass(0); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        subpassDependency.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests); // The type of operation to wait on. (What our dependency is)
-        subpassDependency.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests); // Specifies the type of operation that should do the waiting
-        subpassDependency.setSrcAccessMask(vk::AccessFlags());  // Specifies the specific operation that should do the waiting
-        subpassDependency.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite);  // Specifies the specific operation that should do the waiting
+        subpassDependency.setSrcSubpass(sourceSubpassIndex); // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
+        subpassDependency.setDstSubpass(destSubpassIndex); // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
+        subpassDependency.setSrcStageMask(sourceStageMask); // The type of operation to wait on. (What our dependency is)
+        subpassDependency.setDstStageMask(destStageMask); // Specifies the type of operation that should do the waiting
+        subpassDependency.setSrcAccessMask(sourceAccessMask);  // Specifies the specific operation that should do the waiting
+        subpassDependency.setDstAccessMask(destAccessMask);  // Specifies the specific operation that should do the waiting
         
         return subpassDependency;      
+    }
+
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment)
+    {
+        Subpass subpass{};
+        subpass.description = CreateSubpassDescription(depthAttachment);
+        subpass.dependencies =
+        {
+            CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
+                                    0,
+                                    vk::PipelineStageFlagBits::eFragmentShader,
+                                    vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                    vk::AccessFlagBits::eShaderRead,
+                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+                                    vk::DependencyFlagBits::eByRegion),
+
+            CreateSubpassDependency(0,
+                                    VK_SUBPASS_EXTERNAL,
+                                    vk::PipelineStageFlagBits::eLateFragmentTests,
+                                    vk::PipelineStageFlagBits::eFragmentShader,
+                                    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+                                    vk::AccessFlagBits::eShaderRead,
+                                    vk::DependencyFlagBits::eByRegion),
+        };
+        return subpass;
+    }
+
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment)
+    {
+        Subpass subpass{};
+        subpass.description = CreateSubpassDescription(depthAttachment, colorAttachment);
+        subpass.dependencies =
+        {
+            CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
+                                    0,
+                                    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                                    vk::AccessFlags(),
+                                    vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite)
+        };
+        return subpass;
     }
 
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader)
@@ -107,6 +202,12 @@ namespace nc::graphics
         return vertexInputInfo;
     }
 
+    vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo()
+    {
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
+        return vertexInputInfo;
+    }
+
     vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo()
     {
         // @todo: Look into using element buffers here to reuse vertices
@@ -126,7 +227,7 @@ namespace nc::graphics
         return viewportState;
     }
 
-    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth)
+    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth, bool depthBiasEnable)
     {
         vk::PipelineRasterizationStateCreateInfo rasterizer{};
         rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
@@ -135,7 +236,23 @@ namespace nc::graphics
         rasterizer.setLineWidth(lineWidth);
         rasterizer.setCullMode(vk::CullModeFlagBits::eBack);
         rasterizer.setFrontFace(vk::FrontFace::eClockwise);
-        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(false));
+        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(depthBiasEnable));
+        rasterizer.setDepthBiasConstantFactor(0.0f);
+        rasterizer.setDepthBiasClamp(0.0f);
+        rasterizer.setDepthBiasSlopeFactor(0.0f);
+        return rasterizer;
+    }
+
+    vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, vk::CullModeFlags cullMode, float lineWidth, bool depthBiasEnable)
+    {
+        vk::PipelineRasterizationStateCreateInfo rasterizer{};
+        rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
+        rasterizer.setRasterizerDiscardEnable(static_cast<vk::Bool32>(false));
+        rasterizer.setPolygonMode(polygonMode);
+        rasterizer.setLineWidth(lineWidth);
+        rasterizer.setCullMode(cullMode);
+        rasterizer.setFrontFace(vk::FrontFace::eClockwise);
+        rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(depthBiasEnable));
         rasterizer.setDepthBiasConstantFactor(0.0f);
         rasterizer.setDepthBiasClamp(0.0f);
         rasterizer.setDepthBiasSlopeFactor(0.0f);
@@ -154,12 +271,20 @@ namespace nc::graphics
         return multisampling;
     }
 
-    vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo()
+    vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo(bool shadowMapping)
     {
         vk::PipelineDepthStencilStateCreateInfo depthStencil{};
         depthStencil.setDepthTestEnable(static_cast<vk::Bool32>(true));
         depthStencil.setDepthWriteEnable(static_cast<vk::Bool32>(true));
-        depthStencil.setDepthCompareOp(vk::CompareOp::eLess);
+
+        if (shadowMapping)
+        {
+            depthStencil.setDepthCompareOp(vk::CompareOp::eLessOrEqual);
+        }
+        else
+        {
+            depthStencil.setDepthCompareOp(vk::CompareOp::eLess);
+        }
         return depthStencil;
     }
 
@@ -188,6 +313,14 @@ namespace nc::graphics
         colorBlendAttachment.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
         colorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
         return colorBlendAttachment;
+    }
+
+    vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo()
+    {
+        vk::PipelineColorBlendStateCreateInfo colorBlending{};
+        colorBlending.setAttachmentCount(0);
+        colorBlending.setPAttachments(nullptr);
+        return colorBlending;
     }
 
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment, bool useAlphaBlending)
@@ -231,6 +364,16 @@ namespace nc::graphics
         return pipelineLayoutInfo;
     }
 
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts)
+    {
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
+        pipelineLayoutInfo.setSetLayoutCount(layouts.size());  
+        pipelineLayoutInfo.setPSetLayouts(layouts.data());  
+        pipelineLayoutInfo.setPushConstantRangeCount(0); 
+        pipelineLayoutInfo.setPPushConstantRanges(nullptr);
+        return pipelineLayoutInfo;
+    }
+
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -241,6 +384,56 @@ namespace nc::graphics
         return pipelineLayoutInfo;
     }
     
+    vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues)
+    {
+        vk::RenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.setRenderPass(renderpass); // Specify the render pass and attachments.
+        renderPassInfo.setFramebuffer(framebuffer);
+        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
+        renderPassInfo.renderArea.setExtent(extent);
+        renderPassInfo.setClearValueCount(clearValues.size()); // Set clear color
+        renderPassInfo.setPClearValues(clearValues.data());
+        return renderPassInfo;
+    }
+
+    vk::UniqueRenderPass CreateRenderPass(Base* base, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses)
+    {
+        std::vector<vk::AttachmentDescription> attachmentDescriptions{};
+        attachmentDescriptions.reserve(attachmentSlots.size());
+        std::transform(attachmentSlots.begin(), attachmentSlots.end(), std::back_inserter(attachmentDescriptions), [](const auto& attachmentSlot)
+        {
+            return attachmentSlot.description;
+        });
+
+        std::vector<vk::SubpassDescription> subpassDescriptions{};
+        subpassDescriptions.reserve(subpasses.size());
+        uint32_t subpassDependenciesCount = 0;
+
+        for (const auto& subpass : subpasses)
+        {
+            subpassDescriptions.push_back(subpass.description);
+            subpassDependenciesCount += subpass.dependencies.size();
+        }
+
+        std::vector<vk::SubpassDependency> subpassDependencies{};
+        subpassDependencies.reserve(subpassDependenciesCount);
+
+        for (const auto& subpass : subpasses)
+        {
+            subpassDependencies.insert(subpassDependencies.cend(), subpass.dependencies.cbegin(), subpass.dependencies.cend());
+        }
+
+        vk::RenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.setAttachmentCount(static_cast<uint32_t>(attachmentDescriptions.size()));
+        renderPassInfo.setPAttachments(attachmentDescriptions.data());
+        renderPassInfo.setSubpassCount(static_cast<uint32_t>(subpassDescriptions.size()));
+        renderPassInfo.setPSubpasses(subpassDescriptions.data());
+        renderPassInfo.setDependencyCount(static_cast<uint32_t>(subpassDependencies.size()));
+        renderPassInfo.setPDependencies(subpassDependencies.data());
+
+        return base->GetDevice().createRenderPassUnique(renderPassInfo);
+    }
+
     vk::Viewport CreateViewport(const Vector2& dimensions)
     {
         vk::Viewport viewport = {};
@@ -269,7 +462,7 @@ namespace nc::graphics
 
     void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions)
     {
-         auto viewport = CreateViewport(dimensions);
+        auto viewport = CreateViewport(dimensions);
         auto extent = CreateExtent(dimensions);
         auto scissor = CreateScissor(extent);
         commandBuffer->setViewport(0, 1, &viewport);
@@ -290,12 +483,12 @@ namespace nc::graphics
         return layoutBinding;
     }
 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, vk::DescriptorBindingFlagsEXT bindingFlags)
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
     {
         vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
         extendedInfo.setPNext(nullptr);
         extendedInfo.setBindingCount(layoutBindings.size());
-        extendedInfo.setPBindingFlags(&bindingFlags);
+        extendedInfo.setPBindingFlags(bindingFlags.data());
 
         vk::DescriptorSetLayoutCreateInfo setInfo{};
         setInfo.setBindingCount(layoutBindings.size());
@@ -357,5 +550,46 @@ namespace nc::graphics
         imageInfo.setImageView(imageView);
         imageInfo.setImageLayout(layout);
         return imageInfo;
+    }
+
+    std::vector<vk::ClearValue> CreateClearValues(ClearValue clearValue, const std::array<float, 4>& clearColor)
+    {
+        std::vector<vk::ClearValue> clearValues = {};
+
+        switch (clearValue)
+        {
+            case ClearValue::Depth:
+            {
+                clearValues.reserve(1);
+                auto value = vk::ClearValue{};
+                value.setDepthStencil({1.0f, 0});
+                clearValues.push_back(value);
+                break;
+            }
+
+            case ClearValue::Color:
+            {
+                clearValues.reserve(1);
+                auto value = vk::ClearValue{};
+                value.setColor(vk::ClearColorValue(clearColor));
+                clearValues.push_back(value);
+                break;
+            }
+
+            case ClearValue::DepthAndColor:
+            {
+                clearValues.reserve(2);
+                auto colorValue = vk::ClearValue{};
+                colorValue.setColor(vk::ClearColorValue(clearColor));
+                clearValues.push_back(colorValue);
+
+                auto depthValue = vk::ClearValue{};
+                depthValue.setDepthStencil({1.0f, 0});
+                clearValues.push_back(depthValue);
+                break;
+            }
+        }
+
+        return clearValues;
     }
 }

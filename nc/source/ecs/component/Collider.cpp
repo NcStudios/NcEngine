@@ -1,7 +1,7 @@
 #include "ecs/component/Collider.h"
 #include "ecs/component/DebugWidget.h"
-#include "graphics/Renderer.h"
 #include "ecs/Registry.h"
+#include "graphics/Renderer.h"
 #include "debug/Utils.h"
 #include "assets/AssetService.h"
 
@@ -169,14 +169,18 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Collider::UpdateWidget(graphics::Renderer* renderer)
+    void Collider::SetEditorSelection(bool state)
     {
-        // Expire to false to avoid state management in editor (it sets this to true as needed)
-        if(!std::exchange(m_selectedInEditor, false))
-        {
-            return;
-        }
+        m_selectedInEditor = state;
+    }
 
+    bool Collider::GetEditorSelection()
+    {
+        return m_selectedInEditor;
+    }
+
+    DebugWidget Collider::GetDebugWidget()
+    {
         const auto& scale = m_info.scale;
         const auto& offset = m_info.offset; 
 
@@ -187,12 +191,7 @@ namespace nc
             DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
 
-        renderer->RegisterDebugWidget(DebugWidget(m_info.type, transformationMatrix));
-    }
-
-    void Collider::SetEditorSelection(bool state)
-    {
-        m_selectedInEditor = state;
+        return DebugWidget(m_info.type, transformationMatrix);
     }
 
     template<> void ComponentGuiElement<Collider>(Collider* collider)

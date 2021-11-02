@@ -6,6 +6,8 @@
 #include "physics/collision/IntersectionQueries.h"
 #include "resources/ShaderResourceService.h"
 
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -23,15 +25,19 @@ namespace
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
-        : viewMatrix{camera->GetViewMatrix()},
+        : camViewMatrix{camera->GetViewMatrix()},
           projectionMatrix{camera->GetProjectionMatrix()},
           cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
           objectData{},
           pointLightInfos{},
+          #ifdef NC_EDITOR_ENABLED
+          colliderDebugWidget{std::nullopt},
+          #endif
+          pointLightVPs{},
           isPointLightBindRequired{isPointLightSystemDirty}
     {
         const auto frustum = camera->CalculateFrustum();
-        const auto viewProjection = viewMatrix * projectionMatrix;
+        const auto viewProjection = camViewMatrix * projectionMatrix;
         const auto renderers = registry->ViewAll<MeshRenderer>();
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());
@@ -44,17 +50,35 @@ namespace nc::graphics
             if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
 
-            const auto [base, normal, roughness] = renderer.GetTextureIndices();
-            objectData.emplace_back(modelMatrix, modelMatrix * viewMatrix, viewProjection, base.index, normal.index, roughness.index, 1);
+            const auto [base, normal, roughness, metallic] = renderer.GetTextureIndices();
+            objectData.emplace_back(modelMatrix, modelMatrix * camViewMatrix, viewProjection, base.index, normal.index, roughness.index, metallic.index);
             meshes.push_back(renderer.GetMesh());
         }
 
+        #ifdef NC_EDITOR_ENABLED
+        auto colliderIsSelected = false;
+        for(auto& collider : registry->ViewAll<Collider>())
+        {
+            if (collider.GetEditorSelection())
+            {
+                colliderDebugWidget = collider.GetDebugWidget();
+                colliderIsSelected = true;
+            }
+        }
+
+        if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
+        #endif
+
         auto pointLights = registry->ViewAll<PointLight>();
+        pointLightVPs.reserve(pointLights.size());
 
         for(auto& pointLight : pointLights)
         {
             auto* transform = registry->Get<Transform>(pointLight.GetParentEntity());
-            if(pointLight.Update(transform->GetPosition(), viewMatrix))
+
+            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->GetTransformationMatrix()));
+
+            if(pointLight.Update(transform->GetPosition(), pointLightVPs.back()))
                 isPointLightBindRequired = true;
         }
 

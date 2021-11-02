@@ -30,7 +30,12 @@ namespace nc::graphics
             CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)
         };
 
-        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, vk::DescriptorBindingFlagsEXT());
+        std::array<vk::DescriptorBindingFlagsEXT, 1> layoutBindingFlags
+        {  
+            vk::DescriptorBindingFlagsEXT()
+        };
+
+        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, layoutBindingFlags);
         m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_graphics, objectsSize); //@todo: not hard code upper bound
         m_descriptorSet = CreateDescriptorSet(m_graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 

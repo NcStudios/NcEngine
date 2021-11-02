@@ -22,7 +22,7 @@ namespace nc::graphics
     class Swapchain
     {
         public:
-            Swapchain(Base* base, const DepthStencil& depthStencil, Vector2 dimensions);
+            Swapchain(Base* base, Vector2 dimensions);
             ~Swapchain() noexcept;
 
             // Swap chain
@@ -32,13 +32,8 @@ namespace nc::graphics
             const Vector2 GetExtentDimensions() const noexcept;
             const vk::Extent2D& GetExtent() const noexcept;
             const vk::Format& GetFormat() const noexcept;
-            const std::vector<vk::ImageView>& GetImageViews() const noexcept;
-
-            // Frame buffers
-            void CreateFrameBuffers();
-            const vk::Framebuffer& GetFrameBuffer(uint32_t index) const;
-            void DestroyFrameBuffers() noexcept;
-            const vk::RenderPass& GetPassDefinition();
+            const std::vector<vk::ImageView>& GetColorImageViews() const noexcept;
+            vk::ImageView& GetDepthView() const noexcept;
 
             // Image synchronization
             void CreateSynchronizationObjects();
@@ -56,7 +51,6 @@ namespace nc::graphics
         private:
             // External members
             Base* m_base;
-            const DepthStencil& m_depthStencil;
 
             // Internal members
             // Swap chain
@@ -65,8 +59,6 @@ namespace nc::graphics
             vk::Format m_swapChainImageFormat;
             vk::Extent2D m_swapChainExtent;
             std::vector<vk::ImageView> m_swapChainImageViews;
-            std::vector<vk::Framebuffer> m_framebuffers;
-            vk::RenderPass m_defaultPass;
 
             // Synchronization
             std::vector<vk::Fence> m_imagesInFlightFences;

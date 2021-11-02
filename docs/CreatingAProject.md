@@ -62,7 +62,8 @@ const auto DefaultMaterial = nc::Material
 {
     .baseColor = "nc/resources/texture/DefaultBaseColor.png",
     .normal = "nc/resources/texture/DefaultNormal.png",
-    .roughness = "nc/resources/texture/DefaultMetallic.png"
+    .roughness = "nc/resources/texture/DefaultMetallic.png",
+    .metallic = "nc/resources/texture/DefaultMetallic.png",
 };
 
 class ExampleScene : public nc::Scene
@@ -74,7 +75,8 @@ class ExampleScene : public nc::Scene
             nc::LoadMeshAsset(CubeMeshPath);
             nc::LoadTextureAssets({DefaultMaterial.baseColor,
                                    DefaultMaterial.normal,
-                                   DefaultMaterial.roughness});
+                                   DefaultMaterial.roughness,
+                                   DefaultMaterial.metallic});
 
             auto registry = engine->Registry();
 

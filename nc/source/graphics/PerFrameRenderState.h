@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Assets.h"
+#include "ecs/component/DebugWidget.h"
 #include "ecs/component/PointLight.h"
+#include "ecs/Registry.h"
 #include "resources/ObjectDataManager.h"
 
 namespace nc
@@ -16,12 +18,16 @@ namespace nc::graphics
     {
         PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty);
 
-        DirectX::XMMATRIX viewMatrix;
+        DirectX::XMMATRIX camViewMatrix;
         DirectX::XMMATRIX projectionMatrix;
         Vector3 cameraPosition;
         std::vector<ObjectData> objectData;
         std::vector<MeshView> meshes;
         std::vector<PointLightInfo> pointLightInfos;
+        #ifdef NC_EDITOR_ENABLED
+        std::optional<nc::DebugWidget> colliderDebugWidget;
+        #endif
+        std::vector<DirectX::XMMATRIX> pointLightVPs;
         bool isPointLightBindRequired;
     };
 

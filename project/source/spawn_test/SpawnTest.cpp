@@ -55,10 +55,10 @@ namespace nc::sample
         engine->MainCamera()->Set(camera);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, -18.0f, 0.0f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.275f, 0.27f, 0.27f),
-                                                           .diffuseColor = Vector3(0.99f, 1.0f, 0.76f),
-                                                           .diffuseIntensity = 5.0f});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, -18.4f, -18.2f}, .tag = "Point Light 1"});
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.564f, 0.307f, 0.564f),
+                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
+                                                           .diffuseIntensity = 600.0f });
 
         // Collider that destroys anything leaving its bounded area
         auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(100.0f), .tag = "KillBox", .flags = Entity::Flags::Static});

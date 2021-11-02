@@ -19,7 +19,7 @@ namespace nc::graphics
             void Reset() override;
 
         private:
-            WriteableBuffer<nc::PointLightInfo> m_pointLightsArrayBuffer;
+            std::unique_ptr<WriteableBuffer<nc::PointLightInfo>> m_pointLightsArrayBuffer;
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             Graphics* m_graphics;

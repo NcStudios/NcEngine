@@ -6,6 +6,7 @@
 
 namespace nc
 {
+    constexpr size_t PointLightInfoSize = 128;
     namespace ecs { class PointLightSystem; }
     namespace graphics { struct PerFrameRenderState; }
 
@@ -13,17 +14,18 @@ namespace nc
      *  type for initializing point lights. It would be reasonable to assume
      *  that 'pos' controls the position or an offset for the light, when in
      *  reality it is just overwritten with the transform position. */
-    struct PointLightInfo
+    struct alignas(PointLightInfoSize) PointLightInfo
     {
-        alignas(16)Vector3 pos = Vector3::Zero();
-        alignas(16)Vector3 ambient = Vector3::Splat(0.35f);
-        alignas(16)Vector3 diffuseColor = Vector3::One();
+        DirectX::XMMATRIX viewProjection = {};
+        Vector3 pos = Vector3::Zero();
+        int castShadows = 1;
+        Vector3 ambient = Vector3::Splat(0.35f);
+        float paddingA = 0.0f; /** todo - Remove */
+        Vector3 diffuseColor = Vector3::One();
+        float paddingB = 0.0f;  /** todo - Remove */
         float diffuseIntensity = 2.5f;
-        float attConst = 2.61f;
-        float attLin = 0.1819f;
-        float attQuad = 0.0000001f;
         int isInitialized = 1;
-        float padding[15] = {};
+        float padding[2] = {};
     };
 
     class PointLight final : public ComponentBase
@@ -36,15 +38,19 @@ namespace nc
             void SetInfo(PointLightInfo info);
 
         private:
+            DirectX::XMMATRIX CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix);
+
             PointLightInfo m_info;
-            alignas(16)Vector3 m_projectedPos;
+            DirectX::XMMATRIX m_lightProjectionMatrix;
             bool m_isDirty;
 
-            bool Update(const Vector3& position, const DirectX::XMMATRIX& view);
+            bool Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj);
 
             friend ecs::PointLightSystem;
             friend graphics::PerFrameRenderState;
     };
+
+    static_assert(sizeof(PointLightInfo) == PointLightInfoSize, "PointLight::PointLight Size of m_info must be 128 bytes.");
     
     template<>
     struct StoragePolicy<PointLight>
