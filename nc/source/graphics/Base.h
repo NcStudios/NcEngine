@@ -8,6 +8,10 @@
 #include "vulkan/vk_mem_alloc.hpp"
 #include "imgui/imgui_impl_vulkan.h"
 
+#include <optional>
+#include <unordered_map>
+#include <vector>
+
 typedef unsigned char stbi_uc;
 
 namespace nc::graphics
