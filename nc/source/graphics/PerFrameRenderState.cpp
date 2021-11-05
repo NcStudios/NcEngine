@@ -27,32 +27,17 @@ namespace
 
 namespace nc::graphics
 {
-    #ifdef NC_DEBUG_RENDERING
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, physics::PhysicsSystemImpl* physicsSystem)
-        : camViewMatrix{camera->GetViewMatrix()},
-          projectionMatrix{camera->GetProjectionMatrix()},
-          cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
-          objectData{},
-          pointLightInfos{},
-          #ifdef NC_EDITOR_ENABLED
-          colliderDebugWidget{std::nullopt},
-          #endif
-          debugData{},
-          pointLightVPs{},
-          isPointLightBindRequired{isPointLightSystemDirty}
-    #else
-        PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
-        : camViewMatrix{camera->GetViewMatrix()},
-          projectionMatrix{camera->GetProjectionMatrix()},
-          cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
-          objectData{},
-          pointLightInfos{},
-          #ifdef NC_EDITOR_ENABLED
-          colliderDebugWidget{std::nullopt},
-          #endif
-          pointLightVPs{},
-          isPointLightBindRequired{isPointLightSystemDirty}
-    #endif
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
+    : camViewMatrix{camera->GetViewMatrix()},
+      projectionMatrix{camera->GetProjectionMatrix()},
+      cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
+      objectData{},
+      pointLightInfos{},
+      #ifdef NC_EDITOR_ENABLED
+      colliderDebugWidget{std::nullopt},
+      #endif
+      pointLightVPs{},
+      isPointLightBindRequired{isPointLightSystemDirty}
     {
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;
@@ -85,10 +70,6 @@ namespace nc::graphics
         }
 
         if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
-        #endif
-
-        #ifdef NC_DEBUG_RENDERING
-        debugData = physicsSystem->GetDebugData();
         #endif
 
         auto pointLights = registry->ViewAll<PointLight>();

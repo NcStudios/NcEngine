@@ -24,7 +24,7 @@ namespace nc
           m_window{ hInstance },
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physicsSystem{m_ecs.GetRegistry(), &m_graphics},
+          m_physicsSystem{m_ecs.GetRegistry()},
           m_sceneSystem{},
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
@@ -120,7 +120,7 @@ namespace nc
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
             {
                 /** @todo need to store prev transforms for interpolation */
-                m_physicsSystem.DoPhysicsStep(m_taskExecutor);
+                m_physicsSystem.DoPhysicsStep(m_taskExecutor, &m_graphics);
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
@@ -189,11 +189,7 @@ namespace nc
         #endif
 
         /** Get the frame data */
-        #ifdef NC_DEBUG_RENDERING
-        auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset(), &m_physicsSystem};
-        #else
         auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
-        #endif
         graphics::MapPerFrameRenderState(state);
 
         /** Draw the frame */

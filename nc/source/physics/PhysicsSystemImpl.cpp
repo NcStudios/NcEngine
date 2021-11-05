@@ -9,14 +9,11 @@
 
 namespace nc::physics
 {
-    PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics)
+    PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry)
         : m_cache{},
           m_joints{},
-          #ifdef NC_DEBUG_RENDERING
-          m_debugRenderer{},
-          #endif
           m_bspTree{registry},
-          m_clickableSystem{graphics},
+          m_clickableSystem{},
           m_tasks{}
     {
         m_cache.fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
@@ -84,13 +81,6 @@ namespace nc::physics
     {
         return m_clickableSystem.RaycastToClickables(mask);
     }
-
-    #ifdef NC_DEBUG_RENDERING
-    graphics::DebugData* PhysicsSystemImpl::GetDebugData()
-    {
-        return m_debugRenderer.GetData();
-    }
-    #endif
 
     void PhysicsSystemImpl::ClearState()
     {
@@ -263,13 +253,12 @@ namespace nc::physics
         #endif
     }
 
-    void PhysicsSystemImpl::DoPhysicsStep(tf::Executor& taskExecutor)
+    void PhysicsSystemImpl::DoPhysicsStep(tf::Executor& taskExecutor, graphics::Graphics* graphics)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
 
         #ifdef NC_DEBUG_RENDERING
-        m_debugRenderer.ClearLines();
-        m_debugRenderer.ClearPoints();
+        graphics->ClearDebugRenderer();
         #endif
 
         m_tasks.Run(taskExecutor);

@@ -4,7 +4,9 @@
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "directx/math/DirectXMath.h"
-
+#ifdef NC_DEBUG_RENDERING
+#include "DebugRenderer.h"
+#endif
 #include <memory>
 #include <mutex>
 
@@ -44,6 +46,11 @@ namespace nc::graphics
             const DepthStencil& GetDepthStencil() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 
+            #ifdef NC_DEBUG_RENDERING
+            graphics::DebugData* GetDebugData();
+            void ClearDebugRenderer();
+            #endif
+
             uint32_t FrameBegin();
             void Draw(PerFrameRenderState* state);
             void FrameEnd();
@@ -61,6 +68,9 @@ namespace nc::graphics
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
+            #ifdef NC_DEBUG_RENDERING
+            graphics::DebugRenderer m_debugRenderer;
+            #endif
             std::unique_ptr<Renderer> m_renderer;
 
             std::mutex m_resizingMutex;

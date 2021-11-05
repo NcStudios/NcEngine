@@ -3,6 +3,7 @@
 
 #ifdef NC_DEBUG_RENDERING
 
+#include <vector>
 #include <iostream>
 namespace nc::graphics
 {

@@ -41,8 +41,9 @@ namespace nc::graphics
         #ifndef NC_DEBUG_RENDERING
         ;
         #else
-        || !frameData->debugData->points.empty()
-        || !frameData->debugData->lines.empty();
+        || !m_graphics->GetDebugData()->points.empty()
+        || !m_graphics->GetDebugData()->planes.empty()
+        || !m_graphics->GetDebugData()->lines.empty();
         #endif
     }
 
@@ -117,8 +118,9 @@ namespace nc::graphics
         #ifndef NC_DEBUG_RENDERING
         ;
         #else
-        || !frameData->debugData->points.empty()
-        || !frameData->debugData->lines.empty();
+        || !m_graphics->GetDebugData()->points.empty()
+        || !m_graphics->GetDebugData()->planes.empty()
+        || !m_graphics->GetDebugData()->lines.empty();
         #endif
     }
 
@@ -140,7 +142,7 @@ namespace nc::graphics
         #ifdef NC_DEBUG_RENDERING
         const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(m_meshPath);
 
-        for (const auto& point : frameData->debugData->points)
+        for (const auto& point : m_graphics->GetDebugData()->points)
         {
             pushConstants.viewProjection = frameData->camViewMatrix * frameData->projectionMatrix;
             pushConstants.model = point;
@@ -149,7 +151,7 @@ namespace nc::graphics
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
 
-        for (const auto& line : frameData->debugData->lines)
+        for (const auto& line : m_graphics->GetDebugData()->lines)
         {
             pushConstants.viewProjection = frameData->camViewMatrix * frameData->projectionMatrix;
             pushConstants.model = line;
@@ -158,7 +160,7 @@ namespace nc::graphics
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
 
-        for (const auto& plane : frameData->debugData->planes)
+        for (const auto& plane : m_graphics->GetDebugData()->planes)
         {
             pushConstants.viewProjection = frameData->camViewMatrix * frameData->projectionMatrix;
             pushConstants.model = plane;

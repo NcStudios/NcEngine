@@ -28,6 +28,9 @@ namespace nc::graphics
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
           m_assetServices{ std::make_unique<AssetServices>(this, config::GetMemorySettings().maxTextures) },
+          #ifdef NC_DEBUG_RENDERING
+          m_debugRenderer{},
+          #endif
           m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
@@ -115,6 +118,20 @@ namespace nc::graphics
     {
         return m_dimensions;
     }
+
+    #ifdef NC_DEBUG_RENDERING
+    graphics::DebugData* Graphics::GetDebugData()
+    {
+        return m_debugRenderer.GetData();
+    }
+
+    void Graphics::ClearDebugRenderer()
+    {
+        m_debugRenderer.ClearLines();
+        m_debugRenderer.ClearPoints();
+        m_debugRenderer.ClearPlanes();
+    }
+    #endif
 
     bool Graphics::GetNextImageIndex(uint32_t* imageIndex)
     {
