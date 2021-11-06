@@ -236,5 +236,4 @@ namespace nc::graphics
 
         m_renderTargets.push_back(std::move(renderTarget));
     }
-
 }

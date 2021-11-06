@@ -22,7 +22,7 @@ namespace nc::graphics
 
     struct WireframePushConstants
     {
-        // N MVP matrices
+        // MVP matrices
         DirectX::XMMATRIX model;
         DirectX::XMMATRIX viewProjection;
     };
@@ -44,7 +44,7 @@ namespace nc::graphics
 
             nc::graphics::Graphics* m_graphics;
             Base* m_base;
-            Swapchain* m_swapchain;
+            std::string m_meshPath;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };

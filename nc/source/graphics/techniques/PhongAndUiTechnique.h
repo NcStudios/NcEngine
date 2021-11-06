@@ -38,7 +38,6 @@ namespace nc::graphics
 
             nc::graphics::Graphics* m_graphics;
             Base* m_base;
-            Swapchain* m_swapchain;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };

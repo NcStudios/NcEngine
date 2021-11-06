@@ -27,13 +27,16 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
+          m_assetServices{ std::make_unique<AssetServices>(this, config::GetMemorySettings().maxTextures) },
+          #ifdef NC_DEBUG_RENDERING
+          m_debugRenderer{},
+          #endif
           m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
-          m_clearColor{DefaultClearColor},
-          m_drawCallCount{0}
+          m_clearColor{DefaultClearColor}
     {
     }
 
@@ -63,38 +66,18 @@ namespace nc::graphics
         WaitIdle();
 
         m_dimensions = dimensions;
-
-        auto shadowMap = ShadowMap
-        {
-            .dimensions = dimensions
-        };
-
-        // Destroy all resources used by the swapchain
-        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
-
         m_renderer.reset();
         m_commands.reset();
         m_swapchain.reset();
         m_depthStencil.reset();
 
         // Recreate swapchain and resources
-        m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), dimensions);
-        m_swapchain = std::make_unique<Swapchain>(m_base.get(), dimensions);
+        auto shadowMap = ShadowMap { .dimensions = m_dimensions };
+        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
+        m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), m_dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_base.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
-        m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions);
-    }
-
-    void Graphics::ToggleFullscreen()
-    {
-        // @todo
-    }
-
-    void Graphics::ResizeTarget(float width, float height)
-    {
-        (void)width;
-        (void)height;
-
-        // @todo
+        m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), m_dimensions);
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
@@ -131,15 +114,17 @@ namespace nc::graphics
         return m_commands.get();
     }
 
-    Renderer* Graphics::GetRendererPtr() const noexcept
-    {
-        return m_renderer.get();
-    }
-
     const Vector2 Graphics::GetDimensions() const noexcept
     {
         return m_dimensions;
     }
+
+    #ifdef NC_DEBUG_RENDERING
+    graphics::DebugData* Graphics::GetDebugData()
+    {
+        return m_debugRenderer.GetData();
+    }
+    #endif
 
     bool Graphics::GetNextImageIndex(uint32_t* imageIndex)
     {
@@ -205,7 +190,6 @@ namespace nc::graphics
 
     uint32_t Graphics::FrameBegin()
     {
-        m_drawCallCount = 0;
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         if (m_isMinimized) return UINT32_MAX;
 
@@ -221,10 +205,12 @@ namespace nc::graphics
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
     // See Device.cpp for synchronization of these calls.
-    void Graphics::Draw()
+    void Graphics::Draw(const PerFrameRenderState& state)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         if (m_isMinimized) return;
+
+        m_renderer->Record(m_commands.get(), state, m_assetServices.get(), m_imageIndex);
 
         // Executes the command buffer to render to the image
         RenderToImage(m_imageIndex);
@@ -240,17 +226,4 @@ namespace nc::graphics
         // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
         m_swapchain->IncrementFrameIndex();
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    void Graphics::IncrementDrawCallCount()
-    {
-        m_drawCallCount++;
-    }
-    
-    uint32_t Graphics::GetDrawCallCount() const
-    {
-        return m_drawCallCount;
-    }
-
-    #endif
 }

@@ -6,18 +6,16 @@
 #include "dynamics/Dynamics.h"
 #include "dynamics/Solver.h"
 #include "debug/Profiler.h"
+#include "graphics/DebugRenderer.h"
 
 namespace nc::physics
 {
-    PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics)
+    PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry)
         : m_cache{},
           m_joints{},
           m_bspTree{registry},
-          m_clickableSystem{graphics},
+          m_clickableSystem{},
           m_tasks{}
-          #ifdef NC_DEBUG_RENDERING
-          , m_debugRenderer{graphics}
-          #endif
     {
         m_cache.fixedTimeStep = config::GetPhysicsSettings().fixedUpdateInterval;
         BuildTaskGraph(registry);
@@ -84,13 +82,6 @@ namespace nc::physics
     {
         return m_clickableSystem.RaycastToClickables(mask);
     }
-
-    #ifdef NC_DEBUG_RENDERING
-    void PhysicsSystemImpl::DebugRender()
-    {
-        m_debugRenderer.Render();
-    }
-    #endif
 
     void PhysicsSystemImpl::ClearState()
     {
@@ -268,8 +259,9 @@ namespace nc::physics
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
 
         #ifdef NC_DEBUG_RENDERING
-        m_debugRenderer.ClearLines();
-        m_debugRenderer.ClearPoints();
+        graphics::DebugRenderer::ClearPoints();
+        graphics::DebugRenderer::ClearPlanes();
+        graphics::DebugRenderer::ClearLines();
         #endif
 
         m_tasks.Run(taskExecutor);

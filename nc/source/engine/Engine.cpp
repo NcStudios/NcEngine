@@ -23,9 +23,8 @@ namespace nc
         : m_mainCamera{},
           m_window{ hInstance },
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physicsSystem{m_ecs.GetRegistry(), &m_graphics},
+          m_physicsSystem{m_ecs.GetRegistry()},
           m_sceneSystem{},
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
@@ -34,7 +33,6 @@ namespace nc
           m_tasks{},
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},
-          m_currentImageIndex{0},
           m_isRunning{false}
     {
         SetBindings();
@@ -173,42 +171,35 @@ namespace nc
     void Engine::FrameRender()
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+
+        /** Update the view matrix for the camera */
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
-        m_currentImageIndex = m_graphics.FrameBegin();
 
-        if (m_currentImageIndex == UINT32_MAX)
-        {
-            return;
-        }
-        
+        /** Setup the frame */
+        if (m_graphics.FrameBegin() == UINT32_MAX) return;
         m_uiSystem.FrameBegin();
+
         auto* registry = m_ecs.GetRegistry();
 
         #ifdef NC_EDITOR_ENABLED
-        m_uiSystem.Frame(&m_frameDeltaTimeFactor, registry);
+        m_uiSystem.Draw(&m_frameDeltaTimeFactor, registry);
         #else
-        m_uiSystem.Frame();
+        m_uiSystem.Draw();
         #endif
 
-        m_uiSystem.FrameEnd();
-
+        /** Get the frame data */
         auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
         graphics::MapPerFrameRenderState(state);
 
-        auto* renderer = m_graphics.GetRendererPtr();
-
-        // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr(), state, &m_assetServices, m_currentImageIndex);
+        /** Draw the frame */
+        m_graphics.Draw(state);
 
         #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : registry->ViewAll<Collider>())
-        {
-            collider.SetEditorSelection(false);
-        }
+        for(auto& collider : registry->ViewAll<Collider>()) collider.SetEditorSelection(false);
         #endif
 
-        m_graphics.Draw();
+        /** End the frame */
         m_graphics.FrameEnd();
 
         NC_PROFILE_END();

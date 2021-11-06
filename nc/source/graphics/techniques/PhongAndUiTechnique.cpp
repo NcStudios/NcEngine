@@ -20,7 +20,6 @@ namespace nc::graphics
     PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
     {
@@ -134,11 +133,6 @@ namespace nc::graphics
         for(const auto& mesh : frameData.meshes)
         {
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            
-            #ifdef NC_EDITOR_ENABLED
-            m_graphics->IncrementDrawCallCount();
-            #endif
-            
             ++objectInstance;
         }
 
