@@ -33,11 +33,11 @@ namespace nc::graphics
             WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
             ~WireframeTechnique() noexcept;
 
-            bool CanBind(PerFrameRenderState* frameData) override;
+            bool CanBind(const PerFrameRenderState& frameData) override;
             void Bind(vk::CommandBuffer* cmd) override;
 
-            bool CanRecord(PerFrameRenderState* frameData) override;
-            void Record(vk::CommandBuffer* cmd, PerFrameRenderState* frameData) override;
+            bool CanRecord(const PerFrameRenderState& frameData) override;
+            void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         private:
             void CreatePipeline(vk::RenderPass* renderPass);

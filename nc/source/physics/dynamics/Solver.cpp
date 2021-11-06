@@ -2,7 +2,7 @@
 #include "physics/PhysicsConstants.h"
 #include "graphics/DebugRenderer.h"
 #include "debug/Profiler.h"
-// #define USE_DEBUG_RENDERING
+//#define USE_DEBUG_RENDERING
 #undef USE_DEBUG_RENDERING
 
 #include <cassert>

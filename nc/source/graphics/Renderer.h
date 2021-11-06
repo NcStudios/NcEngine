@@ -29,7 +29,7 @@ namespace nc::graphics
 
             ~Renderer() noexcept;
             
-            void Record(Commands* commands, PerFrameRenderState* state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex);
+            void Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex);
             void Clear() noexcept;
             void InitializeImgui();
 

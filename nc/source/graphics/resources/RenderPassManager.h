@@ -29,7 +29,7 @@ namespace nc::graphics
             RenderPassManager(Graphics* graphics, const Vector2& dimensions);
             ~RenderPassManager() noexcept;
 
-            void Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, PerFrameRenderState* frameData);
+            void Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData);
             RenderPass& Acquire(const std::string& uid);
 
             void RegisterAttachments(std::vector<vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index);
