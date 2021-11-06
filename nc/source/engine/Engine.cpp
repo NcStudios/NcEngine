@@ -193,7 +193,7 @@ namespace nc
         graphics::MapPerFrameRenderState(state);
 
         /** Draw the frame */
-        m_graphics.Draw(&state);
+        m_graphics.Draw(state);
 
         #ifdef NC_EDITOR_ENABLED
         for(auto& collider : registry->ViewAll<Collider>()) collider.SetEditorSelection(false);

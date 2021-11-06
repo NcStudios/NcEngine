@@ -205,7 +205,7 @@ namespace nc::graphics
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MAX_FRAMES_IN_FLIGHT sets of calls will be running at any given time.
     // See Device.cpp for synchronization of these calls.
-    void Graphics::Draw(PerFrameRenderState* state)
+    void Graphics::Draw(const PerFrameRenderState& state)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         if (m_isMinimized) return;

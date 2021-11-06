@@ -51,7 +51,7 @@ namespace nc::graphics
             #endif
 
             uint32_t FrameBegin();
-            void Draw(PerFrameRenderState* state);
+            void Draw(const PerFrameRenderState& state);
             void FrameEnd();
 
         private:
