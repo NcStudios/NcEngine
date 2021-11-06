@@ -6,6 +6,7 @@
 #include "dynamics/Dynamics.h"
 #include "dynamics/Solver.h"
 #include "debug/Profiler.h"
+#include "graphics/DebugRenderer.h"
 
 namespace nc::physics
 {
@@ -253,12 +254,14 @@ namespace nc::physics
         #endif
     }
 
-    void PhysicsSystemImpl::DoPhysicsStep(tf::Executor& taskExecutor, graphics::Graphics* graphics)
+    void PhysicsSystemImpl::DoPhysicsStep(tf::Executor& taskExecutor)
     {
         NC_PROFILE_BEGIN(debug::profiler::Filter::Dynamics);
 
         #ifdef NC_DEBUG_RENDERING
-        graphics->ClearDebugRenderer();
+        graphics::DebugRenderer::ClearPoints();
+        graphics::DebugRenderer::ClearPlanes();
+        graphics::DebugRenderer::ClearLines();
         #endif
 
         m_tasks.Run(taskExecutor);

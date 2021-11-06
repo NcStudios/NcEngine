@@ -48,7 +48,6 @@ namespace nc::graphics
 
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugData* GetDebugData();
-            void ClearDebugRenderer();
             #endif
 
             uint32_t FrameBegin();

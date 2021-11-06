@@ -124,13 +124,6 @@ namespace nc::graphics
     {
         return m_debugRenderer.GetData();
     }
-
-    void Graphics::ClearDebugRenderer()
-    {
-        m_debugRenderer.ClearLines();
-        m_debugRenderer.ClearPoints();
-        m_debugRenderer.ClearPlanes();
-    }
     #endif
 
     bool Graphics::GetNextImageIndex(uint32_t* imageIndex)

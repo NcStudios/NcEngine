@@ -23,7 +23,7 @@ namespace nc::physics
             void UnregisterClickable(IClickable* clickable) noexcept override;
             auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
 
-            void DoPhysicsStep(tf::Executor& taskExecutor, graphics::Graphics* graphics);
+            void DoPhysicsStep(tf::Executor& taskExecutor);
             void ClearState();
 
         private:

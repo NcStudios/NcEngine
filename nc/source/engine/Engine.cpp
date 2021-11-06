@@ -120,7 +120,7 @@ namespace nc
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
             {
                 /** @todo need to store prev transforms for interpolation */
-                m_physicsSystem.DoPhysicsStep(m_taskExecutor, &m_graphics);
+                m_physicsSystem.DoPhysicsStep(m_taskExecutor);
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
