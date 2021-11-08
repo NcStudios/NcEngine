@@ -2,7 +2,7 @@
 
 #include "ecs/component/PhysicsBody.h"
 #include "ecs/component/Transform.h"
-#include "physics/collision/Manifold.h"
+#include "physics/collision/narrow_phase/Manifold.h"
 
 namespace nc::physics
 {

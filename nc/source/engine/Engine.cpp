@@ -30,7 +30,7 @@ namespace nc
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_uiSystem{m_window.GetHWND(), &m_graphics},
-          m_taskExecutor{6u}, // @todo probably add to config
+          m_taskExecutor{8u}, // @todo probably add to config
           m_tasks{},
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},

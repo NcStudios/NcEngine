@@ -2,8 +2,17 @@
 
 #include "CollisionCache.h"
 
+
+#include "physics/PhysicsPipelineTypes.h"
+
+#include "proxy/GenericProxy.h"
+
 namespace nc::physics
 {
+    auto SimplePhysics(Registry* registry) -> NarrowPhysicsResult;
+
+
+
     /** Compute estimates for each collider. The world space matrices are also returned,
      *  in a separate vector, for narrow phase use. */
     void FetchEstimates(const Registry* registry, CollisionStepInitData* out);
@@ -23,4 +32,9 @@ namespace nc::physics
 
     /** Narrow phase collision detection for trigger events. */
     void FindNarrowTriggerPairs(const Registry* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadTriggerEvents, std::vector<NarrowEvent>* out);
+
+
+    void FindNarrowPhysicsPairs(Registry* registry, std::span<const BroadPair<GenericProxy>> physicsPairs, NarrowPhysicsResult* out);
+
+    void FindNarrowTriggerPairs(std::span<const BroadPair<GenericProxy>> triggerPairs, std::vector<NarrowEvent>* out);
 }

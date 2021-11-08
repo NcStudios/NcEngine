@@ -8,10 +8,18 @@
 #include "graphics/DebugRenderer.h"
 #include "task/Task.h"
 
+#include "PhysicsWorld.h"
+//#include "PhysicsPipelineTypes.h"
+//#include "collision/proxy/FrameDeltaProxyCache.h"
+#include "PhysicsPipeline.h"
+
 namespace nc::physics
 {
     class PhysicsSystemImpl final : public PhysicsSystem
     {
+        //using pipeline = PhysicsPipelineDescription<PerFrameProxyCache, HashedGrid, NarrowPhase>;
+        using pipeline = PhysicsPipelineDescription<PerFrameProxyCache, GlobalAllPair, NarrowPhase>;
+
         public:
             PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics);
 
@@ -36,6 +44,15 @@ namespace nc::physics
             BspTree m_bspTree;
             ClickableSystem m_clickableSystem;
             TaskGraph m_tasks;
+            //PhysicsWorld m_world;
+
+            //PhysicsPipelineBuilder<pipeline> m_pipeline;
+
+            pipeline::broad_phase::result_type m_broadPairs;
+            pipeline::broad_phase::result_type m_broadPairs2;
+            pipeline::proxy_cache m_proxyCache;
+            pipeline::broad_phase m_broadPhase;
+            pipeline::narrow_phase m_narrowPhase;
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugRenderer m_debugRenderer;
             #endif

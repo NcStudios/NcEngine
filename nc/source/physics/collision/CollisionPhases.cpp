@@ -4,6 +4,10 @@
 #include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 
+
+#include "time/NcTime.h"
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -44,65 +48,112 @@ namespace
 
     }
 
-    CollisionEventType GetInteractionType(ColliderInteractionType typeA, ColliderInteractionType typeB)
-    {
-        if(typeA == ColliderInteractionType::Collider)
-        {
-            if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::SecondBodyPhysics;
+    // CollisionEventType GetInteractionType(ColliderInteractionType typeA, ColliderInteractionType typeB)
+    // {
+    //     if(typeA == ColliderInteractionType::Collider)
+    //     {
+    //         if(typeB == ColliderInteractionType::Physics)
+    //             return CollisionEventType::SecondBodyPhysics;
             
-            if(typeB == ColliderInteractionType::PhysicsTrigger || typeB == ColliderInteractionType::KinematicPhysicsTrigger)
-                return CollisionEventType::Trigger;
+    //         if(typeB == ColliderInteractionType::PhysicsTrigger || typeB == ColliderInteractionType::KinematicPhysicsTrigger)
+    //             return CollisionEventType::Trigger;
             
-            return CollisionEventType::None;
-        }
+    //         return CollisionEventType::None;
+    //     }
 
-        if(typeA == ColliderInteractionType::Physics)
-        {
-            if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::TwoBodyPhysics;
+    //     if(typeA == ColliderInteractionType::Physics)
+    //     {
+    //         if(typeB == ColliderInteractionType::Physics)
+    //             return CollisionEventType::TwoBodyPhysics;
             
-            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
-                return CollisionEventType::FirstBodyPhysics;
+    //         if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
+    //             return CollisionEventType::FirstBodyPhysics;
 
-            return CollisionEventType::Trigger;
-        }
+    //         return CollisionEventType::Trigger;
+    //     }
 
-        if(typeA == ColliderInteractionType::KinematicPhysics)
-        {
-            if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::SecondBodyPhysics;
+    //     if(typeA == ColliderInteractionType::KinematicPhysics)
+    //     {
+    //         if(typeB == ColliderInteractionType::Physics)
+    //             return CollisionEventType::SecondBodyPhysics;
             
-            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
-                return CollisionEventType::None;
+    //         if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
+    //             return CollisionEventType::None;
             
-            return CollisionEventType::Trigger;
-        }
+    //         return CollisionEventType::Trigger;
+    //     }
 
-        if(typeA == ColliderInteractionType::ColliderTrigger)
-        {
-            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::ColliderTrigger)
-                return CollisionEventType::None;
+    //     if(typeA == ColliderInteractionType::ColliderTrigger)
+    //     {
+    //         if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::ColliderTrigger)
+    //             return CollisionEventType::None;
             
-            return CollisionEventType::Trigger;
-        }
+    //         return CollisionEventType::Trigger;
+    //     }
 
-        if(typeA == ColliderInteractionType::PhysicsTrigger)
-        {
-            return CollisionEventType::Trigger;
-        }
+    //     if(typeA == ColliderInteractionType::PhysicsTrigger)
+    //     {
+    //         return CollisionEventType::Trigger;
+    //     }
 
-        if(typeA == ColliderInteractionType::KinematicPhysicsTrigger)
-        {
-            return CollisionEventType::Trigger;
-        }
+    //     if(typeA == ColliderInteractionType::KinematicPhysicsTrigger)
+    //     {
+    //         return CollisionEventType::Trigger;
+    //     }
 
-        throw NcError("Unknown ColliderInteractionType");
-    }
+    //     throw NcError("Unknown ColliderInteractionType");
+    // }
 }
 
 namespace nc::physics
 {
+    // auto SimplePhysics(Registry* registry) -> NarrowPhysicsResult
+    // {
+    //     std::cerr << "SimplePhysics\n";
+
+    //     NarrowPhysicsResult out;
+
+    //     Octree tree{registry};
+    //     auto colliders = registry->ViewAll<Collider>();
+
+    //     for(const auto& collider : colliders)
+    //     {
+    //         tree.Add(collider);
+    //     }
+
+    //     std::cerr << "Testing\n";
+
+    //     auto pairs = tree.Test();
+
+    //     std::cerr << "  pair count: " << pairs.size() << '\n';
+
+    //     CollisionState state;
+
+    //     for(const auto& [a, b] : pairs)
+    //     {
+    //         std::cerr << "  testing pair\n";
+    //         auto colliderA = registry->Get<Collider>(a);
+    //         auto colliderB = registry->Get<Collider>(b);
+
+    //         const auto& volumeA = colliderA->GetVolume();
+    //         const auto& volumeB = colliderB->GetVolume();
+
+    //         auto transA = registry->Get<Transform>(a);
+    //         auto transB = registry->Get<Transform>(b);
+
+    //         if(Collide(volumeA, volumeB, transA->GetTransformationMatrix(), transB->GetTransformationMatrix(), &state))
+    //         {
+    //             std::cerr << "    collide\n";
+    //             out.contacts.push_back(state.contact);
+    //             out.events.emplace_back(a, b, CollisionEventType::TwoBodyPhysics);
+    //         }
+    //     }
+
+    //     std::cerr << "end simple physics\n";
+
+    //     return out;
+    // }
+
     void FetchEstimates(const Registry* registry, CollisionStepInitData* out)
     {
         auto colliders = registry->ViewAll<Collider>();
@@ -164,6 +215,14 @@ namespace nc::physics
 
     void FindBroadPairs(std::span<const ColliderEstimate> estimates, size_t prevPhysicsCount, size_t prevTriggerCount, BroadResult* out)
     {
+        static int itCount = 0;
+        static time::Timer timer;
+        ++itCount;
+        if(itCount > 60)
+        {
+            timer.Start();
+        }
+
         out->physics.clear();
         out->physics.reserve(prevPhysicsCount);
         out->trigger.clear();
@@ -173,11 +232,14 @@ namespace nc::physics
 
         for(size_t i = 0u; i < count; ++i)
         {
-            const auto& first = estimates[i];
+            auto& first = estimates[i];
 
             for(size_t j = i + 1; j < count; ++j)
             {
-                const auto& second = estimates[j];
+                auto& second = estimates[j];
+
+                if(first.interactionType != ColliderInteractionType::Collider && second.interactionType != ColliderInteractionType::Collider)
+                    continue;
 
                 if constexpr(physics::EnableSleeping)
                 {
@@ -198,10 +260,25 @@ namespace nc::physics
                 }
             }
         }
+
+        if(itCount > 60)
+        {
+            timer.Stop();
+            //std::cout << "BroadPhase: " << timer.Value() / 1000000 << '\n';
+            itCount = 0;
+        }
     }
 
     void FindNarrowPhysicsPairs(Registry* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadPhysicsEvents, NarrowPhysicsResult* out)
     {
+        static int itCount = 0;
+        static time::Timer timer;
+        ++itCount;
+        if(itCount > 60)
+        {
+            timer.Start();
+        }
+
         const auto broadEventCount = broadPhysicsEvents.size();
         out->contacts.clear();
         out->contacts.reserve(broadEventCount);
@@ -243,6 +320,13 @@ namespace nc::physics
                 out->contacts.push_back(state.contact);
             }
         }
+
+        if(itCount > 60)
+        {
+            timer.Stop();
+            std::cout << "NarrowPhase: " << timer.Value() / 1000000 << '\n';
+            itCount = 0;
+        }
     }
 
     void FindNarrowTriggerPairs(const Registry* registry, std::span<const DirectX::XMMATRIX> matrices, std::span<const BroadEvent> broadTriggerEvents, std::vector<NarrowEvent>* out)
@@ -262,6 +346,68 @@ namespace nc::physics
             if(Intersect(v1, v2, m1, m2))
             {
                 out->emplace_back(colliders[i].GetParentEntity(), colliders[j].GetParentEntity());
+            }
+        }
+    }
+
+    void FindNarrowPhysicsPairs(Registry*, std::span<const BroadPair<GenericProxy>> physicsPairs, NarrowPhysicsResult* out)
+    {
+        const auto broadEventCount = physicsPairs.size();
+        out->contacts.clear();
+        out->contacts.reserve(broadEventCount);
+        out->events.clear();
+        out->events.reserve(broadEventCount);
+        CollisionState state;
+        //auto colliders = registry->ViewAll<Collider>();
+
+        for(auto& [i, j, eventType] : physicsPairs)
+        {
+            // auto& collider1 = colliders[i];
+            // auto& collider2 = colliders[j];
+            // const auto& v1 = collider1.GetVolume();
+            // const auto& v2 = collider2.GetVolume();
+            // const auto& m1 = matrices[i];
+            // const auto& m2 = matrices[j];
+
+            if(Collide(i->volume, j->volume, i->matrix, j->matrix, &state))
+            {
+                //auto e1 = collider1.GetParentEntity();
+                //auto e2 = collider2.GetParentEntity();
+                auto e1 = i->entity;
+                auto e2 = j->entity;
+
+                // if constexpr(EnableSleeping)
+                // {
+                //     if(!collider1.IsAwake())
+                //     {
+                //         collider1.Wake();
+                //         registry->Get<PhysicsBody>(e1)->Wake();
+                //     }
+
+                //     if(!collider2.IsAwake())
+                //     {
+                //         collider2.Wake();
+                //         registry->Get<PhysicsBody>(e2)->Wake();
+                //     }
+                // }
+
+                out->events.emplace_back(e1, e2, eventType);
+                out->contacts.push_back(state.contact);
+            }
+        }
+    }
+
+    void FindNarrowTriggerPairs(std::span<const BroadPair<GenericProxy>> triggerPairs, std::vector<NarrowEvent>* out)
+    {
+        out->clear();
+        out->reserve(triggerPairs.size());
+        CollisionState state;
+
+        for(const auto& [i, j, unused] : triggerPairs)
+        {
+            if(Intersect(i->volume, j->volume, i->matrix, j->matrix))
+            {
+                out->emplace_back(i->entity, j->entity);
             }
         }
     }

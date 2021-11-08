@@ -7,6 +7,10 @@
 
 using namespace DirectX;
 
+
+#include "time/NcTime.h"
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -370,8 +374,41 @@ namespace
 
 namespace nc::physics
 {
+    void ResolveConstraints(std::span<ContactConstraint*> contactConstraints, std::span<PositionConstraint*> positionConstraints, std::span<Joint*> joints, float dt)
+    {
+        for(size_t i = 0u; i < SolverIterations; ++i)
+        {
+            for(auto* constraint : contactConstraints)
+            {
+                ResolveContactConstraint(*constraint, dt);
+            }
+
+            for(auto* joint : joints)
+            {
+                ResolveJoint(*joint);
+            }
+        }
+
+        if constexpr(EnableDirectPositionCorrection)
+        {
+            for(auto* constraint : positionConstraints)
+            {
+                ResolvePositionConstraint(*constraint);
+            }
+        }
+    }
+
+
     void ResolveConstraints(Constraints& constraints, std::span<Joint> joints, float dt)
     {
+        static int itCount = 0;
+        static time::Timer timer;
+        ++itCount;
+        if(itCount > 60)
+        {
+            timer.Start();
+        }
+
         for(size_t i = 0u; i < SolverIterations; ++i)
         {
             for(auto& constraint : constraints.contact)
@@ -392,10 +429,25 @@ namespace nc::physics
                 ResolvePositionConstraint(constraint);
             }
         }
+
+        if(itCount > 60)
+        {
+            timer.Stop();
+            //std::cout << "ResolveConstraints: " << timer.Value() / 1000000 << '\n';
+            itCount = 0;
+        }
     }
 
     void GenerateConstraints(Registry* registry, std::span<const Manifold> manifolds, Constraints* out)
     {
+        static int itCount = 0;
+        static time::Timer timer;
+        ++itCount;
+        if(itCount > 60)
+        {
+            timer.Start();
+        }
+
         const auto manifoldCount = manifolds.size();
         out->contact.clear();
         out->contact.reserve(manifoldCount * 4u);
@@ -430,6 +482,13 @@ namespace nc::physics
 
                 out->contact.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
             }
+        }
+
+        if(itCount > 60)
+        {
+            timer.Stop();
+            //std::cout << "GenerateConstraints: " << timer.Value() / 1000000 << '\n';
+            itCount = 0;
         }
     }
 

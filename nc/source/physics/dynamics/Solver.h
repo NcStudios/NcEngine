@@ -3,7 +3,6 @@
 #include "ecs/Registry.h"
 #include "Constraint.h"
 #include "Joint.h"
-#include "physics/collision/Manifold.h"
 
 namespace nc::physics
 {
@@ -22,4 +21,11 @@ namespace nc::physics
 
     /** Store current frame impulses from constraints in each contact for warmstarting. */
     void CacheImpulses(std::span<const ContactConstraint> constraints, std::span<Manifold> manifolds);
+
+
+
+    /** Resolve contact, position, and joint constraints. For contacts and joints, linear
+     *  and angular velocities will be updated, but positions must be integrated separately.
+     *  Position constraints will update transforms directly. */
+    void ResolveConstraints(std::span<ContactConstraint*> contactConstraints, std::span<PositionConstraint*> positionConstraints, std::span<Joint*> joints, float dt);
 } // namespace nc::physics

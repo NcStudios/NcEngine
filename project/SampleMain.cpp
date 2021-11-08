@@ -3,6 +3,10 @@
 #include "debug/Utils.h"
 #include "worms/Worms.h"
 
+
+#include "collision_events/CollisionEvents.h"
+#include "spawn_test/SpawnTest.h"
+
 #include <iostream>
 
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
@@ -12,7 +16,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     try
     {
         engine = nc::InitializeNcEngine(instance, "project/config.ini");
-        engine->Start(std::make_unique<nc::sample::Worms>());
+        engine->Start(std::make_unique<nc::sample::SpawnTest>());
     }
     catch(std::exception& e)
     {
