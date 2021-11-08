@@ -28,7 +28,6 @@ namespace nc::graphics
     : 
       m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_swapchain{graphics->GetSwapchainPtr()},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr},
       m_enabled{false}

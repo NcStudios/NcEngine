@@ -90,7 +90,6 @@ namespace nc::ecs
 
     void ParticleEmitterSystem::Add(ParticleEmitter&)
     {
-        // m_graphics->GetRendererPtr()->RegisterParticleEmitter(&m_emitterStates);
         // m_toAdd.emplace_back(emitter.GetParentEntity(), emitter.GetInfo(), &m_graphicsData);
         // emitter.RegisterSystem(this);
     }
@@ -108,6 +107,5 @@ namespace nc::ecs
         m_toAdd.shrink_to_fit();
         m_toRemove.clear();
         m_toRemove.shrink_to_fit();
-        // m_graphics->GetRendererPtr()->ClearParticleEmitters();
     }
 } // namespace nc::ecs

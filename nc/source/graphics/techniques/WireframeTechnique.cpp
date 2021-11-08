@@ -6,6 +6,7 @@
 #include "ecs/component/Transform.h"
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
+#include "graphics/DebugRenderer.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
@@ -20,11 +21,12 @@ namespace nc::graphics
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_swapchain{graphics->GetSwapchainPtr()},
+      m_meshPath{"project/assets/mesh/cube.nca"},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
     {
         CreatePipeline(renderPass);
+        LoadMeshAsset(m_meshPath);
     }
 
     WireframeTechnique::~WireframeTechnique() noexcept
@@ -35,7 +37,14 @@ namespace nc::graphics
 
     bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return frameData.colliderDebugWidget.has_value();
+        return frameData.colliderDebugWidget.has_value() 
+        #ifndef NC_DEBUG_RENDERING
+        ;
+        #else
+        || !m_graphics->GetDebugData()->points.empty()
+        || !m_graphics->GetDebugData()->planes.empty()
+        || !m_graphics->GetDebugData()->lines.empty();
+        #endif
     }
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
@@ -61,7 +70,7 @@ namespace nc::graphics
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
+        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
@@ -105,7 +114,14 @@ namespace nc::graphics
 
     bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return frameData.colliderDebugWidget.has_value();
+        return frameData.colliderDebugWidget.has_value() 
+        #ifndef NC_DEBUG_RENDERING
+        ;
+        #else
+        || !m_graphics->GetDebugData()->points.empty()
+        || !m_graphics->GetDebugData()->planes.empty()
+        || !m_graphics->GetDebugData()->lines.empty();
+        #endif
     }
 
     void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
@@ -113,12 +129,46 @@ namespace nc::graphics
         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
 
         auto pushConstants = WireframePushConstants{};
-        pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
-        pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
 
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
-        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
-        cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        if (frameData.colliderDebugWidget.has_value())
+        {
+            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
+            pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
+            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+            cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        }
+
+        #ifdef NC_DEBUG_RENDERING
+        const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(m_meshPath);
+
+        for (const auto& point : m_graphics->GetDebugData()->points)
+        {
+            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
+            pushConstants.model = point;
+
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+            cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        }
+
+        for (const auto& line : m_graphics->GetDebugData()->lines)
+        {
+            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
+            pushConstants.model = line;
+
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+            cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        }
+
+        for (const auto& plane : m_graphics->GetDebugData()->planes)
+        {
+            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
+            pushConstants.model = plane;
+
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+            cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        }
+        #endif
 
         NC_PROFILE_END();
     }

@@ -3,12 +3,9 @@
 
 namespace nc::physics
 {
-    PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics)
+    PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry)
         : m_pipeline{registry, config::GetPhysicsSettings().fixedUpdateInterval},
-          m_clickableSystem{graphics}
-          #ifdef NC_DEBUG_RENDERING
-          , m_debugRenderer{graphics}
-          #endif
+          m_clickableSystem{}
     {
     }
 
@@ -42,13 +39,6 @@ namespace nc::physics
         return m_clickableSystem.RaycastToClickables(mask);
     }
 
-    #ifdef NC_DEBUG_RENDERING
-    void PhysicsSystemImpl::DebugRender()
-    {
-        m_debugRenderer.Render();
-    }
-    #endif
-
     void PhysicsSystemImpl::ClearState()
     {
         m_pipeline.Clear();
@@ -58,8 +48,9 @@ namespace nc::physics
     void PhysicsSystemImpl::DoPhysicsStep(tf::Executor& taskExecutor)
     {
         #ifdef NC_DEBUG_RENDERING
-        m_debugRenderer.ClearLines();
-        m_debugRenderer.ClearPoints();
+        graphics::DebugRenderer::ClearPoints();
+        graphics::DebugRenderer::ClearPlanes();
+        graphics::DebugRenderer::ClearLines();
         #endif
 
         m_pipeline.Step(taskExecutor);

@@ -48,7 +48,7 @@ namespace nc::ui::editor
             DrawMenu();
             controls::SceneGraphPanel(registry, height);
             if(m_openState_UtilitiesPanel)
-                controls::UtilitiesPanel(dt, registry, m_graphics->GetDrawCallCount(), width, height);
+                controls::UtilitiesPanel(dt, registry, width, height);
         }
         ImGui::End();
     }

@@ -37,7 +37,6 @@ namespace nc
             camera::MainCameraImpl m_mainCamera;
             window::WindowImpl m_window;
             graphics::Graphics m_graphics;
-            AssetServices m_assetServices;
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystemImpl m_physicsSystem;
             scene::SceneSystemImpl m_sceneSystem;
@@ -48,7 +47,6 @@ namespace nc
             TaskGraph m_tasks;
             float m_dt;
             float m_frameDeltaTimeFactor;
-            uint32_t m_currentImageIndex;
             bool m_isRunning;
 
             void BuildTaskGraph();

@@ -4,6 +4,9 @@
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
 #include "physics/collision/IntersectionQueries.h"
+#ifdef NC_EDITOR_ENABLED
+#include "physics/PhysicsSystemImpl.h"
+#endif
 #include "resources/ShaderResourceService.h"
 
 #include <iostream>
@@ -25,16 +28,16 @@ namespace
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
-        : camViewMatrix{camera->GetViewMatrix()},
-          projectionMatrix{camera->GetProjectionMatrix()},
-          cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
-          objectData{},
-          pointLightInfos{},
-          #ifdef NC_EDITOR_ENABLED
-          colliderDebugWidget{std::nullopt},
-          #endif
-          pointLightVPs{},
-          isPointLightBindRequired{isPointLightSystemDirty}
+    : camViewMatrix{camera->GetViewMatrix()},
+      projectionMatrix{camera->GetProjectionMatrix()},
+      cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
+      objectData{},
+      pointLightInfos{},
+      #ifdef NC_EDITOR_ENABLED
+      colliderDebugWidget{std::nullopt},
+      #endif
+      pointLightVPs{},
+      isPointLightBindRequired{isPointLightSystemDirty}
     {
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;

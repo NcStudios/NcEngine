@@ -2,7 +2,6 @@
 
 #include "physics/PhysicsSystem.h"
 #include "ClickableSystem.h"
-#include "graphics/DebugRenderer.h"
 #include "PhysicsPipeline.h"
 #include "collision/proxy/PerFrameProxyCache.h"
 #include "collision/broad_phase/GlobalAllPair.h"
@@ -22,7 +21,7 @@ namespace nc::physics
         };
 
         public:
-            PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics);
+            PhysicsSystemImpl(Registry* registry);
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
             void RemoveJoint(Entity entityA, Entity entityB) override;
@@ -35,15 +34,10 @@ namespace nc::physics
             void DoPhysicsStep(tf::Executor& taskExecutor);
             void ClearState();
 
-            #ifdef NC_DEBUG_RENDERING
-            void DebugRender();
-            #endif
-
         private:
             PhysicsPipeline<PipelineDescription> m_pipeline;
             ClickableSystem m_clickableSystem;
-            #ifdef NC_DEBUG_RENDERING
-            graphics::DebugRenderer m_debugRenderer;
-            #endif
+
+            void BuildTaskGraph(Registry* registry);
     };
 } // namespace nc::physics

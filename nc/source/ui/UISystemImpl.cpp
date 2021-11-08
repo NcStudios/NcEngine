@@ -60,26 +60,26 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UISystemImpl::Frame(float* dt, Registry* registry)
+    void UISystemImpl::Draw(float* dt, Registry* registry)
     {
         m_editor.Frame(dt, registry);
         if(m_projectUI)
         {
             m_projectUI->Draw();
         }
+
+        ImGui::Render();
     }
     #else
-    void UISystemImpl::Frame()
+    void UISystemImpl::Draw()
     {
         if(m_projectUI)
         {
             m_projectUI->Draw();
         }
+
+        ImGui::Render();
     }
     #endif
 
-    void UISystemImpl::FrameEnd()
-    {
-        ImGui::Render();
-    }
 } //end namespace nc::ui
