@@ -203,4 +203,3 @@ target_link_libraries(Transform_unit_tests
 add_test(Transform_unit_tests Transform_unit_tests)
 
 add_subdirectory(assets)
-add_subdirectory(physics)

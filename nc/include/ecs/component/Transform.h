@@ -20,19 +20,19 @@ namespace nc
             Transform& operator=(const Transform&) = delete;
             Transform& operator=(Transform&&) = default;
 
-            Vector3 GetPosition() const;                        // Get world space position
-            Vector3 GetLocalPosition() const;                   // Get position relative to parent
-            Quaternion GetRotation() const;                     // Get world space rotation
-            Quaternion GetLocalRotation() const;                // Get rotation relative to parent
-            Vector3 GetScale() const;                           // Get world space scale
-            Vector3 GetLocalScale() const;                      // Get scale relative to parent
-            DirectX::FXMMATRIX GetTransformationMatrix() const; // Get world space transformation matrix
-            Vector3 ToLocalSpace(const Vector3& vec) const;     // Transform a vector by this transforms's world space matrix
-            Vector3 Up() const;                                 // Get the up axis of the transform
-            Vector3 Forward() const;                            // Get the forward axis of the transform
-            Vector3 Right() const;                              // Get the right axis of the transform
-
-            DirectX::XMVECTOR GetRotationXM() const;
+            auto GetPosition() const -> Vector3;                        // Get world space position
+            auto GetPositionXM() const -> DirectX::XMVECTOR;            // Get world space position as XMVECTOR
+            auto GetLocalPosition() const -> Vector3;                   // Get position relative to parent
+            auto GetRotation() const -> Quaternion;                     // Get world space rotation
+            auto GetRotationXM() const -> DirectX::XMVECTOR;            // Get world space rotation as XMVECTOR
+            auto GetLocalRotation() const -> Quaternion;                // Get rotation relative to parent
+            auto GetScale() const -> Vector3;                           // Get world space scale
+            auto GetLocalScale() const -> Vector3;                      // Get scale relative to parent
+            auto GetTransformationMatrix() const -> DirectX::FXMMATRIX; // Get world space transformation matrix
+            auto ToLocalSpace(const Vector3& vec) const -> Vector3;     // Transform a vector by this transforms's world space matrix
+            auto Up() const -> Vector3;                                 // Get the up axis of the transform
+            auto Forward() const -> Vector3;                            // Get the forward axis of the transform
+            auto Right() const -> Vector3;                              // Get the right axis of the transform
 
             // All modification methods operate on the local matrix
             void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);

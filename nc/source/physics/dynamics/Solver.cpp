@@ -1,4 +1,5 @@
 #include "Solver.h"
+#include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 #include "graphics/DebugRenderer.h"
 #include "debug/Profiler.h"
@@ -21,7 +22,6 @@ namespace
     const auto g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
 
     auto CreateContactConstraint(const Contact&, Entity, Entity, Transform*, Transform*, PhysicsBody*, PhysicsBody*) -> ContactConstraint;
-    void UpdateJoint(Registry* registry, Joint& joint, float dt);
     void ResolveContactConstraint(ContactConstraint& constraint, float dt);
     void ResolvePositionConstraint(PositionConstraint& constraint);
     void ResolveJoint(Joint& joint);
@@ -29,7 +29,6 @@ namespace
     auto ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent) -> ConstraintMatrix;
     auto ClampLambda(float newLambda, float* totalLambda) -> float;
     auto ClampMu(float newMu, float extent, float* totalMu) -> float;
-    auto Skew(FXMVECTOR vec) -> XMMATRIX;
 
     ContactConstraint CreateContactConstraint(const Contact& contact,
                                               Entity entityA,
@@ -266,20 +265,6 @@ namespace
         return *totalMu - temp;
     }
 
-    XMMATRIX Skew(FXMVECTOR vec)
-    {
-        Vector3 v;
-        XMStoreVector3(&v, vec);
-
-        return XMMatrixSet
-        (
-            0.0f, -v.z,  v.y, 0.0f,
-             v.z, 0.0f, -v.x, 0.0f,
-            -v.y,  v.x, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
-    }
-
     void ResolveJoint(Joint& joint)
     {
         auto vA = joint.bodyA->GetVelocity();
@@ -306,112 +291,61 @@ namespace
             XMVector3Transform(XMVector3Cross(joint.rB, impulse), joint.bodyB->GetInverseInertia())
         );
     }
-
-    void UpdateJoint(Registry* registry, Joint& joint, float dt)
-    {
-        // Get anchor world space positions
-        XMVECTOR pA, pB;
-        {
-            auto* transform = registry->Get<Transform>(joint.entityA);
-            auto position = transform->GetPosition();
-            auto rotation = transform->GetRotation();
-            auto rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotation));
-            joint.rA = XMVector3Transform(joint.anchorA, rotMatrix);
-            pA = XMLoadVector3(&position) + joint.rA;
-
-            transform = registry->Get<Transform>(joint.entityB);
-            position = transform->GetPosition();
-            rotation = transform->GetRotation();
-            rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotation));
-            joint.rB = XMVector3Transform(joint.anchorB, rotMatrix);
-            pB = XMLoadVector3(&position) + joint.rB;
-        }
-
-        /** Scale bias by time step and positional error */
-        joint.bias = -1.0f * joint.biasFactor * (1.0f / dt) * (pB - pA);
-
-        /** Fetch inverse mass and inertia of each body */
-        joint.bodyA = registry->Get<PhysicsBody>(joint.entityA);
-        joint.bodyB = registry->Get<PhysicsBody>(joint.entityB);
-        IF_THROW(!joint.bodyA || !joint.bodyB, "UpdateJoint - Entity does not have a PhysicsBody");
-        auto invMassA = joint.bodyA->GetInverseMass();
-        const auto& invInertiaA = joint.bodyA->GetInverseInertia();
-        auto invMassB = joint.bodyB->GetInverseMass();
-        const auto& invInertiaB = joint.bodyB->GetInverseInertia();
-
-        /** effectiveMass = [(M^-1) - (skewRa * Ia^-1 * skewRa) - (skewRb * Ib^-1 * skewRb)]^-1 */
-        {
-            auto invMass = invMassA + invMassB;
-            auto k1 = XMMatrixScaling(invMass, invMass, invMass);
-            auto skewRa = Skew(joint.rA);
-            auto k2 = skewRa * invInertiaA * skewRa; 
-            auto skewRb = Skew(joint.rB);
-            auto k3 = skewRb * invInertiaB * skewRb;
-            joint.m = XMMatrixInverse(nullptr, k1 - k2 - k3);
-        }
-
-        /** Apply or zero out accumulated impulse */
-        if constexpr(EnableJointWarmstarting)
-        {
-            auto vA = XMVectorScale(joint.p, invMassA * WarmstartFactor);
-            vA = XMVectorNegate(XMVectorScale(vA, WarmstartFactor));
-            auto wA = XMVector3Transform(XMVector3Cross(joint.rA, joint.p), invInertiaA);
-            wA = XMVectorNegate(XMVectorScale(wA, WarmstartFactor));
-            joint.bodyA->ApplyVelocities(vA, wA);
-
-            auto vB = XMVectorScale(joint.p, invMassB);
-            vB = XMVectorScale(vB, WarmstartFactor);
-            auto wB = XMVector3Transform(XMVector3Cross(joint.rB, joint.p), invInertiaB);
-            wB =  XMVectorScale(wB, WarmstartFactor);
-            joint.bodyB->ApplyVelocities(vB, wB);
-        }
-        else
-        {
-            joint.p = g_XMZero;
-        }
-    }
 } // end anonymous namespace
 
 namespace nc::physics
 {
-    void ResolveConstraints(std::span<ContactConstraint*> contactConstraints, std::span<PositionConstraint*> positionConstraints, std::span<Joint*> joints, float dt)
+    Solver::Solver(Registry* registry)
+        : m_registry{registry},
+          m_contactConstraints{},
+          m_positionConstraints{}
     {
-        for(size_t i = 0u; i < SolverIterations; ++i)
-        {
-            for(auto* constraint : contactConstraints)
-            {
-                ResolveContactConstraint(*constraint, dt);
-            }
+    }
 
-            for(auto* joint : joints)
-            {
-                ResolveJoint(*joint);
-            }
-        }
+    void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
+    {
+        const auto manifoldCount = manifolds.size();
+        m_contactConstraints.clear();
+        m_contactConstraints.reserve(manifoldCount * 4u);
 
         if constexpr(EnableDirectPositionCorrection)
         {
-            for(auto* constraint : positionConstraints)
+            m_positionConstraints.clear();
+            m_positionConstraints.reserve(manifoldCount);
+        }
+
+        for(const auto& manifold : manifolds)
+        {
+            const Entity entityA = manifold.event.first;
+            const Entity entityB = manifold.event.second;
+            auto* transformA = m_registry->Get<Transform>(entityA);
+            auto* transformB = m_registry->Get<Transform>(entityB);
+            auto* physBodyA = m_registry->Get<PhysicsBody>(entityA);
+            auto* physBodyB = m_registry->Get<PhysicsBody>(entityB);
+
+            if constexpr(EnableDirectPositionCorrection)
             {
-                ResolvePositionConstraint(*constraint);
+                auto deepestContact = manifold.GetDeepestContact();
+                m_positionConstraints.emplace_back(transformA, transformB, manifold.event.eventType, deepestContact.normal, deepestContact.depth);
+            }
+
+            for(const auto& contact : manifold.contacts)
+            {
+                #ifdef NC_DEBUG_RENDERING
+                graphics::DebugRenderer::AddPoint(contact.worldPointA);
+                graphics::DebugRenderer::AddPoint(contact.worldPointB);
+                #endif
+
+                m_contactConstraints.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
             }
         }
     }
 
-
-    void ResolveConstraints(Constraints& constraints, std::span<Joint> joints, float dt)
+    void Solver::ResolveConstraints(std::span<Joint> joints, float dt)
     {
-        static int itCount = 0;
-        static time::Timer timer;
-        ++itCount;
-        if(itCount > 60)
-        {
-            timer.Start();
-        }
-
         for(size_t i = 0u; i < SolverIterations; ++i)
         {
-            for(auto& constraint : constraints.contact)
+            for(auto& constraint : m_contactConstraints)
             {
                 ResolveContactConstraint(constraint, dt);
             }
@@ -424,98 +358,9 @@ namespace nc::physics
 
         if constexpr(EnableDirectPositionCorrection)
         {
-            for(auto& constraint : constraints.position)
+            for(auto& constraint : m_positionConstraints)
             {
                 ResolvePositionConstraint(constraint);
-            }
-        }
-
-        if(itCount > 60)
-        {
-            timer.Stop();
-            //std::cout << "ResolveConstraints: " << timer.Value() / 1000000 << '\n';
-            itCount = 0;
-        }
-    }
-
-    void GenerateConstraints(Registry* registry, std::span<const Manifold> manifolds, Constraints* out)
-    {
-        static int itCount = 0;
-        static time::Timer timer;
-        ++itCount;
-        if(itCount > 60)
-        {
-            timer.Start();
-        }
-
-        const auto manifoldCount = manifolds.size();
-        out->contact.clear();
-        out->contact.reserve(manifoldCount * 4u);
-
-        if constexpr(EnableDirectPositionCorrection)
-        {
-            out->position.clear();
-            out->position.reserve(manifoldCount);
-        }
-
-        for(const auto& manifold : manifolds)
-        {
-            Entity entityA = Entity{manifold.entityA};
-            Entity entityB = Entity{manifold.entityB};
-            auto* transformA = registry->Get<Transform>(entityA);
-            auto* transformB = registry->Get<Transform>(entityB);
-            auto* physBodyA = registry->Get<PhysicsBody>(entityA);
-            auto* physBodyB = registry->Get<PhysicsBody>(entityB);
-
-            if constexpr(EnableDirectPositionCorrection)
-            {
-                auto deepestContact = manifold.GetDeepestContact();
-                out->position.emplace_back(transformA, transformB, manifold.eventType, deepestContact.normal, deepestContact.depth);
-            }
-
-            for(const auto& contact : manifold.contacts)
-            {
-                #ifdef NC_DEBUG_RENDERING
-                graphics::DebugRenderer::AddPoint(contact.worldPointA);
-                graphics::DebugRenderer::AddPoint(contact.worldPointB);
-                #endif
-
-                out->contact.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
-            }
-        }
-
-        if(itCount > 60)
-        {
-            timer.Stop();
-            //std::cout << "GenerateConstraints: " << timer.Value() / 1000000 << '\n';
-            itCount = 0;
-        }
-    }
-
-    void UpdateJoints(Registry* registry, std::span<Joint> joints, float dt)
-    {
-        for(auto& joint : joints)
-        {
-            UpdateJoint(registry, joint, dt);
-        }
-    }
-
-    void CacheImpulses(std::span<const ContactConstraint> constraints, std::span<Manifold> manifolds)
-    {
-        auto index = 0u;
-
-        for(auto& manifold : manifolds)
-        {
-            for(auto& contact : manifold.contacts)
-            {
-                assert(index < constraints.size());
-                assert(manifold.entityA == constraints[index].entityA && manifold.entityB == constraints[index].entityB);
-
-                const auto& constraint = constraints[index];
-                contact.lambda = constraint.totalLambda;
-                contact.muTangent = constraint.totalMuTangent;
-                contact.muBitangent = constraint.totalMuBitangent;
-                ++index;
             }
         }
     }

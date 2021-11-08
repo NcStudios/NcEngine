@@ -2,23 +2,24 @@
 
 #include "physics/PhysicsSystem.h"
 #include "ClickableSystem.h"
-#include "collision/CollisionCache.h"
-#include "collision/BspTree.h"
-#include "dynamics/Joint.h"
 #include "graphics/DebugRenderer.h"
-#include "task/Task.h"
-
-#include "PhysicsWorld.h"
-//#include "PhysicsPipelineTypes.h"
-//#include "collision/proxy/FrameDeltaProxyCache.h"
 #include "PhysicsPipeline.h"
+#include "collision/proxy/PerFrameProxyCache.h"
+#include "collision/broad_phase/GlobalAllPair.h"
+#include "collision/broad_phase/HashedGrid.h"
 
 namespace nc::physics
 {
     class PhysicsSystemImpl final : public PhysicsSystem
     {
-        //using pipeline = PhysicsPipelineDescription<PerFrameProxyCache, HashedGrid, NarrowPhase>;
-        using pipeline = PhysicsPipelineDescription<PerFrameProxyCache, GlobalAllPair, NarrowPhase>;
+        struct PipelineDescription
+        {
+            using multithreaded = std::true_type;
+            using proxy_cache = PerFrameProxyCache;
+            using proxy = proxy_cache::proxy_type;
+            using broad_phase = HashedGrid<proxy_cache>;
+            using concave_phase = BspTree;
+        };
 
         public:
             PhysicsSystemImpl(Registry* registry, graphics::Graphics* graphics);
@@ -39,24 +40,10 @@ namespace nc::physics
             #endif
 
         private:
-            CollisionCache m_cache;
-            std::vector<Joint> m_joints;
-            BspTree m_bspTree;
+            PhysicsPipeline<PipelineDescription> m_pipeline;
             ClickableSystem m_clickableSystem;
-            TaskGraph m_tasks;
-            //PhysicsWorld m_world;
-
-            //PhysicsPipelineBuilder<pipeline> m_pipeline;
-
-            pipeline::broad_phase::result_type m_broadPairs;
-            pipeline::broad_phase::result_type m_broadPairs2;
-            pipeline::proxy_cache m_proxyCache;
-            pipeline::broad_phase m_broadPhase;
-            pipeline::narrow_phase m_narrowPhase;
             #ifdef NC_DEBUG_RENDERING
             graphics::DebugRenderer m_debugRenderer;
             #endif
-
-            void BuildTaskGraph(Registry* registry);
     };
 } // namespace nc::physics

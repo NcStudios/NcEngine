@@ -58,6 +58,11 @@ namespace nc
         return out;
     }
 
+    DirectX::XMVECTOR Transform::GetPositionXM() const
+    {
+        return m_worldMatrix.r[3];
+    }
+
     Quaternion Transform::GetLocalRotation() const
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
