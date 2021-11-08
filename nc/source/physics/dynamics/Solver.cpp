@@ -10,10 +10,6 @@
 
 using namespace DirectX;
 
-
-#include "time/NcTime.h"
-#include <iostream>
-
 namespace
 {
     using namespace nc;

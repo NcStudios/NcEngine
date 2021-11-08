@@ -4,8 +4,6 @@
 
 #include <algorithm>
 
-#include "debug/Serialize.h"
-
 using namespace DirectX;
 
 namespace
@@ -116,18 +114,6 @@ namespace
             auto boxLocal = XMVector3Transform(closestPointOnBox, XMMatrixInverse(nullptr, boxMatrix));
             XMStoreVector3(&stateOut->contact.localPointA, boxLocal);
             stateOut->contact.localPointB = sphere.center - stateOut->contact.normal * sphere.radius;
-
-
-            // std::cout << "worldA: " << stateOut->contact.worldPointA << '\n'
-            //           << "localA: " << stateOut->contact.localPointA << '\n'
-            //           << "worldB: " << stateOut->contact.worldPointB << '\n'
-            //           << "localB: " << stateOut->contact.localPointB << '\n'
-            //           << "center: " << sphereCenter_v
-            //           << "redius: " << sphereRadius
-            //           << "GetScale: " << GetScale(sphereMatrix)
-            //           << "sphere.radius: " << sphere.radius << '\n'
-            //           << "norm: " << stateOut->contact.normal << '\n'
-            //           << "dept: " << stateOut->contact.depth << '\n';
         }
 
         return true;

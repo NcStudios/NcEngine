@@ -110,7 +110,7 @@ namespace nc::physics
                 /** Narrow check against each mesh triangle until we find a collision. */
                 for(const auto& triangle : mesh.triangles)
                 {
-                    if(Collide(proxy.volume, triangle, proxy.matrix, &state))
+                    if(Collide(proxy.Volume(), triangle, proxy.Matrix(), &state))
                     {
                         m_results.events.emplace_back(proxy.entity, mesh.entity, CollisionEventType::FirstBodyPhysics);
                         m_results.contacts.push_back(state.contact);

@@ -238,22 +238,22 @@ namespace nc::physics
         /** Task graph visual output */
         #if 0
         m_tasks.GetTaskFlow().name("Physics Step");
-        fixedUpdateTask.name("Component - FixedUpdate");
-        updateInertiaTask.name("Update Inertia");
+        fixedUpdateTask.name("Component FixedUpdate Logic");
+        updateInertiaTask.name("Update Inertia Tensors");
         applyGravityTask.name("Apply Gravity");
-        updateManifoldsTask.name("Update Manifolds");
-        updateProxyCacheTask.name("Update Proxy Cache");
-        broadPhaseTask.name("Broad Phase");
-        narrowPhasePhysicsTask.name("Narrow Phase - Physics");
-        narrowPhaseTriggerTask.name("Narrow Phase - Trigger");
-        concavePhaseTask.name("Concave Phase (Bsp Tree)");
-        mergeContactsTask.name("Merge Contacts");
-        generateConstraintsTask.name("Generate Constraints");
-        updateJointsTask.name("Update Joints");
-        resolveConstraintsTask.name("Resolve Constraints");
-        cacheImpulsesTask.name("Cache Impulses");
+        updateManifoldsTask.name("Narrow Phase - Update Manifolds");
+        updateProxyCacheTask.name("Proxy Cache - Update");
+        broadPhaseTask.name("Broad Phase - Update & Find Pairs");
+        narrowPhasePhysicsTask.name("Narrow Phase - Detect Contacts");
+        narrowPhaseTriggerTask.name("Narrow Phase - Detect Triggers");
+        concavePhaseTask.name("Concave Phase - Detect Contacts");
+        mergeContactsTask.name("Narrow Phase - Merge Contacts");
+        generateConstraintsTask.name("Solver - Generate Constraints");
+        updateJointsTask.name("Joints - Update");
+        resolveConstraintsTask.name("Solver - Resolve Constraints");
+        cacheImpulsesTask.name("Narrow Phase - Cache Impulses");
         integrateTask.name("Integrate");
-        notifyEventsTask.name("Notify Events");
+        notifyEventsTask.name("Narrow Phase - Notify Events");
         m_tasks.GetTaskFlow().dump(std::cout);
         #endif
     }

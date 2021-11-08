@@ -61,7 +61,7 @@ namespace nc::physics
 
         for(auto& [i, j, eventType] : physicsPairs)
         {
-            if(Collide(i->volume, j->volume, i->matrix, j->matrix, &state))
+            if(Collide(i->Volume(), j->Volume(), i->Matrix(), j->Matrix(), &state))
             {
                 auto e1 = i->entity;
                 auto e2 = j->entity;
@@ -99,7 +99,7 @@ namespace nc::physics
     {
         for(const auto& [i, j, type] : triggerPairs)
         {
-            if(Intersect(i->volume, j->volume, i->matrix, j->matrix))
+            if(Intersect(i->Volume(), j->Volume(), i->Matrix(), j->Matrix()))
             {
                 m_triggerCache.Add(i->entity, j->entity, type);
             }

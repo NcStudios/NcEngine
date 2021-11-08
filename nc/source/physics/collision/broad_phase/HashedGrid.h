@@ -8,6 +8,12 @@
 
 namespace nc::physics
 {
+    /** Broad phase using hierarchical grids.
+     *  @todo This guy needs work:
+     *  - Neighboring cells are not checked. Straddling objects are just thrown up
+     *    the hierarchy and eventually land in a single list.
+     *  - The hierarchy could be extended to support larger objects.
+     *  - Splitting FindPairs() across multiple threads provides a decent speed up. */
     template<ProxyCache ProxyCacheType>
     class HashedGrid
     {
@@ -66,9 +72,9 @@ namespace nc::physics
 
         for(size_t i = 0; i < BucketCount; ++i)
         {
-            auto x = xPos % 2 == 0 ? xPos / 2 : (xPos - 1) / 2;
-            auto y = yPos % 2 == 0 ? yPos / 2 : (yPos - 1) / 2;
-            auto z = zPos % 2 == 0 ? zPos / 2 : (zPos - 1) / 2;
+            auto x = xPos >> 1;
+            auto y = yPos >> 1;
+            auto z = zPos >> 1;
             auto value = x + y * LargeCellCount + z * LargeCellCount * LargeCellCount;
             m_indexMap.push_back(value);
 
