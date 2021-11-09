@@ -11,7 +11,8 @@ namespace nc::graphics
           m_imageInfos{},
           m_descriptorSet{},
           m_descriptorSetLayout{},
-          m_sampler{},
+          m_textureSampler{},
+          m_cubeMapSampler{},
           m_layout{},
           m_maxTexturesCount{maxTextures},
           m_texturesInitialized{false}
@@ -23,7 +24,8 @@ namespace nc::graphics
     {
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
-        m_sampler.reset();
+        m_textureSampler.reset();
+        m_cubeMapSampler.reset();
     }
 
     void TextureManager::Initialize()
@@ -45,7 +47,8 @@ namespace nc::graphics
         m_descriptorSet = CreateDescriptorSet(m_graphics, m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
         /** @todo Figure out why there are validation errors when creating sampler in the constructor. */
-        m_sampler = m_graphics->GetBasePtr()->CreateTextureSampler();
+        m_textureSampler = m_graphics->GetBasePtr()->CreateTextureSampler();
+        m_cubeMapSampler = m_graphics->GetBasePtr()->CreateTextureSampler();
     }
 
     void TextureManager::Update(const std::vector<Texture>& data)
@@ -54,7 +57,7 @@ namespace nc::graphics
 
         std::array<vk::WriteDescriptorSet, 2> writes;
         vk::DescriptorImageInfo samplerInfo = {};
-        samplerInfo.sampler = m_sampler.get();
+        samplerInfo.sampler = m_textureSampler.get();
 
         if (!m_texturesInitialized)
         {

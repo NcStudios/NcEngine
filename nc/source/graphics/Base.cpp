@@ -405,17 +405,18 @@ namespace nc::graphics
         return m_bufferIndex++;
     }
 
-    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::Image* createdImage)
+    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, arrayLayers, vk::Image* createdImage)
     {
         vk::ImageCreateInfo imageInfo{};
         imageInfo.setImageType(vk::ImageType::e2D);
         imageInfo.setFormat(format);
         imageInfo.setExtent( { static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y), 1 });
         imageInfo.setMipLevels(1);
-        imageInfo.setArrayLayers(1);
+        imageInfo.setArrayLayers(arrayLayers);
         imageInfo.setSamples(vk::SampleCountFlagBits::e1);
         imageInfo.setTiling(vk::ImageTiling::eOptimal);
         imageInfo.setUsage(usageFlags);
+        imageInfo.setFlags(vk::ImageCreateFlagBits::eCubeCompatible);
 
         vma::AllocationCreateInfo allocationInfo;
         allocationInfo.usage = vma::MemoryUsage::eGpuOnly;
@@ -449,11 +450,43 @@ namespace nc::graphics
         stbi_image_free(pixels);
 
         vk::Image textureImage;
-        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, &textureImage);
+        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, &textureImage);
 
-        TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+        TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, 1, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer, textureImage, width, height);
-        TransitionImageLayout(textureImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+        TransitionImageLayout(textureImage, vk::ImageLayout::eTransferDstOptimal, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        DestroyBuffer(stagingIndex);
+
+        *createdImage = textureImage;
+        return imageIndex;
+    }
+
+    uint32_t Base::CreateCubeMapTexture(const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, vk::Image* createdImage)
+    {
+        vk::DeviceSize imageSize = cubeMapSize;
+
+        // Create staging buffer (lives on CPU)
+        vk::Buffer stagingBuffer;
+        auto stagingIndex = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
+
+        // Map the pixels onto the staging buffer
+        void* mappedData;
+        auto allocation = m_buffers.at(stagingIndex).second;
+        m_allocator.mapMemory(allocation, &mappedData);
+        for (auto i = 0; i < 6; i++)
+        {
+            memcpy(mappedData, pixels[i], static_cast<size_t>(imageSize));
+            stbi_image_free(pixels[i]);
+        }
+        m_allocator.unmapMemory(allocation);
+
+        vk::Image textureImage;
+        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, &textureImage);
+
+        TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
+        CopyBufferToImage(stagingBuffer, textureImage, width, height);
+        TransitionImageLayout(textureImage, vk::ImageLayout::eTransferDstOptimal, 6, vk::ImageLayout::eShaderReadOnlyOptimal);
 
         DestroyBuffer(stagingIndex);
 
@@ -470,8 +503,18 @@ namespace nc::graphics
 
         return m_logicalDevice.createSamplerUnique(samplerInfo);
     }
+
+    vk::UniqueSampler Base::CreateCubeMapSampler()
+    {
+        vk::PhysicalDeviceProperties properties{};
+        m_physicalDevice.getProperties(&properties);
+
+        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
+
+        return m_logicalDevice.createSamplerUnique(samplerInfo);
+    }
     
-    void Base::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
+    void Base::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout)
     {
         Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) 
         { 
@@ -487,7 +530,7 @@ namespace nc::graphics
             subresourceRange.setBaseMipLevel(0);
             subresourceRange.setLevelCount(1);
             subresourceRange.setBaseArrayLayer(0);
-            subresourceRange.setLayerCount(1);
+            subresourceRange.setLayerCount(layerCount);
 
             barrier.setSubresourceRange(subresourceRange);
 
@@ -553,6 +596,24 @@ namespace nc::graphics
         subresourceRange.setLevelCount(1);
         subresourceRange.setBaseArrayLayer(0);
         subresourceRange.setLayerCount(1);
+
+        viewInfo.setSubresourceRange(subresourceRange);
+        return m_logicalDevice.createImageViewUnique(viewInfo);
+    }
+
+    vk::UniqueImageView Base::CreateCubeMapTextureView(const vk::Image& image)
+    {
+        vk::ImageViewCreateInfo viewInfo{};
+        viewInfo.setImage(image);
+        viewInfo.setViewType(vk::ImageViewType::eCube);
+        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
+
+        vk::ImageSubresourceRange subresourceRange{};
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+        subresourceRange.setBaseMipLevel(0);
+        subresourceRange.setLevelCount(1);
+        subresourceRange.setBaseArrayLayer(0);
+        subresourceRange.setLayerCount(6);
 
         viewInfo.setSubresourceRange(subresourceRange);
         return m_logicalDevice.createImageViewUnique(viewInfo);
