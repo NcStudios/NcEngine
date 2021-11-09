@@ -88,6 +88,7 @@ namespace nc
         if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + leftPath);
 
         m_cubeMaps.emplace_back(m_graphics, pixelArray, width * height * STBI_rgb_alpha * 6);
+        graphics::ShaderResourceService<graphics::EnvironmentData>::Get()->Update
     }
 
     bool TextureAssetManager::Load(const std::string& path)

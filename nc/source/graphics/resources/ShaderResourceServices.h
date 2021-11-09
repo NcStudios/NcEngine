@@ -15,7 +15,8 @@ namespace nc::graphics
                 : m_objectDataManager{graphics, memorySettings.maxRenderers},
                   m_pointLightManager{graphics, memorySettings.maxPointLights},
                   m_shadowMapManager{graphics, dimensions},
-                  m_textureManager{graphics, memorySettings.maxTextures}
+                  m_textureManager{graphics, memorySettings.maxTextures},
+                  m_environmentDataManager{}
             {
             }
         
@@ -26,5 +27,6 @@ namespace nc::graphics
             PointLightManager m_pointLightManager;
             ShadowMapManager m_shadowMapManager;
             TextureManager m_textureManager;
+            EnvironmentDataManager m_environmentDataManager;
     };
 }

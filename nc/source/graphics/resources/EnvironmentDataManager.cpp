@@ -1,4 +1,4 @@
-#include "TextureManager.h"
+#include "EnvironmentDataManager.h"
 #include "graphics/Initializers.h"
 #include "debug/Utils.h"
 
@@ -6,12 +6,13 @@
 
 namespace nc::graphics
 {
-    TextureManager::TextureManager(Graphics* graphics, uint32_t maxTextures)
+    EnvironmentDataManager::EnvironmentDataManager(Graphics* graphics, uint32_t maxTextures)
         : m_graphics{graphics},
           m_imageInfos{},
           m_descriptorSet{},
           m_descriptorSetLayout{},
           m_textureSampler{},
+          m_cubeMapSampler{},
           m_layout{},
           m_maxTexturesCount{maxTextures},
           m_texturesInitialized{false}
@@ -19,7 +20,7 @@ namespace nc::graphics
         Initialize();
     }
 
-    TextureManager::~TextureManager() noexcept
+    EnvironmentDataManager::~EnvironmentDataManager() noexcept
     {
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
@@ -27,7 +28,7 @@ namespace nc::graphics
         m_cubeMapSampler.reset();
     }
 
-    void TextureManager::Initialize()
+    void EnvironmentDataManager::Initialize()
     {
         // Create and bind the descriptor set for the array of textures.
         std::array<vk::DescriptorSetLayoutBinding, 2u> layoutBindings
@@ -49,7 +50,7 @@ namespace nc::graphics
         m_textureSampler = m_graphics->GetBasePtr()->CreateTextureSampler();
     }
 
-    void TextureManager::Update(const std::vector<Texture>& data)
+    void EnvironmentDataManager::Update(const std::vector<Texture>& data)
     {
         assert(data.size() < m_maxTexturesCount && !data.empty());
 
@@ -87,17 +88,17 @@ namespace nc::graphics
         m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
     }
 
-    auto TextureManager::GetDescriptorSet() -> vk::DescriptorSet*
+    auto EnvironmentDataManager::GetDescriptorSet() -> vk::DescriptorSet*
     {
         return &m_descriptorSet.get();
     }
 
-    auto TextureManager::GetDescriptorSetLayout() -> vk::DescriptorSetLayout*
+    auto EnvironmentDataManager::GetDescriptorSetLayout() -> vk::DescriptorSetLayout*
     {
         return &m_descriptorSetLayout.get();
     }
 
-    void TextureManager::Reset()
+    void EnvironmentDataManager::Reset()
     {
     }
 }

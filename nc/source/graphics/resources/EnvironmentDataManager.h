@@ -10,9 +10,10 @@ namespace nc::graphics
 
     struct EnvironmentData
     {
+        uint32_t skyboxIndex;
     };
 
-    class EnvironmentDataManager : public IShaderResourceService<ShadowMap>
+    class EnvironmentDataManager : public IShaderResourceService<EnvironmentData>
     {
         public:
             EnvironmentDataManager(Graphics* graphics, Vector2 dimensions);
@@ -23,8 +24,6 @@ namespace nc::graphics
             auto GetDescriptorSet() -> vk::DescriptorSet* override;
             auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* override;
             void Reset() override;
-
-            auto GetImageView() noexcept -> const vk::ImageView& { return m_depthStencil.get()->GetImageView(); } 
 
         private:
             Graphics* m_graphics;

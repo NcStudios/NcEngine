@@ -34,7 +34,6 @@ namespace nc::graphics
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             vk::UniqueSampler m_textureSampler;
-            vk::UniqueSampler m_cubeMapSampler;
             vk::ImageLayout m_layout;
             uint32_t m_maxTexturesCount;
             bool m_texturesInitialized;

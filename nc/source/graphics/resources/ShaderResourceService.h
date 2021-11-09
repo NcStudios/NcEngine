@@ -13,6 +13,7 @@ namespace nc
         class Graphics;
         struct ObjectData;
         struct Texture;
+        struct EnvironmentData;
     }
 }
 
@@ -30,7 +31,8 @@ namespace nc::graphics
     concept ShaderResource = std::same_as<T, ObjectData> ||
                              std::same_as<T, PointLightInfo> ||
                              std::same_as<T, Texture> ||
-                             std::same_as<T, ShadowMap>;
+                             std::same_as<T, ShadowMap> || 
+                             std::same_as<T, EnvironmentData>;
 
     /** Interface for types that manage shader parameters. */
     template<ShaderResource T>
