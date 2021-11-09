@@ -33,10 +33,11 @@ namespace
 namespace nc
 {
     TextureAssetManager::TextureAssetManager(graphics::Graphics* graphics, uint32_t maxTextures)
-        : m_accessors{},
+        : m_textureAccessors{},
           m_textures{},
+          m_cubeMaps{},
           m_graphics{graphics},
-          m_sampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_textureSampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
           m_maxTextureCount{maxTextures}
     {
     }
@@ -49,11 +50,49 @@ namespace nc
         }
 
         m_textures.resize(0);
+        m_cubeMaps.resize(0);
+    }
+
+    bool TextureAssetManager::LoadCubeMap(const std::string& frontPath,
+                                          const std::string& backPath,
+                                          const std::string& upPath,
+                                          const std::string& downPath,
+                                          const std::string& rightPath,
+                                          const std::string& leftPath)
+    {
+        std::array<stbi_uc*, 6> pixelArray = {};
+        int32_t width, height, numChannels; // Same for all faces.
+
+        /** Front face */
+        pixelArray.at(0) = stbi_load(frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + frontPath);
+
+        /** Back face */
+        pixelArray.at(1) = stbi_load(backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + backPath);
+
+        /** Up face */
+        pixelArray.at(2) = stbi_load(upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + upPath);
+
+        /** Down face */
+        pixelArray.at(3) = stbi_load(downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + downPath);
+
+        /** Right face */
+        pixelArray.at(4) = stbi_load(rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + rightPath);
+
+        /** Left face */
+        pixelArray.at(5) = stbi_load(leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + leftPath);
+
+        m_cubeMaps.emplace_back(m_graphics, pixelArray, width * height * STBI_rgb_alpha * 6);
     }
 
     bool TextureAssetManager::Load(const std::string& path)
     {
-        const auto index = m_accessors.size();
+        const auto index = m_textureAccessors.size();
 
         if (index + 1 >= m_maxTextureCount)
             throw NcError("Cannot exceed max texture count.");
@@ -61,8 +100,8 @@ namespace nc
         if(IsLoaded(path))
             return false;
 
-        m_accessors.emplace(path, index);
-        m_textures.push_back(ReadTexture(path, m_graphics, &m_sampler.get()));
+        m_textureAccessors.emplace(path, index);
+        m_textures.push_back(ReadTexture(path, m_graphics, &m_textureSampler.get()));
         graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
         return true;
     }
@@ -79,8 +118,8 @@ namespace nc
             if(IsLoaded(path))
                 continue;
 
-            m_textures.push_back(ReadTexture(path, m_graphics, &m_sampler.get()));
-            m_accessors.emplace(path, nextTextureIndex++);
+            m_textures.push_back(ReadTexture(path, m_graphics, &m_textureSampler.get()));
+            m_textureAccessors.emplace(path, nextTextureIndex++);
         }
 
         graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
@@ -89,7 +128,7 @@ namespace nc
 
     bool TextureAssetManager::Unload(const std::string& path)
     {
-        auto removed = static_cast<bool>(m_accessors.erase(path));
+        auto removed = static_cast<bool>(m_textureAccessors.erase(path));
         if(!removed)
             return false;
         
@@ -114,14 +153,14 @@ namespace nc
 
     void TextureAssetManager::UnloadAll()
     {
-        m_accessors.clear();
+        m_textureAccessors.clear();
         m_textures.clear();
     }
 
     auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
     {
-        const auto it = m_accessors.find(path);
-        if(it == m_accessors.cend())
+        const auto it = m_textureAccessors.find(path);
+        if(it == m_textureAccessors.cend())
             throw NcError("Asset is not loaded: " + path);
         
         return it->second;
@@ -129,6 +168,6 @@ namespace nc
     
     bool TextureAssetManager::IsLoaded(const std::string& path) const
     {
-        return m_accessors.contains(path);
+        return m_textureAccessors.contains(path);
     }
 }
