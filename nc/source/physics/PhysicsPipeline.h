@@ -11,6 +11,7 @@
 #include "ecs/Registry.h"
 #include "config/Config.h"
 #include "task/Task.h"
+#include "debug/Profiler.h"
 
 namespace nc::physics
 {
@@ -68,6 +69,7 @@ namespace nc::physics
     template<class Stages>
     void PhysicsPipeline<Stages>::Step(tf::Executor& executor)
     {
+        OPTICK_CATEGORY("PhysicsPipeline::Step", Optick::Category::Physics);
         if constexpr(multithreaded::value)
         {
             m_tasks.Run(executor);
@@ -116,12 +118,14 @@ namespace nc::physics
     {
         auto fixedUpdateTask = m_tasks.AddGuardedTask([registry]
         {
+            OPTICK_CATEGORY("SendFixedUpdate", Optick::Category::Physics);
             for(auto& group : registry->ViewAll<AutoComponentGroup>())
                 group.SendFixedUpdate();
         });
 
         auto updateInertiaTask = m_tasks.AddGuardedTask([registry]
         {
+            OPTICK_CATEGORY("UpdateWorldInertiaTensors", Optick::Category::Physics);
             UpdateWorldInertiaTensors(registry);
         });
 
@@ -129,17 +133,20 @@ namespace nc::physics
             [registry,
              dt = m_fixedTimeStep]
         {
+            OPTICK_CATEGORY("ApplyGravity", Optick::Category::Physics);
             ApplyGravity(registry, dt);
         });
 
         auto updateManifoldsTask = m_tasks.AddGuardedTask(
             [&narrow = m_narrowPhase]
         {
+            OPTICK_CATEGORY("NarrowPhase::UpdateManifolds", Optick::Category::Physics);
             narrow.UpdateManifolds();
         });
 
         auto updateProxyCacheTask = m_tasks.AddGuardedTask([proxyCache = &m_proxyCache]
         {
+            OPTICK_CATEGORY("ProxyCache::Update", Optick::Category::Physics);
             proxyCache->Update();
         });
 
@@ -147,14 +154,22 @@ namespace nc::physics
             [proxyCache = &m_proxyCache,
              broadPhase = &m_broadPhase]
         {
-            broadPhase->Update(proxyCache);
-            broadPhase->FindPairs();
+            {
+                OPTICK_CATEGORY("BroadPhase::Update", Optick::Category::Physics);
+                broadPhase->Update(proxyCache);
+            }
+
+            {
+                OPTICK_CATEGORY("BroadPhase::FindPairs", Optick::Category::Physics);
+                broadPhase->FindPairs();
+            }
         });
 
         auto narrowPhasePhysicsTask = m_tasks.AddGuardedTask(
             [&narrow = m_narrowPhase,
              &broad = std::as_const(m_broadPhase)]
         {
+            OPTICK_CATEGORY("NarrowPhase::FindPhysicsPairs", Optick::Category::Physics);
             narrow.FindPhysicsPairs<proxy>(broad.GetPhysicsPairs());
         });
 
@@ -162,6 +177,7 @@ namespace nc::physics
             [&narrow = m_narrowPhase,
              &broad = std::as_const(m_broadPhase)]
         {
+            OPTICK_CATEGORY("NarrowPhase::FindTriggerPairs", Optick::Category::Physics);
             narrow.FindTriggerPairs<proxy>(broad.GetTriggerPairs());
         });
 
@@ -169,6 +185,7 @@ namespace nc::physics
             [&concave = m_concavePhase,
              &proxyCache = m_proxyCache]
         {
+            OPTICK_CATEGORY("Concave::FindPairs", Optick::Category::Physics);
             concave.template FindPairs<proxy>(proxyCache.GetProxies());
         });
 
@@ -176,6 +193,7 @@ namespace nc::physics
             [&narrow = m_narrowPhase,
              &concave = std::as_const(m_concavePhase)]
         {
+            OPTICK_CATEGORY("NarrowPhase::MergeContacts", Optick::Category::Physics);
             narrow.MergeContacts(concave.GetPairs());
         });
 
@@ -183,6 +201,7 @@ namespace nc::physics
             [&solver = m_solver,
              &narrow = std::as_const(m_narrowPhase)]
         {
+            OPTICK_CATEGORY("Solver::GenerateConstraints", Optick::Category::Physics);
             solver.GenerateConstraints(narrow.GetManifolds());
         });
 
@@ -190,6 +209,7 @@ namespace nc::physics
             [&jointSystem = m_jointSystem,
              dt = m_fixedTimeStep]
         {
+            OPTICK_CATEGORY("JointSystem::UpdateJoints", Optick::Category::Physics);
             jointSystem.UpdateJoints(dt);
         });
 
@@ -198,6 +218,7 @@ namespace nc::physics
              &jointSystem = m_jointSystem,
              dt = m_fixedTimeStep]
         {
+            OPTICK_CATEGORY("Solver::ResolveConstraints", Optick::Category::Physics);
             solver.ResolveConstraints(jointSystem.GetJoints(), dt);
         });
 
@@ -205,6 +226,7 @@ namespace nc::physics
             [&solver = m_solver,
              &narrow = m_narrowPhase]
         {
+            OPTICK_CATEGORY("NarrowPhase::CacheImpulses", Optick::Category::Physics);
             if constexpr(EnableContactWarmstarting)
                 narrow.CacheImpulses(solver.GetContactConstraints());
         });
@@ -213,12 +235,14 @@ namespace nc::physics
             [registry,
              dt = m_fixedTimeStep]
         {
+            OPTICK_CATEGORY("Integrate", Optick::Category::Physics);
             Integrate(registry, dt);
         });
 
         auto notifyEventsTask = m_tasks.AddGuardedTask(
             [&narrow = m_narrowPhase]
         {
+            OPTICK_CATEGORY("NarrowPhase::NotifyEvents", Optick::Category::Physics);
             narrow.NotifyEvents();
         });
 

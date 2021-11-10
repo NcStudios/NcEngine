@@ -87,6 +87,7 @@ namespace nc
         [[maybe_unused]] auto writeAudioBuffersTask = m_tasks.AddGuardedTask(
             [&audioSystem = m_audioSystem]
         {
+            OPTICK_CATEGORY("AudioSystem::Update", Optick::Category::Audio);
             audioSystem.Update();
         });
 
@@ -118,6 +119,8 @@ namespace nc
 
         while(m_isRunning)
         {
+            OPTICK_FRAME("Main Thread");
+
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
@@ -167,18 +170,14 @@ namespace nc
 
     void Engine::FrameLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-
+        OPTICK_CATEGORY("SendFrameUpdate", Optick::Category::GameLogic);
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFrameUpdate(dt);
-        
-        NC_PROFILE_END();
     }
 
     void Engine::FrameRender()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
+        OPTICK_CATEGORY("FrameRender", Optick::Category::Rendering);
         /** Update the view matrix for the camera */
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
@@ -208,8 +207,6 @@ namespace nc
 
         /** End the frame */
         m_graphics.FrameEnd();
-
-        NC_PROFILE_END();
     }
 
     void Engine::FrameCleanup()
@@ -218,7 +215,7 @@ namespace nc
         {
             DoSceneSwap();
         }
-        
+
         input::Flush();
     }
 

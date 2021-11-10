@@ -30,6 +30,8 @@ imgui.ini
 !nc/lib/glfw3.dll
 !nc/lib/libglfw3.a
 !nc/lib/libglfw3dll.a
+!nc/lib/libOptickCore.dll
+!nc/lib/libOptickCore.dll.a
 
 !tools/gen.exe
 !tools/asset_builder/build.exe

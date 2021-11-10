@@ -48,10 +48,9 @@ namespace nc::graphics
 
     void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
-        NC_PROFILE_END();
     }
 
     void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -122,8 +121,7 @@ namespace nc::graphics
 
     void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
+        OPTICK_CATEGORY("ShadowMappingTechnique::Record", Optick::Category::Rendering);
         cmd->setDepthBias
         (
             DEPTH_BIAS_CONSTANT,
@@ -147,7 +145,5 @@ namespace nc::graphics
                 objectInstance++;
             }
         }
-
-        NC_PROFILE_END();
     }
 }

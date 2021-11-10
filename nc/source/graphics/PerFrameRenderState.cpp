@@ -1,4 +1,5 @@
 #include "PerFrameRenderState.h"
+#include "debug/Profiler.h"
 #include "ecs/Registry.h"
 #include "ecs/component/Camera.h"
 #include "ecs/component/MeshRenderer.h"
@@ -39,6 +40,7 @@ namespace nc::graphics
       pointLightVPs{},
       isPointLightBindRequired{isPointLightSystemDirty}
     {
+        OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;
         const auto renderers = registry->ViewAll<MeshRenderer>();
@@ -98,8 +100,9 @@ namespace nc::graphics
 
     void MapPerFrameRenderState(const PerFrameRenderState& state)
     {
+        OPTICK_CATEGORY("MapPerFrameRenderState", Optick::Category::Rendering);
         ShaderResourceService<ObjectData>::Get()->Update(state.objectData);
-        
+
         if(state.isPointLightBindRequired)
         {
             ShaderResourceService<PointLightInfo>::Get()->Update(state.pointLightInfos);

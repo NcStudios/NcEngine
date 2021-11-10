@@ -1,5 +1,6 @@
 #include "NarrowPhase.h"
 #include "debug/Utils.h"
+#include "debug/Profiler.h"
 
 #include <algorithm>
 
@@ -14,6 +15,7 @@ namespace nc::physics
 
     void NarrowPhase::UpdateManifolds()
     {
+        OPTICK_THREAD("Worker"); // one of the tasks needs to specify a thread
         /** Reverse iterate so items can be removed. */
         auto manifolds = m_manifoldCache.GetData();
         auto end = manifolds.rend();

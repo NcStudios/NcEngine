@@ -2,6 +2,7 @@
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
+#include "debug/Profiler.h"
 
 #include <iostream>
 
@@ -51,8 +52,9 @@ namespace nc::graphics
 
     void RenderPassManager::Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData)
     {
+        OPTICK_CATEGORY("RenderPassManager::Execute", Optick::Category::Rendering);
         auto& renderPass = Acquire(uid);
-       
+
         Begin(&renderPass, cmd, renderTargetIndex);
 
         for (auto& technique : renderPass.techniques)
@@ -65,9 +67,9 @@ namespace nc::graphics
 
             technique->Record(cmd, frameData);
         }
-        
+
         End(cmd);
-    }   
+    }
 
     void RenderPassManager::Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
     {

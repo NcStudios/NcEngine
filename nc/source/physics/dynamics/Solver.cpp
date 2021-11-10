@@ -3,10 +3,10 @@
 #include "physics/PhysicsConstants.h"
 #include "graphics/DebugRenderer.h"
 #include "debug/Profiler.h"
-//#define USE_DEBUG_RENDERING
-#undef USE_DEBUG_RENDERING
 
 #include <cassert>
+
+#define USE_DEBUG_RENDERING 0
 
 using namespace DirectX;
 
@@ -329,7 +329,7 @@ namespace nc::physics
 
             for(const auto& contact : manifold.contacts)
             {
-                #ifdef USE_DEBUG_RENDERING
+                #if USE_DEBUG_RENDERING
                 graphics::DebugRenderer::AddPoint(contact.worldPointA);
                 graphics::DebugRenderer::AddPoint(contact.worldPointB);
                 #endif

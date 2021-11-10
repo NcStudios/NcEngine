@@ -1,5 +1,6 @@
 #include "PhysicsSystemImpl.h"
 #include "config/Config.h"
+#include "graphics/DebugRenderer.h"
 
 namespace nc::physics
 {
