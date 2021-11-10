@@ -2,7 +2,7 @@
 #include "ecs/component/Collider.h"
 #include "ecs/component/PhysicsBody.h"
 #include "physics/PhysicsConstants.h"
-#include "debug/Profiler.h"
+#include "optick/optick.h"
 
 namespace
 {

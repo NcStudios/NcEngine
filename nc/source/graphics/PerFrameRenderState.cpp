@@ -1,9 +1,9 @@
 #include "PerFrameRenderState.h"
-#include "debug/Profiler.h"
 #include "ecs/Registry.h"
 #include "ecs/component/Camera.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
+#include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
 #ifdef NC_EDITOR_ENABLED
 #include "physics/PhysicsSystemImpl.h"

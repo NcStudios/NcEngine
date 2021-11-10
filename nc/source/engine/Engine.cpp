@@ -2,10 +2,10 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
-#include "debug/Profiler.h"
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
 #include "graphics/PerFrameRenderState.h"
+#include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
 
 namespace nc

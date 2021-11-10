@@ -1,6 +1,5 @@
 #include "ShadowMappingTechnique.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
@@ -9,6 +8,7 @@
 #include "graphics/resources/ShaderResourceService.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
+#include "optick/optick.h"
 
 #include <iostream>
 

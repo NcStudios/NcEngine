@@ -1,6 +1,6 @@
 #include "IntersectionQueries.h"
 #include "narrow_phase/Gjk.h"
-#include "debug/Profiler.h"
+#include "optick/optick.h"
 
 #include <algorithm>
 

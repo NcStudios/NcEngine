@@ -1,7 +1,6 @@
 #include "PhongAndUiTechnique.h"
 #include "Assets.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
 #include "graphics/Initializers.h"
@@ -12,6 +11,7 @@
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ShaderResourceService.h"
+#include "optick/optick.h"
 
 namespace nc::graphics
 {

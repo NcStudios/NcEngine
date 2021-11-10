@@ -1,6 +1,6 @@
 #include "NarrowPhase.h"
 #include "debug/Utils.h"
-#include "debug/Profiler.h"
+#include "optick/optick.h"
 
 #include <algorithm>
 

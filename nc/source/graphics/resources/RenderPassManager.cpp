@@ -2,7 +2,7 @@
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
-#include "debug/Profiler.h"
+#include "optick/optick.h"
 
 #include <iostream>
 

@@ -5,13 +5,13 @@
 #include "collision/BspTree.h"
 #include "collision/narrow_phase/ManifoldCache.h"
 #include "collision/narrow_phase/NarrowPhase.h"
+#include "config/Config.h"
 #include "dynamics/Dynamics.h"
 #include "dynamics/Joint.h"
 #include "dynamics/Solver.h"
 #include "ecs/Registry.h"
-#include "config/Config.h"
+#include "optick/optick.h"
 #include "task/Task.h"
-#include "debug/Profiler.h"
 
 namespace nc::physics
 {

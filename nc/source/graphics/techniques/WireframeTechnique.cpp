@@ -2,7 +2,6 @@
 #include "WireframeTechnique.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "ecs/component/Transform.h"
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
@@ -13,6 +12,7 @@
 #include "graphics/ShaderUtilities.h"
 #include "graphics/Swapchain.h"
 #include "graphics/VertexDescriptions.h"
+#include "optick/optick.h"
 
 #include <iostream>
 
