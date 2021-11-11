@@ -47,6 +47,14 @@ namespace nc
     bool UnloadTextureAsset(const std::string& path);
     void UnloadAllTextureAssets();
 
+    /** Supported file types: .png 
+    *  @note Unloading textures invalidates all CubeMapViews. It is intended
+    *  to be done on scene change. */
+    bool LoadCubeMapAsset(const CubeMapFaces& paths);
+    bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths);
+    bool UnloadCubeMapAsset(const CubeMapFaces& paths);
+    void UnloadAllCubeMapAssets();
+
     struct ConcaveColliderView
     {
         std::span<const Triangle> triangles;
@@ -81,6 +89,22 @@ namespace nc
         uint32_t index;
     };
 
+    struct CubeMapView
+    {
+        uint32_t index;
+    };
+
+    struct CubeMapFaces
+    {
+        std::string uid;
+        std::string frontPath;
+        std::string backPath;
+        std::string upPath;
+        std::string downPath;
+        std::string rightPath;
+        std::string leftPath;
+    };
+
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
@@ -88,5 +112,6 @@ namespace nc
                         std::same_as<T, ConvexHullView> ||
                         std::same_as<T, ConcaveColliderView> ||
                         std::same_as<T, MeshView> ||
-                        std::same_as<T, TextureView>;
+                        std::same_as<T, TextureView> ||
+                        std::same_as<T, CubeMapView>;
 }
