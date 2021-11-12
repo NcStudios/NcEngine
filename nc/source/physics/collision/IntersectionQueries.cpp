@@ -6,6 +6,10 @@
 
 using namespace DirectX;
 
+
+
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -47,16 +51,16 @@ namespace
 
         if(XMVector3Greater(sqDist, sqRadii))
             return false;
-        
+
         if constexpr(GenerateContacts)
         {
-            stateOut->contact.depth = XMVectorGetX(sqRadii - sqDist);
             const auto normal = XMVector3Normalize(ab);
             XMStoreVector3(&stateOut->contact.normal, normal);
             XMStoreVector3(&stateOut->contact.worldPointA, centerA + normal * radiusA);
             XMStoreVector3(&stateOut->contact.worldPointB, centerB - normal * radiusB);
+            stateOut->contact.depth = Dot(stateOut->contact.worldPointA - stateOut->contact.worldPointB, stateOut->contact.normal);
             stateOut->contact.localPointA = a.center + stateOut->contact.normal * a.radius;
-            stateOut->contact.localPointB = b.center + stateOut->contact.normal * b.radius;
+            stateOut->contact.localPointB = b.center - stateOut->contact.normal * b.radius;
         }
 
         return true;
@@ -106,7 +110,7 @@ namespace
         {
             auto normal_v = XMVector3Normalize(pointToSphere);
             auto pointOnSphere = sphereCenter_v - normal_v * sphereRadius;
-            auto depth_v = XMVector3Length(closestPointOnBox - pointOnSphere);
+            auto depth_v = XMVector3Dot(closestPointOnBox - pointOnSphere, normal_v);
             XMStoreVector3(&stateOut->contact.normal, normal_v);
             stateOut->contact.depth = XMVectorGetX(depth_v);
             XMStoreVector3(&stateOut->contact.worldPointA, closestPointOnBox);

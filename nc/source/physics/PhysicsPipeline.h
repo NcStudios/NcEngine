@@ -151,25 +151,19 @@ namespace nc::physics
         });
 
         auto broadPhaseTask = m_tasks.AddGuardedTask(
-            [proxyCache = &m_proxyCache,
-             broadPhase = &m_broadPhase]
+            [broad = &m_broadPhase,
+             cache = &m_proxyCache]
         {
-            {
-                OPTICK_CATEGORY("BroadPhase::Update", Optick::Category::Physics);
-                broadPhase->Update(proxyCache);
-            }
-
-            {
-                OPTICK_CATEGORY("BroadPhase::FindPairs", Optick::Category::Physics);
-                broadPhase->FindPairs();
-            }
+            OPTICK_CATEGORY("BroadPhase", Optick::Category::Physics);
+            broad->Update(cache);
+            broad->FindPairs();
         });
 
         auto narrowPhasePhysicsTask = m_tasks.AddGuardedTask(
             [&narrow = m_narrowPhase,
              &broad = std::as_const(m_broadPhase)]
         {
-            OPTICK_CATEGORY("NarrowPhase::FindPhysicsPairs", Optick::Category::Physics);
+            OPTICK_CATEGORY("NarrowPhase::FindPhysicsPairs1", Optick::Category::Physics);
             narrow.FindPhysicsPairs<proxy>(broad.GetPhysicsPairs());
         });
 

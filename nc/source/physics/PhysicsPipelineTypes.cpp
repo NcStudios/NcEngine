@@ -6,6 +6,8 @@
 
 #include <array>
 
+#include <iostream>
+
 namespace
 {
     using namespace nc;
@@ -245,10 +247,11 @@ namespace nc::physics
             DirectX::XMStoreVector3(&contact.worldPointA, pointA_v);
             DirectX::XMStoreVector3(&contact.worldPointB, pointB_v);
 
-            contact.depth = Dot(contact.worldPointA - contact.worldPointB, contact.normal);
+            contact.depth = Dot(contact.worldPointB - contact.worldPointA, contact.normal);
 
             if(contact.depth < ContactBreakDistance)
             {
+                //std::cerr << "depth\n";
                 *cur = contacts.back();
                 contacts.pop_back();
                 continue;

@@ -86,34 +86,33 @@ namespace nc::physics
         {
             switch(cur->state)
             {
-                case NarrowEvent::State::New:
+                [[likely]] case NarrowEvent::State::Persisting:
                 {
-                    if(m_registry->Contains<Entity>(cur->first))
-                        m_registry->Get<AutoComponentGroup>(cur->first)->SendOnTriggerEnter(cur->second);
-                    if(m_registry->Contains<Entity>(cur->second))
-                        m_registry->Get<AutoComponentGroup>(cur->second)->SendOnTriggerEnter(cur->first);
-
                     cur->state = NarrowEvent::State::Stale;
                     break;
                 }
-                case NarrowEvent::State::Persisting:
+                case NarrowEvent::State::New:
                 {
-                    if(m_registry->Contains<Entity>(cur->first))
-                        m_registry->Get<AutoComponentGroup>(cur->first)->SendOnTriggerStay(cur->second);
-                    if(m_registry->Contains<Entity>(cur->second))
-                        m_registry->Get<AutoComponentGroup>(cur->second)->SendOnTriggerStay(cur->first);
+                    const auto e1 = cur->first;
+                    const auto e2 = cur->second;
+                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
+                        m_registry->Get<AutoComponentGroup>(e1)->SendOnTriggerEnter(e2);
+                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
+                        m_registry->Get<AutoComponentGroup>(e2)->SendOnTriggerEnter(e1);
 
                     cur->state = NarrowEvent::State::Stale;
                     break;
                 }
                 case NarrowEvent::State::Stale:
                 {
-                    if(m_registry->Contains<Entity>(cur->first))
-                        m_registry->Get<AutoComponentGroup>(cur->first)->SendOnTriggerExit(cur->second);
-                    if(m_registry->Contains<Entity>(cur->second))
-                        m_registry->Get<AutoComponentGroup>(cur->second)->SendOnTriggerExit(cur->first);
+                    const auto e1 = cur->first;
+                    const auto e2 = cur->second;
+                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
+                        m_registry->Get<AutoComponentGroup>(e1)->SendOnTriggerExit(e2);
+                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
+                        m_registry->Get<AutoComponentGroup>(e2)->SendOnTriggerExit(e1);
 
-                    m_triggerCache.Remove(cur->first, cur->second);
+                    m_triggerCache.Remove(e1, e2);
                     break;
                 }
             }
@@ -127,20 +126,17 @@ namespace nc::physics
             {
                 [[likely]] case NarrowEvent::State::Persisting:
                 {
-                    if(m_registry->Contains<Entity>(cur->event.first))
-                        m_registry->Get<AutoComponentGroup>(cur->event.first)->SendOnCollisionStay(cur->event.second);
-                    if(m_registry->Contains<Entity>(cur->event.second))
-                        m_registry->Get<AutoComponentGroup>(cur->event.second)->SendOnCollisionStay(cur->event.first);
-
                     cur->event.state = NarrowEvent::State::Stale;
                     break;
                 }
                 case NarrowEvent::State::New:
                 {
-                    if(m_registry->Contains<Entity>(cur->event.first))
-                        m_registry->Get<AutoComponentGroup>(cur->event.first)->SendOnCollisionEnter(cur->event.second);
-                    if(m_registry->Contains<Entity>(cur->event.second))
-                        m_registry->Get<AutoComponentGroup>(cur->event.second)->SendOnCollisionEnter(cur->event.first);
+                    const auto e1 = cur->event.first;
+                    const auto e2 = cur->event.second;
+                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
+                        m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionEnter(e2);
+                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
+                        m_registry->Get<AutoComponentGroup>(e2)->SendOnCollisionEnter(e1);
 
                     cur->event.state = NarrowEvent::State::Stale;
                     break;
@@ -148,24 +144,26 @@ namespace nc::physics
                 [[unlikely]] case NarrowEvent::State::Stale:
                 {
                     /** This isn't expected to be detected here, but just in case. */
-                    if(m_registry->Contains<Entity>(cur->event.first))
-                        m_registry->Get<AutoComponentGroup>(cur->event.first)->SendOnCollisionExit(cur->event.second);
-                    if(m_registry->Contains<Entity>(cur->event.second))
-                        m_registry->Get<AutoComponentGroup>(cur->event.second)->SendOnCollisionExit(cur->event.first);
+                    const auto e1 = cur->event.first;
+                    const auto e2 = cur->event.second;
+                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
+                        m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionExit(e2);
+                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
+                        m_registry->Get<AutoComponentGroup>(e2)->SendOnCollisionExit(e1);
 
-                    m_manifoldCache.Remove(cur->event.first, cur->event.second);
+                    m_manifoldCache.Remove(e1, e2);
                     break;
                 }
             }
         }
 
         /** Send exit events for stale and empty manifolds detected earlier in the step. */
-        for(auto& removed : m_manifoldCache.GetRemoved())
+        for(const auto& [e1, e2] : m_manifoldCache.GetRemoved())
         {
-            if(m_registry->Contains<Entity>(removed.first))
-                m_registry->Get<AutoComponentGroup>(removed.first)->SendOnCollisionExit(removed.second);
-            if(m_registry->Contains<Entity>(removed.second))
-                m_registry->Get<AutoComponentGroup>(removed.second)->SendOnCollisionExit(removed.first);
+            if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
+                m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionExit(e2);
+            if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
+                m_registry->Get<AutoComponentGroup>(e2)->SendOnCollisionExit(e1);
         }
 
         m_manifoldCache.ClearRemoved();

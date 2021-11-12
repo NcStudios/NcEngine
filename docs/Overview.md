@@ -23,9 +23,9 @@ An entitiy's index is determined and used internally. It can be useful to create
 Layers are underused and are reserved for future use.
 
 ### Flags
-
 * Entity::Flags::Static: Specifies an Entity will not be moved after construction. This is used for various optimizations and is required in certain cases ([ConcaveCollider](EngineComponents.md#concavecollider)).
 * Entity::Flags::Persistent: Persistent entities and their attached components are not destroyed on scene changes.
+* Entity::Flags::NoCollisionNotifications: Attached components will not receive collision/trigger events. This can improve performance in scenes with many colliders.
 
 Entities do not inherit flags from their parents.
 
@@ -49,10 +49,8 @@ virtual void OnDestroy();
 
 /** Called on collision/trigger event detection. */
 virtual void OnCollisionEnter(Entity other);
-virtual void OnCollisionStay(Entity other);
 virtual void OnCollisionExit(Entity other);
 virtual void OnTriggerEnter(Entity other);
-virtual void OnTriggerStay(Entity other);
 virtual void OnTriggerExit(Entity other);
 ```
 

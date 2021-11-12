@@ -4,8 +4,7 @@
 #include "ClickableSystem.h"
 #include "PhysicsPipeline.h"
 #include "collision/proxy/PerFrameProxyCache.h"
-#include "collision/broad_phase/GlobalAllPair.h"
-#include "collision/broad_phase/HashedGrid.h"
+#include "collision/broad_phase/SingleAxisPrune.h"
 
 namespace nc::physics
 {
@@ -16,7 +15,7 @@ namespace nc::physics
             using multithreaded = std::true_type;
             using proxy_cache = PerFrameProxyCache;
             using proxy = proxy_cache::proxy_type;
-            using broad_phase = HashedGrid<proxy_cache>;
+            using broad_phase = SingleAxisPrune<proxy_cache>;
             using concave_phase = BspTree;
         };
 
