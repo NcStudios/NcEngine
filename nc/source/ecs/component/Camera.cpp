@@ -21,8 +21,8 @@ namespace nc
 
     void Camera::UpdateViewMatrix()
     {
-        const auto* transform = ActiveRegistry()->Get<Transform>(GetParentEntity());
-        const auto& m = transform->GetTransformationMatrix();
+        const auto* transform = ActiveRegistry()->Get<Transform>(ParentEntity());
+        const auto& m = transform->TransformationMatrix();
         const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m);
         m_view = DirectX::XMMatrixLookAtRH(m.r[3], look, DirectX::g_XMNegIdentityR1);
     }

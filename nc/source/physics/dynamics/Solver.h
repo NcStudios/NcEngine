@@ -20,8 +20,8 @@ namespace nc::physics
              *  Position constraints will update transforms directly. */
             void ResolveConstraints(std::span<Joint> joints, float dt);
 
-            auto GetContactConstraints() const -> std::span<const ContactConstraint> { return m_contactConstraints; }
-            auto GetPositionConstraints() const -> std::span<const PositionConstraint> { return m_positionConstraints; }
+            auto ContactConstraints() const -> std::span<const ContactConstraint> { return m_contactConstraints; }
+            auto PositionConstraints() const -> std::span<const PositionConstraint> { return m_positionConstraints; }
 
         private:
             Registry* m_registry;

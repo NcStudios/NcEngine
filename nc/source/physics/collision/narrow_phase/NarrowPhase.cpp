@@ -17,7 +17,7 @@ namespace nc::physics
     {
         OPTICK_THREAD("Worker"); // one of the tasks needs to specify a thread
         /** Reverse iterate so items can be removed. */
-        auto manifolds = m_manifoldCache.GetData();
+        auto manifolds = m_manifoldCache.Data();
         auto end = manifolds.rend();
         for(auto cur = manifolds.rbegin(); cur != end; ++cur)
         {
@@ -45,7 +45,7 @@ namespace nc::physics
          *  - If a manifold isn't 'updated' I would expect UpdateManfiolds() to have removed it.
          *    Why isn't this the case?
          *  - Does this actually affect stability at all? It is hard to see a difference. */
-        auto manifolds = m_manifoldCache.GetData();
+        auto manifolds = m_manifoldCache.Data();
         auto end = manifolds.rend();
         for(auto cur = manifolds.rbegin(); cur != end; ++cur)
         {
@@ -61,13 +61,13 @@ namespace nc::physics
     {
         auto index = 0u;
 
-        for(auto& manifold : m_manifoldCache.GetData())
+        for(auto& manifold : m_manifoldCache.Data())
         {
             for(auto& contact : manifold.contacts)
             {
                 const auto& constraint = constraints[index];
 
-                assert(index < m_contactConstraints.size());
+                assert(index < constraints.size());
                 assert(manifold.event.first == constraint.entityA && manifold.event.second == constraint.entityB);
 
                 contact.lambda = constraint.totalLambda;
@@ -80,7 +80,7 @@ namespace nc::physics
 
     void NarrowPhase::NotifyEvents()
     {
-        auto triggers = m_triggerCache.GetData();
+        auto triggers = m_triggerCache.Data();
         auto triggerEnd = triggers.rend();
         for(auto cur = triggers.rbegin(); cur != triggerEnd; ++cur)
         {
@@ -118,7 +118,7 @@ namespace nc::physics
             }
         }
 
-        auto manifolds = m_manifoldCache.GetData();
+        auto manifolds = m_manifoldCache.Data();
         auto manifoldEnd = manifolds.rend();
         for(auto cur = manifolds.rbegin(); cur != manifoldEnd; ++cur)
         {

@@ -38,7 +38,7 @@ namespace nc::physics
             /** Send collision and trigger events to components. */
             void NotifyEvents();
 
-            auto GetManifolds() const -> std::span<const Manifold> { return m_manifoldCache.GetData(); }
+            auto Manifolds() const -> std::span<const Manifold> { return m_manifoldCache.Data(); }
 
             /** Clear the manifold and trigger caches. */
             void Clear();

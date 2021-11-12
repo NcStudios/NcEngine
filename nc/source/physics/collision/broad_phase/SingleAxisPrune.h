@@ -29,8 +29,8 @@ namespace nc::physics
             void Update(proxy_cache_type* cache);
             void FindPairs();
             void Clear();
-            auto GetPhysicsPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.physicsPairs; }
-            auto GetTriggerPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.triggerPairs; }
+            auto PhysicsPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.physicsPairs; }
+            auto TriggerPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.triggerPairs; }
 
         private:
             BroadResults<proxy_type> m_results;
@@ -52,7 +52,7 @@ namespace nc::physics
     {
         m_results.physicsPairs.clear();
         m_results.triggerPairs.clear();
-        m_proxies = cache->GetProxies();
+        m_proxies = cache->Proxies();
 
         const auto count = m_proxies.size();
         if(count == 0u) return;

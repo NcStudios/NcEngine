@@ -16,7 +16,7 @@ namespace nc::physics
             PerFrameProxyCache(Registry* registry);
 
             void Update();
-            auto GetProxies() -> std::span<proxy_type> { return m_proxies; }
+            auto Proxies() -> std::span<proxy_type> { return m_proxies; }
 
         private:
             Registry* m_registry;

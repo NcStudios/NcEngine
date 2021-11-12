@@ -29,9 +29,9 @@ namespace
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
-    : camViewMatrix{camera->GetViewMatrix()},
-      projectionMatrix{camera->GetProjectionMatrix()},
-      cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
+    : camViewMatrix{camera->ViewMatrix()},
+      projectionMatrix{camera->ProjectionMatrix()},
+      cameraPosition{registry->Get<Transform>(camera->ParentEntity())->Position()},
       objectData{},
       pointLightInfos{},
       #ifdef NC_EDITOR_ENABLED
@@ -50,7 +50,7 @@ namespace nc::graphics
 
         for(const auto& renderer : renderers)
         {
-            const auto& modelMatrix = registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
+            const auto& modelMatrix = registry->Get<Transform>(renderer.ParentEntity())->TransformationMatrix();
             
             if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
@@ -79,11 +79,11 @@ namespace nc::graphics
 
         for(auto& pointLight : pointLights)
         {
-            auto* transform = registry->Get<Transform>(pointLight.GetParentEntity());
+            auto* transform = registry->Get<Transform>(pointLight.ParentEntity());
 
-            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->GetTransformationMatrix()));
+            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
 
-            if(pointLight.Update(transform->GetPosition(), pointLightVPs.back()))
+            if(pointLight.Update(transform->Position(), pointLightVPs.back()))
                 isPointLightBindRequired = true;
         }
 

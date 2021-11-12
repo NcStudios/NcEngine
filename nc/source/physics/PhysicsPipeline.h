@@ -87,17 +87,17 @@ namespace nc::physics
             m_broadPhase.FindPairs();
 
             m_narrowPhase.UpdateManifolds();
-            m_concavePhase.template FindPairs<proxy>(m_proxyCache.GetProxies());
-            m_narrowPhase.FindPhysicsPairs<proxy>(m_broadPhase.GetPhysicsPairs());
-            m_narrowPhase.FindTriggerPairs<proxy>(m_broadPhase.GetTriggerPairs());
-            m_narrowPhase.MergeContacts(m_concavePhase.GetPairs());
+            m_concavePhase.template FindPairs<proxy>(m_proxyCache.Proxies());
+            m_narrowPhase.FindPhysicsPairs<proxy>(m_broadPhase.PhysicsPairs());
+            m_narrowPhase.FindTriggerPairs<proxy>(m_broadPhase.TriggerPairs());
+            m_narrowPhase.MergeContacts(m_concavePhase.Pairs());
 
             m_jointSystem.UpdateJoints(m_fixedTimeStep);
-            m_solver.GenerateConstraints(m_narrowPhase.GetManifolds());
-            m_solver.ResolveConstraints(m_jointSystem.GetJoints(), m_fixedTimeStep);
+            m_solver.GenerateConstraints(m_narrowPhase.Manifolds());
+            m_solver.ResolveConstraints(m_jointSystem.Joints(), m_fixedTimeStep);
 
             if constexpr(EnableContactWarmstarting)
-                m_narrowPhase.CacheImpulses(m_solver.GetContactConstraints());
+                m_narrowPhase.CacheImpulses(m_solver.ContactConstraints());
 
             Integrate(m_registry, m_fixedTimeStep);
             m_narrowPhase.NotifyEvents();
@@ -164,7 +164,7 @@ namespace nc::physics
              &broad = std::as_const(m_broadPhase)]
         {
             OPTICK_CATEGORY("NarrowPhase::FindPhysicsPairs1", Optick::Category::Physics);
-            narrow.FindPhysicsPairs<proxy>(broad.GetPhysicsPairs());
+            narrow.FindPhysicsPairs<proxy>(broad.PhysicsPairs());
         });
 
         auto narrowPhaseTriggerTask = m_tasks.AddGuardedTask(
@@ -172,7 +172,7 @@ namespace nc::physics
              &broad = std::as_const(m_broadPhase)]
         {
             OPTICK_CATEGORY("NarrowPhase::FindTriggerPairs", Optick::Category::Physics);
-            narrow.FindTriggerPairs<proxy>(broad.GetTriggerPairs());
+            narrow.FindTriggerPairs<proxy>(broad.TriggerPairs());
         });
 
         auto concavePhaseTask = m_tasks.AddGuardedTask(
@@ -180,7 +180,7 @@ namespace nc::physics
              &proxyCache = m_proxyCache]
         {
             OPTICK_CATEGORY("Concave::FindPairs", Optick::Category::Physics);
-            concave.template FindPairs<proxy>(proxyCache.GetProxies());
+            concave.template FindPairs<proxy>(proxyCache.Proxies());
         });
 
         auto mergeContactsTask = m_tasks.AddGuardedTask(
@@ -188,7 +188,7 @@ namespace nc::physics
              &concave = std::as_const(m_concavePhase)]
         {
             OPTICK_CATEGORY("NarrowPhase::MergeContacts", Optick::Category::Physics);
-            narrow.MergeContacts(concave.GetPairs());
+            narrow.MergeContacts(concave.Pairs());
         });
 
         auto generateConstraintsTask = m_tasks.AddGuardedTask(
@@ -196,7 +196,7 @@ namespace nc::physics
              &narrow = std::as_const(m_narrowPhase)]
         {
             OPTICK_CATEGORY("Solver::GenerateConstraints", Optick::Category::Physics);
-            solver.GenerateConstraints(narrow.GetManifolds());
+            solver.GenerateConstraints(narrow.Manifolds());
         });
 
         auto updateJointsTask = m_tasks.AddGuardedTask(
@@ -213,7 +213,7 @@ namespace nc::physics
              dt = m_fixedTimeStep]
         {
             OPTICK_CATEGORY("Solver::ResolveConstraints", Optick::Category::Physics);
-            solver.ResolveConstraints(jointSystem.GetJoints(), dt);
+            solver.ResolveConstraints(jointSystem.Joints(), dt);
         });
 
         auto cacheImpulsesTask = m_tasks.AddGuardedTask(
@@ -222,7 +222,7 @@ namespace nc::physics
         {
             OPTICK_CATEGORY("NarrowPhase::CacheImpulses", Optick::Category::Physics);
             if constexpr(EnableContactWarmstarting)
-                narrow.CacheImpulses(solver.GetContactConstraints());
+                narrow.CacheImpulses(solver.ContactConstraints());
         });
 
         auto integrateTask = m_tasks.AddGuardedTask(

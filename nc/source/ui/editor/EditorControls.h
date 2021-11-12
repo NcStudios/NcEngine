@@ -58,7 +58,7 @@ namespace nc::ui::editor::controls
                 {
                     auto* transform = registry->Get<Transform>(entity);
                     auto* tag = registry->Get<Tag>(entity);
-                    if(transform->GetParent().Valid()) // only draw root nodes
+                    if(transform->Parent().Valid()) // only draw root nodes
                         continue;
 
                     if(!filter.PassFilter(tag->Value().data()))
@@ -92,7 +92,7 @@ namespace nc::ui::editor::controls
         
         if(open)
         {
-            for(auto child : transform->GetChildren())
+            for(auto child : transform->Children())
                 SceneGraphNode(registry, child, registry->Get<Tag>(child), registry->Get<Transform>(child));
 
             ImGui::TreePop();
@@ -251,7 +251,7 @@ namespace nc::ui::editor::controls
             {
                 ImGui::Indent();
                 for(const auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", component.GetParentEntity().Index(), static_cast<const void*>(&component));
+                    ImGui::Text("Handle: %5u  |  Address: %p", component.ParentEntity().Index(), static_cast<const void*>(&component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();

@@ -50,8 +50,8 @@ namespace nc
             auto Hash(IdType a, IdType b) -> uint32_t;
 
             /** Contiguous access to entries. */
-            auto GetData() -> std::span<DataType> { return m_data; }
-            auto GetData() const -> std::span<const DataType> { return m_data; }
+            auto Data() -> std::span<DataType> { return m_data; }
+            auto Data() const -> std::span<const DataType> { return m_data; }
 
         private:
             std::vector<DataType> m_data;

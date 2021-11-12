@@ -161,7 +161,7 @@ namespace nc::physics
         return insertIndex;
     }
 
-    const Contact& Manifold::GetDeepestContact() const
+    const Contact& Manifold::DeepestContact() const
     {
         IF_THROW(contacts.size() == 0u, "Manifold::GetDeepestContact - Empty contacts");
 
@@ -229,8 +229,8 @@ namespace nc::physics
             return;
         }
 
-        const auto& aMatrix = transformA->GetTransformationMatrix();
-        const auto& bMatrix = transformB->GetTransformationMatrix();
+        const auto& aMatrix = transformA->TransformationMatrix();
+        const auto& bMatrix = transformB->TransformationMatrix();
 
         for(auto cur = contacts.rbegin(); cur != contacts.rend(); ++cur)
         {

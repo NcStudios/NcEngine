@@ -96,12 +96,12 @@ namespace nc::physics
         XMVECTOR pA, pB;
         {
             auto* transform = m_registry->Get<Transform>(joint.entityA);
-            joint.rA = XMVector3Rotate(joint.anchorA, transform->GetRotationXM());
-            pA = joint.rA + transform->GetPositionXM();
+            joint.rA = XMVector3Rotate(joint.anchorA, transform->RotationXM());
+            pA = joint.rA + transform->PositionXM();
 
             transform = m_registry->Get<Transform>(joint.entityB);
-            joint.rB = XMVector3Rotate(joint.anchorB, transform->GetRotationXM());
-            pB = joint.rB + transform->GetPositionXM();
+            joint.rB = XMVector3Rotate(joint.anchorB, transform->RotationXM());
+            pB = joint.rB + transform->PositionXM();
         }
 
         /** Scale bias by time step and positional error */

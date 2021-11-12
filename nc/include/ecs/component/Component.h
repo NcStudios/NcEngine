@@ -26,7 +26,7 @@ namespace nc
             ComponentBase& operator=(const ComponentBase&) = delete;
             ComponentBase& operator=(ComponentBase&&) = default;
 
-            Entity GetParentEntity() const noexcept { return m_parentEntity; }
+            Entity ParentEntity() const noexcept { return m_parentEntity; }
 
         private:
             Entity m_parentEntity;

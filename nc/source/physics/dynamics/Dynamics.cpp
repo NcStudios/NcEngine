@@ -14,7 +14,7 @@ namespace nc::physics
     {
         for(auto& body : registry->ViewAll<PhysicsBody>())
         {
-            const auto* transform = registry->Get<Transform>(body.GetParentEntity());
+            const auto* transform = registry->Get<Transform>(body.ParentEntity());
             body.UpdateWorldInertia(transform);
         }
     }
@@ -36,13 +36,13 @@ namespace nc::physics
     {
         for(auto& body : registry->ViewAll<PhysicsBody>())
         {
-            auto* transform = registry->Get<Transform>(body.GetParentEntity());
+            auto* transform = registry->Get<Transform>(body.ParentEntity());
 
             if(body.Integrate(transform, dt) == IntegrationResult::PutToSleep)
             {
                 if constexpr(EnableSleeping)
                 {
-                    auto* collider = registry->Get<Collider>(body.GetParentEntity());
+                    auto* collider = registry->Get<Collider>(body.ParentEntity());
                     collider->Sleep();
                 }
             }

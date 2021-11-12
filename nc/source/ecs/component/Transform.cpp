@@ -40,30 +40,30 @@ namespace nc
         {
             auto* parentTransform = ActiveRegistry()->Get<Transform>(parent);
             parentTransform->AddChild(entity);
-            m_worldMatrix = parentTransform->GetTransformationMatrix() * m_worldMatrix;
+            m_worldMatrix = parentTransform->TransformationMatrix() * m_worldMatrix;
         }
     }
 
-    Vector3 Transform::GetLocalPosition() const
+    Vector3 Transform::LocalPosition() const
     {
         Vector3 out;
         DirectX::XMStoreVector3(&out, m_localMatrix.r[3]);
         return out;
     }
 
-    Vector3 Transform::GetPosition() const
+    Vector3 Transform::Position() const
     {
         Vector3 out;
         DirectX::XMStoreVector3(&out, m_worldMatrix.r[3]);
         return out;
     }
 
-    DirectX::XMVECTOR Transform::GetPositionXM() const
+    DirectX::XMVECTOR Transform::PositionXM() const
     {
         return m_worldMatrix.r[3];
     }
 
-    Quaternion Transform::GetLocalRotation() const
+    Quaternion Transform::LocalRotation() const
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
@@ -72,7 +72,7 @@ namespace nc
         return out;
     }
 
-    Quaternion Transform::GetRotation() const
+    Quaternion Transform::Rotation() const
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
@@ -81,14 +81,14 @@ namespace nc
         return out;
     }
 
-    DirectX::XMVECTOR Transform::GetRotationXM() const
+    DirectX::XMVECTOR Transform::RotationXM() const
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
         return rot_v;
     }
 
-    Vector3 Transform::GetScale() const
+    Vector3 Transform::Scale() const
     {
         using namespace DirectX;
         // Fill out_v with x scale, then shift in y and z values
@@ -100,7 +100,7 @@ namespace nc
         return out;
     }
 
-    Vector3 Transform::GetLocalScale() const
+    Vector3 Transform::LocalScale() const
     {
         using namespace DirectX;
         // Fill out_v with x scale, then shift in y and z values
@@ -112,7 +112,7 @@ namespace nc
         return out;
     }
 
-    DirectX::FXMMATRIX Transform::GetTransformationMatrix() const
+    DirectX::FXMMATRIX Transform::TransformationMatrix() const
     {
         return m_worldMatrix;
     }
@@ -262,20 +262,20 @@ namespace nc
         UpdateWorldMatrix();
     }
 
-    std::span<Entity> Transform::GetChildren()
+    std::span<Entity> Transform::Children()
     {
         return std::span<Entity>(m_children.data(), m_children.size());
     }
 
-    Entity Transform::GetRoot() const
+    Entity Transform::Root() const
     {
         if(m_parent.Valid())
-            return ActiveRegistry()->Get<Transform>(m_parent)->GetRoot();
+            return ActiveRegistry()->Get<Transform>(m_parent)->Root();
         
-        return GetParentEntity();
+        return ParentEntity();
     }
 
-    Entity Transform::GetParent() const
+    Entity Transform::Parent() const
     {
         return m_parent;
     }
@@ -285,12 +285,12 @@ namespace nc
         auto* registry = ActiveRegistry();
 
         if(m_parent.Valid())
-            registry->Get<Transform>(m_parent)->RemoveChild(GetParentEntity());
+            registry->Get<Transform>(m_parent)->RemoveChild(ParentEntity());
         
         m_parent = parent;
 
         if(m_parent.Valid())
-            registry->Get<Transform>(m_parent)->AddChild(GetParentEntity());
+            registry->Get<Transform>(m_parent)->AddChild(ParentEntity());
     }
 
     void Transform::AddChild(Entity child)
@@ -314,7 +314,7 @@ namespace nc
         auto* registry = ActiveRegistry();
 
         if(m_parent.Valid())
-            m_worldMatrix = m_localMatrix * registry->Get<Transform>(m_parent)->GetTransformationMatrix();
+            m_worldMatrix = m_localMatrix * registry->Get<Transform>(m_parent)->TransformationMatrix();
         else
             m_worldMatrix = m_localMatrix;
         

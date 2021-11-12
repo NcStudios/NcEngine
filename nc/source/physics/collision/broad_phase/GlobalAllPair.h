@@ -19,8 +19,8 @@ namespace nc::physics
             void FindPairs();
             void Clear();
 
-            auto GetPhysicsPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.physicsPairs; }
-            auto GetTriggerPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.triggerPairs; }
+            auto PhysicsPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.physicsPairs; }
+            auto TriggerPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.triggerPairs; }
 
         private:
             std::span<proxy_type> m_proxies;
@@ -30,7 +30,7 @@ namespace nc::physics
     template<ProxyCache ProxyCacheType>
     void GlobalAllPair<ProxyCacheType>::Update(proxy_cache_type* cache)
     {
-        m_proxies = cache->GetProxies();
+        m_proxies = cache->Proxies();
     }
 
     template<ProxyCache ProxyCacheType>

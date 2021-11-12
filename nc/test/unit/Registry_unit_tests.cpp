@@ -133,7 +133,7 @@ TEST_F(Registry_unit_tests, AddComponent_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
     auto* ptr = registry.Add<Fake1>(handle, 1);
-    EXPECT_EQ(ptr->GetParentEntity(), handle);
+    EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
 }
 
@@ -149,7 +149,7 @@ TEST_F(Registry_unit_tests, AddComponent_ReplaceAfterRemove_ConstructsObject)
     registry.CommitStagedChanges();
     registry.Remove<Fake1>(handle);
     auto* ptr = registry.Add<Fake1>(handle, 2);
-    EXPECT_EQ(ptr->GetParentEntity(), handle);
+    EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 2);
 }
 
@@ -343,7 +343,7 @@ TEST_F(Registry_unit_tests, AddAutoComponent_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
     auto* ptr = registry.Add<FakeAutoComponent>(handle, 1);
-    EXPECT_EQ(ptr->GetParentEntity(), handle);
+    EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
 }
 
@@ -376,7 +376,7 @@ TEST_F(Registry_unit_tests, ViewGroup_FirstGroupLarger_ReturnsSortedViews)
 
     for(size_t i = 0u; i < fake1Size; ++i)
     {
-        EXPECT_EQ(fake1[i].GetParentEntity(), fake2[i].GetParentEntity());
+        EXPECT_EQ(fake1[i].ParentEntity(), fake2[i].ParentEntity());
     }
 }
 
@@ -409,7 +409,7 @@ TEST_F(Registry_unit_tests, ViewGroup_SecondGroupLarger_ReturnsSortedViews)
 
     for(size_t i = 0u; i < fake1Size; ++i)
     {
-        EXPECT_EQ(fake1[i].GetParentEntity(), fake2[i].GetParentEntity());
+        EXPECT_EQ(fake1[i].ParentEntity(), fake2[i].ParentEntity());
     }
 }
 

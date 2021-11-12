@@ -27,7 +27,7 @@ namespace nc::physics
         public:
             JointSystem(Registry* registry);
 
-            auto GetJoints() -> std::span<Joint> { return m_joints; }
+            auto Joints() -> std::span<Joint> { return m_joints; }
 
             /** Prepare joints for resolution. Applies worldpsace transformations and
             *   precomputes bias/effective mass matrix. */

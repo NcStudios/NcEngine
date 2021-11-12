@@ -36,8 +36,8 @@ namespace
                                               PhysicsBody* physBodyB)
     {
         /** Compute vectors from object centers to contact points */
-        auto rA = contact.worldPointA - transformA->GetPosition();
-        auto rB = contact.worldPointB - transformB->GetPosition();
+        auto rA = contact.worldPointA - transformA->Position();
+        auto rB = contact.worldPointB - transformB->Position();
         auto rA_v = XMLoadVector3(&rA);
         auto rB_v = XMLoadVector3(&rB);
 
@@ -322,7 +322,7 @@ namespace nc::physics
 
             if constexpr(EnableDirectPositionCorrection)
             {
-                auto deepestContact = manifold.GetDeepestContact();
+                auto deepestContact = manifold.DeepestContact();
                 m_positionConstraints.emplace_back(transformA, transformB, manifold.event.eventType, deepestContact.normal, deepestContact.depth);
             }
 

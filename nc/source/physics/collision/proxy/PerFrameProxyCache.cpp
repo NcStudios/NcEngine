@@ -18,8 +18,8 @@ namespace nc::physics
 
         for(auto& collider : colliders)
         {
-            auto entity = collider.GetParentEntity();
-            auto matrix = m_registry->Get<Transform>(entity)->GetTransformationMatrix();
+            auto entity = collider.ParentEntity();
+            auto matrix = m_registry->Get<Transform>(entity)->TransformationMatrix();
             auto volume = collider.GetVolume();
             auto estimate = collider.EstimateBoundingVolume(matrix);
             auto body = m_registry->Get<PhysicsBody>(entity);

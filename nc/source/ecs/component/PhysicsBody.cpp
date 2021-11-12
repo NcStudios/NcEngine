@@ -18,7 +18,7 @@ namespace
 
     Vector3 CreateInverseInertiaTensor(Transform* transform, Collider* collider, float mass)
     {
-        auto transformScale = transform->GetScale();
+        auto transformScale = transform->Scale();
         auto colliderScale = collider->GetInfo().scale;
         auto scale = HadamardProduct(transformScale, colliderScale);
         auto type = collider->GetType();
@@ -115,7 +115,7 @@ namespace nc
 
     void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
     {
-        if(m_properties.isKinematic || GetParentEntity().IsStatic())
+        if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
         
         m_linearVelocity += DirectX::XMVectorScale(impulse, m_properties.mass) * m_linearFreedom;
@@ -128,7 +128,7 @@ namespace nc
 
     void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
     {
-        if(m_properties.isKinematic || GetParentEntity().IsStatic())
+        if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
 
         auto restrictedTorque = torque * m_angularFreedom;
@@ -137,7 +137,7 @@ namespace nc
 
     void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
     {
-        if(m_properties.isKinematic || GetParentEntity().IsStatic())
+        if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
         
         m_linearVelocity += delta * m_linearFreedom;
@@ -145,7 +145,7 @@ namespace nc
 
     void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
     {
-        if(m_properties.isKinematic || GetParentEntity().IsStatic())
+        if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
         
         m_linearVelocity += velDelta * m_linearFreedom;
@@ -154,10 +154,10 @@ namespace nc
 
     void PhysicsBody::UpdateWorldInertia(const Transform* transform)
     {
-        if(GetParentEntity().IsStatic())
+        if(ParentEntity().IsStatic())
             return;
 
-        auto rot_v = transform->GetRotationXM();
+        auto rot_v = transform->RotationXM();
         auto rot_m = DirectX::XMMatrixRotationQuaternion(rot_v);
         auto invInertiaLocalMatrix = DirectX::XMMatrixScaling(m_invInertiaLocal.x, m_invInertiaLocal.y, m_invInertiaLocal.z);
         m_invInertiaWorld = rot_m * invInertiaLocalMatrix * DirectX::XMMatrixTranspose(rot_m);

@@ -32,8 +32,8 @@ namespace nc::physics
 
             HashedGrid();
 
-            auto GetPhysicsPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.physicsPairs; }
-            auto GetTriggerPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.triggerPairs; }
+            auto PhysicsPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.physicsPairs; }
+            auto TriggerPairs() const -> std::span<const BroadPair<proxy_type>> { return m_results.triggerPairs; }
 
             void Update(proxy_cache_type* cache);
             void FindPairs();
@@ -250,7 +250,7 @@ namespace nc::physics
         std::ranges::fill(m_buckets, nullptr);
         std::ranges::fill(m_largeBuckets, nullptr);
 
-        for(auto& proxy : cache->GetProxies())
+        for(auto& proxy : cache->Proxies())
         {
             Add(&proxy);
         }

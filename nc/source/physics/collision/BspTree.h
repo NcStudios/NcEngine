@@ -59,7 +59,7 @@ namespace nc::physics
 
             template<Proxy ProxyType>
             void FindPairs(std::span<const ProxyType> proxies);
-            auto GetPairs() const -> const NarrowPhysicsResult& { return m_results; }
+            auto Pairs() const -> const NarrowPhysicsResult& { return m_results; }
             void Clear();
 
         private:

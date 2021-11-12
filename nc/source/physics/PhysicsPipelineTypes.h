@@ -49,7 +49,7 @@ namespace nc::physics
     concept ProxyCache = requires(T cache)
     {
         cache.Update();
-        cache.GetProxies();
+        cache.Proxies();
         /** @todo will need a few more for working with frame deltas */
     };
 
@@ -79,8 +79,8 @@ namespace nc::physics
         phase.Update(cache);
         phase.FindPairs();
         phase.Clear();
-        { phase.GetPhysicsPairs() } -> std::same_as<std::span<const BroadPair<typename T::proxy_type>>>;
-        { phase.GetTriggerPairs() } -> std::same_as<std::span<const BroadPair<typename T::proxy_type>>>;
+        { phase.PhysicsPairs() } -> std::same_as<std::span<const BroadPair<typename T::proxy_type>>>;
+        { phase.TriggerPairs() } -> std::same_as<std::span<const BroadPair<typename T::proxy_type>>>;
     };
 
     /** A pair of colliding objects. */
@@ -124,14 +124,14 @@ namespace nc::physics
         int AddContact(const Contact& contact);
         int SortPoints(const Contact& contact);
         void UpdateWorldPoints(const Registry* registry);
-        const Contact& GetDeepestContact() const;
+        const Contact& DeepestContact() const;
     };
 
     template<class T>
     concept ConcavePhase = requires(T phase)
     {
         /** @todo FindPairs */
-        { phase.GetPairs() } -> std::same_as<const NarrowPhysicsResult&>;
+        { phase.Pairs() } -> std::same_as<const NarrowPhysicsResult&>;
         phase.Clear();
     };
 }

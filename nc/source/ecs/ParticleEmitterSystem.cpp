@@ -11,8 +11,8 @@
 //     {
 //         return nc::particle::GraphicsData
 //         {
-//             // graphics->GetViewMatrix(),
-//             // graphics->GetProjectionMatrix(),
+//             // graphics->ViewMatrix(),
+//             // graphics->ProjectionMatrix(),
 //             // graphics
 //         };
 //     }
@@ -90,7 +90,7 @@ namespace nc::ecs
 
     void ParticleEmitterSystem::Add(ParticleEmitter&)
     {
-        // m_toAdd.emplace_back(emitter.GetParentEntity(), emitter.GetInfo(), &m_graphicsData);
+        // m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_graphicsData);
         // emitter.RegisterSystem(this);
     }
 

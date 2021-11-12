@@ -12,12 +12,12 @@ namespace
     auto CreateTriMesh(Registry* registry, const ConcaveCollider& collider) -> TriMesh
     {
         auto meshView = AssetService<ConcaveColliderView>::Get()->Acquire(collider.GetPath());
-        auto entity = collider.GetParentEntity();
+        auto entity = collider.ParentEntity();
         auto* transform = registry->Get<Transform>(entity);
-        const auto& m = transform->GetTransformationMatrix();
-        const auto& scale = transform->GetScale();
+        const auto& m = transform->TransformationMatrix();
+        const auto& scale = transform->Scale();
         auto maxScale = math::Max(math::Max(scale.x, scale.y), scale.z);
-        auto estimate = Sphere{transform->GetPosition(), maxScale * meshView.maxExtent};
+        auto estimate = Sphere{transform->Position(), maxScale * meshView.maxExtent};
 
         std::vector<Triangle> triangles;
         triangles.reserve(meshView.triangles.size());
