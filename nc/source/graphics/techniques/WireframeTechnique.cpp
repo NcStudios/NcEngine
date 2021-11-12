@@ -12,7 +12,6 @@
 #include "graphics/ShaderUtilities.h"
 #include "graphics/Swapchain.h"
 #include "graphics/VertexDescriptions.h"
-#include "optick/optick.h"
 
 #include <iostream>
 

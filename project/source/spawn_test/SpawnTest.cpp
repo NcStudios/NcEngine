@@ -52,7 +52,6 @@ namespace nc::sample
 {
     void SpawnTest::Load(NcEngine* engine)
     {
-        prefab::InitializeResources();
         auto* registry = engine->Registry();
 
         // Setup

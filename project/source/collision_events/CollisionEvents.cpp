@@ -46,8 +46,6 @@ namespace nc::sample
 {
     void CollisionEvents::Load(NcEngine* engine)
     {
-        prefab::InitializeResources();
-
         auto* registry = engine->Registry();
         
         // Setup

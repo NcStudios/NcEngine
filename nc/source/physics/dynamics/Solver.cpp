@@ -2,7 +2,6 @@
 #include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 #include "graphics/DebugRenderer.h"
-#include "optick/optick.h"
 
 #include <cassert>
 

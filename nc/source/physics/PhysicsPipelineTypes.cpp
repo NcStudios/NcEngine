@@ -6,8 +6,6 @@
 
 #include <array>
 
-#include <iostream>
-
 namespace
 {
     using namespace nc;
@@ -251,7 +249,6 @@ namespace nc::physics
 
             if(contact.depth < ContactBreakDistance)
             {
-                //std::cerr << "depth\n";
                 *cur = contacts.back();
                 contacts.pop_back();
                 continue;

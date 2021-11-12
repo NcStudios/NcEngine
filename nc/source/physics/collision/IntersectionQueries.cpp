@@ -183,11 +183,6 @@ namespace nc::physics
         return SquareMagnitude(a.center - b.center) < radii * radii;
     }
 
-    bool Intersect(const Sphere& a, const Box& b)
-    {
-        return SquareMtdToAABB(a.center, b) <= a.radius * a.radius;
-    }
-
     bool Intersect(const Frustum& a, const Sphere& b)
     {
         if(auto space = TestHalfspace(a.front, b); space != HalfspaceContainment::Positive)

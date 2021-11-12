@@ -30,5 +30,5 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
         engine = nullptr;
     }
 
-	return 0;
+    return 0;
 }

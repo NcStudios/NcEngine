@@ -20,9 +20,6 @@ namespace nc::physics
     bool Intersect(const Sphere& a, const Sphere& b);
     bool Intersect(const Frustum& a, const Sphere& b);
 
-    // check, also must be aabb
-    bool Intersect(const Sphere& a, const Box& b);
-
     /** Test intersection and generate contact points between untransformed volumes. */
     bool Collide(const BoundingVolume& a, const BoundingVolume& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state);
     
