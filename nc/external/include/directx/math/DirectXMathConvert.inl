@@ -570,6 +570,28 @@ inline XMVECTOR XM_CALLCONV XMLoadFloat3A
 
 //------------------------------------------------------------------------------
 _Use_decl_annotations_
+inline XMVECTOR XMLoadVector3A
+(
+    const nc::Vector3* pSource
+)
+{
+    assert(pSource);
+    assert((reinterpret_cast<uintptr_t>(pSource) & 0xF) == 0);
+#if defined(_XM_NO_INTRINSICS_)
+    XMVECTOR V;
+    V.vector4_f32[0] = pSource->x;
+    V.vector4_f32[1] = pSource->y;
+    V.vector4_f32[2] = pSource->z;
+    V.vector4_f32[3] = 0.f;
+    return V;
+#elif defined(_XM_SSE_INTRINSICS_)
+    __m128 V = _mm_load_ps( &pSource->x );
+    return _mm_and_ps( V, g_XMMask3 );
+#endif
+}
+
+//------------------------------------------------------------------------------
+_Use_decl_annotations_
 inline XMVECTOR XM_CALLCONV XMLoadSInt3
 (
     const XMINT3* pSource
@@ -1629,6 +1651,27 @@ inline void XM_CALLCONV XMStoreFloat3A
     float32x2_t VL = vget_low_f32(V);
     vst1_f32_ex( reinterpret_cast<float*>(pDestination), VL, 64 );
     vst1q_lane_f32( reinterpret_cast<float*>(pDestination)+2, V, 2 );
+#elif defined(_XM_SSE_INTRINSICS_)
+    XMVECTOR T = XM_PERMUTE_PS(V,_MM_SHUFFLE(2,2,2,2));
+    _mm_storel_epi64( reinterpret_cast<__m128i*>(pDestination), _mm_castps_si128(V) );
+    _mm_store_ss( &pDestination->z, T );
+#endif
+}
+
+//------------------------------------------------------------------------------
+_Use_decl_annotations_
+inline void XMStoreVector3A
+(
+    nc::Vector3* pDestination,
+    FXMVECTOR V
+)
+{
+    assert(pDestination);
+    assert((reinterpret_cast<uintptr_t>(pDestination) & 0xF) == 0);
+#if defined(_XM_NO_INTRINSICS_)
+    pDestination->x = V.vector4_f32[0];
+    pDestination->y = V.vector4_f32[1];
+    pDestination->z = V.vector4_f32[2];
 #elif defined(_XM_SSE_INTRINSICS_)
     XMVECTOR T = XM_PERMUTE_PS(V,_MM_SHUFFLE(2,2,2,2));
     _mm_storel_epi64( reinterpret_cast<__m128i*>(pDestination), _mm_castps_si128(V) );

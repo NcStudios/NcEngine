@@ -182,7 +182,7 @@ namespace nc::audio
         if(!listenerTransform)
             throw NcError("Invalid listener registered");
         
-        const auto listenerPosition = listenerTransform->GetPosition();
+        const auto listenerPosition = listenerTransform->Position();
         const auto rightEar = listenerTransform->Right();
 
         for(auto& source : m_registry->ViewAll<AudioSource>())
@@ -192,8 +192,8 @@ namespace nc::audio
             
             if(source.IsSpatial())
             {
-                auto* transform = m_registry->Get<Transform>(source.GetParentEntity());
-                source.WriteSpatialSamples(buffer, BufferFrames, transform->GetPosition(), listenerPosition, rightEar);
+                auto* transform = m_registry->Get<Transform>(source.ParentEntity());
+                source.WriteSpatialSamples(buffer, BufferFrames, transform->Position(), listenerPosition, rightEar);
             }
             else
             {

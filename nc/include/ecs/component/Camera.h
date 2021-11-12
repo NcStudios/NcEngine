@@ -12,8 +12,8 @@ namespace nc
         public:
             Camera(Entity entity) noexcept;
 
-            auto GetViewMatrix() const noexcept -> DirectX::FXMMATRIX { return m_view; }
-            auto GetProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
+            auto ViewMatrix() const noexcept -> DirectX::FXMMATRIX { return m_view; }
+            auto ProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
             auto CalculateFrustum() const noexcept -> Frustum;
 
             void UpdateViewMatrix();

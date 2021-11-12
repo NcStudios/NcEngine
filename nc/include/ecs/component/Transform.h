@@ -20,19 +20,19 @@ namespace nc
             Transform& operator=(const Transform&) = delete;
             Transform& operator=(Transform&&) = default;
 
-            Vector3 GetPosition() const;                        // Get world space position
-            Vector3 GetLocalPosition() const;                   // Get position relative to parent
-            Quaternion GetRotation() const;                     // Get world space rotation
-            Quaternion GetLocalRotation() const;                // Get rotation relative to parent
-            Vector3 GetScale() const;                           // Get world space scale
-            Vector3 GetLocalScale() const;                      // Get scale relative to parent
-            DirectX::FXMMATRIX GetTransformationMatrix() const; // Get world space transformation matrix
-            Vector3 ToLocalSpace(const Vector3& vec) const;     // Transform a vector by this transforms's world space matrix
-            Vector3 Up() const;                                 // Get the up axis of the transform
-            Vector3 Forward() const;                            // Get the forward axis of the transform
-            Vector3 Right() const;                              // Get the right axis of the transform
-
-            DirectX::XMVECTOR GetRotationXM() const;
+            auto Position() const -> Vector3;                        // Get world space position
+            auto PositionXM() const -> DirectX::XMVECTOR;            // Get world space position as XMVECTOR
+            auto LocalPosition() const -> Vector3;                   // Get position relative to parent
+            auto Rotation() const -> Quaternion;                     // Get world space rotation
+            auto RotationXM() const -> DirectX::XMVECTOR;            // Get world space rotation as XMVECTOR
+            auto LocalRotation() const -> Quaternion;                // Get rotation relative to parent
+            auto Scale() const -> Vector3;                           // Get world space scale
+            auto LocalScale() const -> Vector3;                      // Get scale relative to parent
+            auto TransformationMatrix() const -> DirectX::FXMMATRIX; // Get world space transformation matrix
+            auto ToLocalSpace(const Vector3& vec) const -> Vector3;  // Transform a vector by this transforms's world space matrix
+            auto Up() const -> Vector3;                              // Get the up axis of the transform
+            auto Forward() const -> Vector3;                         // Get the forward axis of the transform
+            auto Right() const -> Vector3;                           // Get the right axis of the transform
 
             // All modification methods operate on the local matrix
             void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
@@ -49,11 +49,11 @@ namespace nc
             void Rotate(Vector3 axis, float radians);
 
             // Hierarchy methods
-            std::span<Entity> GetChildren(); // Get all immediate children of this transform
-            Entity GetRoot() const;         // Get the root node relative to this transform
-            Entity GetParent() const;        // Get the immediate parent of this transform - may be nullptr
-            void SetParent(Entity parent);   // Make this transform the child of another - nullptr will detach from existing parent
-            
+            auto Children() -> std::span<Entity>; // Get all immediate children of this transform
+            auto Root() const -> Entity;          // Get the root node relative to this transform
+            auto Parent() const -> Entity;        // Get the immediate parent of this transform - may be nullptr
+            void SetParent(Entity parent);        // Make this transform the child of another - nullptr will detach from existing parent
+
         private:
             void AddChild(Entity child);
             void RemoveChild(Entity child);
@@ -63,7 +63,7 @@ namespace nc
             DirectX::XMMATRIX m_worldMatrix;
             Entity m_parent;
             std::vector<Entity> m_children;
-            
+
             #ifdef NC_EDITOR_ENABLED
             friend void ComponentGuiElement<Transform>(Transform*);
             #endif

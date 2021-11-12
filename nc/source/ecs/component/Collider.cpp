@@ -187,7 +187,7 @@ namespace nc
         auto transformationMatrix = DirectX::FXMMATRIX
         (
             DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
-            ActiveRegistry()->Get<Transform>(GetParentEntity())->GetTransformationMatrix() *
+            ActiveRegistry()->Get<Transform>(ParentEntity())->TransformationMatrix() *
             DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
         );
 

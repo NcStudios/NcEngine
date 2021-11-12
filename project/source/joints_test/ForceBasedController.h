@@ -24,7 +24,7 @@ namespace nc::sample
 
     inline void ForceBasedController::FixedUpdate()
     {
-        auto* body = m_registry->Get<PhysicsBody>(GetParentEntity());
+        auto* body = m_registry->Get<PhysicsBody>(ParentEntity());
 
         if(!body)
             return;

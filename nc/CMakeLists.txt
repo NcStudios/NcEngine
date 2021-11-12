@@ -10,7 +10,7 @@ option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(NC_DEBUG_RENDERING "Enable wireframe primitive rendering" OFF)
 option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
-option(PROFILING_ENABLED "Include gprof instrumentation" OFF)
+option(NC_PROFILING_ENABLED "Include Optick profiling" OFF)
 option(SANITIZE_UB "Use undefined behavior santizer" OFF)
 
 if(NOT DEFINED NC_BUILD_TYPE)
@@ -60,6 +60,10 @@ if(NC_DEBUG_RENDERING)
     add_definitions(-DNC_DEBUG_RENDERING)
 endif()
 
+if(NC_PROFILING_ENABLED)
+    add_definitions(-DNC_PROFILING_ENABLED)
+endif()
+
 if(NC_USE_VALIDATION)
     add_definitions(-DNC_USE_VALIDATION)
 endif()
@@ -97,13 +101,6 @@ if(SANITIZE_UB)
     )
 endif()
 
-if(PROFILING_ENABLED)
-    target_compile_options(${ENGINE_LIB}
-        PRIVATE
-            -pg
-    )
-endif()
-
 #Link libraries
 target_link_libraries(${ENGINE_LIB}
     Vulkan::Vulkan
@@ -116,14 +113,6 @@ target_include_directories(${ENGINE_LIB}
         ${NC_SOURCE_DIR}
         ${EXTERNAL_INCLUDE_DIR}
 )
-
-#Link Options
-if(PROFILING_ENABLED)
-    target_link_options(${ENGINE_LIB}
-        PRIVATE
-            -pg
-    )
-endif()
 
 #SUBDIRS
 add_subdirectory(source)

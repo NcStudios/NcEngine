@@ -2,7 +2,6 @@
 #include "WireframeTechnique.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "ecs/component/Transform.h"
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
@@ -49,9 +48,7 @@ namespace nc::graphics
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        NC_PROFILE_END();
     }
 
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -126,8 +123,6 @@ namespace nc::graphics
 
     void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
         auto pushConstants = WireframePushConstants{};
 
         if (frameData.colliderDebugWidget.has_value())
@@ -169,8 +164,6 @@ namespace nc::graphics
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
         #endif
-
-        NC_PROFILE_END();
     }
 }
 #endif

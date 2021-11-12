@@ -1,6 +1,5 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
-#include "debug/Profiler.h"
 #include "ecs/Registry.h"
 #include "ecs/EntityComponentSystem.h"
 #include "ecs/component/AudioSource.h"
@@ -32,7 +31,6 @@ namespace nc::ui::editor::controls
     inline void AutoComponentElement(AutoComponent* comp);
     inline void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight);
     inline void FrameData(float* dtMult);
-    inline void Profiler();
     inline void ComponentSystems(Registry* registry);
     inline void PhysicsMetrics();
 
@@ -60,7 +58,7 @@ namespace nc::ui::editor::controls
                 {
                     auto* transform = registry->Get<Transform>(entity);
                     auto* tag = registry->Get<Tag>(entity);
-                    if(transform->GetParent().Valid()) // only draw root nodes
+                    if(transform->Parent().Valid()) // only draw root nodes
                         continue;
 
                     if(!filter.PassFilter(tag->Value().data()))
@@ -94,7 +92,7 @@ namespace nc::ui::editor::controls
         
         if(open)
         {
-            for(auto child : transform->GetChildren())
+            for(auto child : transform->Children())
                 SceneGraphNode(registry, child, registry->Get<Tag>(child), registry->Get<Transform>(child));
 
             ImGui::TreePop();
@@ -209,7 +207,6 @@ namespace nc::ui::editor::controls
             }
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
-                WrapTabItem("Profiler", Profiler);
                 WrapTabItem("Systems", ComponentSystems, registry);
                 ImGui::EndTabBar();
             }
@@ -235,56 +232,6 @@ namespace nc::ui::editor::controls
         ImGui::Text("%.1f ms/frame", 1000.0f / frameRate);
     }
 
-    void Profiler()
-    {
-        using nc::debug::profiler::Filter;
-
-        static ImGuiTextFilter textFilter;
-        static int filterSelection = 0u;
-
-        textFilter.Draw("Search##telemetry", 128.0f);
-
-        for(auto v : {Filter::All, Filter::Logic, Filter::Collision, Filter::Dynamics, Filter::Rendering, Filter::User})
-        {
-            ImGui::SameLine();
-            ImGui::RadioButton(ToCString(v), &filterSelection, static_cast<int>(v));
-        }
-
-        ImGui::Separator();
-
-        if(ImGui::BeginChild("Profiler##child"))
-        {
-            const auto filterGroup = static_cast<Filter>(filterSelection);
-            for(auto& [id, data] : nc::debug::profiler::GetData())
-            {
-                if(!textFilter.PassFilter(data.functionName.c_str()))
-                    continue;
-                
-                if((filterGroup != Filter::All) && (filterGroup != data.filter))
-                    continue;
-
-                ImGui::PushID(id);
-                if(ImGui::CollapsingHeader(data.functionName.c_str()))
-                {
-                    debug::profiler::UpdateHistory(&data);
-                    auto [avgCalls, avgTime] = debug::profiler::ComputeAverages(&data);
-                    ImGui::Indent();
-                        ImGui::Text("   Calls: %.1f", avgCalls);
-                        ImGui::SameLine();
-                        ImGui::PlotHistogram("##calls", data.callHistory.data(), data.historySize, 0, nullptr, 0.0f, 100.0f, GraphSize);
-                        ImGui::SameLine();
-                        ImGui::Text("   Time: %.1f", avgTime);
-                        ImGui::SameLine();
-                        ImGui::PlotHistogram("##time", data.timeHistory.data(), data.historySize, 0, nullptr, 0.0f, 20.0f, GraphSize);
-                    ImGui::Unindent();
-                }
-                ImGui::PopID();
-                debug::profiler::Reset(&data);
-            }
-        }
-        ImGui::EndChild();
-    }
-
     template<class T>
     void ComponentSystemHeader(const char* name, std::span<T> components)
     {
@@ -304,7 +251,7 @@ namespace nc::ui::editor::controls
             {
                 ImGui::Indent();
                 for(const auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", component.GetParentEntity().Index(), static_cast<const void*>(&component));
+                    ImGui::Text("Handle: %5u  |  Address: %p", component.ParentEntity().Index(), static_cast<const void*>(&component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();

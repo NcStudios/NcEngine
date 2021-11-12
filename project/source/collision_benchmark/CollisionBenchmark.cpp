@@ -86,13 +86,13 @@ namespace nc::sample
         {
             registry->Add<Collider>(entity, BoxProperties{}, false);
         };
-        
+
         // Dynamic Cube Spawner
         auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
         auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, registry, prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
 
         // Static Cube Spawner
-        spawnBehavior.spawnAsStaticEntity = true;
+        spawnBehavior.flags = Entity::Flags::Static;
         auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
         auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, registry, prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
 

@@ -22,8 +22,8 @@ namespace nc::physics
     /** Position Correction */
     constexpr bool EnableBaumgarteStabilization = true;   // Enable velocity-based position correction
     constexpr bool EnableDirectPositionCorrection = true; // Enable translation-based position correction
-    constexpr float BaumgarteFactor = 0.1f;               // Bias factor for baumgarte stabilization [0, 1]
-    constexpr float PositionCorrectionFactor = 0.333f;    // Percentage of mtv to use for direct position correction
+    constexpr float BaumgarteFactor = 0.05f;              // Bias factor for baumgarte stabilization [0, 1]
+    constexpr float PositionCorrectionFactor = 0.2f;      // Percentage of mtv to use for direct position correction
 
     /** Sleeping Behavior */
     constexpr bool EnableSleeping = false;   // Allow disabling simulation of inactive bodies

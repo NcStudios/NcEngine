@@ -2,7 +2,6 @@
 #include "debug/NcError.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace
 {

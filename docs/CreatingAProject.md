@@ -38,7 +38,7 @@ class Controller : public nc::AutoComponent
             auto [xAxis, yAxis] = nc::input::GetAxis() * Speed * dt;
             
             /** Get the Transform of the Entity we're attached to. */
-            auto transform = m_registry->Get<nc::Transform>(GetParentEntity());
+            auto transform = m_registry->Get<nc::Transform>(ParentEntity());
 
             /** Move the Transform. */
             transform->Translate(nc::Vector3{xAxis, 0.0f, yAxis});

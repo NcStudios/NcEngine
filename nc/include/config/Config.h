@@ -45,8 +45,8 @@ namespace nc::config
         float octreeMinimumExtent;
     };
 
-    [[nodiscard]] const ProjectSettings& GetProjectSettings();
-    [[nodiscard]] const MemorySettings& GetMemorySettings();
-    [[nodiscard]] const GraphicsSettings& GetGraphicsSettings();
-    [[nodiscard]] const PhysicsSettings& GetPhysicsSettings();
+    [[nodiscard]] auto GetProjectSettings() -> const ProjectSettings&;
+    [[nodiscard]] auto GetMemorySettings() -> const MemorySettings&;
+    [[nodiscard]] auto GetGraphicsSettings() -> const GraphicsSettings&;
+    [[nodiscard]] auto GetPhysicsSettings() -> const PhysicsSettings&;
 }

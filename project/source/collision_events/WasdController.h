@@ -33,17 +33,17 @@ namespace nc::sample
         auto e = input::GetKey(input::KeyCode::E);
         auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * m_speed * dt;
 
-        m_registry->Get<Transform>(GetParentEntity())->Translate(Vector3{leftRight, upDown, frontBack});
+        m_registry->Get<Transform>(ParentEntity())->Translate(Vector3{leftRight, upDown, frontBack});
 
         if (input::GetKeyDown(input::KeyCode::B))
         {
             std::cout << "Remove pressed.\n";
-            m_registry->Remove<PointLight>(GetParentEntity());
+            m_registry->Remove<PointLight>(ParentEntity());
         }
         else if (input::GetKeyDown(input::KeyCode::V))
         {
             std::cout << "Add pressed.\n";
-            m_registry->Add<PointLight>(GetParentEntity(), PointLightInfo{});
+            m_registry->Add<PointLight>(ParentEntity(), PointLightInfo{});
         }
     }
 }

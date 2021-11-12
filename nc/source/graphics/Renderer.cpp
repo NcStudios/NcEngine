@@ -1,6 +1,5 @@
 #include "Renderer.h"
 #include "assets/AssetServices.h"
-#include "debug/Profiler.h"
 #include "ecs/component/DebugWidget.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
@@ -10,6 +9,7 @@
 #include "graphics/Swapchain.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/techniques/ShadowMappingTechnique.h"
+#include "optick/optick.h"
 #include "PerFrameRenderState.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
@@ -42,8 +42,7 @@ namespace nc::graphics
     
     void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
+        OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
         auto* cmd = BeginFrame(commands, assetServices, currentSwapChainImageIndex);
 
         /** Shadow mapping pass */
@@ -53,7 +52,6 @@ namespace nc::graphics
         m_renderPasses->Execute(RenderPassManager::LitShadingPass, cmd, currentSwapChainImageIndex, state);
 
         cmd->end();
-        NC_PROFILE_END();
     }
 
     void Renderer::InitializeImgui()

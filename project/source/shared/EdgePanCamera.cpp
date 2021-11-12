@@ -41,6 +41,6 @@ namespace nc::sample
             translation = Vector3::Zero();
         m_lastFrameTranslation = translation;
         translation = translation * dt;
-        ActiveRegistry()->Get<Transform>(GetParentEntity())->Translate(translation);
+        ActiveRegistry()->Get<Transform>(ParentEntity())->Translate(translation);
     }
 }

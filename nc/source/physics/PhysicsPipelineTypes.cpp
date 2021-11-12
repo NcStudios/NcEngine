@@ -1,7 +1,8 @@
-#include "Manifold.h"
-#include "ecs/Registry.h"
-#include "physics/PhysicsConstants.h"
+#include "PhysicsPipelineTypes.h"
 #include "debug/Utils.h"
+#include "ecs/Registry.h"
+#include "ecs/component/PhysicsBody.h"
+#include "physics/PhysicsConstants.h"
 
 #include <array>
 
@@ -48,14 +49,105 @@ namespace
 
 namespace nc::physics
 {
+    auto GetColliderInteractionType(bool isTrigger, const PhysicsBody* body) -> ColliderInteractionType
+    {
+        // note: could probably store this in collider... have physics body send message in c'tor
+        // to update as it already gets the collider pointer
+
+        if(body)
+        {
+            if(body->IsKinematic())
+            {
+                if(isTrigger)
+                {
+                    return ColliderInteractionType::KinematicPhysicsTrigger;
+                }
+
+                return ColliderInteractionType::KinematicPhysics;
+            }
+
+            // need to add kinematic body
+            if(isTrigger)
+            {
+                return ColliderInteractionType::PhysicsTrigger;
+            }
+
+            return ColliderInteractionType::Physics;
+        }
+
+        if(isTrigger)
+        {
+            return ColliderInteractionType::ColliderTrigger;
+        }
+
+        return ColliderInteractionType::Collider;
+    }
+
+    auto GetEventType(ColliderInteractionType typeA, ColliderInteractionType typeB) -> CollisionEventType
+    {
+        if(typeA == ColliderInteractionType::Collider)
+        {
+            if(typeB == ColliderInteractionType::Physics)
+                return CollisionEventType::SecondBodyPhysics;
+            
+            if(typeB == ColliderInteractionType::PhysicsTrigger || typeB == ColliderInteractionType::KinematicPhysicsTrigger)
+                return CollisionEventType::Trigger;
+            
+            return CollisionEventType::None;
+        }
+
+        if(typeA == ColliderInteractionType::Physics)
+        {
+            if(typeB == ColliderInteractionType::Physics)
+                return CollisionEventType::TwoBodyPhysics;
+            
+            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
+                return CollisionEventType::FirstBodyPhysics;
+
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::KinematicPhysics)
+        {
+            if(typeB == ColliderInteractionType::Physics)
+                return CollisionEventType::SecondBodyPhysics;
+            
+            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
+                return CollisionEventType::None;
+            
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::ColliderTrigger)
+        {
+            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::ColliderTrigger)
+                return CollisionEventType::None;
+            
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::PhysicsTrigger)
+        {
+            return CollisionEventType::Trigger;
+        }
+
+        if(typeA == ColliderInteractionType::KinematicPhysicsTrigger)
+        {
+            return CollisionEventType::Trigger;
+        }
+
+        throw nc::NcError("Unknown ColliderInteractionType");
+    }
+
     int Manifold::AddContact(const Contact& contact)
     {
+        event.state = NarrowEvent::State::Persisting;
         int insertIndex = contacts.size();
 
         if(insertIndex >= 4)
         {
             insertIndex = SortPoints(contact);
-            
+
             if(insertIndex < 0)
                 insertIndex = 0;
 
@@ -69,7 +161,7 @@ namespace nc::physics
         return insertIndex;
     }
 
-    const Contact& Manifold::GetDeepestContact() const
+    const Contact& Manifold::DeepestContact() const
     {
         IF_THROW(contacts.size() == 0u, "Manifold::GetDeepestContact - Empty contacts");
 
@@ -129,16 +221,16 @@ namespace nc::physics
          *  cleaner to handle this through registy callbacks, but we can't because the BspTree uses the
          *  ConcaveCollider callback. Long story short, I think we need to support multiple callbacks per
          *  component type. */
-        const auto* transformA = registry->Get<Transform>(Entity{entityA});
-        const auto* transformB = registry->Get<Transform>(Entity{entityB});
+        const auto* transformA = registry->Get<Transform>(event.first);
+        const auto* transformB = registry->Get<Transform>(event.second);
         if(!transformA || !transformB)
         {
             contacts.clear();
             return;
         }
 
-        const auto& aMatrix = transformA->GetTransformationMatrix();
-        const auto& bMatrix = transformB->GetTransformationMatrix();
+        const auto& aMatrix = transformA->TransformationMatrix();
+        const auto& bMatrix = transformB->TransformationMatrix();
 
         for(auto cur = contacts.rbegin(); cur != contacts.rend(); ++cur)
         {
@@ -153,7 +245,7 @@ namespace nc::physics
             DirectX::XMStoreVector3(&contact.worldPointA, pointA_v);
             DirectX::XMStoreVector3(&contact.worldPointB, pointB_v);
 
-            contact.depth = Dot(contact.worldPointA - contact.worldPointB, contact.normal);
+            contact.depth = Dot(contact.worldPointB - contact.worldPointA, contact.normal);
 
             if(contact.depth < ContactBreakDistance)
             {

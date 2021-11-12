@@ -24,6 +24,6 @@ namespace nc::sample
 
     inline void ConstantTranslation::FrameUpdate(float dt)
     {
-        m_registry->Get<Transform>(GetParentEntity())->Translate(m_velocity * dt);
+        m_registry->Get<Transform>(ParentEntity())->Translate(m_velocity * dt);
     }
 }

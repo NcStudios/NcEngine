@@ -38,7 +38,7 @@ namespace nc::sample
             bool m_applyConstantVelocity;
             bool m_applyConstantRotation;
             Entity::layer_type m_layer;
-            bool m_spawnStaticEntities;
+            Entity::flags_type m_flags;
             size_t m_stagedAdditions;
             size_t m_stagedDeletions;
     };
@@ -58,9 +58,7 @@ namespace nc::sample
           m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxisRandomRange &&
                                   0.0f != behavior.thetaRandomRange},
           m_layer{behavior.layer},
-          m_spawnStaticEntities{behavior.spawnAsStaticEntity &&
-                                !m_applyConstantRotation &&
-                                !m_applyConstantRotation},
+          m_flags{behavior.flags},
           m_stagedAdditions{0u},
           m_stagedDeletions{0u}
     {
@@ -98,7 +96,7 @@ namespace nc::sample
                 .position = m_generator.Position(),
                 .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
                 .layer = m_layer,
-                .flags = m_spawnStaticEntities
+                .flags = m_flags
             });
 
             if(m_applyConstantVelocity)

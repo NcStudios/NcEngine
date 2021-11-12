@@ -2,10 +2,10 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
-#include "debug/Profiler.h"
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
 #include "graphics/PerFrameRenderState.h"
+#include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
 
 namespace nc
@@ -29,7 +29,7 @@ namespace nc
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_uiSystem{m_window.GetHWND(), &m_graphics},
-          m_taskExecutor{6u}, // @todo probably add to config
+          m_taskExecutor{8u}, // @todo probably add to config
           m_tasks{},
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},
@@ -64,7 +64,14 @@ namespace nc
     void Engine::Shutdown() noexcept
     {
         V_LOG("Shutdown NcEngine");
-        ClearState();
+        try
+        {
+            ClearState();
+        }
+        catch(const std::exception& e)
+        {
+            debug::LogException(e);
+        }
     }
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
@@ -80,6 +87,7 @@ namespace nc
         [[maybe_unused]] auto writeAudioBuffersTask = m_tasks.AddGuardedTask(
             [&audioSystem = m_audioSystem]
         {
+            OPTICK_CATEGORY("AudioSystem::Update", Optick::Category::Audio);
             audioSystem.Update();
         });
 
@@ -111,6 +119,8 @@ namespace nc
 
         while(m_isRunning)
         {
+            OPTICK_FRAME("Main Thread");
+
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
@@ -160,18 +170,14 @@ namespace nc
 
     void Engine::FrameLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-
+        OPTICK_CATEGORY("SendFrameUpdate", Optick::Category::GameLogic);
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFrameUpdate(dt);
-        
-        NC_PROFILE_END();
     }
 
     void Engine::FrameRender()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
+        OPTICK_CATEGORY("FrameRender", Optick::Category::Rendering);
         /** Update the view matrix for the camera */
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
@@ -201,8 +207,6 @@ namespace nc
 
         /** End the frame */
         m_graphics.FrameEnd();
-
-        NC_PROFILE_END();
     }
 
     void Engine::FrameCleanup()
@@ -211,7 +215,7 @@ namespace nc
         {
             DoSceneSwap();
         }
-        
+
         input::Flush();
     }
 

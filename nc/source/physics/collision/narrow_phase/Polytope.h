@@ -1,13 +1,20 @@
 #pragma once
 
 #include "Simplex.h"
-#include "Manifold.h"
-#include "debug/Profiler.h"
+#include "physics/PhysicsPipelineTypes.h"
 
 #include <vector>
 
 namespace nc::physics
 {
+    struct Contact;
+
+    struct NormalData
+    {
+        Vector3 normal;
+        float distance;
+    };
+
     class Polytope
     {
         public:
