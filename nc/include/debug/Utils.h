@@ -2,7 +2,7 @@
 
 #include "NcError.h"
 
-#include <stdexcept>
+#include <cassert>
 #include <string>
 
 namespace nc::debug

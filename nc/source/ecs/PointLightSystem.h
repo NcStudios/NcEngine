@@ -1,14 +1,13 @@
 #pragma once
 
-#include "component/PointLight.h"
-#include "Ecs.h"
 #include "SoA.h"
 
 #include <unordered_map>
 
-namespace nc::graphics
+namespace nc
 {
-    class Graphics;
+    class Registry;
+    namespace graphics { class Graphics; }
 }
 
 namespace nc::ecs
@@ -16,7 +15,7 @@ namespace nc::ecs
     class PointLightSystem
     {
         public:
-            PointLightSystem(registry_type* registryType, graphics::Graphics* graphics);
+            PointLightSystem(Registry* registryType, graphics::Graphics* graphics);
             PointLightSystem(PointLightSystem&&) = delete;
             PointLightSystem(const PointLightSystem&) = delete;
             PointLightSystem& operator = (PointLightSystem&&) = delete;
@@ -27,7 +26,7 @@ namespace nc::ecs
 
         private:
             graphics::Graphics* m_graphics;
-            registry_type* m_registry;
+            Registry* m_registry;
             bool m_isSystemDirty;
     };
 }

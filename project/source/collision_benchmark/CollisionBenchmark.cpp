@@ -86,13 +86,13 @@ namespace nc::sample
         {
             registry->Add<Collider>(entity, BoxProperties{}, false);
         };
-        
+
         // Dynamic Cube Spawner
         auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
         auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, registry, prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
 
         // Static Cube Spawner
-        spawnBehavior.spawnAsStaticEntity = true;
+        spawnBehavior.flags = Entity::Flags::Static;
         auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
         auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, registry, prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
 
@@ -102,9 +102,8 @@ namespace nc::sample
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(1.0f, 0.7f, 1.0f),
-                                                            .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
-                                                            .diffuseIntensity = 2.0f
-                                                            });
+                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
+                                                           .diffuseIntensity = 1200.0f});
 
         // UI Callbacks
         GetDynamicCountCallback = std::bind(Spawner::GetObjectCount, dynamicSpawner);

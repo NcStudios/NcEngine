@@ -1,6 +1,16 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
+
+#include "ecs/component/AudioSource.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/ConcaveCollider.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/NetworkDispatcher.h"
+#include "ecs/component/ParticleEmitter.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/PointLight.h"
+#include "ecs/component/Transform.h"
 
 namespace nc::editor
 {
@@ -13,10 +23,10 @@ namespace nc::editor
     const auto DefaultBaseColorPath     = std::string{"nc/resources/texture/DefaultBaseColor.png"};
     const auto DefaultNormalPath        = std::string{"nc/resources/texture/DefaultNormal.png"};
     const auto DefaultRoughnessPath     = std::string{"nc/resources/texture/DefaultMetallic.png"};
-    const auto DefaultMaterial          = nc::Material{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath};
+    const auto DefaultMaterial          = nc::Material{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath, DefaultRoughnessPath};
 
     /** Helper to create a mesh renderer using only default resources. */
-    void AddDefaultMeshRenderer(registry_type* registry, Entity entity);
-    void AddDefaultHullCollider(registry_type* registry, Entity entity, bool isTrigger);
-    void AddDefaultConcaveCollider(registry_type* registry, Entity entity);
+    void AddDefaultMeshRenderer(Registry* registry, Entity entity);
+    void AddDefaultHullCollider(Registry* registry, Entity entity, bool isTrigger);
+    void AddDefaultConcaveCollider(Registry* registry, Entity entity);
 }

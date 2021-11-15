@@ -100,7 +100,7 @@ namespace
 
 namespace nc::editor
 {
-    SceneReader::SceneReader(registry_type* registry, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
+    SceneReader::SceneReader(Registry* registry, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
         : m_registry{registry},
           m_file{scenesDirectory / (sceneName + GeneratedSourceExtension)},
           m_handleNames{},
@@ -268,9 +268,6 @@ namespace nc::editor
             .ambient = ReadVector3FromAction(args),
             .diffuseColor = ReadVector3FromAction(args),
             .diffuseIntensity = ReadFloatFromAction(args),
-            .attConst = ReadFloatFromAction(args),
-            .attLin = ReadFloatFromAction(args),
-            .attQuad = ReadFloatFromAction(args)
         };
         m_registry->Add<PointLight>(entity, properties);
     }
@@ -283,7 +280,8 @@ namespace nc::editor
         {
             .baseColor = ReadQuotedStringFromAction(args),
             .normal = ReadQuotedStringFromAction(args),
-            .roughness = ReadQuotedStringFromAction(args)
+            .roughness = ReadQuotedStringFromAction(args),
+            .metallic = ReadQuotedStringFromAction(args)
         };
         auto technique = ToTechniqueType(ReadTokenFromAction(args));
 

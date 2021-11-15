@@ -1,25 +1,31 @@
 #pragma once
 
-#include "Ecs.h"
 #include "Constraint.h"
 #include "Joint.h"
-#include "physics/collision/Manifold.h"
+#include "physics/PhysicsPipelineTypes.h"
 
 namespace nc::physics
 {
-    /** Create contact constraints for every contact point in each manifold. Also creates
-     *  position constraints for each manifold if EnableDirectPositionCorrection == true. */
-    void GenerateConstraints(registry_type* registry, std::span<const Manifold> persistentManifolds, Constraints* out);
-    
-    /** Prepare joints for resolution. Applies worldpsace transformations and 
-     *  precomputes bias/effective mass matrix. */
-    void UpdateJoints(registry_type* registry, std::span<Joint> joints, float dt);
+    class Solver
+    {
+        public:
+            Solver(Registry* registry);
 
-    /** Resolve contact, position, and joint constraints. For contacts and joints, linear
-     *  and angular velocities will be updated, but positions must be integrated separately.
-     *  Position constraints will update transforms directly. */
-    void ResolveConstraints(Constraints& constraints, std::span<Joint> joints, float dt);
+            /** Create contact constraints for every contact point in each manifold. Also creates
+            *  position constraints for each manifold if EnableDirectPositionCorrection == true. */
+            void GenerateConstraints(std::span<const Manifold> manifolds);
 
-    /** Store current frame impulses from constraints in each contact for warmstarting. */
-    void CacheImpulses(std::span<const ContactConstraint> constraints, std::span<Manifold> manifolds);
+            /** Resolve contact, position, and joint constraints. For contacts and joints, linear
+             *  and angular velocities will be updated, but positions must be integrated separately.
+             *  Position constraints will update transforms directly. */
+            void ResolveConstraints(std::span<Joint> joints, float dt);
+
+            auto ContactConstraints() const -> std::span<const ContactConstraint> { return m_contactConstraints; }
+            auto PositionConstraints() const -> std::span<const PositionConstraint> { return m_positionConstraints; }
+
+        private:
+            Registry* m_registry;
+            std::vector<ContactConstraint> m_contactConstraints;
+            std::vector<PositionConstraint> m_positionConstraints;
+    };
 } // namespace nc::physics

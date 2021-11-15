@@ -4,7 +4,7 @@
 
 // Engine includes
 #include "Assets.h"
-#include "component/MeshRenderer.h"
+#include "ecs/component/MeshRenderer.h"
 #include "platform/win32/NcWin32.h"
 
 #include <iostream>

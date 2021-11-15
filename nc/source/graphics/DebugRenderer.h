@@ -1,81 +1,70 @@
 #pragma once
-
-/** @todo This class will probably be useful from time to time. It
- *  will need to be Vulkan compatible. We may also want this #define
- *  to be a build option in the future. */
-//#define NC_DEBUG_RENDERING
-#undef NC_DEBUG_RENDERING
+#include "debug/Serialize.h"
 
 #ifdef NC_DEBUG_RENDERING
 
-#include "camera/MainCameraInternal.h"
-#include "graphics/MvpMatrices.h"
-#include "graphics/techniques/DebugTechnique.h"
-#include "graphics/techniques/TechniqueManager.h"
-#include "graphics/Graphics.h"
-
+#include <vector>
+#include <iostream>
 namespace nc::graphics
 {
+    struct DebugData
+    {
+        DebugData()
+        : points{},
+          lines{},
+          planes{}
+        {}
+
+        std::vector<DirectX::XMMATRIX> points;
+        std::vector<DirectX::XMMATRIX> lines;
+        std::vector<DirectX::XMMATRIX> planes;     
+    };
+
     class DebugRenderer
     {
         public:
-            DebugRenderer(Graphics* graphics)
-                : m_graphics{graphics},
-                  m_mesh{},
-                  m_points{},
-                  m_lines{},
-                  m_planes{},
-                  m_pixelCBuff{std::make_unique<d3dresource::PixelConstantBuffer<graphics::MvpMatrices>>(2u)},
-                  m_vertexCBuff{std::make_unique<d3dresource::VertexConstantBuffer<graphics::MvpMatrices>>(0u)}
+            DebugRenderer()
+                : m_debugData{}
             {
                 DebugRenderer::m_instance = this;
-                TechniqueManager::GetTechnique<DebugTechnique>();
-
-                LoadMeshAsset("project/assets/mesh/cube.nca");
-                m_mesh = Mesh{"project/assets/mesh/cube.nca"};
             }
 
-            void Render()
+            static DebugData* GetData()
             {
-                constexpr size_t CubeIndexCount = 36u;
-                DebugTechnique::BindCommonResources();
-                m_mesh.Bind();
-
-                for(const auto& matrices : m_points)
-                {
-                    BindMatrices(matrices);
-                    m_graphics->DrawIndexed(CubeIndexCount);
-                }
-
-                const auto& view = camera::GetViewMatrix();
-                const auto& projection = camera::GetProjectionMatrix();
-
-                for(const auto& matrix : m_planes)
-                {
-                    auto modelView = matrix * view;
-                    auto mvp = modelView * projection;
-                    BindMatrices({XMMatrixTranspose(modelView), XMMatrixTranspose(mvp)});
-                    m_graphics->DrawIndexed(CubeIndexCount);
-                }
+                return &DebugRenderer::m_instance->m_debugData;
             }
 
-            static void ClearPoints() { DebugRenderer::m_instance->m_points.clear(); }
-            static void ClearLines() { DebugRenderer::m_instance->m_lines.clear(); }
-            static void ClearPlanes() { DebugRenderer::m_instance->m_planes.clear(); }
+            static void ClearPoints() { DebugRenderer::m_instance->m_debugData.points.clear(); }
+            static void ClearLines() { DebugRenderer::m_instance->m_debugData.lines.clear(); }
+            static void ClearPlanes() { DebugRenderer::m_instance->m_debugData.planes.clear(); }
 
             static void AddPoint(const Vector3& position)
             {
                 using namespace DirectX;
+                auto model = XMMatrixScaling(0.1f, 0.1f, 0.1f) *
+                             XMMatrixTranslation(position.x, position.y, position.z);
 
-                const auto& view = camera::GetViewMatrix();
-                const auto& projection = camera::GetProjectionMatrix();
+                DebugRenderer::m_instance->m_debugData.points.emplace_back(model);
+            }
 
-                auto modelView = XMMatrixScaling(0.1f, 0.1f, 0.1f) *
-                                 XMMatrixTranslation(position.x, position.y, position.z) *
-                                 view;
+            static void AddLine(const Vector3& positionStart, const Vector3& positionEnd)
+            {
+                using namespace DirectX;
+                auto start_v = XMLoadVector3(&positionStart);
+                auto end_v = XMLoadVector3(&positionEnd);
+                auto distance_v = XMVector3Length(end_v - start_v);
+                float distance = XMVectorGetX(distance_v);
+                auto line_v = XMVector3Normalize(end_v - start_v);
+                auto orthogonal_v = XMVector3Normalize(XMVector3Cross(line_v,  g_XMIdentityR0));
+                auto angle_v = XMVector3AngleBetweenNormals(line_v, g_XMIdentityR0);
+                auto midpoint_v = start_v + line_v * XMVectorScale(distance_v, 0.5);
+                float angle = DirectX::XMVectorGetW(angle_v);
+                auto rotationMatrix = XMMatrixRotationNormal(orthogonal_v, -angle);
+                auto model = XMMatrixScaling(distance, 0.01f, 0.01f) *
+                             rotationMatrix * 
+                             XMMatrixTranslationFromVector(midpoint_v);
 
-                auto mvp = modelView * projection;
-                DebugRenderer::m_instance->m_points.emplace_back(XMMatrixTranspose(modelView), XMMatrixTranspose(mvp));
+                DebugRenderer::m_instance->m_debugData.lines.emplace_back(model);
             }
 
             static void AddPlane(const Vector3& normal, float d)
@@ -91,26 +80,14 @@ namespace nc::graphics
                 auto axis_v = XMVector3Cross(normal_v, g_XMIdentityR1);
                 auto rot_m = XMMatrixRotationAxis(axis_v, XMVectorGetX(angle_v));
 
-                DebugRenderer::m_instance->m_planes.emplace_back(scale_m * rot_m * trans_m);
+                DebugRenderer::m_instance->m_debugData.planes.emplace_back(scale_m * rot_m * trans_m);
             }
 
         private:
             static inline DebugRenderer* m_instance = nullptr;
-            Graphics* m_graphics;
-            Mesh m_mesh;
-            std::vector<MvpMatrices> m_points;
-            std::vector<DirectX::XMMATRIX> m_lines;
-            std::vector<DirectX::XMMATRIX> m_planes;
-            std::unique_ptr<d3dresource::PixelConstantBuffer<MvpMatrices>> m_pixelCBuff;
-            std::unique_ptr<d3dresource::VertexConstantBuffer<MvpMatrices>> m_vertexCBuff;
+            DebugData m_debugData;
+            std::string m_mesh;
 
-            void BindMatrices(const graphics::MvpMatrices& matrices)
-            {
-                m_vertexCBuff->Update(matrices);
-                m_vertexCBuff->Bind();
-                m_pixelCBuff->Update(matrices);
-                m_pixelCBuff->Bind();
-            }
     };
 }
 #endif

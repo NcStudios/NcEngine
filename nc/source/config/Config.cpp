@@ -50,6 +50,7 @@ namespace
     const auto NearClipKey = std::string{"near_clip"};
     const auto FarClipKey = std::string{"far_clip"};
     const auto ShadersPathKey = std::string{"shaders_path"};
+    const auto UseShadowsKey = std::string{"use_shadows"}; /** @todo: Make this a property of the material */
 
     void MapKeyValue(const std::string& key, const std::string& value, Config* out)
     {
@@ -107,9 +108,11 @@ namespace
             out->graphicsSettings.farClip = std::stof(value);
         else if (key == ShadersPathKey)
             out->graphicsSettings.shadersPath = value;
+        else if (key == UseShadowsKey)
+            out->graphicsSettings.useShadows = std::stoi(value);
         else
-            throw std::runtime_error("config::MapKeyValue - Unknown key reading engine config");
-    }
+            throw nc::NcError("Unknown config key");
+    };
 } //end anonymous namespace
 
 namespace nc::config
@@ -146,7 +149,7 @@ namespace nc::config
         g_config = std::make_unique<Config>();
         nc::config::Read(configPath, MapKeyValue, g_config.get());
         if(!Validate())
-            throw std::runtime_error("config::Load - Failed to validate config");
+            throw NcError("Failed to validate config");
     }
 
     bool Validate()

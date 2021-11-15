@@ -1,6 +1,8 @@
 #include "Base.h"
+#include "graphics/Initializers.h"
 #include "graphics/Commands.h"
 #include "stb/stb_image.h"
+#include "debug/NcError.h"
 
 #include <set>
 #include <string>
@@ -28,7 +30,7 @@ namespace
         {
             if (!CheckValidationLayerSupport())
             {
-                throw std::runtime_error("Instance::EnableValidationLayers - Validation layers requested but not available.");
+                throw nc::NcError("Validation layers requested but not available.");
             }
 
             instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
@@ -141,7 +143,7 @@ namespace nc::graphics
         }
         catch (const std::exception& error)
         {
-            std::throw_with_nested(std::runtime_error("Failed to create instance."));
+            std::throw_with_nested(NcError("Failed to create instance."));
         }
     }
 
@@ -153,7 +155,7 @@ namespace nc::graphics
         surfaceCreateInfo.setHwnd(hwnd);
         if (m_instance.createWin32SurfaceKHR(&surfaceCreateInfo, nullptr, &m_surface) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Failed to get surface.");
+            throw NcError("Failed to get surface.");
         }
     }
 
@@ -167,13 +169,13 @@ namespace nc::graphics
         uint32_t deviceCount = 0;
         if (m_instance.enumeratePhysicalDevices(&deviceCount, nullptr) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Count physical devices - Failed to find GPU that supports Vulkan.");
+            throw NcError("Count physical devices - Failed to find GPU that supports Vulkan.");
         }
 
         std::vector<vk::PhysicalDevice> devices(deviceCount);
         if (m_instance.enumeratePhysicalDevices(&deviceCount, devices.data()) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Get physical devices - Failed to find GPU that supports Vulkan.");
+            throw NcError("Get physical devices - Failed to find GPU that supports Vulkan.");
         }
 
         // Select the first suitable physical device
@@ -185,13 +187,13 @@ namespace nc::graphics
             uint32_t extensionCount;
             if (device.enumerateDeviceExtensionProperties(nullptr, &extensionCount, nullptr) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Base::IsPhysicalDeviceExtensionSupported() - could not enumerate device extensions.");
+                throw NcError("Could not enumerate device extensions.");
             }
 
             std::vector<vk::ExtensionProperties> availableExtensions(extensionCount);
             if (device.enumerateDeviceExtensionProperties(nullptr, &extensionCount, availableExtensions.data()) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Base::IsPhysicalDeviceExtensionSupported() - could not enumerate device extensions.");
+                throw NcError("Could not enumerate device extensions.");
             }
 
             bool extensionsSupported = std::all_of(DeviceExtensions.cbegin(), DeviceExtensions.cend(), [&availableExtensions](const auto& requiredExtension)
@@ -232,7 +234,7 @@ namespace nc::graphics
 
         if (!foundSuitableDevice)
         {
-            throw std::runtime_error("Test physical devices for suitability - Failed to find GPU that supports Vulkan.");
+            throw NcError("Test physical devices for suitability - Failed to find GPU that supports Vulkan.");
         }
     }
 
@@ -269,14 +271,14 @@ namespace nc::graphics
 
         if (m_logicalDevice.createDescriptorPool(&imguiDescriptorPoolInfo, nullptr, &m_imguiDescriptorPool) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Could not create ImGUI descriptor pool.");
+            throw NcError("Could not create ImGUI descriptor pool.");
         }
 
-        /** @todo These value need to be configurable (at least sampled images) */
-        std::array<vk::DescriptorPoolSize, 3> renderingPoolSizes =
+        std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
         {
             vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 }
         };
         
@@ -288,7 +290,7 @@ namespace nc::graphics
         
         if (m_logicalDevice.createDescriptorPool(&renderingDescriptorPoolInfo, nullptr, &m_renderingDescriptorPool) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Could not create rendering descriptor pool.");
+            throw NcError("Could not create rendering descriptor pool.");
         }
     }
 
@@ -368,7 +370,7 @@ namespace nc::graphics
         }
         catch (const std::exception& error)
         {
-            std::throw_with_nested(std::runtime_error("Failed to create device."));
+            std::throw_with_nested(NcError("Failed to create device."));
         }
     }
 
@@ -395,7 +397,7 @@ namespace nc::graphics
         auto result = m_allocator.createBuffer(&bufferInfo, &allocationInfo, &buffer, &allocation, nullptr);
         if (result != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Error creating buffer.");
+            throw NcError("Error creating buffer.");
         }
 
         m_buffers.emplace(m_bufferIndex, std::pair{buffer, allocation});
@@ -422,7 +424,7 @@ namespace nc::graphics
         vk::Image image;
         if (m_allocator.createImage(&imageInfo, &allocationInfo, &image, &allocation, nullptr) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Error creating image.");
+            throw NcError("Error creating image.");
         }
 
         m_images.emplace(m_imageIndex, std::pair{image, allocation});
@@ -464,22 +466,7 @@ namespace nc::graphics
         vk::PhysicalDeviceProperties properties{};
         m_physicalDevice.getProperties(&properties);
 
-        vk::SamplerCreateInfo samplerInfo{};
-        samplerInfo.setMagFilter(vk::Filter::eLinear);
-        samplerInfo.setMinFilter(vk::Filter::eLinear);
-        samplerInfo.setAddressModeU(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeV(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeW(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAnisotropyEnable(VK_TRUE);
-        samplerInfo.setMaxAnisotropy(properties.limits.maxSamplerAnisotropy);
-        samplerInfo.setBorderColor(vk::BorderColor::eIntOpaqueBlack);
-        samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
-        samplerInfo.setCompareEnable(VK_FALSE);
-        samplerInfo.setCompareOp(vk::CompareOp::eAlways);
-        samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
-        samplerInfo.setMipLodBias(0.0f);
-        samplerInfo.setMinLod(0.0f);
-        samplerInfo.setMaxLod(0.0f);
+        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
 
         return m_logicalDevice.createSamplerUnique(samplerInfo);
     }
@@ -523,7 +510,7 @@ namespace nc::graphics
             }
             else 
             {
-                throw std::runtime_error("Unsupported layout transition.");
+                throw NcError("Unsupported layout transition.");
             }
 
             cmd.pipelineBarrier(sourceStage, destinationStage, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
@@ -668,7 +655,7 @@ namespace nc::graphics
                 return;
 			}
 		}
-		throw std::runtime_error("Could not find a matching depth format");
+		throw NcError("Could not find a matching depth format");
     }
 
     const SwapChainSupportDetails Base::QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const
@@ -676,13 +663,13 @@ namespace nc::graphics
         SwapChainSupportDetails details;
         if (device.getSurfaceCapabilitiesKHR(surface, &details.capabilities) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface capabilities.");
+            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface capabilities.");
         }
 
         uint32_t formatCount;
         if (device.getSurfaceFormatsKHR(surface, &formatCount, nullptr) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
         }
 
         if (formatCount != 0)
@@ -690,14 +677,14 @@ namespace nc::graphics
             details.formats.resize(formatCount);
             if (device.getSurfaceFormatsKHR(surface, &formatCount, details.formats.data()) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+                throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
             }
         }
 
         uint32_t presentModeCount;
         if (device.getSurfacePresentModesKHR(surface, &presentModeCount, nullptr) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
         }
 
         if (presentModeCount != 0)
@@ -705,7 +692,7 @@ namespace nc::graphics
             details.presentModes.resize(presentModeCount);
             if (device.getSurfacePresentModesKHR(surface, &presentModeCount, details.presentModes.data()) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+                throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
             }
         } 
         return details;
@@ -725,7 +712,7 @@ namespace nc::graphics
             vk::Bool32 presentSupport = false;
             if (device.getSurfaceSupportKHR(i, surface, &presentSupport) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Could not get surface support KHR");
+                throw NcError("Could not get surface support KHR");
             }
 
             if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics)
@@ -748,12 +735,12 @@ namespace nc::graphics
 
         if (!m_graphicsFamily.has_value())
         {
-            throw std::runtime_error("No graphics queue family found on device.");
+            throw NcError("No graphics queue family found on device.");
         }
 
         if (!m_presentFamily.has_value())
         {
-            throw std::runtime_error("No graphics queue family found on device.");
+            throw NcError("No graphics queue family found on device.");
         }
 
         m_isSeparatePresentQueue = m_presentFamily != m_graphicsFamily ? true : false;
@@ -773,7 +760,7 @@ namespace nc::graphics
     {
         if (!IsComplete())
         {
-            throw std::runtime_error("QueueFamilyIndices::GetQueueFamilyIndex() - QueueFamilies incomplete.");
+            throw NcError("QueueFamilyIndices::GetQueueFamilyIndex() - QueueFamilies incomplete.");
         }
 
         switch (type)
@@ -783,6 +770,6 @@ namespace nc::graphics
             case QueueFamilyType::PresentFamily:
                 return m_presentFamily.value();
         }
-        throw std::runtime_error("QueueFamilyIndices::GetQueueFamilyIndex() - Chosen queue not present.");
+        throw NcError("QueueFamilyIndices::GetQueueFamilyIndex() - Chosen queue not present.");
     }
 }

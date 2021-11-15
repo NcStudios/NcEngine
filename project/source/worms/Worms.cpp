@@ -27,13 +27,10 @@ namespace nc::sample
         // Light
         auto lightOneProperties = PointLightInfo
         {
-            .pos = Vector3::Zero(),
-            .ambient = Vector3{0.05f, 0.05f, 0.05f},
+            .pos = Vector3{0.05f, 3.0f, -5.0f},
+            .ambient = Vector3{0.3f, 0.3f, 0.3f},
             .diffuseColor = Vector3{0.3, 0.3, 0.3},
-            .diffuseIntensity = 10.56,
-            .attConst = 0.0f,
-            .attLin = 0.05f,
-            .attQuad = 0.0f
+            .diffuseIntensity = 1200.0f
         };
 
         auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});

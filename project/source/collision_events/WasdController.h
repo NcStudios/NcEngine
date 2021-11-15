@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "Input.h"
 
 #include <iostream>
@@ -10,15 +10,15 @@ namespace nc::sample
     class WasdController : public AutoComponent
     {
         public:
-            WasdController(Entity entity, registry_type* registry, float speed);
+            WasdController(Entity entity, Registry* registry, float speed);
             void FrameUpdate(float dt) override;
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             float m_speed;
     };
 
-    inline WasdController::WasdController(Entity entity, registry_type* registry, float speed)
+    inline WasdController::WasdController(Entity entity, Registry* registry, float speed)
         : AutoComponent{entity},
           m_registry{registry},
           m_speed{speed}
@@ -33,17 +33,17 @@ namespace nc::sample
         auto e = input::GetKey(input::KeyCode::E);
         auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * m_speed * dt;
 
-        m_registry->Get<Transform>(GetParentEntity())->Translate(Vector3{leftRight, upDown, frontBack});
+        m_registry->Get<Transform>(ParentEntity())->Translate(Vector3{leftRight, upDown, frontBack});
 
         if (input::GetKeyDown(input::KeyCode::B))
         {
             std::cout << "Remove pressed.\n";
-            m_registry->Remove<PointLight>(GetParentEntity());
+            m_registry->Remove<PointLight>(ParentEntity());
         }
         else if (input::GetKeyDown(input::KeyCode::V))
         {
             std::cout << "Add pressed.\n";
-            m_registry->Add<PointLight>(GetParentEntity(), PointLightInfo{});
+            m_registry->Add<PointLight>(ParentEntity(), PointLightInfo{});
         }
     }
 }

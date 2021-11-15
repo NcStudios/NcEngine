@@ -2,6 +2,8 @@
 
 #include "Dialog.h"
 
+#include <vector>
+
 namespace nc::editor
 {
     class ActiveDialogs

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "physics/PhysicsSystem.h"
-#include "Entity.h"
 #include "shared/GameLog.h"
 
 #include <string>

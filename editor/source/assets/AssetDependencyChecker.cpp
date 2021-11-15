@@ -2,9 +2,15 @@
 #include "AssetManifest.h"
 #include "utility/Output.h"
 
+#include "ecs/component/AudioSource.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/ConcaveCollider.h"
+#include "ecs/component/AudioSource.h"
+#include "ecs/component/MeshRenderer.h"
+
 namespace nc::editor
 {
-    AssetDependencyChecker::AssetDependencyChecker(const registry_type* registry, const AssetManifest* manifest)
+    AssetDependencyChecker::AssetDependencyChecker(const Registry* registry, const AssetManifest* manifest)
         : missingDependencies{},
           result{false}
     {

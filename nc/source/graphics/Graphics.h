@@ -4,7 +4,13 @@
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "directx/math/DirectXMath.h"
+#ifdef NC_DEBUG_RENDERING
+#include "DebugRenderer.h"
+#endif
 #include <memory>
+#include <mutex>
+
+namespace nc { struct AssetServices; }
 
 namespace nc::graphics
 {
@@ -12,8 +18,10 @@ namespace nc::graphics
     class Commands;
     class Swapchain;
     class DepthStencil;
+    class PerFrameRenderState;
     class Renderer;
-    class ShaderResourceServices;
+    class RenderPassManager;
+    struct ShaderResourceServices;
 
     class Graphics
     {
@@ -25,31 +33,26 @@ namespace nc::graphics
             Graphics& operator=(const Graphics&) = delete;
             Graphics& operator=(Graphics&&) = delete;
 
-            void ResizeTarget(float width, float height);
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
-            void ToggleFullscreen();
             void SetClearColor(std::array<float, 4> color);
-            void SetRenderer(Renderer* renderer);
+            void WaitIdle();
+            void Clear();
+            void InitializeUI();
 
             Base* GetBasePtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
             Commands* GetCommandsPtr() const noexcept;
-            Renderer* GetRendererPtr() const noexcept;
             const Vector2 GetDimensions() const noexcept;
+            const DepthStencil& GetDepthStencil() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 
-            // Blocks the current thread until all operations in the command queues on the device are completed. 
-            void WaitIdle();
-            void Clear();
+            #ifdef NC_DEBUG_RENDERING
+            graphics::DebugData* GetDebugData();
+            #endif
 
             uint32_t FrameBegin();
-            void Draw();
+            void Draw(const PerFrameRenderState& state);
             void FrameEnd();
-
-    #ifdef NC_EDITOR_ENABLED
-            uint32_t GetDrawCallCount() const;
-            void IncrementDrawCallCount();
-    #endif
 
         private:
             void RecreateSwapchain(Vector2 dimensions);
@@ -62,15 +65,17 @@ namespace nc::graphics
             std::unique_ptr<DepthStencil> m_depthStencil;
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
-            Renderer* m_renderer;
-            std::unique_ptr<ShaderResourceServices> m_shaderServices;
-            uint32_t m_imageIndex;
+            std::unique_ptr<ShaderResourceServices> m_shaderResources;
+            std::unique_ptr<AssetServices> m_assetServices;
+            #ifdef NC_DEBUG_RENDERING
+            graphics::DebugRenderer m_debugRenderer;
+            #endif
+            std::unique_ptr<Renderer> m_renderer;
 
+            std::mutex m_resizingMutex;
+            uint32_t m_imageIndex;
             Vector2 m_dimensions;
             bool m_isMinimized;
-            bool m_isFullscreen;
-            bool m_isResized;
             std::array<float, 4> m_clearColor;
-            uint32_t m_drawCallCount = 0;
     };
 }

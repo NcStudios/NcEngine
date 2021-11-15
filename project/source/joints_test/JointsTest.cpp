@@ -4,7 +4,6 @@
 #include "ForceBasedController.h"
 #include "shared/SceneNavigationCamera.h"
 #include "physics/PhysicsSystem.h"
-#include "AudioSystem.h"
 
 namespace nc::sample
 {
@@ -19,17 +18,13 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
         engine->MainCamera()->Set(camera);
-        engine->Audio()->RegisterListener(cameraHandle);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
                                                            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .diffuseIntensity = 3.0,
-                                                           .attConst = 0.0f,
-                                                           .attLin = 0.05f,
-                                                           .attQuad = 0.0f});
+                                                           .diffuseIntensity = 600});
 
         // Movable object
         {
@@ -37,8 +32,6 @@ namespace nc::sample
             registry->Add<Collider>(head, BoxProperties{}, false);
             registry->Add<PhysicsBody>(head, PhysicsProperties{.mass = 5.0f});
             registry->Add<ForceBasedController>(head, registry);
-            auto* audio = registry->Add<AudioSource>(head, "project/assets/sounds/drums.wav", AudioSourceProperties{.innerRadius = 5.0f, .outerRadius = 25.0f, .spatialize = true, .loop = true});
-            audio->Play();
 
             auto segment1 = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, -0.9f}, .scale = Vector3::Splat(0.8f)});
             registry->Add<Collider>(segment1, BoxProperties{}, false);

@@ -17,7 +17,7 @@ namespace
 
 namespace nc::editor
 {
-    EditorUI::EditorUI(registry_type* registry,
+    EditorUI::EditorUI(Registry* registry,
                        Output* output,
                        AssetManifest* assetManifest,
                        ProjectCallbacks projectCallbacks,

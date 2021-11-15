@@ -1,4 +1,5 @@
 #include "AudioSystemImpl.h"
+#include "ecs/component/AudioSource.h"
 
 #include <cstring>
 #include <iostream>
@@ -27,7 +28,7 @@ namespace
 
 namespace nc::audio
 {
-    AudioSystemImpl::AudioSystemImpl(registry_type* registry)
+    AudioSystemImpl::AudioSystemImpl(Registry* registry)
         : m_registry{registry},
           m_rtAudio{},
           m_readyBuffers{},
@@ -52,7 +53,7 @@ namespace nc::audio
         unsigned devices = m_rtAudio.getDeviceCount();
         if(devices < 1)
         {
-            throw std::runtime_error("AudioSystem - No devices found");
+            throw NcError("No audio devices found");
         }
 
         RtAudio::StreamParameters parameters
@@ -78,11 +79,11 @@ namespace nc::audio
         catch(const RtAudioError& e)
         {
             e.printMessage();
-            throw std::runtime_error("AudioSystemImpl - Failure starting audio stream");
+            throw NcError("Failure starting audio stream");
         }
 
         if(bufferFrames != BufferFrames)
-            throw std::runtime_error("AudioSystemImpl - Invalid number of buffer frames specified");
+            throw NcError("Invalid number of buffer frames specified");
     }
 
     AudioSystemImpl::~AudioSystemImpl() noexcept
@@ -179,9 +180,9 @@ namespace nc::audio
 
         const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
         if(!listenerTransform)
-            throw std::runtime_error("AudioSystemImpl::MixToBuffer - Invalid listener registered");
+            throw NcError("Invalid listener registered");
         
-        const auto listenerPosition = listenerTransform->GetPosition();
+        const auto listenerPosition = listenerTransform->Position();
         const auto rightEar = listenerTransform->Right();
 
         for(auto& source : m_registry->ViewAll<AudioSource>())
@@ -191,8 +192,8 @@ namespace nc::audio
             
             if(source.IsSpatial())
             {
-                auto* transform = m_registry->Get<Transform>(source.GetParentEntity());
-                source.WriteSpatialSamples(buffer, BufferFrames, transform->GetPosition(), listenerPosition, rightEar);
+                auto* transform = m_registry->Get<Transform>(source.ParentEntity());
+                source.WriteSpatialSamples(buffer, BufferFrames, transform->Position(), listenerPosition, rightEar);
             }
             else
             {

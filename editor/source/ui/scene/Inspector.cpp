@@ -5,6 +5,17 @@
 #include "directx/math/DirectXMath.h"
 #include "imgui/imgui.h"
 
+#include "ecs/Registry.h"
+#include "ecs/component/AudioSource.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/ConcaveCollider.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/NetworkDispatcher.h"
+#include "ecs/component/ParticleEmitter.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/PointLight.h"
+#include "ecs/component/Transform.h"
+
 namespace
 {
     constexpr float defaultItemWidth = 50.0f;
@@ -69,6 +80,7 @@ namespace
         return xResult || yResult || zResult;
     };
 
+    [[maybe_unused]]
     void columnHeaderWidget(const char* frontPadding, const char* label1, const char* label2, const char* label3 = nullptr)
     {
         const ImVec2 buttonSize{defaultItemWidth, 0};
@@ -84,7 +96,7 @@ namespace
 
 namespace nc::editor
 {
-    Inspector::Inspector(registry_type* registry, AssetManifest* assetManifest)
+    Inspector::Inspector(Registry* registry, AssetManifest* assetManifest)
         : m_registry{registry},
           m_assetManifest{assetManifest}
     {
@@ -404,7 +416,7 @@ namespace nc::editor
             ImGui::SameLine();
             ImGui::Checkbox("##kinematicbox", &properties.isKinematic);
 
-            if(physicsBody->GetParentEntity().IsStatic())
+            if(physicsBody->ParentEntity().IsStatic())
             {
                 ImGui::Text("Mass               0(Inf)");
             }
@@ -433,9 +445,6 @@ namespace nc::editor
         Vector3 ambient = info.ambient;
         Vector3 diffuse = info.diffuseColor;
         float diffuseIntensity = info.diffuseIntensity;
-        float attConst = info.attConst;
-        float attLin = info.attLin;
-        float attQuad = info.attQuad;
 
         ElementHeader("PointLight");
         ImGui::BeginGroup();
@@ -449,13 +458,6 @@ namespace nc::editor
                 ImGui::Text("Color      ");   ImGui::SameLine(); auto diffuseResult = ImGui::ColorEdit3("##difcolor", &diffuse.x, ImGuiColorEditFlags_NoInputs);
                 auto diffuseIntensityResult = floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 600.0f, "%.2f");
             ImGui::Unindent();
-            ImGui::Text("Attenuation");
-                columnHeaderWidget("", "Const", "Lin", "Quad");
-                xyzWidget("", "att", &attConst, &attLin, &attQuad, 0.01f, 1.0f);
-                
-            auto buttonSize = ImVec2{ImGui::GetWindowWidth() - 20, 18};
-            if(ImGui::Button("Serialize", buttonSize))
-                SerializeToFile("nc/PointLightData.txt", info);
         ImGui::Unindent();
         ImGui::EndGroup();
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AudioSystem.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "rtaudio/RtAudio.h"
 
 #include <mutex>
@@ -12,7 +12,7 @@ namespace nc::audio
     class AudioSystemImpl final : public AudioSystem
     {
         public:
-            AudioSystemImpl(registry_type* registry);
+            AudioSystemImpl(Registry* registry);
             ~AudioSystemImpl() noexcept;
 
             void RegisterListener(Entity listener) noexcept override;
@@ -22,7 +22,7 @@ namespace nc::audio
             void Clear() noexcept;
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             RtAudio m_rtAudio;
             std::queue<std::span<double>> m_readyBuffers;
             std::queue<std::span<double>> m_staleBuffers;

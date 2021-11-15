@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 namespace nc::sample
 {
@@ -8,16 +8,16 @@ namespace nc::sample
     class ConstantRotation : public AutoComponent
     {
         public:
-            ConstantRotation(Entity entity, registry_type* registry, Vector3 axis, float radiansPerSecond);
+            ConstantRotation(Entity entity, Registry* registry, Vector3 axis, float radiansPerSecond);
             void FrameUpdate(float dt) override;
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             Vector3 m_axis;
             float m_radiansPerSecond;
     };
 
-    inline ConstantRotation::ConstantRotation(Entity entity, registry_type* registry, Vector3 axis, float radiansPerSecond)
+    inline ConstantRotation::ConstantRotation(Entity entity, Registry* registry, Vector3 axis, float radiansPerSecond)
         : AutoComponent{entity},
           m_registry{registry},
           m_axis{axis},
@@ -27,6 +27,6 @@ namespace nc::sample
 
     inline void ConstantRotation::FrameUpdate(float dt)
     {
-        m_registry->Get<Transform>(GetParentEntity())->Rotate(m_axis, m_radiansPerSecond * dt);
+        m_registry->Get<Transform>(ParentEntity())->Rotate(m_axis, m_radiansPerSecond * dt);
     }
 }

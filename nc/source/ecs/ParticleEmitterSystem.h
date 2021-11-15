@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Ecs.h"
-#include "component/ParticleEmitter.h"
+#include "ecs/Registry.h"
+#include "ecs/component/ParticleEmitter.h"
 #include "particle/EmitterState.h"
 
 namespace nc::graphics { class Graphics; }
@@ -11,7 +11,7 @@ namespace nc::ecs
     class ParticleEmitterSystem
     {
         public:
-            ParticleEmitterSystem(registry_type* registry, graphics::Graphics* graphics);
+            ParticleEmitterSystem(Registry* registry, graphics::Graphics* graphics);
 
             /** UpdateParticles is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to

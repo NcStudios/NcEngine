@@ -67,7 +67,7 @@ namespace nc::window
 
         if(!RegisterClass(&m_wndClass))
         {
-            throw std::runtime_error("Window::Constructor - failed to register wnd class");
+            throw NcError("Failed to register wnd class");
         }
 
         auto nativeWidth = GetSystemMetrics(SM_CXFULLSCREEN);
@@ -95,7 +95,7 @@ namespace nc::window
 
         if(!AdjustWindowRect(&clientRect, WND_STYLE_FLAGS, FALSE))
         {
-            throw std::runtime_error("Failed to adjust client rect to window rect");
+            throw NcError("Failed to adjust client rect to window rect");
         }
 
         if(clientRect.left < 0)
@@ -120,7 +120,7 @@ namespace nc::window
                                 
         if(!m_hwnd)
         {
-            throw std::runtime_error("Window constructor - CreateWindow failed");
+            throw NcError("CreateWindow failed");
         }
     }
 

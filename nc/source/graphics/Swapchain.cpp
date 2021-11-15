@@ -2,19 +2,17 @@
 #include "resources/DepthStencil.h"
 #include "Initializers.h"
 #include "Base.h"
+#include "debug/NcError.h"
 
 namespace nc::graphics
 {
-    Swapchain::Swapchain(Base* base, const DepthStencil& depthStencil, Vector2 dimensions)
+    Swapchain::Swapchain(Base* base, Vector2 dimensions)
         : m_base{ base },
-          m_depthStencil{ depthStencil },
           m_swapChain{},
           m_swapChainImages{},
           m_swapChainImageFormat{},
           m_swapChainExtent{},
           m_swapChainImageViews{},
-          m_framebuffers{},
-          m_defaultPass{},
           m_imagesInFlightFences{},
           m_framesInFlightFences{},
           m_imageAvailableSemaphores{},
@@ -23,7 +21,6 @@ namespace nc::graphics
     {
         Create(dimensions);
         CreateSynchronizationObjects();
-        CreateFrameBuffers();
     }
     
     Swapchain::~Swapchain() noexcept
@@ -47,7 +44,6 @@ namespace nc::graphics
     void Swapchain::Cleanup() noexcept
     {
         auto device = m_base->GetDevice();
-        DestroyFrameBuffers();
 
         for (auto& imageView : m_swapChainImageViews)
         {
@@ -55,56 +51,6 @@ namespace nc::graphics
         }
 
        device.destroySwapchainKHR(m_swapChain);
-    }
-
-    void Swapchain::CreateFrameBuffers()
-    {
-        std::array<vk::AttachmentDescription, 2> renderPassAttachments = 
-        {
-            CreateAttachmentDescription(AttachmentType::Color, GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
-            CreateAttachmentDescription(AttachmentType::Depth, m_base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare),
-        };
-
-        vk::AttachmentReference colorReference = CreateAttachmentReference(AttachmentType::Color, 0);
-        vk::AttachmentReference depthReference = CreateAttachmentReference(AttachmentType::Depth, 1);
-        vk::SubpassDescription subpass = CreateSubpassDescription(colorReference, depthReference);
-
-        vk::SubpassDependency subpassDependency = CreateSubpassDependency();
-
-        vk::RenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.setAttachmentCount(static_cast<uint32_t>(renderPassAttachments.size()));
-        renderPassInfo.setPAttachments(renderPassAttachments.data());
-        renderPassInfo.setSubpassCount(1);
-        renderPassInfo.setPSubpasses(&subpass);
-        renderPassInfo.setDependencyCount(1);
-        renderPassInfo.setPDependencies(&subpassDependency);
-
-        if (m_base->GetDevice().createRenderPass(&renderPassInfo, nullptr, &m_defaultPass) != vk::Result::eSuccess)
-        {
-            throw std::runtime_error("Could not create render pass.");
-        }
-
-        vk::ImageView attachments[2];
-        
-        attachments[1] = m_depthStencil.GetImageView();
-
-        auto swapChainDimensions = GetExtentDimensions();
-
-        vk::FramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.setRenderPass(m_defaultPass);
-        framebufferInfo.setAttachmentCount(2);
-        framebufferInfo.setPAttachments(attachments);
-        framebufferInfo.setWidth(swapChainDimensions.x);
-        framebufferInfo.setHeight(swapChainDimensions.y);
-        framebufferInfo.setLayers(1);
-
-        auto swapChainImageViewsCount = m_swapChainImageViews.size();
-        m_framebuffers.resize(swapChainImageViewsCount);
-        for (size_t i = 0; i < swapChainImageViewsCount; i++)
-        {
-            attachments[0] = m_swapChainImageViews.at(i);
-            m_framebuffers[i] = m_base->GetDevice().createFramebuffer(framebufferInfo);
-        }
     }
 
     // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
@@ -159,7 +105,7 @@ namespace nc::graphics
         
         if (result != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Could not present to the swapchain.");
+            throw NcError("Could not present to the swapchain.");
         }
     }
     
@@ -174,7 +120,7 @@ namespace nc::graphics
         {
             if (m_base->GetDevice().waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Could not wait for fences to complete.");
+                throw NcError("Could not wait for fences to complete.");
             }
         }
     }
@@ -182,16 +128,6 @@ namespace nc::graphics
     void Swapchain::SyncImageAndFrameFence(uint32_t imageIndex)
     {
         m_imagesInFlightFences[imageIndex] = m_framesInFlightFences[m_currentFrameIndex];
-    }
-
-    const vk::Framebuffer& Swapchain::GetFrameBuffer(uint32_t index) const
-    {
-        return m_framebuffers.at(index);
-    }
-
-    const vk::RenderPass& Swapchain::GetPassDefinition()
-    {
-        return m_defaultPass;
     }
 
     const vk::Format& Swapchain::GetFormat() const noexcept
@@ -287,13 +223,13 @@ namespace nc::graphics
         uint32_t swapChainImageCount;
         if (device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Error getting swapchain images count.");
+            throw NcError("Error getting swapchain images count.");
         }
 
         m_swapChainImages.resize(swapChainImageCount);
         if (device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Error getting swapchain images.");
+            throw NcError("Error getting swapchain images.");
         }
 
         m_swapChainImageFormat = surfaceFormat.format;
@@ -326,17 +262,8 @@ namespace nc::graphics
 
             if (device.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
             {
-                throw std::runtime_error("Failed to create image view");
+                throw NcError("Failed to create image view");
             }
-        }
-    }
-
-    void Swapchain::DestroyFrameBuffers() noexcept
-    {
-        auto device = m_base->GetDevice();
-        for (auto& frameBuffer : m_framebuffers)
-        {
-            device.destroyFramebuffer(frameBuffer);
         }
     }
 
@@ -344,7 +271,7 @@ namespace nc::graphics
     {
         if (m_base->GetDevice().waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
         {
-            throw std::runtime_error("Could not wait for fences to complete.");
+            throw NcError("Could not wait for fences to complete.");
         }
     }
 
@@ -368,7 +295,7 @@ namespace nc::graphics
         return m_swapChainExtent;
     }
 
-    const std::vector<vk::ImageView>& Swapchain::GetImageViews() const noexcept
+    const std::vector<vk::ImageView>& Swapchain::GetColorImageViews() const noexcept
     {
         return m_swapChainImageViews;
     }

@@ -34,8 +34,8 @@ registry->Add<ConcaveCollider>(handle, assetPath);
 #define NC_SCENE_ACTION_ADD_PHYSICS_BODY(handle, mass, drag, angularDrag, restitution, friction, useGravity, isKinematic) \
 registry->Add<PhysicsBody>(handle, PhysicsProperties{.mass = mass, .drag = drag, .angularDrag = angularDrag, .restitution = restitution, .friction = friction, .useGravity = useGravity, .isKinematic = isKinematic});
 
-#define NC_SCENE_ACTION_ADD_POINT_LIGHT(handle, pos, ambient, diffuseColor, diffuseIntensity, attConst, attLin, attQuad) \
-registry->Add<PointLight>(handle, PointLightInfo{.pos = pos, .ambient = ambient, .diffuseColor = diffuseColor, .diffuseIntensity = diffuseIntensity, .attConst = attConst, .attLin = attLin, .attQuad = attQuad});
+#define NC_SCENE_ACTION_ADD_POINT_LIGHT(handle, pos, ambient, diffuseColor, diffuseIntensity) \
+registry->Add<PointLight>(handle, PointLightInfo{.pos = pos, .ambient = ambient, .diffuseColor = diffuseColor, .diffuseIntensity = diffuseIntensity});
 
-#define NC_SCENE_ACTION_ADD_MESH_RENDERER(handle, meshPath, baseColor, normal, roughness, technique) \
-registry->Add<MeshRenderer>(handle, meshPath, graphics::Material{.basColor = baseColor, .normal = normal, .roughness = roughness}, technique);
+#define NC_SCENE_ACTION_ADD_MESH_RENDERER(handle, meshPath, baseColor, normal, roughness, metallic, technique) \
+registry->Add<MeshRenderer>(handle, meshPath, graphics::Material{.basColor = baseColor, .normal = normal, .roughness = roughness, .metallic = metallic}, technique);

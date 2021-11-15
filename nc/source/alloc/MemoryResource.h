@@ -16,7 +16,7 @@ namespace nc::alloc
             static void Create(size_t size)
             {
                 if(m_resource)
-                    throw std::runtime_error("MemoryResource - Resource already exists");
+                    throw NcError("Resource already exists");
 
                 m_resource = std::make_unique<Resource_t>(size);
             }
@@ -29,7 +29,7 @@ namespace nc::alloc
             static Resource_t* Get()
             {
                 if(!m_resource)
-                    throw std::runtime_error("MemoryResource - Resource not initialized");
+                    throw NcError("Resource not initialized");
 
                 return m_resource.get();
             }

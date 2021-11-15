@@ -1,5 +1,5 @@
 #include "EmitterState.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "MainCamera.h"
 #include "random/Random.h"
 
@@ -58,7 +58,7 @@ namespace nc::particle
 
     void EmitterState::Emit(size_t count)
     {
-        auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->GetPosition();
+        auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
         auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
         for(size_t i = 0; i < particleCount; ++i)
         {
@@ -75,7 +75,7 @@ namespace nc::particle
         // const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
         // const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
         // auto* camera = GetMainCameraTransform();
-        // auto camRotation = camera->GetRotation();
+        // auto camRotation = camera->Rotation();
         // auto camForward = camera->Forward();
         // auto [index, particles, matrices] = m_soa.View<ParticlesIndex, MvpMatricesIndex>();
 

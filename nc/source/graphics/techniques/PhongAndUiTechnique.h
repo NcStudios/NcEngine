@@ -1,17 +1,16 @@
 #pragma once
 
-#include "component/Component.h"
-#include "vulkan/vk_mem_alloc.hpp"
 #include "directx/math/DirectXMath.h"
+#include "ecs/component/Component.h"
+#include "ITechnique.h"
 
+#include "vulkan/vk_mem_alloc.hpp"
 #include <vector>
 #include <span>
 
-namespace nc { struct MeshView; }
-
 namespace nc::graphics
 {
-    class Graphics; class Commands; class Base; class Swapchain;
+    class Graphics; class Base; class Swapchain;
 
     struct PhongPushConstants
     {
@@ -20,14 +19,18 @@ namespace nc::graphics
         float padding;
     };
 
-    class PhongAndUiTechnique
+    class PhongAndUiTechnique : public ITechnique
     {
         public:
             PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
             ~PhongAndUiTechnique() noexcept;
             
-            void Bind(vk::CommandBuffer* cmd);
-            void Record(vk::CommandBuffer* cmd, const Vector3& cameraPosition, std::span<const MeshView> meshes);
+            bool CanBind(const PerFrameRenderState& frameData) override;
+            void Bind(vk::CommandBuffer* cmd) override;
+
+            bool CanRecord(const PerFrameRenderState& frameData) override;
+            void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
+            
             void Clear() noexcept;
 
         private:
@@ -35,8 +38,7 @@ namespace nc::graphics
 
             nc::graphics::Graphics* m_graphics;
             Base* m_base;
-            Swapchain* m_swapchain;
-            vk::Pipeline m_pipeline;
-            vk::PipelineLayout m_pipelineLayout;
+            vk::UniquePipeline m_pipeline;
+            vk::UniquePipelineLayout m_pipelineLayout;
     };
 }

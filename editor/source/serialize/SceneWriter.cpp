@@ -34,7 +34,7 @@ namespace nc
 
 namespace nc::editor
 {
-    SceneWriter::SceneWriter(registry_type* registry, const std::filesystem::path& scenesDirectory)
+    SceneWriter::SceneWriter(Registry* registry, const std::filesystem::path& scenesDirectory)
         : m_registry{registry},
           m_file{},
           m_handleNames{},
@@ -175,14 +175,14 @@ namespace nc::editor
 
         const auto& handleName = m_handleNames.at(entity.Index());
         auto* transform = m_registry->Get<Transform>(entity);
-        auto parent = transform->GetParent();
+        auto parent = transform->Parent();
         auto parentHandle = parent.Valid() ? m_handleNames.at(parent.Index()) : std::string{"Entity::Null()"};
 
         m_file << AddEntitySceneAction << "( "
                << handleName << " , "
-               << transform->GetLocalPosition() << " , "
-               << transform->GetLocalRotation() << " , "
-               << transform->GetLocalScale() << " , "
+               << transform->LocalPosition() << " , "
+               << transform->LocalRotation() << " , "
+               << transform->LocalScale() << " , "
                << parentHandle << " , "
                << "\"" << tag << "\" , "
                << static_cast<unsigned>(entity.Layer()) << " , "
@@ -281,10 +281,7 @@ namespace nc::editor
                << info.pos << " , "
                << info.ambient << " , "
                << info.diffuseColor << " , "
-               << info.diffuseIntensity << " , "
-               << info.attConst << " , "
-               << info.attLin << " , "
-               << info.attQuad << " )\n";
+               << info.diffuseIntensity << " )\n";
     }
 
     void SceneWriter::WriteMeshRenderer(Entity entity, const std::string& handleName)
@@ -303,6 +300,7 @@ namespace nc::editor
                << "\"" << material.baseColor << "\" , "
                << "\"" << material.normal << "\" , "
                << "\"" << material.roughness << "\" , "
+               << "\"" << material.metallic << "\" , "
                << techniqueType << " )\n";
     }
 }

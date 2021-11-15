@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 #include "Common.h"
 
@@ -11,12 +11,12 @@ namespace nc::editor
     class SceneWriter
     {
         public:
-            SceneWriter(registry_type* registry, const std::filesystem::path& scenesDirectory);
+            SceneWriter(Registry* registry, const std::filesystem::path& scenesDirectory);
             void WriteCurrentScene(const std::string& sceneName);
             void WriteNewScene(const std::string& sceneName);
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             std::ofstream m_file;
             std::unordered_map<Entity::index_type, std::string> m_handleNames;
             std::filesystem::path m_scenesDirectory;

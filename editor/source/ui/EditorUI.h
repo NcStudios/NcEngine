@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "ui/IUI.h"
 #include "window/IOnResizeReceiver.h"
 #include "framework/Callbacks.h"
@@ -19,7 +19,7 @@ namespace nc::editor
     class EditorUI : public ui::UIFlexible, public window::IOnResizeReceiver
     {
         public:
-            EditorUI(registry_type* registry,
+            EditorUI(Registry* registry,
                      Output* output,
                      AssetManifest* assetManifest,
                      ProjectCallbacks projectCallbacks,
@@ -40,7 +40,7 @@ namespace nc::editor
             auto GetRegisterDialogCallback() -> UICallbacks::RegisterDialogCallbackType;
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             Vector2 m_dimensions;
             ProjectCallbacks m_callbacks;
             SceneGraph m_sceneGraph;

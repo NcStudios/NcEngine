@@ -7,10 +7,10 @@ namespace nc
     {
         if(IsLoaded(path))
             return false;
-        
+
         AudioFile<double> asset;
         if(!asset.load(path))
-            throw std::runtime_error("SoundClipAssetManager::DoLoad - Failure opening file: " + path);
+            throw NcError("Failure opening file: " + path);
 
         size_t samplesPerChannel = asset.samples.at(0).size();
 
@@ -25,25 +25,37 @@ namespace nc
         return true;
     }
 
-    bool SoundClipAssetManager::Load(const std::vector<std::string>& paths)
+    bool SoundClipAssetManager::Load(std::span<const std::string> paths)
     {
-        /** @todo */
-        (void)paths;
-        return false;
+        bool anyLoaded = false;
+
+        for(const auto& path : paths)
+        {
+            if(IsLoaded(path))
+                continue;
+            
+            if(Load(path))
+                anyLoaded = true;
+        }
+
+        return anyLoaded;
     }
-    
+
     bool SoundClipAssetManager::Unload(const std::string& path)
     {
-        /** @todo */
-        (void)path;
-        return true;
+        return static_cast<bool>(m_soundClips.erase(path));
+    }
+
+    void SoundClipAssetManager::UnloadAll()
+    {
+        m_soundClips.clear();
     }
 
     auto SoundClipAssetManager::Acquire(const std::string& path) const -> SoundClipView
     {
         const auto it = m_soundClips.find(path);
         if(it == m_soundClips.end())
-            throw std::runtime_error("SoundClipAssetManager::DoGet - asset is not loaded: " + path);
+            throw NcError("Asset is not loaded: " + path);
         
         return SoundClipView
         {

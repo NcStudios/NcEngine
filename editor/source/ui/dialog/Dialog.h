@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Ecs.h"
 #include "window/IOnResizeReceiver.h"
 #include "imgui/imgui.h"
+
+#include <string>
 
 namespace nc::editor
 {

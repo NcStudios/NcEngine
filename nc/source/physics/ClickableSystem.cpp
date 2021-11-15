@@ -1,11 +1,10 @@
 #include "ClickableSystem.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "debug/Utils.h"
 #include "Input.h"
 #include "MainCamera.h"
 #include "Window.h"
 #include "directx/math/DirectXMath.h"
-#include "graphics/Graphics.h"
 
 #include <algorithm>
 #include <limits>
@@ -13,9 +12,8 @@
 namespace nc::physics
 {
     /** System Implementation */
-    ClickableSystem::ClickableSystem(graphics::Graphics* graphics)
-        : m_clickableComponents{},
-          m_graphics{graphics}
+    ClickableSystem::ClickableSystem()
+        : m_clickableComponents{}
     {
     }
 
@@ -39,12 +37,12 @@ namespace nc::physics
         return nullptr;
         // auto unit = Normalize(Vector3::Splat(1.0f));
         // auto unit_v = DirectX::XMLoadVector3(&unit);
-        // const auto& viewMatrix = m_graphics->GetViewMatrix();
+        // const auto& viewMatrix = m_graphics->ViewMatrix();
         // unit_v = DirectX::XMVector3Transform(unit_v, viewMatrix);
         // DirectX::XMStoreVector3(&unit, unit_v);
 
         // auto [screenWidth, screenHeight] = window::GetDimensions();
-        // const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
+        // const auto& projectionMatrix = m_graphics->ProjectionMatrix();
         // auto worldMatrix = DirectX::XMMatrixIdentity();
         // IClickable* out = nullptr;
         // float smallestZ = std::numeric_limits<float>::max();
@@ -56,7 +54,7 @@ namespace nc::physics
         //         continue;
 
         //     //project clickable to screen space
-        //     auto worldPos = registry->Get<Transform>(clickable->entity)->GetPosition();
+        //     auto worldPos = registry->Get<Transform>(clickable->entity)->Position();
         //     auto worldPos_v = DirectX::XMLoadVector3(&worldPos);
         //     auto screenPos_v = DirectX::XMVector3Project(worldPos_v,
         //                                                  0.0f, 0.0f,

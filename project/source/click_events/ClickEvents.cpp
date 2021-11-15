@@ -64,15 +64,12 @@ namespace nc::sample
         LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.4f, 12.1f, 0.0f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{});
+        auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.8f, 2.3f, -4.7f}, .tag = "Point Light 1"});
+        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3{0.325, 0.325, 0.325}, .diffuseColor = Vector3{0.9, 0.9, 0.9}, .diffuseIntensity = 48.0});
 
-        auto lvHandle2 = registry->Add<Entity>({.position = Vector3{12.1f, 14.5f, 7.3f}, .tag = "Point Light 2"});
-        registry->Add<PointLight>(lvHandle2, PointLightInfo{});
-
-        auto lvHandle3 = registry->Add<Entity>({.position = Vector3{4.1f, 14.5f, 3.3f}, .tag = "Point Light 3"});
-        registry->Add<PointLight>(lvHandle3, PointLightInfo{});
-
+        auto lvHandle2 = registry->Add<Entity>({.position = Vector3{5.1f, 3.7f, 1.6f}, .tag = "Point Light 2"});
+        registry->Add<PointLight>(lvHandle2, PointLightInfo{.ambient = Vector3{1.0, 1.0, 1.0}, .diffuseColor = Vector3{1.0, 1.0, 1.0}, .diffuseIntensity = 54.0});
+        
         // Objects
         prefab::Create(registry,
                        prefab::Resource::Table, 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "Input.h"
 
 namespace nc::sample
@@ -35,7 +35,7 @@ namespace nc::sample
 
     inline void SceneNavigationCamera::FrameUpdate(float dt)
     {
-        auto* transform = ActiveRegistry()->Get<Transform>(GetParentEntity());
+        auto* transform = ActiveRegistry()->Get<Transform>(ParentEntity());
         Pan(dt, transform);
         Look(dt, transform);
         Zoom(dt, transform);

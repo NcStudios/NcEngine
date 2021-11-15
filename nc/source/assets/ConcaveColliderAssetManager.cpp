@@ -11,7 +11,7 @@ namespace nc
         
         std::ifstream file{path};
         if(!file.is_open())
-            throw std::runtime_error("ConcaveColliderAssetManager - Could not open file: " + path);
+            throw NcError("Failure opening file: " + path);
 
         size_t triangleCount;
         float maxExtent;
@@ -24,7 +24,7 @@ namespace nc
         for(size_t i = 0u; i < triangleCount; ++i)
         {
             if(file.fail())
-                throw std::runtime_error("ConcaveColliderAssetManager - Failure reading file: " + path);
+                throw NcError("Failure reading file: " + path);
 
             file >> a.x >> a.y >> a.z
                  >> b.x >> b.y >> b.z
@@ -37,25 +37,37 @@ namespace nc
         return true;
     }
     
-    bool ConcaveColliderAssetManager::Load(const std::vector<std::string>& paths)
+    bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths)
     {
-        /** @todo */
-        (void)paths;
-        return false;
+        bool anyLoaded = false;
+
+        for(const auto& path : paths)
+        {
+            if(IsLoaded(path))
+                continue;
+            
+            if(Load(path))
+                anyLoaded = true;
+        }
+
+        return anyLoaded;
     }
     
     bool ConcaveColliderAssetManager::Unload(const std::string& path)
     {
-        /** @todo */
-        (void)path;
-        return false;
+        return static_cast<bool>(m_concaveColliders.erase(path));
+    }
+
+    void ConcaveColliderAssetManager::UnloadAll()
+    {
+        m_concaveColliders.clear();
     }
 
     auto ConcaveColliderAssetManager::Acquire(const std::string& path) const -> ConcaveColliderView
     {
         const auto it = m_concaveColliders.find(path);
         if(it == m_concaveColliders.end())
-            throw std::runtime_error("ConcaveColliderAssetManager::Acquire - asset is not loaded: " + path);
+            throw NcError("Asset is not loaded: " + path);
         
         return ConcaveColliderView
         {

@@ -1,5 +1,5 @@
 // #include "ParticleTechnique.h"
-// #include "Ecs.h"
+// #include "ecs/Registry.h"
 // #include "config/Config.h"
 // #include "component/Transform.h"
 // #include "debug/Profiler.h"
@@ -115,8 +115,8 @@
 //     void ParticleTechnique::Record(vk::CommandBuffer* cmd)
 //     {
 //         NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-//         const auto& viewMatrix = m_graphics->GetViewMatrix();
-//         const auto& projectionMatrix = m_graphics->GetProjectionMatrix();
+//         const auto& viewMatrix = m_graphics->ViewMatrix();
+//         const auto& projectionMatrix = m_graphics->ProjectionMatrix();
 
 //         auto pushConstants = ParticlePushConstants{};
 //         pushConstants.viewProjection = viewMatrix * projectionMatrix;

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "Entity.h"
+#include "ecs/Entity.h"
 
 using namespace nc;
 
@@ -75,6 +75,20 @@ TEST(Entity_unit_tests, IsStatic_FlagNotSet_ReturnsFalse)
     auto flags = Entity::Flags::None;
     auto handle = Entity{1u, 1u, flags};
     EXPECT_FALSE(handle.IsStatic());
+}
+
+TEST(Entity_unit_tests, IsPersistent_FlagSet_ReturnsTrue)
+{
+    auto flags = Entity::Flags::Persistent;
+    auto handle = Entity{1u, 1u, flags};
+    EXPECT_TRUE(handle.IsPersistent());
+}
+
+TEST(Entity_unit_tests, IsPersistent_FlagNotSet_ReturnsFalse)
+{
+    auto flags = Entity::Flags::None;
+    auto handle = Entity{1u, 1u, flags};
+    EXPECT_FALSE(handle.IsPersistent());
 }
 
 int main(int argc, char ** argv)

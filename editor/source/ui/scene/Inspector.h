@@ -1,6 +1,20 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Entity.h"
+
+namespace nc
+{
+    class AudioSource;
+    class Collider;
+    class ConcaveCollider;
+    class MeshRenderer;
+    class NetworkDispatcher;
+    class ParticleEmitter;
+    class PhysicsBody;
+    class PointLight;
+    class Registry;
+    class Transform;
+}
 
 namespace nc::editor
 {
@@ -10,11 +24,11 @@ namespace nc::editor
     class Inspector
     {
         public:
-            Inspector(registry_type* registry, AssetManifest* assetManifest);
+            Inspector(Registry* registry, AssetManifest* assetManifest);
             void InspectEntity(Entity entity);
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             AssetManifest* m_assetManifest;
 
             void DrawAudioSource(AudioSource* audioSource);

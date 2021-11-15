@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "component/AutoComponentGroup.h"
+#include "ecs/component/AutoComponentGroup.h"
 
 using namespace nc;
 
@@ -17,7 +17,7 @@ TEST(AutoComponentGroup_unit_tests, Add_ValidCall_ConstructsObject)
 {
     auto group = AutoComponentGroup{TestEntity};
     auto ptr = group.Add<FakeAutoComponent>(TestEntity);
-    EXPECT_EQ(ptr->GetParentEntity(), TestEntity);
+    EXPECT_EQ(ptr->ParentEntity(), TestEntity);
 }
 
 TEST(AutoComponentGroup_unit_tests, Add_ReplaceAfterRemove_ConstructsObject)
@@ -28,7 +28,7 @@ TEST(AutoComponentGroup_unit_tests, Add_ReplaceAfterRemove_ConstructsObject)
     group.Remove<FakeAutoComponent>();
     group.CommitStagedComponents();
     auto ptr = group.Add<FakeAutoComponent>(TestEntity);
-    EXPECT_EQ(ptr->GetParentEntity(), TestEntity);
+    EXPECT_EQ(ptr->ParentEntity(), TestEntity);
 }
 
 TEST(AutoComponentGroup_unit_tests, Add_DoubleCall_Throws)

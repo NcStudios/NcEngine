@@ -1,21 +1,10 @@
 #pragma once
 
-#include "component/Collider.h"
-#include "Simplex.h"
-#include "Polytope.h"
+#include "ecs/component/Collider.h"
+#include "CollisionState.h"
 
 namespace nc::physics
 {
-    /* Collision data produced by Gjk and consumed by Epa. */
-    struct CollisionState
-    {
-        Simplex simplex;
-        Polytope polytope;
-        Contact contact;
-        DirectX::XMVECTOR rotationA;
-        DirectX::XMVECTOR rotationB;
-    };
-
     enum class HalfspaceContainment
     {
         Intersecting,

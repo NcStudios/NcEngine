@@ -25,8 +25,7 @@ namespace nc::ui
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
 
-        auto& uiPassDefinition = m_graphics->GetSwapchainPtr()->GetPassDefinition();
-        m_graphics->GetBasePtr()->InitializeImgui(uiPassDefinition);
+        m_graphics->InitializeUI();
     }
 
     UISystemImpl::~UISystemImpl() noexcept
@@ -61,26 +60,26 @@ namespace nc::ui
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void UISystemImpl::Frame(float* dt, registry_type* registry)
+    void UISystemImpl::Draw(float* dt, Registry* registry)
     {
         m_editor.Frame(dt, registry);
         if(m_projectUI)
         {
             m_projectUI->Draw();
         }
+
+        ImGui::Render();
     }
     #else
-    void UISystemImpl::Frame()
+    void UISystemImpl::Draw()
     {
         if(m_projectUI)
         {
             m_projectUI->Draw();
         }
+
+        ImGui::Render();
     }
     #endif
 
-    void UISystemImpl::FrameEnd()
-    {
-        ImGui::Render();
-    }
 } //end namespace nc::ui

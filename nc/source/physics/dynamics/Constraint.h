@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../collision/Manifold.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/Transform.h"
+#include "physics/PhysicsPipelineTypes.h"
 
 namespace nc::physics
 {

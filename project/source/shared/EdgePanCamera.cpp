@@ -1,5 +1,6 @@
 #include "EdgePanCamera.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
+#include "ecs/component/Transform.h"
 #include "MainCamera.h"
 #include "Input.h"
 #include "Window.h"
@@ -40,6 +41,6 @@ namespace nc::sample
             translation = Vector3::Zero();
         m_lastFrameTranslation = translation;
         translation = translation * dt;
-        ActiveRegistry()->Get<Transform>(GetParentEntity())->Translate(translation);
+        ActiveRegistry()->Get<Transform>(ParentEntity())->Translate(translation);
     }
 }

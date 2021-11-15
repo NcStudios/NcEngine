@@ -2,10 +2,10 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
-#include "debug/Profiler.h"
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
 #include "graphics/PerFrameRenderState.h"
+#include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
 
 namespace nc
@@ -23,25 +23,19 @@ namespace nc
         : m_mainCamera{},
           m_window{ hInstance },
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_assetServices{&m_graphics, config::GetMemorySettings().maxTextures},
-          m_renderer{&m_graphics,
-                    [&manager = m_assetServices.meshManager] { return manager.GetVertexBuffer(); },
-                    [&manager = m_assetServices.meshManager] { return manager.GetIndexBuffer(); }},
           m_ecs{&m_graphics, config::GetMemorySettings()},
-          m_physicsSystem{m_ecs.GetRegistry(), &m_graphics},
+          m_physicsSystem{m_ecs.GetRegistry()},
           m_sceneSystem{},
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_uiSystem{m_window.GetHWND(), &m_graphics},
-          m_taskExecutor{6u}, // @todo probably add to config
+          m_taskExecutor{8u}, // @todo probably add to config
           m_tasks{},
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},
-          m_currentImageIndex{0},
           m_useEditorMode{useEditorMode},
           m_isRunning{false}
     {
-        m_graphics.SetRenderer(&m_renderer);
         SetBindings();
         BuildTaskGraph();
         V_LOG("Engine constructed");
@@ -75,11 +69,18 @@ namespace nc
     void Engine::Shutdown() noexcept
     {
         V_LOG("Shutdown NcEngine");
-        ClearState();
+        try
+        {
+            ClearState();
+        }
+        catch(const std::exception& e)
+        {
+            debug::LogException(e);
+        }
     }
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
-    auto Engine::Registry()    noexcept -> registry_type*   { return m_ecs.GetRegistry(); }
+    auto Engine::Registry()    noexcept -> nc::Registry*    { return m_ecs.GetRegistry(); }
     auto Engine::MainCamera()  noexcept -> nc::MainCamera*  { return &m_mainCamera;       }
     auto Engine::Physics()     noexcept -> PhysicsSystem*   { return &m_physicsSystem;    }
     auto Engine::SceneSystem() noexcept -> nc::SceneSystem* { return &m_sceneSystem;      }
@@ -91,6 +92,7 @@ namespace nc
         [[maybe_unused]] auto writeAudioBuffersTask = m_tasks.AddGuardedTask(
             [&audioSystem = m_audioSystem]
         {
+            OPTICK_CATEGORY("AudioSystem::Update", Optick::Category::Audio);
             audioSystem.Update();
         });
 
@@ -122,6 +124,8 @@ namespace nc
 
         while(m_isRunning)
         {
+            OPTICK_FRAME("Main Thread");
+
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
@@ -194,48 +198,43 @@ namespace nc
 
     void Engine::FrameLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-
+        OPTICK_CATEGORY("SendFrameUpdate", Optick::Category::GameLogic);
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFrameUpdate(dt);
-        
-        NC_PROFILE_END();
     }
 
     void Engine::FrameRender()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("FrameRender", Optick::Category::Rendering);
+        /** Update the view matrix for the camera */
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
-        m_currentImageIndex = m_graphics.FrameBegin();
+
+        /** Setup the frame */
+        if (m_graphics.FrameBegin() == UINT32_MAX) return;
         m_uiSystem.FrameBegin();
+
         auto* registry = m_ecs.GetRegistry();
 
         #ifdef NC_EDITOR_ENABLED
-        m_uiSystem.Frame(&m_frameDeltaTimeFactor, registry);
+        m_uiSystem.Draw(&m_frameDeltaTimeFactor, registry);
         #else
-        m_uiSystem.Frame();
+        m_uiSystem.Draw();
         #endif
 
-        m_uiSystem.FrameEnd();
-
+        /** Get the frame data */
         auto state = graphics::PerFrameRenderState{registry, mainCamera, m_ecs.GetPointLightSystem()->CheckDirtyAndReset()};
         graphics::MapPerFrameRenderState(state);
 
-        auto* renderer = m_graphics.GetRendererPtr();
-        
-        #ifdef NC_EDITOR_ENABLED
+        /** Draw the frame */
+        m_graphics.Draw(state);
 
-        for(auto& collider : registry->ViewAll<Collider>())
-            collider.UpdateWidget(renderer);
+        #ifdef NC_EDITOR_ENABLED
+        for(auto& collider : registry->ViewAll<Collider>()) collider.SetEditorSelection(false);
         #endif
 
-        // @todo: conditionally update based on changes
-        renderer->Record(m_graphics.GetCommandsPtr(), state, m_currentImageIndex);
-
-        m_graphics.Draw();
+        /** End the frame */
         m_graphics.FrameEnd();
-        NC_PROFILE_END();
     }
 
     void Engine::FrameCleanup()
@@ -244,7 +243,7 @@ namespace nc
         {
             DoSceneSwap();
         }
-        
+
         input::Flush();
     }
 

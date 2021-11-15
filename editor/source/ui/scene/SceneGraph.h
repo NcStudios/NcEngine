@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "window/IOnResizeReceiver.h"
 #include "imgui/imgui.h"
 #include "ui/dialog/Dialog.h"
@@ -16,7 +16,7 @@ namespace nc::editor
     class SceneGraph : public window::IOnResizeReceiver
     {
         public:
-            SceneGraph(registry_type* registry,
+            SceneGraph(Registry* registry,
                        AssetManifest* assetManifest,
                        SceneCallbacks sceneCallbacks,
                        EntityCallbacks::ChangeTagCallbackType changeTag,
@@ -29,7 +29,7 @@ namespace nc::editor
             void UpdateScenes(std::vector<std::string> scenes, int selectedScene);
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             AssetManifest* m_assetManifest;
             std::string m_projectName;
             Inspector m_inspector;

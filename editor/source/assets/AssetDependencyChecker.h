@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 namespace nc::editor
 {
@@ -8,7 +8,7 @@ namespace nc::editor
 
     struct AssetDependencyChecker
     {
-        AssetDependencyChecker(const registry_type* registry, const AssetManifest* manifest);
+        AssetDependencyChecker(const Registry* registry, const AssetManifest* manifest);
         void LogMissingDependencies();
 
         std::vector<std::string> missingDependencies;

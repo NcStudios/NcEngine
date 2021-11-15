@@ -4,5 +4,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/graphics/resources/ImmutableImage.cpp
         ${ROOT_DIR}/source/graphics/resources/ObjectDataManager.cpp
         ${ROOT_DIR}/source/graphics/resources/PointLightManager.cpp
+        ${ROOT_DIR}/source/graphics/resources/RenderPassManager.cpp
+        ${ROOT_DIR}/source/graphics/resources/ShadowMapManager.cpp
         ${ROOT_DIR}/source/graphics/resources/TextureManager.cpp
 )

@@ -1,7 +1,7 @@
 #ifdef NC_EDITOR_ENABLED
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 namespace nc 
 {
@@ -17,7 +17,7 @@ namespace nc::ui::editor
     {
         public:
             Editor(graphics::Graphics* graphics);
-            void Frame(float* dt, registry_type* registry);
+            void Frame(float* dt, Registry* registry);
 
         private:
             nc::graphics::Graphics* m_graphics;

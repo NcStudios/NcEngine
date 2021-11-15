@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ecs.h"
+#include "ecs/Registry.h"
 
 #include "Common.h"
 
@@ -10,10 +10,10 @@ namespace nc::editor
     class SceneReader
     {
         public:
-            SceneReader(registry_type* registry, const std::filesystem::path& scenesDirectory, const std::string& sceneName);
+            SceneReader(Registry* registry, const std::filesystem::path& scenesDirectory, const std::string& sceneName);
 
         private:
-            registry_type* m_registry;
+            Registry* m_registry;
             std::ifstream m_file;
             std::unordered_map<std::string, Entity> m_handleNames;
             std::filesystem::path m_scenesDirectory;

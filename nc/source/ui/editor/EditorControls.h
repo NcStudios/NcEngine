@@ -1,8 +1,18 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
-#include "debug/Profiler.h"
-#include "Ecs.h"
+#include "ecs/Registry.h"
 #include "ecs/EntityComponentSystem.h"
+#include "ecs/component/AudioSource.h"
+#include "ecs/component/Camera.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/ConcaveCollider.h"
+#include "ecs/component/MeshRenderer.h"
+#include "ecs/component/NetworkDispatcher.h"
+#include "ecs/component/ParticleEmitter.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/PointLight.h"
+#include "ecs/component/Tag.h"
+#include "ecs/component/Transform.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls
@@ -15,20 +25,19 @@ namespace nc::ui::editor::controls
     const auto GraphSize = ImVec2{128, 32};
     const auto Padding = 4.0f;
 
-    inline void SceneGraphPanel(registry_type* registry, float windowHeight);
-    inline void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform);
-    inline void EntityPanel(registry_type* registry, Entity entity);
+    inline void SceneGraphPanel(Registry* registry, float windowHeight);
+    inline void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform);
+    inline void EntityPanel(Registry* registry, Entity entity);
     inline void AutoComponentElement(AutoComponent* comp);
-    inline void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight);
-    inline void FrameData(float* dtMult, unsigned drawCallCount);
-    inline void Profiler();
-    inline void ComponentSystems(registry_type* registry);
+    inline void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight);
+    inline void FrameData(float* dtMult);
+    inline void ComponentSystems(Registry* registry);
     inline void PhysicsMetrics();
 
     /**
      * Scene Graph Controls
      */
-    void SceneGraphPanel(registry_type* registry, float windowHeight)
+    void SceneGraphPanel(Registry* registry, float windowHeight)
     {
         ImGui::SetNextWindowPos({Padding, TitleBarHeight});
         auto sceneGraphHeight = windowHeight - TitleBarHeight;
@@ -49,7 +58,7 @@ namespace nc::ui::editor::controls
                 {
                     auto* transform = registry->Get<Transform>(entity);
                     auto* tag = registry->Get<Tag>(entity);
-                    if(transform->GetParent().Valid()) // only draw root nodes
+                    if(transform->Parent().Valid()) // only draw root nodes
                         continue;
 
                     if(!filter.PassFilter(tag->Value().data()))
@@ -69,7 +78,7 @@ namespace nc::ui::editor::controls
         } ImGui::EndChild();
     }
 
-    void SceneGraphNode(registry_type* registry, Entity entity, Tag* tag, Transform* transform)
+    void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform)
     {
         ImGui::PushID(entity.Index());
 
@@ -83,7 +92,7 @@ namespace nc::ui::editor::controls
         
         if(open)
         {
-            for(auto child : transform->GetChildren())
+            for(auto child : transform->Children())
                 SceneGraphNode(registry, child, registry->Get<Tag>(child), registry->Get<Transform>(child));
 
             ImGui::TreePop();
@@ -92,7 +101,7 @@ namespace nc::ui::editor::controls
         ImGui::PopID();
     }
 
-    void EntityPanel(registry_type* registry, Entity entity)
+    void EntityPanel(Registry* registry, Entity entity)
     {
         if(!registry->Contains<Entity>(entity)) // entity may have been deleted
         {
@@ -128,7 +137,6 @@ namespace nc::ui::editor::controls
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
-        
         }
 
         if (auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
@@ -182,7 +190,7 @@ namespace nc::ui::editor::controls
         }
     }
 
-    void UtilitiesPanel(float* dtMult, registry_type* registry, unsigned drawCallCount, float windowWidth, float windowHeight)
+    void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight)
     {
         static auto initColumnWidth = false;
         const auto xPos = SceneGraphPanelWidth + 2.0f * Padding;
@@ -199,7 +207,6 @@ namespace nc::ui::editor::controls
             }
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
             {
-                WrapTabItem("Profiler", Profiler);
                 WrapTabItem("Systems", ComponentSystems, registry);
                 ImGui::EndTabBar();
             }
@@ -207,7 +214,7 @@ namespace nc::ui::editor::controls
             ImGui::NextColumn();
             if(ImGui::BeginTabBar("UtilitiesRightTabBar"))
             {
-                WrapTabItem("Frame Data", FrameData, dtMult, drawCallCount);
+                WrapTabItem("Frame Data", FrameData, dtMult);
                 WrapTabItem("UI Style", ImGui::ShowStyleEditor, nullptr);
                 WrapTabItem("UI Metrics", ImGui::ShowMetricsWindow, nullptr);
                 ImGui::EndTabBar();
@@ -216,64 +223,13 @@ namespace nc::ui::editor::controls
         ImGui::EndChild();
     }
 
-    void FrameData(float* dtMult, unsigned drawCallCount)
+    void FrameData(float* dtMult)
     {
         float frameRate = ImGui::GetIO().Framerate;
         ImGui::SetNextItemWidth(DefaultItemWidth);
         ImGui::DragFloat("dtX", dtMult, 0.1f, 0.0f, 5.0f, "%.1f");
         ImGui::Text("%.1f fps", frameRate);
         ImGui::Text("%.1f ms/frame", 1000.0f / frameRate);
-        ImGui::Text("%u Draw Calls", drawCallCount);
-    }
-
-    void Profiler()
-    {
-        using nc::debug::profiler::Filter;
-
-        static ImGuiTextFilter textFilter;
-        static int filterSelection = 0u;
-
-        textFilter.Draw("Search##telemetry", 128.0f);
-
-        for(auto v : {Filter::All, Filter::Logic, Filter::Collision, Filter::Dynamics, Filter::Rendering, Filter::User})
-        {
-            ImGui::SameLine();
-            ImGui::RadioButton(ToCString(v), &filterSelection, static_cast<int>(v));
-        }
-
-        ImGui::Separator();
-
-        if(ImGui::BeginChild("Profiler##child"))
-        {
-            const auto filterGroup = static_cast<Filter>(filterSelection);
-            for(auto& [id, data] : nc::debug::profiler::GetData())
-            {
-                if(!textFilter.PassFilter(data.functionName.c_str()))
-                    continue;
-                
-                if((filterGroup != Filter::All) && (filterGroup != data.filter))
-                    continue;
-
-                ImGui::PushID(id);
-                if(ImGui::CollapsingHeader(data.functionName.c_str()))
-                {
-                    debug::profiler::UpdateHistory(&data);
-                    auto [avgCalls, avgTime] = debug::profiler::ComputeAverages(&data);
-                    ImGui::Indent();
-                        ImGui::Text("   Calls: %.1f", avgCalls);
-                        ImGui::SameLine();
-                        ImGui::PlotHistogram("##calls", data.callHistory.data(), data.historySize, 0, nullptr, 0.0f, 100.0f, GraphSize);
-                        ImGui::SameLine();
-                        ImGui::Text("   Time: %.1f", avgTime);
-                        ImGui::SameLine();
-                        ImGui::PlotHistogram("##time", data.timeHistory.data(), data.historySize, 0, nullptr, 0.0f, 20.0f, GraphSize);
-                    ImGui::Unindent();
-                }
-                ImGui::PopID();
-                debug::profiler::Reset(&data);
-            }
-        }
-        ImGui::EndChild();
     }
 
     template<class T>
@@ -295,7 +251,7 @@ namespace nc::ui::editor::controls
             {
                 ImGui::Indent();
                 for(const auto& component : components)
-                    ImGui::Text("Handle: %5u  |  Address: %p", component.GetParentEntity().Index(), static_cast<const void*>(&component));
+                    ImGui::Text("Handle: %5u  |  Address: %p", component.ParentEntity().Index(), static_cast<const void*>(&component));
                 ImGui::Unindent();
             }
             ImGui::Unindent();
@@ -304,7 +260,7 @@ namespace nc::ui::editor::controls
     }
 
     /** @todo this will eventually need to be generic */
-    void ComponentSystems(registry_type* registry)
+    void ComponentSystems(Registry* registry)
     {
         ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());

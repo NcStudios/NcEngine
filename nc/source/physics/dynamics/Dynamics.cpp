@@ -1,6 +1,7 @@
 #include "Dynamics.h"
-#include "../PhysicsConstants.h"
-#include "debug/Profiler.h"
+#include "ecs/component/Collider.h"
+#include "ecs/component/PhysicsBody.h"
+#include "physics/PhysicsConstants.h"
 
 namespace
 {
@@ -9,16 +10,16 @@ namespace
 
 namespace nc::physics
 {
-    void UpdateWorldInertiaTensors(registry_type* registry)
+    void UpdateWorldInertiaTensors(Registry* registry)
     {
         for(auto& body : registry->ViewAll<PhysicsBody>())
         {
-            const auto* transform = registry->Get<Transform>(body.GetParentEntity());
+            const auto* transform = registry->Get<Transform>(body.ParentEntity());
             body.UpdateWorldInertia(transform);
         }
     }
 
-    void ApplyGravity(registry_type* registry, float dt)
+    void ApplyGravity(Registry* registry, float dt)
     {
         const auto g = DirectX::XMVectorScale(GravityVector, dt);
 
@@ -31,17 +32,17 @@ namespace nc::physics
         }
     }
 
-    void Integrate(registry_type* registry, float dt)
+    void Integrate(Registry* registry, float dt)
     {
         for(auto& body : registry->ViewAll<PhysicsBody>())
         {
-            auto* transform = registry->Get<Transform>(body.GetParentEntity());
+            auto* transform = registry->Get<Transform>(body.ParentEntity());
 
             if(body.Integrate(transform, dt) == IntegrationResult::PutToSleep)
             {
                 if constexpr(EnableSleeping)
                 {
-                    auto* collider = registry->Get<Collider>(body.GetParentEntity());
+                    auto* collider = registry->Get<Collider>(body.ParentEntity());
                     collider->Sleep();
                 }
             }

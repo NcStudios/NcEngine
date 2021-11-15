@@ -29,7 +29,7 @@ namespace nc::ui::editor
     {
     }
 
-    void Editor::Frame(float* dt, registry_type* registry)
+    void Editor::Frame(float* dt, Registry* registry)
     {
         if(input::GetKeyDown(hotkey::Editor))
             m_openState_Editor = !m_openState_Editor;
@@ -48,7 +48,7 @@ namespace nc::ui::editor
             DrawMenu();
             controls::SceneGraphPanel(registry, height);
             if(m_openState_UtilitiesPanel)
-                controls::UtilitiesPanel(dt, registry, m_graphics->GetDrawCallCount(), width, height);
+                controls::UtilitiesPanel(dt, registry, width, height);
         }
         ImGui::End();
     }

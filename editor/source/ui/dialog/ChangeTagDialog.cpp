@@ -7,7 +7,7 @@ namespace
 
 namespace nc::editor
 {
-    ChangeTagDialog::ChangeTagDialog(registry_type* registry)
+    ChangeTagDialog::ChangeTagDialog(Registry* registry)
         : DialogFixedCentered{"Change Entity Tag", ChangeTagDialogSize},
           m_registry{registry},
           m_addDialog{},

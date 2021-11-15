@@ -16,7 +16,7 @@ namespace
 
 namespace nc::editor
 {
-    SceneGraph::SceneGraph(registry_type* registry,
+    SceneGraph::SceneGraph(Registry* registry,
                            AssetManifest* assetManifest,
                            SceneCallbacks sceneCallbacks,
                            EntityCallbacks::ChangeTagCallbackType changeTag,
@@ -95,7 +95,7 @@ namespace nc::editor
                 for(auto entity : m_registry->ViewAll<Entity>())
                 {
                     auto* transform = m_registry->Get<Transform>(entity);
-                    if(transform->GetParent().Valid()) // only draw root nodes
+                    if(transform->Parent().Valid()) // only draw root nodes
                         continue;
 
                     auto* tag = m_registry->Get<Tag>(entity);
@@ -136,7 +136,7 @@ namespace nc::editor
 
         if(open)
         {
-            for(auto child : transform->GetChildren())
+            for(auto child : transform->Children())
                 SceneGraphNode(child, m_registry->Get<Tag>(child), m_registry->Get<Transform>(child));
 
             ImGui::TreePop();

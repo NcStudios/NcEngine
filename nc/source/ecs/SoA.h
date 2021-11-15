@@ -1,5 +1,7 @@
 #pragma once
 
+#include "debug/NcError.h"
+
 #include <concepts>
 #include <cstdint>
 #include <memory>
@@ -93,7 +95,7 @@ namespace nc::ecs
     void SoA<Members...>::Add(Members... members)
     {
         if(IsFull())
-            throw std::runtime_error("SoA::Add - capacity exceeded");
+            throw NcError("Capacity exceeded");
         
         auto index = [this]()
         {
@@ -130,7 +132,7 @@ namespace nc::ecs
         }
 
         if(!index.Valid())
-            throw std::runtime_error("SoA::Remove - member doesn't exists");
+            throw NcError("Member doesn't exist");
         
         m_gaps.insert(index);
     }
