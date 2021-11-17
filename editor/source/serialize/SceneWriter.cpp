@@ -66,10 +66,10 @@ namespace nc::editor
         {
             Output::LogError("Failure writing scene: Scene already exists with name: " + sceneName);
         }
-        
+
         CreateHeader();
         CreateSource();
-        
+
         auto filePath = m_scenesDirectory / (m_sceneName + GeneratedSourceExtension);
         m_file.open(filePath);
         m_file << "/** Generated source code for scene: " << m_sceneName << " - DO NOT MODIFY */\n";
@@ -152,7 +152,7 @@ namespace nc::editor
                << "using namespace nc;\n"
                << "void Init(NcEngine* engine)\n"
                << "{\n"
-               << "    auto* registry = engine->Registry()\n";
+               << "auto* registry = engine->Registry()\n";
 
 
         for(auto e : m_registry->ViewAll<Entity>())

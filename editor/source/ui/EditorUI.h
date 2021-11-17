@@ -32,7 +32,8 @@ namespace nc::editor
             bool IsHovered() override;
             void OnResize(Vector2 dimensions) override;
 
-            void RegisterCallbacks(DialogCallbacks::OpenAssetBrowserCallbackType callback);
+            void RegisterCallbacks(DialogCallbacks::OpenAssetBrowserCallbackType openAssetBrowser,
+                                   DialogCallbacks::OpenConfigEditorCallbackType openConfigEditor);
 
             void SetProjectName(std::string name);
             void UpdateScenes(std::vector<std::string> scenes, int selectedScene);
@@ -47,6 +48,7 @@ namespace nc::editor
             UtilitiesPanel m_utilitiesPanel;
             ActiveDialogs m_activeDialogs;
             DialogCallbacks::OpenAssetBrowserCallbackType m_openAssetBrowser;
+            DialogCallbacks::OpenConfigEditorCallbackType m_openConfigEditor;
             void Menu();
     };
 }

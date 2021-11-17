@@ -6,7 +6,7 @@
 
 namespace nc::editor
 {
-    /** Writes the registry's contents to a scene.gen file. WriteNewScene will
+    /** Writes the registry's contents to a scene.inl file. WriteNewScene will
      *  create the header, source, and generated files for a new scene. */
     class SceneWriter
     {

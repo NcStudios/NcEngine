@@ -4,14 +4,22 @@
 
 namespace nc
 {
-    bool ConcaveColliderAssetManager::Load(const std::string& path)
+    ConcaveColliderAssetManager::ConcaveColliderAssetManager(const std::string& concaveColliderAssetDirectory)
+        : m_concaveColliders{},
+          m_assetDirectory{concaveColliderAssetDirectory}
+    {
+    }
+
+    bool ConcaveColliderAssetManager::Load(const std::string& path, bool isExternal)
     {
         if(IsLoaded(path))
             return false;
         
-        std::ifstream file{path};
+        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+
+        std::ifstream file{fullPath};
         if(!file.is_open())
-            throw NcError("Failure opening file: " + path);
+            throw NcError("Failure opening file: " + fullPath);
 
         size_t triangleCount;
         float maxExtent;
@@ -24,7 +32,7 @@ namespace nc
         for(size_t i = 0u; i < triangleCount; ++i)
         {
             if(file.fail())
-                throw NcError("Failure reading file: " + path);
+                throw NcError("Failure reading file: " + fullPath);
 
             file >> a.x >> a.y >> a.z
                  >> b.x >> b.y >> b.z
@@ -37,7 +45,7 @@ namespace nc
         return true;
     }
     
-    bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths)
+    bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
         bool anyLoaded = false;
 
@@ -46,7 +54,7 @@ namespace nc
             if(IsLoaded(path))
                 continue;
             
-            if(Load(path))
+            if(Load(path, isExternal))
                 anyLoaded = true;
         }
 

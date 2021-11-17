@@ -68,7 +68,7 @@ namespace nc::sample
             case ColliderType::Hull:
             {
                 m_currentObject = prefab::Create(m_registry, prefab::Resource::DiscBlue, {.tag = "Movable Object"});
-                m_registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"}, false);
+                m_registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "coin.nca"}, false);
                 break;
             }
         }

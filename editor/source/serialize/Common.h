@@ -10,7 +10,7 @@ namespace nc::editor
 {
     const auto HeaderExtension = std::string{".h"};
     const auto SourceExtension = std::string{".cpp"};
-    const auto GeneratedSourceExtension = std::string{".gen"};
+    const auto GeneratedSourceExtension = std::string{".inl"};
 
     const auto AddEntitySceneAction = std::string{"NC_SCENE_ACTION_ADD_ENTITY"};
     const auto AddBoxColliderSceneAction = std::string{"NC_SCENE_ACTION_ADD_BOX_COLLIDER"};

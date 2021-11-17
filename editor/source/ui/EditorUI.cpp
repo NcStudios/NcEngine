@@ -32,7 +32,10 @@ namespace nc::editor
                        std::move(sceneCallbacks),
                        std::move(changeTag),
                        std::move(projectName)},
-          m_utilitiesPanel{output}
+          m_utilitiesPanel{output},
+          m_activeDialogs{},
+          m_openAssetBrowser{},
+          m_openConfigEditor{}
     {
         window::RegisterOnResizeReceiver(this);
     }
@@ -42,9 +45,11 @@ namespace nc::editor
         window::UnregisterOnResizeReceiver(this);
     }
 
-    void EditorUI::RegisterCallbacks(DialogCallbacks::OpenAssetBrowserCallbackType callback)
+    void EditorUI::RegisterCallbacks(DialogCallbacks::OpenAssetBrowserCallbackType openAssetBrowser,
+                                     DialogCallbacks::OpenConfigEditorCallbackType openConfigEditor)
     {
-        m_openAssetBrowser = std::move(callback);
+        m_openAssetBrowser = std::move(openAssetBrowser);
+        m_openConfigEditor = std::move(openConfigEditor);
     }
 
     void EditorUI::SetProjectName(std::string name)
@@ -105,6 +110,18 @@ namespace nc::editor
             {
                 if(ImGui::MenuItem("Edit"))
                     m_openAssetBrowser();
+                ImGui::EndMenu();
+            }
+            if(ImGui::BeginMenu("Config"))
+            {
+                if(m_callbacks.getProjectData != nullptr)
+                {
+                const auto& projectData = m_callbacks.getProjectData();
+
+                if(projectData.open && ImGui::MenuItem("Edit"))
+                    m_openConfigEditor(projectData.projectDirectory / "config/config.ini");
+                }
+                
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();

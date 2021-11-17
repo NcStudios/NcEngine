@@ -20,7 +20,7 @@ namespace nc::graphics
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_meshPath{"project/assets/mesh/cube.nca"},
+      m_meshPath{"cube.nca"},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
     {
@@ -54,7 +54,7 @@ namespace nc::graphics
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
 

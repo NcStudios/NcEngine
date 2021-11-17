@@ -4,6 +4,5 @@
 
 namespace nc::config
 {
-    void Load(const std::string& configPath);
-    bool Validate();
+    void LoadInternal(const std::string& configPath);
 }

@@ -27,7 +27,7 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
-          m_assetServices{ std::make_unique<AssetServices>(this, config::GetMemorySettings().maxTextures) },
+          m_assetServices{ std::make_unique<AssetServices>(this, config::GetProjectSettings(), config::GetMemorySettings().maxTextures) },
           #ifdef NC_DEBUG_RENDERING
           m_debugRenderer{},
           #endif

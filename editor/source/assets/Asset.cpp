@@ -80,7 +80,7 @@ namespace nc::editor
             Output::LogError("Failure building asset file");
             return false;
         }
-        
+
         return true;
     }
 
@@ -90,11 +90,11 @@ namespace nc::editor
         {
             switch(type)
             {
-                case AssetType::AudioClip:       { nc::LoadSoundClipAsset(asset.sourcePath.string()); break; }
-                case AssetType::ConcaveCollider: { nc::LoadConcaveColliderAsset(asset.ncaPath.value().string()); break; }
-                case AssetType::HullCollider:    { nc::LoadConvexHullAsset(asset.ncaPath.value().string()); break; }
-                case AssetType::Mesh:            { nc::LoadMeshAsset(asset.ncaPath.value().string()); break; }
-                case AssetType::Texture:         { nc::LoadTextureAsset(asset.sourcePath.string()); break; }
+                case AssetType::AudioClip:       { nc::LoadAudioClipAsset(asset.sourcePath.string(), true); break; }
+                case AssetType::ConcaveCollider: { nc::LoadConcaveColliderAsset(asset.ncaPath.value().string(), true); break; }
+                case AssetType::HullCollider:    { nc::LoadConvexHullAsset(asset.ncaPath.value().string(), true); break; }
+                case AssetType::Mesh:            { nc::LoadMeshAsset(asset.ncaPath.value().string(), true); break; }
+                case AssetType::Texture:         { nc::LoadTextureAsset(asset.sourcePath.string(), true); break; }
                 default:                         { return false; }
             }
 

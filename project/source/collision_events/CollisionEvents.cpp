@@ -85,7 +85,7 @@ namespace nc::sample
         registry->Add<PhysicsBody>(greenCapsule, PhysicsProperties{});
 
         auto greenDisc = prefab::Create(registry, prefab::Resource::DiscGreen, {.position = Vector3{-6.0f, 0.0f, 1.5f}, .rotation = Quaternion::FromEulerAngles(1.57095f, 0.0f, 0.0f), .scale = Vector3::Splat(7.0f), .tag = "Green Disc"});
-        registry->Add<Collider>(greenDisc, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"}, false);
+        registry->Add<Collider>(greenDisc, HullProperties{.assetPath = "coin.nca"}, false);
         registry->Add<PhysicsBody>(greenDisc, PhysicsProperties{});
 
         // // Static Objects
