@@ -34,7 +34,6 @@ namespace nc::physics
     /** Velocity-based contact constraint. */
     struct ContactConstraint
     {
-        Entity entityA, entityB;
         PhysicsBody* physBodyA, *physBodyB;
         ConstraintMatrix jNormal, jTangent, jBitangent;
         DirectX::XMMATRIX invInertiaA, invInertiaB;

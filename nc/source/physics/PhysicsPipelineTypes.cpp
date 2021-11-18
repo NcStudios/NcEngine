@@ -254,7 +254,7 @@ namespace nc::physics
                 continue;
             }
 
-            auto projectedPoint = contact.worldPointA - contact.normal * contact.depth;
+            auto projectedPoint = contact.worldPointA + contact.normal * contact.depth;
             auto projectedDifference = contact.worldPointB - projectedPoint;
             auto distance2d = SquareMagnitude(projectedDifference);
             if(distance2d > SquareContactBreakDistance)
