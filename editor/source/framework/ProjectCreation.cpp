@@ -37,10 +37,17 @@ namespace nc::editor
 
     void CreateConfig(const std::filesystem::path& projectDirectory, const std::string& projectName)
     {
-        std::ofstream file{projectDirectory / "config/config.ini"};
+        const auto directory = projectDirectory.string();
+        std::ofstream file{projectDirectory / "config\\config.ini"};
         file << "[project]\n"
              << "project_name=" << projectName << '\n'
-             << "log_file_path=" << projectDirectory.string() << '\n'
+             << "log_file_path=" << directory << '\n'
+             << "audio_clips_path=" << directory << "\\assets\\audio_clips\\\n"
+             << "concave_colliders_path=" << directory << "\\assets\\concave_colliders\\\n"
+             << "hull_colliders_path=" << directory << "\\assets\\hull_colliders\\\n"
+             << "meshes_path=" << directory << "\\assets\\meshes\\\n"
+             << "shaders_path=" << directory << "\\assets\\shaders\\\n"
+             << "textures_path=" << directory << "\\assets\\textures\\\n"
              << "[memory]\n"
              << "max_dynamic_colliders=25000\n"
              << "max_static_colliders=25000\n"
@@ -63,7 +70,6 @@ namespace nc::editor
              << "target_fps=60\n"
              << "near_clip=0.5\n"
              << "far_clip=400\n"
-             << "shaders_path=" << (projectDirectory / "assets/shaders").string() << '\n'
              << "use_shadows=1";
     }
 
@@ -71,7 +77,7 @@ namespace nc::editor
     {
         using std::filesystem::copy_file;
         const auto& projectSettings = config::GetProjectSettings();
-        auto projectAssetDirectory = projectDirectory / "assets/";
+        auto projectAssetDirectory = projectDirectory / "assets\\";
 
         {
             copy_file(std::filesystem::path{projectSettings.concaveCollidersPath} / PlaneConcaveColliderPath, projectAssetDirectory / "concave_colliders" / PlaneConcaveColliderPath);
