@@ -15,8 +15,8 @@ namespace nc
             IAssetService();
             virtual ~IAssetService() = default;
 
-            virtual bool Load(const std::string& path) = 0;
-            virtual bool Load(std::span<const std::string> paths) = 0;
+            virtual bool Load(const std::string& path, bool isExternal) = 0;
+            virtual bool Load(std::span<const std::string> paths, bool isExternal) = 0;
             virtual bool Unload(const std::string& path) = 0;
             virtual void UnloadAll() = 0;
             virtual auto Acquire(const std::string& path) const -> data_type = 0;

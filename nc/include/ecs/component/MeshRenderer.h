@@ -33,6 +33,8 @@ namespace nc
 
     class MeshRenderer : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(MeshRenderer)
+        
         public:
             MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType);
 
@@ -40,13 +42,20 @@ namespace nc
             auto GetTextureIndices() const -> const TextureIndices& { return m_textureIndices; }
             auto GetTechniqueType() const -> TechniqueType { return m_techniqueType; }
 
+            void SetMesh(std::string meshUid);
+            void SetBaseColor(const std::string& texturePath);
+            void SetNormal(const std::string& texturePath);
+            void SetRoughness(const std::string& texturePath);
+
             #ifdef NC_EDITOR_ENABLED
             auto GetMaterial() -> Material& { return m_material; }
+            auto GetMeshPath() const -> const std::string& { return m_meshPath; }
             #endif
 
         private:
             #ifdef NC_EDITOR_ENABLED
             Material m_material;
+            std::string m_meshPath;
             #endif
             MeshView m_mesh;
             TextureIndices m_textureIndices;

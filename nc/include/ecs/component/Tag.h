@@ -19,6 +19,11 @@ namespace nc
             Tag(const Tag&) = delete;
             Tag& operator=(const Tag&) = delete;
 
+            void Set(std::string newTag)
+            {
+                m_tag = std::move(newTag);
+            }
+
             auto Value() const -> const std::string_view
             {
                 return static_cast<std::string_view>(m_tag);

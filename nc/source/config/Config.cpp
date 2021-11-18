@@ -10,20 +10,18 @@
 
 namespace
 {
-    struct Config
-    {
-        nc::config::ProjectSettings projectSettings;
-        nc::config::MemorySettings memorySettings;
-        nc::config::GraphicsSettings graphicsSettings;
-        nc::config::PhysicsSettings physicsSettings;
-    };
-
-    std::unique_ptr<Config> g_config = nullptr;
+    std::unique_ptr<nc::config::Config> g_config = nullptr;
     std::string g_configPath = "";
 
     // project
     const auto ProjectNameKey = std::string{"project_name"};
     const auto LogFilePathKey = std::string{"log_file_path"};
+    const auto AudioClipsPathKey = std::string{"audio_clips_path"};
+    const auto ConcaveCollidersKey = std::string{"concave_colliders_path"};
+    const auto HullCollidersKey = std::string{"hull_colliders_path"};
+    const auto MeshesPathKey = std::string{"meshes_path"};
+    const auto ShadersPathKey = std::string{"shaders_path"};
+    const auto TexturesPathKey = std::string{"textures_path"};
 
     // memory
     const auto MaxDynamicCollidersKey = std::string{"max_dynamic_colliders"};
@@ -38,8 +36,6 @@ namespace
     // physics
     const auto FixedUpdateIntervalKey = std::string{"fixed_update_interval"};
     const auto WorldspaceExtentKey = std::string{"worldspace_extent"};
-    const auto OctreeDensityThresholdKey = std::string{"octree_density_threshold"};
-    const auto OctreeMinimumExtentKey = std::string{"octree_minimum_extent"};
 
     // graphics
     const auto UseNativeResolutionKey = std::string{"use_native_resolution"};
@@ -49,17 +45,28 @@ namespace
     const auto TargetFpsKey = std::string{"target_fps"};
     const auto NearClipKey = std::string{"near_clip"};
     const auto FarClipKey = std::string{"far_clip"};
-    const auto ShadersPathKey = std::string{"shaders_path"};
     const auto UseShadowsKey = std::string{"use_shadows"}; /** @todo: Make this a property of the material */
 
-    void MapKeyValue(const std::string& key, const std::string& value, Config* out)
+    void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config* out)
     {
         // project
         if (key == ProjectNameKey)
             out->projectSettings.projectName = value;
         else if (key == LogFilePathKey)
             out->projectSettings.logFilePath = value;
-        
+        else if (key == AudioClipsPathKey)
+            out->projectSettings.audioClipsPath = value;
+        else if (key == ConcaveCollidersKey)
+            out->projectSettings.concaveCollidersPath = value;
+        else if (key == HullCollidersKey)
+            out->projectSettings.hullCollidersPath = value;
+        else if (key == MeshesPathKey)
+            out->projectSettings.meshesPath = value;
+        else if (key == ShadersPathKey)
+            out->projectSettings.shadersPath = value;
+        else if (key == TexturesPathKey)
+            out->projectSettings.texturesPath = value;
+
         // memory
         else if(key == MaxDynamicCollidersKey)
             out->memorySettings.maxDynamicColliders = std::stoi(value);
@@ -83,10 +90,6 @@ namespace
             out->physicsSettings.fixedUpdateInterval = std::stof(value);
         else if (key == WorldspaceExtentKey)
             out->physicsSettings.worldspaceExtent = std::stof(value);
-        else if (key == OctreeDensityThresholdKey)
-            out->physicsSettings.octreeDensityThreshold = std::stoi(value);
-        else if (key == OctreeMinimumExtentKey)
-            out->physicsSettings.octreeMinimumExtent = std::stof(value);
 
         // graphics
         else if (key == UseNativeResolutionKey)
@@ -106,8 +109,6 @@ namespace
             out->graphicsSettings.nearClip = std::stof(value);
         else if (key == FarClipKey)
             out->graphicsSettings.farClip = std::stof(value);
-        else if (key == ShadersPathKey)
-            out->graphicsSettings.shadersPath = value;
         else if (key == UseShadowsKey)
             out->graphicsSettings.useShadows = std::stoi(value);
         else
@@ -142,31 +143,81 @@ namespace nc::config
         return g_config->physicsSettings;
     }
 
+    auto Load(const std::string& path) -> Config
+    {
+        Config out;
+        Read(path, MapKeyValue, &out);
+
+        if(!Validate(out))
+            throw NcError("Config validation failed");
+
+        return out;
+    }
+
+    void Save(const std::string& path, const Config& config)
+    {
+        std::ofstream file{path};
+        if(!file.is_open())
+            throw NcError("Failure opening: " + path);
+
+        file << "[project]\n"
+             << ProjectNameKey           << '=' << config.projectSettings.projectName          << '\n'
+             << LogFilePathKey           << '=' << config.projectSettings.logFilePath          << '\n'
+             << AudioClipsPathKey        << '=' << config.projectSettings.audioClipsPath       << '\n'
+             << ConcaveCollidersKey      << '=' << config.projectSettings.concaveCollidersPath << '\n'
+             << HullCollidersKey         << '=' << config.projectSettings.hullCollidersPath    << '\n'
+             << MeshesPathKey            << '=' << config.projectSettings.meshesPath           << '\n'
+             << ShadersPathKey           << '=' << config.projectSettings.shadersPath          << '\n'
+             << TexturesPathKey          << '=' << config.projectSettings.texturesPath         << '\n'
+             << "[memory]\n"
+             << MaxDynamicCollidersKey   << '=' << config.memorySettings.maxDynamicColliders   << '\n'
+             << MaxStaticCollidersKey    << '=' << config.memorySettings.maxStaticColliders    << '\n'
+             << MaxNetworkDispatchersKey << '=' << config.memorySettings.maxNetworkDispatchers << '\n'
+             << MaxParticleEmittersKey   << '=' << config.memorySettings.maxParticleEmitters   << '\n'
+             << MaxRenderersKey          << '=' << config.memorySettings.maxRenderers          << '\n'
+             << MaxTransformsKey         << '=' << config.memorySettings.maxTransforms         << '\n'
+             << MaxTexturesKey           << '=' << config.memorySettings.maxTextures           << '\n'
+             << "[physics]\n"
+             << FixedUpdateIntervalKey   << '=' << config.physicsSettings.fixedUpdateInterval  << '\n'
+             << WorldspaceExtentKey      << '=' << config.physicsSettings.worldspaceExtent     << '\n'
+             << "[graphics]\n"
+             << UseNativeResolutionKey   << '=' << config.graphicsSettings.useNativeResolution << '\n'
+             << LaunchInFullscreenKey    << '=' << config.graphicsSettings.launchInFullscreen  << '\n'
+             << ScreenWidthKey           << '=' << config.graphicsSettings.screenWidth         << '\n'
+             << ScreenHeightKey          << '=' << config.graphicsSettings.screenHeight        << '\n'
+             << TargetFpsKey             << '=' << config.graphicsSettings.targetFPS           << '\n'
+             << NearClipKey              << '=' << config.graphicsSettings.nearClip            << '\n'
+             << FarClipKey               << '=' << config.graphicsSettings.farClip             << '\n'
+             << UseShadowsKey            << '=' << config.graphicsSettings.useShadows;
+    }
+
+    bool Validate(const Config& config)
+    {
+        return { (config.projectSettings.projectName != "") &&
+                 (config.projectSettings.logFilePath != "") &&
+                 (config.projectSettings.audioClipsPath != "") &&
+                 (config.projectSettings.concaveCollidersPath != "") &&
+                 (config.projectSettings.hullCollidersPath != "") &&
+                 (config.projectSettings.meshesPath != "") &&
+                 (config.projectSettings.shadersPath != "") &&
+                 (config.projectSettings.texturesPath != "") &&
+                 (config.physicsSettings.fixedUpdateInterval > 0.0f) &&
+                 (config.physicsSettings.worldspaceExtent > 0.0f) &&
+                 (config.graphicsSettings.screenWidth != 0) &&
+                 (config.graphicsSettings.screenHeight != 0) &&
+                 (config.graphicsSettings.targetFPS != 0) &&
+                 (config.graphicsSettings.frameUpdateInterval > 0.0f) &&
+                 (config.graphicsSettings.nearClip > 0.0f) &&
+                 (config.graphicsSettings.farClip > 0.0f)};
+    }
+
     /* Internal function implementation */
-    void Load(const std::string& configPath)
+    void LoadInternal(const std::string& configPath)
     {
         g_configPath = configPath;
         g_config = std::make_unique<Config>();
         nc::config::Read(configPath, MapKeyValue, g_config.get());
-        if(!Validate())
-            throw NcError("Failed to validate config");
-    }
-
-    bool Validate()
-    {
-        IF_THROW(!g_config, "config::Validate - No config loaded");
-        return { (g_config->projectSettings.projectName != "") &&
-                 (g_config->projectSettings.logFilePath != "") &&
-                 (g_config->physicsSettings.fixedUpdateInterval > 0.0f) &&
-                 (g_config->physicsSettings.worldspaceExtent > 0.0f) &&
-                 (g_config->physicsSettings.octreeDensityThreshold > 0u) &&
-                 (g_config->physicsSettings.octreeMinimumExtent > 0.0f) &&
-                 (g_config->graphicsSettings.screenWidth != 0) &&
-                 (g_config->graphicsSettings.screenHeight != 0) &&
-                 (g_config->graphicsSettings.targetFPS != 0) &&
-                 (g_config->graphicsSettings.frameUpdateInterval > 0.0f) &&
-                 (g_config->graphicsSettings.nearClip > 0.0f) &&
-                 (g_config->graphicsSettings.farClip > 0.0f) &&
-                 (g_config->graphicsSettings.shadersPath != "")};
+        if(!Validate(*g_config))
+            throw NcError("Config validation failed");
     }
 } // end namespace nc::config 

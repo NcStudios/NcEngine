@@ -19,7 +19,7 @@ namespace nc
     class Engine final : public NcEngine
     {
         public:
-            Engine(HINSTANCE hInstance);
+            Engine(HINSTANCE hInstance, bool useEditorMode);
             ~Engine() noexcept;
 
             void Start(std::unique_ptr<Scene> initialScene) override;
@@ -47,11 +47,13 @@ namespace nc
             TaskGraph m_tasks;
             float m_dt;
             float m_frameDeltaTimeFactor;
+            bool m_useEditorMode;
             bool m_isRunning;
 
             void BuildTaskGraph();
             void MainLoop();
-            void DisableRunningFlag();
+            void EditorLoop();
+            void DisableRunningFlag() noexcept;
             void ClearState();
             void DoSceneSwap();
             void FrameLogic(float dt);

@@ -14,6 +14,11 @@ set CONFIGURATION="%~2"
         set SOURCE_DIR="%~dp0\..\project"
         goto CheckConfiguration
     )
+    if %TARGET%=="Editor" (
+        echo Building Editor with %CONFIGURATION% Configuration
+        set SOURCE_DIR="%~dp0\..\editor"
+        goto CheckConfiguration
+    )
 
     echo Error: Invalid Target - %TARGET%
     EXIT

@@ -13,6 +13,10 @@ namespace nc
         : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
     {}
 
+    void Transform::SetParent(Entity entity) { m_parent = entity; }
+
+    std::span<Entity> Transform::GetChildren() { return std::span<Entity>{m_children}; }
+
     Quaternion::Quaternion(float X, float Y, float Z, float W)
         : x{X}, y{Y}, z{Z}, w{W}
     {}
@@ -172,7 +176,7 @@ TEST_F(Registry_unit_tests, RemoveComponent_ComponentExists_Removes)
 
 TEST_F(Registry_unit_tests, RemoveComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Remove<Fake1>(Entity{0u, 0u, 0u}), std::runtime_error);
+    EXPECT_THROW(registry.Remove<Fake1>(Entity{0u, 0u, Entity::Flags::None}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, RemoveComponent_ComponentDoesNotExist_Throws)
@@ -218,7 +222,7 @@ TEST_F(Registry_unit_tests, ContainsComponent_Exists_ReturnsTrue)
 
 TEST_F(Registry_unit_tests, ContainsComponent_BadEntity_Throws)
 {
-    EXPECT_THROW(registry.Contains<Fake1>(Entity{0u, 0u, 0u}), std::runtime_error);
+    EXPECT_THROW(registry.Contains<Fake1>(Entity{0u, 0u, Entity::Flags::None}), std::runtime_error);
 }
 
 TEST_F(Registry_unit_tests, ContainsComponent_ExistsStaged_ReturnsTrue)
@@ -259,7 +263,7 @@ TEST_F(Registry_unit_tests, GetComponent_Exists_ReturnsPointer)
 
 TEST_F(Registry_unit_tests, GetComponent_BadEntity_ReturnsNull)
 {
-    auto* actual = registry.Get<Fake1>(Entity{0u, 0u, 0u});
+    auto* actual = registry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None});
     EXPECT_EQ(actual, nullptr);
 }
 
@@ -305,7 +309,7 @@ TEST_F(Registry_unit_tests, GetComponentConst_Exists_ReturnsPointer)
 TEST_F(Registry_unit_tests, GetComponentConst_BadEntity_ReturnsNull)
 {
     const auto& constRegistry = registry;
-    const auto* actual = constRegistry.Get<Fake1>(Entity{0u, 0u, 0u});
+    const auto* actual = constRegistry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None});
     EXPECT_EQ(actual, nullptr);
 }
 

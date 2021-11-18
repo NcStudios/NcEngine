@@ -32,10 +32,11 @@ namespace
 
 namespace nc
 {
-    TextureAssetManager::TextureAssetManager(graphics::Graphics* graphics, uint32_t maxTextures)
+    TextureAssetManager::TextureAssetManager(graphics::Graphics* graphics, const std::string& texturesAssetDirectory, uint32_t maxTextures)
         : m_accessors{},
           m_textures{},
           m_graphics{graphics},
+          m_assetDirectory{texturesAssetDirectory},
           m_sampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
           m_maxTextureCount{maxTextures}
     {
@@ -51,7 +52,7 @@ namespace nc
         m_textures.resize(0);
     }
 
-    bool TextureAssetManager::Load(const std::string& path)
+    bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     {
         const auto index = m_accessors.size();
 
@@ -62,12 +63,13 @@ namespace nc
             return false;
 
         m_accessors.emplace(path, index);
-        m_textures.push_back(ReadTexture(path, m_graphics, &m_sampler.get()));
+        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        m_textures.push_back(ReadTexture(fullPath, m_graphics, &m_sampler.get()));
         graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
         return true;
     }
 
-    bool TextureAssetManager::Load(std::span<const std::string> paths)
+    bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
         const auto newTextureCount = paths.size();
         auto nextTextureIndex = m_textures.size();
@@ -79,7 +81,8 @@ namespace nc
             if(IsLoaded(path))
                 continue;
 
-            m_textures.push_back(ReadTexture(path, m_graphics, &m_sampler.get()));
+            const auto fullPath = isExternal ? path : m_assetDirectory + path;
+            m_textures.push_back(ReadTexture(fullPath, m_graphics, &m_sampler.get()));
             m_accessors.emplace(path, nextTextureIndex++);
         }
 

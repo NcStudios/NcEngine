@@ -3,34 +3,34 @@
 
 namespace nc
 {
-    bool LoadSoundClipAsset(const std::string& path)
+    bool LoadAudioClipAsset(const std::string& path, bool isExternal)
     {
-        return AssetService<SoundClipView>::Get()->Load(path);
+        return AssetService<AudioClipView>::Get()->Load(path, isExternal);
     }
 
-    bool LoadSoundClipAssets(std::span<const std::string> paths)
+    bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal)
     {
-        return AssetService<SoundClipView>::Get()->Load(paths);
+        return AssetService<AudioClipView>::Get()->Load(paths, isExternal);
     }
 
-    bool UnloadSoundClipAsset(const std::string& path)
+    bool UnloadAudioClipAsset(const std::string& path)
     {
-        return AssetService<SoundClipView>::Get()->Unload(path);
+        return AssetService<AudioClipView>::Get()->Unload(path);
     }
 
-    void UnloadAllSoundClipAssets()
+    void UnloadAllAudioClipAssets()
     {
-        AssetService<SoundClipView>::Get()->UnloadAll();
+        AssetService<AudioClipView>::Get()->UnloadAll();
     }
 
-    bool LoadConvexHullAsset(const std::string& path)
+    bool LoadConvexHullAsset(const std::string& path, bool isExternal)
     {
-        return AssetService<ConvexHullView>::Get()->Load(path);
+        return AssetService<ConvexHullView>::Get()->Load(path, isExternal);
     }
 
-    bool LoadConvexHullAssets(std::span<const std::string> paths)
+    bool LoadConvexHullAssets(std::span<const std::string> paths, bool isExternal)
     {
-        return AssetService<ConvexHullView>::Get()->Load(paths);
+        return AssetService<ConvexHullView>::Get()->Load(paths, isExternal);
     }
 
     bool UnloadConvexHullAssets(const std::string& path)
@@ -43,14 +43,14 @@ namespace nc
         AssetService<ConvexHullView>::Get()->UnloadAll();
     }
 
-    bool LoadConcaveColliderAsset(const std::string& path)
+    bool LoadConcaveColliderAsset(const std::string& path, bool isExternal)
     {
-        return AssetService<ConcaveColliderView>::Get()->Load(path);
+        return AssetService<ConcaveColliderView>::Get()->Load(path, isExternal);
     }
 
-    bool LoadConcaveColliderAssets(std::span<const std::string> paths)
+    bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExternal)
     {
-        return AssetService<ConcaveColliderView>::Get()->Load(paths);
+        return AssetService<ConcaveColliderView>::Get()->Load(paths, isExternal);
     }
 
     bool UnloadConcaveColliderAsset(const std::string& path)
@@ -63,14 +63,14 @@ namespace nc
         AssetService<ConcaveColliderView>::Get()->UnloadAll();
     }
 
-    bool LoadMeshAsset(const std::string& path)
+    bool LoadMeshAsset(const std::string& path, bool isExternal)
     {
-        return AssetService<MeshView>::Get()->Load(path);
+        return AssetService<MeshView>::Get()->Load(path, isExternal);
     }
 
-    bool LoadMeshAssets(std::span<const std::string> paths)
+    bool LoadMeshAssets(std::span<const std::string> paths, bool isExternal)
     {
-        return AssetService<MeshView>::Get()->Load(paths);
+        return AssetService<MeshView>::Get()->Load(paths, isExternal);
     }
 
     bool UnloadMeshAsset(const std::string& path)
@@ -83,14 +83,14 @@ namespace nc
         AssetService<MeshView>::Get()->UnloadAll();
     }
 
-    bool LoadTextureAsset(const std::string& path)
+    bool LoadTextureAsset(const std::string& path, bool isExternal)
     {
-        return AssetService<TextureView>::Get()->Load(path);
+        return AssetService<TextureView>::Get()->Load(path, isExternal);
     }
 
-    bool LoadTextureAssets(std::span<const std::string> paths)
+    bool LoadTextureAssets(std::span<const std::string> paths, bool isExternal)
     {
-        return AssetService<TextureView>::Get()->Load(paths);
+        return AssetService<TextureView>::Get()->Load(paths, isExternal);
     }
 
     bool UnloadTextureAsset(const std::string& path)

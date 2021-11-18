@@ -30,6 +30,8 @@ namespace nc
 
     class PointLight final : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(PointLight)
+        
         public:
             PointLight(Entity entity, PointLightInfo info);
 

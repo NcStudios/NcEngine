@@ -145,6 +145,42 @@ namespace nc
     {
     }
     
+    void Collider::SetProperties(BoxProperties properties)
+    {
+        m_info.type = ColliderType::Box;
+        m_info.offset = properties.center;
+        m_info.scale = properties.extents;
+        m_info.hullAssetPath = "";
+        m_volume = CreateBoundingVolume(m_info);
+    }
+
+    void Collider::SetProperties(CapsuleProperties properties)
+    {
+        m_info.type = ColliderType::Capsule;
+        m_info.offset = properties.center;
+        m_info.scale = Vector3{properties.radius * 2.0f, properties.height * 0.5f, properties.radius * 2.0f};
+        m_info.hullAssetPath = "";
+        m_volume = CreateBoundingVolume(m_info);
+    }
+
+    void Collider::SetProperties(HullProperties properties)
+    {
+        m_info.type = ColliderType::Hull;
+        m_info.offset = Vector3::Zero();
+        m_info.scale = Vector3::One();
+        m_info.hullAssetPath = std::move(properties.assetPath);
+        m_volume = CreateBoundingVolume(m_info);
+    }
+
+    void Collider::SetProperties(SphereProperties properties)
+    {
+        m_info.type = ColliderType::Sphere;
+        m_info.offset = properties.center;
+        m_info.scale = Vector3::Splat(properties.radius * 2.0f);
+        m_info.hullAssetPath = "";
+        m_volume = CreateBoundingVolume(m_info);
+    }
+
     auto Collider::EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere
     {
         Vector3 translation;
@@ -197,9 +233,47 @@ namespace nc
     template<> void ComponentGuiElement<Collider>(Collider* collider)
     {
         const auto& info = collider->GetInfo();
+
+        auto& offset = collider->m_info.offset;
+
         ImGui::Text("Collider");
-        ImGui::Text("  Type:    %s", ToCString(info.type));
-        ImGui::Text("  Trigger: %s", info.isTrigger ? "True" : "False");
+
+        if(ImGui::BeginCombo("Type", ToCString(info.type)))
+        {
+            if(ImGui::Selectable("Box"))
+            {
+
+            }
+            if(ImGui::Selectable("Capsule"))
+            {
+
+            }
+            if(ImGui::Selectable("Hull"))
+            {
+
+            }
+            if(ImGui::Selectable("Sphere"))
+            {
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::Checkbox("  ", &collider->m_info.isTrigger);
+        ImGui::SameLine();
+        ImGui::Text("Trigger");
+
+        switch(collider->m_info.type)
+        {
+            case ColliderType::Sphere:
+            {
+                ui::editor::xyzWidgetHeader("   ");
+                ui::editor::xyzWidget("Center", "collidercenter", &offset.x, &offset.y, &offset.z, 0.0001f, 1000.0f);
+
+                break;
+            }
+            default: break;
+        }
+
         /** @todo put widgets back */
     }
     #endif

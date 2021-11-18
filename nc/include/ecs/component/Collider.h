@@ -47,6 +47,8 @@ namespace nc
 
     class Collider final : public ComponentBase
     {
+        NC_ENABLE_IN_EDITOR(Collider)
+
         public:
             struct VolumeInfo
             {
@@ -66,6 +68,11 @@ namespace nc
             Collider(Collider&&) = default;
             Collider& operator=(const Collider&) = delete;
             Collider& operator=(Collider&&) = default;
+
+            void SetProperties(BoxProperties properties);
+            void SetProperties(CapsuleProperties properties);
+            void SetProperties(HullProperties properties);
+            void SetProperties(SphereProperties properties);
 
             void Wake() { m_awake = true; }
             void Sleep() { m_awake = false; }
@@ -90,6 +97,7 @@ namespace nc
 
             #ifdef NC_EDITOR_ENABLED
             bool m_selectedInEditor;
+            friend void ComponentGuiElement<Collider>(Collider*);
             #endif
     };
 

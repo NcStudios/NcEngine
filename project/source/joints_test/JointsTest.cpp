@@ -65,7 +65,7 @@ namespace nc::sample
         // Ramp
         {
             auto ramp = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{9.0f, 2.6f, 6.0f}, .scale = Vector3::Splat(3.0f), .flags = Entity::Flags::Static});
-            registry->Add<ConcaveCollider>(ramp, "project/assets/mesh_colliders/ramp.nca");
+            registry->Add<ConcaveCollider>(ramp, "ramp.nca");
         }
 
         // Hinge

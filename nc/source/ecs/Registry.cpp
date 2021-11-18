@@ -46,6 +46,19 @@ namespace nc
         RegisterComponentType<PointLight>();
     }
 
+    void Registry::RemoveEntityWithoutNotifyingParent(Entity entity)
+    {
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        auto* transform = Get<Transform>(entity);
+        for(auto child : transform->Children())
+            RemoveEntityWithoutNotifyingParent(child);
+        
+        auto pos = std::ranges::find(m_active, entity);
+        *pos = m_active.back();
+        m_active.pop_back();
+        m_toRemove.push_back(entity);
+    }
+
     void Registry::Clear()
     {
         if(!m_toAdd.empty() || !m_toRemove.empty())

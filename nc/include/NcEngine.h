@@ -39,5 +39,5 @@ namespace nc
             virtual auto UI() noexcept -> UISystem* = 0;
     };
 
-    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath) -> std::unique_ptr<NcEngine>;
+    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath, bool useEditorMode = false) -> std::unique_ptr<NcEngine>;
 }

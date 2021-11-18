@@ -1,4 +1,5 @@
 #pragma once
+#include "EditorMeta.h"
 #include "ecs/Entity.h"
 
 #include <concepts>

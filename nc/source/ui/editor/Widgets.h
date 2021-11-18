@@ -25,7 +25,7 @@ namespace nc::ui::editor
         auto result = ImGui::DragFloat("", item, dragSpeed, min, max, fmt);
         ImGui::PopID();
         return result;
-    };
+    }
 
     inline void textBlockWidget(const char* label, ImVec2 size, ImVec4 bgColor, ImVec4 textColor)
     {
@@ -65,7 +65,7 @@ namespace nc::ui::editor
         ImGui::PopID();
 
         return xResult || yResult || zResult;
-    };
+    }
 
     inline void columnHeaderWidget(const char* frontPadding, const char* label1, const char* label2, const char* label3 = nullptr)
     {

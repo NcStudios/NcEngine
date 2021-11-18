@@ -12,6 +12,7 @@ namespace nc
     : ComponentBase{entity},
       #ifdef NC_EDITOR_ENABLED
       m_material{std::move(material)},
+      m_meshPath{meshUid},
       #endif
       m_mesh{AssetService<MeshView>::Get()->Acquire(meshUid)},
       m_textureIndices{},
@@ -28,6 +29,42 @@ namespace nc
         m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(material.roughness);
         m_textureIndices.metallic = AssetService<TextureView>::Get()->Acquire(material.metallic);
         #endif
+    }
+
+    void MeshRenderer::SetMesh(std::string meshUid)
+    {
+        #ifdef NC_EDITOR_ENABLED
+        m_meshPath = meshUid;
+        #endif
+
+        m_mesh = AssetService<MeshView>::Get()->Acquire(meshUid);
+    }
+
+    void MeshRenderer::SetBaseColor(const std::string& texturePath)
+    {
+        #ifdef NC_EDITOR_ENABLED
+        m_material.baseColor = texturePath;
+        #endif
+
+        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(texturePath);
+    }
+
+    void MeshRenderer::SetNormal(const std::string& texturePath)
+    {
+        #ifdef NC_EDITOR_ENABLED
+        m_material.normal = texturePath;
+        #endif
+
+        m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(texturePath);
+    }
+
+    void MeshRenderer::SetRoughness(const std::string& texturePath)
+    {
+        #ifdef NC_EDITOR_ENABLED
+        m_material.roughness = texturePath;
+        #endif
+
+        m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(texturePath);
     }
 
     #ifdef NC_EDITOR_ENABLED

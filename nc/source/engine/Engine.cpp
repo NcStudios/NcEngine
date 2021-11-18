@@ -10,16 +10,16 @@
 
 namespace nc
 {
-    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath) -> std::unique_ptr<NcEngine>
+    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
     {
-        config::Load(configPath);
+        config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         V_LOG("Constructing Engine Instance");
-        return std::make_unique<Engine>(hInstance);
+        return std::make_unique<Engine>(hInstance, useEditorMode);
     }
 
     /* Engine */
-    Engine::Engine(HINSTANCE hInstance)
+    Engine::Engine(HINSTANCE hInstance, bool useEditorMode)
         : m_mainCamera{},
           m_window{ hInstance },
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
@@ -33,6 +33,7 @@ namespace nc
           m_tasks{},
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},
+          m_useEditorMode{useEditorMode},
           m_isRunning{false}
     {
         SetBindings();
@@ -52,7 +53,11 @@ namespace nc
         m_sceneSystem.ChangeScene(std::move(initialScene));
         m_sceneSystem.DoSceneChange(this);
         m_isRunning = true;
-        MainLoop();
+
+        if(!m_useEditorMode)
+            MainLoop();
+        else
+            EditorLoop();
     }
 
     void Engine::Quit() noexcept
@@ -106,7 +111,7 @@ namespace nc
         #endif
     }
 
-    void Engine::DisableRunningFlag()
+    void Engine::DisableRunningFlag() noexcept
     {
         m_isRunning = false;
     }
@@ -134,6 +139,29 @@ namespace nc
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
+
+            mainLoopTasksResult.wait();
+            m_tasks.ThrowIfExceptionStored();
+            m_ecs.GetRegistry()->CommitStagedChanges();
+            FrameRender();
+            particleEmitterSystem->ProcessFrameEvents();
+            FrameCleanup();
+        }
+
+        Shutdown();
+    }
+
+    void Engine::EditorLoop()
+    {
+        V_LOG("Starting engine loop");
+        auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
+
+        while(m_isRunning)
+        {
+            m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            m_window.ProcessSystemMessages();
+            auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
+            FrameLogic(m_dt);
 
             mainLoopTasksResult.wait();
             m_tasks.ThrowIfExceptionStored();
