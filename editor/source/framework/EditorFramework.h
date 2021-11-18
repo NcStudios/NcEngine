@@ -10,6 +10,7 @@
 #include "ui/dialog/FileBrowser.h"
 #include "ui/dialog/NewSceneDialog.h"
 #include "ui/dialog/NewProjectDialog.h"
+#include "ui/dialog/ConfigEditor.h"
 
 namespace nc::editor
 {
@@ -37,5 +38,6 @@ namespace nc::editor
             NewSceneDialog m_newSceneDialog;
             NewProjectDialog m_newProjectDialog;
             ChangeTagDialog m_changeTagDialog;
+            ConfigEditor m_configEditor;
     };
 }

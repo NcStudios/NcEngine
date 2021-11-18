@@ -12,7 +12,7 @@ namespace nc
 {
     auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
     {
-        config::Load(configPath);
+        config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         V_LOG("Constructing Engine Instance");
         return std::make_unique<Engine>(hInstance, useEditorMode);

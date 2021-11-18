@@ -56,7 +56,7 @@ namespace nc::graphics
     void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
 

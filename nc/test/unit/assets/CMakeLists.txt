@@ -94,32 +94,32 @@ target_link_libraries(MeshAssetManager_unit_tests
 
 add_test(MeshAssetManager_unit_tests MeshAssetManager_unit_tests)
 
-### SoundClipAssetManager Tests ###
-add_executable(SoundClipAssetManager_unit_tests
-    ${ROOT_DIR}/test/unit/assets/SoundClipAssetManager_unit_tests.cpp
-    ${ROOT_DIR}/source/assets/SoundClipAssetManager.cpp
+### AudioClipAssetManager Tests ###
+add_executable(AudioClipAssetManager_unit_tests
+    ${ROOT_DIR}/test/unit/assets/AudioClipAssetManager_unit_tests.cpp
+    ${ROOT_DIR}/source/assets/AudioClipAssetManager.cpp
 )
 
-target_compile_definitions(SoundClipAssetManager_unit_tests
+target_compile_definitions(AudioClipAssetManager_unit_tests
     PRIVATE
         NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
 )
 
-target_include_directories(SoundClipAssetManager_unit_tests
+target_include_directories(AudioClipAssetManager_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
-target_compile_options(SoundClipAssetManager_unit_tests
+target_compile_options(AudioClipAssetManager_unit_tests
     PUBLIC
         ${GCC_WARNING_FLAGS}
 )
 
-target_link_libraries(SoundClipAssetManager_unit_tests
+target_link_libraries(AudioClipAssetManager_unit_tests
     PRIVATE
         gtest
 )
 
-add_test(SoundClipAssetManager_unit_tests SoundClipAssetManager_unit_tests)
+add_test(AudioClipAssetManager_unit_tests AudioClipAssetManager_unit_tests)

@@ -35,7 +35,7 @@ namespace nc::graphics
     void PhongAndUiTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PhongVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PhongFragment.spv");
 

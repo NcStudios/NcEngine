@@ -23,11 +23,11 @@ namespace nc
     class MeshAssetManager : public IAssetService<MeshView>
     {
         public:
-            MeshAssetManager(graphics::Graphics* graphics);
+            MeshAssetManager(graphics::Graphics* graphics, const std::string& assetDirectory);
             ~MeshAssetManager() noexcept;
 
-            bool Load(const std::string& path) override;
-            bool Load(std::span<const std::string> paths) override;
+            bool Load(const std::string& path, bool isExternal) override;
+            bool Load(std::span<const std::string> paths, bool isExternal) override;
             bool Unload(const std::string& path) override;
             void UnloadAll() override;
             auto Acquire(const std::string& path) const -> MeshView override;
@@ -41,6 +41,7 @@ namespace nc
             VertexData m_vertexData;
             IndexData m_indexData; 
             std::unordered_map<std::string, MeshView> m_accessors;
+            std::string m_assetDirectory;
 
             void UpdateBuffers();
     };

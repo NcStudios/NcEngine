@@ -4,14 +4,21 @@
 
 namespace nc
 {
-    bool ConvexHullAssetManager::Load(const std::string& path)
+    ConvexHullAssetManager::ConvexHullAssetManager(const std::string& assetDirectory)
+        : m_hullColliders{},
+          m_assetDirectory{assetDirectory}
+    {
+    }
+
+    bool ConvexHullAssetManager::Load(const std::string& path, bool isExternal)
     {
         if(IsLoaded(path))
             return false;
-        
-        std::ifstream file{path};
+
+        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        std::ifstream file{fullPath};
         if(!file.is_open())
-            throw NcError("Failure opening file: " + path);
+            throw NcError("Failure opening file: " + fullPath);
         
         Vector3 extents;
         float maxExtent;
@@ -20,11 +27,11 @@ namespace nc
         std::vector<Vector3> vertices;
         vertices.reserve(vertexCount);
         Vector3 vertex;
-        
+
         for(size_t i = 0u; i < vertexCount; ++i)
         {
             if(file.fail())
-                throw NcError("Failure reading file: " + path);
+                throw NcError("Failure reading file: " + fullPath);
 
             file >> vertex.x >> vertex.y >> vertex.z;
             vertices.push_back(vertex);
@@ -34,7 +41,7 @@ namespace nc
         return true;
     }
 
-    bool ConvexHullAssetManager::Load(std::span<const std::string> paths)
+    bool ConvexHullAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
         bool anyLoaded = false;
 
@@ -43,7 +50,7 @@ namespace nc
             if(IsLoaded(path))
                 continue;
             
-            if(Load(path))
+            if(Load(path, isExternal))
                 anyLoaded = true;
         }
 

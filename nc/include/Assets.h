@@ -8,42 +8,43 @@
 
 namespace nc
 {
-    /** Loading assets creates an internal mapping between the asset path and data.
-     *  Duplicate loads are ignored. Objects that use assets do not load them on
-     *  demand, nor do they own the asset data. Assets must be loaded before dependent
-     *  objects are created and should be unloaded only when they are no longer in use. */
+    /** Assets must be loaded before dependent objects are created and should be unloaded only
+     *  when they are no longer in use.
+     * 
+     *  Paths should be relative to directories specified in the config. Passing true for isExternal
+     *  allows paths to be absolute or relative to the executable. Duplicate loads are ignored. */
 
     /** Supported file types: .nca */
-    bool LoadConcaveColliderAsset(const std::string& path);
-    bool LoadConcaveColliderAssets(std::span<const std::string> paths);
+    bool LoadConcaveColliderAsset(const std::string& path, bool isExternal = false);
+    bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExternal = false);
     bool UnloadConcaveColliderAsset(const std::string& path);
     void UnloadAllConcaveColliderAssets();
 
     /** Supported file types: .nca */
-    bool LoadConvexHullAsset(const std::string& path);
-    bool LoadConvexHullAssets(std::span<const std::string> paths);
+    bool LoadConvexHullAsset(const std::string& path, bool isExternal = false);
+    bool LoadConvexHullAssets(std::span<const std::string> paths, bool isExternal = false);
     bool UnloadConvexHullAsset(const std::string& path);
     void UnloadAllConvexHullAssets();
 
     /** Supported file types: .nca 
      *  @note Unloading meshes invalidates all MeshViews. It is intended
      *  to be done on scene change. */
-    bool LoadMeshAsset(const std::string& path);
-    bool LoadMeshAssets(std::span<const std::string> paths);
+    bool LoadMeshAsset(const std::string& path, bool isExternal = false);
+    bool LoadMeshAssets(std::span<const std::string> paths, bool isExternal = false);
     bool UnloadMeshAsset(const std::string& path);
     void UnloadAllMeshAssets();
 
     /** Supported file types: .wav */
-    bool LoadSoundClipAsset(const std::string& path);
-    bool LoadSoundClipAssets(std::span<const std::string> paths);
-    bool UnloadSoundClipAsset(const std::string& path);
-    void UnloadAllSoundClipAssets();
+    bool LoadAudioClipAsset(const std::string& path, bool isExternal = false);
+    bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadAudioClipAsset(const std::string& path);
+    void UnloadAllAudioClipAssets();
 
     /** Supported file types: .png 
      *  @note Unloading textures invalidates all TextureViews. It is intended
      *  to be done on scene change. */
-    bool LoadTextureAsset(const std::string& path);
-    bool LoadTextureAssets(std::span<const std::string> paths);
+    bool LoadTextureAsset(const std::string& path, bool isExternal = false);
+    bool LoadTextureAssets(std::span<const std::string> paths, bool isExternal = false);
     bool UnloadTextureAsset(const std::string& path);
     void UnloadAllTextureAssets();
 
@@ -69,7 +70,7 @@ namespace nc
         float maxExtent;
     };
 
-    struct SoundClipView
+    struct AudioClipView
     {
         std::span<const double> leftChannel;
         std::span<const double> rightChannel;
@@ -84,7 +85,7 @@ namespace nc
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
-    concept AssetType = std::same_as<T, SoundClipView> ||
+    concept AssetType = std::same_as<T, AudioClipView> ||
                         std::same_as<T, ConvexHullView> ||
                         std::same_as<T, ConcaveColliderView> ||
                         std::same_as<T, MeshView> ||

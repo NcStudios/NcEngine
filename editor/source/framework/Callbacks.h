@@ -1,11 +1,9 @@
 #pragma once
 
 #include "ecs/Entity.h"
+#include "ProjectData.h"
 
-#include <filesystem>
 #include <functional>
-#include <string>
-#include <vector>
 
 namespace nc::editor
 {
@@ -15,9 +13,11 @@ namespace nc::editor
     {
         using CreateProjectCallbackType = std::function<void()>;
         using OpenProjectCallbackType = std::function<void()>;
+        using GetProjectDataCallbackType = std::function<const ProjectData&()>;
 
         CreateProjectCallbackType createProject;
         OpenProjectCallbackType openProject;
+        GetProjectDataCallbackType getProjectData;
     };
 
     struct SceneCallbacks
@@ -61,10 +61,12 @@ namespace nc::editor
         using OpenNewSceneDialogCallbackType = std::function<void(NewSceneOnConfirmCallbackType)>;
         using OpenNewProjectDialogCallbackType = std::function<void(NewProjectOnConfirmCallbackType)>;
         using OpenAssetBrowserCallbackType = std::function<void()>;
+        using OpenConfigEditorCallbackType = std::function<void(const std::filesystem::path&)>;
 
         OpenFileBrowserCallbackType openFileBrowser;
         OpenNewSceneDialogCallbackType openNewSceneDialog;
         OpenNewProjectDialogCallbackType openNewProjectDialog;
         OpenAssetBrowserCallbackType openAssetBrowser;
+        OpenConfigEditorCallbackType openConfigEditor;
     };
 }

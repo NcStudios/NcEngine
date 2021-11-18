@@ -57,13 +57,13 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 #include "Controller.h"
 
 /** Default assets from the nc/resources directory. */
-const auto CubeMeshPath = std::string{"nc/resources/mesh/cube.nca"};
+const auto CubeMeshPath = std::string{"cube.nca"};
 const auto DefaultMaterial = nc::Material
 {
-    .baseColor = "nc/resources/texture/DefaultBaseColor.png",
-    .normal = "nc/resources/texture/DefaultNormal.png",
-    .roughness = "nc/resources/texture/DefaultMetallic.png",
-    .metallic = "nc/resources/texture/DefaultMetallic.png",
+    .baseColor = "DefaultBaseColor.png",
+    .normal = "DefaultNormal.png",
+    .roughness = "DefaultMetallic.png",
+    .metallic = "DefaultMetallic.png",
 };
 
 class ExampleScene : public nc::Scene

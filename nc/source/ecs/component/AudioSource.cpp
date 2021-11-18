@@ -29,12 +29,12 @@ namespace nc
 {
     AudioSource::AudioSource(Entity entity, const std::string& path, AudioSourceProperties properties)
         : ComponentBase{entity},
-          m_soundClip{AssetService<SoundClipView>::Get()->Acquire(path)},
+          m_audioClip{AssetService<AudioClipView>::Get()->Acquire(path)},
           m_currentSampleIndex{0u},
           m_properties{properties},
           m_playing{false}
           #ifdef NC_EDITOR_ENABLED
-          , m_soundClipPath{path}
+          , m_audioClipPath{path}
           #endif
     {
         m_properties.gain = math::Clamp(properties.gain, 0.0f, 1.0f);
@@ -42,7 +42,7 @@ namespace nc
 
     void AudioSource::SetClip(const std::string& path)
     {
-        m_soundClip = AssetService<SoundClipView>::Get()->Acquire(path);
+        m_audioClip = AssetService<AudioClipView>::Get()->Acquire(path);
         m_currentSampleIndex = 0u;
     }
 
@@ -70,7 +70,7 @@ namespace nc
 
         for(size_t i = 0u; i < frames; ++i)
         {
-            if(++m_currentSampleIndex >= m_soundClip.samplesPerChannel)
+            if(++m_currentSampleIndex >= m_audioClip.samplesPerChannel)
             {
                 m_currentSampleIndex = 0;
                 if(!m_properties.loop)
@@ -80,7 +80,7 @@ namespace nc
                 }
             }
 
-            const double sample = gain * (m_soundClip.leftChannel[m_currentSampleIndex] + m_soundClip.rightChannel[m_currentSampleIndex]);
+            const double sample = gain * (m_audioClip.leftChannel[m_currentSampleIndex] + m_audioClip.rightChannel[m_currentSampleIndex]);
             *buffer++ += sample * leftPresence;
             *buffer++ += sample * rightPresence;
         }
@@ -92,10 +92,10 @@ namespace nc
 
         for(size_t i = 0u; i < frames; ++i)
         {
-            *buffer++ += gain * m_soundClip.leftChannel[m_currentSampleIndex];
-            *buffer++ += gain * m_soundClip.rightChannel[m_currentSampleIndex];
+            *buffer++ += gain * m_audioClip.leftChannel[m_currentSampleIndex];
+            *buffer++ += gain * m_audioClip.rightChannel[m_currentSampleIndex];
 
-            if(++m_currentSampleIndex >= m_soundClip.samplesPerChannel)
+            if(++m_currentSampleIndex >= m_audioClip.samplesPerChannel)
             {
                 m_currentSampleIndex = 0;
                 if(!m_properties.loop)

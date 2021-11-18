@@ -23,8 +23,8 @@ namespace
         {
             if(!entry.is_regular_file())
                 continue;
-            
-            if(entry.path().extension() == ".gen")
+
+            if(entry.path().extension() == nc::editor::GeneratedSourceExtension)
                 out.push_back(entry.path().stem().string());
         }
 
@@ -127,21 +127,22 @@ namespace nc::editor
         }
 
         Output::Log("Creating Project:", directoryPath.string());
+        auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
 
         try
         {
             CreateProjectDirectories(directoryPath);
+            CreateProjectFile(projectFilePath);
+            CreateConfig(directoryPath, name);
+            CopyDefaultAssets(directoryPath);
         }
         catch(const std::filesystem::filesystem_error& e)
         {
-            Output::LogError("Failure creating project directories:", e.what());
+            Output::LogError("Failure creating project:", e.what());
             return false;
         }
-        
-        auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
-        CreateProjectFile(projectFilePath);
 
-        /** @todo create engine config, copy default assets, CMakeLists?, default scene? */
+        /** @todo CMakeLists?, default scene? */
 
         DoOpenProject(projectFilePath);
         return true;

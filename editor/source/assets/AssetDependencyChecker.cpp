@@ -16,8 +16,8 @@ namespace nc::editor
     {
         for(const auto& audioSource : registry->ViewAll<AudioSource>())
         {
-            if(!manifest->Contains(audioSource.m_soundClipPath, AssetType::AudioClip))
-                missingDependencies.push_back(audioSource.m_soundClipPath);
+            if(!manifest->Contains(audioSource.m_audioClipPath, AssetType::AudioClip))
+                missingDependencies.push_back(audioSource.m_audioClipPath);
         }
 
         for(const auto& collider : registry->ViewAll<Collider>())

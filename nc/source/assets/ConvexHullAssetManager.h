@@ -17,8 +17,9 @@ namespace nc
     class ConvexHullAssetManager : public IAssetService<ConvexHullView>
     {
         public:
-            bool Load(const std::string& path) override;
-            bool Load(std::span<const std::string> paths) override;
+            ConvexHullAssetManager(const std::string& assetDirectory);
+            bool Load(const std::string& path, bool isExternal) override;
+            bool Load(std::span<const std::string> paths, bool isExternal) override;
             bool Unload(const std::string& path) override;
             void UnloadAll() override;
             auto Acquire(const std::string& path) const -> ConvexHullView override;
@@ -26,5 +27,6 @@ namespace nc
         
         private:
             std::unordered_map<std::string, ConvexHullFlyweight> m_hullColliders;
+            std::string m_assetDirectory;
     };
 }

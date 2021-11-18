@@ -40,13 +40,13 @@ namespace nc
             bool IsSpatial() const { return m_properties.spatialize; }
 
         private:
-            SoundClipView m_soundClip;
+            AudioClipView m_audioClip;
             size_t m_currentSampleIndex;
             AudioSourceProperties m_properties;
             bool m_playing;
 
             #ifdef NC_EDITOR_ENABLED
-            std::string m_soundClipPath;
+            std::string m_audioClipPath;
             #endif
 
             void WriteSpatialSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar);

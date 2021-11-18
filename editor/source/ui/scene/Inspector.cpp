@@ -132,7 +132,7 @@ namespace nc::editor
         ImGui::BeginGroup();
         ImGui::Indent();
         ImGui::Text("Sound Clip");
-        if(ImGui::BeginCombo("##audioclipcomboselect", audioSource->m_soundClipPath.c_str()))
+        if(ImGui::BeginCombo("##audioclipcomboselect", audioSource->m_audioClipPath.c_str()))
         {
             for(const auto& asset : m_assetManifest->View(AssetType::AudioClip))
             {
