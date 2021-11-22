@@ -1,7 +1,7 @@
 target_sources(${EDITOR_EXE}
     PRIVATE
-        ${ROOT_DIR}/source/ui/EditorUI.cpp
-        ${ROOT_DIR}/source/ui/UtilitiesPanel.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/EditorUI.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/UtilitiesPanel.cpp
 )
 
 add_subdirectory(dialog)

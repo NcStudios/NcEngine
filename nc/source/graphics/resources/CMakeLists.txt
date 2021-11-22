@@ -1,4 +1,4 @@
-target_sources(${ENGINE_LIB}
+target_sources(NcEngineLib
     PRIVATE
         ${ROOT_DIR}/source/graphics/resources/DepthStencil.cpp
         ${ROOT_DIR}/source/graphics/resources/ImmutableImage.cpp

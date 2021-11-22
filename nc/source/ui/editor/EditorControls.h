@@ -215,7 +215,6 @@ namespace nc::ui::editor::controls
             if(ImGui::BeginTabBar("UtilitiesRightTabBar"))
             {
                 WrapTabItem("Frame Data", FrameData, dtMult);
-                WrapTabItem("UI Style", ImGui::ShowStyleEditor, nullptr);
                 WrapTabItem("UI Metrics", ImGui::ShowMetricsWindow, nullptr);
                 ImGui::EndTabBar();
             }

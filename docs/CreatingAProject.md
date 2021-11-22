@@ -145,54 +145,35 @@ One thing that isn't obvious in this example is how control is given back to Win
 
 ## Setting up the config file
 -------------------------
-For the config file, start by copying the defaults from [nc/source/config/default_config.ini](../nc/source/config/default_config.ini). Most of these values will be sufficient, but writing shaders is outside the scope of this guide, so we'll just point to the ones in the sample project:
-
-```
-shaders_path=project/shaders/Compiled/
-```
+For the config file, copy the defaults from [nc/source/config/default_config.ini](../nc/source/config/default_config.ini). The default asset paths are specified relative to the repository directory. If you have made your project directory somewhere else, these will need to be updated.
 
 ## Building
 ------------
-The CMakeLists.txt needs to be written before we can build:
+The CMakeLists.txt just needs to find the NcEngine package:
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project("Example" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(ExampleGame "Example")
-set(NCENGINE_REPOSITORY_DIRECTORY ${PROJECT_SOURCE_DIR}/../)
-set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
 
-find_package(Vulkan REQUIRED)
+# Set to <your-installation-directory>/NcEngine/<config>
+set(NC_INSTALL_DIR "C:/Program Files/NcEngine/Release-WithEditor")
+find_package(NcEngine REQUIRED PATHS ${NC_INSTALL_DIR})
 
 add_executable(${ExampleGame} ${PROJECT_SOURCE_DIR}/Main.cpp)
 
-add_definitions(-DNC_EDITOR_ENABLED)
-
-set_target_properties(${ExampleGame}
-    PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${NCENGINE_REPOSITORY_DIRECTORY}
-)
-
-target_include_directories(${ExampleGame}
-    PRIVATE
-        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/include
-        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/external/include
-)
-
 target_link_libraries(${ExampleGame}
     PRIVATE
-        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libNcEngine-ReleaseWithEditor.a
-        ${NCENGINE_REPOSITORY_DIRECTORY}/nc/lib/libimgui-Release.a
-        ${RTAUDIO_LINK_FLAGS}
-        Vulkan::Vulkan
+        Nc::NcEngineLib
 )
 ```
 
-Because we're defining NC_EDITOR_ENABLED in the CMake, we'll need to build the engine with the editor enabled:
+Because we're defining NC_EDITOR_ENABLED in the CMake, we'll need to build and install the engine with the editor enabled:
 ```
->tools/cmake Engine Release-WithEditor
+>tools/cmake Engine Release-WithEditor <your-install-directory>
 >ninja -C build/Engine/Release-WithEditor
+>cmake --install build/Engine/Release-WithEditor
 ```
 
 Then build the example:
