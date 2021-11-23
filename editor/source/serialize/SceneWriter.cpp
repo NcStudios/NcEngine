@@ -113,7 +113,7 @@ namespace nc::editor
              << TAB << TAB << "public:\n"
              << TAB << TAB << TAB << "void Load(nc::NcEngine* engine) override;\n"
              << TAB << TAB << TAB << "void Unload() override;\n"
-             << TAB << "}\n"
+             << TAB << "};\n"
              << "}";
     }
 

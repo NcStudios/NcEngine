@@ -117,4 +117,13 @@ namespace nc::editor
             copy_file(engineTextureDirectory / DefaultRoughnessPath, projectTextureDirectory / DefaultRoughnessPath);
         }
     }
+
+    void CreateCMakeFiles(const std::filesystem::path& projectDirectory)
+    {
+        std::filesystem::copy_file("editor/file_templates/build.bat", projectDirectory / "build.bat");
+        std::filesystem::copy_file("editor/file_templates/Main.cpp", projectDirectory / "Main.cpp");
+        std::filesystem::copy_file("editor/file_templates/RootCMakeLists.txt", projectDirectory / "CMakeLists.txt");
+        std::filesystem::copy_file("editor/file_templates/SceneCMakeLists.txt", projectDirectory / "scenes/CMakeLists.txt");
+        std::filesystem::copy_file("editor/file_templates/SourceCMakeLists.txt", projectDirectory / "source/CMakeLists.txt");
+    }
 }

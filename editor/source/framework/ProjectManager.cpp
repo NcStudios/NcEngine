@@ -135,6 +135,7 @@ namespace nc::editor
             CreateProjectFile(projectFilePath);
             CreateConfig(directoryPath, name);
             CopyDefaultAssets(directoryPath);
+            CreateCMakeFiles(directoryPath);
         }
         catch(const std::filesystem::filesystem_error& e)
         {
