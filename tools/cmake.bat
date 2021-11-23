@@ -6,7 +6,12 @@ set INSTALL_DIRECTORY="%~3"
 
 :CheckInstallDirectory
     if %INSTALL_DIRECTORY%=="" (
-        echo Error: Invalid Install Directory
+        echo Install directory not provided - using default "C:/Program Files/"
+        set INSTALL_DIRECTORY="C:/Program Files/"
+    )
+
+    if not exist %INSTALL_DIRECTORY% (
+        echo Error: Install directory doesn't exist: %INSTALL_DIRECTORY%
         EXIT
     )
 

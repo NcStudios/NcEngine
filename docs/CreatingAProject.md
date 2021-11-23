@@ -61,9 +61,9 @@ const auto CubeMeshPath = std::string{"cube.nca"};
 const auto DefaultMaterial = nc::Material
 {
     .baseColor = "DefaultBaseColor.png",
-    .normal = "DefaultNormal.png",
+    .normal    = "DefaultNormal.png",
     .roughness = "DefaultMetallic.png",
-    .metallic = "DefaultMetallic.png",
+    .metallic  = "DefaultMetallic.png",
 };
 
 class ExampleScene : public nc::Scene
@@ -149,27 +149,18 @@ For the config file, copy the defaults from [nc/source/config/default_config.ini
 
 ## Building
 ------------
-The CMakeLists.txt just needs to find the NcEngine package:
+The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_pakcage to search in \<path>/NcEngine/\<config>:
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project("Example" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(ExampleGame "Example")
-
-# Set to <your-installation-directory>/NcEngine/<config>
-set(NC_INSTALL_DIR "C:/Program Files/NcEngine/Release-WithEditor")
-find_package(NcEngine REQUIRED PATHS ${NC_INSTALL_DIR})
-
-add_executable(${ExampleGame} ${PROJECT_SOURCE_DIR}/Main.cpp)
-
-target_link_libraries(${ExampleGame}
-    PRIVATE
-        Nc::NcEngineLib
-)
+find_package(NcEngine REQUIRED PATHS "C:/Program Files/NcEngine/Release-WithEditor")
+add_executable(Example ${PROJECT_SOURCE_DIR}/Main.cpp)
+target_link_libraries(Example PRIVATE Nc::NcEngineLib)
 ```
 
-Because we're defining NC_EDITOR_ENABLED in the CMake, we'll need to build and install the engine with the editor enabled:
+We'll need to build and install the engine with the desired config:
 ```
 >tools/cmake Engine Release-WithEditor <your-install-directory>
 >ninja -C build/Engine/Release-WithEditor
