@@ -14,7 +14,7 @@ namespace nc
         size_t samplesPerChannel;
     };
 
-    class SoundClipAssetManager : public IAssetService<SoundClipView>
+    class SoundClipAssetManager : public IAssetService<SoundClipView, std::string>
     {
         public:
             bool Load(const std::string& path) override;

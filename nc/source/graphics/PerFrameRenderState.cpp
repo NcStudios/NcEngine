@@ -33,6 +33,7 @@ namespace nc::graphics
       cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
       objectData{},
       pointLightInfos{},
+      sceneData{std::nullopt},
       #ifdef NC_EDITOR_ENABLED
       colliderDebugWidget{std::nullopt},
       #endif
@@ -83,6 +84,16 @@ namespace nc::graphics
 
             if(pointLight.Update(transform->GetPosition(), pointLightVPs.back()))
                 isPointLightBindRequired = true;
+        }
+
+        if (!sceneData.has_value())
+        {
+            sceneData = SceneData
+            {
+                .skyboxIndex = 0
+            };
+
+            ShaderResourceService<SceneData>::Get()->Update(std::vector<SceneData>{sceneData.value()});
         }
 
         if(isPointLightBindRequired)

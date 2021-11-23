@@ -405,7 +405,7 @@ namespace nc::graphics
         return m_bufferIndex++;
     }
 
-    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, arrayLayers, vk::Image* createdImage)
+    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage)
     {
         vk::ImageCreateInfo imageInfo{};
         imageInfo.setImageType(vk::ImageType::e2D);
@@ -416,7 +416,7 @@ namespace nc::graphics
         imageInfo.setSamples(vk::SampleCountFlagBits::e1);
         imageInfo.setTiling(vk::ImageTiling::eOptimal);
         imageInfo.setUsage(usageFlags);
-        imageInfo.setFlags(vk::ImageCreateFlagBits::eCubeCompatible);
+        imageInfo.setFlags(imageFlags);
 
         vma::AllocationCreateInfo allocationInfo;
         allocationInfo.usage = vma::MemoryUsage::eGpuOnly;
@@ -474,10 +474,10 @@ namespace nc::graphics
         void* mappedData;
         auto allocation = m_buffers.at(stagingIndex).second;
         m_allocator.mapMemory(allocation, &mappedData);
-        for (auto i = 0; i < 6; i++)
+        for (auto layer = 0; layer < 6; layer++)
         {
-            memcpy(mappedData, pixels[i], static_cast<size_t>(imageSize));
-            stbi_image_free(pixels[i]);
+            memcpy(mappedData + (width * height * layer), pixels[layer], static_cast<size_t>(width * height));
+            stbi_image_free(pixels[layer]);
         }
         m_allocator.unmapMemory(allocation);
 
@@ -676,24 +676,6 @@ namespace nc::graphics
     const vk::Queue& Base::GetQueue(QueueFamilyType type) const noexcept
     {
         return type == QueueFamilyType::GraphicsFamily ? m_graphicsQueue : m_presentQueue;
-    }
-
-    void Base::MapMemory(uint32_t bufferId, const std::vector<Vertex>& vertices, size_t size)
-    {
-        void* mappedData;
-        auto allocation = m_buffers.at(bufferId).second;
-        m_allocator.mapMemory(allocation, &mappedData);
-        memcpy(mappedData, vertices.data(), size);
-        m_allocator.unmapMemory(allocation);
-    }
-
-    void Base::MapMemory(uint32_t bufferId, const std::vector<uint32_t>& indices, size_t size)
-    {
-        void* mappedData;
-        auto allocation = m_buffers.at(bufferId).second;
-        m_allocator.mapMemory(allocation, &mappedData);
-        memcpy(mappedData, indices.data(), size);
-        m_allocator.unmapMemory(allocation);
     }
 
     const vk::Format& Base::GetDepthFormat() const noexcept

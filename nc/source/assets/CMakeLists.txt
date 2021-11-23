@@ -3,6 +3,7 @@ target_sources(${ENGINE_LIB}
         ${ROOT_DIR}/source/assets/Assets.cpp
         ${ROOT_DIR}/source/assets/ConcaveColliderAssetManager.cpp
         ${ROOT_DIR}/source/assets/ConvexHullAssetManager.cpp
+        ${ROOT_DIR}/source/assets/CubeMapAssetManager.cpp
         ${ROOT_DIR}/source/assets/MeshAssetManager.cpp
         ${ROOT_DIR}/source/assets/SoundClipAssetManager.cpp
         ${ROOT_DIR}/source/assets/TextureAssetManager.cpp

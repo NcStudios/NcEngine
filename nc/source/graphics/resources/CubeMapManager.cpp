@@ -1,4 +1,4 @@
-#include "EnvironmentDataManager.h"
+#include "CubeMapManager.h"
 #include "graphics/Initializers.h"
 #include "debug/Utils.h"
 
@@ -6,35 +6,33 @@
 
 namespace nc::graphics
 {
-    EnvironmentDataManager::EnvironmentDataManager(Graphics* graphics, uint32_t maxTextures)
+    CubeMapManager::CubeMapManager(Graphics* graphics, uint32_t maxCubeMaps)
         : m_graphics{graphics},
           m_imageInfos{},
           m_descriptorSet{},
           m_descriptorSetLayout{},
-          m_textureSampler{},
           m_cubeMapSampler{},
           m_layout{},
-          m_maxTexturesCount{maxTextures},
-          m_texturesInitialized{false}
+          m_maxCubeMapsCount{maxCubeMaps},
+          m_cubeMapsInitialized{false}
     {
         Initialize();
     }
 
-    EnvironmentDataManager::~EnvironmentDataManager() noexcept
+    CubeMapManager::~CubeMapManager() noexcept
     {
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
-        m_textureSampler.reset();
         m_cubeMapSampler.reset();
     }
 
-    void EnvironmentDataManager::Initialize()
+    void CubeMapManager::Initialize()
     {
         // Create and bind the descriptor set for the array of textures.
         std::array<vk::DescriptorSetLayoutBinding, 2u> layoutBindings
         {
           CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment),
-          CreateDescriptorSetLayoutBinding(1, m_maxTexturesCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
+          CreateDescriptorSetLayoutBinding(1, m_maxCubeMapsCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
         };
 
         std::array<vk::DescriptorBindingFlagsEXT, 2> layoutBindingFlags
@@ -47,21 +45,21 @@ namespace nc::graphics
         m_descriptorSet = CreateDescriptorSet(m_graphics, m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
         /** @todo Figure out why there are validation errors when creating sampler in the constructor. */
-        m_textureSampler = m_graphics->GetBasePtr()->CreateTextureSampler();
+        m_cubeMapSampler = m_graphics->GetBasePtr()->CreateTextureSampler();
     }
 
-    void EnvironmentDataManager::Update(const std::vector<Texture>& data)
+    void CubeMapManager::Update(const std::vector<CubeMap>& data)
     {
-        assert(data.size() < m_maxTexturesCount && !data.empty());
+        assert(data.size() < m_maxCubeMapsCount && !data.empty());
 
         std::array<vk::WriteDescriptorSet, 2> writes;
         vk::DescriptorImageInfo samplerInfo = {};
-        samplerInfo.sampler = m_textureSampler.get();
+        samplerInfo.sampler = m_cubeMapSampler.get();
 
-        if (!m_texturesInitialized)
+        if (!m_cubeMapsInitialized)
         {
-            m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxTexturesCount, data.at(0).imageInfo);
-            m_texturesInitialized = true;
+            m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxCubeMapsCount, CreateDescriptorImageInfo(&m_cubeMapSampler.get(), data.at(0).GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
+            m_cubeMapsInitialized = true;
         }
 
         writes[0].setDstBinding(0);
@@ -72,15 +70,15 @@ namespace nc::graphics
         writes[0].setPBufferInfo(0);
         writes[0].setPImageInfo(&samplerInfo);
 
-        std::transform(data.cbegin(), data.cend(), m_imageInfos.begin(), [](const auto& texture)
+        std::transform(data.cbegin(), data.cend(), m_imageInfos.begin(), [sampler = &m_cubeMapSampler.get()](const auto& cubeMap)
         {
-            return texture.imageInfo;
+            return CreateDescriptorImageInfo(sampler, cubeMap.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
         });
 
         writes[1].setDstBinding(1);
         writes[1].setDstArrayElement(0);
         writes[1].setDescriptorType(vk::DescriptorType::eSampledImage);
-        writes[1].setDescriptorCount(m_maxTexturesCount);
+        writes[1].setDescriptorCount(m_maxCubeMapsCount);
         writes[1].setDstSet(m_descriptorSet.get());
         writes[1].setPBufferInfo(0);
         writes[1].setPImageInfo(m_imageInfos.data());
@@ -88,17 +86,17 @@ namespace nc::graphics
         m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
     }
 
-    auto EnvironmentDataManager::GetDescriptorSet() -> vk::DescriptorSet*
+    auto CubeMapManager::GetDescriptorSet() -> vk::DescriptorSet*
     {
         return &m_descriptorSet.get();
     }
 
-    auto EnvironmentDataManager::GetDescriptorSetLayout() -> vk::DescriptorSetLayout*
+    auto CubeMapManager::GetDescriptorSetLayout() -> vk::DescriptorSetLayout*
     {
         return &m_descriptorSetLayout.get();
     }
 
-    void EnvironmentDataManager::Reset()
+    void CubeMapManager::Reset()
     {
     }
 }

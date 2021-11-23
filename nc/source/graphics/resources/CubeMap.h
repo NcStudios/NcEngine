@@ -19,7 +19,7 @@ namespace nc::graphics
             CubeMap& operator=(const CubeMap&) = delete;
             CubeMap(const CubeMap&) = delete;
 
-            vk::ImageView& GetImageView() noexcept;
+            const vk::ImageView& GetImageView() const noexcept;
             void Bind(const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize);
             void Clear() noexcept;
             

@@ -24,7 +24,6 @@ namespace nc::graphics
         m_descriptorSet.reset();
         m_descriptorSetLayout.reset();
         m_textureSampler.reset();
-        m_cubeMapSampler.reset();
     }
 
     void TextureManager::Initialize()

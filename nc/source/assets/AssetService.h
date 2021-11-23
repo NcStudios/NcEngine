@@ -6,7 +6,7 @@
 namespace nc
 {
     /** Interface for services that manage assets. */
-    template<AssetType T>
+    template<AssetType T, class InputType>
     class IAssetService
     {
         public:
@@ -15,21 +15,21 @@ namespace nc
             IAssetService();
             virtual ~IAssetService() = default;
 
-            virtual bool Load(const std::string& path) = 0;
-            virtual bool Load(std::span<const std::string> paths) = 0;
-            virtual bool Unload(const std::string& path) = 0;
+            virtual bool Load(const InputType& input) = 0;
+            virtual bool Load(std::span<const InputType> inputs) = 0;
+            virtual bool Unload(const InputType& input) = 0;
             virtual void UnloadAll() = 0;
-            virtual auto Acquire(const std::string& path) const -> data_type = 0;
-            virtual bool IsLoaded(const std::string& path) const = 0;
+            virtual auto Acquire(const InputType& input) const -> data_type = 0;
+            virtual bool IsLoaded(const InputType& input) const = 0;
     };
 
     /** Helper alias for locating asset services. */
-    template<AssetType T>
-    using AssetService = ServiceLocator<IAssetService<T>>;
+    template<AssetType T, class InputType = std::string>
+    using AssetService = ServiceLocator<IAssetService<T, InputType>>;
 
-    template<AssetType T>
-    IAssetService<T>::IAssetService()
+    template<AssetType T, class InputType>
+    IAssetService<T, InputType>::IAssetService()
     {
-        AssetService<T>::Register(this);
+        AssetService<T, InputType>::Register(this);
     }
 } // namespace nc

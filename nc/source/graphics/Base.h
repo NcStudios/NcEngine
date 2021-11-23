@@ -80,8 +80,6 @@ namespace nc::graphics
             void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers) noexcept;
             void DestroyBuffer(uint32_t id) noexcept;
             void DestroyImage(uint32_t id) noexcept;
-            void MapMemory(uint32_t bufferId, const std::vector<Vertex>& vertices, size_t size);
-            void MapMemory(uint32_t bufferId, const std::vector<uint32_t>& indices, size_t size);
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
             void QueryDepthFormatSupport();
             void InitializeImgui(const vk::RenderPass& defaultPass);

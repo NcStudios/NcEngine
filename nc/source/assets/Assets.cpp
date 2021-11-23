@@ -105,22 +105,22 @@ namespace nc
 
     bool LoadCubeMapAsset(const CubeMapFaces& paths)
     {
-        return AssetService<CubeMapView>::Get()->Load(paths);
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->Load(paths);
     }
 
     bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths)
     {
-        return AssetService<CubeMapView>::Get()->Load(paths);
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->Load(paths);
     }
 
     bool UnloadCubeMapAsset(const CubeMapFaces& paths)
     {
-        return AssetService<CubeMapView>::Get()->Unload(paths);
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->Unload(paths);
     }
 
     void UnloadAllCubeMapAssets()
     {
-        return AssetService<CubeMapView>::Get()->UnloadAll();
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->UnloadAll();
     }
 
 } // namespace nc

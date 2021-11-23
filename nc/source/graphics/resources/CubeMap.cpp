@@ -16,7 +16,7 @@ namespace nc::graphics
         Clear();
     }
 
-    CubeMap::CubeMap(CubeMap&& other)
+    CubeMap::CubeMap(CubeMap&& other) noexcept
         : m_base{std::exchange(other.m_base, nullptr)},
           m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
           m_cubeMapImage{std::exchange(other.m_cubeMapImage, nullptr)},
@@ -24,7 +24,7 @@ namespace nc::graphics
     {
     }
 
-    CubeMap& CubeMap::operator=(CubeMap&& other)
+    CubeMap& CubeMap::operator=(CubeMap&& other) noexcept
     {
         m_base = std::exchange(other.m_base, nullptr);
         m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
@@ -40,7 +40,7 @@ namespace nc::graphics
         m_cubeMapview = m_base->CreateCubeMapTextureView(m_cubeMapImage);
     }
 
-    vk::ImageView& CubeMap::GetImageView() noexcept
+    const vk::ImageView& CubeMap::GetImageView() const noexcept
     {
         return m_cubeMapview.get();
     }

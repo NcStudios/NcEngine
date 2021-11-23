@@ -12,6 +12,63 @@ namespace nc
      *  Duplicate loads are ignored. Objects that use assets do not load them on
      *  demand, nor do they own the asset data. Assets must be loaded before dependent
      *  objects are created and should be unloaded only when they are no longer in use. */
+    struct ConcaveColliderView
+    {
+        std::span<const Triangle> triangles;
+        float maxExtent;
+    };
+
+    struct ConvexHullView
+    {
+        std::span<const Vector3> vertices;
+        Vector3 extents;
+        float maxExtent;
+    };
+
+    struct MeshView
+    {
+        uint32_t firstVertex;
+        uint32_t vertexCount;
+        uint32_t firstIndex;
+        uint32_t indexCount;
+        float maxExtent;
+    };
+
+    struct SoundClipView
+    {
+        std::span<const double> leftChannel;
+        std::span<const double> rightChannel;
+        size_t samplesPerChannel;
+    };
+
+    struct TextureView
+    {
+        uint32_t index;
+    };
+
+    enum class CubeMapUsage
+    {
+        Skybox,
+        ShadowMap
+    };
+
+    struct CubeMapView
+    {
+        CubeMapUsage usage;
+        uint32_t index;
+    };
+
+    struct CubeMapFaces
+    {
+        CubeMapUsage usage;
+        std::string uid;
+        std::string frontPath;
+        std::string backPath;
+        std::string upPath;
+        std::string downPath;
+        std::string rightPath;
+        std::string leftPath;
+    };
 
     /** Supported file types: .nca */
     bool LoadConcaveColliderAsset(const std::string& path);
@@ -54,56 +111,6 @@ namespace nc
     bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths);
     bool UnloadCubeMapAsset(const CubeMapFaces& paths);
     void UnloadAllCubeMapAssets();
-
-    struct ConcaveColliderView
-    {
-        std::span<const Triangle> triangles;
-        float maxExtent;
-    };
-
-    struct ConvexHullView
-    {
-        std::span<const Vector3> vertices;
-        Vector3 extents;
-        float maxExtent;
-    };
-
-    struct MeshView
-    {
-        uint32_t firstVertex;
-        uint32_t vertexCount;
-        uint32_t firstIndex;
-        uint32_t indexCount;
-        float maxExtent;
-    };
-
-    struct SoundClipView
-    {
-        std::span<const double> leftChannel;
-        std::span<const double> rightChannel;
-        size_t samplesPerChannel;
-    };
-
-    struct TextureView
-    {
-        uint32_t index;
-    };
-
-    struct CubeMapView
-    {
-        uint32_t index;
-    };
-
-    struct CubeMapFaces
-    {
-        std::string uid;
-        std::string frontPath;
-        std::string backPath;
-        std::string upPath;
-        std::string downPath;
-        std::string rightPath;
-        std::string leftPath;
-    };
 
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */

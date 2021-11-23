@@ -1,35 +1,29 @@
 #pragma once
 
 #include "ShaderResourceService.h"
-
+#include "graphics/resources/ImmutableBuffer.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {
     class Graphics;
 
-    struct EnvironmentData
-    {
-        uint32_t skyboxIndex;
-    };
-
-    class EnvironmentDataManager : public IShaderResourceService<EnvironmentData>
+    class SceneDataManager : public IShaderResourceService<SceneData>
     {
         public:
-            EnvironmentDataManager(Graphics* graphics, Vector2 dimensions);
-            ~EnvironmentDataManager() noexcept;
+            SceneDataManager(Graphics* graphics);
+            ~SceneDataManager() noexcept;
 
             void Initialize() override;
-            void Update(const std::vector<ShadowMap>& data) override;
+            void Update(const std::vector<SceneData>& data) override;
             auto GetDescriptorSet() -> vk::DescriptorSet* override;
             auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* override;
             void Reset() override;
 
         private:
             Graphics* m_graphics;
-            vk::UniqueSampler m_sampler;
+            std::unique_ptr<ImmutableBuffer> m_sceneDataBuffer;
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
-            Vector2 m_dimensions;
     };
 }

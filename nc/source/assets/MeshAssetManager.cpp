@@ -218,9 +218,9 @@ namespace nc
     void MeshAssetManager::UpdateBuffers()
     {
         m_vertexData.buffer.Clear();
-        m_vertexData.buffer = ImmutableBuffer<graphics::Vertex>(m_graphics, m_vertexData.vertices);
+        m_vertexData.buffer = ImmutableBuffer(m_graphics, m_vertexData.vertices);
 
         m_indexData.buffer.Clear();
-        m_indexData.buffer = ImmutableBuffer<uint32_t>(m_graphics, m_indexData.indices);
+        m_indexData.buffer = ImmutableBuffer(m_graphics, m_indexData.indices);
     }
 }

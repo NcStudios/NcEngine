@@ -7,6 +7,7 @@
 #include "ecs/component/DebugWidget.h"
 #endif
 #include "resources/ObjectDataManager.h"
+#include "resources/SceneDataManager.h"
 
 namespace nc
 {
@@ -29,6 +30,7 @@ namespace nc::graphics
         std::vector<ObjectData> objectData;
         std::vector<MeshView> meshes;
         std::vector<PointLightInfo> pointLightInfos;
+        std::optional<SceneData> sceneData;
         #ifdef NC_EDITOR_ENABLED
         std::optional<nc::DebugWidget> colliderDebugWidget;
         #endif

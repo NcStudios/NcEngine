@@ -10,17 +10,17 @@ namespace nc
 {
     struct VertexData
     {
-        graphics::ImmutableBuffer<graphics::Vertex> buffer;
+        graphics::ImmutableBuffer buffer;
         std::vector<graphics::Vertex> vertices;
     };
 
     struct IndexData
     {
-        graphics::ImmutableBuffer<uint32_t> buffer;
+        graphics::ImmutableBuffer buffer;
         std::vector<uint32_t> indices;
     };
 
-    class MeshAssetManager : public IAssetService<MeshView>
+    class MeshAssetManager : public IAssetService<MeshView, std::string>
     {
         public:
             MeshAssetManager(graphics::Graphics* graphics);

@@ -35,7 +35,6 @@ namespace nc
     TextureAssetManager::TextureAssetManager(graphics::Graphics* graphics, uint32_t maxTextures)
         : m_textureAccessors{},
           m_textures{},
-          m_cubeMaps{},
           m_graphics{graphics},
           m_textureSampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
           m_maxTextureCount{maxTextures}
@@ -50,45 +49,6 @@ namespace nc
         }
 
         m_textures.resize(0);
-        m_cubeMaps.resize(0);
-    }
-
-    bool TextureAssetManager::LoadCubeMap(const std::string& frontPath,
-                                          const std::string& backPath,
-                                          const std::string& upPath,
-                                          const std::string& downPath,
-                                          const std::string& rightPath,
-                                          const std::string& leftPath)
-    {
-        std::array<stbi_uc*, 6> pixelArray = {};
-        int32_t width, height, numChannels; // Same for all faces.
-
-        /** Front face */
-        pixelArray.at(0) = stbi_load(frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + frontPath);
-
-        /** Back face */
-        pixelArray.at(1) = stbi_load(backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + backPath);
-
-        /** Up face */
-        pixelArray.at(2) = stbi_load(upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + upPath);
-
-        /** Down face */
-        pixelArray.at(3) = stbi_load(downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + downPath);
-
-        /** Right face */
-        pixelArray.at(4) = stbi_load(rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + rightPath);
-
-        /** Left face */
-        pixelArray.at(5) = stbi_load(leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + leftPath);
-
-        m_cubeMaps.emplace_back(m_graphics, pixelArray, width * height * STBI_rgb_alpha * 6);
-        graphics::ShaderResourceService<graphics::EnvironmentData>::Get()->Update
     }
 
     bool TextureAssetManager::Load(const std::string& path)
@@ -142,7 +102,7 @@ namespace nc
         auto index = std::distance(m_textures.begin(), pos);
         m_textures.erase(pos);
 
-        for(auto& [path, textureView] : m_accessors)
+        for(auto& [path, textureView] : m_textureAccessors)
         {
             if(textureView.index > index)
                 --textureView.index;

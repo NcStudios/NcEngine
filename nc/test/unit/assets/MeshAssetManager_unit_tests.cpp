@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 
+#include "graphics/Graphics.h"
+#include "graphics/resources/ImmutableBuffer.h"
 #include "assets/MeshAssetManager.h"
 
 using namespace nc;
@@ -12,8 +14,20 @@ namespace nc::graphics
 {
     uint32_t Base::CreateBuffer(uint32_t, vk::BufferUsageFlags, vma::MemoryUsage, vk::Buffer*) { return 0u; }
     void Base::DestroyBuffer(uint32_t) noexcept {}
-    void Base::MapMemory(uint32_t, const std::vector<Vertex>&, size_t) {}
-    void Base::MapMemory(uint32_t, const std::vector<uint32_t>&, size_t) {}
+    ImmutableBuffer::ImmutableBuffer() {}
+    ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics* , const std::vector<uint32_t>&) {}
+    ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics*, const std::vector<Vertex>&) {}
+    ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics*, const SceneData&) {}
+    ImmutableBuffer::~ImmutableBuffer() {}
+    ImmutableBuffer::ImmutableBuffer(ImmutableBuffer&&) {}
+    ImmutableBuffer& ImmutableBuffer::operator=(ImmutableBuffer&&) {}
+    
+    vk::Buffer* ImmutableBuffer::GetBuffer() {}
+    void ImmutableBuffer::Bind(nc::graphics::Graphics*, const std::vector<uint32_t>&) {}
+    void ImmutableBuffer::Bind(nc::graphics::Graphics*, const std::vector<Vertex>&) {}
+    void ImmutableBuffer::Bind(nc::graphics::Graphics*, const SceneData&) {}
+    void ImmutableBuffer::Clear() {}
+
     void Commands::SubmitCopyCommandImmediate(const Base&, const vk::Buffer&, const vk::Buffer&, const vk::DeviceSize) {}
     Base* Graphics::GetBasePtr() const noexcept { return nullptr; }
 }

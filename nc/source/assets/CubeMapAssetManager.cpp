@@ -1,131 +1,171 @@
 #include "CubeMapAssetManager.h"
 #include "graphics/Initializers.h"
-#include "graphics/resources/EnvironmentDataManager.h"
+#include "graphics/resources/ShaderResourceService.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
-#undef STB_IMAGE_IMPLEMENATION
 
 #include <cassert>
 #include <fstream>
 
 namespace nc
 {
-    CubeMapAssetManager::CubeMapAssetManager(graphics::Graphics* graphics, uint32_t maxTextures)
+    CubeMapAssetManager::CubeMapAssetManager(graphics::Graphics* graphics, uint32_t maxCubeMapsCount)
         : m_cubeMapAccessors{},
           m_cubeMaps{},
           m_graphics{graphics},
           m_cubeMapSampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
-          m_maxTextureCount{maxTextures}
+          m_maxCubeMapsCount{maxCubeMapsCount}
     {
     }
 
     CubeMapAssetManager::~CubeMapAssetManager() noexcept
     {
-        for(auto& texture : m_textures)
+        for(auto& cubeMap : m_cubeMaps)
         {
-            texture.image.Clear();
+            cubeMap.Clear();
         }
-
-        m_textures.resize(0);
-        m_cubeMaps.resize(0);
     }
 
-    bool CubeMapAssetManager::Load(const CubeMapFaces& paths)
+    bool CubeMapAssetManager::Load(const CubeMapFaces& faces)
     {
+        auto nextCubeMapIndex = m_cubeMaps.size();
+
+        if(IsLoaded(faces))
+            return true;
+
         std::array<stbi_uc*, 6> pixelArray = {};
         int32_t width, height, numChannels; // Same for all faces.
 
         /** Front face */
-        pixelArray.at(0) = stbi_load(paths.frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + frontPath);
+        pixelArray.at(0) = stbi_load(faces.frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + faces.frontPath);
 
         /** Back face */
-        pixelArray.at(1) = stbi_load(paths.backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + backPath);
+        pixelArray.at(1) = stbi_load(faces.backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + faces.backPath);
 
         /** Up face */
-        pixelArray.at(2) = stbi_load(paths.upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + upPath);
+        pixelArray.at(2) = stbi_load(faces.upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + faces.upPath);
 
         /** Down face */
-        pixelArray.at(3) = stbi_load(paths.downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + downPath);
+        pixelArray.at(3) = stbi_load(faces.downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + faces.downPath);
 
         /** Right face */
-        pixelArray.at(4) = stbi_load(paths.rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + rightPath);
+        pixelArray.at(4) = stbi_load(faces.rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + faces.rightPath);
 
         /** Left face */
-        pixelArray.at(5) = stbi_load(paths.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + leftPath);
+        pixelArray.at(5) = stbi_load(faces.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + faces.leftPath);
 
-        m_cubeMaps.emplace_back(m_graphics, pixelArray, width * height * STBI_rgb_alpha * 6);
-        graphics::ShaderResourceService<graphics::EnvironmentData>::Get()->Update
+        auto cubeMapView = CubeMapView
+        {
+            .usage = faces.usage,
+            .index = nextCubeMapIndex++
+        };
+
+        m_cubeMapAccessors.emplace(faces.uid, cubeMapView);
+        m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6);
+        graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
+        return true;
     }
 
-    bool CubeMapAssetManager::Load(std::span<const CubeMapFaces> paths)
+    bool CubeMapAssetManager::Load(std::span<const CubeMapFaces> facesSet)
     {
-        const auto newTextureCount = paths.size();
-        auto nextTextureIndex = m_textures.size();
-        if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
+        const auto newCubeMapCount = facesSet.size();
+        auto newCubeMapIndex = m_cubeMaps.size();
+        if (newCubeMapCount + newCubeMapIndex >= m_maxCubeMapsCount)
             throw NcError("Cannot exceed max texture count.");
 
-        for (const auto& path : paths)
+        for (const auto& faces : facesSet)
         {
-            if(IsLoaded(path))
+            if(IsLoaded(faces))
                 continue;
 
-            m_textures.push_back(ReadTexture(path, m_graphics, &m_textureSampler.get()));
-            m_textureAccessors.emplace(path, nextTextureIndex++);
+            std::array<stbi_uc*, 6> pixelArray = {};
+            int32_t width, height, numChannels; // Same for all faces.
+
+            /** Front face */
+            pixelArray.at(0) = stbi_load(faces.frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + faces.frontPath);
+
+            /** Back face */
+            pixelArray.at(1) = stbi_load(faces.backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + faces.backPath);
+
+            /** Up face */
+            pixelArray.at(2) = stbi_load(faces.upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + faces.upPath);
+
+            /** Down face */
+            pixelArray.at(3) = stbi_load(faces.downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + faces.downPath);
+
+            /** Right face */
+            pixelArray.at(4) = stbi_load(faces.rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + faces.rightPath);
+
+            /** Left face */
+            pixelArray.at(5) = stbi_load(faces.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + faces.leftPath);
+
+            auto cubeMapView = CubeMapView
+            {
+                .usage = faces.usage,
+                .index = newCubeMapIndex++
+            };
+
+            m_cubeMapAccessors.emplace(faces.uid, cubeMapView);
+            m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6);
         }
 
-        graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
+        graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
         return true;
     }
 
-    bool CubeMapAssetManager::Unload(const std::string& uid)
+    bool CubeMapAssetManager::Unload(const CubeMapFaces& faces)
     {
-        auto removed = static_cast<bool>(m_cubeMapAccessors.erase(uid));
-        if(!removed)
-            return false;
+        // auto removed = static_cast<bool>(m_cubeMapAccessors.erase(faces.uid));
+        // if(!removed)
+        //     return false;
         
-        auto pos = std::ranges::find_if(m_textures, [&path](const auto& texture)
-        {
-            return texture.uid == path;
-        });
+        // auto pos = std::ranges::find_if(m_cubeMaps, [&uid = faces.uid](const auto& cubeMap)
+        // {
+        //     return cubeMap. == uid;
+        // });
 
-        assert(pos != m_textures.end());
-        auto index = std::distance(m_textures.begin(), pos);
-        m_textures.erase(pos);
+        // assert(pos != m_textures.end());
+        // auto index = std::distance(m_textures.begin(), pos);
+        // m_textures.erase(pos);
 
-        for(auto& [path, textureView] : m_accessors)
-        {
-            if(textureView.index > index)
-                --textureView.index;
-        }
+        // for(auto& [path, textureView] : m_accessors)
+        // {
+        //     if(textureView.index > index)
+        //         --textureView.index;
+        // }
 
-        graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
+        // graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
         return true;
     }
 
-    void TextureAssetManager::UnloadAll()
+    void CubeMapAssetManager::UnloadAll()
     {
-        m_textureAccessors.clear();
-        m_textures.clear();
+        m_cubeMapAccessors.clear();
+        m_cubeMaps.clear();
     }
 
-    auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
+    auto CubeMapAssetManager::Acquire(const CubeMapFaces& faces) const -> CubeMapView
     {
-        const auto it = m_textureAccessors.find(path);
-        if(it == m_textureAccessors.cend())
-            throw NcError("Asset is not loaded: " + path);
+        const auto it = m_cubeMapAccessors.find(faces.uid);
+        if(it == m_cubeMapAccessors.cend())
+            throw NcError("Asset is not loaded: " + faces.uid);
         
         return it->second;
     }
     
-    bool TextureAssetManager::IsLoaded(const std::string& path) const
+    bool CubeMapAssetManager::IsLoaded(const CubeMapFaces& faces) const
     {
-        return m_textureAccessors.contains(path);
+        return m_cubeMapAccessors.contains(faces.uid);
     }
 }

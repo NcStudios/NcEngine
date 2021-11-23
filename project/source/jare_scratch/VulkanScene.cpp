@@ -92,6 +92,20 @@ namespace nc::sample
 
         nc::LoadMeshAssets(sceneMeshes);
 
+        auto skybox = CubeMapFaces
+        {
+            .usage = CubeMapUsage::Skybox,
+            .uid = "Humus01Skybox",
+            .frontPath = defaultTexturesPath + "CubeMaps/Humus01/Front.jpg",
+            .backPath  = defaultTexturesPath + "CubeMaps/Humus01/Back.jpg",
+            .upPath    = defaultTexturesPath + "CubeMaps/Humus01/Up.jpg",
+            .downPath  = defaultTexturesPath + "CubeMaps/Humus01/Down.jpg",
+            .rightPath = defaultTexturesPath + "CubeMaps/Humus01/Right.jpg",
+            .leftPath  = defaultTexturesPath + "CubeMaps/Humus01/Left.jpg"
+        };
+
+        nc::LoadCubeMapAsset(skybox);
+
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),

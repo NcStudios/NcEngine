@@ -1,7 +1,9 @@
 #pragma once
 
+#include "CubeMapManager.h"
 #include "ObjectDataManager.h"
 #include "PointLightManager.h"
+#include "SceneDataManager.h"
 #include "ShadowMapManager.h"
 #include "TextureManager.h"
 #include "config/Config.h"
@@ -16,7 +18,8 @@ namespace nc::graphics
                   m_pointLightManager{graphics, memorySettings.maxPointLights},
                   m_shadowMapManager{graphics, dimensions},
                   m_textureManager{graphics, memorySettings.maxTextures},
-                  m_environmentDataManager{}
+                  m_cubeMapManager{graphics, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
+                  m_sceneDataManager{graphics}
             {
             }
         
@@ -27,6 +30,7 @@ namespace nc::graphics
             PointLightManager m_pointLightManager;
             ShadowMapManager m_shadowMapManager;
             TextureManager m_textureManager;
-            EnvironmentDataManager m_environmentDataManager;
+            CubeMapManager m_cubeMapManager;
+            SceneDataManager m_sceneDataManager;
     };
 }
