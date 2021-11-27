@@ -1,6 +1,6 @@
 find_package(Vulkan REQUIRED)
 
-set(NC_TEST_COLLATERAL_DIRECTORY ${ROOT_DIR}/test/unit/assets/collateral)
+set(NC_TEST_COLLATERAL_DIRECTORY ${ROOT_DIR}/test/unit/assets/collateral/)
 
 ### ConcaveColliderAssetManager Tests ###
 add_executable(ConcaveColliderAssetManager_unit_tests

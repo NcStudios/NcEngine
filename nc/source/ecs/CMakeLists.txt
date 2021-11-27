@@ -1,4 +1,4 @@
-target_sources(${ENGINE_LIB}
+target_sources(NcEngineLib
     PRIVATE
         ${ROOT_DIR}/source/ecs/EntityComponentSystem.cpp
         ${ROOT_DIR}/source/ecs/ParticleEmitterSystem.cpp

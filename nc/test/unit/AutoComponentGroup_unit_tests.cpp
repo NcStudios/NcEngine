@@ -35,6 +35,7 @@ TEST(AutoComponentGroup_unit_tests, Add_DoubleCall_Throws)
 {
     auto group = AutoComponentGroup{TestEntity};
     group.Add<FakeAutoComponent>(TestEntity);
+    group.CommitStagedComponents();
     EXPECT_THROW(group.Add<FakeAutoComponent>(TestEntity), std::runtime_error);
 }
 

@@ -1,11 +1,11 @@
 target_sources(${EDITOR_EXE}
     PRIVATE
-        ${ROOT_DIR}/source/ui/dialog/ActiveDialogs.cpp
-        ${ROOT_DIR}/source/ui/dialog/AssetBrowser.cpp
-        ${ROOT_DIR}/source/ui/dialog/ChangeTagDialog.cpp
-        ${ROOT_DIR}/source/ui/dialog/ConfigEditor.cpp
-        ${ROOT_DIR}/source/ui/dialog/Dialog.cpp
-        ${ROOT_DIR}/source/ui/dialog/FileBrowser.cpp
-        ${ROOT_DIR}/source/ui/dialog/NewProjectDialog.cpp
-        ${ROOT_DIR}/source/ui/dialog/NewSceneDialog.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/ActiveDialogs.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/AssetBrowser.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/ChangeTagDialog.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/ConfigEditor.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/Dialog.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/FileBrowser.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/NewProjectDialog.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/NewSceneDialog.cpp
 )

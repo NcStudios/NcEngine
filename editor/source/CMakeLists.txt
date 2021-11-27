@@ -1,8 +1,8 @@
 target_sources(${EDITOR_EXE}
     PRIVATE
-        ${ROOT_DIR}/source/EditorConfig.cpp
-        ${ROOT_DIR}/source/EditorScene.cpp
-        ${ROOT_DIR}/source/main.cpp
+        ${PROJECT_SOURCE_DIR}/source/EditorConfig.cpp
+        ${PROJECT_SOURCE_DIR}/source/EditorScene.cpp
+        ${PROJECT_SOURCE_DIR}/source/main.cpp
 )
 
 add_subdirectory(assets)

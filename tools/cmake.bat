@@ -2,6 +2,18 @@
 
 set TARGET="%~1"
 set CONFIGURATION="%~2"
+set INSTALL_DIRECTORY="%~3"
+
+:CheckInstallDirectory
+    if %INSTALL_DIRECTORY%=="" (
+        echo Install directory not provided - using default "C:/Program Files/"
+        set INSTALL_DIRECTORY="C:/Program Files/"
+    )
+
+    if not exist %INSTALL_DIRECTORY% (
+        echo Error: Install directory doesn't exist: %INSTALL_DIRECTORY%
+        EXIT
+    )
 
 :CheckTarget
     if %TARGET%=="Engine" (
@@ -32,10 +44,6 @@ set CONFIGURATION="%~2"
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Debug -DNC_BUILD_TYPE=%CONFIGURATION% -DNC_EDITOR_ENABLED=ON -DNC_DEBUG_RENDERING=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON -DNC_USE_VALIDATION=ON
         goto Run
     )
-    if %CONFIGURATION%=="Debug-SanitizeUB" (
-        set DEFINITIONS=-DCMAKE_BUILD_TYPE=Debug -DNC_BUILD_TYPE=%CONFIGURATION% -DNC_EDITOR_ENABLED=ON -DNC_DEBUG_RENDERING=ON -DNC_TESTS_ENABLED=ON -DVERBOSE_LOGGING_ENABLED=ON -DSANITIZE_UB=ON
-        goto Run
-    )
     if %CONFIGURATION%=="Release" (
         set DEFINITIONS=-DCMAKE_BUILD_TYPE=Release -DNC_BUILD_TYPE=%CONFIGURATION%
         goto Run
@@ -61,4 +69,9 @@ set CONFIGURATION="%~2"
     if not exist %BUILD_DIR% mkdir %BUILD_DIR%
     cd %BUILD_DIR%
 
-    cmake %DEFINITIONS% -G "Ninja" %SOURCE_DIR%
+    echo Target: %TARGET%
+    echo Configuration: %CONFIGURATION%
+    echo Build Directory: %BUILD_DIR%
+    echo Install Directory: %INSTALL_DIRECTORY%
+
+    cmake %DEFINITIONS% -DNC_ENGINE_INSTALL_DIR=%INSTALL_DIRECTORY% -G "Ninja" %SOURCE_DIR%

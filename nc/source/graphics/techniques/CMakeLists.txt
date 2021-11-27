@@ -1,4 +1,4 @@
-target_sources(${ENGINE_LIB}
+target_sources(NcEngineLib
     PRIVATE
         ${ROOT_DIR}/source/graphics/techniques/PhongAndUiTechnique.cpp
         ${ROOT_DIR}/source/graphics/techniques/WireframeTechnique.cpp

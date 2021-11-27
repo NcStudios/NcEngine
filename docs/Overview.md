@@ -62,7 +62,7 @@ Most engine-provided Components are implemented using an Ecs-oriented approach w
 -----------
 The registry contains storage for all entities and components and manages the associations between them. In order for objects of these types to be recognized by NcEngine, they must be created through one of the registry's Add member functions. There are also functions for retreiving, removing, and viewing ranges of objects, among other things.
 
-A pointer to the registry is passed to each scene's Load() function using the alias registry_type. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
+A pointer to the registry may be retrieved from the NcEngine object, which is passed to each scene's Load() function. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
 
 Generally, don't store return values from the registry, except for Entities. Calls to Add, Remove, ViewGroup, and ReserveHeadroom for a type T may invalidate any existing span\<T\> or pointers/references to other Ts except:
 * if T is derived from AutoComponent, which is guaranteed to be pointer stable.
@@ -145,7 +145,7 @@ While registered, Draw() will be called when rendering between ImGui::NewFrame()
 
 This process is unrefined and easy to misuse. Whatever operations a registered UI performs are done during the render step, which is assumed to not modify the registry. It is recomended that registry pointers in UI functions be const-qualified to guard against segfaults.
 
-## Config File
+## Config
 --------------
 NcEngine reads some settings from a config file upon initialization. A default version can be found [here](../nc/source/config/default_config.ini). Modifications should conform to these rules:
 
@@ -154,3 +154,5 @@ NcEngine reads some settings from a config file upon initialization. A default v
     * As a line comment after a ';' or '#'
     * As a human-readable section tag enclosed in square brackets
 * Extraneous whitespace and blank lines should be avoided.
+
+The default asset paths point to assets in the repository. These should be changed to your own directories - the editor defaults to \<project-name>/assets/\<asset-type>. Asset functions operate relative to the paths specified here. The paths themselves should be absolute or relative to your executable.
