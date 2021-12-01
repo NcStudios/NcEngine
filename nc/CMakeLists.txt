@@ -50,6 +50,8 @@ add_library(NcEngineLib STATIC)
 target_compile_definitions(NcEngineLib
     PUBLIC
         WIN32_LEAN_AND_MEAN
+        $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="ui/DearImGuiConversion.h">
+        $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ui/DearImGuiConversion.h">
     PRIVATE
         __WINDOWS_WASAPI__
 )

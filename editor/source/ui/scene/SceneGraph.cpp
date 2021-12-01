@@ -4,6 +4,9 @@
 #include "utility/Output.h"
 #include "Window.h"
 
+
+#include "ui/DragAndDrop.h"
+
 namespace
 {
     using namespace nc;
@@ -111,7 +114,7 @@ namespace nc::editor
             } ImGui::EndChild();
 
         }
-        
+
         ImGui::End();
     }
 
@@ -124,6 +127,13 @@ namespace nc::editor
             flags = flags | ImGuiTreeNodeFlags_Framed;
 
         auto open = ImGui::TreeNodeEx(tag->Value().data(), flags);
+
+        DragAndDropSource<Entity>(&entity);
+        DragAndDropTarget<Entity>([entity, registry = m_registry](Entity* source)
+        {
+            registry->Get<Transform>(*source)->SetParent(entity);
+        });
+
         if(ImGui::IsItemClicked())
             m_selectedEntity = entity;
         
@@ -189,11 +199,17 @@ namespace nc::editor
 
     void SceneGraph::EntityContextMenu(Entity entity)
     {
+        bool hasCamera = m_registry->Contains<Camera>(entity);
         bool hasCollider = m_registry->Contains<Collider>(entity);
         bool hasConcaveCollider = m_registry->Contains<ConcaveCollider>(entity);
         bool hasMeshRenderer = m_registry->Contains<MeshRenderer>(entity);
         bool hasPhysicsBody = m_registry->Contains<PhysicsBody>(entity);
         bool hasPointLight = m_registry->Contains<PointLight>(entity);
+
+        if(ImGui::Selectable("Make Root"))
+        {
+            m_registry->Get<Transform>(entity)->SetParent(Entity::Null());
+        }
 
         if(ImGui::Selectable("Edit Tag"))
         {
@@ -207,6 +223,11 @@ namespace nc::editor
 
         if(ImGui::BeginMenu("Add Component"))
         {
+            if(!hasCamera && ImGui::Selectable("Camera"))
+            {
+                m_registry->Add<Camera>(entity);
+            }
+
             if(!hasCollider && !hasConcaveCollider && ImGui::BeginMenu("Collider"))
             {
                 if(ImGui::Selectable("Box")) m_registry->Add<Collider>(entity, BoxProperties{}, false);

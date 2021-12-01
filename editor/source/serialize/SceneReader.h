@@ -29,5 +29,6 @@ namespace nc::editor
             void LoadPhysicsBody(Entity entity, std::stringstream& args);
             void LoadPointLight(Entity entity, std::stringstream& args);
             void LoadMeshRenderer(Entity entity, std::stringstream& args);
+            void LoadCamera(Entity entity, std::stringstream& args);
     };
 }

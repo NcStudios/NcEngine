@@ -44,6 +44,7 @@ target_compile_options(${GAME_EXE}
 target_include_directories(${GAME_EXE}
     PRIVATE
         ${PROJECT_SOURCE_DIR}/source
+        ${PROJECT_SOURCE_DIR}/scenes
 )
 
 #Link Options

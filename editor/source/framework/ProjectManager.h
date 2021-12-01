@@ -3,6 +3,7 @@
 #include "NcEngine.h"
 #include "Callbacks.h"
 #include "ProjectData.h"
+#include "SceneData.h"
 #include "ui/dialog/Dialog.h"
 #include "ui/dialog/NewSceneDialog.h"
 
@@ -36,10 +37,13 @@ namespace nc::editor
 
             void RegisterCallbacks(UICallbacks uiCallbacks, DialogCallbacks dialogCallbacks);
 
+            auto GetSceneData() -> SceneData* { return &m_sceneData; }
+
         private:
             NcEngine* m_engine;
             AssetManifest* m_manifest;
             ProjectData m_projectData;
+            SceneData m_sceneData;
             size_t m_currentSceneIndex;
             size_t m_nextSceneIndex;
             UICallbacks m_uiCallbacks;

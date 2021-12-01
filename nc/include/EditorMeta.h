@@ -13,29 +13,33 @@ friend ::nc::editor::AssetDependencyChecker;
 #define NC_ENABLE_IN_EDITOR(Component)
 #endif
 
-#define NC_SCENE_ACTION_ADD_ENTITY(handle, pos, rot, scl, parent, tag, layer, flags) \
-Entity handle = registry->Add<Entity>(EntityInfo{.position = pos, .rotation = rot, .scale = scl, .parent = parent, .tag = tag, .layer = layer, .flags = flags});
+/** Entity */
+#define NC_EDITOR_ENTITY_INFO(...) EntityInfo{__VA_ARGS__}
+#define NC_EDITOR_ADD_ENTITY(handle, info) Entity handle = registry->Add<Entity>(info)
 
-#define NC_SCENE_ACTION_ADD_BOX_COLLIDER(handle, center, extents, isTrigger) \
-registry->Add<Collider>(handle, BoxProperties{.center = center, .extents = extents}, isTrigger);
+/** Camera */
+#define NC_EDITOR_ADD_CAMERA(handle) registry->Add<Camera>(handle)
+#define NC_EDITOR_SET_CAMERA(handle) engine->MainCamera()->Set(registry->Get<Camera>(handle));
 
-#define NC_SCENE_ACTION_ADD_CAPSULE_COLLIDER(handle, center, height, radius, isTrigger) \
-registry->Add<Collider>(handle, CapsuleProperties{.center = center, .height = height, .radius = radius}, isTrigger);
+/** Collider */
+#define NC_EDITOR_BOX_PROPERTIES(...) BoxProperties{__VA_ARGS__}
+#define NC_EDITOR_CAPSULE_PROPERTIES(...) CapsuleProperties{__VA_ARGS__}
+#define NC_EDITOR_HULL_PROPERTIES(...) HullProperties{__VA_ARGS__}
+#define NC_EDITOR_SPHERE_PROPERTIES(...) SphereProperties{__VA_ARGS__}
+#define NC_EDITOR_ADD_BOX_COLLIDER(handle, properties, isTrigger) registry->Add<Collider>(handle, properties, isTrigger)
+#define NC_EDITOR_ADD_CAPSULE_COLLIDER(handle, properties, isTrigger) registry->Add<Collider>(handle, properties, isTrigger)
+#define NC_EDITOR_ADD_HULL_COLLIDER(handle, properties, isTrigger) registry->Add<Collider>(handle, properties, isTrigger)
+#define NC_EDITOR_ADD_SPHERE_COLLIDER(handle, properties, isTrigger) registry->Add<Collider>(handle, properties, isTrigger)
+#define NC_EDITOR_ADD_CONCAVE_COLLIDER(handle, assetPath) registry->Add<ConcaveCollider>(handle, assetPath);
 
-#define NC_SCENE_ACTION_ADD_HULL_COLLIDER(handle, assetPath, isTrigger) \
-registry->Add<Collider>(handle, HullProperties{.assetPath = assetPath}, isTrigger);
+/** PhysicsBody */
+#define NC_EDITOR_PHYSICS_PROPERTIES(...) PhysicsProperties{__VA_ARGS__}
+#define NC_EDITOR_ADD_PHYSICS_BODY(handle, properties) registry->Add<PhysicsBody>(handle, properties)
 
-#define NC_SCENE_ACTION_ADD_SPHERE_COLLIDER(handle, center, radius, isTrigger) \
-registry->Add<Collider>(handle, SpherePropertiess{.center = center, .radius = radius}, isTrigger);
+/** PointLight */
+#define NC_EDITOR_POINT_LIGHT_INFO(...) PointLightInfo{__VA_ARGS__}
+#define NC_EDITOR_ADD_POINT_LIGHT(handle, info) registry->Add<PointLight>(handle, info)
 
-#define NC_SCENE_ACTION_ADD_CONCAVE_COLLIDER(handle, assetPath) \
-registry->Add<ConcaveCollider>(handle, assetPath);
-
-#define NC_SCENE_ACTION_ADD_PHYSICS_BODY(handle, mass, drag, angularDrag, restitution, friction, useGravity, isKinematic) \
-registry->Add<PhysicsBody>(handle, PhysicsProperties{.mass = mass, .drag = drag, .angularDrag = angularDrag, .restitution = restitution, .friction = friction, .useGravity = useGravity, .isKinematic = isKinematic});
-
-#define NC_SCENE_ACTION_ADD_POINT_LIGHT(handle, pos, ambient, diffuseColor, diffuseIntensity) \
-registry->Add<PointLight>(handle, PointLightInfo{.pos = pos, .ambient = ambient, .diffuseColor = diffuseColor, .diffuseIntensity = diffuseIntensity});
-
-#define NC_SCENE_ACTION_ADD_MESH_RENDERER(handle, meshPath, baseColor, normal, roughness, metallic, technique) \
-registry->Add<MeshRenderer>(handle, meshPath, graphics::Material{.basColor = baseColor, .normal = normal, .roughness = roughness, .metallic = metallic}, technique);
+/** MeshRenderer */
+#define NC_EDITOR_MATERIAL(...) Material{__VA_ARGS__}
+#define NC_EDITOR_ADD_MESH_RENDERER(handle, material, technique)

@@ -5,6 +5,7 @@
 namespace nc
 {
     class AudioSource;
+    class Camera;
     class Collider;
     class ConcaveCollider;
     class MeshRenderer;
@@ -32,6 +33,7 @@ namespace nc::editor
             AssetManifest* m_assetManifest;
 
             void DrawAudioSource(AudioSource* audioSource);
+            void DrawCamera(Camera* camera);
             void DrawCollider(Collider* collider);
             void DrawConcaveCollider(ConcaveCollider* concaveCollider);
             void DrawMeshRenderer(MeshRenderer* meshRenderer);

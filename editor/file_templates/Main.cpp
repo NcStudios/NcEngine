@@ -11,7 +11,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 
     try
     {
-        engine = nc::InitializeNcEngine(instance, "project/config.ini");
+        engine = nc::InitializeNcEngine(instance, "config/config.ini");
         engine->Start(std::make_unique<@INITIAL_SCENE_TYPE_HERE@>());
     }
     catch(std::exception& e)

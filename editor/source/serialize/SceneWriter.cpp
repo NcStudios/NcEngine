@@ -43,7 +43,7 @@ namespace nc::editor
     {
     }
 
-    void SceneWriter::WriteCurrentScene(const std::string& sceneName)
+    void SceneWriter::WriteCurrentScene(SceneData* sceneData, const std::string& sceneName)
     {
         m_sceneName = sceneName;
 
@@ -54,8 +54,8 @@ namespace nc::editor
             CreateHeader();
             CreateSource();
         }
-        
-        CreateGeneratedSource();
+
+        CreateGeneratedSource(sceneData);
     }
 
     void SceneWriter::WriteNewScene(const std::string& sceneName)
@@ -135,7 +135,7 @@ namespace nc::editor
              << "}";
     }
 
-    void SceneWriter::CreateGeneratedSource()
+    void SceneWriter::CreateGeneratedSource(SceneData* sceneData)
     {
         auto filePath = m_scenesDirectory / (m_sceneName + GeneratedSourceExtension);
         m_file.open(filePath);
@@ -152,13 +152,14 @@ namespace nc::editor
                << "using namespace nc;\n"
                << "void Init(NcEngine* engine)\n"
                << "{\n"
-               << "auto* registry = engine->Registry()\n";
-
+               << "auto* registry = engine->Registry();\n";
 
         for(auto e : m_registry->ViewAll<Entity>())
         {
             WriteEntity(e);
         }
+
+        WriteSceneData(sceneData);
 
         m_file << "}\n"
                << "}";
@@ -166,10 +167,18 @@ namespace nc::editor
         m_file.close();
     }
 
+    void SceneWriter::WriteSceneData(SceneData* sceneData)
+    {
+        if(sceneData->mainCamera.Valid() && m_registry->Contains<Camera>(sceneData->mainCamera))
+        {
+            m_file << SetCameraSceneAction << "( " << m_handleNames.at(sceneData->mainCamera.Index()) << " );";
+        }
+    }
+
     void SceneWriter::WriteEntity(Entity entity)
     {
         auto tag = m_registry->Get<Tag>(entity)->Value();
-        
+
         if(tag == EditorScene::EditorCameraTag)
             return;
 
@@ -178,16 +187,18 @@ namespace nc::editor
         auto parent = transform->Parent();
         auto parentHandle = parent.Valid() ? m_handleNames.at(parent.Index()) : std::string{"Entity::Null()"};
 
-        m_file << AddEntitySceneAction << "( "
+        m_file << AddEntitySceneAction << "("
                << handleName << " , "
+               << "NC_EDITOR_ENTITY_INFO( "
                << transform->LocalPosition() << " , "
                << transform->LocalRotation() << " , "
                << transform->LocalScale() << " , "
                << parentHandle << " , "
                << "\"" << tag << "\" , "
                << static_cast<unsigned>(entity.Layer()) << " , "
-               << static_cast<unsigned>(entity.Flags()) << " )\n";
+               << static_cast<unsigned>(entity.Flags()) << " ) );\n";
 
+        WriteCamera(entity, handleName);
         WriteCollider(entity, handleName);
         WriteConcaveCollider(entity, handleName);
         WritePhysicsBody(entity, handleName);
@@ -200,7 +211,7 @@ namespace nc::editor
     void SceneWriter::WriteCollider(Entity entity, const std::string& handleName)
     {
         auto* collider = m_registry->Get<Collider>(entity);
-        
+
         if(!collider)
             return;
 
@@ -212,37 +223,37 @@ namespace nc::editor
         {
             case ColliderType::Box:
             {
-                m_file << AddBoxColliderSceneAction << "( " << handleName << " , " << center << " , " << scale << " , " << isTrigger << " )\n";
+                m_file << AddBoxColliderSceneAction << "( " << handleName << " , NC_EDITOR_BOX_PROPERTIES( " << center << " , " << scale << " ) , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Capsule:
             {
                 auto height = scale.y * 2.0f;
                 auto radius = scale.x * 0.5f;
-                m_file << AddCapsuleColliderSceneAction << "( " << handleName << " , " << center << " , " << height << " , " << radius << " , " << isTrigger << " )\n";
+                m_file << AddCapsuleColliderSceneAction << "( " << handleName << " , NC_EDITOR_CAPSULE_PROPERTIES( " << center << " , " << height << " , " << radius << " ) , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Hull:
             {
-                m_file << AddHullColliderSceneAction << "( " << handleName << " , " << "\"" << collider->GetInfo().hullAssetPath << "\" , " << isTrigger << " )\n";
+                m_file << AddHullColliderSceneAction << "( " << handleName << " , NC_EDITOR_HULL_PROPERTIES( " << "\"" << collider->GetInfo().hullAssetPath << "\" ) , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Sphere:
             {
                 auto radius = scale.x * 0.5f;
-                m_file << AddSphereColliderSceneAction << "( " << handleName << " , " << center << " , " << radius << " , " << isTrigger << " )\n";
+                m_file << AddSphereColliderSceneAction << "( " << handleName << " , NC_EDITOR_SPHERE_PROPERTIES( " << center << " , " << radius << " ) , " << isTrigger << " );\n";
                 break;
             }
         }
     }
-    
+
     void SceneWriter::WriteConcaveCollider(Entity entity, const std::string& handleName)
     {
         auto* collider = m_registry->Get<ConcaveCollider>(entity);
 
         if(!collider)
             return;
-        
+
         m_file << AddConcaveColliderSceneAction << "( " << handleName << " , \"" << collider->GetPath() << "\" )\n";
 
     }
@@ -252,19 +263,20 @@ namespace nc::editor
         /** @todo need linear and angular freedoms*/
 
         auto* body = m_registry->Get<PhysicsBody>(entity);
-        
+
         if(!body)
             return;
 
         m_file << AddPhysicsBodySceneAction << "( "
                << handleName << " , "
+               << "NC_EDITOR_PHYSICS_PROPERTIES( "
                << 1.0f / body->GetInverseMass() << " , "
                << body->GetDrag() << " , "
                << body->GetAngularDrag() << " , "
                << body->GetRestitution() << " , "
                << body->GetFriction() << " , "
                << body->UseGravity() << " , "
-               << body->IsKinematic() << " )\n";
+               << body->IsKinematic() << " ) );\n";
     }
 
     void SceneWriter::WritePointLight(Entity entity, const std::string& handleName)
@@ -273,15 +285,20 @@ namespace nc::editor
 
         if(!light)
             return;
-        
+
         const auto& info = light->GetInfo();
 
         m_file << AddPointLightSceneAction << "( "
                << handleName << " , "
+               << "NC_EDITOR_POINT_LIGHT_INFO( "
+               << "DirectX::XMMATRIX{} , "
                << info.pos << " , "
+               << "1 , "
                << info.ambient << " , "
+               << "0.0f , "
                << info.diffuseColor << " , "
-               << info.diffuseIntensity << " )\n";
+               << "0.0f , "
+               << info.diffuseIntensity << " ) );\n";
     }
 
     void SceneWriter::WriteMeshRenderer(Entity entity, const std::string& handleName)
@@ -290,17 +307,28 @@ namespace nc::editor
 
         if(!renderer)
             return;
-        
+
         const auto& material = renderer->GetMaterial();
         auto techniqueType = ToString(renderer->GetTechniqueType());
 
         m_file << AddMeshRendererSceneAction << "( "
                << handleName << " , "
+               << "NC_EDITOR_MATERIAL( "
                << "\"" << renderer->GetMeshPath() << "\" , "
                << "\"" << material.baseColor << "\" , "
                << "\"" << material.normal << "\" , "
                << "\"" << material.roughness << "\" , "
-               << "\"" << material.metallic << "\" , "
-               << techniqueType << " )\n";
+               << "\"" << material.metallic << "\" ) , "
+               << techniqueType << " );\n";
+    }
+
+    void SceneWriter::WriteCamera(Entity entity, const std::string& handleName)
+    {
+        auto* camera = m_registry->Get<Camera>(entity);
+
+        if(!camera)
+            return;
+
+        m_file << AddCameraSceneAction << "( " << handleName << " );\n";
     }
 }

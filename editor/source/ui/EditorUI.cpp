@@ -19,6 +19,7 @@ namespace nc::editor
 {
     EditorUI::EditorUI(Registry* registry,
                        Output* output,
+                       Environment* environment,
                        AssetManifest* assetManifest,
                        ProjectCallbacks projectCallbacks,
                        SceneCallbacks sceneCallbacks,
@@ -32,7 +33,7 @@ namespace nc::editor
                        std::move(sceneCallbacks),
                        std::move(changeTag),
                        std::move(projectName)},
-          m_utilitiesPanel{output},
+          m_utilitiesPanel{output, environment},
           m_activeDialogs{},
           m_openAssetBrowser{},
           m_openConfigEditor{}

@@ -7,6 +7,7 @@
 
 #include "ecs/Registry.h"
 #include "ecs/component/AudioSource.h"
+#include "ecs/component/Camera.h"
 #include "ecs/component/Collider.h"
 #include "ecs/component/ConcaveCollider.h"
 #include "ecs/component/MeshRenderer.h"
@@ -15,6 +16,12 @@
 #include "ecs/component/PhysicsBody.h"
 #include "ecs/component/PointLight.h"
 #include "ecs/component/Transform.h"
+
+
+#include "ui/UIStyle.h"
+#include "ui/Color.h"
+#include "ui/DragAndDrop.h"
+
 
 namespace
 {
@@ -25,7 +32,19 @@ namespace
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
-        ImGui::Text(name);
+        //ImGui::Text(name);
+
+
+        ImGui::PushStyleColor(ImGuiCol_Button, nc::editor::Color::AccentTrans);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, nc::editor::Color::TransGray);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, nc::editor::Color::TransGrayDark);
+        //ImGui::PushStyleColor(ImGuiCol_Text, nc::editor::Color::AccentDark);
+
+
+        ImGui::Button(name);
+
+        ImGui::PopStyleColor(3);
+
     }
 
     namespace color
@@ -104,13 +123,19 @@ namespace nc::editor
 
     void Inspector::InspectEntity(Entity entity)
     {
-        ImGui::Separator();
-        ImGui::Text("Tag     %s", m_registry->Get<Tag>(entity)->Value().data());
-        ImGui::Text("Index   %d", entity.Index());
-        ImGui::Text("Layer   %d", entity.Layer());
-        ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
+        ElementHeader("Entity");
+        ImGui::SameLine();
+        ImGui::Text("(%s)", m_registry->Get<Tag>(entity)->Value().data());
+        
+        ImGui::Text("Index %d", entity.Index());
+        ImGui::SameLine();
+        ImGui::Text("Layer %d", entity.Layer());
+        ImGui::SameLine();
+        ImGui::Text("Static %s", entity.IsStatic() ? "True" : "False");
 
+        ImGui::BeginChild("##inspectchild", {0,0}, true);
         if(auto* transform  = m_registry->Get<Transform>(entity))         { DrawTransform(transform); }
+        if(auto* camera     = m_registry->Get<Camera>(entity))            { DrawCamera(camera); }
         if(auto* renderer   = m_registry->Get<MeshRenderer>(entity))      { DrawMeshRenderer(renderer); }
         if(auto* light      = m_registry->Get<PointLight>(entity))        { DrawPointLight(light); }
         if(auto* body       = m_registry->Get<PhysicsBody>(entity))       { DrawPhysicsBody(body); }
@@ -119,18 +144,36 @@ namespace nc::editor
         if(auto* collider   = m_registry->Get<Collider>(entity))          { DrawCollider(collider); }
         if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))   { DrawConcaveCollider(collider); }
         if(auto* source     = m_registry->Get<AudioSource>(entity))       { DrawAudioSource(source); }
-        
-        // for(const auto& comp : m_registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
-        //     AutoComponentElement(comp);
+        ImGui::EndChild();
+
+        // ImGui::Separator();
+        // ImGui::Text("Tag     %s", m_registry->Get<Tag>(entity)->Value().data());
+        // ImGui::Text("Index   %d", entity.Index());
+        // ImGui::Text("Layer   %d", entity.Layer());
+        // ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
+
+        // if(auto* transform  = m_registry->Get<Transform>(entity))         { DrawTransform(transform); }
+        // if(auto* camera     = m_registry->Get<Camera>(entity))            { DrawCamera(camera); }
+        // if(auto* renderer   = m_registry->Get<MeshRenderer>(entity))      { DrawMeshRenderer(renderer); }
+        // if(auto* light      = m_registry->Get<PointLight>(entity))        { DrawPointLight(light); }
+        // if(auto* body       = m_registry->Get<PhysicsBody>(entity))       { DrawPhysicsBody(body); }
+        // if(auto* emitter    = m_registry->Get<ParticleEmitter>(entity))   { DrawParticleEmitter(emitter); }
+        // if(auto* dispatcher = m_registry->Get<NetworkDispatcher>(entity)) { DrawNetworkDispatcher(dispatcher); }
+        // if(auto* collider   = m_registry->Get<Collider>(entity))          { DrawCollider(collider); }
+        // if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))   { DrawConcaveCollider(collider); }
+        // if(auto* source     = m_registry->Get<AudioSource>(entity))       { DrawAudioSource(source); }
+
+        // // for(const auto& comp : m_registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
+        // //     AutoComponentElement(comp);
     
-        ImGui::Separator();
+        // ImGui::Separator();
     }
 
     void Inspector::DrawAudioSource(AudioSource* audioSource)
     {
         ElementHeader("AudioSource");
         ImGui::BeginGroup();
-        ImGui::Indent();
+        //ImGui::Indent();
         ImGui::Text("Sound Clip");
         if(ImGui::BeginCombo("##audioclipcomboselect", audioSource->m_audioClipPath.c_str()))
         {
@@ -141,8 +184,22 @@ namespace nc::editor
             }
             ImGui::EndGroup();
         }
-        ImGui::Unindent();
+        //ImGui::Unindent();
         ImGui::EndGroup();
+    }
+
+    void Inspector::DrawCamera(Camera* camera)
+    {
+        ElementHeader("Camera");
+
+        DragAndDropSource(camera);
+
+        // if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        // {
+        //     ImGui::SetDragDropPayload("NC_DND_CAMERA", camera, sizeof(Camera));
+        //     ImGui::Text("Camera");
+        //     ImGui::EndDragDropSource();
+        // }
     }
 
     void Inspector::DrawCollider(Collider* collider)
@@ -155,7 +212,7 @@ namespace nc::editor
 
         ElementHeader("Collider");
         ImGui::BeginGroup();
-        ImGui::Indent();
+        //ImGui::Indent();
 
         ImGui::Text("Type   ");
         ImGui::SameLine();
@@ -261,7 +318,7 @@ namespace nc::editor
             }
         }
 
-        ImGui::Unindent();
+        //ImGui::Unindent();
         ImGui::EndGroup();
     }
 
@@ -270,10 +327,10 @@ namespace nc::editor
         /** @todo Currently there is no way to change the asset for a conave collider */
         ElementHeader("ConcaveCollider");
         ImGui::BeginGroup();
-        ImGui::Indent();
+        //ImGui::Indent();
         ImGui::Text("ConcaveCollider");
         ImGui::Text("  Path: %s", concaveCollider->GetPath().c_str());
-        ImGui::Unindent();
+        //ImGui::Unindent();
         ImGui::EndGroup();
     }
 
@@ -283,7 +340,7 @@ namespace nc::editor
 
         ElementHeader("MeshRenderer");
         ImGui::BeginGroup();
-        ImGui::Indent();
+        //ImGui::Indent();
         ImGui::Text("Mesh");
         if(ImGui::BeginCombo("##meshrenderermeshselectcombo", meshRenderer->GetMeshPath().c_str()))
         {
@@ -386,7 +443,7 @@ namespace nc::editor
             ImGui::EndCombo();
         }
 
-        ImGui::Unindent();
+        //ImGui::Unindent();
         ImGui::EndGroup();
     }
 
@@ -406,7 +463,7 @@ namespace nc::editor
 
         ElementHeader("PhysicsBody");
         ImGui::BeginGroup();
-            ImGui::Indent();
+            //ImGui::Indent();
 
             ImGui::Text("Use Gravity");
             ImGui::SameLine();
@@ -448,17 +505,17 @@ namespace nc::editor
 
         ElementHeader("PointLight");
         ImGui::BeginGroup();
-        ImGui::Indent();
+        //ImGui::Indent();
             ImGui::Text("Ambient    ");
-            ImGui::Indent();
+            //ImGui::Indent();
                 ImGui::Text("Color      ");   ImGui::SameLine();  auto ambientResult = ImGui::ColorEdit3("##ambcolor", &ambient.x, ImGuiColorEditFlags_NoInputs);
-            ImGui::Unindent();
+            //ImGui::Unindent();
             ImGui::Text("Diffuse    ");
-            ImGui::Indent();  
+            //ImGui::Indent();  
                 ImGui::Text("Color      ");   ImGui::SameLine(); auto diffuseResult = ImGui::ColorEdit3("##difcolor", &diffuse.x, ImGuiColorEditFlags_NoInputs);
                 auto diffuseIntensityResult = floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 600.0f, "%.2f");
-            ImGui::Unindent();
-        ImGui::Unindent();
+            //ImGui::Unindent();
+        //ImGui::Unindent();
         ImGui::EndGroup();
 
         auto pointLightInfo = info;
@@ -487,12 +544,12 @@ namespace nc::editor
 
         ElementHeader("Transform");
         ImGui::BeginGroup();
-        ImGui::Indent();
+        //ImGui::Indent();
         xyzWidgetHeader("   ");
         auto posResult = xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z, -5000.0f, 5000.0f);
         auto rotResult = xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
         auto sclResult = xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z, 0.01f, 1000.0f);
-        ImGui::Unindent();
+        //ImGui::Unindent();
         ImGui::EndGroup();
 
         if(posResult)

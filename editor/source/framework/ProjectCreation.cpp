@@ -41,7 +41,7 @@ namespace nc::editor
         std::ofstream file{projectDirectory / "config\\config.ini"};
         file << "[project]\n"
              << "project_name=" << projectName << '\n'
-             << "log_file_path=" << directory << '\n'
+             << "log_file_path=" << directory << "\\Diagnostics.log\n"
              << "audio_clips_path=" << directory << "\\assets\\audio_clips\\\n"
              << "concave_colliders_path=" << directory << "\\assets\\concave_colliders\\\n"
              << "hull_colliders_path=" << directory << "\\assets\\hull_colliders\\\n"
@@ -60,8 +60,6 @@ namespace nc::editor
              << "[physics]\n"
              << "fixed_update_interval=0.01667\n"
              << "worldspace_extent=1000\n"
-             << "octree_density_threshold=20\n"
-             << "octree_minimum_extent=5\n"
              << "[graphics]\n"
              << "use_native_resolution=0\n"
              << "launch_fullscreen=0\n"

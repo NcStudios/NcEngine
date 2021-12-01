@@ -12,6 +12,9 @@
 #include "ui/dialog/NewProjectDialog.h"
 #include "ui/dialog/ConfigEditor.h"
 
+
+#include "ui/Environment.h"
+
 namespace nc::editor
 {
     /** Creates and sets callbacks for all of the core editor classes. */
@@ -32,6 +35,7 @@ namespace nc::editor
             EditorConfig m_editorConfig;
             AssetManifest m_assetManifest;
             ProjectManager m_projectManager;
+            Environment m_environment;
             EditorUI m_editorUI;
             FileBrowser m_fileBrowser;
             AssetBrowser m_assetBrowser;
