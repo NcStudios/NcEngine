@@ -19,8 +19,10 @@ namespace nc::editor
         colors[ImGuiCol_ChildBg]               = Color::GrayDark;
         colors[ImGuiCol_PopupBg]               = Color::GrayDark;
         
-        colors[ImGuiCol_Border]                = Color::GrayDarkest;
-        colors[ImGuiCol_BorderShadow]          = Color::Trans;
+        //colors[ImGuiCol_Border]                = Color::GrayDarkest;
+        //colors[ImGuiCol_BorderShadow]          = Color::Trans;
+        colors[ImGuiCol_Border]                = Color::Black;
+        colors[ImGuiCol_BorderShadow]          = Color::AccentTrans;
         
         colors[ImGuiCol_FrameBg]               = Color::Black;
         colors[ImGuiCol_FrameBgHovered]        = Color::GrayLight;

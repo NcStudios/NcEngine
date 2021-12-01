@@ -1,6 +1,6 @@
 #include "Environment.h"
 #include "ecs/component/Camera.h"
-#include "imgui/imgui.h"
+#include "ui/DragAndDrop.h"
 
 namespace nc::editor
 {
@@ -17,17 +17,9 @@ namespace nc::editor
             ImGui::Text("Main Camera: %u", current.Index()) :
             ImGui::Text("Main Camera: None");
 
-        if(ImGui::BeginDragDropTarget())
+        DragAndDropTarget<Camera>([sceneData = m_sceneData](Camera* camera)
         {
-            if(const auto* payload = ImGui::AcceptDragDropPayload("NC_DND_CAMERA"))
-            {
-                m_sceneData->mainCamera = static_cast<Camera*>(payload->Data)->ParentEntity();
-
-                //Entity* e = static_cast<Entity*>(payload->Data);
-                //m_sceneData->mainCamera = *e;
-            }
-
-            ImGui::EndDragDropTarget();
-        }
+            sceneData->mainCamera = camera->ParentEntity();
+        });
     }
 }

@@ -32,19 +32,14 @@ namespace
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
-        //ImGui::Text(name);
 
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, nc::editor::Color::Accent);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, nc::editor::Color::AccentDark);
+        //ImGui::PushStyleColor(ImGuiCol_Text, nc::editor::Color::Accent);
 
-        ImGui::PushStyleColor(ImGuiCol_Button, nc::editor::Color::AccentTrans);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, nc::editor::Color::TransGray);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, nc::editor::Color::TransGrayDark);
-        //ImGui::PushStyleColor(ImGuiCol_Text, nc::editor::Color::AccentDark);
+        ImGui::Button(name, {-1,0});
 
-
-        ImGui::Button(name);
-
-        ImGui::PopStyleColor(3);
-
+        ImGui::PopStyleColor(2);
     }
 
     namespace color
@@ -124,16 +119,12 @@ namespace nc::editor
     void Inspector::InspectEntity(Entity entity)
     {
         ElementHeader("Entity");
-        ImGui::SameLine();
-        ImGui::Text("(%s)", m_registry->Get<Tag>(entity)->Value().data());
-        
-        ImGui::Text("Index %d", entity.Index());
-        ImGui::SameLine();
-        ImGui::Text("Layer %d", entity.Layer());
-        ImGui::SameLine();
+        ImGui::Text("Tag    %s", m_registry->Get<Tag>(entity)->Value().data());
+        ImGui::Text("Index  %d", entity.Index());
+        ImGui::Text("Layer  %d", entity.Layer());
         ImGui::Text("Static %s", entity.IsStatic() ? "True" : "False");
 
-        ImGui::BeginChild("##inspectchild", {0,0}, true);
+        //ImGui::BeginChild("##inspectchild", {0,0}, true);
         if(auto* transform  = m_registry->Get<Transform>(entity))         { DrawTransform(transform); }
         if(auto* camera     = m_registry->Get<Camera>(entity))            { DrawCamera(camera); }
         if(auto* renderer   = m_registry->Get<MeshRenderer>(entity))      { DrawMeshRenderer(renderer); }
@@ -144,7 +135,7 @@ namespace nc::editor
         if(auto* collider   = m_registry->Get<Collider>(entity))          { DrawCollider(collider); }
         if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))   { DrawConcaveCollider(collider); }
         if(auto* source     = m_registry->Get<AudioSource>(entity))       { DrawAudioSource(source); }
-        ImGui::EndChild();
+        //ImGui::EndChild();
 
         // ImGui::Separator();
         // ImGui::Text("Tag     %s", m_registry->Get<Tag>(entity)->Value().data());
