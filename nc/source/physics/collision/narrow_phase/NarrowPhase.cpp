@@ -68,7 +68,6 @@ namespace nc::physics
                 const auto& constraint = constraints[index];
 
                 assert(index < constraints.size());
-                assert(manifold.event.first == constraint.entityA && manifold.event.second == constraint.entityB);
 
                 contact.lambda = constraint.totalLambda;
                 contact.muTangent = constraint.totalMuTangent;
