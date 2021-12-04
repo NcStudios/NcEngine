@@ -17,22 +17,15 @@ namespace nc::editor
         colors[ImGuiCol_TextDisabled]          = Color::GrayLightest;
         colors[ImGuiCol_WindowBg]              = Color::GrayDarkest;
         colors[ImGuiCol_ChildBg]               = Color::GrayDark;
-        colors[ImGuiCol_PopupBg]               = Color::GrayDark;
-        
-        //colors[ImGuiCol_Border]                = Color::GrayDarkest;
-        //colors[ImGuiCol_BorderShadow]          = Color::Trans;
+        colors[ImGuiCol_PopupBg]               = Color::GrayDark;        
         colors[ImGuiCol_Border]                = Color::Black;
         colors[ImGuiCol_BorderShadow]          = Color::AccentTrans;
-        
         colors[ImGuiCol_FrameBg]               = Color::Black;
         colors[ImGuiCol_FrameBgHovered]        = Color::GrayLight;
         colors[ImGuiCol_FrameBgActive]         = Color::TransGrayAlt;
-
-        //colors[ImGuiCol_TitleBg]               = Color::AccentDark;
         colors[ImGuiCol_TitleBg]               = Color::Black;
         colors[ImGuiCol_TitleBgActive]         = Color::Black;
         colors[ImGuiCol_TitleBgCollapsed]      = Color::Black;
-
         colors[ImGuiCol_MenuBarBg]             = Color::GrayDark;
         colors[ImGuiCol_ScrollbarBg]           = Color::TransGrayDark;
         colors[ImGuiCol_ScrollbarGrab]         = Color::Accent;
@@ -41,9 +34,7 @@ namespace nc::editor
         colors[ImGuiCol_CheckMark]             = Color::Accent;
         colors[ImGuiCol_SliderGrab]            = Color::Accent;
         colors[ImGuiCol_SliderGrabActive]      = Color::AccentLight;
-        //colors[ImGuiCol_Button]                = Color::GrayDarkest;
         colors[ImGuiCol_Button]                = Color::Black;
-
         colors[ImGuiCol_ButtonHovered]         = Color::GrayLight;
         colors[ImGuiCol_ButtonActive]          = Color::TransGrayAlt;
         colors[ImGuiCol_Header]                = Color::GrayDarkest;

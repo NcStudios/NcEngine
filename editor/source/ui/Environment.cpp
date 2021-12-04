@@ -1,6 +1,6 @@
 #include "Environment.h"
 #include "ecs/component/Camera.h"
-#include "ui/DragAndDrop.h"
+#include "ui/helpers/DragAndDrop.h"
 
 namespace nc::editor
 {

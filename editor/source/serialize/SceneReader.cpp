@@ -157,9 +157,7 @@ namespace nc::editor
     Entity SceneReader::LoadEntity(std::stringstream& args)
     {
         auto handleName = ReadTokenFromAction(args);
-
-        auto garbage = ReadTokenFromAction(args);
-
+        ReadTokenFromAction(args);
         auto position = ReadVector3FromAction(args);
         auto rotation = ReadQuaternionFromAction(args);
         auto scale = ReadVector3FromAction(args);
@@ -187,7 +185,7 @@ namespace nc::editor
     void SceneReader::LoadBoxCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-        ReadTokenFromAction(args); //garbage
+        ReadTokenFromAction(args);
         BoxProperties properties{ .center = ReadVector3FromAction(args), .extents = ReadVector3FromAction(args) };
         m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
     }
@@ -195,7 +193,7 @@ namespace nc::editor
     void SceneReader::LoadCapsuleCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-        ReadTokenFromAction(args); //garbage
+        ReadTokenFromAction(args);
         CapsuleProperties properties
         {
             .center = ReadVector3FromAction(args),
@@ -208,7 +206,7 @@ namespace nc::editor
     void SceneReader::LoadHullCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-        ReadTokenFromAction(args); //garbage
+        ReadTokenFromAction(args);
         HullProperties properties{ .assetPath = ReadQuotedStringFromAction(args) };
         bool isTrigger = ReadBoolFromAction(args);
 
@@ -227,7 +225,7 @@ namespace nc::editor
     void SceneReader::LoadSphereCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-        ReadTokenFromAction(args); //garbage
+        ReadTokenFromAction(args);
         SphereProperties properties{ .center = ReadVector3FromAction(args), .radius = ReadFloatFromAction(args) };
         m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
     }
@@ -254,7 +252,7 @@ namespace nc::editor
         /** @todo need lin/ang freedom */
 
         ReadTokenFromAction(args);
-        ReadTokenFromAction(args); // garbage
+        ReadTokenFromAction(args);
         PhysicsProperties properties
         {
             .mass = ReadFloatFromAction(args),
@@ -271,10 +269,8 @@ namespace nc::editor
     void SceneReader::LoadPointLight(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-
-        ReadTokenFromAction(args); // garbage
-
-        ReadTokenFromAction(args); // matrix
+        ReadTokenFromAction(args);
+        ReadTokenFromAction(args);
         auto pos = ReadVector3FromAction(args);
         ReadTokenFromAction(args);
         auto ambient = ReadVector3FromAction(args);
@@ -295,7 +291,7 @@ namespace nc::editor
     void SceneReader::LoadMeshRenderer(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-        ReadTokenFromAction(args); // garbage
+        ReadTokenFromAction(args);
         std::string mesh = ReadQuotedStringFromAction(args);
         Material material
         {

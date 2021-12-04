@@ -66,20 +66,14 @@ set GENERATOR="%~4"
     EXIT
 
 :CheckInstallDirectory
-    if %INSTALL_DIRECTORY%=="" (
-        echo Install directory not provided - using default "C:/Program Files/"
-        set INSTALL_DIRECTORY="C:/Program Files/"
-    )
-
     if not exist %INSTALL_DIRECTORY% (
-        echo Error: Install directory doesn't exist: %INSTALL_DIRECTORY%
+        echo Error: Install directory not provided
         exit
     )
 
 :CheckGenerator
     if %GENERATOR%=="" (
-        echo Generator not provided - using ninja
-        set GENERATOR="Ninja"
+        echo Generator not provided
         exit
     )
 

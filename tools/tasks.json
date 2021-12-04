@@ -25,7 +25,7 @@
             "label": "Editor Release-WithEditor",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Editor", "Release-WithEditor", "${config:NcInstallDir}"],
+            "args": ["Editor", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -38,7 +38,7 @@
             "label": "Engine Debug",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Engine", "Debug", "${config:NcInstallDir}"],
+            "args": ["Engine", "Debug", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -50,7 +50,7 @@
             "label": "Engine Debug-WithValidation",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Engine", "Debug-WithValidation", "${config:NcInstallDir}"],
+            "args": ["Engine", "Debug-WithValidation", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -62,7 +62,7 @@
             "label": "Engine Release",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Engine", "Release", "C:/Users/calro/repos/install"],
+            "args": ["Engine", "Release", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -74,7 +74,7 @@
             "label": "Engine Release-WithEditor",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Engine", "Release-WithEditor", "${config:NcInstallDir}"],
+            "args": ["Engine", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -86,7 +86,7 @@
             "label": "Project Debug",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Project", "Debug", "${config:NcInstallDir}"],
+            "args": ["Project", "Debug", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -99,7 +99,7 @@
             "label": "Project Debug-WithValidation",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Project", "Debug-WithValidation", "${config:NcInstallDir}"],
+            "args": ["Project", "Debug-WithValidation", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -112,7 +112,7 @@
             "label": "Project Release",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Project", "Release", "${config:NcInstallDir}"],
+            "args": ["Project", "Release", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -125,7 +125,7 @@
             "label": "Project Release-WithEditor",
             "type": "shell",
             "command": "tools/build.bat",
-            "args": ["Project", "Release-WithEditor", "${config:NcInstallDir}"],
+            "args": ["Project", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
