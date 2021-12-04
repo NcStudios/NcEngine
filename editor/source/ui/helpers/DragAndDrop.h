@@ -16,7 +16,7 @@ namespace nc::editor
         }
     }
 
-    template<class T, class F>
+    template<class T, std::invocable<T*> F>
     void DragAndDropTarget(F&& func)
     {
         if(ImGui::BeginDragDropTarget())

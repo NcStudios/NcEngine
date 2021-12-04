@@ -5,15 +5,13 @@
 #include "assets/AssetManifest.h"
 #include "framework/ProjectManager.h"
 #include "ui/EditorUI.h"
+#include "ui/Environment.h"
 #include "ui/dialog/AssetBrowser.h"
 #include "ui/dialog/ChangeTagDialog.h"
 #include "ui/dialog/FileBrowser.h"
 #include "ui/dialog/NewSceneDialog.h"
 #include "ui/dialog/NewProjectDialog.h"
 #include "ui/dialog/ConfigEditor.h"
-
-
-#include "ui/Environment.h"
 
 namespace nc::editor
 {
