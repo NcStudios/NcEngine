@@ -3,6 +3,7 @@
 #include "ecs/Registry.h"
 
 #include "Common.h"
+#include "framework/SceneData.h"
 
 namespace nc::editor
 {
@@ -12,7 +13,7 @@ namespace nc::editor
     {
         public:
             SceneWriter(Registry* registry, const std::filesystem::path& scenesDirectory);
-            void WriteCurrentScene(const std::string& sceneName);
+            void WriteCurrentScene(SceneData* sceneData, const std::string& sceneName);
             void WriteNewScene(const std::string& sceneName);
 
         private:
@@ -26,12 +27,14 @@ namespace nc::editor
             bool DoFilesExist();
             void CreateHeader();
             void CreateSource();
-            void CreateGeneratedSource();
+            void CreateGeneratedSource(SceneData* sceneData);
+            void WriteSceneData(SceneData* sceneData);
             void WriteEntity(Entity entity);
             void WriteCollider(Entity entity, const std::string& handleName);
             void WriteConcaveCollider(Entity entity, const std::string& handleName);
             void WritePhysicsBody(Entity entity, const std::string& handleName);
             void WritePointLight(Entity entity, const std::string& handleName);
             void WriteMeshRenderer(Entity entity, const std::string& handleName);
+            void WriteCamera(Entity entity, const std::string& handleName);
     };
 }

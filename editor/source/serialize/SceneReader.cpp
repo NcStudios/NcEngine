@@ -128,7 +128,7 @@ namespace nc::editor
 
             std::getline(m_file, line, '\n');
 
-            if(line.starts_with("NC_SCENE_ACTION"))
+            if(line.starts_with("NC_EDITOR"))
             {
                 auto actionDescription = SplitLineToActionDescriptionAndArgs(line, args);
                 currentEntity = DispatchAction(currentEntity, actionDescription, args);
@@ -141,14 +141,15 @@ namespace nc::editor
     Entity SceneReader::DispatchAction(Entity currentEntity, const std::string& actionDescription, std::stringstream& args)
     {
         if(actionDescription == AddEntitySceneAction)               return LoadEntity(args);
+        else if(actionDescription == AddMeshRendererSceneAction)    LoadMeshRenderer(currentEntity, args);
+        else if(actionDescription == AddPhysicsBodySceneAction)     LoadPhysicsBody(currentEntity, args);
         else if(actionDescription == AddBoxColliderSceneAction)     LoadBoxCollider(currentEntity, args);
         else if(actionDescription == AddCapsuleColliderSceneAction) LoadCapsuleCollider(currentEntity, args);
         else if(actionDescription == AddHullColliderSceneAction)    LoadHullCollider(currentEntity, args);
         else if(actionDescription == AddSphereColliderSceneAction)  LoadSphereCollider(currentEntity, args);
         else if(actionDescription == AddConcaveColliderSceneAction) LoadConcaveCollider(currentEntity, args);
-        else if(actionDescription == AddPhysicsBodySceneAction)     LoadPhysicsBody(currentEntity, args);
         else if(actionDescription == AddPointLightSceneAction)      LoadPointLight(currentEntity, args);
-        else if(actionDescription == AddMeshRendererSceneAction)    LoadMeshRenderer(currentEntity, args);
+        else if(actionDescription == AddCameraSceneAction)          LoadCamera(currentEntity, args);
 
         return currentEntity;
     }
@@ -156,6 +157,7 @@ namespace nc::editor
     Entity SceneReader::LoadEntity(std::stringstream& args)
     {
         auto handleName = ReadTokenFromAction(args);
+        ReadTokenFromAction(args);
         auto position = ReadVector3FromAction(args);
         auto rotation = ReadQuaternionFromAction(args);
         auto scale = ReadVector3FromAction(args);
@@ -183,12 +185,14 @@ namespace nc::editor
     void SceneReader::LoadBoxCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
+        ReadTokenFromAction(args);
         BoxProperties properties{ .center = ReadVector3FromAction(args), .extents = ReadVector3FromAction(args) };
         m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
     }
 
     void SceneReader::LoadCapsuleCollider(Entity entity, std::stringstream& args)
     {
+        ReadTokenFromAction(args);
         ReadTokenFromAction(args);
         CapsuleProperties properties
         {
@@ -201,6 +205,7 @@ namespace nc::editor
 
     void SceneReader::LoadHullCollider(Entity entity, std::stringstream& args)
     {
+        ReadTokenFromAction(args);
         ReadTokenFromAction(args);
         HullProperties properties{ .assetPath = ReadQuotedStringFromAction(args) };
         bool isTrigger = ReadBoolFromAction(args);
@@ -219,6 +224,7 @@ namespace nc::editor
 
     void SceneReader::LoadSphereCollider(Entity entity, std::stringstream& args)
     {
+        ReadTokenFromAction(args);
         ReadTokenFromAction(args);
         SphereProperties properties{ .center = ReadVector3FromAction(args), .radius = ReadFloatFromAction(args) };
         m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
@@ -246,6 +252,7 @@ namespace nc::editor
         /** @todo need lin/ang freedom */
 
         ReadTokenFromAction(args);
+        ReadTokenFromAction(args);
         PhysicsProperties properties
         {
             .mass = ReadFloatFromAction(args),
@@ -262,18 +269,28 @@ namespace nc::editor
     void SceneReader::LoadPointLight(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
+        ReadTokenFromAction(args);
+        ReadTokenFromAction(args);
+        auto pos = ReadVector3FromAction(args);
+        ReadTokenFromAction(args);
+        auto ambient = ReadVector3FromAction(args);
+        ReadFloatFromAction(args);
+        auto diffuseColor = ReadVector3FromAction(args);
+        auto diffuseIntensity = ReadFloatFromAction(args);
+
         PointLightInfo properties
         {
-            .pos = ReadVector3FromAction(args),
-            .ambient = ReadVector3FromAction(args),
-            .diffuseColor = ReadVector3FromAction(args),
-            .diffuseIntensity = ReadFloatFromAction(args),
+            .pos = pos,
+            .ambient = ambient,
+            .diffuseColor = diffuseColor,
+            .diffuseIntensity = diffuseIntensity,
         };
         m_registry->Add<PointLight>(entity, properties);
     }
 
     void SceneReader::LoadMeshRenderer(Entity entity, std::stringstream& args)
     {
+        ReadTokenFromAction(args);
         ReadTokenFromAction(args);
         std::string mesh = ReadQuotedStringFromAction(args);
         Material material
@@ -295,5 +312,11 @@ namespace nc::editor
             Output::LogError("Failure adding required mesh assets");
             AddDefaultMeshRenderer(m_registry, entity);
         }
+    }
+
+    void SceneReader::LoadCamera(Entity entity, std::stringstream& args)
+    {
+        ReadTokenFromAction(args);
+        m_registry->Add<Camera>(entity);
     }
 }

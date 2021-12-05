@@ -10,9 +10,10 @@ namespace
 
 namespace nc::editor
 {
-    UtilitiesPanel::UtilitiesPanel(Output* output)
+    UtilitiesPanel::UtilitiesPanel(Output* output, Environment* environment)
         : m_dimensions{window::GetDimensions()},
-          m_output{output}
+          m_output{output},
+          m_environment{environment}
     {
         window::RegisterOnResizeReceiver(this);
     }
@@ -39,10 +40,19 @@ namespace nc::editor
                 {
                     if(ImGui::Button("Clear"))
                         m_output->Clear();
-                    
+
                     if(ImGui::BeginChild("", {0,0}, true))
                     {
                         m_output->Draw();
+                    }
+                    ImGui::EndChild();
+                    ImGui::EndTabItem();
+                }
+                if(ImGui::BeginTabItem("Environment"))
+                {
+                    if(ImGui::BeginChild("", {0,0}, true))
+                    {
+                        m_environment->Draw();
                     }
                     ImGui::EndChild();
                     ImGui::EndTabItem();

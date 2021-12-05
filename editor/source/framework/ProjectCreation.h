@@ -9,4 +9,5 @@ namespace nc::editor
     void CreateProjectFile(const std::filesystem::path& projectFilePath);
     void CreateConfig(const std::filesystem::path& projectDirectory, const std::string& projectName);
     void CopyDefaultAssets(const std::filesystem::path& projectDirectory);
+    void CreateCMakeFiles(const std::filesystem::path& projectDirectory);
 }

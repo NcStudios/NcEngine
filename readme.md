@@ -27,34 +27,25 @@ There are three CMake projects in the repository
 * An editor, located in the 'editor' directory, is output to the repository directory as 'NcEditor.exe'.
 * A sample project, located in the 'project' directory, is output to the repository directory as 'Sample.exe'.
 
-The easiest way to build the either of these is by running 'cmake.bat' in the 'tools' directory. It requires a target, configuration, and install directory. Valid targets are Engine, Sample, or Editor. Configurations are listed [below](#configurations). The install directory is where the NcEngine headers and libraries will be installed.
+The easiest way to build any of these is by running 'build.bat' in the 'tools' directory. It requires
+* Target: Engine, Editor, or Project
+* Config: Common configurations [here](#configurations)
+* Install Directory: Where to install NcEngine headers and binaries
+* Generator: CMake Generator
 
 For example, building everything in Release-WithEditor mode from the repository root directory using Ninja looks like:
 
-Build and install NcEngine:
 ```
->tools/cmake.bat Engine Release-WithEditor C:/your/install/path
->ninja -C build/Engine/Release-WithEditor
->cmake --install build/Engine/Release-WithEditor
-```
-
-Build NcEditor
-```
->tools/cmake.bat Editor Release-WithEditor C:/your/install/path
->ninja -C build/Editor/Release-WithEditor
+>tools/build.bat Engine Release-WithEditor C:/your/install/path "Ninja"
+>tools/build.bat Editor Release-WithEditor C:/your/install/path "Ninja"
+>tools/build.bat Project Release-WithEditor C:/your/install/path "Ninja"
 ```
 
-Build sample project:
-```
->tools/cmake.bat Project Release-WithEditor C:/your/install/path
->ninja -C build/Project/Release-WithEditor
-```
-
-By default the cmake.bat file specifies Ninja as the generator. To use a different generator just change "Ninja" in the last line of cmake.bat to the generator of your choice.
+For Vs Code users, tasks for common cases can be found here [tools/tasks.json](tools/tasks.json).
 
 ### Configurations
 -----------------
-When building with the tools/cmake.bat file, one of these configurations are usually sufficient:
+When building with the tools/build.bat file, one of these configurations are usually sufficient:
 * Release - standard release build
 * Release-WithEditor - Release with editor-specific code included. Link the editor against this.
 * Debug - add debug symbols, editor-specific code, extra logging, build tests

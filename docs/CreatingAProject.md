@@ -162,15 +162,13 @@ target_link_libraries(Example PRIVATE Nc::NcEngineLib)
 
 We'll need to build and install the engine with the desired config:
 ```
->tools/cmake Engine Release-WithEditor <your-install-directory>
->ninja -C build/Engine/Release-WithEditor
->cmake --install build/Engine/Release-WithEditor
+>tools/build Engine Release-WithEditor <your-install-directory> "Ninja"
 ```
 
 Then build the example:
 ```
 >mkdir build/example_project
->cmake -G Ninja -B build/example_project -S example
+>cmake -G "Ninja" -B build/example_project -S example
 >ninja -C build/example_project
 ```
 

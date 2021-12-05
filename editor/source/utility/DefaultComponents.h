@@ -3,6 +3,7 @@
 #include "ecs/Registry.h"
 
 #include "ecs/component/AudioSource.h"
+#include "ecs/component/Camera.h"
 #include "ecs/component/Collider.h"
 #include "ecs/component/ConcaveCollider.h"
 #include "ecs/component/MeshRenderer.h"

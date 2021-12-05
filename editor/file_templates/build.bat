@@ -1,39 +1,24 @@
 @echo off
 
-set TARGET="%~1"
+set PROJECT_NAME="%~1"
 set CONFIGURATION="%~2"
 set INSTALL_DIRECTORY="%~3"
 
+if %PROJECT_NAME%=="" (
+    echo Project name not provided
+    EXIT
+)
+
 :CheckInstallDirectory
     if %INSTALL_DIRECTORY%=="" (
-        echo Install directory not provided - using default "C:/Program Files/"
-        set INSTALL_DIRECTORY="C:/Program Files/"
+        echo Install directory not provided
+        EXIT
     )
 
     if not exist %INSTALL_DIRECTORY% (
         echo Error: Install directory doesn't exist: %INSTALL_DIRECTORY%
         EXIT
     )
-
-:CheckTarget
-    if %TARGET%=="Engine" (
-        echo Building Engine with %CONFIGURATION% Configuration
-        set SOURCE_DIR="%~dp0\..\nc"
-        goto CheckConfiguration
-    )
-    if %TARGET%=="Project" (
-        echo Building Project with %CONFIGURATION% Configuration
-        set SOURCE_DIR="%~dp0\..\project"
-        goto CheckConfiguration
-    )
-    if %TARGET%=="Editor" (
-        echo Building Editor with %CONFIGURATION% Configuration
-        set SOURCE_DIR="%~dp0\..\editor"
-        goto CheckConfiguration
-    )
-
-    echo Error: Invalid Target - %TARGET%
-    EXIT
 
 :CheckConfiguration
     if %CONFIGURATION%=="Debug" (
@@ -65,13 +50,14 @@ set INSTALL_DIRECTORY="%~3"
     EXIT
 
 :Run
-    set BUILD_DIR=%~dp0\..\build\%TARGET%\%CONFIGURATION%
+    set SOURCE_DIR="%~dp0\"
+    set BUILD_DIR=%~dp0\build\%TARGET%\%CONFIGURATION%
     if not exist %BUILD_DIR% mkdir %BUILD_DIR%
     cd %BUILD_DIR%
 
-    echo Target: %TARGET%
     echo Configuration: %CONFIGURATION%
     echo Build Directory: %BUILD_DIR%
     echo Install Directory: %INSTALL_DIRECTORY%
 
-    cmake %DEFINITIONS% -DNC_ENGINE_INSTALL_DIR=%INSTALL_DIRECTORY% -G "Ninja" %SOURCE_DIR%
+    cmake -DNC_EDITOR_PROJECT_NAME=%PROJECT_NAME% %DEFINITIONS% -DNC_ENGINE_INSTALL_DIR=%INSTALL_DIRECTORY% -G "Ninja" %SOURCE_DIR%
+    ninja -C %BUILD_DIR%

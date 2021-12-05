@@ -38,6 +38,7 @@ namespace nc::editor
         : m_engine{engine},
           m_manifest{manifest},
           m_projectData{},
+          m_sceneData{},
           m_currentSceneIndex{0u},
           m_nextSceneIndex{0u},
           m_uiCallbacks{},
@@ -55,7 +56,7 @@ namespace nc::editor
     bool ProjectManager::DoOpenProject(const std::filesystem::path& path)
     {
         auto projectEntry = std::filesystem::directory_entry{path};
-        
+
         if(!projectEntry.exists() || !projectEntry.is_regular_file())
         {
             Output::LogError("Failure opening project - Invalid path:", path.string());
@@ -135,6 +136,7 @@ namespace nc::editor
             CreateProjectFile(projectFilePath);
             CreateConfig(directoryPath, name);
             CopyDefaultAssets(directoryPath);
+            CreateCMakeFiles(directoryPath);
         }
         catch(const std::filesystem::filesystem_error& e)
         {
@@ -216,7 +218,7 @@ namespace nc::editor
         }
 
         SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
-        writer.WriteCurrentScene(m_projectData.scenes.at(m_currentSceneIndex));
+        writer.WriteCurrentScene(&m_sceneData, m_projectData.scenes.at(m_currentSceneIndex));
         Output::Log("Saved scene: " + m_projectData.scenes.at(m_currentSceneIndex));
     }
 
