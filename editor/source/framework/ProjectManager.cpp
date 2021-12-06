@@ -128,24 +128,25 @@ namespace nc::editor
         }
 
         Output::Log("Creating Project:", directoryPath.string());
-        auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
 
         try
         {
             CreateProjectDirectories(directoryPath);
-            CreateProjectFile(projectFilePath);
+            CreateProjectFile(directoryPath, name);
             CreateConfig(directoryPath, name);
+            CreateMain(directoryPath);
             CopyDefaultAssets(directoryPath);
             CreateCMakeFiles(directoryPath);
         }
-        catch(const std::filesystem::filesystem_error& e)
+        catch(const std::exception& e)
         {
             Output::LogError("Failure creating project:", e.what());
             return false;
         }
 
-        /** @todo CMakeLists?, default scene? */
+        /** @todo default scene? */
 
+        auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
         DoOpenProject(projectFilePath);
         return true;
     }
