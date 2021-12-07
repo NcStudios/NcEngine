@@ -93,8 +93,8 @@ namespace nc::editor
     {
         const auto replace = std::unordered_map<std::string, std::string>
         {
-            {"@INCLUDE_INITIAL_SCENE@", "scenes\\LoaderScene.h"},
-            {"@INITIAL_SCENE_TYPE@", "LoaderScene"}
+            {"@INCLUDE_INITIAL_SCENE@", "scenes\\GeneratedLoadScene.h"},
+            {"@INITIAL_SCENE_TYPE@", "GeneratedLoadScene"}
         };
 
         CopyFileTemplate("editor/file_templates/Main.cpp", projectDirectory / "Main.cpp", replace);

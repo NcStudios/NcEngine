@@ -3,6 +3,7 @@
 #include "assets/AssetDependencyChecker.h"
 #include "config/ConfigReader.h"
 #include "utility/Output.h"
+#include "serialize/LoaderScene.h"
 #include "serialize/SceneDeleter.h"
 #include "serialize/SceneReader.h"
 #include "serialize/SceneWriter.h"
@@ -217,6 +218,9 @@ namespace nc::editor
             checkDependencies.LogMissingDependencies();
             return;
         }
+
+        /** @todo This is more of an "on project save" thing, which doesn't exist yet. */
+        WriteLoaderScene(m_projectData.projectDirectory, *m_manifest);
 
         SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
         writer.WriteCurrentScene(&m_sceneData, m_projectData.scenes.at(m_currentSceneIndex));
