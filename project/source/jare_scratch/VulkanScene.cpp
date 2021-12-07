@@ -94,12 +94,12 @@ namespace nc::sample
         {
             .usage = CubeMapUsage::Skybox,
             .uid = "Humus02Skybox",
-            .frontPath = defaultTexturesPath + "CubeMaps/Humus02/Front.jpg",
-            .backPath  = defaultTexturesPath + "CubeMaps/Humus02/Back.jpg",
-            .upPath    = defaultTexturesPath + "CubeMaps/Humus02/Up.jpg",
-            .downPath  = defaultTexturesPath + "CubeMaps/Humus02/Down.jpg",
-            .rightPath = defaultTexturesPath + "CubeMaps/Humus02/Right.jpg",
-            .leftPath  = defaultTexturesPath + "CubeMaps/Humus02/Left.jpg"
+            .frontPath = "Humus02/Front.jpg",
+            .backPath  = "Humus02/Back.jpg",
+            .upPath    = "Humus02/Up.jpg",
+            .downPath  = "Humus02/Down.jpg",
+            .rightPath = "Humus02/Right.jpg",
+            .leftPath  = "Humus02/Left.jpg"
         };
 
         nc::LoadCubeMapAsset(skyboxForest);

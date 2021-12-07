@@ -98,17 +98,16 @@ namespace nc::sample
         auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
         registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
-        const std::string defaultTexturesPath = "project/Textures/";
         auto skybox = CubeMapFaces
         {
             .usage = CubeMapUsage::Skybox,
             .uid = "Humus01Skybox",
-            .frontPath = defaultTexturesPath + "CubeMaps/Humus01/Front.jpg",
-            .backPath  = defaultTexturesPath + "CubeMaps/Humus01/Back.jpg",
-            .upPath    = defaultTexturesPath + "CubeMaps/Humus01/Up.jpg",
-            .downPath  = defaultTexturesPath + "CubeMaps/Humus01/Down.jpg",
-            .rightPath = defaultTexturesPath + "CubeMaps/Humus01/Right.jpg",
-            .leftPath  = defaultTexturesPath + "CubeMaps/Humus01/Left.jpg"
+            .frontPath = "Humus01/Front.jpg",
+            .backPath  = "Humus01/Back.jpg",
+            .upPath    = "Humus01/Up.jpg",
+            .downPath  = "Humus01/Down.jpg",
+            .rightPath = "Humus01/Right.jpg",
+            .leftPath  = "Humus01/Left.jpg"
         };
 
         nc::LoadCubeMapAsset(skybox);
