@@ -2,7 +2,8 @@
 
 #include "ecs/Registry.h"
 #include "ecs/component/ConcaveCollider.h"
-#include "CollisionCache.h"
+#include "physics/PhysicsPipelineTypes.h"
+#include "physics/collision/IntersectionQueries.h"
 
 #include <variant>
 
@@ -52,18 +53,20 @@ namespace nc::physics
 
         public:
             BspTree(Registry* registry);
+
             void OnAdd(ConcaveCollider& collider);
             void OnRemove(Entity entity);
+
+            template<Proxy ProxyType>
+            void FindPairs(std::span<const ProxyType> proxies);
+            auto Pairs() const -> const NarrowPhysicsResult& { return m_results; }
             void Clear();
-            void CheckCollisions(std::span<const DirectX::XMMATRIX> matrices,
-                                 std::span<const ColliderEstimate> estimates,
-                                 NarrowPhysicsResult* out);
 
         private:
+            Registry* m_registry;
             std::vector<node_type> m_nodes;
             std::vector<TriMesh> m_triMeshes;
-            Registry* m_registry;
-            size_t m_previousContactCount;
+            NarrowPhysicsResult m_results;
 
             void AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex);
             void AddToInnerNode(const TriMesh& mesh, size_t meshIndex, InnerNode* innerNode);
@@ -71,6 +74,50 @@ namespace nc::physics
             void SplitLeaf(const TriMesh& mesh, size_t meshIndex, size_t leafNodeIndex, LeafNode* leaf);
             auto FindSplitPlane(const LeafNode& node) -> Plane;
             auto ComputePartitionData(const std::vector<size_t>& meshIndices) -> PartitionData;
-            void BroadTest(size_t currentNodeIndex, const ColliderEstimate& estimate, std::vector<size_t>& narrowTestMeshIndices);
+            void BroadTest(size_t currentNodeIndex, const Sphere& estimate, std::vector<size_t>& narrowTestMeshIndices);
     };
+
+    template<Proxy ProxyType>
+    void BspTree::FindPairs(std::span<const ProxyType> proxies)
+    {
+        m_results.contacts.clear();
+        m_results.events.clear();
+
+        if(m_nodes.empty())
+            return;
+
+        std::vector<size_t> narrowTestMeshIndices;
+        narrowTestMeshIndices.reserve(NodeCapacity); // lower-bound guess
+        CollisionState state;
+        const size_t dynamicCount = proxies.size();
+
+        for(size_t i = 0u; i < dynamicCount; ++i)
+        {
+            const auto& proxy = proxies[i];
+
+            /** Find mesh colliders that are in the same region as the estimate. */
+            narrowTestMeshIndices.clear();
+            BroadTest(0u, proxy.estimate, narrowTestMeshIndices);
+
+            for(auto meshIndex : narrowTestMeshIndices)
+            {
+                const auto& mesh = m_triMeshes[meshIndex];
+
+                /** Broad check against the mesh estimate */
+                if(!Intersect(proxy.estimate, mesh.estimate))
+                    continue;
+
+                /** Narrow check against each mesh triangle until we find a collision. */
+                for(const auto& triangle : mesh.triangles)
+                {
+                    if(Collide(proxy.Volume(), triangle, proxy.Matrix(), &state))
+                    {
+                        m_results.events.emplace_back(proxy.entity, mesh.entity, CollisionEventType::FirstBodyPhysics);
+                        m_results.contacts.push_back(state.contact);
+                        continue;
+                    }
+                }
+            }
+        }
+    }
 }

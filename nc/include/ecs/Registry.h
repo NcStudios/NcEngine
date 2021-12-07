@@ -157,6 +157,8 @@ namespace nc
             HandleManager m_handleManager;
             size_t m_maxEntities;
 
+            void RemoveEntityWithoutNotifyingParent(Entity entity);
+
             template<Component T>
             inline static PerComponentStorage<T>* m_typedStoragePtr = nullptr;
 
@@ -211,6 +213,12 @@ namespace nc
     void Registry::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        auto* transform = Get<Transform>(entity);
+        transform->SetParent(Entity::Null());
+        
+        for(auto child : transform->Children())
+            RemoveEntityWithoutNotifyingParent(child);
+
         auto pos = std::ranges::find(m_active, entity);
         *pos = m_active.back();
         m_active.pop_back();
@@ -315,7 +323,7 @@ namespace nc
 
         while(current <= end)
         {
-            auto entityIndex = referenceEntities.at(current);
+            auto entityIndex = referenceEntities.at(current).Index();
             auto indexInTarget = targetSparseArray.at(entityIndex);
 
             if(indexInTarget != Entity::NullIndex) // Entity has both components
@@ -323,14 +331,14 @@ namespace nc
                 if(indexInTarget != current)
                 {
                     auto swapEntity = targetEntities.at(current);
-                    targetStorage.Swap(entityIndex, swapEntity);
+                    targetStorage.Swap(entityIndex, swapEntity.Index());
                 }
 
                 ++current;
             }
             else // Entity does not have target component
             {
-                auto swapEntity = referenceEntities.at(end);
+                auto swapEntity = referenceEntities.at(end).Index();
                 referenceStorage.Swap(entityIndex, swapEntity);
                 --end;
             }

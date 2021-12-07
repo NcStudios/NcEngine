@@ -23,7 +23,11 @@ An entitiy's index is determined and used internally. It can be useful to create
 Layers are underused and are reserved for future use.
 
 ### Flags
-At the moment, the only Entity flag is Entity::Flags::Static. This is used to specify that an Entity will not be moved after construction. This is used for various optimizations and is required in certain cases ([ConcaveCollider](EngineComponents.md#concavecollider)).
+* Entity::Flags::Static: Specifies an Entity will not be moved after construction. This is used for various optimizations and is required in certain cases ([ConcaveCollider](EngineComponents.md#concavecollider)).
+* Entity::Flags::Persistent: Persistent entities and their attached components are not destroyed on scene changes.
+* Entity::Flags::NoCollisionNotifications: Attached components will not receive collision/trigger events. This can improve performance in scenes with many colliders.
+
+Entities do not inherit flags from their parents.
 
 When creating an Entity through the [registry](#registry), an EntityInfo struct is required, which has more information than is actually stored in the Entity. This is because the registry automatically adds a [Transform](EngineComponents.md#transform) and [Tag](EngineComponents.md#tag) to each new Entity, initialized with data from the EntityInfo.
 
@@ -45,10 +49,8 @@ virtual void OnDestroy();
 
 /** Called on collision/trigger event detection. */
 virtual void OnCollisionEnter(Entity other);
-virtual void OnCollisionStay(Entity other);
 virtual void OnCollisionExit(Entity other);
 virtual void OnTriggerEnter(Entity other);
-virtual void OnTriggerStay(Entity other);
 virtual void OnTriggerExit(Entity other);
 ```
 
@@ -60,7 +62,7 @@ Most engine-provided Components are implemented using an Ecs-oriented approach w
 -----------
 The registry contains storage for all entities and components and manages the associations between them. In order for objects of these types to be recognized by NcEngine, they must be created through one of the registry's Add member functions. There are also functions for retreiving, removing, and viewing ranges of objects, among other things.
 
-A pointer to the registry is passed to each scene's Load() function using the alias registry_type. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
+A pointer to the registry may be retrieved from the NcEngine object, which is passed to each scene's Load() function. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
 
 Generally, don't store return values from the registry, except for Entities. Calls to Add, Remove, ViewGroup, and ReserveHeadroom for a type T may invalidate any existing span\<T\> or pointers/references to other Ts except:
 * if T is derived from AutoComponent, which is guaranteed to be pointer stable.
@@ -115,7 +117,7 @@ Assets are the resources used by some built in components. The components that u
 * ConcaveCollider: expects a path to concave mesh.
 * MeshRenderer: expects a path to a mesh and a material wich requires three paths to textures.
 
-Components do not load or own the assets they use, but instead obtain a view over the data. This means an assets should be loaded before attempting to create a component that depends on it. For example, if you want to create an AudioSource that plays "my_sound.wav", you must have previously loaded "my_sound.wav" by calling LoadSoundClipAsset("my_sound.wav"). The loading functions and supported file types can be found in [Assets.h](../nc/include/Assets.h).
+Components do not load or own the assets they use, but instead obtain a view over the data. This means an asset should be loaded before attempting to create a component that depends on it. For example, if you want to create an AudioSource that plays "my_sound.wav", you must have previously loaded "my_sound.wav" by calling LoadAudioClipAsset("my_sound.wav"). The loading functions and supported file types can be found in [Assets.h](../nc/include/Assets.h).
 
 Assets related to 3d meshes can only be loaded from .nca files. This includes meshes, convex hulls, and concave colliders. This is done to move runtime-independent calculations into a preprocessing step. Nca files can be generated from fbx meshes using the asset builder (tools/asset_builder/build.exe). Usage can be shown by running './build --h'. When using NcEditor, this process is handled automatically. Adding fbx files to the asset manifest will create the appropriate nca files.
 
@@ -143,7 +145,7 @@ While registered, Draw() will be called when rendering between ImGui::NewFrame()
 
 This process is unrefined and easy to misuse. Whatever operations a registered UI performs are done during the render step, which is assumed to not modify the registry. It is recomended that registry pointers in UI functions be const-qualified to guard against segfaults.
 
-## Config File
+## Config
 --------------
 NcEngine reads some settings from a config file upon initialization. A default version can be found [here](../nc/source/config/default_config.ini). Modifications should conform to these rules:
 
@@ -152,3 +154,5 @@ NcEngine reads some settings from a config file upon initialization. A default v
     * As a line comment after a ';' or '#'
     * As a human-readable section tag enclosed in square brackets
 * Extraneous whitespace and blank lines should be avoided.
+
+The default asset paths point to assets in the repository. These should be changed to your own directories - the editor defaults to \<project-name>/assets/\<asset-type>. Asset functions operate relative to the paths specified here. The paths themselves should be absolute or relative to your executable.

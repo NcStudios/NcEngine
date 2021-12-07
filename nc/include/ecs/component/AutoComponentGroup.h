@@ -40,10 +40,8 @@ namespace nc
             void SendFixedUpdate();
             void SendOnDestroy();
             void SendOnCollisionEnter(Entity hit);
-            void SendOnCollisionStay(Entity hit);
             void SendOnCollisionExit(Entity hit);
             void SendOnTriggerEnter(Entity hit);
-            void SendOnTriggerStay(Entity hit);
             void SendOnTriggerExit(Entity hit);
 
         private:

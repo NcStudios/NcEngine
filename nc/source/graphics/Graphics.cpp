@@ -1,11 +1,11 @@
 #include "Graphics.h"
-#include "assets/AssetServices.h"
 #include "Base.h"
 #include "Commands.h"
-#include "config/Config.h"
-#include "debug/Profiler.h"
-#include "debug/Utils.h"
 #include "Renderer.h"
+#include "assets/AssetServices.h"
+#include "config/Config.h"
+#include "debug/Utils.h"
+#include "optick/optick.h"
 #include "resources/DepthStencil.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
@@ -27,7 +27,7 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
-          m_assetServices{ std::make_unique<AssetServices>(this, config::GetMemorySettings().maxTextures) },
+          m_assetServices{ std::make_unique<AssetServices>(this, config::GetProjectSettings(), config::GetMemorySettings().maxTextures) },
           #ifdef NC_DEBUG_RENDERING
           m_debugRenderer{},
           #endif
@@ -166,6 +166,7 @@ namespace nc::graphics
 
     void Graphics::RenderToImage(uint32_t imageIndex)
     {
+        OPTICK_CATEGORY("Graphics::RenderToImage", Optick::Category::Rendering);
         m_swapchain->WaitForImageFence(imageIndex);
         m_swapchain->SyncImageAndFrameFence(imageIndex);
         m_commands->SubmitRenderCommand(imageIndex);
@@ -173,6 +174,7 @@ namespace nc::graphics
 
     bool Graphics::PresentImage(uint32_t imageIndex)
     {
+        OPTICK_CATEGORY("Graphics::PresentImage", Optick::Category::Rendering);
         bool isSwapChainValid = true;
         m_swapchain->Present(imageIndex, isSwapChainValid);
 
@@ -191,7 +193,7 @@ namespace nc::graphics
 
     uint32_t Graphics::FrameBegin()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("Graphics::FrameBegin", Optick::Category::Rendering);
         if (m_isMinimized) return UINT32_MAX;
 
         uint32_t imageIndex = UINT32_MAX;
@@ -208,7 +210,7 @@ namespace nc::graphics
     // See Device.cpp for synchronization of these calls.
     void Graphics::Draw(const PerFrameRenderState& state)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
         if (m_isMinimized) return;
 
         m_renderer->Record(m_commands.get(), state, m_assetServices.get(), m_imageIndex);
@@ -218,8 +220,6 @@ namespace nc::graphics
 
         // Returns the image to the swapchain
         if (!PresentImage(m_imageIndex)) return;
-
-        NC_PROFILE_END();
     }
 
     void Graphics::FrameEnd()

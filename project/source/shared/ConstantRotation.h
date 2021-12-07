@@ -27,6 +27,6 @@ namespace nc::sample
 
     inline void ConstantRotation::FrameUpdate(float dt)
     {
-        m_registry->Get<Transform>(GetParentEntity())->Rotate(m_axis, m_radiansPerSecond * dt);
+        m_registry->Get<Transform>(ParentEntity())->Rotate(m_axis, m_radiansPerSecond * dt);
     }
 }

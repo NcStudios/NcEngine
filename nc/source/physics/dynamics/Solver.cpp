@@ -1,11 +1,11 @@
 #include "Solver.h"
+#include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 #include "graphics/DebugRenderer.h"
-#include "debug/Profiler.h"
-//#define USE_DEBUG_RENDERING
-#undef USE_DEBUG_RENDERING
 
 #include <cassert>
+
+#define USE_DEBUG_RENDERING 0
 
 using namespace DirectX;
 
@@ -18,28 +18,115 @@ namespace
     const auto g_StaticPhysicsProperties = PhysicsProperties{.mass = 0.0f, .useGravity = false};
     const auto g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
 
-    auto CreateContactConstraint(const Contact&, Entity, Entity, Transform*, Transform*, PhysicsBody*, PhysicsBody*) -> ContactConstraint;
-    void UpdateJoint(Registry* registry, Joint& joint, float dt);
+    auto CreateContactConstraint(const Contact&, Transform*, Transform*, PhysicsBody*, PhysicsBody*) -> ContactConstraint;
     void ResolveContactConstraint(ContactConstraint& constraint, float dt);
     void ResolvePositionConstraint(PositionConstraint& constraint);
     void ResolveJoint(Joint& joint);
-    auto MultiplyJVContact(const ConstraintMatrix& v, const ConstraintMatrix& jNormal, const ConstraintMatrix& jTangent, const ConstraintMatrix& jBitangent) -> XMVECTOR;
-    auto ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent) -> ConstraintMatrix;
+    auto ComputeLagrangeMultipliers(ContactConstraint& c, const ConstraintMatrix& v, float biasAlongNormal) -> Vector3;
     auto ClampLambda(float newLambda, float* totalLambda) -> float;
     auto ClampMu(float newMu, float extent, float* totalMu) -> float;
-    auto Skew(FXMVECTOR vec) -> XMMATRIX;
+
+    XMVECTOR ComputeLinearVelocity(FXMVECTOR jNorm, FXMVECTOR jTan, FXMVECTOR jBit, float invMass, float lambda, float muTangent, float muBitangent)
+    {
+        return XMVectorScale(jNorm, invMass * lambda) +
+               XMVectorScale(jTan, invMass * muTangent) +
+               XMVectorScale(jBit, invMass * muBitangent);
+    }
+
+    XMVECTOR ComputeAngularVelocity(FXMVECTOR jNorm, FXMVECTOR jTan, FXMVECTOR jBit, FXMMATRIX invInertia, float lambda, float muTangent, float muBitangent)
+    {
+        return XMVectorScale(XMVector3Transform(jNorm, invInertia), lambda) +
+               XMVectorScale(XMVector3Transform(jTan, invInertia), muTangent) +
+               XMVectorScale(XMVector3Transform(jBit, invInertia), muBitangent);
+    }
+
+    /** Compute largrange multipliers for contact constraint (1 for normal, 2 for friction).
+     *  Result is returned as a vector: [lNorm, lTan, lBit] */
+    Vector3 ComputeLagrangeMultipliers(ContactConstraint& c, const ConstraintMatrix& v, float biasAlongNormal)
+    {
+        /** Compute JV in each direction. */
+        XMVECTOR first = g_XMZero;
+        if(c.physBodyA)
+        {
+            first = XMVector3Dot(c.jNormal.vA(), v.vA()) + XMVector3Dot(c.jNormal.wA(), v.wA());
+            auto tan = XMVector3Dot(c.jTangent.vA(), v.vA()) + XMVector3Dot(c.jTangent.wA(), v.wA());
+            auto bit = XMVector3Dot(c.jBitangent.vA(), v.vA()) + XMVector3Dot(c.jBitangent.wA(), v.wA());
+            first = XMVectorMergeXY(first, tan);
+            first = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(first, bit);
+        }
+
+        XMVECTOR second = g_XMZero;
+        if(c.physBodyB)
+        {
+            second = XMVector3Dot(c.jNormal.vB(), v.vB()) + XMVector3Dot(c.jNormal.wB(), v.wB());
+            auto tan = XMVector3Dot(c.jTangent.vB(), v.vB()) + XMVector3Dot(c.jTangent.wB(), v.wB());
+            auto bit = XMVector3Dot(c.jBitangent.vB(), v.vB()) + XMVector3Dot(c.jBitangent.wB(), v.wB());
+            second = XMVectorMergeXY(second, tan);
+            second = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(second, bit);
+        }
+
+        /** lagrange = -(JV + b) / (J M^-1 J^t)^-1 = effMass [-(JV + b)] */
+        auto bias = XMVectorSet(biasAlongNormal, 0.0f, 0.0f, 0.0f);
+        auto lagrange_v = XMVectorNegate(first + second + bias) * c.effectiveMass;
+        Vector3 lagrange;
+        XMStoreVector3(&lagrange, lagrange_v);
+
+        /** clamping = (Ln >= 0) && (-mu*Ln <= Lt <= mu*Ln) && (-mu*Ln <= Lb < = mu*Ln) */
+        float maxFriction = c.friction * c.totalLambda;
+        return Vector3
+        {
+            ClampLambda(lagrange.x, &c.totalLambda),
+            ClampMu(lagrange.y, maxFriction, &c.totalMuTangent),
+            ClampMu(lagrange.z, maxFriction, &c.totalMuBitangent)
+        };
+    }
+
+    /** Clamping for impulse along normal. */
+    float ClampLambda(float newLambda, float* totalLambda)
+    {
+        float temp = *totalLambda;
+        *totalLambda = math::Max(0.0f, temp + newLambda);
+        return *totalLambda - temp;
+    }
+
+    /** Clamping for impulse along tangents (friction). */
+    float ClampMu(float newMu, float extent, float* totalMu)
+    {
+        float temp = *totalMu;
+        *totalMu = math::Clamp(temp + newMu, -1.0f * extent, extent);
+        return *totalMu - temp;
+    }
+
+    void Warmstart(const ContactConstraint& c, PhysicsBody* bodyA, PhysicsBody* bodyB)
+    {
+        if(bodyA)
+        {
+            bodyA->ApplyVelocities
+            (
+                ComputeLinearVelocity(c.jNormal.vA(), c.jTangent.vA(), c.jBitangent.vA(), c.invMassA, c.totalLambda, c.totalMuTangent, c.totalMuBitangent),
+                ComputeAngularVelocity(c.jNormal.wA(), c.jTangent.wA(), c.jBitangent.wA(), c.invInertiaA, c.totalLambda, c.totalMuTangent, c.totalMuBitangent)
+            );
+        }
+
+        if(bodyB)
+        {
+            bodyB->ApplyVelocities
+            (
+                ComputeLinearVelocity(c.jNormal.vB(), c.jTangent.vB(), c.jBitangent.vB(), c.invMassB, c.totalLambda, c.totalMuTangent, c.totalMuBitangent),
+                ComputeAngularVelocity(c.jNormal.wB(), c.jTangent.wB(), c.jBitangent.wB(), c.invInertiaB, c.totalLambda, c.totalMuTangent, c.totalMuBitangent)
+            );
+        }
+    }
 
     ContactConstraint CreateContactConstraint(const Contact& contact,
-                                              Entity entityA,
-                                              Entity entityB,
                                               Transform* transformA,
                                               Transform* transformB,
                                               PhysicsBody* physBodyA,
                                               PhysicsBody* physBodyB)
     {
         /** Compute vectors from object centers to contact points */
-        auto rA = contact.worldPointA - transformA->GetPosition();
-        auto rB = contact.worldPointB - transformB->GetPosition();
+        auto rA = contact.worldPointA - transformA->Position();
+        auto rB = contact.worldPointB - transformB->Position();
         auto rA_v = XMLoadVector3(&rA);
         auto rB_v = XMLoadVector3(&rB);
 
@@ -74,7 +161,7 @@ namespace
         jInertiaProductA = XMVector3Transform(jTangent.wA(), invInertiaA);
         jInertiaProductB = XMVector3Transform(jTangent.wB(), invInertiaB);
         auto dotTangent = XMVector3Dot(jTangent.wA(), jInertiaProductA) + XMVector3Dot(jTangent.wB(), jInertiaProductB);
-        
+
         jInertiaProductA = XMVector3Transform(jBitangent.wA(), invInertiaA);
         jInertiaProductB = XMVector3Transform(jBitangent.wB(), invInertiaB);
         auto dotBitangent = XMVector3Dot(jBitangent.wA(), jInertiaProductA) + XMVector3Dot(jBitangent.wB(), jInertiaProductB);
@@ -88,24 +175,8 @@ namespace
         float restitution = restitutionA * restitutionB;
         float friction = frictionA * frictionB;
 
-        /** Warmstart accumulated impulses */
-        float lambda, muTangent, muBitangent;
-        if constexpr(EnableContactWarmstarting)
+        auto constraint = ContactConstraint
         {
-            lambda = contact.lambda * WarmstartFactor;
-            muTangent = contact.muTangent * WarmstartFactor;
-            muBitangent = contact.muBitangent * WarmstartFactor;
-        }
-        else
-        {
-            lambda = 0.0f;
-            muTangent = 0.0f;
-            muBitangent = 0.0f;
-        }
-
-        return ContactConstraint
-        {
-            entityA, entityB,
             physBodyA, physBodyB,
             jNormal, jTangent, jBitangent,
             invInertiaA, invInertiaB,
@@ -113,8 +184,19 @@ namespace
             contact.depth,
             invMassA, invMassB,
             restitution, friction,
-            lambda, muTangent, muBitangent
+            0.0f, 0.0f, 0.0f
         };
+
+        /** Warmstart accumulated impulses */
+        if constexpr(EnableContactWarmstarting)
+        {
+            constraint.totalLambda = contact.lambda * WarmstartFactor;
+            constraint.totalMuTangent = contact.muTangent * WarmstartFactor;
+            constraint.totalMuBitangent = contact.muBitangent * WarmstartFactor;
+            Warmstart(constraint, physBodyA, physBodyB);
+        }
+
+        return constraint;
     }
 
     /** Resolve contacts through sequential impulse. */
@@ -130,42 +212,38 @@ namespace
         };
 
         /** Baumgarte Stabilization / Restitution
-         *  bias = b / h (Pa-Pb) * n + Cr(Va + Wa X Ra - Vb - Wb X Rb) * n */
+         *  bias = b / h (Pa-Pb) * n + Cr(Vb + Wb X Rb - Va - Wa X Ra) * n */
         auto relativeVelocity_v = v.vB() + XMVector3Cross(v.wB(), constraint.rB) - v.vA() - XMVector3Cross(v.wA(), constraint.rA);
         relativeVelocity_v = XMVector3Dot(relativeVelocity_v, constraint.normal);
-        relativeVelocity_v = XMVectorScale(relativeVelocity_v, constraint.restitution);
-        float baumgarteTerm = 0.0f;
-        if constexpr(EnableBaumgarteStabilization)
+        float restitution = XMVectorGetX(relativeVelocity_v);
+
+        if constexpr(EnableRestitutionSlop)
         {
-            baumgarteTerm = math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * BaumgarteFactor / dt;
+            restitution = math::Max(restitution - RestitutionSlop, 0.0f);
         }
 
-        auto baumgarte_v = XMVectorReplicate(baumgarteTerm);
-        auto bias_v = XMVectorMultiply(baumgarte_v + relativeVelocity_v, g_XMIdentityR0);
+        auto bias = restitution * constraint.restitution;
 
-        /** lagrange = -(JV + b) / (J M^-1 J^t)^-1 = effMass [-(JV + b)] */
-        auto lagrange_v = MultiplyJVContact(v, constraint.jNormal, constraint.jTangent, constraint.jBitangent);
-        lagrange_v = XMVectorNegate(lagrange_v + bias_v) * constraint.effectiveMass;
-        Vector3 lagrange;
-        XMStoreVector3(&lagrange, lagrange_v);
-        auto& [lagrangeNormal, lagrangeTangent, lagrangeBitangent] = lagrange;
+        if constexpr(EnableBaumgarteStabilization)
+        {
+            bias += math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * BaumgarteFactor / dt;
+        }
 
-        /** (Ln >= 0) && (-mu*Ln <= Lt <= mu*Ln) && (-mu*Ln <= Lb < = mu*Ln) */
-        float maxFriction = constraint.friction * constraint.totalLambda;
-        lagrangeNormal = ClampLambda(lagrangeNormal, &constraint.totalLambda);
-        lagrangeTangent = ClampMu(lagrangeTangent, maxFriction, &constraint.totalMuTangent);
-        lagrangeBitangent = ClampMu(lagrangeBitangent, maxFriction, &constraint.totalMuBitangent);
-
-        auto deltas = ComputeDeltas(constraint, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
+        /** Compute impulse factors */
+        auto [lagrangeNormal, lagrangeTangent, lagrangeBitangent] = ComputeLagrangeMultipliers(constraint, v, bias);
 
         if(constraint.physBodyA)
         {
-            constraint.physBodyA->ApplyVelocities(deltas.vA(), deltas.wA());
+            auto linear = ComputeLinearVelocity(constraint.jNormal.vA(), constraint.jTangent.vA(), constraint.jBitangent.vA(), constraint.invMassA, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
+            auto angular = ComputeAngularVelocity(constraint.jNormal.wA(), constraint.jTangent.wA(), constraint.jBitangent.wA(), constraint.invInertiaA, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
+            constraint.physBodyA->ApplyVelocities(linear, angular);
         }
 
         if(constraint.physBodyB)
         {
-            constraint.physBodyB->ApplyVelocities(deltas.vB(), deltas.wB());
+            auto linear = ComputeLinearVelocity(constraint.jNormal.vB(), constraint.jTangent.vB(), constraint.jBitangent.vB(), constraint.invMassB, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
+            auto angular = ComputeAngularVelocity(constraint.jNormal.wB(), constraint.jTangent.wB(), constraint.jBitangent.wB(), constraint.invInertiaB, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
+            constraint.physBodyB->ApplyVelocities(linear, angular);
         }
     }
 
@@ -183,7 +261,7 @@ namespace
             constraint.transformA->Translate(mtv * -2.0f);
             return;
         }
-        
+
         if(constraint.eventType == CollisionEventType::SecondBodyPhysics)
         {
             constraint.transformB->Translate(mtv * 2.0f);
@@ -192,90 +270,6 @@ namespace
 
         constraint.transformA->Translate(-mtv);
         constraint.transformB->Translate(mtv);
-    }
-
-    /** Compute J * V for 3 separate jacobians. Since ConstraintMatrix represents a 12 element vector,
-     *  we just sum the dot product of each row. Result is returned as a vector: [Rnorm, Rtan, Rbit] */
-    XMVECTOR MultiplyJVContact(const ConstraintMatrix& v,
-                               const ConstraintMatrix& jNormal,
-                               const ConstraintMatrix& jTangent,
-                               const ConstraintMatrix& jBitangent)
-    {
-        auto dotVa = XMVector3Dot(jNormal.vA(), v.vA());
-        auto dotWa = XMVector3Dot(jNormal.wA(), v.wA());
-        auto dotVb = XMVector3Dot(jNormal.vB(), v.vB());
-        auto dotWb = XMVector3Dot(jNormal.wB(), v.wB());
-        auto result = dotVa + dotWa + dotVb + dotWb;
-
-        dotVa = XMVector3Dot(jTangent.vA(), v.vA());
-        dotWa = XMVector3Dot(jTangent.wA(), v.wA());
-        dotVb = XMVector3Dot(jTangent.vB(), v.vB());
-        dotWb = XMVector3Dot(jTangent.wB(), v.wB());
-        result = XMVectorMergeXY(result, dotVa + dotWa + dotVb + dotWb);
-
-        dotVa = XMVector3Dot(jBitangent.vA(), v.vA());
-        dotWa = XMVector3Dot(jBitangent.wA(), v.wA());
-        dotVb = XMVector3Dot(jBitangent.vB(), v.vB());
-        dotWb = XMVector3Dot(jBitangent.wB(), v.wB());
-        result = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_1Y>(result, dotVa + dotWa + dotVb + dotWb);
-        
-        return result;
-    }
-
-    /** Compute velocity deltas using lagrange multipliers. */
-    ConstraintMatrix ComputeDeltas(const ContactConstraint& constraint, float lNormal, float lTangent, float lBitangent)
-    {
-        const auto &jN = constraint.jNormal, &jT = constraint.jTangent, &jB = constraint.jBitangent;
-        const auto &iA = constraint.invInertiaA, &iB = constraint.invInertiaB;
-        float mA = constraint.invMassA, mB = constraint.invMassB;
-
-        auto vA = XMVectorScale(jN.vA(), mA * lNormal) +
-                  XMVectorScale(jT.vA(), mA * lTangent) +
-                  XMVectorScale(jB.vA(), mA * lBitangent);
-
-        auto wA = XMVectorScale(XMVector3Transform(jN.wA(), iA), lNormal) +
-                  XMVectorScale(XMVector3Transform(jT.wA(), iA), lTangent) +
-                  XMVectorScale(XMVector3Transform(jB.wA(), iA), lBitangent);
-
-        auto vB = XMVectorScale(jN.vB(), mB * lNormal) +
-                  XMVectorScale(jT.vB(), mB * lTangent) +
-                  XMVectorScale(jB.vB(), mB * lBitangent);
-
-        auto wB = XMVectorScale(XMVector3Transform(jN.wB(), iB), lNormal) +
-                  XMVectorScale(XMVector3Transform(jT.wB(), iB), lTangent) +
-                  XMVectorScale(XMVector3Transform(jB.wB(), iB), lBitangent);
-
-        return ConstraintMatrix{vA, wA, vB, wB};
-    }
-
-    /** Clamping for impulse along normal. */
-    float ClampLambda(float newLambda, float* totalLambda)
-    {
-        float temp = *totalLambda;
-        *totalLambda = math::Max(0.0f, temp + newLambda);
-        return *totalLambda - temp;
-    }
-
-    /** Clamping for impulse along tangents (friction). */
-    float ClampMu(float newMu, float extent, float* totalMu)
-    {
-        float temp = *totalMu;
-        *totalMu = math::Clamp(temp + newMu, -1.0f * extent, extent);
-        return *totalMu - temp;
-    }
-
-    XMMATRIX Skew(FXMVECTOR vec)
-    {
-        Vector3 v;
-        XMStoreVector3(&v, vec);
-
-        return XMMatrixSet
-        (
-            0.0f, -v.z,  v.y, 0.0f,
-             v.z, 0.0f, -v.x, 0.0f,
-            -v.y,  v.x, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
     }
 
     void ResolveJoint(Joint& joint)
@@ -304,79 +298,61 @@ namespace
             XMVector3Transform(XMVector3Cross(joint.rB, impulse), joint.bodyB->GetInverseInertia())
         );
     }
-
-    void UpdateJoint(Registry* registry, Joint& joint, float dt)
-    {
-        // Get anchor world space positions
-        XMVECTOR pA, pB;
-        {
-            auto* transform = registry->Get<Transform>(joint.entityA);
-            auto position = transform->GetPosition();
-            auto rotation = transform->GetRotation();
-            auto rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotation));
-            joint.rA = XMVector3Transform(joint.anchorA, rotMatrix);
-            pA = XMLoadVector3(&position) + joint.rA;
-
-            transform = registry->Get<Transform>(joint.entityB);
-            position = transform->GetPosition();
-            rotation = transform->GetRotation();
-            rotMatrix = XMMatrixRotationQuaternion(XMLoadQuaternion(&rotation));
-            joint.rB = XMVector3Transform(joint.anchorB, rotMatrix);
-            pB = XMLoadVector3(&position) + joint.rB;
-        }
-
-        /** Scale bias by time step and positional error */
-        joint.bias = -1.0f * joint.biasFactor * (1.0f / dt) * (pB - pA);
-
-        /** Fetch inverse mass and inertia of each body */
-        joint.bodyA = registry->Get<PhysicsBody>(joint.entityA);
-        joint.bodyB = registry->Get<PhysicsBody>(joint.entityB);
-        IF_THROW(!joint.bodyA || !joint.bodyB, "UpdateJoint - Entity does not have a PhysicsBody");
-        auto invMassA = joint.bodyA->GetInverseMass();
-        const auto& invInertiaA = joint.bodyA->GetInverseInertia();
-        auto invMassB = joint.bodyB->GetInverseMass();
-        const auto& invInertiaB = joint.bodyB->GetInverseInertia();
-
-        /** effectiveMass = [(M^-1) - (skewRa * Ia^-1 * skewRa) - (skewRb * Ib^-1 * skewRb)]^-1 */
-        {
-            auto invMass = invMassA + invMassB;
-            auto k1 = XMMatrixScaling(invMass, invMass, invMass);
-            auto skewRa = Skew(joint.rA);
-            auto k2 = skewRa * invInertiaA * skewRa; 
-            auto skewRb = Skew(joint.rB);
-            auto k3 = skewRb * invInertiaB * skewRb;
-            joint.m = XMMatrixInverse(nullptr, k1 - k2 - k3);
-        }
-
-        /** Apply or zero out accumulated impulse */
-        if constexpr(EnableJointWarmstarting)
-        {
-            auto vA = XMVectorScale(joint.p, invMassA * WarmstartFactor);
-            vA = XMVectorNegate(XMVectorScale(vA, WarmstartFactor));
-            auto wA = XMVector3Transform(XMVector3Cross(joint.rA, joint.p), invInertiaA);
-            wA = XMVectorNegate(XMVectorScale(wA, WarmstartFactor));
-            joint.bodyA->ApplyVelocities(vA, wA);
-
-            auto vB = XMVectorScale(joint.p, invMassB);
-            vB = XMVectorScale(vB, WarmstartFactor);
-            auto wB = XMVector3Transform(XMVector3Cross(joint.rB, joint.p), invInertiaB);
-            wB =  XMVectorScale(wB, WarmstartFactor);
-            joint.bodyB->ApplyVelocities(vB, wB);
-        }
-        else
-        {
-            joint.p = g_XMZero;
-        }
-    }
 } // end anonymous namespace
 
 namespace nc::physics
 {
-    void ResolveConstraints(Constraints& constraints, std::span<Joint> joints, float dt)
+    Solver::Solver(Registry* registry)
+        : m_registry{registry},
+          m_contactConstraints{},
+          m_positionConstraints{}
+    {
+    }
+
+    void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
+    {
+        const auto manifoldCount = manifolds.size();
+        m_contactConstraints.clear();
+        m_contactConstraints.reserve(manifoldCount * 4u);
+
+        if constexpr(EnableDirectPositionCorrection)
+        {
+            m_positionConstraints.clear();
+            m_positionConstraints.reserve(manifoldCount);
+        }
+
+        for(const auto& manifold : manifolds)
+        {
+            const Entity entityA = manifold.event.first;
+            const Entity entityB = manifold.event.second;
+            auto* transformA = m_registry->Get<Transform>(entityA);
+            auto* transformB = m_registry->Get<Transform>(entityB);
+            auto* physBodyA = m_registry->Get<PhysicsBody>(entityA);
+            auto* physBodyB = m_registry->Get<PhysicsBody>(entityB);
+
+            if constexpr(EnableDirectPositionCorrection)
+            {
+                auto deepestContact = manifold.DeepestContact();
+                m_positionConstraints.emplace_back(transformA, transformB, manifold.event.eventType, deepestContact.normal, deepestContact.depth);
+            }
+
+            for(const auto& contact : manifold.contacts)
+            {
+                #if USE_DEBUG_RENDERING
+                graphics::DebugRenderer::AddPoint(contact.worldPointA);
+                graphics::DebugRenderer::AddPoint(contact.worldPointB);
+                #endif
+
+                m_contactConstraints.push_back(CreateContactConstraint(contact, transformA, transformB, physBodyA, physBodyB));
+            }
+        }
+    }
+
+    void Solver::ResolveConstraints(std::span<Joint> joints, float dt)
     {
         for(size_t i = 0u; i < SolverIterations; ++i)
         {
-            for(auto& constraint : constraints.contact)
+            for(auto& constraint : m_contactConstraints)
             {
                 ResolveContactConstraint(constraint, dt);
             }
@@ -389,76 +365,9 @@ namespace nc::physics
 
         if constexpr(EnableDirectPositionCorrection)
         {
-            for(auto& constraint : constraints.position)
+            for(auto& constraint : m_positionConstraints)
             {
                 ResolvePositionConstraint(constraint);
-            }
-        }
-    }
-
-    void GenerateConstraints(Registry* registry, std::span<const Manifold> manifolds, Constraints* out)
-    {
-        const auto manifoldCount = manifolds.size();
-        out->contact.clear();
-        out->contact.reserve(manifoldCount * 4u);
-
-        if constexpr(EnableDirectPositionCorrection)
-        {
-            out->position.clear();
-            out->position.reserve(manifoldCount);
-        }
-
-        for(const auto& manifold : manifolds)
-        {
-            Entity entityA = Entity{manifold.entityA};
-            Entity entityB = Entity{manifold.entityB};
-            auto* transformA = registry->Get<Transform>(entityA);
-            auto* transformB = registry->Get<Transform>(entityB);
-            auto* physBodyA = registry->Get<PhysicsBody>(entityA);
-            auto* physBodyB = registry->Get<PhysicsBody>(entityB);
-
-            if constexpr(EnableDirectPositionCorrection)
-            {
-                auto deepestContact = manifold.GetDeepestContact();
-                out->position.emplace_back(transformA, transformB, manifold.eventType, deepestContact.normal, deepestContact.depth);
-            }
-
-            for(const auto& contact : manifold.contacts)
-            {
-                #ifdef USE_DEBUG_RENDERING
-                graphics::DebugRenderer::AddPoint(contact.worldPointA);
-                graphics::DebugRenderer::AddPoint(contact.worldPointB);
-                #endif
-
-                out->contact.push_back(CreateContactConstraint(contact, entityA, entityB, transformA, transformB, physBodyA, physBodyB));
-            }
-        }
-    }
-
-    void UpdateJoints(Registry* registry, std::span<Joint> joints, float dt)
-    {
-        for(auto& joint : joints)
-        {
-            UpdateJoint(registry, joint, dt);
-        }
-    }
-
-    void CacheImpulses(std::span<const ContactConstraint> constraints, std::span<Manifold> manifolds)
-    {
-        auto index = 0u;
-
-        for(auto& manifold : manifolds)
-        {
-            for(auto& contact : manifold.contacts)
-            {
-                assert(index < constraints.size());
-                assert(manifold.entityA == constraints[index].entityA && manifold.entityB == constraints[index].entityB);
-
-                const auto& constraint = constraints[index];
-                contact.lambda = constraint.totalLambda;
-                contact.muTangent = constraint.totalMuTangent;
-                contact.muBitangent = constraint.totalMuBitangent;
-                ++index;
             }
         }
     }

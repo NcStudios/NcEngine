@@ -1018,6 +1018,7 @@ XMVECTOR    XM_CALLCONV     XMLoadInt3(_In_reads_(3) const uint32_t* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadInt3A(_In_reads_(3) const uint32_t* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadFloat3(_In_ const XMFLOAT3* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadVector3(_In_ const nc::Vector3* pSource);
+XMVECTOR    XM_CALLCONV     XMLoadVector3A(_In_ const nc::Vector3* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadFloat3A(_In_ const XMFLOAT3A* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadSInt3(_In_ const XMINT3* pSource);
 XMVECTOR    XM_CALLCONV     XMLoadUInt3(_In_ const XMUINT3* pSource);
@@ -1058,6 +1059,7 @@ void        XM_CALLCONV     XMStoreInt3(_Out_writes_(3) uint32_t* pDestination, 
 void        XM_CALLCONV     XMStoreInt3A(_Out_writes_(3) uint32_t* pDestination, _In_ FXMVECTOR V);
 void        XM_CALLCONV     XMStoreFloat3(_Out_ XMFLOAT3* pDestination, _In_ FXMVECTOR V);
 void        XM_CALLCONV     XMStoreVector3(_Out_ nc::Vector3* pDestination, _In_ FXMVECTOR V);
+void        XM_CALLCONV     XMStoreVector3A(_Out_ nc::Vector3* pDestination, _In_ FXMVECTOR V);
 void        XM_CALLCONV     XMStoreFloat3A(_Out_ XMFLOAT3A* pDestination, _In_ FXMVECTOR V);
 void        XM_CALLCONV     XMStoreSInt3(_Out_ XMINT3* pDestination, _In_ FXMVECTOR V);
 void        XM_CALLCONV     XMStoreUInt3(_Out_ XMUINT3* pDestination, _In_ FXMVECTOR V);

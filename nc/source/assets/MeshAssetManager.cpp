@@ -86,11 +86,12 @@ namespace
 
 namespace nc
 {
-    MeshAssetManager::MeshAssetManager(graphics::Graphics* graphics)
+    MeshAssetManager::MeshAssetManager(graphics::Graphics* graphics, const std::string& assetDirectory)
         : m_graphics{graphics},
           m_vertexData{},
           m_indexData{},
-          m_accessors{}
+          m_accessors{},
+          m_assetDirectory{assetDirectory}
     {
     }
 
@@ -101,7 +102,7 @@ namespace nc
         m_accessors.clear();
     }
 
-    bool MeshAssetManager::Load(const std::string& path)
+    bool MeshAssetManager::Load(const std::string& path, bool isExternal)
     {
         if(IsLoaded(path))
             return false;
@@ -109,7 +110,8 @@ namespace nc
         const auto existingVertexCount = static_cast<uint32_t>(m_vertexData.vertices.size());
         const auto existingIndexCount = static_cast<uint32_t>(m_indexData.indices.size());
 
-        auto [verticesRead, indicesRead, maxExtent] = ReadMesh(path, m_vertexData.vertices, m_indexData.indices);
+        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        auto [verticesRead, indicesRead, maxExtent] = ReadMesh(fullPath, m_vertexData.vertices, m_indexData.indices);
 
         MeshView mesh
         {
@@ -125,7 +127,7 @@ namespace nc
         return true;
     }
 
-    bool MeshAssetManager::Load(std::span<const std::string> paths)
+    bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
@@ -139,7 +141,8 @@ namespace nc
             if(IsLoaded(path))
                 continue;
 
-            auto [verticesRead, indicesRead, maxExtent] = ReadMesh(path, m_vertexData.vertices, m_indexData.indices);
+            const auto fullPath = isExternal ? path : m_assetDirectory + path;
+            auto [verticesRead, indicesRead, maxExtent] = ReadMesh(fullPath, m_vertexData.vertices, m_indexData.indices);
 
             MeshView mesh
             {

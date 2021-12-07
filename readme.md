@@ -22,44 +22,35 @@ Current limitations:
 * NcEngine depends on Windows. There will likely be cross-platform support in the future, but it is not actively being pursued.
 * There are a few places where gcc specific code hasn't been fixed. This unfortunately means that mingw is the only currently supported compiler. This is planned to be fixed in the near future.
 
-There are two CMake projects in the repository
+There are three CMake projects in the repository
 * The engine, located in the 'nc' directory, is built as a static library and is output to 'nc/lib'.
+* An editor, located in the 'editor' directory, is output to the repository directory as 'NcEditor.exe'.
 * A sample project, located in the 'project' directory, is output to the repository directory as 'Sample.exe'.
 
-The easiest way to build the either of these is by running 'cmake.bat' in the 'tools' directory. It requires a target and configuration, where the target is either 'Engine' or 'Sample', and the configuration is one of the options listed [below](#configurations). This will output build files into the directory 'build/target/configuration' that can then be provided to the build system.
+The easiest way to build any of these is by running 'build.bat' in the 'tools' directory. It requires
+* Target: Engine, Editor, or Project
+* Config: Common configurations [here](#configurations)
+* Install Directory: Where to install NcEngine headers and binaries
+* Generator: CMake Generator
 
-For example, building the engine and sample in release mode from the repository root directory using Ninja looks like:
+For example, building everything in Release-WithEditor mode from the repository root directory using Ninja looks like:
 
-Generate engine build files:
 ```
->tools/cmake.bat Engine Release
-```
-
-Build NcEngine library
-```
->ninja -C build/Engine/Release
-```
-
-Generate sample build files:
-```
->tools/cmake.bat Project Release
+>tools/build.bat Engine Release-WithEditor C:/your/install/path "Ninja"
+>tools/build.bat Editor Release-WithEditor C:/your/install/path "Ninja"
+>tools/build.bat Project Release-WithEditor C:/your/install/path "Ninja"
 ```
 
-Build Sample.exe
-```
->ninja -C build/Project/Release
-```
-
-By default the cmake.bat file specifies Ninja as the generator. To use a different generator just change "Ninja" in the last line of cmake.bat to the generator of your choice.
+For Vs Code users, tasks for common cases can be found here [tools/tasks.json](tools/tasks.json).
 
 ### Configurations
 -----------------
-When building with the tools/cmake.bat file, one of these configurations are usually sufficient:
+When building with the tools/build.bat file, one of these configurations are usually sufficient:
 * Release - standard release build
-* Release-WithEditor - Release with editor-specific code included
+* Release-WithEditor - Release with editor-specific code included. Link the editor against this.
 * Debug - add debug symbols, editor-specific code, extra logging, build tests
 
-There are other available options. Note that these options just set the CMAKE_BUILD_TYPE and various definitions for convenience. CMake can always be run manually to add whatever definitions are needed.
+There are other available options. Note that these options just set the CMAKE_BUILD_TYPE and various definitions for convenience. CMake can always be run manually to add whatever definitions are needed. Note that NcEngine is installed to \<your-instalation-directory>/NcEngine/NC_BUILD_TYPE, so custom build types should set NC_BUILD_TYPE to a unique name.
 
 ### Definitions
 --------------
@@ -75,6 +66,16 @@ There are other available options. Note that these options just set the CMAKE_BU
     Default = OFF
     Enables Vulkan validation layers.
 
+#### NC_DEBUG_RENDERING
+    Default = OFF
+    Allows rendering wireframe primitives for debugging purposes.
+
+#### NC_PROFILING_ENABLED
+    Default = OFF
+    Enabled profiling with Optick. This also requires the Optick application (https://www.optickprofiler.com) and the Optick
+    shared library (nc/lib/libOptick.dll).
+
 #### VERBOSE_LOGGING_ENABLED
     Default = true
     Flag used to enable extra logging of internal engine operations to the diagnostics file specified in config.ini.
+

@@ -21,7 +21,7 @@ namespace nc
 
     void ParticleEmitter::Emit(size_t count)
     {
-        m_emitterSystem->Emit(GetParentEntity(), count);
+        m_emitterSystem->Emit(ParentEntity(), count);
     }
 
     void ParticleEmitter::RegisterSystem(ecs::ParticleEmitterSystem* system)

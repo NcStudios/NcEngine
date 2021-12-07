@@ -32,11 +32,12 @@ namespace
 
 namespace nc
 {
-    TextureAssetManager::TextureAssetManager(graphics::Graphics* graphics, uint32_t maxTextures)
-        : m_textureAccessors{},
+    TextureAssetManager::TextureAssetManager(graphics::Graphics* graphics, const std::string& texturesAssetDirectory, uint32_t maxTextures)
+        : m_accessors{},
           m_textures{},
           m_graphics{graphics},
-          m_textureSampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_assetDirectory{texturesAssetDirectory},
+          m_sampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
           m_maxTextureCount{maxTextures}
     {
     }
@@ -51,9 +52,9 @@ namespace nc
         m_textures.resize(0);
     }
 
-    bool TextureAssetManager::Load(const std::string& path)
+    bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     {
-        const auto index = m_textureAccessors.size();
+        const auto index = m_accessors.size();
 
         if (index + 1 >= m_maxTextureCount)
             throw NcError("Cannot exceed max texture count.");
@@ -61,13 +62,14 @@ namespace nc
         if(IsLoaded(path))
             return false;
 
-        m_textureAccessors.emplace(path, index);
-        m_textures.push_back(ReadTexture(path, m_graphics, &m_textureSampler.get()));
+        m_accessors.emplace(path, index);
+        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        m_textures.push_back(ReadTexture(fullPath, m_graphics, &m_sampler.get()));
         graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
         return true;
     }
 
-    bool TextureAssetManager::Load(std::span<const std::string> paths)
+    bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
         const auto newTextureCount = paths.size();
         auto nextTextureIndex = m_textures.size();
@@ -79,8 +81,9 @@ namespace nc
             if(IsLoaded(path))
                 continue;
 
-            m_textures.push_back(ReadTexture(path, m_graphics, &m_textureSampler.get()));
-            m_textureAccessors.emplace(path, nextTextureIndex++);
+            const auto fullPath = isExternal ? path : m_assetDirectory + path;
+            m_textures.push_back(ReadTexture(fullPath, m_graphics, &m_sampler.get()));
+            m_accessors.emplace(path, nextTextureIndex++);
         }
 
         graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
@@ -89,7 +92,7 @@ namespace nc
 
     bool TextureAssetManager::Unload(const std::string& path)
     {
-        auto removed = static_cast<bool>(m_textureAccessors.erase(path));
+        auto removed = static_cast<bool>(m_accessors.erase(path));
         if(!removed)
             return false;
         
@@ -102,7 +105,7 @@ namespace nc
         auto index = std::distance(m_textures.begin(), pos);
         m_textures.erase(pos);
 
-        for(auto& [path, textureView] : m_textureAccessors)
+        for(auto& [path, textureView] : m_accessors)
         {
             if(textureView.index > index)
                 --textureView.index;
@@ -114,14 +117,14 @@ namespace nc
 
     void TextureAssetManager::UnloadAll()
     {
-        m_textureAccessors.clear();
+        m_accessors.clear();
         m_textures.clear();
     }
 
     auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
     {
-        const auto it = m_textureAccessors.find(path);
-        if(it == m_textureAccessors.cend())
+        const auto it = m_accessors.find(path);
+        if(it == m_accessors.cend())
             throw NcError("Asset is not loaded: " + path);
         
         return it->second;
@@ -129,6 +132,6 @@ namespace nc
     
     bool TextureAssetManager::IsLoaded(const std::string& path) const
     {
-        return m_textureAccessors.contains(path);
+        return m_accessors.contains(path);
     }
 }

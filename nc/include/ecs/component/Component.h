@@ -1,4 +1,5 @@
 #pragma once
+#include "EditorMeta.h"
 #include "ecs/Entity.h"
 
 #include <concepts>
@@ -26,7 +27,7 @@ namespace nc
             ComponentBase& operator=(const ComponentBase&) = delete;
             ComponentBase& operator=(ComponentBase&&) = default;
 
-            Entity GetParentEntity() const noexcept { return m_parentEntity; }
+            Entity ParentEntity() const noexcept { return m_parentEntity; }
 
         private:
             Entity m_parentEntity;
@@ -45,10 +46,8 @@ namespace nc
             virtual void FixedUpdate() {}
             virtual void OnDestroy() {}
             virtual void OnCollisionEnter(Entity) {}
-            virtual void OnCollisionStay(Entity) {}
             virtual void OnCollisionExit(Entity) {}
             virtual void OnTriggerEnter(Entity) {}
-            virtual void OnTriggerStay(Entity) {}
             virtual void OnTriggerExit(Entity) {}
 
             #ifdef NC_EDITOR_ENABLED

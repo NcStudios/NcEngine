@@ -50,14 +50,6 @@ namespace nc
         }
     }
 
-    void AutoComponentGroup::SendOnCollisionStay(Entity hit)
-    {
-        for(auto& comp : m_components)
-        {
-            comp->OnCollisionStay(hit);
-        }
-    }
-
     void AutoComponentGroup::SendOnCollisionExit(Entity hit)
     {
         for(auto& comp : m_components)
@@ -71,14 +63,6 @@ namespace nc
         for(auto& comp : m_components)
         {
             comp->OnTriggerEnter(hit);
-        }
-    }
-
-    void AutoComponentGroup::SendOnTriggerStay(Entity hit)
-    {
-        for(auto& comp : m_components)
-        {
-            comp->OnTriggerStay(hit);
         }
     }
 

@@ -44,7 +44,14 @@ namespace nc::window
     /* WindowImpl */
     WindowImpl::WindowImpl(HINSTANCE instance)
         : m_onResizeReceivers{},
-          m_hInstance{instance}
+          m_hwnd{nullptr},
+          m_wndClass{},
+          m_hInstance{instance},
+          m_dimensions{},
+          GraphicsOnResizeCallback{nullptr},
+          GraphicsSetClearColorCallback{nullptr},
+          UIWndMessageCallback{nullptr},
+          EngineDisableRunningCallback{nullptr}
     {
         g_instance = this;
         GraphicsOnResizeCallback = nullptr;
@@ -53,7 +60,6 @@ namespace nc::window
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
 
-        m_wndClass = {};
         m_wndClass.style = WND_CLASS_STYLE_FLAGS;
         m_wndClass.lpfnWndProc = WindowImpl::WndProc;
         m_wndClass.hInstance = instance;

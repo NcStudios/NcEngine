@@ -15,15 +15,15 @@ namespace nc::physics
     constexpr bool EnableJointWarmstarting  = true;  // Start joint resolution from the most recent impulse or 0
     constexpr float WarmstartFactor = 0.5f;          // Percentage of previous impulse used to initialize constraints
 
-    /** Contact Tolerance */
-    constexpr float ContactBreakDistance = -0.01f; // How aggressively contact points are removed/retained
-    constexpr float PenetrationSlop = 0.01f;       // How far objects are allowed to penetrate
-
-    /** Position Correction */
+    /** Contact Behavior */
+    constexpr float ContactBreakDistance = -0.01f;        // How aggressively contact points are removed/retained
+    constexpr float PenetrationSlop = 0.01f;              // How far objects are allowed to penetrate
     constexpr bool EnableBaumgarteStabilization = true;   // Enable velocity-based position correction
     constexpr bool EnableDirectPositionCorrection = true; // Enable translation-based position correction
     constexpr float BaumgarteFactor = 0.1f;               // Bias factor for baumgarte stabilization [0, 1]
     constexpr float PositionCorrectionFactor = 0.333f;    // Percentage of mtv to use for direct position correction
+    constexpr bool EnableRestitutionSlop = true;          // Enabled zeroing of restitution below a threshold
+    constexpr float RestitutionSlop = 0.1f;               // Velocity threshold for applying restitution
 
     /** Sleeping Behavior */
     constexpr bool EnableSleeping = false;   // Allow disabling simulation of inactive bodies

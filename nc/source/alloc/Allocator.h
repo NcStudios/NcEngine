@@ -51,6 +51,7 @@ namespace nc::alloc
             template<class U>
             struct rebind { using other = LinearAllocator<U, Tag>; };
 
+            LinearAllocator(size_t size);
             LinearAllocator();
             ~LinearAllocator() = default;
             LinearAllocator(const LinearAllocator& other) = default;
@@ -126,6 +127,14 @@ namespace nc::alloc
     }
 
     /** LinearAllocator */
+    template<class T, class Tag>
+    LinearAllocator<T, Tag>::LinearAllocator(size_t size)
+        : m_memoryResource{nullptr}
+    {
+        create_memory_resource(size);
+        m_memoryResource = MemoryResource<memory_resource_type>::Get();
+    }
+
     template<class T, class Tag>
     LinearAllocator<T, Tag>::LinearAllocator()
         : m_memoryResource{MemoryResource<memory_resource_type>::Get()}

@@ -2,7 +2,6 @@
 #include "WireframeTechnique.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "ecs/component/Transform.h"
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
@@ -19,7 +18,7 @@ namespace nc::graphics
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
       m_base{graphics->GetBasePtr()},
-      m_meshPath{"project/assets/mesh/cube.nca"},
+      m_meshPath{"cube.nca"},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
     {
@@ -47,15 +46,13 @@ namespace nc::graphics
 
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        NC_PROFILE_END();
     }
 
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
 
@@ -124,8 +121,6 @@ namespace nc::graphics
 
     void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
         auto pushConstants = WireframePushConstants{};
 
         if (frameData.colliderDebugWidget.has_value())
@@ -167,8 +162,6 @@ namespace nc::graphics
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
         #endif
-
-        NC_PROFILE_END();
     }
 }
 #endif

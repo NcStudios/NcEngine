@@ -46,26 +46,48 @@ namespace nc
         RegisterComponentType<PointLight>();
     }
 
+    void Registry::RemoveEntityWithoutNotifyingParent(Entity entity)
+    {
+        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        auto* transform = Get<Transform>(entity);
+        for(auto child : transform->Children())
+            RemoveEntityWithoutNotifyingParent(child);
+        
+        auto pos = std::ranges::find(m_active, entity);
+        *pos = m_active.back();
+        m_active.pop_back();
+        m_toRemove.push_back(entity);
+    }
+
     void Registry::Clear()
     {
-        for(auto entity : m_toAdd)
-            Get<AutoComponentGroup>(entity)->SendOnDestroy();
-        for(auto entity : m_toRemove)
-            Get<AutoComponentGroup>(entity)->SendOnDestroy();
-        for(auto entity : m_active)
-            Get<AutoComponentGroup>(entity)->SendOnDestroy();
+        if(!m_toAdd.empty() || !m_toRemove.empty())
+        {
+            CommitStagedChanges();
+            m_toAdd.clear();
+            m_toRemove.clear();
+        }
 
-        m_active.clear();
-        m_active.shrink_to_fit();
-        m_toAdd.clear();
         m_toAdd.shrink_to_fit();
-        m_toRemove.clear();
         m_toRemove.shrink_to_fit();
 
+        std::vector<Entity> persistentEntities;
+
+        for(auto entity : m_active)
+        {
+            if(entity.IsPersistent())
+                persistentEntities.push_back(entity);
+            else
+                Get<AutoComponentGroup>(entity)->SendOnDestroy();
+        }
+
+        m_active = std::move(persistentEntities);
+        m_handleManager.Reset(m_active);
+
         for(auto& storage : m_registeredStorage)
+        {
             storage->Clear();
-        
-        m_handleManager.Reset();
+        }
     }
 
     void Registry::VerifyCallbacks()

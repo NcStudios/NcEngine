@@ -1,0 +1,138 @@
+// VS Code tasks for invoking NcEngine's build.bat build script. These
+// can be added to your .vscode/tasks.json file for common build types.
+//
+//  - NcInstallDir must be added to your settings.json. Set it to any
+//    path. Alternatively, ${config:NcInstallDir} may be changed here.
+//
+//  - "Ninja" may be changed to another generator.
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Editor Debug",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Editor", "Debug", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Engine Debug"
+        },
+        {
+            "label": "Editor Release-WithEditor",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Editor", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Engine Release-WithEditor"
+        },
+        {
+            "label": "Engine Debug",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Engine", "Debug", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Engine Debug-WithValidation",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Engine", "Debug-WithValidation", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Engine Release",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Engine", "Release", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Engine Release-WithEditor",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Engine", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Project Debug",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Project", "Debug", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Engine Debug"
+        },
+        {
+            "label": "Project Debug-WithValidation",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Project", "Debug-WithValidation", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Engine Debug-WithValidation"
+        },
+        {
+            "label": "Project Release",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Project", "Release", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Engine Release"
+        },
+        {
+            "label": "Project Release-WithEditor",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Project", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Engine Release-WithEditor"
+        }
+    ]
+}

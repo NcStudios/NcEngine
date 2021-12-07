@@ -28,66 +28,64 @@ namespace nc::sample
         
         m_sceneHelper.Setup(engine, true, false, Widget);
 
-        const std::string defaultTexturesPath = "project/Textures/";
-
         const std::vector<std::string> texturePaths
         {
-            defaultTexturesPath + "Floor/BaseColor.png",
-            defaultTexturesPath + "Floor/Normal.png",
-            defaultTexturesPath + "Floor/Roughness.png",
-            defaultTexturesPath + "Blacktop/BaseColor.png",
-            defaultTexturesPath + "Blacktop/Normal.png",
-            defaultTexturesPath + "Blacktop/Roughness.png",
-            defaultTexturesPath + "Blacktop/Metallic.png",
-            defaultTexturesPath + "Spheres/Blue/BaseColor.png",
-            defaultTexturesPath + "Spheres/Blue/Normal.png",
-            defaultTexturesPath + "Spheres/Blue/Roughness.png",
-            defaultTexturesPath + "Spheres/Blue/Metallic.png",
-            defaultTexturesPath + "Spheres/Gray/BaseColor.png",
-            defaultTexturesPath + "Spheres/Gray/Normal.png",
-            defaultTexturesPath + "Spheres/Gray/Roughness.png",
-            defaultTexturesPath + "Spheres/Gray/Metallic.png",
+            "Floor/BaseColor.png",
+            "Floor/Normal.png",
+            "Floor/Roughness.png",
+            "Blacktop/BaseColor.png",
+            "Blacktop/Normal.png",
+            "Blacktop/Roughness.png",
+            "Blacktop/Metallic.png",
+            "Spheres/Blue/BaseColor.png",
+            "Spheres/Blue/Normal.png",
+            "Spheres/Blue/Roughness.png",
+            "Spheres/Blue/Metallic.png",
+            "Spheres/Gray/BaseColor.png",
+            "Spheres/Gray/Normal.png",
+            "Spheres/Gray/Roughness.png",
+            "Spheres/Gray/Metallic.png",
         };
 
         nc::LoadTextureAssets(texturePaths);
 
         auto floorMaterial = Material
         { 
-            .baseColor = defaultTexturesPath + "Floor/BaseColor.png",
-            .normal    = defaultTexturesPath + "Floor/Normal.png",
-            .roughness = defaultTexturesPath + "Floor/Roughness.png",
-            .metallic  = defaultTexturesPath + "Floor/Roughness.png"
+            .baseColor = "Floor/BaseColor.png",
+            .normal    = "Floor/Normal.png",
+            .roughness = "Floor/Roughness.png",
+            .metallic  = "Floor/Roughness.png"
         };
 
         auto blacktopMaterial = Material
         { 
-            .baseColor = defaultTexturesPath + "Blacktop/BaseColor.png",
-            .normal    = defaultTexturesPath + "Blacktop/Normal.png",
-            .roughness = defaultTexturesPath + "Blacktop/Roughness.png",
-            .metallic  = defaultTexturesPath + "Blacktop/Metallic.png"
+            .baseColor = "Blacktop/BaseColor.png",
+            .normal    = "Blacktop/Normal.png",
+            .roughness = "Blacktop/Roughness.png",
+            .metallic  = "Blacktop/Metallic.png"
         };
 
         auto blueMaterial = Material
         { 
-            .baseColor = defaultTexturesPath + "Spheres/Blue/BaseColor.png",
-            .normal    = defaultTexturesPath + "Spheres/Blue/Normal.png",
-            .roughness = defaultTexturesPath + "Spheres/Blue/Roughness.png",
-            .metallic  = defaultTexturesPath + "Spheres/Blue/Metallic.png"
+            .baseColor = "Spheres/Blue/BaseColor.png",
+            .normal    = "Spheres/Blue/Normal.png",
+            .roughness = "Spheres/Blue/Roughness.png",
+            .metallic  = "Spheres/Blue/Metallic.png"
         };
 
         auto grayMaterial = Material
         { 
-            .baseColor = defaultTexturesPath + "Spheres/Gray/BaseColor.png",
-            .normal    = defaultTexturesPath + "Spheres/Gray/Normal.png",
-            .roughness = defaultTexturesPath + "Spheres/Gray/Roughness.png",
-            .metallic  = defaultTexturesPath + "Spheres/Gray/Metallic.png"
+            .baseColor = "Spheres/Gray/BaseColor.png",
+            .normal    = "Spheres/Gray/Normal.png",
+            .roughness = "Spheres/Gray/Roughness.png",
+            .metallic  = "Spheres/Gray/Metallic.png"
         };
 
         const std::vector<std::string> sceneMeshes = std::vector<std::string>
         { 
-            "project/assets/mesh/plane.nca",
-            "project/assets/mesh/sphere.nca",
-            "project/assets/mesh/cube.nca"
+            "plane.nca",
+            "sphere.nca",
+            "cube.nca"
         };
 
         nc::LoadMeshAssets(sceneMeshes);
@@ -119,7 +117,7 @@ namespace nc::sample
          .scale = Vector3{30.0f, 30.0f, 1.0f},
          .tag = "Floor"});
 
-        registry->Add<MeshRenderer>(floor, "project/assets/mesh/plane.nca", floorMaterial, TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(floor, "plane.nca", floorMaterial, TechniqueType::PhongAndUi);
 
         auto blueSphere = registry->Add<Entity>(
         {.position = Vector3{0.0f, 1.0f, 2.0f},
@@ -127,7 +125,7 @@ namespace nc::sample
         .scale = Vector3{2.0f, 2.0f,2.0f},
         .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blueSphere, "project/assets/mesh/sphere.nca", blueMaterial, TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blueSphere, "sphere.nca", blueMaterial, TechniqueType::PhongAndUi);
 
         auto blackSphere = registry->Add<Entity>(
         {.position = Vector3{3.0f, 1.0f, 2.0f},
@@ -135,7 +133,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blackSphere, "project/assets/mesh/cube.nca", grayMaterial, TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blackSphere, "cube.nca", grayMaterial, TechniqueType::PhongAndUi);
 
         auto blackBox = registry->Add<Entity>(
         {.position = Vector3{-3.0f, 1.0f, 2.0f},
@@ -143,7 +141,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Box"});
 
-        registry->Add<MeshRenderer>(blackBox, "project/assets/mesh/cube.nca", blacktopMaterial, TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blackBox, "cube.nca", blacktopMaterial, TechniqueType::PhongAndUi);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});

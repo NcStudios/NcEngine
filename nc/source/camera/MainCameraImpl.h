@@ -7,8 +7,8 @@ namespace nc::camera
     class MainCameraImpl final : public MainCamera
     {
         public:
-            void Set(Camera* camera) override;
-            auto Get() -> Camera* override;
+            void Set(Camera* camera) noexcept override;
+            auto Get() noexcept -> Camera* override;
         
         private:
             Camera* m_camera = nullptr;

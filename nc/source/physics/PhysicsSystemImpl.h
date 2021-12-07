@@ -2,16 +2,23 @@
 
 #include "physics/PhysicsSystem.h"
 #include "ClickableSystem.h"
-#include "collision/CollisionCache.h"
-#include "collision/BspTree.h"
-#include "dynamics/Joint.h"
-#include "graphics/Graphics.h"
-#include "task/Task.h"
+#include "PhysicsPipeline.h"
+#include "collision/proxy/PerFrameProxyCache.h"
+#include "collision/broad_phase/SingleAxisPrune.h"
 
 namespace nc::physics
 {
     class PhysicsSystemImpl final : public PhysicsSystem
     {
+        struct PipelineDescription
+        {
+            using multithreaded = std::true_type;
+            using proxy_cache = PerFrameProxyCache;
+            using proxy = proxy_cache::proxy_type;
+            using broad_phase = SingleAxisPrune<proxy_cache>;
+            using concave_phase = BspTree;
+        };
+
         public:
             PhysicsSystemImpl(Registry* registry);
 
@@ -27,11 +34,8 @@ namespace nc::physics
             void ClearState();
 
         private:
-            CollisionCache m_cache;
-            std::vector<Joint> m_joints;
-            BspTree m_bspTree;
+            PhysicsPipeline<PipelineDescription> m_pipeline;
             ClickableSystem m_clickableSystem;
-            TaskGraph m_tasks;
 
             void BuildTaskGraph(Registry* registry);
     };

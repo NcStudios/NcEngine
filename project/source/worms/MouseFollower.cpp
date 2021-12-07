@@ -33,6 +33,6 @@ namespace nc::sample
         m_zRatio = m_viewPortDist / m_zDepth;
         auto worldX = input::MouseX() + m_screenDimensions.x / 2;
         auto worldY = input::MouseY() + m_screenDimensions.y / 2;
-        m_registry->Get<Transform>(GetParentEntity())->SetPosition(Vector3{worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
+        m_registry->Get<Transform>(ParentEntity())->SetPosition(Vector3{worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
     }
 }

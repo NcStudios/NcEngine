@@ -2,24 +2,24 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
-#include "debug/Profiler.h"
 #include "input/InputInternal.h"
 #include "graphics/Renderer.h"
 #include "graphics/PerFrameRenderState.h"
+#include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
 
 namespace nc
 {
-    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath) -> std::unique_ptr<NcEngine>
+    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
     {
-        config::Load(configPath);
+        config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         V_LOG("Constructing Engine Instance");
-        return std::make_unique<Engine>(hInstance);
+        return std::make_unique<Engine>(hInstance, useEditorMode);
     }
 
     /* Engine */
-    Engine::Engine(HINSTANCE hInstance)
+    Engine::Engine(HINSTANCE hInstance, bool useEditorMode)
         : m_mainCamera{},
           m_window{ hInstance },
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
@@ -30,10 +30,11 @@ namespace nc
           m_audioSystem{m_ecs.GetRegistry()},
           m_environment{},
           m_uiSystem{m_window.GetHWND(), &m_graphics},
-          m_taskExecutor{6u}, // @todo probably add to config
+          m_taskExecutor{8u}, // @todo probably add to config
           m_tasks{},
           m_dt{0.0f},
           m_frameDeltaTimeFactor{1.0f},
+          m_useEditorMode{useEditorMode},
           m_isRunning{false}
     {
         SetBindings();
@@ -53,7 +54,11 @@ namespace nc
         m_sceneSystem.ChangeScene(std::move(initialScene));
         m_sceneSystem.DoSceneChange(this);
         m_isRunning = true;
-        MainLoop();
+
+        if(!m_useEditorMode)
+            MainLoop();
+        else
+            EditorLoop();
     }
 
     void Engine::Quit() noexcept
@@ -65,7 +70,14 @@ namespace nc
     void Engine::Shutdown() noexcept
     {
         V_LOG("Shutdown NcEngine");
-        ClearState();
+        try
+        {
+            ClearState();
+        }
+        catch(const std::exception& e)
+        {
+            debug::LogException(e);
+        }
     }
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
@@ -82,6 +94,7 @@ namespace nc
         [[maybe_unused]] auto writeAudioBuffersTask = m_tasks.AddGuardedTask(
             [&audioSystem = m_audioSystem]
         {
+            OPTICK_CATEGORY("AudioSystem::Update", Optick::Category::Audio);
             audioSystem.Update();
         });
 
@@ -100,7 +113,7 @@ namespace nc
         #endif
     }
 
-    void Engine::DisableRunningFlag()
+    void Engine::DisableRunningFlag() noexcept
     {
         m_isRunning = false;
     }
@@ -113,6 +126,8 @@ namespace nc
 
         while(m_isRunning)
         {
+            OPTICK_FRAME("Main Thread");
+
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
@@ -126,6 +141,29 @@ namespace nc
                 m_time.DecrementAccumulatedTime(fixedTimeStep);
                 ++physicsIterations;
             }
+
+            mainLoopTasksResult.wait();
+            m_tasks.ThrowIfExceptionStored();
+            m_ecs.GetRegistry()->CommitStagedChanges();
+            FrameRender();
+            particleEmitterSystem->ProcessFrameEvents();
+            FrameCleanup();
+        }
+
+        Shutdown();
+    }
+
+    void Engine::EditorLoop()
+    {
+        V_LOG("Starting engine loop");
+        auto* particleEmitterSystem = m_ecs.GetParticleEmitterSystem();
+
+        while(m_isRunning)
+        {
+            m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            m_window.ProcessSystemMessages();
+            auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
+            FrameLogic(m_dt);
 
             mainLoopTasksResult.wait();
             m_tasks.ThrowIfExceptionStored();
@@ -163,18 +201,14 @@ namespace nc
 
     void Engine::FrameLogic(float dt)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Logic);
-
+        OPTICK_CATEGORY("SendFrameUpdate", Optick::Category::GameLogic);
         for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
             group.SendFrameUpdate(dt);
-        
-        NC_PROFILE_END();
     }
 
     void Engine::FrameRender()
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
+        OPTICK_CATEGORY("FrameRender", Optick::Category::Rendering);
         /** Update the view matrix for the camera */
         auto* mainCamera = m_mainCamera.Get();
         mainCamera->UpdateViewMatrix();
@@ -204,8 +238,6 @@ namespace nc
 
         /** End the frame */
         m_graphics.FrameEnd();
-
-        NC_PROFILE_END();
     }
 
     void Engine::FrameCleanup()
@@ -214,7 +246,7 @@ namespace nc
         {
             DoSceneSwap();
         }
-        
+
         input::Flush();
     }
 

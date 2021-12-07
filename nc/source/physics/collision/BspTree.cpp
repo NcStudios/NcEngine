@@ -1,6 +1,5 @@
 #include "BspTree.h"
 #include "assets/AssetService.h"
-#include "IntersectionQueries.h"
 #include "graphics/DebugRenderer.h"
 
 #include <iostream>
@@ -13,12 +12,12 @@ namespace
     auto CreateTriMesh(Registry* registry, const ConcaveCollider& collider) -> TriMesh
     {
         auto meshView = AssetService<ConcaveColliderView>::Get()->Acquire(collider.GetPath());
-        auto entity = collider.GetParentEntity();
+        auto entity = collider.ParentEntity();
         auto* transform = registry->Get<Transform>(entity);
-        const auto& m = transform->GetTransformationMatrix();
-        const auto& scale = transform->GetScale();
+        const auto& m = transform->TransformationMatrix();
+        const auto& scale = transform->Scale();
         auto maxScale = math::Max(math::Max(scale.x, scale.y), scale.z);
-        auto estimate = Sphere{transform->GetPosition(), maxScale * meshView.maxExtent};
+        auto estimate = Sphere{transform->Position(), maxScale * meshView.maxExtent};
 
         std::vector<Triangle> triangles;
         triangles.reserve(meshView.triangles.size());
@@ -70,10 +69,10 @@ namespace
 namespace nc::physics
 {
     BspTree::BspTree(Registry* registry)
-        : m_nodes{},
+        : m_registry{registry},
+          m_nodes{},
           m_triMeshes{},
-          m_registry{registry},
-          m_previousContactCount{0u}
+          m_results{}
     {
         m_nodes.push_back(LeafNode{});
 
@@ -125,65 +124,13 @@ namespace nc::physics
         m_nodes.clear();
         m_nodes.push_back(LeafNode{});
         m_triMeshes.clear();
-        m_previousContactCount = 0u;
+        m_results.contacts.clear();
+        m_results.contacts.shrink_to_fit();
+        m_results.events.clear();
+        m_results.events.shrink_to_fit();
         #ifdef NC_DEBUG_RENDERING
         graphics::DebugRenderer::ClearPlanes();
         #endif
-    }
-
-    void BspTree::CheckCollisions(std::span<const DirectX::XMMATRIX> matrices,
-                                  std::span<const ColliderEstimate> estimates,
-                                  NarrowPhysicsResult* out)
-    {
-        out->contacts.clear();
-        out->events.clear();
-
-        if(m_nodes.empty())
-            return;
-
-        out->contacts.reserve(m_previousContactCount);
-        out->events.reserve(m_previousContactCount);
-        std::vector<size_t> narrowTestMeshIndices;
-        narrowTestMeshIndices.reserve(NodeCapacity); // lower-bound guess
-        CollisionState state;
-        const size_t dynamicCount = estimates.size();
-        auto colliders = m_registry->ViewAll<Collider>();
-
-        for(size_t i = 0u; i < dynamicCount; ++i)
-        {
-            const auto& estimate = estimates[i];
-
-            /** Find mesh colliders that are in the same region as the estimate. */
-            narrowTestMeshIndices.clear();
-            BroadTest(0u, estimate, narrowTestMeshIndices);
-
-            const auto& collider = colliders[i];
-            auto entity = collider.GetParentEntity();
-            const auto& volume = collider.GetVolume();
-            const auto& matrix = matrices[i];
-
-            for(auto meshIndex : narrowTestMeshIndices)
-            {
-                const auto& mesh = m_triMeshes[meshIndex];
-
-                /** Broad check against the mesh estimate */
-                if(!Intersect(estimate.estimate, mesh.estimate))
-                    continue;
-                
-                /** Narrow check against each mesh triangle until we find a collision. */
-                for(const auto& triangle : mesh.triangles)
-                {
-                    if(Collide(volume, triangle, matrix, &state))
-                    {
-                        out->events.emplace_back(entity, mesh.entity, CollisionEventType::FirstBodyPhysics);
-                        out->contacts.push_back(state.contact);
-                        continue;
-                    }
-                }
-            }
-        }
-
-        m_previousContactCount = out->contacts.size();
     }
 
     void BspTree::AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex)
@@ -372,7 +319,7 @@ namespace nc::physics
         return PartitionData{averageCenter, Normalize(variance), closestIndex};
     }
 
-    void BspTree::BroadTest(size_t currentNodeIndex, const ColliderEstimate& estimate, std::vector<size_t>& narrowTestMeshIndices)
+    void BspTree::BroadTest(size_t currentNodeIndex, const Sphere& estimate, std::vector<size_t>& narrowTestMeshIndices)
     {
         auto& node = m_nodes.at(currentNodeIndex);
 
@@ -383,7 +330,7 @@ namespace nc::physics
         }
 
         auto& inner = std::get<InnerNode>(node);
-        switch(TestHalfspace(inner.dividingPlane, estimate.estimate))
+        switch(TestHalfspace(inner.dividingPlane, estimate))
         {
             case HalfspaceContainment::Intersecting:
             {

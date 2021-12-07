@@ -1,7 +1,6 @@
 #include "PhongAndUiTechnique.h"
 #include "Assets.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
 #include "graphics/Initializers.h"
@@ -12,6 +11,7 @@
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ShaderResourceService.h"
+#include "optick/optick.h"
 
 namespace nc::graphics
 {
@@ -35,7 +35,7 @@ namespace nc::graphics
     void PhongAndUiTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PhongVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PhongFragment.spv");
 
@@ -108,7 +108,7 @@ namespace nc::graphics
 
     void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("PhongAndUiTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 1, ShaderResourceService<Texture>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 1, 1, ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSet(), 0, 0);
@@ -116,7 +116,6 @@ namespace nc::graphics
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 3, 1, ShaderResourceService<ShadowMap>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 4, 1, ShaderResourceService<CubeMap>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 5, 1, ShaderResourceService<EnvironmentData>::Get()->GetDescriptorSet(), 0, 0);
-        NC_PROFILE_END();
     }
 
     bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -127,7 +126,7 @@ namespace nc::graphics
 
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("PhongAndUiTechnique::Record", Optick::Category::Rendering);
         uint32_t objectInstance = 0;
         for(const auto& mesh : frameData.meshes)
         {
@@ -136,7 +135,6 @@ namespace nc::graphics
         }
 
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
-        NC_PROFILE_END();
     }
 
     void PhongAndUiTechnique::Clear() noexcept

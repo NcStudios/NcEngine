@@ -1,6 +1,5 @@
 #include "ShadowMappingTechnique.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
@@ -9,6 +8,7 @@
 #include "graphics/resources/ShaderResourceService.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
+#include "optick/optick.h"
 
 namespace
 {
@@ -46,16 +46,15 @@ namespace nc::graphics
 
     void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
-        NC_PROFILE_END();
     }
 
     void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
 
@@ -120,8 +119,7 @@ namespace nc::graphics
 
     void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
+        OPTICK_CATEGORY("ShadowMappingTechnique::Record", Optick::Category::Rendering);
         cmd->setDepthBias
         (
             DEPTH_BIAS_CONSTANT,
@@ -145,7 +143,5 @@ namespace nc::graphics
                 objectInstance++;
             }
         }
-
-        NC_PROFILE_END();
     }
 }

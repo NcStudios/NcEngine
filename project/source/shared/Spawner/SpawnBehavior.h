@@ -30,6 +30,6 @@ namespace nc::sample
         float thetaRandomRange = 0.0f;
 
         Entity::layer_type layer = 1u;
-        bool spawnAsStaticEntity = false;
+        Entity::flags_type flags = Entity::Flags::None;
     };
 }

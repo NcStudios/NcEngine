@@ -85,21 +85,18 @@ namespace nc::sample
         registry->Add<PhysicsBody>(greenCapsule, PhysicsProperties{});
 
         auto greenDisc = prefab::Create(registry, prefab::Resource::DiscGreen, {.position = Vector3{-6.0f, 0.0f, 1.5f}, .rotation = Quaternion::FromEulerAngles(1.57095f, 0.0f, 0.0f), .scale = Vector3::Splat(7.0f), .tag = "Green Disc"});
-        registry->Add<Collider>(greenDisc, HullProperties{.assetPath = "project/assets/mesh_colliders/coin.nca"}, false);
+        registry->Add<Collider>(greenDisc, HullProperties{.assetPath = "coin.nca"}, false);
         registry->Add<PhysicsBody>(greenDisc, PhysicsProperties{});
 
-        // Static Objects
-        auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{50.0f, 1.0f, 50.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
+        // // Static Objects
+        auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{25.0f, 1.0f, 25.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
         registry->Add<Collider>(ground, BoxProperties{}, false);
 
-        auto redCube = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{3.5f, 0.0f, 4.5f}, .scale = Vector3::Splat(1.0f), .tag = "Big Red Cube", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(redCube, BoxProperties{}, false);
+        // auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
+        // registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
         auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
         registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
-
-        auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(longRedBox, BoxProperties{}, true);
 
         const std::string defaultTexturesPath = "project/Textures/";
         auto skybox = CubeMapFaces
@@ -117,6 +114,8 @@ namespace nc::sample
         nc::LoadCubeMapAsset(skybox);
         engine->Environment()->Set(skybox);
 
+        // auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = Entity::Flags::Static});
+        // registry->Add<Collider>(longRedBox, BoxProperties{}, true);
     }
 
     void CollisionEvents::Unload()

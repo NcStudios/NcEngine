@@ -4,6 +4,7 @@
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
 #include "graphics/Environment.h"
+#include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
 #ifdef NC_EDITOR_ENABLED
 #include "physics/PhysicsSystemImpl.h"
@@ -27,9 +28,9 @@ namespace
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment)
-    : camViewMatrix{camera->GetViewMatrix()},
-      projectionMatrix{camera->GetProjectionMatrix()},
-      cameraPosition{registry->Get<Transform>(camera->GetParentEntity())->GetPosition()},
+    : camViewMatrix{camera->ViewMatrix()},
+      projectionMatrix{camera->ProjectionMatrix()},
+      cameraPosition{registry->Get<Transform>(camera->ParentEntity())->Position()},
       objectData{},
       pointLightInfos{},
       #ifdef NC_EDITOR_ENABLED
@@ -40,6 +41,7 @@ namespace nc::graphics
       environment{environment},
       useSkybox{environment->UseSkybox()}
     {
+        OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;
         const auto renderers = registry->ViewAll<MeshRenderer>();
@@ -49,7 +51,7 @@ namespace nc::graphics
 
         for(const auto& renderer : renderers)
         {
-            const auto& modelMatrix = registry->Get<Transform>(renderer.GetParentEntity())->GetTransformationMatrix();
+            const auto& modelMatrix = registry->Get<Transform>(renderer.ParentEntity())->TransformationMatrix();
             
             if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
@@ -63,7 +65,7 @@ namespace nc::graphics
         useSkybox = environment->UseSkybox();
         if (useSkybox)
         {
-            const auto& cameraPosition = registry->Get<Transform>(camera->GetParentEntity())->GetTransformationMatrix().r[3];
+            const auto& cameraPosition = registry->Get<Transform>(camera->ParentEntity())->TransformationMatrix().r[3];
             auto skyboxMatrix = DirectX::XMMatrixScaling(100.0f, 100.0f, 100.0f);
             skyboxMatrix.r[3] = cameraPosition;
 
@@ -89,11 +91,11 @@ namespace nc::graphics
 
         for(auto& pointLight : pointLights)
         {
-            auto* transform = registry->Get<Transform>(pointLight.GetParentEntity());
+            auto* transform = registry->Get<Transform>(pointLight.ParentEntity());
 
-            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->GetTransformationMatrix()));
+            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
 
-            if(pointLight.Update(transform->GetPosition(), pointLightVPs.back()))
+            if(pointLight.Update(transform->Position(), pointLightVPs.back()))
                 isPointLightBindRequired = true;
         }
 
@@ -110,6 +112,7 @@ namespace nc::graphics
 
     void MapPerFrameRenderState(const PerFrameRenderState& state)
     {
+        OPTICK_CATEGORY("MapPerFrameRenderState", Optick::Category::Rendering);
         ShaderResourceService<ObjectData>::Get()->Update(state.objectData);
 
         if(state.isPointLightBindRequired)

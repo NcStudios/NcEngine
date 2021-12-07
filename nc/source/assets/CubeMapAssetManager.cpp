@@ -8,10 +8,11 @@
 
 namespace nc
 {
-    CubeMapAssetManager::CubeMapAssetManager(graphics::Graphics* graphics, uint32_t maxCubeMapsCount)
+    CubeMapAssetManager::CubeMapAssetManager(graphics::Graphics* graphics, const std::string& cubeMapAssetDirectory, uint32_t maxCubeMapsCount)
         : m_cubeMapAccessors{},
           m_cubeMaps{},
           m_graphics{graphics},
+          m_assetDirectory{cubeMapAssetDirectory},
           m_cubeMapSampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
           m_maxCubeMapsCount{maxCubeMapsCount}
     {
@@ -25,7 +26,7 @@ namespace nc
         }
     }
 
-    bool CubeMapAssetManager::Load(const CubeMapFaces& faces)
+    bool CubeMapAssetManager::Load(const CubeMapFaces& faces, bool isExternal)
     {
         uint32_t nextCubeMapIndex = m_cubeMaps.size();
 
@@ -36,28 +37,34 @@ namespace nc
         int32_t width, height, numChannels; // Same for all faces.
 
         /** Front face */
-        pixelArray.at(0) = stbi_load(faces.frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + faces.frontPath);
+        const auto fullFrontPath = isExternal ? faces.frontPath : m_assetDirectory + faces.frontPath;
+        pixelArray.at(0) = stbi_load(fullFrontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + fullFrontPath);
 
         /** Back face */
-        pixelArray.at(1) = stbi_load(faces.backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + faces.backPath);
+        const auto fullBackPath = isExternal ? faces.backPath : m_assetDirectory + faces.backPath;
+        pixelArray.at(1) = stbi_load(fullBackPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + fullBackPath);
 
         /** Up face */
-        pixelArray.at(2) = stbi_load(faces.upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + faces.upPath);
+        const auto fullUpPath = isExternal ? faces.upPath : m_assetDirectory + faces.upPath;
+        pixelArray.at(2) = stbi_load(fullUpPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + fullUpPath);
 
         /** Down face */
-        pixelArray.at(3) = stbi_load(faces.downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + faces.downPath);
+        const auto fullDownPath = isExternal ? faces.downPath : m_assetDirectory + faces.downPath;
+        pixelArray.at(3) = stbi_load(fullDownPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + fullDownPath);
 
         /** Right face */
-        pixelArray.at(4) = stbi_load(faces.rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + faces.rightPath);
+        const auto fullRightPath = isExternal ? faces.rightPath : m_assetDirectory + faces.rightPath;
+        pixelArray.at(4) = stbi_load(fullRightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + fullRightPath);
 
         /** Left face */
-        pixelArray.at(5) = stbi_load(faces.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + faces.leftPath);
+        const auto fullLeftPath = isExternal ? faces.leftPath : m_assetDirectory + faces.leftPath;
+        pixelArray.at(5) = stbi_load(fullLeftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + fullLeftPath);
 
         auto cubeMapView = CubeMapView
         {
@@ -71,7 +78,7 @@ namespace nc
         return true;
     }
 
-    bool CubeMapAssetManager::Load(std::span<const CubeMapFaces> facesSet)
+    bool CubeMapAssetManager::Load(std::span<const CubeMapFaces> facesSet, bool isExternal)
     {
         const auto newCubeMapCount = facesSet.size();
         uint32_t newCubeMapIndex = m_cubeMaps.size();
@@ -87,29 +94,35 @@ namespace nc
             int32_t width, height, numChannels; // Same for all faces.
 
             /** Front face */
-            pixelArray.at(0) = stbi_load(faces.frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + faces.frontPath);
+            const auto fullFrontPath = isExternal ? faces.frontPath : m_assetDirectory + faces.frontPath;
+            pixelArray.at(0) = stbi_load(fullFrontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + fullFrontPath);
 
             /** Back face */
-            pixelArray.at(1) = stbi_load(faces.backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + faces.backPath);
+            const auto fullBackPath = isExternal ? faces.backPath : m_assetDirectory + faces.backPath;
+            pixelArray.at(1) = stbi_load(fullBackPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + fullBackPath);
 
             /** Up face */
-            pixelArray.at(2) = stbi_load(faces.upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + faces.upPath);
+            const auto fullUpPath = isExternal ? faces.upPath : m_assetDirectory + faces.upPath;
+            pixelArray.at(2) = stbi_load(fullUpPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + fullUpPath);
 
             /** Down face */
-            pixelArray.at(3) = stbi_load(faces.downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + faces.downPath);
+            const auto fullDownPath = isExternal ? faces.downPath : m_assetDirectory + faces.downPath;
+            pixelArray.at(3) = stbi_load(fullDownPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + fullDownPath);
 
             /** Right face */
-            pixelArray.at(4) = stbi_load(faces.rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + faces.rightPath);
+            const auto fullRightPath = isExternal ? faces.rightPath : m_assetDirectory + faces.rightPath;
+            pixelArray.at(4) = stbi_load(fullRightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + fullRightPath);
 
             /** Left face */
-            pixelArray.at(5) = stbi_load(faces.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + faces.leftPath);
-
+            const auto fullLeftPath = isExternal ? faces.leftPath : m_assetDirectory + faces.leftPath;
+            pixelArray.at(5) = stbi_load(fullLeftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + fullLeftPath);
+            
             auto cubeMapView = CubeMapView
             {
                 .usage = faces.usage,

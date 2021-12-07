@@ -15,8 +15,8 @@ namespace nc
             IAssetService();
             virtual ~IAssetService() = default;
 
-            virtual bool Load(const InputType& input) = 0;
-            virtual bool Load(std::span<const InputType> inputs) = 0;
+            virtual bool Load(const InputType& input, bool isExternal) = 0;
+            virtual bool Load(std::span<const InputType> inputs, bool isExternal) = 0;
             virtual bool Unload(const InputType& input) = 0;
             virtual void UnloadAll() = 0;
             virtual auto Acquire(const InputType& input) const -> data_type = 0;
