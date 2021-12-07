@@ -4,7 +4,7 @@
 
 namespace nc
 {
-    const std::string SkyboxMeshPath = "nc/resources/mesh/skybox.nca";
+    const std::string SkyboxMeshPath = "skybox.nca";
 
     struct EnvironmentData
     {
