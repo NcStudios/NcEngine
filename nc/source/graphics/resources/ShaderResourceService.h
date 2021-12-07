@@ -6,6 +6,7 @@
 
 namespace nc
 {
+    struct EnvironmentData;
     struct PointLightInfo;
     namespace graphics
     {
@@ -13,7 +14,6 @@ namespace nc
         class Graphics;
         struct ObjectData;
         struct Texture;
-        struct SceneData;
         class CubeMap;
     }
 }
@@ -33,7 +33,7 @@ namespace nc::graphics
                              std::same_as<T, PointLightInfo> ||
                              std::same_as<T, Texture> ||
                              std::same_as<T, ShadowMap> || 
-                             std::same_as<T, SceneData> ||
+                             std::same_as<T, EnvironmentData> ||
                              std::same_as<T, CubeMap>;
 
     /** Interface for types that manage shader parameters. */

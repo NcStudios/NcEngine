@@ -14,6 +14,7 @@
 #include "ecs/component/Transform.h"
 #include "MainCamera.h"
 #include "AudioSystem.h"
+#include "graphics/Environment.h"
 #include "physics/PhysicsSystem.h"
 #include "ui/UISystem.h"
 #include "Scene.h"
@@ -32,6 +33,7 @@ namespace nc
             virtual void Shutdown() noexcept = 0;
 
             virtual auto Audio() noexcept -> AudioSystem* = 0;
+            virtual auto Environment() noexcept -> Environment* = 0;
             virtual auto MainCamera() noexcept -> MainCamera* = 0;
             virtual auto Physics() noexcept -> PhysicsSystem* = 0;
             virtual auto Registry() noexcept -> Registry* = 0;

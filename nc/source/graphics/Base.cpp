@@ -474,10 +474,10 @@ namespace nc::graphics
         void* mappedData;
         auto allocation = m_buffers.at(stagingIndex).second;
         m_allocator.mapMemory(allocation, &mappedData);
-        for (auto layer = 0; layer < 6; layer++)
+        for (auto layerIndex = 0u; layerIndex < 6u; ++layerIndex)
         {
-            memcpy(mappedData + (width * height * layer), pixels[layer], static_cast<size_t>(width * height));
-            stbi_image_free(pixels[layer]);
+            memcpy(static_cast<char*>(mappedData) + (width * height * 4) * layerIndex, pixels[layerIndex], static_cast<size_t>(width * height * 4));
+            stbi_image_free(pixels[layerIndex]);
         }
         m_allocator.unmapMemory(allocation);
 
@@ -485,7 +485,7 @@ namespace nc::graphics
         auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, &textureImage);
 
         TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
-        CopyBufferToImage(stagingBuffer, textureImage, width, height);
+        CopyBufferToImage(stagingBuffer, textureImage, width, height, 6);
         TransitionImageLayout(textureImage, vk::ImageLayout::eTransferDstOptimal, 6, vk::ImageLayout::eShaderReadOnlyOptimal);
 
         DestroyBuffer(stagingIndex);
@@ -574,6 +574,29 @@ namespace nc::graphics
             subresource.setMipLevel(0);
             subresource.setBaseArrayLayer(0);
             subresource.setLayerCount(1);
+
+            region.setImageSubresource(subresource);
+            region.setImageOffset({0, 0, 0});
+            region.setImageExtent({width, height, 1});
+
+            cmd.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &region);
+        });
+    }
+
+    void Base::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount)
+    {
+        Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) 
+        {
+            vk::BufferImageCopy region{};
+            region.setBufferOffset(0);
+            region.setBufferRowLength(0);
+            region.setBufferImageHeight(0);
+
+            vk::ImageSubresourceLayers subresource{};
+            subresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresource.setMipLevel(0);
+            subresource.setBaseArrayLayer(0);
+            subresource.setLayerCount(layerCount);
 
             region.setImageSubresource(subresource);
             region.setImageOffset({0, 0, 0});

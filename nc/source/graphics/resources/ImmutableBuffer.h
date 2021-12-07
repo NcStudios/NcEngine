@@ -11,11 +11,6 @@ namespace nc::graphics
 {
     class Graphics;
 
-    struct SceneData
-    {
-        uint32_t skyboxIndex;
-    };
-
     // Buffer that is intended for infrequent or one-time writes on the CPU, and frequent reads on the GPU.
     class ImmutableBuffer
     {
@@ -23,7 +18,6 @@ namespace nc::graphics
             ImmutableBuffer();
             ImmutableBuffer(nc::graphics::Graphics* graphics, const std::vector<uint32_t>& data);
             ImmutableBuffer(nc::graphics::Graphics* graphics, const std::vector<Vertex>& data);
-            ImmutableBuffer(nc::graphics::Graphics* graphics, const SceneData& data);
             ~ImmutableBuffer() noexcept;
             ImmutableBuffer(ImmutableBuffer&&);
             ImmutableBuffer& operator=(ImmutableBuffer&&);
@@ -33,7 +27,6 @@ namespace nc::graphics
             vk::Buffer* GetBuffer();
             void Bind(nc::graphics::Graphics* graphics, const std::vector<uint32_t>& data);
             void Bind(nc::graphics::Graphics* graphics, const std::vector<Vertex>& data);
-            void Bind(nc::graphics::Graphics* graphics, const SceneData& data);
             void Clear();
 
         private:

@@ -100,6 +100,23 @@ namespace nc::sample
 
         auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = Entity::Flags::Static});
         registry->Add<Collider>(longRedBox, BoxProperties{}, true);
+
+        const std::string defaultTexturesPath = "project/Textures/";
+        auto skybox = CubeMapFaces
+        {
+            .usage = CubeMapUsage::Skybox,
+            .uid = "Humus01Skybox",
+            .frontPath = defaultTexturesPath + "CubeMaps/Humus01/Front.jpg",
+            .backPath  = defaultTexturesPath + "CubeMaps/Humus01/Back.jpg",
+            .upPath    = defaultTexturesPath + "CubeMaps/Humus01/Up.jpg",
+            .downPath  = defaultTexturesPath + "CubeMaps/Humus01/Down.jpg",
+            .rightPath = defaultTexturesPath + "CubeMaps/Humus01/Right.jpg",
+            .leftPath  = defaultTexturesPath + "CubeMaps/Humus01/Left.jpg"
+        };
+
+        nc::LoadCubeMapAsset(skybox);
+        engine->Environment()->Set(skybox);
+
     }
 
     void CollisionEvents::Unload()

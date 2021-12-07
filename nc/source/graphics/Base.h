@@ -85,6 +85,7 @@ namespace nc::graphics
             void InitializeImgui(const vk::RenderPass& defaultPass);
             void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
+            void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
 
         private:
             void CreateInstance();

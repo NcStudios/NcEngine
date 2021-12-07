@@ -31,8 +31,8 @@ namespace nc::graphics
         // Create and bind the descriptor set for the array of textures.
         std::array<vk::DescriptorSetLayoutBinding, 2u> layoutBindings
         {
-          CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment),
-          CreateDescriptorSetLayoutBinding(1, m_maxCubeMapsCount, vk::DescriptorType::eSampledImage, vk::ShaderStageFlagBits::eFragment)
+          CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eSampler, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex),
+          CreateDescriptorSetLayoutBinding(1, m_maxCubeMapsCount, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)
         };
 
         std::array<vk::DescriptorBindingFlagsEXT, 2> layoutBindingFlags
@@ -56,11 +56,7 @@ namespace nc::graphics
         vk::DescriptorImageInfo samplerInfo = {};
         samplerInfo.sampler = m_cubeMapSampler.get();
 
-        if (!m_cubeMapsInitialized)
-        {
-            m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxCubeMapsCount, CreateDescriptorImageInfo(&m_cubeMapSampler.get(), data.at(0).GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
-            m_cubeMapsInitialized = true;
-        }
+        m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxCubeMapsCount, CreateDescriptorImageInfo(&m_cubeMapSampler.get(), data.at(0).GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
 
         writes[0].setDstBinding(0);
         writes[0].setDstArrayElement(0);
@@ -77,7 +73,7 @@ namespace nc::graphics
 
         writes[1].setDstBinding(1);
         writes[1].setDstArrayElement(0);
-        writes[1].setDescriptorType(vk::DescriptorType::eSampledImage);
+        writes[1].setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
         writes[1].setDescriptorCount(m_maxCubeMapsCount);
         writes[1].setDstSet(m_descriptorSet.get());
         writes[1].setPBufferInfo(0);
@@ -98,5 +94,9 @@ namespace nc::graphics
 
     void CubeMapManager::Reset()
     {
+        m_descriptorSet.reset();
+        m_descriptorSetLayout.reset();
+        m_cubeMapSampler.reset();
+        Initialize();
     }
 }

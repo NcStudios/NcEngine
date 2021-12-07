@@ -27,7 +27,7 @@ namespace nc
 
     bool CubeMapAssetManager::Load(const CubeMapFaces& faces)
     {
-        auto nextCubeMapIndex = m_cubeMaps.size();
+        uint32_t nextCubeMapIndex = m_cubeMaps.size();
 
         if(IsLoaded(faces))
             return true;
@@ -66,7 +66,7 @@ namespace nc
         };
 
         m_cubeMapAccessors.emplace(faces.uid, cubeMapView);
-        m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6);
+        m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, faces.uid);
         graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
         return true;
     }
@@ -74,7 +74,7 @@ namespace nc
     bool CubeMapAssetManager::Load(std::span<const CubeMapFaces> facesSet)
     {
         const auto newCubeMapCount = facesSet.size();
-        auto newCubeMapIndex = m_cubeMaps.size();
+        uint32_t newCubeMapIndex = m_cubeMaps.size();
         if (newCubeMapCount + newCubeMapIndex >= m_maxCubeMapsCount)
             throw NcError("Cannot exceed max texture count.");
 
@@ -117,7 +117,7 @@ namespace nc
             };
 
             m_cubeMapAccessors.emplace(faces.uid, cubeMapView);
-            m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6);
+            m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, faces.uid);
         }
 
         graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
@@ -126,26 +126,26 @@ namespace nc
 
     bool CubeMapAssetManager::Unload(const CubeMapFaces& faces)
     {
-        // auto removed = static_cast<bool>(m_cubeMapAccessors.erase(faces.uid));
-        // if(!removed)
-        //     return false;
+        auto removed = static_cast<bool>(m_cubeMapAccessors.erase(faces.uid));
+        if(!removed)
+            return false;
         
-        // auto pos = std::ranges::find_if(m_cubeMaps, [&uid = faces.uid](const auto& cubeMap)
-        // {
-        //     return cubeMap. == uid;
-        // });
+        auto pos = std::ranges::find_if(m_cubeMaps, [&uid = faces.uid](const auto& cubeMap)
+        {
+            return cubeMap.GetUid() == uid;
+        });
 
-        // assert(pos != m_textures.end());
-        // auto index = std::distance(m_textures.begin(), pos);
-        // m_textures.erase(pos);
+        assert(pos != m_cubeMaps.end());
+        auto index = std::distance(m_cubeMaps.begin(), pos);
+        m_cubeMaps.erase(pos);
 
-        // for(auto& [path, textureView] : m_accessors)
-        // {
-        //     if(textureView.index > index)
-        //         --textureView.index;
-        // }
+        for(auto& [path, cubeMapView] : m_cubeMapAccessors)
+        {
+            if(cubeMapView.index > index)
+                --cubeMapView.index;
+        }
 
-        // graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
+        graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
         return true;
     }
 

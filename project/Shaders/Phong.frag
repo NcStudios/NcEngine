@@ -4,12 +4,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_EXT_nonuniform_qualifier : enable
 
-layout(push_constant) uniform PER_OBJECT
-{
-    // Camera world position
-    vec3 cameraPos;
-} pc;
-
 struct PointLight
 {
     mat4 lightViewProj;
@@ -37,6 +31,12 @@ struct ObjectData
     int metallicIndex;
 };
 
+layout (set = 5, binding = 0) uniform EnvironmentDataBuffer
+{
+    vec3 cameraWorldPosition;
+    int skyboxCubemapIndex;
+} environmentData;
+
 layout(std140, set=2, binding=0) readonly buffer ObjectBuffer
 {
     ObjectData objects[];
@@ -57,12 +57,20 @@ layout (location = 3) in vec2 inUV;
 layout (location = 4) in mat3 inTBN;
 layout (location = 7) in flat int inObjectInstance;
 layout (location = 8) in vec4 inLightSpacePosition;
+layout (location = 9) in vec3 inUVW;
 
 layout (location = 0) out vec4 outFragColor;
 
 vec3 MaterialColor(int textureIndex)
 {
    return vec3(texture(sampler2D(textures[textureIndex], smplr), inUV));
+}
+
+layout (set = 4, binding = 1) uniform samplerCube cubeMaps[];
+
+vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
+{
+    return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
 }
 
 layout (set = 3, binding = 0) uniform sampler2D shadowMap;
@@ -189,8 +197,7 @@ void main()
 
     vec3 normal = normalColor;
     vec3 N = (normalize(inTBN * normal));
-    // vec3 N = normalize(inNormal);
-    vec3 V = normalize(pc.cameraPos - inFragPosition);
+    vec3 V = normalize(environmentData.cameraWorldPosition - inFragPosition);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -207,6 +214,17 @@ void main()
         }
 
         result += CalculatePointLight(i, N, V, F0, baseColor, roughnessColor.r, metallicColor.r);
+    }
+
+    if (environmentData.skyboxCubemapIndex > -1)
+    {
+        // Environment reflection
+        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
+        vec3 surfaceNormal = normalize((inNormal + N)/2);
+        vec3 reflected = reflect(I, surfaceNormal);
+        vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
+
+        result += (F0 * (1-roughnessColor.r) * environmentReflectionColor) / 2;
     }
 
     outFragColor = vec4(result, 1.0);

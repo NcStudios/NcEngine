@@ -10,8 +10,6 @@
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
 
-#include <iostream>
-
 namespace
 {
     // Depth bias (and slope) are used to avoid shadowing artifacts

@@ -17,15 +17,13 @@ namespace nc::graphics
     ImmutableBuffer::ImmutableBuffer() {}
     ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics* , const std::vector<uint32_t>&) {}
     ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics*, const std::vector<Vertex>&) {}
-    ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics*, const SceneData&) {}
     ImmutableBuffer::~ImmutableBuffer() {}
     ImmutableBuffer::ImmutableBuffer(ImmutableBuffer&&) {}
     ImmutableBuffer& ImmutableBuffer::operator=(ImmutableBuffer&&) {}
     
-    vk::Buffer* ImmutableBuffer::GetBuffer() {}
+    vk::Buffer* ImmutableBuffer::GetBuffer() {return nullptr;}
     void ImmutableBuffer::Bind(nc::graphics::Graphics*, const std::vector<uint32_t>&) {}
     void ImmutableBuffer::Bind(nc::graphics::Graphics*, const std::vector<Vertex>&) {}
-    void ImmutableBuffer::Bind(nc::graphics::Graphics*, const SceneData&) {}
     void ImmutableBuffer::Clear() {}
 
     void Commands::SubmitCopyCommandImmediate(const Base&, const vk::Buffer&, const vk::Buffer&, const vk::DeviceSize) {}

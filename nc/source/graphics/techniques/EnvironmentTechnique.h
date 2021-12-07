@@ -2,6 +2,7 @@
 
 #include "directx/math/DirectXMath.h"
 #include "ecs/component/Component.h"
+#include "graphics/Environment.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
@@ -12,11 +13,11 @@ namespace nc::graphics
 {
     class Graphics; class Base; class Swapchain;
 
-    class PhongAndUiTechnique : public ITechnique
+    class EnvironmentTechnique : public ITechnique
     {
         public:
-            PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
-            ~PhongAndUiTechnique() noexcept;
+            EnvironmentTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
+            ~EnvironmentTechnique() noexcept;
             
             bool CanBind(const PerFrameRenderState& frameData) override;
             void Bind(vk::CommandBuffer* cmd) override;

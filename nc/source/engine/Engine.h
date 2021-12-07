@@ -27,6 +27,7 @@ namespace nc
             void Shutdown() noexcept override;
 
             auto Audio() noexcept -> AudioSystem* override;
+            auto Environment() noexcept -> nc::Environment* override;
             auto MainCamera() noexcept -> nc::MainCamera* override;
             auto Registry() noexcept -> nc::Registry* override;
             auto Physics() noexcept -> PhysicsSystem* override;
@@ -42,6 +43,7 @@ namespace nc
             scene::SceneSystemImpl m_sceneSystem;
             time::Time m_time;
             audio::AudioSystemImpl m_audioSystem;
+            nc::Environment m_environment;
             ui::UISystemImpl m_uiSystem;
             tf::Executor m_taskExecutor;
             TaskGraph m_tasks;

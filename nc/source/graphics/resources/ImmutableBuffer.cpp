@@ -23,13 +23,6 @@ namespace nc::graphics
         Bind(graphics, data);
     }
 
-    ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics* graphics, const SceneData& data)
-        : m_memoryIndex { 0 },
-          m_immutableBuffer { nullptr }
-    {
-        Bind(graphics, data);
-    }
-
     ImmutableBuffer::~ImmutableBuffer() noexcept
     {
         if (m_immutableBuffer)
@@ -106,35 +99,6 @@ namespace nc::graphics
 
         // Create immutable buffer (lives on GPU).
         m_memoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vma::MemoryUsage::eGpuOnly, &m_immutableBuffer);
-
-        // Copy staging into immutable buffer.
-        Commands::SubmitCopyCommandImmediate(*m_base, stagingBuffer, m_immutableBuffer, size);
-
-        // Destroy the staging buffer.
-        m_base->DestroyBuffer(stagingBufferMemoryIndex);
-    }
-
-    void ImmutableBuffer::Bind(nc::graphics::Graphics* graphics, const SceneData& data)
-    {
-        m_base = graphics->GetBasePtr();
-
-        auto size = static_cast<uint32_t>(sizeof(SceneData));
-
-        // Create staging buffer (lives on CPU).
-        vk::Buffer stagingBuffer;
-        auto stagingBufferMemoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
-
-        // Map the data onto the staging buffer.
-        void* mappedData;
-        auto* allocator = m_base->GetAllocator();
-        auto* allocation = m_base->GetBufferAllocation(stagingBufferMemoryIndex);
-
-        allocator->mapMemory(*allocation, &mappedData);
-        memcpy(mappedData, &data, size);
-        allocator->unmapMemory(*allocation);
-
-        // Create immutable buffer (lives on GPU).
-        m_memoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst, vma::MemoryUsage::eGpuOnly, &m_immutableBuffer);
 
         // Copy staging into immutable buffer.
         Commands::SubmitCopyCommandImmediate(*m_base, stagingBuffer, m_immutableBuffer, size);

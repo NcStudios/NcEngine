@@ -92,20 +92,21 @@ namespace nc::sample
 
         nc::LoadMeshAssets(sceneMeshes);
 
-        auto skybox = CubeMapFaces
+        auto skyboxForest = CubeMapFaces
         {
             .usage = CubeMapUsage::Skybox,
-            .uid = "Humus01Skybox",
-            .frontPath = defaultTexturesPath + "CubeMaps/Humus01/Front.jpg",
-            .backPath  = defaultTexturesPath + "CubeMaps/Humus01/Back.jpg",
-            .upPath    = defaultTexturesPath + "CubeMaps/Humus01/Up.jpg",
-            .downPath  = defaultTexturesPath + "CubeMaps/Humus01/Down.jpg",
-            .rightPath = defaultTexturesPath + "CubeMaps/Humus01/Right.jpg",
-            .leftPath  = defaultTexturesPath + "CubeMaps/Humus01/Left.jpg"
+            .uid = "Humus02Skybox",
+            .frontPath = defaultTexturesPath + "CubeMaps/Humus02/Front.jpg",
+            .backPath  = defaultTexturesPath + "CubeMaps/Humus02/Back.jpg",
+            .upPath    = defaultTexturesPath + "CubeMaps/Humus02/Up.jpg",
+            .downPath  = defaultTexturesPath + "CubeMaps/Humus02/Down.jpg",
+            .rightPath = defaultTexturesPath + "CubeMaps/Humus02/Right.jpg",
+            .leftPath  = defaultTexturesPath + "CubeMaps/Humus02/Left.jpg"
         };
 
-        nc::LoadCubeMapAsset(skybox);
-
+        nc::LoadCubeMapAsset(skyboxForest);
+        engine->Environment()->Set(skyboxForest);
+        
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),
