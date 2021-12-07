@@ -36,7 +36,7 @@ namespace nc
         float maxExtent;
     };
 
-    struct SoundClipView
+    struct AudioClipView
     {
         std::span<const double> leftChannel;
         std::span<const double> rightChannel;
@@ -75,7 +75,7 @@ namespace nc
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
-    concept AssetType = std::same_as<T, SoundClipView> ||
+    concept AssetType = std::same_as<T, AudioClipView> ||
                         std::same_as<T, ConvexHullView> ||
                         std::same_as<T, ConcaveColliderView> ||
                         std::same_as<T, MeshView> ||

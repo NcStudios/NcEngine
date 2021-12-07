@@ -2,7 +2,6 @@
 #include "Assets.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "debug/Profiler.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"
 #include "graphics/Initializers.h"
@@ -13,6 +12,7 @@
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ShaderResourceService.h"
+#include "optick/optick.h"
 
 namespace nc::graphics
 {
@@ -36,7 +36,7 @@ namespace nc::graphics
     void EnvironmentTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetGraphicsSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "EnvironmentVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "EnvironmentFragment.spv");
 
@@ -105,12 +105,11 @@ namespace nc::graphics
 
     void EnvironmentTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
+        OPTICK_CATEGORY("EnvironmentTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 1, ShaderResourceService<EnvironmentData>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 1, 1, ShaderResourceService<CubeMap>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 2, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
-        NC_PROFILE_END();
     }
 
     bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -120,12 +119,9 @@ namespace nc::graphics
 
     void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        NC_PROFILE_BEGIN(debug::profiler::Filter::Rendering);
-
+        OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
         const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(SkyboxMeshPath);
         cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, frameData.objectData.size()-1); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-
-        NC_PROFILE_END();
     }
 
     void EnvironmentTechnique::Clear() noexcept
