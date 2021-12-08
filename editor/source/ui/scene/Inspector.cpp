@@ -111,10 +111,11 @@ namespace nc::editor
     void Inspector::InspectEntity(Entity entity)
     {
         ElementHeader(&entity);
-        ImGui::Text("Tag    %s", m_registry->Get<Tag>(entity)->Value().data());
-        ImGui::Text("Index  %d", entity.Index());
-        ImGui::Text("Layer  %d", entity.Layer());
-        ImGui::Text("Static %s", entity.IsStatic() ? "True" : "False");
+        ImGui::Text("Tag     %s", m_registry->Get<Tag>(entity)->Value().data());
+        ImGui::Text("Index   %d", entity.Index());
+        ImGui::Text("Layer   %d", entity.Layer());
+        ImGui::Text("Static  %d", entity.IsStatic());
+        ImGui::Text("Persist %d", entity.IsPersistent());
 
         if(auto* transform  = m_registry->Get<Transform>(entity))         { DrawTransform(transform); }
         if(auto* camera     = m_registry->Get<Camera>(entity))            { DrawCamera(camera); }

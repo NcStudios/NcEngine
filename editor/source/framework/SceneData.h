@@ -7,5 +7,6 @@ namespace nc::editor
     struct SceneData
     {
         Entity mainCamera = Entity::Null();
+        Entity audioListener = Entity::Null();
     };
 }

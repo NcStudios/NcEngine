@@ -17,6 +17,9 @@ friend ::nc::editor::AssetDependencyChecker;
 #define NC_EDITOR_ENTITY_INFO(...) EntityInfo{__VA_ARGS__}
 #define NC_EDITOR_ADD_ENTITY(handle, info) Entity handle = registry->Add<Entity>(info)
 
+/** Audio */
+#define NC_EDITOR_REGISTER_AUDIO_LISTENER(handle) engine->AudioSystem()->RegisterAudioListener(handle)
+
 /** Camera */
 #define NC_EDITOR_ADD_CAMERA(handle) registry->Add<Camera>(handle)
 #define NC_EDITOR_SET_CAMERA(handle) engine->MainCamera()->Set(registry->Get<Camera>(handle));
