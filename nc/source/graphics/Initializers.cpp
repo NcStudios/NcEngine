@@ -24,7 +24,6 @@ namespace nc::graphics
         samplerInfo.setMipLodBias(0.0f);
         samplerInfo.setMinLod(0.0f);
         samplerInfo.setMaxLod(0.0f);
-
         return samplerInfo;
     }
 

@@ -102,4 +102,25 @@ namespace nc
     {
         return AssetService<TextureView>::Get()->UnloadAll();
     }
+
+    bool LoadCubeMapAsset(const CubeMapFaces& paths, bool isExternal)
+    {
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->Load(paths, isExternal);
+    }
+
+    bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths, bool isExternal)
+    {
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->Load(paths, isExternal);
+    }
+
+    bool UnloadCubeMapAsset(const CubeMapFaces& paths)
+    {
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->Unload(paths);
+    }
+
+    void UnloadAllCubeMapAssets()
+    {
+        return AssetService<CubeMapView, CubeMapFaces>::Get()->UnloadAll();
+    }
+
 } // namespace nc

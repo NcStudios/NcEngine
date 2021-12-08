@@ -12,13 +12,6 @@ namespace nc::graphics
 {
     class Graphics; class Base; class Swapchain;
 
-    struct PhongPushConstants
-    {
-        // Camera world position
-        Vector3 cameraPos;
-        float padding;
-    };
-
     class PhongAndUiTechnique : public ITechnique
     {
         public:
