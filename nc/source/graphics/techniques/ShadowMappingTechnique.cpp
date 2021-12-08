@@ -10,8 +10,6 @@
 #include "graphics/VertexDescriptions.h"
 #include "optick/optick.h"
 
-#include <iostream>
-
 namespace
 {
     // Depth bias (and slope) are used to avoid shadowing artifacts

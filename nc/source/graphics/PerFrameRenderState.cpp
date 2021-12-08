@@ -3,14 +3,13 @@
 #include "ecs/component/Camera.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
+#include "graphics/resources/EnvironmentImpl.h"
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
 #ifdef NC_EDITOR_ENABLED
 #include "physics/PhysicsSystemImpl.h"
 #endif
 #include "resources/ShaderResourceService.h"
-
-#include <iostream>
 
 namespace
 {
@@ -28,7 +27,7 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty)
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, EnvironmentImpl* environment)
     : camViewMatrix{camera->ViewMatrix()},
       projectionMatrix{camera->ProjectionMatrix()},
       cameraPosition{registry->Get<Transform>(camera->ParentEntity())->Position()},
@@ -38,7 +37,9 @@ namespace nc::graphics
       colliderDebugWidget{std::nullopt},
       #endif
       pointLightVPs{},
-      isPointLightBindRequired{isPointLightSystemDirty}
+      isPointLightBindRequired{isPointLightSystemDirty},
+      environment{environment},
+      useSkybox{environment->UseSkybox()}
     {
         OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
         const auto frustum = camera->CalculateFrustum();
@@ -58,6 +59,14 @@ namespace nc::graphics
             const auto [base, normal, roughness, metallic] = renderer.GetTextureIndices();
             objectData.emplace_back(modelMatrix, modelMatrix * camViewMatrix, viewProjection, base.index, normal.index, roughness.index, metallic.index);
             meshes.push_back(renderer.GetMesh());
+        }
+
+        environment->SetCameraPosition(cameraPosition);
+        if (useSkybox)
+        {
+            auto skyboxMatrix = DirectX::XMMatrixScaling(100.0f, 100.0f, 100.0f);
+            skyboxMatrix.r[3] = DirectX::XMVectorAdd(DirectX::XMLoadVector3(&cameraPosition), DirectX::g_XMIdentityR3);
+            objectData.emplace_back(skyboxMatrix, skyboxMatrix * camViewMatrix, viewProjection, 0, 0, 0, 0);
         }
 
         #ifdef NC_EDITOR_ENABLED
@@ -107,5 +116,9 @@ namespace nc::graphics
         {
             ShaderResourceService<PointLightInfo>::Get()->Update(state.pointLightInfos);
         }
+
+        auto dataVector = std::vector<EnvironmentData>{};
+        dataVector.push_back(state.environment->Get());
+        ShaderResourceService<EnvironmentData>::Get()->Update(dataVector);
     }
 }

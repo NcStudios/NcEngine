@@ -14,7 +14,7 @@ namespace nc
         size_t samplesPerChannel;
     };
 
-    class AudioClipAssetManager : public IAssetService<AudioClipView>
+    class AudioClipAssetManager : public IAssetService<AudioClipView, std::string>
     {
         public:
             AudioClipAssetManager(const std::string& assetDirectory);

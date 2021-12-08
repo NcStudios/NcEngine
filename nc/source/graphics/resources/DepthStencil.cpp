@@ -11,7 +11,7 @@ namespace nc::graphics
     {
         auto depthFormat = base->GetDepthFormat();
         auto imageUseFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment;
-        m_memoryIndex = m_base->CreateImage(depthFormat, dimensions, imageUseFlags, &m_image);
+        m_memoryIndex = m_base->CreateImage(depthFormat, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, &m_image);
         
         vk::ImageSubresourceRange imageSubresourceRange{};
         imageSubresourceRange.setBaseMipLevel(0);
@@ -41,7 +41,7 @@ namespace nc::graphics
       m_memoryIndex{0}
     {
         auto imageUseFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
-        m_memoryIndex = m_base->CreateImage(depthFormat, dimensions, imageUseFlags, &m_image);
+        m_memoryIndex = m_base->CreateImage(depthFormat, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, &m_image);
         
         vk::ImageSubresourceRange imageSubresourceRange{};
         imageSubresourceRange.setBaseMipLevel(0);

@@ -3,6 +3,7 @@
 #include "AudioClipAssetManager.h"
 #include "ConcaveColliderAssetManager.h"
 #include "ConvexHullAssetManager.h"
+#include "CubeMapAssetManager.h"
 #include "MeshAssetManager.h"
 #include "TextureAssetManager.h"
 #include "config/Config.h"
@@ -16,7 +17,8 @@ namespace nc
               hullManager{projectSettings.hullCollidersPath},
               meshManager{graphics, projectSettings.meshesPath},
               audioClipManager{projectSettings.audioClipsPath},
-              textureManager{graphics, projectSettings.texturesPath, maxTextures}
+              textureManager{graphics, projectSettings.texturesPath, maxTextures},
+              cubeMapAssetManager{graphics, projectSettings.cubeMapsPath, maxTextures}
         {
         }
 
@@ -25,5 +27,6 @@ namespace nc
         MeshAssetManager meshManager;
         AudioClipAssetManager audioClipManager;
         TextureAssetManager textureManager;
+        CubeMapAssetManager cubeMapAssetManager;
     };
 }

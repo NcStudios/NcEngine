@@ -127,7 +127,7 @@ The main file will be pretty simple:
 int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 {
     /** Create the engine instance. */
-    auto engine = nc::InitializeEngine(instance, "example/Config.ini");
+    auto engine = nc::InitializeNcEngine(instance, "example/Config.ini");
 
     /** Start the game loop. */
     engine->Start(std::make_unique<ExampleScene>());

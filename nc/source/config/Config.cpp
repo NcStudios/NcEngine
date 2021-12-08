@@ -22,6 +22,7 @@ namespace
     const auto MeshesPathKey = std::string{"meshes_path"};
     const auto ShadersPathKey = std::string{"shaders_path"};
     const auto TexturesPathKey = std::string{"textures_path"};
+    const auto CubeMapsPathKey = std::string{"cubemaps_path"};
 
     // memory
     const auto MaxDynamicCollidersKey = std::string{"max_dynamic_colliders"};
@@ -66,6 +67,8 @@ namespace
             out->projectSettings.shadersPath = value;
         else if (key == TexturesPathKey)
             out->projectSettings.texturesPath = value;
+        else if (key == CubeMapsPathKey)
+            out->projectSettings.cubeMapsPath = value;
 
         // memory
         else if(key == MaxDynamicCollidersKey)
@@ -169,6 +172,7 @@ namespace nc::config
              << MeshesPathKey            << '=' << config.projectSettings.meshesPath           << '\n'
              << ShadersPathKey           << '=' << config.projectSettings.shadersPath          << '\n'
              << TexturesPathKey          << '=' << config.projectSettings.texturesPath         << '\n'
+             << CubeMapsPathKey          << '=' << config.projectSettings.cubeMapsPath         << '\n'
              << "[memory]\n"
              << MaxDynamicCollidersKey   << '=' << config.memorySettings.maxDynamicColliders   << '\n'
              << MaxStaticCollidersKey    << '=' << config.memorySettings.maxStaticColliders    << '\n'
@@ -201,6 +205,7 @@ namespace nc::config
                  (config.projectSettings.meshesPath != "") &&
                  (config.projectSettings.shadersPath != "") &&
                  (config.projectSettings.texturesPath != "") &&
+                 (config.projectSettings.cubeMapsPath != "") &&
                  (config.physicsSettings.fixedUpdateInterval > 0.0f) &&
                  (config.physicsSettings.worldspaceExtent > 0.0f) &&
                  (config.graphicsSettings.screenWidth != 0) &&
