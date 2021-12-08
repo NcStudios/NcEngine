@@ -14,7 +14,7 @@ namespace nc
         struct Texture;
     }
 
-    class TextureAssetManager : public IAssetService<TextureView>
+    class TextureAssetManager : public IAssetService<TextureView, std::string>
     {
         public:
             TextureAssetManager(graphics::Graphics* graphics, const std::string& texturesAssetDirectory, uint32_t maxTextures);

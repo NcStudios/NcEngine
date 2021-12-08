@@ -14,7 +14,7 @@ namespace nc
         float maxExtent;
     };
 
-    class ConvexHullAssetManager : public IAssetService<ConvexHullView>
+    class ConvexHullAssetManager : public IAssetService<ConvexHullView, std::string>
     {
         public:
             ConvexHullAssetManager(const std::string& assetDirectory);

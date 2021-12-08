@@ -48,16 +48,17 @@ namespace nc::graphics
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(PhongPushConstants)); // PushConstants
-        std::array<vk::DescriptorSetLayout, 4u> descriptorLayouts
+        std::array<vk::DescriptorSetLayout, 6u> descriptorLayouts
         {
             *ShaderResourceService<Texture>::Get()->GetDescriptorSetLayout(),
             *ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSetLayout(),
             *ShaderResourceService<ObjectData>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<ShadowMap>::Get()->GetDescriptorSetLayout()
+            *ShaderResourceService<ShadowMap>::Get()->GetDescriptorSetLayout(),
+            *ShaderResourceService<CubeMap>::Get()->GetDescriptorSetLayout(),
+            *ShaderResourceService<EnvironmentData>::Get()->GetDescriptorSetLayout()
         };
 
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -113,6 +114,8 @@ namespace nc::graphics
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 1, 1, ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 2, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
         cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 3, 1, ShaderResourceService<ShadowMap>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 4, 1, ShaderResourceService<CubeMap>::Get()->GetDescriptorSet(), 0, 0);
+        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 5, 1, ShaderResourceService<EnvironmentData>::Get()->GetDescriptorSet(), 0, 0);
     }
 
     bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -124,10 +127,6 @@ namespace nc::graphics
     void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("PhongAndUiTechnique::Record", Optick::Category::Rendering);
-        auto pushConstants = PhongPushConstants{};
-        pushConstants.cameraPos = frameData.cameraPosition;
-        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment, 0, sizeof(PhongPushConstants), &pushConstants);
-
         uint32_t objectInstance = 0;
         for(const auto& mesh : frameData.meshes)
         {

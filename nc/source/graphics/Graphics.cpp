@@ -151,6 +151,7 @@ namespace nc::graphics
         ShaderResourceService<ObjectData>::Get()->Reset();
         ShaderResourceService<PointLightInfo>::Get()->Reset();
         ShaderResourceService<ShadowMap>::Get()->Reset();
+        ShaderResourceService<EnvironmentData>::Get()->Reset();
     }
 
     void Graphics::SetClearColor(std::array<float, 4> color)

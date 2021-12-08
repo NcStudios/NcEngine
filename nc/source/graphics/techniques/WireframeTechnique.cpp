@@ -13,8 +13,6 @@
 #include "graphics/Swapchain.h"
 #include "graphics/VertexDescriptions.h"
 
-#include <iostream>
-
 namespace nc::graphics
 {
     WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)

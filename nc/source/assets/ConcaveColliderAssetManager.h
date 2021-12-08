@@ -13,7 +13,7 @@ namespace nc
         float maxExtent;
     };
 
-    class ConcaveColliderAssetManager : public IAssetService<ConcaveColliderView>
+    class ConcaveColliderAssetManager : public IAssetService<ConcaveColliderView, std::string>
     {
         public:
             ConcaveColliderAssetManager(const std::string& concaveColliderAssetDirectory);

@@ -7,6 +7,7 @@
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
+#include "graphics/techniques/EnvironmentTechnique.h"
 #include "graphics/techniques/PhongAndUiTechnique.h"
 #include "graphics/techniques/ShadowMappingTechnique.h"
 #include "optick/optick.h"
@@ -19,7 +20,6 @@
 #endif
 
 #include <span>
-#include <iostream>
 
 namespace nc::graphics
 {
@@ -82,6 +82,7 @@ namespace nc::graphics
         m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
         #endif
 
+        m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
         m_renderPasses->RegisterTechnique<PhongAndUiTechnique>(RenderPassManager::LitShadingPass);
     }
 

@@ -15,6 +15,7 @@ namespace nc::config
         std::string meshesPath;
         std::string shadersPath;
         std::string texturesPath;
+        std::string cubeMapsPath;
     };
 
     struct MemorySettings

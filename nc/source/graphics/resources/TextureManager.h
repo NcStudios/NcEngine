@@ -33,7 +33,7 @@ namespace nc::graphics
             std::vector<vk::DescriptorImageInfo> m_imageInfos;
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
-            vk::UniqueSampler m_sampler;
+            vk::UniqueSampler m_textureSampler;
             vk::ImageLayout m_layout;
             uint32_t m_maxTexturesCount;
             bool m_texturesInitialized;

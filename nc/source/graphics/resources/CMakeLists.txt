@@ -1,10 +1,16 @@
 target_sources(NcEngineLib
     PRIVATE
+        ${ROOT_DIR}/source/graphics/resources/CubeMap.cpp
+        ${ROOT_DIR}/source/graphics/resources/CubeMapManager.cpp
         ${ROOT_DIR}/source/graphics/resources/DepthStencil.cpp
+        ${ROOT_DIR}/source/graphics/resources/EnvironmentDataManager.cpp
+        ${ROOT_DIR}/source/graphics/resources/EnvironmentImpl.cpp
+        ${ROOT_DIR}/source/graphics/resources/ImmutableBuffer.cpp
         ${ROOT_DIR}/source/graphics/resources/ImmutableImage.cpp
         ${ROOT_DIR}/source/graphics/resources/ObjectDataManager.cpp
         ${ROOT_DIR}/source/graphics/resources/PointLightManager.cpp
         ${ROOT_DIR}/source/graphics/resources/RenderPassManager.cpp
         ${ROOT_DIR}/source/graphics/resources/ShadowMapManager.cpp
         ${ROOT_DIR}/source/graphics/resources/TextureManager.cpp
+        ${ROOT_DIR}/source/graphics/resources/UniformBuffer.cpp
 )
