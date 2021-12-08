@@ -3,7 +3,7 @@
 #include "ecs/component/Camera.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
-#include "graphics/Environment.h"
+#include "graphics/resources/EnvironmentImpl.h"
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
 #ifdef NC_EDITOR_ENABLED
@@ -27,7 +27,7 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment)
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, EnvironmentImpl* environment)
     : camViewMatrix{camera->ViewMatrix()},
       projectionMatrix{camera->ProjectionMatrix()},
       cameraPosition{registry->Get<Transform>(camera->ParentEntity())->Position()},
@@ -61,14 +61,11 @@ namespace nc::graphics
             meshes.push_back(renderer.GetMesh());
         }
 
-        environment->Set(cameraPosition);
-        useSkybox = environment->UseSkybox();
+        environment->SetCameraPosition(cameraPosition);
         if (useSkybox)
         {
-            const auto& cameraPosition = registry->Get<Transform>(camera->ParentEntity())->TransformationMatrix().r[3];
             auto skyboxMatrix = DirectX::XMMatrixScaling(100.0f, 100.0f, 100.0f);
-            skyboxMatrix.r[3] = cameraPosition;
-
+            skyboxMatrix.r[3] = DirectX::XMVectorAdd(DirectX::XMLoadVector3(&cameraPosition), DirectX::g_XMIdentityR3);
             objectData.emplace_back(skyboxMatrix, skyboxMatrix * camViewMatrix, viewProjection, 0, 0, 0, 0);
         }
 

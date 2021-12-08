@@ -103,7 +103,7 @@ namespace nc::sample
         };
 
         nc::LoadCubeMapAsset(skyboxForest);
-        engine->Environment()->Set(skyboxForest);
+        engine->Environment()->SetSkybox(skyboxForest);
         
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});

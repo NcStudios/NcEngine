@@ -10,6 +10,7 @@
 #include "graphics/Swapchain.h"
 #include "graphics/Base.h"
 #include "graphics/VertexDescriptions.h"
+#include "graphics/resources/EnvironmentImpl.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ShaderResourceService.h"
 #include "optick/optick.h"
@@ -120,7 +121,7 @@ namespace nc::graphics
     void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(SkyboxMeshPath);
+        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::SkyboxMeshPath);
         cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, frameData.objectData.size()-1); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
     }
 

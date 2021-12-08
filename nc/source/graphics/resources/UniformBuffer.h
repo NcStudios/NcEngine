@@ -4,6 +4,7 @@
 #include "graphics/Commands.h"
 #include "graphics/Vertex.h"
 #include "graphics/Environment.h"
+#include "graphics/resources/EnvironmentImpl.h"
 
 #include <vector>
 #include "vulkan/vk_mem_alloc.hpp"

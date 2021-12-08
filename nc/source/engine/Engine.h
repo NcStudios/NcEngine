@@ -7,6 +7,7 @@
 #include "ecs/EntityComponentSystem.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
+#include "graphics/resources/EnvironmentImpl.h"
 #include "physics/PhysicsSystemImpl.h"
 #include "scene/SceneSystemImpl.h"
 #include "task/Task.h"
@@ -43,7 +44,7 @@ namespace nc
             scene::SceneSystemImpl m_sceneSystem;
             time::Time m_time;
             audio::AudioSystemImpl m_audioSystem;
-            nc::Environment m_environment;
+            nc::EnvironmentImpl m_environment;
             ui::UISystemImpl m_uiSystem;
             tf::Executor m_taskExecutor;
             TaskGraph m_tasks;

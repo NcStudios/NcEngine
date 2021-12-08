@@ -111,7 +111,7 @@ namespace nc::sample
         };
 
         nc::LoadCubeMapAsset(skybox);
-        engine->Environment()->Set(skybox);
+        engine->Environment()->SetSkybox(skybox);
 
         // auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = Entity::Flags::Static});
         // registry->Add<Collider>(longRedBox, BoxProperties{}, true);
