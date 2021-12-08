@@ -3,6 +3,7 @@
 #include "assets/AssetDependencyChecker.h"
 #include "config/ConfigReader.h"
 #include "utility/Output.h"
+#include "serialize/LoaderScene.h"
 #include "serialize/SceneDeleter.h"
 #include "serialize/SceneReader.h"
 #include "serialize/SceneWriter.h"
@@ -128,24 +129,25 @@ namespace nc::editor
         }
 
         Output::Log("Creating Project:", directoryPath.string());
-        auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
 
         try
         {
             CreateProjectDirectories(directoryPath);
-            CreateProjectFile(projectFilePath);
+            CreateProjectFile(directoryPath, name);
             CreateConfig(directoryPath, name);
+            CreateMain(directoryPath);
             CopyDefaultAssets(directoryPath);
             CreateCMakeFiles(directoryPath);
         }
-        catch(const std::filesystem::filesystem_error& e)
+        catch(const std::exception& e)
         {
             Output::LogError("Failure creating project:", e.what());
             return false;
         }
 
-        /** @todo CMakeLists?, default scene? */
+        /** @todo default scene? */
 
+        auto projectFilePath = directoryPath / (name + std::string{".ncproj"});
         DoOpenProject(projectFilePath);
         return true;
     }
@@ -216,6 +218,9 @@ namespace nc::editor
             checkDependencies.LogMissingDependencies();
             return;
         }
+
+        /** @todo This is more of an "on project save" thing, which doesn't exist yet. */
+        WriteLoaderScene(m_projectData.projectDirectory, *m_manifest);
 
         SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
         writer.WriteCurrentScene(&m_sceneData, m_projectData.scenes.at(m_currentSceneIndex));
