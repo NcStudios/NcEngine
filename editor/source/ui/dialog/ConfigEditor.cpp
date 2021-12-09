@@ -7,7 +7,7 @@
 
 namespace
 {
-    constexpr nc::Vector2 DialogSize{400.0f, 700.0f};
+    constexpr nc::Vector2 DialogSize{500.0f, 1000.0f};
 }
 
 namespace nc::editor
@@ -45,7 +45,6 @@ namespace nc::editor
         m_path = configPath;
         m_addDialog(this);
 
-
         m_nameBuffer = m_config.projectSettings.projectName;
         m_logPathBuffer = m_config.projectSettings.logFilePath;
         m_audioClipPathBuffer = m_config.projectSettings.audioClipsPath;
@@ -70,59 +69,60 @@ namespace nc::editor
 
         if(BeginWindow())
         {
-            ImGui::PushItemWidth(75.0f);
+            IMGUI_SCOPE_ID(ItemWidth, 1, DefaultItemWidth);
             ImGui::Text("Project");
-            ImGui::Indent();
-            ImGui::PushItemWidth(250.0f);
+            {
+                IMGUI_SCOPE_ID(ItemWidth, 2, 200.0f);
+                IMGUI_SCOPE(Indent);
+                InputText("Project Name", &m_nameBuffer);
+                InputText("Log Path", &m_nameBuffer);
+                InputText("AudioClip Path", &m_audioClipPathBuffer);
+                InputText("ConcaveCollider Path", &m_concaveColliderPathBuffer);
+                InputText("HullCollider Path", &m_hullColliderPathBuffer);
+                InputText("Mesh Path", &m_meshPathBuffer);
+                InputText("Shader Path", &m_shaderPathBuffer);
+                InputText("Texture Path", &m_texturePathBuffer);
+                InputText("CubeMap Path", &m_cubeMapPathBuffer);
+            }
 
-            InputText("Project Name        ", &m_nameBuffer);
-            InputText("Log Path            ", &m_nameBuffer);
-            InputText("AudioClip Path      ", &m_audioClipPathBuffer);
-            InputText("ConcaveCollider Path", &m_concaveColliderPathBuffer);
-            InputText("HullCollider Path   ", &m_hullColliderPathBuffer);
-            InputText("Mesh Path           ", &m_meshPathBuffer);
-            InputText("Shader Path         ", &m_shaderPathBuffer);
-            InputText("Texture Path        ", &m_texturePathBuffer);
-            InputText("CubeMap Path        ", &m_cubeMapPathBuffer);
-
-            ImGui::PopItemWidth();
-            ImGui::Unindent();
             ImGui::Separator();
-
             ImGui::Text("Memory");
-            ImGui::Indent();
-            UnsignedInput(" Max Dynamic Colliders", &m_config.memorySettings.maxDynamicColliders);
-            UnsignedInput(" Max Static Colliders", &m_config.memorySettings.maxStaticColliders);
-            UnsignedInput(" Max NetworkDispatchers", &m_config.memorySettings.maxNetworkDispatchers);
-            UnsignedInput(" Max ParticleEmitters", &m_config.memorySettings.maxParticleEmitters);
-            UnsignedInput(" Max MeshRenderers", &m_config.memorySettings.maxRenderers);
-            UnsignedInput(" Max Transforms", &m_config.memorySettings.maxTransforms);
-            UnsignedInput(" Max PointLights", &m_config.memorySettings.maxPointLights);
-            UnsignedInput(" Max Textures", &m_config.memorySettings.maxTextures);
-            ImGui::Unindent();
-            ImGui::Separator();
+            {
+                IMGUI_SCOPE(Indent);
+                UnsignedInput("Max Dynamic Colliders", &m_config.memorySettings.maxDynamicColliders);
+                UnsignedInput("Max Static Colliders", &m_config.memorySettings.maxStaticColliders);
+                UnsignedInput("Max NetworkDispatchers", &m_config.memorySettings.maxNetworkDispatchers);
+                UnsignedInput("Max ParticleEmitters", &m_config.memorySettings.maxParticleEmitters);
+                UnsignedInput("Max MeshRenderers", &m_config.memorySettings.maxRenderers);
+                UnsignedInput("Max Transforms", &m_config.memorySettings.maxTransforms);
+                UnsignedInput("Max PointLights", &m_config.memorySettings.maxPointLights);
+                UnsignedInput("Max Textures", &m_config.memorySettings.maxTextures);
+            }
 
+            ImGui::Separator();
             ImGui::Text("Physics");
-            ImGui::Indent();
-            ImGui::DragFloat(" Fixed Step", &m_config.physicsSettings.fixedUpdateInterval, 0.00001f, 0.001f, 0.3333f, "%.5f");
-            ImGui::DragFloat(" Worldspace Extent", &m_config.physicsSettings.worldspaceExtent, 1.0f, 10.0f, 5000.0f, "%.1f");
-            ImGui::Unindent();
+            {
+                IMGUI_SCOPE(Indent);
+                ImGui::DragFloat("Fixed Step", &m_config.physicsSettings.fixedUpdateInterval, 0.00001f, 0.001f, 0.3333f, "%.5f");
+                ImGui::DragFloat("Worldspace Extent", &m_config.physicsSettings.worldspaceExtent, 1.0f, 10.0f, 5000.0f, "%.1f");
+            }
+            
             ImGui::Separator();
-
             ImGui::Text("Graphics");
-            ImGui::Indent();
-            ImGui::Checkbox(" Use Native Resolution", &m_config.graphicsSettings.useNativeResolution);
-            ImGui::Checkbox(" Use Native Resolution", &m_config.graphicsSettings.launchInFullscreen);
-            UnsignedInput(" Screen Width", &m_config.graphicsSettings.screenWidth);
-            UnsignedInput(" Screen Height", &m_config.graphicsSettings.screenHeight);
-            UnsignedInput(" Target FPS", &m_config.graphicsSettings.targetFPS);
+            {
+                IMGUI_SCOPE(Indent);
+                ImGui::Checkbox("Use Native Resolution", &m_config.graphicsSettings.useNativeResolution);
+                ImGui::Checkbox("Use Native Resolution", &m_config.graphicsSettings.launchInFullscreen);
+                UnsignedInput("Screen Width", &m_config.graphicsSettings.screenWidth);
+                UnsignedInput("Screen Height", &m_config.graphicsSettings.screenHeight);
+                UnsignedInput("Target FPS", &m_config.graphicsSettings.targetFPS);
 
-            ImGui::DragFloat(" Near Clip", &m_config.graphicsSettings.nearClip, 0.001f, 0.001f, 10.0f, "%.3f");
-            ImGui::DragFloat(" Far Clip", &m_config.graphicsSettings.farClip, 1.0f, 1.0f, 5000.0f, "%.1f");
-            ImGui::Checkbox(" Use Shadows", &m_config.graphicsSettings.useShadows);
-            ImGui::Unindent();
+                ImGui::DragFloat("Near Clip", &m_config.graphicsSettings.nearClip, 0.001f, 0.001f, 10.0f, "%.3f");
+                ImGui::DragFloat("Far Clip", &m_config.graphicsSettings.farClip, 1.0f, 1.0f, 5000.0f, "%.1f");
+                ImGui::Checkbox("Use Shadows", &m_config.graphicsSettings.useShadows);
+            }
+
             ImGui::Separator();
-            ImGui::PopItemWidth();
             ImGui::Spacing();
 
             if(ImGui::Button("Save"))

@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "EditorScene.h"
 #include "scene/SceneGraph.h"
+#include "ui/ImGuiUtility.h"
 
 #include <iostream>
 
@@ -60,6 +61,7 @@ namespace nc::editor
 
     void EditorUI::Draw()
     {
+        IMGUI_SCOPE(ItemWidth, 35.0f);
         ImGui::SetNextWindowPos({0,0});
         ImGui::SetNextWindowSize({m_dimensions.x, 20.0f});
 

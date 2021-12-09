@@ -23,67 +23,40 @@ namespace
 {
     using namespace nc::editor;
 
-    constexpr float defaultItemWidth = 50.0f;
-
     template<class T>
     void ElementHeader(T* obj)
     {
         IMGUI_SCOPE_ID(StyleColor, 1, ImGuiCol_ButtonHovered, Color::Accent);
         IMGUI_SCOPE_ID(StyleColor, 2, ImGuiCol_ButtonActive, Color::AccentDark);
-        ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+        SeparatorSpaced();
         ImGui::Button(nc::TypeInfo<T>::name, {-1,0});
         DragAndDropSource<T>(obj);
     }
 
-    bool floatWidget(const char* label, const char* id, float* item, float dragSpeed = 0.1f, float min = 0.1f, float max = 10.0f, const char* fmt = "%.1f")
+    void xyzWidgetHeader(const char*)
     {
-        IMGUI_SCOPE(ImGuiId, id);
-        ImGui::Text(label);
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(defaultItemWidth);
-        auto result = ImGui::DragFloat("", item, dragSpeed, min, max, fmt);
-        return result;
-    };
+        IMGUI_SCOPE_ID(StyleColor, 1, ImGuiCol_Button, Color::Clear);
+        IMGUI_SCOPE_ID(StyleColor, 2, ImGuiCol_ButtonHovered, Color::Clear);
+        IMGUI_SCOPE_ID(StyleColor, 3, ImGuiCol_ButtonActive, Color::Clear);
 
-    void textBlockWidget(const char* label, ImVec2 size, ImVec4 bgColor, ImVec4 textColor)
-    {
-        IMGUI_SCOPE_ID(StyleColor, 1, ImGuiCol_Button, bgColor);
-        IMGUI_SCOPE_ID(StyleColor, 2, ImGuiCol_ButtonHovered, bgColor);
-        IMGUI_SCOPE_ID(StyleColor, 3, ImGuiCol_ButtonActive, bgColor);
-        IMGUI_SCOPE_ID(StyleColor, 4, ImGuiCol_Text, textColor);
-        ImGui::Button(label, size);
-    }
+        const ImVec2 buttonSize{DefaultItemWidth, 0};
 
-    void xyzWidgetHeader(const char* frontPadding)
-    {
-        const ImVec2 buttonSize{defaultItemWidth, 0};
-        ImGui::Text(frontPadding); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-        textBlockWidget("X##widgetHeader", buttonSize, Color::Clear, Color::Red); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-        textBlockWidget("Y##widgetHeader", buttonSize, Color::Clear, Color::Green); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-        textBlockWidget("Z##widgetHeader", buttonSize, Color::Clear, Color::Blue);
-    }
+        {
+            IMGUI_SCOPE_ID(StyleColor, 4, ImGuiCol_Text, Color::Red);
+            ImGui::Button("X##widgetHeader", buttonSize);
+            SameLineSpaced();
+        }
 
-    bool xyzWidget(const char* groupLabel, const char* id, float* x, float* y, float* z, float min = -50.0f, float max = 50.0f)
-    {
-        IMGUI_SCOPE(ImGuiId, id);
-        ImGui::Text(groupLabel); ImGui::SameLine();
-        auto xResult = floatWidget("", "x", x, 0.1f, min, max, "%.1f"); ImGui::SameLine();
-        auto yResult = floatWidget("", "y", y, 0.1f, min, max, "%.1f"); ImGui::SameLine();
-        auto zResult = floatWidget("", "z", z, 0.1f, min, max, "%.1f");
-        return xResult || yResult || zResult;
-    };
+        {
+            IMGUI_SCOPE_ID(StyleColor, 4, ImGuiCol_Text, Color::Green);
+            ImGui::Button("Y##widgetHeader", buttonSize);
+            SameLineSpaced();
+        }
 
-    [[maybe_unused]]
-    void columnHeaderWidget(const char* frontPadding, const char* label1, const char* label2, const char* label3 = nullptr)
-    {
-        IMGUI_SCOPE(ItemWidth, defaultItemWidth);
-
-        const ImVec2 buttonSize{defaultItemWidth, 0};
-        ImGui::Text(frontPadding); ImGui::SameLine();
-        textBlockWidget(label1, buttonSize, Color::Clear, Color::White); ImGui::SameLine();
-        textBlockWidget(label2, buttonSize, Color::Clear, Color::White); ImGui::SameLine();
-        if(label3)
-            textBlockWidget(label3, buttonSize, Color::Clear, Color::White);
+        {
+            IMGUI_SCOPE_ID(StyleColor, 4, ImGuiCol_Text, Color::Blue);
+            ImGui::Button("Z##widgetHeader", buttonSize);
+        }
     }
 }
 
@@ -146,13 +119,9 @@ namespace nc::editor
         collider->SetEditorSelection(true);
 
         const auto& info = collider->GetInfo();
-        auto& offset = collider->m_info.offset;
 
-        ImGui::Text("Type   ");
-        ImGui::SameLine();
         ImGui::SetNextItemWidth(75);
-
-        if(ImGui::BeginCombo("##collidertypecombo", ToCString(info.type)))
+        if(ImGui::BeginCombo("Type##collidertypecombo", ToCString(info.type)))
         {
             if(ImGui::Selectable("Box") && info.type != ColliderType::Box)
             {
@@ -189,68 +158,87 @@ namespace nc::editor
             ImGui::EndCombo();
         }
 
-        ImGui::Text("Trigger");
-        ImGui::SameLine();
-        ImGui::Checkbox("##isTrigger", &collider->m_info.isTrigger);
+        ImGui::Checkbox("Trigger##isTrigger", &collider->m_info.isTrigger);
 
         switch(collider->m_info.type)
         {
             case ColliderType::Box:
             {
-                xyzWidgetHeader("       ");
-                xyzWidget("Center ", "colliderpos", &offset.x, &offset.y, &offset.z, -100.0f, 100.0f);
-                auto& extents = collider->m_info.scale;
-                xyzWidget("Extents", "colliderscl", &extents.x, &extents.y, &extents.z, 0.01, 1000.0f);
+                DrawBoxColliderWidget(collider);
                 break;
             }
             case ColliderType::Capsule:
             {
-                xyzWidgetHeader("");
-                xyzWidget("Center", "colliderpos", &offset.x, &offset.y, &offset.z, -100.0f, 100.0f);
-                float height = collider->m_info.scale.y * 2.0f;
-                float radius = collider->m_info.scale.x * 0.5f;
-                bool heightChanged = floatWidget("Height", "colliderheight", &height, 0.01f, radius, 100.0f);
-                bool radiusChanged = floatWidget("Radius", "colliderradius", &radius, 0.01f, 0.01f, height);
-                if(heightChanged || radiusChanged)
-                    collider->m_info.scale = Vector3{radius * 2.0f, height * 0.5f, radius * 2.0f};
+                DrawCapsuleColliderWidget(collider);
                 break;
             }
             case ColliderType::Hull:
             {
-                /** @todo */
-
-                if(ImGui::BeginCombo("##colliderhullselectcombo", info.hullAssetPath.c_str()))
-                {
-                    for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
-                    {
-                        if(ImGui::Selectable(asset.name.c_str()))
-                        {
-                            try
-                            {
-                                collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
-                            }
-                            catch(const std::runtime_error& e)
-                            {
-                                Output::LogError("Failure loading: " + asset.ncaPath.value().string(), "Exception: " + std::string{e.what()});
-                            }
-                        }
-                    }
-
-                    ImGui::EndCombo();
-                }
-            
+                DrawHullColliderWidget(collider);
                 break;
             }
             case ColliderType::Sphere:
             {
-                xyzWidgetHeader("      ");
-                xyzWidget("Center", "collidercenter", &offset.x, &offset.y, &offset.z, 100.0f, 100.0f);
-                float radius = collider->m_info.scale.x * 0.5f;
-                if(floatWidget("Radius", "colliderradius", &radius, 0.01f, 0.01f, 1000.0f))
-                    collider->m_info.scale = Vector3::Splat(radius) * 2.0f;
-                break;
+                DrawSphereColliderWidget(collider);
             }
         }
+    }
+
+    void Inspector::DrawBoxColliderWidget(Collider* collider)
+    {
+        xyzWidgetHeader("");
+        InputVector3("Center", &collider->m_info.offset, 0.1f, -100.0f, 100.0f);
+        InputVector3("Extents", &collider->m_info.scale, 0.1f, 0.01f, 1000.0f);
+    }
+
+    void Inspector::DrawCapsuleColliderWidget(Collider* collider)
+    {
+        auto& info = collider->m_info;
+
+        xyzWidgetHeader("");
+        InputVector3("Center", &info.offset, 0.1f, -100.0f, 100.0f);
+        float height = info.scale.y * 2.0f;
+        float radius = info.scale.x * 0.5f;
+        bool heightChanged = ImGui::DragFloat("Height", &height, 0.01f, radius, 100.0f);
+        bool radiusChanged = ImGui::DragFloat("Radius", &radius, 0.01f, 0.01f, height);
+
+        if(heightChanged || radiusChanged)
+            collider->m_info.scale = Vector3{radius * 2.0f, height * 0.5f, radius * 2.0f};
+    }
+
+    void Inspector::DrawHullColliderWidget(Collider* collider)
+    {
+        /** @todo */
+
+        if(ImGui::BeginCombo("##colliderhullselectcombo", collider->m_info.hullAssetPath.c_str()))
+        {
+            for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
+            {
+                if(ImGui::Selectable(asset.name.c_str()))
+                {
+                    try
+                    {
+                        collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                    }
+                    catch(const std::runtime_error& e)
+                    {
+                        Output::LogError("Failure loading: " + asset.ncaPath.value().string(), "Exception: " + std::string{e.what()});
+                    }
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+    }
+
+    void Inspector::DrawSphereColliderWidget(Collider* collider)
+    {
+        xyzWidgetHeader("      ");
+        InputVector3("Center", &collider->m_info.offset, 0.1f, 100.0f, 100.0f);
+        float radius = collider->m_info.scale.x * 0.5f;
+
+        if(ImGui::DragFloat("Radius", &radius, 0.01f, 0.01f, 1000.0f))
+            collider->m_info.scale = Vector3::Splat(radius) * 2.0f;
     }
 
     void Inspector::DrawConcaveCollider(ConcaveCollider* concaveCollider)
@@ -381,57 +369,55 @@ namespace nc::editor
     void Inspector::DrawPhysicsBody(PhysicsBody* physicsBody)
     {
         ElementHeader(physicsBody);
+        IMGUI_SCOPE(ItemWidth, 100.0f);
         auto& properties = physicsBody->m_properties;
 
-        ImGui::Text("Use Gravity");
-        ImGui::SameLine();
-        ImGui::Checkbox("##gravitybox", &properties.useGravity);
-
-        ImGui::Text("Kinematic  ");
-        ImGui::SameLine();
-        ImGui::Checkbox("##kinematicbox", &properties.isKinematic);
+        ImGui::Checkbox("Use Gravity", &properties.useGravity);
+        ImGui::Checkbox("Kinematic", &properties.isKinematic);
 
         if(physicsBody->ParentEntity().IsStatic())
         {
-            ImGui::Text("Mass               0(Inf)");
+            ImGui::Text("0(Inf) Mass");
         }
         else
         {
             float mass = 1.0f / properties.mass;
-            if(floatWidget("Mass             ", "pbmass", &mass, 0.01f, 0.0f, 500.0f, "%.1f"))
+            if(ImGui::DragFloat("Mass", &mass, 0.01f, 0.0f, 500.0f, "%.1f"))
             {
                 // check if need to change inertia (maybe this doesn't matter since we're not doing physics)
                 properties.mass = 1.0f / mass;
             }
         }
 
-        floatWidget("Drag             ", "pbdrag", &properties.drag, 0.001f, 0.001f, 1.0f, "%.2f");
-        floatWidget("Angular Drag     ", "pbangdrag", &properties.angularDrag, 0.001f, 0.001f, 1.0f, "%.2f");
-        floatWidget("Restitution      ", "pbrest", &properties.restitution, 0.001f, 0.0f, 1.0f, "%.2f");
-        floatWidget("Friction         ", "pbfriction", &properties.friction, 0.001f, 0.0f, 1.0f, "%.2f");
+        ImGui::DragFloat("Drag", &properties.drag, 0.001f, 0.001f, 1.0f, "%.2f");
+        ImGui::DragFloat("Angular Drag", &properties.angularDrag, 0.001f, 0.001f, 1.0f, "%.2f");
+        ImGui::DragFloat("Restitution", &properties.restitution, 0.001f, 0.0f, 1.0f, "%.2f");
+        ImGui::DragFloat("Friction", &properties.friction, 0.001f, 0.0f, 1.0f, "%.2f");
     }
 
     void Inspector::DrawPointLight(PointLight* pointLight)
     {
-        const float dragSpeed = 1.0f;
+        ElementHeader(pointLight);
+        IMGUI_SCOPE(ItemWidth, 100.0f);
+
         auto& info = pointLight->GetInfo();
+
         Vector3 ambient = info.ambient;
         Vector3 diffuse = info.diffuseColor;
         float diffuseIntensity = info.diffuseIntensity;
 
-        ElementHeader(pointLight);
-        ImGui::Text("Ambient    ");
-        ImGui::Text("Color      ");   ImGui::SameLine();  auto ambientResult = ImGui::ColorEdit3("##ambcolor", &ambient.x, ImGuiColorEditFlags_NoInputs);
-        ImGui::Text("Diffuse    ");
-        ImGui::Text("Color      ");   ImGui::SameLine(); auto diffuseResult = ImGui::ColorEdit3("##difcolor", &diffuse.x, ImGuiColorEditFlags_NoInputs);
-        auto diffuseIntensityResult = floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 600.0f, "%.2f");
+        auto ambientResult = ImGui::ColorEdit3("Ambient Color", &ambient.x, ImGuiColorEditFlags_NoInputs);
+        auto diffuseResult = ImGui::ColorEdit3("Diffuse Color", &diffuse.x, ImGuiColorEditFlags_NoInputs);
+        auto intensityResult = ImGui::DragFloat("Intensity", &diffuseIntensity, 1.0f, 0.0f, 600.0f, "%.2f");
+
+
         auto pointLightInfo = info;
 
         if (ambientResult) pointLightInfo.ambient = ambient;
         if (diffuseResult) pointLightInfo.diffuseColor = diffuse;
-        if (diffuseIntensityResult) pointLightInfo.diffuseIntensity = diffuseIntensity;
+        if (intensityResult) pointLightInfo.diffuseIntensity = diffuseIntensity;
 
-        if (ambientResult || diffuseResult || diffuseIntensityResult)
+        if (ambientResult || diffuseResult || intensityResult)
         {
             pointLight->SetInfo(pointLightInfo);
         }
@@ -450,10 +436,16 @@ namespace nc::editor
         auto angles = rot.ToEulerAngles();
 
         ElementHeader(transform);
-        xyzWidgetHeader("   ");
-        auto posResult = xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z, -5000.0f, 5000.0f);
-        auto rotResult = xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
-        auto sclResult = xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z, 0.01f, 1000.0f);
+        xyzWidgetHeader("");
+
+        auto posResult = InputPosition("Pos", &pos);
+        auto rotResult = InputAngles("Rot", &angles);
+        auto sclResult = InputScale("Scl", &scl);
+
+
+        // auto posResult = xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z, -5000.0f, 5000.0f);
+        // auto rotResult = xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
+        // auto sclResult = xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z, 0.01f, 1000.0f);
 
         if(posResult)
             transform->SetPosition(pos);

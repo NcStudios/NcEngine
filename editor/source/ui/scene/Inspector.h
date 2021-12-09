@@ -42,5 +42,9 @@ namespace nc::editor
             void DrawPhysicsBody(PhysicsBody* physicsBody);
             void DrawPointLight(PointLight* pointLight);
             void DrawTransform(Transform* transform);
+            void DrawBoxColliderWidget(Collider* collider);
+            void DrawCapsuleColliderWidget(Collider* collider);
+            void DrawHullColliderWidget(Collider* collider);
+            void DrawSphereColliderWidget(Collider* collider);
     };
 }

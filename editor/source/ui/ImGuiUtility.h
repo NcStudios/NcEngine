@@ -12,20 +12,28 @@
 
 namespace nc::editor
 {
+    constexpr float DefaultItemWidth = 50.0f;
+
     /** RAII Properties */
     struct ImGuiId;
+    struct Indent;
     struct ItemWidth;
     struct StyleColor;
 
+    inline void SameLineSpaced();
+    inline void SeparatorSpaced();
     inline bool InputText(const char* label, std::string* str, ImGuiInputTextFlags flags = 0);
+    inline bool InputVector3(const char* label, Vector3* vec);
+    inline bool InputVector3(const char* label, Vector3* vec, float speed = 1.0f, float min = 0.0f, float max = 100.0f);
+    inline bool InputPosition(const char* label, Vector3* position);
+    inline bool InputAngles(const char* label, Vector3* angles);
+    inline bool InputScale(const char* label, Vector3* scale);
 
     template<class T>
     void DragAndDropSource(T* item);
 
     template<class T, std::invocable<T*> F>
     void DragAndDropTarget(F&& func);
-
-    /** @todo Various vector inputs */
 
     namespace internal
     {
@@ -54,11 +62,18 @@ namespace nc::editor
         ~ImGuiId() noexcept              { ImGui::PopID();    }
     };
 
+    struct Indent
+    {
+        explicit Indent()  { ImGui::Indent(); }
+        ~Indent() noexcept { ImGui::Unindent(); }
+    };
+
     struct StyleColor
     {
-        explicit StyleColor(ImGuiCol index, ImU32 col)         { ImGui::PushStyleColor(index, col); }
-        explicit StyleColor(ImGuiCol index, const ImVec4& col) { ImGui::PushStyleColor(index, col); }
-        ~StyleColor() noexcept                                 { ImGui::PopStyleColor();            }
+        explicit StyleColor(ImGuiCol index, ImU32 col)          { ImGui::PushStyleColor(index, col); }
+        explicit StyleColor(ImGuiCol index, const ImVec4& col)  { ImGui::PushStyleColor(index, col); }
+        explicit StyleColor(ImGuiCol index, const Vector4& col) { ImGui::PushStyleColor(index, col); }
+        ~StyleColor() noexcept                                  { ImGui::PopStyleColor();            }
     };
 
     struct ItemWidth
@@ -67,11 +82,50 @@ namespace nc::editor
         ~ItemWidth() noexcept               { ImGui::PopItemWidth();           }
     };
 
+    void SameLineSpaced()
+    {
+        ImGui::SameLine();
+        ImGui::Spacing();
+        ImGui::SameLine();
+    }
+
+    void SeparatorSpaced()
+    {
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+    }
+
     bool InputText(const char* label, std::string* str, ImGuiInputTextFlags flags)
     {
         flags |= ImGuiInputTextFlags_CallbackResize;
         internal::InputTextCallbackUserData userData{.string = str};
         return ImGui::InputText(label, (char*)str->c_str(), str->capacity() + 1, flags, internal::InputTextCallback, &userData);
+    }
+
+    bool InputVector3(const char* label, Vector3* vec)
+    {
+        return ImGui::DragFloat3(label, &(vec->x));
+    }
+
+    bool InputVector3(const char* label, Vector3* vec, float speed, float min, float max)
+    {
+        return ImGui::DragFloat3(label, &(vec->x), speed, min, max);
+    }
+
+    bool InputPosition(const char* label, Vector3* position)
+    {
+        return ImGui::DragFloat3(label, &(position->x), 1.0f, -1000.0f, 1000.0f);
+    }
+
+    bool InputAngles(const char* label, Vector3* angles)
+    {
+        return ImGui::DragFloat3(label, &(angles->x), 0.1f, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
+    }
+
+    bool InputScale(const char* label, Vector3* scale)
+    {
+        return ImGui::DragFloat3(label, &(scale->x), 0.5f, 0.01f, 1000.0f);
     }
 
     template<class T>
