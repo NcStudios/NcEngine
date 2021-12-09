@@ -1,4 +1,5 @@
 #include "NewSceneDialog.h"
+#include "ui/ImGuiUtility.h"
 
 #include <cstring>
 
@@ -12,7 +13,8 @@ namespace nc::editor
     NewSceneDialog::NewSceneDialog(UICallbacks::RegisterDialogCallbackType registerDialog)
         : DialogFixedCentered{"Create New Scene", WindowSize},
           m_addDialog{std::move(registerDialog)},
-          m_onConfirm{}
+          m_onConfirm{},
+          m_buffer{}
     {
     }
 
@@ -21,7 +23,7 @@ namespace nc::editor
         m_onConfirm = std::move(onConfirmCallback);
         m_addDialog(this);
         m_isOpen = true;
-        std::memset(m_buffer, '\0', BufferSize);
+        m_buffer.clear();
     }
 
     void NewSceneDialog::Draw()
@@ -33,7 +35,7 @@ namespace nc::editor
             ImGui::SetWindowFocus();
             ImGui::Text("Scene Name: ");
             ImGui::SameLine();
-            ImGui::InputText("", m_buffer, BufferSize);
+            InputText("##scenename", &m_buffer);
 
             if(ImGui::Button("Create"))
             {

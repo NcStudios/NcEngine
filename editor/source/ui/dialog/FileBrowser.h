@@ -38,8 +38,6 @@ namespace nc::editor
 
     class FileBrowser : public DialogFixedCentered
     {
-        inline static constexpr size_t TextEntryBufferSize = 128;
-
         public:
             FileBrowser(UICallbacks::RegisterDialogCallbackType registerDialog, std::filesystem::path initialDirectory = std::filesystem::current_path());
 
@@ -50,12 +48,10 @@ namespace nc::editor
             UICallbacks::RegisterDialogCallbackType m_addDialog;
             DialogCallbacks::FileBrowserOnConfirmCallbackType m_callback;
             DirectoryContents m_directoryContents;
-            char m_textEntryBuffer[TextEntryBufferSize];
+            std::string m_textEntryBuffer;
 
             void DrawCurrentDirectoryWidget();
             void DrawBrowserWindow();
             void DrawFileSelectWidget();
-            void ResetTextEntryBuffer();
-            void SetTextEntryBuffer(const std::string& text);
     };
 }

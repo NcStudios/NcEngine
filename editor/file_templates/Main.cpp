@@ -1,7 +1,7 @@
 #include "platform/win32/NcWin32.h"
 #include "NcEngine.h"
 #include "debug/Utils.h"
-#include @INCLUDE_INITIAL_SCENE_HERE@
+#include "@INCLUDE_INITIAL_SCENE@"
 
 #include <iostream>
 
@@ -12,7 +12,7 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     try
     {
         engine = nc::InitializeNcEngine(instance, "config/config.ini");
-        engine->Start(std::make_unique<@INITIAL_SCENE_TYPE_HERE@>());
+        engine->Start(std::make_unique<@INITIAL_SCENE_TYPE@>());
     }
     catch(std::exception& e)
     {

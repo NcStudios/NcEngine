@@ -64,7 +64,7 @@ namespace nc::editor
     EditorFramework::EditorFramework(NcEngine* engine)
         : m_output{},
           m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
-          m_assetManifest{m_editorConfig.recentProjectDirectory},
+          m_assetManifest{m_editorConfig.recentProjectDirectory, [configEditor = &m_configEditor]() -> const config::Config& { return configEditor->GetConfig();}},
           m_projectManager{engine, &m_assetManifest},
           m_environment{m_projectManager.GetSceneData()},
           m_editorUI{engine->Registry(),

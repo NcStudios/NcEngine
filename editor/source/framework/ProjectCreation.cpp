@@ -4,6 +4,45 @@
 
 #include <fstream>
 
+namespace
+{
+    void CopyFileTemplate(const std::filesystem::path& inFile,
+                          const std::filesystem::path& outFile,
+                          const std::unordered_map<std::string, std::string>& replace)
+    {
+        std::ifstream in{inFile};
+        if(!in) throw std::runtime_error("Could not open file: " + outFile.string());
+
+        std::ofstream out{outFile};
+        if(!out) throw std::runtime_error("Could not open file: " + inFile.string());
+
+        std::string line;
+        bool repeatCheck = false;
+
+        while(std::getline(in, line))
+        {
+            do
+            {
+                repeatCheck = false;
+                if(line.find('@') != line.npos)
+                {
+                    for(const auto& [oldWord, newWord] : replace)
+                    {
+                        auto wordPos = line.find(oldWord);
+                        if(wordPos == line.npos)
+                            continue;
+
+                        line.replace(wordPos, oldWord.size(), newWord);
+                        repeatCheck = true; // could be another replacement on this line
+                    }
+                }
+            } while (repeatCheck);
+
+            out << line << '\n';
+        }
+    }
+}
+
 namespace nc::editor
 {
     bool IsValidProjectParentDirectory(const std::filesystem::path& parentDirectory)
@@ -27,48 +66,46 @@ namespace nc::editor
         std::filesystem::create_directory(projectDirectory / "source");
     }
 
-    void CreateProjectFile(const std::filesystem::path& projectFilePath)
+    void CreateProjectFile(const std::filesystem::path& projectDirectory, const std::string& projectName)
     {
-        std::ofstream projectFile{projectFilePath};
-        projectFile << "name=" << projectFilePath.stem().string() << '\n'
-                    << "initial_scene=" << "SampleScene";
-        projectFile.close();
+        const auto replace = std::unordered_map<std::string, std::string>
+        {
+            {"@PROJECT_NAME@", projectName},
+            {"@INITIAL_SCENE@", "LoaderScene"}
+        };
+
+        CopyFileTemplate("editor/file_templates/ProjectFile.ncproj", projectDirectory / (projectName + std::string{".ncproj"}), replace);
     }
 
     void CreateConfig(const std::filesystem::path& projectDirectory, const std::string& projectName)
     {
         const auto directory = projectDirectory.string();
-        std::ofstream file{projectDirectory / "config\\config.ini"};
-        file << "[project]\n"
-             << "project_name=" << projectName << '\n'
-             << "log_file_path=" << directory << "\\Diagnostics.log\n"
-             << "audio_clips_path=" << directory << "\\assets\\audio_clips\\\n"
-             << "concave_colliders_path=" << directory << "\\assets\\concave_colliders\\\n"
-             << "hull_colliders_path=" << directory << "\\assets\\hull_colliders\\\n"
-             << "meshes_path=" << directory << "\\assets\\meshes\\\n"
-             << "shaders_path=" << directory << "\\assets\\shaders\\\n"
-             << "textures_path=" << directory << "\\assets\\textures\\\n"
-             << "[memory]\n"
-             << "max_dynamic_colliders=25000\n"
-             << "max_static_colliders=25000\n"
-             << "max_network_dispatchers=0\n"
-             << "max_particle_emitters=1000\n"
-             << "max_renderers=100000\n"
-             << "max_transforms=100000\n"
-             << "max_point_lights=10\n"
-             << "max_textures=1000\n"
-             << "[physics]\n"
-             << "fixed_update_interval=0.01667\n"
-             << "worldspace_extent=1000\n"
-             << "[graphics]\n"
-             << "use_native_resolution=0\n"
-             << "launch_fullscreen=0\n"
-             << "screen_width=1000\n"
-             << "screen_height=1000\n"
-             << "target_fps=60\n"
-             << "near_clip=0.5\n"
-             << "far_clip=400\n"
-             << "use_shadows=1";
+        const auto replace = std::unordered_map<std::string, std::string>
+        {
+            {"@PROJECT_NAME@", projectName},
+            {"@PROJECT_DIRECTORY@", directory}
+        };
+
+        CopyFileTemplate("editor/file_templates/config.ini", projectDirectory / "config\\config.ini", replace);
+    }
+
+    void CreateMain(const std::filesystem::path& projectDirectory)
+    {
+        const auto replace = std::unordered_map<std::string, std::string>
+        {
+            {"@INCLUDE_INITIAL_SCENE@", "scenes\\GeneratedLoadScene.h"},
+            {"@INITIAL_SCENE_TYPE@", "GeneratedLoadScene"}
+        };
+
+        CopyFileTemplate("editor/file_templates/Main.cpp", projectDirectory / "Main.cpp", replace);
+    }
+
+    void CreateCMakeFiles(const std::filesystem::path& projectDirectory)
+    {
+        std::filesystem::copy_file("editor/file_templates/build.bat", projectDirectory / "build.bat");
+        std::filesystem::copy_file("editor/file_templates/RootCMakeLists.txt", projectDirectory / "CMakeLists.txt");
+        std::filesystem::copy_file("editor/file_templates/SceneCMakeLists.txt", projectDirectory / "scenes/CMakeLists.txt");
+        std::filesystem::copy_file("editor/file_templates/SourceCMakeLists.txt", projectDirectory / "source/CMakeLists.txt");
     }
 
     void CopyDefaultAssets(const std::filesystem::path& projectDirectory)
@@ -114,14 +151,5 @@ namespace nc::editor
             copy_file(engineTextureDirectory / DefaultNormalPath, projectTextureDirectory / DefaultNormalPath);
             copy_file(engineTextureDirectory / DefaultRoughnessPath, projectTextureDirectory / DefaultRoughnessPath);
         }
-    }
-
-    void CreateCMakeFiles(const std::filesystem::path& projectDirectory)
-    {
-        std::filesystem::copy_file("editor/file_templates/build.bat", projectDirectory / "build.bat");
-        std::filesystem::copy_file("editor/file_templates/Main.cpp", projectDirectory / "Main.cpp");
-        std::filesystem::copy_file("editor/file_templates/RootCMakeLists.txt", projectDirectory / "CMakeLists.txt");
-        std::filesystem::copy_file("editor/file_templates/SceneCMakeLists.txt", projectDirectory / "scenes/CMakeLists.txt");
-        std::filesystem::copy_file("editor/file_templates/SourceCMakeLists.txt", projectDirectory / "source/CMakeLists.txt");
     }
 }

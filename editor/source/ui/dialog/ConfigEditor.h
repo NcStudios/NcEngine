@@ -8,21 +8,26 @@ namespace nc::editor
 {
     class ConfigEditor : public DialogFixedCentered
     {
-        static constexpr size_t BufferSize = 128u;
-
         public:
             ConfigEditor();
 
             void Open(const std::filesystem::path& configPath);
             void Draw() override;
             void RegisterDialog(UICallbacks::RegisterDialogCallbackType registerDialog);
+            auto GetConfig() const -> const config::Config& { return m_config; }
 
         private:
             config::Config m_config;
             UICallbacks::RegisterDialogCallbackType m_addDialog;
             std::filesystem::path m_path;
-            char m_nameBuffer[BufferSize];
-            char m_logBuffer[BufferSize];
-            char m_shadersBuffer[BufferSize];
+            std::string m_nameBuffer;
+            std::string m_logPathBuffer;
+            std::string m_audioClipPathBuffer;
+            std::string m_concaveColliderPathBuffer;
+            std::string m_hullColliderPathBuffer;
+            std::string m_meshPathBuffer;
+            std::string m_shaderPathBuffer;
+            std::string m_texturePathBuffer;
+            std::string m_cubeMapPathBuffer;
     };
 }
