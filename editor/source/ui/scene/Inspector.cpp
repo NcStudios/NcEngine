@@ -1,7 +1,7 @@
 #include "Inspector.h"
 #include "assets/AssetManifest.h"
 #include "ui/Color.h"
-#include "ui/helpers/DragAndDrop.h"
+#include "ui/ImGuiUtility.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
 #include "directx/math/DirectXMath.h"
@@ -21,82 +21,69 @@
 
 namespace
 {
+    using namespace nc::editor;
+
     constexpr float defaultItemWidth = 50.0f;
 
     template<class T>
     void ElementHeader(T* obj)
     {
+        IMGUI_SCOPE_ID(StyleColor, 1, ImGuiCol_ButtonHovered, Color::Accent);
+        IMGUI_SCOPE_ID(StyleColor, 2, ImGuiCol_ButtonActive, Color::AccentDark);
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, nc::editor::Color::Accent);
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, nc::editor::Color::AccentDark);
         ImGui::Button(nc::TypeInfo<T>::name, {-1,0});
-        nc::editor::DragAndDropSource<T>(obj);
-        ImGui::PopStyleColor(2);
-    }
-
-    namespace color
-    {
-        const auto White = ImVec4{1.0f, 1.0f, 1.0f, 1.0f};
-        const auto Black = ImVec4{0.0f, 0.0f, 0.0f, 1.0f};
-        const auto Clear = ImVec4{0.0f, 0.0f, 0.0f, 0.0f};
-        const auto Red =   ImVec4{1.0f, 0.2f, 0.1f, 1.0f};
-        const auto Green = ImVec4{0.0f, 1.0f, 0.0f, 1.0f};
-        const auto Blue =  ImVec4{0.0f, 0.4f, 1.0f, 1.0f};
+        DragAndDropSource<T>(obj);
     }
 
     bool floatWidget(const char* label, const char* id, float* item, float dragSpeed = 0.1f, float min = 0.1f, float max = 10.0f, const char* fmt = "%.1f")
     {
-        ImGui::PushID(id);
+        IMGUI_SCOPE(ImGuiId, id);
         ImGui::Text(label);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(defaultItemWidth);
         auto result = ImGui::DragFloat("", item, dragSpeed, min, max, fmt);
-        ImGui::PopID();
         return result;
     };
 
     void textBlockWidget(const char* label, ImVec2 size, ImVec4 bgColor, ImVec4 textColor)
     {
-        ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, bgColor);
-        ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonHovered, bgColor);
-        ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ButtonActive, bgColor);
-        ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, textColor);
+        IMGUI_SCOPE_ID(StyleColor, 1, ImGuiCol_Button, bgColor);
+        IMGUI_SCOPE_ID(StyleColor, 2, ImGuiCol_ButtonHovered, bgColor);
+        IMGUI_SCOPE_ID(StyleColor, 3, ImGuiCol_ButtonActive, bgColor);
+        IMGUI_SCOPE_ID(StyleColor, 4, ImGuiCol_Text, textColor);
         ImGui::Button(label, size);
-        ImGui::PopStyleColor(4);
     }
 
     void xyzWidgetHeader(const char* frontPadding)
     {
         const ImVec2 buttonSize{defaultItemWidth, 0};
         ImGui::Text(frontPadding); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-        textBlockWidget("X##widgetHeader", buttonSize, color::Clear, color::Red); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-        textBlockWidget("Y##widgetHeader", buttonSize, color::Clear, color::Green); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
-        textBlockWidget("Z##widgetHeader", buttonSize, color::Clear, color::Blue);
+        textBlockWidget("X##widgetHeader", buttonSize, Color::Clear, Color::Red); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+        textBlockWidget("Y##widgetHeader", buttonSize, Color::Clear, Color::Green); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+        textBlockWidget("Z##widgetHeader", buttonSize, Color::Clear, Color::Blue);
     }
 
     bool xyzWidget(const char* groupLabel, const char* id, float* x, float* y, float* z, float min = -50.0f, float max = 50.0f)
     {
-        ImGui::PushID(id);
+        IMGUI_SCOPE(ImGuiId, id);
         ImGui::Text(groupLabel); ImGui::SameLine();
         auto xResult = floatWidget("", "x", x, 0.1f, min, max, "%.1f"); ImGui::SameLine();
         auto yResult = floatWidget("", "y", y, 0.1f, min, max, "%.1f"); ImGui::SameLine();
         auto zResult = floatWidget("", "z", z, 0.1f, min, max, "%.1f");
-        ImGui::PopID();
-
         return xResult || yResult || zResult;
     };
 
     [[maybe_unused]]
     void columnHeaderWidget(const char* frontPadding, const char* label1, const char* label2, const char* label3 = nullptr)
     {
+        IMGUI_SCOPE(ItemWidth, defaultItemWidth);
+
         const ImVec2 buttonSize{defaultItemWidth, 0};
-        ImGui::PushItemWidth(defaultItemWidth);
         ImGui::Text(frontPadding); ImGui::SameLine();
-        textBlockWidget(label1, buttonSize, color::Clear, color::White); ImGui::SameLine();
-        textBlockWidget(label2, buttonSize, color::Clear, color::White); ImGui::SameLine();
+        textBlockWidget(label1, buttonSize, Color::Clear, Color::White); ImGui::SameLine();
+        textBlockWidget(label2, buttonSize, Color::Clear, Color::White); ImGui::SameLine();
         if(label3)
-            textBlockWidget(label3, buttonSize, color::Clear, color::White);
-        ImGui::PopItemWidth();
+            textBlockWidget(label3, buttonSize, Color::Clear, Color::White);
     }
 }
 

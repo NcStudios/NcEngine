@@ -5,11 +5,15 @@
 namespace nc::editor
 {
     struct Color
-    {    
+    {
         static constexpr auto Black             = Vector4{0.009f, 0.009f, 0.009f, 1.000f};
         static constexpr auto White             = Vector4{1.000f, 1.000f, 1.000f, 1.000f};
-        static constexpr auto Trans             = Vector4{0.000f, 0.000f, 0.000f, 0.000f};
+        static constexpr auto Clear             = Vector4{0.000f, 0.000f, 0.000f, 0.000f};
         static constexpr auto TransWhite        = Vector4{1.000f, 1.000f, 1.000f, 0.700f};
+
+        static constexpr auto Red               = Vector4{1.000f, 0.200f, 0.100f, 1.000f};
+        static constexpr auto Green             = Vector4{0.000f, 1.000f, 0.000f, 1.000f};
+        static constexpr auto Blue              = Vector4{0.000f, 0.400f, 1.000f, 1.000f};
 
         static constexpr auto GrayLightest      = Vector4{0.348f, 0.348f, 0.348f, 1.000f};
         static constexpr auto GrayLight         = Vector4{0.168f, 0.168f, 0.168f, 1.000f};

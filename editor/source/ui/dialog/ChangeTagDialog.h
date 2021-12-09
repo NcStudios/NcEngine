@@ -8,8 +8,6 @@ namespace nc::editor
 {
     class ChangeTagDialog : public DialogFixedCentered
     {
-        static constexpr size_t BufferSize = 64;
-
         public:
             ChangeTagDialog(Registry* registry);
 
@@ -22,6 +20,6 @@ namespace nc::editor
             Registry* m_registry;
             UICallbacks::RegisterDialogCallbackType m_addDialog;
             Entity m_entity;
-            char m_buffer[BufferSize];
+            std::string m_buffer;
     };
 }

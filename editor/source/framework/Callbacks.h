@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/Config.h"
 #include "ecs/Entity.h"
 #include "ProjectData.h"
 
@@ -8,6 +9,8 @@
 namespace nc::editor
 {
     class DialogBase;
+
+    using GetProjectConfigCallbackType = std::function<const config::Config&()>;
 
     struct ProjectCallbacks
     {
