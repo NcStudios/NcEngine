@@ -171,7 +171,12 @@ namespace nc::editor
     {
         if(sceneData->mainCamera.Valid() && m_registry->Contains<Camera>(sceneData->mainCamera))
         {
-            m_file << SetCameraSceneAction << "( " << m_handleNames.at(sceneData->mainCamera.Index()) << " );";
+            m_file << SetCameraSceneAction << "( " << m_handleNames.at(sceneData->mainCamera.Index()) << " );\n";
+        }
+
+        if(sceneData->audioListener.Valid())
+        {
+            m_file << RegisterAudioListenerSceneAction << "( " << m_handleNames.at(sceneData->audioListener.Index()) << " );\n";
         }
     }
 

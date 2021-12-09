@@ -1,4 +1,5 @@
 #include "FileBrowser.h"
+#include "ui/ImGuiUtility.h"
 
 #include <cstring>
 #include <iostream>
@@ -127,7 +128,8 @@ namespace nc::editor
         : DialogFixedCentered{"File Browser", FileBrowserSize},
           m_addDialog{std::move(registerDialog)},
           m_callback{},
-          m_directoryContents{std::move(initialDirectory)}
+          m_directoryContents{std::move(initialDirectory)},
+          m_textEntryBuffer{}
     {
     }
 
@@ -136,7 +138,8 @@ namespace nc::editor
         m_callback = std::move(callback);
         m_isOpen = true;
         m_addDialog(this);
-        ResetTextEntryBuffer();
+        m_textEntryBuffer.clear();
+        m_textEntryBuffer.reserve(128u);
         m_directoryContents.OpenDirectory(m_directoryContents.CurrentDirectory());
     }
 
@@ -166,7 +169,7 @@ namespace nc::editor
             ImGui::SameLine();
             if(ImGui::Button(subsection.c_str()))
             {
-                ResetTextEntryBuffer();
+                m_textEntryBuffer.clear();
                 m_directoryContents.OpenParentDirectory(subsectionIndex);
                 break;
             }
@@ -186,8 +189,7 @@ namespace nc::editor
             {
                 if(ImGui::Selectable(entry.c_str(), selectedIndex == currentIndex))
                 {
-                    auto name = m_directoryContents.Entry(currentIndex).path().filename().string();
-                    SetTextEntryBuffer(name);
+                    m_textEntryBuffer = m_directoryContents.Entry(currentIndex).path().filename().string();
                     m_directoryContents.SelectEntry(currentIndex);
                 }
 
@@ -195,7 +197,7 @@ namespace nc::editor
                 {
                     if(m_directoryContents.IsDirectory(currentIndex))
                     {
-                        ResetTextEntryBuffer();
+                        m_textEntryBuffer.clear();
                         m_directoryContents.OpenDirectory(currentIndex);
                         break;
                     }
@@ -213,7 +215,7 @@ namespace nc::editor
     {
         ImGui::Text("File Name");
         ImGui::SameLine();
-        ImGui::InputText("", m_textEntryBuffer, TextEntryBufferSize, ImGuiInputTextFlags_ReadOnly);
+        InputText("", &m_textEntryBuffer, ImGuiInputTextFlags_ReadOnly);
         ImGui::Spacing();
         
         if(ImGui::Button("Ok"))
@@ -239,17 +241,5 @@ namespace nc::editor
         {
             m_isOpen = false;
         }
-    }
-
-    void FileBrowser::ResetTextEntryBuffer()
-    {
-        std::memset(m_textEntryBuffer, '\0', TextEntryBufferSize);
-    }
-
-    void FileBrowser::SetTextEntryBuffer(const std::string& text)
-    {
-        ResetTextEntryBuffer();
-        auto textLength = text.size();
-        std::memcpy(m_textEntryBuffer, text.c_str(), textLength >= TextEntryBufferSize ? TextEntryBufferSize : textLength);
     }
 }

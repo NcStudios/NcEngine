@@ -115,7 +115,7 @@ namespace
         else if (key == UseShadowsKey)
             out->graphicsSettings.useShadows = std::stoi(value);
         else
-            throw nc::NcError("Unknown config key");
+            throw nc::NcError(std::string{"Unknown config key: "} + key);
     };
 } //end anonymous namespace
 

@@ -45,15 +45,30 @@ namespace
 
 namespace nc::editor
 {
-    AssetManifest::AssetManifest(const std::filesystem::path& projectDirectory)
+    AssetManifest::AssetManifest(const std::filesystem::path& projectDirectory, GetProjectConfigCallbackType configCallback)
         : m_meshes{},
           m_hullColliders{},
           m_concaveColliders{},
           m_textures{},
-          m_audioClips{}
+          m_audioClips{},
+          m_getConfig{std::move(configCallback)}
     {
         LoadDefaultAssets();
         Read(projectDirectory);
+    }
+
+    auto AssetManifest::GetAssetImportPath(const std::filesystem::path& assetPath, AssetType type) const -> std::filesystem::path
+    {
+        const auto& projectSettings = m_getConfig().projectSettings;
+        switch(type)
+        {
+            case AssetType::AudioClip:       return projectSettings.audioClipsPath / assetPath.filename();
+            case AssetType::ConcaveCollider: return projectSettings.concaveCollidersPath / assetPath.filename();
+            case AssetType::HullCollider:    return projectSettings.hullCollidersPath / assetPath.filename();
+            case AssetType::Mesh:            return projectSettings.meshesPath / assetPath.filename();
+            case AssetType::Texture:         return projectSettings.texturesPath / assetPath.filename();
+            default: throw NcError("Unknown AssetType");
+        }
     }
 
     bool AssetManifest::Add(const std::filesystem::path& assetPath, AssetType type)
@@ -64,30 +79,32 @@ namespace nc::editor
             return false;
         }
 
+        const auto& importPath = GetAssetImportPath(assetPath, type);
         auto& collection = GetCollection(type);
 
-        if(collection.Contains(assetPath))
+        if(collection.Contains(importPath))
         {
-            Output::LogError("Asset is alread in the manifest");
+            Output::LogError("Asset is already in the manifest");
             return false;
         }
 
-        auto asset = CreateAsset(assetPath, type);
+        std::filesystem::copy(assetPath, importPath);
+        auto asset = CreateAsset(importPath, type);
 
-        if(RequiresNcaFile(type) && !BuildNcaFile(assetPath, type))
+        if(RequiresNcaFile(type) && !BuildNcaFile(importPath, type))
         {
-            Output::LogError("Failure building nca file from:", assetPath.string());
+            Output::LogError("Failure building nca file from:", importPath.string());
             return false;
         }
 
         if(!LoadAsset(asset, type))
         {
-            Output::LogError("Failure loading asset:", assetPath.string());
+            Output::LogError("Failure loading asset:", importPath.string());
             return false;
         }
 
         collection.Add(std::move(asset));
-        Output::Log("Added asset: " + assetPath.string());
+        Output::Log("Added asset: " + importPath.string());
         return true;
     }
 

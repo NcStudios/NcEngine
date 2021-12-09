@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetCollection.h"
+#include "framework/Callbacks.h"
 
 namespace nc::editor
 {
@@ -8,7 +9,7 @@ namespace nc::editor
     class AssetManifest
     {
         public:
-            AssetManifest(const std::filesystem::path& projectDirectory);
+            AssetManifest(const std::filesystem::path& projectDirectory, GetProjectConfigCallbackType configCallback);
 
             bool Add(const std::filesystem::path& assetPath, AssetType type);
             bool Remove(const std::filesystem::path& assetPath, AssetType type);
@@ -26,7 +27,10 @@ namespace nc::editor
             AssetCollection m_textures;
             AssetCollection m_audioClips;
 
+            GetProjectConfigCallbackType m_getConfig;
+
             auto GetCollection(AssetType type) -> AssetCollection&;
             auto GetCollection(AssetType type) const -> const AssetCollection&;
+            auto GetAssetImportPath(const std::filesystem::path& assetPath, AssetType type) const -> std::filesystem::path;
     };
 }

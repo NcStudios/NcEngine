@@ -1,4 +1,5 @@
 #include "ConfigEditor.h"
+#include "ui/ImGuiUtility.h"
 #include "utility/Output.h"
 #include "debug/NcError.h"
 
@@ -14,7 +15,17 @@ namespace nc::editor
     ConfigEditor::ConfigEditor()
         : DialogFixedCentered("Config Editor", DialogSize),
           m_config{},
-          m_addDialog{}
+          m_addDialog{},
+          m_path{},
+          m_nameBuffer{},
+          m_logPathBuffer{},
+          m_audioClipPathBuffer{},
+          m_concaveColliderPathBuffer{},
+          m_hullColliderPathBuffer{},
+          m_meshPathBuffer{},
+          m_shaderPathBuffer{},
+          m_texturePathBuffer{},
+          m_cubeMapPathBuffer{}
     {
     }
 
@@ -34,17 +45,16 @@ namespace nc::editor
         m_path = configPath;
         m_addDialog(this);
 
-        const auto& projectName = m_config.projectSettings.projectName;
-        auto size = projectName.size() < BufferSize ? projectName.size() : BufferSize;
-        std::memcpy(m_nameBuffer, projectName.c_str(), size);
 
-        const auto& logPath = m_config.projectSettings.logFilePath;
-        size = logPath.size() < BufferSize ? logPath.size() : BufferSize;
-        std::memcpy(m_logBuffer, logPath.c_str(), size);
-
-        const auto& shadersPath = m_config.projectSettings.shadersPath;
-        size = shadersPath.size() < BufferSize ? shadersPath.size() : BufferSize;
-        std::memcpy(m_shadersBuffer, shadersPath.c_str(), size);
+        m_nameBuffer = m_config.projectSettings.projectName;
+        m_logPathBuffer = m_config.projectSettings.logFilePath;
+        m_audioClipPathBuffer = m_config.projectSettings.audioClipsPath;
+        m_concaveColliderPathBuffer = m_config.projectSettings.concaveCollidersPath;
+        m_hullColliderPathBuffer = m_config.projectSettings.hullCollidersPath;
+        m_meshPathBuffer = m_config.projectSettings.meshesPath;
+        m_shaderPathBuffer = m_config.projectSettings.shadersPath;
+        m_texturePathBuffer = m_config.projectSettings.texturesPath;
+        m_cubeMapPathBuffer = m_config.projectSettings.cubeMapsPath;
     }
 
     void ConfigEditor::Draw()
@@ -63,10 +73,19 @@ namespace nc::editor
             ImGui::PushItemWidth(75.0f);
             ImGui::Text("Project");
             ImGui::Indent();
-            ImGui::SetNextItemWidth(250.0f);
-            ImGui::InputText("Project Name", m_nameBuffer, BufferSize);
-            ImGui::SetNextItemWidth(250.0f);
-            ImGui::InputText("Log File Path", m_logBuffer, BufferSize);
+            ImGui::PushItemWidth(250.0f);
+
+            InputText("Project Name        ", &m_nameBuffer);
+            InputText("Log Path            ", &m_nameBuffer);
+            InputText("AudioClip Path      ", &m_audioClipPathBuffer);
+            InputText("ConcaveCollider Path", &m_concaveColliderPathBuffer);
+            InputText("HullCollider Path   ", &m_hullColliderPathBuffer);
+            InputText("Mesh Path           ", &m_meshPathBuffer);
+            InputText("Shader Path         ", &m_shaderPathBuffer);
+            InputText("Texture Path        ", &m_texturePathBuffer);
+            InputText("CubeMap Path        ", &m_cubeMapPathBuffer);
+
+            ImGui::PopItemWidth();
             ImGui::Unindent();
             ImGui::Separator();
 
@@ -100,8 +119,6 @@ namespace nc::editor
 
             ImGui::DragFloat(" Near Clip", &m_config.graphicsSettings.nearClip, 0.001f, 0.001f, 10.0f, "%.3f");
             ImGui::DragFloat(" Far Clip", &m_config.graphicsSettings.farClip, 1.0f, 1.0f, 5000.0f, "%.1f");
-            ImGui::SetNextItemWidth(250.0f);
-            ImGui::InputText("Shaders Path", m_shadersBuffer, BufferSize);
             ImGui::Checkbox(" Use Shadows", &m_config.graphicsSettings.useShadows);
             ImGui::Unindent();
             ImGui::Separator();
@@ -111,8 +128,14 @@ namespace nc::editor
             if(ImGui::Button("Save"))
             {
                 m_config.projectSettings.projectName = m_nameBuffer;
-                m_config.projectSettings.logFilePath = m_logBuffer;
-                m_config.projectSettings.shadersPath = m_shadersBuffer;
+                m_config.projectSettings.logFilePath = m_logPathBuffer;
+                m_config.projectSettings.audioClipsPath = m_audioClipPathBuffer;
+                m_config.projectSettings.concaveCollidersPath = m_concaveColliderPathBuffer;
+                m_config.projectSettings.hullCollidersPath = m_hullColliderPathBuffer;
+                m_config.projectSettings.meshesPath = m_meshPathBuffer;
+                m_config.projectSettings.shadersPath = m_shaderPathBuffer;
+                m_config.projectSettings.texturesPath = m_texturePathBuffer;
+                m_config.projectSettings.cubeMapsPath = m_cubeMapPathBuffer;
 
                 if(config::Validate(m_config))
                 {

@@ -7,8 +7,6 @@ namespace nc::editor
 {
     class NewProjectDialog : public DialogFixedCentered
     {
-        inline static constexpr size_t TextEntryBufferSize = 256;
-
         public:
             NewProjectDialog(UICallbacks::RegisterDialogCallbackType registerDialog);
 
@@ -18,7 +16,7 @@ namespace nc::editor
         private:
             UICallbacks::RegisterDialogCallbackType m_addDialog;
             DialogCallbacks::NewProjectOnConfirmCallbackType m_callback;
-            char m_nameBuffer[TextEntryBufferSize];
-            char m_pathBuffer[TextEntryBufferSize];
+            std::string m_nameBuffer;
+            std::string m_pathBuffer;
     };
 }

@@ -1,4 +1,5 @@
 #include "ChangeTagDialog.h"
+#include "ui/ImGuiUtility.h"
 
 namespace
 {
@@ -11,7 +12,8 @@ namespace nc::editor
         : DialogFixedCentered{"Change Entity Tag", ChangeTagDialogSize},
           m_registry{registry},
           m_addDialog{},
-          m_entity{Entity::Null()}
+          m_entity{Entity::Null()},
+          m_buffer{}
     {
     }
 
@@ -19,17 +21,18 @@ namespace nc::editor
     {
         m_isOpen = true;
         m_entity = entity;
-        m_buffer[0] = '\0';
+        m_buffer.clear();
+        m_buffer.reserve(64u);
         m_addDialog(this);
     }
 
     void ChangeTagDialog::Draw()
     {
         if(!m_isOpen) return;
-        
+
         if(BeginWindow())
         {
-            ImGui::InputText("", m_buffer, BufferSize);
+            InputText("", &m_buffer);
             if(ImGui::Button("Save"))
             {
                 m_registry->Get<Tag>(m_entity)->Set(std::string{m_buffer});

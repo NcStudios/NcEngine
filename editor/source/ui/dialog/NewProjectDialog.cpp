@@ -1,4 +1,5 @@
 #include "NewProjectDialog.h"
+#include "ui/ImGuiUtility.h"
 
 #include <cstring>
 
@@ -12,7 +13,9 @@ namespace nc::editor
     NewProjectDialog::NewProjectDialog(UICallbacks::RegisterDialogCallbackType registerDialog)
         : DialogFixedCentered{"Create Project", NewProjectDialogSize},
           m_addDialog{std::move(registerDialog)},
-          m_callback{}
+          m_callback{},
+          m_nameBuffer{},
+          m_pathBuffer{}
     {
     }
 
@@ -21,8 +24,10 @@ namespace nc::editor
         m_callback = std::move(callback);
         m_isOpen = true;
         m_addDialog(this);
-        std::memset(m_nameBuffer, '\0', TextEntryBufferSize);
-        std::memset(m_pathBuffer, '\0', TextEntryBufferSize);
+        m_nameBuffer.clear();
+        m_nameBuffer.reserve(64u);
+        m_pathBuffer.clear();
+        m_pathBuffer.reserve(64u);
     }
 
     void NewProjectDialog::Draw()
@@ -33,12 +38,12 @@ namespace nc::editor
         {
             ImGui::Text("Project Name:");
             ImGui::SameLine();
-            ImGui::InputText("##newprojectname", m_nameBuffer, TextEntryBufferSize);
+            InputText("##newprojectname", &m_nameBuffer);
             ImGui::Spacing();
 
             ImGui::Text("Directory:   ");
             ImGui::SameLine();
-            ImGui::InputText("##newprojectpath", m_pathBuffer, TextEntryBufferSize);
+            InputText("##newprojectpath", &m_pathBuffer);
             ImGui::Spacing();
 
             if(ImGui::Button("Ok"))
