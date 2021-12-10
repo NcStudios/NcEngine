@@ -3,6 +3,7 @@
 #include "assimp/postprocess.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -15,7 +16,8 @@ enum class AssetType
 {
     Mesh,
     ConvexHull,
-    ConcaveCollider
+    ConcaveCollider,
+    Skybox
 };
 
 struct Target
@@ -68,6 +70,7 @@ void BuildAsset(Assimp::Importer* importer, const Target& inPath, const Config& 
 void BuildMeshAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 void BuildConvexHullAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
 void BuildConcaveColliderAsset(Assimp::Importer* importer, const std::filesystem::path& inPath, const Config& config);
+void BuildSkyboxAsset(const std::filesystem::path& inPath, const Config& config);
 auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D;
 auto GetMeshVertexExtents(const aiVector3D* data, unsigned count) -> MeshExtents;
 auto operator<<(std::ostream& stream, aiVector3D& vec) -> std::ostream&;
@@ -189,6 +192,8 @@ auto GetAssetType(std::string type) -> AssetType
         return AssetType::ConvexHull;
     else if(type.compare("concave-collider") == 0)
         return AssetType::ConcaveCollider;
+    else if(type.compare("skybox") == 0)
+        return AssetType::Skybox;
     
     throw std::runtime_error("Failed to parse asset type: " + type);
 }
@@ -296,6 +301,11 @@ void BuildAsset(Assimp::Importer* importer, const Target& target, const Config& 
         case AssetType::ConcaveCollider:
         {
             BuildConcaveColliderAsset(importer, target.path, config);
+            break;
+        }
+        case AssetType::Skybox:
+        {
+            BuildSkyboxAsset(target.path, config);
             break;
         }
     }
@@ -436,6 +446,64 @@ void BuildConcaveColliderAsset(Assimp::Importer* importer, const std::filesystem
         std::cerr << "    Warning: Bad value detected in mesh data. Some values have been set to 0.\n";
 
     outFile.close();
+}
+
+void BuildSkyboxAsset(const std::filesystem::path& inPath, const Config& config)
+{
+    if (!std::filesystem::is_directory(inPath))
+    {
+        throw std::runtime_error("Must specify a directory.");
+    }
+
+    const auto assetPath = ToAssetPath(inPath, config);
+    std::cout << "Creating skybox asset: " << assetPath << '\n';
+    std::ofstream outFile{assetPath};
+    if(!outFile)
+        throw std::runtime_error("Failure opening asset file");
+
+    struct Entry
+    {
+        std::string face;
+        bool found = false;
+    };
+
+    std::array<Entry, 6> skyboxFacePaths
+    {
+        Entry{"front"}, 
+        Entry{"back"}, 
+        Entry{"up"}, 
+        Entry{"down"}, 
+        Entry{"right"}, 
+        Entry{"left"}
+    };
+
+    for (const auto& facePathIt : std::filesystem::directory_iterator{inPath})
+    {
+        const auto& facePath = facePathIt.path();
+        auto facePathName = facePath.stem().string();
+        auto facePathExt = facePath.extension().string();
+        std::ranges::for_each(facePathName, [](auto& character){character = std::tolower(character);});
+
+        auto pos = std::ranges::find_if(skyboxFacePaths, [facePathName](const auto& entry)
+        {
+            return entry.face == facePathName;
+        });
+
+        if (pos == skyboxFacePaths.end())
+        {
+            continue;
+        }
+
+        pos->found = true;
+        auto outputDir = config.OutputDirectory / facePathName;
+        outputDir.replace_extension(facePathExt);
+        auto outputDirStr = outputDir.string();
+        std::filesystem::copy_file(facePath, outputDir, std::filesystem::copy_options::overwrite_existing);
+        outputDirStr.erase(std::remove(outputDirStr.begin(), outputDirStr.end(), '\"'), outputDirStr.end());
+        outFile << outputDirStr << '\n';
+    }
+
+    if (std::any_of(skyboxFacePaths.begin(), skyboxFacePaths.end(), [](const auto& entry) { return entry.found == false; })) throw std::runtime_error("One or more skybox faces did not get created correctly.");
 }
 
 auto GetMaximumVertexInDirection(const aiVector3D* data, unsigned count, aiVector3D direction) -> aiVector3D
