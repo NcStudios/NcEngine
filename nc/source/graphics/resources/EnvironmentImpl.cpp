@@ -13,7 +13,7 @@ namespace nc
         m_environmentData.skyboxTextureIndex = -1;
     }
 
-    void EnvironmentImpl::SetSkybox(const CubeMapFaces& skybox)
+    void EnvironmentImpl::SetSkybox(const std::string& path)
     {
         m_useSkybox = true;
 
@@ -22,7 +22,7 @@ namespace nc
             LoadMeshAsset(SkyboxMeshPath);
         }
 
-        auto skyboxView = AssetService<CubeMapView, CubeMapFaces>::Get()->Acquire(skybox);
+        auto skyboxView = AssetService<CubeMapView>::Get()->Acquire(path);
         m_environmentData.skyboxTextureIndex = skyboxView.index;
     }
 

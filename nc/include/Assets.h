@@ -60,18 +60,6 @@ namespace nc
         uint32_t index;
     };
 
-    struct CubeMapFaces
-    {
-        CubeMapUsage usage;
-        std::string uid;
-        std::string frontPath;
-        std::string backPath;
-        std::string upPath;
-        std::string downPath;
-        std::string rightPath;
-        std::string leftPath;
-    };
-
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
@@ -117,11 +105,11 @@ namespace nc
     void UnloadAllTextureAssets();
 
     /** Supported file types: .png 
-    *  @note Unloading textures invalidates all CubeMapViews. It is intended
+    *  @note Unloading cube maps invalidates all CubeMapViews. It is intended
     *  to be done on scene change. */
-    bool LoadCubeMapAsset(const CubeMapFaces& paths, bool isExternal = false);
-    bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths, bool isExternal = false);
-    bool UnloadCubeMapAsset(const CubeMapFaces& paths);
+    bool LoadCubeMapAsset(const std::string& path, bool isExternal = false);
+    bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadCubeMapAsset(const std::string& path);
     void UnloadAllCubeMapAssets();
 
 }

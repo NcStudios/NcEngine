@@ -89,21 +89,8 @@ namespace nc::sample
         };
 
         nc::LoadMeshAssets(sceneMeshes);
-
-        auto skyboxForest = CubeMapFaces
-        {
-            .usage = CubeMapUsage::Skybox,
-            .uid = "Humus02Skybox",
-            .frontPath = "Humus02/Front.jpg",
-            .backPath  = "Humus02/Back.jpg",
-            .upPath    = "Humus02/Up.jpg",
-            .downPath  = "Humus02/Down.jpg",
-            .rightPath = "Humus02/Right.jpg",
-            .leftPath  = "Humus02/Left.jpg"
-        };
-
-        nc::LoadCubeMapAsset(skyboxForest);
-        engine->Environment()->SetSkybox(skyboxForest);
+        nc::LoadCubeMapAsset("Humus02.nca");
+        engine->Environment()->SetSkybox("Humus02.nca");
         
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});

@@ -500,7 +500,7 @@ void BuildSkyboxAsset(const std::filesystem::path& inPath, const Config& config)
         auto outputDirStr = outputDir.string();
         std::filesystem::copy_file(facePath, outputDir, std::filesystem::copy_options::overwrite_existing);
         outputDirStr.erase(std::remove(outputDirStr.begin(), outputDirStr.end(), '\"'), outputDirStr.end());
-        outFile << outputDirStr << '\n';
+        outFile << facePathName << facePathExt << '\n';
     }
 
     if (std::any_of(skyboxFacePaths.begin(), skyboxFacePaths.end(), [](const auto& entry) { return entry.found == false; })) throw std::runtime_error("One or more skybox faces did not get created correctly.");

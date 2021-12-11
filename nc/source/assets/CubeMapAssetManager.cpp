@@ -2,9 +2,9 @@
 #include "graphics/Initializers.h"
 #include "graphics/resources/ShaderResourceService.h"
 
-
 #include <cassert>
 #include <fstream>
+#include <filesystem>
 
 namespace nc
 {
@@ -26,15 +26,68 @@ namespace nc
         }
     }
 
-    bool CubeMapAssetManager::Load(const CubeMapFaces& faces, bool isExternal)
+    struct CubeMapFaces
+    {
+        std::string frontPath;
+        std::string backPath;
+        std::string upPath;
+        std::string downPath;
+        std::string rightPath;
+        std::string leftPath;
+    };
+
+    CubeMapFaces ReadFacePathsFromAsset(std::ifstream& file, const std::filesystem::path& subdirectory)
+    {
+        CubeMapFaces facePaths{};
+
+        std::string currentFace;
+        for(size_t i = 0; i < 6; ++i)
+        {
+            if(file.fail())
+                throw nc::NcError("Failure reading file");
+            
+            file >> currentFace;
+            const std::filesystem::path currentFacePath = currentFace;
+
+                 if (currentFacePath.stem().string() == "front") facePaths.frontPath = (subdirectory / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "back") facePaths.backPath   = (subdirectory / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "up") facePaths.upPath       = (subdirectory / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "down") facePaths.downPath   = (subdirectory / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "right") facePaths.rightPath = (subdirectory / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "left") facePaths.leftPath   = (subdirectory / currentFacePath).string();
+        }
+
+        return facePaths;
+    }
+
+    bool HasValidAssetExtension(const std::string& path)
+    {
+        std::size_t periodPosition = path.rfind('.');
+        const std::string fileExtension = path.substr(periodPosition+1);
+        return fileExtension.compare("nca") == 0 ? true : false;
+    }
+
+    bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
     {
         uint32_t nextCubeMapIndex = m_cubeMaps.size();
 
-        if(IsLoaded(faces))
+        if(IsLoaded(path))
             return true;
 
         std::array<stbi_uc*, 6> pixelArray = {};
         int32_t width, height, numChannels; // Same for all faces.
+
+        if(!HasValidAssetExtension(path))
+            throw nc::NcError("Invalid extension: " + path);
+
+        const std::filesystem::path assetPath = path;
+        const std::filesystem::path assetDirectory = m_assetDirectory / assetPath.stem() / assetPath;
+
+        std::ifstream file{assetDirectory};
+        if(!file.is_open())
+            throw nc::NcError("Could not open file: " + assetDirectory.string());
+
+        auto faces = ReadFacePathsFromAsset(file, assetPath.stem());
 
         /** Front face */
         const auto fullFrontPath = isExternal ? faces.frontPath : m_assetDirectory + faces.frontPath;
@@ -68,27 +121,39 @@ namespace nc
 
         auto cubeMapView = CubeMapView
         {
-            .usage = faces.usage,
+            .usage = CubeMapUsage::Skybox,
             .index = nextCubeMapIndex++
         };
 
-        m_cubeMapAccessors.emplace(faces.uid, cubeMapView);
-        m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, faces.uid);
+        m_cubeMapAccessors.emplace(path, cubeMapView);
+        m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, path);
         graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
         return true;
     }
 
-    bool CubeMapAssetManager::Load(std::span<const CubeMapFaces> facesSet, bool isExternal)
+    bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
-        const auto newCubeMapCount = facesSet.size();
+        const auto newCubeMapCount = paths.size();
         uint32_t newCubeMapIndex = m_cubeMaps.size();
         if (newCubeMapCount + newCubeMapIndex >= m_maxCubeMapsCount)
             throw NcError("Cannot exceed max texture count.");
 
-        for (const auto& faces : facesSet)
+        for (const auto& path : paths)
         {
-            if(IsLoaded(faces))
+            if(IsLoaded(path))
                 continue;
+
+            if(!HasValidAssetExtension(path))
+            throw nc::NcError("Invalid extension: " + path);
+
+            const std::filesystem::path assetPath = path;
+            const std::filesystem::path assetDirectory = m_assetDirectory / assetPath.stem() / assetPath;
+
+            std::ifstream file{assetDirectory};
+            if(!file.is_open())
+                throw nc::NcError("Could not open file: " + assetDirectory.string());
+
+            auto faces = ReadFacePathsFromAsset(file, assetPath.stem());
 
             std::array<stbi_uc*, 6> pixelArray = {};
             int32_t width, height, numChannels; // Same for all faces.
@@ -122,28 +187,28 @@ namespace nc
             const auto fullLeftPath = isExternal ? faces.leftPath : m_assetDirectory + faces.leftPath;
             pixelArray.at(5) = stbi_load(fullLeftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
             if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + fullLeftPath);
-            
+
             auto cubeMapView = CubeMapView
             {
-                .usage = faces.usage,
+                .usage = CubeMapUsage::Skybox,
                 .index = newCubeMapIndex++
             };
 
-            m_cubeMapAccessors.emplace(faces.uid, cubeMapView);
-            m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, faces.uid);
+            m_cubeMapAccessors.emplace(path, cubeMapView);
+            m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, path);
         }
 
         graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
         return true;
     }
 
-    bool CubeMapAssetManager::Unload(const CubeMapFaces& faces)
+    bool CubeMapAssetManager::Unload(const std::string& path)
     {
-        auto removed = static_cast<bool>(m_cubeMapAccessors.erase(faces.uid));
+        auto removed = static_cast<bool>(m_cubeMapAccessors.erase(path));
         if(!removed)
             return false;
         
-        auto pos = std::ranges::find_if(m_cubeMaps, [&uid = faces.uid](const auto& cubeMap)
+        auto pos = std::ranges::find_if(m_cubeMaps, [&uid = path](const auto& cubeMap)
         {
             return cubeMap.GetUid() == uid;
         });
@@ -152,7 +217,7 @@ namespace nc
         auto index = std::distance(m_cubeMaps.begin(), pos);
         m_cubeMaps.erase(pos);
 
-        for(auto& [path, cubeMapView] : m_cubeMapAccessors)
+        for(auto& [cubeMapPath, cubeMapView] : m_cubeMapAccessors)
         {
             if(cubeMapView.index > index)
                 --cubeMapView.index;
@@ -168,17 +233,17 @@ namespace nc
         m_cubeMaps.clear();
     }
 
-    auto CubeMapAssetManager::Acquire(const CubeMapFaces& faces) const -> CubeMapView
+    auto CubeMapAssetManager::Acquire(const std::string& path) const -> CubeMapView
     {
-        const auto it = m_cubeMapAccessors.find(faces.uid);
+        const auto it = m_cubeMapAccessors.find(path);
         if(it == m_cubeMapAccessors.cend())
-            throw NcError("Asset is not loaded: " + faces.uid);
+            throw NcError("Asset is not loaded: " + path);
         
         return it->second;
     }
     
-    bool CubeMapAssetManager::IsLoaded(const CubeMapFaces& faces) const
+    bool CubeMapAssetManager::IsLoaded(const std::string& path) const
     {
-        return m_cubeMapAccessors.contains(faces.uid);
+        return m_cubeMapAccessors.contains(path);
     }
 }

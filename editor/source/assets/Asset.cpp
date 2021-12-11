@@ -14,6 +14,8 @@ namespace nc::editor
     const auto FbxExtension = std::string{".fbx"};
     const auto WaveExtension = std::string{".wav"};
     const auto PngExtension = std::string{".png"};
+    const auto JpgExtension = std::string{".jpg"};
+    const auto JpegExtension = std::string{".jpeg"};
     const auto ExeName = std::string{"tools/asset_builder/build.exe"};
 
     std::string BuildAssetTypeArg(nc::editor::AssetType type)
@@ -24,7 +26,8 @@ namespace nc::editor
             return std::string{" -a concave-collider "};
         if(type == nc::editor::AssetType::HullCollider)
             return std::string{" -a hull-collider "};
-
+        if(type == nc::editor::AssetType::Skybox)
+            return std::string{" -a skybox "};
         return std::string{};
     }
 
@@ -95,6 +98,7 @@ namespace nc::editor
                 case AssetType::HullCollider:    { nc::LoadConvexHullAsset(asset.ncaPath.value().string(), true); break; }
                 case AssetType::Mesh:            { nc::LoadMeshAsset(asset.ncaPath.value().string(), true); break; }
                 case AssetType::Texture:         { nc::LoadTextureAsset(asset.sourcePath.string(), true); break; }
+                case AssetType::Skybox:          { nc::LoadCubeMapAsset(asset.sourcePath.string(), true); break; }
                 default:                         { return false; }
             }
 
