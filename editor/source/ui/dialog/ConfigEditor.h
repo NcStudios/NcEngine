@@ -9,7 +9,7 @@ namespace nc::editor
     class ConfigEditor : public DialogFixedCentered
     {
         public:
-            ConfigEditor();
+            ConfigEditor(const std::filesystem::path& configPath);
 
             void Open(const std::filesystem::path& configPath);
             void Draw() override;

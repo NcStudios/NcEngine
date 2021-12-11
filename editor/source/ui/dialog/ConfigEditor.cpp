@@ -12,7 +12,7 @@ namespace
 
 namespace nc::editor
 {
-    ConfigEditor::ConfigEditor()
+    ConfigEditor::ConfigEditor(const std::filesystem::path& configPath)
         : DialogFixedCentered("Config Editor", DialogSize),
           m_config{},
           m_addDialog{},
@@ -27,6 +27,16 @@ namespace nc::editor
           m_texturePathBuffer{},
           m_cubeMapPathBuffer{}
     {
+        try
+        {
+            m_config = config::Load(configPath.string());
+            m_path = configPath;
+        }
+        catch(const NcError& e)
+        {
+            Output::LogError("Failure opening config", std::string{"Exception: "} + e.what());
+            return;
+        }
     }
 
     void ConfigEditor::Open(const std::filesystem::path& configPath)
