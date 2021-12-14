@@ -59,6 +59,7 @@ namespace nc::editor
     struct ImGuiId
     {
         explicit ImGuiId(const char* id) { ImGui::PushID(id); }
+        explicit ImGuiId(int id)         { ImGui::PushID(id); }
         ~ImGuiId() noexcept              { ImGui::PopID();    }
     };
 

@@ -19,6 +19,41 @@
 #include "ecs/component/PointLight.h"
 #include "ecs/component/Transform.h"
 
+
+
+
+
+
+
+
+
+
+#include "serialize/type/UIStream.h"
+#include "serialize/type/TypeSerialization.h"
+
+
+using namespace nc;
+
+
+
+struct Foo
+{
+    Vector3 velocity;
+    Color3 color;
+    float mass;
+    float mass2;
+    int count;
+};
+
+namespace nc
+{
+    REGISTER_TYPE(Vector3, PROPERTY(Vector3, x), PROPERTY(Vector3, y), PROPERTY(Vector3, z));
+    REGISTER_TYPE(Color3, PROPERTY(Color3, r), PROPERTY(Color3, g), PROPERTY(Color3, b));
+    REGISTER_TYPE(Foo, PROPERTY(Foo, velocity), PROPERTY(Foo, color), PROPERTY_F(Foo, mass, SerializationFlags::Nonnegative), PROPERTY(Foo, mass2), PROPERTY(Foo, count));
+
+    REGISTER_TYPE(PointLightInfo, PROPERTY(PointLightInfo, ambient), PROPERTY(PointLightInfo, diffuseColor), PROPERTY(PointLightInfo, diffuseIntensity));
+}
+
 namespace
 {
     using namespace nc::editor;
@@ -364,17 +399,29 @@ namespace nc::editor
     void Inspector::DrawPointLight(PointLight* pointLight)
     {
         ElementHeader(pointLight);
-        IMGUI_SCOPE(ItemWidth, 50.0f);
+        //IMGUI_SCOPE(ItemWidth, 50.0f);
 
-        auto info = pointLight->GetInfo();
-        auto ambientResult = ImGui::ColorEdit3("Ambient Color", &info.ambient.x, ImGuiColorEditFlags_NoInputs);
-        auto diffuseResult = ImGui::ColorEdit3("Diffuse Color", &info.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
-        auto intensityResult = ImGui::DragFloat("Intensity", &info.diffuseIntensity, 1.0f, 0.0f, 600.0f, "%.2f");
+        //auto info = pointLight->GetInfo();
 
-        if (ambientResult || diffuseResult || intensityResult)
-        {
-            pointLight->SetInfo(info);
-        }
+        //UIStream::Clear();
+        UIStream::Send(pointLight->m_info);
+        if(UIStream::ExchangeWriteStatus())
+            pointLight->SetDirty();
+
+
+        // auto ambientResult = ImGui::ColorEdit3("Ambient Color", &info.ambient.x, ImGuiColorEditFlags_NoInputs);
+        // auto diffuseResult = ImGui::ColorEdit3("Diffuse Color", &info.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
+        // auto intensityResult = ImGui::DragFloat("Intensity", &info.diffuseIntensity, 1.0f, 0.0f, 600.0f, "%.2f");
+
+        // if (ambientResult || diffuseResult || intensityResult)
+        // {
+        //     pointLight->SetInfo(info);
+        // }
+    }
+
+    void DrawFoo(Foo& foo)
+    {
+        UIStream::Send(foo);
     }
 
     void Inspector::DrawTransform(Transform* transform)
@@ -402,5 +449,12 @@ namespace nc::editor
             transform->SetRotation(angles);
         if(sclResult)
             transform->SetScale(scl);
+
+        UIStream::Clear();
+
+        static Foo foo1 {pos, pos, 2.0f, 2.0f, 10};
+        static Foo foo2 {pos * 2, pos * 2, 1.0f, 5.0f, 5};
+        DrawFoo(foo1);
+        DrawFoo(foo2);
     }
 }

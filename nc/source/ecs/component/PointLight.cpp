@@ -41,6 +41,12 @@ namespace nc
         m_info = info;
     }
 
+    /** The editor modifies m_info directly so we need a way to update just the flag. */
+    void PointLight::SetDirty()
+    {
+        m_isDirty = true;
+    }
+
     DirectX::XMMATRIX PointLight::CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix)
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
@@ -50,7 +56,7 @@ namespace nc
     }
 
     bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj)
-    {     
+    {
         m_info.viewProjection = lightViewProj;
 
         if (position.x != m_info.pos.x || position.y != m_info.pos.y || position.z != m_info.pos.z)
