@@ -76,7 +76,7 @@ jobs:
        mkdir build
        mkdir install
        cmake -G "Ninja" -S nc/ -B build/ -DCMAKE_BUILD_TYPE=Release -DNC_BUILD_TYPE=Release-WithEditor -DNC_EDITOR_ENABLED=ON -DNC_ENGINE_INSTALL_DIR=install/
-       ninja -C build/Engine-ReleaseWithEditor
+       ninja -C build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
