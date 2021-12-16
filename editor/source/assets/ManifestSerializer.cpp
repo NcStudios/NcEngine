@@ -8,11 +8,11 @@ namespace
 {
     using namespace std::literals;
 
-    const auto AudioClipTag = "AudioClip"sv;
-    const auto ConcaveColliderTag = "ConcaveCollider"sv;
-    const auto HullColliderTag = "HullCollider"sv;
-    const auto MeshTag = "Mesh"sv;
-    const auto TextureTag = "Texture"sv;
+    constexpr auto AudioClipTag = "AudioClip"sv;
+    constexpr auto ConcaveColliderTag = "ConcaveCollider"sv;
+    constexpr auto HullColliderTag = "HullCollider"sv;
+    constexpr auto MeshTag = "Mesh"sv;
+    constexpr auto TextureTag = "Texture"sv;
 
     auto ReadNonNcaAsset(std::ifstream& file) -> nc::editor::Asset
     {

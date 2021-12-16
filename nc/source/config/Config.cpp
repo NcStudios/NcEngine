@@ -16,38 +16,39 @@ namespace
     using namespace std::literals;
 
     // project
-    const auto ProjectNameKey = "project_name"sv;
-    const auto LogFilePathKey = "log_file_path"sv;
-    const auto AudioClipsPathKey = "audio_clips_path"sv;
-    const auto ConcaveCollidersKey = "concave_colliders_path"sv;
-    const auto HullCollidersKey = "hull_colliders_path"sv;
-    const auto MeshesPathKey = "meshes_path"sv;
-    const auto ShadersPathKey = "shaders_path"sv;
-    const auto TexturesPathKey = "textures_path"sv;
-    const auto CubeMapsPathKey = "cubemaps_path"sv;
+    constexpr auto ProjectNameKey = "project_name"sv;
+    constexpr auto LogFilePathKey = "log_file_path"sv;
+    constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
+    constexpr auto ConcaveCollidersKey = "concave_colliders_path"sv;
+    constexpr auto HullCollidersKey = "hull_colliders_path"sv;
+    constexpr auto MeshesPathKey = "meshes_path"sv;
+    constexpr auto ShadersPathKey = "shaders_path"sv;
+    constexpr auto TexturesPathKey = "textures_path"sv;
+    constexpr auto CubeMapsPathKey = "cubemaps_path"sv;
+
     // memory
-    const auto MaxDynamicCollidersKey = "max_dynamic_colliders"sv;
-    const auto MaxStaticCollidersKey = "max_static_colliders"sv;
-    const auto MaxNetworkDispatchersKey = "max_network_dispatchers"sv;
-    const auto MaxParticleEmittersKey = "max_particle_emitters"sv;
-    const auto MaxRenderersKey = "max_renderers"sv;
-    const auto MaxTransformsKey = "max_transforms"sv;
-    const auto MaxPointLightsKey = "max_point_lights"sv;
-    const auto MaxTexturesKey = "max_textures"sv;
+    constexpr auto MaxDynamicCollidersKey = "max_dynamic_colliders"sv;
+    constexpr auto MaxStaticCollidersKey = "max_static_colliders"sv;
+    constexpr auto MaxNetworkDispatchersKey = "max_network_dispatchers"sv;
+    constexpr auto MaxParticleEmittersKey = "max_particle_emitters"sv;
+    constexpr auto MaxRenderersKey = "max_renderers"sv;
+    constexpr auto MaxTransformsKey = "max_transforms"sv;
+    constexpr auto MaxPointLightsKey = "max_point_lights"sv;
+    constexpr auto MaxTexturesKey = "max_textures"sv;
 
     // physics
-    const auto FixedUpdateIntervalKey = "fixed_update_interval"sv;
-    const auto WorldspaceExtentKey = "worldspace_extent"sv;
+    constexpr auto FixedUpdateIntervalKey = "fixed_update_interval"sv;
+    constexpr auto WorldspaceExtentKey = "worldspace_extent"sv;
 
     // graphics
-    const auto UseNativeResolutionKey = "use_native_resolution"sv;
-    const auto LaunchInFullscreenKey = "launch_fullscreen"sv;
-    const auto ScreenWidthKey = "screen_width"sv;
-    const auto ScreenHeightKey = "screen_height"sv;
-    const auto TargetFpsKey = "target_fps"sv;
-    const auto NearClipKey = "near_clip"sv;
-    const auto FarClipKey = "far_clip"sv;
-    const auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
+    constexpr auto UseNativeResolutionKey = "use_native_resolution"sv;
+    constexpr auto LaunchInFullscreenKey = "launch_fullscreen"sv;
+    constexpr auto ScreenWidthKey = "screen_width"sv;
+    constexpr auto ScreenHeightKey = "screen_height"sv;
+    constexpr auto TargetFpsKey = "target_fps"sv;
+    constexpr auto NearClipKey = "near_clip"sv;
+    constexpr auto FarClipKey = "far_clip"sv;
+    constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
 
     void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config* out)
     {
