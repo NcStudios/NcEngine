@@ -9,9 +9,9 @@ namespace nc::editor
         {
             Output::Log("Deleting Scene: " + sceneName);
 
-            auto headerPath = scenesDirectory / (sceneName + HeaderExtension);
-            auto sourcePath = scenesDirectory / (sceneName + SourceExtension);
-            auto genPath = scenesDirectory / (sceneName + GeneratedSourceExtension);
+            auto headerPath = scenesDirectory / (sceneName + FileExtension::Header.data());
+            auto sourcePath = scenesDirectory / (sceneName + FileExtension::Source.data());
+            auto genPath = scenesDirectory / (sceneName + FileExtension::Generated.data());
 
             if(!std::filesystem::remove(headerPath))
                 Output::LogError("Failure deleting: " + headerPath.string());

@@ -10,8 +10,8 @@
 
 namespace
 {
-    auto WND_CLASS_STYLE_FLAGS = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    auto WND_STYLE_FLAGS = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+    constexpr auto WndClassStyleFlags = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    constexpr auto WndStyleFlags = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
     nc::window::WindowImpl* g_instance = nullptr;
 }
 
@@ -54,13 +54,11 @@ namespace nc::window
           EngineDisableRunningCallback{nullptr}
     {
         g_instance = this;
-        GraphicsOnResizeCallback = nullptr;
-        UIWndMessageCallback = nullptr;
 
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
 
-        m_wndClass.style = WND_CLASS_STYLE_FLAGS;
+        m_wndClass.style = WndClassStyleFlags;
         m_wndClass.lpfnWndProc = WindowImpl::WndProc;
         m_wndClass.hInstance = instance;
         m_wndClass.lpszClassName = TEXT(projectSettings.projectName.c_str());
@@ -75,15 +73,15 @@ namespace nc::window
 
         if(graphicsSettings.useNativeResolution)
         {
-            m_dimensions = Vector2{ (float)nativeWidth, (float)nativeHeight };
+            m_dimensions = Vector2{ static_cast<float>(nativeWidth), static_cast<float>(nativeHeight) };
         }
         else
         {
-            m_dimensions = Vector2{ (float)graphicsSettings.screenWidth, (float)graphicsSettings.screenHeight };
+            m_dimensions = Vector2{ static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight) };
         }
 
-        auto left = math::Clamp(((int)nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
-        auto top = math::Clamp(((int)nativeHeight - (int)m_dimensions.y) / 2, 0, nativeHeight);
+        auto left = math::Clamp((nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
+        auto top = math::Clamp((nativeHeight - (int)m_dimensions.y) / 2, 0, nativeHeight);
 
         auto clientRect = RECT
         {
@@ -93,7 +91,7 @@ namespace nc::window
             (LONG)(top + m_dimensions.y)
         };
 
-        if(!AdjustWindowRect(&clientRect, WND_STYLE_FLAGS, FALSE))
+        if(!AdjustWindowRect(&clientRect, WndStyleFlags, FALSE))
         {
             throw NcError("Failed to adjust client rect to window rect");
         }
@@ -112,7 +110,7 @@ namespace nc::window
 
         m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
                                 projectSettings.projectName.c_str(),
-                                WND_STYLE_FLAGS,
+                                WndStyleFlags,
                                 clientRect.left, clientRect.top,
                                 clientRect.right - clientRect.left,
                                 clientRect.bottom - clientRect.top,
