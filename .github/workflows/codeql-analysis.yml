@@ -55,6 +55,9 @@ jobs:
       with:
         platform: x64
     
+    - name: Set up Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+    
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
     # - name: Autobuild
@@ -68,6 +71,8 @@ jobs:
     #    uses a compiled language
 
     - run: |
+       mkdir build
+       mkdir install
        cmake -G "Ninja" -S nc/ -B build/ -DCMAKE_BUILD_TYPE=Release -DNC_BUILD_TYPE=Release-WithEditor -DNC_EDITOR_ENABLED=ON -DNC_ENGINE_INSTALL_DIR=install/
        ninja -C build/Engine-ReleaseWithEditor
 
