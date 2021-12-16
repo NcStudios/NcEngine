@@ -58,6 +58,8 @@ jobs:
     - name: Set up Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
     
+    - name: Install Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.0.3
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
     # - name: Autobuild
