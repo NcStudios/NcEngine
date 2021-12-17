@@ -19,7 +19,7 @@ namespace nc::graphics
     ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics*, const std::vector<Vertex>&) {}
     ImmutableBuffer::~ImmutableBuffer() {}
     ImmutableBuffer::ImmutableBuffer(ImmutableBuffer&&) {}
-    ImmutableBuffer& ImmutableBuffer::operator=(ImmutableBuffer&&) {}
+    ImmutableBuffer& ImmutableBuffer::operator=(ImmutableBuffer&&) { return *this; }
     
     vk::Buffer* ImmutableBuffer::GetBuffer() {return nullptr;}
     void ImmutableBuffer::Bind(nc::graphics::Graphics*, const std::vector<uint32_t>&) {}
