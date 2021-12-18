@@ -30,7 +30,6 @@ set(EXTERNAL_DIR "${ROOT_DIR}/external")
 set(EXTERNAL_SOURCE_DIR "${ROOT_DIR}/source")
 set(NC_INCLUDE_DIR "${ROOT_DIR}/include")
 set(NC_SOURCE_DIR "${ROOT_DIR}/source")
-set(GCC_WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
 set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
@@ -38,6 +37,11 @@ set(ENGINE_LIB "NcEngineLib")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
 set(NC_INSTALL_DIR "${NC_ENGINE_INSTALL_DIR}/NcEngine/${NC_BUILD_TYPE}")
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+endif()
 
 # Propagate version
 configure_file(${ROOT_DIR}/source/config/Version.h.in
@@ -91,7 +95,7 @@ set_target_properties(NcEngineLib
 # Compile Options
 target_compile_options(NcEngineLib
     PRIVATE
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 add_subdirectory(external/src/enet)

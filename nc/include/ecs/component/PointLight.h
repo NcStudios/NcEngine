@@ -31,22 +31,21 @@ namespace nc
     class PointLight final : public ComponentBase
     {
         NC_ENABLE_IN_EDITOR(PointLight)
-        
+
         public:
             PointLight(Entity entity, PointLightInfo info);
 
             auto GetInfo() const -> const PointLightInfo& { return m_info; }
-            auto IsDirty() const -> bool { return m_isDirty; }
             void SetInfo(PointLightInfo info);
 
         private:
-            DirectX::XMMATRIX CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix);
-
             PointLightInfo m_info;
             DirectX::XMMATRIX m_lightProjectionMatrix;
             bool m_isDirty;
 
-            bool Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj);
+            auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix) -> DirectX::XMMATRIX;
+            auto Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj) -> bool;
+            void SetDirty();
 
             friend ecs::PointLightSystem;
             friend graphics::PerFrameRenderState;

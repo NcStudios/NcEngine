@@ -1,15 +1,5 @@
 #include "ecs/Registry.h"
-#include "ecs/component/AudioSource.h"
-#include "ecs/component/AutoComponentGroup.h"
-#include "ecs/component/Collider.h"
-#include "ecs/component/ConcaveCollider.h"
-#include "ecs/component/NetworkDispatcher.h"
-#include "ecs/component/ParticleEmitter.h"
-#include "ecs/component/PhysicsBody.h"
-#include "ecs/component/Tag.h"
-#include "ecs/component/Transform.h"
-#include "ecs/component/MeshRenderer.h"
-#include "ecs/component/PointLight.h"
+#include "ecs/component/All.h"
 
 /** @todo This needs to go away. */
 namespace

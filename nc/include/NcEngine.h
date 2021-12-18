@@ -2,16 +2,7 @@
 
 #include "platform/win32/HInstanceForwardDecl.h"
 #include "ecs/Registry.h"
-#include "ecs/component/AudioSource.h"
-#include "ecs/component/Camera.h"
-#include "ecs/component/Collider.h"
-#include "ecs/component/ConcaveCollider.h"
-#include "ecs/component/MeshRenderer.h"
-#include "ecs/component/ParticleEmitter.h"
-#include "ecs/component/PhysicsBody.h"
-#include "ecs/component/PointLight.h"
-#include "ecs/component/Tag.h"
-#include "ecs/component/Transform.h"
+#include "ecs/component/All.h"
 #include "MainCamera.h"
 #include "AudioSystem.h"
 #include "graphics/Environment.h"
@@ -41,5 +32,5 @@ namespace nc
             virtual auto UI() noexcept -> UISystem* = 0;
     };
 
-    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath, bool useEditorMode = false) -> std::unique_ptr<NcEngine>;
+    auto InitializeNcEngine(HINSTANCE hInstance, std::string_view configPath, bool useEditorMode = false) -> std::unique_ptr<NcEngine>;
 }

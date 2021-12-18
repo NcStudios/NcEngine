@@ -17,8 +17,14 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(EDITOR_EXE "NcEditor")
-set(GCC_WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 set(NC_INSTALL_DIR "${NC_ENGINE_INSTALL_DIR}/NcEngine/${NC_BUILD_TYPE}")
+
+set(WARNING_FLAGS)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+elseif()
+endif()
 
 find_package(NcEngine REQUIRED PATHS ${NC_INSTALL_DIR})
 
@@ -33,7 +39,7 @@ set_target_properties(${EDITOR_EXE}
 #Compile Options
 target_compile_options(${EDITOR_EXE}
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 #Include Dirs
