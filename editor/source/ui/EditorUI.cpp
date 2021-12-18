@@ -61,7 +61,6 @@ namespace nc::editor
 
     void EditorUI::Draw()
     {
-        IMGUI_SCOPE(ItemWidth, 35.0f);
         ImGui::SetNextWindowPos({0,0});
         ImGui::SetNextWindowSize({m_dimensions.x, 20.0f});
 
@@ -74,7 +73,6 @@ namespace nc::editor
         m_sceneGraph.Draw();
         m_utilitiesPanel.Draw();
         m_activeDialogs.Draw();
-
     }
 
     auto EditorUI::GetRegisterDialogCallback() -> UICallbacks::RegisterDialogCallbackType

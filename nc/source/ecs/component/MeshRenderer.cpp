@@ -67,6 +67,15 @@ namespace nc
         m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(texturePath);
     }
 
+    void MeshRenderer::SetMetallic(const std::string& texturePath)
+    {
+        #ifdef NC_EDITOR_ENABLED
+        m_material.metallic = texturePath;
+        #endif
+
+        m_textureIndices.metallic = AssetService<TextureView>::Get()->Acquire(texturePath);
+    }
+
     #ifdef NC_EDITOR_ENABLED
     template<> void ComponentGuiElement<MeshRenderer>(MeshRenderer* meshRenderer)
     {

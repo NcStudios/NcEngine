@@ -85,7 +85,7 @@ namespace nc::editor
           m_newSceneDialog{m_editorUI.GetRegisterDialogCallback()},
           m_newProjectDialog{m_editorUI.GetRegisterDialogCallback()},
           m_changeTagDialog{engine->Registry()},
-          m_configEditor{}
+          m_configEditor{m_editorConfig.recentProjectDirectory / "config\\config.ini"}
     {
         nc::editor::SetImGuiStyle();
         engine->UI()->Set(&m_editorUI);

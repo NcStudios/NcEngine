@@ -46,6 +46,7 @@ namespace nc
             void SetBaseColor(const std::string& texturePath);
             void SetNormal(const std::string& texturePath);
             void SetRoughness(const std::string& texturePath);
+            void SetMetallic(const std::string& texturePath);
 
             #ifdef NC_EDITOR_ENABLED
             auto GetMaterial() -> Material& { return m_material; }

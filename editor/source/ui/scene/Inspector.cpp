@@ -58,6 +58,33 @@ namespace
             ImGui::Button("Z##widgetHeader", buttonSize);
         }
     }
+
+    template<class Func>
+    void AssetCombo(const char* label, const char* preview, const std::string& defaultPath, std::span<const Asset> assets, Func&& apply)
+    {
+        if(ImGui::BeginCombo(label, preview))
+        {
+            if(ImGui::Selectable("Default"))
+                apply(defaultPath);
+
+            for(const auto& asset : assets)
+            {
+                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
+                {
+                    try
+                    {
+                        apply(asset.sourcePath.string());
+                    }
+                    catch(const std::runtime_error& e)
+                    {
+                        Output::LogError("Failure loading: " + asset.sourcePath.string(), "Exception: " + std::string{e.what()});
+                    }
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+    }
 }
 
 namespace nc::editor
@@ -208,27 +235,12 @@ namespace nc::editor
 
     void Inspector::DrawHullColliderWidget(Collider* collider)
     {
-        /** @todo */
-
-        if(ImGui::BeginCombo("##colliderhullselectcombo", collider->m_info.hullAssetPath.c_str()))
+        const char* assetPath = collider->m_info.hullAssetPath.c_str();
+        auto assets = m_assetManifest->View(AssetType::HullCollider);
+        AssetCombo("##hullcombo", assetPath, CubeHullColliderPath, assets, [collider](const std::string& path)
         {
-            for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
-            {
-                if(ImGui::Selectable(asset.name.c_str()))
-                {
-                    try
-                    {
-                        collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
-                    }
-                    catch(const std::runtime_error& e)
-                    {
-                        Output::LogError("Failure loading: " + asset.ncaPath.value().string(), "Exception: " + std::string{e.what()});
-                    }
-                }
-            }
-
-            ImGui::EndCombo();
-        }
+            collider->SetProperties(HullProperties{.assetPath = path});
+        });
     }
 
     void Inspector::DrawSphereColliderWidget(Collider* collider)
@@ -285,75 +297,29 @@ namespace nc::editor
 
         ImGui::Spacing(); ImGui::Spacing();
 
+        auto textures = m_assetManifest->View(AssetType::Texture);
+
         ImGui::Text("Material");
-        if(ImGui::BeginCombo("Base##meshrendererbaseselectcombo", material.baseColor.c_str()))
+
+        AssetCombo("Base##combo", material.baseColor.c_str(), DefaultBaseColorPath, textures, [meshRenderer](const std::string& path)
         {
-            if(ImGui::Selectable("Default"))
-                meshRenderer->SetBaseColor(DefaultBaseColorPath);
-            
-            for(const auto& asset : m_assetManifest->View(AssetType::Texture))
-            {
-                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
-                {
-                    try
-                    {
-                        meshRenderer->SetBaseColor(asset.sourcePath.string());
-                    }
-                    catch(const std::runtime_error& e)
-                    {
-                        Output::LogError("Failure loading: " + asset.sourcePath.string(), "Exception: " + std::string{e.what()});
-                    }
-                }
-            }
+            meshRenderer->SetBaseColor(path);
+        });
 
-            ImGui::EndCombo();
-        }
-
-        if(ImGui::BeginCombo("Normal##meshrenderernormalselectcombo", material.normal.c_str()))
+        AssetCombo("Normal##combo", material.normal.c_str(), DefaultNormalPath, textures, [meshRenderer](const std::string& path)
         {
-            if(ImGui::Selectable("Default"))
-                meshRenderer->SetBaseColor(DefaultNormalPath);
+            meshRenderer->SetNormal(path);
+        });
 
-            for(const auto& asset : m_assetManifest->View(AssetType::Texture))
-            {
-                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
-                {
-                    try
-                    {
-                        meshRenderer->SetNormal(asset.sourcePath.string());
-                    }
-                    catch(const std::runtime_error& e)
-                    {
-                        Output::LogError("Failure loading: " + asset.sourcePath.string(), "Exception: " + std::string{e.what()});
-                    }
-                }
-            }
-
-            ImGui::EndCombo();
-        }
-
-        if(ImGui::BeginCombo("Roughness##meshrendererroughnessselectcombo", material.roughness.c_str()))
+        AssetCombo("Roughness##combo", material.roughness.c_str(), DefaultRoughnessPath, textures, [meshRenderer](const std::string& path)
         {
-            if(ImGui::Selectable("Default"))
-                meshRenderer->SetBaseColor(DefaultRoughnessPath);
+            meshRenderer->SetRoughness(path);
+        });
 
-            for(const auto& asset : m_assetManifest->View(AssetType::Texture))
-            {
-                if(ImGui::Selectable(asset.sourcePath.string().c_str()))
-                {
-                    try
-                    {
-                        meshRenderer->SetRoughness(asset.sourcePath.string());
-                    }
-                    catch(const std::runtime_error& e)
-                    {
-                        Output::LogError("Failure loading: " + asset.sourcePath.string(), "Exception: " + std::string{e.what()});
-                    }
-                }
-            }
-
-            ImGui::EndCombo();
-        }
+        AssetCombo("Metallic##combo", material.metallic.c_str(), DefaultRoughnessPath, textures, [meshRenderer](const std::string& path)
+        {
+            meshRenderer->SetMetallic(path);
+        });
     }
 
     void Inspector::DrawNetworkDispatcher(NetworkDispatcher* networkDispatcher)
@@ -369,7 +335,7 @@ namespace nc::editor
     void Inspector::DrawPhysicsBody(PhysicsBody* physicsBody)
     {
         ElementHeader(physicsBody);
-        IMGUI_SCOPE(ItemWidth, 100.0f);
+        IMGUI_SCOPE(ItemWidth, 50.0f);
         auto& properties = physicsBody->m_properties;
 
         ImGui::Checkbox("Use Gravity", &properties.useGravity);
@@ -398,28 +364,16 @@ namespace nc::editor
     void Inspector::DrawPointLight(PointLight* pointLight)
     {
         ElementHeader(pointLight);
-        IMGUI_SCOPE(ItemWidth, 100.0f);
+        IMGUI_SCOPE(ItemWidth, 50.0f);
 
-        auto& info = pointLight->GetInfo();
-
-        Vector3 ambient = info.ambient;
-        Vector3 diffuse = info.diffuseColor;
-        float diffuseIntensity = info.diffuseIntensity;
-
-        auto ambientResult = ImGui::ColorEdit3("Ambient Color", &ambient.x, ImGuiColorEditFlags_NoInputs);
-        auto diffuseResult = ImGui::ColorEdit3("Diffuse Color", &diffuse.x, ImGuiColorEditFlags_NoInputs);
-        auto intensityResult = ImGui::DragFloat("Intensity", &diffuseIntensity, 1.0f, 0.0f, 600.0f, "%.2f");
-
-
-        auto pointLightInfo = info;
-
-        if (ambientResult) pointLightInfo.ambient = ambient;
-        if (diffuseResult) pointLightInfo.diffuseColor = diffuse;
-        if (intensityResult) pointLightInfo.diffuseIntensity = diffuseIntensity;
+        auto info = pointLight->GetInfo();
+        auto ambientResult = ImGui::ColorEdit3("Ambient Color", &info.ambient.x, ImGuiColorEditFlags_NoInputs);
+        auto diffuseResult = ImGui::ColorEdit3("Diffuse Color", &info.diffuseColor.x, ImGuiColorEditFlags_NoInputs);
+        auto intensityResult = ImGui::DragFloat("Intensity", &info.diffuseIntensity, 1.0f, 0.0f, 600.0f, "%.2f");
 
         if (ambientResult || diffuseResult || intensityResult)
         {
-            pointLight->SetInfo(pointLightInfo);
+            pointLight->SetInfo(info);
         }
     }
 
