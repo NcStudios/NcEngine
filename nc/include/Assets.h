@@ -5,6 +5,7 @@
 #include <concepts>
 #include <span>
 #include <string>
+#include <string_view>
 
 namespace nc
 {
@@ -13,6 +14,49 @@ namespace nc
      * 
      *  Paths should be relative to directories specified in the config. Passing true for isExternal
      *  allows paths to be absolute or relative to the executable. Duplicate loads are ignored. */
+
+    /** Supported file types: .nca */
+    bool LoadConcaveColliderAsset(const std::string& path, bool isExternal = false);
+    bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadConcaveColliderAsset(const std::string& path);
+    void UnloadAllConcaveColliderAssets();
+
+    /** Supported file types: .nca */
+    bool LoadConvexHullAsset(const std::string& path, bool isExternal = false);
+    bool LoadConvexHullAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadConvexHullAsset(const std::string& path);
+    void UnloadAllConvexHullAssets();
+
+    /** Supported file types: .nca 
+     *  @note Unloading meshes invalidates all MeshViews. It is intended
+     *  to be done on scene change. */
+    bool LoadMeshAsset(const std::string& path, bool isExternal = false);
+    bool LoadMeshAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadMeshAsset(const std::string& path);
+    void UnloadAllMeshAssets();
+
+    /** Supported file types: .wav */
+    bool LoadAudioClipAsset(const std::string& path, bool isExternal = false);
+    bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadAudioClipAsset(const std::string& path);
+    void UnloadAllAudioClipAssets();
+
+    /** Supported file types: .png 
+     *  @note Unloading textures invalidates all TextureViews. It is intended
+     *  to be done on scene change. */
+    bool LoadTextureAsset(const std::string& path, bool isExternal = false);
+    bool LoadTextureAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadTextureAsset(const std::string& path);
+    void UnloadAllTextureAssets();
+
+    /** Supported file types: .png 
+    *  @note Unloading textures invalidates all CubeMapViews. It is intended
+    *  to be done on scene change. */
+    struct CubeMapFaces;
+    bool LoadCubeMapAsset(const CubeMapFaces& paths, bool isExternal = false);
+    bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths, bool isExternal = false);
+    bool UnloadCubeMapAsset(const CubeMapFaces& paths);
+    void UnloadAllCubeMapAssets();
 
     struct ConcaveColliderView
     {
@@ -81,47 +125,5 @@ namespace nc
                         std::same_as<T, MeshView> ||
                         std::same_as<T, TextureView> ||
                         std::same_as<T, CubeMapView>;
-
-    /** Supported file types: .nca */
-    bool LoadConcaveColliderAsset(const std::string& path, bool isExternal = false);
-    bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExternal = false);
-    bool UnloadConcaveColliderAsset(const std::string& path);
-    void UnloadAllConcaveColliderAssets();
-
-    /** Supported file types: .nca */
-    bool LoadConvexHullAsset(const std::string& path, bool isExternal = false);
-    bool LoadConvexHullAssets(std::span<const std::string> paths, bool isExternal = false);
-    bool UnloadConvexHullAsset(const std::string& path);
-    void UnloadAllConvexHullAssets();
-
-    /** Supported file types: .nca 
-     *  @note Unloading meshes invalidates all MeshViews. It is intended
-     *  to be done on scene change. */
-    bool LoadMeshAsset(const std::string& path, bool isExternal = false);
-    bool LoadMeshAssets(std::span<const std::string> paths, bool isExternal = false);
-    bool UnloadMeshAsset(const std::string& path);
-    void UnloadAllMeshAssets();
-
-    /** Supported file types: .wav */
-    bool LoadAudioClipAsset(const std::string& path, bool isExternal = false);
-    bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal = false);
-    bool UnloadAudioClipAsset(const std::string& path);
-    void UnloadAllAudioClipAssets();
-
-    /** Supported file types: .png 
-     *  @note Unloading textures invalidates all TextureViews. It is intended
-     *  to be done on scene change. */
-    bool LoadTextureAsset(const std::string& path, bool isExternal = false);
-    bool LoadTextureAssets(std::span<const std::string> paths, bool isExternal = false);
-    bool UnloadTextureAsset(const std::string& path);
-    void UnloadAllTextureAssets();
-
-    /** Supported file types: .png 
-    *  @note Unloading textures invalidates all CubeMapViews. It is intended
-    *  to be done on scene change. */
-    bool LoadCubeMapAsset(const CubeMapFaces& paths, bool isExternal = false);
-    bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths, bool isExternal = false);
-    bool UnloadCubeMapAsset(const CubeMapFaces& paths);
-    void UnloadAllCubeMapAssets();
 
 }

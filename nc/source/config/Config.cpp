@@ -13,40 +13,42 @@ namespace
     std::unique_ptr<nc::config::Config> g_config = nullptr;
     std::string g_configPath = "";
 
+    using namespace std::literals;
+
     // project
-    const auto ProjectNameKey = std::string{"project_name"};
-    const auto LogFilePathKey = std::string{"log_file_path"};
-    const auto AudioClipsPathKey = std::string{"audio_clips_path"};
-    const auto ConcaveCollidersKey = std::string{"concave_colliders_path"};
-    const auto HullCollidersKey = std::string{"hull_colliders_path"};
-    const auto MeshesPathKey = std::string{"meshes_path"};
-    const auto ShadersPathKey = std::string{"shaders_path"};
-    const auto TexturesPathKey = std::string{"textures_path"};
-    const auto CubeMapsPathKey = std::string{"cubemaps_path"};
+    constexpr auto ProjectNameKey = "project_name"sv;
+    constexpr auto LogFilePathKey = "log_file_path"sv;
+    constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
+    constexpr auto ConcaveCollidersKey = "concave_colliders_path"sv;
+    constexpr auto HullCollidersKey = "hull_colliders_path"sv;
+    constexpr auto MeshesPathKey = "meshes_path"sv;
+    constexpr auto ShadersPathKey = "shaders_path"sv;
+    constexpr auto TexturesPathKey = "textures_path"sv;
+    constexpr auto CubeMapsPathKey = "cubemaps_path"sv;
 
     // memory
-    const auto MaxDynamicCollidersKey = std::string{"max_dynamic_colliders"};
-    const auto MaxStaticCollidersKey = std::string{"max_static_colliders"};
-    const auto MaxNetworkDispatchersKey = std::string{"max_network_dispatchers"};
-    const auto MaxParticleEmittersKey = std::string{"max_particle_emitters"};
-    const auto MaxRenderersKey = std::string{"max_renderers"};
-    const auto MaxTransformsKey = std::string{"max_transforms"};
-    const auto MaxPointLightsKey = std::string{"max_point_lights"};
-    const auto MaxTexturesKey = std::string{"max_textures"};
+    constexpr auto MaxDynamicCollidersKey = "max_dynamic_colliders"sv;
+    constexpr auto MaxStaticCollidersKey = "max_static_colliders"sv;
+    constexpr auto MaxNetworkDispatchersKey = "max_network_dispatchers"sv;
+    constexpr auto MaxParticleEmittersKey = "max_particle_emitters"sv;
+    constexpr auto MaxRenderersKey = "max_renderers"sv;
+    constexpr auto MaxTransformsKey = "max_transforms"sv;
+    constexpr auto MaxPointLightsKey = "max_point_lights"sv;
+    constexpr auto MaxTexturesKey = "max_textures"sv;
 
     // physics
-    const auto FixedUpdateIntervalKey = std::string{"fixed_update_interval"};
-    const auto WorldspaceExtentKey = std::string{"worldspace_extent"};
+    constexpr auto FixedUpdateIntervalKey = "fixed_update_interval"sv;
+    constexpr auto WorldspaceExtentKey = "worldspace_extent"sv;
 
     // graphics
-    const auto UseNativeResolutionKey = std::string{"use_native_resolution"};
-    const auto LaunchInFullscreenKey = std::string{"launch_fullscreen"};
-    const auto ScreenWidthKey = std::string{"screen_width"};
-    const auto ScreenHeightKey = std::string{"screen_height"};
-    const auto TargetFpsKey = std::string{"target_fps"};
-    const auto NearClipKey = std::string{"near_clip"};
-    const auto FarClipKey = std::string{"far_clip"};
-    const auto UseShadowsKey = std::string{"use_shadows"}; /** @todo: Make this a property of the material */
+    constexpr auto UseNativeResolutionKey = "use_native_resolution"sv;
+    constexpr auto LaunchInFullscreenKey = "launch_fullscreen"sv;
+    constexpr auto ScreenWidthKey = "screen_width"sv;
+    constexpr auto ScreenHeightKey = "screen_height"sv;
+    constexpr auto TargetFpsKey = "target_fps"sv;
+    constexpr auto NearClipKey = "near_clip"sv;
+    constexpr auto FarClipKey = "far_clip"sv;
+    constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
 
     void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config* out)
     {
@@ -146,7 +148,7 @@ namespace nc::config
         return g_config->physicsSettings;
     }
 
-    auto Load(const std::string& path) -> Config
+    auto Load(std::string_view path) -> Config
     {
         Config out;
         Read(path, MapKeyValue, &out);
@@ -157,11 +159,11 @@ namespace nc::config
         return out;
     }
 
-    void Save(const std::string& path, const Config& config)
+    void Save(std::string_view path, const Config& config)
     {
-        std::ofstream file{path};
+        std::ofstream file{path.data()};
         if(!file.is_open())
-            throw NcError("Failure opening: " + path);
+            throw NcError(std::string{"Failure opening: "} + path.data());
 
         file << "[project]\n"
              << ProjectNameKey           << '=' << config.projectSettings.projectName          << '\n'
@@ -217,7 +219,7 @@ namespace nc::config
     }
 
     /* Internal function implementation */
-    void LoadInternal(const std::string& configPath)
+    void LoadInternal(std::string_view configPath)
     {
         g_configPath = configPath;
         g_config = std::make_unique<Config>();

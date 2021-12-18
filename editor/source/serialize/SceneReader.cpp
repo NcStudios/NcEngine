@@ -102,14 +102,14 @@ namespace nc::editor
 {
     SceneReader::SceneReader(Registry* registry, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
         : m_registry{registry},
-          m_file{scenesDirectory / (sceneName + GeneratedSourceExtension)},
+          m_file{scenesDirectory / (sceneName + FileExtension::Generated.data())},
           m_handleNames{},
           m_scenesDirectory{scenesDirectory},
           m_sceneName{sceneName}
     {
         if(!m_file.is_open())
         {
-            Output::LogError("Failure opening scene:", m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
+            Output::LogError("Failure opening scene:", m_scenesDirectory.string() + m_sceneName + FileExtension::Generated.data());
             return;
         }
 
@@ -121,7 +121,7 @@ namespace nc::editor
         {
             if(m_file.fail())
             {
-                Output::LogError("Failure reading scene:", m_scenesDirectory.string() + m_sceneName + GeneratedSourceExtension);
+                Output::LogError("Failure reading scene:", m_scenesDirectory.string() + m_sceneName + FileExtension::Generated.data());
                 m_file.close();
                 return;
             }
@@ -140,16 +140,16 @@ namespace nc::editor
     
     Entity SceneReader::DispatchAction(Entity currentEntity, const std::string& actionDescription, std::stringstream& args)
     {
-        if(actionDescription == AddEntitySceneAction)               return LoadEntity(args);
-        else if(actionDescription == AddMeshRendererSceneAction)    LoadMeshRenderer(currentEntity, args);
-        else if(actionDescription == AddPhysicsBodySceneAction)     LoadPhysicsBody(currentEntity, args);
-        else if(actionDescription == AddBoxColliderSceneAction)     LoadBoxCollider(currentEntity, args);
-        else if(actionDescription == AddCapsuleColliderSceneAction) LoadCapsuleCollider(currentEntity, args);
-        else if(actionDescription == AddHullColliderSceneAction)    LoadHullCollider(currentEntity, args);
-        else if(actionDescription == AddSphereColliderSceneAction)  LoadSphereCollider(currentEntity, args);
-        else if(actionDescription == AddConcaveColliderSceneAction) LoadConcaveCollider(currentEntity, args);
-        else if(actionDescription == AddPointLightSceneAction)      LoadPointLight(currentEntity, args);
-        else if(actionDescription == AddCameraSceneAction)          LoadCamera(currentEntity, args);
+             if(actionDescription == SceneMacro::AddEntity)          return LoadEntity(args);
+        else if(actionDescription == SceneMacro::AddMeshRenderer)    LoadMeshRenderer(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddPhysicsBody)     LoadPhysicsBody(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddBoxCollider)     LoadBoxCollider(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddCapsuleCollider) LoadCapsuleCollider(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddHullCollider)    LoadHullCollider(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddSphereCollider)  LoadSphereCollider(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddConcaveCollider) LoadConcaveCollider(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddPointLight)      LoadPointLight(currentEntity, args);
+        else if(actionDescription == SceneMacro::AddCamera)          LoadCamera(currentEntity, args);
 
         return currentEntity;
     }

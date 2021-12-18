@@ -17,10 +17,10 @@ namespace
     // Angle of light's field of view.
     constexpr float LIGHT_FIELD_OF_VIEW = 60.0f;
 
-    // Near clip of light's frustrum
+    // Near clip of light's frustum
     constexpr float NEAR_CLIP = 0.25f;
 
-    // Far clip of light's frustrum
+    // Far clip of light's frustum
     constexpr float FAR_CLIP = 96.0f;
 }
 

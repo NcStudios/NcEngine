@@ -70,7 +70,7 @@ namespace nc::editor
         CreateHeader();
         CreateSource();
 
-        auto filePath = m_scenesDirectory / (m_sceneName + GeneratedSourceExtension);
+        auto filePath = m_scenesDirectory / (m_sceneName + FileExtension::Generated.data());
         m_file.open(filePath);
         m_file << "/** Generated source code for scene: " << m_sceneName << " - DO NOT MODIFY */\n";
         m_file.close();
@@ -96,13 +96,13 @@ namespace nc::editor
 
     bool SceneWriter::DoFilesExist()
     {
-        auto headerEntry = std::filesystem::directory_entry{m_scenesDirectory.string() + m_sceneName + HeaderExtension};
+        auto headerEntry = std::filesystem::directory_entry{m_scenesDirectory.string() + m_sceneName + FileExtension::Header.data()};
         return headerEntry.exists();
     }
 
     void SceneWriter::CreateHeader()
     {
-        auto filePath = m_scenesDirectory / (m_sceneName + HeaderExtension);
+        auto filePath = m_scenesDirectory / (m_sceneName + FileExtension::Header.data());
         std::ofstream file{filePath};
         file << "#pragma once\n\n"
              << "#include \"NcEngine.h\"\n\n"
@@ -119,10 +119,10 @@ namespace nc::editor
 
     void SceneWriter::CreateSource()
     {
-        auto filePath = m_scenesDirectory / (m_sceneName + SourceExtension);
+        auto filePath = m_scenesDirectory / (m_sceneName + FileExtension::Source.data());
         std::ofstream file{filePath};
-        file << "#include \"" << m_sceneName << HeaderExtension << "\"\n"
-             << "#include \"" << m_sceneName << GeneratedSourceExtension << "\"\n\n"
+        file << "#include \"" << m_sceneName << FileExtension::Header << "\"\n"
+             << "#include \"" << m_sceneName << FileExtension::Generated << "\"\n\n"
              << "namespace project\n"
              << "{\n"
              << TAB << "void " << m_sceneName << "::Load(nc::NcEngine* engine)\n"
@@ -137,7 +137,7 @@ namespace nc::editor
 
     void SceneWriter::CreateGeneratedSource(SceneData* sceneData)
     {
-        auto filePath = m_scenesDirectory / (m_sceneName + GeneratedSourceExtension);
+        auto filePath = m_scenesDirectory / (m_sceneName + FileExtension::Source.data());
         m_file.open(filePath);
         if(!m_file.is_open())
         {
@@ -171,12 +171,12 @@ namespace nc::editor
     {
         if(sceneData->mainCamera.Valid() && m_registry->Contains<Camera>(sceneData->mainCamera))
         {
-            m_file << SetCameraSceneAction << "( " << m_handleNames.at(sceneData->mainCamera.Index()) << " );\n";
+            m_file << SceneMacro::SetCamera << "( " << m_handleNames.at(sceneData->mainCamera.Index()) << " );\n";
         }
 
         if(sceneData->audioListener.Valid())
         {
-            m_file << RegisterAudioListenerSceneAction << "( " << m_handleNames.at(sceneData->audioListener.Index()) << " );\n";
+            m_file << SceneMacro::RegisterAudioListener << "( " << m_handleNames.at(sceneData->audioListener.Index()) << " );\n";
         }
     }
 
@@ -192,9 +192,9 @@ namespace nc::editor
         auto parent = transform->Parent();
         auto parentHandle = parent.Valid() ? m_handleNames.at(parent.Index()) : std::string{"Entity::Null()"};
 
-        m_file << AddEntitySceneAction << "("
+        m_file << SceneMacro::AddEntity << "("
                << handleName << " , "
-               << "NC_EDITOR_ENTITY_INFO( "
+               << SceneMacro::EntityInfo << "( "
                << transform->LocalPosition() << " , "
                << transform->LocalRotation() << " , "
                << transform->LocalScale() << " , "
@@ -228,25 +228,25 @@ namespace nc::editor
         {
             case ColliderType::Box:
             {
-                m_file << AddBoxColliderSceneAction << "( " << handleName << " , NC_EDITOR_BOX_PROPERTIES( " << center << " , " << scale << " ) , " << isTrigger << " )\n";
+                m_file << SceneMacro::AddBoxCollider << "( " << handleName << " , " << SceneMacro::BoxProperties << "( " << center << " , " << scale << " ) , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Capsule:
             {
                 auto height = scale.y * 2.0f;
                 auto radius = scale.x * 0.5f;
-                m_file << AddCapsuleColliderSceneAction << "( " << handleName << " , NC_EDITOR_CAPSULE_PROPERTIES( " << center << " , " << height << " , " << radius << " ) , " << isTrigger << " )\n";
+                m_file << SceneMacro::AddCapsuleCollider << "( " << handleName << " , " << SceneMacro::CapsuleProperties << "( " << center << " , " << height << " , " << radius << " ) , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Hull:
             {
-                m_file << AddHullColliderSceneAction << "( " << handleName << " , NC_EDITOR_HULL_PROPERTIES( " << "\"" << collider->GetInfo().hullAssetPath << "\" ) , " << isTrigger << " )\n";
+                m_file << SceneMacro::AddHullCollider << "( " << handleName << " , " << SceneMacro::HullProperties << "( " << "\"" << collider->GetInfo().hullAssetPath << "\" ) , " << isTrigger << " )\n";
                 break;
             }
             case ColliderType::Sphere:
             {
                 auto radius = scale.x * 0.5f;
-                m_file << AddSphereColliderSceneAction << "( " << handleName << " , NC_EDITOR_SPHERE_PROPERTIES( " << center << " , " << radius << " ) , " << isTrigger << " );\n";
+                m_file << SceneMacro::AddSphereCollider << "( " << handleName << " , " << SceneMacro::SphereProperties << "( " << center << " , " << radius << " ) , " << isTrigger << " );\n";
                 break;
             }
         }
@@ -259,7 +259,7 @@ namespace nc::editor
         if(!collider)
             return;
 
-        m_file << AddConcaveColliderSceneAction << "( " << handleName << " , \"" << collider->GetPath() << "\" )\n";
+        m_file << SceneMacro::AddConcaveCollider << "( " << handleName << " , \"" << collider->GetPath() << "\" )\n";
 
     }
 
@@ -272,9 +272,9 @@ namespace nc::editor
         if(!body)
             return;
 
-        m_file << AddPhysicsBodySceneAction << "( "
+        m_file << SceneMacro::AddPhysicsBody << "( "
                << handleName << " , "
-               << "NC_EDITOR_PHYSICS_PROPERTIES( "
+               << SceneMacro::PhysicsProperties << "( "
                << 1.0f / body->GetInverseMass() << " , "
                << body->GetDrag() << " , "
                << body->GetAngularDrag() << " , "
@@ -293,9 +293,9 @@ namespace nc::editor
 
         const auto& info = light->GetInfo();
 
-        m_file << AddPointLightSceneAction << "( "
+        m_file << SceneMacro::AddPointLight << "( "
                << handleName << " , "
-               << "NC_EDITOR_POINT_LIGHT_INFO( "
+               << SceneMacro::PointLightInfo << "( "
                << "DirectX::XMMATRIX{} , "
                << info.pos << " , "
                << "1 , "
@@ -316,9 +316,9 @@ namespace nc::editor
         const auto& material = renderer->GetMaterial();
         auto techniqueType = ToString(renderer->GetTechniqueType());
 
-        m_file << AddMeshRendererSceneAction << "( "
+        m_file << SceneMacro::AddMeshRenderer << "( "
                << handleName << " , "
-               << "NC_EDITOR_MATERIAL( "
+               << SceneMacro::Material << "( "
                << "\"" << renderer->GetMeshPath() << "\" , "
                << "\"" << material.baseColor << "\" , "
                << "\"" << material.normal << "\" , "
@@ -334,6 +334,6 @@ namespace nc::editor
         if(!camera)
             return;
 
-        m_file << AddCameraSceneAction << "( " << handleName << " );\n";
+        m_file << SceneMacro::AddCamera << "( " << handleName << " );\n";
     }
 }

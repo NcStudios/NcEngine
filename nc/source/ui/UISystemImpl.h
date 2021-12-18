@@ -15,7 +15,6 @@ namespace nc::ui
     {
         public:
             UISystemImpl(HWND hwnd, graphics::Graphics* graphics);
-
             ~UISystemImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

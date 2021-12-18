@@ -5,6 +5,7 @@
 #include <concepts>
 #include <fstream>
 #include <string>
+#include <string_view>
 
 namespace nc::config
 {
@@ -26,18 +27,18 @@ namespace nc::config
     }
 
     template<class Config_t, std::invocable<std::string, std::string, Config_t*> MapKeyValueFunc_t>
-    void Read(std::string filePath, MapKeyValueFunc_t mapFunc, Config_t* out)
+    void Read(std::string_view filePath, MapKeyValueFunc_t mapFunc, Config_t* out)
     {
         std::ifstream inFile;
-        inFile.open(filePath);
+        inFile.open(filePath.data());
         if(!inFile.is_open())
-            throw NcError("Failure opening: " + filePath);
+            throw NcError(std::string{"Failure opening: "} + filePath.data());
 
         std::string line{}, key{}, value{};
         while(!inFile.eof())
         {
             if(inFile.fail())
-                throw NcError("Stream failure while reading config: " + filePath);
+                throw NcError(std::string{"Stream failure while reading config: "} + filePath.data());
 
             std::getline(inFile, line, '\n');
             if(ParseLine(line, key, value))
