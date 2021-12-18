@@ -22,7 +22,7 @@ target_include_directories(ConcaveColliderAssetManager_unit_tests
 
 target_compile_options(ConcaveColliderAssetManager_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(ConcaveColliderAssetManager_unit_tests
@@ -52,7 +52,7 @@ target_include_directories(ConvexHullAssetManager_unit_tests
 
 target_compile_options(ConvexHullAssetManager_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(ConvexHullAssetManager_unit_tests
@@ -83,7 +83,7 @@ target_include_directories(MeshAssetManager_unit_tests
 
 target_compile_options(MeshAssetManager_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(MeshAssetManager_unit_tests
@@ -114,7 +114,7 @@ target_include_directories(AudioClipAssetManager_unit_tests
 
 target_compile_options(AudioClipAssetManager_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(AudioClipAssetManager_unit_tests

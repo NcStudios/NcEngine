@@ -12,7 +12,7 @@ target_include_directories(Allocator_unit_tests
 
 target_compile_options(Allocator_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(Allocator_unit_tests
@@ -36,7 +36,7 @@ target_include_directories(MakeUnique_unit_tests
 
 target_compile_options(MakeUnique_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(MakeUnique_unit_tests
@@ -60,7 +60,7 @@ target_include_directories(MemoryResource_unit_tests
 
 target_compile_options(MemoryResource_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(MemoryResource_unit_tests

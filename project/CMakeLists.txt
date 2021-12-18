@@ -18,8 +18,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(GAME_EXE "Sample")
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
-set(GCC_WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 set(NC_INSTALL_DIR "${NC_ENGINE_INSTALL_DIR}/NcEngine/${NC_BUILD_TYPE}")
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+endif()
 
 find_package(NcEngine REQUIRED PATHS ${NC_INSTALL_DIR})
 
@@ -34,7 +38,7 @@ set_target_properties(${GAME_EXE}
 #Compile Options
 target_compile_options(${GAME_EXE}
     PRIVATE
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 #Include Dirs

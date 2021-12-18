@@ -13,7 +13,7 @@ target_include_directories(AutoComponentGroup_unit_tests
 
 target_compile_options(AutoComponentGroup_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(AutoComponentGroup_unit_tests
@@ -37,7 +37,7 @@ target_include_directories(Entity_unit_tests
 
 target_compile_options(Entity_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(Entity_unit_tests
@@ -64,7 +64,7 @@ target_include_directories(Registry_unit_tests
 
 target_compile_options(Registry_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(Registry_unit_tests
@@ -92,7 +92,7 @@ target_include_directories(Transform_unit_tests
 
 target_compile_options(Transform_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(Transform_unit_tests

@@ -13,7 +13,7 @@ target_include_directories(TaskGraph_unit_tests
 
 target_compile_options(TaskGraph_unit_tests
     PUBLIC
-        ${GCC_WARNING_FLAGS}
+        ${WARNING_FLAGS}
 )
 
 target_link_libraries(TaskGraph_unit_tests

@@ -60,11 +60,11 @@ namespace nc
     constexpr auto Dot(const Vector2& lhs, const Vector2& rhs) noexcept -> float;
     constexpr auto HadamardProduct(const Vector2& lhs, const Vector2& rhs) noexcept -> Vector2;
     constexpr auto SquareMagnitude(const Vector2& vec) noexcept -> float;
-    constexpr auto Magnitude(const Vector2& vec) noexcept -> float;
-    constexpr auto Normalize(const Vector2& vec) noexcept -> Vector2;
+    inline    auto Magnitude(const Vector2& vec) noexcept -> float;
+    inline    auto Normalize(const Vector2& vec) noexcept -> Vector2;
     constexpr auto Lerp(const Vector2& lhs, const Vector2& rhs, float factor) noexcept -> Vector2;
     constexpr auto SquareDistance(const Vector2& lhs, const Vector2& rhs) noexcept -> float;
-    constexpr auto Distance(const Vector2& lhs, const Vector2& rhs) noexcept -> float;
+    inline    auto Distance(const Vector2& lhs, const Vector2& rhs) noexcept -> float;
     constexpr auto HasAnyZeroElement(const Vector2& vec) noexcept -> bool;
 
     /* Vector3 Functions */
@@ -85,14 +85,14 @@ namespace nc
     constexpr auto TripleCrossProduct(const Vector3& a, const Vector3& b, const Vector3& c) noexcept -> Vector3;
     constexpr auto HadamardProduct(const Vector3& lhs, const Vector3& rhs) noexcept -> Vector3;
     constexpr auto SquareMagnitude(const Vector3& vec) noexcept -> float;
-    constexpr auto Magnitude(const Vector3& vec) noexcept -> float;
-    constexpr auto Normalize(const Vector3& vec) noexcept -> Vector3;
+    inline    auto Magnitude(const Vector3& vec) noexcept -> float;
+    inline    auto Normalize(const Vector3& vec) noexcept -> Vector3;
     constexpr auto Lerp(const Vector3& lhs, const Vector3& rhs, float factor) noexcept -> Vector3;
     constexpr auto SquareDistance(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
-    constexpr auto Distance(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
+    inline    auto Distance(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
     constexpr auto HasAnyZeroElement(const Vector3& vec) noexcept -> bool;
-    constexpr auto OrthogonalTo(const Vector3& vec) noexcept -> Vector3;
-    constexpr void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept;
+    inline    auto OrthogonalTo(const Vector3& vec) noexcept -> Vector3;
+    inline    void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept;
 
     /* Vector4 Functions */
     constexpr auto operator ==(const Vector4& lhs, const Vector4& rhs) noexcept -> bool;
@@ -106,11 +106,11 @@ namespace nc
     constexpr auto Dot(const Vector4& lhs, const Vector4& rhs) noexcept -> float;
     constexpr auto HadamardProduct(const Vector4& lhs, const Vector4& rhs) noexcept -> Vector4;
     constexpr auto SquareMagnitude(const Vector4& vec) noexcept -> float;
-    constexpr auto Magnitude(const Vector4& vec) noexcept -> float;
-    constexpr auto Normalize(const Vector4& vec) noexcept -> Vector4;
+    inline    auto Magnitude(const Vector4& vec) noexcept -> float;
+    inline    auto Normalize(const Vector4& vec) noexcept -> Vector4;
     constexpr auto Lerp(const Vector4& lhs, const Vector4& rhs, float factor) noexcept -> Vector4;
     constexpr auto SquareDistance(const Vector4& lhs, const Vector4& rhs) noexcept -> float;
-    constexpr auto Distance(const Vector4& lhs, const Vector4& rhs) noexcept -> float;
+    inline    auto Distance(const Vector4& lhs, const Vector4& rhs) noexcept -> float;
     constexpr auto HasAnyZeroElement(const Vector4& vec) noexcept -> bool;
     constexpr auto ToVector3(const Vector4& vec) noexcept -> Vector3;
 
@@ -170,12 +170,12 @@ namespace nc
         return Dot(vec, vec);
     }
 
-    constexpr float Magnitude(const Vector2& vec) noexcept
+    float Magnitude(const Vector2& vec) noexcept
     {
         return sqrt(SquareMagnitude(vec));
     }
 
-    constexpr Vector2 Normalize(const Vector2& vec) noexcept
+    Vector2 Normalize(const Vector2& vec) noexcept
     {
         return vec == Vector2::Zero() ? Vector2::Zero() : vec / Magnitude(vec);
     }
@@ -190,7 +190,7 @@ namespace nc
         return SquareMagnitude(lhs - rhs);
     }
 
-    constexpr float Distance(const Vector2& lhs, const Vector2& rhs) noexcept
+    float Distance(const Vector2& lhs, const Vector2& rhs) noexcept
     {
         return Magnitude(lhs - rhs);
     }
@@ -294,13 +294,13 @@ namespace nc
     {
         return Dot(vec, vec);
     }
-    
-    constexpr float Magnitude(const Vector3& vec) noexcept
+
+    float Magnitude(const Vector3& vec) noexcept
     {
         return sqrt(SquareMagnitude(vec));
     }
 
-    constexpr Vector3 Normalize(const Vector3& vec) noexcept
+    Vector3 Normalize(const Vector3& vec) noexcept
     {
         return vec == Vector3::Zero() ? Vector3::Zero() : vec / Magnitude(vec);
     }
@@ -315,7 +315,7 @@ namespace nc
         return SquareMagnitude(lhs - rhs);
     }
 
-    constexpr float Distance(const Vector3& lhs, const Vector3& rhs) noexcept
+    float Distance(const Vector3& lhs, const Vector3& rhs) noexcept
     {
         return Magnitude(lhs - rhs);
     }
@@ -325,15 +325,15 @@ namespace nc
         return math::FloatEqual(vec.x, 0.0f) || math::FloatEqual(vec.y, 0.0f) || math::FloatEqual(vec.z, 0.0f);
     }
 
-    constexpr Vector3 OrthogonalTo(const Vector3& vec) noexcept
+    Vector3 OrthogonalTo(const Vector3& vec) noexcept
     {
-        constexpr float invSqrt3 = 1.0f / sqrt(3.0f);
+        const float invSqrt3 = 1.0f / sqrt(3.0f);
         return (abs(vec.x) >= invSqrt3) ?
             Normalize(Vector3{vec.y, -1.0f * vec.x, 0.0f}) :
             Normalize(Vector3{0.0f, vec.z, -1.0f * vec.y});
     }
 
-    constexpr void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept
+    void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept
     {
         *a = OrthogonalTo(vec);
         *b = CrossProduct(*a, vec);
@@ -398,12 +398,12 @@ namespace nc
         return Dot(vec, vec);
     }
 
-    constexpr float Magnitude(const Vector4& vec) noexcept
+    float Magnitude(const Vector4& vec) noexcept
     {
         return sqrt(SquareMagnitude(vec));
     }
 
-    constexpr Vector4 Normalize(const Vector4& vec) noexcept
+    Vector4 Normalize(const Vector4& vec) noexcept
     {
         return vec == Vector4::Zero() ? Vector4::Zero() : vec / Magnitude(vec);
     }
@@ -418,7 +418,7 @@ namespace nc
         return SquareMagnitude(lhs - rhs);
     }
 
-    constexpr float Distance(const Vector4& lhs, const Vector4& rhs) noexcept
+    float Distance(const Vector4& lhs, const Vector4& rhs) noexcept
     {
         return Magnitude(lhs - rhs);
     }
