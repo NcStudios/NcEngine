@@ -11,7 +11,7 @@
 #include "dynamics/Solver.h"
 #include "ecs/Registry.h"
 #include "optick/optick.h"
-#include "task/Task.h"
+#include "task/TaskGraph.h"
 
 namespace nc::physics
 {

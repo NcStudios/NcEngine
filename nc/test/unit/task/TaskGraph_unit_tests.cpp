@@ -1,24 +1,24 @@
 #include "gtest/gtest.h"
-#include "task/Task.h"
+#include "task/TaskGraph.h"
 
-class Task_unit_tests : public ::testing::Test
+class TaskGraph_unit_tests : public ::testing::Test
 {
     public:
         tf::Executor executor;
         nc::TaskGraph taskGraph;
 
-        Task_unit_tests() : executor{2u}, taskGraph{} {}
-        ~Task_unit_tests() {}
+        TaskGraph_unit_tests() : executor{2u}, taskGraph{} {}
+        ~TaskGraph_unit_tests() {}
 };
 
-TEST_F(Task_unit_tests, AddGuardedTask_InitializesTask)
+TEST_F(TaskGraph_unit_tests, AddGuardedTask_InitializesTask)
 {
     auto task = taskGraph.AddGuardedTask([](){});
     EXPECT_TRUE(task.has_work());
     EXPECT_NE(nullptr, task.data());
 }
 
-TEST_F(Task_unit_tests, Run_TaskThrows_ThrowsUponCompletingAllTasks)
+TEST_F(TaskGraph_unit_tests, Run_TaskThrows_ThrowsUponCompletingAllTasks)
 {
     int value = 0;
     auto task1 = taskGraph.AddGuardedTask([](){ throw std::runtime_error{"error"}; });
@@ -29,7 +29,7 @@ TEST_F(Task_unit_tests, Run_TaskThrows_ThrowsUponCompletingAllTasks)
     EXPECT_EQ(value, 1);
 }
 
-TEST_F(Task_unit_tests, RunAsync_TaskThrows_StoresException)
+TEST_F(TaskGraph_unit_tests, RunAsync_TaskThrows_StoresException)
 {
     taskGraph.AddGuardedTask([](){ throw std::runtime_error{"error"}; });
     auto result = taskGraph.RunAsync(executor);
@@ -37,7 +37,7 @@ TEST_F(Task_unit_tests, RunAsync_TaskThrows_StoresException)
     EXPECT_THROW(taskGraph.ThrowIfExceptionStored(), std::runtime_error);
 }
 
-TEST_F(Task_unit_tests, RunAsync_TaskThrows_OtherTasksFinish)
+TEST_F(TaskGraph_unit_tests, RunAsync_TaskThrows_OtherTasksFinish)
 {
     int value = 0;
     auto task1 = taskGraph.AddGuardedTask([](){ throw std::runtime_error{"error"}; });

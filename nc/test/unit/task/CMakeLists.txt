@@ -1,9 +1,9 @@
 ### Transform Tests ###
-add_executable(Task_unit_tests
-    ${ROOT_DIR}/test/unit/task/Task_unit_tests.cpp
+add_executable(TaskGraph_unit_tests
+    ${ROOT_DIR}/test/unit/task/TaskGraph_unit_tests.cpp
 )
 
-target_include_directories(Task_unit_tests
+target_include_directories(TaskGraph_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
@@ -11,14 +11,14 @@ target_include_directories(Task_unit_tests
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
-target_compile_options(Task_unit_tests
+target_compile_options(TaskGraph_unit_tests
     PUBLIC
         ${GCC_WARNING_FLAGS}
 )
 
-target_link_libraries(Task_unit_tests
+target_link_libraries(TaskGraph_unit_tests
     PRIVATE
         gtest
 )
 
-add_test(Task_unit_tests Task_unit_tests)
+add_test(TaskGraph_unit_tests TaskGraph_unit_tests)
