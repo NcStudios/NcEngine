@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility/Type.h"
+#include "type/EngineTypes.h"
 #include "imgui/imgui.h"
 
 /** Create a variable to hold a scoped property. */
@@ -59,6 +59,7 @@ namespace nc::editor
     struct ImGuiId
     {
         explicit ImGuiId(const char* id) { ImGui::PushID(id); }
+        explicit ImGuiId(int id)         { ImGui::PushID(id); }
         ~ImGuiId() noexcept              { ImGui::PopID();    }
     };
 
@@ -133,8 +134,8 @@ namespace nc::editor
     {
         if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
-            ImGui::SetDragDropPayload(TypeInfo<T>::name, item, sizeof(T));
-            ImGui::Text(TypeInfo<T>::name);
+            ImGui::SetDragDropPayload(Type<T>::name, item, sizeof(T));
+            ImGui::Text(Type<T>::name);
             ImGui::EndDragDropSource();
         }
     }
@@ -144,7 +145,7 @@ namespace nc::editor
     {
         if(ImGui::BeginDragDropTarget())
         {
-            if(const auto* payload = ImGui::AcceptDragDropPayload(TypeInfo<T>::name))
+            if(const auto* payload = ImGui::AcceptDragDropPayload(Type<T>::name))
             {
                 func(static_cast<std::add_pointer_t<T>>(payload->Data));
             }

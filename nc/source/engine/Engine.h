@@ -10,7 +10,7 @@
 #include "graphics/resources/EnvironmentImpl.h"
 #include "physics/PhysicsSystemImpl.h"
 #include "scene/SceneSystemImpl.h"
-#include "task/Task.h"
+#include "task/TaskGraph.h"
 #include "time/NcTime.h"
 #include "ui/UISystemImpl.h"
 #include "window/WindowImpl.h"

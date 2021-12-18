@@ -6,12 +6,14 @@
 
 namespace
 {
-    const auto AudioClipTag = std::string{"AudioClip"};
-    const auto ConcaveColliderTag = std::string{"ConcaveCollider"};
-    const auto HullColliderTag = std::string{"HullCollider"};
-    const auto MeshTag = std::string{"Mesh"};
-    const auto TextureTag = std::string{"Texture"};
-    const auto SkyboxTag = std::string{"Skybox"};
+    using namespace std::literals;
+
+    constexpr auto AudioClipTag = "AudioClip"sv;
+    constexpr auto ConcaveColliderTag = "ConcaveCollider"sv;
+    constexpr auto HullColliderTag = "HullCollider"sv;
+    constexpr auto MeshTag = "Mesh"sv;
+    constexpr auto TextureTag = "Texture"sv;
+    constexpr auto SkyboxTag = "Skybox"sv;
 
     auto ReadNonNcaAsset(std::ifstream& file) -> nc::editor::Asset
     {
@@ -35,10 +37,10 @@ namespace
         return out;
     }
 
-    void WriteAsset(std::ofstream& file, const nc::editor::Asset& asset, const std::string& typeTag)
+    void WriteAsset(std::ofstream& file, const nc::editor::Asset& asset, std::string_view typeTag)
     {
         file << typeTag << '\n' << asset.name << '\n' << asset.sourcePath.string() << '\n';
-        
+
         if(asset.ncaPath.has_value())
         {
             file << asset.ncaPath.value().string() << '\n';
@@ -117,13 +119,13 @@ namespace nc::editor
 
         for(const auto& asset : manifest.View(AssetType::AudioClip))
             WriteAsset(file, asset, AudioClipTag);
-        
+
         for(const auto& asset : manifest.View(AssetType::ConcaveCollider))
             WriteAsset(file, asset, ConcaveColliderTag);
-        
+
         for(const auto& asset : manifest.View(AssetType::HullCollider))
             WriteAsset(file, asset, HullColliderTag);
-        
+
         for(const auto& asset : manifest.View(AssetType::Mesh))
             WriteAsset(file, asset, MeshTag);
 

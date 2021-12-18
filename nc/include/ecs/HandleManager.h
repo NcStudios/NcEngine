@@ -20,7 +20,7 @@ namespace nc
             {
                 if(m_freeHandles.empty())
                     return Entity{m_nextIndex++, layer, flags};
-                
+
                 auto index = m_freeHandles.back();
                 m_freeHandles.pop_back();
                 return Entity{index, layer, flags};

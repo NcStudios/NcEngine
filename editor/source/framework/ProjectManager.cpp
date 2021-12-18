@@ -25,7 +25,7 @@ namespace
             if(!entry.is_regular_file())
                 continue;
 
-            if(entry.path().extension() == nc::editor::GeneratedSourceExtension)
+            if(entry.path().extension() == nc::editor::FileExtension::Generated)
                 out.push_back(entry.path().stem().string());
         }
 
