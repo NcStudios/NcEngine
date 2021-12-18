@@ -19,8 +19,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(EDITOR_EXE "NcEditor")
 set(NC_INSTALL_DIR "${NC_ENGINE_INSTALL_DIR}/NcEngine/${NC_BUILD_TYPE}")
 
+set(WARNING_FLAGS)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNING_FLAGS -Wall -Wextra- Wfatal-errors -Wno-cast-function-type)
+    set(WARNING_FLAGS -Wall -Wextra Wfatal-errors -Wno-cast-function-type)
 elseif()
 endif()
 
