@@ -1,0 +1,3 @@
+[submodule "nc/external/directx"]
+	path = nc/external/directx
+	url = https://github.com/McCallisterRomer/DirectXMath
