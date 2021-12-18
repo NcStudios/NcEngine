@@ -3,7 +3,7 @@
 #include "MainCamera.h"
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 #ifdef NC_DEBUG_RENDERING
 #include "DebugRenderer.h"
 #endif

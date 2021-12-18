@@ -2,7 +2,7 @@
 
 #include "ITechnique.h"
 
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics

@@ -4,7 +4,7 @@
 #include "ui/ImGuiUtility.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 #include "imgui/imgui.h"
 
 #include "ecs/Registry.h"

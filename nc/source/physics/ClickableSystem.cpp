@@ -4,7 +4,7 @@
 #include "Input.h"
 #include "MainCamera.h"
 #include "Window.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 
 #include <algorithm>
 #include <limits>
