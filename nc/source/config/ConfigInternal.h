@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
 namespace nc::config
 {
-    void LoadInternal(const std::string& configPath);
+    void LoadInternal(std::string_view configPath);
 }

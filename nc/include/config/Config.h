@@ -62,7 +62,7 @@ namespace nc::config
         nc::config::PhysicsSettings physicsSettings;
     };
 
-    auto Load(const std::string& path) -> Config;
-    void Save(const std::string& path, const Config& config);
+    auto Load(std::string_view path) -> Config;
+    void Save(std::string_view path, const Config& config);
     bool Validate(const Config& config);
 }

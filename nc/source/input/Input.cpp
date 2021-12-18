@@ -46,7 +46,7 @@ namespace nc::input
     {
         auto beg = g_state.downKeys.cbegin();
         auto end = g_state.downKeys.cend();
-        return end != std::find_if(beg, end, [keyCode](const auto& item)
+        return end != std::ranges::find_if(beg, end, [keyCode](const auto& item)
         {
             return item.keyCode == static_cast<KeyCode_t>(keyCode);
         });

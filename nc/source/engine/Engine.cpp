@@ -10,7 +10,7 @@
 
 namespace nc
 {
-    auto InitializeNcEngine(HINSTANCE hInstance, const std::string& configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
+    auto InitializeNcEngine(HINSTANCE hInstance, std::string_view configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
     {
         config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);

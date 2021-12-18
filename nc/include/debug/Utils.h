@@ -17,7 +17,7 @@ namespace nc::debug
 
     namespace internal
     {
-        void OpenLog(const std::string& path);
+        void OpenLog(std::string_view path);
         void CloseLog() noexcept;
     }
 }

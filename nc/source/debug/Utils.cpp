@@ -18,12 +18,12 @@ namespace nc::debug
             return std::ctime(&time);
         }
 
-        void OpenLog(const std::string& path)
+        void OpenLog(std::string_view path)
         {
-            internal::file.open(path);
+            internal::file.open(path.data());
             if(!internal::file.is_open())
             {
-                throw NcError("Failed to open log file: " + path);
+                throw NcError(std::string{"Failed to open log file: "} + path.data());
             }
             internal::file << "Log started: " << GetTime();
         }
