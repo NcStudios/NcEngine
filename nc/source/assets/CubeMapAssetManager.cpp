@@ -5,6 +5,7 @@
 #include <cassert>
 #include <fstream>
 #include <filesystem>
+#include <iostream>
 
 namespace nc
 {
@@ -26,17 +27,7 @@ namespace nc
         }
     }
 
-    struct CubeMapFaces
-    {
-        std::string frontPath;
-        std::string backPath;
-        std::string upPath;
-        std::string downPath;
-        std::string rightPath;
-        std::string leftPath;
-    };
-
-    CubeMapFaces ReadFacePathsFromAsset(std::ifstream& file, const std::filesystem::path& subdirectory)
+    CubeMapFaces ReadFacePathsFromAsset(std::ifstream& file, const std::filesystem::path& parentPath)
     {
         CubeMapFaces facePaths{};
 
@@ -49,12 +40,12 @@ namespace nc
             file >> currentFace;
             const std::filesystem::path currentFacePath = currentFace;
 
-                 if (currentFacePath.stem().string() == "front") facePaths.frontPath = (subdirectory / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "back") facePaths.backPath   = (subdirectory / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "up") facePaths.upPath       = (subdirectory / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "down") facePaths.downPath   = (subdirectory / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "right") facePaths.rightPath = (subdirectory / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "left") facePaths.leftPath   = (subdirectory / currentFacePath).string();
+                 if (currentFacePath.stem().string() == "front") facePaths.frontPath = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "back") facePaths.backPath   = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "up") facePaths.upPath       = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "down") facePaths.downPath   = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "right") facePaths.rightPath = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "left") facePaths.leftPath   = (parentPath / currentFacePath).string();
         }
 
         return facePaths;
@@ -67,6 +58,10 @@ namespace nc
         return fileExtension.compare("nca") == 0 ? true : false;
     }
 
+
+    /** If external (from the editor) path will be: D:\\NC\\Projects\\Test\\assets\\Textures\\Cubemaps\\Church001\\Church001.nca"
+     *  If internal (called programmatically) path will be: Church001\\Church001.nca"
+     * */
     bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
     {
         uint32_t nextCubeMapIndex = m_cubeMaps.size();
@@ -80,44 +75,41 @@ namespace nc
         if(!HasValidAssetExtension(path))
             throw nc::NcError("Invalid extension: " + path);
 
-        const std::filesystem::path assetPath = path;
-        const std::filesystem::path assetDirectory = m_assetDirectory / assetPath.stem() / assetPath;
+        std::filesystem::path inputPath = path;
+        const std::filesystem::path fullyQualifiedPath = isExternal ? inputPath :  m_assetDirectory / inputPath;
+        const std::filesystem::path fullyQualifiedParentDirectory = fullyQualifiedPath.parent_path();
 
-        std::ifstream file{assetDirectory};
+        // Need to pass in fully qualifed path to the nca
+        std::ifstream file{fullyQualifiedPath};
         if(!file.is_open())
-            throw nc::NcError("Could not open file: " + assetDirectory.string());
+            throw nc::NcError("Could not open file: " + fullyQualifiedPath.string());
 
-        auto faces = ReadFacePathsFromAsset(file, assetPath.stem());
+        // Need to pass in fully qualified path minus Church001.nca
+        auto faces = ReadFacePathsFromAsset(file, fullyQualifiedParentDirectory);
 
         /** Front face */
-        const auto fullFrontPath = isExternal ? faces.frontPath : m_assetDirectory + faces.frontPath;
-        pixelArray.at(0) = stbi_load(fullFrontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + fullFrontPath);
+        pixelArray.at(0) = stbi_load(faces.frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + faces.frontPath);
 
         /** Back face */
-        const auto fullBackPath = isExternal ? faces.backPath : m_assetDirectory + faces.backPath;
-        pixelArray.at(1) = stbi_load(fullBackPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + fullBackPath);
+        pixelArray.at(1) = stbi_load(faces.backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + faces.backPath);
 
         /** Up face */
-        const auto fullUpPath = isExternal ? faces.upPath : m_assetDirectory + faces.upPath;
-        pixelArray.at(2) = stbi_load(fullUpPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + fullUpPath);
+        pixelArray.at(2) = stbi_load(faces.upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + faces.upPath);
 
         /** Down face */
-        const auto fullDownPath = isExternal ? faces.downPath : m_assetDirectory + faces.downPath;
-        pixelArray.at(3) = stbi_load(fullDownPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + fullDownPath);
+        pixelArray.at(3) = stbi_load(faces.downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + faces.downPath);
 
         /** Right face */
-        const auto fullRightPath = isExternal ? faces.rightPath : m_assetDirectory + faces.rightPath;
-        pixelArray.at(4) = stbi_load(fullRightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + fullRightPath);
+        pixelArray.at(4) = stbi_load(faces.rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + faces.rightPath);
 
         /** Left face */
-        const auto fullLeftPath = isExternal ? faces.leftPath : m_assetDirectory + faces.leftPath;
-        pixelArray.at(5) = stbi_load(fullLeftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + fullLeftPath);
+        pixelArray.at(5) = stbi_load(faces.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+        if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + faces.leftPath);
 
         auto cubeMapView = CubeMapView
         {
@@ -146,47 +138,44 @@ namespace nc
             if(!HasValidAssetExtension(path))
             throw nc::NcError("Invalid extension: " + path);
 
-            const std::filesystem::path assetPath = path;
-            const std::filesystem::path assetDirectory = m_assetDirectory / assetPath.stem() / assetPath;
+            std::filesystem::path inputPath = path;
+            const std::filesystem::path fullyQualifiedPath = isExternal ? inputPath :  m_assetDirectory / inputPath;
+            const std::filesystem::path fullyQualifiedParentDirectory = fullyQualifiedPath.parent_path();
 
-            std::ifstream file{assetDirectory};
+            // Need to pass in fully qualifed path to the nca
+            std::ifstream file{fullyQualifiedPath};
             if(!file.is_open())
-                throw nc::NcError("Could not open file: " + assetDirectory.string());
+                throw nc::NcError("Could not open file: " + fullyQualifiedPath.string());
 
-            auto faces = ReadFacePathsFromAsset(file, assetPath.stem());
+            // Need to pass in fully qualified path minus Church001.nca
+            auto faces = ReadFacePathsFromAsset(file, fullyQualifiedParentDirectory);
 
             std::array<stbi_uc*, 6> pixelArray = {};
             int32_t width, height, numChannels; // Same for all faces.
 
             /** Front face */
-            const auto fullFrontPath = isExternal ? faces.frontPath : m_assetDirectory + faces.frontPath;
-            pixelArray.at(0) = stbi_load(fullFrontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + fullFrontPath);
+            pixelArray.at(0) = stbi_load(faces.frontPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(0)) throw nc::NcError("Failed to load texture file: " + faces.frontPath);
 
             /** Back face */
-            const auto fullBackPath = isExternal ? faces.backPath : m_assetDirectory + faces.backPath;
-            pixelArray.at(1) = stbi_load(fullBackPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + fullBackPath);
+            pixelArray.at(1) = stbi_load(faces.backPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(1)) throw nc::NcError("Failed to load texture file: " + faces.backPath);
 
             /** Up face */
-            const auto fullUpPath = isExternal ? faces.upPath : m_assetDirectory + faces.upPath;
-            pixelArray.at(2) = stbi_load(fullUpPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + fullUpPath);
+            pixelArray.at(2) = stbi_load(faces.upPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(2)) throw nc::NcError("Failed to load texture file: " + faces.upPath);
 
             /** Down face */
-            const auto fullDownPath = isExternal ? faces.downPath : m_assetDirectory + faces.downPath;
-            pixelArray.at(3) = stbi_load(fullDownPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + fullDownPath);
+            pixelArray.at(3) = stbi_load(faces.downPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(3)) throw nc::NcError("Failed to load texture file: " + faces.downPath);
 
             /** Right face */
-            const auto fullRightPath = isExternal ? faces.rightPath : m_assetDirectory + faces.rightPath;
-            pixelArray.at(4) = stbi_load(fullRightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + fullRightPath);
+            pixelArray.at(4) = stbi_load(faces.rightPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(4)) throw nc::NcError("Failed to load texture file: " + faces.rightPath);
 
             /** Left face */
-            const auto fullLeftPath = isExternal ? faces.leftPath : m_assetDirectory + faces.leftPath;
-            pixelArray.at(5) = stbi_load(fullLeftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-            if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + fullLeftPath);
+            pixelArray.at(5) = stbi_load(faces.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+            if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + faces.leftPath);
 
             auto cubeMapView = CubeMapView
             {

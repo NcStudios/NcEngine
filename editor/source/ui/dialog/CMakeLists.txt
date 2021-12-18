@@ -8,4 +8,5 @@ target_sources(${EDITOR_EXE}
         ${PROJECT_SOURCE_DIR}/source/ui/dialog/FileBrowser.cpp
         ${PROJECT_SOURCE_DIR}/source/ui/dialog/NewProjectDialog.cpp
         ${PROJECT_SOURCE_DIR}/source/ui/dialog/NewSceneDialog.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/dialog/SkyboxBrowser.cpp
 )

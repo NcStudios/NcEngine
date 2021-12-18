@@ -8,5 +8,6 @@ namespace nc::editor
     {
         Entity mainCamera = Entity::Null();
         Entity audioListener = Entity::Null();
+        std::string skybox;
     };
 }

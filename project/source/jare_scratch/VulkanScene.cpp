@@ -89,8 +89,8 @@ namespace nc::sample
         };
 
         nc::LoadMeshAssets(sceneMeshes);
-        nc::LoadCubeMapAsset("Humus02.nca");
-        engine->Environment()->SetSkybox("Humus02.nca");
+        nc::LoadCubeMapAsset("Humus02/Humus02.nca");
+        engine->Environment()->SetSkybox("Humus02/Humus02.nca");
         
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});

@@ -60,6 +60,16 @@ namespace nc
         uint32_t index;
     };
 
+    struct CubeMapFaces
+    {
+        std::string frontPath;
+        std::string backPath;
+        std::string upPath;
+        std::string downPath;
+        std::string rightPath;
+        std::string leftPath;
+    };
+
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>

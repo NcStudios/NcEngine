@@ -95,8 +95,8 @@ namespace nc::sample
         auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
         registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
-        nc::LoadCubeMapAsset("Humus01.nca");
-        engine->Environment()->SetSkybox("Humus01.nca");
+        nc::LoadCubeMapAsset("Humus01/Humus01.nca");
+        engine->Environment()->SetSkybox("Humus01/Humus01.nca");
     }
 
     void CollisionEvents::Unload()

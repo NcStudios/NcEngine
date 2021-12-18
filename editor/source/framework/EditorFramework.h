@@ -5,7 +5,7 @@
 #include "assets/AssetManifest.h"
 #include "framework/ProjectManager.h"
 #include "ui/EditorUI.h"
-#include "ui/Environment.h"
+#include "ui/Environment2.h"
 #include "ui/dialog/AssetBrowser.h"
 #include "ui/dialog/ChangeTagDialog.h"
 #include "ui/dialog/FileBrowser.h"
@@ -33,7 +33,7 @@ namespace nc::editor
             EditorConfig m_editorConfig;
             AssetManifest m_assetManifest;
             ProjectManager m_projectManager;
-            Environment m_environment;
+            Environment2 m_environment2;
             EditorUI m_editorUI;
             FileBrowser m_fileBrowser;
             AssetBrowser m_assetBrowser;

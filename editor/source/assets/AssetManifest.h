@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Assets.h"
 #include "AssetCollection.h"
 #include "framework/Callbacks.h"
 
@@ -12,6 +13,7 @@ namespace nc::editor
             AssetManifest(const std::filesystem::path& projectDirectory, GetProjectConfigCallbackType configCallback);
 
             bool Add(const std::filesystem::path& assetPath, AssetType type);
+            bool AddSkybox(const CubeMapFaces& assetPaths, const std::string& name);
             bool Remove(const std::filesystem::path& assetPath, AssetType type);
             bool Contains(const std::filesystem::path& assetPath, AssetType type) const;
             bool ContainsNca(const std::filesystem::path& assetPath, AssetType type) const;
@@ -26,6 +28,7 @@ namespace nc::editor
             AssetCollection m_concaveColliders;
             AssetCollection m_textures;
             AssetCollection m_audioClips;
+            AssetCollection m_skyboxes;
 
             GetProjectConfigCallbackType m_getConfig;
 

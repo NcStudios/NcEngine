@@ -59,6 +59,7 @@ namespace nc::editor
         using FileBrowserOnConfirmCallbackType = std::function<bool(const std::filesystem::path&)>;
         using NewSceneOnConfirmCallbackType = std::function<bool(const std::string&)>;
         using NewProjectOnConfirmCallbackType = std::function<bool(const std::string&, const std::filesystem::path&)>;
+        using SkyboxOnConfirmCallbackType = std::function<bool(const std::filesystem::path&)>;
 
         using OpenFileBrowserCallbackType = std::function<void(FileBrowserOnConfirmCallbackType)>;
         using OpenNewSceneDialogCallbackType = std::function<void(NewSceneOnConfirmCallbackType)>;

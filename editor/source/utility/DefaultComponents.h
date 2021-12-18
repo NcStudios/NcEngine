@@ -25,6 +25,7 @@ namespace nc::editor
     const auto DefaultNormalPath        = std::string{"DefaultNormal.png"};
     const auto DefaultRoughnessPath     = std::string{"DefaultMetallic.png"};
     const auto DefaultMaterial          = nc::Material{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath, DefaultRoughnessPath};
+    const auto DefaultSkyboxPath        = std::string{"Humus01\\Humus01.nca"};
 
     /** Helper to create a mesh renderer using only default resources. */
     void AddDefaultMeshRenderer(Registry* registry, Entity entity);

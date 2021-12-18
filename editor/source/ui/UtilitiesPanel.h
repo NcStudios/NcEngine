@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/Environment.h"
+#include "ui/Environment2.h"
 #include "utility/Output.h"
 #include "window/IOnResizeReceiver.h"
 
@@ -9,7 +9,7 @@ namespace nc::editor
     class UtilitiesPanel : public window::IOnResizeReceiver
     {
         public:
-            UtilitiesPanel(Output* output, Environment* environment);
+            UtilitiesPanel(Output* output, Environment2* environment2);
             ~UtilitiesPanel();
 
             void Draw();
@@ -18,6 +18,6 @@ namespace nc::editor
         private:
             Vector2 m_dimensions;
             Output* m_output;
-            Environment* m_environment;
+            Environment2* m_environment2;
     };
 }
