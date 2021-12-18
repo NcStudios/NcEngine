@@ -1,5 +1,7 @@
 #include "ecs/component/AutoComponentGroup.h"
 
+#include <algorithm>
+
 namespace nc
 {
     AutoComponentGroup::AutoComponentGroup(Entity)
