@@ -14,6 +14,7 @@ find_package(Vulkan REQUIRED)
 target_include_directories(${IMGUI_LIB}
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_EXTERNAL_DIR}
         ${EXTERNAL_INCLUDE_DIR}
 )
 

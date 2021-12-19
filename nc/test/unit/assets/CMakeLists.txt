@@ -77,7 +77,8 @@ target_include_directories(MeshAssetManager_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
-        ${ROOT_DIR}/external/include
+        ${NC_EXTERNAL_DIR}
+        ${EXTERNAL_INCLUDE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 

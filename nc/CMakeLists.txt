@@ -25,8 +25,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 set(LIB_DIR "${ROOT_DIR}/lib")
+set(NC_EXTERNAL_DIR "${ROOT_DIR}/external")
 set(EXTERNAL_INCLUDE_DIR "${ROOT_DIR}/external/include")
-set(EXTERNAL_DIR "${ROOT_DIR}/external")
 set(EXTERNAL_SOURCE_DIR "${ROOT_DIR}/source")
 set(NC_INCLUDE_DIR "${ROOT_DIR}/include")
 set(NC_SOURCE_DIR "${ROOT_DIR}/source")
@@ -131,8 +131,7 @@ target_include_directories(NcEngineLib
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
         $<BUILD_INTERFACE:${EXTERNAL_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:${EXTERNAL_DIR}>
-        $<BUILD_INTERFACE:${EXTERNAL_DIR}/taskflow>
+        $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
 )
 
 add_subdirectory(source)
@@ -157,11 +156,9 @@ install(EXPORT NcEngine-export
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/include/ DESTINATION external)
-
-
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/directx/Inc DESTINATION external/directx/)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/taskflow/taskflow DESTINATION external/taskflow/)
-
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/vulkan DESTINATION external/vulkan/)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/NcEngineConfig.cmake DESTINATION lib/cmake/NcEngine)
 
 if(${NC_PROFILING_ENABLED})
