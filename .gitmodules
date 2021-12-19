@@ -4,3 +4,6 @@
 [submodule "nc/external/taskflow"]
 	path = nc/external/taskflow
 	url = https://github.com/McCallisterRomer/taskflow
+[submodule "nc/external/gtest"]
+	path = nc/external/gtest
+	url = https://github.com/McCallisterRomer/googletest

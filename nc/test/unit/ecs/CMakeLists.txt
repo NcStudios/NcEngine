@@ -31,7 +31,6 @@ add_executable(Entity_unit_tests
 target_include_directories(Entity_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
-        ${EXTERNAL_INCLUDE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
@@ -86,7 +85,6 @@ target_include_directories(Transform_unit_tests
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${EXTERNAL_INCLUDE_DIR}
         ${ROOT_DIR}/external/gtest/googletest/include
 )
 
