@@ -98,8 +98,8 @@ target_compile_options(NcEngineLib
         ${WARNING_FLAGS}
 )
 
-add_subdirectory(external/src/enet)
-add_subdirectory(external/src/imgui)
+add_subdirectory(external/enet/src)
+add_subdirectory(external/imgui/src)
 
 find_package(Vulkan REQUIRED)
 
@@ -138,7 +138,7 @@ add_subdirectory(source)
 
 if(NC_TESTS_ENABLED)
     enable_testing()
-    add_subdirectory(external/src/gtest)
+    add_subdirectory(external/gtest)
     add_subdirectory(test)
 endif()
 
