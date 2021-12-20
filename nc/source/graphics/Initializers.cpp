@@ -349,14 +349,14 @@ namespace nc::graphics
         vk::PushConstantRange pushConstantRange{};
         pushConstantRange.setStageFlags(stageFlags);
         pushConstantRange.setOffset(0);
-        pushConstantRange.setSize(dataTypeSize);
+        pushConstantRange.setSize(static_cast<uint32_t>(dataTypeSize));
         return pushConstantRange;
     }
 
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, std::span<const vk::DescriptorSetLayout> layouts)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(layouts.size());
+        pipelineLayoutInfo.setSetLayoutCount(static_cast<uint32_t>(layouts.size()));
         pipelineLayoutInfo.setPSetLayouts(layouts.data());
         pipelineLayoutInfo.setPushConstantRangeCount(1);
         pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);
@@ -366,7 +366,7 @@ namespace nc::graphics
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(layouts.size());  
+        pipelineLayoutInfo.setSetLayoutCount(static_cast<uint32_t>(layouts.size()));  
         pipelineLayoutInfo.setPSetLayouts(layouts.data());  
         pipelineLayoutInfo.setPushConstantRangeCount(0); 
         pipelineLayoutInfo.setPPushConstantRanges(nullptr);
@@ -390,7 +390,7 @@ namespace nc::graphics
         renderPassInfo.setFramebuffer(framebuffer);
         renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
         renderPassInfo.renderArea.setExtent(extent);
-        renderPassInfo.setClearValueCount(clearValues.size()); // Set clear color
+        renderPassInfo.setClearValueCount(static_cast<uint32_t>(clearValues.size())); // Set clear color
         renderPassInfo.setPClearValues(clearValues.data());
         return renderPassInfo;
     }
@@ -411,7 +411,7 @@ namespace nc::graphics
         for (const auto& subpass : subpasses)
         {
             subpassDescriptions.push_back(subpass.description);
-            subpassDependenciesCount += subpass.dependencies.size();
+            subpassDependenciesCount += static_cast<uint32_t>(subpass.dependencies.size());
         }
 
         std::vector<vk::SubpassDependency> subpassDependencies{};
@@ -446,8 +446,8 @@ namespace nc::graphics
     vk::Extent2D CreateExtent(const Vector2& dimensions)
     {
         vk::Extent2D extent = {};
-        extent.setWidth(dimensions.x);
-        extent.setHeight(dimensions.y);
+        extent.setWidth(static_cast<uint32_t>(dimensions.x));
+        extent.setHeight(static_cast<uint32_t>(dimensions.y));
         return extent;
     }
 
@@ -486,11 +486,11 @@ namespace nc::graphics
     {
         vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
         extendedInfo.setPNext(nullptr);
-        extendedInfo.setBindingCount(layoutBindings.size());
+        extendedInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
         extendedInfo.setPBindingFlags(bindingFlags.data());
 
         vk::DescriptorSetLayoutCreateInfo setInfo{};
-        setInfo.setBindingCount(layoutBindings.size());
+        setInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
         setInfo.setFlags(vk::DescriptorSetLayoutCreateFlags());
         setInfo.setPNext(&extendedInfo);
         setInfo.setPBindings(layoutBindings.data());

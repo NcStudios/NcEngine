@@ -97,15 +97,15 @@ namespace nc::physics
         {
             auto* transform = m_registry->Get<Transform>(joint.entityA);
             joint.rA = XMVector3Rotate(joint.anchorA, transform->RotationXM());
-            pA = joint.rA + transform->PositionXM();
+            pA = XMVectorAdd(joint.rA, transform->PositionXM());
 
             transform = m_registry->Get<Transform>(joint.entityB);
             joint.rB = XMVector3Rotate(joint.anchorB, transform->RotationXM());
-            pB = joint.rB + transform->PositionXM();
+            pB = XMVectorAdd(joint.rB, transform->PositionXM());
         }
 
         /** Scale bias by time step and positional error */
-        joint.bias = -1.0f * joint.biasFactor * (1.0f / dt) * (pB - pA);
+        joint.bias = XMVectorScale(XMVectorSubtract(pB, pA), -joint.biasFactor * (1.0f / dt));
 
         /** Fetch inverse mass and inertia of each body */
         joint.bodyA = m_registry->Get<PhysicsBody>(joint.entityA);

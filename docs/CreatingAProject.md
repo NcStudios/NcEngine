@@ -149,7 +149,7 @@ For the config file, copy the defaults from [nc/source/config/default_config.ini
 
 ## Building
 ------------
-The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_pakcage to search in \<path>/NcEngine/\<config>:
+The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_pakcage to search in \<path>/NcEngine/\<config>. MSVC users will need to set WIN32_EXECUTABLE to correctly link to WinMain:
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project("Example" LANGUAGES CXX)
@@ -157,6 +157,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(NcEngine REQUIRED PATHS "C:/Program Files/NcEngine/Release-WithEditor")
 add_executable(Example ${PROJECT_SOURCE_DIR}/Main.cpp)
+set_target_properties(Example PROPERTIES WIN32_EXECUTABLE TRUE)
 target_link_libraries(Example PRIVATE Nc::NcEngineLib)
 ```
 

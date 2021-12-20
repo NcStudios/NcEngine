@@ -87,7 +87,7 @@ endif()
 # Properties
 set_target_properties(NcEngineLib
     PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY ${LIB_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${LIB_DIR}>
 )
 
 # Compile Options
@@ -153,10 +153,10 @@ install(EXPORT NcEngine-export
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/directx/Inc DESTINATION external/directx/)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/enet DESTINATION external/enet/)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui DESTINATION external/imgui/)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/taskflow/taskflow DESTINATION external/taskflow/)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/vulkan DESTINATION external/vulkan/)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/enet DESTINATION external/)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui DESTINATION external/)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/taskflow/taskflow DESTINATION external/)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/vulkan DESTINATION external/)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/NcEngineConfig.cmake DESTINATION lib/cmake/NcEngine)
 
 if(${NC_PROFILING_ENABLED})

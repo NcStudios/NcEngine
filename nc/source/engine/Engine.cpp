@@ -128,7 +128,7 @@ namespace nc
         {
             OPTICK_FRAME("Main Thread");
 
-            m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            m_dt = m_frameDeltaTimeFactor * static_cast<float>(m_time.UpdateTime());
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
             FrameLogic(m_dt);
@@ -160,7 +160,7 @@ namespace nc
 
         while(m_isRunning)
         {
-            m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
+            m_dt = m_frameDeltaTimeFactor * static_cast<float>(m_time.UpdateTime());
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
             FrameLogic(m_dt);
@@ -254,9 +254,9 @@ namespace nc
     {
         using namespace std::placeholders;
 
-        m_window.BindGraphicsOnResizeCallback(std::bind(graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
-        m_window.BindGraphicsSetClearColorCallback(std::bind(graphics::Graphics::SetClearColor, &m_graphics, _1));
-        m_window.BindUICallback(std::bind(ui::UISystemImpl::WndProc, &m_uiSystem, _1, _2, _3, _4));
-        m_window.BindEngineDisableRunningCallback(std::bind(Engine::DisableRunningFlag, this));
+        m_window.BindGraphicsOnResizeCallback(std::bind(&graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
+        m_window.BindGraphicsSetClearColorCallback(std::bind(&graphics::Graphics::SetClearColor, &m_graphics, _1));
+        m_window.BindUICallback(std::bind(&ui::UISystemImpl::WndProc, &m_uiSystem, _1, _2, _3, _4));
+        m_window.BindEngineDisableRunningCallback(std::bind(&Engine::DisableRunningFlag, this));
     }
 } // end namespace nc::engine

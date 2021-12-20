@@ -102,7 +102,7 @@ namespace nc::physics
             auto bDirection_v = XMVectorNegate(direction_v);
             auto bSupportWorld_v = MinkowskiSupport(b, bDirection_v);
             
-            auto support_v = aSupportWorld_v - bSupportWorld_v;
+            auto support_v = XMVectorSubtract(aSupportWorld_v, bSupportWorld_v);
             Vector3 support;
             XMStoreVector3(&support, support_v);
 

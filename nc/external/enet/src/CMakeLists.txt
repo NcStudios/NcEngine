@@ -83,5 +83,5 @@ target_include_directories(${ENET_LIB}
 
 set_target_properties(${ENET_LIB}
     PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY ${LIB_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${LIB_DIR}>
 )

@@ -63,12 +63,12 @@ namespace nc::graphics
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
-        dynamicStateInfo.setDynamicStateCount(dynamicStates.size());
+        dynamicStateInfo.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
         dynamicStateInfo.setDynamicStates(dynamicStates);
 
         // Graphics pipeline
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
-        pipelineCreateInfo.setStageCount(shaderStages.size()); // Shader stages
+        pipelineCreateInfo.setStageCount(static_cast<uint32_t>(shaderStages.size())); // Shader stages
         pipelineCreateInfo.setPStages(shaderStages.data()); // Shader stages
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();

@@ -60,7 +60,7 @@ namespace nc::sample
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
         auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-        GetFPSCallback = std::bind(FPSTracker::GetFPS, fpsTracker);
+        GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 35.0f, -100.0f}, .rotation = Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});
@@ -110,8 +110,8 @@ namespace nc::sample
         auto spawner = registry->Add<Entity>({});
         auto spawnerPtr = registry->Add<Spawner>(spawner, registry, prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
 
-        SpawnFunc = std::bind(Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
-        DestroyFunc = std::bind(Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);
+        SpawnFunc = std::bind(&Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
+        DestroyFunc = std::bind(&Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);
     }
 
     void SpawnTest::Unload()

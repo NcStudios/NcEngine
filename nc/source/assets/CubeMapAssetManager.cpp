@@ -28,7 +28,7 @@ namespace nc
 
     bool CubeMapAssetManager::Load(const CubeMapFaces& faces, bool isExternal)
     {
-        uint32_t nextCubeMapIndex = m_cubeMaps.size();
+        uint32_t nextCubeMapIndex = static_cast<uint32_t>(m_cubeMaps.size());
 
         if(IsLoaded(faces))
             return true;
@@ -81,7 +81,7 @@ namespace nc
     bool CubeMapAssetManager::Load(std::span<const CubeMapFaces> facesSet, bool isExternal)
     {
         const auto newCubeMapCount = facesSet.size();
-        uint32_t newCubeMapIndex = m_cubeMaps.size();
+        uint32_t newCubeMapIndex = static_cast<uint32_t>(m_cubeMaps.size());
         if (newCubeMapCount + newCubeMapIndex >= m_maxCubeMapsCount)
             throw NcError("Cannot exceed max texture count.");
 

@@ -4,6 +4,8 @@
 *.pch
 *.dll
 *.a
+*.lib
+*.pdb
 *.exe
 *.out
 *.log

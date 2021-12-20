@@ -8,13 +8,15 @@
 #include "imgui/imgui.h"
 #endif
 
+using namespace DirectX;
+
 namespace
 {
     using namespace nc;
 
-    const auto VelocitySleepThreshold = DirectX::XMVectorSet(physics::SleepEpsilon, physics::SleepEpsilon, physics::SleepEpsilon, 0.0f);
-    const auto AngularVelocityMin = DirectX::XMVectorReplicate(-1.0f * physics::MaxAngularVelocity);
-    const auto AngularVelocityMax = DirectX::XMVectorReplicate(physics::MaxAngularVelocity);
+    const auto VelocitySleepThreshold = XMVectorSet(physics::SleepEpsilon, physics::SleepEpsilon, physics::SleepEpsilon, 0.0f);
+    const auto AngularVelocityMin = XMVectorReplicate(-1.0f * physics::MaxAngularVelocity);
+    const auto AngularVelocityMax = XMVectorReplicate(physics::MaxAngularVelocity);
 
     Vector3 CreateInverseInertiaTensor(Transform* transform, Collider* collider, float mass)
     {
@@ -79,8 +81,8 @@ namespace nc
           m_properties{properties},
           m_linearVelocity{},
           m_angularVelocity{},
-          m_linearFreedom{DirectX::XMLoadVector3(&linearFreedom)},
-          m_angularFreedom{DirectX::XMLoadVector3(&angularFreedom)},
+          m_linearFreedom{XMLoadVector3(&linearFreedom)},
+          m_angularFreedom{XMLoadVector3(&angularFreedom)},
           m_invInertiaWorld{},
           m_invInertiaLocal{},
           m_framesAtThreshold{0u},
@@ -110,7 +112,7 @@ namespace nc
 
     void PhysicsBody::ApplyImpulse(const Vector3& impulse)
     {
-        ApplyImpulse(DirectX::XMLoadVector3(&impulse));
+        ApplyImpulse(XMLoadVector3(&impulse));
     }
 
     void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
@@ -118,7 +120,7 @@ namespace nc
         if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
         
-        m_linearVelocity += DirectX::XMVectorScale(impulse, m_properties.mass) * m_linearFreedom;
+        m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(XMVectorScale(impulse, m_properties.mass), m_linearFreedom));
     }
 
     void PhysicsBody::ApplyTorqueImpulse(const Vector3& torque)
@@ -131,8 +133,8 @@ namespace nc
         if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
 
-        auto restrictedTorque = torque * m_angularFreedom;
-        m_angularVelocity += DirectX::XMVector3Transform(restrictedTorque, m_invInertiaWorld);
+        auto restrictedTorque = XMVectorMultiply(torque, m_angularFreedom);
+        m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVector3Transform(restrictedTorque, m_invInertiaWorld));
     }
 
     void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
@@ -140,7 +142,7 @@ namespace nc
         if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
         
-        m_linearVelocity += delta * m_linearFreedom;
+        m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(delta, m_linearFreedom));
     }
 
     void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
@@ -148,8 +150,8 @@ namespace nc
         if(m_properties.isKinematic || ParentEntity().IsStatic())
             return;
         
-        m_linearVelocity += velDelta * m_linearFreedom;
-        m_angularVelocity += angVelDelta * m_angularFreedom;
+        m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(velDelta, m_linearFreedom));
+        m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVectorMultiply(angVelDelta, m_angularFreedom));
     }
 
     void PhysicsBody::UpdateWorldInertia(const Transform* transform)
@@ -165,6 +167,8 @@ namespace nc
 
     IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
     {
+        using namespace DirectX;
+
         /** @todo Applying a force/velocity to a sleeping body will not wake it. That should
          *  probably happen here. Note that it cannot happen in ApplyXXX because the collider
          *  needs to be notified as well. */
@@ -173,20 +177,20 @@ namespace nc
         
         auto linearDragFactor = pow(1.0f - m_properties.drag, dt);
         auto angularDragFactor = pow(1.0f - m_properties.angularDrag, dt);
-        m_linearVelocity = DirectX::XMVectorScale(m_linearVelocity, linearDragFactor);
-        m_angularVelocity = DirectX::XMVectorScale(m_angularVelocity, angularDragFactor);
-        m_angularVelocity = DirectX::XMVectorClamp(m_angularVelocity, AngularVelocityMin, AngularVelocityMax);
+        m_linearVelocity = XMVectorScale(m_linearVelocity, linearDragFactor);
+        m_angularVelocity = XMVectorScale(m_angularVelocity, angularDragFactor);
+        m_angularVelocity = XMVectorClamp(m_angularVelocity, AngularVelocityMin, AngularVelocityMax);
 
         if constexpr(physics::EnableSleeping)
         {
-            auto velSquareMag = DirectX::XMVector3LengthSq(m_linearVelocity) + DirectX::XMVector3LengthSq(m_angularVelocity);
+            auto velSquareMag = XMVectorAdd(XMVector3LengthSq(m_linearVelocity), XMVector3LengthSq(m_angularVelocity));
 
-            if(DirectX::XMVector3Less(velSquareMag, VelocitySleepThreshold))
+            if(XMVector3Less(velSquareMag, VelocitySleepThreshold))
             {
                 if(++m_framesAtThreshold >= physics::FramesUntilSleep)
                 {
-                    m_linearVelocity = DirectX::g_XMZero;
-                    m_angularVelocity = DirectX::g_XMZero;
+                    m_linearVelocity = g_XMZero;
+                    m_angularVelocity = g_XMZero;
                     m_awake = false;
                     return IntegrationResult::PutToSleep;
                 }
@@ -197,9 +201,9 @@ namespace nc
             }
         }
 
-        transform->Translate(DirectX::XMVectorScale(m_linearVelocity, dt));
-        auto rotQuat = DirectX::XMVectorScale(m_angularVelocity, dt);
-        rotQuat = DirectX::XMQuaternionRotationRollPitchYawFromVector(rotQuat);
+        transform->Translate(XMVectorScale(m_linearVelocity, dt));
+        auto rotQuat = XMVectorScale(m_angularVelocity, dt);
+        rotQuat = XMQuaternionRotationRollPitchYawFromVector(rotQuat);
         transform->Rotate(rotQuat);
         return IntegrationResult::Integrated;
     }

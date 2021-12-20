@@ -106,13 +106,13 @@ namespace nc::sample
                                                            .diffuseIntensity = 1200.0f});
 
         // UI Callbacks
-        GetDynamicCountCallback = std::bind(Spawner::GetObjectCount, dynamicSpawner);
-        SpawnDynamicCallback = std::bind(Spawner::StageSpawn, dynamicSpawner, std::placeholders::_1);
-        DestroyDynamicCallback = std::bind(Spawner::StageDestroy, dynamicSpawner, std::placeholders::_1);
-        GetStaticCountCallback = std::bind(Spawner::GetObjectCount, staticSpawner);
-        SpawnStaticCallback = std::bind(Spawner::StageSpawn, staticSpawner, std::placeholders::_1);
-        DestroyStaticCallback = std::bind(Spawner::StageDestroy, staticSpawner, std::placeholders::_1);
-        GetFPSCallback = std::bind(FPSTracker::GetFPS, fpsTracker);
+        GetDynamicCountCallback = std::bind(&Spawner::GetObjectCount, dynamicSpawner);
+        SpawnDynamicCallback = std::bind(&Spawner::StageSpawn, dynamicSpawner, std::placeholders::_1);
+        DestroyDynamicCallback = std::bind(&Spawner::StageDestroy, dynamicSpawner, std::placeholders::_1);
+        GetStaticCountCallback = std::bind(&Spawner::GetObjectCount, staticSpawner);
+        SpawnStaticCallback = std::bind(&Spawner::StageSpawn, staticSpawner, std::placeholders::_1);
+        DestroyStaticCallback = std::bind(&Spawner::StageDestroy, staticSpawner, std::placeholders::_1);
+        GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
     }
 
     void CollisionBenchmark::Unload()

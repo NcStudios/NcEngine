@@ -1,3 +1,4 @@
+#if __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #pragma GCC diagnostic push
@@ -10,6 +11,7 @@
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
 
 #ifndef AMD_VULKAN_MEMORY_ALLOCATOR_HPP
 #define AMD_VULKAN_MEMORY_ALLOCATOR_HPP
@@ -2767,9 +2769,11 @@ namespace VMA_HPP_NAMESPACE {
 }
 
 #endif
+#if __GNUC__
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
+#endif

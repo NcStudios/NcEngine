@@ -7,6 +7,8 @@
 #ifdef NC_DEBUG_RENDERING
 #include "DebugRenderer.h"
 #endif
+
+#include <array>
 #include <memory>
 #include <mutex>
 
@@ -18,10 +20,10 @@ namespace nc::graphics
     class Commands;
     class Swapchain;
     class DepthStencil;
-    class PerFrameRenderState;
+    struct PerFrameRenderState;
     class Renderer;
     class RenderPassManager;
-    struct ShaderResourceServices;
+    class ShaderResourceServices;
 
     class Graphics
     {

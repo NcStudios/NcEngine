@@ -11,6 +11,11 @@ add_library(${IMGUI_LIB}
 
 find_package(Vulkan REQUIRED)
 
+target_compile_definitions(${IMGUI_LIB}
+    PUBLIC
+        WIN32_LEAN_AND_MEAN
+)
+
 target_include_directories(${IMGUI_LIB}
     PRIVATE
         ${NC_INCLUDE_DIR}
@@ -25,5 +30,5 @@ target_link_libraries(${IMGUI_LIB}
 
 set_target_properties(${IMGUI_LIB}
     PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY ${LIB_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${LIB_DIR}>
 )

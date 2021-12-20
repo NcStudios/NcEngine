@@ -1,6 +1,6 @@
 #pragma once
 
-#include "platform/win32/NCWinDef.h"
+#include "platform/win32/NCWin32.h"
 #include "ui/UISystem.h"
 #include "editor/Editor.h"
 

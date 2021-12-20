@@ -91,18 +91,18 @@ set GENERATOR="%~4"
     echo *** Generating build files ***
     cmake -G %GENERATOR% -S %SOURCE_DIR% -B %BUILD_DIR% %DEFINITIONS% -DNC_ENGINE_INSTALL_DIR=%INSTALL_DIRECTORY%
     
-    if not %errorlevel%==0 (
-        exit
-    )
+    @REM if not %errorlevel%==0 (
+    @REM     exit
+    @REM )
 
-    echo *** Building target ***
-    ninja -C %BUILD_DIR%
+    @REM echo *** Building target ***
+    @REM ninja -C %BUILD_DIR%
 
-    if not %errorlevel%==0 (
-        exit
-    )
+    @REM if not %errorlevel%==0 (
+    @REM     exit
+    @REM )
 
-    if %TARGET%=="Engine" (
-        echo *** Installing ***
-        cmake --install %BUILD_DIR%
-    )
+    @REM if %TARGET%=="Engine" (
+    @REM     echo *** Installing ***
+    @REM     cmake --install %BUILD_DIR%
+    @REM )

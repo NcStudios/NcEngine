@@ -36,7 +36,7 @@ namespace nc::graphics
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
-          m_clearColor{DefaultClearColor}
+          m_clearColor{DefaultClearColor[0], DefaultClearColor[1], DefaultClearColor[2], DefaultClearColor[3]}
     {
     }
 

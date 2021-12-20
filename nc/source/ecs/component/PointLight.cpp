@@ -49,10 +49,11 @@ namespace nc
 
     DirectX::XMMATRIX PointLight::CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix)
     {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transformMatrix);
-        auto look_v = DirectX::XMVector3Rotate(DirectX::g_XMIdentityR2, rot_v);
-        return DirectX::XMMatrixLookAtRH(pos_v, pos_v + look_v, DirectX::g_XMNegIdentityR1) * m_lightProjectionMatrix;
+        using namespace DirectX;
+        XMVECTOR scl_v, rot_v, pos_v;
+        XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transformMatrix);
+        auto look_v = XMVector3Rotate(g_XMIdentityR2, rot_v);
+        return XMMatrixLookAtRH(pos_v, XMVectorAdd(pos_v, look_v), g_XMNegIdentityR1) * m_lightProjectionMatrix;
     }
 
     bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj)

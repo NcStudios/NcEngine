@@ -61,7 +61,7 @@ namespace nc::sample
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
         engine->MainCamera()->Set(camera);
         auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, engine->Physics());
-        LayerSelectCallback = std::bind(ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
+        LayerSelectCallback = std::bind(&ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.8f, 2.3f, -4.7f}, .tag = "Point Light 1"});
