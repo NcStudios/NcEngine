@@ -153,8 +153,14 @@ install(EXPORT NcEngine-export
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/directx/Inc DESTINATION external/directx/)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/enet DESTINATION external/)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui DESTINATION external/)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/enet
+        DESTINATION external/
+        PATTERN "src" EXCLUDE
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
+        DESTINATION external/
+        PATTERN "src" EXCLUDE
+)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/taskflow/taskflow DESTINATION external/)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/vulkan DESTINATION external/)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/NcEngineConfig.cmake DESTINATION lib/cmake/NcEngine)
