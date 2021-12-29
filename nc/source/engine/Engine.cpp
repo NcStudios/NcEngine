@@ -128,7 +128,7 @@ namespace nc
         {
             OPTICK_FRAME("Main Thread");
 
-            m_dt = m_frameDeltaTimeFactor * static_cast<float>(m_time.UpdateTime());
+            m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
             FrameLogic(m_dt);

@@ -9,12 +9,12 @@ namespace nc::time
         public:
             Time() noexcept;
 
-            double GetFrameDeltaTime() const noexcept { return m_frameDeltaTime; }
-            double GetAccumulatedTime() const noexcept { return m_accumulatedTime; }
+            auto GetFrameDeltaTime() const noexcept -> float { return static_cast<float>(m_frameDeltaTime); }
+            auto GetAccumulatedTime() const noexcept -> float { return static_cast<float>(m_accumulatedTime); }
             void DecrementAccumulatedTime(float time) noexcept { m_accumulatedTime -= time; }
             void ResetFrameDeltaTime() noexcept { m_frameDeltaTime = 0.0; }
             void ResetAccumulatedTime() noexcept { m_accumulatedTime = 0.0; }
-            double UpdateTime() noexcept;
+            auto UpdateTime() noexcept -> float;
 
         private:
             using Clock = std::chrono::high_resolution_clock;
