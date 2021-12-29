@@ -14,7 +14,7 @@
 .vs/
 .vscode/
 build/
-external/src/gtest/
+install/
 Testing/
 scratch/
 
