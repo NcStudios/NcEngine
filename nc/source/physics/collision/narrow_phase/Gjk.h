@@ -201,7 +201,7 @@ namespace nc::physics
 
             auto bDirection_v = XMVectorNegate(direction_v);
             auto bSupportWorld_v = MinkowskiSupport(bXM, bDirection_v);
-            auto supportCSO_v = aSupportWorld_v - bSupportWorld_v;
+            auto supportCSO_v = XMVectorSubtract(aSupportWorld_v, bSupportWorld_v);
 
             if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
                 break;
@@ -240,7 +240,7 @@ namespace nc::physics
             const auto direction_v = XMLoadVector3(&direction);
             auto supportA_v = MinkowskiSupport(a, direction_v);
             auto supportB_v = MinkowskiSupport(b, XMVectorNegate(direction_v));
-            auto supportCSO_v =  supportA_v - supportB_v;
+            auto supportCSO_v =  XMVectorSubtract(supportA_v, supportB_v);
 
             if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
                 break;

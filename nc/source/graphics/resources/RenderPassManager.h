@@ -55,7 +55,7 @@ namespace nc::graphics
     {
         const auto& techniqueType = typeid(T);
         auto& renderpass = Acquire(uid);
-        auto techniquePos = std::ranges::find_if(renderpass.techniques, [](const auto& foundTechnique)
+        auto techniquePos = std::ranges::find_if(renderpass.techniques, [&techniqueType](const auto& foundTechnique)
         {
             return (typeid(foundTechnique) == techniqueType);
         });

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "math/Vector.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 
 #include <iostream>
 

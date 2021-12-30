@@ -2,7 +2,7 @@
 
 #include "Component.h"
 #include "math/Vector.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 
 namespace nc
 {
@@ -13,8 +13,11 @@ namespace nc
     /** @todo As this is a shader resource, we should be using a different
      *  type for initializing point lights. It would be reasonable to assume
      *  that 'pos' controls the position or an offset for the light, when in
-     *  reality it is just overwritten with the transform position. */
-    struct alignas(PointLightInfoSize) PointLightInfo
+     *  reality it is just overwritten with the transform position.
+     *  @todo alignas was moved from the definition to the m_info member to
+     *  make msvc happy. This pushes alignment concerns off to other users,
+     *  which doesn't seem wise. */
+    struct /** alignas(PointLightInfoSize) */ PointLightInfo
     {
         DirectX::XMMATRIX viewProjection = {};
         Vector3 pos = Vector3::Zero();
@@ -39,7 +42,7 @@ namespace nc
             void SetInfo(PointLightInfo info);
 
         private:
-            PointLightInfo m_info;
+            alignas(PointLightInfoSize) PointLightInfo m_info;
             DirectX::XMMATRIX m_lightProjectionMatrix;
             bool m_isDirty;
 

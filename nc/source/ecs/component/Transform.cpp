@@ -213,14 +213,16 @@ namespace nc
 
     void Transform::Translate(Vector3 translation)
     {
-        auto trans_v = ToXMVector(translation);
-        m_localMatrix.r[3] += trans_v;
+        const auto trans_v = ToXMVector(translation);
+        auto& localPos = m_localMatrix.r[3];
+        localPos = XMVectorAdd(localPos, trans_v);
         UpdateWorldMatrix();
     }
 
     void Transform::Translate(DirectX::FXMVECTOR translation)
     {
-        m_localMatrix.r[3] += translation;
+        auto& localPos = m_localMatrix.r[3];
+        localPos = XMVectorAdd(localPos, translation);
         UpdateWorldMatrix();
     }
     
@@ -231,7 +233,7 @@ namespace nc
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
         trans_v = DirectX::XMVector3Transform(trans_v, DirectX::XMMatrixRotationQuaternion(rot_v));
         trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
-        m_localMatrix.r[3] += trans_v;
+        m_localMatrix.r[3] = XMVectorAdd(m_localMatrix.r[3], trans_v);
         UpdateWorldMatrix();
     }
 

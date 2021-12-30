@@ -141,7 +141,7 @@ namespace nc::graphics
         {
             m_instance = createInstance(instanceCreateInfo);
         }
-        catch (const std::exception& error)
+        catch (const std::exception&)
         {
             std::throw_with_nested(NcError("Failed to create instance."));
         }
@@ -266,7 +266,7 @@ namespace nc::graphics
         vk::DescriptorPoolCreateInfo imguiDescriptorPoolInfo = {};
         imguiDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
         imguiDescriptorPoolInfo.setMaxSets(1000);
-        imguiDescriptorPoolInfo.setPoolSizeCount(imguiPoolSizes.size());
+        imguiDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(imguiPoolSizes.size()));
         imguiDescriptorPoolInfo.setPPoolSizes(imguiPoolSizes.data());
 
         if (m_logicalDevice.createDescriptorPool(&imguiDescriptorPoolInfo, nullptr, &m_imguiDescriptorPool) != vk::Result::eSuccess)
@@ -285,7 +285,7 @@ namespace nc::graphics
         vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
         renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
         renderingDescriptorPoolInfo.setMaxSets(1000);
-        renderingDescriptorPoolInfo.setPoolSizeCount(renderingPoolSizes.size());
+        renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
         renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
         
         if (m_logicalDevice.createDescriptorPool(&renderingDescriptorPoolInfo, nullptr, &m_renderingDescriptorPool) != vk::Result::eSuccess)
@@ -368,7 +368,7 @@ namespace nc::graphics
         {
             m_logicalDevice = m_physicalDevice.createDevice(deviceCreateInfo);
         }
-        catch (const std::exception& error)
+        catch (const std::exception&)
         {
             std::throw_with_nested(NcError("Failed to create device."));
         }
@@ -439,7 +439,7 @@ namespace nc::graphics
 
         // Create staging buffer (lives on CPU)
         vk::Buffer stagingBuffer;
-        auto stagingIndex = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
+        auto stagingIndex = CreateBuffer(static_cast<uint32_t>(imageSize), vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
 
         // Map the pixels onto the staging buffer
         void* mappedData;
@@ -468,7 +468,7 @@ namespace nc::graphics
 
         // Create staging buffer (lives on CPU)
         vk::Buffer stagingBuffer;
-        auto stagingIndex = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
+        auto stagingIndex = CreateBuffer(static_cast<uint32_t>(imageSize), vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
 
         // Map the pixels onto the staging buffer
         void* mappedData;

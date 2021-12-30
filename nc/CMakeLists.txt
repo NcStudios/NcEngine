@@ -25,10 +25,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 set(LIB_DIR "${ROOT_DIR}/lib")
-set(EXTERNAL_INCLUDE_DIR "${ROOT_DIR}/external/include")
-set(EXTERNAL_SOURCE_DIR "${ROOT_DIR}/source")
 set(NC_INCLUDE_DIR "${ROOT_DIR}/include")
 set(NC_SOURCE_DIR "${ROOT_DIR}/source")
+set(NC_EXTERNAL_DIR "${ROOT_DIR}/external")
 set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
 set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
 set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
@@ -88,7 +87,7 @@ endif()
 # Properties
 set_target_properties(NcEngineLib
     PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY ${LIB_DIR}
+        ARCHIVE_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${LIB_DIR}>
 )
 
 # Compile Options
@@ -97,8 +96,8 @@ target_compile_options(NcEngineLib
         ${WARNING_FLAGS}
 )
 
-add_subdirectory(external/src/enet)
-add_subdirectory(external/src/imgui)
+add_subdirectory(external/enet/src)
+add_subdirectory(external/imgui/src)
 
 find_package(Vulkan REQUIRED)
 
@@ -129,14 +128,14 @@ target_include_directories(NcEngineLib
     PRIVATE
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${EXTERNAL_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
 )
 
 add_subdirectory(source)
 
 if(NC_TESTS_ENABLED)
     enable_testing()
-    add_subdirectory(external/src/gtest)
+    add_subdirectory(external/gtest)
     add_subdirectory(test)
 endif()
 
@@ -153,7 +152,17 @@ install(EXPORT NcEngine-export
 )
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/include/ DESTINATION external)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/directx/Inc DESTINATION external/directx/)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/enet
+        DESTINATION external/
+        PATTERN "src" EXCLUDE
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
+        DESTINATION external/
+        PATTERN "src" EXCLUDE
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/taskflow/taskflow DESTINATION external/)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/vulkan DESTINATION external/)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/NcEngineConfig.cmake DESTINATION lib/cmake/NcEngine)
 
 if(${NC_PROFILING_ENABLED})
