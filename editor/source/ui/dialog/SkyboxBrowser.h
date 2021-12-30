@@ -12,6 +12,7 @@ namespace nc::editor
             SkyboxBrowser(UICallbacks::RegisterDialogCallbackType registerDialog, DialogCallbacks::OpenFileBrowserCallbackType openFileBrowserCallback, AssetManifest* manifest);
 
             void Open(DialogCallbacks::SkyboxOnConfirmCallbackType callback);
+            void Open(DialogCallbacks::SkyboxOnConfirmCallbackType callback, CubeMapFaces existingFaces);
             void Draw() override;
 
         private:
@@ -23,5 +24,6 @@ namespace nc::editor
             CubeMapFaces m_facesPaths;
             AssetManifest* m_assetManifest;
             std::string m_skyboxName;
+            bool m_isEditMode;
     };
 }

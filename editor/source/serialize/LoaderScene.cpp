@@ -48,6 +48,7 @@ namespace nc::editor
         WriteLoadsForType(file, manifest, AssetType::HullCollider,    "LoadConvexHullAssets");
         WriteLoadsForType(file, manifest, AssetType::Mesh,            "LoadMeshAssets");
         WriteLoadsForType(file, manifest, AssetType::Texture,         "LoadTextureAssets");
+        WriteLoadsForType(file, manifest, AssetType::Skybox,          "LoadCubeMapAssets");
 
         file << "}\n\n"
              << "void Unload() override\n{\n}\n"

@@ -61,6 +61,7 @@ namespace nc::editor
         std::filesystem::create_directory(projectDirectory / "assets" / "meshes");
         std::filesystem::create_directory(projectDirectory / "assets" / "shaders");
         std::filesystem::create_directory(projectDirectory / "assets" / "textures");
+        std::filesystem::create_directory(projectDirectory / "assets" / "textures" / "cubemaps");
         std::filesystem::create_directory(projectDirectory / "config");
         std::filesystem::create_directory(projectDirectory / "scenes");
         std::filesystem::create_directory(projectDirectory / "source");
@@ -150,6 +151,13 @@ namespace nc::editor
             copy_file(engineTextureDirectory / DefaultBaseColorPath, projectTextureDirectory / DefaultBaseColorPath);
             copy_file(engineTextureDirectory / DefaultNormalPath, projectTextureDirectory / DefaultNormalPath);
             copy_file(engineTextureDirectory / DefaultRoughnessPath, projectTextureDirectory / DefaultRoughnessPath);
+        }
+
+        {
+            auto engineSkyboxesDirectory = std::filesystem::path{projectSettings.cubeMapsPath};
+            auto projectTextureDirectory = projectAssetDirectory / "textures";
+            auto projectSkyboxesDirectory = projectTextureDirectory / "cubemaps";
+            copy(engineSkyboxesDirectory / "DefaultSkybox", projectSkyboxesDirectory / "DefaultSkybox");
         }
     }
 }

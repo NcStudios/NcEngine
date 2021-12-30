@@ -1,4 +1,5 @@
 #include "AssetBrowser.h"
+#include "utility/SkyboxEditor.h"
 
 namespace
 {
@@ -80,17 +81,31 @@ namespace nc::editor
 
             if(ImGui::Button("Add"))
             {
-                // replace return true with call to load assets in assetbuilder, make nca, and return validation result.
-                m_skyboxBrowser.Open([](const std::filesystem::path&) {
-                    
-                    return true;
-                });
+                m_skyboxBrowser.Open([](const std::filesystem::path&) { return true; });
             }
+
+            ImGui::SameLine();
 
             if(ImGui::Button("Edit"))
             {
+                auto fileExtension = GetFileExtensionFromNca(assets[selected].sourcePath); 
+                const auto& parentPath = assets[selected].sourcePath.parent_path();
+
+                auto cubeMapFaces = CubeMapFaces
+                {
+                    .frontPath = (parentPath / "front").string() + fileExtension,
+                    .backPath  = (parentPath / "back").string() + fileExtension,
+                    .upPath    = (parentPath / "up").string() + fileExtension,
+                    .downPath  = (parentPath / "down").string() + fileExtension,
+                    .rightPath = (parentPath / "right").string() + fileExtension,
+                    .leftPath  = (parentPath / "left").string() + fileExtension
+                };
+
+                m_assetManifest->Remove(assets[selected].sourcePath, AssetType::Skybox);
+                m_skyboxBrowser.Open([](const std::filesystem::path&) { return true; }, cubeMapFaces);
             }
 
+            ImGui::SameLine();
 
             if(ImGui::Button("Delete"))
             {

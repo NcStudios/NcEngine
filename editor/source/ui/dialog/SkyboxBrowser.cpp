@@ -16,7 +16,8 @@ namespace nc::editor
       m_openFileBrowser{std::move(openFileBrowserCallback)},
       m_facesPaths{},
       m_assetManifest{manifest},
-      m_skyboxName{}
+      m_skyboxName{},
+      m_isEditMode{false}
     {
     }
 
@@ -28,14 +29,26 @@ namespace nc::editor
         m_facesPaths = CubeMapFaces{};
     }
 
+    void SkyboxBrowser::Open(DialogCallbacks::SkyboxOnConfirmCallbackType callback, CubeMapFaces existingFaces)
+    {
+        m_onConfirm = std::move(callback);
+        m_addDialog(this);
+        m_isOpen = true;
+        m_facesPaths = existingFaces;
+        m_isEditMode = true;
+    }
+
     void SkyboxBrowser::Draw()
     {
         if (!m_isOpen) return;
 
         if (BeginWindow())
         {
-            InputText("Skybox name: ", &m_skyboxName);
-            ImGui::Spacing();
+            if (!m_isEditMode)
+            {
+                InputText("Skybox name: ", &m_skyboxName);
+                ImGui::Spacing();
+            }
 
             if(ImGui::BeginChild("Faces", ImVec2{WindowSize.x * 0.97f, WindowSize.y * 0.85f}, true))
             {
@@ -53,6 +66,11 @@ namespace nc::editor
             {
                 if (m_onConfirm(""))
                 {
+                    if (m_isEditMode)
+                    {
+                        m_assetManifest->Remove(std::filesystem::path(m_facesPaths.frontPath).replace_extension(".nca"), AssetType::Skybox);
+                    }
+
                     m_assetManifest->AddSkybox(m_facesPaths, m_skyboxName);
                     m_isOpen = false;
                 }

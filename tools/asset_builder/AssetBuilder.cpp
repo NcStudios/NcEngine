@@ -152,7 +152,6 @@ bool ParseArgs(int argc, char** argv, Config* out)
 
         if(option.compare("-a") == 0)
         {
-            std::cout << "-a used" << std::endl;
             out->SingleTargetType = GetAssetType(std::string{argv[current++]});
             continue;
         }
@@ -176,10 +175,8 @@ bool ParseArgs(int argc, char** argv, Config* out)
 
     if(!out->SingleTargetPath && !out->TargetsFilePath)
     {
-        std::cout << " SingleTargetsPath: " << out->SingleTargetPath.value().string() << ", TargetsFilePath: " << out->SingleTargetPath.value().string() << std::endl;   
         out->TargetsFilePath = std::filesystem::path(argv[0]).replace_filename(DefaultAssetTargetFilename);
         out->TargetsFilePath.value().make_preferred();
-        std::cout << " SingleTargetsPath: " << out->SingleTargetPath.value().string() << ", TargetsFilePath: " << out->SingleTargetPath.value().string() << std::endl;   
     }
 
     return true;
@@ -188,8 +185,6 @@ bool ParseArgs(int argc, char** argv, Config* out)
 auto GetAssetType(std::string type) -> AssetType
 {
     std::ranges::transform(type, type.begin(), [](char c) { return std::tolower(c); });
-
-    std::cout << "GetAssetType()" << type << std::endl;
 
     if(type.compare("mesh") == 0)
         return AssetType::Mesh;
@@ -205,6 +200,7 @@ auto GetAssetType(std::string type) -> AssetType
 
 void CreateOutputDirectory(const std::filesystem::path& directory)
 {
+    // const std::filesystem::path normalizedPath = directory.lexically_normal
     if(std::filesystem::exists(directory))
         return;
 
@@ -461,7 +457,6 @@ void BuildSkyboxAsset(const std::filesystem::path& inPath, const Config& config)
     }
 
     const auto assetPath = ToAssetPath(inPath, config);
-    std::cout << "Creating skybox asset: " << assetPath << '\n';
     std::ofstream outFile{assetPath};
     if(!outFile)
         throw std::runtime_error("Failure opening asset file");

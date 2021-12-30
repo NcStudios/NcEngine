@@ -33,12 +33,12 @@ namespace nc
         return AssetService<ConvexHullView>::Get()->Load(paths, isExternal);
     }
 
-    bool UnloadConvexHullAssets(const std::string& path)
+    bool UnloadConvexHullAsset(const std::string& path)
     {
         return AssetService<ConvexHullView>::Get()->Unload(path);
     }
 
-    void UnloadAllConvexHullAsset()
+    void UnloadAllConvexHullAssets()
     {
         AssetService<ConvexHullView>::Get()->UnloadAll();
     }

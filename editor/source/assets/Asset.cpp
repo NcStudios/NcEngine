@@ -28,7 +28,6 @@ namespace nc::editor
             return std::string{" -a hull-collider "};
         if(type == nc::editor::AssetType::Skybox)
         {
-            Output::LogError("passing args to asset builder.");
             return std::string{" -a skybox "};
         }
         return std::string{};
@@ -67,7 +66,7 @@ namespace nc::editor
 
         if (type == AssetType::Skybox) outPath = path;
             
-        std::string cmdLine = ExeName + BuildAssetTypeArg(type) + std::string{" -t "} + path.string() + std::string{" -o "} + outPath.string();
+        std::string cmdLine = ExeName + BuildAssetTypeArg(type) + std::string{" -t "} + path.lexically_normal().string() + std::string{" -o "} + outPath.lexically_normal().string();
         Output::Log(cmdLine.data());
         auto result = CreateProcessA(TEXT(ExeName.data()), TEXT(cmdLine.data()), NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
 
@@ -88,11 +87,6 @@ namespace nc::editor
             Output::LogError("Failure building asset file");
             return false;
         }
-        else
-        {
-            Output::LogError("Successfully called asset builder");
-        }
-
         return true;
     }
 

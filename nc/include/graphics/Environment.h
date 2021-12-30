@@ -9,5 +9,6 @@ namespace nc
     {
         public:
             virtual void SetSkybox(const std::string& path) = 0;
+            virtual void Clear() = 0;
     };
 }

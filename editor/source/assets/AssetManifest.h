@@ -14,6 +14,7 @@ namespace nc::editor
 
             bool Add(const std::filesystem::path& assetPath, AssetType type);
             bool AddSkybox(const CubeMapFaces& assetPaths, const std::string& name);
+            bool AddSkybox(const std::string& name);
             bool Remove(const std::filesystem::path& assetPath, AssetType type);
             bool Contains(const std::filesystem::path& assetPath, AssetType type) const;
             bool ContainsNca(const std::filesystem::path& assetPath, AssetType type) const;

@@ -28,7 +28,8 @@ friend ::nc::UIStream;
 
 /** Camera */
 #define NC_EDITOR_ADD_CAMERA(handle) registry->Add<Camera>(handle)
-#define NC_EDITOR_SET_CAMERA(handle) engine->MainCamera()->Set(registry->Get<Camera>(handle));
+#define NC_EDITOR_SET_CAMERA(handle) engine->MainCamera()->Set(registry->Get<Camera>(handle))
+#define NC_EDITOR_SET_SKYBOX(assetPath) engine->Environment()->SetSkybox(assetPath) 
 
 /** Collider */
 #define NC_EDITOR_BOX_PROPERTIES(...) BoxProperties{__VA_ARGS__}
@@ -39,7 +40,8 @@ friend ::nc::UIStream;
 #define NC_EDITOR_ADD_CAPSULE_COLLIDER(handle, properties, isTrigger) registry->Add<Collider>(handle, properties, isTrigger)
 #define NC_EDITOR_ADD_HULL_COLLIDER(handle, properties, isTrigger) registry->Add<Collider>(handle, properties, isTrigger)
 #define NC_EDITOR_ADD_SPHERE_COLLIDER(handle, properties, isTrigger) registry->Add<Collider>(handle, properties, isTrigger)
-#define NC_EDITOR_ADD_CONCAVE_COLLIDER(handle, assetPath) registry->Add<ConcaveCollider>(handle, assetPath);
+#define NC_EDITOR_ADD_CONCAVE_COLLIDER(handle, assetPath) registry->Add<ConcaveCollider>(handle, assetPath)
+#define NC_EDITOR_ADD_SKYBOX(assetPath) nc::LoadCubeMapAsset(assetPath)
 
 /** PhysicsBody */
 #define NC_EDITOR_PHYSICS_PROPERTIES(...) PhysicsProperties{__VA_ARGS__}
