@@ -101,7 +101,6 @@ namespace nc::editor
                     .leftPath  = (parentPath / "left").string() + fileExtension
                 };
 
-                m_assetManifest->Remove(assets[selected].sourcePath, AssetType::Skybox);
                 m_skyboxBrowser.Open([](const std::filesystem::path&) { return true; }, cubeMapFaces);
             }
 

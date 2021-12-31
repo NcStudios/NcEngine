@@ -1,10 +1,11 @@
 #include "SkyboxBrowser.h"
 #include "ui/ImGuiUtility.h"
 #include "assets/Asset.h"
+#include <iostream>
 
 namespace
 {
-    constexpr nc::Vector2 WindowSize{300.0f, 500.0f};
+    constexpr nc::Vector2 WindowSize{400.0f, 550.0f};
 }
 
 namespace nc::editor
@@ -15,6 +16,7 @@ namespace nc::editor
       m_onConfirm{},
       m_openFileBrowser{std::move(openFileBrowserCallback)},
       m_facesPaths{},
+      m_previousPaths{},
       m_assetManifest{manifest},
       m_skyboxName{},
       m_isEditMode{false}
@@ -35,6 +37,7 @@ namespace nc::editor
         m_addDialog(this);
         m_isOpen = true;
         m_facesPaths = existingFaces;
+        m_previousPaths = existingFaces;
         m_isEditMode = true;
     }
 
@@ -46,7 +49,7 @@ namespace nc::editor
         {
             if (!m_isEditMode)
             {
-                InputText("Skybox name: ", &m_skyboxName);
+                InputText("Skybox name ", &m_skyboxName);
                 ImGui::Spacing();
             }
 
@@ -68,10 +71,14 @@ namespace nc::editor
                 {
                     if (m_isEditMode)
                     {
-                        m_assetManifest->Remove(std::filesystem::path(m_facesPaths.frontPath).replace_extension(".nca"), AssetType::Skybox);
+                        m_skyboxName = std::filesystem::path(m_previousPaths.frontPath).parent_path().stem().string();
+                        m_assetManifest->EditSkybox(m_previousPaths, m_facesPaths, m_skyboxName);
+                    }
+                    else
+                    {
+                        m_assetManifest->AddSkybox(m_facesPaths, m_skyboxName);
                     }
 
-                    m_assetManifest->AddSkybox(m_facesPaths, m_skyboxName);
                     m_isOpen = false;
                 }
             }
@@ -89,6 +96,7 @@ namespace nc::editor
     void SkyboxBrowser::SelectFace(std::string& facePath, const std::string& label)
     {
         IMGUI_SCOPE(ImGuiId, label.c_str());
+
         if (ImGui::Button("Edit"))
         {
             m_openFileBrowser([&facePath](const std::filesystem::path& path)
@@ -103,6 +111,7 @@ namespace nc::editor
             });
         }
 
+        ImGui::SameLine();
         InputText(label.c_str(), &facePath, ImGuiInputTextFlags_ReadOnly);
     }
 }

@@ -59,6 +59,30 @@ namespace
         if (std::filesystem::exists(fbxPath)) std::filesystem::remove(fbxPath);
         if (std::filesystem::exists(assetPath)) std::filesystem::remove(assetPath);
     }
+
+    bool ReplaceSkyboxFile(const std::filesystem::path& oldFile, const std::filesystem::path& newFile)
+    {
+        if (oldFile != newFile)
+        {
+            if(!std::filesystem::exists(newFile))
+            {
+                return false;
+            }
+
+            try 
+            {
+                if (std::filesystem::exists(oldFile)) std::filesystem::remove(oldFile);
+                std::filesystem::copy(newFile, oldFile);
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 namespace nc::editor
@@ -128,12 +152,31 @@ namespace nc::editor
         return true;
     }
 
-    /**
-     * Call AssetManifest.Add, potentially overload.
-     * This will copy all six files to a directory, normalizing the filenames.
-     * This will then pass that directory to AssetBuilder.BuildSkyboxPath(folderName, config)
-     * 
-     * */
+    bool AssetManifest::EditSkybox(const CubeMapFaces& previousPaths, const CubeMapFaces& newPaths, const std::string& name)
+    {
+        ReplaceSkyboxFile(previousPaths.frontPath, newPaths.frontPath);
+        ReplaceSkyboxFile(previousPaths.backPath,  newPaths.backPath);
+        ReplaceSkyboxFile(previousPaths.upPath,    newPaths.upPath);
+        ReplaceSkyboxFile(previousPaths.downPath,  newPaths.downPath);
+        ReplaceSkyboxFile(previousPaths.rightPath, newPaths.rightPath);
+        ReplaceSkyboxFile(previousPaths.leftPath, newPaths.leftPath);
+
+        const auto subdirectory = std::filesystem::path(name);
+        const auto& projectSettings = m_getConfig().projectSettings;
+        const auto& ncaImportPath = projectSettings.cubeMapsPath/subdirectory/(name + ".nca");
+        UnloadCubeMapAsset(ncaImportPath.string());
+
+        auto asset = CreateAsset(ncaImportPath, AssetType::Skybox);
+        if(!LoadAsset(asset, AssetType::Skybox))
+        {
+            Output::LogError("Failure loading asset:", ncaImportPath.string());
+            return false;
+        }
+
+        Output::Log("Added asset: " + ncaImportPath.string());
+        return true;
+    }
+
     bool AssetManifest::AddSkybox(const CubeMapFaces& assetPaths, const std::string& name)
     {
         if(!std::filesystem::exists(assetPaths.frontPath))
@@ -311,7 +354,8 @@ namespace nc::editor
                 {
                     if (std::filesystem::exists(assetPath)) std::filesystem::remove_all(assetPath.parent_path());
                     if (std::filesystem::exists(assetPath.parent_path())) std::filesystem::remove(assetPath.parent_path());
-                } catch(std::exception) {}
+                } 
+                catch(const std::exception&) {}
 
                 nc::UnloadCubeMapAsset(assetPath.string());
                 break;

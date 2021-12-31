@@ -22,6 +22,7 @@ namespace nc::editor
             DialogCallbacks::SkyboxOnConfirmCallbackType m_onConfirm;
             DialogCallbacks::OpenFileBrowserCallbackType m_openFileBrowser;
             CubeMapFaces m_facesPaths;
+            CubeMapFaces m_previousPaths;
             AssetManifest* m_assetManifest;
             std::string m_skyboxName;
             bool m_isEditMode;
