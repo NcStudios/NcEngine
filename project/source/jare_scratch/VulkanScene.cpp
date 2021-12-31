@@ -86,7 +86,6 @@ namespace nc::sample
             "plane.nca",
             "sphere.nca",
             "cube.nca",
-            "newSphere.nca"
         };
 
         nc::LoadMeshAssets(sceneMeshes);
@@ -121,7 +120,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blackSphere, "newSphere.nca", grayMaterial, TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blackSphere, "sphere.nca", grayMaterial, TechniqueType::PhongAndUi);
 
         auto blackBox = registry->Add<Entity>(
         {.position = Vector3{-3.0f, 1.0f, 2.0f},
