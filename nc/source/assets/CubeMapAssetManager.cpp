@@ -64,7 +64,7 @@ namespace nc
      * */
     bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
     {
-        uint32_t nextCubeMapIndex = m_cubeMaps.size();
+        uint32_t nextCubeMapIndex = static_cast<uint32_t>(m_cubeMaps.size());
 
         if(IsLoaded(path))
             return true;
@@ -125,15 +125,14 @@ namespace nc
 
     bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
-        const auto newCubeMapCount = paths.size();
-        uint32_t newCubeMapIndex = m_cubeMaps.size();
+        const auto newCubeMapCount = facesSet.size();
+        uint32_t newCubeMapIndex = static_cast<uint32_t>(m_cubeMaps.size());
         if (newCubeMapCount + newCubeMapIndex >= m_maxCubeMapsCount)
             throw NcError("Cannot exceed max texture count.");
 
         for (const auto& path : paths)
         {
-            if(IsLoaded(path))
-                continue;
+            if(IsLoaded(path)) continue;
 
             if(!HasValidAssetExtension(path))
             throw nc::NcError("Invalid extension: " + path);

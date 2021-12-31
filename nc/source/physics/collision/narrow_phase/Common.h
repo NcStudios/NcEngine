@@ -1,7 +1,7 @@
 #pragma once
 
 #include "debug/Utils.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 
 #include <array>
 
@@ -67,8 +67,11 @@ namespace nc::physics
 
     inline DirectX::XMVECTOR MinkowskiSupport(const Sphere& collider, DirectX::FXMVECTOR direction_v)
     {
-        return DirectX::XMLoadVector3(&collider.center) +
-               DirectX::XMVectorScale(DirectX::XMVector3Normalize(direction_v), collider.radius);
+        return DirectX::XMVectorAdd
+        (
+            DirectX::XMLoadVector3(&collider.center),
+            DirectX::XMVectorScale(DirectX::XMVector3Normalize(direction_v), collider.radius)
+        );
     }
 
     inline DirectX::XMVECTOR MinkowskiSupport(const Box& collider, DirectX::FXMVECTOR direction_v)
@@ -155,7 +158,7 @@ namespace nc::physics
         out.worldA = XMVector3Transform(out.localA, aMatrix);
         out.localB = MinkowskiSupport(b, XMVector3InverseRotate(XMVectorNegate(direction), bRot));
         out.worldB = XMVector3Transform(out.localB, bMatrix);
-        out.worldCSO = out.worldA - out.worldB;
+        out.worldCSO = XMVectorSubtract(out.worldA, out.worldB);
         return out;
     }
 }

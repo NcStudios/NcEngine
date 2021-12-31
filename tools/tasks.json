@@ -83,6 +83,18 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "Engine Release-WithProfiling",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Engine", "Release-WithProfiling", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "Project Debug",
             "type": "shell",
             "command": "tools/build.bat",
@@ -133,6 +145,19 @@
             },
             "problemMatcher": "$msCompile",
             "dependsOn": "Engine Release-WithEditor"
+        },
+        {
+            "label": "Project Release-WithProfiling",
+            "type": "shell",
+            "command": "tools/build.bat",
+            "args": ["Project", "Release-WithProfiling", "${config:NcInstallDir}", "Ninja"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Engine Release-WithProfiling"
         }
     ]
 }

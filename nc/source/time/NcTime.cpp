@@ -20,14 +20,14 @@ namespace nc::time
     {
     }
 
-    double Time::UpdateTime() noexcept
+    auto Time::UpdateTime() noexcept -> float
     {
         const auto cycleDelta = duration_cast<microseconds>(m_currentTime - m_lastTime).count();
         m_frameDeltaTime = cycleDelta / MicrosecondsPerSecond;
         m_accumulatedTime += m_frameDeltaTime;
         m_lastTime = m_currentTime;
         m_currentTime  = Clock::now();
-        return m_frameDeltaTime;
+        return static_cast<float>(m_frameDeltaTime);
     }
 
     void Timer::Start() noexcept

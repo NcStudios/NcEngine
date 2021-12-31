@@ -73,10 +73,10 @@ namespace nc::sample
                                                            .diffuseIntensity = 1200.0f});
 
         // UI Callbacks
-        GetObjectCountCallback = std::bind(Spawner::GetObjectCount, spawner);
-        SpawnCallback = std::bind(Spawner::StageSpawn, spawner, std::placeholders::_1);
-        DestroyCallback = std::bind(Spawner::StageDestroy, spawner, std::placeholders::_1);
-        GetFPSCallback = std::bind(FPSTracker::GetFPS, fpsTracker);
+        GetObjectCountCallback = std::bind(&Spawner::GetObjectCount, spawner);
+        SpawnCallback = std::bind(&Spawner::StageSpawn, spawner, std::placeholders::_1);
+        DestroyCallback = std::bind(&Spawner::StageDestroy, spawner, std::placeholders::_1);
+        GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
     }
 
     void RenderingBenchmark::Unload()

@@ -65,7 +65,7 @@ namespace nc::sample
         // Movable Objects
         auto objectSpawner = registry->Add<Entity>({.tag = "Prefab Selector"});
         auto* prefabSelector = registry->Add<PrefabSelector>(objectSpawner, registry);
-        SelectPrefabCallback = std::bind(PrefabSelector::Select, prefabSelector, std::placeholders::_1);
+        SelectPrefabCallback = std::bind(&PrefabSelector::Select, prefabSelector, std::placeholders::_1);
 
         // Dynamic Objects
         auto smallGreenCube = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{3.5f, 0.0f, -1.0f}, .rotation = Quaternion::FromEulerAngles(0.0f, 0.785f, 0.0f), .tag = "Small Green Cube"});

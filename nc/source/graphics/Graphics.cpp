@@ -13,11 +13,6 @@
 
 #include <iostream>
 
-namespace
-{
-    constexpr std::array<float, 4> DefaultClearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-}
-
 namespace nc::graphics
 {
     Graphics::Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
@@ -36,7 +31,7 @@ namespace nc::graphics
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false },
-          m_clearColor{DefaultClearColor}
+          m_clearColor{0.0f, 0.0f, 0.0f, 1.0f}
     {
     }
 

@@ -1,5 +1,5 @@
 #include "math/Quaternion.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 #include "debug/Utils.h"
 
 

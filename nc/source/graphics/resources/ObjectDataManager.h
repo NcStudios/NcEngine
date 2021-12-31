@@ -2,7 +2,7 @@
 
 #include "ShaderResourceService.h"
 #include "WriteableBuffer.h"
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 
 namespace nc::graphics
 {

@@ -32,7 +32,8 @@ add_executable(${GAME_EXE})
 #Properties
 set_target_properties(${GAME_EXE}
     PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}/..
+        RUNTIME_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${ROOT_DIR}/..>
+        WIN32_EXECUTABLE TRUE
 )
 
 #Compile Options

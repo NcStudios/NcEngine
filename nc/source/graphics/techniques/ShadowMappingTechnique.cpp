@@ -77,7 +77,7 @@ namespace nc::graphics
         // Graphics pipeline
         std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
-        dynamicStateInfo.setDynamicStateCount(dynamicStates.size());
+        dynamicStateInfo.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
         dynamicStateInfo.setDynamicStates(dynamicStates);
 
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};

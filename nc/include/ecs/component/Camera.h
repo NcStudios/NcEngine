@@ -3,7 +3,7 @@
 #include "Component.h"
 #include "physics/Geometry.h"
 
-#include "directx/math/DirectXMath.h"
+#include "directx/Inc/DirectXMath.h"
 
 namespace nc
 {

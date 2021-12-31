@@ -79,7 +79,7 @@ namespace nc::graphics
         writes[1].setPBufferInfo(0);
         writes[1].setPImageInfo(m_imageInfos.data());
 
-        m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
+        m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
     }
 
     auto CubeMapManager::GetDescriptorSet() -> vk::DescriptorSet*

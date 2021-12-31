@@ -145,10 +145,10 @@ namespace nc::graphics
 
             vk::FramebufferCreateInfo framebufferInfo{};
             framebufferInfo.setRenderPass(renderPass.renderpass.get());
-            framebufferInfo.setAttachmentCount(renderTarget.attachmentHandles.size());
+            framebufferInfo.setAttachmentCount(static_cast<uint32_t>(renderTarget.attachmentHandles.size()));
             framebufferInfo.setPAttachments(renderTarget.attachmentHandles.data());
-            framebufferInfo.setWidth(dimensions.x);
-            framebufferInfo.setHeight(dimensions.y);
+            framebufferInfo.setWidth(static_cast<uint32_t>(dimensions.x));
+            framebufferInfo.setHeight(static_cast<uint32_t>(dimensions.y));
             framebufferInfo.setLayers(1);
 
             renderTarget.frameBuffer.reset();
@@ -194,10 +194,10 @@ namespace nc::graphics
         auto& renderpass = Acquire(uid);
         vk::FramebufferCreateInfo framebufferInfo{};
         framebufferInfo.setRenderPass(renderpass.renderpass.get());
-        framebufferInfo.setAttachmentCount(renderTarget.attachmentHandles.size());
+        framebufferInfo.setAttachmentCount(static_cast<uint32_t>(renderTarget.attachmentHandles.size()));
         framebufferInfo.setPAttachments(renderTarget.attachmentHandles.data());
-        framebufferInfo.setWidth(renderpass.renderTargetSize.dimensions.x);
-        framebufferInfo.setHeight(renderpass.renderTargetSize.dimensions.y);
+        framebufferInfo.setWidth(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.x));
+        framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
         renderTarget.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
@@ -230,8 +230,8 @@ namespace nc::graphics
         framebufferInfo.setRenderPass(renderpass.renderpass.get());
         framebufferInfo.setAttachmentCount(1);
         framebufferInfo.setPAttachments(renderTarget.attachmentHandles.data());
-        framebufferInfo.setWidth(renderpass.renderTargetSize.dimensions.x);
-        framebufferInfo.setHeight(renderpass.renderTargetSize.dimensions.y);
+        framebufferInfo.setWidth(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.x));
+        framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
         renderTarget.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
