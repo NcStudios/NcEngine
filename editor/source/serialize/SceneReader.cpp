@@ -1,4 +1,5 @@
 #include "SceneReader.h"
+#include "graphics/Environment.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
 
@@ -100,8 +101,9 @@ namespace
 
 namespace nc::editor
 {
-    SceneReader::SceneReader(Registry* registry, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
+    SceneReader::SceneReader(Registry* registry,  Environment* environment, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
         : m_registry{registry},
+          m_environment{environment},
           m_file{scenesDirectory / (sceneName + FileExtension::Generated.data())},
           m_handleNames{},
           m_scenesDirectory{scenesDirectory},
@@ -150,6 +152,7 @@ namespace nc::editor
         else if(actionDescription == SceneMacro::AddConcaveCollider) LoadConcaveCollider(currentEntity, args);
         else if(actionDescription == SceneMacro::AddPointLight)      LoadPointLight(currentEntity, args);
         else if(actionDescription == SceneMacro::AddCamera)          LoadCamera(currentEntity, args);
+        else if(actionDescription == SceneMacro::SetSkybox)          LoadSkybox(args);
 
         return currentEntity;
     }
@@ -318,5 +321,21 @@ namespace nc::editor
     {
         ReadTokenFromAction(args);
         m_registry->Add<Camera>(entity);
+    }
+
+    void SceneReader::LoadSkybox(std::stringstream& args)
+    {
+        const auto path = ReadQuotedStringFromAction(args);
+        if (path.empty())
+        {
+            m_environment->Clear();
+        }
+
+        if (path == DefaultSkyboxPath)
+        {
+            m_environment->SetSkybox(DefaultSkyboxPath);
+        }
+        
+        m_environment->SetSkybox(path);
     }
 }

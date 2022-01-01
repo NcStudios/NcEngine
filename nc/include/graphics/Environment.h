@@ -8,6 +8,7 @@ namespace nc
     class Environment : public SystemBase
     {
         public:
-            virtual void SetSkybox(const CubeMapFaces& skybox) = 0;
+            virtual void SetSkybox(const std::string& path) = 0;
+            virtual void Clear() = 0;
     };
 }

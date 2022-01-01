@@ -4,16 +4,22 @@
 
 #include "Common.h"
 
+namespace nc
+{
+    class Environment;
+}
+
 namespace nc::editor
 {
     /** Loads contents of a scene.gen file into the registry. */
     class SceneReader
     {
         public:
-            SceneReader(Registry* registry, const std::filesystem::path& scenesDirectory, const std::string& sceneName);
+            SceneReader(Registry* registry, Environment* environment, const std::filesystem::path& scenesDirectory, const std::string& sceneName);
 
         private:
             Registry* m_registry;
+            Environment* m_environment;
             std::ifstream m_file;
             std::unordered_map<std::string, Entity> m_handleNames;
             std::filesystem::path m_scenesDirectory;
@@ -30,5 +36,6 @@ namespace nc::editor
             void LoadPointLight(Entity entity, std::stringstream& args);
             void LoadMeshRenderer(Entity entity, std::stringstream& args);
             void LoadCamera(Entity entity, std::stringstream& args);
+            void LoadSkybox(std::stringstream& args);
     };
 }

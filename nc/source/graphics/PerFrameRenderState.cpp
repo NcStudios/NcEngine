@@ -64,7 +64,7 @@ namespace nc::graphics
         environment->SetCameraPosition(cameraPosition);
         if (useSkybox)
         {
-            auto skyboxMatrix = DirectX::XMMatrixScaling(100.0f, 100.0f, 100.0f);
+            auto skyboxMatrix = DirectX::XMMatrixScaling(200.0f, 200.0f, 200.0f);
             skyboxMatrix.r[3] = DirectX::XMVectorAdd(DirectX::XMLoadVector3(&cameraPosition), DirectX::g_XMIdentityR3);
             objectData.emplace_back(skyboxMatrix, skyboxMatrix * camViewMatrix, viewProjection, 0, 0, 0, 0);
         }

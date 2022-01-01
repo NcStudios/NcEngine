@@ -188,7 +188,7 @@ namespace nc::editor
 
         Output::Log("Creating scene: " + name);
 
-        SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
+        SceneWriter writer{m_engine->Registry(), m_manifest, m_projectData.projectDirectory / "scenes"};
         writer.WriteNewScene(name);
 
         m_projectData.scenes.push_back(name);
@@ -222,7 +222,7 @@ namespace nc::editor
         /** @todo This is more of an "on project save" thing, which doesn't exist yet. */
         WriteLoaderScene(m_projectData.projectDirectory, *m_manifest);
 
-        SceneWriter writer{m_engine->Registry(), m_projectData.projectDirectory / "scenes"};
+        SceneWriter writer{m_engine->Registry(), m_manifest, m_projectData.projectDirectory / "scenes"};
         writer.WriteCurrentScene(&m_sceneData, m_projectData.scenes.at(m_currentSceneIndex));
         Output::Log("Saved scene: " + m_projectData.scenes.at(m_currentSceneIndex));
     }
@@ -264,7 +264,7 @@ namespace nc::editor
 
         m_currentSceneIndex = m_nextSceneIndex;
 
-        NC_TRACE(SceneReader serialize{m_engine->Registry(), m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
+        NC_TRACE(SceneReader serialize{m_engine->Registry(), m_engine->Environment(), m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
     }
 
     void ProjectManager::DeleteCurrentScene()

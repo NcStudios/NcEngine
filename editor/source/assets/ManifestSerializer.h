@@ -15,6 +15,7 @@ namespace nc::editor
         std::vector<Asset> hullColliders;
         std::vector<Asset> meshes;
         std::vector<Asset> textures;
+        std::vector<Asset> skyboxes;
         bool readSuccessfully;
     };
 

@@ -16,10 +16,10 @@ namespace nc
         public:
             EnvironmentImpl();
 
-            void SetSkybox(const CubeMapFaces& skybox) override;
+            void SetSkybox(const std::string& path) override;
             void SetCameraPosition(const Vector3& cameraPosition);
             const EnvironmentData& Get() const;
-            void Clear();
+            void Clear() override;
             bool UseSkybox();
             
         private:

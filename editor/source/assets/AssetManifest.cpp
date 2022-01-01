@@ -3,6 +3,8 @@
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
 
+#include <iostream>
+
 namespace
 {
     bool IsDefaultAsset(const std::filesystem::path& path, nc::editor::AssetType type)
@@ -37,9 +39,49 @@ namespace
                        str == nc::editor::DefaultNormalPath ||
                        str == nc::editor::DefaultRoughnessPath;
             }
+            case nc::editor::AssetType::Skybox:
+            {
+                return path.string() == nc::editor::DefaultSkyboxPath;
+            }
         }
 
         return false;
+    }
+
+    void DeleteMeshFiles(const std::filesystem::path& assetPath)
+    {
+        auto fbxPath = assetPath;
+        fbxPath.replace_extension(".fbx");
+
+        auto objPath = assetPath;
+        objPath.replace_extension(".obj");
+
+        if (std::filesystem::exists(fbxPath)) std::filesystem::remove(fbxPath);
+        if (std::filesystem::exists(assetPath)) std::filesystem::remove(assetPath);
+    }
+
+    bool ReplaceSkyboxFile(const std::filesystem::path& oldFile, const std::filesystem::path& newFile)
+    {
+        if (oldFile != newFile)
+        {
+            if(!std::filesystem::exists(newFile))
+            {
+                return false;
+            }
+
+            try 
+            {
+                if (std::filesystem::exists(oldFile)) std::filesystem::remove(oldFile);
+                std::filesystem::copy(newFile, oldFile);
+            }
+            catch(const std::exception& e)
+            {
+                nc::editor::Output::LogError("Error replacing skybox file: ", e.what());
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
@@ -51,6 +93,7 @@ namespace nc::editor
           m_concaveColliders{},
           m_textures{},
           m_audioClips{},
+          m_skyboxes{},
           m_getConfig{std::move(configCallback)}
     {
         LoadDefaultAssets();
@@ -67,6 +110,7 @@ namespace nc::editor
             case AssetType::HullCollider:    return projectSettings.hullCollidersPath / assetPath.filename();
             case AssetType::Mesh:            return projectSettings.meshesPath / assetPath.filename();
             case AssetType::Texture:         return projectSettings.texturesPath / assetPath.filename();
+            case AssetType::Skybox:          return projectSettings.cubeMapsPath / assetPath.filename();
             default: throw NcError("Unknown AssetType");
         }
     }
@@ -108,10 +152,175 @@ namespace nc::editor
         return true;
     }
 
+    bool AssetManifest::EditSkybox(const CubeMapFaces& previousPaths, const CubeMapFaces& newPaths, const std::string& name)
+    {
+        ReplaceSkyboxFile(previousPaths.frontPath, newPaths.frontPath);
+        ReplaceSkyboxFile(previousPaths.backPath,  newPaths.backPath);
+        ReplaceSkyboxFile(previousPaths.upPath,    newPaths.upPath);
+        ReplaceSkyboxFile(previousPaths.downPath,  newPaths.downPath);
+        ReplaceSkyboxFile(previousPaths.rightPath, newPaths.rightPath);
+        ReplaceSkyboxFile(previousPaths.leftPath, newPaths.leftPath);
+
+        const auto subdirectory = std::filesystem::path(name);
+        const auto& projectSettings = m_getConfig().projectSettings;
+        const auto& ncaImportPath = projectSettings.cubeMapsPath/subdirectory/(name + ".nca");
+        UnloadCubeMapAsset(ncaImportPath.string());
+
+        auto asset = CreateAsset(ncaImportPath, AssetType::Skybox);
+        if(!LoadAsset(asset, AssetType::Skybox))
+        {
+            Output::LogError("Failure loading asset:", ncaImportPath.string());
+            return false;
+        }
+
+        Output::Log("Added asset: " + ncaImportPath.string());
+        return true;
+    }
+
+    bool AssetManifest::AddSkybox(const CubeMapFaces& assetPaths, const std::string& name)
+    {
+        auto checkForExistence = [](const std::string& path) -> bool
+        {
+            if(!std::filesystem::exists(path))
+            {
+                Output::LogError("Face path does not exist: ", path);
+                return false;
+            }
+            return true;
+        };
+
+        if (!checkForExistence(assetPaths.frontPath)) return false;
+        if (!checkForExistence(assetPaths.backPath)) return false;
+        if (!checkForExistence(assetPaths.upPath)) return false;
+        if (!checkForExistence(assetPaths.downPath)) return false;
+        if (!checkForExistence(assetPaths.rightPath)) return false;
+        if (!checkForExistence(assetPaths.leftPath)) return false;
+     
+        auto& collection = GetCollection(AssetType::Skybox);
+
+        if(collection.Contains(name))
+        {
+            Output::LogError("Asset is already in the manifest");
+            return false;
+        }
+
+        const auto subdirectory = std::filesystem::path(name);
+        const auto& projectSettings = m_getConfig().projectSettings;
+
+        if (!std::filesystem::exists(projectSettings.cubeMapsPath/subdirectory))
+        {
+            std::filesystem::create_directory(projectSettings.cubeMapsPath/subdirectory);
+        }
+
+        const auto importSubdirectory = std::filesystem::path{projectSettings.cubeMapsPath} / subdirectory;
+        auto copyFacePath = [&importSubdirectory](const std::string& inPath, const std::string& outName)
+        {
+            const auto sourcePath = std::filesystem::path{inPath};
+            const auto extension = sourcePath.extension().string();
+            const auto filePath = std::filesystem::path{outName + extension};
+            const auto importPath = importSubdirectory / filePath;
+            if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
+            std::filesystem::copy(sourcePath, importPath);
+        };
+
+        try
+        {
+            copyFacePath(assetPaths.frontPath, "front");
+            copyFacePath(assetPaths.backPath, "back");
+            copyFacePath(assetPaths.upPath, "up");
+            copyFacePath(assetPaths.downPath, "down");
+            copyFacePath(assetPaths.rightPath, "right");
+            copyFacePath(assetPaths.leftPath, "left");
+        }
+        catch(const std::exception& e)
+        {
+            Output::LogError("Error copying face path.", e.what());
+        }
+
+        const auto& ncaImportPath = projectSettings.cubeMapsPath/subdirectory/(name + ".nca");
+        if (std::filesystem::exists(ncaImportPath)) std::filesystem::remove(ncaImportPath);
+        auto asset = CreateAsset(ncaImportPath, AssetType::Skybox);
+
+        if(!BuildNcaFile(projectSettings.cubeMapsPath/subdirectory, AssetType::Skybox))
+        {
+            Output::LogError("Failure building nca file from:", (projectSettings.cubeMapsPath/subdirectory).string());
+            return false;
+        }
+
+        if(!LoadAsset(asset, AssetType::Skybox))
+        {
+            Output::LogError("Failure loading asset:", ncaImportPath.string());
+            return false;
+        }
+
+        collection.Add(std::move(asset));
+        Output::Log("Added asset: " + ncaImportPath.string());
+        return true;
+    }
+
+     bool AssetManifest::AddSkybox(const std::string& name)
+    {
+        const auto& projectSettings = m_getConfig().projectSettings;
+        const auto& ncaImportPath = std::filesystem::path(projectSettings.cubeMapsPath)/name;
+
+        auto asset = CreateAsset(ncaImportPath, AssetType::Skybox);
+        auto& collection = GetCollection(AssetType::Skybox);
+        collection.Add(std::move(asset));
+
+        Output::Log("Added asset: " + ncaImportPath.string());
+        return true;
+    }
+
     bool AssetManifest::Remove(const std::filesystem::path& assetPath, AssetType type)
     {
-        /** @todo unload assets once implemented */
         Output::Log("Removed asset: " + assetPath.string());
+
+        switch (type)
+        {
+            case AssetType::AudioClip:
+            {
+                auto wavPath = assetPath;
+                wavPath.replace_extension(".wav");
+
+                if (std::filesystem::exists(wavPath)) std::filesystem::remove(wavPath);
+                if (std::filesystem::exists(assetPath)) std::filesystem::remove(assetPath);
+                nc::UnloadAudioClipAsset(assetPath.string());
+                break;
+            }
+            case AssetType::ConcaveCollider:
+            {
+                DeleteMeshFiles(assetPath);
+                nc::UnloadConcaveColliderAsset(assetPath.string());
+                break;
+            }
+            case AssetType::HullCollider:
+            {
+                DeleteMeshFiles(assetPath);
+                nc::UnloadConvexHullAsset(assetPath.string());
+                break;
+            }
+            case AssetType::Mesh:
+            {
+                DeleteMeshFiles(assetPath);
+                nc::UnloadMeshAsset(assetPath.string());
+                break;
+            }
+            case AssetType::Skybox:
+            {
+                if (std::filesystem::exists(assetPath)) std::filesystem::remove_all(assetPath.parent_path());
+                if (std::filesystem::exists(assetPath.parent_path())) std::filesystem::remove(assetPath.parent_path());
+
+                nc::UnloadCubeMapAsset(assetPath.string());
+                break;
+            }
+            case AssetType::Texture:
+            {
+                if (std::filesystem::exists(assetPath)) std::filesystem::remove(assetPath);
+                nc::UnloadTextureAsset(assetPath.string());
+                break;
+            }
+        }
+
         return GetCollection(type).Remove(assetPath);
     }
 
@@ -182,6 +391,14 @@ namespace nc::editor
             
             m_textures.Add(std::move(asset));
         }
+        
+        for(auto& asset : manifestData.skyboxes)
+        {
+            if(!LoadAsset(asset, AssetType::Skybox))
+                Output::LogError("Failure loading Skybox:", asset.sourcePath.string());
+            
+            m_skyboxes.Add(std::move(asset));
+        }
     }
 
     void AssetManifest::Write(const std::filesystem::path& projectDirectory) const
@@ -199,6 +416,7 @@ namespace nc::editor
             case AssetType::HullCollider:    return m_hullColliders;
             case AssetType::Mesh:            return m_meshes;
             case AssetType::Texture:         return m_textures;
+            case AssetType::Skybox:          return m_skyboxes;
         }
 
         throw std::runtime_error("AssetManifest::GetCollection - Unknown AssetType");
@@ -213,6 +431,7 @@ namespace nc::editor
             case AssetType::HullCollider:    return m_hullColliders;
             case AssetType::Mesh:            return m_meshes;
             case AssetType::Texture:         return m_textures;
+            case AssetType::Skybox:          return m_skyboxes;
         }
 
         throw std::runtime_error("AssetManifest::GetCollection - Unknown AssetType");

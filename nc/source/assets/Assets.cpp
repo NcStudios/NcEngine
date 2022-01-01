@@ -33,12 +33,12 @@ namespace nc
         return AssetService<ConvexHullView>::Get()->Load(paths, isExternal);
     }
 
-    bool UnloadConvexHullAssets(const std::string& path)
+    bool UnloadConvexHullAsset(const std::string& path)
     {
         return AssetService<ConvexHullView>::Get()->Unload(path);
     }
 
-    void UnloadAllConvexHullAsset()
+    void UnloadAllConvexHullAssets()
     {
         AssetService<ConvexHullView>::Get()->UnloadAll();
     }
@@ -103,24 +103,24 @@ namespace nc
         return AssetService<TextureView>::Get()->UnloadAll();
     }
 
-    bool LoadCubeMapAsset(const CubeMapFaces& paths, bool isExternal)
+    bool LoadCubeMapAsset(const std::string& path, bool isExternal)
     {
-        return AssetService<CubeMapView, CubeMapFaces>::Get()->Load(paths, isExternal);
+        return AssetService<CubeMapView>::Get()->Load(path, isExternal);
     }
 
-    bool LoadCubeMapAssets(std::span<const CubeMapFaces> paths, bool isExternal)
+    bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal)
     {
-        return AssetService<CubeMapView, CubeMapFaces>::Get()->Load(paths, isExternal);
+        return AssetService<CubeMapView>::Get()->Load(paths, isExternal);
     }
 
-    bool UnloadCubeMapAsset(const CubeMapFaces& paths)
+    bool UnloadCubeMapAsset(const std::string& path)
     {
-        return AssetService<CubeMapView, CubeMapFaces>::Get()->Unload(paths);
+        return AssetService<CubeMapView>::Get()->Unload(path);
     }
 
     void UnloadAllCubeMapAssets()
     {
-        return AssetService<CubeMapView, CubeMapFaces>::Get()->UnloadAll();
+        return AssetService<CubeMapView>::Get()->UnloadAll();
     }
 
 } // namespace nc

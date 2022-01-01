@@ -1,6 +1,8 @@
 #include "SceneWriter.h"
 #include "EditorScene.h"
 #include "utility/Output.h"
+#include "assets/AssetManifest.h"
+#include "utility/DefaultComponents.h"
 
 #include <iostream>
 
@@ -34,8 +36,9 @@ namespace nc
 
 namespace nc::editor
 {
-    SceneWriter::SceneWriter(Registry* registry, const std::filesystem::path& scenesDirectory)
+    SceneWriter::SceneWriter(Registry* registry, AssetManifest* manifest, const std::filesystem::path& scenesDirectory)
         : m_registry{registry},
+          m_manifest{manifest},
           m_file{},
           m_handleNames{},
           m_scenesDirectory{scenesDirectory},
@@ -137,7 +140,7 @@ namespace nc::editor
 
     void SceneWriter::CreateGeneratedSource(SceneData* sceneData)
     {
-        auto filePath = m_scenesDirectory / (m_sceneName + FileExtension::Source.data());
+        auto filePath = m_scenesDirectory / (m_sceneName + FileExtension::Generated.data());
         m_file.open(filePath);
         if(!m_file.is_open())
         {
@@ -172,6 +175,16 @@ namespace nc::editor
         if(sceneData->mainCamera.Valid() && m_registry->Contains<Camera>(sceneData->mainCamera))
         {
             m_file << SceneMacro::SetCamera << "( " << m_handleNames.at(sceneData->mainCamera.Index()) << " );\n";
+        }
+
+        if (!sceneData->skybox.empty() && m_manifest->ContainsNca(sceneData->skybox, AssetType::Skybox))
+        {
+            m_file << SceneMacro::AddSkybox << "( \"" << sceneData->skybox << "\" );\n";
+            m_file << SceneMacro::SetSkybox << "( \"" << sceneData->skybox << "\" );\n";
+        }
+        else if (sceneData->skybox == DefaultSkyboxPath)
+        {
+            m_file << SceneMacro::SetSkybox << "( \"" << nc::editor::DefaultSkyboxPath << "\" );\n";
         }
 
         if(sceneData->audioListener.Valid())
