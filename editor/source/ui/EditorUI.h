@@ -4,7 +4,7 @@
 #include "ui/IUI.h"
 #include "window/IOnResizeReceiver.h"
 #include "framework/Callbacks.h"
-#include "ui/Environment2.h"
+#include "ui/EnvironmentPanel.h"
 #include "ui/dialog/Dialog.h"
 #include "ui/dialog/ActiveDialogs.h"
 #include "scene/SceneGraph.h"
@@ -22,7 +22,7 @@ namespace nc::editor
         public:
             EditorUI(Registry* registry,
                      Output* output,
-                     Environment2* environment2,
+                     EnvironmentPanel* environmentPanel,
                      AssetManifest* assetManifest,
                      ProjectCallbacks projectCallbacks,
                      SceneCallbacks sceneCallbacks,

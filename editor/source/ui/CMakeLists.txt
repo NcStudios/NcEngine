@@ -1,7 +1,7 @@
 target_sources(${EDITOR_EXE}
     PRIVATE
         ${PROJECT_SOURCE_DIR}/source/ui/EditorUI.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/Environment2.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/EnvironmentPanel.cpp
         ${PROJECT_SOURCE_DIR}/source/ui/UtilitiesPanel.cpp
 )
 

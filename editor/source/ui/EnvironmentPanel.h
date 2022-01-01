@@ -12,10 +12,10 @@ namespace nc::editor
 {
     class AssetManifest;
 
-    class Environment2
+    class EnvironmentPanel
     {
         public:
-            Environment2(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, Environment* environment);
+            EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, Environment* environment);
 
             void Draw();
             void DrawSkybox();

@@ -1,4 +1,4 @@
-#include "Environment2.h"
+#include "EnvironmentPanel.h"
 #include "graphics/Environment.h"
 #include "assets/AssetManifest.h"
 #include "ecs/component/Camera.h"
@@ -8,7 +8,7 @@
 
 namespace nc::editor
 {
-    Environment2::Environment2(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, nc::Environment* environment)
+    EnvironmentPanel::EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, nc::Environment* environment)
         : m_sceneData{sceneData},
           m_registry{registry},
           m_assetManifest{assetManifest},
@@ -16,7 +16,7 @@ namespace nc::editor
     {
     }
 
-    void Environment2::Draw()
+    void EnvironmentPanel::Draw()
     {
         m_sceneData->mainCamera.Valid() ?
             ImGui::Text("Main Camera: %u", m_sceneData->mainCamera.Index()) :
@@ -126,7 +126,7 @@ namespace nc::editor
         ImGui::Spacing(); ImGui::Spacing();
     }
 
-    void Environment2::DrawSkybox()
+    void EnvironmentPanel::DrawSkybox()
     {
 
     }

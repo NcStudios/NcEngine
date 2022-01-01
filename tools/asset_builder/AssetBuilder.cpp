@@ -200,7 +200,6 @@ auto GetAssetType(std::string type) -> AssetType
 
 void CreateOutputDirectory(const std::filesystem::path& directory)
 {
-    // const std::filesystem::path normalizedPath = directory.lexically_normal
     if(std::filesystem::exists(directory))
         return;
 

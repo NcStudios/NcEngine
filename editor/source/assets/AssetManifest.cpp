@@ -76,7 +76,7 @@ namespace
             }
             catch(const std::exception& e)
             {
-                std::cerr << e.what() << '\n';
+                nc::editor::Output::LogError("Error replacing skybox file: ", e.what());
                 return false;
             }
         }
@@ -179,41 +179,22 @@ namespace nc::editor
 
     bool AssetManifest::AddSkybox(const CubeMapFaces& assetPaths, const std::string& name)
     {
-        if(!std::filesystem::exists(assetPaths.frontPath))
+        auto checkForExistence = [](const std::string& path) -> bool
         {
-            Output::LogError("Face path does not exist.");
-            return false;
-        }
+            if(!std::filesystem::exists(path))
+            {
+                Output::LogError("Face path does not exist: ", path);
+                return false;
+            }
+            return true;
+        };
 
-        if(!std::filesystem::exists(assetPaths.backPath))
-        {
-            Output::LogError("Face path does not exist.");
-            return false;
-        }
-
-        if(!std::filesystem::exists(assetPaths.upPath))
-        {
-            Output::LogError("Face path does not exist.");
-            return false;
-        }
-
-        if(!std::filesystem::exists(assetPaths.downPath))
-        {
-            Output::LogError("Face path does not exist.");
-            return false;
-        }
-
-        if(!std::filesystem::exists(assetPaths.rightPath))
-        {
-            Output::LogError("Face path does not exist.");
-            return false;
-        }
-
-        if(!std::filesystem::exists(assetPaths.leftPath))
-        {
-            Output::LogError("Face path does not exist.");
-            return false;
-        }
+        if (!checkForExistence(assetPaths.frontPath)) return false;
+        if (!checkForExistence(assetPaths.backPath)) return false;
+        if (!checkForExistence(assetPaths.upPath)) return false;
+        if (!checkForExistence(assetPaths.downPath)) return false;
+        if (!checkForExistence(assetPaths.rightPath)) return false;
+        if (!checkForExistence(assetPaths.leftPath)) return false;
      
         auto& collection = GetCollection(AssetType::Skybox);
 
@@ -231,53 +212,29 @@ namespace nc::editor
             std::filesystem::create_directory(projectSettings.cubeMapsPath/subdirectory);
         }
 
+        const auto importSubdirectory = std::filesystem::path{projectSettings.cubeMapsPath} / subdirectory;
+        auto copyFacePath = [&importSubdirectory](const std::string& inPath, const std::string& outName)
+        {
+            const auto sourcePath = std::filesystem::path{inPath};
+            const auto extension = sourcePath.extension().string();
+            const auto filePath = std::filesystem::path{outName + extension};
+            const auto importPath = importSubdirectory / filePath;
+            if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
+            std::filesystem::copy(sourcePath, importPath);
+        };
+
         try
         {
-            {
-                const auto filePath = "front" + std::filesystem::path(assetPaths.frontPath).extension().string();
-                const auto importPath = std::filesystem::path(projectSettings.cubeMapsPath/subdirectory/filePath);
-                if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
-                std::filesystem::copy(assetPaths.frontPath, importPath);
-            }
-
-            {
-                const auto filePath = "back" + std::filesystem::path(assetPaths.backPath).extension().string();
-                const auto importPath = std::filesystem::path(projectSettings.cubeMapsPath/subdirectory/filePath);
-                if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
-                std::filesystem::copy(assetPaths.backPath, importPath);
-            }
-
-            {
-                const auto filePath = "up" + std::filesystem::path(assetPaths.upPath).extension().string();
-                const auto importPath = std::filesystem::path(projectSettings.cubeMapsPath/subdirectory/filePath);
-                if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
-                std::filesystem::copy(assetPaths.upPath, importPath);
-            }
-
-            {
-                const auto filePath = "down" + std::filesystem::path(assetPaths.downPath).extension().string();
-                const auto importPath = std::filesystem::path(projectSettings.cubeMapsPath/subdirectory/filePath);
-                if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
-                std::filesystem::copy(assetPaths.downPath, importPath);
-            }
-
-            {
-                const auto filePath = "right" + std::filesystem::path(assetPaths.rightPath).extension().string();
-                const auto importPath = std::filesystem::path(projectSettings.cubeMapsPath/subdirectory/filePath);
-                if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
-                std::filesystem::copy(assetPaths.rightPath, importPath);
-            }
-
-            {
-                const auto filePath = "left" + std::filesystem::path(assetPaths.leftPath).extension().string();
-                const auto importPath = std::filesystem::path(projectSettings.cubeMapsPath/subdirectory/filePath);
-                if (std::filesystem::exists(importPath)) std::filesystem::remove(importPath);
-                std::filesystem::copy(assetPaths.leftPath, importPath);
-            }
+            copyFacePath(assetPaths.frontPath, "front");
+            copyFacePath(assetPaths.backPath, "back");
+            copyFacePath(assetPaths.upPath, "up");
+            copyFacePath(assetPaths.downPath, "down");
+            copyFacePath(assetPaths.rightPath, "right");
+            copyFacePath(assetPaths.leftPath, "left");
         }
         catch(const std::exception& e)
         {
-            std::cerr << e.what() << '\n';
+            Output::LogError("Error copying face path.", e.what());
         }
 
         const auto& ncaImportPath = projectSettings.cubeMapsPath/subdirectory/(name + ".nca");
@@ -350,12 +307,8 @@ namespace nc::editor
             }
             case AssetType::Skybox:
             {
-                try
-                {
-                    if (std::filesystem::exists(assetPath)) std::filesystem::remove_all(assetPath.parent_path());
-                    if (std::filesystem::exists(assetPath.parent_path())) std::filesystem::remove(assetPath.parent_path());
-                } 
-                catch(const std::exception&) {}
+                if (std::filesystem::exists(assetPath)) std::filesystem::remove_all(assetPath.parent_path());
+                if (std::filesystem::exists(assetPath.parent_path())) std::filesystem::remove(assetPath.parent_path());
 
                 nc::UnloadCubeMapAsset(assetPath.string());
                 break;

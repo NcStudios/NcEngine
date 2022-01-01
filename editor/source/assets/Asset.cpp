@@ -65,7 +65,6 @@ namespace nc::editor
         outPath.remove_filename();
 
         if (type == AssetType::Skybox) outPath = path;
-            
         std::string cmdLine = ExeName + BuildAssetTypeArg(type) + std::string{" -t "} + path.lexically_normal().string() + std::string{" -o "} + outPath.lexically_normal().string();
         Output::Log(cmdLine.data());
         auto result = CreateProcessA(TEXT(ExeName.data()), TEXT(cmdLine.data()), NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
@@ -102,9 +101,10 @@ namespace nc::editor
                 case AssetType::Mesh:            { nc::LoadMeshAsset(asset.ncaPath.value().string(), true); break; }
                 case AssetType::Texture:         { nc::LoadTextureAsset(asset.sourcePath.string(), true); break; }
                 case AssetType::Skybox:          
-                { 
+                {
                     Output::Log("Asset Path: " + asset.ncaPath.value().string());
-                    nc::LoadCubeMapAsset(asset.ncaPath.value().string(), true); break; 
+                    nc::LoadCubeMapAsset(asset.ncaPath.value().string(), true);
+                    break;
                 }
                 default:                         { return false; }
             }

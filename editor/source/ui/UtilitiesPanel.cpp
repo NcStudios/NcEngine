@@ -10,10 +10,10 @@ namespace
 
 namespace nc::editor
 {
-    UtilitiesPanel::UtilitiesPanel(Output* output, Environment2* environment2)
+    UtilitiesPanel::UtilitiesPanel(Output* output, EnvironmentPanel* environmentPanel)
         : m_dimensions{window::GetDimensions()},
           m_output{output},
-          m_environment2{environment2}
+          m_environmentPanel{environmentPanel}
     {
         window::RegisterOnResizeReceiver(this);
     }
@@ -52,7 +52,7 @@ namespace nc::editor
                 {
                     if(ImGui::BeginChild("", {0,0}, true))
                     {
-                        m_environment2->Draw();
+                        m_environmentPanel->Draw();
                     }
                     ImGui::EndChild();
                     ImGui::EndTabItem();
