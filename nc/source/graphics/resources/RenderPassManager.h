@@ -12,7 +12,7 @@ namespace nc::graphics
 {
     class Graphics;
 
-    struct RenderTarget
+    struct FrameBufferAttachment
     {
         std::string renderPassUid;
         uint32_t index;
@@ -43,11 +43,11 @@ namespace nc::graphics
             void Resize(const Vector2& dimensions, vk::Extent2D extent);
             void Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex);
             void End(vk::CommandBuffer* cmd);
-            RenderTarget& GetRenderTarget(const std::string& uid, uint32_t index);
+            FrameBufferAttachment& GetFrameBufferAttachment(const std::string& uid, uint32_t index);
 
             Graphics* m_graphics;
             std::vector<RenderPass> m_renderPasses;
-            std::vector<RenderTarget> m_renderTargets;
+            std::vector<FrameBufferAttachment> m_renderTargets;
     };
 
     template <std::derived_from<ITechnique> T>

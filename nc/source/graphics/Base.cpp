@@ -405,7 +405,7 @@ namespace nc::graphics
         return m_bufferIndex++;
     }
 
-    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage)
+    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage, vk::SampleCountFlagBits numSamples)
     {
         vk::ImageCreateInfo imageInfo{};
         imageInfo.setImageType(vk::ImageType::e2D);
@@ -413,7 +413,7 @@ namespace nc::graphics
         imageInfo.setExtent( { static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y), 1 });
         imageInfo.setMipLevels(1);
         imageInfo.setArrayLayers(arrayLayers);
-        imageInfo.setSamples(vk::SampleCountFlagBits::e1);
+        imageInfo.setSamples(numSamples);
         imageInfo.setTiling(vk::ImageTiling::eOptimal);
         imageInfo.setUsage(usageFlags);
         imageInfo.setFlags(imageFlags);
@@ -450,7 +450,7 @@ namespace nc::graphics
         stbi_image_free(pixels);
 
         vk::Image textureImage;
-        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, &textureImage);
+        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, &textureImage, vk::SampleCountFlagBits::e1);
 
         TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, 1, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer, textureImage, width, height);
@@ -482,7 +482,7 @@ namespace nc::graphics
         m_allocator.unmapMemory(allocation);
 
         vk::Image textureImage;
-        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, &textureImage);
+        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, &textureImage, vk::SampleCountFlagBits::e1);
 
         TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer, textureImage, width, height, 6);

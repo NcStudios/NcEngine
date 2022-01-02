@@ -5,7 +5,7 @@
 
 namespace nc::graphics
 {
-    class Base; class DepthStencil;
+    class Base; class RenderTarget;
 
     enum class SemaphoreType : uint8_t
     {
