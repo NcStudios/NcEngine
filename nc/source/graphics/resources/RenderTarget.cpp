@@ -10,22 +10,21 @@ namespace nc::graphics
           m_memoryIndex{0}
     {
         auto format = isDepthStencil ? base->GetDepthFormat() : vk::Format::eR8G8B8A8Srgb;
-        auto imageUseFlags = isDepthStencil ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
+
+        constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
+        constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
+
+        auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
         m_memoryIndex = m_base->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, &m_image, vk::SampleCountFlagBits::e1);
-        
+
+        auto aspectMask = isDepthStencil ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
+
         vk::ImageSubresourceRange imageSubresourceRange{};
         imageSubresourceRange.setBaseMipLevel(0);
         imageSubresourceRange.setLevelCount(1);
         imageSubresourceRange.setBaseArrayLayer(0);
         imageSubresourceRange.setLayerCount(1);
-        if (isDepthStencil)
-        {
-            imageSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eDepth);
-        }
-        else
-        {
-            imageSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-        }
+        imageSubresourceRange.setAspectMask(aspectMask);
 
         if (format >= vk::Format::eD16UnormS8Uint && isDepthStencil)
         {
@@ -47,23 +46,22 @@ namespace nc::graphics
       m_view{},
       m_memoryIndex{0}
     {
-        auto imageUseFlags = isDepthStencil ? vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled : vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
+
+        constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
+        constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
+
+        auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
         
         m_memoryIndex = m_base->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, &m_image, vk::SampleCountFlagBits::e1);
         
+        auto aspectMask = isDepthStencil ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
+
         vk::ImageSubresourceRange imageSubresourceRange{};
         imageSubresourceRange.setBaseMipLevel(0);
         imageSubresourceRange.setLevelCount(1);
         imageSubresourceRange.setBaseArrayLayer(0);
         imageSubresourceRange.setLayerCount(1);
-        if (isDepthStencil)
-        {
-            imageSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eDepth);
-        }
-        else
-        {
-            imageSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-        }
+        imageSubresourceRange.setAspectMask(aspectMask);
 
         if (format >= vk::Format::eD16UnormS8Uint && isDepthStencil)
         {
