@@ -75,7 +75,7 @@ namespace nc::graphics
     {
         auto clearValues = CreateClearValues(renderPass->valuesToClear, m_graphics->GetClearColor());
         auto renderPassInfo = CreateRenderPassBeginInfo(renderPass->renderpass.get(), 
-                                                        GetRenderTarget(renderPass->uid, renderTargetIndex).frameBuffer.get(), 
+                                                        GetFrameBufferAttachment(renderPass->uid, renderTargetIndex).frameBuffer.get(), 
                                                         renderPass->renderTargetSize.extent, 
                                                         clearValues);
 
@@ -139,103 +139,103 @@ namespace nc::graphics
             renderPass.renderTargetSize.extent = extent;
         }
 
-        for (auto& renderTarget : m_renderTargets)
+        for (auto& frameBufferAttachment : m_renderTargets)
         {
-            auto& renderPass = Acquire(renderTarget.renderPassUid);
+            auto& renderPass = Acquire(frameBufferAttachment.renderPassUid);
 
             vk::FramebufferCreateInfo framebufferInfo{};
             framebufferInfo.setRenderPass(renderPass.renderpass.get());
-            framebufferInfo.setAttachmentCount(static_cast<uint32_t>(renderTarget.attachmentHandles.size()));
-            framebufferInfo.setPAttachments(renderTarget.attachmentHandles.data());
+            framebufferInfo.setAttachmentCount(static_cast<uint32_t>(frameBufferAttachment.attachmentHandles.size()));
+            framebufferInfo.setPAttachments(frameBufferAttachment.attachmentHandles.data());
             framebufferInfo.setWidth(static_cast<uint32_t>(dimensions.x));
             framebufferInfo.setHeight(static_cast<uint32_t>(dimensions.y));
             framebufferInfo.setLayers(1);
 
-            renderTarget.frameBuffer.reset();
-            renderTarget.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+            frameBufferAttachment.frameBuffer.reset();
+            frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
         }
     }
 
-    RenderTarget& RenderPassManager::GetRenderTarget(const std::string& uid, uint32_t index)
+    FrameBufferAttachment& RenderPassManager::GetFrameBufferAttachment(const std::string& uid, uint32_t index)
     {
-        auto renderTargetPos = std::ranges::find_if(m_renderTargets, [&uid, index](const auto& aRenderTarget)
+        auto frameBufferPos = std::ranges::find_if(m_renderTargets, [&uid, index](const auto& frameBufferAttachment)
         {
-            return (aRenderTarget.index == index && aRenderTarget.renderPassUid == uid);
+            return (frameBufferAttachment.index == index && frameBufferAttachment.renderPassUid == uid);
         });
 
-        if (renderTargetPos == m_renderTargets.end())
+        if (frameBufferPos == m_renderTargets.end())
         {
-            throw std::runtime_error("RenderPassManager::GetRenderTarget - RenderTarget does not exist.");
+            throw std::runtime_error("RenderPassManager::GetFrameBufferAttachment - FrameBufferAttachment does not exist.");
         }
 
-        return *renderTargetPos;
+        return *frameBufferPos;
     }
 
     void RenderPassManager::RegisterAttachments(std::vector<vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index)
     {
-        auto renderTargetPos = std::ranges::find_if(m_renderTargets, [&uid, index](auto& aRenderTarget)
+        auto frameBufferPos = std::ranges::find_if(m_renderTargets, [&uid, index](const auto& frameBufferAttachment)
         {
-            return (aRenderTarget.index == index && aRenderTarget.renderPassUid == uid);
+            return (frameBufferAttachment.index == index && frameBufferAttachment.renderPassUid == uid);
         });
 
-        if (renderTargetPos != m_renderTargets.end())
+        if (frameBufferPos != m_renderTargets.end())
         {
-            *renderTargetPos = std::move(m_renderTargets.back());
+            *frameBufferPos = std::move(m_renderTargets.back());
             m_renderTargets.pop_back();
         }
 
         auto* base = m_graphics->GetBasePtr();
-        auto renderTarget = RenderTarget{};
+        auto frameBufferAttachment = FrameBufferAttachment{};
 
-        renderTarget.attachmentHandles = std::move(attachmentHandles);
-        renderTarget.renderPassUid = uid;
-        renderTarget.index = index;
+        frameBufferAttachment.attachmentHandles = std::move(attachmentHandles);
+        frameBufferAttachment.renderPassUid = uid;
+        frameBufferAttachment.index = index;
 
         auto& renderpass = Acquire(uid);
         vk::FramebufferCreateInfo framebufferInfo{};
         framebufferInfo.setRenderPass(renderpass.renderpass.get());
-        framebufferInfo.setAttachmentCount(static_cast<uint32_t>(renderTarget.attachmentHandles.size()));
-        framebufferInfo.setPAttachments(renderTarget.attachmentHandles.data());
+        framebufferInfo.setAttachmentCount(static_cast<uint32_t>(frameBufferAttachment.attachmentHandles.size()));
+        framebufferInfo.setPAttachments(frameBufferAttachment.attachmentHandles.data());
         framebufferInfo.setWidth(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.x));
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        renderTarget.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
-        m_renderTargets.push_back(std::move(renderTarget));
+        frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+        m_renderTargets.push_back(std::move(frameBufferAttachment));
     }
 
     void RenderPassManager::RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid)
     {
-        auto renderTargetPos = std::ranges::find_if(m_renderTargets, [uid](auto& aRenderTarget)
+        auto frameBufferPos = std::ranges::find_if(m_renderTargets, [uid](const auto& frameBufferAttachment)
         {
-            return (aRenderTarget.renderPassUid == uid);
+            return (frameBufferAttachment.renderPassUid == uid);
         });
 
-        if (renderTargetPos != m_renderTargets.end())
+        if (frameBufferPos != m_renderTargets.end())
         {
-            *renderTargetPos = std::move(m_renderTargets.back());
+            *frameBufferPos = std::move(m_renderTargets.back());
             m_renderTargets.pop_back();
         }
 
         auto* base = m_graphics->GetBasePtr();
-        auto renderTarget = RenderTarget{};
+        auto frameBufferAttachment = FrameBufferAttachment{};
 
-        renderTarget.attachmentHandles.reserve(1);
-        renderTarget.attachmentHandles.push_back(attachmentHandle);
-        renderTarget.renderPassUid = uid;
-        renderTarget.index = 0;
+        frameBufferAttachment.attachmentHandles.reserve(1);
+        frameBufferAttachment.attachmentHandles.push_back(attachmentHandle);
+        frameBufferAttachment.renderPassUid = uid;
+        frameBufferAttachment.index = 0;
 
         auto& renderpass = Acquire(uid);
         vk::FramebufferCreateInfo framebufferInfo{};
         framebufferInfo.setRenderPass(renderpass.renderpass.get());
         framebufferInfo.setAttachmentCount(1);
-        framebufferInfo.setPAttachments(renderTarget.attachmentHandles.data());
+        framebufferInfo.setPAttachments(frameBufferAttachment.attachmentHandles.data());
         framebufferInfo.setWidth(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.x));
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        renderTarget.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+        frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
 
-        m_renderTargets.push_back(std::move(renderTarget));
+        m_renderTargets.push_back(std::move(frameBufferAttachment));
     }
 }

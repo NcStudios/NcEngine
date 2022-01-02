@@ -1,5 +1,4 @@
 #include "Swapchain.h"
-#include "resources/DepthStencil.h"
 #include "Initializers.h"
 #include "Base.h"
 #include "debug/NcError.h"

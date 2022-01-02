@@ -69,7 +69,7 @@ namespace nc::graphics
             vma::Allocation* GetBufferAllocation(uint32_t index);
 
             uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage memoryUsageType, vk::Buffer* createdBuffer);
-            uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage);
+            uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage, vk::SampleCountFlagBits numSamples);
             uint32_t CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage);
             uint32_t CreateCubeMapTexture(const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, vk::Image* createdImage);
             vk::UniqueImageView CreateTextureView(const vk::Image& image);

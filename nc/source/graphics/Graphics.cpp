@@ -6,7 +6,6 @@
 #include "config/Config.h"
 #include "debug/Utils.h"
 #include "optick/optick.h"
-#include "resources/DepthStencil.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
 #include "Swapchain.h"
@@ -18,7 +17,6 @@ namespace nc::graphics
     Graphics::Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
-          m_depthStencil{ std::make_unique<DepthStencil>(m_base.get(), dimensions) }, 
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
@@ -64,12 +62,10 @@ namespace nc::graphics
         m_renderer.reset();
         m_commands.reset();
         m_swapchain.reset();
-        m_depthStencil.reset();
 
         // Recreate swapchain and resources
         auto shadowMap = ShadowMap { .dimensions = m_dimensions };
         m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
-        m_depthStencil = std::make_unique<DepthStencil>(m_base.get(), m_dimensions);
         m_swapchain = std::make_unique<Swapchain>(m_base.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
         m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), m_dimensions);
@@ -132,11 +128,6 @@ namespace nc::graphics
             return false;
         }
         return true;
-    }
-    
-    const DepthStencil& Graphics::GetDepthStencil() const noexcept
-    {
-        return *(m_depthStencil.get());
     }
 
     void Graphics::Clear()
