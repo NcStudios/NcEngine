@@ -12,6 +12,7 @@
 #include "graphics/techniques/ShadowMappingTechnique.h"
 #include "optick/optick.h"
 #include "PerFrameRenderState.h"
+#include "resources/RenderTarget.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
 
@@ -29,7 +30,8 @@ namespace nc::graphics
         : m_graphics{graphics},
           m_shaderResources{shaderResources},
           m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
-          m_dimensions{dimensions}
+          m_dimensions{dimensions},
+          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true) }
     {
         RegisterRenderPasses();
         RegisterTechniques();
@@ -37,6 +39,7 @@ namespace nc::graphics
 
     Renderer::~Renderer() noexcept
     {
+        m_depthStencil.reset();
         m_renderPasses.reset();
     }
     
@@ -69,7 +72,7 @@ namespace nc::graphics
 
         /** Lit shading pass */
         auto& colorImageViews = swapchain->GetColorImageViews();
-        auto& depthImageView = m_graphics->GetDepthStencil().GetImageView();
+        auto& depthImageView = m_depthStencil->GetImageView();
         uint32_t index = 0;
         for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, RenderPassManager::LitShadingPass, index++); }
     }

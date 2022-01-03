@@ -7,12 +7,12 @@ namespace nc::graphics
 {
     class Base; 
 
-    class DepthStencil
+    class RenderTarget
     {
         public:
-            DepthStencil(Base* base, Vector2 dimensions);
-            DepthStencil(Base* base, Vector2 dimensions, vk::Format depthFormat);
-            ~DepthStencil() noexcept;
+            RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil);
+            RenderTarget(Base* base, Vector2 dimensions, vk::Format depthFormat, bool isDepthStencil);
+            ~RenderTarget() noexcept;
 
             const vk::Image& GetImage() const noexcept;
             const vk::ImageView& GetImageView() const noexcept;

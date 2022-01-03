@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DepthStencil.h"
+#include "RenderTarget.h"
 #include "ShaderResourceService.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
@@ -31,7 +31,7 @@ namespace nc::graphics
         private:
             Graphics* m_graphics;
             vk::UniqueSampler m_sampler;
-            std::unique_ptr<DepthStencil> m_depthStencil;
+            std::unique_ptr<RenderTarget> m_depthStencil;
             vk::UniqueDescriptorSet m_descriptorSet;
             vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             Vector2 m_dimensions;

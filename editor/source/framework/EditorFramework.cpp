@@ -57,6 +57,11 @@ namespace
             .openConfigEditor = [configEditor](const std::filesystem::path& path){ configEditor->Open(path); }
         };
     }
+
+    auto CreateOpenFileBrowserCallback(nc::editor::FileBrowser* fileBrowser) -> nc::editor::DialogCallbacks::OpenFileBrowserCallbackType
+    {
+        return [fileBrowser](nc::editor::DialogCallbacks::FileBrowserOnConfirmCallbackType callback){ fileBrowser->Open(std::move(callback)); };
+    }
 }
 
 namespace nc::editor
@@ -66,17 +71,17 @@ namespace nc::editor
           m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
           m_assetManifest{m_editorConfig.recentProjectDirectory, [configEditor = &m_configEditor]() -> const config::Config& { return configEditor->GetConfig();}},
           m_projectManager{engine, &m_assetManifest},
-          m_environment{m_projectManager.GetSceneData()},
+          m_environmentPanel{m_projectManager.GetSceneData(), engine->Registry(), &m_assetManifest, engine->Environment()},
           m_editorUI{engine->Registry(),
                      &m_output,
-                     &m_environment,
+                     &m_environmentPanel,
                      &m_assetManifest,
                      CreateProjectCallbacks(&m_projectManager),
                      CreateSceneCallbacks(&m_projectManager),
                      std::bind(ChangeTagDialog::Open, &m_changeTagDialog, std::placeholders::_1),
                      std::string{}},
           m_fileBrowser{m_editorUI.GetRegisterDialogCallback()},
-          m_assetBrowser{m_editorUI.GetRegisterDialogCallback(), &m_assetManifest},
+          m_assetBrowser{m_editorUI.GetRegisterDialogCallback(), CreateOpenFileBrowserCallback(&m_fileBrowser), &m_assetManifest},
           m_newSceneDialog{m_editorUI.GetRegisterDialogCallback()},
           m_newProjectDialog{m_editorUI.GetRegisterDialogCallback()},
           m_changeTagDialog{engine->Registry()},
@@ -90,7 +95,6 @@ namespace nc::editor
         m_configEditor.RegisterDialog(uiCallbacks.registerDialog);
 
         auto dialogCallbacks = CreateDialogCallbacks(&m_fileBrowser, &m_newSceneDialog, &m_newProjectDialog, &m_assetBrowser, &m_configEditor);
-        m_assetBrowser.RegisterCallback(dialogCallbacks.openFileBrowser);
         m_editorUI.RegisterCallbacks(dialogCallbacks.openAssetBrowser, dialogCallbacks.openConfigEditor);
 
         m_projectManager.RegisterCallbacks(std::move(uiCallbacks), std::move(dialogCallbacks));

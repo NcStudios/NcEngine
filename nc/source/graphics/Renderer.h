@@ -16,6 +16,7 @@ namespace nc
 namespace nc::graphics
 {
     class Commands;
+    class RenderTarget;
     class ShaderResourceServices;
     struct PerFrameRenderState;
     class RenderPassManager;
@@ -42,6 +43,6 @@ namespace nc::graphics
             ShaderResourceServices* m_shaderResources;
             std::unique_ptr<RenderPassManager> m_renderPasses;
             Vector2 m_dimensions;
-            
+            std::unique_ptr<RenderTarget> m_depthStencil;
     };
 }

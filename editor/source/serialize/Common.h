@@ -30,6 +30,7 @@ namespace nc::editor
         static constexpr auto AddPointLight         = std::string_view{"NC_EDITOR_ADD_POINT_LIGHT"};
         static constexpr auto AddPhysicsBody        = std::string_view{"NC_EDITOR_ADD_PHYSICS_BODY"};
         static constexpr auto AddMeshRenderer       = std::string_view{"NC_EDITOR_ADD_MESH_RENDERER"};
+        static constexpr auto AddSkybox             = std::string_view{"NC_EDITOR_ADD_SKYBOX"};
         static constexpr auto BoxProperties         = std::string_view{"NC_EDITOR_BOX_PROPERTIES"};
         static constexpr auto CapsuleProperties     = std::string_view{"NC_EDITOR_CAPSULE_PROPERTIES"};
         static constexpr auto EntityInfo            = std::string_view{"NC_EDITOR_ENTITY_INFO"};
@@ -39,6 +40,7 @@ namespace nc::editor
         static constexpr auto PointLightInfo        = std::string_view{"NC_EDITOR_POINT_LIGHT_INFO"};
         static constexpr auto RegisterAudioListener = std::string_view{"NC_EDITOR_REGISTER_AUDIO_LISTENER"};
         static constexpr auto SetCamera             = std::string_view{"NC_EDITOR_SET_CAMERA"};
+        static constexpr auto SetSkybox             = std::string_view{"NC_EDITOR_SET_SKYBOX"};
         static constexpr auto SphereProperties      = std::string_view{"NC_EDITOR_SPHERE_PROPERTIES"};
     };
 

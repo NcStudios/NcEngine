@@ -13,6 +13,7 @@ namespace
     constexpr auto HullColliderTag = "HullCollider"sv;
     constexpr auto MeshTag = "Mesh"sv;
     constexpr auto TextureTag = "Texture"sv;
+    constexpr auto SkyboxTag = "Skybox"sv;
 
     auto ReadNonNcaAsset(std::ifstream& file) -> nc::editor::Asset
     {
@@ -95,6 +96,10 @@ namespace nc::editor
             {
                 out.textures.push_back(ReadNonNcaAsset(file));
             }
+            else if(line == SkyboxTag)
+            {
+                out.skyboxes.push_back(ReadNcaAsset(file));
+            }
         }
 
         out.readSuccessfully = true;
@@ -126,5 +131,8 @@ namespace nc::editor
 
         for(const auto& asset : manifest.View(AssetType::Texture))
             WriteAsset(file, asset, TextureTag);
+        
+        for(const auto& asset : manifest.View(AssetType::Skybox))
+            WriteAsset(file, asset, SkyboxTag);
     }
 }

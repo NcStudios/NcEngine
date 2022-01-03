@@ -53,6 +53,7 @@ layout (location = 3) out vec2 outUV;
 layout (location = 4) out mat3 outTBN;
 layout (location = 7) out int  outObjectInstance;
 layout (location = 8) out vec4 outLightSpacePos;
+layout (location = 9) out vec3 outUVW;
 
 out gl_PerVertex {
 	vec4 gl_Position;
@@ -77,6 +78,7 @@ void main()
     outTBN = mat3(T, B, N);
     outUV = inUV;
     outObjectInstance = gl_BaseInstance;
+    outUVW = inPos;
 
     if (pointLights.lights[0].castShadows == 1)
     {

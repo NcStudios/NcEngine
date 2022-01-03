@@ -7,17 +7,20 @@
 
 namespace nc::editor
 {
+    class AssetManifest;
+
     /** Writes the registry's contents to a scene.inl file. WriteNewScene will
      *  create the header, source, and generated files for a new scene. */
     class SceneWriter
     {
         public:
-            SceneWriter(Registry* registry, const std::filesystem::path& scenesDirectory);
+            SceneWriter(Registry* registry, AssetManifest* manifest, const std::filesystem::path& scenesDirectory);
             void WriteCurrentScene(SceneData* sceneData, const std::string& sceneName);
             void WriteNewScene(const std::string& sceneName);
 
         private:
             Registry* m_registry;
+            AssetManifest* m_manifest;
             std::ofstream m_file;
             std::unordered_map<Entity::index_type, std::string> m_handleNames;
             std::filesystem::path m_scenesDirectory;

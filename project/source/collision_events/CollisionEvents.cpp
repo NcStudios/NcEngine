@@ -92,29 +92,11 @@ namespace nc::sample
         auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{25.0f, 1.0f, 25.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
         registry->Add<Collider>(ground, BoxProperties{}, false);
 
-        // auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
-        // registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
-
         auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
         registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
-        auto skybox = CubeMapFaces
-        {
-            .usage = CubeMapUsage::Skybox,
-            .uid = "Humus01Skybox",
-            .frontPath = "Humus01/Front.jpg",
-            .backPath  = "Humus01/Back.jpg",
-            .upPath    = "Humus01/Up.jpg",
-            .downPath  = "Humus01/Down.jpg",
-            .rightPath = "Humus01/Right.jpg",
-            .leftPath  = "Humus01/Left.jpg"
-        };
-
-        nc::LoadCubeMapAsset(skybox);
-        engine->Environment()->SetSkybox(skybox);
-
-        // auto longRedBox = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3::Back() * 3.0f, .scale = Vector3{5.0f, 1.0f, 1.0f}, .tag = "Long Red Box", .flags = Entity::Flags::Static});
-        // registry->Add<Collider>(longRedBox, BoxProperties{}, true);
+        nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
+        engine->Environment()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
     }
 
     void CollisionEvents::Unload()

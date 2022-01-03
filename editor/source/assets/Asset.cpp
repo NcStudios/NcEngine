@@ -14,6 +14,8 @@ namespace nc::editor
     const auto FbxExtension = std::string{".fbx"};
     const auto WaveExtension = std::string{".wav"};
     const auto PngExtension = std::string{".png"};
+    const auto JpgExtension = std::string{".jpg"};
+    const auto JpegExtension = std::string{".jpeg"};
     const auto ExeName = std::string{"tools/asset_builder/build.exe"};
 
     std::string BuildAssetTypeArg(nc::editor::AssetType type)
@@ -24,7 +26,10 @@ namespace nc::editor
             return std::string{" -a concave-collider "};
         if(type == nc::editor::AssetType::HullCollider)
             return std::string{" -a hull-collider "};
-
+        if(type == nc::editor::AssetType::Skybox)
+        {
+            return std::string{" -a skybox "};
+        }
         return std::string{};
     }
 
@@ -59,8 +64,9 @@ namespace nc::editor
         auto outPath = path;
         outPath.remove_filename();
 
-        std::string cmdLine = ExeName + BuildAssetTypeArg(type) + std::string{" -t "} + path.string() + std::string{" -o "} + outPath.string();
-
+        if (type == AssetType::Skybox) outPath = path;
+        std::string cmdLine = ExeName + BuildAssetTypeArg(type) + std::string{" -t "} + path.lexically_normal().string() + std::string{" -o "} + outPath.lexically_normal().string();
+        Output::Log(cmdLine.data());
         auto result = CreateProcessA(TEXT(ExeName.data()), TEXT(cmdLine.data()), NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
 
         if(!result)
@@ -80,7 +86,6 @@ namespace nc::editor
             Output::LogError("Failure building asset file");
             return false;
         }
-
         return true;
     }
 
@@ -95,6 +100,12 @@ namespace nc::editor
                 case AssetType::HullCollider:    { nc::LoadConvexHullAsset(asset.ncaPath.value().string(), true); break; }
                 case AssetType::Mesh:            { nc::LoadMeshAsset(asset.ncaPath.value().string(), true); break; }
                 case AssetType::Texture:         { nc::LoadTextureAsset(asset.sourcePath.string(), true); break; }
+                case AssetType::Skybox:          
+                {
+                    Output::Log("Asset Path: " + asset.ncaPath.value().string());
+                    nc::LoadCubeMapAsset(asset.ncaPath.value().string(), true);
+                    break;
+                }
                 default:                         { return false; }
             }
 
@@ -114,6 +125,7 @@ namespace nc::editor
         LoadTextureAssets(std::vector<std::string>{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath});
         LoadConvexHullAsset(CubeHullColliderPath);
         LoadConcaveColliderAsset(PlaneConcaveColliderPath);
+        LoadCubeMapAsset(DefaultSkyboxPath);
     }
 
     bool HasValidExtensionForAssetType(const std::filesystem::path& assetPath, AssetType type)
@@ -128,7 +140,8 @@ namespace nc::editor
             case AssetType::ConcaveCollider: return extension == FbxExtension;
             case AssetType::HullCollider:    return extension == FbxExtension;
             case AssetType::Mesh:            return extension == FbxExtension;
-            case AssetType::Texture:         return extension == PngExtension;
+            case AssetType::Texture:         return extension == PngExtension || extension == JpgExtension || extension == JpegExtension;
+            case AssetType::Skybox:          return extension == PngExtension || extension == JpgExtension || extension == JpegExtension;
         }
 
         return false;
@@ -136,6 +149,6 @@ namespace nc::editor
 
     bool RequiresNcaFile(AssetType type)
     {
-        return type == AssetType::ConcaveCollider || type == AssetType::HullCollider || type == AssetType::Mesh;
+        return type == AssetType::ConcaveCollider || type == AssetType::HullCollider || type == AssetType::Mesh || type == AssetType::Skybox;
     }
 }

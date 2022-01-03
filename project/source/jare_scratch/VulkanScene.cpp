@@ -85,25 +85,12 @@ namespace nc::sample
         { 
             "plane.nca",
             "sphere.nca",
-            "cube.nca"
+            "cube.nca",
         };
 
         nc::LoadMeshAssets(sceneMeshes);
-
-        auto skyboxForest = CubeMapFaces
-        {
-            .usage = CubeMapUsage::Skybox,
-            .uid = "Humus02Skybox",
-            .frontPath = "Humus02/Front.jpg",
-            .backPath  = "Humus02/Back.jpg",
-            .upPath    = "Humus02/Up.jpg",
-            .downPath  = "Humus02/Down.jpg",
-            .rightPath = "Humus02/Right.jpg",
-            .leftPath  = "Humus02/Left.jpg"
-        };
-
-        nc::LoadCubeMapAsset(skyboxForest);
-        engine->Environment()->SetSkybox(skyboxForest);
+        nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
+        engine->Environment()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
         
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
@@ -133,7 +120,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blackSphere, "cube.nca", grayMaterial, TechniqueType::PhongAndUi);
+        registry->Add<MeshRenderer>(blackSphere, "sphere.nca", grayMaterial, TechniqueType::PhongAndUi);
 
         auto blackBox = registry->Add<Entity>(
         {.position = Vector3{-3.0f, 1.0f, 2.0f},

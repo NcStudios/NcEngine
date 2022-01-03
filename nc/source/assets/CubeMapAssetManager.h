@@ -15,18 +15,18 @@ namespace nc
         struct Texture;
     }
 
-    class CubeMapAssetManager : public IAssetService<CubeMapView, CubeMapFaces>
+    class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
     {
         public:
             CubeMapAssetManager(graphics::Graphics* graphics, const std::string& cubeMapAssetDirectory, uint32_t maxCubeMapsCount);
             ~CubeMapAssetManager() noexcept;
 
-            bool Load(const CubeMapFaces& faces, bool isExternal) override;
-            bool Load(std::span<const CubeMapFaces> facesSet, bool isExternal) override;
-            bool Unload(const CubeMapFaces& faces) override;
+            bool Load(const std::string& path, bool isExternal) override;
+            bool Load(std::span<const std::string> paths, bool isExternal) override;
+            bool Unload(const std::string& path) override;
             void UnloadAll() override;
-            auto Acquire(const CubeMapFaces& faces) const -> CubeMapView override;
-            bool IsLoaded(const CubeMapFaces& faces) const override;
+            auto Acquire(const std::string& path) const -> CubeMapView override;
+            bool IsLoaded(const std::string& path) const override;
 
         private:
             std::unordered_map<std::string, CubeMapView> m_cubeMapAccessors;

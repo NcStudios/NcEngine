@@ -19,7 +19,6 @@ namespace nc::graphics
     class Base;
     class Commands;
     class Swapchain;
-    class DepthStencil;
     struct PerFrameRenderState;
     class Renderer;
     class RenderPassManager;
@@ -45,7 +44,6 @@ namespace nc::graphics
             Swapchain* GetSwapchainPtr() const noexcept;
             Commands* GetCommandsPtr() const noexcept;
             const Vector2 GetDimensions() const noexcept;
-            const DepthStencil& GetDepthStencil() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 
             #ifdef NC_DEBUG_RENDERING
@@ -64,7 +62,6 @@ namespace nc::graphics
 
             MainCamera* m_mainCamera;
             std::unique_ptr<Base> m_base;
-            std::unique_ptr<DepthStencil> m_depthStencil;
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;

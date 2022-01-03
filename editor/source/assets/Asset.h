@@ -16,7 +16,7 @@ namespace nc::editor
         std::filesystem::path sourcePath;
 
         /** The path to the .nca representation of the asset. Used for
-         *  meshes and colliders. */
+         *  meshes, skyboxes and colliders. */
         std::optional<std::filesystem::path> ncaPath;
         
         /** @todo add lastWriteTime and automatic rebuilding of assets */
@@ -29,7 +29,8 @@ namespace nc::editor
         ConcaveCollider,
         HullCollider,
         Mesh,
-        Texture
+        Texture,
+        Skybox
     };
 
     /** Create an Asset object from a path and type. This will not build any .nca

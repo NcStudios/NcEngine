@@ -2,7 +2,7 @@ target_sources(NcEngineLib
     PRIVATE
         ${ROOT_DIR}/source/graphics/resources/CubeMap.cpp
         ${ROOT_DIR}/source/graphics/resources/CubeMapManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/DepthStencil.cpp
+        ${ROOT_DIR}/source/graphics/resources/RenderTarget.cpp
         ${ROOT_DIR}/source/graphics/resources/EnvironmentDataManager.cpp
         ${ROOT_DIR}/source/graphics/resources/EnvironmentImpl.cpp
         ${ROOT_DIR}/source/graphics/resources/ImmutableBuffer.cpp
