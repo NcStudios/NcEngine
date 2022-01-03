@@ -89,7 +89,7 @@ set GENERATOR="%~4"
     echo -- Install:   %INSTALL_DIRECTORY%
 
     echo *** Generating build files ***
-    cmake -G %GENERATOR% -S %SOURCE_DIR% -B %BUILD_DIR% %DEFINITIONS% -DNC_ENGINE_INSTALL_DIR=%INSTALL_DIRECTORY%
+    cmake -G %GENERATOR% -S %SOURCE_DIR% -B %BUILD_DIR% %DEFINITIONS% -DNC_INSTALL_DIR=%INSTALL_DIRECTORY%
     
     if not %errorlevel%==0 (
         exit

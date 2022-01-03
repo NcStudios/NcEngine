@@ -9,8 +9,8 @@ if(NOT DEFINED NC_BUILD_TYPE)
     message(FATAL_ERROR "NC_BUILD_TYPE is not defined. This is required in NcEngine and all projects for archive selection.")
 endif()
 
-if(NOT DEFINED NC_ENGINE_INSTALL_DIR)
-    message(FATAL_ERROR "NC_ENGINE_INSTALL_DIR is not defined.")
+if(NOT DEFINED NC_INSTALL_DIR)
+    message(FATAL_ERROR "NC_INSTALL_DIR is not defined.")
 endif()
 
 #OPTIONS
@@ -34,7 +34,6 @@ set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspu
 set(ENGINE_LIB "NcEngineLib")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
-set(NC_INSTALL_DIR "${NC_ENGINE_INSTALL_DIR}/NcEngine/${NC_BUILD_TYPE}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
