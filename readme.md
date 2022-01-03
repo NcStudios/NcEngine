@@ -113,7 +113,7 @@ Each of these presets follows the following naming scheme `<target>-<generator>-
 * WithProfiling: Include Optick profiling code.
 * WithValidation: Enable Vulkan validation layers.
 
-Each preset provides a different set of [definitions](#definitions). When adding custom presets to CMakeUserPresets.json, both NC_BUILD_TYPE and NC_INSTALL_DIR must be defined.
+Each preset provides a different set of [definitions](#definitions). When adding custom presets to CMakeUserPresets.json, NC_INSTALL_DIR must be defined.
 
 More on CMake Presets:
 * [Documentation](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
@@ -121,12 +121,8 @@ More on CMake Presets:
 
 ### Definitions
 --------------
-#### NC_BUILD_TYPE
-    Default = N/A
-    A unique name identifying the selected build preset. Used for differentiating builds/directories.
-
 #### NC_INSTALL_DIR
-    Default = NcEngine/install
+    Default = install/NcEngine/${presetName}
     The directory NcEngine will be installed to.
 
 #### NC_TESTS_ENABLED

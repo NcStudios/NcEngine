@@ -12,7 +12,7 @@
           "binaryDir": "${sourceDir}/build/${presetName}",
           "installDir": "${sourceDir}/install/${presetName}",
           "cacheVariables": {
-              "NC_INSTALL_DIR": "${sourceDir}/../install"
+              "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/${presetName}"
           }
       },
       {
@@ -47,61 +47,45 @@
       },
       {
         "name": "NcEngine-MSVC-Release",
-        "inherits": [ "Release-Base", "MSVC-Base" ],
-        "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}"
-        }
+        "inherits": [ "Release-Base", "MSVC-Base" ]
       },
       {
         "name": "NcEngine-Ninja-Release",
-        "inherits": [ "Release-Base", "Ninja-Base" ],
+        "inherits": [ "Release-Base", "Ninja-Base" ]
+      },
+      {
+        "name": "NcEngine-MSVC-Debug",
+        "inherits": [ "Debug-Base", "MSVC-Base" ]
+      },
+      {
+        "name": "NcEngine-Ninja-Debug",
+        "inherits": [ "Debug-Base", "Ninja-Base" ]
+      },
+      {
+        "name": "NcEngine-MSVC-Debug-WithValidation",
+        "inherits": [ "Debug-Base", "MSVC-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}"
+          "NC_USE_VALIDATION": "ON"
         }
       },
-       {
-         "name": "NcEngine-MSVC-Debug",
-         "inherits": [ "Debug-Base", "MSVC-Base" ],
-         "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}"
-         }
-       },
-       {
-         "name": "NcEngine-Ninja-Debug",
-         "inherits": [ "Debug-Base", "Ninja-Base" ],
-         "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}"
-         }
-       },
-       {
-         "name": "NcEngine-MSVC-Debug-WithValidation",
-         "inherits": [ "Debug-Base", "MSVC-Base" ],
-         "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
-           "NC_USE_VALIDATION": "ON"
-         }
-       },
-       {
-         "name": "NcEngine-Ninja-Debug-WithValidation",
-         "inherits": [ "Debug-Base", "Ninja-Base" ],
-         "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
-           "NC_USE_VALIDATION": "ON"
-         }
-       },
-       {
-         "name": "NcEngine-MSVC-Release-WithEditor",
-         "inherits": [ "Debug-Base", "MSVC-Base" ],
-         "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
-           "NC_EDITOR_ENABLED": "ON"
-         }
-       },
+      {
+        "name": "NcEngine-Ninja-Debug-WithValidation",
+        "inherits": [ "Debug-Base", "Ninja-Base" ],
+        "cacheVariables": {
+          "NC_USE_VALIDATION": "ON"
+        }
+      },
+      {
+        "name": "NcEngine-MSVC-Release-WithEditor",
+        "inherits": [ "Debug-Base", "MSVC-Base" ],
+        "cacheVariables": {
+          "NC_EDITOR_ENABLED": "ON"
+        }
+      },
       {
         "name": "NcEngine-Ninja-Release-WithEditor",
         "inherits": [ "Debug-Base", "Ninja-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_EDITOR_ENABLED": "ON"
         }
       },
@@ -109,7 +93,6 @@
         "name": "NcEngine-MSVC-Release-WithProfiling",
         "inherits": [ "Debug-Base", "MSVC-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_PROFILING_ENABLED": "ON"
         }
       },
@@ -117,7 +100,6 @@
         "name": "NcEngine-Ninja-Release-WithProfiling",
         "inherits": [ "Debug-Base", "Ninja-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_PROFILING_ENABLED": "ON"
         }
       },
@@ -125,7 +107,6 @@
          "name": "NcEngine-MSVC-Release-WithValidation",
          "inherits": [ "Debug-Base", "MSVC-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_EDITOR_ENABLED": "ON",
            "NC_DEBUG_RENDERING": "ON",
            "NC_USE_VALIDATION": "ON"
@@ -135,7 +116,6 @@
          "name": "NcEngine-Ninja-Release-WithValidation",
          "inherits": [ "Debug-Base", "Ninja-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_EDITOR_ENABLED": "ON",
            "NC_DEBUG_RENDERING": "ON",
            "NC_USE_VALIDATION": "ON"

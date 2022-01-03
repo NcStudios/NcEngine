@@ -10,10 +10,7 @@
           "name": "Base",
           "hidden": true,
           "binaryDir": "${sourceDir}/build/${presetName}",
-          "installDir": "${sourceDir}/install/${presetName}",
-          "cacheVariables": {
-              "NC_INSTALL_DIR": "${sourceDir}/../install"
-          }
+          "installDir": "${sourceDir}/install/${presetName}"
       },
       {
           "name": "Release-Base",
@@ -49,7 +46,6 @@
         "name": "Sample-MSVC-Release",
         "inherits": [ "Release-Base", "MSVC-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release"
         }
       },
@@ -57,7 +53,6 @@
         "name": "Sample-Ninja-Release",
         "inherits": [ "Release-Base", "Ninja-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release"
         }
       },
@@ -65,7 +60,6 @@
          "name": "Sample-MSVC-Debug",
          "inherits": [ "Debug-Base", "MSVC-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Debug"
          }
        },
@@ -73,7 +67,6 @@
          "name": "Sample-Ninja-Debug",
          "inherits": [ "Debug-Base", "Ninja-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Debug"
          }
        },
@@ -81,7 +74,6 @@
          "name": "Sample-MSVC-Debug-WithValidation",
          "inherits": [ "Debug-Base", "MSVC-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Debug-WithValidation",
            "NC_USE_VALIDATION": "ON"
          }
@@ -90,7 +82,6 @@
          "name": "Sample-Ninja-Debug-WithValidation",
          "inherits": [ "Debug-Base", "Ninja-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Debug-WithValidation",
            "NC_USE_VALIDATION": "ON"
          }
@@ -99,7 +90,6 @@
          "name": "Sample-MSVC-Release-WithEditor",
          "inherits": [ "Debug-Base", "MSVC-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithEditor",
            "NC_EDITOR_ENABLED": "ON"
          }
@@ -108,7 +98,6 @@
         "name": "Sample-Ninja-Release-WithEditor",
         "inherits": [ "Debug-Base", "Ninja-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithEditor",
           "NC_EDITOR_ENABLED": "ON"
         }
@@ -117,7 +106,6 @@
         "name": "Sample-MSVC-Release-WithProfiling",
         "inherits": [ "Debug-Base", "MSVC-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithProfiling",
           "NC_PROFILING_ENABLED": "ON"
         }
@@ -126,7 +114,6 @@
         "name": "Sample-Ninja-Release-WithProfiling",
         "inherits": [ "Debug-Base", "Ninja-Base" ],
         "cacheVariables": {
-          "NC_BUILD_TYPE": "${presetName}",
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithProfiling",
           "NC_PROFILING_ENABLED": "ON"
         }
@@ -135,7 +122,6 @@
          "name": "Sample-MSVC-Release-WithValidation",
          "inherits": [ "Debug-Base", "MSVC-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithValidation",
            "NC_EDITOR_ENABLED": "ON",
            "NC_DEBUG_RENDERING": "ON",
@@ -146,7 +132,6 @@
          "name": "Sample-Ninja-Release-WithValidation",
          "inherits": [ "Debug-Base", "Ninja-Base" ],
          "cacheVariables": {
-           "NC_BUILD_TYPE": "${presetName}",
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithValidation",
            "NC_EDITOR_ENABLED": "ON",
            "NC_DEBUG_RENDERING": "ON",
