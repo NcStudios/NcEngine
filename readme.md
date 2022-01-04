@@ -29,7 +29,7 @@ More information:
 ----------------
 * Windows
 * Vulkan SDK
-* CMake
+* CMake 3.20
 * Compiler with c++20 support:
     * Visual Studio 17 2022
     * MinGW-w64 9.0.0
@@ -100,7 +100,7 @@ Once cloned, open the repository in a Visual Studio instance. Visual Studio shou
 
 CMake presets may need to be enabled: Tools > Options > CMake > Use CMakePresets.json to drive CMake configure, build and test.
 
-Select the desired NcEngine-MSVC option from the 'Configuration' dropdown. You may need to first select 'Manage Configurations... (nc/CMakeLists.txt). The 'Build Preset' dropdown should update to have the same name as the selected configuration. Upon completion of the configure step, proceed to build and install.
+Select the desired NcEngine-MSVC option from the 'Configuration' dropdown. You may need to first select 'Manage Configurations... (nc/CMakeLists.txt)'. The 'Build Preset' dropdown should update to have the same name as the selected configuration. Upon completion of the configure step, proceed to build and install.
 
 Once NcEngien is installed, NcEditor or the sample application may be built in the same way.
 

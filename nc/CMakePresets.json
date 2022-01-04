@@ -9,8 +9,7 @@
       {
           "name": "Base",
           "hidden": true,
-          "binaryDir": "${sourceDir}/build/${presetName}",
-          "installDir": "${sourceDir}/install/${presetName}",
+          "binaryDir": "${sourceDir}/../build/${presetName}",
           "cacheVariables": {
               "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/${presetName}"
           }
@@ -77,35 +76,35 @@
       },
       {
         "name": "NcEngine-MSVC-Release-WithEditor",
-        "inherits": [ "Debug-Base", "MSVC-Base" ],
+        "inherits": [ "Release-Base", "MSVC-Base" ],
         "cacheVariables": {
           "NC_EDITOR_ENABLED": "ON"
         }
       },
       {
         "name": "NcEngine-Ninja-Release-WithEditor",
-        "inherits": [ "Debug-Base", "Ninja-Base" ],
+        "inherits": [ "Release-Base", "Ninja-Base" ],
         "cacheVariables": {
           "NC_EDITOR_ENABLED": "ON"
         }
       },
       {
         "name": "NcEngine-MSVC-Release-WithProfiling",
-        "inherits": [ "Debug-Base", "MSVC-Base" ],
+        "inherits": [ "Release-Base", "MSVC-Base" ],
         "cacheVariables": {
           "NC_PROFILING_ENABLED": "ON"
         }
       },
       {
         "name": "NcEngine-Ninja-Release-WithProfiling",
-        "inherits": [ "Debug-Base", "Ninja-Base" ],
+        "inherits": [ "Release-Base", "Ninja-Base" ],
         "cacheVariables": {
           "NC_PROFILING_ENABLED": "ON"
         }
       },
        {
          "name": "NcEngine-MSVC-Release-WithValidation",
-         "inherits": [ "Debug-Base", "MSVC-Base" ],
+         "inherits": [ "Release-Base", "MSVC-Base" ],
          "cacheVariables": {
            "NC_EDITOR_ENABLED": "ON",
            "NC_DEBUG_RENDERING": "ON",
@@ -114,7 +113,7 @@
        },
        {
          "name": "NcEngine-Ninja-Release-WithValidation",
-         "inherits": [ "Debug-Base", "Ninja-Base" ],
+         "inherits": [ "Release-Base", "Ninja-Base" ],
          "cacheVariables": {
            "NC_EDITOR_ENABLED": "ON",
            "NC_DEBUG_RENDERING": "ON",

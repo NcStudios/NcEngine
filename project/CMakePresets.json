@@ -9,8 +9,7 @@
       {
           "name": "Base",
           "hidden": true,
-          "binaryDir": "${sourceDir}/build/${presetName}",
-          "installDir": "${sourceDir}/install/${presetName}"
+          "binaryDir": "${sourceDir}/../build/${presetName}"
       },
       {
           "name": "Release-Base",
