@@ -87,7 +87,7 @@
        },
        {
          "name": "Sample-MSVC-Release-WithEditor",
-         "inherits": [ "Debug-Base", "MSVC-Base" ],
+         "inherits": [ "Release-Base", "MSVC-Base" ],
          "cacheVariables": {
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithEditor",
            "NC_EDITOR_ENABLED": "ON"
@@ -95,7 +95,7 @@
        },
       {
         "name": "Sample-Ninja-Release-WithEditor",
-        "inherits": [ "Debug-Base", "Ninja-Base" ],
+        "inherits": [ "Release-Base", "Ninja-Base" ],
         "cacheVariables": {
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithEditor",
           "NC_EDITOR_ENABLED": "ON"
@@ -103,7 +103,7 @@
       },
       {
         "name": "Sample-MSVC-Release-WithProfiling",
-        "inherits": [ "Debug-Base", "MSVC-Base" ],
+        "inherits": [ "Release-Base", "MSVC-Base" ],
         "cacheVariables": {
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithProfiling",
           "NC_PROFILING_ENABLED": "ON"
@@ -111,7 +111,7 @@
       },
       {
         "name": "Sample-Ninja-Release-WithProfiling",
-        "inherits": [ "Debug-Base", "Ninja-Base" ],
+        "inherits": [ "Release-Base", "Ninja-Base" ],
         "cacheVariables": {
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithProfiling",
           "NC_PROFILING_ENABLED": "ON"
@@ -119,7 +119,7 @@
       },
        {
          "name": "Sample-MSVC-Release-WithValidation",
-         "inherits": [ "Debug-Base", "MSVC-Base" ],
+         "inherits": [ "Release-Base", "MSVC-Base" ],
          "cacheVariables": {
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithValidation",
            "NC_EDITOR_ENABLED": "ON",
@@ -129,7 +129,7 @@
        },
        {
          "name": "Sample-Ninja-Release-WithValidation",
-         "inherits": [ "Debug-Base", "Ninja-Base" ],
+         "inherits": [ "Release-Base", "Ninja-Base" ],
          "cacheVariables": {
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithValidation",
            "NC_EDITOR_ENABLED": "ON",

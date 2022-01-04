@@ -24,9 +24,7 @@ set(LIB_DIR "${ROOT_DIR}/lib")
 set(NC_INCLUDE_DIR "${ROOT_DIR}/include")
 set(NC_SOURCE_DIR "${ROOT_DIR}/source")
 set(NC_EXTERNAL_DIR "${ROOT_DIR}/external")
-set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
 set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
-set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
 set(ENGINE_LIB "NcEngineLib")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
@@ -100,8 +98,14 @@ find_package(Vulkan REQUIRED)
 target_link_libraries(NcEngineLib
     INTERFACE
         ${IMGUI_LIB}
-        ${RTAUDIO_LINK_FLAGS}
-        ${WIN32_LINK_FLAGS}
+        gdi32
+        ws2_32
+        ole32
+        winmm
+        ksuser
+        mfplat
+        mfuuid
+        wmcodecdspuuid
         #{ENET_LIB} add for project requiring networking
     PUBLIC
         Vulkan::Vulkan

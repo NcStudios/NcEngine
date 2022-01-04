@@ -51,7 +51,7 @@ namespace nc::editor
 
     void ProjectManager::OpenProject()
     {
-        m_openFileBrowser(std::bind(ProjectManager::DoOpenProject, this, std::placeholders::_1));
+        m_openFileBrowser(std::bind(&ProjectManager::DoOpenProject, this, std::placeholders::_1));
     }
 
     bool ProjectManager::DoOpenProject(const std::filesystem::path& path)
@@ -107,7 +107,7 @@ namespace nc::editor
 
     void ProjectManager::CreateProject()
     {
-        m_openNewProjectDialog(std::bind(ProjectManager::DoCreateProject, this, std::placeholders::_1, std::placeholders::_2));
+        m_openNewProjectDialog(std::bind(&ProjectManager::DoCreateProject, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     bool ProjectManager::DoCreateProject(const std::string& name, const std::filesystem::path& path)
@@ -168,7 +168,7 @@ namespace nc::editor
             return;
         }
 
-        m_openNewSceneDialog(std::bind(ProjectManager::DoNewScene, this, std::placeholders::_1));
+        m_openNewSceneDialog(std::bind(&ProjectManager::DoNewScene, this, std::placeholders::_1));
     }
 
     bool ProjectManager::DoNewScene(const std::string& name)

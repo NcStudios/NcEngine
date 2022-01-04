@@ -28,7 +28,8 @@ add_executable(${EDITOR_EXE})
 #Properties
 set_target_properties(${EDITOR_EXE}
     PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/..
+        RUNTIME_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/..>
+        WIN32_EXECUTABLE TRUE
 )
 
 #Compile Options
