@@ -26,9 +26,9 @@
         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Debug",
             "NC_EDITOR_ENABLED": "ON",
-            "NC_DEBUG_RENDERING": "ON",
+            "NC_DEBUG_RENDERING_ENABLED": "ON",
             "NC_TESTS_ENABLED": "ON",
-            "VERBOSE_LOGGING_ENABLED": "ON"
+            "NC_VERBOSE_LOGGING_ENABLED": "ON"
         }
       },
       {
@@ -60,7 +60,7 @@
          "inherits": [ "Debug-Base", "MSVC-Base" ],
          "cacheVariables": {
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Debug-WithValidation",
-           "NC_USE_VALIDATION": "ON"
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
          }
        },
        {
@@ -68,7 +68,7 @@
          "inherits": [ "Debug-Base", "Ninja-Base" ],
          "cacheVariables": {
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Debug-WithValidation",
-           "NC_USE_VALIDATION": "ON"
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
          }
        },
        {
@@ -93,8 +93,8 @@
          "cacheVariables": {
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithValidation",
            "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING": "ON",
-           "NC_USE_VALIDATION": "ON"
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
          }
        },
        {
@@ -103,8 +103,8 @@
          "cacheVariables": {
            "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithValidation",
            "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING": "ON",
-           "NC_USE_VALIDATION": "ON"
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
          }
        }
     ],

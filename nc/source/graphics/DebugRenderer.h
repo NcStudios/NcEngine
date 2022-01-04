@@ -1,7 +1,7 @@
 #pragma once
 #include "debug/Serialize.h"
 
-#ifdef NC_DEBUG_RENDERING
+#ifdef NC_DEBUG_RENDERING_ENABLED
 
 #include <vector>
 #include <iostream>

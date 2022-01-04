@@ -21,7 +21,7 @@ namespace nc::graphics
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
           m_assetServices{ std::make_unique<AssetServices>(this, config::GetProjectSettings(), config::GetMemorySettings().maxTextures) },
-          #ifdef NC_DEBUG_RENDERING
+          #ifdef NC_DEBUG_RENDERING_ENABLED
           m_debugRenderer{},
           #endif
           m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
@@ -110,7 +110,7 @@ namespace nc::graphics
         return m_dimensions;
     }
 
-    #ifdef NC_DEBUG_RENDERING
+    #ifdef NC_DEBUG_RENDERING_ENABLED
     graphics::DebugData* Graphics::GetDebugData()
     {
         return m_debugRenderer.GetData();

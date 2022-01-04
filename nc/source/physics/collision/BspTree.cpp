@@ -128,7 +128,7 @@ namespace nc::physics
         m_results.contacts.shrink_to_fit();
         m_results.events.clear();
         m_results.events.shrink_to_fit();
-        #ifdef NC_DEBUG_RENDERING
+        #ifdef NC_DEBUG_RENDERING_ENABLED
         graphics::DebugRenderer::ClearPlanes();
         #endif
     }
@@ -250,7 +250,7 @@ namespace nc::physics
             }
         }
 
-        #ifdef NC_DEBUG_RENDERING
+        #ifdef NC_DEBUG_RENDERING_ENABLED
         graphics::DebugRenderer::AddPlane(plane.normal, plane.d);
         #endif
     }

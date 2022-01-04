@@ -29,9 +29,9 @@
         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Debug",
             "NC_EDITOR_ENABLED": "ON",
-            "NC_DEBUG_RENDERING": "ON",
+            "NC_DEBUG_RENDERING_ENABLED": "ON",
             "NC_TESTS_ENABLED": "ON",
-            "VERBOSE_LOGGING_ENABLED": "ON"
+            "NC_VERBOSE_LOGGING_ENABLED": "ON"
         }
       },
       {
@@ -64,14 +64,14 @@
         "name": "NcEngine-MSVC-Debug-WithValidation",
         "inherits": [ "Debug-Base", "MSVC-Base" ],
         "cacheVariables": {
-          "NC_USE_VALIDATION": "ON"
+          "NC_VULKAN_VALIDATION_ENABLED": "ON"
         }
       },
       {
         "name": "NcEngine-Ninja-Debug-WithValidation",
         "inherits": [ "Debug-Base", "Ninja-Base" ],
         "cacheVariables": {
-          "NC_USE_VALIDATION": "ON"
+          "NC_VULKAN_VALIDATION_ENABLED": "ON"
         }
       },
       {
@@ -107,8 +107,8 @@
          "inherits": [ "Release-Base", "MSVC-Base" ],
          "cacheVariables": {
            "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING": "ON",
-           "NC_USE_VALIDATION": "ON"
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
          }
        },
        {
@@ -116,8 +116,8 @@
          "inherits": [ "Release-Base", "Ninja-Base" ],
          "cacheVariables": {
            "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING": "ON",
-           "NC_USE_VALIDATION": "ON"
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
          }
        }
     ],

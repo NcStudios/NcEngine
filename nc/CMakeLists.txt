@@ -12,8 +12,8 @@ endif()
 #OPTIONS
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
-option(NC_DEBUG_RENDERING "Enable wireframe primitive rendering" OFF)
-option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
+option(NC_DEBUG_RENDERING_ENABLED "Enable wireframe primitive rendering" OFF)
+option(NC_VULKAN_VALIDATION_ENABLED "Use Vulkan validation layers" OFF)
 option(NC_PROFILING_ENABLED "Include Optick profiling" OFF)
 
 #VARIABLES
@@ -56,16 +56,16 @@ if(NC_EDITOR_ENABLED)
     target_compile_definitions(NcEngineLib PUBLIC NC_EDITOR_ENABLED)
 endif()
 
-if(NC_DEBUG_RENDERING)
-    target_compile_definitions(NcEngineLib PUBLIC NC_DEBUG_RENDERING)
+if(NC_DEBUG_RENDERING_ENABLED)
+    target_compile_definitions(NcEngineLib PUBLIC NC_DEBUG_RENDERING_ENABLED)
 endif()
 
 if(NC_PROFILING_ENABLED)
     target_compile_definitions(NcEngineLib PUBLIC NC_PROFILING_ENABLED)
 endif()
 
-if(NC_USE_VALIDATION)
-    target_compile_definitions(NcEngineLib PUBLIC NC_USE_VALIDATION)
+if(NC_VULKAN_VALIDATION_ENABLED)
+    target_compile_definitions(NcEngineLib PUBLIC NC_VULKAN_VALIDATION_ENABLED)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -73,8 +73,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DNC_DEBUG_BUILD)
 endif()
 
-if(VERBOSE_LOGGING_ENABLED)
-    target_compile_definitions(NcEngineLib PUBLIC VERBOSE_LOGGING_ENABLED)
+if(NC_VERBOSE_LOGGING_ENABLED)
+    target_compile_definitions(NcEngineLib PUBLIC NC_VERBOSE_LOGGING_ENABLED)
 endif()
 
 # Properties
