@@ -1,15 +1,3 @@
-<style type="text/css">
-<!--
- .tab { margin-left: 20px; }
--->
-</style>
-
-# NcEngine
-
-<p align="center">
-  <img src="docs/Logo.png" />
-</p>
-
 NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively being developed but is still in very early stages. Features are in varying stages of completeness.
 
 -----------
