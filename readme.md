@@ -60,8 +60,9 @@ NcEngine is the library games link against. NcEditor and the sample application 
 
 <details>
 <summary>Command Line</summary>
-<div class="tab">
+<p>
 Each target can be configured and built with:
+
 ```
 >cmake -S <target-directory> -B build/<Preset-Name> --preset <Preset-Name>
 >cmake --build build/<Preset-Name>
@@ -86,12 +87,12 @@ An example building everything using Ninja and Release configuration with the ed
 ```
 
 More on available presets [here](#configuration-and-presets)
-</div>
+</p>
 </details>
 
 <details>
 <summary>Visual Studio</summary>
-<div class="tab">
+<p>
 Once cloned, open the repository in Visual Studio. The CMakePresets.json files should be automatically detected, displaying the Target System/Configuration/Build Preset dropdowns. Set the system to 'Local Machine' and select the desired NcEngine-MSVC option from the 'Configuration' menu. Update the 'Build' menu to match the configuration name, if it doesn't do so automatically. If configuration options are missing from the dropdown, first select 'Manage Configurations... (nc/CMakeLists.txt)'. A release build will look like:
 
 <p align="center">
@@ -103,7 +104,7 @@ The configuration step should automatically start. Upon completion, build and in
 Configure, build, and install steps may be manually triggered from the 'Project' and 'Build' menus or from a target's context menu from the solution explorer in 'CMake Targets View'.
 
 > Make sure CMake presets are enabled in Visual Studio: Tools > Options > CMake > Use CMakePresets.json to drive CMake configure, build and test.
-</div>
+</p>
 </details>
 
 ### Configuration and Presets
