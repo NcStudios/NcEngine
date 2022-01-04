@@ -1,3 +1,9 @@
+<style type="text/css">
+<!--
+ .tab { margin-left: 20px; }
+-->
+</style>
+
 # NcEngine
 
 <p align="center">
@@ -9,7 +15,6 @@ NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively 
 -----------
 Getting started:
 * [Requirements](#requirements)
-* [Cloning](#cloning)
 * [Targets](#targets)
 * [Building](#building)
     * [Command Line](#command-line)
@@ -32,19 +37,6 @@ More information:
     * Visual Studio 17 2022
     * MinGW-w64 9.0.0
 
-### Cloning:
-------------
-When cloning, make sure submodules are cloned properly:
-
-```
-git clone --recurse-submodules https://github.com/McCallisterRomer/NCEngine
-```
-
-If any subdirectories of nc/external are empty, the repository was cloned non-recursively. You can get the dependencies with:
-```
-git submodule update --init
-```
-
 ### Targets
 ----------
 There are three primary targets in the repository:
@@ -64,7 +56,11 @@ NcEngine is the library games link against. NcEditor and the sample application 
 
 ### Building
 ------------
-### Command Line
+> When cloning, use `--recurse-submodules`. If any subdirectories of nc/external are empty, the repo was cloned non-recursively. Use `git submodule update --init` to get the dependencies.
+
+<details>
+<summary>Command Line</summary>
+<div class="tab">
 Each target can be configured and built with:
 ```
 >cmake -S <target-directory> -B build/<Preset-Name> --preset <Preset-Name>
@@ -90,11 +86,13 @@ An example building everything using Ninja and Release configuration with the ed
 ```
 
 More on available presets [here](#configuration-and-presets)
+</div>
+</details>
 
-### Visual Studio
-> Make sure CMake presets are enabled in Visual Studio: Tools > Options > CMake > Use CMakePresets.json to drive CMake configure, build and test.
-
-Once cloned, open the repository in Visual Studio. The CMakePresets.json files should be automatically detected, displaying the Target System/Configuration/Build Preset dropdowns. Set the system to 'Local Machine' and select the desired NcEngine-MSVC option from the 'Configuration' menu. Update the 'Build' menu to match the configuration name, if it doesn't do so automatically. If configuration options are missing from the dropdown, first select 'Manage Configurations... (nc/CMakeLists.txt)':
+<details>
+<summary>Visual Studio</summary>
+<div class="tab">
+Once cloned, open the repository in Visual Studio. The CMakePresets.json files should be automatically detected, displaying the Target System/Configuration/Build Preset dropdowns. Set the system to 'Local Machine' and select the desired NcEngine-MSVC option from the 'Configuration' menu. Update the 'Build' menu to match the configuration name, if it doesn't do so automatically. If configuration options are missing from the dropdown, first select 'Manage Configurations... (nc/CMakeLists.txt)'. A release build will look like:
 
 <p align="center">
   <img src="docs/visual_studio_control.png" />
@@ -103,6 +101,10 @@ Once cloned, open the repository in Visual Studio. The CMakePresets.json files s
 The configuration step should automatically start. Upon completion, build and install the engine. Once NcEngine is installed, NcEditor or the sample application may be built in the same way, excluding installation.
 
 Configure, build, and install steps may be manually triggered from the 'Project' and 'Build' menus or from a target's context menu from the solution explorer in 'CMake Targets View'.
+
+> Make sure CMake presets are enabled in Visual Studio: Tools > Options > CMake > Use CMakePresets.json to drive CMake configure, build and test.
+</div>
+</details>
 
 ### Configuration and Presets
 ----------------------------
