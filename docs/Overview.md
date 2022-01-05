@@ -56,7 +56,7 @@ virtual void OnTriggerExit(Entity other);
 
 The most common uses for components are handled by the included types or by adding logic with FrameUpdate(). See [creating a project](CreatingAProject.md) or the [sample project](../project/source) for examples.
 
-Most engine-provided Components are implemented using an Ecs-oriented approach which can be extended to custom types through Registry::RegisterComponentType\<T\>(). These types should derive from ComponentBase rather than AutoComponent.
+Most engine-provided Components are implemented using an Ecs-oriented approach which can be extended to custom types through `Registry::RegisterComponentType<T>()`. These types should derive from ComponentBase rather than AutoComponent.
 
 ## Registry
 -----------
@@ -116,10 +116,11 @@ Assets are the resources used by some built in components. The components that u
 * Collider(Hull): expects a path to a convex hull mesh.
 * ConcaveCollider: expects a path to concave mesh.
 * MeshRenderer: expects a path to a mesh and a material wich requires three paths to textures.
+* Skybox(not a component): expects a path to a skybox asset (.nca).
 
 Components do not load or own the assets they use, but instead obtain a view over the data. This means an asset should be loaded before attempting to create a component that depends on it. For example, if you want to create an AudioSource that plays "my_sound.wav", you must have previously loaded "my_sound.wav" by calling LoadAudioClipAsset("my_sound.wav"). The loading functions and supported file types can be found in [Assets.h](../nc/include/Assets.h).
 
-Assets related to 3d meshes can only be loaded from .nca files. This includes meshes, convex hulls, and concave colliders. This is done to move runtime-independent calculations into a preprocessing step. Nca files can be generated from fbx meshes using the asset builder (tools/asset_builder/build.exe). Usage can be shown by running './build --h'. When using NcEditor, this process is handled automatically. Adding fbx files to the asset manifest will create the appropriate nca files.
+Assets related to 3d meshes(meshes, convex hulls, concave colliders) and skyboxes can only be loaded from .nca files. This is done to move runtime-independent calculations into a preprocessing step. Nca files can be generated from input files using the asset builder (tools/asset_builder/build.exe). Usage can be shown by running './build --h'. When using NcEditor, this process is handled automatically. Adding fbx files to the asset manifest will create the appropriate nca files.
 
 ## UI
 -----
