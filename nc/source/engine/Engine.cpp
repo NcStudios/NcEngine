@@ -8,6 +8,8 @@
 #include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
 
+#include <iostream>
+
 namespace nc
 {
     auto InitializeNcEngine(HINSTANCE hInstance, std::string_view configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
@@ -148,6 +150,8 @@ namespace nc
             FrameRender();
             particleEmitterSystem->ProcessFrameEvents();
             FrameCleanup();
+
+            std::cout << "in main loop" << std::endl;
         }
 
         Shutdown();

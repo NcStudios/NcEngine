@@ -14,11 +14,14 @@ namespace nc::graphics
 
 namespace nc::graphics
 {
+    constexpr vk::SampleCountFlagBits SampleCount = vk::SampleCountFlagBits::e1;
+
     enum class AttachmentType : uint8_t
     {
         Color,
         Depth,
-        ShadowDepth
+        ShadowDepth,
+        Resolve
     };
 
     enum class ShaderStage : uint8_t
@@ -67,17 +70,17 @@ namespace nc::graphics
     vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode);
 
     // Attachments
-    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
+    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp,  vk::SampleCountFlagBits numSamples);
     vk::AttachmentReference CreateAttachmentReference(AttachmentType type, uint32_t attachmentIndex);
-    AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp);
+    AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples);
 
     // Subpasses
     vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment);
-    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment);
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment, const AttachmentSlot& resolveAttachment);
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask);
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags);
     Subpass CreateSubpass(const AttachmentSlot& depthAttachment);
-    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment);
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment, const AttachmentSlot& resolveAttachment);
     
     //Pipelines
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
@@ -87,7 +90,7 @@ namespace nc::graphics
     vk::PipelineViewportStateCreateInfo CreateViewportCreateInfo();
     vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth, bool depthBiasEnable = false);
     vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, vk::CullModeFlags cullMode, float lineWidth, bool depthBiasEnable = false);
-    vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo();
+    vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo(vk::SampleCountFlagBits numSamples = vk::SampleCountFlagBits::e1);
     vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo(bool shadowMapping = false);
     vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo(bool useAlphaBlending);
     vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo();

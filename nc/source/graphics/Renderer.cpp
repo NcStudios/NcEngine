@@ -21,6 +21,7 @@
 #endif
 
 #include <span>
+#include <iostream>
 
 namespace nc::graphics
 {
@@ -31,8 +32,12 @@ namespace nc::graphics
           m_shaderResources{shaderResources},
           m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
           m_dimensions{dimensions},
-          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true) }
+        //   m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
+        //   m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, m_graphics->GetSwapchainPtr()->GetFormat(), false, m_graphics->GetBasePtr()->GetMaxSamplesCount()) }
+                    m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, vk::SampleCountFlagBits::e1) },
+          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, m_graphics->GetSwapchainPtr()->GetFormat(), false, vk::SampleCountFlagBits::e1) }
     {
+        std::cout << "Renderer CTOR" << std::endl;
         RegisterRenderPasses();
         RegisterTechniques();
     }
@@ -40,6 +45,7 @@ namespace nc::graphics
     Renderer::~Renderer() noexcept
     {
         m_depthStencil.reset();
+        m_colorBuffer.reset();
         m_renderPasses.reset();
     }
     
@@ -73,8 +79,10 @@ namespace nc::graphics
         /** Lit shading pass */
         auto& colorImageViews = swapchain->GetColorImageViews();
         auto& depthImageView = m_depthStencil->GetImageView();
+        auto& colorResolveView = m_colorBuffer->GetImageView();
+        
         uint32_t index = 0;
-        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, RenderPassManager::LitShadingPass, index++); }
+        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView, colorResolveView}, RenderPassManager::LitShadingPass, index++); }
     }
 
     void Renderer::RegisterTechniques()

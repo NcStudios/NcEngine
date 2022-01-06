@@ -10,8 +10,8 @@ namespace nc::graphics
     class RenderTarget
     {
         public:
-            RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil);
-            RenderTarget(Base* base, Vector2 dimensions, vk::Format depthFormat, bool isDepthStencil);
+            RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples);
+            RenderTarget(Base* base, Vector2 dimensions, vk::Format depthFormat, bool isDepthStencil, vk::SampleCountFlagBits numSamples);
             ~RenderTarget() noexcept;
 
             const vk::Image& GetImage() const noexcept;

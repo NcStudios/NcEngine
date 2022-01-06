@@ -27,11 +27,11 @@ namespace nc::graphics
         return samplerInfo;
     }
 
-    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
+    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples)
     {
         vk::AttachmentDescription attachmentDescription{};
         attachmentDescription.setFormat(format);
-        attachmentDescription.setSamples(vk::SampleCountFlagBits::e1);
+        attachmentDescription.setSamples(numSamples);
         attachmentDescription.setLoadOp(loadOp);
         attachmentDescription.setStoreOp(storeOp);
         attachmentDescription.setInitialLayout(vk::ImageLayout::eUndefined);
@@ -39,6 +39,12 @@ namespace nc::graphics
         switch (type)
         {
             case AttachmentType::Color:
+                attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+                attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+                attachmentDescription.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
+                break;
+
+            case AttachmentType::Resolve:
                 attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
                 attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
                 attachmentDescription.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
@@ -65,10 +71,10 @@ namespace nc::graphics
 
         switch (type)
         {
+            case AttachmentType::Resolve:
             case AttachmentType::Color:
                 attachmentReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
                 break;
-
             case AttachmentType::Depth:
             case AttachmentType::ShadowDepth:
                 attachmentReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
@@ -77,26 +83,23 @@ namespace nc::graphics
         return attachmentReference;
     }
 
-    AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp)
+    AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples)
     {
         AttachmentSlot AttachmentSlot{};
         AttachmentSlot.reference = CreateAttachmentReference(type, attachmentIndex);
-        AttachmentSlot.description = CreateAttachmentDescription(type, format, loadOp, storeOp);
+        AttachmentSlot.description = CreateAttachmentDescription(type, format, loadOp, storeOp, numSamples);
         AttachmentSlot.type = type;
         return AttachmentSlot;
     }
 
-    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment)
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment, const AttachmentSlot& resolveAttachment)
     {
         vk::SubpassDescription subpassDescription{};
         subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
         subpassDescription.setColorAttachmentCount(1);
         subpassDescription.setPColorAttachments(&colorAttachment.reference);
         subpassDescription.setPDepthStencilAttachment(&depthAttachment.reference);
-        subpassDescription.setInputAttachmentCount(0);
-        subpassDescription.setPreserveAttachmentCount(0);
-        subpassDescription.setPPreserveAttachments(nullptr);
-        subpassDescription.setPResolveAttachments(nullptr);
+        subpassDescription.setPResolveAttachments(&resolveAttachment.reference);
         return subpassDescription;
     }
 
@@ -155,10 +158,10 @@ namespace nc::graphics
         return subpass;
     }
 
-    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment)
+    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment, const AttachmentSlot& resolveAttachment)
     {
         Subpass subpass{};
-        subpass.description = CreateSubpassDescription(depthAttachment, colorAttachment);
+        subpass.description = CreateSubpassDescription(depthAttachment, colorAttachment, resolveAttachment);
         subpass.dependencies =
         {
             CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
@@ -258,11 +261,11 @@ namespace nc::graphics
         return rasterizer;
     }
 
-    vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo()
+    vk::PipelineMultisampleStateCreateInfo CreateMulitsampleCreateInfo(vk::SampleCountFlagBits numSamples)
     {
         vk::PipelineMultisampleStateCreateInfo multisampling{};
         multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(false));
-        multisampling.setRasterizationSamples(vk::SampleCountFlagBits::e1);
+        multisampling.setRasterizationSamples(numSamples);
         multisampling.setMinSampleShading(1.0f);
         multisampling.setPSampleMask(nullptr);
         multisampling.setAlphaToCoverageEnable(static_cast<vk::Bool32>(false));

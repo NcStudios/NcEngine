@@ -41,7 +41,7 @@ namespace nc::graphics
         auto* base = m_graphics->GetBasePtr();
 
         m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(base, m_dimensions, vk::Format::eD16Unorm, true);
+        m_depthStencil = std::make_unique<RenderTarget>(base, m_dimensions, vk::Format::eD16Unorm, true, vk::SampleCountFlagBits::e1);
         
         vk::DescriptorImageInfo imageSamplerInfo;
         imageSamplerInfo.setSampler(m_sampler.get());
@@ -64,7 +64,7 @@ namespace nc::graphics
     {
         auto* base = m_graphics->GetBasePtr();
 
-        m_depthStencil = std::make_unique<RenderTarget>(base, m_dimensions, vk::Format::eD16Unorm, true);
+        m_depthStencil = std::make_unique<RenderTarget>(base, m_dimensions, vk::Format::eD16Unorm, true, vk::SampleCountFlagBits::e1);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
         vk::SamplerCreateInfo samplerInfo = {};

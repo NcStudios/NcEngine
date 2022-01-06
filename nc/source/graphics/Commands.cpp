@@ -2,6 +2,8 @@
 #include "Base.h"
 #include "Swapchain.h"
 
+#include <iostream>
+
 namespace nc::graphics
 {
     Commands::Commands(Base* base, const Swapchain& swapchain)
@@ -39,6 +41,8 @@ namespace nc::graphics
 
     void Commands::SubmitRenderCommand(uint32_t imageIndex)
     {
+        std::cout << "Submitting render command" << std::endl;
+
         auto currentFrameIndex = m_swapchain.GetFrameIndex();
 
         vk::Semaphore waitSemaphores[] = { m_renderReadySemaphores[currentFrameIndex] }; // Which semaphore to wait on before execution begins

@@ -11,7 +11,7 @@ namespace nc::graphics
     RenderPassManager::RenderPassManager(Graphics* graphics, const Vector2& dimensions)
     : m_graphics(graphics),
       m_renderPasses{},
-      m_renderTargets{}
+      m_frameBufferAttachments{}
     {
         auto* base = m_graphics->GetBasePtr();
         auto* swapchain = m_graphics->GetSwapchainPtr();
@@ -19,7 +19,7 @@ namespace nc::graphics
         /** Shadow mapping pass */
         std::array<AttachmentSlot, 1> shadowAttachmentSlots
         {
-            CreateAttachmentSlot(0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore)
+            CreateAttachmentSlot(0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1)
         };
 
         std::array<Subpass, 1> shadowSubpasses
@@ -30,15 +30,18 @@ namespace nc::graphics
         Create(RenderPassManager::ShadowMappingPass, shadowAttachmentSlots, shadowSubpasses, ClearValue::Depth, dimensions);
 
         /** Lit shading pass */
-        std::array<AttachmentSlot, 2> litAttachmentSlots
+        std::array<AttachmentSlot, 3> litAttachmentSlots
         {
-            CreateAttachmentSlot(0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore),
-            CreateAttachmentSlot(1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare)
+            // CreateAttachmentSlot(0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, base->GetMaxSamplesCount()),
+            // CreateAttachmentSlot(1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, base->GetMaxSamplesCount()),
+            CreateAttachmentSlot(0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1),
+            CreateAttachmentSlot(1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, vk::SampleCountFlagBits::e1),
+            CreateAttachmentSlot(2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1)
         };
 
         std::array<Subpass, 1> litSubpasses
         {
-            CreateSubpass(litAttachmentSlots.at(1), litAttachmentSlots.at(0))
+            CreateSubpass(litAttachmentSlots.at(1), litAttachmentSlots.at(0), litAttachmentSlots.at(2))
         };
         
         Create(RenderPassManager::LitShadingPass, litAttachmentSlots, litSubpasses, ClearValue::DepthAndColor, dimensions);
@@ -47,7 +50,7 @@ namespace nc::graphics
     RenderPassManager::~RenderPassManager() noexcept
     {
         m_renderPasses.clear();
-        m_renderTargets.clear();
+        m_frameBufferAttachments.clear();
     }
 
     void RenderPassManager::Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData)
@@ -139,7 +142,7 @@ namespace nc::graphics
             renderPass.renderTargetSize.extent = extent;
         }
 
-        for (auto& frameBufferAttachment : m_renderTargets)
+        for (auto& frameBufferAttachment : m_frameBufferAttachments)
         {
             auto& renderPass = Acquire(frameBufferAttachment.renderPassUid);
 
@@ -158,12 +161,12 @@ namespace nc::graphics
 
     FrameBufferAttachment& RenderPassManager::GetFrameBufferAttachment(const std::string& uid, uint32_t index)
     {
-        auto frameBufferPos = std::ranges::find_if(m_renderTargets, [&uid, index](const auto& frameBufferAttachment)
+        auto frameBufferPos = std::ranges::find_if(m_frameBufferAttachments, [&uid, index](const auto& frameBufferAttachment)
         {
             return (frameBufferAttachment.index == index && frameBufferAttachment.renderPassUid == uid);
         });
 
-        if (frameBufferPos == m_renderTargets.end())
+        if (frameBufferPos == m_frameBufferAttachments.end())
         {
             throw std::runtime_error("RenderPassManager::GetFrameBufferAttachment - FrameBufferAttachment does not exist.");
         }
@@ -173,15 +176,15 @@ namespace nc::graphics
 
     void RenderPassManager::RegisterAttachments(std::vector<vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index)
     {
-        auto frameBufferPos = std::ranges::find_if(m_renderTargets, [&uid, index](const auto& frameBufferAttachment)
+        auto frameBufferPos = std::ranges::find_if(m_frameBufferAttachments, [&uid, index](const auto& frameBufferAttachment)
         {
             return (frameBufferAttachment.index == index && frameBufferAttachment.renderPassUid == uid);
         });
 
-        if (frameBufferPos != m_renderTargets.end())
+        if (frameBufferPos != m_frameBufferAttachments.end())
         {
-            *frameBufferPos = std::move(m_renderTargets.back());
-            m_renderTargets.pop_back();
+            *frameBufferPos = std::move(m_frameBufferAttachments.back());
+            m_frameBufferAttachments.pop_back();
         }
 
         auto* base = m_graphics->GetBasePtr();
@@ -201,20 +204,20 @@ namespace nc::graphics
         framebufferInfo.setLayers(1);
 
         frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
-        m_renderTargets.push_back(std::move(frameBufferAttachment));
+        m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 
     void RenderPassManager::RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid)
     {
-        auto frameBufferPos = std::ranges::find_if(m_renderTargets, [uid](const auto& frameBufferAttachment)
+        auto frameBufferPos = std::ranges::find_if(m_frameBufferAttachments, [uid](const auto& frameBufferAttachment)
         {
             return (frameBufferAttachment.renderPassUid == uid);
         });
 
-        if (frameBufferPos != m_renderTargets.end())
+        if (frameBufferPos != m_frameBufferAttachments.end())
         {
-            *frameBufferPos = std::move(m_renderTargets.back());
-            m_renderTargets.pop_back();
+            *frameBufferPos = std::move(m_frameBufferAttachments.back());
+            m_frameBufferAttachments.pop_back();
         }
 
         auto* base = m_graphics->GetBasePtr();
@@ -235,7 +238,6 @@ namespace nc::graphics
         framebufferInfo.setLayers(1);
 
         frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
-
-        m_renderTargets.push_back(std::move(frameBufferAttachment));
+        m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 }

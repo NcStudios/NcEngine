@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <algorithm>
+#include <iostream>
 
 namespace
 {
@@ -100,6 +101,8 @@ namespace nc::graphics
         CreateAllocator();
         QueryDepthFormatSupport();
         CreateDescriptorPools();
+
+        std::cout << "End of Base ctor" << std::endl;
     }
 
     Base::~Base() noexcept
@@ -319,6 +322,48 @@ namespace nc::graphics
     vma::Allocation* Base::GetBufferAllocation(uint32_t index)
     {
         return &(m_buffers.at(index)).second;
+    }
+
+    vk::SampleCountFlagBits Base::GetMaxSamplesCount()
+    {
+        vk::PhysicalDeviceProperties properties{};
+        m_physicalDevice.getProperties(&properties);
+        std::cout << "Getting Samples Count" << std::endl;
+
+        auto counts = properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
+
+        if (counts & vk::SampleCountFlagBits::e64) 
+        {
+            std::cout << "64" << std::endl;
+            return vk::SampleCountFlagBits::e64;
+        }
+        if (counts & vk::SampleCountFlagBits::e32) 
+        {
+            std::cout << "32" << std::endl;
+            return vk::SampleCountFlagBits::e32;
+        }
+        if (counts & vk::SampleCountFlagBits::e16) 
+        {
+            std::cout << "16" << std::endl;
+            return vk::SampleCountFlagBits::e16;
+        }
+        if (counts & vk::SampleCountFlagBits::e8) 
+        {
+            std::cout << "8" << std::endl;
+            return vk::SampleCountFlagBits::e8;
+        }
+        if (counts & vk::SampleCountFlagBits::e4) 
+        {
+            std::cout << "4" << std::endl;
+            return vk::SampleCountFlagBits::e4;
+        }
+        if (counts & vk::SampleCountFlagBits::e2) 
+        {
+            std::cout << "2" << std::endl;
+            return vk::SampleCountFlagBits::e2;
+        }
+
+        return vk::SampleCountFlagBits::e1;
     }
 
     void Base::CreateLogicalDevice()
