@@ -1,6 +1,6 @@
 ### TaskGraph Tests ###
 add_executable(TaskGraph_unit_tests
-    ${ROOT_DIR}/test/unit/task/TaskGraph_unit_tests.cpp
+    ${PROJECT_SOURCE_DIR}/unit/task/TaskGraph_unit_tests.cpp
 )
 
 target_include_directories(TaskGraph_unit_tests
@@ -8,7 +8,7 @@ target_include_directories(TaskGraph_unit_tests
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${ROOT_DIR}/external/gtest/googletest/include
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(TaskGraph_unit_tests

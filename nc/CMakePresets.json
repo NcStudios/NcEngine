@@ -30,7 +30,6 @@
             "CMAKE_BUILD_TYPE": "Debug",
             "NC_EDITOR_ENABLED": "ON",
             "NC_DEBUG_RENDERING_ENABLED": "ON",
-            "NC_TESTS_ENABLED": "ON",
             "NC_VERBOSE_LOGGING_ENABLED": "ON"
         }
       },
