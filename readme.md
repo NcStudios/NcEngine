@@ -7,20 +7,17 @@
 NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively being developed but is still in very early stages. Features are in varying stages of completeness.
 
 -------------------
-* [Getting Started](#getting-started)
+* Getting Started
     * [Requirements](#requirements)
     * [Targets](#targets)
     * [Configuration and Presets](#configuration-and-presets)
     * [Building from Command Line](#building-from-command-line)
     * [Building in Visual Studio](#building-in-visual-studio)
     * [Definitions](#definitions)
-* [More Information](#more-information)
+* More Information
     * [Overview](docs/Overview.md)
     * [Creating a Project](docs/CreatingAProject.md)
     * [NcEngine Components](docs/EngineComponents.md)
-
-## Getting Started
-------------
 
 ### Requirements
 ----------------
@@ -35,8 +32,7 @@ NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively 
 
 ### Targets
 -----------
-There are three primary targets in the repository:
-* NcEngine: Core Library
+* NcEngine: Core Library [Required]
     * Type: Static Library
     * Directory: nc
 * NcEditor: Application for project creation and management.
@@ -47,6 +43,9 @@ There are three primary targets in the repository:
     * Type: Executable
     * Directory: project
     * Dependencies: NcEngine
+* Tests:
+    * Type: Executable(s)
+    * Directory: test
 
 NcEngine is the library games link against. NcEditor and the sample application are optional and depend on NcEngine being built *and* installed.
 
@@ -92,8 +91,6 @@ An example building everything using Ninja and Release configuration with the ed
 >cmake --build build/Sample-Ninja-Release-WithEditor
 ```
 
-More on available presets [here](#configuration-and-presets)
-
 ### Building in Visual Studio
 -----------------------------
 
@@ -114,10 +111,6 @@ Configure, build, and install steps may be manually triggered from the 'Project'
 #### NC_INSTALL_DIR
     Default = install/NcEngine/${presetName}
     The directory NcEngine will be installed to.
-
-#### NC_TESTS_ENABLED
-    Default = OFF
-    Flag used by cmake to enable building test executables.
 
 #### NC_EDITOR_ENABLED
     Default = OFF

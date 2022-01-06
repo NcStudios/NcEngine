@@ -97,7 +97,7 @@ namespace nc
         task.data(&m_exceptionState);
         task.work
         (
-            [&task, func = std::forward<Func>(func)]
+            [task, func = std::forward<Func>(func)]
             {
                 try
                 {

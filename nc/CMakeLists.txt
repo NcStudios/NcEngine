@@ -10,7 +10,6 @@ if(NOT DEFINED NC_INSTALL_DIR)
 endif()
 
 #OPTIONS
-option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(NC_DEBUG_RENDERING_ENABLED "Enable wireframe primitive rendering" OFF)
 option(NC_VULKAN_VALIDATION_ENABLED "Use Vulkan validation layers" OFF)
@@ -131,12 +130,6 @@ target_include_directories(NcEngineLib
 )
 
 add_subdirectory(source)
-
-if(NC_TESTS_ENABLED)
-    enable_testing()
-    add_subdirectory(external/gtest)
-    add_subdirectory(test)
-endif()
 
 set(CMAKE_INSTALL_PREFIX ${NC_INSTALL_DIR})
 install(TARGETS NcEngineLib ${IMGUI_LIB} ${ENET_LIB}

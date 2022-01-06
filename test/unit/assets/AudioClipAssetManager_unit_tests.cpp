@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "assets/AudioClipAssetManager.h"
 
+#include <array>
+#include <string>
+
 using namespace nc;
 
 const auto SoundPath1 = "sound1.wav";
