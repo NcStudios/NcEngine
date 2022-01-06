@@ -149,28 +149,30 @@ For the config file, copy the defaults from [nc/source/config/default_config.ini
 
 ## Building
 ------------
-The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_pakcage to search in \<path>/NcEngine/\<config>. MSVC users will need to set WIN32_EXECUTABLE to correctly link to WinMain:
+The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_package to search in \<path>/NcEngine/\<config>. MSVC users will need to set WIN32_EXECUTABLE to correctly link to WinMain:
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project("Example" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-find_package(NcEngine REQUIRED PATHS "C:/Program Files/NcEngine/Release-WithEditor")
+find_package(NcEngine REQUIRED PATHS "your-install-path/NcEngine/Release-WithEditor")
 add_executable(Example ${PROJECT_SOURCE_DIR}/Main.cpp)
 set_target_properties(Example PROPERTIES WIN32_EXECUTABLE TRUE)
 target_link_libraries(Example PRIVATE Nc::NcEngineLib)
 ```
 
-We'll need to build and install the engine with the desired config:
+We'll need to build and install the engine with the desired preset:
 ```
->tools/build Engine Release-WithEditor <your-install-directory> "Ninja"
+>cmake -S nc -B build/NcEngine-Ninja-Release-WithEditor --preset NcEngine-Ninja-Release-WithEditor
+>cmake --build build/NcEngine-Ninja-Release-WithEditor
+>cmake --install build/NcEngine-Ninja-Release-WithEditor
 ```
 
 Then build the example:
 ```
 >mkdir build/example_project
 >cmake -G "Ninja" -B build/example_project -S example
->ninja -C build/example_project
+>cmake --build build/example_project
 ```
 
 That's it! You should be able to run Example.exe and move the cube around. Pressing ` will toggle the editor, where you can tinker with the camera or point light properties. The editor has a pretty limited set of features, but there is an improved standalone version coming soon.

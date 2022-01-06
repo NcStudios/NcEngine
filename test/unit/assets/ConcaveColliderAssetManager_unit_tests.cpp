@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "assets/ConcaveColliderAssetManager.h"
 
+#include <array>
+#include <string>
+
 using namespace nc;
 
 const auto ConcavePath1 = "concave_collider1.nca";

@@ -78,7 +78,7 @@ namespace nc::editor
                      &m_assetManifest,
                      CreateProjectCallbacks(&m_projectManager),
                      CreateSceneCallbacks(&m_projectManager),
-                     std::bind(ChangeTagDialog::Open, &m_changeTagDialog, std::placeholders::_1),
+                     std::bind(&ChangeTagDialog::Open, &m_changeTagDialog, std::placeholders::_1),
                      std::string{}},
           m_fileBrowser{m_editorUI.GetRegisterDialogCallback()},
           m_assetBrowser{m_editorUI.GetRegisterDialogCallback(), CreateOpenFileBrowserCallback(&m_fileBrowser), &m_assetManifest},

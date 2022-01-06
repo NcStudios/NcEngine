@@ -1,16 +1,12 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 project("Sample" LANGUAGES CXX)
 
 if(${PROJECT_SOURCE_DIR} EQUAL ${PROJECT_BINARY_DIR})
     message(FATAL_ERROR "Don't be a fool, out-of-source build with your tool.")
 endif()
 
-if(NOT DEFINED NC_BUILD_TYPE)
-    message(FATAL_ERROR "NC_BUILD_TYPE is not defined. This is required in NcEngine and all projects for archive selection.")
-endif()
-
-if(NOT DEFINED NC_ENGINE_INSTALL_DIR)
-    message(FATAL_ERROR "NC_ENGINE_INSTALL_DIR is not defined.")
+if(NOT DEFINED NC_INSTALL_DIR)
+    message(FATAL_ERROR "NC_INSTALL_DIR is not defined.")
 endif()
 
 #Variables
@@ -18,7 +14,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(GAME_EXE "Sample")
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
-set(NC_INSTALL_DIR "${NC_ENGINE_INSTALL_DIR}/NcEngine/${NC_BUILD_TYPE}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)

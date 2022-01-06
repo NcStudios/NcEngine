@@ -4,7 +4,7 @@
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "directx/Inc/DirectXMath.h"
-#ifdef NC_DEBUG_RENDERING
+#ifdef NC_DEBUG_RENDERING_ENABLED
 #include "DebugRenderer.h"
 #endif
 
@@ -46,7 +46,7 @@ namespace nc::graphics
             const Vector2 GetDimensions() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 
-            #ifdef NC_DEBUG_RENDERING
+            #ifdef NC_DEBUG_RENDERING_ENABLED
             graphics::DebugData* GetDebugData();
             #endif
 
@@ -66,7 +66,7 @@ namespace nc::graphics
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
-            #ifdef NC_DEBUG_RENDERING
+            #ifdef NC_DEBUG_RENDERING_ENABLED
             graphics::DebugRenderer m_debugRenderer;
             #endif
             std::unique_ptr<Renderer> m_renderer;

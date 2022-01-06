@@ -1,44 +1,11 @@
-// VS Code tasks for invoking NcEngine's build.bat build script. These
-// can be added to your .vscode/tasks.json file for common build types.
-//
-//  - NcInstallDir must be added to your settings.json. Set it to any
-//    path. Alternatively, ${config:NcInstallDir} may be changed here.
-//
-//  - "Ninja" may be changed to another generator.
 {
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Editor Debug",
+            "label": "Configure-NcEngine-Debug",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Editor", "Debug", "${config:NcInstallDir}", "Ninja"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "Engine Debug"
-        },
-        {
-            "label": "Editor Release-WithEditor",
-            "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Editor", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "Engine Release-WithEditor"
-        },
-        {
-            "label": "Engine Debug",
-            "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Engine", "Debug", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["-S", "nc", "-B", "build/NcEngine-Ninja-Debug", "--preset", "NcEngine-Ninja-Debug"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -47,10 +14,23 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "Engine Debug-WithValidation",
+            "label": "Configure-NcEngine-Debug-WithValidation",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Engine", "Debug-WithValidation", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["-S", "nc", "-B", "build/NcEngine-Ninja-Debug-WithValidation", "--preset", "NcEngine-Ninja-Debug-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+
+        {
+            "label": "Configure-NcEngine-Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "nc", "-B", "build/NcEngine-Ninja-Release", "--preset", "NcEngine-Ninja-Release"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -59,10 +39,10 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "Engine Release",
+            "label": "Configure-NcEngine-Release-WithEditor",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Engine", "Release", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["-S", "nc", "-B", "build/NcEngine-Ninja-Release-WithEditor", "--preset", "NcEngine-Ninja-Release-WithEditor"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -71,10 +51,10 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "Engine Release-WithEditor",
+            "label": "Configure-NcEngine-Release-WithProfiling",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Engine", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["-S", "nc", "-B", "build/NcEngine-Ninja-Release-WithProfiling", "--preset", "NcEngine-Ninja-Release-WithProfiling"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -83,10 +63,10 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "Engine Release-WithProfiling",
+            "label": "Configure-NcEngine-Release-WithValidation",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Engine", "Release-WithProfiling", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["-S", "nc", "-B", "build/NcEngine-Ninja-Release-WithValidation", "--preset", "NcEngine-Ninja-Release-WithValidation"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -94,70 +74,375 @@
             },
             "problemMatcher": "$msCompile"
         },
+
         {
-            "label": "Project Debug",
+            "label": "Build-NcEngine-Debug",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Project", "Debug", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["--build", "build/NcEngine-Ninja-Debug"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Engine Debug"
+            "dependsOn": "Configure-NcEngine-Debug"
         },
         {
-            "label": "Project Debug-WithValidation",
+            "label": "Build-NcEngine-Debug-WithValidation",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Project", "Debug-WithValidation", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["--build", "build/NcEngine-Ninja-Debug-WithValidation"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Engine Debug-WithValidation"
+            "dependsOn": "Configure-NcEngine-Debug-WithValidation"
         },
         {
-            "label": "Project Release",
+            "label": "Build-NcEngine-Release",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Project", "Release", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["--build", "build/NcEngine-Ninja-Release"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Engine Release"
+            "dependsOn": "Configure-NcEngine-Release"
         },
         {
-            "label": "Project Release-WithEditor",
+            "label": "Build-NcEngine-Release-WithEditor",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Project", "Release-WithEditor", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["--build", "build/NcEngine-Ninja-Release-WithEditor"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Engine Release-WithEditor"
+            "dependsOn": "Configure-NcEngine-Release-WithEditor"
         },
         {
-            "label": "Project Release-WithProfiling",
+            "label": "Build-NcEngine-Release-WithProfiling",
             "type": "shell",
-            "command": "tools/build.bat",
-            "args": ["Project", "Release-WithProfiling", "${config:NcInstallDir}", "Ninja"],
+            "command": "cmake",
+            "args": ["--build", "build/NcEngine-Ninja-Release-WithProfiling"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Engine Release-WithProfiling"
+            "dependsOn": "Configure-NcEngine-Release-WithProfiling"
+        },
+        {
+            "label": "Build-NcEngine-Release-WithValidation",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/NcEngine-Ninja-Release-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-NcEngine-Release-WithValidation"
+        },
+
+        {
+            "label": "Install-NcEngine-Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--install", "build/NcEngine-Ninja-Debug"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Build-NcEngine-Debug"
+        },
+        {
+            "label": "Install-NcEngine-Debug-WithValidation",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--install", "build/NcEngine-Ninja-Debug-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Build-NcEngine-Debug-WithValidation"
+        },
+        {
+            "label": "Install-NcEngine-Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--install", "build/NcEngine-Ninja-Release"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Build-NcEngine-Release"
+        },
+        {
+            "label": "Install-NcEngine-Release-WithEditor",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--install", "build/NcEngine-Ninja-Release-WithEditor"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Build-NcEngine-Release-WithEditor"
+        },
+        {
+            "label": "Install-NcEngine-Release-WithProfiling",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--install", "build/NcEngine-Ninja-Release-WithProfiling"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Build-NcEngine-Release-WithProfiling"
+        },
+        {
+            "label": "Install-NcEngine-Release-WithValidation",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--install", "build/NcEngine-Ninja-Release-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Build-NcEngine-Release-WithValidation"
+        },
+
+        {
+            "label": "Configure-NcEditor-Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "editor", "-B", "build/NcEditor-Ninja-Debug", "--preset", "NcEditor-Ninja-Debug"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Debug"
+        },
+        {
+            "label": "Configure-NcEditor-Release-WithEditor",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "editor", "-B", "build/NcEditor-Ninja-Release-WithEditor", "--preset", "NcEditor-Ninja-Release-WithEditor"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Release-WithEditor"
+        },
+
+        {
+            "label": "Build-NcEditor-Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/NcEditor-Ninja-Debug"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-NcEditor-Debug"
+        },
+        {
+            "label": "Build-NcEditor-Release-WithEditor",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/NcEditor-Ninja-Release-WithEditor"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-NcEditor-Release-WithEditor"
+        },
+
+        {
+            "label": "Configure-Sample-Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "project", "-B", "build/Sample-Ninja-Debug", "--preset", "Sample-Ninja-Debug"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Ninja-Debug"
+        },
+        {
+            "label": "Configure-Sample-Debug-WithValidation",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "project", "-B", "build/Sample-Ninja-Debug-WithValidation", "--preset", "Sample-Ninja-Debug-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Ninja-Debug-WithValidation"
+        },
+        {
+            "label": "Configure-Sample-Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "project", "-B", "build/Sample-Ninja-Release", "--preset", "Sample-Ninja-Release"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Ninja-Ninja-Release"
+        },
+        {
+            "label": "Configure-Sample-Release-WithEditor",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "project", "-B", "build/Sample-Ninja-Release-WithEditor", "--preset", "Sample-Ninja-Release-WithEditor"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Ninja-Release-WithEditor"
+        },
+        {
+            "label": "Configure-Sample-Release-WithProfiling",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "project", "-B", "build/Sample-Ninja-Release-WithProfiling", "--preset", "Sample-Ninja-Release-WithProfiling"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Ninja-Release-WithProfiling"
+        },
+        {
+            "label": "Configure-Sample-Release-WithValidation",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "project", "-B", "build/Sample-Ninja-Release-WithValidation", "--preset", "Sample-Ninja-Release-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Install-NcEngine-Ninja-Release-WithValidation"
+        },
+
+        {
+            "label": "Build-Sample-Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/Sample-Ninja-Debug"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-Sample--Debug"
+        },
+        {
+            "label": "Build-Sample-Debug-WithValidation",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/Sample-Ninja-Debug-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-Sample--Debug-WithValidation"
+        },
+        {
+            "label": "Build-Sample-Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/Sample-Ninja-Release"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-Sample--Ninja-Release"
+        },
+        {
+            "label": "Build-Sample-Release-WithEditor",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-build", "build/Sample-Ninja-Release-WithEditor"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-Sample--Release-WithEditor"
+        },
+        {
+            "label": "Build-Sample-Release-WithProfiling",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/Sample-Ninja-Release-WithProfiling"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-Sample--Release-WithProfiling"
+        },
+        {
+            "label": "Build-Sample-Release-WithValidation",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/Sample-Ninja-Release-WithValidation"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-Sample-Release-WithValidation"
         }
     ]
 }
