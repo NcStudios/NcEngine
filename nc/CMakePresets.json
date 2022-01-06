@@ -1,0 +1,173 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 21,
+      "patch": 0
+    },
+    "configurePresets": [
+      {
+          "name": "Base",
+          "hidden": true,
+          "binaryDir": "${sourceDir}/../build/${presetName}",
+          "cacheVariables": {
+              "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/${presetName}"
+          }
+      },
+      {
+          "name": "Release-Base",
+          "hidden": true,
+          "inherits": [ "Base" ],
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release"
+          }
+      },
+      {
+        "name": "Debug-Base",
+        "hidden": true,
+        "inherits": [ "Base" ],
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "NC_EDITOR_ENABLED": "ON",
+            "NC_DEBUG_RENDERING_ENABLED": "ON",
+            "NC_VERBOSE_LOGGING_ENABLED": "ON"
+        }
+      },
+      {
+        "name": "MSVC-Base",
+        "hidden": true,
+        "generator": "Visual Studio 17 2022"
+      },
+      {
+        "name": "Ninja-Base",
+        "hidden": true,
+        "generator": "Ninja"
+      },
+      {
+        "name": "NcEngine-MSVC-Release",
+        "inherits": [ "Release-Base", "MSVC-Base" ]
+      },
+      {
+        "name": "NcEngine-Ninja-Release",
+        "inherits": [ "Release-Base", "Ninja-Base" ]
+      },
+      {
+        "name": "NcEngine-MSVC-Debug",
+        "inherits": [ "Debug-Base", "MSVC-Base" ]
+      },
+      {
+        "name": "NcEngine-Ninja-Debug",
+        "inherits": [ "Debug-Base", "Ninja-Base" ]
+      },
+      {
+        "name": "NcEngine-MSVC-Debug-WithValidation",
+        "inherits": [ "Debug-Base", "MSVC-Base" ],
+        "cacheVariables": {
+          "NC_VULKAN_VALIDATION_ENABLED": "ON"
+        }
+      },
+      {
+        "name": "NcEngine-Ninja-Debug-WithValidation",
+        "inherits": [ "Debug-Base", "Ninja-Base" ],
+        "cacheVariables": {
+          "NC_VULKAN_VALIDATION_ENABLED": "ON"
+        }
+      },
+      {
+        "name": "NcEngine-MSVC-Release-WithEditor",
+        "inherits": [ "Release-Base", "MSVC-Base" ],
+        "cacheVariables": {
+          "NC_EDITOR_ENABLED": "ON"
+        }
+      },
+      {
+        "name": "NcEngine-Ninja-Release-WithEditor",
+        "inherits": [ "Release-Base", "Ninja-Base" ],
+        "cacheVariables": {
+          "NC_EDITOR_ENABLED": "ON"
+        }
+      },
+      {
+        "name": "NcEngine-MSVC-Release-WithProfiling",
+        "inherits": [ "Release-Base", "MSVC-Base" ],
+        "cacheVariables": {
+          "NC_PROFILING_ENABLED": "ON"
+        }
+      },
+      {
+        "name": "NcEngine-Ninja-Release-WithProfiling",
+        "inherits": [ "Release-Base", "Ninja-Base" ],
+        "cacheVariables": {
+          "NC_PROFILING_ENABLED": "ON"
+        }
+      },
+       {
+         "name": "NcEngine-MSVC-Release-WithValidation",
+         "inherits": [ "Release-Base", "MSVC-Base" ],
+         "cacheVariables": {
+           "NC_EDITOR_ENABLED": "ON",
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
+         }
+       },
+       {
+         "name": "NcEngine-Ninja-Release-WithValidation",
+         "inherits": [ "Release-Base", "Ninja-Base" ],
+         "cacheVariables": {
+           "NC_EDITOR_ENABLED": "ON",
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
+         }
+       }
+    ],
+  "buildPresets": [
+    {
+      "name": "NcEngine-MSVC-Release",
+      "configurePreset": "NcEngine-MSVC-Release"
+    },
+    {
+      "name": "NcEngine-Ninja-Release",
+      "configurePreset": "NcEngine-Ninja-Release"
+    },
+    {
+      "name": "NcEngine-MSVC-Debug",
+      "configurePreset": "NcEngine-MSVC-Debug"
+    },
+    {
+      "name": "NcEngine-Ninja-Debug",
+      "configurePreset": "NcEngine-Ninja-Debug"
+    },
+    {
+      "name": "NcEngine-MSVC-Debug-WithValidation",
+      "configurePreset": "NcEngine-MSVC-Debug-WithValidation"
+    },
+    {
+      "name": "NcEngine-Ninja-Debug-WithValidation",
+      "configurePreset": "NcEngine-Ninja-Debug-WithValidation"
+    },
+    {
+      "name": "NcEngine-MSVC-Release-WithEditor",
+      "configurePreset": "NcEngine-MSVC-Release-WithEditor"
+    },
+    {
+      "name": "NcEngine-Ninja-Release-WithEditor",
+      "configurePreset": "NcEngine-Ninja-Release-WithEditor"
+    },
+    {
+      "name": "NcEngine-MSVC-Release-WithProfiling",
+      "configurePreset": "NcEngine-MSVC-Release-WithProfiling"
+    },
+    {
+      "name": "NcEngine-Ninja-Release-WithProfiling",
+      "configurePreset": "NcEngine-Ninja-Release-WithProfiling"
+    },
+    {
+      "name": "NcEngine-MSVC-Release-WithValidation",
+      "configurePreset": "NcEngine-MSVC-Release-WithValidation"
+    },
+    {
+      "name": "NcEngine-Ninja-Release-WithValidation",
+      "configurePreset": "NcEngine-Ninja-Release-WithValidation"
+    }
+  ]
+}

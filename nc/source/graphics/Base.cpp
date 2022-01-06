@@ -14,7 +14,7 @@ namespace
     const std::vector<const char*> GlobalExtensions = { VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME };
     const std::vector<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 
-    #ifdef NC_USE_VALIDATION
+    #ifdef NC_VULKAN_VALIDATION_ENABLED
         const bool IsValidationLayersEnabled = true;
     #else
         const bool IsValidationLayersEnabled = false;

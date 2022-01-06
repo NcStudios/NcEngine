@@ -33,7 +33,7 @@ catch(const std::exception& e) { std::throw_with_nested(std::runtime_error(std::
 #define IF_THROW(expr, msg)
 #endif
 
-#ifdef VERBOSE_LOGGING_ENABLED
+#ifdef NC_VERBOSE_LOGGING_ENABLED
 /** Log an item with source location data. */
 #define V_LOG(item); \
         nc::debug::LogToDiagnostics(item); \

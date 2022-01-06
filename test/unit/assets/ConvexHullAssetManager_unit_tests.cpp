@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "assets/ConvexHullAssetManager.h"
 
+#include <array>
+#include <string>
+
 using namespace nc;
 
 const auto HullPath1 = "convex_hull1.nca";

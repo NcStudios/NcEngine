@@ -13,9 +13,9 @@ class TaskGraph_unit_tests : public ::testing::Test
 
 TEST_F(TaskGraph_unit_tests, AddGuardedTask_InitializesTask)
 {
-    auto task = taskGraph.AddGuardedTask([](){});
-    EXPECT_TRUE(task.has_work());
-    EXPECT_NE(nullptr, task.data());
+   auto task = taskGraph.AddGuardedTask([](){});
+   EXPECT_TRUE(task.has_work());
+   EXPECT_NE(nullptr, task.data());
 }
 
 TEST_F(TaskGraph_unit_tests, Run_TaskThrows_ThrowsUponCompletingAllTasks)

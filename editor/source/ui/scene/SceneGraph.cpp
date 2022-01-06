@@ -66,7 +66,7 @@ namespace nc::editor
             if(m_projectName.empty())
             {
                 ImGui::Text("No Project Open");
-                ImGui::EndChild();
+                ImGui::End();
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace nc::editor
             if(!m_sceneManagementControl.HasScenes())
             {
                 ImGui::Text("No Scene Open");
-                ImGui::EndChild();
+                ImGui::End();
                 return;
             }
 
@@ -102,15 +102,17 @@ namespace nc::editor
                     auto* tag = m_registry->Get<Tag>(entity);
                     SceneGraphNode(entity, tag, transform);
                 }
-            } ImGui::EndChild();
+            }
+
+            ImGui::EndChild();
 
             if(ImGui::BeginChild("EntityPanel", {0,0}, true))
             {
                 if(m_selectedEntity.Valid())
                     EntityPanel(m_selectedEntity);
+            }
 
-            } ImGui::EndChild();
-
+            ImGui::EndChild();
         }
 
         ImGui::End();

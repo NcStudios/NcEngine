@@ -1,0 +1,47 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 21,
+      "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "Tests-Base",
+            "binaryDir": "${sourceDir}/../build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "Tests-Ninja",
+            "generator": "Ninja",
+            "inherits": "Tests-Base"
+        },
+        {
+            "name": "Tests-MSVC",
+            "generator": "Visual Studio 17 2022",
+            "inherits": "Tests-Base"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Tests-Ninja",
+            "configurePreset": "Tests-Ninja"
+        },
+        {
+            "name": "Tests-MSVC",
+            "configurePreset": "Tests-MSVC"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "Tests-Ninja",
+            "configurePreset": "Tests-Ninja"
+        },
+        {
+            "name": "Tests-MSVC",
+            "configurePreset": "Tests-MSVC"
+        }
+    ]
+}
