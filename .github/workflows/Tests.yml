@@ -1,17 +1,20 @@
 name: Tests
 
 on:
-  push:
-    branches: [ vnext ]
   pull_request:
     branches: [ vnext ]
-
-env:
-  BUILD_TYPE: Debug
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.config'
+      - '**/*.ini'
+      - '**/*.fbx'
+      - '**/*.nca'
+      - '**/*.png'
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
