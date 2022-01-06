@@ -50,8 +50,8 @@ namespace nc
         private:
             inline static StreamState m_state = StreamState{};
 
-            static auto CurrentPropertyName();
-            static auto GetRange() -> Vector2;
+            static auto CurrentPropertyName() noexcept;
+            static auto GetRange() noexcept -> Vector2;
             static void Draw(float& obj);
             static void Draw(int& obj);
             static void Draw(nc::Vector3& obj);
@@ -100,7 +100,7 @@ namespace nc
         return m_state.currentPropertyBase.name;
     }
 
-    inline auto UIStream::GetRange() -> Vector2
+    inline auto UIStream::GetRange() noexcept -> Vector2
     {
         const auto flags = m_state.currentPropertyBase.flags;
         if(flags & PropertyFlags::Position)    return Range::Position;

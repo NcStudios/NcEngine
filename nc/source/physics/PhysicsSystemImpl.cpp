@@ -48,7 +48,7 @@ namespace nc::physics
 
     void PhysicsSystemImpl::DoPhysicsStep(tf::Executor& taskExecutor)
     {
-        #ifdef NC_DEBUG_RENDERING
+        #ifdef NC_DEBUG_RENDERING_ENABLED
         graphics::DebugRenderer::ClearPoints();
         graphics::DebugRenderer::ClearPlanes();
         graphics::DebugRenderer::ClearLines();

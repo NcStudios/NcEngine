@@ -1,23 +1,19 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 project("NcEngine" VERSION "0.1.0" LANGUAGES CXX C)
 
 if(${PROJECT_SOURCE_DIR} EQUAL ${PROJECT_BINARY_DIR})
     message(FATAL_ERROR "Don't be a fool, out-of-source build with your tool.")
 endif()
 
-if(NOT DEFINED NC_BUILD_TYPE)
-    message(FATAL_ERROR "NC_BUILD_TYPE is not defined. This is required in NcEngine and all projects for archive selection.")
-endif()
-
-if(NOT DEFINED NC_ENGINE_INSTALL_DIR)
-    message(FATAL_ERROR "NC_ENGINE_INSTALL_DIR is not defined.")
+if(NOT DEFINED NC_INSTALL_DIR)
+    message(FATAL_ERROR "NC_INSTALL_DIR is not defined.")
 endif()
 
 #OPTIONS
 option(NC_TESTS_ENABLED "Include NcEngine tests" OFF)
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
-option(NC_DEBUG_RENDERING "Enable wireframe primitive rendering" OFF)
-option(NC_USE_VALIDATION "Use Vulkan validation layers" OFF)
+option(NC_DEBUG_RENDERING_ENABLED "Enable wireframe primitive rendering" OFF)
+option(NC_VULKAN_VALIDATION_ENABLED "Use Vulkan validation layers" OFF)
 option(NC_PROFILING_ENABLED "Include Optick profiling" OFF)
 
 #VARIABLES
@@ -28,13 +24,10 @@ set(LIB_DIR "${ROOT_DIR}/lib")
 set(NC_INCLUDE_DIR "${ROOT_DIR}/include")
 set(NC_SOURCE_DIR "${ROOT_DIR}/source")
 set(NC_EXTERNAL_DIR "${ROOT_DIR}/external")
-set(WIN32_LINK_FLAGS "-lgdi32 -ld3d11 -ld3dcompiler_47 -lwinmm -lws2_32")
 set(WIN32_DEFINITIONS -DWIN32_LEAN_AND_MEAN)
-set(RTAUDIO_LINK_FLAGS "-lole32 -lwinmm -lksuser -lmfplat -lmfuuid -lwmcodecdspuuid")
 set(ENGINE_LIB "NcEngineLib")
 set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
-set(NC_INSTALL_DIR "${NC_ENGINE_INSTALL_DIR}/NcEngine/${NC_BUILD_TYPE}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
@@ -63,16 +56,16 @@ if(NC_EDITOR_ENABLED)
     target_compile_definitions(NcEngineLib PUBLIC NC_EDITOR_ENABLED)
 endif()
 
-if(NC_DEBUG_RENDERING)
-    target_compile_definitions(NcEngineLib PUBLIC NC_DEBUG_RENDERING)
+if(NC_DEBUG_RENDERING_ENABLED)
+    target_compile_definitions(NcEngineLib PUBLIC NC_DEBUG_RENDERING_ENABLED)
 endif()
 
 if(NC_PROFILING_ENABLED)
     target_compile_definitions(NcEngineLib PUBLIC NC_PROFILING_ENABLED)
 endif()
 
-if(NC_USE_VALIDATION)
-    target_compile_definitions(NcEngineLib PUBLIC NC_USE_VALIDATION)
+if(NC_VULKAN_VALIDATION_ENABLED)
+    target_compile_definitions(NcEngineLib PUBLIC NC_VULKAN_VALIDATION_ENABLED)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -80,8 +73,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DNC_DEBUG_BUILD)
 endif()
 
-if(VERBOSE_LOGGING_ENABLED)
-    target_compile_definitions(NcEngineLib PUBLIC VERBOSE_LOGGING_ENABLED)
+if(NC_VERBOSE_LOGGING_ENABLED)
+    target_compile_definitions(NcEngineLib PUBLIC NC_VERBOSE_LOGGING_ENABLED)
 endif()
 
 # Properties
@@ -105,8 +98,14 @@ find_package(Vulkan REQUIRED)
 target_link_libraries(NcEngineLib
     INTERFACE
         ${IMGUI_LIB}
-        ${RTAUDIO_LINK_FLAGS}
-        ${WIN32_LINK_FLAGS}
+        gdi32
+        ws2_32
+        ole32
+        winmm
+        ksuser
+        mfplat
+        mfuuid
+        wmcodecdspuuid
         #{ENET_LIB} add for project requiring networking
     PUBLIC
         Vulkan::Vulkan

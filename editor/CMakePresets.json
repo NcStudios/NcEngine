@@ -1,0 +1,145 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 21,
+      "patch": 0
+    },
+    "configurePresets": [
+      {
+          "name": "Base",
+          "hidden": true,
+          "binaryDir": "${sourceDir}/../build/${presetName}"
+      },
+      {
+          "name": "Release-Base",
+          "hidden": true,
+          "inherits": [ "Base" ],
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release"
+          }
+      },
+      {
+        "name": "Debug-Base",
+        "hidden": true,
+        "inherits": [ "Base" ],
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "NC_EDITOR_ENABLED": "ON",
+            "NC_DEBUG_RENDERING_ENABLED": "ON",
+            "NC_TESTS_ENABLED": "ON",
+            "NC_VERBOSE_LOGGING_ENABLED": "ON"
+        }
+      },
+      {
+        "name": "MSVC-Base",
+        "hidden": true,
+        "generator": "Visual Studio 17 2022"
+      },
+      {
+        "name": "Ninja-Base",
+        "hidden": true,
+        "generator": "Ninja"
+      },
+       {
+         "name": "NcEditor-MSVC-Debug",
+         "inherits": [ "Debug-Base", "MSVC-Base" ],
+         "cacheVariables": {
+           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Debug"
+         }
+       },
+       {
+         "name": "NcEditor-Ninja-Debug",
+         "inherits": [ "Debug-Base", "Ninja-Base" ],
+         "cacheVariables": {
+           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Debug"
+         }
+       },
+       {
+         "name": "NcEditor-MSVC-Debug-WithValidation",
+         "inherits": [ "Debug-Base", "MSVC-Base" ],
+         "cacheVariables": {
+           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Debug-WithValidation",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
+         }
+       },
+       {
+         "name": "NcEditor-Ninja-Debug-WithValidation",
+         "inherits": [ "Debug-Base", "Ninja-Base" ],
+         "cacheVariables": {
+           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Debug-WithValidation",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
+         }
+       },
+       {
+         "name": "NcEditor-MSVC-Release-WithEditor",
+         "inherits": [ "Release-Base", "MSVC-Base" ],
+         "cacheVariables": {
+           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithEditor",
+           "NC_EDITOR_ENABLED": "ON"
+         }
+       },
+      {
+        "name": "NcEditor-Ninja-Release-WithEditor",
+        "inherits": [ "Release-Base", "Ninja-Base" ],
+        "cacheVariables": {
+          "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithEditor",
+          "NC_EDITOR_ENABLED": "ON"
+        }
+      },
+       {
+         "name": "NcEditor-MSVC-Release-WithValidation",
+         "inherits": [ "Release-Base", "MSVC-Base" ],
+         "cacheVariables": {
+           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithValidation",
+           "NC_EDITOR_ENABLED": "ON",
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
+         }
+       },
+       {
+         "name": "NcEditor-Ninja-Release-WithValidation",
+         "inherits": [ "Release-Base", "Ninja-Base" ],
+         "cacheVariables": {
+           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithValidation",
+           "NC_EDITOR_ENABLED": "ON",
+           "NC_DEBUG_RENDERING_ENABLED": "ON",
+           "NC_VULKAN_VALIDATION_ENABLED": "ON"
+         }
+       }
+    ],
+  "buildPresets": [
+    {
+      "name": "NcEditor-MSVC-Debug",
+      "configurePreset": "NcEditor-MSVC-Debug"
+    },
+    {
+      "name": "NcEditor-Ninja-Debug",
+      "configurePreset": "NcEditor-Ninja-Debug"
+    },
+    {
+      "name": "NcEditor-MSVC-Debug-WithValidation",
+      "configurePreset": "NcEditor-MSVC-Debug-WithValidation"
+    },
+    {
+      "name": "NcEditor-Ninja-Debug-WithValidation",
+      "configurePreset": "NcEditor-Ninja-Debug-WithValidation"
+    },
+    {
+      "name": "NcEditor-MSVC-Release-WithEditor",
+      "configurePreset": "NcEditor-MSVC-Release-WithEditor"
+    },
+    {
+      "name": "NcEditor-Ninja-Release-WithEditor",
+      "configurePreset": "NcEditor-Ninja-Release-WithEditor"
+    },
+    {
+      "name": "NcEditor-MSVC-Release-WithValidation",
+      "configurePreset": "NcEditor-MSVC-Release-WithValidation"
+    },
+    {
+      "name": "NcEditor-Ninja-Release-WithValidation",
+      "configurePreset": "NcEditor-Ninja-Release-WithValidation"
+    }
+  ]
+}

@@ -13,7 +13,7 @@ namespace nc
     class Camera;
     class EnvironmentImpl;
     class Registry;
-    #ifdef NC_DEBUG_RENDERING
+    #ifdef NC_DEBUG_RENDERING_ENABLED
     namespace physics { class PhysicsSystemImpl; }
     #endif
 }

@@ -35,7 +35,7 @@ namespace nc::graphics
     bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
     {
         return frameData.colliderDebugWidget.has_value() 
-        #ifndef NC_DEBUG_RENDERING
+        #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
         || !m_graphics->GetDebugData()->points.empty()
@@ -111,7 +111,7 @@ namespace nc::graphics
     bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
         return frameData.colliderDebugWidget.has_value() 
-        #ifndef NC_DEBUG_RENDERING
+        #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
         || !m_graphics->GetDebugData()->points.empty()
@@ -133,7 +133,7 @@ namespace nc::graphics
             cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
 
-        #ifdef NC_DEBUG_RENDERING
+        #ifdef NC_DEBUG_RENDERING_ENABLED
         const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(m_meshPath);
 
         for (const auto& point : m_graphics->GetDebugData()->points)
