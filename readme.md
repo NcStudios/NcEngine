@@ -1,5 +1,6 @@
 # NcEngine
-![Tests](https://github.com/McCallisterRomer/NCEngine/actions/workflows/Tests.yml/badge.svg)
+[![Tests](https://github.com/McCallisterRomer/NCEngine/actions/workflows/Tests.yml/badge.svg)](https://github.com/McCallisterRomer/NCEngine/actions?query=workflow%3ATests)
+[![License](https://img.shields.io/github/license/McCallisterRomer/NCEngine.svg)](https://github.com/McCallisterRomer/NCEngine/blob/master/LICENSE)
 
 <p align="center">
   <img src="docs/Logo.png" />

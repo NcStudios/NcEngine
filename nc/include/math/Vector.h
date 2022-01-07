@@ -12,10 +12,10 @@ namespace nc
         static constexpr Vector2 Splat(float v) noexcept { return Vector2{v, v}; }
         static constexpr Vector2 Zero()  noexcept { return Vector2{ 0, 0}; }
         static constexpr Vector2 One()   noexcept { return Vector2{ 1, 1}; }
-        static constexpr Vector2 Up()    noexcept { return Vector2{ 1, 0}; }
-        static constexpr Vector2 Down()  noexcept { return Vector2{-1, 0}; }
-        static constexpr Vector2 Left()  noexcept { return Vector2{ 0,-1}; }
-        static constexpr Vector2 Right() noexcept { return Vector2{ 0, 1}; }
+        static constexpr Vector2 Up()    noexcept { return Vector2{ 0, 1}; }
+        static constexpr Vector2 Down()  noexcept { return Vector2{ 0,-1}; }
+        static constexpr Vector2 Left()  noexcept { return Vector2{-1, 0}; }
+        static constexpr Vector2 Right() noexcept { return Vector2{ 1, 0}; }
     };
 
     struct Vector3
@@ -45,7 +45,7 @@ namespace nc
         constexpr explicit Vector4(const Vector3& v, float w) noexcept : x{v.x}, y{v.y}, z{v.z}, w{w} {}
         static constexpr Vector4 Splat(float v) noexcept { return Vector4{v, v, v, v}; }
         static constexpr Vector4 Zero() noexcept { return Vector4(0, 0, 0, 0); }
-        static constexpr Vector4 One() noexcept { return Vector4(1, 1, 1, 1); }
+        static constexpr Vector4 One()  noexcept { return Vector4(1, 1, 1, 1); }
     };
 
     /* Vector2 Functions */
