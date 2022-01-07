@@ -1,5 +1,6 @@
 add_subdirectory(alloc)
 add_subdirectory(assets)
 add_subdirectory(ecs)
+add_subdirectory(math)
 add_subdirectory(network)
 add_subdirectory(task)

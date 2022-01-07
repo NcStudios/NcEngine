@@ -1,4 +1,5 @@
 # NcEngine
+![Tests](https://github.com/McCallisterRomer/NCEngine/actions/workflows/Tests.yml/badge.svg)
 
 <p align="center">
   <img src="docs/Logo.png" />
