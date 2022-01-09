@@ -24,10 +24,10 @@ namespace nc::physics
             cur->UpdateWorldPoints(m_registry);
 
             /** The objects have moved apart. Remove their manifold. */
-            if(cur->contacts.empty())
+            if(cur->Contacts().empty())
             {
-                m_manifoldCache.AddToRemoved(cur->event.first, cur->event.second);
-                m_manifoldCache.Remove(cur->event.first, cur->event.second);
+                m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
+                m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
             }
         }
     }
@@ -49,10 +49,10 @@ namespace nc::physics
         auto end = manifolds.rend();
         for(auto cur = manifolds.rbegin(); cur != end; ++cur)
         {
-            if(cur->event.state == NarrowEvent::State::Stale)
+            if(cur->Event().state == NarrowEvent::State::Stale)
             {
-                m_manifoldCache.AddToRemoved(cur->event.first, cur->event.second);
-                m_manifoldCache.Remove(cur->event.first, cur->event.second);
+                m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
+                m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
             }
         }
     }
@@ -63,7 +63,7 @@ namespace nc::physics
 
         for(auto& manifold : m_manifoldCache.Data())
         {
-            for(auto& contact : manifold.contacts)
+            for(auto& contact : manifold.Contacts())
             {
                 const auto& constraint = constraints[index];
 
@@ -121,30 +121,30 @@ namespace nc::physics
         auto manifoldEnd = manifolds.rend();
         for(auto cur = manifolds.rbegin(); cur != manifoldEnd; ++cur)
         {
-            switch(cur->event.state)
+            switch(cur->Event().state)
             {
                 [[likely]] case NarrowEvent::State::Persisting:
                 {
-                    cur->event.state = NarrowEvent::State::Stale;
+                    cur->Event().state = NarrowEvent::State::Stale;
                     break;
                 }
                 case NarrowEvent::State::New:
                 {
-                    const auto e1 = cur->event.first;
-                    const auto e2 = cur->event.second;
+                    const auto e1 = cur->Event().first;
+                    const auto e2 = cur->Event().second;
                     if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
                         m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionEnter(e2);
                     if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
                         m_registry->Get<AutoComponentGroup>(e2)->SendOnCollisionEnter(e1);
 
-                    cur->event.state = NarrowEvent::State::Stale;
+                    cur->Event().state = NarrowEvent::State::Stale;
                     break;
                 }
                 [[unlikely]] case NarrowEvent::State::Stale:
                 {
                     /** This isn't expected to be detected here, but just in case. */
-                    const auto e1 = cur->event.first;
-                    const auto e2 = cur->event.second;
+                    const auto e1 = cur->Event().first;
+                    const auto e2 = cur->Event().second;
                     if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
                         m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionExit(e2);
                     if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))

@@ -323,8 +323,8 @@ namespace nc::physics
 
         for(const auto& manifold : manifolds)
         {
-            const Entity entityA = manifold.event.first;
-            const Entity entityB = manifold.event.second;
+            const Entity entityA = manifold.Event().first;
+            const Entity entityB = manifold.Event().second;
             auto* transformA = m_registry->Get<Transform>(entityA);
             auto* transformB = m_registry->Get<Transform>(entityB);
             auto* physBodyA = m_registry->Get<PhysicsBody>(entityA);
@@ -333,10 +333,10 @@ namespace nc::physics
             if constexpr(EnableDirectPositionCorrection)
             {
                 auto deepestContact = manifold.DeepestContact();
-                m_positionConstraints.emplace_back(transformA, transformB, manifold.event.eventType, deepestContact.normal, deepestContact.depth);
+                m_positionConstraints.emplace_back(transformA, transformB, deepestContact.normal, deepestContact.depth, manifold.Event().eventType);
             }
 
-            for(const auto& contact : manifold.contacts)
+            for(const auto& contact : manifold.Contacts())
             {
                 #if USE_DEBUG_RENDERING
                 graphics::DebugRenderer::AddPoint(contact.worldPointA);

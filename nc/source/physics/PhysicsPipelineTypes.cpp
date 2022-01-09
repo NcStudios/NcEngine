@@ -9,30 +9,65 @@
 namespace
 {
     using namespace nc;
+    using namespace nc::physics;
 
     constexpr float SquareContactBreakDistance = physics::ContactBreakDistance * physics::ContactBreakDistance;
 
-    int ClosestAxis(float x, float y, float z, float w)
+    constexpr auto CollisionEventTypeLookup = std::array<std::array<physics::CollisionEventType, 6u>, 6u>
+    {
+        std::array<physics::CollisionEventType, 6u> /** Physics */
+        {
+            CollisionEventType::TwoBodyPhysics,    CollisionEventType::Trigger,          CollisionEventType::FirstBodyPhysics,
+            CollisionEventType::Trigger,           CollisionEventType::FirstBodyPhysics, CollisionEventType::Trigger
+        },
+        std::array<physics::CollisionEventType, 6u> /** Physics-Trigger */
+        {
+            CollisionEventType::Trigger,           CollisionEventType::Trigger,          CollisionEventType::Trigger,
+            CollisionEventType::Trigger,           CollisionEventType::Trigger,          CollisionEventType::Trigger
+        },
+        std::array<physics::CollisionEventType, 6u> /** Collider */
+        {
+            CollisionEventType::SecondBodyPhysics, CollisionEventType::Trigger,          CollisionEventType::None,
+            CollisionEventType::None,              CollisionEventType::None,             CollisionEventType::Trigger
+        },
+        std::array<physics::CollisionEventType, 6u> /** Collider-Trigger */
+        {
+            CollisionEventType::Trigger,           CollisionEventType::Trigger,          CollisionEventType::None,
+            CollisionEventType::None,              CollisionEventType::Trigger,          CollisionEventType::Trigger
+        },
+        std::array<physics::CollisionEventType, 6u> /** Physics-Kinematic */
+        {
+            CollisionEventType::SecondBodyPhysics, CollisionEventType::Trigger,          CollisionEventType::None,
+            CollisionEventType::Trigger,           CollisionEventType::None,             CollisionEventType::Trigger
+        },
+        std::array<physics::CollisionEventType, 6u> /** Physics-Kinematic-Trigger */
+        {
+            CollisionEventType::Trigger,           CollisionEventType::Trigger,          CollisionEventType::Trigger,
+            CollisionEventType::Trigger,           CollisionEventType::Trigger,          CollisionEventType::Trigger
+        }
+    };
+
+    size_t ClosestAxis(float x, float y, float z, float w)
     {
         x = fabs(x); y = fabs(y); z = fabs(z); w = fabs(w);
-        int maxIndex = 0;
+        size_t maxIndex = 0u;
         float maxVal = x;
 
         if(y > maxVal)
         {
-            maxIndex = 1;
+            maxIndex = 1u;
             maxVal = y;
         }
 
         if(z > maxVal)
         {
-            maxIndex = 2;
+            maxIndex = 2u;
             maxVal = z;
         }
 
         if(w > maxVal)
         {
-            maxIndex = 3;
+            maxIndex = 3u;
         }
 
         return maxIndex;
@@ -49,147 +84,77 @@ namespace
 
 namespace nc::physics
 {
-    auto GetColliderInteractionType(bool isTrigger, const PhysicsBody* body) -> ColliderInteractionType
+    ClientObjectProperties::ClientObjectProperties(bool isTrigger, bool noBody, bool isKinematic)
+        : m_index{0u}
     {
-        // note: could probably store this in collider... have physics body send message in c'tor
-        // to update as it already gets the collider pointer
-
-        if(body)
-        {
-            if(body->IsKinematic())
-            {
-                if(isTrigger)
-                {
-                    return ColliderInteractionType::KinematicPhysicsTrigger;
-                }
-
-                return ColliderInteractionType::KinematicPhysics;
-            }
-
-            // need to add kinematic body
-            if(isTrigger)
-            {
-                return ColliderInteractionType::PhysicsTrigger;
-            }
-
-            return ColliderInteractionType::Physics;
-        }
-
-        if(isTrigger)
-        {
-            return ColliderInteractionType::ColliderTrigger;
-        }
-
-        return ColliderInteractionType::Collider;
+        if(isTrigger) m_index += Trigger;
+        if(noBody) m_index += NoBody;
+        if(isKinematic) m_index += Kinematic;
     }
 
-    auto GetEventType(ColliderInteractionType typeA, ColliderInteractionType typeB) -> CollisionEventType
+    ClientObjectProperties::ClientObjectProperties(bool isTrigger, const PhysicsBody* body)
+        : m_index{0u}
     {
-        if(typeA == ColliderInteractionType::Collider)
-        {
-            if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::SecondBodyPhysics;
-            
-            if(typeB == ColliderInteractionType::PhysicsTrigger || typeB == ColliderInteractionType::KinematicPhysicsTrigger)
-                return CollisionEventType::Trigger;
-            
-            return CollisionEventType::None;
-        }
-
-        if(typeA == ColliderInteractionType::Physics)
-        {
-            if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::TwoBodyPhysics;
-            
-            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
-                return CollisionEventType::FirstBodyPhysics;
-
-            return CollisionEventType::Trigger;
-        }
-
-        if(typeA == ColliderInteractionType::KinematicPhysics)
-        {
-            if(typeB == ColliderInteractionType::Physics)
-                return CollisionEventType::SecondBodyPhysics;
-            
-            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::KinematicPhysics)
-                return CollisionEventType::None;
-            
-            return CollisionEventType::Trigger;
-        }
-
-        if(typeA == ColliderInteractionType::ColliderTrigger)
-        {
-            if(typeB == ColliderInteractionType::Collider || typeB == ColliderInteractionType::ColliderTrigger)
-                return CollisionEventType::None;
-            
-            return CollisionEventType::Trigger;
-        }
-
-        if(typeA == ColliderInteractionType::PhysicsTrigger)
-        {
-            return CollisionEventType::Trigger;
-        }
-
-        if(typeA == ColliderInteractionType::KinematicPhysicsTrigger)
-        {
-            return CollisionEventType::Trigger;
-        }
-
-        throw nc::NcError("Unknown ColliderInteractionType");
+        if(isTrigger) m_index |= ClientObjectProperties::Trigger;
+        if(!body) m_index |= ClientObjectProperties::NoBody;
+        else if(body->IsKinematic()) m_index |= ClientObjectProperties::Kinematic;
     }
 
-    int Manifold::AddContact(const Contact& contact)
+    auto ClientObjectProperties::EventType(ClientObjectProperties second) const -> CollisionEventType
     {
-        event.state = NarrowEvent::State::Persisting;
-        int insertIndex = contacts.size();
-
-        if(insertIndex >= 4)
-        {
-            insertIndex = SortPoints(contact);
-
-            if(insertIndex < 0)
-                insertIndex = 0;
-
-            contacts[insertIndex] = contact;
-        }
-        else
-        {
-            contacts.push_back(contact);
-        }
-
-        return insertIndex;
+        return CollisionEventTypeLookup.at(m_index).at(second.m_index);
     }
 
-    const Contact& Manifold::DeepestContact() const
+    Manifold::Manifold(Entity a, Entity b, CollisionEventType type, const Contact& contact)
+        : m_event{a, b, type},
+          m_contacts{contact}
     {
-        IF_THROW(contacts.size() == 0u, "Manifold::GetDeepestContact - Empty contacts");
+    }
+
+    void Manifold::AddContact(const Contact& contact)
+    {
+        m_event.state = NarrowEvent::State::Persisting;
+        auto insertIndex = m_contacts.size();
+
+        if(insertIndex < Manifold::MaxPointCount)
+        {
+            m_contacts.push_back(contact);
+            return;
+        }
+
+        insertIndex = SortPoints(contact);
+        m_contacts[insertIndex] = contact;
+    }
+
+    auto Manifold::DeepestContact() const -> const Contact&
+    {
+        IF_THROW(m_contacts.size() == 0u, "Manifold::GetDeepestContact - Empty contacts");
 
         size_t maxPenetrationIndex = 0;
-        float maxPenetration = contacts[0].depth;
-        for(size_t i = 1u; i < contacts.size(); ++i)
+        float maxPenetration = m_contacts[0].depth;
+        for(size_t i = 1u; i < m_contacts.size(); ++i)
         {
-            if(contacts[i].depth > maxPenetration)
+            if(m_contacts[i].depth > maxPenetration)
             {
                 maxPenetrationIndex = i;
-                maxPenetration = contacts[i].depth;
+                maxPenetration = m_contacts[i].depth;
             }
         }
 
-        return contacts[maxPenetrationIndex];
+        return m_contacts[maxPenetrationIndex];
     }
 
-    int Manifold::SortPoints(const Contact& contact)
+    auto Manifold::SortPoints(const Contact& contact) -> size_t
     {
         int maxPenetrationIndex = -1;
 
         float maxPenetration = contact.depth;
-        for(size_t i = 0; i < contacts.size(); ++i)
+        for(size_t i = 0; i < m_contacts.size(); ++i)
         {
-            if(contacts[i].depth > maxPenetration)
+            if(m_contacts[i].depth > maxPenetration)
             {
                 maxPenetrationIndex = i;
-                maxPenetration = contacts[i].depth;
+                maxPenetration = m_contacts[i].depth;
             }
         }
 
@@ -197,20 +162,20 @@ namespace nc::physics
         float res1 = 0.0f;
         float res2 = 0.0f;
         float res3 = 0.0f;
-        
+
         if(maxPenetrationIndex != 0)
-            res0 = CalcArea4Points(contact.localPointA, contacts[1].localPointA, contacts[2].localPointA, contacts[3].localPointA);
+            res0 = CalcArea4Points(contact.localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
 
         if(maxPenetrationIndex != 1)
-            res1 = CalcArea4Points(contact.localPointA, contacts[0].localPointA, contacts[2].localPointA, contacts[3].localPointA);
+            res1 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
 
         if(maxPenetrationIndex != 2)
-            res2 = CalcArea4Points(contact.localPointA, contacts[0].localPointA, contacts[1].localPointA, contacts[3].localPointA);
+            res2 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[3].localPointA);
 
         if(maxPenetrationIndex != 3)
-            res3 = CalcArea4Points(contact.localPointA, contacts[0].localPointA, contacts[1].localPointA, contacts[2].localPointA);
+            res3 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA);
 
-        int biggestArea = ClosestAxis(res0, res1, res2, res3);
+        size_t biggestArea = ClosestAxis(res0, res1, res2, res3);
         return biggestArea;
     }
 
@@ -221,18 +186,18 @@ namespace nc::physics
          *  cleaner to handle this through registy callbacks, but we can't because the BspTree uses the
          *  ConcaveCollider callback. Long story short, I think we need to support multiple callbacks per
          *  component type. */
-        const auto* transformA = registry->Get<Transform>(event.first);
-        const auto* transformB = registry->Get<Transform>(event.second);
+        const auto* transformA = registry->Get<Transform>(m_event.first);
+        const auto* transformB = registry->Get<Transform>(m_event.second);
         if(!transformA || !transformB)
         {
-            contacts.clear();
+            m_contacts.clear();
             return;
         }
 
         const auto& aMatrix = transformA->TransformationMatrix();
         const auto& bMatrix = transformB->TransformationMatrix();
 
-        for(auto cur = contacts.rbegin(); cur != contacts.rend(); ++cur)
+        for(auto cur = m_contacts.rbegin(); cur != m_contacts.rend(); ++cur)
         {
             auto& contact = *cur;
 
@@ -249,8 +214,8 @@ namespace nc::physics
 
             if(contact.depth < ContactBreakDistance)
             {
-                *cur = contacts.back();
-                contacts.pop_back();
+                *cur = m_contacts.back();
+                m_contacts.pop_back();
                 continue;
             }
 
@@ -259,8 +224,8 @@ namespace nc::physics
             auto distance2d = SquareMagnitude(projectedDifference);
             if(distance2d > SquareContactBreakDistance)
             {
-                *cur = contacts.back();
-                contacts.pop_back();
+                *cur = m_contacts.back();
+                m_contacts.pop_back();
             }
         }
     }

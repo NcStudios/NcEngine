@@ -13,18 +13,9 @@ namespace nc::math
 
     template<std::totally_ordered T>
     constexpr T Min(T a, T b) noexcept { return a < b ? a : b; }
-    
+
     template<std::totally_ordered T>
     constexpr T Max(T a, T b) noexcept { return a > b ? a : b; }
-
-    template<std::floating_point T>
-    constexpr T Ceiling(T val) noexcept { return (int)(val + 1); }
-    
-    template<std::floating_point T>
-    constexpr T Floor (T val) noexcept { return (int) val; }
-    
-    template<std::floating_point T>
-    constexpr T Round (T val) noexcept { return (int)(val + 0.5); }
 
     template<std::totally_ordered T>
     constexpr T Clamp(T val, T min, T max) noexcept
@@ -52,7 +43,7 @@ namespace nc::math
 
     template<std::floating_point T>
     constexpr T DegreesToRadians(T degrees) noexcept { return degrees * std::numbers::pi / 180.0; }
-    
+
     template<std::floating_point T>
     constexpr T RadiansToDegrees(T radians) noexcept { return radians * 180.0 / std::numbers::pi; }
 
