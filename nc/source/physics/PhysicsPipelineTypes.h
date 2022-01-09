@@ -9,20 +9,9 @@ namespace nc { class PhysicsBody; class Registry; }
 
 namespace nc::physics
 {
-    /** Specifies how a Collider interacts with other colliders. */
-    enum class ColliderInteractionType
-    {
-        Collider,               // Default Collider
-        Physics,                // Collider and PhysicsBody
-        KinematicPhysics,       // Collider and PhysicsBody with isKinematic == true
-        ColliderTrigger,        // Collider with isTrigger == true
-        PhysicsTrigger,         // Collider with isTrigger == true and PhysicsBody
-        KinematicPhysicsTrigger // Collider and PhysicsBody with both flags == true
-    };
-
     /** Specifies how to respond to a collision event. A physics response may be
      *  restricted to a single body but will always notify both entities. */
-    enum class CollisionEventType
+    enum class CollisionEventType : uint8_t
     {
         None,
         Trigger,
@@ -31,8 +20,25 @@ namespace nc::physics
         SecondBodyPhysics
     };
 
-    auto GetColliderInteractionType(bool isTrigger, const PhysicsBody* body) -> ColliderInteractionType;
-    auto GetEventType(ColliderInteractionType typeA, ColliderInteractionType typeB) -> CollisionEventType;
+    /** Properties describing how an object interacts with the world. */
+    class ClientObjectProperties
+    {
+        static constexpr uint8_t Trigger   = 0b00000001;
+        static constexpr uint8_t NoBody    = 0b00000010;
+        static constexpr uint8_t Kinematic = 0b00000100;
+
+        public:
+            ClientObjectProperties(bool isTrigger, bool noBody, bool isKinematic);
+            ClientObjectProperties(bool isTrigger, const PhysicsBody* body);
+
+            auto EventType(ClientObjectProperties second) const -> CollisionEventType;
+            auto IsTrigger() const noexcept -> bool { return m_index & Trigger; }
+            auto HasPhysicsBody() const noexcept -> bool { return !(m_index & NoBody); }
+            auto IsKinematic() const noexcept -> bool { return m_index & Kinematic; }
+
+        private:
+            uint8_t m_index;
+    };
 
     /** A proxy is any object that provides access to physics-related object data. */
     template<class T>
@@ -41,7 +47,7 @@ namespace nc::physics
         { a.Matrix() } -> std::same_as<DirectX::FXMMATRIX>;
         { a.Volume() } -> std::same_as<const BoundingVolume&>;
         { a.Estimate() } -> std::same_as<const Sphere&>;
-        { a.InteractionType() } -> std::same_as<ColliderInteractionType>;
+        { a.Properties() } -> std::same_as<ClientObjectProperties>;
         { a.Id() } -> std::equality_comparable;
     };
 
@@ -115,16 +121,29 @@ namespace nc::physics
         std::vector<Contact> contacts = {};
     };
 
-    /** A persistent list of contact points for a pair. */
-    struct Manifold
+    /** A persistent list of contact points for a pair. Retains at most four points,
+     *  prioritizing those that maximize depth and area. */
+    class Manifold
     {
-        NarrowEvent event;
-        std::vector<Contact> contacts;
+        static constexpr size_t MaxPointCount = 4u;
 
-        int AddContact(const Contact& contact);
-        int SortPoints(const Contact& contact);
-        void UpdateWorldPoints(const Registry* registry);
-        const Contact& DeepestContact() const;
+        public:
+            Manifold(Entity a, Entity b, CollisionEventType type, const Contact& contact);
+
+            void AddContact(const Contact& contact);
+            void UpdateWorldPoints(const Registry* registry);
+
+            auto DeepestContact() const -> const Contact&;
+            auto Event() const -> const NarrowEvent& { return m_event; }
+            auto Event() -> NarrowEvent& { return m_event; }
+            auto Contacts() const -> std::span<const Contact> { return m_contacts; }
+            auto Contacts() -> std::span<Contact> { return m_contacts; }
+
+        private:
+            NarrowEvent m_event;
+            std::vector<Contact> m_contacts;
+
+            auto SortPoints(const Contact& contact) -> size_t;
     };
 
     template<class T>

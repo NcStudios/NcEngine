@@ -105,7 +105,7 @@ namespace nc::physics
                 {
                     auto& a = m_proxies[iUnsorted];
                     auto& b = m_proxies[m_mapToUnsorted[jSorted]];
-                    const auto eventType = GetEventType(a.InteractionType(), b.InteractionType());
+                    const auto eventType = a.Properties().EventType(b.Properties());
                     if(eventType != CollisionEventType::None)
                     {
                         if(eventType == CollisionEventType::Trigger)

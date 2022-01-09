@@ -49,9 +49,9 @@ namespace nc::physics
     {
         Transform* transformA;
         Transform* transformB;
-        CollisionEventType eventType;
         Vector3 normal;
         float depth;
+        CollisionEventType eventType;
     };
 
     struct Constraints

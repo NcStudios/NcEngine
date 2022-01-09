@@ -23,8 +23,8 @@ namespace nc::physics
             auto volume = collider.GetVolume();
             auto estimate = collider.EstimateBoundingVolume(matrix);
             auto body = m_registry->Get<PhysicsBody>(entity);
-            auto interactionType = GetColliderInteractionType(collider.IsTrigger(), body);
-            m_proxies.emplace_back(matrix, volume, estimate, entity, interactionType, nullptr);
+            auto properties = ClientObjectProperties(collider.IsTrigger(), body);
+            m_proxies.emplace_back(matrix, volume, estimate, entity, properties, nullptr);
         }
     }
 }
