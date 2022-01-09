@@ -92,7 +92,7 @@ namespace nc::graphics
         return AttachmentSlot;
     }
 
-    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment, const AttachmentSlot& resolveAttachment)
+    vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment)
     {
         vk::SubpassDescription subpassDescription{};
         subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
@@ -158,10 +158,10 @@ namespace nc::graphics
         return subpass;
     }
 
-    Subpass CreateSubpass(const AttachmentSlot& depthAttachment, const AttachmentSlot& colorAttachment, const AttachmentSlot& resolveAttachment)
+    Subpass CreateSubpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment)
     {
         Subpass subpass{};
-        subpass.description = CreateSubpassDescription(depthAttachment, colorAttachment, resolveAttachment);
+        subpass.description = CreateSubpassDescription(colorAttachment, depthAttachment, resolveAttachment);
         subpass.dependencies =
         {
             CreateSubpassDependency(VK_SUBPASS_EXTERNAL,

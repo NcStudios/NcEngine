@@ -21,7 +21,6 @@
 #endif
 
 #include <span>
-#include <iostream>
 
 namespace nc::graphics
 {
@@ -32,12 +31,9 @@ namespace nc::graphics
           m_shaderResources{shaderResources},
           m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
           m_dimensions{dimensions},
-        //   m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
-        //   m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, m_graphics->GetSwapchainPtr()->GetFormat(), false, m_graphics->GetBasePtr()->GetMaxSamplesCount()) }
-                    m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, vk::SampleCountFlagBits::e1) },
-          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, m_graphics->GetSwapchainPtr()->GetFormat(), false, vk::SampleCountFlagBits::e1) }
+          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
+          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, m_graphics->GetSwapchainPtr()->GetFormat(), false, m_graphics->GetBasePtr()->GetMaxSamplesCount()) }
     {
-        std::cout << "Renderer CTOR" << std::endl;
         RegisterRenderPasses();
         RegisterTechniques();
     }
@@ -82,7 +78,7 @@ namespace nc::graphics
         auto& colorResolveView = m_colorBuffer->GetImageView();
         
         uint32_t index = 0;
-        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView, colorResolveView}, RenderPassManager::LitShadingPass, index++); }
+        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, RenderPassManager::LitShadingPass, index++); }
     }
 
     void Renderer::RegisterTechniques()

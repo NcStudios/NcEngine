@@ -32,16 +32,14 @@ namespace nc::graphics
         /** Lit shading pass */
         std::array<AttachmentSlot, 3> litAttachmentSlots
         {
-            // CreateAttachmentSlot(0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, base->GetMaxSamplesCount()),
-            // CreateAttachmentSlot(1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, base->GetMaxSamplesCount()),
-            CreateAttachmentSlot(0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1),
-            CreateAttachmentSlot(1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, vk::SampleCountFlagBits::e1),
+            CreateAttachmentSlot(0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, base->GetMaxSamplesCount()),
+            CreateAttachmentSlot(1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, base->GetMaxSamplesCount()),
             CreateAttachmentSlot(2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1)
         };
 
         std::array<Subpass, 1> litSubpasses
         {
-            CreateSubpass(litAttachmentSlots.at(1), litAttachmentSlots.at(0), litAttachmentSlots.at(2))
+            CreateSubpass(litAttachmentSlots.at(0), litAttachmentSlots.at(1), litAttachmentSlots.at(2))
         };
         
         Create(RenderPassManager::LitShadingPass, litAttachmentSlots, litSubpasses, ClearValue::DepthAndColor, dimensions);

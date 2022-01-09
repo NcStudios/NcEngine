@@ -41,6 +41,7 @@ namespace nc::config
         float farClip;
         float frameUpdateInterval;
         bool useShadows;
+        unsigned antialiasing;
     };
 
     struct PhysicsSettings

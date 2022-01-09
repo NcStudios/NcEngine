@@ -3,6 +3,7 @@
 #include "graphics/Commands.h"
 #include "stb/stb_image.h"
 #include "debug/NcError.h"
+#include "config/Config.h"
 
 #include <set>
 #include <string>
@@ -90,7 +91,9 @@ namespace nc::graphics
       m_allocator{},
       m_commandPool{},
       m_imguiDescriptorPool{},
-      m_renderingDescriptorPool{}
+      m_renderingDescriptorPool{},
+      m_samplesCount{},
+      m_samplesInitialized{false}
     {
         CreateInstance();
         CreateSurface(hwnd, hinstance);
@@ -307,6 +310,7 @@ namespace nc::graphics
         initInfo.DescriptorPool = m_imguiDescriptorPool;
         initInfo.MinImageCount = 3;
         initInfo.ImageCount = 3;
+        initInfo.MSAASamples = VkSampleCountFlagBits(GetMaxSamplesCount());
 
         ImGui_ImplVulkan_Init(&initInfo, defaultPass);
 
@@ -326,44 +330,42 @@ namespace nc::graphics
 
     vk::SampleCountFlagBits Base::GetMaxSamplesCount()
     {
+        if (m_samplesInitialized == true)
+        {
+            return m_samplesCount;
+        }
+
+        m_samplesInitialized = true;
+
         vk::PhysicalDeviceProperties properties{};
         m_physicalDevice.getProperties(&properties);
-        std::cout << "Getting Samples Count" << std::endl;
+
+        auto antialiasingSamples = nc::config::GetGraphicsSettings().antialiasing;
+        vk::SampleCountFlags countsFromConfig = vk::SampleCountFlagBits::e1;
+
+        if      (antialiasingSamples >= 64) countsFromConfig = vk::SampleCountFlagBits::e64;
+        else if (antialiasingSamples >= 32) countsFromConfig = vk::SampleCountFlagBits::e32;
+        else if (antialiasingSamples >= 16) countsFromConfig = vk::SampleCountFlagBits::e16;
+        else if (antialiasingSamples >= 8)  countsFromConfig = vk::SampleCountFlagBits::e8;
+        else if (antialiasingSamples >= 4)  countsFromConfig = vk::SampleCountFlagBits::e4;
+        else if (antialiasingSamples >= 2)  countsFromConfig = vk::SampleCountFlagBits::e2;
+        else countsFromConfig = vk::SampleCountFlagBits::e1;
 
         auto counts = properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
-
-        if (counts & vk::SampleCountFlagBits::e64) 
+        if (countsFromConfig < counts)
         {
-            std::cout << "64" << std::endl;
-            return vk::SampleCountFlagBits::e64;
-        }
-        if (counts & vk::SampleCountFlagBits::e32) 
-        {
-            std::cout << "32" << std::endl;
-            return vk::SampleCountFlagBits::e32;
-        }
-        if (counts & vk::SampleCountFlagBits::e16) 
-        {
-            std::cout << "16" << std::endl;
-            return vk::SampleCountFlagBits::e16;
-        }
-        if (counts & vk::SampleCountFlagBits::e8) 
-        {
-            std::cout << "8" << std::endl;
-            return vk::SampleCountFlagBits::e8;
-        }
-        if (counts & vk::SampleCountFlagBits::e4) 
-        {
-            std::cout << "4" << std::endl;
-            return vk::SampleCountFlagBits::e4;
-        }
-        if (counts & vk::SampleCountFlagBits::e2) 
-        {
-            std::cout << "2" << std::endl;
-            return vk::SampleCountFlagBits::e2;
+            counts = countsFromConfig;
         }
 
-        return vk::SampleCountFlagBits::e1;
+        if      (counts & vk::SampleCountFlagBits::e64) m_samplesCount = vk::SampleCountFlagBits::e64;
+        else if (counts & vk::SampleCountFlagBits::e32) m_samplesCount = vk::SampleCountFlagBits::e32;
+        else if (counts & vk::SampleCountFlagBits::e16) m_samplesCount = vk::SampleCountFlagBits::e16;
+        else if (counts & vk::SampleCountFlagBits::e8)  m_samplesCount = vk::SampleCountFlagBits::e8;
+        else if (counts & vk::SampleCountFlagBits::e4)  m_samplesCount = vk::SampleCountFlagBits::e4;
+        else if (counts & vk::SampleCountFlagBits::e2)  m_samplesCount = vk::SampleCountFlagBits::e2;
+        else m_samplesCount = vk::SampleCountFlagBits::e1;
+
+        return m_samplesCount;
     }
 
     void Base::CreateLogicalDevice()
@@ -714,7 +716,6 @@ namespace nc::graphics
     void Base::CreateAllocator()
     {
         VmaAllocatorCreateInfo allocatorInfo{};
-        allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
         allocatorInfo.physicalDevice = m_physicalDevice;
         allocatorInfo.device = m_logicalDevice;
         allocatorInfo.instance = m_instance;

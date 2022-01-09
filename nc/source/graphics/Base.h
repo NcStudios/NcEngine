@@ -106,6 +106,7 @@ namespace nc::graphics
             vk::Queue m_presentQueue;
             vk::Format m_depthFormat;
             vk::SampleCountFlagBits m_samplesCount;
+            bool m_samplesInitialized;
 
             // @todo: The below resources don't need to live here, they should be managed by some resource management class.
             uint32_t m_bufferIndex;

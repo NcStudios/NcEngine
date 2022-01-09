@@ -1,8 +1,6 @@
 #include "RenderTarget.h"
 #include "graphics/Base.h"
 
-#include <iostream>
-
 namespace nc::graphics
 {
     RenderTarget::RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples)
@@ -11,7 +9,6 @@ namespace nc::graphics
           m_view{},
           m_memoryIndex{0}
     {
-        std::cout << "In RenderTarget ctor" << std::endl;
         auto format = isDepthStencil ? base->GetDepthFormat() : vk::Format::eR8G8B8A8Srgb;
 
         constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
