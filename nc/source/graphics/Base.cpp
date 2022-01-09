@@ -8,7 +8,6 @@
 #include <set>
 #include <string>
 #include <algorithm>
-#include <iostream>
 
 namespace
 {
@@ -104,8 +103,6 @@ namespace nc::graphics
         CreateAllocator();
         QueryDepthFormatSupport();
         CreateDescriptorPools();
-
-        std::cout << "End of Base ctor" << std::endl;
     }
 
     Base::~Base() noexcept
