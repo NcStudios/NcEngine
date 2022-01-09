@@ -52,12 +52,12 @@ namespace nc::graphics
                 using namespace DirectX;
                 auto start_v = XMLoadVector3(&positionStart);
                 auto end_v = XMLoadVector3(&positionEnd);
-                auto distance_v = XMVector3Length(end_v - start_v);
+                auto distance_v = XMVector3Length(XMVectorSubtract(end_v, start_v));
                 float distance = XMVectorGetX(distance_v);
-                auto line_v = XMVector3Normalize(end_v - start_v);
+                auto line_v = XMVector3Normalize(XMVectorSubtract(end_v, start_v));
                 auto orthogonal_v = XMVector3Normalize(XMVector3Cross(line_v,  g_XMIdentityR0));
                 auto angle_v = XMVector3AngleBetweenNormals(line_v, g_XMIdentityR0);
-                auto midpoint_v = start_v + line_v * XMVectorScale(distance_v, 0.5);
+                auto midpoint_v = XMVectorAdd(start_v, XMVectorMultiply(line_v, XMVectorScale(distance_v, 0.5)));
                 float angle = DirectX::XMVectorGetW(angle_v);
                 auto rotationMatrix = XMMatrixRotationNormal(orthogonal_v, -angle);
                 auto model = XMMatrixScaling(distance, 0.01f, 0.01f) *
