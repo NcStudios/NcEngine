@@ -19,7 +19,7 @@ namespace nc
     auto Transform::TransformationMatrix() const -> DirectX::FXMMATRIX { return m_worldMatrix; }
 }
 
-TEST(ClientObjectProperties_unit_tests, GetEventType_ColliderVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_ColliderVsOthers)
 {
     auto colliderVsCollider = ColliderProperties.EventType(ColliderProperties);
     auto colliderVsPhysics = ColliderProperties.EventType(PhysicsProperties);
@@ -36,7 +36,7 @@ TEST(ClientObjectProperties_unit_tests, GetEventType_ColliderVsOthers)
     EXPECT_EQ(colliderVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
 }
 
-TEST(ClientObjectProperties_unit_tests, GetEventType_PhysicsVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_PhysicsVsOthers)
 {
     auto physicsVsCollider = PhysicsProperties.EventType(ColliderProperties);
     auto physicsVsPhysics = PhysicsProperties.EventType(PhysicsProperties);
@@ -53,7 +53,7 @@ TEST(ClientObjectProperties_unit_tests, GetEventType_PhysicsVsOthers)
     EXPECT_EQ(physicsVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
 }
 
-TEST(ClientObjectProperties_unit_tests, GetEventType_KinematicPhysicsVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_KinematicPhysicsVsOthers)
 {
     auto kinematicPhysicsVsCollider = PhysicsKinematicProperties.EventType(ColliderProperties);
     auto kinematicPhysicsVsPhysics = PhysicsKinematicProperties.EventType(PhysicsProperties);
@@ -70,7 +70,7 @@ TEST(ClientObjectProperties_unit_tests, GetEventType_KinematicPhysicsVsOthers)
     EXPECT_EQ(kinematicPhysicsVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
 }
 
-TEST(ClientObjectProperties_unit_tests, GetEventType_ColliderTriggerVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_ColliderTriggerVsOthers)
 {
     auto colliderTriggerVsCollider = ColliderTriggerProperties.EventType(ColliderProperties);
     auto colliderTriggerVsPhysics = ColliderTriggerProperties.EventType(PhysicsProperties);
@@ -87,7 +87,7 @@ TEST(ClientObjectProperties_unit_tests, GetEventType_ColliderTriggerVsOthers)
     EXPECT_EQ(colliderTriggerVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
 }
 
-TEST(ClientObjectProperties_unit_tests, GetEventType_PhysicsTriggerVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_PhysicsTriggerVsOthers)
 {
     auto physicsTriggerVsCollider = PhysicsTriggerProperties.EventType(ColliderProperties);
     auto physicsTriggerVsPhysics = PhysicsTriggerProperties.EventType(PhysicsProperties);
@@ -104,7 +104,7 @@ TEST(ClientObjectProperties_unit_tests, GetEventType_PhysicsTriggerVsOthers)
     EXPECT_EQ(physicsTriggerVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
 }
 
-TEST(ClientObjectProperties_unit_tests, GetEventType_KinematicPhysicsTriggerVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_KinematicPhysicsTriggerVsOthers)
 {
     auto kinematicPhysicsTriggerVsCollider = PhysicsKinematicTriggerProperties.EventType(ColliderProperties);
     auto kinematicPhysicsTriggerVsPhysics = PhysicsKinematicTriggerProperties.EventType(PhysicsProperties);

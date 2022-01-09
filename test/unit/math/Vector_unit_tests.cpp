@@ -172,8 +172,6 @@ TEST(Vector_unit_tests, Vector2_HasAnyZeroElement)
     EXPECT_TRUE(HasAnyZeroElement(c));
 }
 
-////////////////////////////////////
-
 TEST(Vector_unit_tests, Vector3_Initialization)
 {
     auto defaultVec = Vector3{};
@@ -342,8 +340,6 @@ TEST(Vector_unit_tests, Vector3_HasAnyZeroElement)
     EXPECT_TRUE(HasAnyZeroElement(b));
     EXPECT_TRUE(HasAnyZeroElement(c));
 }
-
-/////////
 
 TEST(Vector_unit_tests, Vector4_Initialization)
 {
