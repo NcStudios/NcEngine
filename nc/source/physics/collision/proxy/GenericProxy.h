@@ -12,14 +12,14 @@ namespace nc::physics
         BoundingVolume volume;
         Sphere estimate;
         Entity entity;
-        ColliderInteractionType interactionType;
+        ClientObjectProperties properties;
         GenericProxy* spatialData;
 
         /** Methods to satisfy Proxy concept. */
-        auto Matrix()          const noexcept -> DirectX::FXMMATRIX      { return matrix;          }
-        auto Volume()          const noexcept -> const BoundingVolume&   { return volume;          }
-        auto Estimate()        const noexcept -> const Sphere&           { return estimate;        }
-        auto Id()              const noexcept -> Entity                  { return entity;          }
-        auto InteractionType() const noexcept -> ColliderInteractionType { return interactionType; }
+        auto Matrix()     const noexcept -> DirectX::FXMMATRIX      { return matrix;     }
+        auto Volume()     const noexcept -> const BoundingVolume&   { return volume;     }
+        auto Estimate()   const noexcept -> const Sphere&           { return estimate;   }
+        auto Id()         const noexcept -> Entity                  { return entity;     }
+        auto Properties() const noexcept -> ClientObjectProperties  { return properties; }
     };
 }

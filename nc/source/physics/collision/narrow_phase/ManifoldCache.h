@@ -10,8 +10,8 @@ namespace nc::physics
         public:
             bool PairEqual(Entity a, Entity b, const Manifold& manifold)
             {
-                return (a == manifold.event.first && b == manifold.event.second) ||
-                       (a == manifold.event.second && b == manifold.event.first);
+                return (a == manifold.Event().first && b == manifold.Event().second) ||
+                       (a == manifold.Event().second && b == manifold.Event().first);
             }
 
             void AddToExisting(Manifold* existing, CollisionEventType, const Contact& contact)
@@ -21,16 +21,12 @@ namespace nc::physics
 
             auto ConstructNew(Entity a, Entity b, CollisionEventType type, const Contact& contact) -> Manifold
             {
-                return Manifold
-                {
-                    .event{.first = a, .second = b, .eventType = type},
-                    .contacts = {contact}
-                };
+                return Manifold{a, b, type, contact};
             }
 
             auto Hash(const Manifold& manifold) -> uint32_t
             {
-                return PairCache<ManifoldCache, Manifold>::Hash(manifold.event.first, manifold.event.second);
+                return PairCache<ManifoldCache, Manifold>::Hash(manifold.Event().first, manifold.Event().second);
             }
 
             void AddToRemoved(Entity a, Entity b)
