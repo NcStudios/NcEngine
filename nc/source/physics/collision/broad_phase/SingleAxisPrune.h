@@ -78,7 +78,7 @@ namespace nc::physics
         }
 
         /** Sentinel */
-        m_sortedEntries[count].min = FLT_MAX;
+        m_sortedEntries.emplace_back(Sphere{}, FLT_MAX, FLT_MAX);
     }
 
     template<ProxyCache ProxyCacheType>

@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [ vnext ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.config'
+      - '**/*.ini'
+      - '**/*.fbx'
+      - '**/*.nca'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - uses: ilammy/msvc-dev-cmd@v1
+ 
+    - uses: humbletim/setup-vulkan-sdk@v1.0.3
+ 
+    - name: Configure CMake
+      run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/Tests-MSVC --preset Tests-MSVC
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build/Tests-MSVC
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build/Tests-MSVC
+      run: ctest -V
