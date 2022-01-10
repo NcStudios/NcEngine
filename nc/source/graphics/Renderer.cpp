@@ -31,7 +31,8 @@ namespace nc::graphics
           m_shaderResources{shaderResources},
           m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
           m_dimensions{dimensions},
-          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true) }
+          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
+          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
     {
         RegisterRenderPasses();
         RegisterTechniques();
@@ -40,6 +41,7 @@ namespace nc::graphics
     Renderer::~Renderer() noexcept
     {
         m_depthStencil.reset();
+        m_colorBuffer.reset();
         m_renderPasses.reset();
     }
     
@@ -73,8 +75,10 @@ namespace nc::graphics
         /** Lit shading pass */
         auto& colorImageViews = swapchain->GetColorImageViews();
         auto& depthImageView = m_depthStencil->GetImageView();
+        auto& colorResolveView = m_colorBuffer->GetImageView();
         uint32_t index = 0;
-        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{imageView, depthImageView}, RenderPassManager::LitShadingPass, index++); }
+
+        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, RenderPassManager::LitShadingPass, index++); }
     }
 
     void Renderer::RegisterTechniques()

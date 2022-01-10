@@ -49,6 +49,7 @@ namespace
     constexpr auto NearClipKey = "near_clip"sv;
     constexpr auto FarClipKey = "far_clip"sv;
     constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
+    constexpr auto AntialiasingKey = "antialiasing"sv;
 
     void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config* out)
     {
@@ -116,6 +117,8 @@ namespace
             out->graphicsSettings.farClip = std::stof(value);
         else if (key == UseShadowsKey)
             out->graphicsSettings.useShadows = std::stoi(value);
+        else if (key == AntialiasingKey)
+            out->graphicsSettings.antialiasing = std::stoi(value);
         else
             throw nc::NcError(std::string{"Unknown config key: "} + key);
     };
@@ -194,7 +197,8 @@ namespace nc::config
              << TargetFpsKey             << '=' << config.graphicsSettings.targetFPS           << '\n'
              << NearClipKey              << '=' << config.graphicsSettings.nearClip            << '\n'
              << FarClipKey               << '=' << config.graphicsSettings.farClip             << '\n'
-             << UseShadowsKey            << '=' << config.graphicsSettings.useShadows;
+             << UseShadowsKey            << '=' << config.graphicsSettings.useShadows          << '\n'
+             << AntialiasingKey          << '=' << config.graphicsSettings.antialiasing;
     }
 
     bool Validate(const Config& config)
@@ -215,7 +219,8 @@ namespace nc::config
                  (config.graphicsSettings.targetFPS != 0) &&
                  (config.graphicsSettings.frameUpdateInterval > 0.0f) &&
                  (config.graphicsSettings.nearClip > 0.0f) &&
-                 (config.graphicsSettings.farClip > 0.0f)};
+                 (config.graphicsSettings.farClip > 0.0f) &&
+                 (config.graphicsSettings.antialiasing > 0)};
     }
 
     /* Internal function implementation */

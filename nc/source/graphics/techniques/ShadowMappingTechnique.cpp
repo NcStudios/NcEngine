@@ -94,7 +94,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, vk::CullModeFlagBits::eFront, 1.0f, true);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMulitsampleCreateInfo();
+        auto multisampling = CreateMulitsampleCreateInfo(vk::SampleCountFlagBits::e1);
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
