@@ -26,8 +26,9 @@ namespace nc::physics
             /** The objects have moved apart. Remove their manifold. */
             if(cur->Contacts().empty())
             {
-                m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
-                m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
+                auto event = cur->Event();
+                m_manifoldCache.AddToRemoved(event.first, event.second);
+                m_manifoldCache.Remove(event.first, event.second);
             }
         }
     }

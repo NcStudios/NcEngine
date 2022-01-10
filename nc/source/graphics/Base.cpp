@@ -669,7 +669,6 @@ namespace nc::graphics
     void Base::CreateAllocator()
     {
         VmaAllocatorCreateInfo allocatorInfo{};
-        allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
         allocatorInfo.physicalDevice = m_physicalDevice;
         allocatorInfo.device = m_logicalDevice;
         allocatorInfo.instance = m_instance;

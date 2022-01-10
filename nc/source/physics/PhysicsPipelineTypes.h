@@ -80,7 +80,7 @@ namespace nc::physics
     /** A broad phase reads proxies from a proxy cache and filters pairs
      *  before the narrow phase is run. */
     template<class T>
-    concept BroadPhase = requires(T phase, T::proxy_cache_type* cache)
+    concept BroadPhase = requires(T phase, typename T::proxy_cache_type* cache)
     {
         phase.Update(cache);
         phase.FindPairs();
