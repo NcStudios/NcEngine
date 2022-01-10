@@ -40,7 +40,7 @@ namespace nc::graphics
         m_view = m_base->GetDevice().createImageView(imageViewInfo);
     }
 
-    RenderTarget::RenderTarget(Base* base, Vector2 dimensions, vk::Format format, bool isDepthStencil, vk::SampleCountFlagBits numSamples)
+    RenderTarget::RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format)
     : m_base{base},
       m_image{},
       m_view{},

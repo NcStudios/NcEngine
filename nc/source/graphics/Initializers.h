@@ -14,8 +14,6 @@ namespace nc::graphics
 
 namespace nc::graphics
 {
-    constexpr vk::SampleCountFlagBits SampleCount = vk::SampleCountFlagBits::e1;
-
     enum class AttachmentType : uint8_t
     {
         Color,
@@ -70,7 +68,7 @@ namespace nc::graphics
     vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode);
 
     // Attachments
-    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp,  vk::SampleCountFlagBits numSamples);
+    vk::AttachmentDescription CreateAttachmentDescription(AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples);
     vk::AttachmentReference CreateAttachmentReference(AttachmentType type, uint32_t attachmentIndex);
     AttachmentSlot CreateAttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples);
 

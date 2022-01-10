@@ -11,7 +11,7 @@ namespace nc::graphics
     {
         public:
             RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples);
-            RenderTarget(Base* base, Vector2 dimensions, vk::Format depthFormat, bool isDepthStencil, vk::SampleCountFlagBits numSamples);
+            RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat);
             ~RenderTarget() noexcept;
 
             const vk::Image& GetImage() const noexcept;
