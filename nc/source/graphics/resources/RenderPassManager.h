@@ -47,7 +47,7 @@ namespace nc::graphics
 
             Graphics* m_graphics;
             std::vector<RenderPass> m_renderPasses;
-            std::vector<FrameBufferAttachment> m_renderTargets;
+            std::vector<FrameBufferAttachment> m_frameBufferAttachments;
     };
 
     template <std::derived_from<ITechnique> T>

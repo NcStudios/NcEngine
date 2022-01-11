@@ -67,6 +67,7 @@ namespace nc::graphics
             vk::DescriptorPool* GetRenderingDescriptorPoolPtr() noexcept;
             vma::Allocator* GetAllocator() noexcept;
             vma::Allocation* GetBufferAllocation(uint32_t index);
+            vk::SampleCountFlagBits GetMaxSamplesCount();
 
             uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage memoryUsageType, vk::Buffer* createdBuffer);
             uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage, vk::SampleCountFlagBits numSamples);
@@ -104,6 +105,8 @@ namespace nc::graphics
             vk::Queue m_graphicsQueue;
             vk::Queue m_presentQueue;
             vk::Format m_depthFormat;
+            vk::SampleCountFlagBits m_samplesCount;
+            bool m_samplesInitialized;
 
             // @todo: The below resources don't need to live here, they should be managed by some resource management class.
             uint32_t m_bufferIndex;

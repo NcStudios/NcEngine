@@ -44,5 +44,6 @@ namespace nc::graphics
             std::unique_ptr<RenderPassManager> m_renderPasses;
             Vector2 m_dimensions;
             std::unique_ptr<RenderTarget> m_depthStencil;
+            std::unique_ptr<RenderTarget> m_colorBuffer;
     };
 }
