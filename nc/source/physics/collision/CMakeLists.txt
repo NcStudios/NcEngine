@@ -6,4 +6,3 @@ target_sources(NcEngineLib
 
 add_subdirectory(broad_phase)
 add_subdirectory(narrow_phase)
-add_subdirectory(proxy)

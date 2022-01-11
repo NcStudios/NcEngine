@@ -272,7 +272,8 @@ namespace nc::physics
         cacheImpulsesTask.name("Narrow Phase - Cache Impulses");
         integrateTask.name("Integrate");
         notifyEventsTask.name("Narrow Phase - Notify Events");
-        m_tasks.GetTaskFlow().dump(std::cout);
+        std::ofstream outFile{"taskflow_physicspipeline_out.txt"};
+        m_tasks.GetTaskFlow().dump(outFile);
         #endif
     }
 }

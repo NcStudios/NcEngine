@@ -3,8 +3,8 @@
 #include "physics/PhysicsSystem.h"
 #include "ClickableSystem.h"
 #include "PhysicsPipeline.h"
-#include "collision/proxy/PerFrameProxyCache.h"
 #include "collision/broad_phase/SingleAxisPrune.h"
+#include "proxy/PerFrameProxyCache.h"
 
 namespace nc::physics
 {

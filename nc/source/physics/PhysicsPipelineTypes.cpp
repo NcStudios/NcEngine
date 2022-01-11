@@ -197,6 +197,9 @@ namespace nc::physics
         const auto& aMatrix = transformA->TransformationMatrix();
         const auto& bMatrix = transformB->TransformationMatrix();
 
+        size_t removeCount = 0u;
+        size_t removePosition = m_contacts.empty() ? 0u : m_contacts.size() - 1u;
+
         for(auto cur = m_contacts.rbegin(); cur != m_contacts.rend(); ++cur)
         {
             auto& contact = *cur;
@@ -214,8 +217,8 @@ namespace nc::physics
 
             if(contact.depth < ContactBreakDistance)
             {
-                *cur = m_contacts.back();
-                m_contacts.pop_back();
+                *cur = m_contacts.at(removePosition--);
+                ++removeCount;
                 continue;
             }
 
@@ -224,9 +227,18 @@ namespace nc::physics
             auto distance2d = SquareMagnitude(projectedDifference);
             if(distance2d > SquareContactBreakDistance)
             {
-                *cur = m_contacts.back();
-                m_contacts.pop_back();
+                *cur = m_contacts.at(removePosition--);
+                ++removeCount;
+                continue;
             }
+        }
+
+        /** 'cur' is invalidated when removing the last element. MSVC's iterator debug checks
+         *  can segfault on the next advance, so we just delay all removals. */
+        while (removeCount != 0)
+        {
+           m_contacts.pop_back();
+           --removeCount;
         }
     }
 }
