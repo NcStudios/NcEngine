@@ -51,3 +51,4 @@ target_link_libraries(ClientObjectProperties_unit_tests
 add_test(ClientObjectProperties_unit_tests ClientObjectProperties_unit_tests)
 
 add_subdirectory(collision)
+add_subdirectory(proxy)

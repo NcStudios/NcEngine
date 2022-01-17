@@ -13,7 +13,7 @@ namespace nc::physics
         struct PipelineDescription
         {
             using multithreaded = std::true_type;
-            using proxy_cache = PerFrameProxyCache;
+            using proxy_cache = PerFrameProxyCache<Registry>;
             using proxy = proxy_cache::proxy_type;
             using broad_phase = SingleAxisPrune<proxy_cache>;
             using concave_phase = BspTree;
