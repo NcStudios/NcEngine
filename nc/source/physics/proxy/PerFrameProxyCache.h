@@ -47,7 +47,7 @@ namespace nc::physics
             auto estimate = collider.EstimateBoundingVolume(matrix);
             auto body = m_client->template Get<PhysicsBody>(entity);
             auto properties = ClientObjectProperties(collider.IsTrigger(), body);
-            m_proxies.emplace_back(matrix, volume, estimate, entity, properties, nullptr);
+            m_proxies.emplace_back(matrix, volume, estimate, entity, properties);
         }
     }
 }
