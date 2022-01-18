@@ -15,13 +15,13 @@
 namespace
 {
     // Angle of light's field of view.
-    constexpr float LIGHT_FIELD_OF_VIEW = 60.0f;
+    constexpr float LightFieldOfView = nc::math::DegreesToRadians(60.0f);
 
     // Near clip of light's frustum
-    constexpr float NEAR_CLIP = 0.25f;
+    constexpr float NearClip = 0.25f;
 
     // Far clip of light's frustum
-    constexpr float FAR_CLIP = 96.0f;
+    constexpr float FarClip = 96.0f;
 }
 
 namespace nc
@@ -29,13 +29,13 @@ namespace nc
     PointLight::PointLight(Entity entity, PointLightInfo info)
         : ComponentBase{entity},
           m_info{info},
-          m_lightProjectionMatrix{DirectX::XMMatrixPerspectiveRH(math::DegreesToRadians(LIGHT_FIELD_OF_VIEW), 1.0f, NEAR_CLIP, FAR_CLIP)},
+          m_lightProjectionMatrix{DirectX::XMMatrixPerspectiveRH(LightFieldOfView, 1.0f, NearClip, FarClip)},
           m_isDirty{false}
     {
         m_info.castShadows = config::GetGraphicsSettings().useShadows;
     }
 
-    void PointLight::SetInfo(PointLightInfo info)
+    void PointLight::SetInfo(const PointLightInfo& info)
     {
         m_isDirty = true;
         m_info = info;
@@ -49,11 +49,8 @@ namespace nc
 
     DirectX::XMMATRIX PointLight::CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix)
     {
-        using namespace DirectX;
-        XMVECTOR scl_v, rot_v, pos_v;
-        XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transformMatrix);
-        auto look_v = XMVector3Rotate(g_XMIdentityR2, rot_v);
-        return XMMatrixLookAtRH(pos_v, XMVectorAdd(pos_v, look_v), g_XMNegIdentityR1) * m_lightProjectionMatrix;
+        const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
+        return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * m_lightProjectionMatrix;
     }
 
     bool PointLight::Update(const Vector3& position, const DirectX::XMMATRIX& lightViewProj)

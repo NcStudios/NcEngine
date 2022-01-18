@@ -39,7 +39,7 @@ namespace nc
             PointLight(Entity entity, PointLightInfo info);
 
             auto GetInfo() const -> const PointLightInfo& { return m_info; }
-            void SetInfo(PointLightInfo info);
+            void SetInfo(const PointLightInfo& info);
 
         private:
             alignas(PointLightInfoSize) PointLightInfo m_info;
