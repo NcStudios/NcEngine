@@ -23,7 +23,7 @@ namespace nc::graphics
 
     // How many frames can be rendered concurrently.
     // Each frame requires its own pair of semaphores.
-    const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+    constexpr uint32_t MaxFramesInFlight = 2u;
 
     enum class QueueFamilyType : uint8_t
     {

@@ -32,7 +32,7 @@ namespace nc::graphics
     {
         auto device = m_base->GetDevice();
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        for (size_t i = 0; i < MaxFramesInFlight; ++i)
         {
             device.destroySemaphore(m_imageAvailableSemaphores[i]);
             device.destroySemaphore(m_renderFinishedSemaphores[i]);
@@ -53,16 +53,16 @@ namespace nc::graphics
     }
 
     // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
-    // the semaphores below tell the GPU when either step can begin for a single image. Vulkan will render multiple swapchain images very rapidly, so MAX_FRAMES_IN_FLIGHT here creates 
-    // a pair of semaphores for each frame up to MAX_FRAMES_IN_FLIGHT. 
-    // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MAX_FRAMES_IN_FLIGHT amount of frame-render jobs to the command queues. 
+    // the semaphores below tell the GPU when either step can begin for a single image. Vulkan will render multiple swapchain images very rapidly, so MaxFramesInFlight here creates 
+    // a pair of semaphores for each frame up to MaxFramesInFlight. 
+    // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MaxFramesInFlight amount of frame-render jobs to the command queues. 
     // The fences in framesInFlightFences (one per frame in MAX_FRAMES_PER_FLIGHT) prevent more frame-render jobs than fences from being submitted until one frame-render job completes.
     // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
     void Swapchain::CreateSynchronizationObjects()
     {
-        m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_framesInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_imageAvailableSemaphores.resize(MaxFramesInFlight);
+        m_renderFinishedSemaphores.resize(MaxFramesInFlight);
+        m_framesInFlightFences.resize(MaxFramesInFlight);
         m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr); // To start, no frames in flight are using swapchain images, so explicitly initialize to nullptr.
 
         vk::SemaphoreCreateInfo semaphoreInfo{};
@@ -70,7 +70,7 @@ namespace nc::graphics
         fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
 
         auto device =  m_base->GetDevice();
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+        for (size_t i = 0; i < MaxFramesInFlight; ++i)
         {
             m_imageAvailableSemaphores[i] = device.createSemaphore(semaphoreInfo);
             m_renderFinishedSemaphores[i] = device.createSemaphore(semaphoreInfo);
@@ -276,7 +276,7 @@ namespace nc::graphics
 
     void Swapchain::IncrementFrameIndex()
     {
-        m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+        m_currentFrameIndex = (m_currentFrameIndex + 1) % MaxFramesInFlight;
     }
 
     void Swapchain::ResetFrameFence()

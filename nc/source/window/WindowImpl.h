@@ -16,16 +16,16 @@ namespace nc::window
     class WindowImpl
     {
         public:
-            WindowImpl(HINSTANCE instance);
+            WindowImpl();
             ~WindowImpl() noexcept;
             WindowImpl(const WindowImpl& other) = delete;
             WindowImpl(WindowImpl&& other) = delete;
             WindowImpl& operator=(const WindowImpl& other) = delete;
             WindowImpl& operator=(WindowImpl&& other) = delete;
 
-            HWND GetHWND() const noexcept;
-            HINSTANCE GetHINSTANCE() const noexcept;
-            Vector2 GetDimensions() const noexcept;
+            auto GetHWND() const noexcept -> HWND;
+            auto GetHINSTANCE() const noexcept -> HINSTANCE;
+            auto GetDimensions() const noexcept -> Vector2;
 
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept;
             void BindGraphicsSetClearColorCallback(std::function<void(std::array<float, 4>)> callback) noexcept;

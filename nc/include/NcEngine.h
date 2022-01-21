@@ -1,6 +1,5 @@
 #pragma once
 
-#include "platform/win32/HInstanceForwardDecl.h"
 #include "ecs/Registry.h"
 #include "ecs/component/All.h"
 #include "MainCamera.h"
@@ -32,5 +31,5 @@ namespace nc
             virtual auto UI() noexcept -> UISystem* = 0;
     };
 
-    auto InitializeNcEngine(HINSTANCE hInstance, std::string_view configPath, bool useEditorMode = false) -> std::unique_ptr<NcEngine>;
+    auto InitializeNcEngine(std::string_view configPath, bool useEditorMode = false) -> std::unique_ptr<NcEngine>;
 }
