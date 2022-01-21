@@ -115,6 +115,9 @@ namespace nc
             template<Component T, Component U>
             auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
 
+            template<Component T, class Predicate>
+            void Sort(Predicate&& comparesLessThan);
+
             template<Component T>
             void ReserveHeadroom(size_t additionalRequiredCount);
 
@@ -357,6 +360,12 @@ namespace nc
             std::span<T>{referenceComponents.begin(), sharedRangeSize},
             std::span<U>{targetComponents.begin(), sharedRangeSize}
         };
+    }
+
+    template<Component T, class Predicate>
+    void Registry::Sort(Predicate&& comparesLessThan)
+    {
+        StorageFor<T>()->Sort(std::move(comparesLessThan));
     }
 
     template<Component T>
