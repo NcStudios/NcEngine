@@ -365,7 +365,7 @@ namespace nc
     template<Component T, class Predicate>
     void Registry::Sort(Predicate&& comparesLessThan)
     {
-        StorageFor<T>()->Sort(std::move(comparesLessThan));
+        StorageFor<T>()->Sort(std::forward<Predicate>(comparesLessThan));
     }
 
     template<Component T>
