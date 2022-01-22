@@ -10,18 +10,18 @@
 
 namespace nc
 {
-    auto InitializeNcEngine(HINSTANCE hInstance, std::string_view configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
+    auto InitializeNcEngine(std::string_view configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
     {
         config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         V_LOG("Constructing Engine Instance");
-        return std::make_unique<Engine>(hInstance, useEditorMode);
+        return std::make_unique<Engine>(useEditorMode);
     }
 
     /* Engine */
-    Engine::Engine(HINSTANCE hInstance, bool useEditorMode)
+    Engine::Engine(bool useEditorMode)
         : m_mainCamera{},
-          m_window{ hInstance },
+          m_window{},
           m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
           m_ecs{&m_graphics, config::GetMemorySettings()},
           m_physicsSystem{m_ecs.GetRegistry()},

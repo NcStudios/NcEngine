@@ -83,6 +83,8 @@ namespace nc::graphics
       m_graphicsQueue{},
       m_presentQueue{},
       m_depthFormat{},
+      m_samplesCount{},
+      m_samplesInitialized{false},
       m_bufferIndex{0},
       m_buffers{},
       m_imageIndex{0},
@@ -90,9 +92,7 @@ namespace nc::graphics
       m_allocator{},
       m_commandPool{},
       m_imguiDescriptorPool{},
-      m_renderingDescriptorPool{},
-      m_samplesCount{},
-      m_samplesInitialized{false}
+      m_renderingDescriptorPool{}
     {
         CreateInstance();
         CreateSurface(hwnd, hinstance);

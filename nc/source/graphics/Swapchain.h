@@ -62,9 +62,9 @@ namespace nc::graphics
 
             // Synchronization
             std::vector<vk::Fence> m_imagesInFlightFences;
-            std::vector<vk::Fence> m_framesInFlightFences; // One per concurrent frame. (MAX_FRAMES_IN_FLIGHT). Synchronizes the submission of the queues from the CPU with the completion of the queues on the GPU.
-            std::vector<vk::Semaphore> m_imageAvailableSemaphores; // One per concurrent frame. (MAX_FRAMES_IN_FLIGHT). Controls when the swapchain image can be written to.
-            std::vector<vk::Semaphore> m_renderFinishedSemaphores; // One per concurrent frame. (MAX_FRAMES_IN_FLIGHT). Controls when the swapchain image can be presented back to the swapchain.
-            uint32_t m_currentFrameIndex; // Used to select which pair of semaphores and which fence to use as each frame in MAX_FRAMES_IN_FLIGHT requires its own pair of semaphores and fence.
+            std::vector<vk::Fence> m_framesInFlightFences; // One per concurrent frame. (MaxFramesInFlight). Synchronizes the submission of the queues from the CPU with the completion of the queues on the GPU.
+            std::vector<vk::Semaphore> m_imageAvailableSemaphores; // One per concurrent frame. (MaxFramesInFlight). Controls when the swapchain image can be written to.
+            std::vector<vk::Semaphore> m_renderFinishedSemaphores; // One per concurrent frame. (MaxFramesInFlight). Controls when the swapchain image can be presented back to the swapchain.
+            uint32_t m_currentFrameIndex; // Used to select which pair of semaphores and which fence to use as each frame in MaxFramesInFlight requires its own pair of semaphores and fence.
     };
 }

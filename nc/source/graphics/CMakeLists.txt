@@ -4,6 +4,7 @@ target_sources(NcEngineLib
         ${ROOT_DIR}/source/graphics/Commands.cpp
         ${ROOT_DIR}/source/graphics/Graphics.cpp
         ${ROOT_DIR}/source/graphics/Initializers.cpp
+        ${ROOT_DIR}/source/graphics/MeshBatcher.cpp
         ${ROOT_DIR}/source/graphics/PerFrameRenderState.cpp
         ${ROOT_DIR}/source/graphics/Renderer.cpp
         ${ROOT_DIR}/source/graphics/ShaderUtilities.cpp

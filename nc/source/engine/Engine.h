@@ -20,7 +20,7 @@ namespace nc
     class Engine final : public NcEngine
     {
         public:
-            Engine(HINSTANCE hInstance, bool useEditorMode);
+            Engine(bool useEditorMode);
             ~Engine() noexcept;
 
             void Start(std::unique_ptr<Scene> initialScene) override;
