@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <tuple>
+#include <type_traits>
 
 namespace nc
 {
@@ -35,11 +37,11 @@ namespace nc
 
     struct PropertyFlags
     {
-        static constexpr uint32_t None        = 0x0000;
-        static constexpr uint32_t Nonnegative = 0x0001;
-        static constexpr uint32_t Position    = 0x0010;
-        static constexpr uint32_t Scale       = 0x0100;
-        static constexpr uint32_t Angles      = 0x1000;
+        static constexpr uint32_t None        = 0b0000;
+        static constexpr uint32_t Nonnegative = 0b0001;
+        static constexpr uint32_t Position    = 0b0010;
+        static constexpr uint32_t Scale       = 0b0100;
+        static constexpr uint32_t Angles      = 0b1000;
     };
 
     struct PropertyBase

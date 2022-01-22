@@ -42,11 +42,11 @@ namespace nc::window
     }
 
     /* WindowImpl */
-    WindowImpl::WindowImpl(HINSTANCE instance)
+    WindowImpl::WindowImpl()
         : m_onResizeReceivers{},
           m_hwnd{nullptr},
           m_wndClass{},
-          m_hInstance{instance},
+          m_hInstance{},
           m_dimensions{},
           GraphicsOnResizeCallback{nullptr},
           GraphicsSetClearColorCallback{nullptr},
@@ -54,13 +54,14 @@ namespace nc::window
           EngineDisableRunningCallback{nullptr}
     {
         g_instance = this;
+        GetModuleHandleExA(0, NULL, &m_hInstance);
 
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
 
         m_wndClass.style = WndClassStyleFlags;
         m_wndClass.lpfnWndProc = WindowImpl::WndProc;
-        m_wndClass.hInstance = instance;
+        m_wndClass.hInstance = m_hInstance;
         m_wndClass.lpszClassName = TEXT(projectSettings.projectName.c_str());
 
         if(!RegisterClass(&m_wndClass))
@@ -114,8 +115,8 @@ namespace nc::window
                                 clientRect.left, clientRect.top,
                                 clientRect.right - clientRect.left,
                                 clientRect.bottom - clientRect.top,
-                                0, 0, instance, 0);
-                                
+                                0, 0, m_hInstance, 0);
+
         if(!m_hwnd)
         {
             throw NcError("CreateWindow failed");

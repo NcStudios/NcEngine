@@ -1,9 +1,5 @@
 #pragma once
 
-#include "SoA.h"
-
-#include <unordered_map>
-
 namespace nc
 {
     class Registry;
@@ -15,7 +11,7 @@ namespace nc::ecs
     class PointLightSystem
     {
         public:
-            PointLightSystem(Registry* registryType, graphics::Graphics* graphics);
+            PointLightSystem(Registry* registry, graphics::Graphics* graphics);
             PointLightSystem(PointLightSystem&&) = delete;
             PointLightSystem(const PointLightSystem&) = delete;
             PointLightSystem& operator = (PointLightSystem&&) = delete;

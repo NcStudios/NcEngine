@@ -47,12 +47,11 @@ namespace nc::graphics
         const auto renderers = registry->ViewAll<MeshRenderer>();
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());
-        Sphere sphere;
 
         for(const auto& renderer : renderers)
         {
             const auto& modelMatrix = registry->Get<Transform>(renderer.ParentEntity())->TransformationMatrix();
-            
+
             if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
 
