@@ -90,6 +90,7 @@ namespace nc::graphics
 
     void MeshBatcher::Sort()
     {
+        /** @todo Comparison should also deal with materials. */
         m_isDirty = false;
         m_registry->Sort<MeshRenderer>([](const auto& lhs, const auto& rhs)
         {
