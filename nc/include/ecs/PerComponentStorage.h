@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <numeric>
 #include <span>
 #include <vector>
 
@@ -65,11 +66,14 @@ namespace nc
             auto ViewAll() -> std::span<T>;
             auto ViewAll() const -> std::span<const T>;
 
+            template<class Predicate>
+            void Sort(Predicate&& comparesLessThan);
+
             void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
             void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
             void Swap(index_type firstEntity, index_type secondEntity);
             void ReserveHeadroom(size_t additionalRequiredCount);
-            
+
             void Clear() override;
             void CommitStagedComponents(const std::vector<Entity>& removed) override;
             void VerifyCallbacks() override;
@@ -111,7 +115,7 @@ namespace nc
         auto poolIndex = sparseArray.at(sparseIndex);
 
         IF_THROW(poolIndex == Entity::NullIndex, "Entity does not have component");
-        
+
         componentPool.at(poolIndex) = std::move(componentPool.back());
         componentPool.pop_back();
 
@@ -133,7 +137,7 @@ namespace nc
     {
         if(!Contains(entity))
             return false;
-        
+
         Remove(entity);
         return true;
     }
@@ -187,11 +191,58 @@ namespace nc
     {
         return std::span<T>{componentPool};
     }
-    
+
     template<Component T>
     auto PerComponentStorage<T>::ViewAll() const -> std::span<const T>
     {
         return std::span<const T>{componentPool};
+    }
+
+    template<Component T>
+    template<class Predicate>
+    void PerComponentStorage<T>::Sort(Predicate&& comparesLessThan)
+    {
+        /** Create array of indices for an out-of-place sort. */
+        const auto size = componentPool.size();
+        std::vector<uint32_t> permutation(size);
+        const auto beg = permutation.begin();
+        const auto end = permutation.end();
+        std::iota(beg, end, 0u);
+
+        /** Extend the user-provided predicate to operate in terms of indices. */
+        auto compare = [&pool = componentPool, predicate = std::forward<Predicate>(comparesLessThan)](const auto lhs, const auto rhs)
+        {
+            return predicate(pool[lhs], pool[rhs]);
+        };
+
+        /** Insertion sort - @todo radix sort used in physics is probably very fast here. */
+        for(auto cur = beg; cur != end; ++cur)
+        {
+            const auto pos = std::upper_bound(beg, cur, *cur, compare);
+            std::rotate(pos, cur, cur + 1);
+        }
+
+        /** Apply the permutation. */
+        for(auto i = 0u; i < size; ++i)
+        {
+            auto cur = i;
+            auto next = permutation[cur];
+
+            while(cur != next)
+            {
+                const auto i1 = permutation[cur];
+                const auto i2 = permutation[next];
+                std::swap(entityPool[i1], entityPool[i2]);
+                std::swap(componentPool[i1], componentPool[i2]);
+                const auto sparse1 = entityPool[i1].Index();
+                const auto sparse2 = entityPool[i2].Index();
+                sparseArray[sparse1] = i2;
+                sparseArray[sparse2] = i1;
+                permutation[cur] = cur;
+                cur = next;
+                next = permutation[cur];
+            }
+        }
     }
 
     template<Component T>
@@ -280,7 +331,7 @@ namespace nc
             auto entity = entityPool[denseIndex];
             if(!entity.IsPersistent())
                 continue;
-            
+
             sparseArray.at(entity.Index()) = swapToIndex;
             entityPool.at(swapToIndex) = entityPool.at(denseIndex);
             componentPool.at(swapToIndex) = std::move(componentPool.at(denseIndex));

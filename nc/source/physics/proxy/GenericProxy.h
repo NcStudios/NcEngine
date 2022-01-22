@@ -13,7 +13,6 @@ namespace nc::physics
         Sphere estimate;
         Entity entity;
         ClientObjectProperties properties;
-        GenericProxy* spatialData;
 
         /** Methods to satisfy Proxy concept. */
         auto Matrix()     const noexcept -> DirectX::FXMMATRIX      { return matrix;     }
@@ -21,5 +20,19 @@ namespace nc::physics
         auto Estimate()   const noexcept -> const Sphere&           { return estimate;   }
         auto Id()         const noexcept -> Entity                  { return entity;     }
         auto Properties() const noexcept -> ClientObjectProperties  { return properties; }
+    };
+
+    /** GenericProxy with an added pointer singly linked lists. */
+    struct ForwardListProxy
+    {
+        GenericProxy proxy;
+        ForwardListProxy* next;
+
+        /** Methods to satisfy Proxy concept. */
+        auto Matrix()     const noexcept -> DirectX::FXMMATRIX      { return proxy.matrix;     }
+        auto Volume()     const noexcept -> const BoundingVolume&   { return proxy.volume;     }
+        auto Estimate()   const noexcept -> const Sphere&           { return proxy.estimate;   }
+        auto Id()         const noexcept -> Entity                  { return proxy.entity;     }
+        auto Properties() const noexcept -> ClientObjectProperties  { return proxy.properties; }
     };
 }

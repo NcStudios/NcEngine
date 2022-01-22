@@ -7,4 +7,3 @@ target_sources(NcEngineLib
 
 add_subdirectory(collision)
 add_subdirectory(dynamics)
-add_subdirectory(proxy)
