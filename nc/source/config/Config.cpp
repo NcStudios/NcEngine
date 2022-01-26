@@ -109,7 +109,7 @@ namespace
         else if (key == TargetFpsKey)
         {
             out->graphicsSettings.targetFPS = std::stoi(value);
-            out->graphicsSettings.frameUpdateInterval = 1.0 / static_cast<float>(out->graphicsSettings.targetFPS);
+            out->graphicsSettings.frameUpdateInterval = 1.0f / static_cast<float>(out->graphicsSettings.targetFPS);
         }
         else if (key == NearClipKey)
             out->graphicsSettings.nearClip = std::stof(value);

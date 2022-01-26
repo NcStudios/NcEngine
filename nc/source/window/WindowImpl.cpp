@@ -272,7 +272,6 @@ namespace nc::window
                 case WM_MBUTTONDOWN:
                 {
                     AddMouseButtonDownToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
-
                     break;
                 }
                 case WM_MBUTTONUP:
@@ -295,7 +294,7 @@ namespace nc::window
                 case WM_KEYDOWN:
                 case WM_KEYUP:
                 {
-                    AddKeyToQueue(message.wParam, message.lParam);
+                    AddKeyToQueue(static_cast<KeyCode_t>(message.wParam), message.lParam);
                     break;
                 }
             }

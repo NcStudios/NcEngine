@@ -28,23 +28,24 @@ namespace nc::graphics
         {
             CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex )
         };
-        
+
         std::array<vk::DescriptorBindingFlagsEXT, 1> layoutBindingFlags
-        {  
+        {
             vk::DescriptorBindingFlagsEXT()
         };
 
         m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, layoutBindingFlags);
         if (m_pointLightsArrayBuffer == nullptr)
         {
-            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, (sizeof(nc::PointLightInfo) * m_maxPointLights));
+            const auto bufferSize = static_cast<uint32_t>(sizeof(PointLightInfo) * m_maxPointLights);
+            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, bufferSize);
         }
         m_descriptorSet = CreateDescriptorSet(m_graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
 
-		vk::DescriptorBufferInfo pointLightArrayInfo;
-		pointLightArrayInfo.buffer = *m_pointLightsArrayBuffer->GetBuffer();
-		pointLightArrayInfo.offset = 0;
-		pointLightArrayInfo.range = sizeof(nc::PointLightInfo) * m_maxPointLights;
+        vk::DescriptorBufferInfo pointLightArrayInfo;
+        pointLightArrayInfo.buffer = *m_pointLightsArrayBuffer->GetBuffer();
+        pointLightArrayInfo.offset = 0;
+        pointLightArrayInfo.range = sizeof(nc::PointLightInfo) * m_maxPointLights;
 
         vk::WriteDescriptorSet write{};
         write.setDstBinding(0);

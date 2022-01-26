@@ -49,6 +49,10 @@ endif()
 if(HAS_SOCKLEN_T)
     add_definitions(-DHAS_SOCKLEN_T=1)
 endif()
+if(MSVC)
+    add_definitions(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
+endif()
+
 
 set(INCLUDE_FILES_PREFIX ${PROJECT_SOURCE_DIR}/external/enet)
 set(INCLUDE_FILES

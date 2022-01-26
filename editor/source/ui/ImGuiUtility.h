@@ -121,7 +121,7 @@ namespace nc::editor
 
     bool InputAngles(const char* label, Vector3* angles)
     {
-        return ImGui::DragFloat3(label, &(angles->x), 0.1f, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
+        return ImGui::DragFloat3(label, &(angles->x), 0.1f, std::numbers::pi_v<float> * -2.0f, std::numbers::pi_v<float> * 2.0f);
     }
 
     bool InputScale(const char* label, Vector3* scale)

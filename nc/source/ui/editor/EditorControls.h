@@ -192,7 +192,7 @@ namespace nc::ui::editor::controls
             ImGui::Columns(2);
             if(!initColumnWidth)
             {
-                ImGui::SetColumnWidth(-1, 0.85 * panelWidth);
+                ImGui::SetColumnWidth(-1, 0.85f * panelWidth);
                 initColumnWidth = true;
             }
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))

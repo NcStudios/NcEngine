@@ -103,7 +103,7 @@ namespace nc
                 {
                     func();
                 }
-                catch(const std::exception& e)
+                catch(const std::exception&)
                 {
                     auto* state = static_cast<TaskExceptionState*>(task.data());
                     state->StoreException(std::current_exception());

@@ -27,13 +27,13 @@ namespace nc::time
     class Timer
     {
         public:
-            void  Start() noexcept;
-            void  Stop() noexcept;
-            float Value() const noexcept;
+            void Start() noexcept;
+            void Stop() noexcept;
+            int64_t Value() const noexcept;
 
         private:
             using Clock = std::chrono::high_resolution_clock;
-            float m_time = 0.0f;
+            int64_t m_time = 0;
             std::chrono::time_point<Clock> m_start;
             std::chrono::time_point<Clock> m_end;
     };

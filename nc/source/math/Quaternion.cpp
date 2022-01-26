@@ -24,7 +24,7 @@ namespace nc
     {
         float roll = std::atan2(2.0f * (w * x + y * z), 1.0f - 2.0f * (x * x + y * y));
         float sinp = 2.0f * (w * y - z * x);
-        float pitch = std::abs(sinp) >= 1.0f ? std::copysign(std::numbers::pi / 2.0f, sinp) : std::asin(sinp);
+        float pitch = std::abs(sinp) >= 1.0f ? std::copysign(std::numbers::pi_v<float> / 2.0f, sinp) : std::asin(sinp);
         float yaw = std::atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (y * y + z * z));
         return Vector3{roll, pitch, yaw};
     }

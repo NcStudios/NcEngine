@@ -7,7 +7,7 @@
 namespace
 {
     constexpr nc::Vector2 FileBrowserSize{600.0f, 400.0f};
-    const ImVec2 BrowserWindowSize{FileBrowserSize.x * 0.95f, FileBrowserSize.y * 0.65};
+    const ImVec2 BrowserWindowSize{FileBrowserSize.x * 0.95f, FileBrowserSize.y * 0.65f};
 }
 
 namespace nc::editor

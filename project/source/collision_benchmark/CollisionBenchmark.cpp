@@ -79,7 +79,7 @@ namespace nc::sample
         {
             .positionOffset = Vector3{0.0f, 0.0f, 35.0f},
             .positionRandomRange = Vector3::Splat(420.0f),
-            .rotationRandomRange = Vector3::Splat(std::numbers::pi / 2.0f)
+            .rotationRandomRange = Vector3::Splat(std::numbers::pi_v<float> / 2.0f)
         };
 
         auto spawnExtension = [registry](Entity entity)

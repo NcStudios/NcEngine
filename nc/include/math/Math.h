@@ -42,10 +42,10 @@ namespace nc::math
     }
 
     template<std::floating_point T>
-    constexpr T DegreesToRadians(T degrees) noexcept { return degrees * std::numbers::pi / 180.0; }
+    constexpr T DegreesToRadians(T degrees) noexcept { return degrees * std::numbers::pi_v<T> / 180.0f; }
 
     template<std::floating_point T>
-    constexpr T RadiansToDegrees(T radians) noexcept { return radians * 180.0 / std::numbers::pi; }
+    constexpr T RadiansToDegrees(T radians) noexcept { return radians * 180.0f / std::numbers::pi_v<T>; }
 
     constexpr bool FloatEqual(float a, float b, float maxAbsDiff = 0.00001f, float maxRelDiff = FloatEpsilon) noexcept
     {

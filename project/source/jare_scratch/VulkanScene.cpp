@@ -124,7 +124,7 @@ namespace nc::sample
 
         auto blackBox = registry->Add<Entity>(
         {.position = Vector3{-3.0f, 1.0f, 2.0f},
-         .rotation = Quaternion::FromEulerAngles(0.2, 0.7f, 0.4f),
+         .rotation = Quaternion::FromEulerAngles(0.2f, 0.7f, 0.4f),
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Box"});
 
