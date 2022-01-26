@@ -12,14 +12,13 @@ namespace nc::graphics
 
 	uint32_t ShaderDescriptorSets::RegisterLayoutBinding(BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages)
 	{
-
+		return 0;
 	}
 
 	vk::DescriptorSetLayout* ShaderDescriptorSets::GetDescriptorSetLayout(BindFrequency bindFrequency)
 	{
 		return &GetSet(bindFrequency)->layout.get();
 	}
-
 
 	void ShaderDescriptorSets::Bind(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet, uint32_t setCount)
 	{
