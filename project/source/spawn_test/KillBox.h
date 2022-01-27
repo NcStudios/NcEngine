@@ -28,6 +28,8 @@ namespace nc::sample
     {
         if(m_logOnDestroy)
             GameLog::Log("KillBox - Object Destroyed");
-        m_registry->Remove<Entity>(hit);
+
+        if(m_registry->Contains<Entity>(hit))
+            m_registry->Remove<Entity>(hit);
     }
 }
