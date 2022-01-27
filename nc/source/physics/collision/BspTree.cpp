@@ -188,24 +188,24 @@ namespace nc::physics
 
         /** Add existing indices to new positive/negative children nodes. */
         LeafNode positiveNode, negativeNode;
-        for(auto meshIndex : leaf->triMeshIndices)
+        for(auto i : leaf->triMeshIndices)
         {
-            switch(TestHalfspace(plane, m_triMeshes.at(meshIndex).estimate))
+            switch(TestHalfspace(plane, m_triMeshes.at(i).estimate))
             {
                 case HalfspaceContainment::Intersecting:
                 {
-                    positiveNode.triMeshIndices.push_back(meshIndex);
-                    negativeNode.triMeshIndices.push_back(meshIndex);
+                    positiveNode.triMeshIndices.push_back(i);
+                    negativeNode.triMeshIndices.push_back(i);
                     break;
                 }
                 case HalfspaceContainment::Positive:
                 {
-                    positiveNode.triMeshIndices.push_back(meshIndex);
+                    positiveNode.triMeshIndices.push_back(i);
                     break;
                 }
                 case HalfspaceContainment::Negative:
                 {
-                    negativeNode.triMeshIndices.push_back(meshIndex);
+                    negativeNode.triMeshIndices.push_back(i);
                     break;
                 }
             }
@@ -296,8 +296,7 @@ namespace nc::physics
             averageCenter += m_triMeshes.at(meshIndex).estimate.center;
         }
 
-        averageCenter /= indexCount;
-
+        averageCenter /= static_cast<float>(indexCount);
         auto variance = Vector3::Zero();
         float minSquareDistance = std::numeric_limits<float>::max();
         size_t closestIndex = 0u; // only safe if we throw on empty vector
@@ -315,7 +314,7 @@ namespace nc::physics
             }
         }
 
-        variance = KeepMaximum(variance / indexCount);
+        variance = KeepMaximum(variance / static_cast<float>(indexCount));
         return PartitionData{averageCenter, Normalize(variance), closestIndex};
     }
 

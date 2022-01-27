@@ -11,12 +11,19 @@ namespace nc::debug
     {
         std::ofstream file;
 
+#if defined(_MSC_VER)
+    #pragma warning( push )
+    #pragma warning( disable : 4996 )
+#endif
         auto GetTime()
         {
             auto timePoint = std::chrono::system_clock::now();
             std::time_t time = std::chrono::system_clock::to_time_t(timePoint);
             return std::ctime(&time);
         }
+#if defined(_MSC_VER)
+    #pragma warning( pop )
+#endif
 
         void OpenLog(std::string_view path)
         {

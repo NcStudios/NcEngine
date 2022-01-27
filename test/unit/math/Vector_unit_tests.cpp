@@ -159,7 +159,7 @@ TEST(Vector_unit_tests, Vector2_Distance)
     Vector2 a{1.0f, 1.0f};
     Vector2 b{2.0f, 2.0f};
     auto actual = Distance(a, b);
-    EXPECT_FLOAT_EQ(actual, std::sqrt(2));
+    EXPECT_FLOAT_EQ(actual, std::sqrt(2.0f));
 }
 
 TEST(Vector_unit_tests, Vector2_HasAnyZeroElement)
@@ -328,7 +328,7 @@ TEST(Vector_unit_tests, Vector3_Distance)
     Vector3 a{1.0f, 1.0f, 1.0f};
     Vector3 b{2.0f, 2.0f, 2.0f};
     auto actual = Distance(a, b);
-    EXPECT_FLOAT_EQ(actual, std::sqrt(3));
+    EXPECT_FLOAT_EQ(actual, std::sqrt(3.0f));
 }
 
 TEST(Vector_unit_tests, Vector3_HasAnyZeroElement)

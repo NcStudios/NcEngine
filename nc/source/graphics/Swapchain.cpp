@@ -286,7 +286,7 @@ namespace nc::graphics
 
     const Vector2 Swapchain::GetExtentDimensions() const noexcept
     {
-        return Vector2(m_swapChainExtent.width, m_swapChainExtent.height);
+        return Vector2(static_cast<float>(m_swapChainExtent.width), static_cast<float>(m_swapChainExtent.height));
     }
 
     const vk::Extent2D& Swapchain::GetExtent() const noexcept

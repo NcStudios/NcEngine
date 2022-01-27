@@ -342,7 +342,7 @@ namespace nc
         ImGui::Text("Transform");
         ui::editor::xyzWidgetHeader("   ");
         auto posResult = ui::editor::xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z);
-        auto rotResult = ui::editor::xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi * -2.0f, std::numbers::pi * 2.0f);
+        auto rotResult = ui::editor::xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi_v<float> * -2.0f, std::numbers::pi_v<float> * 2.0f);
         auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
 
         if(posResult)

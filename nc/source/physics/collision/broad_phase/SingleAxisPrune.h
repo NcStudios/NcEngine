@@ -66,7 +66,7 @@ namespace nc::physics
         }
 
         /** Sort the minimums */
-        m_mapToUnsorted = m_sort.Sort(minimums.data(), count + 1).GetRanks();
+        m_mapToUnsorted = m_sort.Sort(minimums.data(), static_cast<int>(count + 1)).GetRanks();
         m_sortedEntries.clear();
         m_sortedEntries.reserve(count + 1);
 
@@ -84,7 +84,7 @@ namespace nc::physics
     template<ProxyCache ProxyCacheType>
     void SingleAxisPrune<ProxyCacheType>::FindPairs()
     {
-        const unsigned count = m_proxies.size();
+        const unsigned count = static_cast<unsigned>(m_proxies.size());
         unsigned next = 0;
         unsigned iSorted = 0;
 

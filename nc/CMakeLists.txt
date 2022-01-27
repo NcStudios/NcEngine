@@ -29,8 +29,9 @@ set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+    set(WARNING_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(WARNING_FLAGS /W3 /WX)
 endif()
 
 # Propagate version

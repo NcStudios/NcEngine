@@ -4120,10 +4120,14 @@ static int stbi__zhuffman_decode_slowpath(stbi__zbuf *a, stbi__zhuffman *z)
    if (s >= 16) return -1; // invalid code!
    // code size is s, so:
    b = (k >> (16-s)) - z->firstcode[s] + z->firstsymbol[s];
+   #if defined(__GNUC__)
    #pragma GCC diagnostic push
    #pragma GCC diagnostic ignored "-Wsign-compare"
+   #endif
    if (b >= sizeof (z->size)) return -1; // some data was corrupt somewhere!
+   #if defined(__GNUC__)
    #pragma GCC diagnostic pop
+   #endif
    if (z->size[b] != s) return -1;  // was originally an assert, but report failure instead.
    a->code_buffer >>= s;
    a->num_bits -= s;
@@ -6778,11 +6782,15 @@ static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y,
       stbi_uc *two_back = 0;
       stbi__gif g;
       int stride;
+    #if defined(__GNUC__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+    #endif
       int out_size = 0;
       int delays_size = 0;
+    #if defined(__GNUC__)
     #pragma GCC diagnostic pop
+    #endif
       memset(&g, 0, sizeof(g));
       if (delays) {
          *delays = 0;

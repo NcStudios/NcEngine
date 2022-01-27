@@ -112,7 +112,7 @@ namespace nc
         /** Add a new entry. */
         m_data.push_back(ToDerived()->ConstructNew(a, b, std::forward<Args>(args)...));
         m_next[nextIndex] = m_hashTable[hash];
-        m_hashTable[hash] = nextIndex;
+        m_hashTable[hash] = static_cast<uint32_t>(nextIndex);
     }
 
     template<class Derived, class DataType, class IdType, uint32_t InitialSize>
@@ -132,7 +132,7 @@ namespace nc
         RemoveDataFromTable(hash, toRemoveIndex);
 
         /** If the entry is in the last position, just remove it. */
-        auto toSwapIndex = m_data.size() - 1;
+        auto toSwapIndex = static_cast<uint32_t>(m_data.size() - 1);
         if(toSwapIndex == toRemoveIndex)
         {
             m_data.pop_back();
@@ -196,7 +196,7 @@ namespace nc
         const auto newSize = oldSize * 2u;
         m_hashTable.resize(newSize, NullIndex);
         m_next.resize(newSize, NullIndex);
-        m_hashMask = newSize - 1;
+        m_hashMask = static_cast<uint32_t>(newSize - 1);
         auto* derived = ToDerived();
 
         /** Compute new hashes for entries and add them back. */

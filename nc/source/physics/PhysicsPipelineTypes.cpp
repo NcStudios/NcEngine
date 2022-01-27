@@ -146,7 +146,7 @@ namespace nc::physics
 
     auto Manifold::SortPoints(const Contact& contact) -> size_t
     {
-        int maxPenetrationIndex = -1;
+        auto maxPenetrationIndex = std::numeric_limits<size_t>::max();
 
         float maxPenetration = contact.depth;
         for(size_t i = 0; i < m_contacts.size(); ++i)

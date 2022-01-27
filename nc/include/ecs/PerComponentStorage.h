@@ -303,7 +303,7 @@ namespace nc
             componentPool.push_back(std::move(component));
             auto sparseIndex = entity.Index();
             entityPool.push_back(entity);
-            sparseArray.at(sparseIndex) = componentPool.size() - 1;
+            sparseArray.at(sparseIndex) = static_cast<uint32_t>(componentPool.size() - 1);
         }
 
         stagingPool.clear();
@@ -325,8 +325,8 @@ namespace nc
 
         std::ranges::fill(sparseArray, Entity::NullIndex);
 
-        size_t swapToIndex = 0u;
-        for(size_t denseIndex = 0u; denseIndex < entityPool.size(); ++denseIndex)
+        uint32_t swapToIndex = 0u;
+        for(uint32_t denseIndex = 0u; denseIndex < entityPool.size(); ++denseIndex)
         {
             auto entity = entityPool[denseIndex];
             if(!entity.IsPersistent())

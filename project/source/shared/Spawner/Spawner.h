@@ -39,8 +39,8 @@ namespace nc::sample
             bool m_applyConstantRotation;
             Entity::layer_type m_layer;
             Entity::flags_type m_flags;
-            size_t m_stagedAdditions;
-            size_t m_stagedDeletions;
+            unsigned m_stagedAdditions;
+            unsigned m_stagedDeletions;
     };
 
     inline Spawner::Spawner(Entity entity,
@@ -135,6 +135,6 @@ namespace nc::sample
     
     inline int Spawner::GetObjectCount() const
     {
-        return m_entities.size();
+        return static_cast<int>(m_entities.size());
     }
 }

@@ -1,6 +1,6 @@
 # Creating a Project
 
-This document will walk through creating and building a simple project using NcEngine. The project will consist of a single scene with a camera, point light, and a box that can be moved with the WASD keys. If anything is unclear, the [overview](Overview.md) or [engine components](EngineComponents.md) pages might offer clarification.
+NcEngine projects can be developed purely through source code or with the help of NcEditor. This document will walk through creating and building a simple project using the former method. The project will consist of a single scene with a camera, point light, and a cube that can be moved with the WASD keys. If anything is unclear, the [overview](Overview.md) or [engine components](EngineComponents.md) pages might offer clarification.
 
 ## Setting up the project directory
 -----------------------------------
@@ -13,7 +13,7 @@ Create a directory called 'example' in the repository directory with a few files
 
 ## Creating a Component
 -----------------------
-Controller.h will define a component that handles movement of the box:
+Controller.h will define a component that handles movement of the cube:
 ```cpp
 /** Controller.h */
 #include "ecs/Registry.h"
@@ -80,33 +80,34 @@ class ExampleScene : public nc::Scene
 
             auto registry = engine->Registry();
 
-            /** Create and register a camera. */
+            /** Initial properties for the camera. */
             auto cameraInit = nc::EntityInfo
             {
                 .position = nc::Vector3{0.0f, 3.0f, -10.0f},
-                .rotation = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, 45.0f),
+                .rotation = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, 0.785f),
                 .tag = "Camera"
             };
 
+            /** Create a new Entity, attach a Camera, and set it as the main camera. */
             auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
             engine->MainCamera()->Set(camera);
 
-            /** Add a PointLight. */
+            /** Initial properties for the PointLight. */
             auto pointLightInit = nc::EntityInfo
             {
                 .position = nc::Vector3::Up(),
                 .tag = "Point Light"
             };
 
+            /** Create a new Entity and attach a PointLight. */
             auto pointLightHandle = registry->Add<nc::Entity>(pointLightInit);
             registry->Add<nc::PointLight>(pointLightHandle, nc::PointLightInfo{});
 
-            /** Add the box. */
-            auto cubeHandle = registry->Add<nc::Entity>(nc::EntityInfo{.tag = "Box"});
+            /** Create a new Entity, attach a MeshRenderer, and attach our movement controller. */
+            auto cubeInit = nc::EntityInfo{.tag = "Cube"};
+            auto cubeHandle = registry->Add<nc::Entity>(cubeInit);
             registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::TechniqueType::PhongAndUi);
-
-            /** Add the movement controller to the cube. */
             registry->Add<Controller>(cubeHandle, registry);
         }
 
@@ -121,13 +122,12 @@ The main file will be pretty simple:
 ```cpp
 /** Main.cpp */
 #include "NcEngine.h"
-#include "platform/win32/NcWin32.h"
 #include "ExampleScene.h"
 
-int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
+int main()
 {
     /** Create the engine instance. */
-    auto engine = nc::InitializeNcEngine(instance, "example/Config.ini");
+    auto engine = nc::InitializeNcEngine("example/Config.ini");
 
     /** Start the game loop. */
     engine->Start(std::make_unique<ExampleScene>());
@@ -149,7 +149,7 @@ For the config file, copy the defaults from [nc/source/config/default_config.ini
 
 ## Building
 ------------
-The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_package to search in \<path>/NcEngine/\<config>. MSVC users will need to set WIN32_EXECUTABLE to correctly link to WinMain:
+The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_package to search in \<path>/NcEngine/\<config>.
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project("Example" LANGUAGES CXX)
@@ -157,7 +157,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(NcEngine REQUIRED PATHS "your-install-path/NcEngine/Release-WithEditor")
 add_executable(Example ${PROJECT_SOURCE_DIR}/Main.cpp)
-set_target_properties(Example PROPERTIES WIN32_EXECUTABLE TRUE)
 target_link_libraries(Example PRIVATE Nc::NcEngineLib)
 ```
 
