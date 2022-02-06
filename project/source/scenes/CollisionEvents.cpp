@@ -1,11 +1,9 @@
 #include "CollisionEvents.h"
 #include "NcEngine.h"
+#include "ecs/InvokeAttachment.h"
 #include "imgui/imgui.h"
 #include "shared/Prefabs.h"
-#include "shared/SceneNavigationCamera.h"
-#include "WasdController.h"
-#include "PrefabSelector.h"
-#include "CollisionLogger.h"
+#include "shared/Attachments.h"
 
 #include <functional>
 
@@ -47,7 +45,7 @@ namespace nc::sample
     void CollisionEvents::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
-        
+
         // Setup
         m_sceneHelper.Setup(engine, true, false, Widget);
 
@@ -59,12 +57,14 @@ namespace nc::sample
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
+        auto* camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
+        registry->Add<FrameLogic>(cameraHandle, InvokeAttachment<SceneNavigationCamera>{});
         engine->MainCamera()->Set(camera);
 
         // Movable Objects
         auto objectSpawner = registry->Add<Entity>({.tag = "Prefab Selector"});
-        auto* prefabSelector = registry->Add<PrefabSelector>(objectSpawner, registry);
+        auto* prefabSelector = registry->Add<PrefabSelector>(objectSpawner);
+        registry->Add<FrameLogic>(objectSpawner, InvokeAttachment<PrefabSelector>{});
         SelectPrefabCallback = std::bind(&PrefabSelector::Select, prefabSelector, std::placeholders::_1);
 
         // Dynamic Objects
@@ -88,7 +88,7 @@ namespace nc::sample
         registry->Add<Collider>(greenDisc, HullProperties{.assetPath = "coin.nca"}, false);
         registry->Add<PhysicsBody>(greenDisc, PhysicsProperties{});
 
-        // // Static Objects
+        // Static Objects
         auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{25.0f, 1.0f, 25.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
         registry->Add<Collider>(ground, BoxProperties{}, false);
 

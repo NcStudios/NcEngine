@@ -1,11 +1,9 @@
 #include "ClickEvents.h"
 #include "NcEngine.h"
 #include "imgui/imgui.h"
+#include "shared/Attachments.h"
 #include "shared/Prefabs.h"
-#include "shared/EdgePanCamera.h"
 #include "shared/spawner/Spawner.h"
-#include "Clickable.h"
-#include "ClickHandler.h"
 
 #include <functional>
 
@@ -53,14 +51,20 @@ namespace nc::sample
     void ClickEvents::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
-        
+
         // Setup
         m_sceneHelper.Setup(engine, true, false, Widget);
 
+        // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
         engine->MainCamera()->Set(camera);
         auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, engine->Physics());
+        registry->Add<FrameLogic>(cameraHandle, [](Entity self, Registry* registry, float dt)
+        {
+            registry->Get<EdgePanCamera>(self)->Run(self, registry, dt);
+            registry->Get<ClickHandler>(self)->Run(self, registry, dt);
+        });
         LayerSelectCallback = std::bind(&ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 
         // Lights
@@ -69,7 +73,7 @@ namespace nc::sample
 
         auto lvHandle2 = registry->Add<Entity>({.position = Vector3{5.1f, 3.7f, 1.6f}, .tag = "Point Light 2"});
         registry->Add<PointLight>(lvHandle2, PointLightInfo{.ambient = Vector3{1.0, 1.0, 1.0}, .diffuseColor = Vector3{1.0, 1.0, 1.0}, .diffuseIntensity = 54.0});
-        
+
         // Objects
         prefab::Create(registry,
                        prefab::Resource::Table, 
@@ -77,7 +81,7 @@ namespace nc::sample
                        .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
                        .scale = Vector3::Splat(7.5f),
                        .tag = "Table"});
-        
+
         // Coin Spawner
         SpawnBehavior behavior
         {
@@ -85,7 +89,7 @@ namespace nc::sample
             .positionRandomRange = Vector3{4.2f, 0.0f, 2.8f},
             .layer = CoinLayer
         };
-        
+
         auto spawnExtension = [registry, physicsSystem = engine->Physics()](Entity handle)
         {
             registry->Get<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
@@ -93,13 +97,13 @@ namespace nc::sample
         };
 
         auto coinSpawnerHandle = registry->Add<Entity>({.tag = "Coin Spawner"});
-        auto coinSpawner = registry->Add<Spawner>(coinSpawnerHandle, registry, prefab::Resource::Coin, behavior, spawnExtension);
-        coinSpawner->Spawn(20);
-        
+        auto coinSpawner = registry->Add<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, spawnExtension);
+        coinSpawner->Spawn(registry, 20);
+
         behavior.layer = TokenLayer;
         auto tokenSpawnerHandle = registry->Add<Entity>({.tag = "Token Spawner"});
-        auto tokenSpawner = registry->Add<Spawner>(tokenSpawnerHandle, registry, prefab::Resource::Token, behavior, spawnExtension);
-        tokenSpawner->Spawn(20);
+        auto tokenSpawner = registry->Add<Spawner>(tokenSpawnerHandle, prefab::Resource::Token, behavior, spawnExtension);
+        tokenSpawner->Spawn(registry, 20);
     }
 
     void ClickEvents::Unload()
