@@ -2,8 +2,8 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
+#include "ecs/component/Logic.h"
 #include "input/InputInternal.h"
-#include "graphics/Renderer.h"
 #include "graphics/PerFrameRenderState.h"
 #include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
@@ -131,7 +131,7 @@ namespace nc
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
-            FrameLogic(m_dt);
+            RunFrameLogic(m_dt);
 
             size_t physicsIterations = 0u;
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
@@ -163,7 +163,7 @@ namespace nc
             m_dt = m_frameDeltaTimeFactor * static_cast<float>(m_time.UpdateTime());
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
-            FrameLogic(m_dt);
+            RunFrameLogic(m_dt);
 
             mainLoopTasksResult.wait();
             m_tasks.ThrowIfExceptionStored();
@@ -199,11 +199,13 @@ namespace nc
         m_sceneSystem.DoSceneChange(this);
     }
 
-    void Engine::FrameLogic(float dt)
+    void Engine::RunFrameLogic(float dt)
     {
         OPTICK_CATEGORY("SendFrameUpdate", Optick::Category::GameLogic);
-        for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
-            group.SendFrameUpdate(dt);
+        auto* registry = m_ecs.GetRegistry();
+
+        for(auto& frameLogic : registry->ViewAll<FrameLogic>())
+            frameLogic.Run(registry, dt);
     }
 
     void Engine::FrameRender()

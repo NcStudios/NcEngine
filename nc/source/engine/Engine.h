@@ -59,7 +59,7 @@ namespace nc
             void DisableRunningFlag() noexcept;
             void ClearState();
             void DoSceneSwap();
-            void FrameLogic(float dt);
+            void RunFrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();
             void SetBindings();
