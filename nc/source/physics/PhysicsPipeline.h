@@ -10,7 +10,7 @@
 #include "dynamics/Joint.h"
 #include "dynamics/Solver.h"
 #include "ecs/Registry.h"
-#include "ecs/component/AttachmentGroup.h"
+#include "ecs/component/FreeComponentGroup.h"
 #include "ecs/component/Logic.h"
 #include "optick/optick.h"
 #include "task/TaskGraph.h"

@@ -24,7 +24,7 @@ namespace nc
     {
         g_registry = this;
         RegisterComponentType<AudioSource>();
-        RegisterComponentType<AttachmentGroup>();
+        RegisterComponentType<FreeComponentGroup>();
         RegisterComponentType<Collider>();
         RegisterComponentType<CollisionLogic>();
         RegisterComponentType<ConcaveCollider>();

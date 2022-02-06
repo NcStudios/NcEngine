@@ -3,7 +3,7 @@
 #include "ecs/component/PhysicsBody.h"
 #include "random/Random.h"
 #include "imgui/imgui.h"
-#include "shared/Attachments.h"
+#include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
 #include "shared/Spawner/Spawner.h"
@@ -59,13 +59,13 @@ namespace nc::sample
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
         auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeAttachment<FPSTracker>{});
+        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
         GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 35.0f, -100.0f}, .rotation = Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.25f, 0.005f, 1.4f);
-        registry->Add<FrameLogic>(cameraHandle, InvokeAttachment<SceneNavigationCamera>{});
+        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
         engine->MainCamera()->Set(camera);
 
         // Lights
@@ -110,7 +110,7 @@ namespace nc::sample
 
         auto spawner = registry->Add<Entity>({});
         auto spawnerPtr = registry->Add<Spawner>(spawner, prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
-        registry->Add<FrameLogic>(spawner, InvokeAttachment<Spawner>{});
+        registry->Add<FrameLogic>(spawner, InvokeFreeComponent<Spawner>{});
         SpawnFunc = std::bind(&Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
         DestroyFunc = std::bind(&Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);
     }

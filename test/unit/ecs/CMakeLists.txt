@@ -1,27 +1,27 @@
-### AttachmentGroup Tests ###
-add_executable(AttachmentGroup_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/ecs/AttachmentGroup_unit_tests.cpp
-    ${NC_SOURCE_DIR}/ecs/component/AttachmentGroup.cpp
+### FreeComponentGroup Tests ###
+add_executable(FreeComponentGroup_unit_tests
+    ${PROJECT_SOURCE_DIR}/unit/ecs/FreeComponentGroup_unit_tests.cpp
+    ${NC_SOURCE_DIR}/ecs/component/FreeComponentGroup.cpp
 )
 
-target_include_directories(AttachmentGroup_unit_tests
+target_include_directories(FreeComponentGroup_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
-target_compile_options(AttachmentGroup_unit_tests
+target_compile_options(FreeComponentGroup_unit_tests
     PUBLIC
         ${WARNING_FLAGS}
 )
 
-target_link_libraries(AttachmentGroup_unit_tests
+target_link_libraries(FreeComponentGroup_unit_tests
     PRIVATE
         gtest
 )
 
-add_test(AttachmentGroup_unit_tests AttachmentGroup_unit_tests)
+add_test(FreeComponentGroup_unit_tests FreeComponentGroup_unit_tests)
 
 ### Entity Tests ###
 add_executable(Entity_unit_tests

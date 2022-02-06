@@ -166,7 +166,7 @@ namespace nc::editor
         m_inspector.InspectEntity(entity);
     }
 
-    void SceneGraph::StateAttachmentElement(StateAttachment* comp)
+    void SceneGraph::FreeComponentElement(FreeComponent* comp)
     {
         if(!comp)
             return;

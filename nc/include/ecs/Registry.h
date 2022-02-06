@@ -2,7 +2,7 @@
 
 #include "HandleManager.h"
 #include "PerComponentStorage.h"
-#include "component/AttachmentGroup.h"
+#include "component/FreeComponentGroup.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
 
@@ -70,20 +70,20 @@ namespace nc
             template<Component T>
             void ReserveHeadroom(size_t additionalRequiredCount);
 
-            /** StateAttachment Functions */
-            template<std::derived_from<StateAttachment> T, class ... Args>
+            /** FreeComponent Functions */
+            template<std::derived_from<FreeComponent> T, class ... Args>
             auto Add(Entity entity, Args&& ... args) -> T*;
 
-            template<std::derived_from<StateAttachment> T>
+            template<std::derived_from<FreeComponent> T>
             void Remove(Entity entity);
 
-            template<std::derived_from<StateAttachment> T>
+            template<std::derived_from<FreeComponent> T>
             bool Contains(Entity entity) const;
 
-            template<std::derived_from<StateAttachment> T>
+            template<std::derived_from<FreeComponent> T>
             auto Get(Entity entity) -> T*;
 
-            template<std::derived_from<StateAttachment> T>
+            template<std::derived_from<FreeComponent> T>
             auto Get(Entity entity) const -> const T*;
 
             /** System Functions */
@@ -127,7 +127,7 @@ namespace nc
         auto handle = m_handleManager.GenerateNewHandle(info.layer, info.flags);
         m_toAdd.push_back(handle);
         Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
-        Add<AttachmentGroup>(handle);
+        Add<FreeComponentGroup>(handle);
         Add<Tag>(handle, std::move(info.tag));
         return handle;
     }
@@ -153,11 +153,11 @@ namespace nc
         return StorageFor<T>()->Add(entity, std::forward<Args>(args)...);
     }
 
-    template<std::derived_from<StateAttachment> T, class... Args>
+    template<std::derived_from<FreeComponent> T, class... Args>
     auto Registry::Add(Entity entity, Args&&... args) -> T*
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        AttachmentGroup* group = Get<AttachmentGroup>(entity);
+        FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group->Add<T>(entity, std::forward<Args>(args)...);
     }
 
@@ -184,11 +184,11 @@ namespace nc
         StorageFor<T>()->Remove(entity);
     }
 
-    template<std::derived_from<StateAttachment> T>
+    template<std::derived_from<FreeComponent> T>
     void Registry::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        AttachmentGroup* group = StorageFor<AttachmentGroup>()->Get(entity);
+        FreeComponentGroup* group = StorageFor<FreeComponentGroup>()->Get(entity);
         group->Remove<T>();
     }
 
@@ -206,11 +206,11 @@ namespace nc
         return StorageFor<T>()->Contains(entity);
     }
 
-    template<std::derived_from<StateAttachment> T>
+    template<std::derived_from<FreeComponent> T>
     bool Registry::Contains(Entity entity) const
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        const AttachmentGroup* group = Get<AttachmentGroup>(entity);
+        const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group->Contains<T>();
     }
 
@@ -226,17 +226,17 @@ namespace nc
         return StorageFor<T>()->Get(entity);
     }
 
-    template<std::derived_from<StateAttachment> T>
+    template<std::derived_from<FreeComponent> T>
     auto Registry::Get(Entity entity) -> T*
     {
-        AttachmentGroup* group = Get<AttachmentGroup>(entity);
+        FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group ? group->Get<T>() : nullptr;
     }
 
-    template<std::derived_from<StateAttachment> T>
+    template<std::derived_from<FreeComponent> T>
     auto Registry::Get(Entity entity) const -> const T*
     {
-        const AttachmentGroup* group = Get<AttachmentGroup>(entity);
+        const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group ? group->Get<T>() : nullptr;
     }
 

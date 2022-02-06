@@ -13,7 +13,7 @@ namespace nc
 
     /** @todo Only registering names of these: */
     REGISTER_TYPE(AudioSource);
-    REGISTER_TYPE(AttachmentGroup);
+    REGISTER_TYPE(FreeComponentGroup);
     REGISTER_TYPE(Camera);
     REGISTER_TYPE(Collider);
     REGISTER_TYPE(ConcaveCollider);

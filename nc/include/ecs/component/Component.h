@@ -7,12 +7,12 @@
 
 namespace nc
 {
-    class StateAttachment;
+    class FreeComponent;
 
     template<class T>
     concept Component = std::movable<T> &&
                         !std::same_as<Entity, T> &&
-                        !std::derived_from<T, StateAttachment>;
+                        !std::derived_from<T, FreeComponent>;
 
     /** Base class for all Components. Only Components associated with a system
      *  should derive directly from ComponentBase. */
@@ -33,13 +33,13 @@ namespace nc
             Entity m_parentEntity;
     };
 
-    class StateAttachment : public ComponentBase
+    class FreeComponent : public ComponentBase
     {
         public:
-            explicit StateAttachment(Entity entity) noexcept
+            explicit FreeComponent(Entity entity) noexcept
                 : ComponentBase{entity} {}
 
-            virtual ~StateAttachment() = default;
+            virtual ~FreeComponent() = default;
 
             #ifdef NC_EDITOR_ENABLED
             virtual void ComponentGuiElement();
@@ -67,7 +67,7 @@ namespace nc
     };
 
     /** Editor function that can be specialized to provide a custom widget.
-     *  StateAttachments must use override their member function instead. */
+     *  FreeComponents must use override their member function instead. */
     #ifdef NC_EDITOR_ENABLED
     namespace internal
     {

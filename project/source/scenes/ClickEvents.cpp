@@ -1,7 +1,7 @@
 #include "ClickEvents.h"
 #include "NcEngine.h"
 #include "imgui/imgui.h"
-#include "shared/Attachments.h"
+#include "shared/FreeComponents.h"
 #include "shared/Prefabs.h"
 #include "shared/spawner/Spawner.h"
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs/component/Component.h"
-#include "ecs/component/AttachmentGroup.h"
+#include "ecs/component/FreeComponentGroup.h"
 #include "debug/Utils.h"
 
 #include <algorithm>
@@ -306,11 +306,11 @@ namespace nc
 
         stagingPool.clear();
 
-        if constexpr(std::same_as<T, AttachmentGroup>)
+        if constexpr(std::same_as<T, FreeComponentGroup>)
         {
             for(auto& group : componentPool)
             {
-                group.CommitStagedAttachments();
+                group.CommitStagedComponents();
             }
         }
     }

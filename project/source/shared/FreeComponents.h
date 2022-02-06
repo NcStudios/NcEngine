@@ -3,7 +3,7 @@
 #include "Window.h"
 #include "physics/PhysicsSystem.h"
 
-#include "ecs/InvokeAttachment.h"
+#include "ecs/InvokeFreeComponent.h"
 #include "ecs/Registry.h"
 #include "ecs/component/All.h"
 
@@ -42,7 +42,7 @@ namespace nc::sample
     };
 
     /** Applies a constant rotation around an axis to the parent object */
-    class ConstantRotation : public StateAttachment
+    class ConstantRotation : public FreeComponent
     {
         public:
             ConstantRotation(Entity entity, Vector3 axis, float radiansPerSecond);
@@ -54,7 +54,7 @@ namespace nc::sample
     };
 
     /** Applies a constant translation along a vector to the parent object. */
-    class ConstantTranslation : public StateAttachment
+    class ConstantTranslation : public FreeComponent
     {
         public:
             ConstantTranslation(Entity entity, Vector3 velocity);
@@ -65,7 +65,7 @@ namespace nc::sample
     };
 
     /** Used by the Worms scene to make a point light track mouse movement. */
-    class MouseFollower : public StateAttachment, public window::IOnResizeReceiver
+    class MouseFollower : public FreeComponent, public window::IOnResizeReceiver
     {
         public:
             MouseFollower(Entity entity);
@@ -81,7 +81,7 @@ namespace nc::sample
     };
 
     /** Used by CollisionEvents scene to swap the shape of a moveable object. */
-    class PrefabSelector : public StateAttachment
+    class PrefabSelector : public FreeComponent
     {
         public:
             PrefabSelector(Entity entity);
@@ -96,7 +96,7 @@ namespace nc::sample
 
     /** Keeps track of FPS as seen by the logic components. This is not necessarily
      *  the number of frames being rendered. */
-    class FPSTracker : public StateAttachment
+    class FPSTracker : public FreeComponent
     {
         public:
             FPSTracker(Entity entity);
@@ -110,7 +110,7 @@ namespace nc::sample
     };
 
     /** Outputs to the game log when the parent object receives a click event. */
-    class Clickable : public StateAttachment, public IClickable
+    class Clickable : public FreeComponent, public IClickable
     {
         public:
             Clickable(Entity entity, std::string tag, PhysicsSystem* physicsSystem);
@@ -124,7 +124,7 @@ namespace nc::sample
 
     /** Notifies the PhysicsSystem to perform a raycast against clickables 
      *  upon pressing the left mouse button. */
-    class ClickHandler : public StateAttachment
+    class ClickHandler : public FreeComponent
     {
         public:
             ClickHandler(Entity entity, LayerMask mask, PhysicsSystem* physicsSystem);

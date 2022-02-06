@@ -1,6 +1,6 @@
 #include "Worms.h"
 #include "NcEngine.h"
-#include "shared/Attachments.h"
+#include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
 
 #include <random>
@@ -34,7 +34,7 @@ namespace nc::sample
 
         auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});
         registry->Add<PointLight>(lightHandle, lightOneProperties);
-        registry->Add<FrameLogic>(lightHandle, InvokeAttachment<MouseFollower>{lightHandle, registry});
+        registry->Add<FrameLogic>(lightHandle, InvokeFreeComponent<MouseFollower>{lightHandle, registry});
 
         // Worm Spawner
         SpawnBehavior spawnBehavior
@@ -48,7 +48,7 @@ namespace nc::sample
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
         auto spawner = registry->Add<Spawner>(spawnerHandle, prefab::Resource::Worm, spawnBehavior);
-        registry->Add<FrameLogic>(spawnerHandle, InvokeAttachment<Spawner>{});
+        registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
         spawner->Spawn(registry, 40u);
     }
 

@@ -6,16 +6,16 @@ namespace nc
 {
     /** @todo It may be useful to allow invoking fixed and collision logic as well. */
 
-   /** Helper for invoking a StateAttachment's Run method from a FrameLogic
+   /** Helper for invoking a FreeComponent's Run method from a FrameLogic
     *  component. The user-defined constructor can be used to add an instance
     *  of T to the registry. */
-    template<std::derived_from<StateAttachment> T>
-    struct InvokeAttachment
+    template<std::derived_from<FreeComponent> T>
+    struct InvokeFreeComponent
     {
-        InvokeAttachment() = default;
+        InvokeFreeComponent() = default;
 
         template<class ... Args>
-        InvokeAttachment(Entity self, Registry* registry, Args&&... args)
+        InvokeFreeComponent(Entity self, Registry* registry, Args&&... args)
         {
             registry->Add<T>(self, std::forward<Args>(args)...);
         }

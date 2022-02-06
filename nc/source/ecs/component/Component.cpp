@@ -5,9 +5,9 @@
 
 namespace nc
 {
-    void StateAttachment::ComponentGuiElement()
+    void FreeComponent::ComponentGuiElement()
     {
-        ImGui::Text("Unknown StateAttachment");
+        ImGui::Text("Unknown FreeComponent");
     }
 
     namespace internal

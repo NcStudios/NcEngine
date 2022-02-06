@@ -10,7 +10,7 @@
 namespace nc
 {
     Camera::Camera(Entity entity) noexcept
-        : StateAttachment(entity),
+        : FreeComponent(entity),
           m_view{},
           m_projection{}
     {

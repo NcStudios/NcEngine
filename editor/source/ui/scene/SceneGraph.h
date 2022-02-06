@@ -41,7 +41,7 @@ namespace nc::editor
             void SceneGraphPanel();
             void SceneGraphNode(Entity entity, Tag* tag, Transform* transform);
             void EntityPanel(Entity entity);
-            void StateAttachmentElement(StateAttachment* comp);
+            void FreeComponentElement(FreeComponent* comp);
             void SceneGraphContextMenu();
             void EntityContextMenu(Entity entity);
     };

@@ -1,4 +1,4 @@
-#include "Attachments.h"
+#include "FreeComponents.h"
 #include "Input.h"
 #include "config/Config.h"
 #include "shared/Prefabs.h"
@@ -100,7 +100,7 @@ namespace nc::sample
     }
 
     ConstantRotation::ConstantRotation(Entity entity, Vector3 axis, float radiansPerSecond)
-        : StateAttachment{entity},
+        : FreeComponent{entity},
           m_axis{axis},
           m_radiansPerSecond{radiansPerSecond}
     {
@@ -112,7 +112,7 @@ namespace nc::sample
     }
 
     ConstantTranslation::ConstantTranslation(Entity entity, Vector3 velocity)
-        : StateAttachment{entity},
+        : FreeComponent{entity},
           m_velocity{velocity}
     {
     }
@@ -123,7 +123,7 @@ namespace nc::sample
     }
 
     MouseFollower::MouseFollower(Entity entity)
-        : StateAttachment(entity),
+        : FreeComponent(entity),
           m_screenDimensions{ window::GetDimensions() },
           m_viewPortDist{ 0.0f },
           m_zDepth{ 0.0f },
@@ -154,7 +154,7 @@ namespace nc::sample
     }
 
     PrefabSelector::PrefabSelector(Entity entity)
-        : StateAttachment{entity},
+        : FreeComponent{entity},
           m_currentObject{Entity::Null()},
           m_typeToSpawn{ColliderType::Box},
           m_doSpawn{true}
@@ -214,7 +214,7 @@ namespace nc::sample
     }
 
     FPSTracker::FPSTracker(Entity entity)
-        : StateAttachment{entity}
+        : FreeComponent{entity}
     {
     }
 
@@ -236,7 +236,7 @@ namespace nc::sample
     }
 
     Clickable::Clickable(Entity entity, std::string tag, PhysicsSystem* physicsSystem)
-        : StateAttachment(entity),
+        : FreeComponent(entity),
           IClickable(entity, 40.0f),
           m_Tag{std::move(tag)},
           m_physicsSystem{physicsSystem}
@@ -258,7 +258,7 @@ namespace nc::sample
     }
 
     ClickHandler::ClickHandler(Entity entity, LayerMask mask, PhysicsSystem* physicsSystem)
-        : StateAttachment{entity},
+        : FreeComponent{entity},
           m_mask{mask},
           m_physicsSystem{physicsSystem}
     {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AudioSource.h"
-#include "AttachmentGroup.h"
+#include "FreeComponentGroup.h"
 #include "Camera.h"
 #include "Collider.h"
 #include "ConcaveCollider.h"

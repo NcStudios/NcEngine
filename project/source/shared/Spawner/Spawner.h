@@ -1,7 +1,7 @@
 #pragma once
 #include "SpawnPropertyGenerator.h"
 #include "shared/Prefabs.h"
-#include "shared/Attachments.h"
+#include "shared/FreeComponents.h"
 
 #include <functional>
 
@@ -9,7 +9,7 @@ namespace nc::sample
 {
     /** A prefab spawner configurable with a SpawnBehavior. If provided, extension
         will be applied to each handle after creation. */
-    class Spawner : public StateAttachment
+    class Spawner : public FreeComponent
     {
         public:
             using SpawnExtension = std::function<void(Entity)>;
@@ -44,7 +44,7 @@ namespace nc::sample
                             prefab::Resource resource,
                             SpawnBehavior behavior,
                             SpawnExtension extension)
-        : StateAttachment{entity},
+        : FreeComponent{entity},
           m_extension{extension},
           m_entities{},
           m_generator{behavior},

@@ -1,7 +1,7 @@
 #include "RenderingBenchmark.h"
 #include "NcEngine.h"
 #include "imgui/imgui.h"
-#include "shared/Attachments.h"
+#include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
 
 #include <functional>
@@ -64,11 +64,11 @@ namespace nc::sample
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
         auto spawner = registry->Add<Spawner>(spawnerHandle, prefab::Resource::Cube, spawnBehavior);
-        registry->Add<FrameLogic>(spawnerHandle, InvokeAttachment<Spawner>{});
+        registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
 
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FPSTracker"});
         auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeAttachment<FPSTracker>{});
+        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});

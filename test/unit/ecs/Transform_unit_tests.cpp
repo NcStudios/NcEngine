@@ -7,8 +7,8 @@ namespace nc
 {
     Registry g_registry{10u};
 
-    AttachmentGroup::AttachmentGroup(Entity) : m_attachments{} {}
-    void AttachmentGroup::CommitStagedAttachments() {}
+    FreeComponentGroup::FreeComponentGroup(Entity) : m_components{} {}
+    void FreeComponentGroup::CommitStagedComponents() {}
 }
 
 constexpr auto TestLayer = Entity::layer_type{0u};
