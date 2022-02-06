@@ -1,14 +1,10 @@
 #pragma once
 
 #include "Registry.h"
-#include "component/Component.h"
 
 namespace nc
 {
-    /** @todo what does it look like if we overload operator() to handle invoking for
-     *  1. different logic types: frame/fixed/collision
-     *  2. is there a way to overload for the same logic type: Frame(Entity) and Frame(Entity, Reg*, float)
-    */
+    /** @todo It may be useful to allow invoking fixed and collision logic as well. */
 
    /** Helper for invoking a StateAttachment's Run method from a FrameLogic
     *  component. The user-defined constructor can be used to add an instance

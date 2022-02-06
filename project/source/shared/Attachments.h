@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "physics/PhysicsSystem.h"
 
+#include "ecs/InvokeAttachment.h"
 #include "ecs/Registry.h"
 #include "ecs/component/All.h"
 
