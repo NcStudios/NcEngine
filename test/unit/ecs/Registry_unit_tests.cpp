@@ -5,9 +5,8 @@ using namespace nc;
 
 namespace nc
 {
-    AutoComponentGroup::AutoComponentGroup(Entity) {}
-    void AutoComponentGroup::SendOnDestroy() {}
-    void AutoComponentGroup::CommitStagedComponents() {}
+    AttachmentGroup::AttachmentGroup(Entity) {}
+    void AttachmentGroup::CommitStagedAttachments() {}
 
     Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
         : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
@@ -47,10 +46,10 @@ struct Fake2 : public ComponentBase
     int value;
 };
 
-struct FakeAutoComponent : public AutoComponent
+struct FakeAttachment : public StateAttachment
 {
-    FakeAutoComponent(Entity entity, int v)
-        : AutoComponent{entity}, value{v}
+    FakeAttachment(Entity entity, int v)
+        : StateAttachment{entity}, value{v}
     {}
 
     int value;
@@ -348,10 +347,10 @@ TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
     EXPECT_EQ(ptr, nullptr);
 }
 
-TEST_F(Registry_unit_tests, AddAutoComponent_ValidCall_ConstructsObject)
+TEST_F(Registry_unit_tests, AddStateAttachment_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
-    auto* ptr = registry.Add<FakeAutoComponent>(handle, 1);
+    auto* ptr = registry.Add<FakeAttachment>(handle, 1);
     EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
 }
