@@ -7,12 +7,12 @@
 
 namespace nc
 {
-    class AutoComponent;
+    class StateAttachment;
 
     template<class T>
     concept Component = std::movable<T> &&
                         !std::same_as<Entity, T> &&
-                        !std::derived_from<T, AutoComponent>;
+                        !std::derived_from<T, StateAttachment>;
 
     /** Base class for all Components. Only Components associated with a system
      *  should derive directly from ComponentBase. */
@@ -33,22 +33,13 @@ namespace nc
             Entity m_parentEntity;
     };
 
-    /** Base class for components with no associated system. */
-    class AutoComponent : public ComponentBase
+    class StateAttachment : public ComponentBase
     {
         public:
-            explicit AutoComponent(Entity entity) noexcept
+            explicit StateAttachment(Entity entity) noexcept
                 : ComponentBase{entity} {}
 
-            virtual ~AutoComponent() = default;
-
-            virtual void FrameUpdate(float) {}
-            virtual void FixedUpdate() {}
-            virtual void OnDestroy() {}
-            virtual void OnCollisionEnter(Entity) {}
-            virtual void OnCollisionExit(Entity) {}
-            virtual void OnTriggerEnter(Entity) {}
-            virtual void OnTriggerExit(Entity) {}
+            virtual ~StateAttachment() = default;
 
             #ifdef NC_EDITOR_ENABLED
             virtual void ComponentGuiElement();
@@ -76,7 +67,7 @@ namespace nc
     };
 
     /** Editor function that can be specialized to provide a custom widget.
-     *  AutoComponents must use override their member function instead. */
+     *  StateAttachments must use override their member function instead. */
     #ifdef NC_EDITOR_ENABLED
     namespace internal
     {

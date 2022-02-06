@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs/component/Component.h"
-#include "ecs/component/AutoComponentGroup.h"
+#include "ecs/component/AttachmentGroup.h"
 #include "debug/Utils.h"
 
 #include <algorithm>
@@ -148,12 +148,10 @@ namespace nc
         if(sparseArray.at(entity.Index()) != Entity::NullIndex)
             return true;
 
-        auto pos = std::ranges::find_if(stagingPool, [entity](const auto& pair)
+        return stagingPool.cend() != std::ranges::find_if(stagingPool, [entity](const auto& pair)
         {
             return entity == pair.entity;
         });
-
-        return pos == stagingPool.cend() ? false : true;
     }
 
     template<Component T>
@@ -308,11 +306,11 @@ namespace nc
 
         stagingPool.clear();
 
-        if constexpr(std::same_as<T, AutoComponentGroup>)
+        if constexpr(std::same_as<T, AttachmentGroup>)
         {
             for(auto& group : componentPool)
             {
-                group.CommitStagedComponents();
+                group.CommitStagedAttachments();
             }
         }
     }

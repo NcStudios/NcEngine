@@ -1,7 +1,7 @@
 target_sources(NcEngineLib
     PRIVATE
         ${ROOT_DIR}/source/ecs/component/AudioSource.cpp
-        ${ROOT_DIR}/source/ecs/component/AutoComponentGroup.cpp
+        ${ROOT_DIR}/source/ecs/component/AttachmentGroup.cpp
         ${ROOT_DIR}/source/ecs/component/Camera.cpp
         ${ROOT_DIR}/source/ecs/component/Collider.cpp
         ${ROOT_DIR}/source/ecs/component/Component.cpp

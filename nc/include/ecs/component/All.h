@@ -1,10 +1,11 @@
 #pragma once
 
 #include "AudioSource.h"
-#include "AutoComponentGroup.h"
+#include "AttachmentGroup.h"
 #include "Camera.h"
 #include "Collider.h"
 #include "ConcaveCollider.h"
+#include "Logic.h"
 #include "MeshRenderer.h"
 #include "NetworkDispatcher.h"
 #include "ParticleEmitter.h"

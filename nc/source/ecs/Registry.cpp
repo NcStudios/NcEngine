@@ -24,9 +24,12 @@ namespace nc
     {
         g_registry = this;
         RegisterComponentType<AudioSource>();
-        RegisterComponentType<AutoComponentGroup>();
+        RegisterComponentType<AttachmentGroup>();
         RegisterComponentType<Collider>();
+        RegisterComponentType<CollisionLogic>();
         RegisterComponentType<ConcaveCollider>();
+        RegisterComponentType<FrameLogic>();
+        RegisterComponentType<FixedLogic>();
         RegisterComponentType<NetworkDispatcher>();
         RegisterComponentType<ParticleEmitter>();
         RegisterComponentType<PhysicsBody>();
@@ -67,8 +70,6 @@ namespace nc
         {
             if(entity.IsPersistent())
                 persistentEntities.push_back(entity);
-            else
-                Get<AutoComponentGroup>(entity)->SendOnDestroy();
         }
 
         m_active = std::move(persistentEntities);

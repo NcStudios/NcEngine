@@ -7,7 +7,7 @@
 
 namespace nc
 {
-    class Camera : public AutoComponent
+    class Camera : public StateAttachment
     {
         public:
             Camera(Entity entity) noexcept;

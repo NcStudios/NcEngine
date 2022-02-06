@@ -2,60 +2,9 @@
 
 #include "HandleManager.h"
 #include "PerComponentStorage.h"
-#include "component/AutoComponentGroup.h"
+#include "component/AttachmentGroup.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
-
-/** The regsitry is a collection of entity and component state.
- * 
- *  State tracked per component type in the registry:
- *  - A packed array of the components.
- * 
- *  - A staging array of recently added components waiting to be merged into the pool.
- * 
- *  - A packed array of all the entity indices associated with the component with the same
- *    ordering as the component pool. Useful for sorting different component pools according
- *    to entity.
- * 
- *  - A sparse array of indices into the pools which can be indexed with an entity index.
- * 
- *  - A set of callbacks for external systems to hook into addition and removal events.
- * 
- *  Note about pointers and iteration:
- *   - Generally don't make assumptions about the ordering of components or cache pointers to them.
- *  
- *   - Adding a component may resize the internal storage, invalidating all pointers and spans. The
- *     ReserveHeadroom method can be used to prevent this if the maximum required capacity is known,
- *     but note that the method itself may cause resizing.
- * 
- *   - Removing a component uses the 'swap and pop' idiom so pointers to the last element and end
- *     iterators are invalidated.
- *  
- *  General Notes
- *   - Callbacks will only be used if specified in the StoragePolicy for a component. Attempts to 
- *     set callbacks for types whose StoragePolicy doesn't allow this will fail to compile, while 
- *     VerifyCallbacks can be used to check at runtime that all required callbacks are set, throwing
- *     on failure.
- *
- *   - Newly added and destroyed entities exist in staging areas until CommitStagedChanges is called.
- *     Staged additions are queryable with GetEntity, but they will not appear in the active set. Staged
- *     removals are not queryable, nor do they appear in the active set, but their components are still
- *     present in their respective pools until destruction is finalized.
- *
- *   - Newly added components also exist in a staging area to allow adding components while iterating
- *     over pools. Calls to Contains and Get work normally while a component is staged, but Remove
- *     will only work when called in a later frame.
- * 
- *   - On destruction of an entity, all components are removed in the order they appear in the
- *     registry's template argument list. The entity is destroyed after all components are removed.
- *     Dependencies on destruction order of components should be avoided.
- * 
- *  @todo
- *   - Finish re-fetching pointer?
- *   - Buffering
- *   - Groups
- *   - Remove multiple?
- */
 
 namespace nc
 {
@@ -121,20 +70,20 @@ namespace nc
             template<Component T>
             void ReserveHeadroom(size_t additionalRequiredCount);
 
-            /** AutoComponent Functions */
-            template<std::derived_from<AutoComponent> T, class ... Args>
+            /** StateAttachment Functions */
+            template<std::derived_from<StateAttachment> T, class ... Args>
             auto Add(Entity entity, Args&& ... args) -> T*;
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<StateAttachment> T>
             void Remove(Entity entity);
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<StateAttachment> T>
             bool Contains(Entity entity) const;
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<StateAttachment> T>
             auto Get(Entity entity) -> T*;
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<StateAttachment> T>
             auto Get(Entity entity) const -> const T*;
 
             /** System Functions */
@@ -178,7 +127,7 @@ namespace nc
         auto handle = m_handleManager.GenerateNewHandle(info.layer, info.flags);
         m_toAdd.push_back(handle);
         Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
-        Add<AutoComponentGroup>(handle);
+        Add<AttachmentGroup>(handle);
         Add<Tag>(handle, std::move(info.tag));
         return handle;
     }
@@ -204,11 +153,11 @@ namespace nc
         return StorageFor<T>()->Add(entity, std::forward<Args>(args)...);
     }
 
-    template<std::derived_from<AutoComponent> T, class... Args>
+    template<std::derived_from<StateAttachment> T, class... Args>
     auto Registry::Add(Entity entity, Args&&... args) -> T*
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        AttachmentGroup* group = Get<AttachmentGroup>(entity);
         return group->Add<T>(entity, std::forward<Args>(args)...);
     }
 
@@ -235,11 +184,11 @@ namespace nc
         StorageFor<T>()->Remove(entity);
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<StateAttachment> T>
     void Registry::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        AutoComponentGroup* group = StorageFor<AutoComponentGroup>()->Get(entity);
+        AttachmentGroup* group = StorageFor<AttachmentGroup>()->Get(entity);
         group->Remove<T>();
     }
 
@@ -257,11 +206,11 @@ namespace nc
         return StorageFor<T>()->Contains(entity);
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<StateAttachment> T>
     bool Registry::Contains(Entity entity) const
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        const AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        const AttachmentGroup* group = Get<AttachmentGroup>(entity);
         return group->Contains<T>();
     }
 
@@ -277,17 +226,17 @@ namespace nc
         return StorageFor<T>()->Get(entity);
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<StateAttachment> T>
     auto Registry::Get(Entity entity) -> T*
     {
-        AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        AttachmentGroup* group = Get<AttachmentGroup>(entity);
         return group ? group->Get<T>() : nullptr;
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<StateAttachment> T>
     auto Registry::Get(Entity entity) const -> const T*
     {
-        const AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        const AttachmentGroup* group = Get<AttachmentGroup>(entity);
         return group ? group->Get<T>() : nullptr;
     }
 
@@ -403,7 +352,7 @@ namespace nc
     {
         for(auto entity : m_toRemove)
         {
-            Get<AutoComponentGroup>(entity)->SendOnDestroy();
+            /** @todo can we just pass a span here now? */
             m_handleManager.ReclaimHandle(entity);
         }
 
