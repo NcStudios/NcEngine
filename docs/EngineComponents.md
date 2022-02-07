@@ -27,9 +27,9 @@ There are three Components designed for quickly hooking up custom logic. They ea
 * CollisionLogic
     * Called: on each collision and trigger event.
     * Signature: `void Func(Entity self, Entity other, Registry* registry)`
-    * Contains distinct callables for each event type: Collision Enter/Exit and Trigger Enter/Exit.
+    * Contains distinct callables for all four event types: Collision Enter/Exit and Trigger Enter/Exit.
 
-All callables can be changed dynamically and my be nullptr. They may also be invoked directly through the corresponding member functions.
+All callables can be changed dynamically and may be set to nullptr. They may also be invoked directly through the corresponding member functions.
 
 It can be useful to wire up a FreeComponent member function to one of these. To mitigate code repetition in these cases, an instance of [InvokeFreeComponent](../nc/include/ecs/InvokeFreeComponent.h) may be passed as the callable. Note that it expects a function named 'Run' invocable with arguments matching one of the signatures above.
 
