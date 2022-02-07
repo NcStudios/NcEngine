@@ -20,7 +20,7 @@ namespace nc
             registry->Add<T>(self, std::forward<Args>(args)...);
         }
 
-        void operator()(Entity self, Registry* registry, float dt)
+        void operator()(Entity self, Registry* registry, float dt) const
         {
             if(auto* attachment = registry->Get<T>(self))
                 attachment->Run(self, registry, dt);

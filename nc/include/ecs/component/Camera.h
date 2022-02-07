@@ -16,13 +16,13 @@ namespace nc
             auto ProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
             auto CalculateFrustum() const noexcept -> Frustum;
 
-            void UpdateViewMatrix();
-            void UpdateProjectionMatrix(float width, float height, float nearZ, float farZ);
+            virtual void UpdateViewMatrix();
+            virtual void UpdateProjectionMatrix(float width, float height, float nearZ, float farZ);
 
             #ifdef NC_EDITOR_ENABLED
             void ComponentGuiElement() override;
             #endif
-        
+
         private:
             DirectX::XMMATRIX m_view;
             DirectX::XMMATRIX m_projection;
