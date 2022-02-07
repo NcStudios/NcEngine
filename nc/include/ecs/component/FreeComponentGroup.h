@@ -10,7 +10,7 @@
 
 namespace nc
 {
-    class FreeComponentGroup final
+    class FreeComponentGroup final : public ComponentBase
     {
         public:
             FreeComponentGroup(Entity entity);

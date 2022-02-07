@@ -4,8 +4,9 @@
 
 namespace nc
 {
-    FreeComponentGroup::FreeComponentGroup(Entity)
-        : m_components{},
+    FreeComponentGroup::FreeComponentGroup(Entity entity)
+        : ComponentBase{entity},
+          m_components{},
           m_toAdd{},
           m_toRemove{}
     {}
