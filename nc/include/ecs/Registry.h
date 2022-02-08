@@ -39,35 +39,35 @@ namespace nc
             template<std::same_as<Entity> T>
             auto ViewAll() -> std::span<Entity>;
 
-            /** Component Functions */
-            template<Component T, class... Args>
+            /** PooledComponent Functions */
+            template<PooledComponent T, class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
 
-            template<Component T>
+            template<PooledComponent T>
             void Remove(Entity entity);
 
-            template<Component T>
+            template<PooledComponent T>
             bool Contains(Entity entity) const;
 
-            template<Component T>
+            template<PooledComponent T>
             auto Get(Entity entity) -> T*;
 
-            template<Component T>
+            template<PooledComponent T>
             auto Get(Entity entity) const -> const T*;
 
-            template<Component T>
+            template<PooledComponent T>
             auto ViewAll() -> std::span<T>;
 
-            template<Component T>
+            template<PooledComponent T>
             auto ViewAll() const -> std::span<const T>;
 
-            template<Component T, Component U>
+            template<PooledComponent T, PooledComponent U>
             auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
 
-            template<Component T, class Predicate>
+            template<PooledComponent T, class Predicate>
             void Sort(Predicate&& comparesLessThan);
 
-            template<Component T>
+            template<PooledComponent T>
             void ReserveHeadroom(size_t additionalRequiredCount);
 
             /** FreeComponent Functions */
@@ -87,13 +87,13 @@ namespace nc
             auto Get(Entity entity) const -> const T*;
 
             /** System Functions */
-            template<Component T>
+            template<PooledComponent T>
             void RegisterComponentType();
 
-            template<Component T>
+            template<PooledComponent T>
             void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
 
-            template<Component T>
+            template<PooledComponent T>
             void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
 
             /** Engine Functions */
@@ -111,13 +111,13 @@ namespace nc
 
             void RemoveEntityWithoutNotifyingParent(Entity entity);
 
-            template<Component T>
+            template<PooledComponent T>
             inline static PerComponentStorage<T>* m_typedStoragePtr = nullptr;
 
-            template<Component T>
+            template<PooledComponent T>
             auto StorageFor() -> PerComponentStorage<T>*;
 
-            template<Component T>
+            template<PooledComponent T>
             auto StorageFor() const -> const PerComponentStorage<T>*;
     };
 
@@ -132,21 +132,21 @@ namespace nc
         return handle;
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::StorageFor() -> PerComponentStorage<T>*
     {
         IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::StorageFor() const -> const PerComponentStorage<T>*
     {
         IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
     }
 
-    template<Component T, class... Args>
+    template<PooledComponent T, class... Args>
     auto Registry::Add(Entity entity, Args&&... args) -> T*
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
@@ -177,7 +177,7 @@ namespace nc
         m_toRemove.push_back(entity);
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
@@ -199,7 +199,7 @@ namespace nc
                (m_toAdd.cend() != std::ranges::find(m_toAdd, entity));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     bool Registry::Contains(Entity entity) const
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
@@ -214,13 +214,13 @@ namespace nc
         return group->Contains<T>();
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::Get(Entity entity) -> T*
     {
         return StorageFor<T>()->Get(entity);
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::Get(Entity entity) const -> const T*
     {
         return StorageFor<T>()->Get(entity);
@@ -246,19 +246,19 @@ namespace nc
         return std::span<Entity>{m_active};
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::ViewAll() -> std::span<T>
     {
         return StorageFor<T>()->ViewAll();
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::ViewAll() const -> std::span<const T>
     {
         return StorageFor<T>()->ViewAll();
     }
 
-    template<Component T, Component U>
+    template<PooledComponent T, PooledComponent U>
     auto Registry::ViewGroup() -> std::pair<std::span<T>, std::span<U>>
     {
         auto& referenceStorage = *StorageFor<T>();
@@ -311,19 +311,19 @@ namespace nc
         };
     }
 
-    template<Component T, class Predicate>
+    template<PooledComponent T, class Predicate>
     void Registry::Sort(Predicate&& comparesLessThan)
     {
         StorageFor<T>()->Sort(std::forward<Predicate>(comparesLessThan));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::ReserveHeadroom(size_t additionalRequiredCount)
     {
         StorageFor<T>()->ReserveHeadroom();
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::RegisterComponentType()
     {
         if(m_typedStoragePtr<T>)
@@ -334,14 +334,14 @@ namespace nc
         m_registeredStorage.push_back(std::move(storage));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::RegisterOnAddCallback(typename SystemCallbacks<T>::on_add_type func)
     {
         static_assert(StoragePolicy<T>::requires_on_add_callback::value, "Cannot register an OnAdd callback unless specified in the StoragePolicy");
         StorageFor<T>()->RegisterOnAddCallback(std::move(func));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::RegisterOnRemoveCallback(typename SystemCallbacks<T>::on_remove_type func)
     {
         static_assert(StoragePolicy<T>::requires_on_remove_callback::value, "Cannot register an OnRemove callback unless specified in the StoragePolicy");

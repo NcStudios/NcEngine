@@ -7,15 +7,8 @@
 
 namespace nc
 {
-    class FreeComponent;
-
-    template<class T>
-    concept Component = std::movable<T> &&
-                        !std::same_as<Entity, T> &&
-                        !std::derived_from<T, FreeComponent>;
-
-    /** Base class for all Components. Only Components associated with a system
-     *  should derive directly from ComponentBase. */
+    /** Base class for all Components. Pooled components should derive
+     *  directly from this. */
     class ComponentBase
     {
         public:
@@ -33,6 +26,7 @@ namespace nc
             Entity m_parentEntity;
     };
 
+    /** Base class for free components (unpooled). */
     class FreeComponent : public ComponentBase
     {
         public:
@@ -45,6 +39,12 @@ namespace nc
             virtual void ComponentGuiElement();
             #endif
     };
+
+    /** Requirements for the Registry to recognize a pooled component. */
+    template<class T>
+    concept PooledComponent = std::movable<T> &&
+                              std::derived_from<T, ComponentBase> &&
+                              !std::derived_from<T, FreeComponent>;
 
     /** Helper for configuring storage and allocation behavior. */
     template<class T>
