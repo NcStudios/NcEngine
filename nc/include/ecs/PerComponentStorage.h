@@ -66,7 +66,7 @@ namespace nc
             auto ViewAll() -> std::span<T>;
             auto ViewAll() const -> std::span<const T>;
 
-            template<class Predicate>
+            template<std::predicate<const T&, const T&> Predicate>
             void Sort(Predicate&& comparesLessThan);
 
             void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
@@ -197,7 +197,7 @@ namespace nc
     }
 
     template<PooledComponent T>
-    template<class Predicate>
+    template<std::predicate<const T&, const T&> Predicate>
     void PerComponentStorage<T>::Sort(Predicate&& comparesLessThan)
     {
         /** Create array of indices for an out-of-place sort. */

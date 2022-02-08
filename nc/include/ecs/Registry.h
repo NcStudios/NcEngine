@@ -64,7 +64,7 @@ namespace nc
             template<PooledComponent T, PooledComponent U>
             auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
 
-            template<PooledComponent T, class Predicate>
+            template<PooledComponent T, std::predicate<const T&, const T&> Predicate>
             void Sort(Predicate&& comparesLessThan);
 
             template<PooledComponent T>
@@ -311,7 +311,7 @@ namespace nc
         };
     }
 
-    template<PooledComponent T, class Predicate>
+    template<PooledComponent T, std::predicate<const T&, const T&> Predicate>
     void Registry::Sort(Predicate&& comparesLessThan)
     {
         StorageFor<T>()->Sort(std::forward<Predicate>(comparesLessThan));
