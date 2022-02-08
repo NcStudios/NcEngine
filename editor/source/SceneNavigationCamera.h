@@ -10,11 +10,10 @@ namespace nc::editor
     class SceneNavigationCamera : public Camera
     {
         public:
-            SceneNavigationCamera(Entity entity, Registry* registry, float panDamp, float lookDamp, float zoomDamp);
-            void FrameUpdate(float dt) override;
+            SceneNavigationCamera(Entity entity, float panDamp, float lookDamp, float zoomDamp);
+            void Run(Entity self, Registry* registry, float dt);
 
         private:
-            Registry* m_registry;
             Vector2 m_panPivot = Vector2::Zero();
             Vector2 m_lookPivot = Vector2::Zero();
             float m_zoom = 0.0f;
@@ -27,18 +26,17 @@ namespace nc::editor
             void Zoom(float dt, Transform* transform);
     };
 
-    inline SceneNavigationCamera::SceneNavigationCamera(Entity entity, Registry* registry, float panDamp, float lookDamp, float zoomDamp)
+    inline SceneNavigationCamera::SceneNavigationCamera(Entity entity, float panDamp, float lookDamp, float zoomDamp)
         : Camera{entity},
-          m_registry{registry},
           m_panDampen{panDamp},
           m_lookDampen{lookDamp},
           m_zoomDampen{zoomDamp}
     {
     }
 
-    inline void SceneNavigationCamera::FrameUpdate(float dt)
+    inline void SceneNavigationCamera::Run(Entity, Registry* registry, float dt)
     {
-        auto* transform = m_registry->Get<Transform>(ParentEntity());
+        auto* transform = registry->Get<Transform>(ParentEntity());
         Pan(dt, transform);
         Look(dt, transform);
         Zoom(dt, transform);
