@@ -19,14 +19,14 @@ Engine Components
 There are three Components designed for quickly hooking up custom logic. They each each hold a callable type which is invoked under specific conditions:
 
 * FrameLogic
-    * Called: on each iteration of the game loop.
-    * Signature: `void Func(Entity self, Registry* registry, float dt)`
+    * Called on: each iteration of the game loop.
+    * Invocable with: `(Entity self, Registry* registry, float dt)`
 * FixedLogic
-    * Called: on each physics system tick
-    * Signature: `void Func(Entity self, Registry* registry)`
+    * Called on: each physics system tick
+    * Invocable with: `(Entity self, Registry* registry)`
 * CollisionLogic
-    * Called: on each collision and trigger event.
-    * Signature: `void Func(Entity self, Entity other, Registry* registry)`
+    * Called on: each collision and trigger event.
+    * Invocable with: `(Entity self, Entity other, Registry* registry)`
     * Contains distinct callables for all four event types: Collision Enter/Exit and Trigger Enter/Exit.
 
 All callables can be changed dynamically and may be set to nullptr. They may also be invoked directly through the corresponding member functions.
@@ -53,7 +53,7 @@ registry->Add<FrameLogic>(entity, [](Entity self, Registry* registry, float dt)
 registry->Add<MyType>(entity, args...);
 registry->Add<FrameLogic>(entity, InvokeFreeComponent<MyType>{});
 
-/** The InvokeFreeComponent constructor can also handle adding the FreeComponent: */
+/** Alternatively, the MyType instance can be added by InvokeFreeComponent: */
 registry->Add<FrameLogic>(entity, InvokeFreeComponent<MyType>{entity, registry, args...});
 ```
 
@@ -105,7 +105,7 @@ Properties of the Colliders and PhysicsBodies, if present, determine the event t
 ------------------
 Concave colliders exist to support collision detection against objects that can't be accurately modelled with a standard collider. They are less efficient, so prefer approximating volumes with standard colliders over concave colliders. To minimize their added cost, concave colliders may only be added to static entities and do not collide with one another. Constructing a concave collider requires a path to an [asset](Overview.md#assets) file specifying the geometry as a triangle list.
 
-Concave colliders act more like a collision surface than a volume. They may be used to represent unenclosed objects (imagine a deformed plane representing a topography). When used to represent an enclosed volume, they have no concept of their interior or exterior - just the surface. This makes them unsuitable for use as triggers.
+Concave colliders act more like a collision surface than a volume. They may be used to represent unenclosed objects (imagine a plane deformed like a topography). When modeling an enclosed volume, they have no concept of their interior or exterior - just the surface. This makes them unsuitable for use as triggers.
 
 ### PhysicsBody
 --------------
