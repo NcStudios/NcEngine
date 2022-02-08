@@ -7,7 +7,7 @@ namespace nc
 {
     Registry g_registry{10u};
 
-    FreeComponentGroup::FreeComponentGroup(Entity) : m_components{} {}
+    FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity}, m_components{} {}
     void FreeComponentGroup::CommitStagedComponents() {}
 }
 

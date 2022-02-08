@@ -5,7 +5,7 @@ using namespace nc;
 
 namespace nc
 {
-    FreeComponentGroup::FreeComponentGroup(Entity) {}
+    FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity} {}
     void FreeComponentGroup::CommitStagedComponents() {}
 
     Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)

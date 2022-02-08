@@ -79,6 +79,11 @@ namespace nc
             {
             }
 
+            void SetOnCollisionEnter(function_t func) { m_onCollisionEnter = std::move(func); }
+            void SetOnCollisionExit(function_t func) { m_onCollisionExit = std::move(func); }
+            void SetOnTriggerEnter(function_t func) { m_onTriggerEnter = std::move(func); }
+            void SetOnTriggerExit(function_t func) { m_onTriggerExit = std::move(func); }
+
             void NotifyCollisionEnter(Entity other, Registry* registry)
             {
                 if(m_onCollisionEnter) m_onCollisionEnter(ParentEntity(), other, registry);
