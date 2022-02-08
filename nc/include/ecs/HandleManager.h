@@ -3,6 +3,7 @@
 #include "Entity.h"
 
 #include <algorithm>
+#include <span>
 #include <vector>
 
 namespace nc
@@ -29,6 +30,15 @@ namespace nc
             void ReclaimHandle(Entity handle)
             {
                 m_freeHandles.push_back(handle.Index());
+            }
+
+            void ReclaimHandles(std::span<Entity> handles)
+            {
+                m_freeHandles.reserve(m_freeHandles.capacity() + handles.size());
+                std::ranges::transform(handles.begin(), handles.end(), std::back_inserter(m_freeHandles), [](auto entity)
+                {
+                    return entity.Index();
+                });
             }
 
             void Reset(const std::vector<Entity>& persistentEntities)

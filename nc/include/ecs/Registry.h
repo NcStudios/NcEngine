@@ -350,11 +350,7 @@ namespace nc
 
     inline void Registry::CommitStagedChanges()
     {
-        for(auto entity : m_toRemove)
-        {
-            /** @todo can we just pass a span here now? */
-            m_handleManager.ReclaimHandle(entity);
-        }
+        m_handleManager.ReclaimHandles(m_toRemove);
 
         for(auto& storage : m_registeredStorage)
             storage->CommitStagedComponents(m_toRemove);
