@@ -3,6 +3,7 @@
 #include "Entity.h"
 
 #include <algorithm>
+#include <iterator>
 #include <span>
 #include <vector>
 

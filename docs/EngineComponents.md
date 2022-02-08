@@ -16,7 +16,7 @@ Engine Components
 
 ### Logic
 ---------
-There are three Components designed for quickly hooking up custom logic. They each each hold a callable type which is invoked under specific conditions:
+There are three Components designed for quickly hooking up custom logic. They each hold a callable type which is invoked under specific conditions:
 
 * FrameLogic
     * Called on: each iteration of the game loop.
