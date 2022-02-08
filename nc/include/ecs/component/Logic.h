@@ -8,21 +8,26 @@ namespace nc
 {
     class Registry;
 
+    using FrameLogicCallable_t = std::function<void(Entity, Registry*, float)>;
+
+    template<class Func>
+    concept FrameLogicCallable = std::convertible_to<Func, FrameLogicCallable_t>;
+
     /** Runs custom logic each frame. */
     class FrameLogic final : public ComponentBase
     {
         public:
-            using function_t = std::function<void(Entity, Registry*, float)>;
-
-            FrameLogic(Entity entity, function_t func)
+            template<FrameLogicCallable Func>
+            FrameLogic(Entity entity, Func&& func)
                 : ComponentBase{entity},
-                  m_func{std::move(func)}
+                  m_func{std::forward<Func>(func)}
             {
             }
 
-            void SetFunction(function_t func)
+            template<FrameLogicCallable Func>
+            void SetFunction(Func&& func)
             {
-                m_func = std::move(func);
+                m_func = std::forward<Func>(func);
             }
 
             void Run(Registry* registry, float dt)
@@ -31,24 +36,29 @@ namespace nc
             }
 
         private:
-            function_t m_func;
+            FrameLogicCallable_t m_func;
     };
+
+    using FixedLogicCallable_t = std::function<void(Entity, Registry*)>;
+
+    template<class Func>
+    concept FixedLogicCallable = std::convertible_to<Func, FixedLogicCallable_t>;
 
     /** Runs custom logic each physics update tick. */
     class FixedLogic final : public ComponentBase
     {
         public:
-            using function_t = std::function<void(Entity, Registry*)>;
-
-            FixedLogic(Entity entity, function_t func)
+            template<std::invocable<Entity, Registry*> Func>
+            FixedLogic(Entity entity, Func&& func)
                 : ComponentBase{entity},
-                  m_func{std::move(func)}
+                  m_func{std::forward<Func>(func)}
             {
             }
 
-            void SetFunction(function_t func)
+            template<std::invocable<Entity, Registry*> Func>
+            void SetFunction(Func&& func)
             {
-                m_func = std::move(func);
+                m_func = std::forward<Func>(func);
             }
 
             void Run(Registry* registry)
@@ -57,32 +67,58 @@ namespace nc
             }
 
         private:
-            function_t m_func;
+            FixedLogicCallable_t m_func;
     };
+
+    using CollisionLogicCallable_t = std::function<void(Entity, Entity, Registry*)>;
+
+    template<class Func>
+    concept CollisionLogicCallable = std::convertible_to<Func, CollisionLogicCallable_t>;
 
     /** Runs custom logic on collision and trigger events. */
     class CollisionLogic final : public ComponentBase
     {
         public:
-            using function_t = std::function<void(Entity, Entity, Registry*)>;
-
+            template<CollisionLogicCallable CollisionEnterFunc,
+                     CollisionLogicCallable CollisionExitFunc,
+                     CollisionLogicCallable TriggerEnterFunc,
+                     CollisionLogicCallable TriggerExitFunc>
             CollisionLogic(Entity entity,
-                           function_t onCollisionEnter = nullptr,
-                           function_t onCollisionExit = nullptr,
-                           function_t onTriggerEnter = nullptr,
-                           function_t onTriggerExit = nullptr)
+                           CollisionEnterFunc&& onCollisionEnter = nullptr,
+                           CollisionExitFunc&& onCollisionExit = nullptr,
+                           TriggerEnterFunc&& onTriggerEnter = nullptr,
+                           TriggerExitFunc&& onTriggerExit = nullptr)
                 : ComponentBase{entity},
-                  m_onCollisionEnter{std::move(onCollisionEnter)},
-                  m_onCollisionExit{std::move(onCollisionExit)},
-                  m_onTriggerEnter{std::move(onTriggerEnter)},
-                  m_onTriggerExit{std::move(onTriggerExit)}
+                  m_onCollisionEnter{std::forward<CollisionEnterFunc>(onCollisionEnter)},
+                  m_onCollisionExit{std::forward<CollisionExitFunc>(onCollisionExit)},
+                  m_onTriggerEnter{std::forward<TriggerEnterFunc>(onTriggerEnter)},
+                  m_onTriggerExit{std::forward<TriggerExitFunc>(onTriggerExit)}
             {
             }
 
-            void SetOnCollisionEnter(function_t func) { m_onCollisionEnter = std::move(func); }
-            void SetOnCollisionExit(function_t func) { m_onCollisionExit = std::move(func); }
-            void SetOnTriggerEnter(function_t func) { m_onTriggerEnter = std::move(func); }
-            void SetOnTriggerExit(function_t func) { m_onTriggerExit = std::move(func); }
+            template<CollisionLogicCallable Func>
+            void SetOnCollisionEnter(Func&& func)
+            {
+                m_onCollisionEnter = std::forward<Func>(func);
+            }
+
+            template<CollisionLogicCallable Func>
+            void SetOnCollisionExit(Func&& func)
+            {
+                m_onCollisionExit = std::forward<Func>(func);
+            }
+
+            template<CollisionLogicCallable Func>
+            void SetOnTriggerEnter(Func&& func)
+            {
+                m_onTriggerEnter = std::forward<Func>(func);
+            }
+
+            template<CollisionLogicCallable Func>
+            void SetOnTriggerExit(Func&& func)
+            {
+                m_onTriggerExit = std::forward<Func>(func);
+            }
 
             void NotifyCollisionEnter(Entity other, Registry* registry)
             {
@@ -105,9 +141,9 @@ namespace nc
             }
 
         private:
-            function_t m_onCollisionEnter;
-            function_t m_onCollisionExit;
-            function_t m_onTriggerEnter;
-            function_t m_onTriggerExit;
+            CollisionLogicCallable_t m_onCollisionEnter;
+            CollisionLogicCallable_t m_onCollisionExit;
+            CollisionLogicCallable_t m_onTriggerEnter;
+            CollisionLogicCallable_t m_onTriggerExit;
     };
 }
