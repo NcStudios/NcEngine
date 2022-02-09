@@ -2,60 +2,9 @@
 
 #include "HandleManager.h"
 #include "PerComponentStorage.h"
-#include "component/AutoComponentGroup.h"
+#include "component/FreeComponentGroup.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
-
-/** The regsitry is a collection of entity and component state.
- * 
- *  State tracked per component type in the registry:
- *  - A packed array of the components.
- * 
- *  - A staging array of recently added components waiting to be merged into the pool.
- * 
- *  - A packed array of all the entity indices associated with the component with the same
- *    ordering as the component pool. Useful for sorting different component pools according
- *    to entity.
- * 
- *  - A sparse array of indices into the pools which can be indexed with an entity index.
- * 
- *  - A set of callbacks for external systems to hook into addition and removal events.
- * 
- *  Note about pointers and iteration:
- *   - Generally don't make assumptions about the ordering of components or cache pointers to them.
- *  
- *   - Adding a component may resize the internal storage, invalidating all pointers and spans. The
- *     ReserveHeadroom method can be used to prevent this if the maximum required capacity is known,
- *     but note that the method itself may cause resizing.
- * 
- *   - Removing a component uses the 'swap and pop' idiom so pointers to the last element and end
- *     iterators are invalidated.
- *  
- *  General Notes
- *   - Callbacks will only be used if specified in the StoragePolicy for a component. Attempts to 
- *     set callbacks for types whose StoragePolicy doesn't allow this will fail to compile, while 
- *     VerifyCallbacks can be used to check at runtime that all required callbacks are set, throwing
- *     on failure.
- *
- *   - Newly added and destroyed entities exist in staging areas until CommitStagedChanges is called.
- *     Staged additions are queryable with GetEntity, but they will not appear in the active set. Staged
- *     removals are not queryable, nor do they appear in the active set, but their components are still
- *     present in their respective pools until destruction is finalized.
- *
- *   - Newly added components also exist in a staging area to allow adding components while iterating
- *     over pools. Calls to Contains and Get work normally while a component is staged, but Remove
- *     will only work when called in a later frame.
- * 
- *   - On destruction of an entity, all components are removed in the order they appear in the
- *     registry's template argument list. The entity is destroyed after all components are removed.
- *     Dependencies on destruction order of components should be avoided.
- * 
- *  @todo
- *   - Finish re-fetching pointer?
- *   - Buffering
- *   - Groups
- *   - Remove multiple?
- */
 
 namespace nc
 {
@@ -90,61 +39,61 @@ namespace nc
             template<std::same_as<Entity> T>
             auto ViewAll() -> std::span<Entity>;
 
-            /** Component Functions */
-            template<Component T, class... Args>
+            /** PooledComponent Functions */
+            template<PooledComponent T, class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
 
-            template<Component T>
+            template<PooledComponent T>
             void Remove(Entity entity);
 
-            template<Component T>
+            template<PooledComponent T>
             bool Contains(Entity entity) const;
 
-            template<Component T>
+            template<PooledComponent T>
             auto Get(Entity entity) -> T*;
 
-            template<Component T>
+            template<PooledComponent T>
             auto Get(Entity entity) const -> const T*;
 
-            template<Component T>
+            template<PooledComponent T>
             auto ViewAll() -> std::span<T>;
 
-            template<Component T>
+            template<PooledComponent T>
             auto ViewAll() const -> std::span<const T>;
 
-            template<Component T, Component U>
+            template<PooledComponent T, PooledComponent U>
             auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
 
-            template<Component T, class Predicate>
+            template<PooledComponent T, std::predicate<const T&, const T&> Predicate>
             void Sort(Predicate&& comparesLessThan);
 
-            template<Component T>
+            template<PooledComponent T>
             void ReserveHeadroom(size_t additionalRequiredCount);
 
-            /** AutoComponent Functions */
-            template<std::derived_from<AutoComponent> T, class ... Args>
+            /** FreeComponent Functions */
+            template<std::derived_from<FreeComponent> T, class ... Args>
             auto Add(Entity entity, Args&& ... args) -> T*;
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<FreeComponent> T>
             void Remove(Entity entity);
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<FreeComponent> T>
             bool Contains(Entity entity) const;
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<FreeComponent> T>
             auto Get(Entity entity) -> T*;
 
-            template<std::derived_from<AutoComponent> T>
+            template<std::derived_from<FreeComponent> T>
             auto Get(Entity entity) const -> const T*;
 
             /** System Functions */
-            template<Component T>
+            template<PooledComponent T>
             void RegisterComponentType();
 
-            template<Component T>
+            template<PooledComponent T>
             void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
 
-            template<Component T>
+            template<PooledComponent T>
             void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
 
             /** Engine Functions */
@@ -162,13 +111,13 @@ namespace nc
 
             void RemoveEntityWithoutNotifyingParent(Entity entity);
 
-            template<Component T>
+            template<PooledComponent T>
             inline static PerComponentStorage<T>* m_typedStoragePtr = nullptr;
 
-            template<Component T>
+            template<PooledComponent T>
             auto StorageFor() -> PerComponentStorage<T>*;
 
-            template<Component T>
+            template<PooledComponent T>
             auto StorageFor() const -> const PerComponentStorage<T>*;
     };
 
@@ -178,37 +127,37 @@ namespace nc
         auto handle = m_handleManager.GenerateNewHandle(info.layer, info.flags);
         m_toAdd.push_back(handle);
         Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
-        Add<AutoComponentGroup>(handle);
+        Add<FreeComponentGroup>(handle);
         Add<Tag>(handle, std::move(info.tag));
         return handle;
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::StorageFor() -> PerComponentStorage<T>*
     {
         IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::StorageFor() const -> const PerComponentStorage<T>*
     {
         IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
     }
 
-    template<Component T, class... Args>
+    template<PooledComponent T, class... Args>
     auto Registry::Add(Entity entity, Args&&... args) -> T*
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         return StorageFor<T>()->Add(entity, std::forward<Args>(args)...);
     }
 
-    template<std::derived_from<AutoComponent> T, class... Args>
+    template<std::derived_from<FreeComponent> T, class... Args>
     auto Registry::Add(Entity entity, Args&&... args) -> T*
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group->Add<T>(entity, std::forward<Args>(args)...);
     }
 
@@ -228,18 +177,18 @@ namespace nc
         m_toRemove.push_back(entity);
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         StorageFor<T>()->Remove(entity);
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<FreeComponent> T>
     void Registry::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        AutoComponentGroup* group = StorageFor<AutoComponentGroup>()->Get(entity);
+        FreeComponentGroup* group = StorageFor<FreeComponentGroup>()->Get(entity);
         group->Remove<T>();
     }
 
@@ -250,44 +199,44 @@ namespace nc
                (m_toAdd.cend() != std::ranges::find(m_toAdd, entity));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     bool Registry::Contains(Entity entity) const
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         return StorageFor<T>()->Contains(entity);
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<FreeComponent> T>
     bool Registry::Contains(Entity entity) const
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        const AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group->Contains<T>();
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::Get(Entity entity) -> T*
     {
         return StorageFor<T>()->Get(entity);
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::Get(Entity entity) const -> const T*
     {
         return StorageFor<T>()->Get(entity);
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<FreeComponent> T>
     auto Registry::Get(Entity entity) -> T*
     {
-        AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group ? group->Get<T>() : nullptr;
     }
 
-    template<std::derived_from<AutoComponent> T>
+    template<std::derived_from<FreeComponent> T>
     auto Registry::Get(Entity entity) const -> const T*
     {
-        const AutoComponentGroup* group = Get<AutoComponentGroup>(entity);
+        const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
         return group ? group->Get<T>() : nullptr;
     }
 
@@ -297,19 +246,19 @@ namespace nc
         return std::span<Entity>{m_active};
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::ViewAll() -> std::span<T>
     {
         return StorageFor<T>()->ViewAll();
     }
 
-    template<Component T>
+    template<PooledComponent T>
     auto Registry::ViewAll() const -> std::span<const T>
     {
         return StorageFor<T>()->ViewAll();
     }
 
-    template<Component T, Component U>
+    template<PooledComponent T, PooledComponent U>
     auto Registry::ViewGroup() -> std::pair<std::span<T>, std::span<U>>
     {
         auto& referenceStorage = *StorageFor<T>();
@@ -362,19 +311,19 @@ namespace nc
         };
     }
 
-    template<Component T, class Predicate>
+    template<PooledComponent T, std::predicate<const T&, const T&> Predicate>
     void Registry::Sort(Predicate&& comparesLessThan)
     {
         StorageFor<T>()->Sort(std::forward<Predicate>(comparesLessThan));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::ReserveHeadroom(size_t additionalRequiredCount)
     {
         StorageFor<T>()->ReserveHeadroom();
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::RegisterComponentType()
     {
         if(m_typedStoragePtr<T>)
@@ -385,14 +334,14 @@ namespace nc
         m_registeredStorage.push_back(std::move(storage));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::RegisterOnAddCallback(typename SystemCallbacks<T>::on_add_type func)
     {
         static_assert(StoragePolicy<T>::requires_on_add_callback::value, "Cannot register an OnAdd callback unless specified in the StoragePolicy");
         StorageFor<T>()->RegisterOnAddCallback(std::move(func));
     }
 
-    template<Component T>
+    template<PooledComponent T>
     void Registry::RegisterOnRemoveCallback(typename SystemCallbacks<T>::on_remove_type func)
     {
         static_assert(StoragePolicy<T>::requires_on_remove_callback::value, "Cannot register an OnRemove callback unless specified in the StoragePolicy");
@@ -401,11 +350,7 @@ namespace nc
 
     inline void Registry::CommitStagedChanges()
     {
-        for(auto entity : m_toRemove)
-        {
-            Get<AutoComponentGroup>(entity)->SendOnDestroy();
-            m_handleManager.ReclaimHandle(entity);
-        }
+        m_handleManager.ReclaimHandles(m_toRemove);
 
         for(auto& storage : m_registeredStorage)
             storage->CommitStagedComponents(m_toRemove);

@@ -4,7 +4,6 @@
 #include "ecs/component/PointLight.h"
 #include "GameLog.h"
 #include "SampleUI.h"
-#include "FrameTimer.h"
 
 #include <functional>
 #include <memory>
@@ -32,8 +31,6 @@ namespace nc::sample
         if(enableLog)
         {
             m_log = std::make_unique<GameLog>();
-            auto timerHandle = registry->Add<Entity>({.tag = "FrameTimer"});
-            registry->Add<FrameTimer>(timerHandle);
         }
 
         m_ui = std::make_unique<SampleUI>(engine->SceneSystem(), m_log.get(), widgetCallback);

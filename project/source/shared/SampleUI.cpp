@@ -5,15 +5,15 @@
 #include "UIStyle.h"
 #include "imgui/imgui.h"
 
-#include "worms/Worms.h"
-#include "click_events/ClickEvents.h"
-#include "spawn_test/SpawnTest.h"
-#include "collision_benchmark/CollisionBenchmark.h"
-#include "collision_events/CollisionEvents.h"
-#include "joints_test/JointsTest.h"
-#include "rendering_benchmark/RenderingBenchmark.h"
-#include "jare_scratch/VulkanScene.h"
-// #include "solar_system/SolarSystem.h"
+#include "scenes/Worms.h"
+#include "scenes/ClickEvents.h"
+#include "scenes/SpawnTest.h"
+#include "scenes/CollisionBenchmark.h"
+#include "scenes/CollisionEvents.h"
+#include "scenes/JointsTest.h"
+#include "scenes/RenderingBenchmark.h"
+#include "scenes/JareTestScene.h"
+// #include "scenes/SolarSystem.h"
 
 namespace
 {
@@ -21,7 +21,7 @@ namespace
     constexpr auto WindowFlags = ImGuiWindowFlags_NoCollapse |
                                  ImGuiWindowFlags_NoTitleBar |
                                  ImGuiWindowFlags_NoResize;
-    
+
     void Spacing(unsigned count)
     {
         while(count--)
@@ -127,12 +127,12 @@ namespace nc::sample
 
             if(ImGui::Button("Rendering Benchmark", buttonSize))
                 m_sceneSystem->ChangeScene(std::make_unique<RenderingBenchmark>());
-                
+
             if(ImGui::Button("Collision Benchmark", buttonSize))
                 m_sceneSystem->ChangeScene(std::make_unique<CollisionBenchmark>());
 
-            if(ImGui::Button("Jare Scratch", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<VulkanScene>());
+            if(ImGui::Button("Jare Test", buttonSize))
+                m_sceneSystem->ChangeScene(std::make_unique<JareTestScene>());
 
             // if(ImGui::Button("Solar System", buttonSize))
             //     m_sceneSystem->ChangeScene(std::make_unique<SolarSystem>());

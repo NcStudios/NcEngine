@@ -1,6 +1,6 @@
 #include "NcEngine.h"
 #include "debug/Utils.h"
-#include "worms/Worms.h"
+#include "scenes/Worms.h"
 
 #include <iostream>
 

@@ -5,7 +5,7 @@
 
 namespace nc::sample
 {
-    class VulkanScene : public Scene
+    class JareTestScene : public Scene
     {
         public:
             void Load(NcEngine* engine) override;

@@ -1,10 +1,10 @@
-#include "VulkanScene.h"
+#include "JareTestScene.h"
 #include "Assets.h"
-#include "collision_events/WasdController.h"
+#include "ecs/InvokeFreeComponent.h"
 #include "ecs/component/MeshRenderer.h"
 #include "imgui/imgui.h"
 #include "NcEngine.h"
-#include "shared/SceneNavigationCamera.h"
+#include "shared/FreeComponents.h"
 
 #include <string>
 
@@ -22,7 +22,7 @@ namespace
 
 namespace nc::sample
 {
-    void VulkanScene::Load(NcEngine* engine)
+    void JareTestScene::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
         
@@ -133,10 +133,11 @@ namespace nc::sample
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
+        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
         engine->MainCamera()->Set(camera);
     }
 
-    void VulkanScene::Unload()
+    void JareTestScene::Unload()
     {
         m_sceneHelper.TearDown();
     }

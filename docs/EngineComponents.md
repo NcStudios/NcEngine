@@ -1,6 +1,6 @@
 Engine Components
 =================
-
+* [Logic](#logic)
 * [Transform](#transform)
 * [Tag](#tag)
 * [Collider](#collider)
@@ -12,6 +12,50 @@ Engine Components
 * [Camera](#camera)
 * [ParticleEmitter](#particleemitter)
 * [NetworkDispatcher](#networkdispatcher)
+* [FreeComponentGroup](#freecomponentgroup)
+
+### Logic
+---------
+There are three Components designed for quickly hooking up custom logic. They each hold a callable type which is invoked under specific conditions:
+
+* FrameLogic
+    * Called on: each iteration of the game loop.
+    * Invocable with: `(Entity self, Registry* registry, float dt)`
+* FixedLogic
+    * Called on: each physics system tick
+    * Invocable with: `(Entity self, Registry* registry)`
+* CollisionLogic
+    * Called on: each collision and trigger event.
+    * Invocable with: `(Entity self, Entity other, Registry* registry)`
+    * Contains distinct callables for all four event types: Collision Enter/Exit and Trigger Enter/Exit.
+
+All callables can be changed dynamically and may be set to nullptr. They may also be invoked directly through the corresponding member functions.
+
+It can be useful to wire up a FreeComponent member function to one of these. To mitigate code repetition in these cases, an instance of [InvokeFreeComponent](../nc/include/ecs/InvokeFreeComponent.h) may be passed as the callable. Note that it expects a function named 'Run' invocable with arguments matching one of the signatures above.
+
+```cpp
+struct MyType : public FreeComponent
+{
+    /** Constructor, etc...
+     *  We want to invoke this member each frame. */
+    void Run(Entity, Registry*, float);
+};
+
+/** Using a lambda: */
+registry->Add<MyType>(entity, args...);
+registry->Add<FrameLogic>(entity, [](Entity self, Registry* registry, float dt)
+{
+    if(auto* component = registry->Get<MyType>(self))
+        component->Run(self, registry, dt);
+});
+
+/** Using a default constructed InvokeFreeComponent: */
+registry->Add<MyType>(entity, args...);
+registry->Add<FrameLogic>(entity, InvokeFreeComponent<MyType>{});
+
+/** Alternatively, the MyType instance can be added by InvokeFreeComponent: */
+registry->Add<FrameLogic>(entity, InvokeFreeComponent<MyType>{entity, registry, args...});
+```
 
 ### Transform
 ------------
@@ -39,7 +83,9 @@ When creating a Collider, the type of properties struct passed will determine th
 
 These values describing a shape cannot be modified after construction, but the shapes will be affected by the object's transform. For example, dynamically scaling a transform's scale will propagate to the collider. Transforms should always have a positive scale in each axis. Also, sphere colliders always assume uniform scaling.
 
-There are two types of events that may result from the interaction of two colliders: collision and trigger. This determines whether to call OnCollisionXXX or OnTriggerXXX on the AutoComponents for each involved object. Components attached to Entities with the NoCollisionNotifications flag set will not receive these calls. Additionally, collision events are sent to the physics solver. The physics solver, however, may not be allowed to modify both objects. For example, in a collision between two standard PhysicsBodies both objects may be adjusted, but if one of them is kinematic, it cannot be moved or have its velocity modified.
+There are two types of events that may result from the interaction of two colliders: collision and trigger. This determines which [CollisionLogic](#logic) function should be called for each involved object. Components attached to Entities with the NoCollisionNotifications flag set will not receive these calls.
+
+Additionally, collision events are sent to the physics solver. The physics solver, however, may not be allowed to modify both objects. For example, in a collision between two standard PhysicsBodies both objects may be adjusted, but if one of them is kinematic, it cannot be moved or have its velocity modified.
 
 Properties of the Colliders and PhysicsBodies, if present, determine the event type except for one special case: no event will be detected between two static Entities. The following table outlines the result of two colliders interacting.
 * Trigger:     The Collider has isTrigger == true.
@@ -59,7 +105,7 @@ Properties of the Colliders and PhysicsBodies, if present, determine the event t
 ------------------
 Concave colliders exist to support collision detection against objects that can't be accurately modelled with a standard collider. They are less efficient, so prefer approximating volumes with standard colliders over concave colliders. To minimize their added cost, concave colliders may only be added to static entities and do not collide with one another. Constructing a concave collider requires a path to an [asset](Overview.md#assets) file specifying the geometry as a triangle list.
 
-Concave colliders act more like a collision surface than a volume. They may be used to represent unenclosed objects (imagine a deformed plane representing a topography). When used to represent an enclosed volume, they have no concept of their interior or exterior - just the surface. This makes them unsuitable for use as triggers.
+Concave colliders act more like a collision surface than a volume. They may be used to represent unenclosed objects (imagine a plane deformed like a topography). When modeling an enclosed volume, they have no concept of their interior or exterior - just the surface. This makes them unsuitable for use as triggers.
 
 ### PhysicsBody
 --------------
@@ -88,8 +134,8 @@ Audio sources are used to play sounds in a scene. Construction requires a path t
 An audio listener must be registered for audio sources to play (Audio.h), even if spatial sound isn't used.
 
 ### Camera
----------
-Camera properties have not yet been moved into the camera component. Some can be set in the config file, while others are still internally managed. The only current use for the camera component is for calling SetMainCamera (MainCamera.h).
+----------
+NcEngine requires a Camera component to be registered through [MainCamera::Set(camera)](../nc/include/MainCamera.h). This camera can be swapped dynamically. Internally, `UpdateViewMatrix()` is called once per frame before rendering, and `UpdateProjectionMatrix(width, height, nearZ, farZ)` is called upon construction and when the screen is resized. These both can be overridden in derived classes when unconventional matrices are required.
 
 ### ParticleEmitter
 ------------------
@@ -97,3 +143,8 @@ Particle emitters have not yet been updated from DirectX to Vulkan.
 
 ### NetworkDispatcher
 ---------------------
+The NetworkDispatcher relies on some old, tedious, and probably unsafe code.
+
+### FreeComponentGroup
+----------------------
+A FreeComponentGroup is a collection of FreeComponents belonging to an Entity. It is automatically added to each Entity upon creation. Projects do not need to directly interact with this component.

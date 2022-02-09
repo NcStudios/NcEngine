@@ -18,7 +18,7 @@ namespace nc::ui::editor::controls
     inline void SceneGraphPanel(Registry* registry, float windowHeight);
     inline void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform);
     inline void EntityPanel(Registry* registry, Entity entity);
-    inline void AutoComponentElement(AutoComponent* comp);
+    inline void FreeComponentElement(FreeComponent* comp);
     inline void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight);
     inline void FrameData(float* dtMult);
     inline void ComponentSystems(Registry* registry);
@@ -149,13 +149,13 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(col);
         }
 
-        for(const auto& comp : registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
-            controls::AutoComponentElement(comp);
+        for(const auto& comp : registry->Get<FreeComponentGroup>(entity)->GetComponents())
+            controls::FreeComponentElement(comp);
 
         ImGui::Separator();
     }
 
-    void AutoComponentElement(AutoComponent* comp)
+    void FreeComponentElement(FreeComponent* comp)
     {
         if(!comp)
             return;

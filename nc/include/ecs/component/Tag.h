@@ -1,23 +1,20 @@
 #pragma once
 
+#include "ecs/component/Component.h"
+
 #include <string>
 #include <string_view>
 
 namespace nc
 {
-    class Tag final
+    class Tag final : public ComponentBase
     {
         public:
-            Tag(Entity, std::string tag)
-                : m_tag{std::move(tag)}
-            {}
-
-            Tag(Tag&&) = default;
-            Tag& operator=(Tag&&) = default;
-            ~Tag() = default;
-
-            Tag(const Tag&) = delete;
-            Tag& operator=(const Tag&) = delete;
+            Tag(Entity entity, std::string tag)
+                : ComponentBase{entity},
+                  m_tag{std::move(tag)}
+            {
+            }
 
             void Set(std::string newTag)
             {

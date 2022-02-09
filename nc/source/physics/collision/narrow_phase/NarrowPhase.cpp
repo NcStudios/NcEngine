@@ -1,5 +1,6 @@
 #include "NarrowPhase.h"
 #include "debug/Utils.h"
+#include "ecs/component/Logic.h"
 #include "optick/optick.h"
 
 #include <algorithm>
@@ -78,6 +79,16 @@ namespace nc::physics
         }
     }
 
+    auto NarrowPhase::TryGetCollisionLogic(Entity a) -> CollisionLogic*
+    {
+        if(a.ReceivesCollisionEvents() && m_registry->Contains<Entity>(a))
+        {
+            return m_registry->Get<CollisionLogic>(a);
+        }
+
+        return nullptr;
+    }
+
     void NarrowPhase::NotifyEvents()
     {
         auto triggers = m_triggerCache.Data();
@@ -95,10 +106,8 @@ namespace nc::physics
                 {
                     const auto e1 = cur->first;
                     const auto e2 = cur->second;
-                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
-                        m_registry->Get<AutoComponentGroup>(e1)->SendOnTriggerEnter(e2);
-                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
-                        m_registry->Get<AutoComponentGroup>(e2)->SendOnTriggerEnter(e1);
+                    if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyTriggerEnter(e2, m_registry);
+                    if(auto* logic = TryGetCollisionLogic(e2)) logic->NotifyTriggerEnter(e1, m_registry);
 
                     cur->state = NarrowEvent::State::Stale;
                     break;
@@ -107,10 +116,8 @@ namespace nc::physics
                 {
                     const auto e1 = cur->first;
                     const auto e2 = cur->second;
-                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
-                        m_registry->Get<AutoComponentGroup>(e1)->SendOnTriggerExit(e2);
-                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
-                        m_registry->Get<AutoComponentGroup>(e2)->SendOnTriggerExit(e1);
+                    if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyTriggerExit(e2, m_registry);
+                    if(auto* logic = TryGetCollisionLogic(e2)) logic->NotifyTriggerExit(e1, m_registry);
 
                     m_triggerCache.Remove(e1, e2);
                     break;
@@ -133,10 +140,8 @@ namespace nc::physics
                 {
                     const auto e1 = cur->Event().first;
                     const auto e2 = cur->Event().second;
-                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
-                        m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionEnter(e2);
-                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
-                        m_registry->Get<AutoComponentGroup>(e2)->SendOnCollisionEnter(e1);
+                    if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyCollisionEnter(e2, m_registry);
+                    if(auto* logic = TryGetCollisionLogic(e2)) logic->NotifyCollisionEnter(e1, m_registry);
 
                     cur->Event().state = NarrowEvent::State::Stale;
                     break;
@@ -146,10 +151,8 @@ namespace nc::physics
                     /** This isn't expected to be detected here, but just in case. */
                     const auto e1 = cur->Event().first;
                     const auto e2 = cur->Event().second;
-                    if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
-                        m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionExit(e2);
-                    if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
-                        m_registry->Get<AutoComponentGroup>(e2)->SendOnCollisionExit(e1);
+                    if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyCollisionExit(e2, m_registry);
+                    if(auto* logic = TryGetCollisionLogic(e2)) logic->NotifyCollisionExit(e1, m_registry);
 
                     m_manifoldCache.Remove(e1, e2);
                     break;
@@ -160,10 +163,8 @@ namespace nc::physics
         /** Send exit events for stale and empty manifolds detected earlier in the step. */
         for(const auto& [e1, e2] : m_manifoldCache.GetRemoved())
         {
-            if(e1.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e1))
-                m_registry->Get<AutoComponentGroup>(e1)->SendOnCollisionExit(e2);
-            if(e2.ReceivesCollisionEvents() && m_registry->Contains<Entity>(e2))
-                m_registry->Get<AutoComponentGroup>(e2)->SendOnCollisionExit(e1);
+            if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyCollisionExit(e2, m_registry);
+            if(auto* logic = TryGetCollisionLogic(e2)) logic->NotifyCollisionExit(e1, m_registry);
         }
 
         m_manifoldCache.ClearRemoved();

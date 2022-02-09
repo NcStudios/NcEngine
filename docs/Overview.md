@@ -32,31 +32,21 @@ Entities do not inherit flags from their parents.
 When creating an Entity through the [registry](#registry), an EntityInfo struct is required, which has more information than is actually stored in the Entity. This is because the registry automatically adds a [Transform](EngineComponents.md#transform) and [Tag](EngineComponents.md#tag) to each new Entity, initialized with data from the EntityInfo.
 
 ## Components
---------------
-Components describe the behavior and properties of objects in a game. An Entity may have at most one Component of each type. A number of components are provided by NcEngine which are described [here](EngineComponents.md). 
+-------------
+Components describe the behavior and properties of objects in a game. An Entity may have at most one Component of each type. A number of components are provided by NcEngine which are described [here](EngineComponents.md).
 
-Most user-created components should derive from [AutoComponent](../nc/include/component/Component.h). This provides a number of virtual functions that can be overriden to hook into the most common events:
+Components must be added and removed through the Registry. They are expected to be move-only types.
 
-```cpp
-/** Called on each frame. */
-virtual void FrameUpdate(float dt);
+### Pooled Component
+Pooled components are intended for types that are numerous and processed in bulk. They are stored contiguously by type and have fixed size memory overhead for maintaining constant random access time. User-defined pooled components should derive from [ComponentBase](../nc/include/ecs/component/Component.h). Also, `Registry::RegisterComponentType<T>()` needs to be called once before interacting with the type in the Registry. This is done internally for all engine types.
 
-/** Called on each tick of the physics system. */
-virtual void FixedUpdate();
+### Free Component
+Free components should be used for types that appear in small numbers - an input handler, for example. They also have the advantage of being pointer stable. Free components are grouped according to the Entities they belong to and do not have the additional memory overhead of pooled components. This, however, results in random access times that are linear in terms of the number of free components attached to an Entity. User-defined free components should derive from [FreeComponent](../nc/include/ecs/component/Component.h).
 
-/** Called on destruction of the associated Entity. */
-virtual void OnDestroy();
+### Systems, Callbacks, and StoragePolicy
+Pooled components usually want to be processed as a whole or in batches by an external system. This can be set up in whatever way best suits the scenario. A simple solution is to implement the systems as FreeComponents attached to a single persistent Entity, which can then be invoked by a [FrameLogic or FixedLogic](EngineComponents.md#logic) component.
 
-/** Called on collision/trigger event detection. */
-virtual void OnCollisionEnter(Entity other);
-virtual void OnCollisionExit(Entity other);
-virtual void OnTriggerEnter(Entity other);
-virtual void OnTriggerExit(Entity other);
-```
-
-The most common uses for components are handled by the included types or by adding logic with FrameUpdate(). See [creating a project](CreatingAProject.md) or the [sample project](../project/source) for examples.
-
-Most engine-provided Components are implemented using an Ecs-oriented approach which can be extended to custom types through `Registry::RegisterComponentType<T>()`. These types should derive from ComponentBase rather than AutoComponent.
+Callbacks can be set in the Registry to receive on add/remove notifications for a particular type. First, a specialization of StoragePolicy must be provided specifying which callbacks will be used. Then `Registry::RegisterOnAddCallback<T>(cb)` and/or `Registry::RegisterOnRemoveCallback<T>(cb)` can be used. The callback signatures are `void Func(T&)` for additions and `void Func(Entity)` for removals.
 
 ## Registry
 -----------
@@ -64,8 +54,8 @@ The registry contains storage for all entities and components and manages the as
 
 A pointer to the registry may be retrieved from the NcEngine object, which is passed to each scene's Load() function. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
 
-Generally, don't store return values from the registry, except for Entities. Calls to Add, Remove, ViewGroup, and ReserveHeadroom for a type T may invalidate any existing span\<T\> or pointers/references to other Ts except:
-* if T is derived from AutoComponent, which is guaranteed to be pointer stable.
+Generally, don't store values from the registry across frames, except for Entities. Calls to Add, Remove, ViewGroup, Sort and ReserveHeadroom for a type T may invalidate any existing span\<T\> or pointers/references to other Ts except:
+* if T is derived from FreeComponent, which is guaranteed to be pointer stable.
 * Add\<T\> will not invalidate a span\<T\> until the end of the current frame. It is possible to add while iterating a collection.
 * Remove\<T\> will not invalidate the subrange [ begin(), T's position ) of a span\<T\>. It is possible to remove while reverse iterating a collection.
 

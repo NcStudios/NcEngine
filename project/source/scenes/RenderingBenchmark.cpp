@@ -1,7 +1,7 @@
 #include "RenderingBenchmark.h"
 #include "NcEngine.h"
 #include "imgui/imgui.h"
-#include "shared/FPSTracker.h"
+#include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
 
 #include <functional>
@@ -46,7 +46,7 @@ namespace nc::sample
     void RenderingBenchmark::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
-        
+
         // Setup
         m_sceneHelper.Setup(engine, false, false, Widget);
 
@@ -61,10 +61,14 @@ namespace nc::sample
             .positionRandomRange = Vector3::Splat(15.0f),
             .rotationRandomRange = Vector3::Splat(std::numbers::pi_v<float> / 2.0f)
         };
-        
-        auto handle = registry->Add<Entity>({.tag = "Spawner"});
-        auto spawner = registry->Add<Spawner>(handle, registry, prefab::Resource::Cube, spawnBehavior);
-        auto fpsTracker = registry->Add<FPSTracker>(handle);
+
+        auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
+        auto spawner = registry->Add<Spawner>(spawnerHandle, prefab::Resource::Cube, spawnBehavior);
+        registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
+
+        auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FPSTracker"});
+        auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
+        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});

@@ -3,10 +3,9 @@
 #include "ecs/component/PhysicsBody.h"
 #include "random/Random.h"
 #include "imgui/imgui.h"
-#include "KillBox.h"
+#include "shared/FreeComponents.h"
+#include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
-#include "shared/FPSTracker.h"
-#include "shared/SceneNavigationCamera.h"
 #include "shared/Spawner/Spawner.h"
 
 namespace
@@ -60,11 +59,13 @@ namespace nc::sample
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
         auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
+        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
         GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 35.0f, -100.0f}, .rotation = Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.25f, 0.005f, 1.4f);
+        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
         engine->MainCamera()->Set(camera);
 
         // Lights
@@ -76,7 +77,7 @@ namespace nc::sample
         // Collider that destroys anything leaving its bounded area
         auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(200.0f), .tag = "KillBox", .flags = Entity::Flags::Static});
         registry->Add<Collider>(killBox, BoxProperties{}, true);
-        registry->Add<KillBox>(killBox, registry);
+        registry->Add<CollisionLogic>(killBox, nullptr, nullptr, nullptr, DestroyOnTriggerExit);
 
         auto platform = prefab::Create(registry, prefab::Resource::Ground, {.position = Vector3{0.0f, 0.0f, 0.0f}, .scale = Vector3{160.0f, 6.0f, 160.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
         registry->Add<Collider>(platform, BoxProperties{}, false);
@@ -108,8 +109,8 @@ namespace nc::sample
         };
 
         auto spawner = registry->Add<Entity>({});
-        auto spawnerPtr = registry->Add<Spawner>(spawner, registry, prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
-
+        auto spawnerPtr = registry->Add<Spawner>(spawner, prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
+        registry->Add<FrameLogic>(spawner, InvokeFreeComponent<Spawner>{});
         SpawnFunc = std::bind(&Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
         DestroyFunc = std::bind(&Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);
     }

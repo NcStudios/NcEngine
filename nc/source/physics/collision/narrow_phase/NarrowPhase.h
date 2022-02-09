@@ -9,6 +9,11 @@
 
 #include <span>
 
+namespace nc
+{
+    class CollisionLogic;
+}
+
 namespace nc::physics
 {
     class NarrowPhase
@@ -47,6 +52,8 @@ namespace nc::physics
             Registry* m_registry;
             ManifoldCache m_manifoldCache;
             TriggerCache m_triggerCache;
+
+            auto TryGetCollisionLogic(Entity) -> CollisionLogic*;
     };
 
     template<Proxy ProxyType>

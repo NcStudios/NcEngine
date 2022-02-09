@@ -7,15 +7,8 @@
 
 namespace nc
 {
-    class AutoComponent;
-
-    template<class T>
-    concept Component = std::movable<T> &&
-                        !std::same_as<Entity, T> &&
-                        !std::derived_from<T, AutoComponent>;
-
-    /** Base class for all Components. Only Components associated with a system
-     *  should derive directly from ComponentBase. */
+    /** Base class for all Components. Pooled components should derive
+     *  directly from this. */
     class ComponentBase
     {
         public:
@@ -33,27 +26,25 @@ namespace nc
             Entity m_parentEntity;
     };
 
-    /** Base class for components with no associated system. */
-    class AutoComponent : public ComponentBase
+    /** Base class for free components (unpooled). */
+    class FreeComponent : public ComponentBase
     {
         public:
-            explicit AutoComponent(Entity entity) noexcept
+            explicit FreeComponent(Entity entity) noexcept
                 : ComponentBase{entity} {}
 
-            virtual ~AutoComponent() = default;
-
-            virtual void FrameUpdate(float) {}
-            virtual void FixedUpdate() {}
-            virtual void OnDestroy() {}
-            virtual void OnCollisionEnter(Entity) {}
-            virtual void OnCollisionExit(Entity) {}
-            virtual void OnTriggerEnter(Entity) {}
-            virtual void OnTriggerExit(Entity) {}
+            virtual ~FreeComponent() = default;
 
             #ifdef NC_EDITOR_ENABLED
             virtual void ComponentGuiElement();
             #endif
     };
+
+    /** Requirements for the Registry to recognize a pooled component. */
+    template<class T>
+    concept PooledComponent = std::movable<T> &&
+                              std::derived_from<T, ComponentBase> &&
+                              !std::derived_from<T, FreeComponent>;
 
     /** Helper for configuring storage and allocation behavior. */
     template<class T>
@@ -76,7 +67,7 @@ namespace nc
     };
 
     /** Editor function that can be specialized to provide a custom widget.
-     *  AutoComponents must use override their member function instead. */
+     *  FreeComponents must use override their member function instead. */
     #ifdef NC_EDITOR_ENABLED
     namespace internal
     {

@@ -5,9 +5,8 @@ using namespace nc;
 
 namespace nc
 {
-    AutoComponentGroup::AutoComponentGroup(Entity) {}
-    void AutoComponentGroup::SendOnDestroy() {}
-    void AutoComponentGroup::CommitStagedComponents() {}
+    FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity} {}
+    void FreeComponentGroup::CommitStagedComponents() {}
 
     Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
         : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
@@ -47,10 +46,10 @@ struct Fake2 : public ComponentBase
     int value;
 };
 
-struct FakeAutoComponent : public AutoComponent
+struct FakeFreeComponent : public FreeComponent
 {
-    FakeAutoComponent(Entity entity, int v)
-        : AutoComponent{entity}, value{v}
+    FakeFreeComponent(Entity entity, int v)
+        : FreeComponent{entity}, value{v}
     {}
 
     int value;
@@ -348,10 +347,10 @@ TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
     EXPECT_EQ(ptr, nullptr);
 }
 
-TEST_F(Registry_unit_tests, AddAutoComponent_ValidCall_ConstructsObject)
+TEST_F(Registry_unit_tests, AddFreeComponent_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
-    auto* ptr = registry.Add<FakeAutoComponent>(handle, 1);
+    auto* ptr = registry.Add<FakeFreeComponent>(handle, 1);
     EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
 }

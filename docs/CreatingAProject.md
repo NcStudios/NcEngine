@@ -5,46 +5,10 @@ NcEngine projects can be developed purely through source code or with the help o
 ## Setting up the project directory
 -----------------------------------
 Create a directory called 'example' in the repository directory with a few files:
-* Controller.h
 * ExampleScene.h
 * Main.cpp
 * Config.ini
 * CMakeLists.txt
-
-## Creating a Component
------------------------
-Controller.h will define a component that handles movement of the cube:
-```cpp
-/** Controller.h */
-#include "ecs/Registry.h"
-#include "Input.h"
-
-/** Deriving from AutoComponent allows us to run logic each frame with FrameUpdate. */
-class Controller : public nc::AutoComponent
-{
-    constexpr static auto Speed = 5.0f;
-    nc::Registry* m_registry;
-
-    public:
-        Controller(nc::Entity entity, nc::Registry* registry)
-            : nc::AutoComponent{entity},
-              m_registry{registry}
-        {
-        }
-
-        void FrameUpdate(float dt) override
-        {
-            /** Get the state of the WASD keys as floats in the range [-1, 1] and scale them. */
-            auto [xAxis, yAxis] = nc::input::GetAxis() * Speed * dt;
-            
-            /** Get the Transform of the Entity we're attached to. */
-            auto transform = m_registry->Get<nc::Transform>(ParentEntity());
-
-            /** Move the Transform. */
-            transform->Translate(nc::Vector3{xAxis, 0.0f, yAxis});
-        }
-};
-```
 
 ## Creating a Scene
 --------------------
@@ -53,8 +17,8 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 ```cpp
 /** ExampleScene.h */
 #include "Assets.h"
+#include "Input.h"
 #include "NcEngine.h"
-#include "Controller.h"
 
 /** Default assets from the nc/resources directory. */
 const auto CubeMeshPath = std::string{"cube.nca"};
@@ -80,7 +44,7 @@ class ExampleScene : public nc::Scene
 
             auto registry = engine->Registry();
 
-            /** Initial properties for the camera. */
+            /** Initial properties for the Camera. */
             auto cameraInit = nc::EntityInfo
             {
                 .position = nc::Vector3{0.0f, 3.0f, -10.0f},
@@ -88,7 +52,7 @@ class ExampleScene : public nc::Scene
                 .tag = "Camera"
             };
 
-            /** Create a new Entity, attach a Camera, and set it as the main camera. */
+            /** Create and register the Camera. */
             auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
             engine->MainCamera()->Set(camera);
@@ -100,15 +64,29 @@ class ExampleScene : public nc::Scene
                 .tag = "Point Light"
             };
 
-            /** Create a new Entity and attach a PointLight. */
+            /** Create the PointLight. */
             auto pointLightHandle = registry->Add<nc::Entity>(pointLightInit);
             registry->Add<nc::PointLight>(pointLightHandle, nc::PointLightInfo{});
 
-            /** Create a new Entity, attach a MeshRenderer, and attach our movement controller. */
+            /** Create the cube using the previously loaded assets. */
             auto cubeInit = nc::EntityInfo{.tag = "Cube"};
             auto cubeHandle = registry->Add<nc::Entity>(cubeInit);
             registry->Add<nc::MeshRenderer>(cubeHandle, CubeMeshPath, DefaultMaterial, nc::TechniqueType::PhongAndUi);
-            registry->Add<Controller>(cubeHandle, registry);
+
+            /** Add logic to the box for detecting input and handling movement. */
+            registry->Add<FrameLogic>(cubeHandle, [](Entity self, Registry* registry, float dt)
+            {
+                constexpr float Speed = 5.0f;
+
+                /** Get the state of the WASD keys as floats in the range [-1, 1] and scale them. */
+                auto [xAxis, yAxis] = nc::input::GetAxis() * Speed * dt;
+                
+                /** Get the Transform of the Entity we're attached to. */
+                auto transform = registry->Get<nc::Transform>(self);
+
+                /** Move the Transform. */
+                transform->Translate(nc::Vector3{xAxis, 0.0f, yAxis});
+            });
         }
 
         /** Nothing to be done on Unload. */
