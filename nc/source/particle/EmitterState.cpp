@@ -1,7 +1,7 @@
 #include "EmitterState.h"
 #include "ecs/Registry.h"
 #include "MainCamera.h"
-#include "random/Random.h"
+#include "math/Random.h"
 
 namespace
 {
@@ -14,21 +14,21 @@ namespace
     //            DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
     // }
 
-    particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset)
-    {
-        const auto& [emission, init, kinematic] = info;
+    // particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset)
+    // {
+    //     const auto& [emission, init, kinematic] = info;
 
-        return particle::Particle
-        {
-            .maxLifetime = init.lifetime,
-            .currentLifetime = 0.0f,
-            .position = positionOffset + random::Vec3(init.position, init.positionRange),
-            .linearVelocity = random::Vec3(kinematic.velocity, kinematic.velocityRange),
-            .rotation = random::Float(init.rotation, init.rotationRange), //.rotation + g_random.Float() * init.rotationRange,
-            .angularVelocity = random::Float(kinematic.rotation, kinematic.rotationRange), //kinematic.rotation + g_random.Float() * kinematic.rotationRange,
-            .scale = random::Float(init.scale, init.scaleRange) //g_random.Float() * init.scaleRange + init.scale
-        };
-    }
+    //     return particle::Particle
+    //     {
+    //         .maxLifetime = init.lifetime,
+    //         .currentLifetime = 0.0f,
+    //         .position = positionOffset + random::Vec3(init.position, init.positionRange),
+    //         .linearVelocity = random::Vec3(kinematic.velocity, kinematic.velocityRange),
+    //         .rotation = random::Float(init.rotation, init.rotationRange), //.rotation + g_random.Float() * init.rotationRange,
+    //         .angularVelocity = random::Float(kinematic.rotation, kinematic.rotationRange), //kinematic.rotation + g_random.Float() * kinematic.rotationRange,
+    //         .scale = random::Float(init.scale, init.scaleRange) //g_random.Float() * init.scaleRange + init.scale
+    //     };
+    // }
 
     // void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
     // {
@@ -56,14 +56,14 @@ namespace nc::particle
         Emit(m_info.emission.initialEmissionCount);
     }
 
-    void EmitterState::Emit(size_t count)
+    void EmitterState::Emit(size_t)
     {
-        auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
-        auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
-        for(size_t i = 0; i < particleCount; ++i)
-        {
-            m_soa.Add(CreateParticle(m_info, parentPosition), {});
-        }
+        //auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
+        //auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
+        //for(size_t i = 0; i < particleCount; ++i)
+        //{
+            //m_soa.Add(CreateParticle(m_info, parentPosition), {});
+        //}
     }
 
     void EmitterState::Update(float)

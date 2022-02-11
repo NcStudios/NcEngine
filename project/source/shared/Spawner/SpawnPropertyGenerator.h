@@ -1,6 +1,6 @@
 #pragma once
 #include "SpawnBehavior.h"
-#include "random/Random.h"
+#include "math/Random.h"
 
 namespace nc::sample
 {
@@ -8,7 +8,7 @@ namespace nc::sample
     class SpawnPropertyGenerator
     {
         public:
-            SpawnPropertyGenerator(SpawnBehavior behavior);
+            SpawnPropertyGenerator(SpawnBehavior behavior, Random* random);
             Vector3 Position();
             Vector3 Rotation();
             Vector3 Velocity();
@@ -17,35 +17,37 @@ namespace nc::sample
 
         private:
             SpawnBehavior m_behavior;
+            Random* m_random;
     };
 
-    inline SpawnPropertyGenerator::SpawnPropertyGenerator(SpawnBehavior behavior)
-        : m_behavior{behavior}
+    inline SpawnPropertyGenerator::SpawnPropertyGenerator(SpawnBehavior behavior, Random* random)
+        : m_behavior{behavior},
+          m_random{random}
     {
     }
 
     inline Vector3 SpawnPropertyGenerator::Position()
     {
-        return random::Vec3(m_behavior.positionOffset, m_behavior.positionRandomRange);
+        return m_random->Between(m_behavior.minPosition, m_behavior.maxPosition);
     }
 
     inline Vector3 SpawnPropertyGenerator::Rotation()
     {
-        return random::Vec3(m_behavior.rotationOffset, m_behavior.rotationRandomRange);
+        return m_random->Between(m_behavior.minRotation, m_behavior.maxRotation);
     }
 
     inline Vector3 SpawnPropertyGenerator::Velocity()
     {
-        return random::Vec3(Vector3::Zero(), m_behavior.velocityRandomRange);
+        return m_random->Between(m_behavior.minVelocity, m_behavior.maxVelocity);
     }
 
     inline Vector3 SpawnPropertyGenerator::RotationAxis()
     {
-        return random::Vec3(Vector3::Zero(), m_behavior.rotationAxisRandomRange);
+        return m_random->Between(Vector3::Zero(), m_behavior.rotationAxis);
     }
 
     inline float SpawnPropertyGenerator::Theta()
     {
-        return random::Float(0.0f, m_behavior.thetaRandomRange);
+        return m_random->Between(0.0f, m_behavior.rotationTheta);
     }
 }
