@@ -1,5 +1,6 @@
 #pragma once
 
+#include "detail/EntityStorage.h"
 #include "detail/HandleManager.h"
 #include "detail/PerComponentStorage.h"
 #include "component/FreeComponentGroup.h"
@@ -86,10 +87,7 @@ namespace nc
 
         private:
             std::vector<std::unique_ptr<PerComponentStorageBase>> m_registeredStorage;
-            std::vector<Entity> m_active;
-            std::vector<Entity> m_toAdd;
-            std::vector<Entity> m_toRemove;
-            HandleManager m_handleManager;
+            detail::EntityStorage m_entities;
             size_t m_maxEntities;
 
             void RemoveEntityWithoutNotifyingParent(Entity entity);
@@ -121,8 +119,7 @@ namespace nc
     template<std::same_as<Entity> T>
     auto Registry::Add(EntityInfo info) -> Entity
     {
-        auto handle = m_handleManager.GenerateNewHandle(info.layer, info.flags);
-        m_toAdd.push_back(handle);
+        auto handle = m_entities.Add(info);
         Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
         Add<FreeComponentGroup>(handle);
         Add<Tag>(handle, std::move(info.tag));
@@ -154,10 +151,7 @@ namespace nc
         for(auto child : transform->Children())
             RemoveEntityWithoutNotifyingParent(child);
 
-        auto pos = std::ranges::find(m_active, entity);
-        *pos = m_active.back();
-        m_active.pop_back();
-        m_toRemove.push_back(entity);
+        m_entities.Remove(entity);
     }
 
     template<std::derived_from<ComponentBase> T>
@@ -178,8 +172,7 @@ namespace nc
     template<std::same_as<Entity> T>
     bool Registry::Contains(Entity entity) const
     {
-        return (m_active.cend() != std::ranges::find(m_active, entity)) ||
-               (m_toAdd.cend() != std::ranges::find(m_toAdd, entity));
+        return m_entities.Contains(entity);
     }
 
     template<std::derived_from<ComponentBase> T>
@@ -228,7 +221,7 @@ namespace nc
     template<std::same_as<Entity> T>
     auto Registry::ViewAll() -> std::span<Entity>
     {
-        return std::span<Entity>{m_active};
+        return m_entities.View();
     }
 
     template<PooledComponent T>
@@ -335,14 +328,10 @@ namespace nc
 
     inline void Registry::CommitStagedChanges()
     {
-        m_handleManager.ReclaimHandles(m_toRemove);
-
+        const auto& toRemove = m_entities.GetStagedRemovals();
         for(auto& storage : m_registeredStorage)
-            storage->CommitStagedComponents(m_toRemove);
+            storage->CommitStagedComponents(toRemove);
 
-        m_toRemove.clear();
-        m_active.reserve(m_active.size() + m_toAdd.size());
-        m_active.insert(m_active.end(), m_toAdd.cbegin(), m_toAdd.cend());
-        m_toAdd.clear();
+        m_entities.CommitStagedChanges();
     }
 }
