@@ -10,7 +10,7 @@
 #include "graphics/Base.h"
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/resources/ShaderResourceService.h"
+#include "graphics/resources/ShaderResourceServices.h"
 #include "optick/optick.h"
 
 namespace nc::graphics
@@ -19,7 +19,8 @@ namespace nc::graphics
 
     PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
     : m_graphics{graphics},
-      m_base{graphics->GetBasePtr()},
+      m_base{ m_graphics->GetBasePtr()},
+      m_descriptorSets{m_graphics->GetShaderResources()->GetDescriptorSets()},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
     {
@@ -48,14 +49,9 @@ namespace nc::graphics
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        std::array<vk::DescriptorSetLayout, 6u> descriptorLayouts
+        std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
         {
-            *ShaderResourceService<Texture>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<ObjectData>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<ShadowMap>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<CubeMap>::Get()->GetDescriptorSetLayout(),
-            *ShaderResourceService<EnvironmentData>::Get()->GetDescriptorSetLayout()
+            *(m_descriptorSets->GetDescriptorSetLayout(BindFrequency::PerFrame))
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -109,13 +105,9 @@ namespace nc::graphics
     void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
     {
         OPTICK_CATEGORY("PhongAndUiTechnique::Bind", Optick::Category::Rendering);
+
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 1, ShaderResourceService<Texture>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 1, 1, ShaderResourceService<PointLightInfo>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 2, 1, ShaderResourceService<ObjectData>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 3, 1, ShaderResourceService<ShadowMap>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 4, 1, ShaderResourceService<CubeMap>::Get()->GetDescriptorSet(), 0, 0);
-        cmd->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 5, 1, ShaderResourceService<EnvironmentData>::Get()->GetDescriptorSet(), 0, 0);
+        m_descriptorSets->Bind(BindFrequency::PerFrame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 6);
     }
 
     bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)

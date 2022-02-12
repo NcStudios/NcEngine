@@ -43,6 +43,7 @@ namespace nc::graphics
             Base* GetBasePtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
             Commands* GetCommandsPtr() const noexcept;
+            ShaderResourceServices* GetShaderResources() const noexcept;
             const Vector2 GetDimensions() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
 

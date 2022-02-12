@@ -2,6 +2,7 @@
 
 #include "directx/Inc/DirectXMath.h"
 #include "ecs/component/Component.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
@@ -29,8 +30,9 @@ namespace nc::graphics
         private:
             void CreatePipeline(vk::RenderPass* renderPass);
 
-            nc::graphics::Graphics* m_graphics;
+            Graphics* m_graphics;
             Base* m_base;
+            ShaderDescriptorSets* m_descriptorSets;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };

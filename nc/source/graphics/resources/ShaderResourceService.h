@@ -48,8 +48,6 @@ namespace nc::graphics
             
             virtual void Initialize() = 0;
             virtual void Update(const std::vector<data_type>& data) = 0;
-            virtual auto GetDescriptorSet() -> vk::DescriptorSet* = 0;
-            virtual auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* = 0;
             virtual void Reset() = 0;
     };
 

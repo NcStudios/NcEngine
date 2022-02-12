@@ -105,10 +105,16 @@ namespace nc::graphics
         return m_commands.get();
     }
 
+    ShaderResourceServices* Graphics::GetShaderResources() const noexcept
+    {
+        return m_shaderResources.get();
+    }
+
     const Vector2 Graphics::GetDimensions() const noexcept
     {
         return m_dimensions;
     }
+
 
     #ifdef NC_DEBUG_RENDERING_ENABLED
     graphics::DebugData* Graphics::GetDebugData()
