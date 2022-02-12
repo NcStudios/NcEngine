@@ -75,10 +75,10 @@ namespace nc
             void RegisterComponentType();
 
             template<PooledComponent T>
-            void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
+            void RegisterOnAddCallback(detail::SystemCallbacks<T>::on_add_type func);
 
             template<PooledComponent T>
-            void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
+            void RegisterOnRemoveCallback(detail::SystemCallbacks<T>::on_remove_type func);
 
             /** Engine Functions */
             void CommitStagedChanges();
@@ -86,31 +86,31 @@ namespace nc
             void Clear();
 
         private:
-            std::vector<std::unique_ptr<PerComponentStorageBase>> m_registeredStorage;
+            std::vector<std::unique_ptr<detail::PerComponentStorageBase>> m_registeredStorage;
             detail::EntityStorage m_entities;
             size_t m_maxEntities;
 
             void RemoveEntityWithoutNotifyingParent(Entity entity);
 
             template<PooledComponent T>
-            inline static PerComponentStorage<T>* m_typedStoragePtr = nullptr;
+            inline static detail::PerComponentStorage<T>* m_typedStoragePtr = nullptr;
 
             template<PooledComponent T>
-            auto StorageFor() -> PerComponentStorage<T>*;
+            auto StorageFor() -> detail::PerComponentStorage<T>*;
 
             template<PooledComponent T>
-            auto StorageFor() const -> const PerComponentStorage<T>*;
+            auto StorageFor() const -> const detail::PerComponentStorage<T>*;
     };
 
     template<PooledComponent T>
-    auto Registry::StorageFor() -> PerComponentStorage<T>*
+    auto Registry::StorageFor() -> detail::PerComponentStorage<T>*
     {
         IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
     }
 
     template<PooledComponent T>
-    auto Registry::StorageFor() const -> const PerComponentStorage<T>*
+    auto Registry::StorageFor() const -> const detail::PerComponentStorage<T>*
     {
         IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
@@ -307,20 +307,20 @@ namespace nc
         if(m_typedStoragePtr<T>)
             return;
 
-        auto storage = std::make_unique<PerComponentStorage<T>>(m_maxEntities);
+        auto storage = std::make_unique<detail::PerComponentStorage<T>>(m_maxEntities);
         m_typedStoragePtr<T> = storage.get();
         m_registeredStorage.push_back(std::move(storage));
     }
 
     template<PooledComponent T>
-    void Registry::RegisterOnAddCallback(typename SystemCallbacks<T>::on_add_type func)
+    void Registry::RegisterOnAddCallback(typename detail::SystemCallbacks<T>::on_add_type func)
     {
         static_assert(StoragePolicy<T>::requires_on_add_callback::value, "Cannot register an OnAdd callback unless specified in the StoragePolicy");
         StorageFor<T>()->RegisterOnAddCallback(std::move(func));
     }
 
     template<PooledComponent T>
-    void Registry::RegisterOnRemoveCallback(typename SystemCallbacks<T>::on_remove_type func)
+    void Registry::RegisterOnRemoveCallback(typename detail::SystemCallbacks<T>::on_remove_type func)
     {
         static_assert(StoragePolicy<T>::requires_on_remove_callback::value, "Cannot register an OnRemove callback unless specified in the StoragePolicy");
         StorageFor<T>()->RegisterOnRemoveCallback(std::move(func));

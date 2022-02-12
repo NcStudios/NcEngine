@@ -7,7 +7,7 @@
 #include <span>
 #include <vector>
 
-namespace nc
+namespace nc::detail
 {
     class HandleManager
     {
