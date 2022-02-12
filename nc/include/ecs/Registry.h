@@ -1,7 +1,7 @@
 #pragma once
 
-#include "HandleManager.h"
-#include "PerComponentStorage.h"
+#include "detail/HandleManager.h"
+#include "detail/PerComponentStorage.h"
 #include "component/FreeComponentGroup.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
@@ -22,7 +22,6 @@ namespace nc
             ~Registry() = default;
             Registry(Registry&&) = default;
             Registry& operator=(Registry&&) = default;
-
             Registry(const Registry&) = delete;
             Registry& operator=(const Registry&) = delete;
 
@@ -39,22 +38,23 @@ namespace nc
             template<std::same_as<Entity> T>
             auto ViewAll() -> std::span<Entity>;
 
-            /** PooledComponent Functions */
-            template<PooledComponent T, class... Args>
+            /** Component Functions */
+            template<std::derived_from<ComponentBase> T, class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
 
-            template<PooledComponent T>
+            template<std::derived_from<ComponentBase> T>
             void Remove(Entity entity);
 
-            template<PooledComponent T>
+            template<std::derived_from<ComponentBase> T>
             bool Contains(Entity entity) const;
 
-            template<PooledComponent T>
+            template<std::derived_from<ComponentBase> T>
             auto Get(Entity entity) -> T*;
 
-            template<PooledComponent T>
+            template<std::derived_from<ComponentBase> T>
             auto Get(Entity entity) const -> const T*;
 
+            /** PooledComponent Specific Functions */
             template<PooledComponent T>
             auto ViewAll() -> std::span<T>;
 
@@ -70,23 +70,6 @@ namespace nc
             template<PooledComponent T>
             void ReserveHeadroom(size_t additionalRequiredCount);
 
-            /** FreeComponent Functions */
-            template<std::derived_from<FreeComponent> T, class ... Args>
-            auto Add(Entity entity, Args&& ... args) -> T*;
-
-            template<std::derived_from<FreeComponent> T>
-            void Remove(Entity entity);
-
-            template<std::derived_from<FreeComponent> T>
-            bool Contains(Entity entity) const;
-
-            template<std::derived_from<FreeComponent> T>
-            auto Get(Entity entity) -> T*;
-
-            template<std::derived_from<FreeComponent> T>
-            auto Get(Entity entity) const -> const T*;
-
-            /** System Functions */
             template<PooledComponent T>
             void RegisterComponentType();
 
@@ -121,17 +104,6 @@ namespace nc
             auto StorageFor() const -> const PerComponentStorage<T>*;
     };
 
-    template<std::same_as<Entity> T>
-    auto Registry::Add(EntityInfo info) -> Entity
-    {
-        auto handle = m_handleManager.GenerateNewHandle(info.layer, info.flags);
-        m_toAdd.push_back(handle);
-        Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
-        Add<FreeComponentGroup>(handle);
-        Add<Tag>(handle, std::move(info.tag));
-        return handle;
-    }
-
     template<PooledComponent T>
     auto Registry::StorageFor() -> PerComponentStorage<T>*
     {
@@ -146,19 +118,30 @@ namespace nc
         return m_typedStoragePtr<T>;
     }
 
-    template<PooledComponent T, class... Args>
-    auto Registry::Add(Entity entity, Args&&... args) -> T*
+    template<std::same_as<Entity> T>
+    auto Registry::Add(EntityInfo info) -> Entity
     {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        return StorageFor<T>()->Add(entity, std::forward<Args>(args)...);
+        auto handle = m_handleManager.GenerateNewHandle(info.layer, info.flags);
+        m_toAdd.push_back(handle);
+        Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
+        Add<FreeComponentGroup>(handle);
+        Add<Tag>(handle, std::move(info.tag));
+        return handle;
     }
 
-    template<std::derived_from<FreeComponent> T, class... Args>
+    template<std::derived_from<ComponentBase> T, class... Args>
     auto Registry::Add(Entity entity, Args&&... args) -> T*
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
-        return group->Add<T>(entity, std::forward<Args>(args)...);
+        if constexpr(std::derived_from<T, FreeComponent>)
+        {
+            FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
+            return group->Add<T>(entity, std::forward<Args>(args)...);
+        }
+        else
+        {
+            return StorageFor<T>()->Add(entity, std::forward<Args>(args)...);
+        }
     }
 
     template<std::same_as<Entity> T>
@@ -177,19 +160,19 @@ namespace nc
         m_toRemove.push_back(entity);
     }
 
-    template<PooledComponent T>
+    template<std::derived_from<ComponentBase> T>
     void Registry::Remove(Entity entity)
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        StorageFor<T>()->Remove(entity);
-    }
-
-    template<std::derived_from<FreeComponent> T>
-    void Registry::Remove(Entity entity)
-    {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        FreeComponentGroup* group = StorageFor<FreeComponentGroup>()->Get(entity);
-        group->Remove<T>();
+        if constexpr(std::derived_from<T, FreeComponent>)
+        {
+            FreeComponentGroup* group = StorageFor<FreeComponentGroup>()->Get(entity);
+            group->Remove<T>();
+        }
+        else
+        {
+            StorageFor<T>()->Remove(entity);
+        }
     }
 
     template<std::same_as<Entity> T>
@@ -199,45 +182,47 @@ namespace nc
                (m_toAdd.cend() != std::ranges::find(m_toAdd, entity));
     }
 
-    template<PooledComponent T>
+    template<std::derived_from<ComponentBase> T>
     bool Registry::Contains(Entity entity) const
     {
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        return StorageFor<T>()->Contains(entity);
+        if constexpr(std::derived_from<T, FreeComponent>)
+        {
+            const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
+            return group->Contains<T>();
+        }
+        else
+        {
+            return StorageFor<T>()->Contains(entity);
+        }
     }
 
-    template<std::derived_from<FreeComponent> T>
-    bool Registry::Contains(Entity entity) const
-    {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
-        const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
-        return group->Contains<T>();
-    }
-
-    template<PooledComponent T>
+    template<std::derived_from<ComponentBase> T>
     auto Registry::Get(Entity entity) -> T*
     {
-        return StorageFor<T>()->Get(entity);
+        if constexpr(std::derived_from<T, FreeComponent>)
+        {
+            FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
+            return group ? group->Get<T>() : nullptr;
+        }
+        else
+        {
+            return StorageFor<T>()->Get(entity);
+        }
     }
 
-    template<PooledComponent T>
+    template<std::derived_from<ComponentBase> T>
     auto Registry::Get(Entity entity) const -> const T*
     {
-        return StorageFor<T>()->Get(entity);
-    }
-
-    template<std::derived_from<FreeComponent> T>
-    auto Registry::Get(Entity entity) -> T*
-    {
-        FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
-        return group ? group->Get<T>() : nullptr;
-    }
-
-    template<std::derived_from<FreeComponent> T>
-    auto Registry::Get(Entity entity) const -> const T*
-    {
-        const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
-        return group ? group->Get<T>() : nullptr;
+        if constexpr(std::derived_from<T, FreeComponent>)
+        {
+            FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
+            return group ? group->Get<T>() : nullptr;
+        }
+        else
+        {
+            return StorageFor<T>()->Get(entity);
+        }
     }
 
     template<std::same_as<Entity> T>
