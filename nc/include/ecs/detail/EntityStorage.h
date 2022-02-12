@@ -10,6 +10,8 @@ namespace nc::detail
     class EntityStorage
     {
         public:
+            using iterator = std::vector<Entity>::iterator;
+
             EntityStorage()
                 : m_entities{},
                   m_toRemove{},

@@ -15,10 +15,26 @@ namespace nc::detail
     class PerComponentStorageBase
     {
         public:
+            using index_type = Entity::index_type;
+
+            PerComponentStorageBase(size_t maxEntities)
+                : sparseArray(maxEntities, Entity::NullIndex),
+                  entityPool{}
+            {
+            }
+
+            auto SparseArray() noexcept -> std::vector<index_type>& { return sparseArray; }
+            auto EntityPool() noexcept -> std::vector<Entity>& { return entityPool; }
+            auto size() const noexcept { return entityPool.size(); }
+
             virtual ~PerComponentStorageBase() = default;
             virtual void Clear() = 0;
             virtual void CommitStagedComponents(const std::vector<Entity>& removed) = 0;
             virtual void VerifyCallbacks() = 0;
+
+        protected:
+            std::vector<index_type> sparseArray;
+            std::vector<Entity> entityPool;
     };
 
     template<PooledComponent T>
@@ -33,9 +49,6 @@ namespace nc::detail
     template<PooledComponent T>
     class PerComponentStorage : public PerComponentStorageBase
     {
-        using value_type = T;
-        using index_type = Entity::index_type;
-
         struct StagedComponent
         {
             Entity entity;
@@ -43,17 +56,17 @@ namespace nc::detail
         };
 
         public:
+            using value_type = T;
+            using iterator = std::vector<T>::iterator;
+
             PerComponentStorage(size_t maxEntities);
             ~PerComponentStorage() = default;
             PerComponentStorage(PerComponentStorage&&) = default;
             PerComponentStorage& operator=(PerComponentStorage&&) = default;
-
             PerComponentStorage(const PerComponentStorage&) = delete;
             PerComponentStorage& operator=(const PerComponentStorage&) = delete;
 
-            auto GetSparseArray() -> std::vector<index_type>& { return sparseArray; }
-            auto GetEntityPool() -> std::vector<Entity>& { return entityPool; }
-            auto GetComponentPool() -> std::vector<T>& { return componentPool; }
+            auto ComponentPool() noexcept -> std::vector<T>& { return componentPool; }
 
             template<class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
@@ -79,8 +92,6 @@ namespace nc::detail
             void VerifyCallbacks() override;
 
         private:
-            std::vector<index_type> sparseArray;
-            std::vector<Entity> entityPool;
             std::vector<T> componentPool;
             std::vector<StagedComponent> stagingPool;
             SystemCallbacks<T> callbacks;
@@ -88,8 +99,7 @@ namespace nc::detail
 
     template<PooledComponent T>
     PerComponentStorage<T>::PerComponentStorage(size_t maxEntities)
-        : sparseArray(maxEntities, Entity::NullIndex),
-          entityPool{},
+        : PerComponentStorageBase{maxEntities},
           componentPool{},
           stagingPool{},
           callbacks{}

@@ -80,6 +80,12 @@ namespace nc
             template<PooledComponent T>
             void RegisterOnRemoveCallback(detail::SystemCallbacks<T>::on_remove_type func);
 
+            template<PooledComponent T>
+            auto StorageFor() -> detail::PerComponentStorage<T>*;
+
+            template<PooledComponent T>
+            auto StorageFor() const -> const detail::PerComponentStorage<T>*;
+
             /** Engine Functions */
             void CommitStagedChanges();
             void VerifyCallbacks();
@@ -94,12 +100,6 @@ namespace nc
 
             template<PooledComponent T>
             inline static detail::PerComponentStorage<T>* m_typedStoragePtr = nullptr;
-
-            template<PooledComponent T>
-            auto StorageFor() -> detail::PerComponentStorage<T>*;
-
-            template<PooledComponent T>
-            auto StorageFor() const -> const detail::PerComponentStorage<T>*;
     };
 
     template<PooledComponent T>
@@ -241,9 +241,9 @@ namespace nc
     {
         auto& referenceStorage = *StorageFor<T>();
         auto& targetStorage = *StorageFor<U>();
-        auto& referenceEntities = referenceStorage.GetEntityPool();
-        auto& targetSparseArray = targetStorage.GetSparseArray();
-        auto& targetEntities = targetStorage.GetEntityPool();
+        auto& referenceEntities = referenceStorage.EntityPool();
+        auto& targetSparseArray = targetStorage.SparseArray();
+        auto& targetEntities = targetStorage.EntityPool();
 
         size_t referenceSize = referenceEntities.size();
         if(referenceSize == 0u || targetEntities.size() == 0u)
@@ -274,8 +274,8 @@ namespace nc
             }
         }
 
-        auto& referenceComponents = referenceStorage.GetComponentPool();
-        auto& targetComponents = targetStorage.GetComponentPool();
+        auto& referenceComponents = referenceStorage.ComponentPool();
+        auto& targetComponents = targetStorage.ComponentPool();
 
         if(referenceComponents.size() < current || targetComponents.size() < current)
             throw NcError("ViewGroup - Invalid size");
