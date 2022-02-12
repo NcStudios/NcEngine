@@ -59,8 +59,6 @@ namespace nc
     template<>
     struct StoragePolicy<PointLight>
     {
-        using allow_trivial_destruction = std::false_type;
-        using sort_dense_storage_by_address = std::true_type;
         using requires_on_add_callback = std::true_type;
         using requires_on_remove_callback = std::true_type;
     };

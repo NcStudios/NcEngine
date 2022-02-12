@@ -50,15 +50,6 @@ namespace nc
     template<class T>
     struct StoragePolicy
     {
-        /** Allow destructor calls to be elided for types
-         *  that don't satisfy std::is_trivially_destructible. */
-        using allow_trivial_destruction = std::false_type;
-
-        /** Dense views over sparse sets can be optionally sorted.
-         *  This minimizes cache misses during iteration but results
-         *  in slower additions and deletions. */
-        using sort_dense_storage_by_address = std::true_type;
-
         /** Requires an OnAdd callback to be set in the registry. */
         using requires_on_add_callback = std::false_type;
 
