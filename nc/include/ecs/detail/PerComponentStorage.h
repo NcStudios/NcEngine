@@ -112,7 +112,7 @@ namespace nc::detail
         IF_THROW(Contains(entity), "PerComponentStorage::Add - Cannot add multiple components of the same type");
         auto& [emplacedEntity, emplacedComponent] = stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
 
-        if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
+        if constexpr(storage_policy<T>::requires_on_add_callback)
             callbacks.OnAdd(emplacedComponent);
 
         return &emplacedComponent;
@@ -138,7 +138,7 @@ namespace nc::detail
         if(sparseIndex != movedEntity.Index())
             sparseArray.at(movedEntity.Index()) = poolIndex;
 
-        if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
+        if constexpr(storage_policy<T>::requires_on_remove_callback)
             callbacks.OnRemove(entity);
     }
 
@@ -268,13 +268,13 @@ namespace nc::detail
     template<PooledComponent T>
     void PerComponentStorage<T>::VerifyCallbacks()
     {
-        if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
+        if constexpr(storage_policy<T>::requires_on_add_callback)
         {
             if(!callbacks.OnAdd)
                 throw NcError("OnAdd callback required but not set");
         }
 
-        if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
+        if constexpr(storage_policy<T>::requires_on_remove_callback)
         {
             if(!callbacks.OnRemove)
                 throw NcError("OnRemove callback required but not set");

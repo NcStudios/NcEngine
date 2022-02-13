@@ -315,14 +315,14 @@ namespace nc
     template<PooledComponent T>
     void Registry::RegisterOnAddCallback(typename detail::SystemCallbacks<T>::on_add_type func)
     {
-        static_assert(StoragePolicy<T>::requires_on_add_callback::value, "Cannot register an OnAdd callback unless specified in the StoragePolicy");
+        static_assert(storage_policy<T>::requires_on_add_callback, "Cannot register an OnAdd callback unless specified by storage_policy<T>");
         StorageFor<T>()->RegisterOnAddCallback(std::move(func));
     }
 
     template<PooledComponent T>
     void Registry::RegisterOnRemoveCallback(typename detail::SystemCallbacks<T>::on_remove_type func)
     {
-        static_assert(StoragePolicy<T>::requires_on_remove_callback::value, "Cannot register an OnRemove callback unless specified in the StoragePolicy");
+        static_assert(storage_policy<T>::requires_on_remove_callback, "Cannot register an OnRemove callback unless specified by storage_policy<T>");
         StorageFor<T>()->RegisterOnRemoveCallback(std::move(func));
     }
 

@@ -101,13 +101,6 @@ namespace nc
             #endif
     };
 
-    template<>
-    struct StoragePolicy<Collider>
-    {
-        using requires_on_add_callback = std::false_type;
-        using requires_on_remove_callback = std::false_type;
-    };
-
     const char* ToCString(ColliderType type);
 
     #ifdef NC_EDITOR_ENABLED

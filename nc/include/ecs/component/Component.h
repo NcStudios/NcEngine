@@ -7,8 +7,12 @@
 
 namespace nc
 {
-    /** Base class for all Components. Pooled components should derive
-     *  directly from this. */
+    /**
+     * @brief Base class for all components.
+     * 
+     * User-defined pooled components should derive directly from this. These types
+     * must be registered with Registry::RegisterComponentType<T>() before use.
+     */
     class ComponentBase
     {
         public:
@@ -26,7 +30,13 @@ namespace nc
             Entity m_parentEntity;
     };
 
-    /** Base class for free components (unpooled). */
+    /**
+     * @brief Base class for free components.
+     * 
+     * User-defined free components should derive from this to avoid creating
+     * distinct pools for each type. They do not need to be registered.
+     * 
+     */
     class FreeComponent : public ComponentBase
     {
         public:
@@ -40,31 +50,38 @@ namespace nc
             #endif
     };
 
-    /** Requirements for the Registry to recognize a pooled component. */
+    /** @brief Requirements for the Registry to recognize a pooled component. */
     template<class T>
     concept PooledComponent = std::movable<T> &&
                               std::derived_from<T, ComponentBase> &&
                               !std::derived_from<T, FreeComponent>;
 
-    /** Helper for configuring storage and allocation behavior. */
-    template<class T>
-    struct StoragePolicy
+    /** @brief Default storage behavior for pooled components. */
+    struct default_storage_policy
     {
-        /** Requires an OnAdd callback to be set in the registry. */
-        using requires_on_add_callback = std::false_type;
+        /** @brief Requires an OnAdd callback to be set in the registry. */
+        static constexpr bool requires_on_add_callback = false;
 
-        /** Requires an OnRemove callback to be set in the registry. */
-        using requires_on_remove_callback = std::false_type;
+        /** @brief Requires an OnRemove callback to be set in the registry. */
+        static constexpr bool requires_on_remove_callback = false;
     };
 
-    /** Editor function that can be specialized to provide a custom widget.
-     *  FreeComponents must use override their member function instead. */
+    /**
+     * @brief Provide a specialization to customize storage options and
+     * behavior for a user-defined type.
+     * 
+     * @tparam T A component, which models PooledComponent, to customize.
+     */
+    template<PooledComponent T>
+    struct storage_policy : default_storage_policy {};
+
     #ifdef NC_EDITOR_ENABLED
     namespace internal
     {
         void DefaultComponentGuiElement();
     }
 
+    /** @brief Provide a specialization to customize a pooled component's editor widget. */
     template<class T>
     void ComponentGuiElement(T*)
     {

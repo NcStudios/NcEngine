@@ -43,10 +43,10 @@ Pooled components are intended for types that are numerous and processed in bulk
 ### Free Component
 Free components should be used for types that appear in small numbers - an input handler, for example. They also have the advantage of being pointer stable. Free components are grouped according to the Entities they belong to and do not have the additional memory overhead of pooled components. This, however, results in random access times that are linear in terms of the number of free components attached to an Entity. User-defined free components should derive from [FreeComponent](../nc/include/ecs/component/Component.h).
 
-### Systems, Callbacks, and StoragePolicy
+### Systems, Callbacks, and Storage Policies
 Pooled components usually want to be processed as a whole or in batches by an external system. This can be set up in whatever way best suits the scenario. A simple solution is to implement the systems as FreeComponents attached to a single persistent Entity, which can then be invoked by a [FrameLogic or FixedLogic](EngineComponents.md#logic) component.
 
-Callbacks can be set in the Registry to receive on add/remove notifications for a particular type. First, a specialization of StoragePolicy must be provided specifying which callbacks will be used. Then `Registry::RegisterOnAddCallback<T>(cb)` and/or `Registry::RegisterOnRemoveCallback<T>(cb)` can be used. The callback signatures are `void Func(T&)` for additions and `void Func(Entity)` for removals.
+Callbacks can be set in the Registry to receive on add/remove notifications for a particular type. First, a specialization of storage_policy must be provided specifying which callbacks will be used. Then `Registry::RegisterOnAddCallback<T>(cb)` and/or `Registry::RegisterOnRemoveCallback<T>(cb)` can be used. The callback signatures are `void Func(T&)` for additions and `void Func(Entity)` for removals.
 
 ## Registry
 -----------
