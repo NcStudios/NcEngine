@@ -2,6 +2,8 @@
 
 #include "ecs/Registry.h"
 
+#include <iterator>
+
 namespace nc::detail
 {
     template<PooledComponent T>
@@ -13,7 +15,7 @@ namespace nc::detail
             using value_type = std::iterator_traits<iterator_type>::value_type;
             using pointer = std::iterator_traits<iterator_type>::pointer;
             using reference = std::iterator_traits<iterator_type>::reference;
-            using iterator_category = std::forward_iterator_tag;
+            using iterator_category = std::contiguous_iterator_tag;
 
             single_view_iterator(iterator_type it) noexcept
                 : m_cur{it}
@@ -26,10 +28,23 @@ namespace nc::detail
                 return *this;
             }
 
+            auto operator--() noexcept -> single_view_iterator&
+            {
+                --m_cur;
+                return *this;
+            }
+
             auto operator++(int) noexcept -> single_view_iterator
             {
                 auto temp = *this;
                 operator++();
+                return temp;
+            }
+
+            auto operator--(int) noexcept -> single_view_iterator
+            {
+                auto temp = *this;
+                operator--();
                 return temp;
             }
 
