@@ -10,7 +10,7 @@ namespace nc::detail
     class single_view_iterator final
     {
         public:
-            using iterator_type = PerComponentStorage<T>::iterator;
+            using iterator_type = T*;
             using difference_type = std::iterator_traits<iterator_type>::difference_type;
             using value_type = std::iterator_traits<iterator_type>::value_type;
             using pointer = std::iterator_traits<iterator_type>::pointer;
@@ -50,12 +50,12 @@ namespace nc::detail
 
             [[nodiscard]] auto operator->() const -> pointer
             {
-                return &*m_cur;
+                return m_cur;
             }
 
             [[nodiscard]] auto operator*() const -> reference
             {
-                return *operator->();
+                return *m_cur;
             }
 
             [[nodiscard]] friend bool operator==(const single_view_iterator<T>& lhs, const single_view_iterator<T>& rhs)

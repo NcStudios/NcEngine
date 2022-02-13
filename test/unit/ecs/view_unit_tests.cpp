@@ -131,6 +131,31 @@ TEST_F(view_unit_tests, Single_ReverseIteration_VisitsEach)
     }
 }
 
+TEST_F(view_unit_tests, Single_EmptyView_SkipsLoop)
+{
+    auto v = view<Fake1>{&registry};
+    EXPECT_EQ(v.size(), 0);
+
+    auto beg = v.begin();
+    auto end = v.end();
+    auto count = 0;
+    for(auto cur = beg; cur != end; ++cur)
+    {
+        ++count;
+    }
+
+    EXPECT_EQ(count, 0);
+
+    auto rbeg = v.rbegin();
+    auto rend = v.rend();
+    for(auto cur = rbeg; cur != rend; ++cur)
+    {
+        ++count;
+    }
+
+    EXPECT_EQ(count, 0);
+}
+
 TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
@@ -145,12 +170,14 @@ TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
     auto rbeg = v.rbegin();
     auto rend = v.rend();
     auto count = 2;
-    for(auto cur = rbeg; cur != rend; ++cur)
+    for(auto cur = rbeg; cur != rend; )
     {
         EXPECT_EQ((*cur).value, count);
         EXPECT_EQ(cur->value, count);
         --count;
-        registry.Remove<Fake1>(cur->ParentEntity());
+        auto e = cur->ParentEntity();
+        ++cur;
+        registry.Remove<Fake1>(e);
     }
 }
 
