@@ -52,7 +52,7 @@ namespace nc
 
     /** @brief Requirements for the Registry to recognize a pooled component. */
     template<class T>
-    concept PooledComponent = std::movable<T> &&
+    concept PooledComponent = std::movable<std::remove_const_t<T>> &&
                               std::derived_from<T, ComponentBase> &&
                               !std::derived_from<T, FreeComponent>;
 

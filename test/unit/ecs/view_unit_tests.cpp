@@ -181,6 +181,16 @@ TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
     }
 }
 
+TEST_F(view_unit_tests, Single_ConstRegistry_ConstructsReadOnlyView)
+{
+    auto e1 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(e1, 0);
+    registry.CommitStagedChanges();
+    const auto* constRegistry = &registry;
+    auto v = view<const Fake1>{constRegistry};
+    EXPECT_EQ(v.size(), 1);
+}
+
 TEST_F(view_unit_tests, Multi_SizeUpperBound)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
@@ -242,7 +252,6 @@ TEST_F(view_unit_tests, Multi_VisitsEach)
     EXPECT_EQ(registry.Get<Fake2>(e4)->value, expectedFake2Value);
     EXPECT_EQ(registry.Get<Fake3>(e4)->value, expectedFake3Value);
 }
-
 
 int main(int argc, char ** argv)
 {

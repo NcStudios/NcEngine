@@ -7,6 +7,7 @@
 #include "ecs/component/ConcaveCollider.h"
 #include "ecs/component/AudioSource.h"
 #include "ecs/component/MeshRenderer.h"
+#include "ecs/view.h"
 
 namespace nc::editor
 {
@@ -14,28 +15,28 @@ namespace nc::editor
         : missingDependencies{},
           result{false}
     {
-        for(const auto& audioSource : registry->ViewAll<AudioSource>())
+        for(const auto& audioSource : view<const AudioSource>{registry})
         {
             if(!manifest->Contains(audioSource.m_audioClipPath, AssetType::AudioClip))
                 missingDependencies.push_back(audioSource.m_audioClipPath);
         }
 
-        for(const auto& collider : registry->ViewAll<Collider>())
+        for(const auto& collider : view<const Collider>{registry})
         {
             if(collider.GetType() != ColliderType::Hull)
                 continue;
-            
+
             if(!manifest->ContainsNca(collider.m_info.hullAssetPath, AssetType::HullCollider))
                 missingDependencies.push_back(collider.m_info.hullAssetPath);
         }
 
-        for(const auto& collider : registry->ViewAll<ConcaveCollider>())
+        for(const auto& collider : view<const ConcaveCollider>{registry})
         {
             if(!manifest->ContainsNca(collider.m_path, AssetType::ConcaveCollider))
                 missingDependencies.push_back(collider.m_path);
         }
 
-        for(const auto& renderer : registry->ViewAll<MeshRenderer>())
+        for(const auto& renderer : view<const MeshRenderer>{registry})
         {
             if(!manifest->ContainsNca(renderer.m_meshPath, AssetType::Mesh))
                 missingDependencies.push_back(renderer.m_meshPath);
