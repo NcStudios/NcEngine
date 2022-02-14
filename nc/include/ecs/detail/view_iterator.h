@@ -76,7 +76,7 @@ namespace nc::detail
     class multi_view_iterator final
     {
         public:
-            using iterator_type = EntityStorage::iterator;
+            using iterator_type = entity_storage::iterator;
             using difference_type = std::iterator_traits<iterator_type>::difference_type;
             using value_type = std::iterator_traits<iterator_type>::value_type;
             using pointer = std::iterator_traits<iterator_type>::pointer;

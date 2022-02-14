@@ -7,12 +7,12 @@
 
 namespace nc::detail
 {
-    class EntityStorage
+    class entity_storage
     {
         public:
             using iterator = std::vector<Entity>::iterator;
 
-            EntityStorage()
+            entity_storage()
                 : m_entities{},
                   m_toRemove{},
                   m_persistent{},
@@ -20,7 +20,7 @@ namespace nc::detail
             {
             }
 
-            auto Add(const EntityInfo& info) -> Entity
+            auto add(const EntityInfo& info) -> Entity
             {
                 auto handle = m_handleManager.GenerateNewHandle(info.layer, info.flags);
                 m_entities.push_back(handle);
@@ -30,7 +30,7 @@ namespace nc::detail
                 return handle;
             }
 
-            void Remove(Entity entity)
+            void remove(Entity entity)
             {
                 auto pos = std::ranges::find(m_entities, entity);
                 *pos = m_entities.back();
@@ -45,12 +45,12 @@ namespace nc::detail
                 }
             }
 
-            bool Contains(Entity entity) const
+            bool contains(Entity entity) const
             {
                 return m_entities.cend() != std::ranges::find(m_entities, entity);
             }
 
-            void Clear()
+            void clear()
             {
                 m_toRemove.shrink_to_fit();
                 m_persistent.shrink_to_fit();
@@ -58,12 +58,12 @@ namespace nc::detail
                 m_handleManager.Reset(m_persistent);
             }
 
-            auto GetStagedRemovals() const -> const std::vector<Entity>& { return m_toRemove; }
+            auto get_staged_removals() const -> const std::vector<Entity>& { return m_toRemove; }
 
-            auto View() -> std::span<Entity> { return m_entities; }
-            auto View() const -> std::span<const Entity> { return m_entities; }
+            auto view() -> std::span<Entity> { return m_entities; }
+            auto view() const -> std::span<const Entity> { return m_entities; }
 
-            void CommitStagedChanges()
+            void commit_staged_changes()
             {
                 if(m_toRemove.empty()) return;
                 m_handleManager.ReclaimHandles(m_toRemove);

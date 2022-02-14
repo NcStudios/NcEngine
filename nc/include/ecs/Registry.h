@@ -1,6 +1,6 @@
 #pragma once
 
-#include "detail/EntityStorage.h"
+#include "detail/entity_storage.h"
 #include "detail/HandleManager.h"
 #include "detail/PerComponentStorage.h"
 #include "component/FreeComponentGroup.h"
@@ -93,7 +93,7 @@ namespace nc
 
         private:
             std::vector<std::unique_ptr<detail::PerComponentStorageBase>> m_registeredStorage;
-            detail::EntityStorage m_entities;
+            detail::entity_storage m_entities;
             size_t m_maxEntities;
 
             void RemoveEntityWithoutNotifyingParent(Entity entity);
@@ -119,7 +119,7 @@ namespace nc
     template<std::same_as<Entity> T>
     auto Registry::Add(EntityInfo info) -> Entity
     {
-        auto handle = m_entities.Add(info);
+        auto handle = m_entities.add(info);
         Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
         Add<FreeComponentGroup>(handle);
         Add<Tag>(handle, std::move(info.tag));
@@ -147,11 +147,11 @@ namespace nc
         IF_THROW(!Contains<Entity>(entity), "Bad Entity");
         auto* transform = Get<Transform>(entity);
         transform->SetParent(Entity::Null());
-        
+
         for(auto child : transform->Children())
             RemoveEntityWithoutNotifyingParent(child);
 
-        m_entities.Remove(entity);
+        m_entities.remove(entity);
     }
 
     template<std::derived_from<ComponentBase> T>
@@ -172,7 +172,7 @@ namespace nc
     template<std::same_as<Entity> T>
     bool Registry::Contains(Entity entity) const
     {
-        return m_entities.Contains(entity);
+        return m_entities.contains(entity);
     }
 
     template<std::derived_from<ComponentBase> T>
@@ -221,7 +221,7 @@ namespace nc
     template<std::same_as<Entity> T>
     auto Registry::ViewAll() -> std::span<Entity>
     {
-        return m_entities.View();
+        return m_entities.view();
     }
 
     template<PooledComponent T>
@@ -328,10 +328,10 @@ namespace nc
 
     inline void Registry::CommitStagedChanges()
     {
-        const auto& toRemove = m_entities.GetStagedRemovals();
+        const auto& toRemove = m_entities.get_staged_removals();
         for(auto& storage : m_registeredStorage)
             storage->CommitStagedComponents(toRemove);
 
-        m_entities.CommitStagedChanges();
+        m_entities.commit_staged_changes();
     }
 }
