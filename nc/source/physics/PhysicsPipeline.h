@@ -9,9 +9,10 @@
 #include "dynamics/Dynamics.h"
 #include "dynamics/Joint.h"
 #include "dynamics/Solver.h"
-#include "ecs/Registry.h"
 #include "ecs/component/FreeComponentGroup.h"
 #include "ecs/component/Logic.h"
+#include "ecs/Registry.h"
+#include "ecs/view.h"
 #include "optick/optick.h"
 #include "task/TaskGraph.h"
 
@@ -78,7 +79,7 @@ namespace nc::physics
         }
         else
         {
-            for(auto& fixedLogic : m_registry->ViewAll<FixedLogic>())
+            for(auto& fixedLogic : view<FixedLogic>{m_registry})
                 fixedLogic.Run(m_registry);
 
             UpdateWorldInertiaTensors(m_registry);
@@ -121,7 +122,7 @@ namespace nc::physics
         auto fixedUpdateTask = m_tasks.AddGuardedTask([registry]
         {
             OPTICK_CATEGORY("SendFixedUpdate", Optick::Category::Physics);
-            for(auto& fixedLogic : registry->ViewAll<FixedLogic>())
+            for(auto& fixedLogic : view<FixedLogic>{registry})
                 fixedLogic.Run(registry);
         });
 

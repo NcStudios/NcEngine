@@ -3,6 +3,7 @@
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
 #include "ecs/component/Logic.h"
+#include "ecs/view.h"
 #include "input/InputInternal.h"
 #include "graphics/PerFrameRenderState.h"
 #include "optick/optick.h"
@@ -204,7 +205,7 @@ namespace nc
         OPTICK_CATEGORY("SendFrameUpdate", Optick::Category::GameLogic);
         auto* registry = m_ecs.GetRegistry();
 
-        for(auto& frameLogic : registry->ViewAll<FrameLogic>())
+        for(auto& frameLogic : view<FrameLogic>{registry})
             frameLogic.Run(registry, dt);
     }
 
@@ -235,7 +236,7 @@ namespace nc
         m_graphics.Draw(state);
 
         #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : registry->ViewAll<Collider>()) collider.SetEditorSelection(false);
+        for(auto& collider : view<Collider>{registry}) collider.SetEditorSelection(false);
         #endif
 
         /** End the frame */

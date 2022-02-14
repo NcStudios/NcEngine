@@ -1,5 +1,6 @@
 #include "AudioSystemImpl.h"
 #include "ecs/component/AudioSource.h"
+#include "ecs/view.h"
 
 #include <cstring>
 #include <iostream>
@@ -185,7 +186,7 @@ namespace nc::audio
         const auto listenerPosition = listenerTransform->Position();
         const auto rightEar = listenerTransform->Right();
 
-        for(auto& source : m_registry->ViewAll<AudioSource>())
+        for(auto& source : view<AudioSource>{m_registry})
         {
             if(!source.IsPlaying())
                 continue;

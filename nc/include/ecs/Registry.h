@@ -56,11 +56,6 @@ namespace nc
             auto Get(Entity entity) const -> const T*;
 
             /** PooledComponent Specific Functions */
-            template<PooledComponent T>
-            auto ViewAll() -> std::span<T>;
-
-            template<PooledComponent T>
-            auto ViewAll() const -> std::span<const T>;
 
             template<PooledComponent T, PooledComponent U>
             auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
@@ -222,18 +217,6 @@ namespace nc
     auto Registry::ViewAll() -> std::span<Entity>
     {
         return m_entities.view();
-    }
-
-    template<PooledComponent T>
-    auto Registry::ViewAll() -> std::span<T>
-    {
-        return StorageFor<T>()->ViewAll();
-    }
-
-    template<PooledComponent T>
-    auto Registry::ViewAll() const -> std::span<const T>
-    {
-        return StorageFor<T>()->ViewAll();
     }
 
     template<PooledComponent T, PooledComponent U>
