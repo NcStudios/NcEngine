@@ -101,20 +101,6 @@ namespace nc
             #endif
     };
 
-    template<>
-    struct StoragePolicy<Collider>
-    {
-        #ifdef NC_EDITOR_ENABLED
-        using allow_trivial_destruction = std::false_type;
-        #else
-        using allow_trivial_destruction = std::true_type;
-        #endif
-
-        using sort_dense_storage_by_address = std::true_type;
-        using requires_on_add_callback = std::false_type;
-        using requires_on_remove_callback = std::false_type;
-    };
-
     const char* ToCString(ColliderType type);
 
     #ifdef NC_EDITOR_ENABLED

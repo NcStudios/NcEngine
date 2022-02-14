@@ -16,10 +16,7 @@ namespace nc
 
     Registry::Registry(size_t maxEntities)
         : m_registeredStorage{},
-          m_active{},
-          m_toAdd{},
-          m_toRemove{},
-          m_handleManager{},
+          m_entities{},
           m_maxEntities{maxEntities}
     {
         g_registry = this;
@@ -41,39 +38,18 @@ namespace nc
 
     void Registry::RemoveEntityWithoutNotifyingParent(Entity entity)
     {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        IF_THROW(!m_entities.contains(entity), "Bad Entity");
         auto* transform = Get<Transform>(entity);
+
         for(auto child : transform->Children())
             RemoveEntityWithoutNotifyingParent(child);
-        
-        auto pos = std::ranges::find(m_active, entity);
-        *pos = m_active.back();
-        m_active.pop_back();
-        m_toRemove.push_back(entity);
+
+        m_entities.remove(entity);
     }
 
     void Registry::Clear()
     {
-        if(!m_toAdd.empty() || !m_toRemove.empty())
-        {
-            CommitStagedChanges();
-            m_toAdd.clear();
-            m_toRemove.clear();
-        }
-
-        m_toAdd.shrink_to_fit();
-        m_toRemove.shrink_to_fit();
-
-        std::vector<Entity> persistentEntities;
-
-        for(auto entity : m_active)
-        {
-            if(entity.IsPersistent())
-                persistentEntities.push_back(entity);
-        }
-
-        m_active = std::move(persistentEntities);
-        m_handleManager.Reset(m_active);
+        m_entities.clear();
 
         for(auto& storage : m_registeredStorage)
         {

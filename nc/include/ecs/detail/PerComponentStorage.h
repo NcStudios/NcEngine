@@ -10,15 +10,31 @@
 #include <span>
 #include <vector>
 
-namespace nc
+namespace nc::detail
 {
     class PerComponentStorageBase
     {
         public:
+            using index_type = Entity::index_type;
+
+            PerComponentStorageBase(size_t maxEntities)
+                : sparseArray(maxEntities, Entity::NullIndex),
+                  entityPool{}
+            {
+            }
+
+            auto SparseArray() noexcept -> std::vector<index_type>& { return sparseArray; }
+            auto EntityPool() noexcept -> std::vector<Entity>& { return entityPool; }
+            auto size() const noexcept { return entityPool.size(); }
+
             virtual ~PerComponentStorageBase() = default;
             virtual void Clear() = 0;
             virtual void CommitStagedComponents(const std::vector<Entity>& removed) = 0;
             virtual void VerifyCallbacks() = 0;
+
+        protected:
+            std::vector<index_type> sparseArray;
+            std::vector<Entity> entityPool;
     };
 
     template<PooledComponent T>
@@ -33,9 +49,6 @@ namespace nc
     template<PooledComponent T>
     class PerComponentStorage : public PerComponentStorageBase
     {
-        using value_type = T;
-        using index_type = Entity::index_type;
-
         struct StagedComponent
         {
             Entity entity;
@@ -43,17 +56,17 @@ namespace nc
         };
 
         public:
+            using value_type = T;
+            using iterator = std::vector<T>::iterator;
+
             PerComponentStorage(size_t maxEntities);
             ~PerComponentStorage() = default;
             PerComponentStorage(PerComponentStorage&&) = default;
             PerComponentStorage& operator=(PerComponentStorage&&) = default;
-
             PerComponentStorage(const PerComponentStorage&) = delete;
             PerComponentStorage& operator=(const PerComponentStorage&) = delete;
 
-            auto GetSparseArray() -> std::vector<index_type>& { return sparseArray; }
-            auto GetEntityPool() -> std::vector<Entity>& { return entityPool; }
-            auto GetComponentPool() -> std::vector<T>& { return componentPool; }
+            auto ComponentPool() noexcept -> std::vector<T>& { return componentPool; }
 
             template<class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
@@ -79,8 +92,6 @@ namespace nc
             void VerifyCallbacks() override;
 
         private:
-            std::vector<index_type> sparseArray;
-            std::vector<Entity> entityPool;
             std::vector<T> componentPool;
             std::vector<StagedComponent> stagingPool;
             SystemCallbacks<T> callbacks;
@@ -88,8 +99,7 @@ namespace nc
 
     template<PooledComponent T>
     PerComponentStorage<T>::PerComponentStorage(size_t maxEntities)
-        : sparseArray(maxEntities, Entity::NullIndex),
-          entityPool{},
+        : PerComponentStorageBase{maxEntities},
           componentPool{},
           stagingPool{},
           callbacks{}
@@ -102,7 +112,7 @@ namespace nc
         IF_THROW(Contains(entity), "PerComponentStorage::Add - Cannot add multiple components of the same type");
         auto& [emplacedEntity, emplacedComponent] = stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
 
-        if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
+        if constexpr(storage_policy<T>::requires_on_add_callback)
             callbacks.OnAdd(emplacedComponent);
 
         return &emplacedComponent;
@@ -128,7 +138,7 @@ namespace nc
         if(sparseIndex != movedEntity.Index())
             sparseArray.at(movedEntity.Index()) = poolIndex;
 
-        if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
+        if constexpr(storage_policy<T>::requires_on_remove_callback)
             callbacks.OnRemove(entity);
     }
 
@@ -258,13 +268,13 @@ namespace nc
     template<PooledComponent T>
     void PerComponentStorage<T>::VerifyCallbacks()
     {
-        if constexpr(StoragePolicy<T>::requires_on_add_callback::value)
+        if constexpr(storage_policy<T>::requires_on_add_callback)
         {
             if(!callbacks.OnAdd)
                 throw NcError("OnAdd callback required but not set");
         }
 
-        if constexpr(StoragePolicy<T>::requires_on_remove_callback::value)
+        if constexpr(storage_policy<T>::requires_on_remove_callback)
         {
             if(!callbacks.OnRemove)
                 throw NcError("OnRemove callback required but not set");

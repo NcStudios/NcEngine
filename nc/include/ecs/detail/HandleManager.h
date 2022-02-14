@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Entity.h"
+#include "ecs/Entity.h"
 
 #include <algorithm>
 #include <iterator>
 #include <span>
 #include <vector>
 
-namespace nc
+namespace nc::detail
 {
     class HandleManager
     {

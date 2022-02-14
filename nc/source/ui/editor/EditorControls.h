@@ -225,8 +225,6 @@ namespace nc::ui::editor::controls
     void ComponentSystemHeader(const char* name, std::span<T> components)
     {
         constexpr auto size = static_cast<unsigned>(sizeof(T));
-        constexpr auto destruction = StoragePolicy<T>::allow_trivial_destruction::value ? "False" : "True";
-        constexpr auto sorting = StoragePolicy<T>::sort_dense_storage_by_address::value ? "True" : "False";
 
         if(ImGui::CollapsingHeader(name))
         {
@@ -234,8 +232,6 @@ namespace nc::ui::editor::controls
             ImGui::Indent();
             ImGui::Text("Component Size:      %u", size);
             ImGui::Text("Copmonent Count:     %u", static_cast<unsigned>(components.size()));
-            ImGui::Text("Require Destruction: %s", destruction);
-            ImGui::Text("Sort by Address:     %s", sorting);
             if(ImGui::CollapsingHeader("Components"))
             {
                 ImGui::Indent();

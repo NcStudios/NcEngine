@@ -23,8 +23,6 @@ namespace nc::alloc
     class PoolAdapter final : private PoolResourceScope<T>
     {
         public:
-            using storage_policy = StoragePolicy<T>;
-
             explicit PoolAdapter(size_t count);
             
             template<class... Args>
@@ -70,12 +68,6 @@ namespace nc::alloc
     template<class T>
     void PoolAdapter<T>::Clear()
     {
-        if constexpr(!storage_policy::allow_trivial_destruction::value)
-        {
-            for(auto* item : m_data)
-                m_allocator.deallocate(item, 1u);
-        }
-
         m_data.clear();
         m_data.shrink_to_fit();
         m_allocator.clear_memory_resource();
@@ -87,17 +79,7 @@ namespace nc::alloc
     {
         auto* ptr = m_allocator.allocate(1);
         ptr = new(ptr) T{std::forward<Args>(args)...};
-
-        if constexpr(storage_policy::sort_dense_storage_by_address::value)
-        {
-            auto pos = std::ranges::upper_bound(m_data, ptr, std::less<T*>());
-            m_data.insert(pos, ptr);
-        }
-        else
-        {
-            m_data.push_back(ptr);
-        }
-
+        m_data.push_back(ptr);
         return ptr;
     }
 
@@ -106,16 +88,7 @@ namespace nc::alloc
     {
         auto* ptr = m_allocator.allocate(1);
         ptr = new(ptr) T{std::move(value)};
-
-        if constexpr(storage_policy::sort_dense_storage_by_address::value)
-        {
-            auto pos = std::ranges::upper_bound(m_data, ptr, std::less<T*>());
-            m_data.insert(pos, ptr);
-        }
-        else
-        {
-            m_data.push_back(ptr);
-        }
+        m_data.push_back(ptr);
     }
 
     template<class T>
@@ -125,18 +98,10 @@ namespace nc::alloc
         auto pos = std::ranges::find_if(m_data, predicate);
         if(pos == m_data.end())
             return false;
-        
-        m_allocator.deallocate(*pos, 1);
 
-        if constexpr(storage_policy::sort_dense_storage_by_address::value)
-        {
-            std::erase(m_data, *pos);
-        }
-        else
-        {
-            *pos = m_data.back();
-            m_data.pop_back();
-        }
+        m_allocator.deallocate(*pos, 1);
+        *pos = m_data.back();
+        m_data.pop_back();
 
         return true;
     }
@@ -160,15 +125,8 @@ namespace nc::alloc
         T out{std::move(**pos)};
         m_allocator.deallocate(*pos, 1);
 
-        if constexpr(storage_policy::sort_dense_storage_by_address::value)
-        {
-            m_data.erase(pos);
-        }
-        else
-        {
-            *pos = m_data.back();
-            m_data.pop_back();
-        }
+        *pos = m_data.back();
+        m_data.pop_back();
 
         return out;
     }
