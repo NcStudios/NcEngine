@@ -16,16 +16,26 @@ namespace nc
     class view
     {
         public:
+            using value_type = std::remove_const_t<T>;
             using iterator = detail::single_view_iterator<T>;
             using reverse_iterator = std::reverse_iterator<iterator>;
-            using storage = detail::PerComponentStorage<T>;
+            using storage = detail::constness_as_other<detail::PerComponentStorage<value_type>, T>::type;
 
             /**
              * @brief Constructs a new view.
-             * @param registry Pointer to the Registry the view will be constructed from.
+             * @param registry Pointer to a Registry the view will be constructed from.
              */
             view(Registry* registry)
-                : m_viewBasis{registry->StorageFor<T>()}
+                : m_viewBasis{registry->StorageFor<value_type>()}
+            {
+            }
+
+            /**
+             * @brief Constructs a new read-only view.
+             * @param registry Pointer to a const Registry the view will be constructed from.
+             */
+            view(const Registry* registry)
+                : m_viewBasis{registry->StorageFor<value_type>()}
             {
             }
 
@@ -33,7 +43,7 @@ namespace nc
              * @brief Returns an iterator to the first component in the view.
              * @return iterator
              */
-            auto begin() noexcept
+            auto begin() const noexcept
             {
                 auto& pool = m_viewBasis->ComponentPool();
                 return iterator{pool.data()};
@@ -43,7 +53,7 @@ namespace nc
              * @brief Returns an iterator one past the last component in the view.
              * @return iterator
              */
-            auto end() noexcept
+            auto end() const noexcept
             {
                 auto& pool = m_viewBasis->ComponentPool();
                 return iterator{pool.data() + pool.size()};
@@ -53,7 +63,7 @@ namespace nc
              * @brief Returns a reverse iterator to the first component in the reversed view.
              * @return reverse_iterator
              */
-            auto rbegin() noexcept
+            auto rbegin() const noexcept
             {
                 return std::make_reverse_iterator(end());
             }
@@ -62,7 +72,7 @@ namespace nc
              * @brief Returns a reverse iterator one before the last component in the reversed view.
              * @return reverse_iterator
              */
-            auto rend() noexcept
+            auto rend() const noexcept
             {
                 return std::make_reverse_iterator(begin());
             }

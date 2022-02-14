@@ -6,6 +6,12 @@
 
 namespace nc::detail
 {
+    template<class Target, class Reference>
+    struct constness_as_other
+    {
+        using type = std::conditional_t<std::is_const_v<Reference>, const Target, Target>;
+    };
+
     template<PooledComponent T>
     class single_view_iterator final
     {
