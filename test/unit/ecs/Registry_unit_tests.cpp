@@ -107,10 +107,10 @@ TEST_F(Registry_unit_tests, RemoveEntity_EntityExists_EntityRemovedFromActiveLis
 {
     auto handle = registry.Add<Entity>(TestInfo);
     registry.CommitStagedChanges();
-    auto entities = registry.ViewAll<Entity>();
+    auto entities = view<Entity>{&registry};
     EXPECT_EQ(entities.size(), 1u);
     registry.Remove<Entity>(handle);
-    entities = registry.ViewAll<Entity>();
+    entities = view<Entity>{&registry};
     EXPECT_EQ(entities.size(), 0u);
 }
 

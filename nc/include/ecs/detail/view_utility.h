@@ -6,13 +6,60 @@
 
 namespace nc::detail
 {
+    /** Map constness of Reference onto Target. */
     template<class Target, class Reference>
-    struct constness_as_other
+    struct constness_of
     {
-        using type = std::conditional_t<std::is_const_v<Reference>, const Target, Target>;
+        using type = std::conditional_t<std::is_const_v<Reference>,
+                                        std::add_const_t<Target>,
+                                        std::remove_const_t<Target>>;
     };
 
+    /** Generalized access to registry storage for views. */
+    template<class T>
+        requires viewable<T>
+    struct view_storage_adaptor {};
+
+    /** Specialization for views over entities. */
+    template<std::same_as<Entity> T>
+    struct view_storage_adaptor<T>
+    {
+        using storage_type = constness_of<detail::entity_storage, T>::type;
+
+        static auto begin(storage_type* basis) noexcept
+        {
+            auto& pool = basis->pool();
+            return pool.data();
+        }
+
+        static auto end(storage_type* basis) noexcept
+        {
+            auto& pool = basis->pool();
+            return pool.data() + pool.size();
+        }
+    };
+
+    /** Specialization for views over components. */
     template<PooledComponent T>
+    struct view_storage_adaptor<T>
+    {
+        using storage_type = constness_of<detail::PerComponentStorage<std::remove_const_t<T>>, T>::type;
+
+        static auto begin(storage_type* basis) noexcept
+        {
+            auto& pool = basis->ComponentPool();
+            return pool.data();
+        }
+
+        static auto end(storage_type* basis) noexcept
+        {
+            auto& pool = basis->ComponentPool();
+            return pool.data() + pool.size();
+        }
+    };
+
+    /** Iterator for a single storage pool. */
+    template<viewable T>
     class single_view_iterator final
     {
         public:
@@ -78,6 +125,7 @@ namespace nc::detail
             iterator_type m_cur;
     };
 
+    /** Iterator for multiple storage pools. */
     template<PooledComponent... Ts>
     class multi_view_iterator final
     {

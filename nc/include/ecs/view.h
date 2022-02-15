@@ -1,90 +1,70 @@
 #pragma once
 
-#include "detail/view_iterator.h"
+#include "detail/view_utility.h"
 
 namespace nc
 {
     /**
-     * @brief A view over a single component.
+     * @brief A view over a single registry type.
      * 
-     * Represents a range of all components of the specified type. Iterator
+     * Represents a contiguous range of all objects of the specified type. Iterator
      * invalidation rules are the same as the registry.
      * 
-     * @tparam T The component, which models PooledComponent, to be viewed.
+     * @tparam T The type, which models viewable, to be accessed.
      */
-    template<PooledComponent T>
+    template<viewable T>
     class view
     {
         public:
             using value_type = std::remove_const_t<T>;
             using iterator = detail::single_view_iterator<T>;
             using reverse_iterator = std::reverse_iterator<iterator>;
-            using storage = detail::constness_as_other<detail::PerComponentStorage<value_type>, T>::type;
+            using adaptor = detail::view_storage_adaptor<T>;
+            using storage = adaptor::storage_type;
 
             /**
              * @brief Constructs a new view.
              * @param registry Pointer to a Registry the view will be constructed from.
              */
             view(Registry* registry)
-                : m_viewBasis{registry->StorageFor<value_type>()}
-            {
-            }
+                : m_viewBasis{registry->StorageFor<value_type>()} {}
 
             /**
              * @brief Constructs a new read-only view.
              * @param registry Pointer to a const Registry the view will be constructed from.
              */
             view(const Registry* registry)
-                : m_viewBasis{registry->StorageFor<value_type>()}
-            {
-            }
+                : m_viewBasis{registry->StorageFor<value_type>()} {}
 
             /**
-             * @brief Returns an iterator to the first component in the view.
+             * @brief Returns an iterator to the first element in the view.
              * @return iterator
              */
-            auto begin() const noexcept
-            {
-                auto& pool = m_viewBasis->ComponentPool();
-                return iterator{pool.data()};
-            }
+            auto begin() const noexcept { return iterator{adaptor::begin(m_viewBasis)}; }
 
             /**
-             * @brief Returns an iterator one past the last component in the view.
+             * @brief Returns an iterator one past the last element in the view.
              * @return iterator
              */
-            auto end() const noexcept
-            {
-                auto& pool = m_viewBasis->ComponentPool();
-                return iterator{pool.data() + pool.size()};
-            }
+            auto end() const noexcept { return iterator{adaptor::end(m_viewBasis)}; }
 
             /**
-             * @brief Returns a reverse iterator to the first component in the reversed view.
+             * @brief Returns a reverse iterator to the first element in the reversed view.
              * @return reverse_iterator
              */
-            auto rbegin() const noexcept
-            {
-                return std::make_reverse_iterator(end());
-            }
+            auto rbegin() const noexcept { return std::make_reverse_iterator(end()); }
 
             /**
-             * @brief Returns a reverse iterator one before the last component in the reversed view.
+             * @brief Returns a reverse iterator one before the last element in the reversed view.
              * @return reverse_iterator
              */
-            auto rend() const noexcept
-            {
-                return std::make_reverse_iterator(begin());
-            }
+            auto rend() const noexcept { return std::make_reverse_iterator(begin()); }
 
             /**
-             * @brief Returns the number of components in the view.
+             * @brief Returns the number of element in the view.
              * @return size_t
              */
-            auto size() const noexcept
-            {
-                return m_viewBasis->size();
-            }
+            auto size() const noexcept { return m_viewBasis->size(); }
 
         private:
             storage* m_viewBasis;

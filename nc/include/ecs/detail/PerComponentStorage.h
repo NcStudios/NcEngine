@@ -79,8 +79,6 @@ namespace nc::detail
             bool Contains(Entity entity) const;
             auto Get(Entity entity) -> T*;
             auto Get(Entity entity) const -> const T*;
-            //auto ViewAll() -> std::span<T>;
-            //auto ViewAll() const -> std::span<const T>;
 
             template<std::predicate<const T&, const T&> Predicate>
             void Sort(Predicate&& comparesLessThan);
@@ -196,18 +194,6 @@ namespace nc::detail
 
         return pos == stagingPool.end() ? nullptr : &pos->component;
     }
-
-    // template<PooledComponent T>
-    // auto PerComponentStorage<T>::ViewAll() -> std::span<T>
-    // {
-    //     return std::span<T>{componentPool};
-    // }
-
-    // template<PooledComponent T>
-    // auto PerComponentStorage<T>::ViewAll() const -> std::span<const T>
-    // {
-    //     return std::span<const T>{componentPool};
-    // }
 
     template<PooledComponent T>
     template<std::predicate<const T&, const T&> Predicate>
