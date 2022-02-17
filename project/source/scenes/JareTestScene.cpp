@@ -93,10 +93,10 @@ namespace nc::sample
         engine->Environment()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
         
         //Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),
-                                                           .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
-                                                           .diffuseIntensity = 88.0f});
+        auto light = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
+        light.add<PointLight>(PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),
+                                             .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
+                                             .diffuseIntensity = 88.0f});
 
         auto floor = registry->Add<Entity>(
         {.position = Vector3{0.0f, 0.0f, 0.0f},
@@ -104,7 +104,7 @@ namespace nc::sample
          .scale = Vector3{30.0f, 30.0f, 1.0f},
          .tag = "Floor"});
 
-        registry->Add<MeshRenderer>(floor, "plane.nca", floorMaterial, TechniqueType::PhongAndUi);
+        floor.add<MeshRenderer>("plane.nca", floorMaterial, TechniqueType::PhongAndUi);
 
         auto blueSphere = registry->Add<Entity>(
         {.position = Vector3{0.0f, 1.0f, 2.0f},
@@ -112,7 +112,7 @@ namespace nc::sample
         .scale = Vector3{2.0f, 2.0f,2.0f},
         .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blueSphere, "sphere.nca", blueMaterial, TechniqueType::PhongAndUi);
+        blueSphere.add<MeshRenderer>("sphere.nca", blueMaterial, TechniqueType::PhongAndUi);
 
         auto blackSphere = registry->Add<Entity>(
         {.position = Vector3{3.0f, 1.0f, 2.0f},
@@ -120,7 +120,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blackSphere, "sphere.nca", grayMaterial, TechniqueType::PhongAndUi);
+        blackSphere.add<MeshRenderer>("sphere.nca", grayMaterial, TechniqueType::PhongAndUi);
 
         auto blackBox = registry->Add<Entity>(
         {.position = Vector3{-3.0f, 1.0f, 2.0f},
@@ -128,12 +128,12 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Box"});
 
-        registry->Add<MeshRenderer>(blackBox, "cube.nca", blacktopMaterial, TechniqueType::PhongAndUi);
+        blackBox.add<MeshRenderer>("cube.nca", blacktopMaterial, TechniqueType::PhongAndUi);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
-        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
+        auto camera = cameraHandle.add<SceneNavigationCamera>(0.05f, 0.005f, 1.4f);
+        cameraHandle.add<FrameLogic>(InvokeFreeComponent<SceneNavigationCamera>{});
         engine->MainCamera()->Set(camera);
     }
 

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "ecs/Entity.h"
-
-namespace nc { class Registry; }
+#include "ecs/Registry.h"
 
 namespace nc::sample::prefab
 {
@@ -36,5 +34,5 @@ namespace nc::sample::prefab
 
     std::string ToString(Resource resource);
     void InitializeResources();
-    Entity Create(Registry* registry, Resource resource, EntityInfo info);
+    handle Create(Registry* registry, Resource resource, EntityInfo info);
 } // end namespace project::prefab

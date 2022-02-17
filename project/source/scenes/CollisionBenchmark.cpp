@@ -71,7 +71,8 @@ namespace nc::sample
         // Setup
         m_sceneHelper.Setup(engine, false, true, Widget);
 
-        auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
+        auto cameraHandle = registry->Add<Entity>({.tag = "Main Camera"});
+        auto camera = cameraHandle.add<Camera>();
         engine->MainCamera()->Set(camera);
 
         // Cube Spawner Options
@@ -89,33 +90,31 @@ namespace nc::sample
 
         // Dynamic Cube Spawner
         auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
-        auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
-        registry->Add<FrameLogic>(dynamicSpawnerHandle, InvokeFreeComponent<Spawner>{});
+        auto dynamicSpawner = dynamicSpawnerHandle.add<Spawner>(prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
+        dynamicSpawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
+        GetDynamicCountCallback = std::bind_front(&Spawner::GetObjectCount, dynamicSpawner);
+        SpawnDynamicCallback = std::bind_front(&Spawner::StageSpawn, dynamicSpawner);
+        DestroyDynamicCallback = std::bind_front(&Spawner::StageDestroy, dynamicSpawner);
 
         // Static Cube Spawner
         spawnBehavior.flags = Entity::Flags::Static;
         auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
-        auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
-        registry->Add<FrameLogic>(staticSpawnerHandle, InvokeFreeComponent<Spawner>{});
+        auto staticSpawner = staticSpawnerHandle.add<Spawner>(prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
+        staticSpawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
+        GetStaticCountCallback = std::bind_front(&Spawner::GetObjectCount, staticSpawner);
+        SpawnStaticCallback = std::bind_front(&Spawner::StageSpawn, staticSpawner);
+        DestroyStaticCallback = std::bind_front(&Spawner::StageDestroy, staticSpawner);
 
-        auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
-        auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
+        auto fpsHandle = registry->Add<Entity>({.tag = "FpsTracker"});
+        auto fpsTracker = fpsHandle.add<FPSTracker>();
+        fpsHandle.add<FrameLogic>(InvokeFreeComponent<FPSTracker>{});
+        GetFPSCallback = std::bind_front(&FPSTracker::GetFPS, fpsTracker);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(1.0f, 0.7f, 1.0f),
-                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
-                                                           .diffuseIntensity = 1200.0f});
-
-        // UI Callbacks
-        GetDynamicCountCallback = std::bind(&Spawner::GetObjectCount, dynamicSpawner);
-        SpawnDynamicCallback = std::bind(&Spawner::StageSpawn, dynamicSpawner, std::placeholders::_1);
-        DestroyDynamicCallback = std::bind(&Spawner::StageDestroy, dynamicSpawner, std::placeholders::_1);
-        GetStaticCountCallback = std::bind(&Spawner::GetObjectCount, staticSpawner);
-        SpawnStaticCallback = std::bind(&Spawner::StageSpawn, staticSpawner, std::placeholders::_1);
-        DestroyStaticCallback = std::bind(&Spawner::StageDestroy, staticSpawner, std::placeholders::_1);
-        GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
+        auto light = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
+        light.add<PointLight>(PointLightInfo{.ambient = Vector3(1.0f, 0.7f, 1.0f),
+                                             .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
+                                             .diffuseIntensity = 1200.0f});
     }
 
     void CollisionBenchmark::Unload()

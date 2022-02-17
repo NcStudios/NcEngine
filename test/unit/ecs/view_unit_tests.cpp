@@ -64,12 +64,12 @@ class view_unit_tests : public ::testing::Test
 
 TEST_F(view_unit_tests, Single_ForwardIteration_VisitsEach)
 {
-    auto e1 = registry.Add<Entity>(EntityInfo{});
-    auto e2 = registry.Add<Entity>(EntityInfo{});
-    auto e3 = registry.Add<Entity>(EntityInfo{});
-    registry.Add<Fake1>(e1, 0);
-    registry.Add<Fake1>(e2, 1);
-    registry.Add<Fake1>(e3, 2);
+    auto h1 = registry.Add<Entity>(EntityInfo{});
+    auto h2 = registry.Add<Entity>(EntityInfo{});
+    auto h3 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(h1.entity(), 0);
+    registry.Add<Fake1>(h2.entity(), 1);
+    registry.Add<Fake1>(h3.entity(), 2);
     registry.CommitStagedChanges();
     auto v = view<Fake1>{&registry};
     EXPECT_EQ(v.size(), 3);
@@ -86,16 +86,16 @@ TEST_F(view_unit_tests, Single_ForwardIteration_VisitsEach)
 
 TEST_F(view_unit_tests, Single_ForwardIteration_ValidAfterAdd)
 {
-    auto e1 = registry.Add<Entity>(EntityInfo{});
-    auto e2 = registry.Add<Entity>(EntityInfo{});
-    auto e3 = registry.Add<Entity>(EntityInfo{});
-    auto e4 = registry.Add<Entity>(EntityInfo{});
-    registry.Add<Fake1>(e1, 0);
-    registry.Add<Fake1>(e2, 1);
+    auto h1 = registry.Add<Entity>(EntityInfo{});
+    auto h2 = registry.Add<Entity>(EntityInfo{});
+    auto h3 = registry.Add<Entity>(EntityInfo{});
+    auto h4 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(h1.entity(), 0);
+    registry.Add<Fake1>(h2.entity(), 1);
     registry.CommitStagedChanges();
     auto v = view<Fake1>{&registry};
-    registry.Add<Fake1>(e3, 2);
-    registry.Add<Fake1>(e4, 3);
+    registry.Add<Fake1>(h3.entity(), 2);
+    registry.Add<Fake1>(h4.entity(), 3);
     EXPECT_EQ(v.size(), 2);
     auto beg = v.begin();
     auto end = v.end();
@@ -111,12 +111,12 @@ TEST_F(view_unit_tests, Single_ForwardIteration_ValidAfterAdd)
 
 TEST_F(view_unit_tests, Single_ReverseIteration_VisitsEach)
 {
-    auto e1 = registry.Add<Entity>(EntityInfo{});
-    auto e2 = registry.Add<Entity>(EntityInfo{});
-    auto e3 = registry.Add<Entity>(EntityInfo{});
-    registry.Add<Fake1>(e1, 0);
-    registry.Add<Fake1>(e2, 1);
-    registry.Add<Fake1>(e3, 2);
+    auto h1 = registry.Add<Entity>(EntityInfo{});
+    auto h2 = registry.Add<Entity>(EntityInfo{});
+    auto h3 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(h1.entity(), 0);
+    registry.Add<Fake1>(h2.entity(), 1);
+    registry.Add<Fake1>(h3.entity(), 2);
     registry.CommitStagedChanges();
     auto v = view<Fake1>{&registry};
     EXPECT_EQ(v.size(), 3);
@@ -158,12 +158,12 @@ TEST_F(view_unit_tests, Single_EmptyView_SkipsLoop)
 
 TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
 {
-    auto e1 = registry.Add<Entity>(EntityInfo{});
-    auto e2 = registry.Add<Entity>(EntityInfo{});
-    auto e3 = registry.Add<Entity>(EntityInfo{});
-    registry.Add<Fake1>(e1, 0);
-    registry.Add<Fake1>(e2, 1);
-    registry.Add<Fake1>(e3, 2);
+    auto h1 = registry.Add<Entity>(EntityInfo{});
+    auto h2 = registry.Add<Entity>(EntityInfo{});
+    auto h3 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(h1.entity(), 0);
+    registry.Add<Fake1>(h2.entity(), 1);
+    registry.Add<Fake1>(h3.entity(), 2);
     registry.CommitStagedChanges();
     auto v = view<Fake1>{&registry};
     EXPECT_EQ(v.size(), 3);
@@ -183,8 +183,8 @@ TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
 
 TEST_F(view_unit_tests, Single_ConstRegistry_ConstructsReadOnlyView)
 {
-    auto e1 = registry.Add<Entity>(EntityInfo{});
-    registry.Add<Fake1>(e1, 0);
+    auto h1 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(h1.entity(), 0);
     registry.CommitStagedChanges();
     const auto* constRegistry = &registry;
     auto v = view<const Fake1>{constRegistry};
@@ -200,15 +200,15 @@ TEST_F(view_unit_tests, Single_NonConstRegistryConstType_ReturnsReadOnlyValues)
 
 TEST_F(view_unit_tests, Multi_SizeUpperBound)
 {
-    auto e1 = registry.Add<Entity>(EntityInfo{});
-    auto e2 = registry.Add<Entity>(EntityInfo{});
-    auto e3 = registry.Add<Entity>(EntityInfo{});
-    registry.Add<Fake1>(e1, 0);
-    registry.Add<Fake1>(e2, 1);
-    registry.Add<Fake1>(e3, 2);
-    registry.Add<Fake2>(e2, 1);
-    registry.Add<Fake2>(e3, 2);
-    registry.Add<Fake3>(e2, 1);
+    auto h1 = registry.Add<Entity>(EntityInfo{});
+    auto h2 = registry.Add<Entity>(EntityInfo{});
+    auto h3 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(h1.entity(), 0);
+    registry.Add<Fake1>(h2.entity(), 1);
+    registry.Add<Fake1>(h3.entity(), 2);
+    registry.Add<Fake2>(h2.entity(), 1);
+    registry.Add<Fake2>(h3.entity(), 2);
+    registry.Add<Fake3>(h2.entity(), 1);
     registry.CommitStagedChanges();
 
     auto v12 = multi_view<Fake1, Fake2>{&registry};
@@ -226,19 +226,19 @@ TEST_F(view_unit_tests, Multi_SizeUpperBound)
 
 TEST_F(view_unit_tests, Multi_VisitsEach)
 {
-    auto e1 = registry.Add<Entity>(EntityInfo{});
-    auto e2 = registry.Add<Entity>(EntityInfo{});
-    auto e3 = registry.Add<Entity>(EntityInfo{});
-    auto e4 = registry.Add<Entity>(EntityInfo{});
-    registry.Add<Fake1>(e1, 1);
-    registry.Add<Fake1>(e2, 1);
-    registry.Add<Fake1>(e3, 1);
-    registry.Add<Fake1>(e4, 1);
-    registry.Add<Fake2>(e2, 2);
-    registry.Add<Fake2>(e3, 2);
-    registry.Add<Fake2>(e4, 2);
-    registry.Add<Fake3>(e2, 3);
-    registry.Add<Fake3>(e4, 3);
+    auto h1 = registry.Add<Entity>(EntityInfo{});
+    auto h2 = registry.Add<Entity>(EntityInfo{});
+    auto h3 = registry.Add<Entity>(EntityInfo{});
+    auto h4 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(h1.entity(), 1);
+    registry.Add<Fake1>(h2.entity(), 1);
+    registry.Add<Fake1>(h3.entity(), 1);
+    registry.Add<Fake1>(h4.entity(), 1);
+    registry.Add<Fake2>(h2.entity(), 2);
+    registry.Add<Fake2>(h3.entity(), 2);
+    registry.Add<Fake2>(h4.entity(), 2);
+    registry.Add<Fake3>(h2.entity(), 3);
+    registry.Add<Fake3>(h4.entity(), 3);
     registry.CommitStagedChanges();
 
     const auto expectedFake1Value = 10;
@@ -252,12 +252,12 @@ TEST_F(view_unit_tests, Multi_VisitsEach)
         f3->value = expectedFake3Value;
     }
 
-    EXPECT_EQ(registry.Get<Fake1>(e2)->value, expectedFake1Value);
-    EXPECT_EQ(registry.Get<Fake2>(e2)->value, expectedFake2Value);
-    EXPECT_EQ(registry.Get<Fake3>(e2)->value, expectedFake3Value);
-    EXPECT_EQ(registry.Get<Fake1>(e4)->value, expectedFake1Value);
-    EXPECT_EQ(registry.Get<Fake2>(e4)->value, expectedFake2Value);
-    EXPECT_EQ(registry.Get<Fake3>(e4)->value, expectedFake3Value);
+    EXPECT_EQ(registry.Get<Fake1>(h2.entity())->value, expectedFake1Value);
+    EXPECT_EQ(registry.Get<Fake2>(h2.entity())->value, expectedFake2Value);
+    EXPECT_EQ(registry.Get<Fake3>(h2.entity())->value, expectedFake3Value);
+    EXPECT_EQ(registry.Get<Fake1>(h4.entity())->value, expectedFake1Value);
+    EXPECT_EQ(registry.Get<Fake2>(h4.entity())->value, expectedFake2Value);
+    EXPECT_EQ(registry.Get<Fake3>(h4.entity())->value, expectedFake3Value);
 }
 
 int main(int argc, char ** argv)

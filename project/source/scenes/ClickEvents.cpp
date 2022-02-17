@@ -57,22 +57,22 @@ namespace nc::sample
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = registry->Add<EdgePanCamera>(cameraHandle);
+        auto camera = cameraHandle.add<EdgePanCamera>();
         engine->MainCamera()->Set(camera);
-        auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, engine->Physics());
-        registry->Add<FrameLogic>(cameraHandle, [](Entity self, Registry* registry, float dt)
+        auto clickHandler = cameraHandle.add<ClickHandler>(MaskAll, engine->Physics());
+        cameraHandle.add<FrameLogic>([](Entity self, Registry* registry, float dt)
         {
             registry->Get<EdgePanCamera>(self)->Run(self, registry, dt);
             registry->Get<ClickHandler>(self)->Run(self, registry, dt);
         });
-        LayerSelectCallback = std::bind(&ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
+        LayerSelectCallback = std::bind_front(&ClickHandler::SetLayer, clickHandler);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.8f, 2.3f, -4.7f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3{0.325, 0.325, 0.325}, .diffuseColor = Vector3{0.9, 0.9, 0.9}, .diffuseIntensity = 48.0});
+        auto light1 = registry->Add<Entity>({.position = Vector3{-2.8f, 2.3f, -4.7f}, .tag = "Point Light 1"});
+        light1.add<PointLight>(PointLightInfo{.ambient = Vector3{0.325, 0.325, 0.325}, .diffuseColor = Vector3{0.9, 0.9, 0.9}, .diffuseIntensity = 48.0});
 
-        auto lvHandle2 = registry->Add<Entity>({.position = Vector3{5.1f, 3.7f, 1.6f}, .tag = "Point Light 2"});
-        registry->Add<PointLight>(lvHandle2, PointLightInfo{.ambient = Vector3{1.0, 1.0, 1.0}, .diffuseColor = Vector3{1.0, 1.0, 1.0}, .diffuseIntensity = 54.0});
+        auto light2 = registry->Add<Entity>({.position = Vector3{5.1f, 3.7f, 1.6f}, .tag = "Point Light 2"});
+        light2.add<PointLight>(PointLightInfo{.ambient = Vector3{1.0, 1.0, 1.0}, .diffuseColor = Vector3{1.0, 1.0, 1.0}, .diffuseIntensity = 54.0});
 
         // Objects
         prefab::Create(registry,
@@ -97,12 +97,12 @@ namespace nc::sample
         };
 
         auto coinSpawnerHandle = registry->Add<Entity>({.tag = "Coin Spawner"});
-        auto coinSpawner = registry->Add<Spawner>(coinSpawnerHandle, prefab::Resource::Coin, behavior, spawnExtension);
+        auto coinSpawner = coinSpawnerHandle.add<Spawner>(prefab::Resource::Coin, behavior, spawnExtension);
         coinSpawner->Spawn(registry, 20);
 
         behavior.layer = TokenLayer;
         auto tokenSpawnerHandle = registry->Add<Entity>({.tag = "Token Spawner"});
-        auto tokenSpawner = registry->Add<Spawner>(tokenSpawnerHandle, prefab::Resource::Token, behavior, spawnExtension);
+        auto tokenSpawner = tokenSpawnerHandle.add<Spawner>(prefab::Resource::Token, behavior, spawnExtension);
         tokenSpawner->Spawn(registry, 20);
     }
 

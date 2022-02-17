@@ -178,25 +178,25 @@ namespace nc::sample
         {
             case ColliderType::Box:
             {
-                m_currentObject = prefab::Create(registry, prefab::Resource::CubeBlue, {.tag = "Movable Object"});
+                m_currentObject = prefab::Create(registry, prefab::Resource::CubeBlue, {.tag = "Movable Object"}).entity();
                 registry->Add<Collider>(m_currentObject, BoxProperties{}, false);
                 break;
             }
             case ColliderType::Sphere:
             {
-                m_currentObject = prefab::Create(registry, prefab::Resource::SphereBlue, {.tag = "Movable Object"});
+                m_currentObject = prefab::Create(registry, prefab::Resource::SphereBlue, {.tag = "Movable Object"}).entity();
                 registry->Add<Collider>(m_currentObject, SphereProperties{}, false);
                 break;
             }
             case ColliderType::Capsule:
             {
-                m_currentObject = prefab::Create(registry, prefab::Resource::CapsuleBlue, {.tag = "Movable Object"});
+                m_currentObject = prefab::Create(registry, prefab::Resource::CapsuleBlue, {.tag = "Movable Object"}).entity();
                 registry->Add<Collider>(m_currentObject, CapsuleProperties{}, false);
                 break;
             }
             case ColliderType::Hull:
             {
-                m_currentObject = prefab::Create(registry, prefab::Resource::DiscBlue, {.tag = "Movable Object"});
+                m_currentObject = prefab::Create(registry, prefab::Resource::DiscBlue, {.tag = "Movable Object"}).entity();
                 registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "coin.nca"}, false);
                 break;
             }

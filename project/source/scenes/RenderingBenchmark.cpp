@@ -51,7 +51,9 @@ namespace nc::sample
         m_sceneHelper.Setup(engine, false, false, Widget);
 
         // Camera
-        auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
+        auto cameraHandle = registry->Add<Entity>({.tag = "Main Camera"});
+        auto camera = cameraHandle.add<SceneNavigationCamera>(0.25f, 0.005f, 1.4f);
+        cameraHandle.add<FrameLogic>(InvokeFreeComponent<SceneNavigationCamera>{});
         engine->MainCamera()->Set(camera);
 
         // Spawner
@@ -63,24 +65,22 @@ namespace nc::sample
         };
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
-        auto spawner = registry->Add<Spawner>(spawnerHandle, prefab::Resource::Cube, spawnBehavior);
-        registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
+        auto spawner = spawnerHandle.add<Spawner>(prefab::Resource::Cube, spawnBehavior);
+        spawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
+        GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, spawner);
+        SpawnCallback = std::bind_front(&Spawner::StageSpawn, spawner);
+        DestroyCallback = std::bind_front(&Spawner::StageDestroy, spawner);
 
-        auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FPSTracker"});
-        auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-        registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
+        auto fpsHandle = registry->Add<Entity>({.tag = "FPSTracker"});
+        auto fpsTracker = fpsHandle.add<FPSTracker>();
+        fpsHandle.add<FrameLogic>(InvokeFreeComponent<FPSTracker>{});
+        GetFPSCallback = std::bind_front(&FPSTracker::GetFPS, fpsTracker);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.3f, 0.3f, 0.3f),
-                                                           .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
-                                                           .diffuseIntensity = 1200.0f});
-
-        // UI Callbacks
-        GetObjectCountCallback = std::bind(&Spawner::GetObjectCount, spawner);
-        SpawnCallback = std::bind(&Spawner::StageSpawn, spawner, std::placeholders::_1);
-        DestroyCallback = std::bind(&Spawner::StageDestroy, spawner, std::placeholders::_1);
-        GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
+        auto lightHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light"});
+        lightHandle.add<PointLight>(PointLightInfo{.ambient = Vector3(0.3f, 0.3f, 0.3f),
+                                                   .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
+                                                   .diffuseIntensity = 1200.0f});
     }
 
     void RenderingBenchmark::Unload()

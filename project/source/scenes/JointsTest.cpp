@@ -17,146 +17,146 @@ namespace nc::sample
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
-        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
+        auto camera = cameraHandle.add<SceneNavigationCamera>(0.05f, 0.005f, 1.4f);
+        cameraHandle.add<FrameLogic>(InvokeFreeComponent<SceneNavigationCamera>{});
         engine->MainCamera()->Set(camera);
 
         // Lights
-        auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
-                                                           .ambient = Vector3{0.443f, 0.412f, 0.412f},
-                                                           .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .diffuseIntensity = 600});
+        auto lightHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light"});
+        lightHandle.add<PointLight>(PointLightInfo{.pos = Vector3::Zero(),
+                                                   .ambient = Vector3{0.443f, 0.412f, 0.412f},
+                                                   .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
+                                                   .diffuseIntensity = 600});
 
         // Movable object
         {
             auto head = prefab::Create(registry, prefab::Resource::CubeGreen, {.tag = "Movable Object"});
-            registry->Add<Collider>(head, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(head, PhysicsProperties{.mass = 5.0f});
-            registry->Add<FixedLogic>(head, ForceBasedMovement);
+            head.add<Collider>(BoxProperties{}, false);
+            head.add<PhysicsBody>(PhysicsProperties{.mass = 5.0f});
+            head.add<FixedLogic>(ForceBasedMovement);
 
             auto segment1 = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, -0.9f}, .scale = Vector3::Splat(0.8f)});
-            registry->Add<Collider>(segment1, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(segment1, PhysicsProperties{.mass = 3.0f});
+            segment1.add<Collider>(BoxProperties{}, false);
+            segment1.add<PhysicsBody>(PhysicsProperties{.mass = 3.0f});
 
             auto segment2 = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, -1.6f}, .scale = Vector3::Splat(0.6f)});
-            registry->Add<Collider>(segment2, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(segment2, PhysicsProperties{.mass = 1.0f});
+            segment2.add<Collider>(BoxProperties{}, false);
+            segment2.add<PhysicsBody>(PhysicsProperties{.mass = 1.0f});
 
             auto segment3 = prefab::Create(registry, prefab::Resource::CubeGreen, {.position = Vector3{0.0f, 0.0f, -2.1f}, .scale = Vector3::Splat(0.4f)});
-            registry->Add<Collider>(segment3, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(segment3, PhysicsProperties{.mass = 0.2f});
+            segment3.add<Collider>(BoxProperties{}, false);
+            segment3.add<PhysicsBody>(PhysicsProperties{.mass = 0.2f});
 
             float bias = 0.2f;
             float softness = 0.1f;
 
-            physics->AddJoint(head, segment1, Vector3{0.0f, 0.0f, -0.6f}, Vector3{0.0f, 0.0f, 0.5f}, bias, softness);
-            physics->AddJoint(segment1, segment2, Vector3{0.0f, 0.0f, -0.5f}, Vector3{0.0f, 0.0f, 0.4f}, bias, softness);
-            physics->AddJoint(segment2, segment3, Vector3{0.0f, 0.0f, -0.4f}, Vector3{0.0f, 0.0f, 0.3f}, bias, softness);
+            physics->AddJoint(head.entity(), segment1.entity(), Vector3{0.0f, 0.0f, -0.6f}, Vector3{0.0f, 0.0f, 0.5f}, bias, softness);
+            physics->AddJoint(segment1.entity(), segment2.entity(), Vector3{0.0f, 0.0f, -0.5f}, Vector3{0.0f, 0.0f, 0.4f}, bias, softness);
+            physics->AddJoint(segment2.entity(), segment3.entity(), Vector3{0.0f, 0.0f, -0.4f}, Vector3{0.0f, 0.0f, 0.3f}, bias, softness);
         }
 
         // Ground
         auto platform1 = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{0.0f, -1.0f, 0.0f}, .scale = Vector3{30.0f, 1.0f, 30.0f}, .tag = "Platform1"});
-        registry->Add<Collider>(platform1, BoxProperties{}, false);
-        registry->Add<PhysicsBody>(platform1, PhysicsProperties{.mass = 0.0f, .isKinematic = true});
+        platform1.add<Collider>(BoxProperties{}, false);
+        platform1.add<PhysicsBody>(PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
         auto platform2 = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{8.0f, -1.0f, 30.0f}, .scale = Vector3{10.0f, 1.0f, 10.0f}, .tag = "Platform2"});
-        registry->Add<Collider>(platform2, BoxProperties{}, false);
-        registry->Add<PhysicsBody>(platform2, PhysicsProperties{.mass = 0.0f, .isKinematic = true});
+        platform2.add<Collider>(BoxProperties{}, false);
+        platform2.add<PhysicsBody>(PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
         // Ramp
         {
             auto ramp = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{9.0f, 2.6f, 6.0f}, .scale = Vector3::Splat(3.0f), .flags = Entity::Flags::Static});
-            registry->Add<ConcaveCollider>(ramp, "ramp.nca");
+            ramp.add<ConcaveCollider>("ramp.nca");
         }
 
         // Hinge
         {
             auto anchor = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 3.25f, 10.0f}, .scale = Vector3{3.0f, 0.5f, 0.5f}});
-            registry->Add<Collider>(anchor, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(anchor, PhysicsProperties{.isKinematic = true});
+            anchor.add<Collider>(BoxProperties{}, false);
+            anchor.add<PhysicsBody>(PhysicsProperties{.isKinematic = true});
 
             auto panel = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, 1.5f, 10.0f}, .scale = Vector3{3.0f, 3.0f, 0.1f}});
-            registry->Add<Collider>(panel, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(panel, PhysicsProperties{});
+            panel.add<Collider>(BoxProperties{}, false);
+            panel.add<PhysicsBody>(PhysicsProperties{});
 
-            physics->AddJoint(anchor, panel, Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
-            physics->AddJoint(anchor, panel, Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
+            physics->AddJoint(anchor.entity(), panel.entity(), Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
+            physics->AddJoint(anchor.entity(), panel.entity(), Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
         }
 
         // Balance platform
         {
             auto base = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{10.0f, -0.75f, -10.0f}, .scale = Vector3::Splat(2.0f)});
-            registry->Add<Collider>(base, SphereProperties{}, false);
-            registry->Add<PhysicsBody>(base, PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
+            base.add<Collider>(SphereProperties{}, false);
+            base.add<PhysicsBody>(PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
 
             auto balancePlatform = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{10.0f, -0.4f, -10.0f}, .scale = Vector3{6.0f, 0.1f, 6.0f}});
-            registry->Add<Collider>(balancePlatform, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(balancePlatform, PhysicsProperties{.mass = 5.0f});
+            balancePlatform.add<Collider>(BoxProperties{}, false);
+            balancePlatform.add<PhysicsBody>(PhysicsProperties{.mass = 5.0f});
 
-            physics->AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
+            physics->AddJoint(base.entity(), balancePlatform.entity(), Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
         }
 
         // Swinging bars
         {
             auto pole = prefab::Create(registry, prefab::Resource::CubeBlue, {.position = Vector3{-10.0f, 1.0f, -10.0f}, .scale = Vector3{0.05f, 4.0f, 0.05f}});
-            registry->Add<Collider>(pole, BoxProperties{}, true);
-            registry->Add<PhysicsBody>(pole, PhysicsProperties{.isKinematic = true});
+            pole.add<Collider>(BoxProperties{}, true);
+            pole.add<PhysicsBody>(PhysicsProperties{.isKinematic = true});
 
             auto bar1 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, -0.5f, -10.0f}, .scale = Vector3{3.0f, 1.0f, 0.1f}});
-            registry->Add<Collider>(bar1, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(bar1, PhysicsProperties{}, Vector3::One(), Vector3::Up());
+            bar1.add<Collider>(BoxProperties{}, false);
+            bar1.add<PhysicsBody>(PhysicsProperties{}, Vector3::One(), Vector3::Up());
 
             auto bar2 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{-10.0f, 1.0f, -10.0f}, .scale = Vector3{3.0f, 1.0f, 0.1f}});
-            registry->Add<Collider>(bar2, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(bar2, PhysicsProperties{}, Vector3::One(), Vector3::Up());
+            bar2.add<Collider>(BoxProperties{}, false);
+            bar2.add<PhysicsBody>(PhysicsProperties{}, Vector3::One(), Vector3::Up());
 
-            physics->AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
-            physics->AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
+            physics->AddJoint(pole.entity(), bar1.entity(), Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
+            physics->AddJoint(pole.entity(), bar2.entity(), Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
         }
 
         // Bridge
         {
             auto plank1 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{8.0f, -1.0f, 16.0f}, .scale = Vector3{8.0f, 0.8f, 1.8f}, .tag = "Plank"});
-            registry->Add<Collider>(plank1, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(plank1, PhysicsProperties{});
+            plank1.add<Collider>(BoxProperties{}, false);
+            plank1.add<PhysicsBody>(PhysicsProperties{});
 
             auto plank2 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{8.0f, -1.0f, 18.0f}, .scale = Vector3{8.0f, 0.8f, 1.8f}, .tag = "Plank"});
-            registry->Add<Collider>(plank2, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(plank2, PhysicsProperties{});
+            plank2.add<Collider>(BoxProperties{}, false);
+            plank2.add<PhysicsBody>(PhysicsProperties{});
 
             auto plank3 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{8.0f, -1.0f, 20.0f}, .scale = Vector3{8.0f, 0.8f, 1.8f}, .tag = "Plank"});
-            registry->Add<Collider>(plank3, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(plank3, PhysicsProperties{});
+            plank3.add<Collider>(BoxProperties{}, false);
+            plank3.add<PhysicsBody>(PhysicsProperties{});
 
             auto plank4 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{8.0f, -1.0f, 22.0f}, .scale = Vector3{8.0f, 0.8f, 1.8f}, .tag = "Plank"});
-            registry->Add<Collider>(plank4, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(plank4, PhysicsProperties{});
+            plank4.add<Collider>(BoxProperties{}, false);
+            plank4.add<PhysicsBody>(PhysicsProperties{});
 
             auto plank5 = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{8.0f, -1.0f, 24.0f}, .scale = Vector3{8.0f, 0.8f, 1.8f}, .tag = "Plank"});
-            registry->Add<Collider>(plank5, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(plank5, PhysicsProperties{});
+            plank5.add<Collider>(BoxProperties{}, false);
+            plank5.add<PhysicsBody>(PhysicsProperties{});
 
             float bias = 0.2f;
             float softness = 0.5f;
 
-            physics->AddJoint(platform1, plank1, Vector3{5.0f, 0.0f, 15.1f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics->AddJoint(platform1, plank1, Vector3{11.0f, 0.0f, 15.1f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(platform1.entity(), plank1.entity(), Vector3{5.0f, 0.0f, 15.1f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(platform1.entity(), plank1.entity(), Vector3{11.0f, 0.0f, 15.1f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics->AddJoint(plank1, plank2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics->AddJoint(plank1, plank2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank1.entity(), plank2.entity(), Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank1.entity(), plank2.entity(), Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics->AddJoint(plank2, plank3, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics->AddJoint(plank2, plank3, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank2.entity(), plank3.entity(), Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank2.entity(), plank3.entity(), Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics->AddJoint(plank3, plank4, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics->AddJoint(plank3, plank4, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank3.entity(), plank4.entity(), Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank3.entity(), plank4.entity(), Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics->AddJoint(plank4, plank5, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-            physics->AddJoint(plank4, plank5, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank4.entity(), plank5.entity(), Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
+            physics->AddJoint(plank4.entity(), plank5.entity(), Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
 
-            physics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
-            physics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
+            physics->AddJoint(plank5.entity(), platform2.entity(), Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
+            physics->AddJoint(plank5.entity(), platform2.entity(), Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
         }
     }
 

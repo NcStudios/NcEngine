@@ -6,6 +6,7 @@
 #include "component/FreeComponentGroup.h"
 #include "component/Tag.h"
 #include "component/Transform.h"
+#include "handle.h"
 
 namespace nc
 {
@@ -32,7 +33,7 @@ namespace nc
 
             /** Entity Functions */
             template<std::same_as<Entity> T>
-            auto Add(EntityInfo info) -> Entity;
+            auto Add(EntityInfo info) -> handle;
 
             template<std::same_as<Entity> T>
             void Remove(Entity entity);
@@ -130,13 +131,13 @@ namespace nc
     }
 
     template<std::same_as<Entity> T>
-    auto Registry::Add(EntityInfo info) -> Entity
+    auto Registry::Add(EntityInfo info) -> handle
     {
-        auto handle = m_entities.add(info);
-        Add<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
-        Add<FreeComponentGroup>(handle);
-        Add<Tag>(handle, std::move(info.tag));
-        return handle;
+        auto ent = m_entities.add(info);
+        Add<Transform>(ent, info.position, info.rotation, info.scale, info.parent);
+        Add<FreeComponentGroup>(ent);
+        Add<Tag>(ent, std::move(info.tag));
+        return handle{this, ent};
     }
 
     template<std::derived_from<ComponentBase> T, class... Args>

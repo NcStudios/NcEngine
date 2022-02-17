@@ -46,6 +46,29 @@ target_link_libraries(Entity_unit_tests
 
 add_test(Entity_unit_tests Entity_unit_tests)
 
+### Handle Tests ###
+add_executable(handle_unit_tests
+    ${PROJECT_SOURCE_DIR}/unit/ecs/handle_unit_tests.cpp
+)
+
+target_include_directories(handle_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
+)
+
+target_compile_options(handle_unit_tests
+    PUBLIC
+        ${WARNING_FLAGS}
+)
+
+target_link_libraries(handle_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(handle_unit_tests handle_unit_tests)
+
 ### Registry Tests ###
 add_executable(Registry_unit_tests
     ${PROJECT_SOURCE_DIR}/unit/ecs/Registry_unit_tests.cpp

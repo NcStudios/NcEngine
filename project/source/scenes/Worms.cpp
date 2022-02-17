@@ -16,8 +16,8 @@ namespace nc::sample
         prefab::InitializeResources();
 
         // Camera
-        auto cameraEntity = registry->Add<Entity>({.tag = "Main Camera"});
-        auto camera = registry->Add<Camera>(cameraEntity);
+        auto cameraHandle = registry->Add<Entity>({.tag = "Main Camera"});
+        auto camera = cameraHandle.add<Camera>();
         engine->MainCamera()->Set(camera);
 
         // Window
@@ -33,8 +33,8 @@ namespace nc::sample
         };
 
         auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});
-        registry->Add<PointLight>(lightHandle, lightOneProperties);
-        registry->Add<FrameLogic>(lightHandle, InvokeFreeComponent<MouseFollower>{lightHandle, registry});
+        lightHandle.add<PointLight>(lightOneProperties);
+        lightHandle.add<FrameLogic>(InvokeFreeComponent<MouseFollower>{lightHandle});
 
         // Worm Spawner
         SpawnBehavior spawnBehavior
@@ -47,8 +47,8 @@ namespace nc::sample
         };
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
-        auto spawner = registry->Add<Spawner>(spawnerHandle, prefab::Resource::Worm, spawnBehavior);
-        registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
+        auto spawner = spawnerHandle.add<Spawner>(prefab::Resource::Worm, spawnBehavior);
+        spawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
         spawner->Spawn(registry, 40u);
     }
 

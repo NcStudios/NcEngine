@@ -255,11 +255,9 @@ namespace nc
 
     void Engine::SetBindings()
     {
-        using namespace std::placeholders;
-
-        m_window.BindGraphicsOnResizeCallback(std::bind(&graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
-        m_window.BindGraphicsSetClearColorCallback(std::bind(&graphics::Graphics::SetClearColor, &m_graphics, _1));
-        m_window.BindUICallback(std::bind(&ui::UISystemImpl::WndProc, &m_uiSystem, _1, _2, _3, _4));
-        m_window.BindEngineDisableRunningCallback(std::bind(&Engine::DisableRunningFlag, this));
+        m_window.BindGraphicsOnResizeCallback(std::bind_front(&graphics::Graphics::OnResize, &m_graphics));
+        m_window.BindGraphicsSetClearColorCallback(std::bind_front(&graphics::Graphics::SetClearColor, &m_graphics));
+        m_window.BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_uiSystem));
+        m_window.BindEngineDisableRunningCallback(std::bind_front(&Engine::DisableRunningFlag, this));
     }
 } // end namespace nc::engine

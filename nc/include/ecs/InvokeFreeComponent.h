@@ -12,10 +12,10 @@ namespace nc
         InvokeFreeComponent() = default;
 
         /** The user-defined constructor attaches an instance of the component to be invoked. */
-        template<class ... Args>
-        InvokeFreeComponent(Entity self, Registry* registry, Args&&... args)
+        template<class... Args>
+        InvokeFreeComponent(handle h, Args&&... args)
         {
-            registry->Add<T>(self, std::forward<Args>(args)...);
+            h.add<T>(std::forward<Args>(args)...);
         }
 
         /** FrameLogic call operator */

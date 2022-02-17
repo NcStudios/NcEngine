@@ -95,11 +95,11 @@ namespace nc::sample
             });
 
             if(m_applyConstantVelocity)
-                registry->Add<ConstantTranslation>(handle, m_generator.Velocity());
+                handle.add<ConstantTranslation>(m_generator.Velocity());
             if(m_applyConstantRotation)
-                registry->Add<ConstantRotation>(handle, m_generator.RotationAxis(), m_generator.Theta());
+                handle.add<ConstantRotation>(m_generator.RotationAxis(), m_generator.Theta());
 
-            registry->Add<FrameLogic>(handle, [](Entity self, Registry* registry, float dt)
+            handle.add<FrameLogic>([](Entity self, Registry* registry, float dt)
             {
                 if(auto* translation = registry->Get<ConstantTranslation>(self))
                     translation->Run(self, registry, dt);
@@ -108,8 +108,9 @@ namespace nc::sample
             });
 
             if(m_extension)
-                m_extension(handle);
-            return handle;
+                m_extension(handle.entity());
+
+            return handle.entity();
         });
     }
 
