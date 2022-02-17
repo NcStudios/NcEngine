@@ -25,6 +25,8 @@ namespace nc::detail
 
             auto SparseArray() noexcept -> std::vector<index_type>& { return sparseArray; }
             auto EntityPool() noexcept -> std::vector<Entity>& { return entityPool; }
+            auto SparseArray() const noexcept -> const std::vector<index_type>& { return sparseArray; }
+            auto EntityPool() const noexcept -> const std::vector<Entity>& { return entityPool; }
             auto size() const noexcept { return entityPool.size(); }
 
             virtual ~PerComponentStorageBase() = default;
@@ -67,6 +69,7 @@ namespace nc::detail
             PerComponentStorage& operator=(const PerComponentStorage&) = delete;
 
             auto ComponentPool() noexcept -> std::vector<T>& { return componentPool; }
+            auto ComponentPool() const noexcept -> const std::vector<T>& { return componentPool; }
 
             template<class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
@@ -76,8 +79,6 @@ namespace nc::detail
             bool Contains(Entity entity) const;
             auto Get(Entity entity) -> T*;
             auto Get(Entity entity) const -> const T*;
-            auto ViewAll() -> std::span<T>;
-            auto ViewAll() const -> std::span<const T>;
 
             template<std::predicate<const T&, const T&> Predicate>
             void Sort(Predicate&& comparesLessThan);
@@ -192,18 +193,6 @@ namespace nc::detail
         });
 
         return pos == stagingPool.end() ? nullptr : &pos->component;
-    }
-
-    template<PooledComponent T>
-    auto PerComponentStorage<T>::ViewAll() -> std::span<T>
-    {
-        return std::span<T>{componentPool};
-    }
-
-    template<PooledComponent T>
-    auto PerComponentStorage<T>::ViewAll() const -> std::span<const T>
-    {
-        return std::span<const T>{componentPool};
     }
 
     template<PooledComponent T>

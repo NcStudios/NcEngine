@@ -58,10 +58,10 @@ namespace nc::detail
                 m_handleManager.Reset(m_persistent);
             }
 
-            auto get_staged_removals() const -> const std::vector<Entity>& { return m_toRemove; }
-
-            auto view() -> std::span<Entity> { return m_entities; }
-            auto view() const -> std::span<const Entity> { return m_entities; }
+            auto pool() noexcept -> std::vector<Entity>& { return m_entities; }
+            auto pool() const noexcept -> const std::vector<Entity>& { return m_entities; }
+            auto staged_removals() const -> const std::vector<Entity>& { return m_toRemove; }
+            auto size() const noexcept -> size_t { return m_entities.size(); }
 
             void commit_staged_changes()
             {

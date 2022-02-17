@@ -3,6 +3,7 @@
 #include "ecs/Registry.h"
 #include "ecs/EntityComponentSystem.h"
 #include "ecs/component/All.h"
+#include "ecs/view.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls
@@ -44,7 +45,7 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityList", {0, sceneGraphHeight / 2}, true))
             {
-                for(auto entity : registry->ViewAll<Entity>())
+                for(auto entity : view<Entity>{registry})
                 {
                     auto* transform = registry->Get<Transform>(entity);
                     auto* tag = registry->Get<Tag>(entity);
@@ -222,7 +223,7 @@ namespace nc::ui::editor::controls
     }
 
     template<class T>
-    void ComponentSystemHeader(const char* name, std::span<T> components)
+    void ComponentSystemHeader(const char* name, view<T> components)
     {
         constexpr auto size = static_cast<unsigned>(sizeof(T));
 
@@ -247,13 +248,13 @@ namespace nc::ui::editor::controls
     /** @todo this will eventually need to be generic */
     void ComponentSystems(Registry* registry)
     {
-        ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
-        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());
-        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
-        ComponentSystemHeader<PhysicsBody>("Physics Body", registry->ViewAll<PhysicsBody>());
-        ComponentSystemHeader<Transform>("Transform", registry->ViewAll<Transform>());
-        ComponentSystemHeader<nc::MeshRenderer>("Mesh Renderer", registry->ViewAll<MeshRenderer>());
-        ComponentSystemHeader<nc::PointLight>("Point Light", registry->ViewAll<PointLight>());
+        ComponentSystemHeader<Collider>("Collider", view<Collider>(registry));
+        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", view<NetworkDispatcher>(registry));
+        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", view<ParticleEmitter>(registry));
+        ComponentSystemHeader<PhysicsBody>("Physics Body", view<PhysicsBody>(registry));
+        ComponentSystemHeader<Transform>("Transform", view<Transform>(registry));
+        ComponentSystemHeader<MeshRenderer>("Mesh Renderer", view<MeshRenderer>(registry));
+        ComponentSystemHeader<PointLight>("Point Light", view<PointLight>(registry));
     }
 
 } // end namespace nc::ui::editor

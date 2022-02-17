@@ -14,6 +14,10 @@ namespace nc
     /** @deprecated Use NcEngine::Registry() instead. */
     auto ActiveRegistry() -> Registry*;
 
+    /** @brief Requirements for views over the registry. */
+    template<class T>
+    concept viewable = PooledComponent<T> || std::same_as<T, Entity>;
+
     class Registry
     {
         using index_type = Entity::index_type;
@@ -36,9 +40,6 @@ namespace nc
             template<std::same_as<Entity> T>
             bool Contains(Entity entity) const;
 
-            template<std::same_as<Entity> T>
-            auto ViewAll() -> std::span<Entity>;
-
             /** Component Functions */
             template<std::derived_from<ComponentBase> T, class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
@@ -56,12 +57,6 @@ namespace nc
             auto Get(Entity entity) const -> const T*;
 
             /** PooledComponent Specific Functions */
-            template<PooledComponent T>
-            auto ViewAll() -> std::span<T>;
-
-            template<PooledComponent T>
-            auto ViewAll() const -> std::span<const T>;
-
             template<PooledComponent T, PooledComponent U>
             auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
 
@@ -80,13 +75,19 @@ namespace nc
             template<PooledComponent T>
             void RegisterOnRemoveCallback(detail::SystemCallbacks<T>::on_remove_type func);
 
+            /** Engine Functions */
             template<PooledComponent T>
             auto StorageFor() -> detail::PerComponentStorage<T>*;
 
             template<PooledComponent T>
             auto StorageFor() const -> const detail::PerComponentStorage<T>*;
 
-            /** Engine Functions */
+            template<std::same_as<Entity> T>
+            auto StorageFor() -> detail::entity_storage*;
+
+            template<std::same_as<Entity> T>
+            auto StorageFor() const -> const detail::entity_storage*;
+
             void CommitStagedChanges();
             void VerifyCallbacks();
             void Clear();
@@ -114,6 +115,18 @@ namespace nc
     {
         IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
+    }
+
+    template<std::same_as<Entity> T>
+    auto Registry::StorageFor() -> detail::entity_storage*
+    {
+        return &m_entities;
+    }
+
+    template<std::same_as<Entity> T>
+    auto Registry::StorageFor() const -> const detail::entity_storage*
+    {
+        return &m_entities;
     }
 
     template<std::same_as<Entity> T>
@@ -218,24 +231,6 @@ namespace nc
         }
     }
 
-    template<std::same_as<Entity> T>
-    auto Registry::ViewAll() -> std::span<Entity>
-    {
-        return m_entities.view();
-    }
-
-    template<PooledComponent T>
-    auto Registry::ViewAll() -> std::span<T>
-    {
-        return StorageFor<T>()->ViewAll();
-    }
-
-    template<PooledComponent T>
-    auto Registry::ViewAll() const -> std::span<const T>
-    {
-        return StorageFor<T>()->ViewAll();
-    }
-
     template<PooledComponent T, PooledComponent U>
     auto Registry::ViewGroup() -> std::pair<std::span<T>, std::span<U>>
     {
@@ -328,7 +323,7 @@ namespace nc
 
     inline void Registry::CommitStagedChanges()
     {
-        const auto& toRemove = m_entities.get_staged_removals();
+        const auto& toRemove = m_entities.staged_removals();
         for(auto& storage : m_registeredStorage)
             storage->CommitStagedComponents(toRemove);
 

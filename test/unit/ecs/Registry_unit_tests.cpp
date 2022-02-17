@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "ecs/Registry.h"
+#include "ecs/view.h"
 
 using namespace nc;
 
@@ -106,10 +107,10 @@ TEST_F(Registry_unit_tests, RemoveEntity_EntityExists_EntityRemovedFromActiveLis
 {
     auto handle = registry.Add<Entity>(TestInfo);
     registry.CommitStagedChanges();
-    auto entities = registry.ViewAll<Entity>();
+    auto entities = view<Entity>{&registry};
     EXPECT_EQ(entities.size(), 1u);
     registry.Remove<Entity>(handle);
-    entities = registry.ViewAll<Entity>();
+    entities = view<Entity>{&registry};
     EXPECT_EQ(entities.size(), 0u);
 }
 
@@ -439,7 +440,7 @@ TEST_F(Registry_unit_tests, Sort_RandomInput_SortsData)
     registry.CommitStagedChanges();
     registry.Sort<Fake1>(std::less<Fake1>());
 
-    auto fakes = registry.ViewAll<Fake1>();
+    const auto& fakes = registry.StorageFor<Fake1>()->ComponentPool();
     ASSERT_EQ(fakes.size(), 6u);
     EXPECT_EQ(fakes[0].value, 1);
     EXPECT_EQ(fakes[1].value, 3);
@@ -463,7 +464,7 @@ TEST_F(Registry_unit_tests, Sort_SortedInput_PreservesOrder)
     registry.CommitStagedChanges();
     registry.Sort<Fake1>(std::less<Fake1>());
 
-    auto fakes = registry.ViewAll<Fake1>();
+    const auto& fakes = registry.StorageFor<Fake1>()->ComponentPool();
     ASSERT_EQ(fakes.size(), 4u);
     EXPECT_EQ(fakes[0].value, 1);
     EXPECT_EQ(fakes[0].ParentEntity().Index(), 0);

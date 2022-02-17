@@ -181,6 +181,23 @@ TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
     }
 }
 
+TEST_F(view_unit_tests, Single_ConstRegistry_ConstructsReadOnlyView)
+{
+    auto e1 = registry.Add<Entity>(EntityInfo{});
+    registry.Add<Fake1>(e1, 0);
+    registry.CommitStagedChanges();
+    const auto* constRegistry = &registry;
+    auto v = view<const Fake1>{constRegistry};
+    EXPECT_EQ(v.size(), 1);
+}
+
+TEST_F(view_unit_tests, Single_NonConstRegistryConstType_ReturnsReadOnlyValues)
+{
+    using expected_t = const Fake1&;
+    using actual_t = decltype(*view<const Fake1>{&registry}.begin());
+    EXPECT_TRUE((std::is_same_v<expected_t, actual_t>));
+}
+
 TEST_F(view_unit_tests, Multi_SizeUpperBound)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
@@ -228,11 +245,11 @@ TEST_F(view_unit_tests, Multi_VisitsEach)
     const auto expectedFake2Value = 20;
     const auto expectedFake3Value = 30;
 
-    for(auto entity : multi_view<Fake1, Fake2, Fake3>{&registry})
+    for(auto& [f1, f2, f3] : multi_view<Fake1, Fake2, Fake3>{&registry})
     {
-        registry.Get<Fake1>(entity)->value = expectedFake1Value;
-        registry.Get<Fake2>(entity)->value = expectedFake2Value;
-        registry.Get<Fake3>(entity)->value = expectedFake3Value;
+        f1->value = expectedFake1Value;
+        f2->value = expectedFake2Value;
+        f3->value = expectedFake3Value;
     }
 
     EXPECT_EQ(registry.Get<Fake1>(e2)->value, expectedFake1Value);
@@ -242,7 +259,6 @@ TEST_F(view_unit_tests, Multi_VisitsEach)
     EXPECT_EQ(registry.Get<Fake2>(e4)->value, expectedFake2Value);
     EXPECT_EQ(registry.Get<Fake3>(e4)->value, expectedFake3Value);
 }
-
 
 int main(int argc, char ** argv)
 {
