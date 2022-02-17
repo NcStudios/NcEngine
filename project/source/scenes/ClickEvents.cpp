@@ -85,8 +85,10 @@ namespace nc::sample
         // Coin Spawner
         SpawnBehavior behavior
         {
-            .rotationOffset = Vector3{std::numbers::pi_v<float> / 2.0f, 0.0f, 0.0f},
-            .positionRandomRange = Vector3{4.2f, 0.0f, 2.8f},
+            .minPosition = Vector3{-4.2f, 0.0f, -2.8f},
+            .maxPosition = Vector3{4.2f, 0.0f, 2.8f},
+            .minRotation = Vector3::Zero(),
+            .maxRotation = Vector3{std::numbers::pi_v<float> * 2.0f, 0.0f, 0.0f},
             .layer = CoinLayer
         };
 
@@ -97,12 +99,12 @@ namespace nc::sample
         };
 
         auto coinSpawnerHandle = registry->Add<Entity>({.tag = "Coin Spawner"});
-        auto coinSpawner = coinSpawnerHandle.add<Spawner>(prefab::Resource::Coin, behavior, spawnExtension);
+        auto coinSpawner = coinSpawnerHandle.add<Spawner>(engine->Random(), prefab::Resource::Coin, behavior, spawnExtension);
         coinSpawner->Spawn(registry, 20);
 
         behavior.layer = TokenLayer;
         auto tokenSpawnerHandle = registry->Add<Entity>({.tag = "Token Spawner"});
-        auto tokenSpawner = tokenSpawnerHandle.add<Spawner>(prefab::Resource::Token, behavior, spawnExtension);
+        auto tokenSpawner = tokenSpawnerHandle.add<Spawner>(engine->Random(), prefab::Resource::Token, behavior, spawnExtension);
         tokenSpawner->Spawn(registry, 20);
     }
 

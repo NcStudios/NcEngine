@@ -23,6 +23,29 @@ target_link_libraries(Math_unit_tests
 
 add_test(Math_unit_tests Math_unit_tests)
 
+### Random Tests ###
+add_executable(Random_unit_tests
+    ${PROJECT_SOURCE_DIR}/unit/math/Random_unit_tests.cpp
+)
+
+target_include_directories(Random_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
+)
+
+target_compile_options(Random_unit_tests
+    PUBLIC
+        ${WARNING_FLAGS}
+)
+
+target_link_libraries(Random_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(Random_unit_tests Random_unit_tests)
+
 ### Vector Tests ###
 add_executable(Vector_unit_tests
     ${PROJECT_SOURCE_DIR}/unit/math/Vector_unit_tests.cpp

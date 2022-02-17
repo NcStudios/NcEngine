@@ -30,6 +30,7 @@ namespace nc
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_environment{},
+          m_random{},
           m_uiSystem{m_window.GetHWND(), &m_graphics},
           m_taskExecutor{8u}, // @todo probably add to config
           m_tasks{},
@@ -83,6 +84,7 @@ namespace nc
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
     auto Engine::Environment() noexcept -> nc::Environment* { return &m_environment;      }
+    auto Engine::Random()      noexcept -> nc::Random*      { return &m_random;           }
     auto Engine::Registry()    noexcept -> nc::Registry*    { return m_ecs.GetRegistry(); }
     auto Engine::MainCamera()  noexcept -> nc::MainCamera*  { return &m_mainCamera;       }
     auto Engine::Physics()     noexcept -> PhysicsSystem*   { return &m_physicsSystem;    }

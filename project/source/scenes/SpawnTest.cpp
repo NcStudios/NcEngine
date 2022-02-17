@@ -1,7 +1,7 @@
 #include "SpawnTest.h"
 #include "NcEngine.h"
 #include "ecs/component/PhysicsBody.h"
-#include "random/Random.h"
+#include "math/Random.h"
 #include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
@@ -97,9 +97,10 @@ namespace nc::sample
         // Fixed interval spawner for moving cubes
         SpawnBehavior dynamicCubeBehavior
         {
-            .positionOffset = Vector3{0.0f, 35.0f, 0.0f},
-            .positionRandomRange = Vector3{70.0f, 15.0f, 70.0f},
-            .rotationRandomRange = Vector3::Splat(std::numbers::pi_v<float> / 2.0f),
+            .minPosition = Vector3{-70.0f, 20.0f, -70.0f},
+            .maxPosition = Vector3{70.0f, 50.0f, 70.0f},
+            .minRotation = Vector3::Zero(),
+            .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         };
 
         auto dynamicCubeExtension = [registry](Entity handle)
@@ -109,7 +110,7 @@ namespace nc::sample
         };
 
         auto spawnerHandle = registry->Add<Entity>({});
-        auto spawner = spawnerHandle.add<Spawner>(prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
+        auto spawner = spawnerHandle.add<Spawner>(engine->Random(), prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
         spawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
         SpawnFunc = std::bind_front(&Spawner::StageSpawn, spawner);
         DestroyFunc = std::bind_front(&Spawner::StageDestroy, spawner);

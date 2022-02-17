@@ -181,15 +181,15 @@ namespace nc::editor
     {
         if(ImGui::Selectable("New Entity"))
         {
-            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{});
+            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{}).entity();
         }
         else if(ImGui::Selectable("New Static Entity"))
         {
-            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static});
+            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static}).entity();
         }
         else if(ImGui::Selectable("New PointLight"))
         {
-            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{.tag = "PointLight"});
+            m_selectedEntity = m_registry->Add<Entity>(EntityInfo{.tag = "PointLight"}).entity();
             m_registry->Add<PointLight>(m_selectedEntity, PointLightInfo{});
         }
         else

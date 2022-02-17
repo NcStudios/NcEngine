@@ -5,6 +5,7 @@
 #include "MainCamera.h"
 #include "AudioSystem.h"
 #include "graphics/Environment.h"
+#include "math/Random.h"
 #include "physics/PhysicsSystem.h"
 #include "ui/UISystem.h"
 #include "Scene.h"
@@ -26,6 +27,7 @@ namespace nc
             virtual auto Environment() noexcept -> Environment* = 0;
             virtual auto MainCamera() noexcept -> MainCamera* = 0;
             virtual auto Physics() noexcept -> PhysicsSystem* = 0;
+            virtual auto Random() noexcept -> Random* = 0;
             virtual auto Registry() noexcept -> Registry* = 0;
             virtual auto SceneSystem() noexcept -> SceneSystem* = 0;
             virtual auto UI() noexcept -> UISystem* = 0;

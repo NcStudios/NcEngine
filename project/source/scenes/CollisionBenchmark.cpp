@@ -78,9 +78,10 @@ namespace nc::sample
         // Cube Spawner Options
         SpawnBehavior spawnBehavior
         {
-            .positionOffset = Vector3{0.0f, 0.0f, 35.0f},
-            .positionRandomRange = Vector3::Splat(420.0f),
-            .rotationRandomRange = Vector3::Splat(std::numbers::pi_v<float> / 2.0f)
+            .minPosition = Vector3{-420.0f, -420.0f, 20.0f},
+            .maxPosition = Vector3{420.0f, 420.0f, 420.0f},
+            .minRotation = Vector3::Zero(),
+            .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         };
 
         auto spawnExtension = [registry](Entity entity)
@@ -90,7 +91,7 @@ namespace nc::sample
 
         // Dynamic Cube Spawner
         auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
-        auto dynamicSpawner = dynamicSpawnerHandle.add<Spawner>(prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
+        auto dynamicSpawner = dynamicSpawnerHandle.add<Spawner>(engine->Random(), prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
         dynamicSpawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
         GetDynamicCountCallback = std::bind_front(&Spawner::GetObjectCount, dynamicSpawner);
         SpawnDynamicCallback = std::bind_front(&Spawner::StageSpawn, dynamicSpawner);
@@ -99,7 +100,7 @@ namespace nc::sample
         // Static Cube Spawner
         spawnBehavior.flags = Entity::Flags::Static;
         auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
-        auto staticSpawner = staticSpawnerHandle.add<Spawner>(prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
+        auto staticSpawner = staticSpawnerHandle.add<Spawner>(engine->Random(), prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
         staticSpawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
         GetStaticCountCallback = std::bind_front(&Spawner::GetObjectCount, staticSpawner);
         SpawnStaticCallback = std::bind_front(&Spawner::StageSpawn, staticSpawner);

@@ -180,9 +180,9 @@ namespace nc::editor
             .flags = flags
         };
 
-        Entity entity = m_registry->Add<Entity>(std::move(info));
-        m_handleNames.emplace(std::move(handleName), entity);
-        return entity;
+        auto handle = m_registry->Add<Entity>(std::move(info));
+        m_handleNames.emplace(std::move(handleName), handle.entity());
+        return handle.entity();
     }
 
     void SceneReader::LoadBoxCollider(Entity entity, std::stringstream& args)

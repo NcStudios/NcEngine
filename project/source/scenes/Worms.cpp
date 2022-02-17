@@ -39,15 +39,16 @@ namespace nc::sample
         // Worm Spawner
         SpawnBehavior spawnBehavior
         {
-            .positionOffset = Vector3{0.0f, 0.0f, 25.0f},
-            .positionRandomRange = Vector3::Splat(15.0f),
-            .rotationRandomRange = Vector3::Splat(std::numbers::pi_v<float> / 2.0f),
-            .rotationAxisRandomRange = Vector3::One(),
-            .thetaRandomRange = 1.0f
+            .minPosition = Vector3{-15.0f, -15.0f, 10.0f},
+            .maxPosition = Vector3{15.0f, 15.0f, 40.0f},
+            .minRotation = Vector3::Zero(),
+            .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f),
+            .rotationAxis = Vector3::One(),
+            .rotationTheta = 1.0f
         };
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
-        auto spawner = spawnerHandle.add<Spawner>(prefab::Resource::Worm, spawnBehavior);
+        auto spawner = spawnerHandle.add<Spawner>(engine->Random(), prefab::Resource::Worm, spawnBehavior);
         spawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
         spawner->Spawn(registry, 40u);
     }

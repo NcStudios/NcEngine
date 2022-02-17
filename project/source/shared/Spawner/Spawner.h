@@ -2,6 +2,7 @@
 #include "SpawnPropertyGenerator.h"
 #include "shared/Prefabs.h"
 #include "shared/FreeComponents.h"
+#include "math/Random.h"
 
 #include <functional>
 
@@ -15,6 +16,7 @@ namespace nc::sample
             using SpawnExtension = std::function<void(Entity)>;
 
             Spawner(Entity entity,
+                    Random* random,
                     prefab::Resource resource,
                     SpawnBehavior behavior,
                     SpawnExtension extension = nullptr);
@@ -41,17 +43,19 @@ namespace nc::sample
     };
 
     inline Spawner::Spawner(Entity entity,
+                            Random* random,
                             prefab::Resource resource,
                             SpawnBehavior behavior,
                             SpawnExtension extension)
         : FreeComponent{entity},
           m_extension{extension},
           m_entities{},
-          m_generator{behavior},
+          m_generator{behavior, random},
           m_resource{resource},
-          m_applyConstantVelocity{Vector3::Zero() != behavior.velocityRandomRange},
-          m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxisRandomRange &&
-                                  0.0f != behavior.thetaRandomRange},
+          m_applyConstantVelocity{Vector3::Zero() != behavior.minVelocity &&
+                                  Vector3::Zero() != behavior.maxVelocity},
+          m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxis ||
+                                  0.0f != behavior.rotationTheta},
           m_layer{behavior.layer},
           m_flags{behavior.flags},
           m_stagedAdditions{0u},

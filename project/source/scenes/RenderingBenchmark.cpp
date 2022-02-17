@@ -59,13 +59,14 @@ namespace nc::sample
         // Spawner
         SpawnBehavior spawnBehavior
         {
-            .positionOffset = Vector3{0.0f, 0.0f, 35.0f},
-            .positionRandomRange = Vector3::Splat(15.0f),
-            .rotationRandomRange = Vector3::Splat(std::numbers::pi_v<float> / 2.0f)
+            .minPosition = Vector3{-15.0f, -15.0f, 20.0f},
+            .maxPosition = Vector3{15.0f, 15.0f, 50.0f},
+            .minRotation = Vector3::Zero(),
+            .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         };
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
-        auto spawner = spawnerHandle.add<Spawner>(prefab::Resource::Cube, spawnBehavior);
+        auto spawner = spawnerHandle.add<Spawner>(engine->Random(), prefab::Resource::Cube, spawnBehavior);
         spawnerHandle.add<FrameLogic>(InvokeFreeComponent<Spawner>{});
         GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, spawner);
         SpawnCallback = std::bind_front(&Spawner::StageSpawn, spawner);

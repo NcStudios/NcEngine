@@ -44,7 +44,7 @@ TEST(handle_unit_tests, DelegatesToRegistry)
     EXPECT_EQ(h.get<Fake>(), nullptr);
 }
 
-TEST(handle_unit_tests, Equality)
+TEST(handle_unit_tests, EqualityOperators)
 {
     RegistryMock registry;
     auto original = handle_base<RegistryMock>{&registry, Entity1};
