@@ -12,7 +12,7 @@ namespace nc::net
 
     void ServerCommand(const PacketBuffer& buffer)
     {
-        IF_THROW(!g_SendHandler, "net::ServerCommandHandler is not set");
+        NC_ASSERT(g_SendHandler, "net::ServerCommandHandler is not set");
         g_SendHandler(buffer);
     }
 }

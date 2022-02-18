@@ -21,6 +21,6 @@ enable_testing()
 add_subdirectory(${NC_EXTERNAL_DIR}/gtest ${PROJECT_BINARY_DIR}/gtest)
 include(GoogleTest)
 
-add_definitions(-DNC_DEBUG_BUILD)
+add_definitions(-DNC_ASSERT_ENABLED)
 
 add_subdirectory(unit)

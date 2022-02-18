@@ -2,6 +2,7 @@
 
 #include "debug/Utils.h"
 #include "directx/Inc/DirectXMath.h"
+#include "physics/Geometry.h"
 
 #include <array>
 
@@ -108,7 +109,7 @@ namespace nc::physics
 
     inline DirectX::XMVECTOR MinkowskiSupport(const ConvexHull& collider, DirectX::FXMVECTOR direction_v)
     {
-        IF_THROW(collider.vertices.size() == 0u, "MinkowskiSupport - ConvexHull vertex buffer is empty");
+        NC_ASSERT(!collider.vertices.empty(), "ConvexHull vertex buffer is empty");
         const auto& vertices = collider.vertices;
         Vector3 direction;
         DirectX::XMStoreVector3(&direction, direction_v);

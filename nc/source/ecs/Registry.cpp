@@ -38,7 +38,7 @@ namespace nc
 
     void Registry::RemoveEntityWithoutNotifyingParent(Entity entity)
     {
-        IF_THROW(!m_entities.contains(entity), "Bad Entity");
+        NC_ASSERT(m_entities.contains(entity), "Bad Entity");
         auto* transform = Get<Transform>(entity);
 
         for(auto child : transform->Children())

@@ -26,11 +26,11 @@ namespace nc::debug
 try { __VA_ARGS__; } \
 catch(const std::exception&) { std::throw_with_nested(std::runtime_error(std::string{"Exception in file: "} + std::string{__FILE__} + std::string{" on line: "} + std::to_string(__LINE__))); } \
 
-#ifdef NC_DEBUG_BUILD
+#ifdef NC_ASSERT_ENABLED
 /** Conditionally throw only in debug builds. */
-#define IF_THROW(expr, msg) if(expr) throw nc::NcError(msg);
+#define NC_ASSERT(expr, msg) if(!(expr)) throw nc::NcError(msg);
 #else
-#define IF_THROW(expr, msg)
+#define NC_ASSERT(expr, msg)
 #endif
 
 #ifdef NC_VERBOSE_LOGGING_ENABLED

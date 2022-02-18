@@ -110,7 +110,7 @@ namespace nc::physics
         /** Fetch inverse mass and inertia of each body */
         joint.bodyA = m_registry->Get<PhysicsBody>(joint.entityA);
         joint.bodyB = m_registry->Get<PhysicsBody>(joint.entityB);
-        IF_THROW(!joint.bodyA || !joint.bodyB, "UpdateJoint - Entity does not have a PhysicsBody");
+        NC_ASSERT(joint.bodyA && joint.bodyB, "UpdateJoint - Entity does not have a PhysicsBody");
         auto invMassA = joint.bodyA->GetInverseMass();
         const auto& invInertiaA = joint.bodyA->GetInverseInertia();
         auto invMassB = joint.bodyB->GetInverseMass();

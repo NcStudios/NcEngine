@@ -129,25 +129,25 @@ namespace nc::config
     /* Api function implementation */
     const ProjectSettings& GetProjectSettings()
     {
-        IF_THROW(!g_config, "config::GetProjectSettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->projectSettings;
     }
 
     const MemorySettings& GetMemorySettings()
     {
-        IF_THROW(!g_config, "config::GetMemorySettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->memorySettings;
     }
 
     const GraphicsSettings& GetGraphicsSettings()
     {
-        IF_THROW(!g_config, "config::GetGraphicsSettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->graphicsSettings;
     }
 
     const PhysicsSettings& GetPhysicsSettings()
     {
-        IF_THROW(!g_config, "config::GetPhysicsSettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->physicsSettings;
     }
 

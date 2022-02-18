@@ -19,13 +19,6 @@ namespace
     auto EstimateBoundingVolume(const ConvexHull& mesh, const Vector3& translation, float scale) -> Sphere;
     auto CreateBoundingVolume(const Collider::VolumeInfo& info) -> BoundingVolume;
 
-    #ifdef NC_DEBUG_BUILD
-    bool IsUniformScale(const Vector3& scale)
-    {
-        return math::FloatEqual(scale.x, scale.y) && math::FloatEqual(scale.y, scale.z);
-    }
-    #endif
-
     Sphere EstimateBoundingVolume(const Sphere& sphere, const Vector3& translation, float scale)
     {
         return Sphere{sphere.center + translation, sphere.radius * scale};
@@ -91,8 +84,8 @@ namespace nc
           m_selectedInEditor{false}
           #endif
     {
-        IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
-        IF_THROW(!IsUniformScale(m_info.scale), "Collider::Collider - Sphere colliders do not support nonuniform scaling");
+        NC_ASSERT(!HasAnyZeroElement(m_info.scale), "Invalid scale(elements cannot be 0)");
+        NC_ASSERT(HasUniformElements(m_info.scale), "Sphere colliders do not support nonuniform scaling");
     }
 
     Collider::Collider(Entity entity, BoxProperties properties, bool isTrigger)
@@ -109,7 +102,7 @@ namespace nc
           m_selectedInEditor{false}
           #endif
     {
-        IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        NC_ASSERT(!HasAnyZeroElement(m_info.scale), "Invalid scale(elements cannot be 0)");
     }
 
     Collider::Collider(Entity entity, CapsuleProperties properties, bool isTrigger)
@@ -126,7 +119,7 @@ namespace nc
           m_selectedInEditor{false}
           #endif
     {
-        IF_THROW(HasAnyZeroElement(m_info.scale), "Collider::Collider - Invalid scale(elements cannot be 0)");
+        NC_ASSERT(!HasAnyZeroElement(m_info.scale), "Invalid scale(elements cannot be 0)");
     }
 
     Collider::Collider(Entity entity, HullProperties properties, bool isTrigger)
