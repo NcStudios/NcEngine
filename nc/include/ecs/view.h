@@ -61,7 +61,7 @@ namespace nc
             auto rend() const noexcept { return std::make_reverse_iterator(begin()); }
 
             /**
-             * @brief Returns the number of element in the view.
+             * @brief Returns the number of elements in the view.
              * @return size_t
              */
             auto size() const noexcept { return m_viewBasis->size(); }

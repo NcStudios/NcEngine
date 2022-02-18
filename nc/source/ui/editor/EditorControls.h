@@ -253,8 +253,8 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", view<ParticleEmitter>(registry));
         ComponentSystemHeader<PhysicsBody>("Physics Body", view<PhysicsBody>(registry));
         ComponentSystemHeader<Transform>("Transform", view<Transform>(registry));
-        ComponentSystemHeader<nc::MeshRenderer>("Mesh Renderer", view<MeshRenderer>(registry));
-        ComponentSystemHeader<nc::PointLight>("Point Light", view<PointLight>(registry));
+        ComponentSystemHeader<MeshRenderer>("Mesh Renderer", view<MeshRenderer>(registry));
+        ComponentSystemHeader<PointLight>("Point Light", view<PointLight>(registry));
     }
 
 } // end namespace nc::ui::editor
