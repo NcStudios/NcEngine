@@ -66,6 +66,7 @@ namespace nc
     constexpr auto SquareDistance(const Vector2& lhs, const Vector2& rhs) noexcept -> float;
     inline    auto Distance(const Vector2& lhs, const Vector2& rhs) noexcept -> float;
     constexpr auto HasAnyZeroElement(const Vector2& vec) noexcept -> bool;
+    constexpr auto HasUniformElements(const Vector2& vec) noexcept -> bool;
 
     /* Vector3 Functions */
     constexpr auto operator ==(const Vector3& lhs, const Vector3& rhs) noexcept -> bool;
@@ -91,6 +92,7 @@ namespace nc
     constexpr auto SquareDistance(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
     inline    auto Distance(const Vector3& lhs, const Vector3& rhs) noexcept -> float;
     constexpr auto HasAnyZeroElement(const Vector3& vec) noexcept -> bool;
+    constexpr auto HasUniformElements(const Vector3& vec) noexcept -> bool;
     inline    auto OrthogonalTo(const Vector3& vec) noexcept -> Vector3;
     inline    void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept;
 
@@ -112,6 +114,7 @@ namespace nc
     constexpr auto SquareDistance(const Vector4& lhs, const Vector4& rhs) noexcept -> float;
     inline    auto Distance(const Vector4& lhs, const Vector4& rhs) noexcept -> float;
     constexpr auto HasAnyZeroElement(const Vector4& vec) noexcept -> bool;
+    constexpr auto HasUniformElements(const Vector4& vec) noexcept -> bool;
     constexpr auto ToVector3(const Vector4& vec) noexcept -> Vector3;
 
     /* Vector2 Implementation */
@@ -198,6 +201,11 @@ namespace nc
     constexpr bool HasAnyZeroElement(const Vector2& vec) noexcept
     {
         return math::FloatEqual(vec.x, 0.0f) || math::FloatEqual(vec.y, 0.0f);
+    }
+
+    constexpr auto HasUniformElements(const Vector2& vec) noexcept -> bool
+    {
+        return math::FloatEqual(vec.x, vec.y);
     }
 
     /* Vector3 Implementation */
@@ -325,6 +333,11 @@ namespace nc
         return math::FloatEqual(vec.x, 0.0f) || math::FloatEqual(vec.y, 0.0f) || math::FloatEqual(vec.z, 0.0f);
     }
 
+    constexpr auto HasUniformElements(const Vector3& vec) noexcept -> bool
+    {
+        return math::FloatEqual(vec.x, vec.y) && math::FloatEqual(vec.x, vec.z);
+    }
+
     Vector3 OrthogonalTo(const Vector3& vec) noexcept
     {
         const float invSqrt3 = 1.0f / sqrt(3.0f);
@@ -429,6 +442,11 @@ namespace nc
                math::FloatEqual(vec.y, 0.0f) ||
                math::FloatEqual(vec.z, 0.0f) ||
                math::FloatEqual(vec.w, 0.0f);
+    }
+
+    constexpr auto HasUniformElements(const Vector4& vec) noexcept -> bool
+    {
+        return math::FloatEqual(vec.x, vec.y) && math::FloatEqual(vec.x, vec.z) && math::FloatEqual(vec.x, vec.w);
     }
 
     constexpr Vector3 ToVector3(const Vector4& vec) noexcept
