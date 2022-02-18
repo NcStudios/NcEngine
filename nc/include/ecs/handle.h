@@ -7,11 +7,7 @@ namespace nc
     class Registry;
 
     /**
-     * @brief Binds an entity to component-specific registry functions.
-     * 
-     * A handle is a wrapper around an entity and its owning registry, returned when constructing
-     * the entity. It offers no functionality distinct from the registry, and exists only as a
-     * convenience.
+     * @brief Wrapper around an entity and its owning registry.
      * 
      * @tparam RegistryType Always specified as Registry. Templating is
      * an implementation detail.
