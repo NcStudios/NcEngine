@@ -16,9 +16,6 @@ namespace nc
     class view
     {
         public:
-            using value_type = std::remove_const_t<T>;
-            using iterator = detail::single_view_iterator<T>;
-            using reverse_iterator = std::reverse_iterator<iterator>;
             using adaptor = detail::view_storage_adaptor<T>;
             using storage = adaptor::storage_type;
 
@@ -27,26 +24,26 @@ namespace nc
              * @param registry Pointer to a Registry the view will be constructed from.
              */
             view(Registry* registry)
-                : m_viewBasis{registry->StorageFor<value_type>()} {}
+                : m_viewBasis{adaptor::basis(registry)} {}
 
             /**
              * @brief Constructs a new read-only view.
              * @param registry Pointer to a const Registry the view will be constructed from.
              */
             view(const Registry* registry)
-                : m_viewBasis{registry->StorageFor<value_type>()} {}
+                : m_viewBasis{adaptor::basis(registry)} {}
 
             /**
              * @brief Returns an iterator to the first element in the view.
              * @return iterator
              */
-            auto begin() const noexcept { return iterator{adaptor::begin(m_viewBasis)}; }
+            auto begin() const noexcept { return adaptor::begin(m_viewBasis); }
 
             /**
              * @brief Returns an iterator one past the last element in the view.
              * @return iterator
              */
-            auto end() const noexcept { return iterator{adaptor::end(m_viewBasis)}; }
+            auto end() const noexcept { return adaptor::end(m_viewBasis); }
 
             /**
              * @brief Returns a reverse iterator to the first element in the reversed view.
@@ -82,55 +79,36 @@ namespace nc
     class multi_view
     {
         public:
-            using iterator = detail::multi_view_iterator<Ts...>;
-            using storage = detail::PerComponentStorageBase;
+            using adaptor = detail::view_storage_adaptor<Ts...>;
+            using storage = adaptor::storage_type;
 
             /**
              * @brief Constructs a new multi_view.
              * @param registry Pointer to the Registry the view will be constructed from.
              */
             multi_view(Registry* registry)
-                : m_registry{registry},
-                  m_viewBasis{find_basis_storage()}
-            {
-            }
+                : m_registry{registry}, m_viewBasis{adaptor::basis(registry)} {}
 
             /**
              * @brief Returns an iterator to the first entity in the view.
              * @return iterator
              */
-            auto begin() noexcept -> iterator
-            {
-                auto& pool = m_viewBasis->EntityPool();
-                return iterator{pool.begin(), pool.end(), m_registry};
-            }
+            auto begin() noexcept { return adaptor::begin(m_viewBasis, m_registry); }
 
             /**
              * @brief Returns an iterator one past the last entity in the view.
              * @return iterator
              */
-            auto end() noexcept -> iterator
-            {
-                auto& pool = m_viewBasis->EntityPool();
-                return iterator{pool.end(), pool.end(), m_registry};
-            }
+            auto end() noexcept { return adaptor::end(m_viewBasis, m_registry); }
 
             /**
              * @brief Returns the maximum number of entities in the view.
              * @return size_t
              */
-            auto size_upper_bound() const noexcept -> size_t
-            {
-                return m_viewBasis->size();
-            }
+            auto size_upper_bound() const noexcept { return m_viewBasis->size(); }
 
         private:
             Registry* m_registry;
             storage* m_viewBasis;
-
-            auto find_basis_storage() -> storage*
-            {
-                return std::min<storage*>({m_registry->StorageFor<Ts>()...}, [](const auto* l, const auto* r) { return l->size() < r->size(); });
-            }
     };
 }
