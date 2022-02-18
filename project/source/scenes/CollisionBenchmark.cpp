@@ -77,9 +77,10 @@ namespace nc::sample
         // Cube Spawner Options
         SpawnBehavior spawnBehavior
         {
-            .positionOffset = Vector3{0.0f, 0.0f, 35.0f},
-            .positionRandomRange = Vector3::Splat(420.0f),
-            .rotationRandomRange = Vector3::Splat(std::numbers::pi_v<float> / 2.0f)
+            .minPosition = Vector3{-420.0f, -420.0f, 20.0f},
+            .maxPosition = Vector3{420.0f, 420.0f, 420.0f},
+            .minRotation = Vector3::Zero(),
+            .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         };
 
         auto spawnExtension = [registry](Entity entity)
@@ -89,13 +90,13 @@ namespace nc::sample
 
         // Dynamic Cube Spawner
         auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
-        auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
+        auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, engine->Random(), prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
         registry->Add<FrameLogic>(dynamicSpawnerHandle, InvokeFreeComponent<Spawner>{});
 
         // Static Cube Spawner
         spawnBehavior.flags = Entity::Flags::Static;
         auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
-        auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
+        auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, engine->Random(), prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
         registry->Add<FrameLogic>(staticSpawnerHandle, InvokeFreeComponent<Spawner>{});
 
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
