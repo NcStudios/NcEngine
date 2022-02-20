@@ -18,7 +18,7 @@ Conceptually, Entities are the objects in a game: a player or a building, for ex
 Entities are made up of an index, layer, and flags. 
 
 ### Index
-An entitiy's index is determined and used internally. It can be useful to create a 'null' Entity. This can be done through default construction or with `Entity::Null()`. The resulting Entity will have an index of `std::numeric_limits<uint32_t>::max()`.
+An entity's index is determined and used internally. It can be useful to create a 'null' Entity. This can be done through default construction or with `Entity::Null()`. The resulting Entity will have an index of `std::numeric_limits<uint32_t>::max()`.
 
 ### Layers
 Layers are underused and are reserved for future use.
