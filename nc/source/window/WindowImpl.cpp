@@ -20,19 +20,19 @@ namespace nc::window
     /* Api Function Implementation */
     Vector2 GetDimensions()
     {
-        IF_THROW(!g_instance, "window::GetDimensions - g_instance is not set");
+        NC_ASSERT(g_instance, "window::GetDimensions - g_instance is not set");
         return g_instance->GetDimensions();
     }
 
     void SetClearColor(std::array<float, 4> color)
     {
-        IF_THROW(!g_instance, "window::SetClearColor - g_instance is not set");
+        NC_ASSERT(g_instance, "window::SetClearColor - g_instance is not set");
         g_instance->SetClearColor(color);
     }
 
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
-        IF_THROW(!g_instance, "window::RegisterOnResizeReceiver - g_instance is not set");
+        NC_ASSERT(g_instance, "window::RegisterOnResizeReceiver - g_instance is not set");
         g_instance->RegisterOnResizeReceiver(receiver);
     }
 

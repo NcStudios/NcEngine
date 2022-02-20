@@ -110,7 +110,7 @@ namespace nc::detail
     template<class... Args>
     auto PerComponentStorage<T>::Add(Entity entity, Args&&... args) -> T*
     {
-        IF_THROW(Contains(entity), "PerComponentStorage::Add - Cannot add multiple components of the same type");
+        NC_ASSERT(!Contains(entity), "Cannot add multiple components of the same type");
         auto& [emplacedEntity, emplacedComponent] = stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
 
         if constexpr(storage_policy<T>::requires_on_add_callback)
@@ -125,7 +125,7 @@ namespace nc::detail
         auto sparseIndex = entity.Index();
         auto poolIndex = sparseArray.at(sparseIndex);
 
-        IF_THROW(poolIndex == Entity::NullIndex, "Entity does not have component");
+        NC_ASSERT(poolIndex != Entity::NullIndex, "Entity does not have component");
 
         componentPool.at(poolIndex) = std::move(componentPool.back());
         componentPool.pop_back();

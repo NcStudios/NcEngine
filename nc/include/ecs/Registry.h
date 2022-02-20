@@ -106,14 +106,14 @@ namespace nc
     template<PooledComponent T>
     auto Registry::StorageFor() -> detail::PerComponentStorage<T>*
     {
-        IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
+        NC_ASSERT(m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
     }
 
     template<PooledComponent T>
     auto Registry::StorageFor() const -> const detail::PerComponentStorage<T>*
     {
-        IF_THROW(!m_typedStoragePtr<T>, "Cannot access unregistered component type");
+        NC_ASSERT(m_typedStoragePtr<T>, "Cannot access unregistered component type");
         return m_typedStoragePtr<T>;
     }
 
@@ -142,7 +142,7 @@ namespace nc
     template<std::derived_from<ComponentBase> T, class... Args>
     auto Registry::Add(Entity entity, Args&&... args) -> T*
     {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
         if constexpr(std::derived_from<T, FreeComponent>)
         {
             FreeComponentGroup* group = Get<FreeComponentGroup>(entity);
@@ -157,7 +157,7 @@ namespace nc
     template<std::same_as<Entity> T>
     void Registry::Remove(Entity entity)
     {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
         auto* transform = Get<Transform>(entity);
         transform->SetParent(Entity::Null());
 
@@ -170,7 +170,7 @@ namespace nc
     template<std::derived_from<ComponentBase> T>
     void Registry::Remove(Entity entity)
     {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
         if constexpr(std::derived_from<T, FreeComponent>)
         {
             FreeComponentGroup* group = StorageFor<FreeComponentGroup>()->Get(entity);
@@ -191,7 +191,7 @@ namespace nc
     template<std::derived_from<ComponentBase> T>
     bool Registry::Contains(Entity entity) const
     {
-        IF_THROW(!Contains<Entity>(entity), "Bad Entity");
+        NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
         if constexpr(std::derived_from<T, FreeComponent>)
         {
             const FreeComponentGroup* group = Get<FreeComponentGroup>(entity);

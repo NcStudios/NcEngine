@@ -129,7 +129,7 @@ namespace nc::physics
     {
         using namespace DirectX;
 
-        IF_THROW(!stateOut, "Gjk - CollisionState cannot be null");
+        NC_ASSERT(stateOut, "CollisionState cannot be null");
 
         stateOut->simplex = Simplex{};
         stateOut->rotationA = GetRotation(aMatrix);

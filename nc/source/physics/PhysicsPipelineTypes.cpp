@@ -128,7 +128,7 @@ namespace nc::physics
 
     auto Manifold::DeepestContact() const -> const Contact&
     {
-        IF_THROW(m_contacts.size() == 0u, "Manifold::GetDeepestContact - Empty contacts");
+        NC_ASSERT(!m_contacts.empty(), "Empty contacts list");
 
         size_t maxPenetrationIndex = 0;
         float maxPenetration = m_contacts[0].depth;

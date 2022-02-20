@@ -44,7 +44,7 @@ namespace nc
     template<std::derived_from<FreeComponent> T, class ... Args>
     T* FreeComponentGroup::Add(Args&& ... args)
     {
-        IF_THROW(Contains<T>(), "Entity already has a component of this type");
+        NC_ASSERT(!Contains<T>(), "Entity already has a component of this type");
         auto newComponent = std::make_unique<T>(std::forward<Args>(args)...);
         auto* out = newComponent.get();
         m_toAdd.push_back(std::move(newComponent));

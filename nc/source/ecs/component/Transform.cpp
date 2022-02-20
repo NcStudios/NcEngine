@@ -35,7 +35,7 @@ namespace nc
           m_parent{parent},
           m_children{}
     {
-        IF_THROW(HasAnyZeroElement(scale), "Transform::Transform - Invalid scale(elements cannot be 0)");
+        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         if(m_parent.Valid())
         {
             auto* parentTransform = ActiveRegistry()->Get<Transform>(parent);
@@ -162,14 +162,14 @@ namespace nc
 
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
     {
-        IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
+        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
         UpdateWorldMatrix();
     }
 
     void Transform::Set(const Vector3& pos, const Vector3& angles, const Vector3& scale)
     {
-        IF_THROW(HasAnyZeroElement(scale), "Transform::Set - Invalid scale(elements cannot be 0)");
+        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(angles) * ToTransMatrix(pos);
         UpdateWorldMatrix();
     }
@@ -202,7 +202,7 @@ namespace nc
 
     void Transform::SetScale(const Vector3& scale)
     {
-        IF_THROW(HasAnyZeroElement(scale), "Transform::SetScale - Invalid scale(elements cannot be 0)");
+        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
         m_localMatrix = ToScaleMatrix(scale) *
@@ -307,7 +307,7 @@ namespace nc
             return child == c;
         });
 
-        IF_THROW(pos == m_children.cend(), "Transform::RemoveChild - Child does not exists");
+        NC_ASSERT(pos != m_children.cend(), "Child does not exists");
         m_children.erase(pos, m_children.end());
     }
 

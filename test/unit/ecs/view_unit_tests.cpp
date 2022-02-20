@@ -260,6 +260,15 @@ TEST_F(view_unit_tests, Multi_VisitsEach)
     EXPECT_EQ(registry.Get<Fake3>(e4)->value, expectedFake3Value);
 }
 
+TEST_F(view_unit_tests, Multi_ConstAndNonConstComponents_PropagatesConst)
+{
+    for(auto& [f1, f2] : multi_view<Fake1, const Fake2>{&registry})
+    {
+        static_assert(!std::is_const_v<std::remove_pointer_t<decltype(f1)>>);
+        static_assert(std::is_const_v<std::remove_pointer_t<decltype(f2)>>);
+    }
+}
+
 int main(int argc, char ** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
