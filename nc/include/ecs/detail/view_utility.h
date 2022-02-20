@@ -16,48 +16,6 @@ namespace nc::detail
                                         std::remove_const_t<Target>>;
     };
 
-    /** Generalized access to registry storage for views. */
-    template<viewable T>
-    struct view_storage_adaptor {};
-
-    /** Specialization for views over entities. */
-    template<std::same_as<Entity> T>
-    struct view_storage_adaptor<T>
-    {
-        using storage_type = constness_of<detail::entity_storage, T>::type;
-
-        static auto begin(storage_type* basis) noexcept
-        {
-            auto& pool = basis->pool();
-            return pool.data();
-        }
-
-        static auto end(storage_type* basis) noexcept
-        {
-            auto& pool = basis->pool();
-            return pool.data() + pool.size();
-        }
-    };
-
-    /** Specialization for views over components. */
-    template<PooledComponent T>
-    struct view_storage_adaptor<T>
-    {
-        using storage_type = constness_of<detail::PerComponentStorage<std::remove_const_t<T>>, T>::type;
-
-        static auto begin(storage_type* basis) noexcept
-        {
-            auto& pool = basis->ComponentPool();
-            return pool.data();
-        }
-
-        static auto end(storage_type* basis) noexcept
-        {
-            auto& pool = basis->ComponentPool();
-            return pool.data() + pool.size();
-        }
-    };
-
     /** Iterator for a single storage pool. */
     template<viewable T>
     class single_view_iterator final
@@ -193,12 +151,108 @@ namespace nc::detail
             Registry* m_registry;
             value_type m_currentValues;
 
+            template<class T>
+            using raw_type = std::remove_const_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
+
             bool fill_values()
             {
                 return std::apply([ent = *m_cur, reg = m_registry](auto*&... element)
                 {
-                    return ((element = reg->Get<std::remove_pointer_t<std::remove_reference_t<decltype(element)>>>(ent)) && ...);
+                    return ((element = reg->Get<raw_type<decltype(element)>>(ent)) && ...);
                 }, m_currentValues);
             }
+    };
+
+    /** Generalized access to registry storage for views over multiple components. */
+    template<viewable... Ts>
+    struct view_storage_adaptor
+    {
+        using iterator = detail::multi_view_iterator<Ts...>;
+        using storage_type = detail::PerComponentStorageBase;
+
+        static auto basis(Registry* registry) -> storage_type*
+        {
+            return std::min<storage_type*>
+            (
+                {registry->StorageFor<std::remove_const_t<Ts>>()...},
+                [](const auto* l, const auto* r) { return l->size() < r->size(); }
+            );
+        }
+
+        static auto begin(storage_type* basis, Registry* registry) noexcept -> iterator
+        {
+            auto& pool = basis->EntityPool();
+            return iterator{pool.begin(), pool.end(), registry};
+        }
+
+        static auto end(storage_type* basis, Registry* registry) noexcept -> iterator
+        {
+            auto& pool = basis->EntityPool();
+            return iterator{pool.end(), pool.end(), registry};
+        }
+    };
+
+    /** Specialization for views over entities. */
+    template<std::same_as<Entity> T>
+    struct view_storage_adaptor<T>
+    {
+        using value_type = std::remove_const_t<T>;
+        using iterator = detail::single_view_iterator<T>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using storage_type = constness_of<detail::entity_storage, T>::type;
+
+        static auto basis(Registry* registry) -> storage_type*
+        {
+            return registry->StorageFor<value_type>();
+        }
+
+        static auto basis(const Registry* registry) -> const storage_type*
+        {
+            return registry->StorageFor<value_type>();
+        }
+
+        static auto begin(storage_type* basis) noexcept -> iterator
+        {
+            auto& pool = basis->pool();
+            return iterator{pool.data()};
+        }
+
+        static auto end(storage_type* basis) noexcept -> iterator
+        {
+            auto& pool = basis->pool();
+            return iterator{pool.data() + pool.size()};
+        }
+    };
+
+    /** Specialization for views over single components. */
+    template<PooledComponent T>
+    struct view_storage_adaptor<T>
+    {
+        using value_type = std::remove_const_t<T>;
+        using iterator = detail::single_view_iterator<T>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using storage_type = constness_of<detail::PerComponentStorage<std::remove_const_t<T>>, T>::type;
+
+        static auto basis(Registry* registry) -> storage_type*
+        {
+            return registry->StorageFor<value_type>();
+        }
+
+        static auto basis(const Registry* registry) -> storage_type*
+        {
+            return registry->StorageFor<value_type>();
+        }
+
+        static auto begin(storage_type* basis) noexcept -> iterator
+        {
+            auto& pool = basis->ComponentPool();
+            return iterator{pool.data()};
+        }
+
+        static auto end(storage_type* basis) noexcept -> iterator
+        {
+            auto& pool = basis->ComponentPool();
+            return iterator{pool.data() + pool.size()};
+        }
     };
 }

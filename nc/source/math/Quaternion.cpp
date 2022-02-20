@@ -13,9 +13,9 @@ namespace nc
     Quaternion::Quaternion(float X, float Y, float Z, float W)
         : x{X}, y{Y}, z{Z}, w{W}
     {
-        IF_THROW
+        NC_ASSERT
         (
-            (x == 0.0f) && (y == 0.0f) && (z == 0.0f) && (w == 0.0f),
+            (x != 0.0f) || (y != 0.0f) || (z != 0.0f) || (w != 0.0f),
             "Quaternion - Cannot initialize all components with 0"
         );
     }
@@ -54,7 +54,7 @@ namespace nc
 
     Quaternion Quaternion::FromAxisAngle(const Vector3& axis, float radians)
     {
-        IF_THROW(axis == Vector3::Zero(), "Quaternion::FromAxisAngle - Axis cannot be zero");
+        NC_ASSERT(axis != Vector3::Zero(), "Axis cannot be zero");
         auto axis_v = DirectX::XMVectorSet(axis.x, axis.y, axis.z, 0.0f);
         auto quat_v = DirectX::XMQuaternionRotationAxis(axis_v, radians);
         auto out = Quaternion::Identity();

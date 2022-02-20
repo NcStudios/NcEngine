@@ -118,6 +118,10 @@ Configure, build, and install steps may be manually triggered from the 'Project'
     Default = OFF
     Flag used by both CMake and NcEngine specifying whether to include the debug editor in the final executable. Some blocks of coded required only by the editor are wrapped in #ifdefs. If this value is set to ON, it must be passed when building both the engine library and your project.
 
+#### NC_ASSERT_ENABLED
+    Default = ON
+    Enables extra checks through the NC_ASSERT macro. These are enabled by default, even in release builds, as they are unlikely to have a serious effect on performance.
+
 #### NC_VULKAN_VALIDATION_ENABLED
     Default = OFF
     Enables Vulkan validation layers.
