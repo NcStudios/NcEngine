@@ -75,10 +75,10 @@ When removing a Component:
 
 ## Views
 --------
-Views represent ranges of registry data. They come in two forms, `view<viewable>` and `multi_view<viewable...>`, where `viewable` is either `Entity` or models `PooledComponent`. They each provide their own iterator types, and can be used in range-based for loops and the like. Example usage:
+Views represent ranges of registry data. They come in two forms, `view<viewable>` and `multi_view<viewable...>`, where `viewable` is either `Entity` or models `PooledComponent`. They each provide their own iterator types, and can be used in range-based for loops and the like. Viewed types may be individually const-qualified. Example usage:
 
 ```cpp
-for(auto& [t, u, v] : multi_view<T, U, V>{myRegistry})
+for(auto& [t, u, v] : multi_view<T, U, const V>{myRegistry})
 {
     /** ... */
 }
