@@ -34,5 +34,6 @@ namespace nc::graphics
             vk::ImageLayout m_layout;
             uint32_t m_maxTexturesCount;
             bool m_texturesInitialized;
+            uint32_t m_bindingSlot;
     };
 }

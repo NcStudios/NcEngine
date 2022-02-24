@@ -12,7 +12,8 @@ namespace nc::graphics
       m_descriptors{ descriptors },
       m_sampler{nullptr},
       m_depthStencil{nullptr},
-      m_dimensions{dimensions}
+      m_dimensions{dimensions},
+      m_bindingSlot{0}
     {
         Initialize();
     }
@@ -42,7 +43,8 @@ namespace nc::graphics
             BindFrequency::PerFrame,
             imageInfos,
             1,
-            vk::DescriptorType::eCombinedImageSampler
+            vk::DescriptorType::eCombinedImageSampler,
+            m_bindingSlot
         );
     }
 
@@ -76,7 +78,7 @@ namespace nc::graphics
         auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         auto imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
-        m_descriptors->RegisterDescriptor
+        m_bindingSlot = m_descriptors->RegisterDescriptor
         (
             BindFrequency::PerFrame,
             imageInfos,

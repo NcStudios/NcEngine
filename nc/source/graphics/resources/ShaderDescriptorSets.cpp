@@ -47,17 +47,15 @@ namespace nc::graphics
         descriptorSet->bindings.push_back(CreateDescriptorSetLayoutBinding(descriptorSlot, descriptorCount, descriptorType, shaderStages));
         UpdateSet(bindFrequency, bindingFlags);
 
-        UpdateDescriptor(bindFrequency, imageInfos, descriptorCount, descriptorType);
-
         return descriptorSlot;
     }
 
-    void ShaderDescriptorSets::UpdateDescriptor(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType)
+    void ShaderDescriptorSets::UpdateDescriptor(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
     {
         auto* descriptorSet = GetSet(bindFrequency);
 
         vk::WriteDescriptorSet write{};
-        write.setDstBinding(0);
+        write.setDstBinding(bindingSlot);
         write.setDstArrayElement(0);
         write.setDescriptorType(descriptorType);
         write.setDescriptorCount(descriptorCount);

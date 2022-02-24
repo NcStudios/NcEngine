@@ -18,8 +18,8 @@ namespace nc::graphics
                 : m_shaderDescriptorSets{graphics},
                   m_objectDataManager{graphics, &m_shaderDescriptorSets, memorySettings.maxRenderers},
                   m_pointLightManager{graphics, &m_shaderDescriptorSets, memorySettings.maxPointLights},
-                  m_shadowMapManager{graphics, &m_shaderDescriptorSets, dimensions},
                   m_textureManager{graphics, &m_shaderDescriptorSets, memorySettings.maxTextures},
+                  m_shadowMapManager{ graphics, &m_shaderDescriptorSets, dimensions },
                   m_cubeMapManager{graphics, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
                   m_environmentDataManager{graphics, &m_shaderDescriptorSets}
             {
@@ -30,11 +30,12 @@ namespace nc::graphics
 
         private:
             ShaderDescriptorSets m_shaderDescriptorSets;
-            ObjectDataManager m_objectDataManager;
-            PointLightManager m_pointLightManager;
-            ShadowMapManager m_shadowMapManager;
-            TextureManager m_textureManager;
-            CubeMapManager m_cubeMapManager;
-            EnvironmentDataManager m_environmentDataManager;
+
+            ObjectDataManager m_objectDataManager;              // BINDING SLOT 0
+            PointLightManager m_pointLightManager;              // BINDING SLOT 1
+            TextureManager m_textureManager;                    // BINDING SLOT 2
+            ShadowMapManager m_shadowMapManager;                // BINDING SLOT 3
+            CubeMapManager m_cubeMapManager;                    // BINDING SLOT 4
+            EnvironmentDataManager m_environmentDataManager;    // BINDING SLOT 5
     };
 }

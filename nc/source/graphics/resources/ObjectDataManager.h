@@ -37,5 +37,6 @@ namespace nc::graphics
             ShaderDescriptorSets* m_descriptors;
             WriteableBuffer<ObjectData> m_objectsDataBuffer;
             uint32_t m_maxObjects;
+            uint32_t m_bindingSlot;
     };
 }

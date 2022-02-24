@@ -23,5 +23,6 @@ namespace nc::graphics
             Graphics* m_graphics;
             ShaderDescriptorSets* m_descriptors;
             std::unique_ptr<UniformBuffer> m_environmentDataBuffer;
+            uint32_t m_bindingSlot;
     };
 }

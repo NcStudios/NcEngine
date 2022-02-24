@@ -26,14 +26,14 @@ namespace nc::graphics
 
             uint32_t RegisterDescriptor(BindFrequency bindFrequency, vk::Buffer* buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages);
             uint32_t RegisterDescriptor(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagsEXT bindingFlags = vk::DescriptorBindingFlagsEXT());
-            void UpdateDescriptor(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType);
+            void UpdateDescriptor(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
 
             vk::DescriptorSetLayout* GetDescriptorSetLayout(BindFrequency bindFrequency);
             void Bind(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet, uint32_t setCount);
             DescriptorSet* GetSet(BindFrequency bindFrequency);
 
         private:
-            void UpdateSet(BindFrequency bindFrequency, vk::DescriptorBindingFlagsEXT bindingFlags);
+            void UpdateSet(BindFrequency bindFrequency, vk::DescriptorBindingFlagsEXT bindingFlags = vk::DescriptorBindingFlagsEXT());
 
             std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
             std::array<vk::DescriptorBindingFlagsEXT, 1> m_bindingFlags;

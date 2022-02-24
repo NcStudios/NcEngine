@@ -12,7 +12,8 @@ namespace nc::graphics
           m_imageInfos{},
           m_layout{},
           m_maxTexturesCount{maxTextures},
-          m_texturesInitialized{false}
+          m_texturesInitialized{false},
+          m_bindingSlot{0}
     {
         Initialize();
     }
@@ -23,7 +24,7 @@ namespace nc::graphics
 
     void TextureManager::Initialize()
     {
-        m_descriptors->RegisterDescriptor
+        m_bindingSlot = m_descriptors->RegisterDescriptor
         (
             BindFrequency::PerFrame,
             m_imageInfos,
@@ -54,7 +55,8 @@ namespace nc::graphics
             BindFrequency::PerFrame,
             m_imageInfos,
             m_maxTexturesCount,
-            vk::DescriptorType::eCombinedImageSampler
+            vk::DescriptorType::eCombinedImageSampler,
+            m_bindingSlot
         );
     }
 

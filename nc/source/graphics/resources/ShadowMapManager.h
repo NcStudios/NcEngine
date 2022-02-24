@@ -33,5 +33,6 @@ namespace nc::graphics
             vk::UniqueSampler m_sampler;
             std::unique_ptr<RenderTarget> m_depthStencil;
             Vector2 m_dimensions;
+            uint32_t m_bindingSlot;
     };
 }

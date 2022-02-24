@@ -7,7 +7,8 @@ namespace nc::graphics
         : m_graphics { graphics },
           m_descriptors{ descriptors },
           m_objectsDataBuffer{},
-          m_maxObjects{ maxRenderers }
+          m_maxObjects{ maxRenderers },
+          m_bindingSlot{ 0 }
     {
         Initialize();
     }
@@ -22,7 +23,7 @@ namespace nc::graphics
         const uint32_t objectsSize = (sizeof(ObjectData) * m_maxObjects);
         m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_graphics, objectsSize);
 
-        m_descriptors->RegisterDescriptor
+        m_bindingSlot = m_descriptors->RegisterDescriptor
         (
             BindFrequency::PerFrame,
             m_objectsDataBuffer.GetBuffer(),

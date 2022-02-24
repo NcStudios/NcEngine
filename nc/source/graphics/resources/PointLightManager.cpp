@@ -7,7 +7,8 @@ namespace nc::graphics
         : m_pointLightsArrayBuffer{nullptr},
           m_descriptors{ descriptors },
           m_graphics{graphics},
-          m_maxPointLights{maxPointLights}
+          m_maxPointLights{maxPointLights},
+          m_bindingSlot{0}
     {
         Initialize();
     }
@@ -27,7 +28,7 @@ namespace nc::graphics
             m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, pointLightsSize);
         }
 
-        m_descriptors->RegisterDescriptor
+        m_bindingSlot = m_descriptors->RegisterDescriptor
         (
             BindFrequency::PerFrame,
             m_pointLightsArrayBuffer->GetBuffer(),

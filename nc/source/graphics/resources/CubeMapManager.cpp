@@ -13,7 +13,8 @@ namespace nc::graphics
           m_cubeMapSampler{},
           m_layout{},
           m_maxCubeMapsCount{maxCubeMaps},
-          m_cubeMapsInitialized{false}
+          m_cubeMapsInitialized{false},
+          m_bindingSlot{0}
     {
         Initialize();
     }
@@ -25,7 +26,7 @@ namespace nc::graphics
 
     void CubeMapManager::Initialize()
     {
-        m_descriptors->RegisterDescriptor
+        m_bindingSlot = m_descriptors->RegisterDescriptor
         (
             BindFrequency::PerFrame,
             m_imageInfos,
@@ -52,7 +53,8 @@ namespace nc::graphics
             BindFrequency::PerFrame,
             m_imageInfos,
             m_maxCubeMapsCount,
-            vk::DescriptorType::eCombinedImageSampler
+            vk::DescriptorType::eCombinedImageSampler,
+            m_bindingSlot
         );
     }
 

@@ -11,7 +11,8 @@ namespace nc::graphics
 {
     EnvironmentDataManager::EnvironmentDataManager(Graphics* graphics, ShaderDescriptorSets* descriptors)
         : m_graphics{graphics},
-          m_descriptors{ descriptors }
+          m_descriptors{descriptors},
+          m_bindingSlot{0}
     {
         Initialize();
     }
@@ -41,7 +42,7 @@ namespace nc::graphics
         dataVector.push_back(initialEnvironmentData);
         m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_graphics, dataVector.back());
 
-        m_descriptors->RegisterDescriptor
+        m_bindingSlot = m_descriptors->RegisterDescriptor
         (
             BindFrequency::PerFrame,
             m_environmentDataBuffer->GetBuffer(),

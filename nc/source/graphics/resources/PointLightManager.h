@@ -22,5 +22,6 @@ namespace nc::graphics
             ShaderDescriptorSets* m_descriptors;
             Graphics* m_graphics;
             uint32_t m_maxPointLights;
+            uint32_t m_bindingSlot;
     };
 }

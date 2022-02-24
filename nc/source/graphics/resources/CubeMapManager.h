@@ -28,5 +28,6 @@ namespace nc::graphics
             vk::ImageLayout m_layout;
             uint32_t m_maxCubeMapsCount;
             bool m_cubeMapsInitialized;
+            uint32_t m_bindingSlot;
     };
 }
