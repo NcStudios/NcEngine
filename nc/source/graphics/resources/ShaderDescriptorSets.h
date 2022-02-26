@@ -31,12 +31,13 @@ namespace nc::graphics
             vk::DescriptorSetLayout* GetDescriptorSetLayout(BindFrequency bindFrequency);
             void Bind(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet, uint32_t setCount);
             DescriptorSet* GetSet(BindFrequency bindFrequency);
+            uint32_t GetSetLayoutCount(std::span<BindFrequency> bindFrequencies);
 
         private:
-            void UpdateSet(BindFrequency bindFrequency, vk::DescriptorBindingFlagsEXT bindingFlags = vk::DescriptorBindingFlagsEXT());
+            void UpdateSet(BindFrequency bindFrequency);
 
             std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
-            std::array<vk::DescriptorBindingFlagsEXT, 1> m_bindingFlags;
+            std::vector<vk::DescriptorBindingFlagsEXT> m_bindingFlags;
             Graphics* m_graphics;
     };
 }

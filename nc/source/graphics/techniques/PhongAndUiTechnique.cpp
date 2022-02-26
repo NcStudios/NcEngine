@@ -54,7 +54,10 @@ namespace nc::graphics
             *(m_descriptorSets->GetDescriptorSetLayout(BindFrequency::PerFrame))
         };
 
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
+        auto sets = std::vector<BindFrequency>{BindFrequency::PerFrame};
+        auto setLayoutsCount = m_descriptorSets->GetSetLayoutCount(sets);
+
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts, setLayoutsCount);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };

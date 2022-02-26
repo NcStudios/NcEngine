@@ -7,8 +7,8 @@ namespace nc::graphics
 {
     ShaderDescriptorSets::ShaderDescriptorSets(Graphics* graphics)
         : m_descriptorSets{},
-        m_bindingFlags{vk::DescriptorBindingFlagsEXT()},
-        m_graphics{graphics}
+          m_bindingFlags{},
+          m_graphics{graphics}
     {
         m_descriptorSets.reserve(1);
         m_descriptorSets.emplace(BindFrequency::PerFrame, DescriptorSet{});
@@ -19,7 +19,8 @@ namespace nc::graphics
         auto* descriptorSet = GetSet(bindFrequency);
         auto descriptorSlot = static_cast<uint32_t>(descriptorSet->bindings.size());
         descriptorSet->bindings.push_back(CreateDescriptorSetLayoutBinding(descriptorSlot, descriptorCount, descriptorType, shaderStages));
-        UpdateSet(bindFrequency, vk::DescriptorBindingFlagBitsEXT());
+        m_bindingFlags.push_back(vk::DescriptorBindingFlagBitsEXT());
+        UpdateSet(bindFrequency);
 
         vk::DescriptorBufferInfo objectsDataBufferInfo;
         objectsDataBufferInfo.buffer = *buffer;
@@ -45,7 +46,8 @@ namespace nc::graphics
         auto* descriptorSet = GetSet(bindFrequency);
         auto descriptorSlot = static_cast<uint32_t>(descriptorSet->bindings.size());
         descriptorSet->bindings.push_back(CreateDescriptorSetLayoutBinding(descriptorSlot, descriptorCount, descriptorType, shaderStages));
-        UpdateSet(bindFrequency, bindingFlags);
+        m_bindingFlags.push_back(bindingFlags);
+        UpdateSet(bindFrequency);
 
         return descriptorSlot;
     }
@@ -76,7 +78,7 @@ namespace nc::graphics
         cmd->bindDescriptorSets(bindPoint, pipelineLayout, firstSet, setCount, &GetSet(bindFrequency)->set.get(), 0, 0);
     }
 
-    void ShaderDescriptorSets::UpdateSet(BindFrequency bindFrequency, vk::DescriptorBindingFlagsEXT bindingFlags)
+    void ShaderDescriptorSets::UpdateSet(BindFrequency bindFrequency)
     {
         auto* descriptorSet = GetSet(bindFrequency);
         descriptorSet->layout = CreateDescriptorSetLayout(m_graphics, descriptorSet->bindings, m_bindingFlags);
@@ -87,4 +89,18 @@ namespace nc::graphics
     {
         return &m_descriptorSets.at(bindFrequency);
     }
+
+    uint32_t ShaderDescriptorSets::GetSetLayoutCount(std::span<BindFrequency> bindFrequencies)
+    {
+        uint32_t totalSetLayouts = 0;
+
+        for (auto bindFrequency : bindFrequencies)
+        {
+            auto* descriptorSet = GetSet(bindFrequency);
+            totalSetLayouts += descriptorSet->bindings.size();
+        }
+
+        return totalSetLayouts;
+    }
+
 }

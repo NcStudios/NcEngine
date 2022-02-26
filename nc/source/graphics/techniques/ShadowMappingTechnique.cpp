@@ -72,7 +72,10 @@ namespace nc::graphics
             *(m_descriptorSets->GetDescriptorSetLayout(BindFrequency::PerFrame))
         };
 
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
+        auto sets = std::vector<BindFrequency>{ BindFrequency::PerFrame };
+        auto setLayoutsCount = m_descriptorSets->GetSetLayoutCount(sets);
+
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts, setLayoutsCount);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         // Graphics pipeline
