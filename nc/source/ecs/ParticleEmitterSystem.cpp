@@ -20,12 +20,11 @@
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, graphics::Graphics* graphics)
+    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry)
         : m_emitterStates{},
           m_toAdd{},
-          m_toRemove{},
+          m_toRemove{}
           //m_graphicsData{CreateParticleGraphicsData(graphics)},
-          m_graphics{graphics}    
     {
         registry->RegisterOnAddCallback<ParticleEmitter>
         (

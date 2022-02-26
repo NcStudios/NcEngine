@@ -9,6 +9,9 @@
 #include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
 
+#include "graphics/graphics_stub.h"
+#include "graphics/Graphics.h"
+
 namespace nc
 {
     auto InitializeNcEngine(std::string_view configPath, bool useEditorMode) -> std::unique_ptr<NcEngine>
@@ -16,22 +19,30 @@ namespace nc
         config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         V_LOG("Constructing Engine Instance");
-        return std::make_unique<Engine>(useEditorMode);
+
+        auto camera = std::make_unique<camera::MainCameraImpl>();
+        auto window = std::make_unique<window::WindowImpl>();
+        //auto graphics = std::make_unique<graphics::Graphics>(camera.get(), window->GetHWND(), window->GetHINSTANCE(), window->GetDimensions());
+        auto graphics = std::make_unique<graphics::dummy_graphics>();
+        return std::make_unique<Engine>(std::move(camera), std::move(window), std::move(graphics), useEditorMode);
     }
 
     /* Engine */
-    Engine::Engine(bool useEditorMode)
-        : m_mainCamera{},
-          m_window{},
-          m_graphics{ &m_mainCamera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions() },
-          m_ecs{&m_graphics, config::GetMemorySettings()},
+    Engine::Engine(std::unique_ptr<camera::MainCameraImpl> camera,
+                   std::unique_ptr<window::WindowImpl> window,
+                   std::unique_ptr<graphics::graphics_interface> graphics,
+                   bool useEditorMode)
+        : m_mainCamera{std::move(camera)},
+          m_window{std::move(window)},
+          m_graphics{std::move(graphics)},
+          m_ecs{config::GetMemorySettings()},
           m_physicsSystem{m_ecs.GetRegistry()},
           m_sceneSystem{},
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_environment{},
           m_random{},
-          m_uiSystem{m_window.GetHWND(), &m_graphics},
+          m_uiSystem{m_window->GetHWND(), m_graphics.get()},
           m_taskExecutor{8u}, // @todo probably add to config
           m_tasks{},
           m_dt{0.0f},
@@ -86,7 +97,7 @@ namespace nc
     auto Engine::Environment() noexcept -> nc::Environment* { return &m_environment;      }
     auto Engine::Random()      noexcept -> nc::Random*      { return &m_random;           }
     auto Engine::Registry()    noexcept -> nc::Registry*    { return m_ecs.GetRegistry(); }
-    auto Engine::MainCamera()  noexcept -> nc::MainCamera*  { return &m_mainCamera;       }
+    auto Engine::MainCamera()  noexcept -> nc::MainCamera*  { return m_mainCamera.get();  }
     auto Engine::Physics()     noexcept -> PhysicsSystem*   { return &m_physicsSystem;    }
     auto Engine::SceneSystem() noexcept -> nc::SceneSystem* { return &m_sceneSystem;      }
     auto Engine::UI()          noexcept -> UISystem*        { return &m_uiSystem;         }
@@ -132,7 +143,7 @@ namespace nc
             OPTICK_FRAME("Main Thread");
 
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
-            m_window.ProcessSystemMessages();
+            m_window->ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
             RunFrameLogic(m_dt);
 
@@ -164,7 +175,7 @@ namespace nc
         while(m_isRunning)
         {
             m_dt = m_frameDeltaTimeFactor * static_cast<float>(m_time.UpdateTime());
-            m_window.ProcessSystemMessages();
+            m_window->ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
             RunFrameLogic(m_dt);
 
@@ -183,11 +194,11 @@ namespace nc
     {
         V_LOG("Clearing engine state");
 
-        m_graphics.Clear();
+        m_graphics->clear();
         m_ecs.Clear();
         m_physicsSystem.ClearState();
         m_audioSystem.Clear();
-        m_mainCamera.Set(nullptr);
+        m_mainCamera->Set(nullptr);
         m_time.ResetFrameDeltaTime();
         m_time.ResetAccumulatedTime();
         m_environment.Clear();
@@ -215,11 +226,11 @@ namespace nc
     {
         OPTICK_CATEGORY("FrameRender", Optick::Category::Rendering);
         /** Update the view matrix for the camera */
-        auto* mainCamera = m_mainCamera.Get();
+        auto* mainCamera = m_mainCamera->Get();
         mainCamera->UpdateViewMatrix();
 
         /** Setup the frame */
-        if (m_graphics.FrameBegin() == UINT32_MAX) return;
+        if (!m_graphics->frame_begin()) return;
         m_uiSystem.FrameBegin();
 
         auto* registry = m_ecs.GetRegistry();
@@ -235,14 +246,14 @@ namespace nc
         graphics::MapPerFrameRenderState(state);
 
         /** Draw the frame */
-        m_graphics.Draw(state);
+        m_graphics->draw(state);
 
         #ifdef NC_EDITOR_ENABLED
         for(auto& collider : view<Collider>{registry}) collider.SetEditorSelection(false);
         #endif
 
         /** End the frame */
-        m_graphics.FrameEnd();
+        m_graphics->frame_end();
     }
 
     void Engine::FrameCleanup()
@@ -257,11 +268,9 @@ namespace nc
 
     void Engine::SetBindings()
     {
-        using namespace std::placeholders;
-
-        m_window.BindGraphicsOnResizeCallback(std::bind(&graphics::Graphics::OnResize, &m_graphics, _1, _2, _3, _4, _5));
-        m_window.BindGraphicsSetClearColorCallback(std::bind(&graphics::Graphics::SetClearColor, &m_graphics, _1));
-        m_window.BindUICallback(std::bind(&ui::UISystemImpl::WndProc, &m_uiSystem, _1, _2, _3, _4));
-        m_window.BindEngineDisableRunningCallback(std::bind(&Engine::DisableRunningFlag, this));
+        m_window->BindGraphicsOnResizeCallback(std::bind_front(&graphics::graphics_interface::on_resize, m_graphics.get()));
+        m_window->BindGraphicsSetClearColorCallback(std::bind_front(&graphics::graphics_interface::set_clear_color, m_graphics.get()));
+        m_window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_uiSystem));
+        m_window->BindEngineDisableRunningCallback(std::bind_front(&Engine::DisableRunningFlag, this));
     }
 } // end namespace nc::engine

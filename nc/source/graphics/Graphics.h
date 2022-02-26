@@ -1,14 +1,13 @@
 #pragma once
 
+#include "graphics_interface.h"
 #include "MainCamera.h"
 #include "math/Vector.h"
-#include "platform/win32/NcWin32.h"
 #include "directx/Inc/DirectXMath.h"
 #ifdef NC_DEBUG_RENDERING_ENABLED
 #include "DebugRenderer.h"
 #endif
 
-#include <array>
 #include <memory>
 #include <mutex>
 
@@ -19,12 +18,11 @@ namespace nc::graphics
     class Base;
     class Commands;
     class Swapchain;
-    struct PerFrameRenderState;
     class Renderer;
     class RenderPassManager;
     class ShaderResourceServices;
 
-    class Graphics
+    class Graphics : public graphics_interface
     {
         public:
             Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
@@ -34,11 +32,15 @@ namespace nc::graphics
             Graphics& operator=(const Graphics&) = delete;
             Graphics& operator=(Graphics&&) = delete;
 
-            void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
-            void SetClearColor(std::array<float, 4> color);
+            void initialize_ui() override;
+            bool frame_begin() override;
+            void draw(const PerFrameRenderState& state) override;
+            void frame_end() override;
+            void clear() override;
+            void on_resize(float width, float height, float nearZ, float farZ, WPARAM windowArg) override;
+            void set_clear_color(std::array<float, 4> color) override;
+            
             void WaitIdle();
-            void Clear();
-            void InitializeUI();
 
             Base* GetBasePtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
@@ -50,13 +52,9 @@ namespace nc::graphics
             graphics::DebugData* GetDebugData();
             #endif
 
-            uint32_t FrameBegin();
-            void Draw(const PerFrameRenderState& state);
-            void FrameEnd();
-
         private:
             void RecreateSwapchain(Vector2 dimensions);
-            bool GetNextImageIndex(uint32_t* imageIndex);
+            void GetNextImageIndex();
             void RenderToImage(uint32_t imageIndex);
             bool PresentImage(uint32_t imageIndex);
 

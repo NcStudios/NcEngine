@@ -3,7 +3,6 @@
 namespace nc
 {
     class Registry;
-    namespace graphics { class Graphics; }
 }
 
 namespace nc::ecs
@@ -11,7 +10,7 @@ namespace nc::ecs
     class PointLightSystem
     {
         public:
-            PointLightSystem(Registry* registry, graphics::Graphics* graphics);
+            PointLightSystem(Registry* registry);
             PointLightSystem(PointLightSystem&&) = delete;
             PointLightSystem(const PointLightSystem&) = delete;
             PointLightSystem& operator = (PointLightSystem&&) = delete;
@@ -21,7 +20,6 @@ namespace nc::ecs
             void Clear();
 
         private:
-            graphics::Graphics* m_graphics;
             Registry* m_registry;
             bool m_isSystemDirty;
     };

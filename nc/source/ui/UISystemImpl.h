@@ -6,7 +6,7 @@
 
 namespace nc::graphics 
 { 
-    class Graphics;
+    class graphics_interface;
 }
 
 namespace nc::ui
@@ -14,7 +14,7 @@ namespace nc::ui
     class UISystemImpl final : public UISystem
     {
         public:
-            UISystemImpl(HWND hwnd, graphics::Graphics* graphics);
+            UISystemImpl(HWND hwnd, graphics::graphics_interface* graphics);
             ~UISystemImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -37,7 +37,7 @@ namespace nc::ui
             
             IUI* m_projectUI;
             
-            graphics::Graphics* m_graphics;
+            graphics::graphics_interface* m_graphics;
 
     };
 } // namespace nc::ui

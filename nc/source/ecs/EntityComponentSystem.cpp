@@ -2,11 +2,10 @@
 
 namespace nc::ecs
 {
-    EntityComponentSystem::EntityComponentSystem(graphics::Graphics* graphics,
-                                                 const config::MemorySettings& memSettings)
+    EntityComponentSystem::EntityComponentSystem(const config::MemorySettings& memSettings)
         : m_registry{memSettings.maxTransforms},
-          m_particleEmitterSystem{&m_registry, graphics},
-          m_pointLightSystem{&m_registry, graphics}
+          m_particleEmitterSystem{&m_registry},
+          m_pointLightSystem{&m_registry}
     {
     }
 

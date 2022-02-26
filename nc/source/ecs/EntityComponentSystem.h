@@ -5,15 +5,12 @@
 #include "PointLightSystem.h"
 #include "config/Config.h"
 
-namespace nc::graphics { class Graphics; }
-
 namespace nc::ecs
 {
     class EntityComponentSystem
     {
         public:
-            EntityComponentSystem(graphics::Graphics* graphics,
-                                  const config::MemorySettings& memSettings);
+            EntityComponentSystem(const config::MemorySettings& memSettings);
 
             auto GetRegistry() noexcept { return &m_registry; }
             auto GetParticleEmitterSystem() noexcept { return &m_particleEmitterSystem; }

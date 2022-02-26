@@ -37,8 +37,10 @@ namespace nc::graphics
     {
         try
         {
+            // @todo doesn't clear wait already??
+             
             WaitIdle();
-            Clear();
+            clear();
         }
         catch(const std::runtime_error& e) // from WaitIdle()
         {
@@ -71,7 +73,7 @@ namespace nc::graphics
         m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), m_dimensions);
     }
 
-    void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    void Graphics::on_resize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
         m_dimensions = Vector2{ width, height };
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
@@ -117,20 +119,15 @@ namespace nc::graphics
     }
     #endif
 
-    bool Graphics::GetNextImageIndex(uint32_t* imageIndex)
+    void Graphics::GetNextImageIndex()
     {
-        bool isSwapChainValid = true;
-        *imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);
-        m_imageIndex = *imageIndex;
-        if (!isSwapChainValid)
+        if(!m_swapchain->GetNextRenderReadyImageIndex(&m_imageIndex))
         {
             RecreateSwapchain(m_dimensions);
-            return false;
         }
-        return true;
     }
 
-    void Graphics::Clear()
+    void Graphics::clear()
     {
         WaitIdle();
         m_renderer->Clear();
@@ -140,7 +137,7 @@ namespace nc::graphics
         ShaderResourceService<EnvironmentData>::Get()->Reset();
     }
 
-    void Graphics::SetClearColor(std::array<float, 4> color)
+    void Graphics::set_clear_color(std::array<float, 4> color)
     {
         m_clearColor = color;
     }
@@ -172,29 +169,27 @@ namespace nc::graphics
         return true;
     }
 
-    void Graphics::InitializeUI()
+    void Graphics::initialize_ui()
     {
         m_renderer->InitializeImgui();
     }
 
-    uint32_t Graphics::FrameBegin()
+    bool Graphics::frame_begin()
     {
         OPTICK_CATEGORY("Graphics::FrameBegin", Optick::Category::Rendering);
-        if (m_isMinimized) return UINT32_MAX;
-
-        uint32_t imageIndex = UINT32_MAX;
+        if (m_isMinimized) return false;
 
         // Gets the next image in the swapchain
-        GetNextImageIndex(&imageIndex);
+        GetNextImageIndex();
 
-        return m_imageIndex;
+        return true;
     }
 
     // Executes the command buffer for the next swapchain image which writes to the image.
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MaxFramesInFlight sets of calls will be running at any given time.
     // See Device.cpp for synchronization of these calls.
-    void Graphics::Draw(const PerFrameRenderState& state)
+    void Graphics::draw(const PerFrameRenderState& state)
     {
         OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
         if (m_isMinimized) return;
@@ -208,7 +203,7 @@ namespace nc::graphics
         if (!PresentImage(m_imageIndex)) return;
     }
 
-    void Graphics::FrameEnd()
+    void Graphics::frame_end()
     {
         // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
         m_swapchain->IncrementFrameIndex();

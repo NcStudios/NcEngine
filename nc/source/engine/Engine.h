@@ -5,8 +5,7 @@
 #include "audio/AudioSystemImpl.h"
 #include "camera/MainCameraImpl.h"
 #include "ecs/EntityComponentSystem.h"
-#include "graphics/Graphics.h"
-#include "graphics/Renderer.h"
+#include "graphics/graphics_interface.h"
 #include "graphics/resources/EnvironmentImpl.h"
 #include "physics/PhysicsSystemImpl.h"
 #include "scene/SceneSystemImpl.h"
@@ -20,7 +19,10 @@ namespace nc
     class Engine final : public NcEngine
     {
         public:
-            Engine(bool useEditorMode);
+            Engine(std::unique_ptr<camera::MainCameraImpl> camera,
+                   std::unique_ptr<window::WindowImpl> window,
+                   std::unique_ptr<graphics::graphics_interface> graphics,
+                   bool useEditorMode);
             ~Engine() noexcept;
 
             void Start(std::unique_ptr<Scene> initialScene) override;
@@ -37,9 +39,9 @@ namespace nc
             auto UI() noexcept -> UISystem* override;
 
         private:
-            camera::MainCameraImpl m_mainCamera;
-            window::WindowImpl m_window;
-            graphics::Graphics m_graphics;
+            std::unique_ptr<camera::MainCameraImpl> m_mainCamera;
+            std::unique_ptr<window::WindowImpl> m_window;
+            std::unique_ptr<graphics::graphics_interface> m_graphics;
             ecs::EntityComponentSystem m_ecs;
             physics::PhysicsSystemImpl m_physicsSystem;
             scene::SceneSystemImpl m_sceneSystem;

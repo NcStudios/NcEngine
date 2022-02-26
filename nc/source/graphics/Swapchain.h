@@ -38,7 +38,7 @@ namespace nc::graphics
             // Image synchronization
             void CreateSynchronizationObjects();
             void DestroySynchronizationObjects() noexcept;
-            uint32_t GetNextRenderReadyImageIndex(bool& isSwapChainValid);
+            bool GetNextRenderReadyImageIndex(uint32_t* imageIndex);
             uint32_t GetFrameIndex() const noexcept;
             void WaitForFrameFence() const;
             void ResetFrameFence();
