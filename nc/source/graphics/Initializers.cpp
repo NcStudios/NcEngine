@@ -359,7 +359,7 @@ namespace nc::graphics
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, std::span<const vk::DescriptorSetLayout> layouts)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(1);
+        pipelineLayoutInfo.setSetLayoutCount(static_cast<uint32_t>(layouts.size()));
         pipelineLayoutInfo.setPSetLayouts(layouts.data());
         pipelineLayoutInfo.setPushConstantRangeCount(1);
         pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);
@@ -369,7 +369,7 @@ namespace nc::graphics
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.setSetLayoutCount(1);
+        pipelineLayoutInfo.setSetLayoutCount(static_cast<uint32_t>(layouts.size()));
         pipelineLayoutInfo.setPSetLayouts(layouts.data());
         pipelineLayoutInfo.setPushConstantRangeCount(0);
         pipelineLayoutInfo.setPPushConstantRanges(nullptr);
