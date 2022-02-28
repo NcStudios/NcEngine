@@ -8,6 +8,7 @@
 #include "DebugRenderer.h"
 #endif
 
+#include <array>
 #include <memory>
 #include <mutex>
 
