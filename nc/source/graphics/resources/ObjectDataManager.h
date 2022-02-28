@@ -3,7 +3,7 @@
 #include "ShaderResourceService.h"
 #include "WriteableBuffer.h"
 #include "directx/Inc/DirectXMath.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/resources/shader_descriptor_sets.h"
 
 namespace nc::graphics
 {
@@ -25,7 +25,7 @@ namespace nc::graphics
     class ObjectDataManager : public IShaderResourceService<ObjectData>
     {
         public:
-            ObjectDataManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxRenderers);
+            ObjectDataManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, uint32_t maxRenderers);
             ~ObjectDataManager() noexcept;
 
             void Initialize() override;
@@ -34,7 +34,7 @@ namespace nc::graphics
 
         private:
             Graphics* m_graphics;
-            ShaderDescriptorSets* m_descriptors;
+            shader_descriptor_sets* m_descriptors;
             WriteableBuffer<ObjectData> m_objectsDataBuffer;
             uint32_t m_maxObjects;
             uint32_t m_bindingSlot;

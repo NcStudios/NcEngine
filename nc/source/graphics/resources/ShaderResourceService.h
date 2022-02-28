@@ -20,7 +20,7 @@ namespace nc
 
 namespace vk
 {
-    class DescriptorSet;
+    class descriptor_set;
     class DescriptorSetLayout;
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/resources/shader_descriptor_sets.h"
 #include "ITechnique.h"
 
 #include "directx/Inc/DirectXMath.h"
@@ -33,7 +33,7 @@ namespace nc::graphics
 
             nc::graphics::Graphics* m_graphics;
             Base* m_base;
-            ShaderDescriptorSets* m_descriptorSets;
+            shader_descriptor_sets* m_descriptorSets;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
             bool m_enabled;

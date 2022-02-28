@@ -10,7 +10,7 @@ target_sources(NcEngineLib
         ${ROOT_DIR}/source/graphics/resources/ObjectDataManager.cpp
         ${ROOT_DIR}/source/graphics/resources/PointLightManager.cpp
         ${ROOT_DIR}/source/graphics/resources/RenderPassManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/ShaderDescriptorSets.cpp
+        ${ROOT_DIR}/source/graphics/resources/shader_descriptor_sets.cpp
         ${ROOT_DIR}/source/graphics/resources/ShadowMapManager.cpp
         ${ROOT_DIR}/source/graphics/resources/TextureManager.cpp
         ${ROOT_DIR}/source/graphics/resources/UniformBuffer.cpp
