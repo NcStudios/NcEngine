@@ -38,12 +38,12 @@ namespace nc::graphics
         m_depthStencil = std::make_unique<RenderTarget>(base, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
-        auto imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
+        m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
         m_descriptors->UpdateImage
         (
             BindFrequency::PerFrame,
-            imageInfos,
+            m_imageInfos,
             1,
             vk::DescriptorType::eCombinedImageSampler,
             m_bindingSlot
@@ -79,9 +79,6 @@ namespace nc::graphics
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
-
-        //auto shadowMap = ShadowMap{ .dimensions = m_dimensions };
-        //Update(std::vector<ShadowMap>{shadowMap});
 
         m_descriptors->RegisterDescriptor
         (
