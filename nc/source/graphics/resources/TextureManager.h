@@ -20,7 +20,7 @@ namespace nc::graphics
     class TextureManager : public IShaderResourceService<Texture>
     {
         public:
-            TextureManager(Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxTextures);
+            TextureManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxTextures);
             ~TextureManager() noexcept;
 
             void Initialize() override;

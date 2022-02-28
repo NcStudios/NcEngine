@@ -7,13 +7,15 @@
 
 namespace nc::graphics
 {
-    ShadowMapManager::ShadowMapManager(Graphics* graphics, ShaderDescriptorSets* descriptors, Vector2 dimensions)
+    ShadowMapManager::ShadowMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, Vector2 dimensions)
     : m_graphics{graphics},
       m_descriptors{ descriptors },
       m_sampler{nullptr},
       m_depthStencil{nullptr},
       m_dimensions{dimensions},
-      m_bindingSlot{0}
+      m_bindingSlot{bindingSlot},
+      m_imageInfos{},
+      m_isRegistered{false}
     {
         Initialize();
     }
@@ -38,7 +40,7 @@ namespace nc::graphics
         auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         auto imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
-        m_descriptors->UpdateDescriptor
+        m_descriptors->UpdateImage
         (
             BindFrequency::PerFrame,
             imageInfos,
@@ -76,15 +78,29 @@ namespace nc::graphics
         m_sampler = base->GetDevice().createSamplerUnique(samplerInfo);
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
-        auto imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
+        m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
-        m_bindingSlot = m_descriptors->RegisterDescriptor
+        //auto shadowMap = ShadowMap{ .dimensions = m_dimensions };
+        //Update(std::vector<ShadowMap>{shadowMap});
+
+        m_descriptors->RegisterDescriptor
         (
+            m_bindingSlot,
             BindFrequency::PerFrame,
-            imageInfos,
             1,
             vk::DescriptorType::eCombinedImageSampler,
-            vk::ShaderStageFlagBits::eFragment
+            vk::ShaderStageFlagBits::eFragment,
+            vk::DescriptorBindingFlagBitsEXT()
+        );
+        m_isRegistered = true;
+
+        m_descriptors->UpdateImage
+        (
+            BindFrequency::PerFrame,
+            m_imageInfos,
+            1,
+            vk::DescriptorType::eCombinedImageSampler,
+            m_bindingSlot
         );
     }
 }

@@ -18,7 +18,7 @@ namespace nc::graphics
     class ShadowMapManager : public IShaderResourceService<ShadowMap>
     {
         public:
-            ShadowMapManager(Graphics* graphics, ShaderDescriptorSets* descriptors, Vector2 dimensions);
+            ShadowMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, Vector2 dimensions);
             ~ShadowMapManager() noexcept;
 
             void Initialize() override;
@@ -34,5 +34,7 @@ namespace nc::graphics
             std::unique_ptr<RenderTarget> m_depthStencil;
             Vector2 m_dimensions;
             uint32_t m_bindingSlot;
+            std::vector<vk::DescriptorImageInfo> m_imageInfos;
+            bool m_isRegistered;
     };
 }

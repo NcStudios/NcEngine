@@ -9,10 +9,10 @@
 
 namespace nc::graphics
 {
-    EnvironmentDataManager::EnvironmentDataManager(Graphics* graphics, ShaderDescriptorSets* descriptors)
+    EnvironmentDataManager::EnvironmentDataManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors)
         : m_graphics{graphics},
           m_descriptors{descriptors},
-          m_bindingSlot{0}
+          m_bindingSlot{bindingSlot}
     {
         Initialize();
     }
@@ -42,14 +42,24 @@ namespace nc::graphics
         dataVector.push_back(initialEnvironmentData);
         m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_graphics, dataVector.back());
 
-        m_bindingSlot = m_descriptors->RegisterDescriptor
+        m_descriptors->RegisterDescriptor
+        (
+            m_bindingSlot,
+            BindFrequency::PerFrame,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex,
+            vk::DescriptorBindingFlagBitsEXT()
+        );
+
+        m_descriptors->UpdateBuffer
         (
             BindFrequency::PerFrame,
             m_environmentDataBuffer->GetBuffer(),
-            1,
+            sizeof(EnvironmentData),
             1,
             vk::DescriptorType::eUniformBuffer,
-            vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex
+            m_bindingSlot
         );
     }
 

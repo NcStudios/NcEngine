@@ -8,6 +8,7 @@
 
 #include <vector>
 #include "vulkan/vk_mem_alloc.hpp"
+#include "graphics/Graphics.h"
 
 namespace nc::graphics
 {
@@ -18,7 +19,8 @@ namespace nc::graphics
     {
         public:
             UniformBuffer();
-            UniformBuffer(nc::graphics::Graphics* graphics, const EnvironmentData& data);
+            template <typename T>
+            UniformBuffer(nc::graphics::Graphics* graphics, const T& data);
             ~UniformBuffer() noexcept;
             UniformBuffer(UniformBuffer&&);
             UniformBuffer& operator=(UniformBuffer&&);
@@ -26,7 +28,8 @@ namespace nc::graphics
             UniformBuffer(const UniformBuffer&) = delete;
             
             vk::Buffer* GetBuffer();
-            void Bind(nc::graphics::Graphics* graphics, const EnvironmentData& data);
+            template <typename T>
+            void Bind(nc::graphics::Graphics* graphics, const T& data);
             void Clear();
 
         private:
@@ -34,4 +37,32 @@ namespace nc::graphics
             uint32_t m_memoryIndex;
             vk::Buffer m_uniformBuffer;
     };
+
+    template <typename T>
+    void UniformBuffer::Bind(Graphics* graphics, const T& data)
+    {
+        m_base = graphics->GetBasePtr();
+
+        auto size = m_base->PadBufferOffsetAlignment(static_cast<uint32_t>(sizeof(T)), vk::DescriptorType::eUniformBuffer);
+
+        void* mappedData;
+        auto* allocator = m_base->GetAllocator();
+        auto* allocation = m_base->GetBufferAllocation(m_memoryIndex);
+
+        allocator->mapMemory(*allocation, &mappedData);
+        memcpy(mappedData, &data, size);
+        allocator->unmapMemory(*allocation);
+    }
+
+    template <typename T>
+    UniformBuffer::UniformBuffer(Graphics* graphics, const T& data)
+        : m_memoryIndex{ 0 },
+        m_uniformBuffer{ nullptr }
+    {
+        m_base = graphics->GetBasePtr();
+        auto size = m_base->PadBufferOffsetAlignment(static_cast<uint32_t>(sizeof(T)), vk::DescriptorType::eUniformBuffer);
+        m_memoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu, &m_uniformBuffer);
+
+        Bind(graphics, data);
+    }
 }

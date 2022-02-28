@@ -13,7 +13,7 @@ namespace nc::graphics
     class CubeMapManager : public IShaderResourceService<CubeMap>
     {
         public:
-            CubeMapManager(Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
+            CubeMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
             ~CubeMapManager() noexcept;
 
             void Initialize() override;

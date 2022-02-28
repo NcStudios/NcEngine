@@ -6,14 +6,14 @@
 
 namespace nc::graphics
 {
-    TextureManager::TextureManager(Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxTextures)
+    TextureManager::TextureManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxTextures)
         : m_graphics{graphics},
           m_descriptors{ descriptors },
           m_imageInfos{},
           m_layout{},
           m_maxTexturesCount{maxTextures},
           m_texturesInitialized{false},
-          m_bindingSlot{0}
+          m_bindingSlot{bindingSlot}
     {
         Initialize();
     }
@@ -24,10 +24,10 @@ namespace nc::graphics
 
     void TextureManager::Initialize()
     {
-        m_bindingSlot = m_descriptors->RegisterDescriptor
+        m_descriptors->RegisterDescriptor
         (
+            m_bindingSlot,
             BindFrequency::PerFrame,
-            m_imageInfos,
             m_maxTexturesCount,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,
@@ -50,7 +50,7 @@ namespace nc::graphics
             return texture.imageInfo;
         });
 
-        m_descriptors->UpdateDescriptor
+        m_descriptors->UpdateImage
         (
             BindFrequency::PerFrame,
             m_imageInfos,

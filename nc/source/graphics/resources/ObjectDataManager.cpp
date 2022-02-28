@@ -3,12 +3,12 @@
 
 namespace nc::graphics
 {
-    ObjectDataManager::ObjectDataManager(Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxRenderers)
+    ObjectDataManager::ObjectDataManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxRenderers)
         : m_graphics { graphics },
           m_descriptors{ descriptors },
           m_objectsDataBuffer{},
           m_maxObjects{ maxRenderers },
-          m_bindingSlot{ 0 }
+          m_bindingSlot{ bindingSlot }
     {
         Initialize();
     }
@@ -23,14 +23,24 @@ namespace nc::graphics
         const uint32_t objectsSize = (sizeof(ObjectData) * m_maxObjects);
         m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_graphics, objectsSize);
 
-        m_bindingSlot = m_descriptors->RegisterDescriptor
+        m_descriptors->RegisterDescriptor
+        (
+            m_bindingSlot,
+            BindFrequency::PerFrame,
+            1,
+            vk::DescriptorType::eStorageBuffer,
+            vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex,
+            vk::DescriptorBindingFlagBitsEXT()
+        );
+
+        m_descriptors->UpdateBuffer
         (
             BindFrequency::PerFrame,
             m_objectsDataBuffer.GetBuffer(),
             objectsSize,
             1,
             vk::DescriptorType::eStorageBuffer,
-            vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex
+            m_bindingSlot
         );
     }
 

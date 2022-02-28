@@ -25,7 +25,7 @@ namespace nc::graphics
     class ObjectDataManager : public IShaderResourceService<ObjectData>
     {
         public:
-            ObjectDataManager(Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxRenderers);
+            ObjectDataManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxRenderers);
             ~ObjectDataManager() noexcept;
 
             void Initialize() override;

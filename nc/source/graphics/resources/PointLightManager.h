@@ -10,7 +10,7 @@ namespace nc::graphics
     class PointLightManager : public IShaderResourceService<PointLightInfo>
     {
         public:
-            PointLightManager(Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxPointLights);
+            PointLightManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxPointLights);
             ~PointLightManager() noexcept;
 
             void Initialize() override;

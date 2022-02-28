@@ -48,6 +48,7 @@ namespace nc::graphics
       m_memorySize{ 0 },
       m_writeableBuffer { nullptr }
     {
+        size = m_base->PadBufferOffsetAlignment(size, vk::DescriptorType::eStorageBuffer);
         m_memoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu, &m_writeableBuffer);
     }
 

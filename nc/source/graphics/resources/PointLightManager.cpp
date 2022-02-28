@@ -3,12 +3,12 @@
 
 namespace nc::graphics
 {
-    PointLightManager::PointLightManager(Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxPointLights)
+    PointLightManager::PointLightManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxPointLights)
         : m_pointLightsArrayBuffer{nullptr},
-          m_descriptors{ descriptors },
+          m_descriptors{descriptors},
           m_graphics{graphics},
           m_maxPointLights{maxPointLights},
-          m_bindingSlot{0}
+          m_bindingSlot{bindingSlot}
     {
         Initialize();
     }
@@ -28,14 +28,24 @@ namespace nc::graphics
             m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, pointLightsSize);
         }
 
-        m_bindingSlot = m_descriptors->RegisterDescriptor
+        m_descriptors->RegisterDescriptor
+        (
+            m_bindingSlot,
+            BindFrequency::PerFrame,
+            1,
+            vk::DescriptorType::eStorageBuffer,
+            vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex,
+            vk::DescriptorBindingFlagBitsEXT()
+        );
+
+        m_descriptors->UpdateBuffer
         (
             BindFrequency::PerFrame,
             m_pointLightsArrayBuffer->GetBuffer(),
             pointLightsSize,
             1,
             vk::DescriptorType::eStorageBuffer,
-            vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex
+            m_bindingSlot
         );
     }
 

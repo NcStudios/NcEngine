@@ -49,7 +49,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->Bind(BindFrequency::PerFrame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 6);
+        m_descriptorSets->BindSet(BindFrequency::PerFrame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 6);
     }
 
     void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)
@@ -69,13 +69,10 @@ namespace nc::graphics
 
         std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
         {
-            *(m_descriptorSets->GetDescriptorSetLayout(BindFrequency::PerFrame))
+            *(m_descriptorSets->GetSetLayout(BindFrequency::PerFrame))
         };
 
-        auto sets = std::vector<BindFrequency>{ BindFrequency::PerFrame };
-        auto setLayoutsCount = m_descriptorSets->GetSetLayoutCount(sets);
-
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts, setLayoutsCount);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         // Graphics pipeline

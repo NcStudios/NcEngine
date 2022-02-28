@@ -16,13 +16,14 @@ namespace nc::graphics
         public:
             ShaderResourceServices(Graphics* graphics, const config::MemorySettings& memorySettings, Vector2 dimensions)
                 : m_shaderDescriptorSets{graphics},
-                  m_objectDataManager{graphics, &m_shaderDescriptorSets, memorySettings.maxRenderers},
-                  m_pointLightManager{graphics, &m_shaderDescriptorSets, memorySettings.maxPointLights},
-                  m_textureManager{graphics, &m_shaderDescriptorSets, memorySettings.maxTextures},
-                  m_shadowMapManager{ graphics, &m_shaderDescriptorSets, dimensions },
-                  m_cubeMapManager{graphics, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
-                  m_environmentDataManager{graphics, &m_shaderDescriptorSets}
+                  m_objectDataManager{0, graphics, &m_shaderDescriptorSets, memorySettings.maxRenderers},
+                  m_pointLightManager{1, graphics, &m_shaderDescriptorSets, memorySettings.maxPointLights},
+                  m_textureManager{2, graphics, &m_shaderDescriptorSets, memorySettings.maxTextures},
+                  m_shadowMapManager{3,  graphics, &m_shaderDescriptorSets, dimensions },
+                  m_cubeMapManager{4, graphics, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
+                  m_environmentDataManager{5, graphics, &m_shaderDescriptorSets}
             {
+                m_shaderDescriptorSets.CreateSet(BindFrequency::PerFrame);
             }
         
             auto GetShadowMapManager() noexcept -> ShadowMapManager& { return m_shadowMapManager; }

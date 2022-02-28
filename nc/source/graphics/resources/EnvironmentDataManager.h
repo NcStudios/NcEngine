@@ -12,7 +12,7 @@ namespace nc::graphics
     class EnvironmentDataManager : public IShaderResourceService<EnvironmentData>
     {
         public:
-            EnvironmentDataManager(Graphics* graphics, ShaderDescriptorSets* descriptors);
+            EnvironmentDataManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors);
             ~EnvironmentDataManager() noexcept;
 
             void Initialize() override;

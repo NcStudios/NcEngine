@@ -51,13 +51,10 @@ namespace nc::graphics
 
         std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
         {
-            *(m_descriptorSets->GetDescriptorSetLayout(BindFrequency::PerFrame))
+            *(m_descriptorSets->GetSetLayout(BindFrequency::PerFrame))
         };
 
-        auto sets = std::vector<BindFrequency>{BindFrequency::PerFrame};
-        auto setLayoutsCount = m_descriptorSets->GetSetLayoutCount(sets);
-
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts, setLayoutsCount);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -110,7 +107,7 @@ namespace nc::graphics
         OPTICK_CATEGORY("PhongAndUiTechnique::Bind", Optick::Category::Rendering);
 
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->Bind(BindFrequency::PerFrame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 6);
+        m_descriptorSets->BindSet(BindFrequency::PerFrame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 6);
     }
 
     bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
