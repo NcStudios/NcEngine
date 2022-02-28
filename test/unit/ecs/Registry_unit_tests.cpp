@@ -1,13 +1,13 @@
 #include "gtest/gtest.h"
 #include "ecs/Registry.h"
+#include "ecs/view.h"
 
 using namespace nc;
 
 namespace nc
 {
-    AutoComponentGroup::AutoComponentGroup(Entity) {}
-    void AutoComponentGroup::SendOnDestroy() {}
-    void AutoComponentGroup::CommitStagedComponents() {}
+    FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity} {}
+    void FreeComponentGroup::CommitStagedComponents() {}
 
     Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
         : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
@@ -47,10 +47,10 @@ struct Fake2 : public ComponentBase
     int value;
 };
 
-struct FakeAutoComponent : public AutoComponent
+struct FakeFreeComponent : public FreeComponent
 {
-    FakeAutoComponent(Entity entity, int v)
-        : AutoComponent{entity}, value{v}
+    FakeFreeComponent(Entity entity, int v)
+        : FreeComponent{entity}, value{v}
     {}
 
     int value;
@@ -107,10 +107,10 @@ TEST_F(Registry_unit_tests, RemoveEntity_EntityExists_EntityRemovedFromActiveLis
 {
     auto handle = registry.Add<Entity>(TestInfo);
     registry.CommitStagedChanges();
-    auto entities = registry.ViewAll<Entity>();
+    auto entities = view<Entity>{&registry};
     EXPECT_EQ(entities.size(), 1u);
     registry.Remove<Entity>(handle);
-    entities = registry.ViewAll<Entity>();
+    entities = view<Entity>{&registry};
     EXPECT_EQ(entities.size(), 0u);
 }
 
@@ -348,10 +348,10 @@ TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
     EXPECT_EQ(ptr, nullptr);
 }
 
-TEST_F(Registry_unit_tests, AddAutoComponent_ValidCall_ConstructsObject)
+TEST_F(Registry_unit_tests, AddFreeComponent_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
-    auto* ptr = registry.Add<FakeAutoComponent>(handle, 1);
+    auto* ptr = registry.Add<FakeFreeComponent>(handle, 1);
     EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
 }
@@ -440,7 +440,7 @@ TEST_F(Registry_unit_tests, Sort_RandomInput_SortsData)
     registry.CommitStagedChanges();
     registry.Sort<Fake1>(std::less<Fake1>());
 
-    auto fakes = registry.ViewAll<Fake1>();
+    const auto& fakes = registry.StorageFor<Fake1>()->ComponentPool();
     ASSERT_EQ(fakes.size(), 6u);
     EXPECT_EQ(fakes[0].value, 1);
     EXPECT_EQ(fakes[1].value, 3);
@@ -464,7 +464,7 @@ TEST_F(Registry_unit_tests, Sort_SortedInput_PreservesOrder)
     registry.CommitStagedChanges();
     registry.Sort<Fake1>(std::less<Fake1>());
 
-    auto fakes = registry.ViewAll<Fake1>();
+    const auto& fakes = registry.StorageFor<Fake1>()->ComponentPool();
     ASSERT_EQ(fakes.size(), 4u);
     EXPECT_EQ(fakes[0].value, 1);
     EXPECT_EQ(fakes[0].ParentEntity().Index(), 0);

@@ -21,11 +21,12 @@ namespace nc::graphics
     void PointLightManager::Initialize()
     {
         auto base = m_graphics->GetBasePtr();
-        const uint32_t pointLightsSize = (sizeof(nc::PointLightInfo) * m_maxPointLights);
+
+        const auto bufferSize = static_cast<uint32_t>(sizeof(PointLightInfo) * m_maxPointLights);
 
         if (m_pointLightsArrayBuffer == nullptr)
         {
-            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, pointLightsSize);
+            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, bufferSize);
         }
 
         m_descriptors->RegisterDescriptor
@@ -42,7 +43,7 @@ namespace nc::graphics
         (
             BindFrequency::PerFrame,
             m_pointLightsArrayBuffer->GetBuffer(),
-            pointLightsSize,
+            bufferSize,
             1,
             vk::DescriptorType::eStorageBuffer,
             m_bindingSlot

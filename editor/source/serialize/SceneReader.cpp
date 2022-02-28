@@ -218,7 +218,7 @@ namespace nc::editor
         {
             m_registry->Add<Collider>(entity, properties, isTrigger);
         }
-        catch(const std::runtime_error& e)
+        catch(const std::runtime_error&)
         {
             Output::LogError("Failure adding required hull collider:", properties.assetPath);
             AddDefaultHullCollider(m_registry, entity, isTrigger);
@@ -243,7 +243,7 @@ namespace nc::editor
         {
             m_registry->Add<ConcaveCollider>(entity, assetPath);
         }
-        catch(const std::runtime_error& e)
+        catch(const std::runtime_error&)
         {
             Output::LogError("Failure adding required concave collider:", assetPath);
             AddDefaultConcaveCollider(m_registry, entity);
@@ -310,7 +310,7 @@ namespace nc::editor
         {
             m_registry->Add<MeshRenderer>(entity, std::move(mesh), std::move(material), technique);
         }
-        catch(const std::exception& e)
+        catch(const std::exception&)
         {
             Output::LogError("Failure adding required mesh assets");
             AddDefaultMeshRenderer(m_registry, entity);

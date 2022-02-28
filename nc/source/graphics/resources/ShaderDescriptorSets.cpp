@@ -53,7 +53,7 @@ namespace nc::graphics
                 kv.second.write.setDstSet(descriptorSet->set.get());
                 writes.push_back(kv.second.write);
             }
-            m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0, nullptr);
+            m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
             descriptorSet->isDirty = false;
         }
 

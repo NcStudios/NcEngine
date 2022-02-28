@@ -1,5 +1,6 @@
 #include "SceneGraph.h"
 #include "assets/AssetManifest.h"
+#include "ecs/view.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
@@ -93,7 +94,7 @@ namespace nc::editor
                     ImGui::EndPopup();
                 }
 
-                for(auto entity : m_registry->ViewAll<Entity>())
+                for(auto entity : view<Entity>{m_registry})
                 {
                     auto* transform = m_registry->Get<Transform>(entity);
                     if(transform->Parent().Valid()) // only draw root nodes
@@ -166,7 +167,7 @@ namespace nc::editor
         m_inspector.InspectEntity(entity);
     }
 
-    void SceneGraph::AutoComponentElement(AutoComponent* comp)
+    void SceneGraph::FreeComponentElement(FreeComponent* comp)
     {
         if(!comp)
             return;

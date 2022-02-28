@@ -1,8 +1,8 @@
 #pragma once
 #include "SpawnPropertyGenerator.h"
 #include "shared/Prefabs.h"
-#include "shared/ConstantTranslation.h"
-#include "shared/ConstantRotation.h"
+#include "shared/FreeComponents.h"
+#include "math/Random.h"
 
 #include <functional>
 
@@ -10,27 +10,26 @@ namespace nc::sample
 {
     /** A prefab spawner configurable with a SpawnBehavior. If provided, extension
         will be applied to each handle after creation. */
-    class Spawner : public AutoComponent
+    class Spawner : public FreeComponent
     {
         public:
             using SpawnExtension = std::function<void(Entity)>;
 
             Spawner(Entity entity,
-                    Registry* registry,
+                    Random* random,
                     prefab::Resource resource,
                     SpawnBehavior behavior,
                     SpawnExtension extension = nullptr);
-            void FrameUpdate(float) override;
+            void Run(Entity, Registry*, float);
             void StageSpawn(unsigned count = 1u);
-            void Spawn(unsigned count = 1u);
+            void Spawn(Registry* registry, unsigned count = 1u);
             void StageDestroy(unsigned count = 1u);
-            void Destroy(unsigned count = 1u);
+            void Destroy(Registry* registry, unsigned count = 1u);
             void SetPrefab(prefab::Resource resource);
             const std::vector<Entity>& GetHandles() const;
             int GetObjectCount() const;
         
         private:
-            Registry* m_registry;
             SpawnExtension m_extension;
             std::vector<Entity> m_entities;
             SpawnPropertyGenerator m_generator;
@@ -39,24 +38,24 @@ namespace nc::sample
             bool m_applyConstantRotation;
             Entity::layer_type m_layer;
             Entity::flags_type m_flags;
-            size_t m_stagedAdditions;
-            size_t m_stagedDeletions;
+            unsigned m_stagedAdditions;
+            unsigned m_stagedDeletions;
     };
 
     inline Spawner::Spawner(Entity entity,
-                            Registry* registry,
+                            Random* random,
                             prefab::Resource resource,
                             SpawnBehavior behavior,
                             SpawnExtension extension)
-        : AutoComponent{entity},
-          m_registry{registry},
+        : FreeComponent{entity},
           m_extension{extension},
           m_entities{},
-          m_generator{behavior},
+          m_generator{behavior, random},
           m_resource{resource},
-          m_applyConstantVelocity{Vector3::Zero() != behavior.velocityRandomRange},
-          m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxisRandomRange &&
-                                  0.0f != behavior.thetaRandomRange},
+          m_applyConstantVelocity{Vector3::Zero() != behavior.minVelocity &&
+                                  Vector3::Zero() != behavior.maxVelocity},
+          m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxis ||
+                                  0.0f != behavior.rotationTheta},
           m_layer{behavior.layer},
           m_flags{behavior.flags},
           m_stagedAdditions{0u},
@@ -64,20 +63,20 @@ namespace nc::sample
     {
     }
 
-    inline void Spawner::FrameUpdate(float)
+    inline void Spawner::Run(Entity, Registry* registry, float)
     {
         // Additions/Deletions are delayed until FrameUpdate because Spawn/Destroy are
         // callbacks from ui events, and modifying state in the middle of rendering can
         // cause problems.
         if(m_stagedAdditions)
         {
-            Spawn(m_stagedAdditions);
+            Spawn(registry, m_stagedAdditions);
             m_stagedAdditions = 0u;
         }
 
         if(m_stagedDeletions)
         {
-            Destroy(m_stagedDeletions);
+            Destroy(registry, m_stagedDeletions);
             m_stagedDeletions = 0u;
         }
     }
@@ -87,11 +86,11 @@ namespace nc::sample
         m_stagedAdditions = count;
     }
 
-    inline void Spawner::Spawn(unsigned count)
+    inline void Spawner::Spawn(Registry* registry, unsigned count)
     {
-        std::generate_n(std::back_inserter(m_entities), count, [this]()
+        std::generate_n(std::back_inserter(m_entities), count, [this, registry]()
         {
-            auto handle = prefab::Create(m_registry, m_resource,
+            auto handle = prefab::Create(registry, m_resource,
             {
                 .position = m_generator.Position(),
                 .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
@@ -100,9 +99,18 @@ namespace nc::sample
             });
 
             if(m_applyConstantVelocity)
-                m_registry->Add<ConstantTranslation>(handle, m_registry, m_generator.Velocity());
+                registry->Add<ConstantTranslation>(handle, m_generator.Velocity());
             if(m_applyConstantRotation)
-                m_registry->Add<ConstantRotation>(handle, m_registry, m_generator.RotationAxis(), m_generator.Theta());
+                registry->Add<ConstantRotation>(handle, m_generator.RotationAxis(), m_generator.Theta());
+
+            registry->Add<FrameLogic>(handle, [](Entity self, Registry* registry, float dt)
+            {
+                if(auto* translation = registry->Get<ConstantTranslation>(self))
+                    translation->Run(self, registry, dt);
+                if(auto* rotation = registry->Get<ConstantRotation>(self))
+                    rotation->Run(self, registry, dt);
+            });
+
             if(m_extension)
                 m_extension(handle);
             return handle;
@@ -114,11 +122,11 @@ namespace nc::sample
         m_stagedDeletions = count;
     }
 
-    inline void Spawner::Destroy(unsigned count)
+    inline void Spawner::Destroy(Registry* registry, unsigned count)
     {
         while(!m_entities.empty() && count--)
         {
-            m_registry->Remove<Entity>(m_entities.back());
+            registry->Remove<Entity>(m_entities.back());
             m_entities.pop_back();
         }
     }
@@ -135,6 +143,6 @@ namespace nc::sample
     
     inline int Spawner::GetObjectCount() const
     {
-        return m_entities.size();
+        return static_cast<int>(m_entities.size());
     }
 }

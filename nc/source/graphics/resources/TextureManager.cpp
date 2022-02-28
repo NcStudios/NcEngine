@@ -8,7 +8,7 @@ namespace nc::graphics
 {
     TextureManager::TextureManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxTextures)
         : m_graphics{graphics},
-          m_descriptors{ descriptors },
+          m_descriptors{descriptors},
           m_imageInfos{},
           m_layout{},
           m_maxTexturesCount{maxTextures},

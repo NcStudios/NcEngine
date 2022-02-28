@@ -20,19 +20,19 @@ namespace nc::window
     /* Api Function Implementation */
     Vector2 GetDimensions()
     {
-        IF_THROW(!g_instance, "window::GetDimensions - g_instance is not set");
+        NC_ASSERT(g_instance, "window::GetDimensions - g_instance is not set");
         return g_instance->GetDimensions();
     }
 
     void SetClearColor(std::array<float, 4> color)
     {
-        IF_THROW(!g_instance, "window::SetClearColor - g_instance is not set");
+        NC_ASSERT(g_instance, "window::SetClearColor - g_instance is not set");
         g_instance->SetClearColor(color);
     }
 
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
-        IF_THROW(!g_instance, "window::RegisterOnResizeReceiver - g_instance is not set");
+        NC_ASSERT(g_instance, "window::RegisterOnResizeReceiver - g_instance is not set");
         g_instance->RegisterOnResizeReceiver(receiver);
     }
 
@@ -272,7 +272,6 @@ namespace nc::window
                 case WM_MBUTTONDOWN:
                 {
                     AddMouseButtonDownToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
-
                     break;
                 }
                 case WM_MBUTTONUP:
@@ -295,7 +294,7 @@ namespace nc::window
                 case WM_KEYDOWN:
                 case WM_KEYUP:
                 {
-                    AddKeyToQueue(message.wParam, message.lParam);
+                    AddKeyToQueue(static_cast<KeyCode_t>(message.wParam), message.lParam);
                     break;
                 }
             }

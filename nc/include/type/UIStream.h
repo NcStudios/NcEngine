@@ -13,7 +13,7 @@ namespace nc
             static constexpr auto Nonnegative = Vector2{0.0f, 500.0f};
             static constexpr auto Position    = Vector2{-2000.0f, 2000.0f};
             static constexpr auto Scale       = Vector2{0.0f, 1000.0f};
-            static constexpr auto Angle       = Vector2{-2.0f, 2.0f} * std::numbers::pi;
+            static constexpr auto Angle       = Vector2{-2.0f, 2.0f} * std::numbers::pi_v<float>;
         };
 
         struct StreamState

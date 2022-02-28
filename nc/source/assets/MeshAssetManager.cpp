@@ -181,7 +181,7 @@ namespace nc
         assert(vertEnd <= m_vertexData.vertices.end());
         m_vertexData.vertices.erase(vertBeg, vertEnd);
 
-        for(auto& [path, accessor] : m_accessors)
+        for(auto& [unused, accessor] : m_accessors)
         {
             if(accessor.firstVertex > firstVertex)
                 accessor.firstVertex -= vertexCount;

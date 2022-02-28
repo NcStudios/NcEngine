@@ -118,8 +118,10 @@ namespace nc::graphics
     void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
+        const auto objectCount = static_cast<uint32_t>(frameData.objectData.size());
+        if (objectCount == 0) return;
         const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::SkyboxMeshPath);
-        cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, frameData.objectData.size()-1); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        cmd->drawIndexed(meshAccessor.indexCount, 1u, meshAccessor.firstIndex, meshAccessor.firstVertex, objectCount - 1); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
     }
 
     void EnvironmentTechnique::Clear() noexcept

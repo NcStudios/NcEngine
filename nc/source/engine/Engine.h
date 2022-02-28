@@ -30,6 +30,7 @@ namespace nc
             auto Audio() noexcept -> AudioSystem* override;
             auto Environment() noexcept -> nc::Environment* override;
             auto MainCamera() noexcept -> nc::MainCamera* override;
+            auto Random() noexcept -> nc::Random* override;
             auto Registry() noexcept -> nc::Registry* override;
             auto Physics() noexcept -> PhysicsSystem* override;
             auto SceneSystem() noexcept -> nc::SceneSystem* override;
@@ -45,6 +46,7 @@ namespace nc
             time::Time m_time;
             audio::AudioSystemImpl m_audioSystem;
             nc::EnvironmentImpl m_environment;
+            nc::Random m_random;
             ui::UISystemImpl m_uiSystem;
             tf::Executor m_taskExecutor;
             TaskGraph m_tasks;
@@ -59,7 +61,7 @@ namespace nc
             void DisableRunningFlag() noexcept;
             void ClearState();
             void DoSceneSwap();
-            void FrameLogic(float dt);
+            void RunFrameLogic(float dt);
             void FrameRender();
             void FrameCleanup();
             void SetBindings();

@@ -18,7 +18,7 @@ namespace nc
         {
             m_dispatchTable.at(packetType)(data);
         }
-        catch(std::out_of_range& e)
+        catch(std::out_of_range&)
         {
             throw NcError("Unknown PacketType");
         }

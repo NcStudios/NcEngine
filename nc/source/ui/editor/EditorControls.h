@@ -3,6 +3,7 @@
 #include "ecs/Registry.h"
 #include "ecs/EntityComponentSystem.h"
 #include "ecs/component/All.h"
+#include "ecs/view.h"
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor::controls
@@ -18,7 +19,7 @@ namespace nc::ui::editor::controls
     inline void SceneGraphPanel(Registry* registry, float windowHeight);
     inline void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform);
     inline void EntityPanel(Registry* registry, Entity entity);
-    inline void AutoComponentElement(AutoComponent* comp);
+    inline void FreeComponentElement(FreeComponent* comp);
     inline void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight);
     inline void FrameData(float* dtMult);
     inline void ComponentSystems(Registry* registry);
@@ -44,7 +45,7 @@ namespace nc::ui::editor::controls
 
             if(ImGui::BeginChild("EntityList", {0, sceneGraphHeight / 2}, true))
             {
-                for(auto entity : registry->ViewAll<Entity>())
+                for(auto entity : view<Entity>{registry})
                 {
                     auto* transform = registry->Get<Transform>(entity);
                     auto* tag = registry->Get<Tag>(entity);
@@ -149,13 +150,13 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(col);
         }
 
-        for(const auto& comp : registry->Get<AutoComponentGroup>(entity)->GetAutoComponents())
-            controls::AutoComponentElement(comp);
+        for(const auto& comp : registry->Get<FreeComponentGroup>(entity)->GetComponents())
+            controls::FreeComponentElement(comp);
 
         ImGui::Separator();
     }
 
-    void AutoComponentElement(AutoComponent* comp)
+    void FreeComponentElement(FreeComponent* comp)
     {
         if(!comp)
             return;
@@ -192,7 +193,7 @@ namespace nc::ui::editor::controls
             ImGui::Columns(2);
             if(!initColumnWidth)
             {
-                ImGui::SetColumnWidth(-1, 0.85 * panelWidth);
+                ImGui::SetColumnWidth(-1, 0.85f * panelWidth);
                 initColumnWidth = true;
             }
             if(ImGui::BeginTabBar("UtilitiesLeftTabBar"))
@@ -222,11 +223,9 @@ namespace nc::ui::editor::controls
     }
 
     template<class T>
-    void ComponentSystemHeader(const char* name, std::span<T> components)
+    void ComponentSystemHeader(const char* name, view<T> components)
     {
         constexpr auto size = static_cast<unsigned>(sizeof(T));
-        constexpr auto destruction = StoragePolicy<T>::allow_trivial_destruction::value ? "False" : "True";
-        constexpr auto sorting = StoragePolicy<T>::sort_dense_storage_by_address::value ? "True" : "False";
 
         if(ImGui::CollapsingHeader(name))
         {
@@ -234,8 +233,6 @@ namespace nc::ui::editor::controls
             ImGui::Indent();
             ImGui::Text("Component Size:      %u", size);
             ImGui::Text("Copmonent Count:     %u", static_cast<unsigned>(components.size()));
-            ImGui::Text("Require Destruction: %s", destruction);
-            ImGui::Text("Sort by Address:     %s", sorting);
             if(ImGui::CollapsingHeader("Components"))
             {
                 ImGui::Indent();
@@ -251,13 +248,13 @@ namespace nc::ui::editor::controls
     /** @todo this will eventually need to be generic */
     void ComponentSystems(Registry* registry)
     {
-        ComponentSystemHeader<Collider>("Collider", registry->ViewAll<Collider>());
-        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", registry->ViewAll<NetworkDispatcher>());
-        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", registry->ViewAll<ParticleEmitter>());
-        ComponentSystemHeader<PhysicsBody>("Physics Body", registry->ViewAll<PhysicsBody>());
-        ComponentSystemHeader<Transform>("Transform", registry->ViewAll<Transform>());
-        ComponentSystemHeader<nc::MeshRenderer>("Mesh Renderer", registry->ViewAll<MeshRenderer>());
-        ComponentSystemHeader<nc::PointLight>("Point Light", registry->ViewAll<PointLight>());
+        ComponentSystemHeader<Collider>("Collider", view<Collider>(registry));
+        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", view<NetworkDispatcher>(registry));
+        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", view<ParticleEmitter>(registry));
+        ComponentSystemHeader<PhysicsBody>("Physics Body", view<PhysicsBody>(registry));
+        ComponentSystemHeader<Transform>("Transform", view<Transform>(registry));
+        ComponentSystemHeader<MeshRenderer>("Mesh Renderer", view<MeshRenderer>(registry));
+        ComponentSystemHeader<PointLight>("Point Light", view<PointLight>(registry));
     }
 
 } // end namespace nc::ui::editor

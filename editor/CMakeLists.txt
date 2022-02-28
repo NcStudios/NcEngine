@@ -14,11 +14,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(EDITOR_EXE "NcEditor")
 
-set(WARNING_FLAGS)
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
-elseif()
+    set(WARNING_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(WARNING_FLAGS /W3 /WX)
 endif()
 
 find_package(NcEngine REQUIRED PATHS ${NC_INSTALL_DIR})
@@ -29,7 +28,7 @@ add_executable(${EDITOR_EXE})
 set_target_properties(${EDITOR_EXE}
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/..>
-        WIN32_EXECUTABLE TRUE
+        #WIN32_EXECUTABLE TRUE
 )
 
 #Compile Options

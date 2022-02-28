@@ -5,9 +5,9 @@
 
 namespace nc
 {
-    void AutoComponent::ComponentGuiElement()
+    void FreeComponent::ComponentGuiElement()
     {
-        ImGui::Text("User AutoComponent");
+        ImGui::Text("Unknown FreeComponent");
     }
 
     namespace internal

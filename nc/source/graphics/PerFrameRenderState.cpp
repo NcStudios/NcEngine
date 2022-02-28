@@ -3,6 +3,7 @@
 #include "ecs/component/Camera.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
+#include "ecs/view.h"
 #include "graphics/resources/EnvironmentImpl.h"
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
@@ -44,7 +45,7 @@ namespace nc::graphics
         OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;
-        const auto renderers = registry->ViewAll<MeshRenderer>();
+        const auto renderers = view<MeshRenderer>{registry};
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());
 
@@ -70,7 +71,7 @@ namespace nc::graphics
 
         #ifdef NC_EDITOR_ENABLED
         auto colliderIsSelected = false;
-        for(auto& collider : registry->ViewAll<Collider>())
+        for(auto& collider : view<Collider>{registry})
         {
             if (collider.GetEditorSelection())
             {
@@ -82,7 +83,7 @@ namespace nc::graphics
         if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
         #endif
 
-        auto pointLights = registry->ViewAll<PointLight>();
+        auto pointLights = view<PointLight>{registry};
         pointLightVPs.reserve(pointLights.size());
 
         for(auto& pointLight : pointLights)
@@ -99,10 +100,10 @@ namespace nc::graphics
         {
             pointLightInfos.reserve(pointLights.size());
 
-            std::transform(pointLights.begin(), pointLights.end(), std::back_inserter(pointLightInfos), [](auto&& component)
+            for (const auto& pointLight : pointLights)
             {
-                return component.GetInfo();
-            });
+                pointLightInfos.push_back(pointLight.GetInfo());
+            }
         }
     }
 

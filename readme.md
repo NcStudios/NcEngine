@@ -1,6 +1,6 @@
 # NcEngine
 [![Tests](https://github.com/McCallisterRomer/NCEngine/actions/workflows/Tests.yml/badge.svg)](https://github.com/McCallisterRomer/NCEngine/actions?query=workflow%3ATests)
-[![License](https://img.shields.io/github/license/McCallisterRomer/NCEngine.svg)](https://github.com/McCallisterRomer/NCEngine/LICENSE)
+[![License](https://img.shields.io/github/license/McCallisterRomer/NCEngine.svg)](https://github.com/McCallisterRomer/NCEngine/blob/vnext/LICENSE)
 
 <p align="center">
   <img src="docs/Logo.png" />
@@ -117,6 +117,10 @@ Configure, build, and install steps may be manually triggered from the 'Project'
 #### NC_EDITOR_ENABLED
     Default = OFF
     Flag used by both CMake and NcEngine specifying whether to include the debug editor in the final executable. Some blocks of coded required only by the editor are wrapped in #ifdefs. If this value is set to ON, it must be passed when building both the engine library and your project.
+
+#### NC_ASSERT_ENABLED
+    Default = ON
+    Enables extra checks through the NC_ASSERT macro. These are enabled by default, even in release builds, as they are unlikely to have a serious effect on performance.
 
 #### NC_VULKAN_VALIDATION_ENABLED
     Default = OFF

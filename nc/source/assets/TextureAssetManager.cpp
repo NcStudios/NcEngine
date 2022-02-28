@@ -54,7 +54,7 @@ namespace nc
 
     bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     {
-        const auto index = m_accessors.size();
+        const auto index = static_cast<uint32_t>(m_accessors.size());
 
         if (index + 1 >= m_maxTextureCount)
             throw NcError("Cannot exceed max texture count.");
@@ -71,8 +71,8 @@ namespace nc
 
     bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
-        const auto newTextureCount = paths.size();
-        auto nextTextureIndex = m_textures.size();
+        const auto newTextureCount = static_cast<uint32_t>(paths.size());
+        auto nextTextureIndex = static_cast<uint32_t>(m_textures.size());
         if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
             throw NcError("Cannot exceed max texture count.");
 
@@ -105,7 +105,7 @@ namespace nc
         auto index = std::distance(m_textures.begin(), pos);
         m_textures.erase(pos);
 
-        for(auto& [path, textureView] : m_accessors)
+        for(auto& [unused, textureView] : m_accessors)
         {
             if(textureView.index > index)
                 --textureView.index;

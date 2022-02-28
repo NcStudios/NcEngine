@@ -192,7 +192,7 @@ namespace nc::editor
         writer.WriteNewScene(name);
 
         m_projectData.scenes.push_back(name);
-        m_uiCallbacks.updateScenes(m_projectData.scenes, m_projectData.scenes.size() - 1);
+        m_uiCallbacks.updateScenes(m_projectData.scenes, static_cast<int>(m_projectData.scenes.size()) - 1);
 
         LoadScene(name);
         return true;
@@ -285,7 +285,7 @@ namespace nc::editor
 
         m_projectData.scenes = ReadScenes(m_projectData.projectDirectory / "scenes");
         m_currentSceneIndex = m_projectData.scenes.empty() ? 0 : m_projectData.scenes.size() - 1;
-        m_uiCallbacks.updateScenes(m_projectData.scenes, m_currentSceneIndex);
+        m_uiCallbacks.updateScenes(m_projectData.scenes, static_cast<int>(m_currentSceneIndex));
 
         if(!m_projectData.scenes.empty())
             LoadScene(m_projectData.scenes.at(m_currentSceneIndex));

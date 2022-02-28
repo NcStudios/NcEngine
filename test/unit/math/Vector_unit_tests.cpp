@@ -159,7 +159,7 @@ TEST(Vector_unit_tests, Vector2_Distance)
     Vector2 a{1.0f, 1.0f};
     Vector2 b{2.0f, 2.0f};
     auto actual = Distance(a, b);
-    EXPECT_FLOAT_EQ(actual, std::sqrt(2));
+    EXPECT_FLOAT_EQ(actual, std::sqrt(2.0f));
 }
 
 TEST(Vector_unit_tests, Vector2_HasAnyZeroElement)
@@ -170,6 +170,14 @@ TEST(Vector_unit_tests, Vector2_HasAnyZeroElement)
     EXPECT_FALSE(HasAnyZeroElement(a));
     EXPECT_TRUE(HasAnyZeroElement(b));
     EXPECT_TRUE(HasAnyZeroElement(c));
+}
+
+TEST(Vector_unit_tests, Vector2_HasUniformElements)
+{
+    Vector2 a{3.2f, 3.2f};
+    Vector2 b{1.0f, 0.0f};
+    EXPECT_TRUE(HasUniformElements(a));
+    EXPECT_FALSE(HasUniformElements(b));
 }
 
 TEST(Vector_unit_tests, Vector3_Initialization)
@@ -328,7 +336,7 @@ TEST(Vector_unit_tests, Vector3_Distance)
     Vector3 a{1.0f, 1.0f, 1.0f};
     Vector3 b{2.0f, 2.0f, 2.0f};
     auto actual = Distance(a, b);
-    EXPECT_FLOAT_EQ(actual, std::sqrt(3));
+    EXPECT_FLOAT_EQ(actual, std::sqrt(3.0f));
 }
 
 TEST(Vector_unit_tests, Vector3_HasAnyZeroElement)
@@ -339,6 +347,14 @@ TEST(Vector_unit_tests, Vector3_HasAnyZeroElement)
     EXPECT_FALSE(HasAnyZeroElement(a));
     EXPECT_TRUE(HasAnyZeroElement(b));
     EXPECT_TRUE(HasAnyZeroElement(c));
+}
+
+TEST(Vector_unit_tests, Vector3_HasUniformElements)
+{
+    Vector3 a{3.2f, 3.2f, 3.2f};
+    Vector3 b{1.0f, 0.0f, 2.0f};
+    EXPECT_TRUE(HasUniformElements(a));
+    EXPECT_FALSE(HasUniformElements(b));
 }
 
 TEST(Vector_unit_tests, Vector4_Initialization)
@@ -492,6 +508,14 @@ TEST(Vector_unit_tests, Vector4_HasAnyZeroElement)
     EXPECT_FALSE(HasAnyZeroElement(a));
     EXPECT_TRUE(HasAnyZeroElement(b));
     EXPECT_TRUE(HasAnyZeroElement(c));
+}
+
+TEST(Vector_unit_tests, Vector4_HasUniformElements)
+{
+    Vector4 a = Vector4::Splat(3.2f);
+    Vector4 b{1.0f, 0.0f, 2.0f, 0.0f};
+    EXPECT_TRUE(HasUniformElements(a));
+    EXPECT_FALSE(HasUniformElements(b));
 }
 
 int main(int argc, char ** argv)

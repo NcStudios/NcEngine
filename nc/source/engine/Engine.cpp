@@ -2,8 +2,9 @@
 #include "config/Config.h"
 #include "config/ConfigInternal.h"
 #include "debug/Utils.h"
+#include "ecs/component/Logic.h"
+#include "ecs/view.h"
 #include "input/InputInternal.h"
-#include "graphics/Renderer.h"
 #include "graphics/PerFrameRenderState.h"
 #include "optick/optick.h"
 #include "physics/PhysicsConstants.h"
@@ -29,6 +30,7 @@ namespace nc
           m_time{},
           m_audioSystem{m_ecs.GetRegistry()},
           m_environment{},
+          m_random{},
           m_uiSystem{m_window.GetHWND(), &m_graphics},
           m_taskExecutor{8u}, // @todo probably add to config
           m_tasks{},
@@ -82,6 +84,7 @@ namespace nc
 
     auto Engine::Audio()       noexcept -> AudioSystem*     { return &m_audioSystem;      }
     auto Engine::Environment() noexcept -> nc::Environment* { return &m_environment;      }
+    auto Engine::Random()      noexcept -> nc::Random*      { return &m_random;           }
     auto Engine::Registry()    noexcept -> nc::Registry*    { return m_ecs.GetRegistry(); }
     auto Engine::MainCamera()  noexcept -> nc::MainCamera*  { return &m_mainCamera;       }
     auto Engine::Physics()     noexcept -> PhysicsSystem*   { return &m_physicsSystem;    }
@@ -131,7 +134,7 @@ namespace nc
             m_dt = m_frameDeltaTimeFactor * m_time.UpdateTime();
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
-            FrameLogic(m_dt);
+            RunFrameLogic(m_dt);
 
             size_t physicsIterations = 0u;
             while(physicsIterations < physics::MaxPhysicsIterations && m_time.GetAccumulatedTime() > fixedTimeStep)
@@ -163,7 +166,7 @@ namespace nc
             m_dt = m_frameDeltaTimeFactor * static_cast<float>(m_time.UpdateTime());
             m_window.ProcessSystemMessages();
             auto mainLoopTasksResult = m_tasks.RunAsync(m_taskExecutor);
-            FrameLogic(m_dt);
+            RunFrameLogic(m_dt);
 
             mainLoopTasksResult.wait();
             m_tasks.ThrowIfExceptionStored();
@@ -199,11 +202,13 @@ namespace nc
         m_sceneSystem.DoSceneChange(this);
     }
 
-    void Engine::FrameLogic(float dt)
+    void Engine::RunFrameLogic(float dt)
     {
         OPTICK_CATEGORY("SendFrameUpdate", Optick::Category::GameLogic);
-        for(auto& group : m_ecs.GetRegistry()->ViewAll<AutoComponentGroup>())
-            group.SendFrameUpdate(dt);
+        auto* registry = m_ecs.GetRegistry();
+
+        for(auto& frameLogic : view<FrameLogic>{registry})
+            frameLogic.Run(registry, dt);
     }
 
     void Engine::FrameRender()
@@ -233,7 +238,7 @@ namespace nc
         m_graphics.Draw(state);
 
         #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : registry->ViewAll<Collider>()) collider.SetEditorSelection(false);
+        for(auto& collider : view<Collider>{registry}) collider.SetEditorSelection(false);
         #endif
 
         /** End the frame */

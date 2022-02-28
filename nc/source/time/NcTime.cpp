@@ -38,11 +38,10 @@ namespace nc::time
     void Timer::Stop() noexcept
     {
         m_end = Clock::now();
-        auto u_sec = duration_cast<nanoseconds>(m_end - m_start).count();
-        m_time = u_sec;
+        m_time = duration_cast<nanoseconds>(m_end - m_start).count();
     }
 
-    float Timer::Value() const noexcept
+    int64_t Timer::Value() const noexcept
     {
         return m_time;
     }

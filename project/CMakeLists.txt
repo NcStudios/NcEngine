@@ -16,8 +16,9 @@ set(GAME_EXE "Sample")
 set(ROOT_DIR "${PROJECT_SOURCE_DIR}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+    set(WARNING_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(WARNING_FLAGS /W3 /WX)
 endif()
 
 find_package(NcEngine REQUIRED PATHS ${NC_INSTALL_DIR})
@@ -54,13 +55,5 @@ target_sources(${GAME_EXE}
         ${ROOT_DIR}/SampleMain.cpp
 )
 
-add_subdirectory(source/click_events)
-add_subdirectory(source/collision_benchmark)
-add_subdirectory(source/collision_events)
-add_subdirectory(source/jare_scratch)
-add_subdirectory(source/joints_test)
-add_subdirectory(source/rendering_benchmark)
+add_subdirectory(source/scenes)
 add_subdirectory(source/shared)
-# add_subdirectory(source/solar_system)
-add_subdirectory(source/spawn_test)
-add_subdirectory(source/worms)

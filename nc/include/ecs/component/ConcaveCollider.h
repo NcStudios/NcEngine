@@ -17,12 +17,10 @@ namespace nc
     };
 
     template<>
-    struct StoragePolicy<ConcaveCollider>
+    struct storage_policy<ConcaveCollider> : default_storage_policy
     {
-        using allow_trivial_destruction = std::false_type;
-        using sort_dense_storage_by_address = std::true_type;
-        using requires_on_add_callback = std::true_type;
-        using requires_on_remove_callback = std::true_type;
+        static constexpr bool requires_on_add_callback = true;
+        static constexpr bool requires_on_remove_callback = true;
     };
 
     #ifdef NC_EDITOR_ENABLED

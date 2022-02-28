@@ -7,15 +7,12 @@
 
 namespace nc
 {
-    class AutoComponent;
-
-    template<class T>
-    concept Component = std::movable<T> &&
-                        !std::same_as<Entity, T> &&
-                        !std::derived_from<T, AutoComponent>;
-
-    /** Base class for all Components. Only Components associated with a system
-     *  should derive directly from ComponentBase. */
+    /**
+     * @brief Base class for all components.
+     * 
+     * User-defined pooled components should derive directly from this. These types
+     * must be registered with Registry::RegisterComponentType<T>() before use.
+     */
     class ComponentBase
     {
         public:
@@ -33,56 +30,58 @@ namespace nc
             Entity m_parentEntity;
     };
 
-    /** Base class for components with no associated system. */
-    class AutoComponent : public ComponentBase
+    /**
+     * @brief Base class for free components.
+     * 
+     * User-defined free components should derive from this to avoid creating
+     * distinct pools for each type. They do not need to be registered.
+     * 
+     */
+    class FreeComponent : public ComponentBase
     {
         public:
-            explicit AutoComponent(Entity entity) noexcept
+            explicit FreeComponent(Entity entity) noexcept
                 : ComponentBase{entity} {}
 
-            virtual ~AutoComponent() = default;
-
-            virtual void FrameUpdate(float) {}
-            virtual void FixedUpdate() {}
-            virtual void OnDestroy() {}
-            virtual void OnCollisionEnter(Entity) {}
-            virtual void OnCollisionExit(Entity) {}
-            virtual void OnTriggerEnter(Entity) {}
-            virtual void OnTriggerExit(Entity) {}
+            virtual ~FreeComponent() = default;
 
             #ifdef NC_EDITOR_ENABLED
             virtual void ComponentGuiElement();
             #endif
     };
 
-    /** Helper for configuring storage and allocation behavior. */
+    /** @brief Requirements for the Registry to recognize a pooled component. */
     template<class T>
-    struct StoragePolicy
+    concept PooledComponent = std::movable<std::remove_const_t<T>> &&
+                              std::derived_from<T, ComponentBase> &&
+                              !std::derived_from<T, FreeComponent>;
+
+    /** @brief Default storage behavior for pooled components. */
+    struct default_storage_policy
     {
-        /** Allow destructor calls to be elided for types
-         *  that don't satisfy std::is_trivially_destructible. */
-        using allow_trivial_destruction = std::false_type;
+        /** @brief Requires an OnAdd callback to be set in the registry. */
+        static constexpr bool requires_on_add_callback = false;
 
-        /** Dense views over sparse sets can be optionally sorted.
-         *  This minimizes cache misses during iteration but results
-         *  in slower additions and deletions. */
-        using sort_dense_storage_by_address = std::true_type;
-
-        /** Requires an OnAdd callback to be set in the registry. */
-        using requires_on_add_callback = std::false_type;
-
-        /** Requires an OnRemove callback to be set in the registry. */
-        using requires_on_remove_callback = std::false_type;
+        /** @brief Requires an OnRemove callback to be set in the registry. */
+        static constexpr bool requires_on_remove_callback = false;
     };
 
-    /** Editor function that can be specialized to provide a custom widget.
-     *  AutoComponents must use override their member function instead. */
+    /**
+     * @brief Provide a specialization to customize storage options and
+     * behavior for a user-defined type.
+     * 
+     * @tparam T A component, which models PooledComponent, to customize.
+     */
+    template<PooledComponent T>
+    struct storage_policy : default_storage_policy {};
+
     #ifdef NC_EDITOR_ENABLED
     namespace internal
     {
         void DefaultComponentGuiElement();
     }
 
+    /** @brief Provide a specialization to customize a pooled component's editor widget. */
     template<class T>
     void ComponentGuiElement(T*)
     {

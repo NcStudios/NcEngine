@@ -109,7 +109,7 @@ namespace
         else if (key == TargetFpsKey)
         {
             out->graphicsSettings.targetFPS = std::stoi(value);
-            out->graphicsSettings.frameUpdateInterval = 1.0 / static_cast<float>(out->graphicsSettings.targetFPS);
+            out->graphicsSettings.frameUpdateInterval = 1.0f / static_cast<float>(out->graphicsSettings.targetFPS);
         }
         else if (key == NearClipKey)
             out->graphicsSettings.nearClip = std::stof(value);
@@ -129,25 +129,25 @@ namespace nc::config
     /* Api function implementation */
     const ProjectSettings& GetProjectSettings()
     {
-        IF_THROW(!g_config, "config::GetProjectSettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->projectSettings;
     }
 
     const MemorySettings& GetMemorySettings()
     {
-        IF_THROW(!g_config, "config::GetMemorySettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->memorySettings;
     }
 
     const GraphicsSettings& GetGraphicsSettings()
     {
-        IF_THROW(!g_config, "config::GetGraphicsSettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->graphicsSettings;
     }
 
     const PhysicsSettings& GetPhysicsSettings()
     {
-        IF_THROW(!g_config, "config::GetPhysicsSettings - No config loaded");
+        NC_ASSERT(g_config, "No config loaded");
         return g_config->physicsSettings;
     }
 

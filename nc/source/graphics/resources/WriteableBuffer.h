@@ -111,9 +111,9 @@ namespace nc::graphics
 
         T* mappedContainerHandle = (T*)dataContainer;
 
-        auto dataToMapSize = dataToMap.size();
+        auto dataToMapSize = static_cast<uint32_t>(dataToMap.size());
 
-        for (uint32_t i = 0; i < static_cast<uint32_t>(dataToMapSize); ++i)
+        for (uint32_t i = 0; i < dataToMapSize; ++i)
         {
             mappedContainerHandle[i] = dataToMap[i];
         }

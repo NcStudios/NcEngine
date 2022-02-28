@@ -377,7 +377,7 @@
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-Sample--Debug"
+            "dependsOn": "Configure-Sample-Debug"
         },
         {
             "label": "Build-Sample-Debug-WithValidation",
@@ -390,7 +390,7 @@
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-Sample--Debug-WithValidation"
+            "dependsOn": "Configure-Sample-Debug-WithValidation"
         },
         {
             "label": "Build-Sample-Release",
@@ -403,20 +403,20 @@
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-Sample--Ninja-Release"
+            "dependsOn": "Configure-Sample-Ninja-Release"
         },
         {
             "label": "Build-Sample-Release-WithEditor",
             "type": "shell",
             "command": "cmake",
-            "args": ["-build", "build/Sample-Ninja-Release-WithEditor"],
+            "args": ["--build", "build/Sample-Ninja-Release-WithEditor"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-Sample--Release-WithEditor"
+            "dependsOn": "Configure-Sample-Release-WithEditor"
         },
         {
             "label": "Build-Sample-Release-WithProfiling",
@@ -429,7 +429,7 @@
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-Sample--Release-WithProfiling"
+            "dependsOn": "Configure-Sample-Release-WithProfiling"
         },
         {
             "label": "Build-Sample-Release-WithValidation",

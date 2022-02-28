@@ -15,7 +15,6 @@
 .vscode/
 build/
 install/
-Testing/
 scratch/
 
 #gprof analysis
@@ -29,9 +28,6 @@ imgui.ini
 !libassimp.dll.a
 
 #external libs
-!nc/lib/glfw3.dll
-!nc/lib/libglfw3.a
-!nc/lib/libglfw3dll.a
 !nc/lib/libOptickCore.dll
 !nc/lib/libOptickCore.dll.a
 

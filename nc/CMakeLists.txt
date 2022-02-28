@@ -11,6 +11,7 @@ endif()
 
 #OPTIONS
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
+option(NC_ASSERT_ENABLED "Enable extra validation and sanity checks" ON)
 option(NC_DEBUG_RENDERING_ENABLED "Enable wireframe primitive rendering" OFF)
 option(NC_VULKAN_VALIDATION_ENABLED "Use Vulkan validation layers" OFF)
 option(NC_PROFILING_ENABLED "Include Optick profiling" OFF)
@@ -29,8 +30,9 @@ set(IMGUI_LIB "imgui-${CMAKE_BUILD_TYPE}")
 set(ENET_LIB "enet-${CMAKE_BUILD_TYPE}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+    set(WARNING_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(WARNING_FLAGS /W3 /WX)
 endif()
 
 # Propagate version
@@ -67,9 +69,9 @@ if(NC_VULKAN_VALIDATION_ENABLED)
     target_compile_definitions(NcEngineLib PUBLIC NC_VULKAN_VALIDATION_ENABLED)
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(NcEngineLib PUBLIC NC_DEBUG_BUILD)
-    add_definitions(-DNC_DEBUG_BUILD)
+if(NC_ASSERT_ENABLED)
+    target_compile_definitions(NcEngineLib PUBLIC NC_ASSERT_ENABLED)
+    add_definitions(-DNC_ASSERT_ENABLED)
 endif()
 
 if(NC_VERBOSE_LOGGING_ENABLED)
