@@ -37,10 +37,7 @@ namespace nc::graphics
     {
         try
         {
-            // @todo doesn't clear wait already??
-             
-            WaitIdle();
-            clear();
+            Clear();
         }
         catch(const std::runtime_error& e) // from WaitIdle()
         {
@@ -73,7 +70,7 @@ namespace nc::graphics
         m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), m_dimensions);
     }
 
-    void Graphics::on_resize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
         m_dimensions = Vector2{ width, height };
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
@@ -127,7 +124,7 @@ namespace nc::graphics
         }
     }
 
-    void Graphics::clear()
+    void Graphics::Clear()
     {
         WaitIdle();
         m_renderer->Clear();
@@ -137,7 +134,7 @@ namespace nc::graphics
         ShaderResourceService<EnvironmentData>::Get()->Reset();
     }
 
-    void Graphics::set_clear_color(std::array<float, 4> color)
+    void Graphics::SetClearColor(std::array<float, 4> color)
     {
         m_clearColor = color;
     }
@@ -169,12 +166,12 @@ namespace nc::graphics
         return true;
     }
 
-    void Graphics::initialize_ui()
+    void Graphics::InitializeUI()
     {
         m_renderer->InitializeImgui();
     }
 
-    bool Graphics::frame_begin()
+    bool Graphics::FrameBegin()
     {
         OPTICK_CATEGORY("Graphics::FrameBegin", Optick::Category::Rendering);
         if (m_isMinimized) return false;
@@ -189,7 +186,7 @@ namespace nc::graphics
     // Then, returns the image written to to the swap chain for presentation.
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of Device::MaxFramesInFlight sets of calls will be running at any given time.
     // See Device.cpp for synchronization of these calls.
-    void Graphics::draw(const PerFrameRenderState& state)
+    void Graphics::Draw(const PerFrameRenderState& state)
     {
         OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
         if (m_isMinimized) return;
@@ -203,7 +200,7 @@ namespace nc::graphics
         if (!PresentImage(m_imageIndex)) return;
     }
 
-    void Graphics::frame_end()
+    void Graphics::FrameEnd()
     {
         // Used to coordinate semaphores and fences because we have multiple concurrent frames being rendered asynchronously
         m_swapchain->IncrementFrameIndex();

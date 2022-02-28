@@ -6,8 +6,12 @@
 #include "collision/broad_phase/SingleAxisPrune.h"
 #include "proxy/PerFrameProxyCache.h"
 
+namespace nc { struct engine_context; }
+
 namespace nc::physics
 {
+    void attach_physics_system(engine_context* context, Registry* registry, bool enableModule);
+
     class PhysicsSystemImpl final : public PhysicsSystem
     {
         struct PipelineDescription
@@ -32,6 +36,7 @@ namespace nc::physics
 
             void DoPhysicsStep(tf::Executor& taskExecutor);
             void ClearState();
+            auto GetTasks() -> TaskGraph& { return m_pipeline.GetTasks(); }
 
         private:
             PhysicsPipeline<PipelineDescription> m_pipeline;

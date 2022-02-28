@@ -1,9 +1,45 @@
 #include "PhysicsSystemImpl.h"
 #include "config/Config.h"
+#include "engine/engine_context.h"
 #include "graphics/DebugRenderer.h"
+
+namespace
+{
+    struct physics_system_stub : public nc::context_stub
+    {
+        physics_system_stub(nc::Registry* registry)
+        {
+            registry->RegisterOnAddCallback<nc::ConcaveCollider>
+            (
+                [this](nc::ConcaveCollider& collider){ this->OnAdd(collider); }
+            );
+            
+            registry->RegisterOnRemoveCallback<nc::ConcaveCollider>
+            (
+                [this](nc::Entity entity) { this->OnRemove(entity); }
+            );
+        }
+
+        void OnAdd(nc::ConcaveCollider&) {}
+        void OnRemove(nc::Entity) {}
+    };
+}
 
 namespace nc::physics
 {
+    void attach_physics_system(engine_context* context, Registry* registry, bool enableModule)
+    {
+        if(enableModule)
+        {
+            context->physicsSystem = std::make_unique<PhysicsSystemImpl>(registry);
+        }
+        else
+        {
+            context->physicsSystem = nullptr;
+            context->stubs.push_back(std::make_unique<physics_system_stub>(registry));
+        }
+    }
+
     PhysicsSystemImpl::PhysicsSystemImpl(Registry* registry)
         : m_pipeline{registry, config::GetPhysicsSettings().fixedUpdateInterval},
           m_clickableSystem{}

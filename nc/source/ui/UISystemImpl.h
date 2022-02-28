@@ -4,17 +4,12 @@
 #include "ui/UISystem.h"
 #include "editor/Editor.h"
 
-namespace nc::graphics 
-{ 
-    class graphics_interface;
-}
-
 namespace nc::ui
 {
     class UISystemImpl final : public UISystem
     {
         public:
-            UISystemImpl(HWND hwnd, graphics::graphics_interface* graphics);
+            UISystemImpl(HWND hwnd);
             ~UISystemImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -34,10 +29,7 @@ namespace nc::ui
             #ifdef NC_EDITOR_ENABLED
             editor::Editor m_editor;
             #endif
-            
-            IUI* m_projectUI;
-            
-            graphics::graphics_interface* m_graphics;
 
+            IUI* m_projectUI;
     };
 } // namespace nc::ui
