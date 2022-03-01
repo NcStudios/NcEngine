@@ -1,4 +1,4 @@
-name: Tests
+name: Windows
 
 on:
   pull_request:
@@ -19,20 +19,29 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout Branch
+      uses: actions/checkout@v2
       with:
         submodules: recursive
 
-    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
  
-    - uses: humbletim/setup-vulkan-sdk@v1.0.3
+    - name: Setup Vulkan Sdk
+      uses: humbletim/setup-vulkan-sdk@v1.0.3
  
-    - name: Configure CMake
+    - name: Configure Tests
       run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/Tests-MSVC --preset Tests-MSVC
 
-    - name: Build
+    - name: Build Tests
       run: cmake --build ${{github.workspace}}/build/Tests-MSVC
 
-    - name: Test
+    - name: Run Tests
       working-directory: ${{github.workspace}}/build/Tests-MSVC
       run: ctest -V
+    
+    - name: Configure NcEngine Lib
+      run: cmake -S ${{github.workspace}}/nc -B ${{github.workspace}}/build/NcEngine-MSVC-Release --preset NcEngine-MSVC-Release
+    
+    - name: Build NcEngine Lib
+      run: cmake --build ${{github.workspace}}/build/NcEngine-MSVC-Release
