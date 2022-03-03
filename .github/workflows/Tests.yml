@@ -1,4 +1,4 @@
-name: Windows
+name: Tests
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  build:
+  Windows:
     runs-on: windows-2022
 
     steps:
@@ -29,7 +29,10 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
  
     - name: Setup Vulkan Sdk
-      uses: humbletim/setup-vulkan-sdk@v1.0.3
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.2.198.0
+        vulkan-components: Vulkan-Headers
  
     - name: Configure Tests
       run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/Tests-MSVC --preset Tests-MSVC
