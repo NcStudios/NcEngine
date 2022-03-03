@@ -100,7 +100,7 @@ namespace nc::graphics
         {
             pointLightInfos.reserve(pointLights.size());
 
-            for (const auto& pointLight : pointLights)
+            for(const auto& pointLight : pointLights)
             {
                 pointLightInfos.push_back(pointLight.GetInfo());
             }
