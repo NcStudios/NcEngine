@@ -16,8 +16,7 @@ layout(push_constant) uniform PER_OBJECT
     int baseColorIndex;
 } pc;
 
-layout (set = 0, binding = 0) uniform sampler smplr;
-layout (set = 0, binding = 1) uniform texture2D textures[];
+layout (set = 0, binding = 2) uniform sampler2D textures[];
 
 layout (location = 0) in vec3 inFragWorldPos;
 layout (location = 1) in vec3 inNormal;
@@ -28,7 +27,7 @@ layout (location = 0) out vec4 outFragColor;
 
 vec4 MaterialColor(int textureIndex)
 {
-   return vec4(texture(sampler2D(textures[textureIndex], smplr), inUV));
+   return vec4(texture(textures[textureIndex], inUV));
 }
 
 void main() 

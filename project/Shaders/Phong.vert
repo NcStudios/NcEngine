@@ -30,15 +30,15 @@ struct PointLight
     int isInitialized;
 };
 
-layout (std140, set=1, binding=0) readonly buffer PointLightsArray
-{
-    PointLight lights[];
-} pointLights;
-
-layout(std140, set=2, binding = 0) readonly buffer ObjectBuffer
+layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
     ObjectData objects[];
 } objectBuffer;
+
+layout (std140, set=0, binding=1) readonly buffer PointLightsArray
+{
+    PointLight lights[];
+} pointLights;
 
 layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;

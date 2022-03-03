@@ -31,24 +31,26 @@ struct ObjectData
     int metallicIndex;
 };
 
-layout (set = 5, binding = 0) uniform EnvironmentDataBuffer
-{
-    vec3 cameraWorldPosition;
-    int skyboxCubemapIndex;
-} environmentData;
-
-layout(std140, set=2, binding=0) readonly buffer ObjectBuffer
+layout(std140, set=0, binding=0) readonly buffer ObjectBuffer
 {
     ObjectData objects[];
 } objectBuffer;
 
-layout (set = 0, binding = 0) uniform sampler smplr;
-layout (set = 0, binding = 1) uniform texture2D textures[];
 
-layout (std140, set=1, binding=0) readonly buffer PointLightsArray
+layout (std140, set=0, binding=1) readonly buffer PointLightsArray
 {
     PointLight lights[];
 } pointLights;
+
+layout (set = 0, binding = 2) uniform sampler2D textures[];
+layout (set = 0, binding = 3) uniform sampler2D shadowMap;
+layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
+
+layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
+{
+    vec3 cameraWorldPosition;
+    int skyboxCubemapIndex;
+} environmentData;
 
 layout (location = 0) in vec3 inViewPosition;
 layout (location = 1) in vec3 inFragPosition;
@@ -63,17 +65,13 @@ layout (location = 0) out vec4 outFragColor;
 
 vec3 MaterialColor(int textureIndex)
 {
-   return vec3(texture(sampler2D(textures[textureIndex], smplr), inUV));
+   return vec3(texture(textures[textureIndex], inUV));
 }
-
-layout (set = 4, binding = 1) uniform samplerCube cubeMaps[];
 
 vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 {
     return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
 }
-
-layout (set = 3, binding = 0) uniform sampler2D shadowMap;
 
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
