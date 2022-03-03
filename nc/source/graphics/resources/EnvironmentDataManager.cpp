@@ -40,7 +40,7 @@ namespace nc::graphics
         initialEnvironmentData.skyboxTextureIndex = -1;
         auto dataVector = std::vector<EnvironmentData>{};
         dataVector.push_back(initialEnvironmentData);
-        m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_graphics, dataVector.back());
+        m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_graphics, static_cast<const void*>(&dataVector.back()), static_cast<uint32_t>(sizeof(EnvironmentData) * dataVector.size()));
 
         m_descriptors->register_descriptor
         (
@@ -65,7 +65,7 @@ namespace nc::graphics
 
     void EnvironmentDataManager::Update(const std::vector<EnvironmentData>& data)
     {
-       m_environmentDataBuffer->Bind(m_graphics, data.at(0));
+       m_environmentDataBuffer->Bind(m_graphics, static_cast<const void*>(&data.at(0)), static_cast<uint32_t>(sizeof(EnvironmentData) * data.size()));
     }
 
     void EnvironmentDataManager::Reset()

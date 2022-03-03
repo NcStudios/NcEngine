@@ -8,6 +8,17 @@ namespace nc::graphics
     {
     }
 
+    UniformBuffer::UniformBuffer(Graphics* graphics, const void* data, uint32_t size)
+        : m_memoryIndex{ 0 },
+        m_uniformBuffer{ nullptr }
+    {
+        m_base = graphics->GetBasePtr();
+        auto paddedSize = m_base->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
+        m_memoryIndex = m_base->CreateBuffer(paddedSize, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu, &m_uniformBuffer);
+
+        Bind(graphics, data, size);
+    }
+
     UniformBuffer::~UniformBuffer() noexcept
     {
         if (m_uniformBuffer)
@@ -48,5 +59,20 @@ namespace nc::graphics
         }
 
         m_base = nullptr;
+    }
+
+    void UniformBuffer::Bind(Graphics* graphics, const void* data, uint32_t size)
+    {
+        m_base = graphics->GetBasePtr();
+
+        auto paddedSize = m_base->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
+
+        void* mappedData;
+        auto* allocator = m_base->GetAllocator();
+        auto* allocation = m_base->GetBufferAllocation(m_memoryIndex);
+
+        allocator->mapMemory(*allocation, &mappedData);
+        memcpy(mappedData, data, paddedSize);
+        allocator->unmapMemory(*allocation);
     }
 }
