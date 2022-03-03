@@ -32,7 +32,7 @@ jobs:
       uses: humbletim/setup-vulkan-sdk@v1.2.0
       with:
         vulkan-query-version: 1.2.198.0
-        vulkan-components: Vulkan-Headers
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
  
     - name: Configure Tests
       run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/Tests-MSVC --preset Tests-MSVC
