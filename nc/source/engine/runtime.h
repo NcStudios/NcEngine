@@ -1,9 +1,9 @@
 #pragma once
 
+#include "context.h"
 #include "modules.h"
 #include "nc_engine.h"
 #include "task/TaskGraph.h"
-#include "time/NcTime.h"
 #include "window/WindowImpl.h"
 
 namespace nc
@@ -26,16 +26,16 @@ namespace nc
 
         private:
             window::WindowImpl m_window;
+            context m_context;
             modules m_modules;
-            time::Time m_time;
             tf::Executor m_taskExecutor;
             TaskGraph m_tasks;
             float m_dt;
             float m_dtFactor;
             bool m_isRunning;
-            unsigned m_currentPhysicsIterations;
+            unsigned m_currentPhysicsIterations; /** @todo should go in physics_module_impl */
 
-            void build_task_graph();
+            void build_task_graph(); /** @todo could maybe have graph builder class/func */
             void clear();
             void run();
 

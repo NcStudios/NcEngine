@@ -1,4 +1,4 @@
-#include "Network.h"
+#include "network/Network.h"
 #include "debug/Utils.h"
 
 namespace nc::net

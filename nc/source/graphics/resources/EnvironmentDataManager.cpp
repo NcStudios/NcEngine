@@ -1,7 +1,7 @@
 #include "EnvironmentDataManager.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
-#include "graphics/resources/EnvironmentImpl.h"
+#include "graphics/resources/Environment.h"
 #include "debug/Utils.h"
 
 #include <array>

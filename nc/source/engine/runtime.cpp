@@ -8,20 +8,27 @@
 
 namespace
 {
-    auto build_modules(nc::window::WindowImpl* window, nc::engine_init_flags flags) -> nc::modules
+    auto build_context() -> nc::context
+    {
+        return nc::context
+        {
+            .registry = nc::Registry{nc::config::GetMemorySettings().maxTransforms},
+            .time = nc::time::Time{},
+            .scene = nc::scene::SceneSystemImpl{},
+            .random = nc::Random{}
+        };
+    }
+
+    auto build_modules(nc::Registry* reg, nc::window::WindowImpl* window, nc::engine_init_flags flags) -> nc::modules
     {
         V_LOG("build_modules()");
         bool enableGraphicsModule = !(flags & nc::engine_init_flags_headless_mode);
         bool enablePhysicsModule = !(flags & nc::engine_init_flags_disable_physics);
-        const auto& memorySettings = nc::config::GetMemorySettings();
         nc::modules out;
-        out.registry = std::make_unique<nc::Registry>(memorySettings.maxTransforms);
-        out.graphicsModule = nc::graphics::build_graphics_module(enableGraphicsModule, out.registry.get(), window);
-        out.particleSystem = std::make_unique<nc::ecs::ParticleEmitterSystem>(out.registry.get());
-        out.physicsModule = nc::physics::build_physics_module(enablePhysicsModule, out.registry.get());
-        out.sceneSystem = std::make_unique<nc::scene::SceneSystemImpl>();
-        out.audioModule = nc::audio::build_audio_module(out.registry.get());
-        out.random = std::make_unique<nc::Random>();
+        out.graphicsModule = nc::graphics::build_graphics_module(enableGraphicsModule, reg, window);
+        out.particleSystem = std::make_unique<nc::ecs::ParticleEmitterSystem>(reg);
+        out.physicsModule = nc::physics::build_physics_module(enablePhysicsModule, reg);
+        out.audioModule = nc::audio::build_audio_module(reg);
         return out;
     }
 }
@@ -38,8 +45,8 @@ namespace nc
 
     runtime::runtime(engine_init_flags flags)
         : m_window{},
-          m_modules{::build_modules(&m_window, flags)},
-          m_time{},
+          m_context{::build_context()},
+          m_modules{::build_modules(&m_context.registry, &m_window, flags)},
           m_taskExecutor{8},
           m_tasks{},
           m_dt{0.0f},
@@ -56,9 +63,9 @@ namespace nc
     void runtime::start(std::unique_ptr<Scene> initialScene)
     {
         V_LOG("runtime::start()");
-        m_modules.registry->VerifyCallbacks();
-        m_modules.sceneSystem->ChangeScene(std::move(initialScene));
-        m_modules.sceneSystem->DoSceneChange(this);
+        m_context.registry.VerifyCallbacks();
+        m_context.scene.ChangeScene(std::move(initialScene));
+        m_context.scene.DoSceneChange(this);
         m_isRunning = true;
         run();
     }
@@ -85,9 +92,9 @@ namespace nc
     auto runtime::Audio() noexcept -> nc::audio_module*      { return m_modules.audioModule.get();    }
     auto runtime::Graphics() noexcept -> graphics_module*    { return m_modules.graphicsModule.get(); }
     auto runtime::Physics() noexcept -> physics_module*      { return m_modules.physicsModule.get();  }
-    auto runtime::Random() noexcept -> nc::Random*           { return m_modules.random.get();         }
-    auto runtime::Registry() noexcept -> nc::Registry*       { return m_modules.registry.get();       }
-    auto runtime::SceneSystem() noexcept -> nc::SceneSystem* { return m_modules.sceneSystem.get();    }
+    auto runtime::Random() noexcept -> nc::Random*           { return &m_context.random;              }
+    auto runtime::Registry() noexcept -> nc::Registry*       { return &m_context.registry;            }
+    auto runtime::SceneSystem() noexcept -> nc::SceneSystem* { return &m_context.scene;               }
 
     void runtime::build_task_graph()
     {
@@ -111,14 +118,14 @@ namespace nc
             particleEmitterSystem->UpdateParticles(dt);
         }).name("Update Particles");
 
-        auto syncTask = m_tasks.AddGuardedTask([reg = m_modules.registry.get()]
+        auto syncTask = m_tasks.AddGuardedTask([reg = &m_context.registry]
         {
             OPTICK_CATEGORY("Sync State", Optick::Category::None);
             reg->CommitStagedChanges();
         }).name("Synchronize and Commit Deltas");
 
         auto renderTask = m_tasks.AddGuardedTask(
-            [reg = m_modules.registry.get(),
+            [reg = &m_context.registry,
              graphics = m_modules.graphicsModule.get()]
         {
             OPTICK_CATEGORY("Render", Optick::Category::Rendering);
@@ -142,7 +149,7 @@ namespace nc
             auto physicsStepCondition = engineTF.emplace(
                 [&curIt = m_currentPhysicsIterations,
                 maxIt = physics::MaxPhysicsIterations,
-                time = &m_time,
+                time = &m_context.time,
                 fixedStep = config::GetPhysicsSettings().fixedUpdateInterval]
             {
                 return (curIt < maxIt && time->GetAccumulatedTime() > fixedStep) ? 1 : 0;
@@ -150,7 +157,7 @@ namespace nc
 
             auto updatePhysicsCondition = engineTF.emplace(
                 [&i = m_currentPhysicsIterations,
-                time = &m_time,
+                time = &m_context.time,
                 fixedStep = config::GetPhysicsSettings().fixedUpdateInterval]
             {
                 time->DecrementAccumulatedTime(fixedStep);
@@ -177,12 +184,12 @@ namespace nc
     void runtime::clear()
     {
         m_modules.graphicsModule->clear();
-        m_modules.registry->Clear();
+        m_context.registry.Clear();
         m_modules.particleSystem->Clear();
         m_modules.physicsModule->clear();
         m_modules.audioModule->clear();
-        m_time.ResetFrameDeltaTime();
-        m_time.ResetAccumulatedTime();
+        m_context.time.ResetFrameDeltaTime();
+        m_context.time.ResetAccumulatedTime();
     }
 
     void runtime::run()
@@ -190,7 +197,7 @@ namespace nc
         while(m_isRunning)
         {
             OPTICK_FRAME("Main Thread");
-            m_dt = m_dtFactor * m_time.UpdateTime();
+            m_dt = m_dtFactor * m_context.time.UpdateTime();
             m_currentPhysicsIterations = 0u;
             m_window.ProcessSystemMessages();
             m_tasks.Run(m_taskExecutor);
@@ -202,14 +209,14 @@ namespace nc
     void runtime::do_scene_swap()
     {
         V_LOG("runtime::do_scene_swap()");
-        m_modules.sceneSystem->UnloadActiveScene();
+        m_context.scene.UnloadActiveScene();
         clear();
-        m_modules.sceneSystem->DoSceneChange(this);
+        m_context.scene.DoSceneChange(this);
     }
 
     void runtime::run_frame_logic()
     {
-        auto* registry = m_modules.registry.get();
+        auto* registry = &m_context.registry;
 
         for(auto& frameLogic : view<FrameLogic>{registry})
             frameLogic.Run(registry, m_dt);
@@ -217,7 +224,7 @@ namespace nc
 
     void runtime::frame_cleanup()
     {
-        if(m_modules.sceneSystem->IsSceneChangeScheduled())
+        if(m_context.scene.IsSceneChangeScheduled())
         {
             do_scene_swap();
         }

@@ -1,4 +1,4 @@
-#include "NcTime.h"
+#include "Time.h"
 
 namespace
 {

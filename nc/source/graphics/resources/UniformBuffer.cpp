@@ -9,7 +9,7 @@ namespace nc::graphics
     {
     }
 
-    UniformBuffer::UniformBuffer(nc::graphics::Graphics* graphics, const EnvironmentData& data)
+    UniformBuffer::UniformBuffer(Graphics* graphics, const EnvironmentData& data)
         : m_memoryIndex { 0 },
           m_uniformBuffer { nullptr }
     {
@@ -46,7 +46,7 @@ namespace nc::graphics
         return *this;
     }
 
-    void UniformBuffer::Bind(nc::graphics::Graphics* graphics, const EnvironmentData& data)
+    void UniformBuffer::Bind(Graphics* graphics, const EnvironmentData& data)
     {
         m_base = graphics->GetBasePtr();
 

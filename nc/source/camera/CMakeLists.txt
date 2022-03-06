@@ -1,4 +1,4 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/camera/MainCameraImpl.cpp
+        ${ROOT_DIR}/source/camera/MainCamera.cpp
 )

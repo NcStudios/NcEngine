@@ -2,7 +2,6 @@
 
 #include "directx/Inc/DirectXMath.h"
 #include "ecs/component/Component.h"
-#include "graphics/Environment.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"

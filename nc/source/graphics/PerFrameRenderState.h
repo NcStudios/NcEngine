@@ -11,7 +11,7 @@
 namespace nc
 {
     class Camera;
-    class EnvironmentImpl;
+    class Environment;
     class Registry;
     #ifdef NC_DEBUG_RENDERING_ENABLED
     namespace physics { class PhysicsSystemImpl; }
@@ -22,7 +22,7 @@ namespace nc::graphics
 {
     struct PerFrameRenderState
     {
-        PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, EnvironmentImpl* environment);
+        PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment);
 
         DirectX::XMMATRIX camViewMatrix;
         DirectX::XMMATRIX projectionMatrix;
@@ -35,7 +35,7 @@ namespace nc::graphics
         #endif
         std::vector<DirectX::XMMATRIX> pointLightVPs;
         bool isPointLightBindRequired;
-        EnvironmentImpl* environment;
+        Environment* environment;
         bool useSkybox;
     };
 

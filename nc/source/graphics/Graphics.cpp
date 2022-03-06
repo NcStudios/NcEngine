@@ -1,11 +1,12 @@
 #include "Graphics.h"
+#include "assets/AssetServices.h"
 #include "Base.h"
 #include "Commands.h"
-#include "Renderer.h"
-#include "assets/AssetServices.h"
-#include "config/Config.h"
 #include "debug/Utils.h"
+#include "ecs/component/Camera.h"
+#include "config/Config.h"
 #include "optick/optick.h"
+#include "Renderer.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
 #include "Swapchain.h"
@@ -14,7 +15,7 @@
 
 namespace nc::graphics
 {
-    Graphics::Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    Graphics::Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },

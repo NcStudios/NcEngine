@@ -1,10 +1,10 @@
 #pragma once
 
-#include "camera/MainCameraImpl.h"
+#include "camera/MainCamera.h"
 #include "ecs/PointLightSystem.h"
 #include "Graphics.h"
 #include "graphics/graphics_module.h"
-#include "resources/EnvironmentImpl.h"
+#include "resources/Environment.h"
 #include "ui/UISystemImpl.h"
 
 #include <memory>
@@ -40,10 +40,10 @@ namespace nc::graphics
             auto get_tasks() -> TaskGraph& override { static TaskGraph tg; return tg; }
 
         private:
-            camera::MainCameraImpl m_camera;
+            camera::MainCamera m_camera;
             Graphics m_graphics;
             ui::UISystemImpl m_ui;
-            EnvironmentImpl m_environment;
+            Environment m_environment;
             ecs::PointLightSystem m_pointLightSystem;
     };
 }

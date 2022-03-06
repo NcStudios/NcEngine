@@ -1,11 +1,11 @@
-#include "EnvironmentImpl.h"
+#include "Environment.h"
 #include "assets/AssetService.h"
 #include "graphics/Base.h"
 #include "ShaderResourceService.h"
 
 namespace nc
 {
-    EnvironmentImpl::EnvironmentImpl()
+    Environment::Environment()
     : m_environmentData{},
       m_useSkybox{false}
     {
@@ -13,7 +13,7 @@ namespace nc
         m_environmentData.skyboxTextureIndex = -1;
     }
 
-    void EnvironmentImpl::SetSkybox(const std::string& path)
+    void Environment::SetSkybox(const std::string& path)
     {
         m_useSkybox = true;
 
@@ -26,7 +26,7 @@ namespace nc
         m_environmentData.skyboxTextureIndex = skyboxView.index;
     }
 
-    void EnvironmentImpl::SetCameraPosition(const Vector3& cameraPosition)
+    void Environment::SetCameraPosition(const Vector3& cameraPosition)
     {
         if (!AssetService<MeshView>::Get()->IsLoaded(SkyboxMeshPath))
         {
@@ -36,17 +36,17 @@ namespace nc
         m_environmentData.cameraWorldPosition = cameraPosition;
     }
 
-    bool EnvironmentImpl::UseSkybox()
+    bool Environment::UseSkybox()
     {
         return m_useSkybox;
     }
 
-    const EnvironmentData& EnvironmentImpl::Get() const
+    auto Environment::Get() const -> const EnvironmentData& 
     {
         return m_environmentData;
     }
 
-    void EnvironmentImpl::Clear()
+    void Environment::Clear()
     {
         m_useSkybox = false;
         m_environmentData.skyboxTextureIndex = -1;

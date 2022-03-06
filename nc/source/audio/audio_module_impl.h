@@ -1,6 +1,6 @@
 #pragma once
 
-#include "audio_module.h"
+#include "audio/audio_module.h"
 #include "ecs/Registry.h"
 #include "rtaudio/RtAudio.h"
 

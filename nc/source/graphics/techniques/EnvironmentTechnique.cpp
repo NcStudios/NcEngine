@@ -10,7 +10,7 @@
 #include "graphics/Swapchain.h"
 #include "graphics/Base.h"
 #include "graphics/VertexDescriptions.h"
-#include "graphics/resources/EnvironmentImpl.h"
+#include "graphics/resources/Environment.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ShaderResourceService.h"
 #include "optick/optick.h"
