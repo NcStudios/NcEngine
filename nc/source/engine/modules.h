@@ -1,17 +1,17 @@
 #pragma once
 
-#include "audio/audio_module.h"
+#include "audio/AudioModule.h"
 #include "ecs/ParticleEmitterSystem.h"
-#include "graphics/graphics_module.h"
-#include "physics/physics_module.h"
+#include "graphics/GraphicsModule.h"
+#include "physics/PhysicsModule.h"
 
 namespace nc
 {
-    struct modules
+    struct Modules
     {
-        std::unique_ptr<graphics_module> graphicsModule;
+        std::unique_ptr<GraphicsModule> graphicsModule;
         std::unique_ptr<ecs::ParticleEmitterSystem> particleSystem;
-        std::unique_ptr<physics_module> physicsModule;
-        std::unique_ptr<audio_module> audioModule;
+        std::unique_ptr<PhysicsModule> physicsModule;
+        std::unique_ptr<AudioModule> audioModule;
     };
 }

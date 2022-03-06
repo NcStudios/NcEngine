@@ -1,18 +1,16 @@
 #pragma once
 
-#include "physics/physics_module.h"
+#include "physics/PhysicsModule.h"
 #include "ClickableSystem.h"
 #include "PhysicsPipeline.h"
 #include "collision/broad_phase/SingleAxisPrune.h"
 #include "proxy/PerFrameProxyCache.h"
 
-namespace nc { struct modules; }
-
 namespace nc::physics
 {
-    auto build_physics_module(bool enableModule, Registry* registry) -> std::unique_ptr<physics_module>;
+    auto BuildPhysicsModule(bool enableModule, Registry* registry) -> std::unique_ptr<PhysicsModule>;
 
-    class physics_module_impl final : public physics_module
+    class PhysicsModuleImpl final : public PhysicsModule
     {
         struct PipelineDescription
         {
@@ -24,7 +22,7 @@ namespace nc::physics
         };
 
         public:
-            physics_module_impl(Registry* registry);
+            PhysicsModuleImpl(Registry* registry);
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
             void RemoveJoint(Entity entityA, Entity entityB) override;
@@ -37,8 +35,8 @@ namespace nc::physics
             /** @todo not needed? */
             void DoPhysicsStep(tf::Executor& taskExecutor);
 
-            void clear() noexcept override;
-            auto get_tasks() -> TaskGraph& override { return m_pipeline.GetTasks(); }
+            void Clear() noexcept override;
+            auto GetTasks() -> TaskGraph& override { return m_pipeline.GetTasks(); }
 
         private:
             PhysicsPipeline<PipelineDescription> m_pipeline;

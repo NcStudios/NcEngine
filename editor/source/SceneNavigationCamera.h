@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "Input.h"
 #include "MainCamera.h"
 

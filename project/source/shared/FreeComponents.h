@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "physics/physics_module.h"
+#include "physics/PhysicsModule.h"
 
 #include "ecs/InvokeFreeComponent.h"
 #include "ecs/Registry.h"
@@ -113,13 +113,13 @@ namespace nc::sample
     class Clickable : public FreeComponent, public IClickable
     {
         public:
-            Clickable(Entity entity, std::string tag, physics_module* physicsModule);
+            Clickable(Entity entity, std::string tag, PhysicsModule* physicsModule);
             ~Clickable() noexcept;
             void OnClick() override;
 
         private:
             std::string m_Tag;
-            physics_module* m_physicsModule;
+            PhysicsModule* m_physicsModule;
     };
 
     /** Notifies the PhysicsSystem to perform a raycast against clickables 
@@ -127,12 +127,12 @@ namespace nc::sample
     class ClickHandler : public FreeComponent
     {
         public:
-            ClickHandler(Entity entity, LayerMask mask, physics_module* physicsModule);
+            ClickHandler(Entity entity, LayerMask mask, PhysicsModule* physicsModule);
             void Run(Entity self, Registry* registry, float dt);
             void SetLayer(LayerMask mask);
 
         private:
             LayerMask m_mask;
-            physics_module* m_physicsModule;
+            PhysicsModule* m_physicsModule;
     };
 }

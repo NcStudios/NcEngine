@@ -1,5 +1,5 @@
 #include "JointsTest.h"
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "physics/PhysicsSystem.h"
 #include "shared/FreeComponents.h"
@@ -8,7 +8,7 @@
 
 namespace nc::sample
 {
-    void JointsTest::Load(nc_engine* engine)
+    void JointsTest::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
         auto* physics = engine->Physics();
@@ -19,7 +19,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->set_camera(camera);
+        engine->Graphics()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});

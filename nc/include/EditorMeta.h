@@ -28,7 +28,7 @@ friend ::nc::UIStream;
 
 /** Camera */
 #define NC_EDITOR_ADD_CAMERA(handle) registry->Add<Camera>(handle)
-#define NC_EDITOR_SET_CAMERA(handle) engine->Graphics()->set_camera(registry->Get<Camera>(handle))
+#define NC_EDITOR_SET_CAMERA(handle) engine->Graphics()->SetCamera(registry->Get<Camera>(handle))
 
 /** Collider */
 #define NC_EDITOR_BOX_PROPERTIES(...) BoxProperties{__VA_ARGS__}

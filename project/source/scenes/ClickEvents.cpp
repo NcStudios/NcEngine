@@ -1,5 +1,5 @@
 #include "ClickEvents.h"
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/Prefabs.h"
@@ -48,7 +48,7 @@ namespace
 
 namespace nc::sample
 {
-    void ClickEvents::Load(nc_engine* engine)
+    void ClickEvents::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
 
@@ -58,7 +58,7 @@ namespace nc::sample
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
-        engine->Graphics()->set_camera(camera);
+        engine->Graphics()->SetCamera(camera);
         auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, engine->Physics());
         registry->Add<FrameLogic>(cameraHandle, [](Entity self, Registry* registry, float dt)
         {

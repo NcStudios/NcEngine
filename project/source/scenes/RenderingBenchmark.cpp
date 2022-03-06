@@ -1,5 +1,5 @@
 #include "RenderingBenchmark.h"
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
@@ -43,7 +43,7 @@ namespace
 
 namespace nc::sample
 {
-    void RenderingBenchmark::Load(nc_engine* engine)
+    void RenderingBenchmark::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
 
@@ -52,7 +52,7 @@ namespace nc::sample
 
         // Camera
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        engine->Graphics()->set_camera(camera);
+        engine->Graphics()->SetCamera(camera);
 
         // Spawner
         SpawnBehavior spawnBehavior

@@ -1,5 +1,5 @@
 #include "Worms.h"
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
 
@@ -7,7 +7,7 @@
 
 namespace nc::sample
 {
-    void Worms::Load(nc_engine* engine)
+    void Worms::Load(NcEngine* engine)
     {
         auto* registry = engine->Registry();
 
@@ -18,7 +18,7 @@ namespace nc::sample
         // Camera
         auto cameraEntity = registry->Add<Entity>({.tag = "Main Camera"});
         auto camera = registry->Add<Camera>(cameraEntity);
-        engine->Graphics()->set_camera(camera);
+        engine->Graphics()->SetCamera(camera);
 
         // Window
         window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});

@@ -1,19 +1,19 @@
-#include "graphics_module_impl.h"
+#include "GraphicsModuleImpl.h"
 #include "ecs/view.h"
 #include "PerFrameRenderState.h"
 #include "window/WindowImpl.h"
 
 namespace nc::graphics
 {
-    auto build_graphics_module(bool enableModule, Registry* reg, window::WindowImpl* window) -> std::unique_ptr<graphics_module>
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window) -> std::unique_ptr<GraphicsModule>
     {
         /** @todo allow stub */
         (void)enableModule;
 
-        return std::make_unique<graphics_module_impl>(reg, window);
+        return std::make_unique<GraphicsModuleImpl>(reg, window);
     }
 
-    graphics_module_impl::graphics_module_impl(Registry* reg, window::WindowImpl* window)
+    GraphicsModuleImpl::GraphicsModuleImpl(Registry* reg, window::WindowImpl* window)
         : m_camera{},
           m_graphics{&m_camera,
                      window->GetHWND(),
@@ -29,37 +29,37 @@ namespace nc::graphics
         window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
-    void graphics_module_impl::set_camera(Camera* camera) noexcept
+    void GraphicsModuleImpl::SetCamera(Camera* camera) noexcept
     {
         m_camera.Set(camera);
     }
 
-    auto graphics_module_impl::get_camera() noexcept -> Camera*
+    auto GraphicsModuleImpl::GetCamera() noexcept -> Camera*
     {
         return m_camera.Get();
     }
 
-    void graphics_module_impl::set_ui(ui::IUI* ui) noexcept
+    void GraphicsModuleImpl::SetUi(ui::IUI* ui) noexcept
     {
         m_ui.Set(ui);
     }
 
-    bool graphics_module_impl::is_ui_hovered() const noexcept
+    bool GraphicsModuleImpl::IsUiHovered() const noexcept
     {
         return m_ui.IsHovered();
     }
 
-    void graphics_module_impl::set_skybox(const std::string& path)
+    void GraphicsModuleImpl::SetSkybox(const std::string& path)
     {
         m_environment.SetSkybox(path);
     }
 
-    void graphics_module_impl::clear_environment()
+    void GraphicsModuleImpl::ClearEnvironment()
     {
         m_environment.Clear();
     }
 
-    void graphics_module_impl::clear() noexcept
+    void GraphicsModuleImpl::Clear() noexcept
     {
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
@@ -68,7 +68,7 @@ namespace nc::graphics
         m_pointLightSystem.Clear();
     }
 
-    void graphics_module_impl::run(Registry* reg)
+    void GraphicsModuleImpl::Run(Registry* reg)
     {
         auto* camera = m_camera.Get();
         camera->UpdateViewMatrix();

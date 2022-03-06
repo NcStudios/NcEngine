@@ -35,7 +35,7 @@ namespace
 
 namespace nc::editor
 {
-    ProjectManager::ProjectManager(nc_engine* engine, AssetManifest* manifest)
+    ProjectManager::ProjectManager(NcEngine* engine, AssetManifest* manifest)
         : m_engine{engine},
           m_manifest{manifest},
           m_projectData{},

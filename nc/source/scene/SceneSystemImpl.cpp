@@ -31,7 +31,7 @@ namespace nc::scene
         m_activeScene = nullptr;
     }
 
-    void SceneSystemImpl::DoSceneChange(nc_engine* engine)
+    void SceneSystemImpl::DoSceneChange(NcEngine* engine)
     {
         if(!m_swapScene)
         {

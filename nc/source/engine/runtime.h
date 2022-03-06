@@ -1,33 +1,33 @@
 #pragma once
 
-#include "context.h"
-#include "modules.h"
-#include "nc_engine.h"
+#include "Context.h"
+#include "Modules.h"
+#include "NcEngine.h"
 #include "task/TaskGraph.h"
 #include "window/WindowImpl.h"
 
 namespace nc
 {
-    class runtime : public nc_engine
+    class Runtime : public NcEngine
     {
         public:
-            runtime(engine_init_flags flags);
+            Runtime(engine_init_flags flags);
 
-            void start(std::unique_ptr<Scene> initialScene) override;
-            void stop() noexcept override;
-            void shutdown() noexcept override;
+            void Start(std::unique_ptr<Scene> initialScene) override;
+            void Stop() noexcept override;
+            void Shutdown() noexcept override;
 
-            auto Audio() noexcept -> audio_module* override;
-            auto Graphics() noexcept -> graphics_module* override;
-            auto Physics() noexcept -> physics_module* override;
+            auto Audio() noexcept -> AudioModule* override;
+            auto Graphics() noexcept -> GraphicsModule* override;
+            auto Physics() noexcept -> PhysicsModule* override;
             auto Random() noexcept -> nc::Random* override;
             auto Registry() noexcept -> nc::Registry* override;
             auto SceneSystem() noexcept -> nc::SceneSystem* override;
 
         private:
             window::WindowImpl m_window;
-            context m_context;
-            modules m_modules;
+            Context m_context;
+            Modules m_modules;
             tf::Executor m_taskExecutor;
             TaskGraph m_tasks;
             float m_dt;
@@ -35,13 +35,13 @@ namespace nc
             bool m_isRunning;
             unsigned m_currentPhysicsIterations; /** @todo should go in physics_module_impl */
 
-            void build_task_graph(); /** @todo could maybe have graph builder class/func */
-            void clear();
-            void run();
+            void BuildTaskGraph(); /** @todo could maybe have graph builder class/func */
+            void Clear();
+            void Run();
 
             // remove these
-            void do_scene_swap();
-            void run_frame_logic();
-            void frame_cleanup();
+            void DoSceneSwap();
+            void RunFrameLogic();
+            void FrameCleanup();
     };
 }

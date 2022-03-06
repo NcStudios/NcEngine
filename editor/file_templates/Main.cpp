@@ -1,5 +1,5 @@
 #include "platform/win32/NcWin32.h"
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "debug/Utils.h"
 #include "@INCLUDE_INITIAL_SCENE@"
 

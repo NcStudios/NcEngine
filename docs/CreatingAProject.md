@@ -18,7 +18,7 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 /** ExampleScene.h */
 #include "Assets.h"
 #include "Input.h"
-#include "nc_engine.h"
+#include "NcEngine.h"
 
 /** Default assets from the nc/resources directory. */
 const auto CubeMeshPath = std::string{"cube.nca"};
@@ -33,7 +33,7 @@ const auto DefaultMaterial = nc::Material
 class ExampleScene : public nc::Scene
 {
     public:
-        void Load(nc::nc_engine* engine) override
+        void Load(nc::NcEngine* engine) override
         {
             /** Load box assets. */
             nc::LoadMeshAsset(CubeMeshPath);
@@ -55,7 +55,7 @@ class ExampleScene : public nc::Scene
             /** Create and register the Camera. */
             auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
-            engine->Graphics()->set_camera(camera);
+            engine->Graphics()->SetCamera(camera);
 
             /** Initial properties for the PointLight. */
             auto pointLightInit = nc::EntityInfo
@@ -99,7 +99,7 @@ class ExampleScene : public nc::Scene
 The main file will be pretty simple:
 ```cpp
 /** Main.cpp */
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "ExampleScene.h"
 
 int main()

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "engine_executor.h"
 
 namespace nc

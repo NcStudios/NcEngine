@@ -1,12 +1,12 @@
 #pragma once
 
 #include "platform/win32/NCWin32.h"
-#include "ui/UISystem.h"
 #include "editor/Editor.h"
+#include "ui/IUI.h"
 
 namespace nc::ui
 {
-    class UISystemImpl final : public UISystem
+    class UISystemImpl final
     {
         public:
             UISystemImpl(HWND hwnd);
@@ -14,8 +14,8 @@ namespace nc::ui
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-            void Set(IUI* ui) noexcept override;
-            bool IsHovered() const noexcept override;
+            void Set(IUI* ui) noexcept;
+            bool IsHovered() const noexcept;
 
             void FrameBegin();
 

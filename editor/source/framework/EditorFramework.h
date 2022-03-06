@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nc_engine.h"
+#include "NcEngine.h"
 #include "EditorConfig.h"
 #include "assets/AssetManifest.h"
 #include "framework/ProjectManager.h"
@@ -19,7 +19,7 @@ namespace nc::editor
     class EditorFramework
     {
         public:
-            EditorFramework(nc_engine* engine);
+            EditorFramework(NcEngine* engine);
             EditorFramework(const EditorFramework&) = delete;
             EditorFramework(EditorFramework&&) = delete;
             EditorFramework& operator=(const EditorFramework&) = delete;

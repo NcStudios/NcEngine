@@ -7,7 +7,7 @@
 
 namespace nc
 {
-    struct context
+    struct Context
     {
         Registry registry;
         time::Time time;

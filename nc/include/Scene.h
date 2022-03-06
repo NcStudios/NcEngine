@@ -6,13 +6,13 @@
 
 namespace nc
 {
-    class nc_engine;
+    class NcEngine;
 
     class Scene
     {
         public:
             virtual ~Scene() = default;
-            virtual void Load(nc_engine* engine) = 0;
+            virtual void Load(NcEngine* engine) = 0;
             virtual void Unload() = 0;
     };
 
