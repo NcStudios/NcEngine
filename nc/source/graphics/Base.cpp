@@ -394,8 +394,11 @@ namespace nc::graphics
         deviceFeatures.setFillModeNonSolid(VK_TRUE);
         deviceFeatures.setWideLines(VK_TRUE);
 
+        vk::PhysicalDeviceVulkan11Features vulkan11Features{};
+        vulkan11Features.setShaderDrawParameters(VK_TRUE);
+
         vk::PhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures{};
-        indexingFeatures.setPNext(nullptr);
+        indexingFeatures.setPNext(&vulkan11Features);
         indexingFeatures.setDescriptorBindingPartiallyBound(VK_TRUE);
         indexingFeatures.setRuntimeDescriptorArray(VK_TRUE);
 
