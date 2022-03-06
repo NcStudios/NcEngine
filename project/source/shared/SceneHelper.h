@@ -33,7 +33,7 @@ namespace nc::sample
             m_log = std::make_unique<GameLog>();
         }
 
-        m_ui = std::make_unique<SampleUI>(engine->SceneSystem(), m_log.get(), widgetCallback);
+        m_ui = std::make_unique<SampleUI>(engine->Scene(), m_log.get(), widgetCallback);
         engine->Graphics()->SetUi(m_ui.get());
 
         if(createLight)

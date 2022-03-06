@@ -1,11 +1,11 @@
 #pragma once
 
 #include "ecs/Entity.h"
-#include "EngineModule.h"
+#include "Module.h"
 
 namespace nc
 {
-    struct AudioModule : public EngineModule
+    struct AudioModule : public Module
     {
         /** A listener must be registered for the AudioSystem to operate. The most recently
         *  registered listener's position will be used for spatial audio. A listener must not

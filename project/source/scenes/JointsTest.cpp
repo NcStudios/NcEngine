@@ -1,7 +1,7 @@
 #include "JointsTest.h"
 #include "NcEngine.h"
 #include "ecs/InvokeFreeComponent.h"
-#include "physics/PhysicsSystem.h"
+#include "physics/PhysicsModule.h"
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"

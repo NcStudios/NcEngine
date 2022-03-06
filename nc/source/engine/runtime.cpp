@@ -5,21 +5,22 @@
 #include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
 #include "physics/PhysicsModuleImpl.h"
+#include "scene/SceneModuleImpl.h"
 
 namespace
 {
     auto BuildContext() -> nc::Context
     {
+        V_LOG("BuildContext()");
         return nc::Context
         {
             .registry = nc::Registry{nc::config::GetMemorySettings().maxTransforms},
             .time = nc::time::Time{},
-            .scene = nc::scene::SceneSystemImpl{},
             .random = nc::Random{}
         };
     }
 
-    auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, nc::engine_init_flags flags) -> nc::Modules
+    auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, std::function<void()> clearCallback, nc::engine_init_flags flags) -> nc::Modules
     {
         V_LOG("BuildModules()");
         bool enableGraphicsModule = !(flags & nc::engine_init_flags_headless_mode);
@@ -29,7 +30,8 @@ namespace
             .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, window),
             .particleSystem = std::make_unique<nc::ecs::ParticleEmitterSystem>(reg),
             .physicsModule = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg),
-            .audioModule = nc::audio::BuildAudioModule(reg)
+            .audioModule = nc::audio::BuildAudioModule(reg),
+            .sceneModule = std::make_unique<nc::scene::SceneModuleImpl>(std::move(clearCallback))
         };
     }
 }
@@ -46,8 +48,8 @@ namespace nc
 
     Runtime::Runtime(engine_init_flags flags)
         : m_window{},
-          m_context{::BuildContext()},
-          m_modules{::BuildModules(&m_context.registry, &m_window, flags)},
+          m_context{BuildContext()},
+          m_modules{BuildModules(&m_context.registry, &m_window, std::bind_front(&Runtime::Clear, this), flags)},
           m_taskExecutor{8},
           m_tasks{},
           m_dt{0.0f},
@@ -60,12 +62,12 @@ namespace nc
         V_LOG("Runtime Initialized");
     }
 
-    void Runtime::Start(std::unique_ptr<Scene> initialScene)
+    void Runtime::Start(std::unique_ptr<nc::Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
         m_context.registry.VerifyCallbacks();
-        m_context.scene.ChangeScene(std::move(initialScene));
-        m_context.scene.DoSceneChange(this);
+        m_modules.sceneModule->ChangeScene(std::move(initialScene));
+        m_modules.sceneModule->DoSceneSwap(this);
         m_isRunning = true;
         Run();
     }
@@ -89,12 +91,12 @@ namespace nc
         }
     }
 
-    auto Runtime::Audio() noexcept -> nc::AudioModule*       { return m_modules.audioModule.get();    }
-    auto Runtime::Graphics() noexcept -> GraphicsModule*     { return m_modules.graphicsModule.get(); }
-    auto Runtime::Physics() noexcept -> PhysicsModule*       { return m_modules.physicsModule.get();  }
-    auto Runtime::Random() noexcept -> nc::Random*           { return &m_context.random;              }
-    auto Runtime::Registry() noexcept -> nc::Registry*       { return &m_context.registry;            }
-    auto Runtime::SceneSystem() noexcept -> nc::SceneSystem* { return &m_context.scene;               }
+    auto Runtime::Audio()    noexcept -> AudioModule*    { return m_modules.audioModule.get();    }
+    auto Runtime::Graphics() noexcept -> GraphicsModule* { return m_modules.graphicsModule.get(); }
+    auto Runtime::Physics()  noexcept -> PhysicsModule*  { return m_modules.physicsModule.get();  }
+    auto Runtime::Random()   noexcept -> nc::Random*     { return &m_context.random;              }
+    auto Runtime::Registry() noexcept -> nc::Registry*   { return &m_context.registry;            }
+    auto Runtime::Scene()    noexcept -> SceneModule*    { return m_modules.sceneModule.get();    }
 
     void Runtime::BuildTaskGraph()
     {
@@ -132,11 +134,14 @@ namespace nc
             graphics->Run(reg);
         }).name("Render");
 
-        auto endFrameTask = m_tasks.AddGuardedTask([this]
+        auto endFrameTask = m_tasks.AddGuardedTask(
+            [particle = m_modules.particleSystem.get(),
+             scene = m_modules.sceneModule.get(),
+             engine = this]
         {
-            m_modules.particleSystem->ProcessFrameEvents();
-            FrameCleanup();
-        }).name("Frame Cleanup");
+            particle->ProcessFrameEvents();
+            scene->DoSceneSwap(engine);
+        }).name("End Frame");
 
         auto& engineTF = m_tasks.GetTaskFlow();
         auto physicsFinished = engineTF.emplace([]{}).name("Physics Finished");
@@ -197,19 +202,12 @@ namespace nc
             OPTICK_FRAME("Main Thread");
             m_dt = m_dtFactor * m_context.time.UpdateTime();
             m_currentPhysicsIterations = 0u;
+            input::Flush();
             m_window.ProcessSystemMessages();
             m_tasks.Run(m_taskExecutor);
         }
 
         Shutdown();
-    }
-
-    void Runtime::DoSceneSwap()
-    {
-        V_LOG("Runtime::do_scene_swap()");
-        m_context.scene.UnloadActiveScene();
-        Clear();
-        m_context.scene.DoSceneChange(this);
     }
 
     void Runtime::RunFrameLogic()
@@ -218,15 +216,5 @@ namespace nc
 
         for(auto& frameLogic : view<FrameLogic>{registry})
             frameLogic.Run(registry, m_dt);
-    }
-
-    void Runtime::FrameCleanup()
-    {
-        if(m_context.scene.IsSceneChangeScheduled())
-        {
-            DoSceneSwap();
-        }
-
-        input::Flush();
     }
 }

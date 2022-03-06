@@ -7,7 +7,7 @@
 #include "graphics/GraphicsModule.h"
 #include "math/Random.h"
 #include "physics/PhysicsModule.h"
-#include "Scene.h"
+#include "scene/SceneModule.h"
 
 namespace nc
 {
@@ -30,7 +30,7 @@ namespace nc
             virtual auto Physics() noexcept -> PhysicsModule* = 0;
             virtual auto Random() noexcept -> nc::Random* = 0;
             virtual auto Registry() noexcept -> nc::Registry* = 0;
-            virtual auto SceneSystem() noexcept -> nc::SceneSystem* = 0;
+            virtual auto Scene() noexcept -> SceneModule* = 0;
     };
 
     auto InitializeNcEngine(std::string_view configPath, engine_init_flags flags = 0) -> std::unique_ptr<NcEngine>;

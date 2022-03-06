@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene.h"
+#include "scene/Scene.h"
 #include "shared/SceneHelper.h"
 
 namespace nc::sample

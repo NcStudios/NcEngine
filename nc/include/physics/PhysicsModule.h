@@ -1,12 +1,11 @@
 #pragma once
 
-#include "EngineModule.h"
-#include "utility/SystemBase.h"
+#include "Module.h"
 #include "physics/IClickable.h"
 
 namespace nc
 {
-    struct PhysicsModule : public EngineModule
+    struct PhysicsModule : public Module
     {
         /** Add and remove joints between entities. Both entities must have a PhysicsBody.
         *  Joints must be manually removed before an object is destroyed. */

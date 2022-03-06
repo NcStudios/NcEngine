@@ -13,7 +13,7 @@ namespace nc
         public:
             Runtime(engine_init_flags flags);
 
-            void Start(std::unique_ptr<Scene> initialScene) override;
+            void Start(std::unique_ptr<nc::Scene> initialScene) override;
             void Stop() noexcept override;
             void Shutdown() noexcept override;
 
@@ -22,7 +22,7 @@ namespace nc
             auto Physics() noexcept -> PhysicsModule* override;
             auto Random() noexcept -> nc::Random* override;
             auto Registry() noexcept -> nc::Registry* override;
-            auto SceneSystem() noexcept -> nc::SceneSystem* override;
+            auto Scene() noexcept -> SceneModule* override;
 
         private:
             window::WindowImpl m_window;
@@ -40,8 +40,6 @@ namespace nc
             void Run();
 
             // remove these
-            void DoSceneSwap();
             void RunFrameLogic();
-            void FrameCleanup();
     };
 }
