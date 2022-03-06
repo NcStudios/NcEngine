@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "Callbacks.h"
 #include "ProjectData.h"
 #include "SceneData.h"
@@ -20,7 +20,7 @@ namespace nc::editor
     class ProjectManager
     {
         public:
-            ProjectManager(NcEngine* engine, AssetManifest* manifest);
+            ProjectManager(nc_engine* engine, AssetManifest* manifest);
 
             void OpenProject();
             void CreateProject();

@@ -1,4 +1,4 @@
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "debug/Utils.h"
 #include "scenes/Worms.h"
 
@@ -6,12 +6,12 @@
 
 int main()
 {
-    std::unique_ptr<nc::NcEngine> engine;
+    std::unique_ptr<nc::nc_engine> engine;
 
     try
     {
-        engine = nc::InitializeNcEngine("project/config.ini");
-        engine->Start(std::make_unique<nc::sample::Worms>());
+        engine = nc::initialize_nc_engine("project/config.ini");
+        engine->start(std::make_unique<nc::sample::Worms>());
     }
     catch(std::exception& e)
     {
@@ -25,7 +25,7 @@ int main()
 
     if(engine)
     {
-        engine->Shutdown();
+        engine->shutdown();
         engine = nullptr;
     }
 

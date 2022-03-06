@@ -1,5 +1,5 @@
 #include "RenderingBenchmark.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
@@ -43,7 +43,7 @@ namespace
 
 namespace nc::sample
 {
-    void RenderingBenchmark::Load(NcEngine* engine)
+    void RenderingBenchmark::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
 

@@ -1,5 +1,5 @@
 #include "Worms.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
 
@@ -7,7 +7,7 @@
 
 namespace nc::sample
 {
-    void Worms::Load(NcEngine* engine)
+    void Worms::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
 

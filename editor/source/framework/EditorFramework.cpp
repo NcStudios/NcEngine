@@ -66,7 +66,7 @@ namespace
 
 namespace nc::editor
 {
-    EditorFramework::EditorFramework(NcEngine* engine)
+    EditorFramework::EditorFramework(nc_engine* engine)
         : m_output{},
           m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
           m_assetManifest{m_editorConfig.recentProjectDirectory, [configEditor = &m_configEditor]() -> const config::Config& { return configEditor->GetConfig();}},

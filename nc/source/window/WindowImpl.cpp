@@ -1,7 +1,7 @@
 #include "WindowImpl.h"
 #include "Window.h"
 #include "config/Config.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "debug/Utils.h"
 #include "input/InputInternal.h"
 #include "math/Math.h"

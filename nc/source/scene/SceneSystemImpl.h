@@ -14,7 +14,7 @@ namespace nc::scene
             void ChangeScene(std::unique_ptr<Scene> swapScene) override;
             bool IsSceneChangeScheduled() const;
             void UnloadActiveScene();
-            void DoSceneChange(NcEngine* engine);
+            void DoSceneChange(nc_engine* engine);
 
         private:
             std::unique_ptr<Scene> m_activeScene;

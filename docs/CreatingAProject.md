@@ -18,7 +18,7 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 /** ExampleScene.h */
 #include "Assets.h"
 #include "Input.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 
 /** Default assets from the nc/resources directory. */
 const auto CubeMeshPath = std::string{"cube.nca"};
@@ -33,7 +33,7 @@ const auto DefaultMaterial = nc::Material
 class ExampleScene : public nc::Scene
 {
     public:
-        void Load(nc::NcEngine* engine) override
+        void Load(nc::nc_engine* engine) override
         {
             /** Load box assets. */
             nc::LoadMeshAsset(CubeMeshPath);
@@ -99,7 +99,7 @@ class ExampleScene : public nc::Scene
 The main file will be pretty simple:
 ```cpp
 /** Main.cpp */
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "ExampleScene.h"
 
 int main()

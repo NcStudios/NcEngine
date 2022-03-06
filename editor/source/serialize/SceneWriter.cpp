@@ -109,13 +109,13 @@ namespace nc::editor
         auto filePath = m_scenesDirectory / (m_sceneName + FileExtension::Header.data());
         std::ofstream file{filePath};
         file << "#pragma once\n\n"
-             << "#include \"NcEngine.h\"\n\n"
+             << "#include \"nc_engine.h\"\n\n"
              << "namespace project\n"
              << "{\n"
              << TAB << "class " << m_sceneName << " : public nc::Scene\n"
              << TAB << "{\n"
              << TAB << TAB << "public:\n"
-             << TAB << TAB << TAB << "void Load(nc::NcEngine* engine) override;\n"
+             << TAB << TAB << TAB << "void Load(nc::nc_engine* engine) override;\n"
              << TAB << TAB << TAB << "void Unload() override;\n"
              << TAB << "};\n"
              << "}";
@@ -129,7 +129,7 @@ namespace nc::editor
              << "#include \"" << m_sceneName << FileExtension::Generated << "\"\n\n"
              << "namespace project\n"
              << "{\n"
-             << TAB << "void " << m_sceneName << "::Load(nc::NcEngine* engine)\n"
+             << TAB << "void " << m_sceneName << "::Load(nc::nc_engine* engine)\n"
              << TAB << "{\n"
              << TAB << TAB << "nc::generated::" << m_sceneName << "::Init(engine);\n"
              << TAB << "}\n\n"
@@ -150,11 +150,11 @@ namespace nc::editor
 
         m_file << "/** Generated source code for scene: " << m_sceneName << " - DO NOT MODIFY */\n"
                << "#pragma once\n\n"
-               << "#include \"NcEngine.h\"\n\n"
+               << "#include \"nc_engine.h\"\n\n"
                << "namespace nc::generated::" << m_sceneName << '\n'
                << "{\n"
                << "using namespace nc;\n"
-               << "void Init(NcEngine* engine)\n"
+               << "void Init(nc_engine* engine)\n"
                << "{\n"
                << "auto* registry = engine->Registry();\n";
 

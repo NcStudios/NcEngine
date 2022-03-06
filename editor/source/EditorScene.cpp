@@ -11,7 +11,7 @@ namespace nc::editor
     {
     }
 
-    void EditorScene::Load(NcEngine* engine)
+    void EditorScene::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
         auto cameraEntity = registry->Add<Entity>({.position = Vector3{0, 0, -5}, .tag = EditorScene::EditorCameraTag});

@@ -1,6 +1,6 @@
 #include "application.h"
 #include "Assets.h"
-#include "engine_context.h"
+#include "modules.h"
 #include "graphics/resources/CubeMapManager.h"
 #include "graphics/resources/ObjectDataManager.h"
 #include "graphics/resources/PointLightManager.h"
@@ -57,33 +57,33 @@ namespace
 
 namespace nc
 {
-    void attach_application(engine_context* context, MainCamera* mainCamera, bool useModule)
+    void attach_application(modules* mods, window::WindowImpl* window, MainCamera* mainCamera, bool useModule)
     {
         if(useModule)
         {
-            context->application = std::make_unique<application>(mainCamera);
+            mods->application = std::make_unique<application>(window, mainCamera);
         }
         else
         {
-            context->application = nullptr;
-            context->stubs.push_back(std::make_unique<service_stub>());
+            mods->application = nullptr;
+            mods->stubs.push_back(std::make_unique<service_stub>());
         }
     }
 
-    application::application(MainCamera* camera)
-        : m_window{},
-            m_graphics{camera, m_window.GetHWND(), m_window.GetHINSTANCE(), m_window.GetDimensions()},
-            m_ui{m_window.GetHWND()}
+    application::application(window::WindowImpl* window, MainCamera* camera)
+        : m_window{window},
+          m_graphics{camera, m_window->GetHWND(), m_window->GetHINSTANCE(), m_window->GetDimensions()},
+          m_ui{m_window->GetHWND()}
     {
         m_graphics.InitializeUI();
-        m_window.BindGraphicsOnResizeCallback(std::bind_front(&graphics::Graphics::OnResize, &m_graphics));
-        m_window.BindGraphicsSetClearColorCallback(std::bind_front(&graphics::Graphics::SetClearColor, &m_graphics));
-        m_window.BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
+        m_window->BindGraphicsOnResizeCallback(std::bind_front(&graphics::Graphics::OnResize, &m_graphics));
+        m_window->BindGraphicsSetClearColorCallback(std::bind_front(&graphics::Graphics::SetClearColor, &m_graphics));
+        m_window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
     void application::process_system_messages()
     {
-        m_window.ProcessSystemMessages();
+        m_window->ProcessSystemMessages();
     }
 
     bool application::frame_begin()
@@ -114,12 +114,12 @@ namespace nc
 
     void application::register_shutdown_callback(std::function<void()> cb)
     {
-        m_window.BindEngineDisableRunningCallback(std::move(cb));
+        m_window->BindEngineDisableRunningCallback(std::move(cb));
     }
 
     auto application::get_hwnd() -> HWND
     {
-        return m_window.GetHWND();
+        return m_window->GetHWND();
     }
 
     auto application::get_graphics() -> graphics::Graphics*
@@ -134,6 +134,6 @@ namespace nc
 
     auto application::get_window() -> window::WindowImpl*
     {
-        return &m_window;
+        return m_window;
     }
 }

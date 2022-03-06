@@ -31,13 +31,13 @@ namespace nc::scene
         m_activeScene = nullptr;
     }
 
-    void SceneSystemImpl::DoSceneChange(NcEngine* engine)
+    void SceneSystemImpl::DoSceneChange(nc_engine* engine)
     {
         if(!m_swapScene)
         {
             throw NcError("Attempt to swap null scene");
         }
-        
+
         m_activeScene = std::move(m_swapScene);
         m_swapScene = nullptr;
         m_isSceneChangeScheduled = false;

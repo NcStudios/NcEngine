@@ -3,7 +3,7 @@
 #include "ecs/InvokeFreeComponent.h"
 #include "ecs/component/MeshRenderer.h"
 #include "imgui/imgui.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "shared/FreeComponents.h"
 
 #include <string>
@@ -22,7 +22,7 @@ namespace
 
 namespace nc::sample
 {
-    void JareTestScene::Load(NcEngine* engine)
+    void JareTestScene::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
         

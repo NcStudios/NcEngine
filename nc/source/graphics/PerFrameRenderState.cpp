@@ -8,7 +8,7 @@
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
 #ifdef NC_EDITOR_ENABLED
-#include "physics/PhysicsSystemImpl.h"
+//#include "physics/PhysicsSystemImpl.h"
 #endif
 #include "resources/ShaderResourceService.h"
 

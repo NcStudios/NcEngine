@@ -7,7 +7,7 @@ namespace nc::sample
     class RenderingBenchmark : public Scene
     {
         public:
-            void Load(NcEngine* engine) override;
+            void Load(nc_engine* engine) override;
             void Unload() override;
         
         private:

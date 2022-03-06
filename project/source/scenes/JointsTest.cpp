@@ -1,5 +1,5 @@
 #include "JointsTest.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "physics/PhysicsSystem.h"
 #include "shared/FreeComponents.h"
@@ -8,7 +8,7 @@
 
 namespace nc::sample
 {
-    void JointsTest::Load(NcEngine* engine)
+    void JointsTest::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
         auto* physics = engine->Physics();

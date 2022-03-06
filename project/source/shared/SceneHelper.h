@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "ecs/component/PointLight.h"
 #include "GameLog.h"
 #include "SampleUI.h"
@@ -14,16 +14,16 @@ namespace nc::sample
     class SceneHelper
     {
         public:
-            void Setup(NcEngine* engine, bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
+            void Setup(nc_engine* engine, bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
             void TearDown();
 
         private:
             std::unique_ptr<SampleUI> m_ui;
             std::unique_ptr<GameLog> m_log;
-            NcEngine* m_engine;
+            nc_engine* m_engine;
     };
 
-    inline void SceneHelper::Setup(NcEngine* engine, bool enableLog, bool createLight, std::function<void()> widgetCallback)
+    inline void SceneHelper::Setup(nc_engine* engine, bool enableLog, bool createLight, std::function<void()> widgetCallback)
     {
         m_engine = engine;
         auto* registry = engine->Registry();

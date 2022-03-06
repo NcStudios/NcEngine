@@ -1,5 +1,5 @@
 #include "SpawnTest.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "ecs/component/PhysicsBody.h"
 #include "math/Random.h"
 #include "imgui/imgui.h"
@@ -49,7 +49,7 @@ namespace
 
 namespace nc::sample
 {
-    void SpawnTest::Load(NcEngine* engine)
+    void SpawnTest::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
 

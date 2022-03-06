@@ -235,21 +235,21 @@ namespace nc::sample
         return m_latestFPS;
     }
 
-    Clickable::Clickable(Entity entity, std::string tag, PhysicsSystem* physicsSystem)
+    Clickable::Clickable(Entity entity, std::string tag, physics_module* physicsModule)
         : FreeComponent(entity),
           IClickable(entity, 40.0f),
           m_Tag{std::move(tag)},
-          m_physicsSystem{physicsSystem}
+          m_physicsModule{physicsModule}
 
     {
-        m_physicsSystem->RegisterClickable(this);
+        m_physicsModule->RegisterClickable(this);
         auto layer = entity.Layer();
         IClickable::layers = ToLayerMask(layer);
     }
 
     Clickable::~Clickable() noexcept
     {
-        m_physicsSystem->UnregisterClickable(this);
+        m_physicsModule->UnregisterClickable(this);
     }
 
     void Clickable::OnClick()
@@ -257,10 +257,10 @@ namespace nc::sample
         GameLog::Log("Clicked: " + m_Tag);
     }
 
-    ClickHandler::ClickHandler(Entity entity, LayerMask mask, PhysicsSystem* physicsSystem)
+    ClickHandler::ClickHandler(Entity entity, LayerMask mask, physics_module* physicsModule)
         : FreeComponent{entity},
           m_mask{mask},
-          m_physicsSystem{physicsSystem}
+          m_physicsModule{physicsModule}
     {
     }
 
@@ -268,7 +268,7 @@ namespace nc::sample
     {
         if(GetKeyDown(input::KeyCode::LeftButton))
         {
-            auto hit = m_physicsSystem->RaycastToClickables(m_mask);
+            auto hit = m_physicsModule->RaycastToClickables(m_mask);
             if(hit)
                 hit->OnClick();
         }

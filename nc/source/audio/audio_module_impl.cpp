@@ -1,4 +1,4 @@
-#include "AudioSystemImpl.h"
+#include "audio_module_impl.h"
 #include "ecs/component/AudioSource.h"
 #include "ecs/view.h"
 
@@ -22,14 +22,20 @@ namespace
          *  quickly see when they happen. */
         if(status) std::cerr << "Audio stream underflow\n";
 
-        auto* system = static_cast<nc::audio::AudioSystemImpl*>(userData);
-        return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer));
+        auto* system = static_cast<nc::audio::audio_module_impl*>(userData);
+        return system->write_to_device_buffer(static_cast<double*>(outputBuffer));
     }
 }
 
 namespace nc::audio
 {
-    AudioSystemImpl::AudioSystemImpl(Registry* registry)
+    auto build_audio_module(Registry* reg) -> std::unique_ptr<audio_module>
+    {
+        /** @note If we make a stub version of this, consider the cast in AudioSystemCallback. */
+        return std::make_unique<audio_module_impl>(reg);
+    }
+
+    audio_module_impl::audio_module_impl(Registry* registry)
         : m_registry{registry},
           m_rtAudio{},
           m_readyBuffers{},
@@ -87,9 +93,9 @@ namespace nc::audio
             throw NcError("Invalid number of buffer frames specified");
     }
 
-    AudioSystemImpl::~AudioSystemImpl() noexcept
+    audio_module_impl::~audio_module_impl() noexcept
     {
-        Clear();
+        clear();
 
         try
         {
@@ -104,7 +110,7 @@ namespace nc::audio
             m_rtAudio.closeStream();
     }
 
-    void AudioSystemImpl::Clear() noexcept
+    void audio_module_impl::clear() noexcept
     {
         m_listener = Entity::Null();
 
@@ -116,12 +122,12 @@ namespace nc::audio
         }
     }
 
-    void AudioSystemImpl::RegisterListener(Entity listener) noexcept
+    void audio_module_impl::register_listener(Entity listener) noexcept
     {
         m_listener = listener;
     }
 
-    int AudioSystemImpl::WriteToDeviceBuffer(double* output)
+    int audio_module_impl::write_to_device_buffer(double* output)
     {
         // empty check before lock is only safe with 1 consumer
         if(m_readyBuffers.empty())
@@ -148,7 +154,7 @@ namespace nc::audio
         return 0;
     }
 
-    void AudioSystemImpl::Update()
+    void audio_module_impl::update()
     {
         if(!m_listener.Valid())
             return;
@@ -166,7 +172,7 @@ namespace nc::audio
                 m_staleBuffers.pop();
             }
 
-            MixToBuffer(buffer.data());
+            mix_to_buffer(buffer.data());
 
             {
                 std::lock_guard lock{m_readyMutex};
@@ -175,7 +181,7 @@ namespace nc::audio
         }
     }
 
-    void AudioSystemImpl::MixToBuffer(double* buffer)
+    void audio_module_impl::mix_to_buffer(double* buffer)
     {
         std::memset(buffer, 0, BufferSizeInBytes);
 
@@ -203,7 +209,7 @@ namespace nc::audio
         }
     }
 
-    auto AudioSystemImpl::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
+    auto audio_module_impl::probe_devices() -> std::vector<RtAudio::DeviceInfo>
     {
         unsigned deviceCount = m_rtAudio.getDeviceCount();
         std::vector<RtAudio::DeviceInfo> out;

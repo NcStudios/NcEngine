@@ -1,5 +1,5 @@
 #include "ClickEvents.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/Prefabs.h"
@@ -48,7 +48,7 @@ namespace
 
 namespace nc::sample
 {
-    void ClickEvents::Load(NcEngine* engine)
+    void ClickEvents::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
 

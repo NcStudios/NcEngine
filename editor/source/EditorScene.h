@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "Scene.h"
 
 #include <filesystem>
@@ -16,7 +16,7 @@ namespace nc::editor
             inline static std::string EditorCameraTag = "NcEditorCamera";
 
             EditorScene(ProjectManager* projectManager);
-            void Load(NcEngine* engine) override;
+            void Load(nc_engine* engine) override;
             void Unload() override;
         
         private:

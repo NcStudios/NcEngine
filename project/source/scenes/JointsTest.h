@@ -8,7 +8,7 @@ namespace nc::sample
     class JointsTest : public Scene
     {
         public:
-            void Load(NcEngine* registry) override;
+            void Load(nc_engine* engine) override;
             void Unload() override;
         
         private:

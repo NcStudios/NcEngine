@@ -1,5 +1,5 @@
 #include "CollisionBenchmark.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
@@ -64,7 +64,7 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionBenchmark::Load(NcEngine* engine)
+    void CollisionBenchmark::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
 

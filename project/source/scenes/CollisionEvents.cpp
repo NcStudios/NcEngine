@@ -1,5 +1,5 @@
 #include "CollisionEvents.h"
-#include "NcEngine.h"
+#include "nc_engine.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "imgui/imgui.h"
 #include "shared/Prefabs.h"
@@ -42,7 +42,7 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionEvents::Load(NcEngine* engine)
+    void CollisionEvents::Load(nc_engine* engine)
     {
         auto* registry = engine->Registry();
 

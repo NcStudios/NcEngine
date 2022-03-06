@@ -3,19 +3,24 @@
 #include "MainCamera.h"
 #include "graphics/Graphics.h"
 #include "ui/UISystemImpl.h"
+
+
 #include "window/WindowImpl.h"
 
 namespace nc
 {
-    struct engine_context;
+    struct modules;
     namespace graphics { struct PerFrameRenderState; }
+    
+    
+    namespace window { class Window; }
 
-    void attach_application(engine_context* context, MainCamera* mainCamera, bool useModule);
+    void attach_application(modules* context, window::WindowImpl* window, MainCamera* mainCamera, bool useModule);
 
     class application
     {
         public:
-            application(MainCamera* camera);
+            application(window::WindowImpl* window, MainCamera* camera);
 
             void process_system_messages();
             bool frame_begin();
@@ -29,7 +34,7 @@ namespace nc
             auto get_window() -> window::WindowImpl*;
 
         private:
-            window::WindowImpl m_window;
+            window::WindowImpl* m_window;
             graphics::Graphics m_graphics;
             ui::UISystemImpl m_ui;
     };
