@@ -1,42 +1,24 @@
 #pragma once
 
-#include "application.h"
-#include "assets/AssetServices.h"
-//#include "audio/AudioSystemImpl.h"
-#include "camera/MainCameraImpl.h"
-#include "config/ConfigInternal.h"
-#include "context_stub.h"
-#include "debug/Utils.h"
+#include "audio_module.h"
 #include "ecs/ParticleEmitterSystem.h"
-#include "ecs/PointLightSystem.h"
 #include "ecs/Registry.h"
-#include "graphics/resources/EnvironmentImpl.h"
+#include "graphics/graphics_module.h"
 #include "math/Random.h"
 #include "nc_engine.h"
-//#include "physics/PhysicsSystemImpl.h"
-#include "scene/SceneSystemImpl.h"
-#include "time/NcTime.h"
-
-
-// new
-#include "audio_module.h"
 #include "physics/physics_module.h"
+#include "scene/SceneSystemImpl.h"
 
 namespace nc
 {
     struct modules
     {
         std::unique_ptr<Registry> registry;
-        std::unique_ptr<camera::MainCameraImpl> mainCamera;
-        std::unique_ptr<application> application;
+        std::unique_ptr<graphics_module> graphicsModule;
         std::unique_ptr<ecs::ParticleEmitterSystem> particleSystem;
-        std::unique_ptr<ecs::PointLightSystem> pointLightSystem;
         std::unique_ptr<physics_module> physicsModule;
         std::unique_ptr<scene::SceneSystemImpl> sceneSystem;
-        //std::unique_ptr<time::Time> time;
         std::unique_ptr<audio_module> audioModule;
-        std::unique_ptr<nc::EnvironmentImpl> environment;
         std::unique_ptr<nc::Random> random;
-        std::vector<std::unique_ptr<context_stub>> stubs;
     };
 }

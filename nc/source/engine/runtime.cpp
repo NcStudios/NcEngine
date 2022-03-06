@@ -1,31 +1,26 @@
 #include "runtime.h"
-#include "config/Config.h"
-
 #include "audio/audio_module_impl.h"
-#include "physics/physics_module_impl.h"
+#include "config/ConfigInternal.h"
+#include "graphics/graphics_module_impl.h"
 #include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
+#include "physics/physics_module_impl.h"
 
 namespace
 {
     auto build_modules(nc::window::WindowImpl* window, nc::engine_init_flags flags) -> nc::modules
     {
         V_LOG("build_modules()");
-        bool enableApplicationModule = !(flags & nc::engine_init_flags_headless_mode);
+        bool enableGraphicsModule = !(flags & nc::engine_init_flags_headless_mode);
         bool enablePhysicsModule = !(flags & nc::engine_init_flags_disable_physics);
         const auto& memorySettings = nc::config::GetMemorySettings();
         nc::modules out;
         out.registry = std::make_unique<nc::Registry>(memorySettings.maxTransforms);
-        out.mainCamera = std::make_unique<nc::camera::MainCameraImpl>();
-        attach_application(&out, window, out.mainCamera.get(), enableApplicationModule);
+        out.graphicsModule = nc::graphics::build_graphics_module(enableGraphicsModule, out.registry.get(), window);
         out.particleSystem = std::make_unique<nc::ecs::ParticleEmitterSystem>(out.registry.get());
-        out.pointLightSystem = std::make_unique<nc::ecs::PointLightSystem>(out.registry.get());
-
         out.physicsModule = nc::physics::build_physics_module(enablePhysicsModule, out.registry.get());
         out.sceneSystem = std::make_unique<nc::scene::SceneSystemImpl>();
         out.audioModule = nc::audio::build_audio_module(out.registry.get());
-
-        out.environment = std::make_unique<nc::EnvironmentImpl>();
         out.random = std::make_unique<nc::Random>();
         return out;
     }
@@ -87,14 +82,12 @@ namespace nc
         }
     }
 
-    auto runtime::Audio() noexcept -> nc::audio_module*      { return m_modules.audioModule.get();     }
-    auto runtime::Environment() noexcept -> nc::Environment* { return m_modules.environment.get();     }
-    auto runtime::MainCamera() noexcept -> nc::MainCamera*   { return m_modules.mainCamera.get();      }
-    auto runtime::Physics() noexcept -> physics_module*      { return m_modules.physicsModule.get();   }
-    auto runtime::Random() noexcept -> nc::Random*           { return m_modules.random.get();          }
-    auto runtime::Registry() noexcept -> nc::Registry*       { return m_modules.registry.get();        }
-    auto runtime::SceneSystem() noexcept -> nc::SceneSystem* { return m_modules.sceneSystem.get();     }
-    auto runtime::UI() noexcept -> UISystem*                 { return m_modules.application->get_ui(); }
+    auto runtime::Audio() noexcept -> nc::audio_module*      { return m_modules.audioModule.get();    }
+    auto runtime::Graphics() noexcept -> graphics_module*    { return m_modules.graphicsModule.get(); }
+    auto runtime::Physics() noexcept -> physics_module*      { return m_modules.physicsModule.get();  }
+    auto runtime::Random() noexcept -> nc::Random*           { return m_modules.random.get();         }
+    auto runtime::Registry() noexcept -> nc::Registry*       { return m_modules.registry.get();       }
+    auto runtime::SceneSystem() noexcept -> nc::SceneSystem* { return m_modules.sceneSystem.get();    }
 
     void runtime::build_task_graph()
     {
@@ -118,12 +111,19 @@ namespace nc
             particleEmitterSystem->UpdateParticles(dt);
         }).name("Update Particles");
 
-        auto renderTask = m_tasks.AddGuardedTask([this]
+        auto syncTask = m_tasks.AddGuardedTask([reg = m_modules.registry.get()]
         {
-            OPTICK_CATEGORY("FrameRender", Optick::Category::Rendering);
-            m_modules.registry->CommitStagedChanges();
-            frame_render();
-        }).name("Commit Changes and Render");
+            OPTICK_CATEGORY("Sync State", Optick::Category::None);
+            reg->CommitStagedChanges();
+        }).name("Synchronize and Commit Deltas");
+
+        auto renderTask = m_tasks.AddGuardedTask(
+            [reg = m_modules.registry.get(),
+             graphics = m_modules.graphicsModule.get()]
+        {
+            OPTICK_CATEGORY("Render", Optick::Category::Rendering);
+            graphics->run(reg);
+        }).name("Render");
 
         auto endFrameTask = m_tasks.AddGuardedTask([this]
         {
@@ -164,7 +164,8 @@ namespace nc
             updatePhysicsCondition.precede(physicsStepCondition);
         }
 
-        renderTask.succeed(writeAudioBuffersTask, particleSystemTask, physicsFinished);
+        syncTask.succeed(writeAudioBuffersTask, particleSystemTask, physicsFinished);
+        renderTask.succeed(syncTask);
         endFrameTask.succeed(renderTask);
 
         #if NC_OUTPUT_TASKFLOW
@@ -175,21 +176,13 @@ namespace nc
 
     void runtime::clear()
     {
-        //::clear(&m_modules);
-
-        if(m_modules.application) m_modules.application->clear();
+        m_modules.graphicsModule->clear();
         m_modules.registry->Clear();
         m_modules.particleSystem->Clear();
-        m_modules.pointLightSystem->Clear();
-
-        //if(mods->physicsSystem) mods->physicsSystem->ClearState();
         m_modules.physicsModule->clear();
-        
         m_modules.audioModule->clear();
-        m_modules.mainCamera->Set(nullptr);
         m_time.ResetFrameDeltaTime();
         m_time.ResetAccumulatedTime();
-        m_modules.environment->Clear();
     }
 
     void runtime::run()
@@ -220,40 +213,6 @@ namespace nc
 
         for(auto& frameLogic : view<FrameLogic>{registry})
             frameLogic.Run(registry, m_dt);
-    }
-
-    void runtime::frame_render()
-    {
-        if(!m_modules.application) return;
-
-        /** Update the view matrix for the camera */
-        auto* mainCamera = m_modules.mainCamera->Get();
-        mainCamera->UpdateViewMatrix();
-
-        /** Setup the frame */
-        if (!m_modules.application->frame_begin()) return;
-
-        auto* registry = m_modules.registry.get();
-
-        #ifdef NC_EDITOR_ENABLED
-        if(auto* ui = m_modules.application->get_ui()) ui->Draw(&m_dtFactor, registry);
-        #else
-        if(auto* ui = m_modules.application->get_ui()) ui->Draw();
-        #endif
-
-        /** Get the frame data */
-        auto state = graphics::PerFrameRenderState{registry, mainCamera, m_modules.pointLightSystem->CheckDirtyAndReset(), m_modules.environment.get()};
-        graphics::MapPerFrameRenderState(state);
-
-        /** Draw the frame */
-        m_modules.application->draw(state);
-
-        #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : view<Collider>{registry}) collider.SetEditorSelection(false);
-        #endif
-
-        /** End the frame */
-        m_modules.application->frame_end();
     }
 
     void runtime::frame_cleanup()

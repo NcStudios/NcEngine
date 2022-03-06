@@ -34,7 +34,7 @@ namespace nc::sample
         }
 
         m_ui = std::make_unique<SampleUI>(engine->SceneSystem(), m_log.get(), widgetCallback);
-        engine->UI()->Set(m_ui.get());
+        engine->Graphics()->set_ui(m_ui.get());
 
         if(createLight)
         {
@@ -47,7 +47,7 @@ namespace nc::sample
 
     inline void SceneHelper::TearDown()
     {
-        m_engine->UI()->Set(nullptr);
+        m_engine->Graphics()->set_ui(nullptr);
         m_ui = nullptr;
         m_log = nullptr;
     }

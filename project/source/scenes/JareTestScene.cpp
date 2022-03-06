@@ -90,7 +90,7 @@ namespace nc::sample
 
         nc::LoadMeshAssets(sceneMeshes);
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-        engine->Environment()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+        engine->Graphics()->set_skybox("DefaultSkybox/DefaultSkybox.nca");
         
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
@@ -134,7 +134,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle, 0.05f, 0.005f, 1.4f);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->MainCamera()->Set(camera);
+        engine->Graphics()->set_camera(camera);
     }
 
     void JareTestScene::Unload()

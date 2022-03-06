@@ -17,14 +17,12 @@ namespace nc
             void stop() noexcept override;
             void shutdown() noexcept override;
 
-            auto Audio() noexcept -> nc::audio_module* override;
-            auto Environment() noexcept -> nc::Environment* override;
-            auto MainCamera() noexcept -> nc::MainCamera* override;
+            auto Audio() noexcept -> audio_module* override;
+            auto Graphics() noexcept -> graphics_module* override;
             auto Physics() noexcept -> physics_module* override;
             auto Random() noexcept -> nc::Random* override;
             auto Registry() noexcept -> nc::Registry* override;
             auto SceneSystem() noexcept -> nc::SceneSystem* override;
-            auto UI() noexcept -> UISystem* override;
 
         private:
             window::WindowImpl m_window;
@@ -44,7 +42,6 @@ namespace nc
             // remove these
             void do_scene_swap();
             void run_frame_logic();
-            void frame_render();
             void frame_cleanup();
     };
 }

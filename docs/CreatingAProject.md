@@ -55,7 +55,7 @@ class ExampleScene : public nc::Scene
             /** Create and register the Camera. */
             auto cameraHandle = registry->Add<nc::Entity>(cameraInit);
             auto camera = registry->Add<nc::Camera>(cameraHandle);
-            engine->MainCamera()->Set(camera);
+            engine->Graphics()->set_camera(camera);
 
             /** Initial properties for the PointLight. */
             auto pointLightInit = nc::EntityInfo

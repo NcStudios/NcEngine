@@ -5,7 +5,7 @@
 
 namespace
 {
-    struct bsp_tree_stub : public nc::context_stub
+    struct bsp_tree_stub
     {
         bsp_tree_stub(nc::Registry* registry)
         {
