@@ -47,7 +47,7 @@ namespace nc
 
             /** Get underlying Taskflow object for adding unguarded tasks, 
              *  composing, etc. */
-            auto GetTaskFlow() -> tf::Taskflow& { return m_tasks; }
+            auto GetTaskFlow() -> tf::Taskflow* { return &m_tasks; }
 
         private:
             tf::Taskflow m_tasks;

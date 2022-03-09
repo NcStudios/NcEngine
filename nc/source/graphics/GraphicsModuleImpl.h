@@ -5,12 +5,11 @@
 #include "Graphics.h"
 #include "graphics/GraphicsModule.h"
 #include "resources/Environment.h"
+#include "task/Job.h"
 #include "ui/UISystemImpl.h"
 
 #include <memory>
 
-/** @todo remove */
-#include "task/TaskGraph.h"
 
 namespace nc::window { class WindowImpl; }
 
@@ -21,25 +20,20 @@ namespace nc::graphics
     class GraphicsModuleImpl : public GraphicsModule
     {
         public:
-            GraphicsModuleImpl(Registry* reg, window::WindowImpl* window);
+            GraphicsModuleImpl(Registry* registry, window::WindowImpl* window);
 
             void SetCamera(Camera* camera) noexcept override;
             auto GetCamera() noexcept -> Camera* override;
-
             void SetUi(ui::IUI* ui) noexcept override;
             bool IsUiHovered() const noexcept override;
-
             void SetSkybox(const std::string& path) override;
             void ClearEnvironment() override;
-
+            auto BuildWorkload() -> std::vector<Job> override;
             void Clear() noexcept override;
-
-            void Run(Registry* reg) override;
-
-            /** @todo fix */
-            auto GetTasks() -> TaskGraph& override { static TaskGraph tg; return tg; }
+            void Run();
 
         private:
+            Registry* m_registry;
             camera::MainCamera m_camera;
             Graphics m_graphics;
             ui::UISystemImpl m_ui;

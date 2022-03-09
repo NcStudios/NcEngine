@@ -1,11 +1,9 @@
 #pragma once
 
 #include "scene/SceneModule.h"
+#include "task/Job.h"
 
 #include <functional>
-
-/** @todo remove */
-#include "task/TaskGraph.h"
 
 namespace nc::scene
 {
@@ -16,11 +14,8 @@ namespace nc::scene
 
             void ChangeScene(std::unique_ptr<Scene> swapScene) override;
             void DoSceneSwap(NcEngine* engine) override;
+            auto BuildWorkload() -> std::vector<Job> override { return {}; }
             void Clear() noexcept override {}
-
-            /** @todo fix */
-            auto GetTasks() -> TaskGraph& override { static TaskGraph tg; return tg; }
-
 
         private:
             std::unique_ptr<Scene> m_activeScene;

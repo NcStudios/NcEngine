@@ -1,8 +1,10 @@
 #pragma once
 
+#include <vector>
+
 namespace nc
 {
-    class TaskGraph;
+    struct Job;
 
     /** @brief Base class for modules that attach worloads to the core execution graph. */
     struct Module
@@ -17,7 +19,10 @@ namespace nc
         /** @brief Called on scene changes and NcEngine::Shutdown(). */
         virtual void Clear() noexcept = 0;
 
-        /** @brief Retrieve the module's workload. */
-        virtual auto GetTasks() -> TaskGraph& = 0;
+        /**
+         * @brief Builds a list of jobs required by the module.
+         * @return Workload
+         */
+        virtual auto BuildWorkload() -> std::vector<Job> = 0;
     };
 }

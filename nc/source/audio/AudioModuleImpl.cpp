@@ -2,6 +2,7 @@
 #include "ecs/component/AudioSource.h"
 #include "ecs/view.h"
 
+#include "optick/optick.h"
 #include <cstring>
 #include <iostream>
 
@@ -122,6 +123,14 @@ namespace nc::audio
         }
     }
 
+    auto AudioModuleImpl::BuildWorkload() -> std::vector<Job>
+    {
+        return std::vector<Job>
+        {
+            Job{ [this]{Run();}, "AudioModule", HookPoint::Free }
+        };
+    }
+
     void AudioModuleImpl::RegisterListener(Entity listener) noexcept
     {
         m_listener = listener;
@@ -154,8 +163,9 @@ namespace nc::audio
         return 0;
     }
 
-    void AudioModuleImpl::Update()
+    void AudioModuleImpl::Run()
     {
+        OPTICK_CATEGORY("AudioModule", Optick::Category::Audio);
         if(!m_listener.Valid())
             return;
 
@@ -188,7 +198,7 @@ namespace nc::audio
         const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
         if(!listenerTransform)
             throw NcError("Invalid listener registered");
-        
+
         const auto listenerPosition = listenerTransform->Position();
         const auto rightEar = listenerTransform->Right();
 

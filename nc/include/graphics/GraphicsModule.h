@@ -18,7 +18,5 @@ namespace nc
 
         virtual void SetSkybox(const std::string& path) = 0;
         virtual void ClearEnvironment() = 0;
-
-        virtual void Run(Registry* reg) = 0;
     };
 }

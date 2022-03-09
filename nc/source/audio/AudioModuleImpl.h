@@ -3,12 +3,10 @@
 #include "audio/AudioModule.h"
 #include "ecs/Registry.h"
 #include "rtaudio/RtAudio.h"
+#include "task/Job.h"
 
 #include <mutex>
 #include <queue>
-
-/** @todo remove */
-#include "task/TaskGraph.h"
 
 namespace nc::audio
 {
@@ -21,13 +19,10 @@ namespace nc::audio
             ~AudioModuleImpl() noexcept;
 
             void RegisterListener(Entity listener) noexcept override;
-            void Update() override;
+            auto BuildWorkload() -> std::vector<Job> override;
             void Clear() noexcept override;
-
-            /** @todo fix */
-            auto GetTasks() -> TaskGraph& { static TaskGraph tg; return tg; }
-
-            int WriteToDeviceBuffer(double* output);
+            void Run();
+            auto WriteToDeviceBuffer(double* output) -> int;
             auto ProbeDevices() -> std::vector<RtAudio::DeviceInfo>;
 
         private:

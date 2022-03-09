@@ -12,8 +12,5 @@ namespace nc
         *  be destroyed, except on a scene change. Entity::Null() may be passed to disable
         *  audio. */
         virtual void RegisterListener(Entity entity) noexcept = 0;
-
-        /** @todo replace with task/workload */
-        virtual void Update() = 0;
     };
 }

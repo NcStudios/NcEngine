@@ -259,7 +259,7 @@ namespace nc::physics
 
         /** Task graph visual output */
         #if NC_OUTPUT_TASKFLOW
-        m_tasks.GetTaskFlow().name("Physics Step");
+        m_tasks.GetTaskFlow()->name("Physics Pipeline");
         fixedUpdateTask.name("Component FixedUpdate Logic");
         updateInertiaTask.name("Update Inertia Tensors");
         applyGravityTask.name("Apply Gravity");

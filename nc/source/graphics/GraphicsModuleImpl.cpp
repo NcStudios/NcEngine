@@ -3,6 +3,8 @@
 #include "PerFrameRenderState.h"
 #include "window/WindowImpl.h"
 
+#include "optick/optick.h"
+
 namespace nc::graphics
 {
     auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window) -> std::unique_ptr<GraphicsModule>
@@ -13,15 +15,16 @@ namespace nc::graphics
         return std::make_unique<GraphicsModuleImpl>(reg, window);
     }
 
-    GraphicsModuleImpl::GraphicsModuleImpl(Registry* reg, window::WindowImpl* window)
-        : m_camera{},
+    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window)
+        : m_registry{registry},
+          m_camera{},
           m_graphics{&m_camera,
                      window->GetHWND(),
                      window->GetHINSTANCE(),
                      window->GetDimensions()},
           m_ui{window->GetHWND()},
           m_environment{},
-          m_pointLightSystem{reg}
+          m_pointLightSystem{registry}
     {
         m_graphics.InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
@@ -68,8 +71,17 @@ namespace nc::graphics
         m_pointLightSystem.Clear();
     }
 
-    void GraphicsModuleImpl::Run(Registry* reg)
+    auto GraphicsModuleImpl::BuildWorkload() -> std::vector<Job>
     {
+        return std::vector<Job>
+        {
+            Job{ [this]{Run();}, "GraphicsModule", HookPoint::Render }
+        };
+    }
+
+    void GraphicsModuleImpl::Run()
+    {
+        OPTICK_CATEGORY("Render", Optick::Category::Rendering);
         auto* camera = m_camera.Get();
         camera->UpdateViewMatrix();
 
@@ -82,18 +94,18 @@ namespace nc::graphics
         /** @todo I think the old editor can start to go away. I'm
          *  hacking dt factor in here. */
         float dtFactor = 1.0f;
-        m_ui.Draw(&dtFactor, reg);
+        m_ui.Draw(&dtFactor, m_registry);
 #else
         m_ui.Draw();
 #endif
 
         auto areLightsDirty = m_pointLightSystem.CheckDirtyAndReset();
-        auto state = PerFrameRenderState{reg, camera, areLightsDirty, &m_environment};
+        auto state = PerFrameRenderState{m_registry, camera, areLightsDirty, &m_environment};
         MapPerFrameRenderState(state);
         m_graphics.Draw(state);
 
 #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : view<Collider>{reg}) collider.SetEditorSelection(false);
+        for(auto& collider : view<Collider>{m_registry}) collider.SetEditorSelection(false);
 #endif
 
         m_graphics.FrameEnd();
