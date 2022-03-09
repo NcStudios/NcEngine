@@ -10,10 +10,10 @@
 
 namespace nc
 {
-    class LogicModuleImpl : public Module
+    class LogicModule : public Module
     {
         public:
-            LogicModuleImpl(Registry* registry, float* dt)
+            LogicModule(Registry* registry, float* dt)
                 : m_registry{registry},
                   m_dt{dt}
             {

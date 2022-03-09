@@ -32,7 +32,7 @@ namespace
             .physicsModule = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg, time),
             .audioModule = nc::audio::BuildAudioModule(reg),
             .sceneModule = std::make_unique<nc::scene::SceneModuleImpl>(std::move(clearCallback)),
-            .logicModule = std::make_unique<nc::LogicModuleImpl>(reg, dt)
+            .logicModule = std::make_unique<nc::LogicModule>(reg, dt)
         };
     }
 }
