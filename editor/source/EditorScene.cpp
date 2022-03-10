@@ -1,6 +1,5 @@
 #include "EditorScene.h"
 #include "SceneNavigationCamera.h"
-#include "MainCamera.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "framework/ProjectManager.h"
 

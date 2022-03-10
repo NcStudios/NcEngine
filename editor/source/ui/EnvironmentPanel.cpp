@@ -1,5 +1,5 @@
 #include "EnvironmentPanel.h"
-#include "graphics/Environment.h"
+#include "graphics/GraphicsModule.h"
 #include "assets/AssetManifest.h"
 #include "ecs/component/Camera.h"
 #include "ecs/view.h"
@@ -9,11 +9,11 @@
 
 namespace nc::editor
 {
-    EnvironmentPanel::EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, nc::Environment* environment)
+    EnvironmentPanel::EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, GraphicsModule* graphics)
         : m_sceneData{sceneData},
           m_registry{registry},
           m_assetManifest{assetManifest},
-          m_environment{environment}
+          m_graphics{graphics}
     {
     }
 
@@ -81,7 +81,7 @@ namespace nc::editor
             {
                 try
                 {
-                    m_environment->SetSkybox(DefaultSkyboxPath);
+                    m_graphics->SetSkybox(DefaultSkyboxPath);
                     m_sceneData->skybox = DefaultSkyboxPath;
                 }
                 catch(const std::exception& e)
@@ -93,7 +93,7 @@ namespace nc::editor
             {
                 try
                 {
-                    m_environment->Clear();
+                    m_graphics->ClearEnvironment();
                     m_sceneData->skybox = "";
                 }
                 catch(const std::exception& e)
@@ -110,7 +110,7 @@ namespace nc::editor
                 {
                     try
                     {
-                        m_environment->SetSkybox(assetNcaPath);
+                        m_graphics->SetSkybox(assetNcaPath);
                         m_sceneData->skybox = assetNcaPath;
                     }
                     catch(const std::exception& e)

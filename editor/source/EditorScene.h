@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NcEngine.h"
-#include "Scene.h"
+#include "scene/Scene.h"
 
 #include <filesystem>
 

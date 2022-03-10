@@ -6,7 +6,7 @@
 
 namespace nc
 {
-    class Environment;
+    class GraphicsModule;
 }
 
 namespace nc::editor
@@ -15,11 +15,11 @@ namespace nc::editor
     class SceneReader
     {
         public:
-            SceneReader(Registry* registry, Environment* environment, const std::filesystem::path& scenesDirectory, const std::string& sceneName);
+            SceneReader(Registry* registry, GraphicsModule* graphics, const std::filesystem::path& scenesDirectory, const std::string& sceneName);
 
         private:
             Registry* m_registry;
-            Environment* m_environment;
+            GraphicsModule* m_graphics;
             std::ifstream m_file;
             std::unordered_map<std::string, Entity> m_handleNames;
             std::filesystem::path m_scenesDirectory;

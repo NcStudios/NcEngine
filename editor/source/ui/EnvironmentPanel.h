@@ -4,7 +4,7 @@
 
 namespace nc
 {
-    class Environment;
+    class GraphicsModule;
     class Registry;
 }
 
@@ -15,7 +15,7 @@ namespace nc::editor
     class EnvironmentPanel
     {
         public:
-            EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, Environment* environment);
+            EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, GraphicsModule* graphics);
 
             void Draw();
             void DrawSkybox();
@@ -24,6 +24,6 @@ namespace nc::editor
             SceneData* m_sceneData;
             Registry* m_registry;
             AssetManifest* m_assetManifest;
-            Environment* m_environment;
+            GraphicsModule* m_graphics;
     };
 }
