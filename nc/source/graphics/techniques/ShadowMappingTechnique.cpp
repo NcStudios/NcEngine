@@ -49,7 +49,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->bind_set(bind_frequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 6);
+        m_descriptorSets->bind_set(bind_frequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)

@@ -35,7 +35,7 @@ namespace nc::graphics
         return &get_set(bindFrequency)->layout.get();
     }
 
-    void shader_descriptor_sets::bind_set(bind_frequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet, uint32_t setCount)
+    void shader_descriptor_sets::bind_set(bind_frequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet)
     {
         auto* descriptorSet = get_set(bindFrequency);
 
@@ -97,7 +97,7 @@ namespace nc::graphics
         /* Add or update the write for the image descriptor. */
         auto it = descriptorSet->writes.find(bindingSlot);
         if (it != descriptorSet->writes.end()) it->second = descriptor_write(write, imageInfos);
-        else auto [pos, success] = descriptorSet->writes.emplace(bindingSlot, descriptor_write(write, imageInfos));
+        else descriptorSet->writes.emplace(bindingSlot, descriptor_write(write, imageInfos));
 
         descriptorSet->isDirty = true;
     }

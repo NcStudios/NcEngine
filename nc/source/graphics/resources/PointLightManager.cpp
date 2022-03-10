@@ -20,8 +20,6 @@ namespace nc::graphics
 
     void PointLightManager::Initialize()
     {
-        auto base = m_graphics->GetBasePtr();
-
         const auto bufferSize = static_cast<uint32_t>(sizeof(PointLightInfo) * m_maxPointLights);
 
         if (m_pointLightsArrayBuffer == nullptr)
