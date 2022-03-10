@@ -673,7 +673,7 @@ namespace nc::graphics
             }
             default:
             {
-                throw std::runtime_error("Invalid bufferType chosen.");
+                throw NcError("Invalid bufferType chosen.");
             }
         }
 
