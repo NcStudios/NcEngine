@@ -12,7 +12,7 @@
 
 namespace nc
 {
-    /** @brief Core engine object. */
+    /** @brief Interface for the engine runtime and modules. */
     class NcEngine
     {
         public:
@@ -86,7 +86,7 @@ namespace nc
     }; DEFINE_BITWISE_OPERATORS(EngineInitFlags)
 
     /**
-     * @brief Create the engine runtime, modules, and context.
+     * @brief Create the engine runtime, context, and modules.
      * 
      * @param configPath Path to an ini file specifying configuration settings.
      * @param flags Flags for controlling initialization behavior.

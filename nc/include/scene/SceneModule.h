@@ -5,6 +5,7 @@
 
 namespace nc
 {
+    /** @brief Interface for general scene functionality. */
     class SceneModule : public Module
     {
         public:

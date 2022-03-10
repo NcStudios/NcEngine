@@ -21,7 +21,7 @@ namespace nc
 
         /**
          * @brief Builds a list of jobs required by the module.
-         * @return Workload
+         * @return std::vector<Job>
          */
         virtual auto BuildWorkload() -> std::vector<Job> = 0;
     };
