@@ -62,7 +62,7 @@ namespace nc::graphics
             /* Called in the techniques to access and bind the descriptor set(s). */
             vk::DescriptorSetLayout* get_set_layout(bind_frequency bindFrequency);
             descriptor_set* get_set(bind_frequency bindFrequency);
-            void bind_set(bind_frequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet, uint32_t setCount);
+            void bind_set(bind_frequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
 
             /* Called in ShaderResourceServices CTOR after each of the services have been initialized. */
             void create_set(bind_frequency bindFrequency);

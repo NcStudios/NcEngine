@@ -661,12 +661,20 @@ namespace nc::graphics
 
         switch (bufferType)
         {
-        case vk::DescriptorType::eStorageBuffer:
-            minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minStorageBufferOffsetAlignment);
-            break;
-
-        case vk::DescriptorType::eUniformBuffer:
-            minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minUniformBufferOffsetAlignment);
+            case vk::DescriptorType::eStorageBuffer:
+            {
+                minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minStorageBufferOffsetAlignment);
+                break;
+            }
+            case vk::DescriptorType::eUniformBuffer:
+            {
+                minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minUniformBufferOffsetAlignment);
+                break;
+            }
+            default:
+            {
+                throw NcError("Invalid bufferType chosen.");
+            }
         }
 
         uint32_t alignedSize = originalSize;

@@ -23,18 +23,6 @@ namespace nc::graphics
 
     void EnvironmentDataManager::Initialize()
     {
-        auto base = m_graphics->GetBasePtr();
-
-        std::array<vk::DescriptorSetLayoutBinding, 1u> layoutBindings
-        {
-            CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)
-        };
-        
-        std::array<vk::DescriptorBindingFlagsEXT, 1> layoutBindingFlags
-        {  
-            vk::DescriptorBindingFlagsEXT()
-        };
-
         auto initialEnvironmentData = EnvironmentData{};
         initialEnvironmentData.cameraWorldPosition = Vector3{-0.0f, 4.0f, -6.4f};
         initialEnvironmentData.skyboxTextureIndex = -1;
