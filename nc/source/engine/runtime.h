@@ -11,7 +11,7 @@ namespace nc
     class Runtime : public NcEngine
     {
         public:
-            Runtime(engine_init_flags flags);
+            Runtime(EngineInitFlags flags);
             void Start(std::unique_ptr<nc::Scene> initialScene) override;
             void Stop() noexcept override;
             void Shutdown() noexcept override;

@@ -20,11 +20,11 @@ namespace
         };
     }
 
-    auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, nc::time::Time* time, std::function<void()> clearCallback, float* dt, nc::engine_init_flags flags) -> nc::Modules
+    auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, nc::time::Time* time, std::function<void()> clearCallback, float* dt, nc::EngineInitFlags flags) -> nc::Modules
     {
         V_LOG("BuildModules()");
-        bool enableGraphicsModule = !(flags & nc::engine_init_flags_headless_mode);
-        bool enablePhysicsModule = !(flags & nc::engine_init_flags_disable_physics);
+        bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::Headless);
+        bool enablePhysicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoPhysics);
         return nc::Modules
         {
             .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, window),
@@ -39,7 +39,7 @@ namespace
 
 namespace nc
 {
-    auto InitializeNcEngine(std::string_view configPath, engine_init_flags flags) -> std::unique_ptr<NcEngine>
+    auto InitializeNcEngine(std::string_view configPath, EngineInitFlags flags) -> std::unique_ptr<NcEngine>
     {
         config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
@@ -47,7 +47,7 @@ namespace nc
         return std::make_unique<Runtime>(flags);
     }
 
-    Runtime::Runtime(engine_init_flags flags)
+    Runtime::Runtime(EngineInitFlags flags)
         : m_window{},
           m_context{BuildContext()},
           m_modules{BuildModules(&m_context.registry, &m_window, &m_context.time, std::bind_front(&Runtime::Clear, this), &m_dt, flags)},
