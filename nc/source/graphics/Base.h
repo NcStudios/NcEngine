@@ -87,6 +87,7 @@ namespace nc::graphics
             void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
+            uint32_t PadBufferOffsetAlignment(uint32_t originalSize, vk::DescriptorType bufferType);
 
         private:
             void CreateInstance();
@@ -117,6 +118,7 @@ namespace nc::graphics
             vk::CommandPool m_commandPool;
             vk::DescriptorPool m_imguiDescriptorPool;
             vk::DescriptorPool m_renderingDescriptorPool;
+            vk::PhysicalDeviceProperties m_gpuProperties;
 
             // Just in case we change the key type; some destructors depend on find not throwing.
             static_assert(noexcept(decltype(m_buffers)::key_equal()));

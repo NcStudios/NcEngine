@@ -2,6 +2,7 @@
 
 #include "RenderTarget.h"
 #include "ShaderResourceService.h"
+#include "graphics/resources/shader_descriptor_sets.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -17,23 +18,23 @@ namespace nc::graphics
     class ShadowMapManager : public IShaderResourceService<ShadowMap>
     {
         public:
-            ShadowMapManager(Graphics* graphics, Vector2 dimensions);
+            ShadowMapManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, Vector2 dimensions);
             ~ShadowMapManager() noexcept;
 
             void Initialize() override;
             void Update(const std::vector<ShadowMap>& data) override;
-            auto GetDescriptorSet() -> vk::DescriptorSet* override;
-            auto GetDescriptorSetLayout() -> vk::DescriptorSetLayout* override;
             void Reset() override;
 
-            auto GetImageView() noexcept -> const vk::ImageView& { return m_depthStencil.get()->GetImageView(); } 
+            auto GetImageView() noexcept -> const vk::ImageView& { return m_depthStencil.get()->GetImageView(); }
 
         private:
             Graphics* m_graphics;
+            shader_descriptor_sets* m_descriptors;
             vk::UniqueSampler m_sampler;
             std::unique_ptr<RenderTarget> m_depthStencil;
-            vk::UniqueDescriptorSet m_descriptorSet;
-            vk::UniqueDescriptorSetLayout m_descriptorSetLayout;
             Vector2 m_dimensions;
+            uint32_t m_bindingSlot;
+            std::vector<vk::DescriptorImageInfo> m_imageInfos;
+            bool m_isRegistered;
     };
 }

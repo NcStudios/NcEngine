@@ -5,9 +5,9 @@
 layout (location = 0) in vec3 inUVW;
 layout (location = 0) out vec4 outFragColor;
 
-layout (set = 1, binding = 1) uniform samplerCube cubeMaps[];
+layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
 
-layout (set = 0, binding = 0) uniform EnvironmentDataBuffer
+layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
     vec3 cameraWorldPosition;
     int skyboxCubemapIndex;

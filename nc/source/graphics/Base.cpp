@@ -394,8 +394,11 @@ namespace nc::graphics
         deviceFeatures.setFillModeNonSolid(VK_TRUE);
         deviceFeatures.setWideLines(VK_TRUE);
 
+        vk::PhysicalDeviceVulkan11Features vulkan11Features{};
+        vulkan11Features.setShaderDrawParameters(VK_TRUE);
+
         vk::PhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures{};
-        indexingFeatures.setPNext(nullptr);
+        indexingFeatures.setPNext(&vulkan11Features);
         indexingFeatures.setDescriptorBindingPartiallyBound(VK_TRUE);
         indexingFeatures.setRuntimeDescriptorArray(VK_TRUE);
 
@@ -416,6 +419,8 @@ namespace nc::graphics
         {
             std::throw_with_nested(NcError("Failed to create device."));
         }
+
+        m_gpuProperties = m_physicalDevice.getProperties();
     }
 
     void Base::CreateCommandPool()
@@ -649,6 +654,38 @@ namespace nc::graphics
             cmd.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &region);
         });
     }
+
+    uint32_t Base::PadBufferOffsetAlignment(uint32_t originalSize, vk::DescriptorType bufferType)
+    {
+        uint32_t minimumAlignment = 0;
+
+        switch (bufferType)
+        {
+            case vk::DescriptorType::eStorageBuffer:
+            {
+                minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minStorageBufferOffsetAlignment);
+                break;
+            }
+            case vk::DescriptorType::eUniformBuffer:
+            {
+                minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minUniformBufferOffsetAlignment);
+                break;
+            }
+            default:
+            {
+                throw NcError("Invalid bufferType chosen.");
+            }
+        }
+
+        uint32_t alignedSize = originalSize;
+
+        if (minimumAlignment > 0)
+        {
+            alignedSize = (alignedSize + minimumAlignment - 1) & ~(minimumAlignment - 1);
+        }
+        return alignedSize;
+    }
+
 
     vk::UniqueImageView Base::CreateTextureView(const vk::Image& image)
     {

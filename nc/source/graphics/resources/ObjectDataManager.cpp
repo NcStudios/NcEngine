@@ -3,12 +3,12 @@
 
 namespace nc::graphics
 {
-    ObjectDataManager::ObjectDataManager(Graphics* graphics, uint32_t maxRenderers)
-        : m_objectsDataBuffer{},
-          m_descriptorSet{},
-          m_descriptorSetLayout{},
-          m_graphics{graphics},
-          m_maxObjects{maxRenderers}
+    ObjectDataManager::ObjectDataManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, uint32_t maxRenderers)
+        : m_graphics { graphics },
+          m_descriptors{ descriptors },
+          m_objectsDataBuffer{},
+          m_maxObjects{ maxRenderers },
+          m_bindingSlot{ bindingSlot }
     {
         Initialize();
     }
@@ -16,44 +16,32 @@ namespace nc::graphics
     ObjectDataManager::~ObjectDataManager() noexcept
     {
         m_objectsDataBuffer.Clear();
-        m_descriptorSet.reset();
-        m_descriptorSetLayout.reset();
     }
 
     void ObjectDataManager::Initialize()
     {
         const uint32_t objectsSize = (sizeof(ObjectData) * m_maxObjects);
-        auto base = m_graphics->GetBasePtr();
+        m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_graphics, objectsSize);
 
-        std::array<vk::DescriptorSetLayoutBinding, 1u> layoutBindings
-        {
-            CreateDescriptorSetLayoutBinding(0, 1, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex)
-        };
+        m_descriptors->register_descriptor
+        (
+            m_bindingSlot,
+            bind_frequency::per_frame,
+            1,
+            vk::DescriptorType::eStorageBuffer,
+            vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex,
+            vk::DescriptorBindingFlagBitsEXT()
+        );
 
-        std::array<vk::DescriptorBindingFlagsEXT, 1> layoutBindingFlags
-        {  
-            vk::DescriptorBindingFlagsEXT()
-        };
-
-        m_descriptorSetLayout = CreateDescriptorSetLayout(m_graphics, layoutBindings, layoutBindingFlags);
-        m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_graphics, objectsSize); //@todo: not hard code upper bound
-        m_descriptorSet = CreateDescriptorSet(m_graphics, base->GetRenderingDescriptorPoolPtr(), 1, &m_descriptorSetLayout.get());
-
-		vk::DescriptorBufferInfo objectsDataBufferInfo;
-		objectsDataBufferInfo.buffer = *m_objectsDataBuffer.GetBuffer();
-		objectsDataBufferInfo.offset = 0;
-		objectsDataBufferInfo.range = objectsSize;
-
-        vk::WriteDescriptorSet write{};
-        write.setDstBinding(0);
-        write.setDstArrayElement(0);
-        write.setDescriptorType(vk::DescriptorType::eStorageBuffer);
-        write.setDescriptorCount(1);
-        write.setDstSet(m_descriptorSet.get());
-        write.setPBufferInfo(&objectsDataBufferInfo);
-        write.setPImageInfo(0);
-
-        base->GetDevice().updateDescriptorSets(1, &write, 0, nullptr);
+        m_descriptors->update_buffer
+        (
+            bind_frequency::per_frame,
+            m_objectsDataBuffer.GetBuffer(),
+            objectsSize,
+            1,
+            vk::DescriptorType::eStorageBuffer,
+            m_bindingSlot
+        );
     }
 
     void ObjectDataManager::Update(const std::vector<ObjectData>& data)
@@ -61,21 +49,9 @@ namespace nc::graphics
         m_objectsDataBuffer.Map(data);
     }
 
-    auto ObjectDataManager::GetDescriptorSet() -> vk::DescriptorSet*
-    {
-        return &m_descriptorSet.get();
-    }
-
-    auto ObjectDataManager::GetDescriptorSetLayout() -> vk::DescriptorSetLayout*
-    {
-        return &m_descriptorSetLayout.get();
-    }
-
     void ObjectDataManager::Reset()
     {
         m_objectsDataBuffer.Clear();
-        m_descriptorSet.reset();
-        m_descriptorSetLayout.reset();
         Initialize();
     }
 }

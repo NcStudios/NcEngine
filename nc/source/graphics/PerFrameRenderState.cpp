@@ -97,10 +97,10 @@ namespace nc::graphics
         {
             pointLightInfos.reserve(pointLights.size());
 
-            std::transform(pointLights.begin(), pointLights.end(), std::back_inserter(pointLightInfos), [](auto&& component)
+            for(const auto& pointLight : pointLights)
             {
-                return component.GetInfo();
-            });
+                pointLightInfos.push_back(pointLight.GetInfo());
+            }
         }
     }
 
