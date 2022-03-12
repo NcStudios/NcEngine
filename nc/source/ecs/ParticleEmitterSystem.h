@@ -14,7 +14,8 @@ namespace nc::ecs
      *    - Implement GetWorkload
      *        - job1 calls Run + HookPoint::Free
      *        - job2 calls ProcessFrameEvents + HookPoint::PostFrameSync
-     *    - Update in Runtime.cpp */
+     *    - Update in Runtime.cpp
+     *    - Update in Modules.h */
     class ParticleEmitterSystem
     {
         public:

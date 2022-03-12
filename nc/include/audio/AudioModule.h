@@ -9,7 +9,7 @@ namespace nc
     struct AudioModule : public Module
     {
         /**
-         * @brief Regester an object to be the reference point audio.
+         * @brief Register an object to be the reference point audio.
          * 
          * A listener must be registered for the AudioModule to operate. A listener
          * should not be destroyed while it is registered, except on a scene change.

@@ -32,7 +32,7 @@ namespace nc::audio
 {
     auto BuildAudioModule(Registry* reg) -> std::unique_ptr<AudioModule>
     {
-        /** @note If we make a stub version of this, consider the cast in AudioSystemCallback. */
+        /** @todo We want a stub version of this, but consider the cast in AudioSystemCallback. */
         return std::make_unique<AudioModuleImpl>(reg);
     }
 

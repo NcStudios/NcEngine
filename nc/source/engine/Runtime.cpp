@@ -23,7 +23,7 @@ namespace
     auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, nc::time::Time* time, std::function<void()> clearCallback, float* dt, nc::EngineInitFlags flags) -> nc::Modules
     {
         V_LOG("BuildModules()");
-        bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::Headless);
+        bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoGraphics);
         bool enablePhysicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoPhysics);
         return nc::Modules
         {

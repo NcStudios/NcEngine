@@ -5,14 +5,48 @@
 
 #include "optick/optick.h"
 
+#ifdef NC_DEBUG_RENDERING_ENABLED
+#include "graphics/DebugRenderer.h"
+#endif
+
+namespace
+{
+    struct GraphicsModuleStub : nc::GraphicsModule
+    {
+        GraphicsModuleStub(nc::Registry* reg)
+        {
+            reg->RegisterOnAddCallback<nc::PointLight>([](nc::PointLight&){});
+            reg->RegisterOnRemoveCallback<nc::PointLight>([](nc::Entity){});
+        }
+
+        void SetCamera(nc::Camera*) noexcept override {}
+        auto GetCamera() noexcept -> nc::Camera* override { return nullptr; }
+        void SetUi(nc::ui::IUI*) noexcept override {}
+        bool IsUiHovered() const noexcept override { return false; }
+        void SetSkybox(const std::string&) override {}
+        void ClearEnvironment() override {}
+        void Clear() noexcept override {}
+        auto BuildWorkload() -> std::vector<nc::Job> { return {}; }
+
+        /** @todo Debug renderer is becoming a problem... */
+        #ifdef NC_DEBUG_RENDERING_ENABLED
+        nc::graphics::DebugRenderer debugRenderer;
+        #endif
+    };
+}
+
 namespace nc::graphics
 {
     auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window) -> std::unique_ptr<GraphicsModule>
     {
-        /** @todo allow stub */
-        (void)enableModule;
-
-        return std::make_unique<GraphicsModuleImpl>(reg, window);
+        if(enableModule)
+        {
+            return std::make_unique<GraphicsModuleImpl>(reg, window);
+        }
+        else
+        {
+            return std::make_unique<GraphicsModuleStub>(reg);
+        }
     }
 
     GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window)

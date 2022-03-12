@@ -17,7 +17,7 @@ namespace nc::graphics
 
         std::vector<DirectX::XMMATRIX> points;
         std::vector<DirectX::XMMATRIX> lines;
-        std::vector<DirectX::XMMATRIX> planes;     
+        std::vector<DirectX::XMMATRIX> planes;
     };
 
     class DebugRenderer

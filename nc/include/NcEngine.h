@@ -78,9 +78,9 @@ namespace nc
         None = 0,
 
         /** Disable the graphics module. */
-        Headless = 1,
+        NoGraphics = 1,
 
-        /** Disables the physics module. */
+        /** Disable the physics module. */
         NoPhysics = 1 << 1
 
     }; DEFINE_BITWISE_OPERATORS(EngineInitFlags)
