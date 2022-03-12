@@ -1,14 +1,18 @@
 #pragma once
 
-#include "physics/PhysicsSystem.h"
+#include "physics/PhysicsModule.h"
 #include "ClickableSystem.h"
 #include "PhysicsPipeline.h"
 #include "collision/broad_phase/SingleAxisPrune.h"
 #include "proxy/PerFrameProxyCache.h"
+#include "task/Job.h"
+#include "time/Time.h"
 
 namespace nc::physics
 {
-    class PhysicsSystemImpl final : public PhysicsSystem
+    auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<PhysicsModule>;
+
+    class PhysicsModuleImpl final : public PhysicsModule
     {
         struct PipelineDescription
         {
@@ -20,23 +24,22 @@ namespace nc::physics
         };
 
         public:
-            PhysicsSystemImpl(Registry* registry);
+            PhysicsModuleImpl(Registry* registry, time::Time* time);
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
             void RemoveJoint(Entity entityA, Entity entityB) override;
             void RemoveAllJoints(Entity entity) override;
-
             void RegisterClickable(IClickable* clickable) override;
             void UnregisterClickable(IClickable* clickable) noexcept override;
             auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
-
-            void DoPhysicsStep(tf::Executor& taskExecutor);
-            void ClearState();
+            auto BuildWorkload() -> std::vector<Job> override;
+            void Clear() noexcept override;
 
         private:
             PhysicsPipeline<PipelineDescription> m_pipeline;
             ClickableSystem m_clickableSystem;
-
-            void BuildTaskGraph(Registry* registry);
+            time::Time* m_time;
+            unsigned m_currentIterations;
+            tf::Taskflow m_tasks;
     };
 } // namespace nc::physics

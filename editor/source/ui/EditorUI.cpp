@@ -1,5 +1,4 @@
 #include "EditorUI.h"
-#include "Scene.h"
 #include "EditorScene.h"
 #include "scene/SceneGraph.h"
 #include "ui/ImGuiUtility.h"

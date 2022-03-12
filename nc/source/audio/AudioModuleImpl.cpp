@@ -1,7 +1,8 @@
-#include "AudioSystemImpl.h"
+#include "AudioModuleImpl.h"
 #include "ecs/component/AudioSource.h"
 #include "ecs/view.h"
 
+#include "optick/optick.h"
 #include <cstring>
 #include <iostream>
 
@@ -22,14 +23,20 @@ namespace
          *  quickly see when they happen. */
         if(status) std::cerr << "Audio stream underflow\n";
 
-        auto* system = static_cast<nc::audio::AudioSystemImpl*>(userData);
+        auto* system = static_cast<nc::audio::AudioModuleImpl*>(userData);
         return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer));
     }
 }
 
 namespace nc::audio
 {
-    AudioSystemImpl::AudioSystemImpl(Registry* registry)
+    auto BuildAudioModule(Registry* reg) -> std::unique_ptr<AudioModule>
+    {
+        /** @todo We want a stub version of this, but consider the cast in AudioSystemCallback. */
+        return std::make_unique<AudioModuleImpl>(reg);
+    }
+
+    AudioModuleImpl::AudioModuleImpl(Registry* registry)
         : m_registry{registry},
           m_rtAudio{},
           m_readyBuffers{},
@@ -87,7 +94,7 @@ namespace nc::audio
             throw NcError("Invalid number of buffer frames specified");
     }
 
-    AudioSystemImpl::~AudioSystemImpl() noexcept
+    AudioModuleImpl::~AudioModuleImpl() noexcept
     {
         Clear();
 
@@ -104,7 +111,7 @@ namespace nc::audio
             m_rtAudio.closeStream();
     }
 
-    void AudioSystemImpl::Clear() noexcept
+    void AudioModuleImpl::Clear() noexcept
     {
         m_listener = Entity::Null();
 
@@ -116,12 +123,20 @@ namespace nc::audio
         }
     }
 
-    void AudioSystemImpl::RegisterListener(Entity listener) noexcept
+    auto AudioModuleImpl::BuildWorkload() -> std::vector<Job>
+    {
+        return std::vector<Job>
+        {
+            Job{ [this]{Run();}, "AudioModule", HookPoint::Free }
+        };
+    }
+
+    void AudioModuleImpl::RegisterListener(Entity listener) noexcept
     {
         m_listener = listener;
     }
 
-    int AudioSystemImpl::WriteToDeviceBuffer(double* output)
+    int AudioModuleImpl::WriteToDeviceBuffer(double* output)
     {
         // empty check before lock is only safe with 1 consumer
         if(m_readyBuffers.empty())
@@ -148,8 +163,9 @@ namespace nc::audio
         return 0;
     }
 
-    void AudioSystemImpl::Update()
+    void AudioModuleImpl::Run()
     {
+        OPTICK_CATEGORY("AudioModule", Optick::Category::Audio);
         if(!m_listener.Valid())
             return;
 
@@ -175,14 +191,14 @@ namespace nc::audio
         }
     }
 
-    void AudioSystemImpl::MixToBuffer(double* buffer)
+    void AudioModuleImpl::MixToBuffer(double* buffer)
     {
         std::memset(buffer, 0, BufferSizeInBytes);
 
         const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
         if(!listenerTransform)
             throw NcError("Invalid listener registered");
-        
+
         const auto listenerPosition = listenerTransform->Position();
         const auto rightEar = listenerTransform->Right();
 
@@ -203,7 +219,7 @@ namespace nc::audio
         }
     }
 
-    auto AudioSystemImpl::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
+    auto AudioModuleImpl::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
     {
         unsigned deviceCount = m_rtAudio.getDeviceCount();
         std::vector<RtAudio::DeviceInfo> out;

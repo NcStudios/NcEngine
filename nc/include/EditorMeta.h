@@ -24,11 +24,11 @@ friend ::nc::UIStream;
 #define NC_EDITOR_ADD_ENTITY(handle, info) Entity handle = registry->Add<Entity>(info)
 
 /** Audio */
-#define NC_EDITOR_REGISTER_AUDIO_LISTENER(handle) engine->AudioSystem()->RegisterAudioListener(handle)
+#define NC_EDITOR_REGISTER_AUDIO_LISTENER(handle) engine->Audio()->RegisterAudioListener(handle)
 
 /** Camera */
 #define NC_EDITOR_ADD_CAMERA(handle) registry->Add<Camera>(handle)
-#define NC_EDITOR_SET_CAMERA(handle) engine->MainCamera()->Set(registry->Get<Camera>(handle))
+#define NC_EDITOR_SET_CAMERA(handle) engine->Graphics()->SetCamera(registry->Get<Camera>(handle))
 
 /** Collider */
 #define NC_EDITOR_BOX_PROPERTIES(...) BoxProperties{__VA_ARGS__}
@@ -55,4 +55,4 @@ friend ::nc::UIStream;
 
 /** Skybox */
 #define NC_EDITOR_ADD_SKYBOX(assetPath) nc::LoadCubeMapAsset(assetPath)
-#define NC_EDITOR_SET_SKYBOX(assetPath) engine->Environment()->SetSkybox(assetPath) 
+#define NC_EDITOR_SET_SKYBOX(assetPath) engine->Graphics()->SetSkybox(assetPath) 

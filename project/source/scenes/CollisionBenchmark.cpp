@@ -72,7 +72,7 @@ namespace nc::sample
         m_sceneHelper.Setup(engine, false, true, Widget);
 
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        engine->MainCamera()->Set(camera);
+        engine->Graphics()->SetCamera(camera);
 
         // Cube Spawner Options
         SpawnBehavior spawnBehavior

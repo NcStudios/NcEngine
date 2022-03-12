@@ -1,25 +1,29 @@
 #pragma once
 
-#include "AudioSystem.h"
+#include "audio/AudioModule.h"
 #include "ecs/Registry.h"
 #include "rtaudio/RtAudio.h"
+#include "task/Job.h"
 
 #include <mutex>
 #include <queue>
 
 namespace nc::audio
 {
-    class AudioSystemImpl final : public AudioSystem
+    auto BuildAudioModule(Registry* reg) -> std::unique_ptr<AudioModule>;
+
+    class AudioModuleImpl final : public AudioModule
     {
         public:
-            AudioSystemImpl(Registry* registry);
-            ~AudioSystemImpl() noexcept;
+            AudioModuleImpl(Registry* registry);
+            ~AudioModuleImpl() noexcept;
 
             void RegisterListener(Entity listener) noexcept override;
-            int WriteToDeviceBuffer(double* output);
-            void Update();
+            auto BuildWorkload() -> std::vector<Job> override;
+            void Clear() noexcept override;
+            void Run();
+            auto WriteToDeviceBuffer(double* output) -> int;
             auto ProbeDevices() -> std::vector<RtAudio::DeviceInfo>;
-            void Clear() noexcept;
 
         private:
             Registry* m_registry;

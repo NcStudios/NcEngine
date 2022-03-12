@@ -4,7 +4,7 @@ target_sources(NcEngineLib
         ${ROOT_DIR}/source/graphics/resources/CubeMapManager.cpp
         ${ROOT_DIR}/source/graphics/resources/RenderTarget.cpp
         ${ROOT_DIR}/source/graphics/resources/EnvironmentDataManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/EnvironmentImpl.cpp
+        ${ROOT_DIR}/source/graphics/resources/Environment.cpp
         ${ROOT_DIR}/source/graphics/resources/ImmutableBuffer.cpp
         ${ROOT_DIR}/source/graphics/resources/ImmutableImage.cpp
         ${ROOT_DIR}/source/graphics/resources/ObjectDataManager.cpp

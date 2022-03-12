@@ -1,8 +1,7 @@
 #pragma once
 
-#include "NcEngine.h"
 #include "Input.h"
-#include "MainCamera.h"
+#include "NcEngine.h"
 
 namespace nc::editor
 {

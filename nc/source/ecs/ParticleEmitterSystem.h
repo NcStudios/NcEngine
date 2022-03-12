@@ -4,20 +4,28 @@
 #include "ecs/component/ParticleEmitter.h"
 #include "particle/EmitterState.h"
 
-namespace nc::graphics { class Graphics; }
-
 namespace nc::ecs
 {
+    /** @todo I skipped making this a module because Jare was working
+     *  on fixing this at the same time:
+     *    - Derive from Module
+     *    - Rename ParticleModule (there is no api interface so no need for impl suffix)
+     *    - Mark Clear as override
+     *    - Implement GetWorkload
+     *        - job1 calls Run + HookPoint::Free
+     *        - job2 calls ProcessFrameEvents + HookPoint::PostFrameSync
+     *    - Update in Runtime.cpp
+     *    - Update in Modules.h */
     class ParticleEmitterSystem
     {
         public:
-            ParticleEmitterSystem(Registry* registry, graphics::Graphics* graphics);
+            ParticleEmitterSystem(Registry* registry, float* dt);
 
-            /** UpdateParticles is able to be run from the JobSystem, but it must finish before
+            /** Run is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
              *  finalize requests from game logic (additions/deletions). A side effect of this is
              *  particles won't be rendered until the frame after they are created. */
-            void UpdateParticles(float dt);
+            void Run();
             void RenderParticles();
             void ProcessFrameEvents();
 
@@ -33,8 +41,6 @@ namespace nc::ecs
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;
             std::vector<Entity> m_toRemove;
-
-            graphics::Graphics* m_graphics;
-
+            float* m_dt;
     };
 } // namespace nc::ecs

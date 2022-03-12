@@ -31,8 +31,8 @@ namespace
 
 namespace nc::sample
 {
-    SampleUI::SampleUI(SceneSystem* sceneSystem, GameLog* gameLog, std::function<void()> widgetCallback)
-        : m_sceneSystem{sceneSystem},
+    SampleUI::SampleUI(SceneModule* sceneModule, GameLog* gameLog, std::function<void()> widgetCallback)
+        : m_sceneModule{sceneModule},
           m_gameLog{ gameLog },
           m_widgetCallback{ widgetCallback },
           m_windowDimensions{ window::GetDimensions() }
@@ -111,28 +111,28 @@ namespace nc::sample
         {
             auto buttonSize = ImVec2{ImGui::GetWindowWidth() - 20, 18};
             if(ImGui::Button("Worms", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<Worms>());
+                m_sceneModule->ChangeScene(std::make_unique<Worms>());
 
             if(ImGui::Button("Click Events", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<ClickEvents>());
+                m_sceneModule->ChangeScene(std::make_unique<ClickEvents>());
 
             if(ImGui::Button("Collision Events", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<CollisionEvents>());
+                m_sceneModule->ChangeScene(std::make_unique<CollisionEvents>());
 
             if(ImGui::Button("Joints Test", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<JointsTest>());
+                m_sceneModule->ChangeScene(std::make_unique<JointsTest>());
 
             if(ImGui::Button("Spawn Test", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<SpawnTest>());
+                m_sceneModule->ChangeScene(std::make_unique<SpawnTest>());
 
             if(ImGui::Button("Rendering Benchmark", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<RenderingBenchmark>());
+                m_sceneModule->ChangeScene(std::make_unique<RenderingBenchmark>());
 
             if(ImGui::Button("Collision Benchmark", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<CollisionBenchmark>());
+                m_sceneModule->ChangeScene(std::make_unique<CollisionBenchmark>());
 
             if(ImGui::Button("Jare Test", buttonSize))
-                m_sceneSystem->ChangeScene(std::make_unique<JareTestScene>());
+                m_sceneModule->ChangeScene(std::make_unique<JareTestScene>());
 
             // if(ImGui::Button("Solar System", buttonSize))
             //     m_sceneSystem->ChangeScene(std::make_unique<SolarSystem>());

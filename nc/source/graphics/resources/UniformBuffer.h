@@ -3,8 +3,7 @@
 #include "graphics/Base.h"
 #include "graphics/Commands.h"
 #include "graphics/Vertex.h"
-#include "graphics/Environment.h"
-#include "graphics/resources/EnvironmentImpl.h"
+#include "graphics/resources/Environment.h"
 
 #include <vector>
 #include "vulkan/vk_mem_alloc.hpp"
@@ -19,7 +18,7 @@ namespace nc::graphics
     {
     public:
         UniformBuffer();
-        UniformBuffer(nc::graphics::Graphics* graphics, const void* data, uint32_t size);
+        UniformBuffer(Graphics* graphics, const void* data, uint32_t size);
         ~UniformBuffer() noexcept;
         UniformBuffer(UniformBuffer&&);
         UniformBuffer& operator=(UniformBuffer&&);
@@ -27,7 +26,7 @@ namespace nc::graphics
         UniformBuffer(const UniformBuffer&) = delete;
 
         vk::Buffer* GetBuffer();
-        void Bind(nc::graphics::Graphics* graphics, const void* data, uint32_t size);
+        void Bind(Graphics* graphics, const void* data, uint32_t size);
         void Clear();
 
     private:

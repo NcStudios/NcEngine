@@ -4,12 +4,9 @@
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
 #include "ecs/view.h"
-#include "graphics/resources/EnvironmentImpl.h"
+#include "graphics/resources/Environment.h"
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
-#ifdef NC_EDITOR_ENABLED
-#include "physics/PhysicsSystemImpl.h"
-#endif
 #include "resources/ShaderResourceService.h"
 
 namespace
@@ -28,7 +25,7 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, EnvironmentImpl* environment)
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment)
     : camViewMatrix{camera->ViewMatrix()},
       projectionMatrix{camera->ProjectionMatrix()},
       cameraPosition{registry->Get<Transform>(camera->ParentEntity())->Position()},

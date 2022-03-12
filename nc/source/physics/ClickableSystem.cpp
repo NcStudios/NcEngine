@@ -2,7 +2,6 @@
 #include "ecs/Registry.h"
 #include "debug/Utils.h"
 #include "Input.h"
-#include "MainCamera.h"
 #include "Window.h"
 #include "directx/Inc/DirectXMath.h"
 

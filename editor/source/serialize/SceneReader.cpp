@@ -1,5 +1,5 @@
 #include "SceneReader.h"
-#include "graphics/Environment.h"
+#include "graphics/GraphicsModule.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
 
@@ -101,9 +101,9 @@ namespace
 
 namespace nc::editor
 {
-    SceneReader::SceneReader(Registry* registry,  Environment* environment, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
+    SceneReader::SceneReader(Registry* registry, GraphicsModule* graphics, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
         : m_registry{registry},
-          m_environment{environment},
+          m_graphics{graphics},
           m_file{scenesDirectory / (sceneName + FileExtension::Generated.data())},
           m_handleNames{},
           m_scenesDirectory{scenesDirectory},
@@ -328,14 +328,14 @@ namespace nc::editor
         const auto path = ReadQuotedStringFromAction(args);
         if (path.empty())
         {
-            m_environment->Clear();
+            m_graphics->ClearEnvironment();
         }
 
         if (path == DefaultSkyboxPath)
         {
-            m_environment->SetSkybox(DefaultSkyboxPath);
+            m_graphics->SetSkybox(DefaultSkyboxPath);
         }
-        
-        m_environment->SetSkybox(path);
+
+        m_graphics->SetSkybox(path);
     }
 }

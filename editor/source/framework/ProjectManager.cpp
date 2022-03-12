@@ -241,7 +241,7 @@ namespace nc::editor
             {
                 m_nextSceneIndex = i;
                 Output::Log("Loading scene: " + name);
-                m_engine->SceneSystem()->ChangeScene(std::make_unique<EditorScene>(this));
+                m_engine->Scene()->ChangeScene(std::make_unique<EditorScene>(this));
                 return;
             }
         }
@@ -264,7 +264,7 @@ namespace nc::editor
 
         m_currentSceneIndex = m_nextSceneIndex;
 
-        NC_TRACE(SceneReader serialize{m_engine->Registry(), m_engine->Environment(), m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
+        NC_TRACE(SceneReader serialize{m_engine->Registry(), m_engine->Graphics(), m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
     }
 
     void ProjectManager::DeleteCurrentScene()

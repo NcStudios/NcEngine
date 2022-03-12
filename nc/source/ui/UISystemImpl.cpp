@@ -1,7 +1,6 @@
 #include "UISystemImpl.h"
 #include "debug/Utils.h"
 #include "graphics/Base.h"
-#include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_vulkan.h"
@@ -11,21 +10,17 @@
 namespace nc::ui
 {
     #ifdef NC_EDITOR_ENABLED
-    UISystemImpl::UISystemImpl(HWND hwnd, graphics::Graphics* graphics)
-    : m_editor{graphics},
-      m_projectUI{nullptr},
-      m_graphics{graphics}
+    UISystemImpl::UISystemImpl(HWND hwnd)
+    : m_editor{},
+      m_projectUI{nullptr}
     #else
-    UISystemImpl::UISystemImpl(HWND hwnd, graphics::Graphics* graphics)
-    : m_projectUI{nullptr},
-      m_graphics{graphics}
+    UISystemImpl::UISystemImpl(HWND hwnd)
+    : m_projectUI{nullptr}
     #endif
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui_ImplWin32_Init(hwnd);
-
-        m_graphics->InitializeUI();
     }
 
     UISystemImpl::~UISystemImpl() noexcept

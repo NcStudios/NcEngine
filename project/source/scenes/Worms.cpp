@@ -18,7 +18,7 @@ namespace nc::sample
         // Camera
         auto cameraEntity = registry->Add<Entity>({.tag = "Main Camera"});
         auto camera = registry->Add<Camera>(cameraEntity);
-        engine->MainCamera()->Set(camera);
+        engine->Graphics()->SetCamera(camera);
 
         // Window
         window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});

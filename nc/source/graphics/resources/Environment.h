@@ -1,27 +1,30 @@
 #pragma once
 
-#include "graphics/Environment.h"
+#include "math/Vector.h"
+
+#include <string>
 
 namespace nc
 {
     const std::string SkyboxMeshPath = "skybox.nca";
+
     struct EnvironmentData
     {
         Vector3 cameraWorldPosition;
         uint32_t skyboxTextureIndex;
     };
 
-    class EnvironmentImpl : public Environment
+    class Environment
     {
         public:
-            EnvironmentImpl();
+            Environment();
 
-            void SetSkybox(const std::string& path) override;
+            void SetSkybox(const std::string& path);
             void SetCameraPosition(const Vector3& cameraPosition);
-            const EnvironmentData& Get() const;
-            void Clear() override;
+            auto Get() const -> const EnvironmentData&;
+            void Clear();
             bool UseSkybox();
-            
+
         private:
             EnvironmentData m_environmentData;
             bool m_useSkybox;

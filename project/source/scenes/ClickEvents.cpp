@@ -58,7 +58,7 @@ namespace nc::sample
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
-        engine->MainCamera()->Set(camera);
+        engine->Graphics()->SetCamera(camera);
         auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, engine->Physics());
         registry->Add<FrameLogic>(cameraHandle, [](Entity self, Registry* registry, float dt)
         {

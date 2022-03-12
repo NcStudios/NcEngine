@@ -1,11 +1,12 @@
 #include "Graphics.h"
+#include "assets/AssetServices.h"
 #include "Base.h"
 #include "Commands.h"
-#include "Renderer.h"
-#include "assets/AssetServices.h"
-#include "config/Config.h"
 #include "debug/Utils.h"
+#include "ecs/component/Camera.h"
+#include "config/Config.h"
 #include "optick/optick.h"
+#include "Renderer.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
 #include "Swapchain.h"
@@ -14,7 +15,7 @@
 
 namespace nc::graphics
 {
-    Graphics::Graphics(MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    Graphics::Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
@@ -37,7 +38,6 @@ namespace nc::graphics
     {
         try
         {
-            WaitIdle();
             Clear();
         }
         catch(const std::runtime_error& e) // from WaitIdle()
@@ -122,17 +122,12 @@ namespace nc::graphics
     }
     #endif
 
-    bool Graphics::GetNextImageIndex(uint32_t* imageIndex)
+    void Graphics::GetNextImageIndex()
     {
-        bool isSwapChainValid = true;
-        *imageIndex = m_swapchain->GetNextRenderReadyImageIndex(isSwapChainValid);
-        m_imageIndex = *imageIndex;
-        if (!isSwapChainValid)
+        if(!m_swapchain->GetNextRenderReadyImageIndex(&m_imageIndex))
         {
             RecreateSwapchain(m_dimensions);
-            return false;
         }
-        return true;
     }
 
     void Graphics::Clear()
@@ -182,17 +177,15 @@ namespace nc::graphics
         m_renderer->InitializeImgui();
     }
 
-    uint32_t Graphics::FrameBegin()
+    bool Graphics::FrameBegin()
     {
         OPTICK_CATEGORY("Graphics::FrameBegin", Optick::Category::Rendering);
-        if (m_isMinimized) return UINT32_MAX;
-
-        uint32_t imageIndex = UINT32_MAX;
+        if (m_isMinimized) return false;
 
         // Gets the next image in the swapchain
-        GetNextImageIndex(&imageIndex);
+        GetNextImageIndex();
 
-        return m_imageIndex;
+        return true;
     }
 
     // Executes the command buffer for the next swapchain image which writes to the image.

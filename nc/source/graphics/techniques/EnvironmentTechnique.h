@@ -2,7 +2,6 @@
 
 #include "directx/Inc/DirectXMath.h"
 #include "ecs/component/Component.h"
-#include "graphics/Environment.h"
 #include "graphics/resources/shader_descriptor_sets.h"
 #include "ITechnique.h"
 

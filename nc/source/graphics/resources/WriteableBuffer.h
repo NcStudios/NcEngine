@@ -55,7 +55,7 @@ namespace nc::graphics
     template<typename T>
     WriteableBuffer<T>::~WriteableBuffer() noexcept
     {
-        if (m_writeableBuffer)
+        if (m_writeableBuffer && m_base)
         {
             m_base->DestroyBuffer(m_memoryIndex);
             m_writeableBuffer = nullptr;

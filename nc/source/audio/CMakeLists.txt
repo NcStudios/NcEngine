@@ -1,6 +1,6 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/audio/AudioSystemImpl.cpp
+        ${ROOT_DIR}/source/audio/AudioModuleImpl.cpp
 )
 
 add_subdirectory(rtaudio)

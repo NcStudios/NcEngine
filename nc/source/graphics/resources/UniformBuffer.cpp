@@ -10,7 +10,7 @@ namespace nc::graphics
 
     UniformBuffer::UniformBuffer(Graphics* graphics, const void* data, uint32_t size)
         : m_memoryIndex{ 0 },
-        m_uniformBuffer{ nullptr }
+          m_uniformBuffer{ nullptr }
     {
         m_base = graphics->GetBasePtr();
         auto paddedSize = m_base->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);

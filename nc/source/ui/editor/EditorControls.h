@@ -1,7 +1,6 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
 #include "ecs/Registry.h"
-#include "ecs/EntityComponentSystem.h"
 #include "ecs/component/All.h"
 #include "ecs/view.h"
 #include "imgui/imgui.h"

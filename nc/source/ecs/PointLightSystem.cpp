@@ -4,9 +4,8 @@
 
 namespace nc::ecs
 {
-    PointLightSystem::PointLightSystem(Registry* registry, graphics::Graphics* graphics)
-        : m_graphics{graphics},
-          m_registry{registry},
+    PointLightSystem::PointLightSystem(Registry* registry)
+        : m_registry{registry},
           m_isSystemDirty{true}
     {
         m_registry->RegisterOnAddCallback<PointLight>

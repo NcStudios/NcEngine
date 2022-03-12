@@ -3,8 +3,6 @@
 #include "ui/UIStyle.h"
 #include "utility/DefaultComponents.h"
 
-#include "ui/UISystem.h"
-
 namespace
 {
     auto CreateProjectCallbacks(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks
@@ -71,7 +69,7 @@ namespace nc::editor
           m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
           m_assetManifest{m_editorConfig.recentProjectDirectory, [configEditor = &m_configEditor]() -> const config::Config& { return configEditor->GetConfig();}},
           m_projectManager{engine, &m_assetManifest},
-          m_environmentPanel{m_projectManager.GetSceneData(), engine->Registry(), &m_assetManifest, engine->Environment()},
+          m_environmentPanel{m_projectManager.GetSceneData(), engine->Registry(), &m_assetManifest, engine->Graphics()},
           m_editorUI{engine->Registry(),
                      &m_output,
                      &m_environmentPanel,
@@ -88,7 +86,7 @@ namespace nc::editor
           m_configEditor{m_editorConfig.recentProjectDirectory / "config\\config.ini"}
     {
         nc::editor::SetImGuiStyle();
-        engine->UI()->Set(&m_editorUI);
+        engine->Graphics()->SetUi(&m_editorUI);
 
         auto uiCallbacks = CreateUICallbacks(&m_editorUI);
         m_changeTagDialog.RegisterDialog(uiCallbacks.registerDialog);

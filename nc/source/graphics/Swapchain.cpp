@@ -299,15 +299,11 @@ namespace nc::graphics
         return m_swapChainImageViews;
     }
 
-    uint32_t Swapchain::GetNextRenderReadyImageIndex(bool& isSwapChainValid)
+    bool Swapchain::GetNextRenderReadyImageIndex(uint32_t* imageIndex)
     {
-        auto resultAndIndex = m_base->GetDevice().acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrameIndex]);
-        if (resultAndIndex.result == vk::Result::eErrorOutOfDateKHR)
-        {
-            isSwapChainValid = false;
-        }
-
-        return resultAndIndex.value;
+        auto [result, index] = m_base->GetDevice().acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrameIndex]);
+        *imageIndex = index;
+        return result != vk::Result::eErrorOutOfDateKHR;
     }
 
     const std::vector<vk::Fence>& Swapchain::GetFences(FenceType fenceType) const noexcept

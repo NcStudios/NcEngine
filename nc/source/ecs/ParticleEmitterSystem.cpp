@@ -3,6 +3,7 @@
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 
+#include "optick/optick.h"
 #include <algorithm>
 
 // namespace
@@ -20,12 +21,12 @@
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, graphics::Graphics* graphics)
+    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, float* dt)
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
+          m_dt{dt}
           //m_graphicsData{CreateParticleGraphicsData(graphics)},
-          m_graphics{graphics}    
     {
         registry->RegisterOnAddCallback<ParticleEmitter>
         (
@@ -38,8 +39,10 @@ namespace nc::ecs
         );
     }
 
-    void ParticleEmitterSystem::UpdateParticles(float dt)
+    void ParticleEmitterSystem::Run()
     {
+        OPTICK_CATEGORY("ParticleModule", Optick::Category::VFX);
+        const float dt = *m_dt;
         for(auto& state : m_emitterStates)
         {
             state.Update(dt);

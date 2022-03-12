@@ -38,6 +38,7 @@ namespace nc::physics
             void Step(tf::Executor& executor);
             void Clear();
             auto GetJointSystem() -> JointSystem* { return &m_jointSystem; }
+            auto GetTasks() -> TaskGraph& { return m_tasks; }
 
         private:
             TaskGraph m_tasks;
@@ -257,8 +258,8 @@ namespace nc::physics
         notifyEventsTask.succeed(integrateTask, narrowPhaseTriggerTask, cacheImpulsesTask);
 
         /** Task graph visual output */
-        #if 0
-        m_tasks.GetTaskFlow().name("Physics Step");
+        #if NC_OUTPUT_TASKFLOW
+        m_tasks.GetTaskFlow()->name("Physics Pipeline");
         fixedUpdateTask.name("Component FixedUpdate Logic");
         updateInertiaTask.name("Update Inertia Tensors");
         applyGravityTask.name("Apply Gravity");
@@ -275,8 +276,6 @@ namespace nc::physics
         cacheImpulsesTask.name("Narrow Phase - Cache Impulses");
         integrateTask.name("Integrate");
         notifyEventsTask.name("Narrow Phase - Notify Events");
-        std::ofstream outFile{"taskflow_physicspipeline_out.txt"};
-        m_tasks.GetTaskFlow().dump(outFile);
         #endif
     }
 }
