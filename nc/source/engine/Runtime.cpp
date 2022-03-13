@@ -25,12 +25,13 @@ namespace
         V_LOG("BuildModules()");
         bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoGraphics);
         bool enablePhysicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoPhysics);
+        bool enableAudioModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
         return nc::Modules
         {
             .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, window),
             .particleSystem = std::make_unique<nc::ecs::ParticleEmitterSystem>(reg, dt),
             .physicsModule = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg, time),
-            .audioModule = nc::audio::BuildAudioModule(reg),
+            .audioModule = nc::audio::BuildAudioModule(enableAudioModule, reg),
             .sceneModule = std::make_unique<nc::scene::SceneModuleImpl>(std::move(clearCallback)),
             .logicModule = std::make_unique<nc::LogicModule>(reg, dt)
         };
