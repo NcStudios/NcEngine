@@ -7,5 +7,6 @@ target_sources(${GAME_EXE}
         ${ROOT_DIR}/source/scenes/JointsTest.cpp
         ${ROOT_DIR}/source/scenes/RenderingBenchmark.cpp
         ${ROOT_DIR}/source/scenes/SpawnTest.cpp
+        ${ROOT_DIR}/source/scenes/SolarSystem.cpp
         ${ROOT_DIR}/source/scenes/Worms.cpp
 )

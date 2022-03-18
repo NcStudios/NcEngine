@@ -1,41 +1,30 @@
 #include "ParticleEmitterSystem.h"
-//#include "camera/MainCameraInternal.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
+#include "ecs/component/Transform.h"
 
 #include "optick/optick.h"
 #include <algorithm>
 
-// namespace
-// {
-//     auto CreateParticleGraphicsData(nc::graphics::Graphics* graphics)
-//     {
-//         return nc::particle::GraphicsData
-//         {
-//             // graphics->ViewMatrix(),
-//             // graphics->ProjectionMatrix(),
-//             // graphics
-//         };
-//     }
-// }
-
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, float* dt)
+    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, float* dt, std::function<nc::Camera* ()> getCamera)
         : m_emitterStates{},
-          m_toAdd{},
-          m_toRemove{},
-          m_dt{dt}
-          //m_graphicsData{CreateParticleGraphicsData(graphics)},
+        m_toAdd{},
+        m_toRemove{},
+        m_dt{ dt },
+        m_random{ Random() },
+        m_getCamera{ getCamera },
+        m_registry{ registry }
     {
         registry->RegisterOnAddCallback<ParticleEmitter>
-        (
-            [this](ParticleEmitter& emitter) { this->Add(emitter); }
+            (
+                [this](ParticleEmitter& emitter) { this->Add(emitter); }
         );
 
         registry->RegisterOnRemoveCallback<ParticleEmitter>
-        (
-            [this](Entity entity) { this->Remove(entity); }
+            (
+                [this](Entity entity) { this->Remove(entity); }
         );
     }
 
@@ -43,9 +32,14 @@ namespace nc::ecs
     {
         OPTICK_CATEGORY("ParticleModule", Optick::Category::VFX);
         const float dt = *m_dt;
-        for(auto& state : m_emitterStates)
+        const auto* camera = m_getCamera();
+        const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
+        const auto camRotation = transform->Rotation();
+        const auto camForward = transform->Forward();
+
+        for (auto& state : m_emitterStates)
         {
-            state.Update(dt);
+            state.Update(dt, camRotation, camForward);
         }
     }
 
@@ -61,12 +55,12 @@ namespace nc::ecs
 
         m_toAdd.clear();
 
-        for(auto entity : m_toRemove)
+        for (auto entity : m_toRemove)
         {
             std::erase_if(m_emitterStates, [entity](auto& state)
-            {
-                return state.GetEntity() == entity;
-            });
+                {
+                    return state.GetEntity() == entity;
+                });
         }
 
         m_toRemove.clear();
@@ -81,20 +75,25 @@ namespace nc::ecs
 
         auto pos = std::ranges::find_if(m_emitterStates, findPred);
 
-        if(pos == m_emitterStates.end())
+        if (pos == m_emitterStates.end())
         {
             pos = std::ranges::find_if(m_toAdd, findPred);
-            if(pos == m_toAdd.end())
+            if (pos == m_toAdd.end())
                 throw NcError("Particle emitter does not exist");
         }
 
         pos->Emit(count);
     }
 
-    void ParticleEmitterSystem::Add(ParticleEmitter&)
+    std::vector<particle::EmitterState>* ParticleEmitterSystem::GetParticles()
     {
-        // m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_graphicsData);
-        // emitter.RegisterSystem(this);
+        return &m_emitterStates;
+    }
+
+    void ParticleEmitterSystem::Add(ParticleEmitter& emitter)
+    {
+        m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_random);
+        emitter.RegisterSystem(this);
     }
 
     void ParticleEmitterSystem::Remove(Entity entity)

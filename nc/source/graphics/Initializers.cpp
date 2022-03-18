@@ -38,28 +38,28 @@ namespace nc::graphics
 
         switch (type)
         {
-            case AttachmentType::Color:
-                attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-                attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-                attachmentDescription.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
-                break;
+        case AttachmentType::Color:
+            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+            attachmentDescription.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
+            break;
 
-            case AttachmentType::Resolve:
-                attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-                attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-                attachmentDescription.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
-                break;
+        case AttachmentType::Resolve:
+            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+            attachmentDescription.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
+            break;
 
-            case AttachmentType::Depth:
-                attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eClear);
-                attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-                attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-                break;
-            case AttachmentType::ShadowDepth:
-                attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-                attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-                attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
-                break;
+        case AttachmentType::Depth:
+            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eClear);
+            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+            attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+            break;
+        case AttachmentType::ShadowDepth:
+            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+            attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+            break;
         }
         return attachmentDescription;
     }
@@ -71,14 +71,14 @@ namespace nc::graphics
 
         switch (type)
         {
-            case AttachmentType::Resolve:
-            case AttachmentType::Color:
-                attachmentReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
-                break;
-            case AttachmentType::Depth:
-            case AttachmentType::ShadowDepth:
-                attachmentReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-                break;
+        case AttachmentType::Resolve:
+        case AttachmentType::Color:
+            attachmentReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
+            break;
+        case AttachmentType::Depth:
+        case AttachmentType::ShadowDepth:
+            attachmentReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+            break;
         }
         return attachmentReference;
     }
@@ -112,11 +112,11 @@ namespace nc::graphics
         return subpassDescription;
     }
 
-    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags)
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask, vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags)
     {
         vk::SubpassDependency subpassDependency = CreateSubpassDependency(sourceSubpassIndex, destSubpassIndex, sourceStageMask, destStageMask, sourceAccessMask, destAccessMask);
         subpassDependency.setDependencyFlags(dependencyFlags);
-        return subpassDependency;      
+        return subpassDependency;
     }
 
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask, vk::AccessFlags destAccessMask)
@@ -129,8 +129,8 @@ namespace nc::graphics
         subpassDependency.setDstStageMask(destStageMask); // Specifies the type of operation that should do the waiting
         subpassDependency.setSrcAccessMask(sourceAccessMask);  // Specifies the specific operation that should do the waiting
         subpassDependency.setDstAccessMask(destAccessMask);  // Specifies the specific operation that should do the waiting
-        
-        return subpassDependency;      
+
+        return subpassDependency;
     }
 
     Subpass CreateSubpass(const AttachmentSlot& depthAttachment)
@@ -180,12 +180,12 @@ namespace nc::graphics
 
         switch (stage)
         {
-            case ShaderStage::Vertex:
-                pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eVertex);
-                break;
-            case ShaderStage::Pixel:
-                pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eFragment);
-                break;
+        case ShaderStage::Vertex:
+            pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eVertex);
+            break;
+        case ShaderStage::Pixel:
+            pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eFragment);
+            break;
         }
 
         pipelineShaderStageCreateInfo.setModule(shader);
@@ -334,16 +334,16 @@ namespace nc::graphics
             colorBlending.setLogicOp(vk::LogicOp::eAnd);
             colorBlending.setAttachmentCount(1);
             colorBlending.setPAttachments(&colorBlendAttachment);
-            colorBlending.setBlendConstants({1.0f, 1.0f, 1.0f, 1.0f});
+            colorBlending.setBlendConstants({ 1.0f, 1.0f, 1.0f, 1.0f });
             return colorBlending;
         }
-        
+
         vk::PipelineColorBlendStateCreateInfo colorBlending{};
         colorBlending.setLogicOpEnable(static_cast<vk::Bool32>(false));
         colorBlending.setLogicOp(vk::LogicOp::eCopy);
         colorBlending.setAttachmentCount(1);
         colorBlending.setPAttachments(&colorBlendAttachment);
-        colorBlending.setBlendConstants({0.0f, 0.0f, 0.0f, 0.0f});
+        colorBlending.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
         return colorBlending;
     }
 
@@ -376,6 +376,16 @@ namespace nc::graphics
         return pipelineLayoutInfo;
     }
 
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo()
+    {
+        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
+        pipelineLayoutInfo.setSetLayoutCount(0);
+        pipelineLayoutInfo.setPSetLayouts(nullptr);
+        pipelineLayoutInfo.setPushConstantRangeCount(0);
+        pipelineLayoutInfo.setPPushConstantRanges(nullptr);
+        return pipelineLayoutInfo;
+    }
+
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange)
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -385,13 +395,13 @@ namespace nc::graphics
         pipelineLayoutInfo.setPPushConstantRanges(&pushConstantRange);
         return pipelineLayoutInfo;
     }
-    
+
     vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues)
     {
         vk::RenderPassBeginInfo renderPassInfo{};
         renderPassInfo.setRenderPass(renderpass); // Specify the render pass and attachments.
         renderPassInfo.setFramebuffer(framebuffer);
-        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
+        renderPassInfo.renderArea.setOffset({ 0,0 }); // Specify the dimensions of the render area.
         renderPassInfo.renderArea.setExtent(extent);
         renderPassInfo.setClearValueCount(static_cast<uint32_t>(clearValues.size())); // Set clear color
         renderPassInfo.setPClearValues(clearValues.data());
@@ -403,9 +413,9 @@ namespace nc::graphics
         std::vector<vk::AttachmentDescription> attachmentDescriptions{};
         attachmentDescriptions.reserve(attachmentSlots.size());
         std::transform(attachmentSlots.begin(), attachmentSlots.end(), std::back_inserter(attachmentDescriptions), [](const auto& attachmentSlot)
-        {
-            return attachmentSlot.description;
-        });
+            {
+                return attachmentSlot.description;
+            });
 
         std::vector<vk::SubpassDescription> subpassDescriptions{};
         subpassDescriptions.reserve(subpasses.size());
@@ -458,7 +468,7 @@ namespace nc::graphics
     {
         vk::Rect2D scissor = {};
         scissor.setExtent(extent);
-        scissor.setOffset({0, 0});
+        scissor.setOffset({ 0, 0 });
         return scissor;
     }
 
@@ -472,9 +482,9 @@ namespace nc::graphics
     }
 
     vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding,
-                                                                    uint32_t descriptorCount,
-                                                                    vk::DescriptorType type,
-                                                                    vk::ShaderStageFlags shaderStages)
+        uint32_t descriptorCount,
+        vk::DescriptorType type,
+        vk::ShaderStageFlags shaderStages)
     {
         vk::DescriptorSetLayoutBinding layoutBinding;
         layoutBinding.setBinding(binding);
@@ -500,7 +510,7 @@ namespace nc::graphics
 
         return graphics->GetBasePtr()->GetDevice().createDescriptorSetLayoutUnique(setInfo);
     }
-    
+
     vk::UniqueDescriptorSet CreateDescriptorSet(Graphics* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
     {
         vk::DescriptorSetAllocateInfo allocationInfo{};
@@ -560,36 +570,36 @@ namespace nc::graphics
 
         switch (clearValue)
         {
-            case ClearValue::Depth:
-            {
-                clearValues.reserve(1);
-                auto value = vk::ClearValue{};
-                value.setDepthStencil({1.0f, 0});
-                clearValues.push_back(value);
-                break;
-            }
+        case ClearValue::Depth:
+        {
+            clearValues.reserve(1);
+            auto value = vk::ClearValue{};
+            value.setDepthStencil({ 1.0f, 0 });
+            clearValues.push_back(value);
+            break;
+        }
 
-            case ClearValue::Color:
-            {
-                clearValues.reserve(1);
-                auto value = vk::ClearValue{};
-                value.setColor(vk::ClearColorValue(clearColor));
-                clearValues.push_back(value);
-                break;
-            }
+        case ClearValue::Color:
+        {
+            clearValues.reserve(1);
+            auto value = vk::ClearValue{};
+            value.setColor(vk::ClearColorValue(clearColor));
+            clearValues.push_back(value);
+            break;
+        }
 
-            case ClearValue::DepthAndColor:
-            {
-                clearValues.reserve(2);
-                auto colorValue = vk::ClearValue{};
-                colorValue.setColor(vk::ClearColorValue(clearColor));
-                clearValues.push_back(colorValue);
+        case ClearValue::DepthAndColor:
+        {
+            clearValues.reserve(2);
+            auto colorValue = vk::ClearValue{};
+            colorValue.setColor(vk::ClearColorValue(clearColor));
+            clearValues.push_back(colorValue);
 
-                auto depthValue = vk::ClearValue{};
-                depthValue.setDepthStencil({1.0f, 0});
-                clearValues.push_back(depthValue);
-                break;
-            }
+            auto depthValue = vk::ClearValue{};
+            depthValue.setDepthStencil({ 1.0f, 0 });
+            clearValues.push_back(depthValue);
+            break;
+        }
         }
 
         return clearValues;

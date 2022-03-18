@@ -15,8 +15,8 @@ namespace
     {
         GraphicsModuleStub(nc::Registry* reg)
         {
-            reg->RegisterOnAddCallback<nc::PointLight>([](nc::PointLight&){});
-            reg->RegisterOnRemoveCallback<nc::PointLight>([](nc::Entity){});
+            reg->RegisterOnAddCallback<nc::PointLight>([](nc::PointLight&) {});
+            reg->RegisterOnRemoveCallback<nc::PointLight>([](nc::Entity) {});
         }
 
         void SetCamera(nc::Camera*) noexcept override {}
@@ -29,19 +29,19 @@ namespace
         auto BuildWorkload() -> std::vector<nc::Job> { return {}; }
 
         /** @todo Debug renderer is becoming a problem... */
-        #ifdef NC_DEBUG_RENDERING_ENABLED
+#ifdef NC_DEBUG_RENDERING_ENABLED
         nc::graphics::DebugRenderer debugRenderer;
-        #endif
+#endif
     };
 }
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window) -> std::unique_ptr<GraphicsModule>
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window, float* dt) -> std::unique_ptr<GraphicsModule>
     {
-        if(enableModule)
+        if (enableModule)
         {
-            return std::make_unique<GraphicsModuleImpl>(reg, window);
+            return std::make_unique<GraphicsModuleImpl>(reg, window, dt);
         }
         else
         {
@@ -49,16 +49,17 @@ namespace nc::graphics
         }
     }
 
-    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window)
-        : m_registry{registry},
-          m_camera{},
-          m_graphics{&m_camera,
-                     window->GetHWND(),
-                     window->GetHINSTANCE(),
-                     window->GetDimensions()},
-          m_ui{window->GetHWND()},
-          m_environment{},
-          m_pointLightSystem{registry}
+    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, float* dt)
+        : m_registry{ registry },
+        m_camera{},
+        m_graphics{ &m_camera,
+                   window->GetHWND(),
+                   window->GetHINSTANCE(),
+                   window->GetDimensions() },
+        m_ui{ window->GetHWND() },
+        m_environment{},
+        m_pointLightSystem{ registry },
+        m_particleEmitterSystem{ registry, dt, std::bind_front(&GraphicsModule::GetCamera, this) }
     {
         m_graphics.InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
@@ -103,13 +104,16 @@ namespace nc::graphics
         m_graphics.Clear();
         m_environment.Clear();
         m_pointLightSystem.Clear();
+        m_particleEmitterSystem.Clear();
     }
 
     auto GraphicsModuleImpl::BuildWorkload() -> std::vector<Job>
     {
         return std::vector<Job>
         {
-            Job{ [this]{Run();}, "GraphicsModule", HookPoint::Render }
+            Job{ [this] {Run(); }, "GraphicsModule", HookPoint::Render },
+                Job{ [this] {m_particleEmitterSystem.Run(); }, "RunParticleEmitterSystem", HookPoint::Free },
+                Job{ [this] {m_particleEmitterSystem.ProcessFrameEvents(); }, "ProcessParticleFrameEvents", HookPoint::PostFrameSync }
         };
     }
 
@@ -119,7 +123,7 @@ namespace nc::graphics
         auto* camera = m_camera.Get();
         camera->UpdateViewMatrix();
 
-        if(!m_graphics.FrameBegin())
+        if (!m_graphics.FrameBegin())
             return;
 
         m_ui.FrameBegin();
@@ -134,12 +138,12 @@ namespace nc::graphics
 #endif
 
         auto areLightsDirty = m_pointLightSystem.CheckDirtyAndReset();
-        auto state = PerFrameRenderState{m_registry, camera, areLightsDirty, &m_environment};
+        auto state = PerFrameRenderState{ m_registry, camera, areLightsDirty, &m_environment, m_particleEmitterSystem.GetParticles() };
         MapPerFrameRenderState(state);
         m_graphics.Draw(state);
 
 #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : view<Collider>{m_registry}) collider.SetEditorSelection(false);
+        for (auto& collider : view<Collider>{ m_registry }) collider.SetEditorSelection(false);
 #endif
 
         m_graphics.FrameEnd();

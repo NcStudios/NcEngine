@@ -2,7 +2,9 @@
 
 #include "ecs/component/ParticleEmitter.h"
 #include "ecs/SoA.h"
-#include "graphics/MvpMatrices.h"
+#include "math/Random.h"
+
+#include "directx/Inc/DirectXMath.h"
 
 #include <vector>
 
@@ -25,36 +27,29 @@ namespace nc::particle
         float scale;
     };
 
-    // struct GraphicsData
-    // {
-    //     DirectX::FXMMATRIX viewMatrix;
-    //     DirectX::FXMMATRIX projectionMatrix;
-    //     graphics::Graphics* graphics;
-    // };
-
     class EmitterState
     {
-        public:
-            using ParticleSoA = ecs::SoA<Particle, graphics::MvpMatrices>;
-            static constexpr size_t ParticlesIndex = 0u;
-            static constexpr size_t MvpMatricesIndex = 1u;
+    public:
+        using ParticleSoA = ecs::SoA<Particle, DirectX::XMMATRIX>;
+        static constexpr size_t ParticlesIndex = 0u;
+        static constexpr size_t ModelMatrixIndex = 1u;
 
-            EmitterState(Entity entity, const ParticleInfo& info);
+        EmitterState(Entity entity, const ParticleInfo& info, Random* random);
 
-            void Emit(size_t count);
-            void Update(float dt);
-            const ParticleSoA* GetSoA() const;
-            ParticleInfo* GetInfo();
-            Entity GetEntity() const;
+        void Emit(size_t count);
+        void Update(float dt, const Quaternion& camRotation, const Vector3& camForward);
+        const ParticleSoA* GetSoA() const;
+        ParticleInfo* GetInfo();
+        Entity GetEntity() const;
 
-        private:
-            void PeriodicEmission(float dt);
-            graphics::MvpMatrices ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const;
-            
-            ParticleSoA m_soa;
-            ParticleInfo m_info;
-            //GraphicsData* m_graphicsData;
-            Entity m_entity;
-            float m_emissionCounter;
+    private:
+        void PeriodicEmission(float dt);
+        auto ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const->DirectX::XMMATRIX;
+
+        ParticleSoA m_soa;
+        ParticleInfo m_info;
+        Entity m_entity;
+        float m_emissionCounter;
+        Random* m_random;
     };
 }

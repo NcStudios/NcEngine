@@ -6,6 +6,7 @@
 #ifdef NC_EDITOR_ENABLED
 #include "ecs/component/DebugWidget.h"
 #endif
+#include "particle/EmitterState.h"
 #include "resources/ObjectDataManager.h"
 
 namespace nc
@@ -13,16 +14,16 @@ namespace nc
     class Camera;
     class Environment;
     class Registry;
-    #ifdef NC_DEBUG_RENDERING_ENABLED
+#ifdef NC_DEBUG_RENDERING_ENABLED
     namespace physics { class PhysicsSystemImpl; }
-    #endif
+#endif
 }
 
 namespace nc::graphics
 {
     struct PerFrameRenderState
     {
-        PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment);
+        PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::vector<nc::particle::EmitterState>* particleEmitters);
 
         DirectX::XMMATRIX camViewMatrix;
         DirectX::XMMATRIX projectionMatrix;
@@ -30,13 +31,14 @@ namespace nc::graphics
         std::vector<ObjectData> objectData;
         std::vector<MeshView> meshes;
         std::vector<PointLightInfo> pointLightInfos;
-        #ifdef NC_EDITOR_ENABLED
+#ifdef NC_EDITOR_ENABLED
         std::optional<nc::DebugWidget> colliderDebugWidget;
-        #endif
+#endif
         std::vector<DirectX::XMMATRIX> pointLightVPs;
         bool isPointLightBindRequired;
         Environment* environment;
         bool useSkybox;
+        std::vector<nc::particle::EmitterState>* emitterStates;
     };
 
     void MapPerFrameRenderState(const PerFrameRenderState& state);

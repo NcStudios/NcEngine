@@ -8,7 +8,9 @@
 #include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
 #include "graphics/techniques/EnvironmentTechnique.h"
-#include "graphics/techniques/PhongAndUiTechnique.h"
+#include "graphics/techniques/ParticleTechnique.h"
+#include "graphics/techniques/PbrTechnique.h"
+#include "graphics/techniques/UiTechnique.h"
 #include "graphics/techniques/ShadowMappingTechnique.h"
 #include "optick/optick.h"
 #include "PerFrameRenderState.h"
@@ -24,15 +26,15 @@
 
 namespace nc::graphics
 {
-    Renderer::Renderer(Graphics* graphics, 
-                       ShaderResourceServices* shaderResources,
-                       Vector2 dimensions)
-        : m_graphics{graphics},
-          m_shaderResources{shaderResources},
-          m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
-          m_dimensions{dimensions},
-          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
-          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
+    Renderer::Renderer(Graphics* graphics,
+        ShaderResourceServices* shaderResources,
+        Vector2 dimensions)
+        : m_graphics{ graphics },
+        m_shaderResources{ shaderResources },
+        m_renderPasses{ std::make_unique<RenderPassManager>(graphics, dimensions) },
+        m_dimensions{ dimensions },
+        m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
+        m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
     {
         RegisterRenderPasses();
         RegisterTechniques();
@@ -44,7 +46,7 @@ namespace nc::graphics
         m_colorBuffer.reset();
         m_renderPasses.reset();
     }
-    
+
     void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex)
     {
         OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
@@ -85,12 +87,14 @@ namespace nc::graphics
     {
         m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
 
-        #ifdef NC_EDITOR_ENABLED
+#ifdef NC_EDITOR_ENABLED
         m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
-        #endif
+#endif
 
         m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
-        m_renderPasses->RegisterTechnique<PhongAndUiTechnique>(RenderPassManager::LitShadingPass);
+        m_renderPasses->RegisterTechnique<PbrTechnique>(RenderPassManager::LitShadingPass);
+        m_renderPasses->RegisterTechnique<ParticleTechnique>(RenderPassManager::LitShadingPass);
+        m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
     }
 
     vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, uint32_t currentSwapChainImageIndex)

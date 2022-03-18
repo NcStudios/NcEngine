@@ -2,6 +2,7 @@
 
 #include "camera/MainCamera.h"
 #include "ecs/PointLightSystem.h"
+#include "ecs/ParticleEmitterSystem.h"
 #include "Graphics.h"
 #include "graphics/GraphicsModule.h"
 #include "resources/Environment.h"
@@ -15,29 +16,30 @@ namespace nc::window { class WindowImpl; }
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window) -> std::unique_ptr<GraphicsModule>;
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window, float* dt)->std::unique_ptr<GraphicsModule>;
 
     class GraphicsModuleImpl : public GraphicsModule
     {
-        public:
-            GraphicsModuleImpl(Registry* registry, window::WindowImpl* window);
+    public:
+        GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, float* dt);
 
-            void SetCamera(Camera* camera) noexcept override;
-            auto GetCamera() noexcept -> Camera* override;
-            void SetUi(ui::IUI* ui) noexcept override;
-            bool IsUiHovered() const noexcept override;
-            void SetSkybox(const std::string& path) override;
-            void ClearEnvironment() override;
-            auto BuildWorkload() -> std::vector<Job> override;
-            void Clear() noexcept override;
-            void Run();
+        void SetCamera(Camera* camera) noexcept override;
+        auto GetCamera() noexcept -> Camera* override;
+        void SetUi(ui::IUI* ui) noexcept override;
+        bool IsUiHovered() const noexcept override;
+        void SetSkybox(const std::string& path) override;
+        void ClearEnvironment() override;
+        auto BuildWorkload()->std::vector<Job> override;
+        void Clear() noexcept override;
+        void Run();
 
-        private:
-            Registry* m_registry;
-            camera::MainCamera m_camera;
-            Graphics m_graphics;
-            ui::UISystemImpl m_ui;
-            Environment m_environment;
-            ecs::PointLightSystem m_pointLightSystem;
+    private:
+        Registry* m_registry;
+        camera::MainCamera m_camera;
+        Graphics m_graphics;
+        ui::UISystemImpl m_ui;
+        Environment m_environment;
+        ecs::PointLightSystem m_pointLightSystem;
+        ecs::ParticleEmitterSystem m_particleEmitterSystem;
     };
 }
