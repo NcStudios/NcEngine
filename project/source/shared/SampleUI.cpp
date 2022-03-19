@@ -19,8 +19,8 @@ namespace
 {
     constexpr auto PanelHeight = 200u;
     constexpr auto WindowFlags = ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize;
+						         ImGuiWindowFlags_NoTitleBar |
+						         ImGuiWindowFlags_NoResize;
 
     void Spacing(unsigned count)
     {

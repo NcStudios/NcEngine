@@ -15,22 +15,22 @@ namespace nc::graphics
 
     class UiTechnique : public ITechnique
     {
-    public:
-        UiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
-        ~UiTechnique() noexcept;
+	    public:
+	        UiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
+	        ~UiTechnique() noexcept;
 
-        bool CanBind(const PerFrameRenderState& frameData) override;
-        void Bind(vk::CommandBuffer* cmd) override;
+	        bool CanBind(const PerFrameRenderState& frameData) override;
+	        void Bind(vk::CommandBuffer* cmd) override;
 
-        bool CanRecord(const PerFrameRenderState& frameData) override;
-        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
+	        bool CanRecord(const PerFrameRenderState& frameData) override;
+	        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
-    private:
-        void CreatePipeline(vk::RenderPass* renderPass);
+	    private:
+	        void CreatePipeline(vk::RenderPass* renderPass);
 
-        nc::graphics::Graphics* m_graphics;
-        Base* m_base;
-        vk::UniquePipeline m_pipeline;
-        vk::UniquePipelineLayout m_pipelineLayout;
+	        nc::graphics::Graphics* m_graphics;
+	        Base* m_base;
+	        vk::UniquePipeline m_pipeline;
+	        vk::UniquePipelineLayout m_pipelineLayout;
     };
 }

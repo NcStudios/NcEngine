@@ -38,28 +38,26 @@ namespace nc::graphics
 
         switch (type)
         {
-        case AttachmentType::Color:
-            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-            attachmentDescription.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
-            break;
-
-        case AttachmentType::Resolve:
-            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-            attachmentDescription.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
-            break;
-
-        case AttachmentType::Depth:
-            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eClear);
-            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-            attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-            break;
-        case AttachmentType::ShadowDepth:
-            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
-            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-            attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
-            break;
+	        case AttachmentType::Color:
+	            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+	            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+	            attachmentDescription.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
+	            break;
+	        case AttachmentType::Resolve:
+	            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+	            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+	            attachmentDescription.setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
+	            break;
+	        case AttachmentType::Depth:
+	            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eClear);
+	            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+	            attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+	            break;
+	        case AttachmentType::ShadowDepth:
+	            attachmentDescription.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare);
+	            attachmentDescription.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare);
+	            attachmentDescription.setFinalLayout(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+	            break;
         }
         return attachmentDescription;
     }
@@ -71,14 +69,14 @@ namespace nc::graphics
 
         switch (type)
         {
-        case AttachmentType::Resolve:
-        case AttachmentType::Color:
-            attachmentReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
-            break;
-        case AttachmentType::Depth:
-        case AttachmentType::ShadowDepth:
-            attachmentReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-            break;
+	        case AttachmentType::Resolve:
+	        case AttachmentType::Color:
+	            attachmentReference.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
+	            break;
+	        case AttachmentType::Depth:
+	        case AttachmentType::ShadowDepth:
+	            attachmentReference.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+	            break;
         }
         return attachmentReference;
     }
@@ -180,12 +178,12 @@ namespace nc::graphics
 
         switch (stage)
         {
-        case ShaderStage::Vertex:
-            pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eVertex);
-            break;
-        case ShaderStage::Pixel:
-            pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eFragment);
-            break;
+	        case ShaderStage::Vertex:
+	            pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eVertex);
+	            break;
+	        case ShaderStage::Pixel:
+	            pipelineShaderStageCreateInfo.setStage(vk::ShaderStageFlagBits::eFragment);
+	            break;
         }
 
         pipelineShaderStageCreateInfo.setModule(shader);
@@ -482,9 +480,9 @@ namespace nc::graphics
     }
 
     vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding,
-        uint32_t descriptorCount,
-        vk::DescriptorType type,
-        vk::ShaderStageFlags shaderStages)
+															        uint32_t descriptorCount,
+															        vk::DescriptorType type,
+															        vk::ShaderStageFlags shaderStages)
     {
         vk::DescriptorSetLayoutBinding layoutBinding;
         layoutBinding.setBinding(binding);
@@ -570,36 +568,34 @@ namespace nc::graphics
 
         switch (clearValue)
         {
-        case ClearValue::Depth:
-        {
-            clearValues.reserve(1);
-            auto value = vk::ClearValue{};
-            value.setDepthStencil({ 1.0f, 0 });
-            clearValues.push_back(value);
-            break;
-        }
+	        case ClearValue::Depth:
+	        {
+	            clearValues.reserve(1);
+	            auto value = vk::ClearValue{};
+	            value.setDepthStencil({ 1.0f, 0 });
+	            clearValues.push_back(value);
+	            break;
+	        }
+	        case ClearValue::Color:
+	        {
+	            clearValues.reserve(1);
+	            auto value = vk::ClearValue{};
+	            value.setColor(vk::ClearColorValue(clearColor));
+	            clearValues.push_back(value);
+	            break;
+	        }
+	        case ClearValue::DepthAndColor:
+	        {
+	            clearValues.reserve(2);
+	            auto colorValue = vk::ClearValue{};
+	            colorValue.setColor(vk::ClearColorValue(clearColor));
+	            clearValues.push_back(colorValue);
 
-        case ClearValue::Color:
-        {
-            clearValues.reserve(1);
-            auto value = vk::ClearValue{};
-            value.setColor(vk::ClearColorValue(clearColor));
-            clearValues.push_back(value);
-            break;
-        }
-
-        case ClearValue::DepthAndColor:
-        {
-            clearValues.reserve(2);
-            auto colorValue = vk::ClearValue{};
-            colorValue.setColor(vk::ClearColorValue(clearColor));
-            clearValues.push_back(colorValue);
-
-            auto depthValue = vk::ClearValue{};
-            depthValue.setDepthStencil({ 1.0f, 0 });
-            clearValues.push_back(depthValue);
-            break;
-        }
+	            auto depthValue = vk::ClearValue{};
+	            depthValue.setDepthStencil({ 1.0f, 0 });
+	            clearValues.push_back(depthValue);
+	            break;
+	        }
         }
 
         return clearValues;

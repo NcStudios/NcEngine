@@ -18,13 +18,13 @@ namespace nc::ecs
         m_registry{ registry }
     {
         registry->RegisterOnAddCallback<ParticleEmitter>
-            (
-                [this](ParticleEmitter& emitter) { this->Add(emitter); }
+        (
+            [this](ParticleEmitter& emitter) { this->Add(emitter); }
         );
 
         registry->RegisterOnRemoveCallback<ParticleEmitter>
-            (
-                [this](Entity entity) { this->Remove(entity); }
+        (
+            [this](Entity entity) { this->Remove(entity); }
         );
     }
 
@@ -58,9 +58,9 @@ namespace nc::ecs
         for (auto entity : m_toRemove)
         {
             std::erase_if(m_emitterStates, [entity](auto& state)
-                {
-                    return state.GetEntity() == entity;
-                });
+            {
+                return state.GetEntity() == entity;
+            });
         }
 
         m_toRemove.clear();

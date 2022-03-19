@@ -112,8 +112,8 @@ namespace nc::graphics
         return std::vector<Job>
         {
             Job{ [this] {Run(); }, "GraphicsModule", HookPoint::Render },
-                Job{ [this] {m_particleEmitterSystem.Run(); }, "RunParticleEmitterSystem", HookPoint::Free },
-                Job{ [this] {m_particleEmitterSystem.ProcessFrameEvents(); }, "ProcessParticleFrameEvents", HookPoint::PostFrameSync }
+            Job{ [this] {m_particleEmitterSystem.Run(); }, "RunParticleEmitterSystem", HookPoint::Free },
+            Job{ [this] {m_particleEmitterSystem.ProcessFrameEvents(); }, "ProcessParticleFrameEvents", HookPoint::PostFrameSync }
         };
     }
 
