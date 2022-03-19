@@ -10,7 +10,7 @@
 
 namespace nc::audio
 {
-    auto BuildAudioModule(Registry* reg) -> std::unique_ptr<AudioModule>;
+    auto BuildAudioModule(bool enableModule, Registry* reg) -> std::unique_ptr<AudioModule>;
 
     class AudioModuleImpl final : public AudioModule
     {

@@ -26,14 +26,27 @@ namespace
         auto* system = static_cast<nc::audio::AudioModuleImpl*>(userData);
         return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer));
     }
+
+    struct AudioModuleStub : public nc::AudioModule
+    {
+        void RegisterListener(nc::Entity) noexcept override {}
+        auto BuildWorkload() -> std::vector<nc::Job> override { return {}; }
+        void Clear() noexcept override {}
+    };
 }
 
 namespace nc::audio
 {
-    auto BuildAudioModule(Registry* reg) -> std::unique_ptr<AudioModule>
+    auto BuildAudioModule(bool enableModule, Registry* reg) -> std::unique_ptr<AudioModule>
     {
-        /** @todo We want a stub version of this, but consider the cast in AudioSystemCallback. */
-        return std::make_unique<AudioModuleImpl>(reg);
+        if(enableModule)
+        {
+            return std::make_unique<AudioModuleImpl>(reg);
+        }
+        else
+        {
+            return std::make_unique<AudioModuleStub>();
+        }
     }
 
     AudioModuleImpl::AudioModuleImpl(Registry* registry)
