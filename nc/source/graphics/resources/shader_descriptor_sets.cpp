@@ -1,13 +1,35 @@
 #include "shader_descriptor_sets.h"
 #include "graphics/Base.h"
-#include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
+
+namespace
+{
+    auto CreateRenderingDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
+    {
+        std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
+        {
+            vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 10 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 }
+        };
+        
+        vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
+        renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+        renderingDescriptorPoolInfo.setMaxSets(1000);
+        renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
+        renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
+
+        return device.createDescriptorPoolUnique(renderingDescriptorPoolInfo);
+    }
+}
 
 namespace nc::graphics
 {
-    shader_descriptor_sets::shader_descriptor_sets(Graphics* graphics)
-        : m_descriptorSets{},
-          m_graphics{graphics}
+    shader_descriptor_sets::shader_descriptor_sets(Base* base)
+        : m_renderingDescriptorPool{CreateRenderingDescriptorPool(base->GetDevice())},
+          m_descriptorSets{},
+          m_base{base}
     {
         m_descriptorSets.reserve(1);
         m_descriptorSets.emplace(bind_frequency::per_frame, descriptor_set{});
@@ -50,7 +72,8 @@ namespace nc::graphics
                 kv.second.write.setDstSet(descriptorSet->set.get());
                 writes.push_back(kv.second.write);
             }
-            m_graphics->GetBasePtr()->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+
+            m_base->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
             descriptorSet->isDirty = false;
         }
 
@@ -78,8 +101,8 @@ namespace nc::graphics
             bindingFlags.push_back(kv.second);
         }
 
-        descriptorSet->layout = CreateDescriptorSetLayout(m_graphics, bindings, bindingFlags);
-        descriptorSet->set = CreateDescriptorSet(m_graphics, m_graphics->GetBasePtr()->GetRenderingDescriptorPoolPtr(), 1, &descriptorSet->layout.get());
+        descriptorSet->layout = CreateDescriptorSetLayout(m_base->GetDevice(), bindings, bindingFlags);
+        descriptorSet->set = CreateDescriptorSet(m_base->GetDevice(), &m_renderingDescriptorPool.get(), 1, &descriptorSet->layout.get());
     }
 
     void shader_descriptor_sets::update_image(bind_frequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
@@ -102,17 +125,14 @@ namespace nc::graphics
         descriptorSet->isDirty = true;
     }
 
-    void shader_descriptor_sets::update_buffer(bind_frequency bindFrequency, vk::Buffer* buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
+    void shader_descriptor_sets::update_buffer(bind_frequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
     {
         auto* descriptorSet = get_set(bindFrequency);
 
-        uint32_t range = 0;
-        range = descriptorType != vk::DescriptorType::eUniformBuffer && descriptorType != vk::DescriptorType::eStorageBuffer ? setSize : m_graphics->GetBasePtr()->PadBufferOffsetAlignment(setSize, descriptorType);
-
         vk::DescriptorBufferInfo bufferInfo;
-        bufferInfo.buffer = *buffer;
+        bufferInfo.buffer = buffer;
         bufferInfo.offset = 0;
-        bufferInfo.range = range;
+        bufferInfo.range = setSize;
 
         vk::WriteDescriptorSet write{};
         write.setDstBinding(bindingSlot);

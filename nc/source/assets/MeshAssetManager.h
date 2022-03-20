@@ -8,6 +8,8 @@
 
 namespace nc
 {
+    namespace graphics { class Graphics; }
+
     struct VertexData
     {
         graphics::ImmutableBuffer buffer;
@@ -33,8 +35,8 @@ namespace nc
             auto Acquire(const std::string& path) const -> MeshView override;
             bool IsLoaded(const std::string& path) const override;
 
-            auto GetVertexBuffer() noexcept -> vk::Buffer* { return m_vertexData.buffer.GetBuffer(); }
-            auto GetIndexBuffer() noexcept -> vk::Buffer* { return m_indexData.buffer.GetBuffer(); }
+            auto GetVertexBuffer() const noexcept -> vk::Buffer { return m_vertexData.buffer.GetBuffer(); }
+            auto GetIndexBuffer() const noexcept -> vk::Buffer { return m_indexData.buffer.GetBuffer(); }
 
         private:
             graphics::Graphics* m_graphics;

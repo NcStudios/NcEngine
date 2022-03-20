@@ -3,11 +3,11 @@
 
 namespace nc::graphics
 {
-    RenderTarget::RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples)
+    RenderTarget::RenderTarget(Base* base, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples)
         : m_base{base},
+          m_allocator{allocator},
           m_image{},
-          m_view{},
-          m_memoryIndex{0}
+          m_view{}
     {
         auto format = isDepthStencil ? base->GetDepthFormat() : vk::Format::eR8G8B8A8Srgb;
 
@@ -15,7 +15,7 @@ namespace nc::graphics
         constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
 
         auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
-        m_memoryIndex = m_base->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, &m_image, numSamples);
+        m_image = m_allocator->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, numSamples);
 
         auto aspectMask = isDepthStencil ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
 
@@ -40,20 +40,17 @@ namespace nc::graphics
         m_view = m_base->GetDevice().createImageView(imageViewInfo);
     }
 
-    RenderTarget::RenderTarget(Base* base, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format)
-    : m_base{base},
-      m_image{},
-      m_view{},
-      m_memoryIndex{0}
+    RenderTarget::RenderTarget(Base* base, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format)
+        : m_base{base},
+          m_allocator{allocator},
+          m_image{},
+          m_view{}
     {
         constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
         constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
-
-        auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
-        
-        m_memoryIndex = m_base->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, &m_image, numSamples);
-        
-        auto aspectMask = isDepthStencil ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
+        const auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
+        m_image = m_allocator->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, numSamples);
+        const auto aspectMask = isDepthStencil ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
 
         vk::ImageSubresourceRange imageSubresourceRange{};
         imageSubresourceRange.setBaseMipLevel(0);
@@ -79,10 +76,9 @@ namespace nc::graphics
     RenderTarget::~RenderTarget() noexcept
     {
         m_base->GetDevice().destroyImageView(m_view);
-        m_base->DestroyImage(m_memoryIndex);
     }
 
-    const vk::Image& RenderTarget::GetImage() const noexcept
+    vk::Image RenderTarget::GetImage() const noexcept
     {
         return m_image;
     }
@@ -90,10 +86,5 @@ namespace nc::graphics
     const vk::ImageView& RenderTarget::GetImageView() const noexcept
     {
         return m_view;
-    }
-
-    const Vector2& RenderTarget::GetDimensions() const noexcept
-    {
-        return m_dimensions;
     }
 }

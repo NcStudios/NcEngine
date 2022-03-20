@@ -16,6 +16,7 @@ namespace nc
 namespace nc::graphics
 {
     class Commands;
+    class Graphics;
     class RenderTarget;
     class ShaderResourceServices;
     struct PerFrameRenderState;

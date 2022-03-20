@@ -1,4 +1,5 @@
 #include "MeshAssetManager.h"
+#include "graphics/Graphics.h"
 
 #include <cassert>
 #include <fstream>
@@ -221,9 +222,9 @@ namespace nc
     void MeshAssetManager::UpdateBuffers()
     {
         m_vertexData.buffer.Clear();
-        m_vertexData.buffer = ImmutableBuffer(m_graphics, m_vertexData.vertices);
+        m_vertexData.buffer = ImmutableBuffer(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_vertexData.vertices);
 
         m_indexData.buffer.Clear();
-        m_indexData.buffer = ImmutableBuffer(m_graphics, m_indexData.indices);
+        m_indexData.buffer = ImmutableBuffer(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_indexData.indices);
     }
 }

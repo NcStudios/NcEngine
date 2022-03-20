@@ -85,14 +85,8 @@ namespace nc::graphics
       m_depthFormat{},
       m_samplesCount{},
       m_samplesInitialized{false},
-      m_bufferIndex{0},
-      m_buffers{},
-      m_imageIndex{0},
-      m_images{},
-      m_allocator{},
       m_commandPool{},
-      m_imguiDescriptorPool{},
-      m_renderingDescriptorPool{}
+      m_imguiDescriptorPool{}
     {
         CreateInstance();
         CreateSurface(hwnd, hinstance);
@@ -100,29 +94,15 @@ namespace nc::graphics
         CreateLogicalDevice();
         CreateCommandQueues();
         CreateCommandPool();
-        CreateAllocator();
         QueryDepthFormatSupport();
         CreateDescriptorPools();
     }
 
     Base::~Base() noexcept
     {
-        m_logicalDevice.destroyDescriptorPool(m_renderingDescriptorPool);
         m_logicalDevice.destroyDescriptorPool(m_imguiDescriptorPool);
         m_logicalDevice.destroyCommandPool(m_commandPool);
-
-        for (uint32_t i = 0; i < m_buffers.size(); ++i)
-        {
-            m_allocator.destroyBuffer(m_buffers[i].first, m_buffers[i].second);
-        }
-        
-        for (uint32_t i = 0; i < m_images.size(); ++i)
-        {
-            m_allocator.destroyImage(m_images[i].first, m_images[i].second);
-        }
-
         m_instance.destroySurfaceKHR(m_surface);
-        m_allocator.destroy();
         m_logicalDevice.destroy();
         m_instance.destroy();
     }
@@ -160,11 +140,6 @@ namespace nc::graphics
         {
             throw NcError("Failed to get surface.");
         }
-    }
-
-    vk::DescriptorPool* Base::GetRenderingDescriptorPoolPtr() noexcept
-    {
-        return &m_renderingDescriptorPool;
     }
 
     void Base::CreatePhysicalDevice()
@@ -276,25 +251,6 @@ namespace nc::graphics
         {
             throw NcError("Could not create ImGUI descriptor pool.");
         }
-
-        std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
-        {
-            vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 10 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 }
-        };
-        
-        vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
-        renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
-        renderingDescriptorPoolInfo.setMaxSets(1000);
-        renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
-        renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
-        
-        if (m_logicalDevice.createDescriptorPool(&renderingDescriptorPoolInfo, nullptr, &m_renderingDescriptorPool) != vk::Result::eSuccess)
-        {
-            throw NcError("Could not create rendering descriptor pool.");
-        }
     }
 
     void Base::InitializeImgui(const vk::RenderPass& defaultPass)
@@ -313,16 +269,6 @@ namespace nc::graphics
 
         Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
         ImGui_ImplVulkan_DestroyFontUploadObjects();
-    }
-
-    vma::Allocator* Base::GetAllocator() noexcept
-    {
-        return &m_allocator;
-    }
-
-    vma::Allocation* Base::GetBufferAllocation(uint32_t index)
-    {
-        return &(m_buffers.at(index)).second;
     }
 
     vk::SampleCountFlagBits Base::GetMaxSamplesCount()
@@ -432,134 +378,15 @@ namespace nc::graphics
         m_commandPool = m_logicalDevice.createCommandPool(poolInfo);
     }
 
-    uint32_t Base::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage memoryUsageType, vk::Buffer* createdBuffer)
-    {
-        vk::BufferCreateInfo bufferInfo{};
-        bufferInfo.setSize(size);
-        bufferInfo.setUsage(usageFlags);
-
-        vma::AllocationCreateInfo allocationInfo;
-        allocationInfo.usage = memoryUsageType;
-
-        vma::Allocation allocation;
-        vk::Buffer buffer;
-        auto result = m_allocator.createBuffer(&bufferInfo, &allocationInfo, &buffer, &allocation, nullptr);
-        if (result != vk::Result::eSuccess)
-        {
-            throw NcError("Error creating buffer.");
-        }
-
-        m_buffers.emplace(m_bufferIndex, std::pair{buffer, allocation});
-        *createdBuffer = buffer;
-        return m_bufferIndex++;
-    }
-
-    uint32_t Base::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage, vk::SampleCountFlagBits numSamples)
-    {
-        vk::ImageCreateInfo imageInfo{};
-        imageInfo.setImageType(vk::ImageType::e2D);
-        imageInfo.setFormat(format);
-        imageInfo.setExtent( { static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y), 1 });
-        imageInfo.setMipLevels(1);
-        imageInfo.setArrayLayers(arrayLayers);
-        imageInfo.setSamples(numSamples);
-        imageInfo.setTiling(vk::ImageTiling::eOptimal);
-        imageInfo.setUsage(usageFlags);
-        imageInfo.setFlags(imageFlags);
-
-        vma::AllocationCreateInfo allocationInfo;
-        allocationInfo.usage = vma::MemoryUsage::eGpuOnly;
-
-        vma::Allocation allocation;        
-        vk::Image image;
-        if (m_allocator.createImage(&imageInfo, &allocationInfo, &image, &allocation, nullptr) != vk::Result::eSuccess)
-        {
-            throw NcError("Error creating image.");
-        }
-
-        m_images.emplace(m_imageIndex, std::pair{image, allocation});
-        *createdImage = image;
-        return m_imageIndex++;
-    }
-
-    uint32_t Base::CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage)
-    {
-        vk::DeviceSize imageSize = width * height * 4;
-
-        // Create staging buffer (lives on CPU)
-        vk::Buffer stagingBuffer;
-        auto stagingIndex = CreateBuffer(static_cast<uint32_t>(imageSize), vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
-
-        // Map the pixels onto the staging buffer
-        void* mappedData;
-        auto allocation = m_buffers.at(stagingIndex).second;
-        m_allocator.mapMemory(allocation, &mappedData);
-        memcpy(mappedData, pixels, static_cast<size_t>(imageSize));
-        m_allocator.unmapMemory(allocation);
-        stbi_image_free(pixels);
-
-        vk::Image textureImage;
-        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, &textureImage, vk::SampleCountFlagBits::e1);
-
-        TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, 1, vk::ImageLayout::eTransferDstOptimal);
-        CopyBufferToImage(stagingBuffer, textureImage, width, height);
-        TransitionImageLayout(textureImage, vk::ImageLayout::eTransferDstOptimal, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
-
-        DestroyBuffer(stagingIndex);
-
-        *createdImage = textureImage;
-        return imageIndex;
-    }
-
-    uint32_t Base::CreateCubeMapTexture(const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, vk::Image* createdImage)
-    {
-        vk::DeviceSize imageSize = cubeMapSize;
-
-        // Create staging buffer (lives on CPU)
-        vk::Buffer stagingBuffer;
-        auto stagingIndex = CreateBuffer(static_cast<uint32_t>(imageSize), vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly, &stagingBuffer);
-
-        // Map the pixels onto the staging buffer
-        void* mappedData;
-        auto allocation = m_buffers.at(stagingIndex).second;
-        m_allocator.mapMemory(allocation, &mappedData);
-        for (auto layerIndex = 0u; layerIndex < 6u; ++layerIndex)
-        {
-            memcpy(static_cast<char*>(mappedData) + (width * height * 4) * layerIndex, pixels[layerIndex], static_cast<size_t>(width * height * 4));
-            stbi_image_free(pixels[layerIndex]);
-        }
-        m_allocator.unmapMemory(allocation);
-
-        vk::Image textureImage;
-        auto imageIndex = CreateImage(vk::Format::eR8G8B8A8Srgb, Vector2{static_cast<float>(width), static_cast<float>(height)}, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, &textureImage, vk::SampleCountFlagBits::e1);
-
-        TransitionImageLayout(textureImage, vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
-        CopyBufferToImage(stagingBuffer, textureImage, width, height, 6);
-        TransitionImageLayout(textureImage, vk::ImageLayout::eTransferDstOptimal, 6, vk::ImageLayout::eShaderReadOnlyOptimal);
-
-        DestroyBuffer(stagingIndex);
-
-        *createdImage = textureImage;
-        return imageIndex;
-    }
-
     vk::UniqueSampler Base::CreateTextureSampler()
     {
-        vk::PhysicalDeviceProperties properties{};
-        m_physicalDevice.getProperties(&properties);
-
         vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
-
         return m_logicalDevice.createSamplerUnique(samplerInfo);
     }
 
     vk::UniqueSampler Base::CreateCubeMapSampler()
     {
-        vk::PhysicalDeviceProperties properties{};
-        m_physicalDevice.getProperties(&properties);
-
         vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
-
         return m_logicalDevice.createSamplerUnique(samplerInfo);
     }
     
@@ -655,107 +482,6 @@ namespace nc::graphics
         });
     }
 
-    uint32_t Base::PadBufferOffsetAlignment(uint32_t originalSize, vk::DescriptorType bufferType)
-    {
-        uint32_t minimumAlignment = 0;
-
-        switch (bufferType)
-        {
-            case vk::DescriptorType::eStorageBuffer:
-            {
-                minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minStorageBufferOffsetAlignment);
-                break;
-            }
-            case vk::DescriptorType::eUniformBuffer:
-            {
-                minimumAlignment = static_cast<uint32_t>(m_gpuProperties.limits.minUniformBufferOffsetAlignment);
-                break;
-            }
-            default:
-            {
-                throw NcError("Invalid bufferType chosen.");
-            }
-        }
-
-        uint32_t alignedSize = originalSize;
-
-        if (minimumAlignment > 0)
-        {
-            alignedSize = (alignedSize + minimumAlignment - 1) & ~(minimumAlignment - 1);
-        }
-        return alignedSize;
-    }
-
-
-    vk::UniqueImageView Base::CreateTextureView(const vk::Image& image)
-    {
-        vk::ImageViewCreateInfo viewInfo{};
-        viewInfo.setImage(image);
-        viewInfo.setViewType(vk::ImageViewType::e2D);
-        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
-
-        vk::ImageSubresourceRange subresourceRange{};
-        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-        subresourceRange.setBaseMipLevel(0);
-        subresourceRange.setLevelCount(1);
-        subresourceRange.setBaseArrayLayer(0);
-        subresourceRange.setLayerCount(1);
-
-        viewInfo.setSubresourceRange(subresourceRange);
-        return m_logicalDevice.createImageViewUnique(viewInfo);
-    }
-
-    vk::UniqueImageView Base::CreateCubeMapTextureView(const vk::Image& image)
-    {
-        vk::ImageViewCreateInfo viewInfo{};
-        viewInfo.setImage(image);
-        viewInfo.setViewType(vk::ImageViewType::eCube);
-        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
-
-        vk::ImageSubresourceRange subresourceRange{};
-        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-        subresourceRange.setBaseMipLevel(0);
-        subresourceRange.setLevelCount(1);
-        subresourceRange.setBaseArrayLayer(0);
-        subresourceRange.setLayerCount(6);
-
-        viewInfo.setSubresourceRange(subresourceRange);
-        return m_logicalDevice.createImageViewUnique(viewInfo);
-    }
-
-    void Base::DestroyBuffer(uint32_t id) noexcept
-    {
-        auto buffer = m_buffers.find(id);
-        if (buffer == m_buffers.end())
-        {
-            return;
-        }
-
-        m_allocator.destroyBuffer(buffer->second.first, buffer->second.second);
-        m_buffers.erase(id);
-    }
-
-    void Base::DestroyImage(uint32_t id) noexcept
-    {
-        auto image = m_images.find(id);
-        if (image == m_images.end())
-        {
-            return;
-        }
-
-        m_allocator.destroyImage(image->second.first, image->second.second);
-        m_images.erase(id);
-    }
-
-    void Base::CreateAllocator()
-    {
-        VmaAllocatorCreateInfo allocatorInfo{};
-        allocatorInfo.physicalDevice = m_physicalDevice;
-        allocatorInfo.device = m_logicalDevice;
-        allocatorInfo.instance = m_instance;
-        m_allocator = vma::createAllocator(allocatorInfo);
-    }
-
     const vk::Device& Base::GetDevice() const noexcept
     {
         return m_logicalDevice;
@@ -764,6 +490,11 @@ namespace nc::graphics
     const vk::PhysicalDevice& Base::GetPhysicalDevice() const noexcept
     {
         return m_physicalDevice;
+    }
+
+    const vk::Instance& Base::GetInstance() const noexcept
+    {
+        return m_instance;
     }
 
     const vk::SurfaceKHR& Base::GetSurface() const noexcept

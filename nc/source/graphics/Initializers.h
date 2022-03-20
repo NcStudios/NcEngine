@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Base; class ITechnique;
+    class ITechnique;
 }
 
 namespace nc::graphics
@@ -63,7 +63,6 @@ namespace nc::graphics
         std::vector<std::unique_ptr<ITechnique>> techniques;
     };
 
-
     // Resources
     vk::SamplerCreateInfo CreateSampler(vk::SamplerAddressMode addressMode);
 
@@ -79,7 +78,7 @@ namespace nc::graphics
     vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags);
     Subpass CreateSubpass(const AttachmentSlot& depthAttachment);
     Subpass CreateSubpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment);
-    
+
     //Pipelines
     vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
     vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo();
@@ -100,7 +99,7 @@ namespace nc::graphics
 
     // Render passes
     vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues);
-    vk::UniqueRenderPass CreateRenderPass(Base* base, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses);
+    vk::UniqueRenderPass CreateRenderPass(vk::Device device, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses);
 
     // Screen size
     vk::Viewport CreateViewport(const Vector2& dimensions);
@@ -110,8 +109,8 @@ namespace nc::graphics
 
     // Descriptor sets
     vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, uint32_t descriptorCount, vk::DescriptorType type, vk::ShaderStageFlags shaderStages); 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags);
-    vk::UniqueDescriptorSet CreateDescriptorSet(Graphics* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout);
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags);
+    vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout);
     vk::WriteDescriptorSet CreateSamplerDescriptorWrite(vk::Sampler* sampler, vk::DescriptorSet* descriptorSet, uint32_t binding);
     vk::WriteDescriptorSet CreateImagesDescriptorWrite(vk::DescriptorSet* descriptorSet, std::vector<vk::DescriptorImageInfo>* imagesInfo, uint32_t imagesCount, uint32_t binding);
     vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler* sampler, const vk::ImageView& imageView, vk::ImageLayout layout);

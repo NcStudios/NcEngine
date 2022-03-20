@@ -5,7 +5,7 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class Base;
 
     enum class bind_frequency : uint8_t
     {
@@ -50,14 +50,14 @@ namespace nc::graphics
     class shader_descriptor_sets
     {
         public:
-            shader_descriptor_sets(Graphics* graphics);
+            shader_descriptor_sets(Base* base);
 
             /* Shader resource services attach themselves to a shader slot by registering themselves here. */
             uint32_t register_descriptor(uint32_t bindingSlot, bind_frequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
             
             /* Called when the data in the image or buffer changes. */
             void update_image(bind_frequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
-            void update_buffer(bind_frequency bindFrequency, vk::Buffer* buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void update_buffer(bind_frequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
 
             /* Called in the techniques to access and bind the descriptor set(s). */
             vk::DescriptorSetLayout* get_set_layout(bind_frequency bindFrequency);
@@ -68,7 +68,10 @@ namespace nc::graphics
             void create_set(bind_frequency bindFrequency);
 
         private:
+            vk::UniqueDescriptorPool m_renderingDescriptorPool;
             std::unordered_map<bind_frequency, descriptor_set> m_descriptorSets;
-            Graphics* m_graphics;
+
+            /** @todo needs only Device & PadBufferOffset... */
+            Base* m_base;
     };
 }

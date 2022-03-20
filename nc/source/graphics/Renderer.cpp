@@ -4,6 +4,7 @@
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
 #include "ecs/Registry.h"
+#include "graphics/Base.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
 #include "graphics/Swapchain.h"
@@ -24,15 +25,15 @@
 
 namespace nc::graphics
 {
-    Renderer::Renderer(Graphics* graphics, 
+    Renderer::Renderer(Graphics* graphics,
                        ShaderResourceServices* shaderResources,
                        Vector2 dimensions)
         : m_graphics{graphics},
           m_shaderResources{shaderResources},
           m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
           m_dimensions{dimensions},
-          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
-          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
+          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
+          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
     {
         RegisterRenderPasses();
         RegisterTechniques();
@@ -104,8 +105,9 @@ namespace nc::graphics
         SetViewportAndScissor(cmd, m_dimensions);
 
         vk::DeviceSize offsets[] = { 0 };
-        cmd->bindVertexBuffers(0, 1, assetServices->meshManager.GetVertexBuffer(), offsets);
-        cmd->bindIndexBuffer(*(assetServices->meshManager.GetIndexBuffer()), 0, vk::IndexType::eUint32);
+        auto vertexBuffer = assetServices->meshManager.GetVertexBuffer();
+        cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
+        cmd->bindIndexBuffer(assetServices->meshManager.GetIndexBuffer(), 0, vk::IndexType::eUint32);
 
         return cmd;
     }

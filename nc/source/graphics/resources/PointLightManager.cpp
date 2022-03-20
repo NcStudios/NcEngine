@@ -3,10 +3,10 @@
 
 namespace nc::graphics
 {
-    PointLightManager::PointLightManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, uint32_t maxPointLights)
+    PointLightManager::PointLightManager(uint32_t bindingSlot, GpuAllocator* allocator, shader_descriptor_sets* descriptors, uint32_t maxPointLights)
         : m_pointLightsArrayBuffer{nullptr},
           m_descriptors{descriptors},
-          m_graphics{graphics},
+          m_allocator{allocator},
           m_maxPointLights{maxPointLights},
           m_bindingSlot{bindingSlot}
     {
@@ -24,7 +24,7 @@ namespace nc::graphics
 
         if (m_pointLightsArrayBuffer == nullptr)
         {
-            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_graphics, bufferSize);
+            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_allocator, bufferSize);
         }
 
         m_descriptors->register_descriptor

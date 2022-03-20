@@ -3,8 +3,8 @@
 
 namespace nc::graphics
 {
-    ObjectDataManager::ObjectDataManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, uint32_t maxRenderers)
-        : m_graphics { graphics },
+    ObjectDataManager::ObjectDataManager(uint32_t bindingSlot, GpuAllocator* allocator, shader_descriptor_sets* descriptors, uint32_t maxRenderers)
+        : m_allocator { allocator },
           m_descriptors{ descriptors },
           m_objectsDataBuffer{},
           m_maxObjects{ maxRenderers },
@@ -21,7 +21,7 @@ namespace nc::graphics
     void ObjectDataManager::Initialize()
     {
         const uint32_t objectsSize = (sizeof(ObjectData) * m_maxObjects);
-        m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_graphics, objectsSize);
+        m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_allocator, objectsSize);
 
         m_descriptors->register_descriptor
         (

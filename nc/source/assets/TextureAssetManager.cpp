@@ -1,4 +1,6 @@
 #include "TextureAssetManager.h"
+#include "graphics/Base.h"
+#include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "graphics/resources/TextureManager.h"
 
@@ -21,7 +23,7 @@ namespace
 
         nc::graphics::Texture texture
         {
-            .image = nc::graphics::ImmutableImage(graphics, pixels, width, height),
+            .image = nc::graphics::ImmutableImage(graphics->GetBasePtr(), graphics->GetAllocatorPtr(), pixels, width, height),
             .imageInfo = nc::graphics::CreateDescriptorImageInfo(sampler, texture.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
             .uid = path
         };

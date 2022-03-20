@@ -62,6 +62,11 @@ namespace nc
         V_LOG("Runtime Initialized");
     }
 
+    Runtime::~Runtime() noexcept
+    {
+        Shutdown();
+    }
+
     void Runtime::Start(std::unique_ptr<nc::Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
@@ -89,6 +94,8 @@ namespace nc
         {
             debug::LogException(e);
         }
+
+        debug::internal::CloseLog();
     }
 
     auto Runtime::Audio()    noexcept -> AudioModule*    { return m_modules.audioModule.get();    }

@@ -18,9 +18,10 @@ namespace nc::graphics
     Graphics::Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
+          m_allocator{ std::make_unique<GpuAllocator>(m_base->GetPhysicalDevice(), m_base->GetDevice(), m_base->GetInstance())},
           m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
-          m_shaderResources{ std::make_unique<ShaderResourceServices>(this, config::GetMemorySettings(), dimensions) },
+          m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
           m_assetServices{ std::make_unique<AssetServices>(this, config::GetProjectSettings(), config::GetMemorySettings().maxTextures) },
           #ifdef NC_DEBUG_RENDERING_ENABLED
           m_debugRenderer{},
@@ -94,7 +95,12 @@ namespace nc::graphics
     {
         return m_base.get();
     }
-    
+
+    GpuAllocator* Graphics::GetAllocatorPtr() const noexcept
+    {
+        return m_allocator.get();
+    }
+
     Swapchain* Graphics::GetSwapchainPtr() const noexcept
     {
         return m_swapchain.get();
