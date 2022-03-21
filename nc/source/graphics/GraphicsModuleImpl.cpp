@@ -37,28 +37,23 @@ namespace
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window) -> std::unique_ptr<GraphicsModule>
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window, float* dt) -> std::unique_ptr<GraphicsModule>
     {
-        if(enableModule)
-        {
-            return std::make_unique<GraphicsModuleImpl>(reg, window);
-        }
-        else
-        {
-            return std::make_unique<GraphicsModuleStub>(reg);
-        }
+        if(enableModule) return std::make_unique<GraphicsModuleImpl>(reg, window, dt);
+        return std::make_unique<GraphicsModuleStub>(reg);
     }
 
-    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window)
-        : m_registry{registry},
+    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, float* dt)
+        : m_registry{ registry },
           m_camera{},
-          m_graphics{&m_camera,
+          m_graphics{ &m_camera,
                      window->GetHWND(),
                      window->GetHINSTANCE(),
-                     window->GetDimensions()},
-          m_ui{window->GetHWND()},
+                     window->GetDimensions() },
+          m_ui{ window->GetHWND() },
           m_environment{},
-          m_pointLightSystem{registry}
+          m_pointLightSystem{ registry },
+          m_particleEmitterSystem{ registry, dt, std::bind_front(&GraphicsModule::GetCamera, this) }
     {
         m_graphics.InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
@@ -103,13 +98,16 @@ namespace nc::graphics
         m_graphics.Clear();
         m_environment.Clear();
         m_pointLightSystem.Clear();
+        m_particleEmitterSystem.Clear();
     }
 
     auto GraphicsModuleImpl::BuildWorkload() -> std::vector<Job>
     {
         return std::vector<Job>
         {
-            Job{ [this]{Run();}, "GraphicsModule", HookPoint::Render }
+            Job{ [this] {Run(); }, "GraphicsModule", HookPoint::Render },
+            Job{ [this] {m_particleEmitterSystem.Run(); }, "RunParticleEmitterSystem", HookPoint::Free },
+            Job{ [this] {m_particleEmitterSystem.ProcessFrameEvents(); }, "ProcessParticleFrameEvents", HookPoint::PostFrameSync }
         };
     }
 
@@ -124,23 +122,23 @@ namespace nc::graphics
 
         m_ui.FrameBegin();
 
-#ifdef NC_EDITOR_ENABLED
+        #ifdef NC_EDITOR_ENABLED
         /** @todo I think the old editor can start to go away. I'm
          *  hacking dt factor in here. */
         float dtFactor = 1.0f;
         m_ui.Draw(&dtFactor, m_registry);
-#else
+        #else
         m_ui.Draw();
-#endif
+        #endif
 
         auto areLightsDirty = m_pointLightSystem.CheckDirtyAndReset();
-        auto state = PerFrameRenderState{m_registry, camera, areLightsDirty, &m_environment};
+        auto state = PerFrameRenderState{ m_registry, camera, areLightsDirty, &m_environment, m_particleEmitterSystem.GetParticles() };
         MapPerFrameRenderState(state);
         m_graphics.Draw(state);
 
-#ifdef NC_EDITOR_ENABLED
-        for(auto& collider : view<Collider>{m_registry}) collider.SetEditorSelection(false);
-#endif
+        #ifdef NC_EDITOR_ENABLED
+        for(auto& collider : view<Collider>{ m_registry }) collider.SetEditorSelection(false);
+        #endif
 
         m_graphics.FrameEnd();
     }

@@ -1,44 +1,48 @@
-#include "PhongAndUiTechnique.h"
-#include "Assets.h"
+#include "UiTechnique.h"
+#include "assets/AssetService.h"
 #include "config/Config.h"
-#include "graphics/Graphics.h"
-#include "graphics/Commands.h"
-#include "graphics/Initializers.h"
-#include "graphics/ShaderUtilities.h"
-#include "graphics/PerFrameRenderState.h"
-#include "graphics/Swapchain.h"
+#include "ecs/Registry.h"
 #include "graphics/Base.h"
-#include "graphics/VertexDescriptions.h"
+#include "graphics/Graphics.h"
+#include "graphics/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/resources/ShaderResourceServices.h"
-#include "optick/optick.h"
+#include "graphics/ShaderUtilities.h"
+#include "graphics/Swapchain.h"
+#include "graphics/VertexDescriptions.h"
 
 namespace nc::graphics
 {
-    struct Texture;
-
-    PhongAndUiTechnique::PhongAndUiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
-    : m_graphics{graphics},
-      m_base{ m_graphics->GetBasePtr()},
-      m_descriptorSets{m_graphics->GetShaderResources()->GetDescriptorSets()},
-      m_pipeline{nullptr},
-      m_pipelineLayout{nullptr}
+    UiTechnique::UiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
+        : m_graphics{ graphics },
+        m_base{ graphics->GetBasePtr() },
+        m_pipeline{ nullptr },
+        m_pipelineLayout{ nullptr }
     {
         CreatePipeline(renderPass);
     }
 
-    PhongAndUiTechnique::~PhongAndUiTechnique() noexcept
+    UiTechnique::~UiTechnique() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    void PhongAndUiTechnique::CreatePipeline(vk::RenderPass* renderPass)
+    bool UiTechnique::CanBind(const PerFrameRenderState&)
+    {
+        return true;
+    }
+
+    void UiTechnique::Bind(vk::CommandBuffer* cmd)
+    {
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
+    }
+
+    void UiTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PhongVertex.spv");
-        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PhongFragment.spv");
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "UiVertex.spv");
+        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "UiFragment.spv");
 
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
@@ -49,12 +53,7 @@ namespace nc::graphics
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
-        {
-            *(m_descriptorSets->get_set_layout(bind_frequency::per_frame))
-        };
-
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo();
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -89,47 +88,19 @@ namespace nc::graphics
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
-        
+
         m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-       
         m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    bool PhongAndUiTechnique::CanBind(const PerFrameRenderState& frameData)
+    bool UiTechnique::CanRecord(const PerFrameRenderState&)
     {
-        (void)frameData;
         return true;
     }
 
-    void PhongAndUiTechnique::Bind(vk::CommandBuffer* cmd)
+    void UiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        OPTICK_CATEGORY("PhongAndUiTechnique::Bind", Optick::Category::Rendering);
-
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->bind_set(bind_frequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
-    }
-
-    bool PhongAndUiTechnique::CanRecord(const PerFrameRenderState& frameData)
-    {
-        (void)frameData;
-        return true;
-    }
-
-    void PhongAndUiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
-    {
-        OPTICK_CATEGORY("PhongAndUiTechnique::Record", Optick::Category::Rendering);
-        uint32_t objectInstance = 0;
-        for(const auto& mesh : frameData.meshes)
-        {
-            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            ++objectInstance;
-        }
-
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
-    }
-
-    void PhongAndUiTechnique::Clear() noexcept
-    {
     }
 }

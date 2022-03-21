@@ -21,22 +21,22 @@ namespace nc
     struct ParticleInitInfo
     {
         float lifetime = 5.0f;
-        Vector3 position = Vector3::Zero();
-        Vector3 positionRange = Vector3::Zero();
-        float rotation = 0.0f;
-        float rotationRange = 0.0f;
-        float scale = 1.0f;
-        float scaleRange = 0.0f;
+        Vector3 positionMin = Vector3::Zero();
+        Vector3 positionMax = Vector3::Zero();
+        float rotationMin = 0.0f;
+        float rotationMax = 0.0f;
+        float scaleMin = 0.0f;
+        float scaleMax = 0.0f;
         std::string particleTexturePath = "";
     };
 
     struct ParticleKinematicInfo
     {
-        Vector3 velocity = Vector3::Zero();
-        Vector3 velocityRange = Vector3::Zero();
+        Vector3 velocityMin = Vector3::Zero();
+        Vector3 velocityMax = Vector3::Zero();
         float velocityOverTimeFactor = 0.5f;
-        float rotation = 0.0f;
-        float rotationRange = 0.0f;
+        float rotationMin = 0.0f;
+        float rotationMax = 0.0f;
         float rotationOverTimeFactor = 0.5f;
         float scaleOverTimeFactor = 0.0f;
     };

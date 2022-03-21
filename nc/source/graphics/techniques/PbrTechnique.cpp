@@ -1,23 +1,24 @@
-#include "ParticleTechnique.h"
-#include "assets/AssetService.h"
+#include "PbrTechnique.h"
+#include "Assets.h"
 #include "config/Config.h"
-#include "ecs/Registry.h"
-#include "graphics/Base.h"
-#include "graphics/Commands.h"
 #include "graphics/Graphics.h"
+#include "graphics/Commands.h"
 #include "graphics/Initializers.h"
-#include "graphics/PerFrameRenderState.h"
 #include "graphics/ShaderUtilities.h"
+#include "graphics/PerFrameRenderState.h"
+#include "graphics/Base.h"
+#include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/resources/ShaderResourceServices.h"
-#include "graphics/VertexDescriptions.h"
 #include "optick/optick.h"
 
 namespace nc::graphics
 {
-    ParticleTechnique::ParticleTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
+    struct Texture;
+
+    PbrTechnique::PbrTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
         : m_graphics{ graphics },
-        m_base{ graphics->GetBasePtr() },
+        m_base{ m_graphics->GetBasePtr() },
         m_descriptorSets{ m_graphics->GetShaderResources()->GetDescriptorSets() },
         m_pipeline{ nullptr },
         m_pipelineLayout{ nullptr }
@@ -25,18 +26,18 @@ namespace nc::graphics
         CreatePipeline(renderPass);
     }
 
-    ParticleTechnique::~ParticleTechnique() noexcept
+    PbrTechnique::~PbrTechnique() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    void ParticleTechnique::CreatePipeline(vk::RenderPass* renderPass)
+    void PbrTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ParticleVertex.spv");
-        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ParticleFragment.spv");
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PbrVertex.spv");
+        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PbrFragment.spv");
 
         auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
         auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
@@ -47,14 +48,12 @@ namespace nc::graphics
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(ParticlePushConstants)); // PushConstants
-
         std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
         {
             *(m_descriptorSets->get_set_layout(bind_frequency::per_frame))
         };
 
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
         m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -80,8 +79,8 @@ namespace nc::graphics
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(true);
-        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, true);
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
@@ -96,44 +95,38 @@ namespace nc::graphics
         m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    bool ParticleTechnique::CanBind(const PerFrameRenderState& frameData)
+    bool PbrTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates.size() > 0;
+        (void)frameData;
+        return true;
     }
 
-    void ParticleTechnique::Bind(vk::CommandBuffer* cmd)
+    void PbrTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        OPTICK_CATEGORY("ParticleTechnique::Bind", Optick::Category::Rendering);
+        OPTICK_CATEGORY("PbrTechnique::Bind", Optick::Category::Rendering);
+
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         m_descriptorSets->bind_set(bind_frequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
-    bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)
+    bool PbrTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates.size() > 0;
+        (void)frameData;
+        return true;
     }
 
-    void ParticleTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+    void PbrTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        OPTICK_CATEGORY("ParticleTechnique::Record", Optick::Category::Rendering);
-        const auto& viewMatrix = frameData.camViewMatrix;
-        const auto& projectionMatrix = frameData.projectionMatrix;
-        auto pushConstants = ParticlePushConstants{};
-        pushConstants.viewProjection = viewMatrix * projectionMatrix;
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(PlaneMeshPath);
-
-        for (auto& emitterState : frameData.emitterStates)
+        OPTICK_CATEGORY("PbrTechnique::Record", Optick::Category::Rendering);
+        uint32_t objectInstance = 0;
+        for (const auto& mesh : frameData.meshes)
         {
-            auto [index, models] = emitterState.GetSoA()->View<particle::EmitterState::ModelMatrixIndex>();
-
-            for (; index.Valid(); ++index)
-            {
-                pushConstants.model = models[index];
-                pushConstants.baseColorIndex = AssetService<TextureView>::Get()->Acquire(emitterState.GetInfo().init.particleTexturePath).index;
-
-                cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
-                cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            }
+            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            ++objectInstance;
         }
+    }
+
+    void PbrTechnique::Clear() noexcept
+    {
     }
 }

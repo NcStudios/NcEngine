@@ -28,8 +28,7 @@ namespace
         bool enableAudioModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
         return nc::Modules
         {
-            .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, window),
-            .particleSystem = std::make_unique<nc::ecs::ParticleEmitterSystem>(reg, dt),
+            .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, window, dt),
             .physicsModule = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg, time),
             .audioModule = nc::audio::BuildAudioModule(enableAudioModule, reg),
             .sceneModule = std::make_unique<nc::scene::SceneModuleImpl>(std::move(clearCallback)),
@@ -50,13 +49,13 @@ namespace nc
 
     Runtime::Runtime(EngineInitFlags flags)
         : m_window{},
-          m_context{BuildContext()},
-          m_modules{BuildModules(&m_context.registry, &m_window, &m_context.time, std::bind_front(&Runtime::Clear, this), &m_dt, flags)},
+          m_context{ BuildContext() },
+          m_modules{ BuildModules(&m_context.registry, &m_window, &m_context.time, std::bind_front(&Runtime::Clear, this), &m_dt, flags) },
           m_executor{},
-          m_dt{0.0f},
-          m_dtFactor{1.0f},
-          m_isRunning{false},
-          m_currentPhysicsIterations{0u}
+          m_dt{ 0.0f },
+          m_dtFactor{ 1.0f },
+          m_isRunning{ false },
+          m_currentPhysicsIterations{ 0u }
     {
         m_window.BindEngineDisableRunningCallback(std::bind_front(&Runtime::Stop, this));
         BuildTaskGraph();
@@ -86,48 +85,33 @@ namespace nc
         {
             Clear();
         }
-        catch(const std::exception& e)
+        catch (const std::exception& e)
         {
             debug::LogException(e);
         }
     }
 
-    auto Runtime::Audio()    noexcept -> AudioModule*    { return m_modules.audioModule.get();    }
+    auto Runtime::Audio()    noexcept -> AudioModule* { return m_modules.audioModule.get(); }
     auto Runtime::Graphics() noexcept -> GraphicsModule* { return m_modules.graphicsModule.get(); }
-    auto Runtime::Physics()  noexcept -> PhysicsModule*  { return m_modules.physicsModule.get();  }
-    auto Runtime::Random()   noexcept -> nc::Random*     { return &m_context.random;              }
-    auto Runtime::Registry() noexcept -> nc::Registry*   { return &m_context.registry;            }
-    auto Runtime::Scene()    noexcept -> SceneModule*    { return m_modules.sceneModule.get();    }
+    auto Runtime::Physics()  noexcept -> PhysicsModule* { return m_modules.physicsModule.get(); }
+    auto Runtime::Random()   noexcept -> nc::Random* { return &m_context.random; }
+    auto Runtime::Registry() noexcept -> nc::Registry* { return &m_context.registry; }
+    auto Runtime::Scene()    noexcept -> SceneModule* { return m_modules.sceneModule.get(); }
 
     void Runtime::BuildTaskGraph()
     {
         V_LOG("Runtime::BuildTaskGraph()");
-
-        /** @todo This should be done like the others once Jare's particle work is done. */
-        auto particleJob = [particleEmitterSystem = m_modules.particleSystem.get()]
-        {
-            particleEmitterSystem->Run();
-        };
 
         auto syncJob = [reg = &m_context.registry]
         {
             OPTICK_CATEGORY("Sync State", Optick::Category::None);
             reg->CommitStagedChanges();
         };
-
-        auto endFrameJob = [particle = m_modules.particleSystem.get(), scene = m_modules.sceneModule.get(), engine = this]
-        {
-            particle->ProcessFrameEvents();
-            scene->DoSceneSwap(engine);
-        };
-
         m_executor.Add(m_modules.audioModule->BuildWorkload());
         m_executor.Add(m_modules.logicModule->BuildWorkload());
         m_executor.Add(m_modules.physicsModule->BuildWorkload());
         m_executor.Add(m_modules.graphicsModule->BuildWorkload());
-        m_executor.Add(Job{particleJob, "ParticleModule", HookPoint::Free});
-        m_executor.Add(Job{syncJob, "Sync", HookPoint::PreRenderSync});
-        m_executor.Add(Job{endFrameJob, "End Frame", HookPoint::PostFrameSync});
+        m_executor.Add(Job{ syncJob, "Sync", HookPoint::PreRenderSync });
         m_executor.Build();
     }
 
@@ -135,7 +119,6 @@ namespace nc
     {
         m_modules.graphicsModule->Clear();
         m_context.registry.Clear();
-        m_modules.particleSystem->Clear();
         m_modules.physicsModule->Clear();
         m_modules.audioModule->Clear();
         m_context.time.ResetFrameDeltaTime();
@@ -153,6 +136,7 @@ namespace nc
             m_window.ProcessSystemMessages();
             auto result = m_executor.Run();
             result.wait();
+            m_modules.sceneModule->DoSceneSwap(this);
         }
 
         Shutdown();

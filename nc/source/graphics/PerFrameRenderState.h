@@ -6,7 +6,10 @@
 #ifdef NC_EDITOR_ENABLED
 #include "ecs/component/DebugWidget.h"
 #endif
+#include "particle/EmitterState.h"
 #include "resources/ObjectDataManager.h"
+
+#include <span>
 
 namespace nc
 {
@@ -22,7 +25,7 @@ namespace nc::graphics
 {
     struct PerFrameRenderState
     {
-        PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment);
+        PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters);
 
         DirectX::XMMATRIX camViewMatrix;
         DirectX::XMMATRIX projectionMatrix;
@@ -37,6 +40,7 @@ namespace nc::graphics
         bool isPointLightBindRequired;
         Environment* environment;
         bool useSkybox;
+        std::span<const nc::particle::EmitterState> emitterStates;
     };
 
     void MapPerFrameRenderState(const PerFrameRenderState& state);
