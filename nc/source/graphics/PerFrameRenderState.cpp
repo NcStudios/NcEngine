@@ -17,7 +17,7 @@ namespace
     {
         const auto maxScaleExtent = GetMaxScaleExtent(transform);
         const auto maxMeshExtent = renderer.GetMesh().maxExtent;
-        Sphere sphere{.center = Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent};
+        Sphere sphere{ .center = Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent };
         DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
         return physics::Intersect(frustum, sphere);
     }
@@ -25,32 +25,33 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment)
-    : camViewMatrix{camera->ViewMatrix()},
-      projectionMatrix{camera->ProjectionMatrix()},
-      cameraPosition{registry->Get<Transform>(camera->ParentEntity())->Position()},
-      objectData{},
-      pointLightInfos{},
-      #ifdef NC_EDITOR_ENABLED
-      colliderDebugWidget{std::nullopt},
-      #endif
-      pointLightVPs{},
-      isPointLightBindRequired{isPointLightSystemDirty},
-      environment{environment},
-      useSkybox{environment->UseSkybox()}
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters)
+        : camViewMatrix{ camera->ViewMatrix() },
+          projectionMatrix{ camera->ProjectionMatrix() },
+          cameraPosition{ registry->Get<Transform>(camera->ParentEntity())->Position() },
+          objectData{},
+          pointLightInfos{},
+          #ifdef NC_EDITOR_ENABLED
+          colliderDebugWidget{ std::nullopt },
+          #endif
+          pointLightVPs{},
+          isPointLightBindRequired{ isPointLightSystemDirty },
+          environment{ environment },
+          useSkybox{ environment->UseSkybox() },
+          emitterStates{ particleEmitters }
     {
         OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;
-        const auto renderers = view<MeshRenderer>{registry};
+        const auto renderers = view<MeshRenderer>{ registry };
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());
 
-        for(const auto& renderer : renderers)
+        for (const auto& renderer : renderers)
         {
             const auto& modelMatrix = registry->Get<Transform>(renderer.ParentEntity())->TransformationMatrix();
 
-            if(!IsViewedByFrustum(frustum, renderer, modelMatrix))
+            if (!IsViewedByFrustum(frustum, renderer, modelMatrix))
                 continue;
 
             const auto [base, normal, roughness, metallic] = renderer.GetTextureIndices();
@@ -68,7 +69,7 @@ namespace nc::graphics
 
         #ifdef NC_EDITOR_ENABLED
         auto colliderIsSelected = false;
-        for(auto& collider : view<Collider>{registry})
+        for (auto& collider : view<Collider>{ registry })
         {
             if (collider.GetEditorSelection())
             {
@@ -80,24 +81,24 @@ namespace nc::graphics
         if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
         #endif
 
-        auto pointLights = view<PointLight>{registry};
+        auto pointLights = view<PointLight>{ registry };
         pointLightVPs.reserve(pointLights.size());
 
-        for(auto& pointLight : pointLights)
+        for (auto& pointLight : pointLights)
         {
             auto* transform = registry->Get<Transform>(pointLight.ParentEntity());
 
             pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
 
-            if(pointLight.Update(transform->Position(), pointLightVPs.back()))
+            if (pointLight.Update(transform->Position(), pointLightVPs.back()))
                 isPointLightBindRequired = true;
         }
 
-        if(isPointLightBindRequired)
+        if (isPointLightBindRequired)
         {
             pointLightInfos.reserve(pointLights.size());
 
-            for(const auto& pointLight : pointLights)
+            for (const auto& pointLight : pointLights)
             {
                 pointLightInfos.push_back(pointLight.GetInfo());
             }
@@ -109,7 +110,7 @@ namespace nc::graphics
         OPTICK_CATEGORY("MapPerFrameRenderState", Optick::Category::Rendering);
         ShaderResourceService<ObjectData>::Get()->Update(state.objectData);
 
-        if(state.isPointLightBindRequired)
+        if (state.isPointLightBindRequired)
         {
             ShaderResourceService<PointLightInfo>::Get()->Update(state.pointLightInfos);
         }

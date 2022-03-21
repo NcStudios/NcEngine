@@ -81,7 +81,10 @@ namespace nc
         NoGraphics = 1,
 
         /** Disable the physics module. */
-        NoPhysics = 1 << 1
+        NoPhysics = 1 << 1,
+
+        /** Disable the audio module. */
+        NoAudio = 1 << 2
 
     }; DEFINE_BITWISE_OPERATORS(EngineInitFlags)
 

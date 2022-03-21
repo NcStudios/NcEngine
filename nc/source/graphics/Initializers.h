@@ -74,8 +74,8 @@ namespace nc::graphics
     // Subpasses
     vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& depthAttachment);
     vk::SubpassDescription CreateSubpassDescription(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment);
-    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask);
-    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask,  vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags);
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask, vk::AccessFlags destAccessMask);
+    vk::SubpassDependency CreateSubpassDependency(uint32_t sourceSubpassIndex, uint32_t destSubpassIndex, vk::PipelineStageFlags sourceStageMask, vk::PipelineStageFlags destStageMask, vk::AccessFlags sourceAccessMask, vk::AccessFlags destAccessMask, vk::DependencyFlags dependencyFlags);
     Subpass CreateSubpass(const AttachmentSlot& depthAttachment);
     Subpass CreateSubpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment);
 
@@ -96,6 +96,7 @@ namespace nc::graphics
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, std::span<const vk::DescriptorSetLayout> layouts);
     vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
+    vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo();
 
     // Render passes
     vk::RenderPassBeginInfo CreateRenderPassBeginInfo(vk::RenderPass& renderpass, vk::Framebuffer& framebuffer, const vk::Extent2D& extent, std::vector<vk::ClearValue>& clearValues);
@@ -105,7 +106,7 @@ namespace nc::graphics
     vk::Viewport CreateViewport(const Vector2& dimensions);
     vk::Extent2D CreateExtent(const Vector2& dimensions);
     vk::Rect2D CreateScissor(const vk::Extent2D& extent);
-    void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions); 
+    void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions);
 
     // Descriptor sets
     vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, uint32_t descriptorCount, vk::DescriptorType type, vk::ShaderStageFlags shaderStages); 

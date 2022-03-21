@@ -1,103 +1,103 @@
 #include "EmitterState.h"
 #include "ecs/Registry.h"
 #include "math/Random.h"
+#include "math/Math.h"
 
 namespace
 {
     using namespace nc;
 
-    // DirectX::XMMATRIX ComposeMatrix(float scale, const Quaternion& r, const Vector3& pos)
-    // {
-    //     return DirectX::XMMatrixScaling(scale, scale, scale) * 
-    //            DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(r.x, r.y, r.z, r.w)) *
-    //            DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-    // }
+    DirectX::XMMATRIX ComposeMatrix(float scale, const Quaternion& r, const Vector3& pos)
+    {
+        return DirectX::XMMatrixScaling(scale, scale, scale) *
+            DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(r.x, r.y, r.z, r.w)) *
+            DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+    }
 
-    // particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset)
-    // {
-    //     const auto& [emission, init, kinematic] = info;
+    particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset, Random* random)
+    {
+        const auto& [emission, init, kinematic] = info;
 
-    //     return particle::Particle
-    //     {
-    //         .maxLifetime = init.lifetime,
-    //         .currentLifetime = 0.0f,
-    //         .position = positionOffset + random::Vec3(init.position, init.positionRange),
-    //         .linearVelocity = random::Vec3(kinematic.velocity, kinematic.velocityRange),
-    //         .rotation = random::Float(init.rotation, init.rotationRange), //.rotation + g_random.Float() * init.rotationRange,
-    //         .angularVelocity = random::Float(kinematic.rotation, kinematic.rotationRange), //kinematic.rotation + g_random.Float() * kinematic.rotationRange,
-    //         .scale = random::Float(init.scale, init.scaleRange) //g_random.Float() * init.scaleRange + init.scale
-    //     };
-    // }
 
-    // void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
-    // {
-    //     auto& vel = particle->linearVelocity;
-    //     vel = vel + vel * velOverTimeFactor;
-    //     particle->position = particle->position + vel * dt;
+        return particle::Particle
+        {
+            .maxLifetime = init.lifetime,
+            .currentLifetime = 0.0f,
+            .position = positionOffset + random->Between(init.positionMin, init.positionMax),
+            .linearVelocity = random->Between(kinematic.velocityMin, kinematic.velocityMax),
+            .rotation = random->Between(init.rotationMin, init.rotationMax),
+            .angularVelocity = random->Between(kinematic.rotationMin, kinematic.rotationMax),
+            .scale = random->Between(init.scaleMin, init.scaleMax)
+        };
+    }
 
-    //     auto& angVel = particle->angularVelocity;
-    //     angVel += angVel * rotOverTimeFactor;
-    //     particle->rotation += angVel * dt;
+    void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
+    {
+        auto& vel = particle->linearVelocity;
+        vel = vel + vel * velOverTimeFactor;
+        particle->position = particle->position + vel * dt;
 
-    //     auto& scale = particle->scale;
-    //     scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
-    // }
+        auto& angVel = particle->angularVelocity;
+        angVel += angVel * rotOverTimeFactor;
+        particle->rotation += angVel * dt;
+
+        auto& scale = particle->scale;
+        scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
+    }
 }
 
 namespace nc::particle
 {
-    EmitterState::EmitterState(Entity entity, const ParticleInfo& info)
-        : m_soa{info.emission.maxParticleCount},
-          m_info{info},
-          m_entity{entity},
-          m_emissionCounter{0.0f}
+    EmitterState::EmitterState(Entity entity, const ParticleInfo& info, Random* random)
+        : m_soa{ info.emission.maxParticleCount },
+        m_info{ info },
+        m_entity{ entity },
+        m_emissionCounter{ 0.0f },
+        m_random{ random }
     {
         Emit(m_info.emission.initialEmissionCount);
     }
 
-    void EmitterState::Emit(size_t)
+    void EmitterState::Emit(size_t count)
     {
-        //auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
-        //auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
-        //for(size_t i = 0; i < particleCount; ++i)
-        //{
-            //m_soa.Add(CreateParticle(m_info, parentPosition), {});
-        //}
+        auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
+        auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
+        for (size_t i = 0; i < particleCount; ++i)
+        {
+            m_soa.Add(CreateParticle(m_info, parentPosition, m_random), {});
+        }
     }
 
-    void EmitterState::Update(float)
+    void EmitterState::Update(float dt, const Quaternion& camRotation, const Vector3& camForward)
     {
-        // PeriodicEmission(dt);
+        PeriodicEmission(dt);
 
-        // std::vector<unsigned> toRemove; // linear allocator?
-        // const auto velOverTimeFactor = m_info.kinematic.velocityOverTimeFactor * dt;
-        // const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
-        // const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
-        // auto* camera = GetMainCameraTransform();
-        // auto camRotation = camera->Rotation();
-        // auto camForward = camera->Forward();
-        // auto [index, particles, matrices] = m_soa.View<ParticlesIndex, MvpMatricesIndex>();
+        std::vector<unsigned> toRemove; // linear allocator?
+        const auto velOverTimeFactor = m_info.kinematic.velocityOverTimeFactor * dt;
+        const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
+        const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
+        auto [index, particles, matrices] = m_soa.View<ParticlesIndex, ModelMatrixIndex>();
 
-        // for(; index.Valid(); ++index)
-        // {
-        //     auto& particle = particles[index];
-        //     particle.currentLifetime += dt;
-        //     if(particle.currentLifetime >= particle.maxLifetime)
-        //         toRemove.push_back(index);
-        //     else
-        //     {
-        //         ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
-        //         matrices[index] = ComputeMvp(particle, camRotation, camForward);
-        //     }
-        // }
+        for (; index.Valid(); ++index)
+        {
+            auto& particle = particles[index];
+            particle.currentLifetime += dt;
+            if (particle.currentLifetime >= particle.maxLifetime)
+                toRemove.push_back(static_cast<uint32_t>(index));
+            else
+            {
+                ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
+                matrices[index] = ComputeMvp(particle, camRotation, camForward);
+            }
+        }
 
-        // for(auto i : toRemove)
-        //     m_soa.RemoveAtIndex(i);
+        for (auto i : toRemove)
+            m_soa.RemoveAtIndex(i);
     }
 
-    ParticleInfo* EmitterState::GetInfo()
+    const ParticleInfo& EmitterState::GetInfo() const
     {
-        return &m_info;
+        return m_info;
     }
 
     auto EmitterState::GetSoA() const -> const ParticleSoA*
@@ -112,10 +112,10 @@ namespace nc::particle
 
     void EmitterState::PeriodicEmission(float dt)
     {
-        if(m_info.emission.periodicEmissionFrequency > 0.0f)
+        if (m_info.emission.periodicEmissionFrequency > 0.0f)
         {
             m_emissionCounter += dt;
-            if(m_emissionCounter > m_info.emission.periodicEmissionFrequency)
+            if (m_emissionCounter > m_info.emission.periodicEmissionFrequency)
             {
                 m_emissionCounter = 0.0f;
                 Emit(m_info.emission.periodicEmissionCount);
@@ -123,23 +123,13 @@ namespace nc::particle
         }
     }
 
-    graphics::MvpMatrices EmitterState::ComputeMvp(const Particle&, const Quaternion&, const Vector3&) const
+    auto EmitterState::ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const -> DirectX::XMMATRIX
     {
-        return graphics::MvpMatrices{};
-
-        // const auto modelView = ComposeMatrix
-        // (
-        //     particle.scale,
-        //     Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)),
-        //     particle.position
-        // ) * m_graphicsData->viewMatrix;
-
-
-        // return graphics::MvpMatrices
-        // {
-        //     // @todo: Replace MvpMatrices with Normal + VP matrices.
-        //     ComposeMatrix(particle.scale, Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)), particle.position),
-        //     DirectX::XMMatrixTranspose(modelView * m_graphicsData->projectionMatrix)
-        // };
+        return ComposeMatrix
+        (
+            particle.scale,
+            Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)),
+            particle.position
+        );
     }
 } // namespace nc::particle
