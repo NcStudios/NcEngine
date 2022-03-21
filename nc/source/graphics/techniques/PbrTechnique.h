@@ -1,13 +1,9 @@
 #pragma once
 
-#include "directx/Inc/DirectXMath.h"
-#include "ecs/component/Component.h"
 #include "graphics/resources/shader_descriptor_sets.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
-#include <vector>
-#include <span>
 
 namespace nc::graphics
 {

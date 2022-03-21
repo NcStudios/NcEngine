@@ -39,7 +39,7 @@ namespace nc::particle
         void Emit(size_t count);
         void Update(float dt, const Quaternion& camRotation, const Vector3& camForward);
         const ParticleSoA* GetSoA() const;
-        ParticleInfo* GetInfo();
+        const ParticleInfo& GetInfo() const;
         Entity GetEntity() const;
 
     private:

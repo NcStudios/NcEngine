@@ -25,7 +25,7 @@ namespace nc::graphics
         CreatePipeline(renderPass);
     }
 
-    ParticleTechnique::~ParticleTechnique()
+    ParticleTechnique::~ParticleTechnique() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
@@ -98,7 +98,7 @@ namespace nc::graphics
 
     bool ParticleTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates != nullptr && frameData.emitterStates->size() > 0;
+        return frameData.emitterStates.size() > 0;
     }
 
     void ParticleTechnique::Bind(vk::CommandBuffer* cmd)
@@ -110,7 +110,7 @@ namespace nc::graphics
 
     bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates != nullptr && frameData.emitterStates->size() > 0;
+        return frameData.emitterStates.size() > 0;
     }
 
     void ParticleTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
@@ -122,14 +122,14 @@ namespace nc::graphics
         pushConstants.viewProjection = viewMatrix * projectionMatrix;
         const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(PlaneMeshPath);
 
-        for (auto& emitterState : *frameData.emitterStates)
+        for (auto& emitterState : frameData.emitterStates)
         {
             auto [index, models] = emitterState.GetSoA()->View<particle::EmitterState::ModelMatrixIndex>();
 
             for (; index.Valid(); ++index)
             {
                 pushConstants.model = models[index];
-                pushConstants.baseColorIndex = AssetService<TextureView>::Get()->Acquire(emitterState.GetInfo()->init.particleTexturePath).index;
+                pushConstants.baseColorIndex = AssetService<TextureView>::Get()->Acquire(emitterState.GetInfo().init.particleTexturePath).index;
 
                 cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
                 cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance

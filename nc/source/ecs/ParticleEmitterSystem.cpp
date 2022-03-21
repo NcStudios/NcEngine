@@ -10,12 +10,12 @@ namespace nc::ecs
 {
     ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, float* dt, std::function<nc::Camera* ()> getCamera)
         : m_emitterStates{},
-        m_toAdd{},
-        m_toRemove{},
-        m_dt{ dt },
-        m_random{ Random() },
-        m_getCamera{ getCamera },
-        m_registry{ registry }
+          m_toAdd{},
+          m_toRemove{},
+          m_dt{ dt },
+          m_random{ Random() },
+          m_getCamera{ getCamera },
+          m_registry{ registry }
     {
         registry->RegisterOnAddCallback<ParticleEmitter>
         (
@@ -85,9 +85,9 @@ namespace nc::ecs
         pos->Emit(count);
     }
 
-    std::vector<particle::EmitterState>* ParticleEmitterSystem::GetParticles()
+    std::span<const particle::EmitterState> ParticleEmitterSystem::GetParticles() const
     {
-        return &m_emitterStates;
+        return m_emitterStates;
     }
 
     void ParticleEmitterSystem::Add(ParticleEmitter& emitter)

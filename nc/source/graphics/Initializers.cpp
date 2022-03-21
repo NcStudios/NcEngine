@@ -193,7 +193,6 @@ namespace nc::graphics
 
     vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, const std::array<vk::VertexInputAttributeDescription, 5>& vertexAttributeDesc)
     {
-
         vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.setVertexBindingDescriptionCount(1);
         vertexInputInfo.setPVertexBindingDescriptions(&vertexInputDesc);
@@ -332,7 +331,7 @@ namespace nc::graphics
             colorBlending.setLogicOp(vk::LogicOp::eAnd);
             colorBlending.setAttachmentCount(1);
             colorBlending.setPAttachments(&colorBlendAttachment);
-            colorBlending.setBlendConstants({ 1.0f, 1.0f, 1.0f, 1.0f });
+            colorBlending.setBlendConstants({1.0f, 1.0f, 1.0f, 1.0f});
             return colorBlending;
         }
 
@@ -341,7 +340,7 @@ namespace nc::graphics
         colorBlending.setLogicOp(vk::LogicOp::eCopy);
         colorBlending.setAttachmentCount(1);
         colorBlending.setPAttachments(&colorBlendAttachment);
-        colorBlending.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+        colorBlending.setBlendConstants({0.0f, 0.0f, 0.0f, 0.0f});
         return colorBlending;
     }
 
@@ -399,7 +398,7 @@ namespace nc::graphics
         vk::RenderPassBeginInfo renderPassInfo{};
         renderPassInfo.setRenderPass(renderpass); // Specify the render pass and attachments.
         renderPassInfo.setFramebuffer(framebuffer);
-        renderPassInfo.renderArea.setOffset({ 0,0 }); // Specify the dimensions of the render area.
+        renderPassInfo.renderArea.setOffset({0,0}); // Specify the dimensions of the render area.
         renderPassInfo.renderArea.setExtent(extent);
         renderPassInfo.setClearValueCount(static_cast<uint32_t>(clearValues.size())); // Set clear color
         renderPassInfo.setPClearValues(clearValues.data());
@@ -411,9 +410,9 @@ namespace nc::graphics
         std::vector<vk::AttachmentDescription> attachmentDescriptions{};
         attachmentDescriptions.reserve(attachmentSlots.size());
         std::transform(attachmentSlots.begin(), attachmentSlots.end(), std::back_inserter(attachmentDescriptions), [](const auto& attachmentSlot)
-            {
-                return attachmentSlot.description;
-            });
+        {
+            return attachmentSlot.description;
+        });
 
         std::vector<vk::SubpassDescription> subpassDescriptions{};
         subpassDescriptions.reserve(subpasses.size());
@@ -466,7 +465,7 @@ namespace nc::graphics
     {
         vk::Rect2D scissor = {};
         scissor.setExtent(extent);
-        scissor.setOffset({ 0, 0 });
+        scissor.setOffset({0, 0});
         return scissor;
     }
 
@@ -479,10 +478,7 @@ namespace nc::graphics
         commandBuffer->setScissor(0, 1, &scissor);
     }
 
-    vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding,
-                                                                    uint32_t descriptorCount,
-                                                                    vk::DescriptorType type,
-                                                                    vk::ShaderStageFlags shaderStages)
+    vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, uint32_t descriptorCount, vk::DescriptorType type, vk::ShaderStageFlags shaderStages)
     {
         vk::DescriptorSetLayoutBinding layoutBinding;
         layoutBinding.setBinding(binding);
@@ -572,7 +568,7 @@ namespace nc::graphics
             {
                 clearValues.reserve(1);
                 auto value = vk::ClearValue{};
-                value.setDepthStencil({ 1.0f, 0 });
+                value.setDepthStencil({1.0f, 0});
                 clearValues.push_back(value);
                 break;
             }
@@ -592,7 +588,7 @@ namespace nc::graphics
                 clearValues.push_back(colorValue);
 
                 auto depthValue = vk::ClearValue{};
-                depthValue.setDepthStencil({ 1.0f, 0 });
+                depthValue.setDepthStencil({1.0f, 0});
                 clearValues.push_back(depthValue);
                 break;
             }

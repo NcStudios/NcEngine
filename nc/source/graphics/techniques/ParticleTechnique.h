@@ -31,7 +31,7 @@ namespace nc::graphics
     {
     public:
         ParticleTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
-        ~ParticleTechnique();
+        ~ParticleTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
         void Bind(vk::CommandBuffer* cmd) override;

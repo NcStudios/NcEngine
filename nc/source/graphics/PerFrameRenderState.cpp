@@ -25,20 +25,20 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::vector<nc::particle::EmitterState>* particleEmitters)
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters)
         : camViewMatrix{ camera->ViewMatrix() },
-        projectionMatrix{ camera->ProjectionMatrix() },
-        cameraPosition{ registry->Get<Transform>(camera->ParentEntity())->Position() },
-        objectData{},
-        pointLightInfos{},
-#ifdef NC_EDITOR_ENABLED
-        colliderDebugWidget{ std::nullopt },
-#endif
-        pointLightVPs{},
-        isPointLightBindRequired{ isPointLightSystemDirty },
-        environment{ environment },
-        useSkybox{ environment->UseSkybox() },
-        emitterStates{ particleEmitters }
+          projectionMatrix{ camera->ProjectionMatrix() },
+          cameraPosition{ registry->Get<Transform>(camera->ParentEntity())->Position() },
+          objectData{},
+          pointLightInfos{},
+          #ifdef NC_EDITOR_ENABLED
+          colliderDebugWidget{ std::nullopt },
+          #endif
+          pointLightVPs{},
+          isPointLightBindRequired{ isPointLightSystemDirty },
+          environment{ environment },
+          useSkybox{ environment->UseSkybox() },
+          emitterStates{ particleEmitters }
     {
         OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
         const auto frustum = camera->CalculateFrustum();
@@ -67,7 +67,7 @@ namespace nc::graphics
             objectData.emplace_back(skyboxMatrix, skyboxMatrix * camViewMatrix, viewProjection, 0, 0, 0, 0);
         }
 
-#ifdef NC_EDITOR_ENABLED
+        #ifdef NC_EDITOR_ENABLED
         auto colliderIsSelected = false;
         for (auto& collider : view<Collider>{ registry })
         {
@@ -79,7 +79,7 @@ namespace nc::graphics
         }
 
         if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
-#endif
+        #endif
 
         auto pointLights = view<PointLight>{ registry };
         pointLightVPs.reserve(pointLights.size());

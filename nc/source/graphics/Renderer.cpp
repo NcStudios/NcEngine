@@ -26,15 +26,13 @@
 
 namespace nc::graphics
 {
-    Renderer::Renderer(Graphics* graphics,
-        ShaderResourceServices* shaderResources,
-        Vector2 dimensions)
+    Renderer::Renderer(Graphics* graphics, ShaderResourceServices* shaderResources, Vector2 dimensions)
         : m_graphics{ graphics },
-        m_shaderResources{ shaderResources },
-        m_renderPasses{ std::make_unique<RenderPassManager>(graphics, dimensions) },
-        m_dimensions{ dimensions },
-        m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
-        m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
+          m_shaderResources{ shaderResources },
+          m_renderPasses{ std::make_unique<RenderPassManager>(graphics, dimensions) },
+          m_dimensions{ dimensions },
+          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
+          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
     {
         RegisterRenderPasses();
         RegisterTechniques();
@@ -87,9 +85,9 @@ namespace nc::graphics
     {
         m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
 
-#ifdef NC_EDITOR_ENABLED
+        #ifdef NC_EDITOR_ENABLED
         m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
-#endif
+        #endif
 
         m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
         m_renderPasses->RegisterTechnique<PbrTechnique>(RenderPassManager::LitShadingPass);
@@ -107,7 +105,7 @@ namespace nc::graphics
 
         SetViewportAndScissor(cmd, m_dimensions);
 
-        vk::DeviceSize offsets[] = { 0 };
+        vk::DeviceSize offsets[] = {0};
         cmd->bindVertexBuffers(0, 1, assetServices->meshManager.GetVertexBuffer(), offsets);
         cmd->bindIndexBuffer(*(assetServices->meshManager.GetIndexBuffer()), 0, vk::IndexType::eUint32);
 

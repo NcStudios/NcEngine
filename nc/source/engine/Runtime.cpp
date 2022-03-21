@@ -48,13 +48,13 @@ namespace nc
 
     Runtime::Runtime(EngineInitFlags flags)
         : m_window{},
-        m_context{ BuildContext() },
-        m_modules{ BuildModules(&m_context.registry, &m_window, &m_context.time, std::bind_front(&Runtime::Clear, this), &m_dt, flags) },
-        m_executor{},
-        m_dt{ 0.0f },
-        m_dtFactor{ 1.0f },
-        m_isRunning{ false },
-        m_currentPhysicsIterations{ 0u }
+          m_context{ BuildContext() },
+          m_modules{ BuildModules(&m_context.registry, &m_window, &m_context.time, std::bind_front(&Runtime::Clear, this), &m_dt, flags) },
+          m_executor{},
+          m_dt{ 0.0f },
+          m_dtFactor{ 1.0f },
+          m_isRunning{ false },
+          m_currentPhysicsIterations{ 0u }
     {
         m_window.BindEngineDisableRunningCallback(std::bind_front(&Runtime::Stop, this));
         BuildTaskGraph();
@@ -126,7 +126,7 @@ namespace nc
 
     void Runtime::Run()
     {
-        while (m_isRunning)
+        while(m_isRunning)
         {
             OPTICK_FRAME("Main Thread");
             m_dt = m_dtFactor * m_context.time.UpdateTime();

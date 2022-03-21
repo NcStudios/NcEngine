@@ -95,9 +95,9 @@ namespace nc::particle
             m_soa.RemoveAtIndex(i);
     }
 
-    ParticleInfo* EmitterState::GetInfo()
+    const ParticleInfo& EmitterState::GetInfo() const
     {
-        return &m_info;
+        return m_info;
     }
 
     auto EmitterState::GetSoA() const -> const ParticleSoA*
