@@ -109,7 +109,7 @@ namespace nc::graphics
     void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const Vector2& dimensions);
 
     // Descriptor sets
-    vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, uint32_t descriptorCount, vk::DescriptorType type, vk::ShaderStageFlags shaderStages); 
+    vk::DescriptorSetLayoutBinding CreateDescriptorSetLayoutBinding(uint32_t binding, uint32_t descriptorCount, vk::DescriptorType type, vk::ShaderStageFlags shaderStages);
     vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags);
     vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout);
     vk::WriteDescriptorSet CreateSamplerDescriptorWrite(vk::Sampler* sampler, vk::DescriptorSet* descriptorSet, uint32_t binding);
