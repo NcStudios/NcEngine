@@ -1,16 +1,11 @@
 #include "EnvironmentDataManager.h"
-#include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "graphics/resources/Environment.h"
-#include "debug/Utils.h"
-
-#include <array>
-#include <iostream>
 
 namespace nc::graphics
 {
-    EnvironmentDataManager::EnvironmentDataManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors)
-        : m_graphics{graphics},
+    EnvironmentDataManager::EnvironmentDataManager(uint32_t bindingSlot, GpuAllocator* allocator, shader_descriptor_sets* descriptors)
+        : m_allocator{allocator},
           m_descriptors{descriptors},
           m_bindingSlot{bindingSlot}
     {
@@ -28,7 +23,7 @@ namespace nc::graphics
         initialEnvironmentData.skyboxTextureIndex = -1;
         auto dataVector = std::vector<EnvironmentData>{};
         dataVector.push_back(initialEnvironmentData);
-        m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_graphics, static_cast<const void*>(&dataVector.back()), static_cast<uint32_t>(sizeof(EnvironmentData) * dataVector.size()));
+        m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_allocator, static_cast<const void*>(&dataVector.back()), static_cast<uint32_t>(sizeof(EnvironmentData) * dataVector.size()));
 
         m_descriptors->register_descriptor
         (
@@ -53,7 +48,7 @@ namespace nc::graphics
 
     void EnvironmentDataManager::Update(const std::vector<EnvironmentData>& data)
     {
-       m_environmentDataBuffer->Bind(m_graphics, static_cast<const void*>(&data.at(0)), static_cast<uint32_t>(sizeof(EnvironmentData) * data.size()));
+       m_environmentDataBuffer->Bind(static_cast<const void*>(&data.at(0)), static_cast<uint32_t>(sizeof(EnvironmentData) * data.size()));
     }
 
     void EnvironmentDataManager::Reset()

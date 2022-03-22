@@ -1,4 +1,6 @@
 #include "CubeMapAssetManager.h"
+#include "graphics/Base.h"
+#include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "graphics/resources/ShaderResourceService.h"
 
@@ -118,7 +120,7 @@ namespace nc
         };
 
         m_cubeMapAccessors.emplace(path, cubeMapView);
-        m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, path);
+        m_cubeMaps.emplace_back(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), pixelArray, width, height, width * height * STBI_rgb_alpha * 6, path);
         graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
         return true;
     }
@@ -183,7 +185,7 @@ namespace nc
             };
 
             m_cubeMapAccessors.emplace(path, cubeMapView);
-            m_cubeMaps.emplace_back(m_graphics, pixelArray, width, height, width * height * STBI_rgb_alpha * 6, path);
+            m_cubeMaps.emplace_back(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), pixelArray, width, height, width * height * STBI_rgb_alpha * 6, path);
         }
 
         graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);

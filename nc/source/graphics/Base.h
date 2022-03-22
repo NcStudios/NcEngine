@@ -5,8 +5,8 @@
 #ifndef VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
-#include "vulkan/vk_mem_alloc.hpp"
 #include "imgui/imgui_impl_vulkan.h"
+#include "GpuAllocator.h"
 
 #include <optional>
 #include <unordered_map>
@@ -60,39 +60,27 @@ namespace nc::graphics
 
             const vk::Device& GetDevice() const noexcept;
             const vk::PhysicalDevice& GetPhysicalDevice() const noexcept;
+            const vk::Instance& GetInstance() const noexcept;
             const vk::SurfaceKHR& GetSurface() const noexcept;
             const vk::CommandPool& GetCommandPool() const noexcept;
             const vk::Queue& GetQueue(QueueFamilyType type) const noexcept;
             const vk::Format& GetDepthFormat() const noexcept;
-            vk::DescriptorPool* GetRenderingDescriptorPoolPtr() noexcept;
-            vma::Allocator* GetAllocator() noexcept;
-            vma::Allocation* GetBufferAllocation(uint32_t index);
             vk::SampleCountFlagBits GetMaxSamplesCount();
 
-            uint32_t CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage memoryUsageType, vk::Buffer* createdBuffer);
-            uint32_t CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::Image* createdImage, vk::SampleCountFlagBits numSamples);
-            uint32_t CreateTexture(stbi_uc* pixels, uint32_t width, uint32_t height, vk::Image* createdImage);
-            uint32_t CreateCubeMapTexture(const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, vk::Image* createdImage);
-            vk::UniqueImageView CreateTextureView(const vk::Image& image);
-            vk::UniqueImageView CreateCubeMapTextureView(const vk::Image& image);
             vk::UniqueSampler CreateTextureSampler();
             vk::UniqueSampler CreateCubeMapSampler();
 
             void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers) noexcept;
-            void DestroyBuffer(uint32_t id) noexcept;
-            void DestroyImage(uint32_t id) noexcept;
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
             void QueryDepthFormatSupport();
             void InitializeImgui(const vk::RenderPass& defaultPass);
             void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
-            uint32_t PadBufferOffsetAlignment(uint32_t originalSize, vk::DescriptorType bufferType);
 
         private:
             void CreateInstance();
             void CreateSurface(HWND hwnd, HINSTANCE hinstance);
-            void CreateAllocator();
             void CreateCommandPool();
             void CreateLogicalDevice();
             void CreatePhysicalDevice();
@@ -109,19 +97,8 @@ namespace nc::graphics
             vk::SampleCountFlagBits m_samplesCount;
             bool m_samplesInitialized;
 
-            // @todo: The below resources don't need to live here, they should be managed by some resource management class.
-            uint32_t m_bufferIndex;
-            std::unordered_map<uint32_t, std::pair<vk::Buffer, vma::Allocation>> m_buffers;
-            uint32_t m_imageIndex;
-            std::unordered_map<uint32_t, std::pair<vk::Image, vma::Allocation>> m_images;
-            vma::Allocator m_allocator;
             vk::CommandPool m_commandPool;
             vk::DescriptorPool m_imguiDescriptorPool;
-            vk::DescriptorPool m_renderingDescriptorPool;
             vk::PhysicalDeviceProperties m_gpuProperties;
-
-            // Just in case we change the key type; some destructors depend on find not throwing.
-            static_assert(noexcept(decltype(m_buffers)::key_equal()));
-            static_assert(noexcept(decltype(m_images)::key_equal()));
     };
 }

@@ -12,6 +12,7 @@ namespace nc
     {
         public:
             Runtime(EngineInitFlags flags);
+            ~Runtime() noexcept;
             void Start(std::unique_ptr<nc::Scene> initialScene) override;
             void Stop() noexcept override;
             void Shutdown() noexcept override;

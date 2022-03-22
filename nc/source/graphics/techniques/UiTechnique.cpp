@@ -99,7 +99,7 @@ namespace nc::graphics
         return true;
     }
 
-    void UiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+    void UiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&)
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }

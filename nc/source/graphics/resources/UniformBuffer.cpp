@@ -3,76 +3,49 @@
 namespace nc::graphics
 {
     UniformBuffer::UniformBuffer()
-        : m_memoryIndex { 0 },
-          m_uniformBuffer { nullptr }
+        : m_allocator{nullptr},
+          m_buffer{}
     {
     }
 
-    UniformBuffer::UniformBuffer(Graphics* graphics, const void* data, uint32_t size)
-        : m_memoryIndex{ 0 },
-          m_uniformBuffer{ nullptr }
+    UniformBuffer::UniformBuffer(GpuAllocator* allocator, const void* data, uint32_t size)
+        : m_allocator{allocator},
+          m_buffer{}
     {
-        m_base = graphics->GetBasePtr();
-        auto paddedSize = m_base->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
-        m_memoryIndex = m_base->CreateBuffer(paddedSize, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu, &m_uniformBuffer);
-
-        Bind(graphics, data, size);
-    }
-
-    UniformBuffer::~UniformBuffer() noexcept
-    {
-        if (m_uniformBuffer)
-        {
-            m_base->DestroyBuffer(m_memoryIndex);
-            m_uniformBuffer = nullptr;
-        }
-
-        m_base = nullptr;
+        auto paddedSize = m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
+        m_buffer = m_allocator->CreateBuffer(paddedSize, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+        Bind(data, size);
     }
 
     UniformBuffer::UniformBuffer(UniformBuffer&& other)
-        : m_base{std::exchange(other.m_base, nullptr)},
-          m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
-          m_uniformBuffer{std::exchange(other.m_uniformBuffer, nullptr)}
+        : m_allocator{std::exchange(other.m_allocator, nullptr)},
+          m_buffer{std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{})}
     {
     }
 
     UniformBuffer& UniformBuffer::operator = (UniformBuffer&& other)
     {
-        m_base = std::exchange(other.m_base, nullptr);
-        m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
-        m_uniformBuffer = std::exchange(other.m_uniformBuffer, nullptr);
+        m_allocator = std::exchange(other.m_allocator, nullptr);
+        m_buffer = std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{});
         return *this;
     }
 
-    vk::Buffer* UniformBuffer::GetBuffer()
+    vk::Buffer UniformBuffer::GetBuffer()
     {
-        return &m_uniformBuffer;
+        return m_buffer;
     }
 
     void UniformBuffer::Clear()
     {
-        if (m_uniformBuffer)
-        {
-            m_base->DestroyBuffer(m_memoryIndex);
-            m_uniformBuffer = nullptr;
-        }
-
-        m_base = nullptr;
+        m_buffer.Release();
+        m_allocator = nullptr;
     }
 
-    void UniformBuffer::Bind(Graphics* graphics, const void* data, uint32_t size)
+    void UniformBuffer::Bind(const void* data, uint32_t size)
     {
-        m_base = graphics->GetBasePtr();
-
-        auto paddedSize = m_base->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
-
-        void* mappedData;
-        auto* allocator = m_base->GetAllocator();
-        auto* allocation = m_base->GetBufferAllocation(m_memoryIndex);
-
-        allocator->mapMemory(*allocation, &mappedData);
+        auto paddedSize = m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
+        void* mappedData = m_allocator->Map(m_buffer.Allocation());
         memcpy(mappedData, data, paddedSize);
-        allocator->unmapMemory(*allocation);
+        m_allocator->Unmap(m_buffer.Allocation());
     }
 }

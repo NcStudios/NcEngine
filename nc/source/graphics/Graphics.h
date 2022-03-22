@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera/MainCamera.h"
+#include "GpuAllocator.h"
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "directx/Inc/DirectXMath.h"
@@ -41,6 +42,7 @@ namespace nc::graphics
             void InitializeUI();
 
             Base* GetBasePtr() const noexcept;
+            GpuAllocator* GetAllocatorPtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
             Commands* GetCommandsPtr() const noexcept;
             ShaderResourceServices* GetShaderResources() const noexcept;
@@ -63,6 +65,7 @@ namespace nc::graphics
 
             camera::MainCamera* m_mainCamera;
             std::unique_ptr<Base> m_base;
+            std::unique_ptr<GpuAllocator> m_allocator;
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;

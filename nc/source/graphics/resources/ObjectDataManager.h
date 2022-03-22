@@ -9,7 +9,6 @@ namespace nc::graphics
 {
     /** @todo We probably don't want the viewProjection in this struct. We only need
      *  1 copy, not 1 per renderer. */
-
     struct ObjectData
     {
         DirectX::XMMATRIX model;
@@ -25,7 +24,7 @@ namespace nc::graphics
     class ObjectDataManager : public IShaderResourceService<ObjectData>
     {
         public:
-            ObjectDataManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, uint32_t maxRenderers);
+            ObjectDataManager(uint32_t bindingSlot, GpuAllocator* allocator, shader_descriptor_sets* descriptors, uint32_t maxRenderers);
             ~ObjectDataManager() noexcept;
 
             void Initialize() override;
@@ -33,7 +32,7 @@ namespace nc::graphics
             void Reset() override;
 
         private:
-            Graphics* m_graphics;
+            GpuAllocator* m_allocator;
             shader_descriptor_sets* m_descriptors;
             WriteableBuffer<ObjectData> m_objectsDataBuffer;
             uint32_t m_maxObjects;

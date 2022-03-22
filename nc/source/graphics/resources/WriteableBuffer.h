@@ -1,7 +1,6 @@
 #pragma once
 
-#include "graphics/Base.h"
-#include "graphics/Graphics.h"
+#include "graphics/GpuAllocator.h"
 
 namespace nc::graphics
 {
@@ -10,14 +9,13 @@ namespace nc::graphics
     {
         public:
             WriteableBuffer();
-            WriteableBuffer(Graphics* graphics, uint32_t size);
-            ~WriteableBuffer() noexcept;
+            WriteableBuffer(GpuAllocator* allocator, uint32_t size);
             WriteableBuffer(WriteableBuffer&&);
-            WriteableBuffer& operator = (WriteableBuffer&&);
-            WriteableBuffer& operator = (const WriteableBuffer&) = delete;
+            WriteableBuffer& operator=(WriteableBuffer&&);
+            WriteableBuffer& operator=(const WriteableBuffer&) = delete;
             WriteableBuffer(const WriteableBuffer&) = delete;
 
-            vk::Buffer* GetBuffer() noexcept;
+            vk::Buffer GetBuffer() const noexcept;
 
             void Clear() noexcept;
 
@@ -26,91 +24,67 @@ namespace nc::graphics
             void Map(const std::vector<T>& dataToMap);
 
         private:
-            Base* m_base;
-            uint32_t m_memoryIndex;
+            GpuAllocator* m_allocator;
+            GpuAllocation<vk::Buffer> m_buffer;
             uint32_t m_memorySize;
-            vk::Buffer m_writeableBuffer;
     };
 
     template<typename T>
     WriteableBuffer<T>::WriteableBuffer()
-    : m_base{ nullptr },
-      m_memoryIndex { 0 },
-      m_memorySize { 0 },
-      m_writeableBuffer { nullptr }
+        : m_allocator{nullptr},
+          m_buffer{},
+          m_memorySize{0}
     {
     }
 
     template<typename T>
-    WriteableBuffer<T>::WriteableBuffer(Graphics* graphics, uint32_t size)
-    : m_base{ graphics->GetBasePtr() },
-      m_memoryIndex { 0 },
-      m_memorySize{ 0 },
-      m_writeableBuffer { nullptr }
+    WriteableBuffer<T>::WriteableBuffer(GpuAllocator* allocator, uint32_t size)
+        : m_allocator{allocator},
+          m_buffer{},
+          m_memorySize{0}
     {
-        size = m_base->PadBufferOffsetAlignment(size, vk::DescriptorType::eStorageBuffer);
-        m_memoryIndex = m_base->CreateBuffer(size, vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu, &m_writeableBuffer);
-    }
-
-    template<typename T>
-    WriteableBuffer<T>::~WriteableBuffer() noexcept
-    {
-        if (m_writeableBuffer && m_base)
-        {
-            m_base->DestroyBuffer(m_memoryIndex);
-            m_writeableBuffer = nullptr;
-        }
-
-        m_base = nullptr;
+        size = m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eStorageBuffer);
+        m_buffer = m_allocator->CreateBuffer(size, vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
     }
 
     template<typename T>
     WriteableBuffer<T>::WriteableBuffer(WriteableBuffer&& other)
-    : m_base{std::exchange(other.m_base, nullptr)},
-      m_memoryIndex{std::exchange(other.m_memoryIndex, 0)},
-      m_memorySize{std::exchange(other.m_memorySize, 0)},
-      m_writeableBuffer{std::exchange(other.m_writeableBuffer, nullptr)}
+        : m_allocator{std::exchange(other.m_allocator, nullptr)},
+          m_buffer{std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{})},
+          m_memorySize{std::exchange(other.m_memorySize, 0)}
     {
     }
 
     template<typename T>
     WriteableBuffer<T>& WriteableBuffer<T>::operator=(WriteableBuffer<T>&& other)
     {
-        m_base = std::exchange(other.m_base, nullptr);
-        m_memoryIndex = std::exchange(other.m_memoryIndex, 0);
+        m_allocator = std::exchange(other.m_allocator, nullptr);
+        m_buffer = std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{});
         m_memorySize = std::exchange(other.m_memorySize, 0);
-        m_writeableBuffer = std::exchange(other.m_writeableBuffer, nullptr);
         return *this;
     }
 
     template<typename T>
-    vk::Buffer* WriteableBuffer<T>::GetBuffer() noexcept
+    vk::Buffer WriteableBuffer<T>::GetBuffer() const noexcept
     {
-        return &m_writeableBuffer;
+        return m_buffer;
     }
 
     template<typename T>
     void WriteableBuffer<T>::Clear() noexcept
     {
-        if (m_writeableBuffer)
-        {
-            m_base->DestroyBuffer(m_memoryIndex);
-            m_writeableBuffer = nullptr;
-        }
-
-        m_base = nullptr;
+        m_buffer.Release();
+        m_memorySize = 0;
+        m_allocator = nullptr;
     }
 
     template<typename T> 
     template<std::invocable<T&> Func>
     void WriteableBuffer<T>::Map(const std::vector<T>& dataToMap, Func&& myNuller)
     {
-        auto allocation = *(m_base->GetBufferAllocation(m_memoryIndex));
-        void* dataContainer;
-        m_base->GetAllocator()->mapMemory(allocation, &dataContainer);
-
+        auto allocation = m_buffer.Allocation();
+        void* dataContainer = m_allocator->Map(allocation);
         T* mappedContainerHandle = (T*)dataContainer;
-
         auto dataToMapSize = static_cast<uint32_t>(dataToMap.size());
 
         for (uint32_t i = 0; i < dataToMapSize; ++i)
@@ -133,16 +107,15 @@ namespace nc::graphics
         }
 
         m_memorySize = dataToMapSize;
-        m_base->GetAllocator()->unmapMemory(allocation);
+        m_allocator->Unmap(allocation);
     }
 
     template<typename T> 
     void WriteableBuffer<T>::Map(const std::vector<T>& dataToMap)
     {
-        auto allocation = *(m_base->GetBufferAllocation(m_memoryIndex));
-        void* dataContainer;
-        m_base->GetAllocator()->mapMemory(allocation, &dataContainer);
+        auto allocation = m_buffer.Allocation();
+        void* dataContainer = m_allocator->Map(allocation);
         memcpy(dataContainer, dataToMap.data(), sizeof(T) * dataToMap.size());
-        m_base->GetAllocator()->unmapMemory(allocation);
+        m_allocator->Unmap(allocation);
     }
 }

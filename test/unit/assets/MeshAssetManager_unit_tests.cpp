@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "graphics/GpuAllocator.h"
 #include "graphics/Graphics.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "assets/MeshAssetManager.h"
@@ -12,22 +13,14 @@ const auto MeshPath_9Vertices = "mesh9Verts.nca";
 
 namespace nc::graphics
 {
-    uint32_t Base::CreateBuffer(uint32_t, vk::BufferUsageFlags, vma::MemoryUsage, vk::Buffer*) { return 0u; }
-    void Base::DestroyBuffer(uint32_t) noexcept {}
+    auto GpuAllocator::CreateBuffer(uint32_t, vk::BufferUsageFlags, vma::MemoryUsage) -> GpuAllocation<vk::Buffer> { return {}; }
+    void GpuAllocator::Destroy(const GpuAllocation<vk::Buffer>&) const {}
     ImmutableBuffer::ImmutableBuffer() {}
-    ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics* , const std::vector<uint32_t>&) {}
-    ImmutableBuffer::ImmutableBuffer(nc::graphics::Graphics*, const std::vector<Vertex>&) {}
-    ImmutableBuffer::~ImmutableBuffer() {}
-    ImmutableBuffer::ImmutableBuffer(ImmutableBuffer&&) {}
-    ImmutableBuffer& ImmutableBuffer::operator=(ImmutableBuffer&&) { return *this; }
-    
-    vk::Buffer* ImmutableBuffer::GetBuffer() {return nullptr;}
-    void ImmutableBuffer::Bind(nc::graphics::Graphics*, const std::vector<uint32_t>&) {}
-    void ImmutableBuffer::Bind(nc::graphics::Graphics*, const std::vector<Vertex>&) {}
-    void ImmutableBuffer::Clear() {}
-
-    void Commands::SubmitCopyCommandImmediate(const Base&, const vk::Buffer&, const vk::Buffer&, const vk::DeviceSize) {}
-    Base* Graphics::GetBasePtr() const noexcept { return nullptr; }
+    ImmutableBuffer::ImmutableBuffer(Base*, GpuAllocator*, const std::vector<uint32_t>&) {}
+    ImmutableBuffer::ImmutableBuffer(Base*, GpuAllocator*, const std::vector<Vertex>&) {}
+    void ImmutableBuffer::Clear() noexcept {}
+    auto Graphics::GetBasePtr() const noexcept -> Base* { return nullptr; }
+    auto Graphics::GetAllocatorPtr() const noexcept -> GpuAllocator* { return nullptr; }
 }
 
 class MeshAssetManager_unit_tests : public ::testing::Test

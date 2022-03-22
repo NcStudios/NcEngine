@@ -1,4 +1,6 @@
 #include "CubeMapManager.h"
+#include "graphics/Base.h"
+#include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
 #include "debug/Utils.h"
 

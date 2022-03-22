@@ -405,7 +405,7 @@ namespace nc::graphics
         return renderPassInfo;
     }
 
-    vk::UniqueRenderPass CreateRenderPass(Base* base, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses)
+    vk::UniqueRenderPass CreateRenderPass(vk::Device device, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses)
     {
         std::vector<vk::AttachmentDescription> attachmentDescriptions{};
         attachmentDescriptions.reserve(attachmentSlots.size());
@@ -440,7 +440,7 @@ namespace nc::graphics
         renderPassInfo.setDependencyCount(static_cast<uint32_t>(subpassDependencies.size()));
         renderPassInfo.setPDependencies(subpassDependencies.data());
 
-        return base->GetDevice().createRenderPassUnique(renderPassInfo);
+        return device.createRenderPassUnique(renderPassInfo);
     }
 
     vk::Viewport CreateViewport(const Vector2& dimensions)
@@ -489,7 +489,7 @@ namespace nc::graphics
         return layoutBinding;
     }
 
-    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(Graphics* graphics, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
+    vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
     {
         vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
         extendedInfo.setPNext(nullptr);
@@ -502,10 +502,10 @@ namespace nc::graphics
         setInfo.setPNext(&extendedInfo);
         setInfo.setPBindings(layoutBindings.data());
 
-        return graphics->GetBasePtr()->GetDevice().createDescriptorSetLayoutUnique(setInfo);
+        return device.createDescriptorSetLayoutUnique(setInfo);
     }
 
-    vk::UniqueDescriptorSet CreateDescriptorSet(Graphics* graphics, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
+    vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
     {
         vk::DescriptorSetAllocateInfo allocationInfo{};
         allocationInfo.setPNext(nullptr);
@@ -514,7 +514,7 @@ namespace nc::graphics
         allocationInfo.setPSetLayouts(descriptorSetLayout);
 
         // @todo: return the vector rather than the indiviual item, don't use move in return values
-        return std::move(graphics->GetBasePtr()->GetDevice().allocateDescriptorSetsUnique(allocationInfo)[0]);
+        return std::move(device.allocateDescriptorSetsUnique(allocationInfo)[0]);
     }
 
     vk::WriteDescriptorSet CreateSamplerDescriptorWrite(vk::Sampler* sampler, vk::DescriptorSet* descriptorSet, uint32_t binding)

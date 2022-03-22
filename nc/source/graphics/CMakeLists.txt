@@ -2,6 +2,7 @@ target_sources(NcEngineLib
     PRIVATE
         ${ROOT_DIR}/source/graphics/Base.cpp
         ${ROOT_DIR}/source/graphics/Commands.cpp
+        ${ROOT_DIR}/source/graphics/GpuAllocator.cpp
         ${ROOT_DIR}/source/graphics/Graphics.cpp
         ${ROOT_DIR}/source/graphics/GraphicsModuleImpl.cpp
         ${ROOT_DIR}/source/graphics/Initializers.cpp

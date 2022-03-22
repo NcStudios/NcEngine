@@ -122,7 +122,7 @@ namespace nc::graphics
         {
             .uid = uid,
             .renderTargetSize = renderTargetSize,
-            .renderpass = CreateRenderPass(base, attachmentSlots, subpasses),
+            .renderpass = CreateRenderPass(base->GetDevice(), attachmentSlots, subpasses),
             .valuesToClear = valuesToClear,
             .techniques = {}
         };
