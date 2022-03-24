@@ -16,6 +16,7 @@
 build/
 install/
 scratch/
+.idea/
 
 #gprof analysis
 analysis.txt
