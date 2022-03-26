@@ -36,14 +36,14 @@ NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively 
 -----------
 * NcEngine: Core Library [Required]
     * Type: Static Library
-    * Directory: nc
+    * Directory: engine
 * NcEditor: Application for project creation and management.
     * Type: Executable
     * Directory: editor
     * Dependencies: NcEngine [with -DNC_EDITOR_ENABLED=ON]
 * Sample: Application containing demo, test, and benchmark scenes.
     * Type: Executable
-    * Directory: project
+    * Directory: sample
     * Dependencies: NcEngine
 * Tests:
     * Type: Executable(s)
