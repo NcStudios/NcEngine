@@ -45,7 +45,7 @@ jobs:
       run: ctest -V
     
     - name: Configure NcEngine Lib
-      run: cmake -S ${{github.workspace}}/nc -B ${{github.workspace}}/build/NcEngine-MSVC-Release --preset NcEngine-MSVC-Release
+      run: cmake -S ${{github.workspace}}/engine -B ${{github.workspace}}/build/NcEngine-MSVC-Release --preset NcEngine-MSVC-Release
     
     - name: Build NcEngine Lib
       run: cmake --build ${{github.workspace}}/build/NcEngine-MSVC-Release
