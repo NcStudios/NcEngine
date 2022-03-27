@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-    ShadowMapManager::ShadowMapManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, Vector2 dimensions)
+    ShadowMapManager::ShadowMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, Vector2 dimensions)
     : m_graphics{graphics},
       m_descriptors{ descriptors },
       m_sampler{nullptr},
@@ -40,9 +40,9 @@ namespace nc::graphics
         auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
-        m_descriptors->update_image
+        m_descriptors->UpdateImage
         (
-            bind_frequency::per_frame,
+            BindFrequency::per_frame,
             m_imageInfos,
             1,
             vk::DescriptorType::eCombinedImageSampler,
@@ -80,10 +80,10 @@ namespace nc::graphics
         auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
-        m_descriptors->register_descriptor
+        m_descriptors->RegisterDescriptor
         (
             m_bindingSlot,
-            bind_frequency::per_frame,
+            BindFrequency::per_frame,
             1,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,
@@ -91,9 +91,9 @@ namespace nc::graphics
         );
         m_isRegistered = true;
 
-        m_descriptors->update_image
+        m_descriptors->UpdateImage
         (
-            bind_frequency::per_frame,
+            BindFrequency::per_frame,
             m_imageInfos,
             1,
             vk::DescriptorType::eCombinedImageSampler,

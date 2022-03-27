@@ -3,14 +3,14 @@
 #include "ShaderResourceService.h"
 #include "WriteableBuffer.h"
 #include "ecs/component/PointLight.h"
-#include "graphics/resources/shader_descriptor_sets.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 
 namespace nc::graphics
 {
     class PointLightManager : public IShaderResourceService<PointLightInfo>
     {
         public:
-            PointLightManager(uint32_t bindingSlot, GpuAllocator* allocator, shader_descriptor_sets* descriptors, uint32_t maxPointLights);
+            PointLightManager(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxPointLights);
             ~PointLightManager() noexcept;
 
             void Initialize() override;
@@ -19,7 +19,7 @@ namespace nc::graphics
 
         private:
             std::unique_ptr<WriteableBuffer<nc::PointLightInfo>> m_pointLightsArrayBuffer;
-            shader_descriptor_sets* m_descriptors;
+            ShaderDescriptorSets* m_descriptors;
             GpuAllocator* m_allocator;
             uint32_t m_maxPointLights;
             uint32_t m_bindingSlot;

@@ -2,7 +2,7 @@
 
 #include "ShaderResourceService.h"
 #include "CubeMap.h"
-#include "graphics/resources/shader_descriptor_sets.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -13,7 +13,7 @@ namespace nc::graphics
     class CubeMapManager : public IShaderResourceService<CubeMap>
     {
         public:
-            CubeMapManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, uint32_t maxCubeMaps);
+            CubeMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
             ~CubeMapManager() noexcept;
 
             void Initialize() override;
@@ -22,7 +22,7 @@ namespace nc::graphics
 
         private:
             Graphics* m_graphics;
-            shader_descriptor_sets* m_descriptors;
+            ShaderDescriptorSets* m_descriptors;
             std::vector<vk::DescriptorImageInfo> m_imageInfos;
             vk::UniqueSampler m_cubeMapSampler;
             vk::ImageLayout m_layout;

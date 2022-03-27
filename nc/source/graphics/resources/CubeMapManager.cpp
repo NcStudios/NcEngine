@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    CubeMapManager::CubeMapManager(uint32_t bindingSlot, Graphics* graphics, shader_descriptor_sets* descriptors, uint32_t maxCubeMaps)
+    CubeMapManager::CubeMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps)
         : m_graphics{graphics},
           m_descriptors{descriptors},
           m_imageInfos{},
@@ -28,10 +28,10 @@ namespace nc::graphics
 
     void CubeMapManager::Initialize()
     {
-        m_descriptors->register_descriptor
+        m_descriptors->RegisterDescriptor
         (
             m_bindingSlot,
-            bind_frequency::per_frame,
+            BindFrequency::per_frame,
             m_maxCubeMapsCount,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,
@@ -52,9 +52,9 @@ namespace nc::graphics
             return CreateDescriptorImageInfo(sampler, cubeMap.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
         });
 
-        m_descriptors->update_image
+        m_descriptors->UpdateImage
         (
-            bind_frequency::per_frame,
+            BindFrequency::per_frame,
             m_imageInfos,
             m_maxCubeMapsCount,
             vk::DescriptorType::eCombinedImageSampler,

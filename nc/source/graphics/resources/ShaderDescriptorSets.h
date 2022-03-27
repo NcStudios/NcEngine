@@ -7,23 +7,23 @@ namespace nc::graphics
 {
     class Base;
 
-    enum class bind_frequency : uint8_t
+    enum class BindFrequency : uint8_t
     {
         per_frame
     };
 
     /* Represents the binding of a resource handle to the descriptor set's GPU memory */
-    struct descriptor_write
+    struct DescriptorWrite
     {
         /* Buffer write */
-        descriptor_write(vk::WriteDescriptorSet inWrite, vk::DescriptorBufferInfo inBuffer)
+        DescriptorWrite(vk::WriteDescriptorSet inWrite, vk::DescriptorBufferInfo inBuffer)
             : write{inWrite},
               buffer{inBuffer},
               images{std::span<const vk::DescriptorImageInfo>()}
         {}
 
         /* Images write */
-        descriptor_write(vk::WriteDescriptorSet inWrite, std::span<const vk::DescriptorImageInfo> inImages)
+        DescriptorWrite(vk::WriteDescriptorSet inWrite, std::span<const vk::DescriptorImageInfo> inImages)
             : write{ inWrite },
               buffer{ vk::DescriptorBufferInfo() },
               images{ inImages }
@@ -37,39 +37,39 @@ namespace nc::graphics
     /* All of the components required for a descriptor set.
     *  The unordered_map keys are the binding slots for each descriptor in the set. 
     *  (The binding slots correspond with the shader slots.) */
-    struct descriptor_set
+    struct DescriptorSet
     {
         vk::UniqueDescriptorSet set;
         vk::UniqueDescriptorSetLayout layout;
-        std::unordered_map<uint32_t, descriptor_write> writes;
+        std::unordered_map<uint32_t, DescriptorWrite> writes;
         std::unordered_map<uint32_t, vk::DescriptorSetLayoutBinding> bindings;
         std::unordered_map<uint32_t, vk::DescriptorBindingFlagsEXT> bindingFlags;
         bool isDirty;
     };
 
-    class shader_descriptor_sets
+    class ShaderDescriptorSets
     {
         public:
-            shader_descriptor_sets(Base* base);
+            ShaderDescriptorSets(Base* base);
 
             /* Shader resource services attach themselves to a shader slot by registering themselves here. */
-            uint32_t register_descriptor(uint32_t bindingSlot, bind_frequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
+            uint32_t RegisterDescriptor(uint32_t bindingSlot, BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
             
             /* Called when the data in the image or buffer changes. */
-            void update_image(bind_frequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
-            void update_buffer(bind_frequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void UpdateImage(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void UpdateBuffer(BindFrequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
 
             /* Called in the techniques to access and bind the descriptor set(s). */
-            vk::DescriptorSetLayout* get_set_layout(bind_frequency bindFrequency);
-            descriptor_set* get_set(bind_frequency bindFrequency);
-            void bind_set(bind_frequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
+            vk::DescriptorSetLayout* GetSetLayout(BindFrequency bindFrequency);
+            DescriptorSet* GetSet(BindFrequency bindFrequency);
+            void BindSet(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
 
             /* Called in ShaderResourceServices CTOR after each of the services have been initialized. */
-            void create_set(bind_frequency bindFrequency);
+            void CreateSet(BindFrequency bindFrequency);
 
         private:
             vk::UniqueDescriptorPool m_renderingDescriptorPool;
-            std::unordered_map<bind_frequency, descriptor_set> m_descriptorSets;
+            std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
 
             /** @todo needs only Device & PadBufferOffset... */
             Base* m_base;
