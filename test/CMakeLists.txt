@@ -7,9 +7,9 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/../nc/include")
-set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../nc/source")
-set(NC_EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/../nc/external")
+set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/../engine/include")
+set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../engine/source")
+set(NC_EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/../engine/external")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNING_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)

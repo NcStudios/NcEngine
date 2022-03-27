@@ -99,7 +99,7 @@
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithProfiling",
           "NC_PROFILING_ENABLED": "ON"
         }
-      },
+      }
     ],
   "buildPresets": [
     {
@@ -133,6 +133,6 @@
     {
       "name": "Sample-Ninja-Release-WithProfiling",
       "configurePreset": "Sample-Ninja-Release-WithProfiling"
-    },
+    }
   ]
 }
