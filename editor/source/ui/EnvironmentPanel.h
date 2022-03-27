@@ -4,7 +4,7 @@
 
 namespace nc
 {
-    class GraphicsModule;
+    struct GraphicsModule;
     class Registry;
 }
 

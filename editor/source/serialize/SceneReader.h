@@ -6,7 +6,7 @@
 
 namespace nc
 {
-    class GraphicsModule;
+    struct GraphicsModule;
 }
 
 namespace nc::editor
