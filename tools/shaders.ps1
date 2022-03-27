@@ -3,7 +3,7 @@ param
 [Parameter()]
 [string]$InputDir = "..\project\shaders",
 
- [Parameter()]
+[Parameter()]
 [string]$OutputDir = "..\project\shaders\Compiled"
 )
 

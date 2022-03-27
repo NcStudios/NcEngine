@@ -99,15 +99,15 @@ namespace nc::sample::prefab
         LoadConcaveColliderAsset("ramp.nca");
 
         auto meshPaths = std::vector<std::string>{ "capsule.nca",
-                                                    "coin.nca",
-                                                    "cube.nca",
-                                                    "plane.nca",
-                                                    "planet.nca",
-                                                    "ramp.nca",
-                                                    "sphere.nca",
-                                                    "table.nca",
-                                                    "token.nca",
-                                                    "worm.nca" };
+                                                   "coin.nca",
+                                                   "cube.nca",
+                                                   "plane.nca",
+                                                   "planet.nca",
+                                                   "ramp.nca",
+                                                   "sphere.nca",
+                                                   "table.nca",
+                                                   "token.nca",
+                                                   "worm.nca" };
         nc::LoadMeshAssets(meshPaths);
 
         const auto defaultBaseColor = std::string{ "DefaultBaseColor.png" };
@@ -115,47 +115,47 @@ namespace nc::sample::prefab
         const auto defaultRoughness = std::string{ "DefaultMetallic.png" };
 
         const std::vector<std::string> texturePaths{ defaultBaseColor,
-                                                      defaultNormal,
-                                                      defaultRoughness,
-                                                      "Beeper/BaseColor.png",
-                                                      "Beeper/Normal.png",
-                                                      "Box/BaseColor.png",
-                                                      "Box/Normal.png",
-                                                      "Box/Roughness.png",
-                                                      "Beeper/Roughness.png",
-                                                      "Floor/BaseColor.png",
-                                                      "Floor/Normal.png",
-                                                      "Floor/Roughness.png",
-                                                      "SolidColor/Blue.png",
-                                                      "SolidColor/Green.png",
-                                                      "SolidColor/Red.png",
-                                                      "Coin/BaseColor.png",
-                                                      "Coin/Normal.png",
-                                                      "Coin/Roughness.png",
-                                                      "Table/BaseColor.png",
-                                                      "Table/Normal.png",
-                                                      "Table/Roughness.png",
-                                                      "Token/BaseColor.png",
-                                                      "Token/Normal.png",
-                                                      "Token/Roughness.png",
-                                                      "Logo/BaseColor.png",
-                                                      "Logo/Normal.png",
-                                                      "Logo/Roughness.png" };
+                                                     defaultNormal,
+                                                     defaultRoughness,
+                                                     "beeper/BaseColor.png",
+                                                     "beeper/Normal.png",
+                                                     "box/BaseColor.png",
+                                                     "box/Normal.png",
+                                                     "box/Roughness.png",
+                                                     "beeper/Roughness.png",
+                                                     "floor/BaseColor.png",
+                                                     "floor/Normal.png",
+                                                     "floor/Roughness.png",
+                                                     "solid_color/Blue.png",
+                                                     "solid_color/Green.png",
+                                                     "solid_color/Red.png",
+                                                     "coin/BaseColor.png",
+                                                     "coin/Normal.png",
+                                                     "coin/Roughness.png",
+                                                     "table/BaseColor.png",
+                                                     "table/Normal.png",
+                                                     "table/Roughness.png",
+                                                     "token/BaseColor.png",
+                                                     "token/Normal.png",
+                                                     "token/Roughness.png",
+                                                     "logo/BaseColor.png",
+                                                     "logo/Normal.png",
+                                                     "logo/Roughness.png" };
         nc::LoadTextureAssets(texturePaths);
 
         // @todo can remove once relative paths are working
         //nc::LoadMeshAssets(std::vector<std::string>{"nc/resources/mesh/capsule.nca", "nc/resources/mesh/cube.nca", "nc/resources/mesh/plane.nca", "nc/resources/mesh/sphere.nca"});
 
-        material::Box = Material{ .baseColor = "Box/BaseColor.png",    .normal = "Box/Normal.png",   .roughness = "Box/Roughness.png",   .metallic = defaultRoughness };
-        material::SolidBlue = Material{ .baseColor = "SolidColor/Blue.png",  .normal = defaultNormal,      .roughness = defaultRoughness,      .metallic = defaultRoughness };
-        material::SolidGreen = Material{ .baseColor = "SolidColor/Green.png", .normal = defaultNormal,      .roughness = defaultRoughness,      .metallic = defaultRoughness };
-        material::SolidRed = Material{ .baseColor = "SolidColor/Red.png",   .normal = defaultNormal,      .roughness = defaultRoughness,      .metallic = defaultRoughness };
-        material::Coin = Material{ .baseColor = "Coin/BaseColor.png",   .normal = "Coin/Normal.png",  .roughness = "Coin/Roughness.png",  .metallic = defaultRoughness };
-        material::Default = Material{ .baseColor = defaultBaseColor,       .normal = defaultNormal,      .roughness = defaultRoughness,      .metallic = defaultRoughness };
-        material::Ground = Material{ .baseColor = "Floor/BaseColor.png",  .normal = "Floor/Normal.png", .roughness = "Floor/Roughness.png", .metallic = defaultRoughness };
-        material::Table = Material{ .baseColor = "Table/BaseColor.png",  .normal = "Table/Normal.png", .roughness = "Table/Roughness.png", .metallic = defaultRoughness };
-        material::Token = Material{ .baseColor = "Token/BaseColor.png",  .normal = "Token/Normal.png", .roughness = "Token/Roughness.png", .metallic = defaultRoughness };
-        material::Worm = Material{ .baseColor = "Logo/BaseColor.png",   .normal = "Logo/Normal.png",  .roughness = "Logo/Roughness.png",  .metallic = defaultRoughness };
+        material::Box        = Material{ "box/BaseColor.png",     "box/Normal.png",   "box/Roughness.png",   defaultRoughness };
+        material::SolidBlue  = Material{ "solid_color/Blue.png",  defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::SolidGreen = Material{ "solid_color/Green.png", defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::SolidRed   = Material{ "solid_color/Red.png",   defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::Coin       = Material{ "coin/BaseColor.png",    "coin/Normal.png",  "coin/Roughness.png",  defaultRoughness };
+        material::Default    = Material{ defaultBaseColor,        defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::Ground     = Material{ "floor/BaseColor.png",   "floor/Normal.png", "floor/Roughness.png", defaultRoughness };
+        material::Table      = Material{ "table/BaseColor.png",   "table/Normal.png", "table/Roughness.png", defaultRoughness };
+        material::Token      = Material{ "token/BaseColor.png",   "token/Normal.png", "token/Roughness.png", defaultRoughness };
+        material::Worm       = Material{ "logo/BaseColor.png",    "logo/Normal.png",  "logo/Roughness.png",  defaultRoughness };
     }
 
     template<Resource Resource_t>

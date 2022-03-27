@@ -30,55 +30,55 @@ namespace nc::sample
 
         const std::vector<std::string> texturePaths
         {
-            "Floor/BaseColor.png",
-            "Floor/Normal.png",
-            "Floor/Roughness.png",
-            "Blacktop/BaseColor.png",
-            "Blacktop/Normal.png",
-            "Blacktop/Roughness.png",
-            "Blacktop/Metallic.png",
-            "Spheres/Blue/BaseColor.png",
-            "Spheres/Blue/Normal.png",
-            "Spheres/Blue/Roughness.png",
-            "Spheres/Blue/Metallic.png",
-            "Spheres/Gray/BaseColor.png",
-            "Spheres/Gray/Normal.png",
-            "Spheres/Gray/Roughness.png",
-            "Spheres/Gray/Metallic.png",
+            "floor/BaseColor.png",
+            "floor/Normal.png",
+            "floor/Roughness.png",
+            "blacktop/BaseColor.png",
+            "blacktop/Normal.png",
+            "blacktop/Roughness.png",
+            "blacktop/Metallic.png",
+            "spheres/Blue/BaseColor.png",
+            "spheres/Blue/Normal.png",
+            "spheres/Blue/Roughness.png",
+            "spheres/Blue/Metallic.png",
+            "spheres/Gray/BaseColor.png",
+            "spheres/Gray/Normal.png",
+            "spheres/Gray/Roughness.png",
+            "spheres/Gray/Metallic.png",
         };
 
         nc::LoadTextureAssets(texturePaths);
 
         auto floorMaterial = Material
         { 
-            .baseColor = "Floor/BaseColor.png",
-            .normal    = "Floor/Normal.png",
-            .roughness = "Floor/Roughness.png",
-            .metallic  = "Floor/Roughness.png"
+            .baseColor = "floor/BaseColor.png",
+            .normal    = "floor/Normal.png",
+            .roughness = "floor/Roughness.png",
+            .metallic  = "floor/Roughness.png"
         };
 
         auto blacktopMaterial = Material
         { 
-            .baseColor = "Blacktop/BaseColor.png",
-            .normal    = "Blacktop/Normal.png",
-            .roughness = "Blacktop/Roughness.png",
-            .metallic  = "Blacktop/Metallic.png"
+            .baseColor = "blacktop/BaseColor.png",
+            .normal    = "blacktop/Normal.png",
+            .roughness = "blacktop/Roughness.png",
+            .metallic  = "blacktop/Metallic.png"
         };
 
         auto blueMaterial = Material
         { 
-            .baseColor = "Spheres/Blue/BaseColor.png",
-            .normal    = "Spheres/Blue/Normal.png",
-            .roughness = "Spheres/Blue/Roughness.png",
-            .metallic  = "Spheres/Blue/Metallic.png"
+            .baseColor = "spheres/Blue/BaseColor.png",
+            .normal    = "spheres/Blue/Normal.png",
+            .roughness = "spheres/Blue/Roughness.png",
+            .metallic  = "spheres/Blue/Metallic.png"
         };
 
         auto grayMaterial = Material
         { 
-            .baseColor = "Spheres/Gray/BaseColor.png",
-            .normal    = "Spheres/Gray/Normal.png",
-            .roughness = "Spheres/Gray/Roughness.png",
-            .metallic  = "Spheres/Gray/Metallic.png"
+            .baseColor = "spheres/Gray/BaseColor.png",
+            .normal    = "spheres/Gray/Normal.png",
+            .roughness = "spheres/Gray/Roughness.png",
+            .metallic  = "spheres/Gray/Metallic.png"
         };
 
         const std::vector<std::string> sceneMeshes = std::vector<std::string>
