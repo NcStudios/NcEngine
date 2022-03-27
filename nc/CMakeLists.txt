@@ -13,7 +13,6 @@ endif()
 option(NC_EDITOR_ENABLED "Include in-game editor(also dear imgui)" OFF)
 option(NC_ASSERT_ENABLED "Enable extra validation and sanity checks" ON)
 option(NC_DEBUG_RENDERING_ENABLED "Enable wireframe primitive rendering" OFF)
-option(NC_VULKAN_VALIDATION_ENABLED "Use Vulkan validation layers" OFF)
 option(NC_PROFILING_ENABLED "Include Optick profiling" OFF)
 
 #VARIABLES
@@ -63,10 +62,6 @@ endif()
 
 if(NC_PROFILING_ENABLED)
     target_compile_definitions(NcEngineLib PUBLIC NC_PROFILING_ENABLED)
-endif()
-
-if(NC_VULKAN_VALIDATION_ENABLED)
-    target_compile_definitions(NcEngineLib PUBLIC NC_VULKAN_VALIDATION_ENABLED)
 endif()
 
 if(NC_ASSERT_ENABLED)
