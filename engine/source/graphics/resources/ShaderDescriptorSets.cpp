@@ -1,4 +1,4 @@
-#include "shader_descriptor_sets.h"
+#include "ShaderDescriptorSets.h"
 #include "graphics/Base.h"
 #include "graphics/Initializers.h"
 
@@ -26,18 +26,18 @@ namespace
 
 namespace nc::graphics
 {
-    shader_descriptor_sets::shader_descriptor_sets(Base* base)
+    ShaderDescriptorSets::ShaderDescriptorSets(Base* base)
         : m_renderingDescriptorPool{CreateRenderingDescriptorPool(base->GetDevice())},
           m_descriptorSets{},
           m_base{base}
     {
         m_descriptorSets.reserve(1);
-        m_descriptorSets.emplace(bind_frequency::per_frame, descriptor_set{});
+        m_descriptorSets.emplace(BindFrequency::per_frame, DescriptorSet{});
     }
 
-    uint32_t shader_descriptor_sets::register_descriptor(uint32_t bindingSlot, bind_frequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags)
+    uint32_t ShaderDescriptorSets::RegisterDescriptor(uint32_t bindingSlot, BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags)
     {
-        auto* descriptorSet = get_set(bindFrequency);
+        auto* descriptorSet = GetSet(bindFrequency);
 
         /* Add binding */
         auto bindingsIt = descriptorSet->bindings.find(bindingSlot);
@@ -52,14 +52,14 @@ namespace nc::graphics
         return bindingSlot;
     }
 
-    vk::DescriptorSetLayout* shader_descriptor_sets::get_set_layout(bind_frequency bindFrequency)
+    vk::DescriptorSetLayout* ShaderDescriptorSets::GetSetLayout(BindFrequency bindFrequency)
     {
-        return &get_set(bindFrequency)->layout.get();
+        return &GetSet(bindFrequency)->layout.get();
     }
 
-    void shader_descriptor_sets::bind_set(bind_frequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet)
+    void ShaderDescriptorSets::BindSet(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet)
     {
-        auto* descriptorSet = get_set(bindFrequency);
+        auto* descriptorSet = GetSet(bindFrequency);
 
         /* Only update the descriptor sets if they have changed since last bind. */
         if (descriptorSet->isDirty)
@@ -81,9 +81,9 @@ namespace nc::graphics
         cmd->bindDescriptorSets(bindPoint, pipelineLayout, firstSet, 1, &descriptorSet->set.get(), 0, 0);
     }
 
-    void shader_descriptor_sets::create_set(bind_frequency bindFrequency)
+    void ShaderDescriptorSets::CreateSet(BindFrequency bindFrequency)
     {
-        auto* descriptorSet = get_set(bindFrequency);
+        auto* descriptorSet = GetSet(bindFrequency);
 
         /* Grab the bindings from the unordered map. */
         std::vector<vk::DescriptorSetLayoutBinding> bindings;
@@ -105,9 +105,9 @@ namespace nc::graphics
         descriptorSet->set = CreateDescriptorSet(m_base->GetDevice(), &m_renderingDescriptorPool.get(), 1, &descriptorSet->layout.get());
     }
 
-    void shader_descriptor_sets::update_image(bind_frequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
+    void ShaderDescriptorSets::UpdateImage(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
     {
-        auto* descriptorSet = get_set(bindFrequency);
+        auto* descriptorSet = GetSet(bindFrequency);
 
         vk::WriteDescriptorSet write{};
         write.setDstBinding(bindingSlot);
@@ -119,15 +119,15 @@ namespace nc::graphics
 
         /* Add or update the write for the image descriptor. */
         auto it = descriptorSet->writes.find(bindingSlot);
-        if (it != descriptorSet->writes.end()) it->second = descriptor_write(write, imageInfos);
-        else descriptorSet->writes.emplace(bindingSlot, descriptor_write(write, imageInfos));
+        if (it != descriptorSet->writes.end()) it->second = DescriptorWrite(write, imageInfos);
+        else descriptorSet->writes.emplace(bindingSlot, DescriptorWrite(write, imageInfos));
 
         descriptorSet->isDirty = true;
     }
 
-    void shader_descriptor_sets::update_buffer(bind_frequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
+    void ShaderDescriptorSets::UpdateBuffer(BindFrequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
     {
-        auto* descriptorSet = get_set(bindFrequency);
+        auto* descriptorSet = GetSet(bindFrequency);
 
         vk::DescriptorBufferInfo bufferInfo;
         bufferInfo.buffer = buffer;
@@ -145,19 +145,19 @@ namespace nc::graphics
         auto it = descriptorSet->writes.find(bindingSlot);
         if (it != descriptorSet->writes.end())
         {
-            it->second = descriptor_write(write, bufferInfo);
+            it->second = DescriptorWrite(write, bufferInfo);
             it->second.write.setPBufferInfo(&it->second.buffer); /* Update the pointer */
         }
         else
         {
-            auto [pos, success] = descriptorSet->writes.emplace(bindingSlot, descriptor_write(write, bufferInfo));
+            auto [pos, success] = descriptorSet->writes.emplace(bindingSlot, DescriptorWrite(write, bufferInfo));
             pos->second.write.setPBufferInfo(&pos->second.buffer);  /* Update the pointer */
         }
 
         descriptorSet->isDirty = true;
     }
 
-    descriptor_set* shader_descriptor_sets::get_set(bind_frequency bindFrequency)
+    DescriptorSet* ShaderDescriptorSets::GetSet(BindFrequency bindFrequency)
     {
         return &m_descriptorSets.at(bindFrequency);
     }

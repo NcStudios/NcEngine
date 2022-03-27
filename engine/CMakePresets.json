@@ -60,20 +60,6 @@
         "inherits": [ "Debug-Base", "Ninja-Base" ]
       },
       {
-        "name": "NcEngine-MSVC-Debug-WithValidation",
-        "inherits": [ "Debug-Base", "MSVC-Base" ],
-        "cacheVariables": {
-          "NC_VULKAN_VALIDATION_ENABLED": "ON"
-        }
-      },
-      {
-        "name": "NcEngine-Ninja-Debug-WithValidation",
-        "inherits": [ "Debug-Base", "Ninja-Base" ],
-        "cacheVariables": {
-          "NC_VULKAN_VALIDATION_ENABLED": "ON"
-        }
-      },
-      {
         "name": "NcEngine-MSVC-Release-WithEditor",
         "inherits": [ "Release-Base", "MSVC-Base" ],
         "cacheVariables": {
@@ -100,25 +86,7 @@
         "cacheVariables": {
           "NC_PROFILING_ENABLED": "ON"
         }
-      },
-       {
-         "name": "NcEngine-MSVC-Release-WithValidation",
-         "inherits": [ "Release-Base", "MSVC-Base" ],
-         "cacheVariables": {
-           "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING_ENABLED": "ON",
-           "NC_VULKAN_VALIDATION_ENABLED": "ON"
-         }
-       },
-       {
-         "name": "NcEngine-Ninja-Release-WithValidation",
-         "inherits": [ "Release-Base", "Ninja-Base" ],
-         "cacheVariables": {
-           "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING_ENABLED": "ON",
-           "NC_VULKAN_VALIDATION_ENABLED": "ON"
-         }
-       }
+      }
     ],
   "buildPresets": [
     {
@@ -138,14 +106,6 @@
       "configurePreset": "NcEngine-Ninja-Debug"
     },
     {
-      "name": "NcEngine-MSVC-Debug-WithValidation",
-      "configurePreset": "NcEngine-MSVC-Debug-WithValidation"
-    },
-    {
-      "name": "NcEngine-Ninja-Debug-WithValidation",
-      "configurePreset": "NcEngine-Ninja-Debug-WithValidation"
-    },
-    {
       "name": "NcEngine-MSVC-Release-WithEditor",
       "configurePreset": "NcEngine-MSVC-Release-WithEditor"
     },
@@ -160,14 +120,6 @@
     {
       "name": "NcEngine-Ninja-Release-WithProfiling",
       "configurePreset": "NcEngine-Ninja-Release-WithProfiling"
-    },
-    {
-      "name": "NcEngine-MSVC-Release-WithValidation",
-      "configurePreset": "NcEngine-MSVC-Release-WithValidation"
-    },
-    {
-      "name": "NcEngine-Ninja-Release-WithValidation",
-      "configurePreset": "NcEngine-Ninja-Release-WithValidation"
     }
   ]
 }

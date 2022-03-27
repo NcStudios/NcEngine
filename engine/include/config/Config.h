@@ -42,6 +42,7 @@ namespace nc::config
         float frameUpdateInterval;
         bool useShadows;
         unsigned antialiasing;
+        bool useValidationLayers;
     };
 
     struct PhysicsSettings

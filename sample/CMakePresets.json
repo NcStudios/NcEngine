@@ -69,22 +69,6 @@
          }
        },
        {
-         "name": "Sample-MSVC-Debug-WithValidation",
-         "inherits": [ "Debug-Base", "MSVC-Base" ],
-         "cacheVariables": {
-           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Debug-WithValidation",
-           "NC_VULKAN_VALIDATION_ENABLED": "ON"
-         }
-       },
-       {
-         "name": "Sample-Ninja-Debug-WithValidation",
-         "inherits": [ "Debug-Base", "Ninja-Base" ],
-         "cacheVariables": {
-           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Debug-WithValidation",
-           "NC_VULKAN_VALIDATION_ENABLED": "ON"
-         }
-       },
-       {
          "name": "Sample-MSVC-Release-WithEditor",
          "inherits": [ "Release-Base", "MSVC-Base" ],
          "cacheVariables": {
@@ -115,27 +99,7 @@
           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithProfiling",
           "NC_PROFILING_ENABLED": "ON"
         }
-      },
-       {
-         "name": "Sample-MSVC-Release-WithValidation",
-         "inherits": [ "Release-Base", "MSVC-Base" ],
-         "cacheVariables": {
-           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-MSVC-Release-WithValidation",
-           "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING_ENABLED": "ON",
-           "NC_VULKAN_VALIDATION_ENABLED": "ON"
-         }
-       },
-       {
-         "name": "Sample-Ninja-Release-WithValidation",
-         "inherits": [ "Release-Base", "Ninja-Base" ],
-         "cacheVariables": {
-           "NC_INSTALL_DIR": "${sourceDir}/../install/NcEngine/NcEngine-Ninja-Release-WithValidation",
-           "NC_EDITOR_ENABLED": "ON",
-           "NC_DEBUG_RENDERING_ENABLED": "ON",
-           "NC_VULKAN_VALIDATION_ENABLED": "ON"
-         }
-       }
+      }
     ],
   "buildPresets": [
     {
@@ -155,14 +119,6 @@
       "configurePreset": "Sample-Ninja-Debug"
     },
     {
-      "name": "Sample-MSVC-Debug-WithValidation",
-      "configurePreset": "Sample-MSVC-Debug-WithValidation"
-    },
-    {
-      "name": "Sample-Ninja-Debug-WithValidation",
-      "configurePreset": "Sample-Ninja-Debug-WithValidation"
-    },
-    {
       "name": "Sample-MSVC-Release-WithEditor",
       "configurePreset": "Sample-MSVC-Release-WithEditor"
     },
@@ -177,14 +133,6 @@
     {
       "name": "Sample-Ninja-Release-WithProfiling",
       "configurePreset": "Sample-Ninja-Release-WithProfiling"
-    },
-    {
-      "name": "Sample-MSVC-Release-WithValidation",
-      "configurePreset": "Sample-MSVC-Release-WithValidation"
-    },
-    {
-      "name": "Sample-Ninja-Release-WithValidation",
-      "configurePreset": "Sample-Ninja-Release-WithValidation"
     }
   ]
 }

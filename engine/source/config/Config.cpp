@@ -50,6 +50,7 @@ namespace
     constexpr auto FarClipKey = "far_clip"sv;
     constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
     constexpr auto AntialiasingKey = "antialiasing"sv;
+    constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
 
     void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config* out)
     {
@@ -119,6 +120,8 @@ namespace
             out->graphicsSettings.useShadows = std::stoi(value);
         else if (key == AntialiasingKey)
             out->graphicsSettings.antialiasing = std::stoi(value);
+        else if (key == UseValidationLayersKey)
+            out->graphicsSettings.useValidationLayers = std::stoi(value);
         else
             throw nc::NcError(std::string{"Unknown config key: "} + key);
     };
@@ -198,7 +201,8 @@ namespace nc::config
              << NearClipKey              << '=' << config.graphicsSettings.nearClip            << '\n'
              << FarClipKey               << '=' << config.graphicsSettings.farClip             << '\n'
              << UseShadowsKey            << '=' << config.graphicsSettings.useShadows          << '\n'
-             << AntialiasingKey          << '=' << config.graphicsSettings.antialiasing;
+             << AntialiasingKey          << '=' << config.graphicsSettings.antialiasing        << '\n'
+             << UseValidationLayersKey   << '=' << config.graphicsSettings.useValidationLayers;
     }
 
     bool Validate(const Config& config)

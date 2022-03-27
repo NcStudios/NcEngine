@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/resources/shader_descriptor_sets.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
@@ -28,7 +28,7 @@ namespace nc::graphics
 
         Graphics* m_graphics;
         Base* m_base;
-        shader_descriptor_sets* m_descriptorSets;
+        ShaderDescriptorSets* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
     };

@@ -2,7 +2,7 @@
 
 #include "directx/Inc/DirectXMath.h"
 #include "ecs/component/Component.h"
-#include "graphics/resources/shader_descriptor_sets.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "particle/EmitterState.h"
 #include "ITechnique.h"
 
@@ -47,7 +47,7 @@ namespace nc::graphics
         Graphics* m_graphics;
         Base* m_base;
         Swapchain* m_swapchain;
-        shader_descriptor_sets* m_descriptorSets;
+        ShaderDescriptorSets* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
     };
