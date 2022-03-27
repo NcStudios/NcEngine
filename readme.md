@@ -58,7 +58,6 @@ Each target's root directory contains a CMakePresets.json file with common confi
 Each of these presets follows the naming scheme `<target>-<generator>-<configuration>-[modifier]`, where modifier describes optional features to include:
 * WithEditor: Include editor-specific code.
 * WithProfiling: Include Optick profiling code.
-* WithValidation: Enable Vulkan validation layers.
 
 Each preset provides a different set of [definitions](#definitions). When adding custom presets to CMakeUserPresets.json, NC_INSTALL_DIR must be defined.
 
@@ -121,10 +120,6 @@ Configure, build, and install steps may be manually triggered from the 'Project'
 #### NC_ASSERT_ENABLED
     Default = ON
     Enables extra checks through the NC_ASSERT macro. These are enabled by default, even in release builds, as they are unlikely to have a serious effect on performance.
-
-#### NC_VULKAN_VALIDATION_ENABLED
-    Default = OFF
-    Enables Vulkan validation layers.
 
 #### NC_DEBUG_RENDERING_ENABLED
     Default = OFF
