@@ -19,7 +19,7 @@ function Run-Commands {
     if ($PresetName.Contains("NcEngine"))
     {
         Write-Host "Installing build/$PresetName"
-        cmake --install "build/$PresetName" --config $configType
+        cmake --install "build/$PresetName"
     }
 }
 
