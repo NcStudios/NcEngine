@@ -6,12 +6,20 @@ function Run-Commands {
         [string]$PresetName
     )
 
+    $configType = ""
+    if ($PresetName.Contains("Debug")) {
+       $configType = "Debug"
+    }
+    else {
+       $configType = "Release"
+    }
+
     cmake -S "$SourceDirectory/" -B "build/$PresetName" --preset "$PresetName"
-    cmake --build "build/$PresetName"
+    cmake --build "build/$PresetName" --config $configType
     if ($PresetName.Contains("NcEngine"))
     {
         Write-Host "Installing build/$PresetName"
-        cmake --install "build/$PresetName"
+        cmake --install "build/$PresetName" --config $configType
     }
 }
 
