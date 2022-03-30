@@ -107,6 +107,21 @@ The configuration step should automatically start. Upon completion, build and in
 
 Configure, build, and install steps may be manually triggered from the 'Project' and 'Build' menus or from a target's context menu from the solution explorer in 'CMake Targets View'.
 
+As an alternative: configure, build and install steps can be batched via build script through the included tools/tasks.vs.json file. The tasks are accessed via the context menu for the engine, sample, editor or test directories.
+
+This allows for a one-click option to configure, build, and install (if required) the chosen target and any dependent targets.
+
+To set these tasks up:
+
+1. Copy the contents of tools/tasks.vs.json to the clipboard. 
+2. Right click in the Solution Explorer and choose "Configure Tasks". 
+3. Replace the tasks.vs.json file that just opened with the contents of the clipboard and save. 
+This creates the context menu options that are wired up to invoke the build script.
+
+<p align="center">
+  <img src="docs/context_menu_build_tasks_vs.png" />
+</p>
+
 ### Definitions
 ---------------
 #### NC_INSTALL_DIR
