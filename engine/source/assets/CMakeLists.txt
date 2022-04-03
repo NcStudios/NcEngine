@@ -6,5 +6,6 @@ target_sources(NcEngineLib
         ${ROOT_DIR}/source/assets/ConvexHullAssetManager.cpp
         ${ROOT_DIR}/source/assets/CubeMapAssetManager.cpp
         ${ROOT_DIR}/source/assets/MeshAssetManager.cpp
+        ${ROOT_DIR}/source/assets/ShaderAssetManager.cpp
         ${ROOT_DIR}/source/assets/TextureAssetManager.cpp
 )

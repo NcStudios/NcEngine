@@ -30,7 +30,8 @@ namespace nc::editor
         HullCollider,
         Mesh,
         Texture,
-        Skybox
+        Skybox,
+        Shader
     };
 
     /** Create an Asset object from a path and type. This will not build any .nca

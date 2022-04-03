@@ -123,3 +123,32 @@ target_link_libraries(AudioClipAssetManager_unit_tests
 )
 
 add_test(AudioClipAssetManager_unit_tests AudioClipAssetManager_unit_tests)
+
+### ShaderAssetManager Tests ###
+add_executable(ShaderAssetManager_unit_tests
+    ${PROJECT_SOURCE_DIR}/unit/assets/ShaderAssetManager_unit_tests.cpp
+    ${NC_SOURCE_DIR}/assets/ShaderAssetManager.cpp
+)
+
+target_compile_definitions(ShaderAssetManager_unit_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+)
+
+target_include_directories(ShaderAssetManager_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
+)
+
+target_compile_options(ShaderAssetManager_unit_tests
+    PUBLIC
+        ${WARNING_FLAGS}
+)
+
+target_link_libraries(ShaderAssetManager_unit_tests
+    PRIVATE
+        gtest
+)

@@ -6,6 +6,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace nc
 {
@@ -114,6 +115,42 @@ namespace nc
         std::string leftPath;
     };
 
+    enum class DescriptorType : uint8_t
+    {
+        None,
+        UniformBuffer,
+        StorageBuffer,
+        CombinedImageSampler
+    };
+
+    enum class ShaderStages : uint8_t
+    {
+        None     = 0,
+        Vertex   = 1,
+        Fragment = 2
+    };
+
+    inline ShaderStages operator|(ShaderStages a, ShaderStages b)
+    {
+        return static_cast<ShaderStages>(static_cast<int>(a) | static_cast<int>(b));
+    }
+
+    struct DescriptorManifest
+    {
+        uint32_t setIndex;
+        uint32_t slotIndex;
+        DescriptorType descriptorType;
+        ShaderStages shaderStages;
+    };
+
+    struct ShaderView
+    {
+        std::string uid;
+        std::vector<uint32_t> vertexByteCode;
+        std::vector<uint32_t> fragmentByteCode;
+        std::vector<DescriptorManifest> descriptors;
+    };
+
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
@@ -122,6 +159,6 @@ namespace nc
                         std::same_as<T, ConcaveColliderView> ||
                         std::same_as<T, MeshView> ||
                         std::same_as<T, TextureView> ||
-                        std::same_as<T, CubeMapView>;
-
+                        std::same_as<T, CubeMapView> ||
+                        std::same_as<T, ShaderView>;
 }
