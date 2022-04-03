@@ -115,8 +115,10 @@ namespace
 
         auto shaderView = nc::ShaderView
         {
+            .uid ="",
             .vertexByteCode = vertexByteCode,
-            .fragmentByteCode =  fragmentByteCode
+            .fragmentByteCode =  fragmentByteCode,
+            .descriptors = {}
         };
 
         uint32_t descriptorCount;
