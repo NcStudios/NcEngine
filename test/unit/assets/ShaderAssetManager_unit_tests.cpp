@@ -66,9 +66,7 @@ TEST_F(ShaderAssetManager_unit_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 2u> paths {"shader1", "shader2"};
     assetManager->Load(paths, false);
-
     assetManager->UnloadAll();
-
     EXPECT_FALSE(assetManager->IsLoaded("shader1"));
     EXPECT_FALSE(assetManager->IsLoaded("shader2"));
 }

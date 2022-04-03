@@ -1,8 +1,10 @@
 #include "ShaderAssetManager.h"
+#include "AssetUtilities.h"
 #include "debug/NcError.h"
 
 #include <fstream>
 #include <filesystem>
+#include <ranges>
 
 namespace
 {
@@ -34,14 +36,7 @@ namespace
         file.close();
         return buffer;
     }
-
-    auto HasValidAssetExtension(const std::string& path) -> bool
-    {
-        const std::size_t periodPosition = path.rfind('.');
-        const std::string fileExtension = path.substr(periodPosition+1);
-        return fileExtension == "nca" ? true : false;
-    }
-
+    
     auto ReadDescriptor(std::ifstream& file) -> nc::DescriptorManifest
     {
         uint32_t set;
@@ -61,8 +56,10 @@ namespace
         {
             descriptorType = nc::DescriptorType::StorageBuffer;
         }
-        else descriptorType = nc::DescriptorType::CombinedImageSampler;
-
+        else if (descriptorTypeFromFile == "CombinedImageSampler")
+        {
+            descriptorType = nc::DescriptorType::CombinedImageSampler;
+        }
         if (descriptorType == nc::DescriptorType::None)
         {
             throw nc::NcError("No valid descriptor type found.");
@@ -93,11 +90,11 @@ namespace
         };
     }
 
-    auto ReadShader(const std::string& path, const std::string uid) -> nc::ShaderView
+    auto ReadShader(const std::string& path, const std::string& uid) -> nc::ShaderFlyweight
     {
         const auto ncaString = (std::filesystem::path(path) / std::filesystem::path("shader.nca")).string();
 
-        if (!HasValidAssetExtension(ncaString)) throw nc::NcError("Invalid extension: " + ncaString);
+        if (!nc::HasValidAssetExtension(ncaString)) throw nc::NcError("Invalid extension: " + ncaString);
 
         std::ifstream file{ncaString};
         if (!file.is_open()) throw nc::NcError("Could not open file: " + ncaString);
@@ -110,14 +107,11 @@ namespace
         file >> fragmentShaderPath;
         fragmentShaderPath = (std::filesystem::path(path) / std::filesystem::path(fragmentShaderPath)).string();
 
-        auto vertexByteCode = ReadSpirvIntoBytes(vertexShaderPath);
-        auto fragmentByteCode = ReadSpirvIntoBytes(fragmentShaderPath);
-
-        auto shaderView = nc::ShaderView
+        auto shaderFlyweight = nc::ShaderFlyweight
         {
             .uid ="",
-            .vertexByteCode = vertexByteCode,
-            .fragmentByteCode =  fragmentByteCode,
+            .vertexByteCode = ReadSpirvIntoBytes(vertexShaderPath),
+            .fragmentByteCode = ReadSpirvIntoBytes(fragmentShaderPath),
             .descriptors = {}
         };
 
@@ -126,20 +120,19 @@ namespace
 
         for (uint32_t i = 0; i < descriptorCount; ++i)
         {
-            shaderView.descriptors.emplace_back(ReadDescriptor(file));
+            shaderFlyweight.descriptors.emplace_back(ReadDescriptor(file));
         }
 
-        shaderView.uid = uid;
+        shaderFlyweight.uid = uid;
 
-        return shaderView;
+        return shaderFlyweight;
     }
-
 }
 
 namespace nc
 {
     ShaderAssetManager::ShaderAssetManager(const std::string& assetDirectory)
-        : m_shaderViews{},
+        : m_shaderFlyweights{},
           m_assetDirectory{assetDirectory}
     {
     }
@@ -148,27 +141,19 @@ namespace nc
     {
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
 
-        auto shaderView = ReadShader(fullPath, path);
-
-        if (IsLoaded(fullPath))
+        if (IsLoaded(path))
         {
             return false;
         }
 
-        for (const auto& manifest : m_shaderViews)
-        {
-            if (manifest.uid == shaderView.uid)
-            {
-                return false;
-            }
-        }
+        auto shaderFlyweight = ReadShader(fullPath, path);
 
-        if (shaderView.vertexByteCode.empty() || shaderView.fragmentByteCode.empty())
+        if (shaderFlyweight.vertexByteCode.empty() || shaderFlyweight.fragmentByteCode.empty())
         {
             return false;
         }
 
-        m_shaderViews.emplace_back(std::move(shaderView));
+        m_shaderFlyweights.push_back(std::move(shaderFlyweight));
 
         return true;
     }
@@ -178,11 +163,6 @@ namespace nc
         auto atLeastOneFailure = false;
         for (const auto& path : paths)
         {
-            if (IsLoaded(path))
-            {
-                continue;
-            }
-
             if (!Load(path, isExternal))
             {
                 atLeastOneFailure = true;
@@ -199,41 +179,51 @@ namespace nc
             return false;
         }
 
-        auto shaderViews = std::vector<ShaderView>();
-
-        for (auto shaderView : shaderViews) // Intentionally copying here
+        const auto pos = std::ranges::find_if(m_shaderFlyweights, [&path](const auto& asset)
         {
-            if (shaderView.uid != path)
-            {
-                shaderViews.emplace_back(std::move(shaderView));
-            }
+            return asset.uid == path;
+        });
+
+        if(pos == m_shaderFlyweights.end())
+        {
+            throw NcError("Could not find asset in manifest:", path);
         }
 
-        m_shaderViews.assign(shaderViews.begin(), shaderViews.end());
+        m_shaderFlyweights.erase(pos);
 
         return true;
     }
 
     void ShaderAssetManager::UnloadAll()
     {
-        m_shaderViews.clear();
+        m_shaderFlyweights.clear();
     }
 
     auto ShaderAssetManager::Acquire(const std::string& path) const -> ShaderView
     {
-        for (const auto& shaderView : m_shaderViews)
+        auto pos = std::ranges::find_if(m_shaderFlyweights, [&path](const auto& asset)
         {
-            if (shaderView.uid == path)
-            {
-                return shaderView;
-            }
+            return asset.uid == path;
+        });
+
+        if(pos == m_shaderFlyweights.end())
+        {
+            throw NcError("Asset not loaded: " + path);
         }
 
-        throw NcError("Asset not loaded: " + path);
+        const auto& flyweight = *pos;
+
+        return ShaderView
+        {
+            .uid = flyweight.uid,
+            .vertexByteCode = flyweight.vertexByteCode,
+            .fragmentByteCode = flyweight.fragmentByteCode,
+            .descriptors = flyweight.descriptors
+        };
     }
 
     bool ShaderAssetManager::IsLoaded(const std::string& path) const
     {
-        return std::ranges::any_of(m_shaderViews.begin(), m_shaderViews.end(), [path](const auto& view) { return view.uid == path; });
+        return std::ranges::any_of(m_shaderFlyweights.begin(), m_shaderFlyweights.end(), [path](const auto& view) { return view.uid == path; });
     }
 }

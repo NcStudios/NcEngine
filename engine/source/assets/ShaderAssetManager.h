@@ -6,7 +6,15 @@
 #include <vector>
 
 namespace nc
-{    
+{
+    struct ShaderFlyweight
+    {
+        std::string uid;
+        std::vector<uint32_t> vertexByteCode;
+        std::vector<uint32_t> fragmentByteCode;
+        std::vector<DescriptorManifest> descriptors;
+    };
+
     class ShaderAssetManager final : public IAssetService<ShaderView, std::string>
     {
         public:
@@ -20,7 +28,7 @@ namespace nc
             bool IsLoaded(const std::string& path) const override;
 
         private:
-            std::vector<ShaderView> m_shaderViews;
+            std::vector<ShaderFlyweight> m_shaderFlyweights;
             std::string m_assetDirectory;
     };
 }

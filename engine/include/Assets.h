@@ -1,6 +1,7 @@
 #pragma once
 
 #include "physics/Geometry.h"
+#include "utility/EnumUtilities.h"
 
 #include <concepts>
 #include <span>
@@ -128,12 +129,7 @@ namespace nc
         None     = 0,
         Vertex   = 1,
         Fragment = 2
-    };
-
-    inline ShaderStages operator|(ShaderStages a, ShaderStages b)
-    {
-        return static_cast<ShaderStages>(static_cast<int>(a) | static_cast<int>(b));
-    }
+    }; DEFINE_BITWISE_OPERATORS(ShaderStages)
 
     struct DescriptorManifest
     {
@@ -146,9 +142,9 @@ namespace nc
     struct ShaderView
     {
         std::string uid;
-        std::vector<uint32_t> vertexByteCode;
-        std::vector<uint32_t> fragmentByteCode;
-        std::vector<DescriptorManifest> descriptors;
+        std::span<const uint32_t> vertexByteCode;
+        std::span<const uint32_t> fragmentByteCode;
+        std::span<const DescriptorManifest> descriptors;
     };
 
     /** Restrict instantiations to supported asset types to minimize
