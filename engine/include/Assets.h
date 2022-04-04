@@ -1,11 +1,13 @@
 #pragma once
 
 #include "physics/Geometry.h"
+#include "utility/EnumUtilities.h"
 
 #include <concepts>
 #include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace nc
 {
@@ -114,6 +116,37 @@ namespace nc
         std::string leftPath;
     };
 
+    enum class DescriptorType : uint8_t
+    {
+        None,
+        UniformBuffer,
+        StorageBuffer,
+        CombinedImageSampler
+    };
+
+    enum class ShaderStages : uint8_t
+    {
+        None     = 0,
+        Vertex   = 1,
+        Fragment = 2
+    }; DEFINE_BITWISE_OPERATORS(ShaderStages)
+
+    struct DescriptorManifest
+    {
+        uint32_t setIndex;
+        uint32_t slotIndex;
+        DescriptorType descriptorType;
+        ShaderStages shaderStages;
+    };
+
+    struct ShaderView
+    {
+        std::string uid;
+        std::span<const uint32_t> vertexByteCode;
+        std::span<const uint32_t> fragmentByteCode;
+        std::span<const DescriptorManifest> descriptors;
+    };
+
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
@@ -122,6 +155,6 @@ namespace nc
                         std::same_as<T, ConcaveColliderView> ||
                         std::same_as<T, MeshView> ||
                         std::same_as<T, TextureView> ||
-                        std::same_as<T, CubeMapView>;
-
+                        std::same_as<T, CubeMapView> ||
+                        std::same_as<T, ShaderView>;
 }

@@ -1,4 +1,5 @@
 #include "MeshAssetManager.h"
+#include "AssetUtilities.h"
 #include "graphics/Graphics.h"
 
 #include <cassert>
@@ -25,13 +26,6 @@ namespace
     {
         stream >> vec.x >> vec.y >> vec.z;
         return stream;
-    }
-
-    bool HasValidAssetExtension(const std::string& path)
-    {
-        std::size_t periodPosition = path.rfind('.');
-        const std::string fileExtension = path.substr(periodPosition+1);
-        return fileExtension.compare("nca") == 0 ? true : false;
     }
 
     void ReadVerticesFromAsset(std::ifstream& file, std::vector<Vertex>& vertices, size_t count)
@@ -66,7 +60,7 @@ namespace
 
     auto ReadMesh(const std::string& meshPath, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
     {
-        if(!HasValidAssetExtension(meshPath))
+        if(!nc::HasValidAssetExtension(meshPath))
             throw nc::NcError("Invalid extension: " + meshPath);
 
         std::ifstream file{meshPath};
