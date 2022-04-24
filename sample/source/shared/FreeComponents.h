@@ -9,26 +9,6 @@
 
 namespace nc::sample
 {
-    /** Control camera pan, look, and zoom with right mouse button, middle mouse button, and mouse wheel. */
-    class SceneNavigationCamera : public Camera
-    {
-        public:
-            SceneNavigationCamera(Entity entity, float panDamp, float lookDamp, float zoomDamp);
-            void Run(Entity self, Registry* registry, float dt);
-
-        private:
-            Vector2 m_panPivot = Vector2::Zero();
-            Vector2 m_lookPivot = Vector2::Zero();
-            float m_zoom = 0.0f;
-            float m_panDampen = 0.25f;
-            float m_lookDampen = 0.005f;
-            float m_zoomDampen = 1.4f;
-
-            void Pan(float dt, Transform* transform);
-            void Look(float dt, Transform* transform);
-            void Zoom(float dt, Transform* transform);
-    };
-
     /** Control camera by moving mouse to edge of the screen. */
     class EdgePanCamera : public Camera
     {

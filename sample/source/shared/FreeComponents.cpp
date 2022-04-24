@@ -23,61 +23,6 @@ namespace
 
 namespace nc::sample
 {
-    SceneNavigationCamera::SceneNavigationCamera(Entity entity, float panDamp, float lookDamp, float zoomDamp)
-        : Camera{entity},
-          m_panDampen{panDamp},
-          m_lookDampen{lookDamp},
-          m_zoomDampen{zoomDamp}
-    {
-    }
-
-    void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
-    {
-        auto* transform = registry->Get<Transform>(self);
-        Pan(dt, transform);
-        Look(dt, transform);
-        Zoom(dt, transform);
-    }
-
-    void SceneNavigationCamera::Pan(float dt, Transform* transform)
-    {
-        if(input::GetKeyDown(input::KeyCode::MiddleButton))
-            m_panPivot = input::MousePos();
-        else if(input::GetKeyUp(input::KeyCode::MiddleButton))
-            m_panPivot = Vector2::Zero();
-        
-        if(m_panPivot != Vector2::Zero())
-        {
-            auto mouseDelta = input::MousePos() - m_panPivot;
-            auto [horizontalPan, verticalPan] = mouseDelta * m_panDampen * dt;
-            transform->TranslateLocalSpace(Vector3{-1.0f * horizontalPan, verticalPan, 0.0f});
-        }
-    }
-
-    void SceneNavigationCamera::Look(float dt, Transform* transform)
-    {
-        if(input::GetKeyDown(input::KeyCode::RightButton))
-            m_lookPivot = input::MousePos();
-        else if(input::GetKeyUp(input::KeyCode::RightButton))
-            m_lookPivot = Vector2::Zero();
-
-        if(m_lookPivot != Vector2::Zero())
-        {
-            auto mouseDelta = input::MousePos() - m_lookPivot;
-            auto [horizontalLook, verticalLook] = mouseDelta * m_lookDampen * dt;
-            transform->Rotate(Vector3::Up(), horizontalLook);
-            transform->Rotate(transform->Right(), verticalLook);
-        }
-    }
-
-    void SceneNavigationCamera::Zoom(float dt, Transform* transform)
-    {
-        m_zoom = math::Lerp(m_zoom, (float)input::MouseWheel() * m_zoomDampen, 0.1f);
-        if(math::FloatEqual(m_zoom, 0.0f))
-            m_zoom = 0.0f;
-        transform->TranslateLocalSpace(Vector3{0.0f, 0.0f, m_zoom * dt});
-    }
-
     EdgePanCamera::EdgePanCamera(Entity entity)
         : Camera(entity),
           m_lastFrameZoom{0.0f}
@@ -266,7 +211,7 @@ namespace nc::sample
 
     void ClickHandler::Run(Entity, Registry*, float)
     {
-        if(GetKeyDown(input::KeyCode::LeftButton))
+        if(KeyDown(input::KeyCode::LeftButton))
         {
             auto hit = m_physicsModule->RaycastToClickables(m_mask);
             if(hit)
