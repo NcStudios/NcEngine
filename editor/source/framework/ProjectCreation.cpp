@@ -135,12 +135,16 @@ namespace nc::editor
         {
             auto engineShaderDirectory = std::filesystem::path{projectSettings.shadersPath};
             auto projectShaderDirectory = projectAssetDirectory / "shaders";
+            copy_file(engineShaderDirectory / "EnvironmentFragment.spv", projectShaderDirectory / "EnvironmentFragment.spv");
+            copy_file(engineShaderDirectory / "EnvironmentVertex.spv", projectShaderDirectory / "EnvironmentVertex.spv");
             copy_file(engineShaderDirectory / "ParticleFragment.spv", projectShaderDirectory / "ParticleFragment.spv");
             copy_file(engineShaderDirectory / "ParticleVertex.spv", projectShaderDirectory / "ParticleVertex.spv");
-            copy_file(engineShaderDirectory / "PhongFragment.spv", projectShaderDirectory / "PhongFragment.spv");
-            copy_file(engineShaderDirectory / "PhongVertex.spv", projectShaderDirectory / "PhongVertex.spv");
+            copy_file(engineShaderDirectory / "PbrFragment.spv", projectShaderDirectory / "PbrFragment.spv");
+            copy_file(engineShaderDirectory / "PbrVertex.spv", projectShaderDirectory / "PbrVertex.spv");
             copy_file(engineShaderDirectory / "ShadowMappingFragment.spv", projectShaderDirectory / "ShadowMappingFragment.spv");
             copy_file(engineShaderDirectory / "ShadowMappingVertex.spv", projectShaderDirectory / "ShadowMappingVertex.spv");
+            copy_file(engineShaderDirectory / "UiFragment.spv", projectShaderDirectory / "UiFragment.spv");
+            copy_file(engineShaderDirectory / "UiVertex.spv", projectShaderDirectory / "UiVertex.spv");
             copy_file(engineShaderDirectory / "WireframeFragment.spv", projectShaderDirectory / "WireframeFragment.spv");
             copy_file(engineShaderDirectory / "WireframeVertex.spv", projectShaderDirectory / "WireframeVertex.spv");
         }
