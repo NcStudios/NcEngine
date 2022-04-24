@@ -9,9 +9,12 @@ namespace nc
     /** @brief Movement settings for SceneNavigationCamera. */
     struct SceneCameraConfig
     {
-        Vector3 fineSpeed   = Vector3{1.800f, 0.004f, 1.200f}; // Truck/Pedestal, Pan/Tilt, Dolly
-        Vector3 coarseSpeed = Vector3{7.000f, 0.008f, 2.600f};
-        float dollyDeceleration = 0.01f;
+        float truckPedestalFine = 1.8f;
+        float truckPedestalCoarse = 7.0f;
+        float panTiltFine = 0.004f;
+        float panTiltCoarse = 0.008f;
+        float dollyFine = 1.2f;
+        float dollyCoarse = 2.6f;
     };
 
     /** @brief Camera for the editor's scene view.
@@ -39,7 +42,8 @@ namespace nc
             void Run(Entity self, Registry* registry, float dt);
 
         private:
-            SceneCameraConfig m_config;
+            Vector3 m_fineSpeed;
+            Vector3 m_coarseSpeed;
             Vector2 m_slideReference = Vector2::Zero();
             Vector2 m_pivotReference = Vector2::Zero();
             float m_unitsTraveled = 0.0f;

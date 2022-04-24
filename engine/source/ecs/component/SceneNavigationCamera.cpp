@@ -4,8 +4,6 @@
 
 namespace
 {
-    constexpr auto UnitsPerPixel = 1.0f / 350.0f; // completely made up magic number
-
     struct Key
     {
         static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
@@ -19,13 +17,14 @@ namespace nc
 {
     SceneNavigationCamera::SceneNavigationCamera(Entity entity, const SceneCameraConfig& config)
         : Camera{entity},
-          m_config{config}
+          m_fineSpeed{config.truckPedestalFine, config.panTiltFine, config.dollyFine},
+          m_coarseSpeed{config.truckPedestalCoarse, config.panTiltCoarse, config.dollyCoarse}
     {
     }
 
     void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
     {
-        const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_config.coarseSpeed : m_config.fineSpeed;
+        const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_coarseSpeed : m_fineSpeed;
         auto* transform = registry->Get<Transform>(self);
         auto translation = Dolly(dt, dollySpeed);
 
@@ -67,10 +66,11 @@ namespace nc
 
     auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3
     {
+        constexpr auto unitsPerPixel = 1.0f / 350.0f;
         const auto mousePos = input::MousePos();
         const auto mouseDelta = (mousePos - m_slideReference) * speedMult;
 
-        if(m_unitsTraveled > Magnitude(mouseDelta) * UnitsPerPixel)
+        if(m_unitsTraveled > Magnitude(mouseDelta) * unitsPerPixel)
         {
             m_slideReference = mousePos;
             m_unitsTraveled = 0.0f;
@@ -96,7 +96,7 @@ namespace nc
             m_dollyVelocity += speedMult * static_cast<float>(wheel);
         }
 
-        m_dollyVelocity = math::Lerp(m_dollyVelocity, 0.0f, m_config.dollyDeceleration);
+        m_dollyVelocity = math::Lerp(m_dollyVelocity, 0.0f, 0.01f);
         return Vector3{0.0f, 0.0f, m_dollyVelocity * dt};
     }
 }

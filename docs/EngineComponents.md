@@ -139,7 +139,6 @@ An audio listener must be registered for audio sources to play (Audio.h), even i
 NcEngine requires a Camera component to be registered through [MainCamera::Set(camera)](../nc/include/MainCamera.h). This camera can be swapped dynamically. Internally, `UpdateViewMatrix()` is called once per frame before rendering, and `UpdateProjectionMatrix(width, height, nearZ, farZ)` is called upon construction and when the screen is resized. These both can be overridden in derived classes when unconventional matrices are required.
 
 #### SceneNavigationCamera
-
 Specialized camera used in NcEditor's scene view. Provides camera movement based on mouse input:
 * Truck/Pedestal: hold middle mouse button and drag
 * Pan/Tilt: hold right mouse button and drag
