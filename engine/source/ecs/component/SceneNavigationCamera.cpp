@@ -4,10 +4,15 @@
 
 namespace
 {
-    constexpr auto KeyPan = nc::input::KeyCode::MiddleButton;
-    constexpr auto KeyZoom = nc::input::KeyCode::MouseWheel;
-    constexpr auto KeyLook = nc::input::KeyCode::RightButton;
-    constexpr auto KeySpeed = nc::input::KeyCode::Shift;
+    constexpr auto UnitsPerPixel = 1.0f / 350.0f; // completely made up magic number
+
+    struct Key
+    {
+        static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
+        static constexpr auto Zoom = nc::input::KeyCode::MouseWheel;
+        static constexpr auto Look = nc::input::KeyCode::RightButton;
+        static constexpr auto Speed = nc::input::KeyCode::Shift;
+    };
 }
 
 namespace nc
@@ -20,82 +25,78 @@ namespace nc
 
     void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
     {
+        const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_config.coarseSpeed : m_config.fineSpeed;
         auto* transform = registry->Get<Transform>(self);
-        auto translation = Zoom(dt);
+        auto translation = Dolly(dt, dollySpeed);
+
         if(HandlePanInput())
         {
-            translation += Pan(dt);
+            translation += TruckAndPedestal(dt, truckPedestalSpeed);
         }
 
         transform->TranslateLocalSpace(translation);
 
         if(HandleLookInput())
         {
-            transform->Rotate(Look(dt, transform->Right()));
+            transform->Rotate(PanAndTilt(dt, panTiltSpeed, transform->Right()));
         }
     }
 
     auto SceneNavigationCamera::HandlePanInput() -> bool
     {
-        if(KeyDown(KeyPan))
+        if(KeyDown(Key::Pan))
         {
-            m_panStartPos = input::MousePos();
-            m_panUnitsTraveled = 0.0f;
+            m_slideReference = input::MousePos();
+            m_unitsTraveled = 0.0f;
             return false;
         }
 
-        return KeyHeld(KeyPan);
+        return KeyHeld(Key::Pan);
     }
 
     auto SceneNavigationCamera::HandleLookInput() -> bool
     {
-        if(KeyDown(KeyLook))
+        if(KeyDown(Key::Look))
         {
-            m_lookStartPos = input::MousePos();
+            m_pivotReference = input::MousePos();
             return false;
         }
 
-        return KeyHeld(KeyLook);
+        return KeyHeld(Key::Look);
     }
 
-    auto SceneNavigationCamera::Pan(float dt) -> Vector3
+    auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3
     {
         const auto mousePos = input::MousePos();
-        const auto mouseDelta = mousePos - m_panStartPos;
-        const auto pixelsTraveled = Magnitude(mouseDelta);
-        const auto unitsPerPixel = KeyHeld(KeySpeed) ? (1.0f / 100.0f) : (1.0f / 350.0f);
-        const auto maxDistance = pixelsTraveled * unitsPerPixel;
+        const auto mouseDelta = (mousePos - m_slideReference) * speedMult;
 
-        if(m_panUnitsTraveled > maxDistance)
+        if(m_unitsTraveled > Magnitude(mouseDelta) * UnitsPerPixel)
         {
-            m_panStartPos = mousePos;
-            m_panUnitsTraveled = 0.0f;
+            m_slideReference = mousePos;
+            m_unitsTraveled = 0.0f;
             return Vector3::Zero();
         }
 
-        const auto [xPan, yPan] = mouseDelta * m_config.panDamp * dt;
-        m_panUnitsTraveled += std::sqrt(xPan * xPan + yPan * yPan);
-        return Vector3{-xPan, yPan, 0.0f};
+        const auto translation = mouseDelta * dt;
+        m_unitsTraveled += Magnitude(translation);
+        return Vector3{translation, 0.0f};
     }
 
-    auto SceneNavigationCamera::Zoom(float dt) -> Vector3
+    auto SceneNavigationCamera::PanAndTilt(float dt, float speedMult, const Vector3& tiltAxis) -> Quaternion
     {
-        auto& zoom = m_zoomVelocity;
-        if(const auto wheel = input::MouseWheel(); wheel != 0)
+        const auto [pan, tilt] = (input::MousePos() - m_pivotReference) * speedMult * dt;
+        return Multiply(Quaternion::FromAxisAngle(Vector3::Up(), pan),
+                        Quaternion::FromAxisAngle(tiltAxis, tilt));
+    }
+
+    auto SceneNavigationCamera::Dolly(float dt, float speedMult) -> Vector3
+    {
+        if(const auto wheel = input::MouseWheel())
         {
-            const auto factor = KeyHeld(input::KeyCode::Shift) ? m_config.zoomSpeedMult : 1.0f;
-            zoom += factor * m_config.zoomDamp * static_cast<float>(wheel);
+            m_dollyVelocity += speedMult * static_cast<float>(wheel);
         }
 
-        zoom = math::Lerp(zoom, 0.0f, 0.05f);
-        return Vector3{0.0f, 0.0f, zoom * dt};
-    }
-
-    auto SceneNavigationCamera::Look(float dt, const Vector3& transformRight) -> Quaternion
-    {
-        const auto mouseDelta = input::MousePos() - m_lookStartPos;
-        const auto [horizontalLook, verticalLook] = mouseDelta * m_config.lookDamp * dt;
-        return Multiply(Quaternion::FromAxisAngle(Vector3::Up(), horizontalLook),
-                        Quaternion::FromAxisAngle(transformRight, verticalLook));
+        m_dollyVelocity = math::Lerp(m_dollyVelocity, 0.0f, m_config.dollyDeceleration);
+        return Vector3{0.0f, 0.0f, m_dollyVelocity * dt};
     }
 }
