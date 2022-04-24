@@ -1,5 +1,6 @@
 #include "CollisionEvents.h"
 #include "NcEngine.h"
+#include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "imgui/imgui.h"
 #include "shared/Prefabs.h"
@@ -24,7 +25,7 @@ namespace
             ImGui::Text("-WASD to control the blue cube");
 
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing(); ImGui::Spacing();
-        
+
             for(auto v : {nc::ColliderType::Box, nc::ColliderType::Capsule, nc::ColliderType::Sphere, nc::ColliderType::Hull})
             {
                 ImGui::SameLine();

@@ -1,5 +1,6 @@
 #include "JointsTest.h"
 #include "NcEngine.h"
+#include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "physics/PhysicsModule.h"
 #include "shared/FreeComponents.h"

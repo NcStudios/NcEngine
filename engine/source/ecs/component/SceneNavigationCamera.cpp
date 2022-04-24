@@ -1,4 +1,4 @@
-#include "SceneNavigationCamera.h"
+#include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/Registry.h"
 #include "Input.h"
 
