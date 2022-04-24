@@ -13,7 +13,7 @@ namespace nc
      * an implementation detail.
      */
     template<class RegistryType = Registry>
-    class handle_base
+    class HandleBase
     {
         public:
             /**
@@ -21,7 +21,7 @@ namespace nc
              * @param reg A pointer to a valid registry.
              * @param ent An entity owned by reg.
              */
-            explicit handle_base(RegistryType* reg, Entity ent)
+            explicit HandleBase(RegistryType* reg, Entity ent)
                 : m_registry{reg}, m_entity{ent} {}
 
             /**
@@ -32,7 +32,7 @@ namespace nc
              * @return T* A pointer to the added component.
              */
             template<std::derived_from<ComponentBase> T, class... Args>
-            auto add(Args&&... args) -> T*
+            auto Add(Args&&... args) -> T*
             {
                 return m_registry->template Add<T, Args...>(m_entity, std::forward<Args>(args)...);
             }
@@ -42,7 +42,7 @@ namespace nc
              * @tparam T The component type.
              */
             template<std::derived_from<ComponentBase> T>
-            void remove()
+            void Remove()
             {
                 m_registry->template Remove<T>(m_entity);
             }
@@ -53,7 +53,7 @@ namespace nc
              * @return bool Whether or not the component exists.
              */
             template<std::derived_from<ComponentBase> T>
-            bool contains() const
+            bool Contains() const
             {
                 return m_registry->template Contains<T>(m_entity);
             }
@@ -64,7 +64,7 @@ namespace nc
              * @return T* A pointer to the component, if found, or nullptr.
              */
             template<std::derived_from<ComponentBase> T>
-            auto get() -> T*
+            auto Get() -> T*
             {
                 return m_registry->template Get<T>(m_entity);
             }
@@ -75,25 +75,25 @@ namespace nc
              * @return const T* A pointer to the const-qualified component, if found, or nullptr.
              */
             template<std::derived_from<ComponentBase> T>
-            auto get() const -> const T*
+            auto Get() const -> const T*
             {
                 return m_registry->template Get<T>(m_entity);
             }
 
             /** @brief Check validity of the entity. */
-            bool valid() const
+            bool Valid() const
             {
                 return m_entity.Valid();
             }
 
             /** @brief Get the bound entity. */
-            auto entity() const -> Entity
+            auto Entity() const -> Entity
             {
                 return m_entity;
             }
 
             /** @brief Get a pointer to the registry owning the entity. */
-            auto registry() -> RegistryType*
+            auto Registry() -> RegistryType*
             {
                 return m_registry;
             }
@@ -115,6 +115,6 @@ namespace nc
             Entity m_entity;
     };
 
-    /** @brief Alias for using handle_base. */
-    using handle = handle_base<Registry>;
+    /** @brief Alias for using HandleBase. */
+    using Handle = HandleBase<Registry>;
 }
