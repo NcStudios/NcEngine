@@ -1,4 +1,5 @@
 #include "CubeMapAssetManager.h"
+#include "assets/AssetUtilities.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"
@@ -52,14 +53,6 @@ namespace nc
 
         return facePaths;
     }
-
-    bool HasValidAssetExtension(const std::string& path)
-    {
-        std::size_t periodPosition = path.rfind('.');
-        const std::string fileExtension = path.substr(periodPosition+1);
-        return fileExtension.compare("nca") == 0 ? true : false;
-    }
-
 
     /** If external (from the editor) path will be: D:\\NC\\Projects\\Test\\assets\\Textures\\Cubemaps\\Church001\\Church001.nca"
      *  If internal (called programmatically) path will be: Church001\\Church001.nca"

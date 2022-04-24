@@ -66,6 +66,7 @@ add_test(ConvexHullAssetManager_unit_tests ConvexHullAssetManager_unit_tests)
 add_executable(MeshAssetManager_unit_tests
     ${PROJECT_SOURCE_DIR}/unit/assets/MeshAssetManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/assets/MeshAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
 )
 
 target_compile_definitions(MeshAssetManager_unit_tests
@@ -128,6 +129,7 @@ add_test(AudioClipAssetManager_unit_tests AudioClipAssetManager_unit_tests)
 add_executable(ShaderAssetManager_unit_tests
     ${PROJECT_SOURCE_DIR}/unit/assets/ShaderAssetManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/assets/ShaderAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
 )
 
 target_compile_definitions(ShaderAssetManager_unit_tests
@@ -152,3 +154,5 @@ target_link_libraries(ShaderAssetManager_unit_tests
     PRIVATE
         gtest
 )
+
+add_test(ShaderAssetManager_unit_tests ShaderAssetManager_unit_tests)
