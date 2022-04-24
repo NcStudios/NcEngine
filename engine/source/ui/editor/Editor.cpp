@@ -29,13 +29,13 @@ namespace nc::ui::editor
 
     void Editor::Frame(float* dt, Registry* registry)
     {
-        if(input::GetKeyDown(hotkey::Editor))
+        if(input::KeyDown(hotkey::Editor))
             m_openState_Editor = !m_openState_Editor;
 
         if(!m_openState_Editor)
             return;
         
-        if(input::GetKeyDown(hotkey::Utilities))
+        if(input::KeyDown(hotkey::Utilities))
             m_openState_UtilitiesPanel = !m_openState_UtilitiesPanel;
 
         auto [width, height] = window::GetDimensions();

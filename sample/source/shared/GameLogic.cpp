@@ -8,8 +8,8 @@ namespace nc::sample
     {
         static constexpr float speed = 2.0f;
         auto [leftRight, frontBack] = input::GetAxis() * speed * dt;
-        auto q = input::GetKey(input::KeyCode::Q);
-        auto e = input::GetKey(input::KeyCode::E);
+        auto q = KeyHeld(input::KeyCode::Q);
+        auto e = KeyHeld(input::KeyCode::E);
         auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * speed * dt;
         registry->Get<Transform>(self)->Translate(Vector3{leftRight, upDown, frontBack});
     }
@@ -22,25 +22,25 @@ namespace nc::sample
         if(!body)
             return;
 
-        if(input::GetKey(input::KeyCode::W))
+        if(KeyHeld(input::KeyCode::W))
             body->ApplyImpulse(Vector3::Front() * force);
 
-        if(input::GetKey(input::KeyCode::S))
+        if(KeyHeld(input::KeyCode::S))
             body->ApplyImpulse(Vector3::Back() * force);
 
-        if(input::GetKey(input::KeyCode::A))
+        if(KeyHeld(input::KeyCode::A))
             body->ApplyImpulse(Vector3::Left() * force);
         
-        if(input::GetKey(input::KeyCode::D))
+        if(KeyHeld(input::KeyCode::D))
             body->ApplyImpulse(Vector3::Right() * force);
 
-        if(input::GetKey(input::KeyCode::Space))
+        if(KeyHeld(input::KeyCode::Space))
             body->ApplyImpulse(Vector3::Up() * 4.0f);
 
-        if(input::GetKey(input::KeyCode::Q))
+        if(KeyHeld(input::KeyCode::Q))
             body->ApplyTorqueImpulse(Vector3::Down() * 0.6f);
 
-        if(input::GetKey(input::KeyCode::E))
+        if(KeyHeld(input::KeyCode::E))
             body->ApplyTorqueImpulse(Vector3::Up() * 0.6f);
     }
 
