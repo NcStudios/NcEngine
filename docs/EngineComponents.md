@@ -10,6 +10,7 @@ Engine Components
 * [PointLight](#pointlight)
 * [AudioSource](#audiosource)
 * [Camera](#camera)
+  * [SceneNavigationCamera](#scenenavigationcamera)
 * [ParticleEmitter](#particleemitter)
 * [NetworkDispatcher](#networkdispatcher)
 * [FreeComponentGroup](#freecomponentgroup)
@@ -34,14 +35,14 @@ All callables can be changed dynamically and may be set to nullptr. They may als
 It can be useful to wire up a FreeComponent member function to one of these. To mitigate code repetition in these cases, an instance of [InvokeFreeComponent](../nc/include/ecs/InvokeFreeComponent.h) may be passed as the callable. Note that it expects a function named 'Run' invocable with arguments matching one of the signatures above.
 
 ```cpp
+/** User-defined FreeComponent with custom logic in 'Run' method. */
 struct MyType : public FreeComponent
 {
-    /** Constructor, etc...
-     *  We want to invoke this member each frame. */
+    /** Constructor, etc... */
     void Run(Entity, Registry*, float);
 };
 
-/** Using a lambda: */
+/** Solution 1: Running logic with a lambda */
 registry->Add<MyType>(entity, args...);
 registry->Add<FrameLogic>(entity, [](Entity self, Registry* registry, float dt)
 {
@@ -49,16 +50,16 @@ registry->Add<FrameLogic>(entity, [](Entity self, Registry* registry, float dt)
         component->Run(self, registry, dt);
 });
 
-/** Using a default constructed InvokeFreeComponent: */
+/** Solution 2: Running logic with InvokeFreeComponent */
 registry->Add<MyType>(entity, args...);
 registry->Add<FrameLogic>(entity, InvokeFreeComponent<MyType>{});
 
-/** Alternatively, the MyType instance can be added by InvokeFreeComponent: */
+/** Solution 3: Creating a component and running logic with InvokeFreeComponent */
 registry->Add<FrameLogic>(entity, InvokeFreeComponent<MyType>{entity, registry, args...});
 ```
 
 ### Transform
-------------
+-------------
 A transform represents the transformation matrix of an entity. Unlike most components, transforms do not need to be manually added as the registry does this when creating an entity. A transform's constructor arguments are taken from the EntityInfo struct used when creating an entity.
 
 Any quaternions supplied to a transform should be unit quaternions, and scale values should be nonzero.
@@ -136,6 +137,13 @@ An audio listener must be registered for audio sources to play (Audio.h), even i
 ### Camera
 ----------
 NcEngine requires a Camera component to be registered through [MainCamera::Set(camera)](../nc/include/MainCamera.h). This camera can be swapped dynamically. Internally, `UpdateViewMatrix()` is called once per frame before rendering, and `UpdateProjectionMatrix(width, height, nearZ, farZ)` is called upon construction and when the screen is resized. These both can be overridden in derived classes when unconventional matrices are required.
+
+#### SceneNavigationCamera
+Specialized camera used in NcEditor's scene view. Provides camera movement based on mouse input:
+* Truck/Pedestal: hold middle mouse button and drag
+* Pan/Tilt: hold right mouse button and drag
+* Dolly: scroll wheel
+* Speed multiplier: hold shift
 
 ### ParticleEmitter
 ------------------

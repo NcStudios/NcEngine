@@ -8,23 +8,23 @@ namespace nc::input
     using KeyCode_t = uint32_t;
     enum class KeyCode : KeyCode_t;
 
-    uint32_t MouseX();
-    uint32_t MouseY();
-    Vector2 MousePos();
-    int32_t MouseWheel();
+    auto MouseX() -> uint32_t;
+    auto MouseY() -> uint32_t;
+    auto MousePos() -> Vector2;
+    auto MouseWheel() -> int32_t;
 
-    float GetXAxis();  // GetKey A & D; returns -1, 0, 1
-    float GetYAxis();  // GetKey W & S; returns -1, 0, 1
-    Vector2 GetAxis(); // WASD results as a pair
+    auto GetXAxis() -> float;  // GetKey A & D; returns -1, 0, 1
+    auto GetYAxis() -> float;  // GetKey W & S; returns -1, 0, 1
+    auto GetAxis() -> Vector2; // WASD results as a pair
 
-    bool GetKeyDown(KeyCode keyCode); // true when key is first pressed
-    bool GetKeyUp(KeyCode keyCode);   // true when key is released
-    bool GetKey(KeyCode keyCode);     // true while key is held
+    auto KeyDown(KeyCode keyCode) -> bool; // true when key is first pressed
+    auto KeyUp(KeyCode keyCode) -> bool;   // true when key is released
+    auto KeyHeld(KeyCode keyCode) -> bool; // true while key is held
 
     enum class KeyCode : KeyCode_t
     {
         LeftButton = 1, RightButton = 2, MiddleButton = 4, MouseWheel = 7,
-        
+
         Zero = 48, One = 49, Two   = 50, Three = 51, Four = 52,
         Five = 53, Six = 54, Seven = 55, Eight = 56, Nine = 57,
 

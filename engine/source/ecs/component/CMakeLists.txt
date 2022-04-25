@@ -12,5 +12,6 @@ target_sources(NcEngineLib
         ${ROOT_DIR}/source/ecs/component/ParticleEmitter.cpp
         ${ROOT_DIR}/source/ecs/component/PhysicsBody.cpp
         ${ROOT_DIR}/source/ecs/component/PointLight.cpp
+        ${ROOT_DIR}/source/ecs/component/SceneNavigationCamera.cpp
         ${ROOT_DIR}/source/ecs/component/Transform.cpp
 )

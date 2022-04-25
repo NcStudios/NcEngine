@@ -24,16 +24,16 @@ namespace nc::input
     float GetXAxis() //eventually should bind inputs to axis from config file (controller/WASD/arrows)
     {
         float axis = 0.0f;
-        if (GetKey(KeyCode::D)) { axis += 1.0; }
-        if (GetKey(KeyCode::A)) { axis -= 1.0; }
+        if (KeyHeld(KeyCode::D)) { axis += 1.0; }
+        if (KeyHeld(KeyCode::A)) { axis -= 1.0; }
         return axis;
     }
 
     float GetYAxis() //eventually binds inputs to axis from config file (controller/WASD/arrows)
     {
         float axis = 0.0f;
-        if (GetKey(KeyCode::W)) { axis += 1.0; }
-        if (GetKey(KeyCode::S)) { axis -= 1.0; }
+        if (KeyHeld(KeyCode::W)) { axis += 1.0; }
+        if (KeyHeld(KeyCode::S)) { axis -= 1.0; }
         return axis;
     }
 
@@ -42,7 +42,7 @@ namespace nc::input
         return Vector2(GetXAxis(), GetYAxis());
     }
 
-    bool GetKeyDown(KeyCode keyCode)
+    bool KeyDown(KeyCode keyCode)
     {
         auto beg = g_state.downKeys.cbegin();
         auto end = g_state.downKeys.cend();
@@ -52,7 +52,7 @@ namespace nc::input
         });
     }
 
-    bool GetKeyUp(KeyCode keyCode)
+    bool KeyUp(KeyCode keyCode)
     {
         auto beg = g_state.upKeys.cbegin();
         auto end = g_state.upKeys.cend();
@@ -62,7 +62,7 @@ namespace nc::input
         });
     }
 
-    bool GetKey(KeyCode keyCode)
+    bool KeyHeld(KeyCode keyCode)
     {
         //if most significant bit is 1, key is down
         return (GetAsyncKeyState((KeyCode_t)keyCode) & (1 << 15)) == 0 ? false : true;
