@@ -15,35 +15,72 @@ on:
       - '**/*.jpg'
       - '**/*.jpeg'
 
+env:
+  ENGINE_PRESET: NcEngine-MSVC-Release-WithEditor
+  EDITOR_PRESET: NcEditor-MSVC-Release-WithEditor
+  SAMPLE_PRESET: Sample-MSVC-Release-WithEditor
+  TEST_PRESET: Tests-MSVC
+
 jobs:
-  Build:
+  Windows:
     runs-on: windows-2022
 
-    steps:
-    - name: Build NcEngine
-      uses: NcStudios/NcEngine/.github/workflows/build-template.yml@main
+    steps:    
+    - name: Checkout Branch
+      uses: actions/checkout@v2
       with:
-        presetName: NcEngine-MSVC-Release-WithEditor
-        sourceDir: ${{github.workspace}}/engine
+        submodules: recursive
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+ 
+    - name: Setup Vulkan Sdk
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.2.198.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+ 
+    - name: Configure NcEngine
+      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/engine -B ${{github.workspace}}/build/$ENGINE_PRESET --preset $ENGINE_PRESET
+          
+    - name: Build and Install NcEngine
+      run: cmake --build ${{github.workspace}}/build/$ENGINE_PRESET --target install --config Release
     
+    - name: Configure NcEditor
+      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/editor -B ${{github.workspace}}/build/$EDITOR_PRESET --preset $EDITOR_PRESET
+      
+    - name: Build NcEditor
+      run: cmake --build ${{github.workspace}}/build/$EDITOR_PRESET
+    
+    - name: Configure Sample
+      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/sample -B ${{github.workspace}}/build/$SAMPLE_PRESET --preset $SAMPLE_PRESET
+    
+    - name: Build Sample
+      run: cmake --build ${{github.workspace}}/build/$SAMPLE_PRESET
+    
+    - name: Configure Tests
+      run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/$TEST_PRESET --preset $TEST_PRESET
+
+    - name: Build Tests
+      run: cmake --build ${{github.workspace}}/build/$TEST_PRESET
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}/build/$TEST_PRESET
+      run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
+  
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action/composite@v1
+      if: always()
+      with:
+        files: ${{github.workspace}}/TestResults.xml
+  
     - name: MSVC Code Analysis
       uses: microsoft/msvc-code-analysis-action@04825f6d9e00f87422d6bf04e1a38b1f3ed60d99
-      # Provide a unique ID to access the sarif output path
-      id: run-analysis
+      id: code-analysis
       with:
-        cmakeBuildDirectory: '${{ github.workspace }}/build/NcEngine-MSVC-Release'
-
-  Test:
-    runs-on: windows-2022
-    
-    steps:
-    - name: Build Tests
-      uses: NcStudios/NcEngine/.github/workflows/build-template.yml@main
-      with:
-        presetName: Tests-MSVC
-        sourceDir: ${{github.workspace}}/test
+        cmakeBuildDirectory: ${{github.workspace}}/build/$ENGINE_PRESET
         
-    - name: Run Tests
-      working-directory: ${{github.workspace}}/build/Tests-MSVC
-      run: ctest -V
-  
+    - name: Upload Code Analysis
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: ${{steps.code-analysis.outputs.sarif}}
