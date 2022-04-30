@@ -16,44 +16,34 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  Windows:
+  Build:
     runs-on: windows-2022
 
     steps:
-    - name: Checkout Branch
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
-
-    - name: Setup MSVC
-      uses: ilammy/msvc-dev-cmd@v1
- 
-    - name: Setup Vulkan Sdk
-      uses: humbletim/setup-vulkan-sdk@v1.2.0
-      with:
-        vulkan-query-version: 1.2.198.0
-        vulkan-components: Vulkan-Headers, Vulkan-Loader
- 
-    - name: Configure NcEngine
-      run: cmake -S ${{github.workspace}}/engine -B ${{github.workspace}}/build/NcEngine-MSVC-Release --preset NcEngine-MSVC-Release
-          
     - name: Build NcEngine
-      run: cmake --build ${{github.workspace}}/build/NcEngine-MSVC-Release
-
+      uses: NcStudios/NcEngine/.github/workflows/build-template.yml@main
+      with:
+        presetName: NcEngine-MSVC-Release-WithEditor
+        sourceDir: ${{github.workspace}}/engine
+    
     - name: MSVC Code Analysis
       uses: microsoft/msvc-code-analysis-action@04825f6d9e00f87422d6bf04e1a38b1f3ed60d99
       # Provide a unique ID to access the sarif output path
       id: run-analysis
       with:
         cmakeBuildDirectory: '${{ github.workspace }}/build/NcEngine-MSVC-Release'
- 
-    - name: Configure Tests
-      run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/Tests-MSVC --preset Tests-MSVC
 
+  Test:
+    runs-on: windows-2022
+    
+    steps:
     - name: Build Tests
-      run: cmake --build ${{github.workspace}}/build/Tests-MSVC
-
+      uses: NcStudios/NcEngine/.github/workflows/build-template.yml@main
+      with:
+        presetName: Tests-MSVC
+        sourceDir: ${{github.workspace}}/test
+        
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/Tests-MSVC
       run: ctest -V
-      
+  
