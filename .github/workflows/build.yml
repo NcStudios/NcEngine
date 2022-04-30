@@ -65,7 +65,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build/$env:TEST_PRESET
 
     - name: Run Tests
-      working-directory: ${{github.workspace}}/build/$env:TEST_PRESET
+      working-directory: ${{github.workspace}}/build/${{env.TEST_PRESET}}
       run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
   
     - name: Publish Unit Test Results
