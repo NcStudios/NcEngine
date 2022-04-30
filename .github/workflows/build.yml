@@ -41,31 +41,31 @@ jobs:
         vulkan-components: Vulkan-Headers, Vulkan-Loader
  
     - name: Configure NcEngine
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/engine -B ${{github.workspace}}/build/$ENGINE_PRESET --preset $ENGINE_PRESET
+      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/engine -B ${{github.workspace}}/build/$env:ENGINE_PRESET --preset $env:ENGINE_PRESET
           
     - name: Build and Install NcEngine
-      run: cmake --build ${{github.workspace}}/build/$ENGINE_PRESET --target install --config Release
+      run: cmake --build ${{github.workspace}}/build/$env:ENGINE_PRESET --target install --config Release
     
     - name: Configure NcEditor
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/editor -B ${{github.workspace}}/build/$EDITOR_PRESET --preset $EDITOR_PRESET
+      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/editor -B ${{github.workspace}}/build/$env:EDITOR_PRESET --preset $env:EDITOR_PRESET
       
     - name: Build NcEditor
-      run: cmake --build ${{github.workspace}}/build/$EDITOR_PRESET
+      run: cmake --build ${{github.workspace}}/build/$env:EDITOR_PRESET
     
     - name: Configure Sample
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/sample -B ${{github.workspace}}/build/$SAMPLE_PRESET --preset $SAMPLE_PRESET
+      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/sample -B ${{github.workspace}}/build/$env:SAMPLE_PRESET --preset $env:SAMPLE_PRESET
     
     - name: Build Sample
-      run: cmake --build ${{github.workspace}}/build/$SAMPLE_PRESET
+      run: cmake --build ${{github.workspace}}/build/$env:SAMPLE_PRESET
     
     - name: Configure Tests
-      run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/$TEST_PRESET --preset $TEST_PRESET
+      run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/$env:TEST_PRESET --preset $env:TEST_PRESET
 
     - name: Build Tests
-      run: cmake --build ${{github.workspace}}/build/$TEST_PRESET
+      run: cmake --build ${{github.workspace}}/build/$env:TEST_PRESET
 
     - name: Run Tests
-      working-directory: ${{github.workspace}}/build/$TEST_PRESET
+      working-directory: ${{github.workspace}}/build/$env:TEST_PRESET
       run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
   
     - name: Publish Unit Test Results
@@ -78,7 +78,7 @@ jobs:
       uses: microsoft/msvc-code-analysis-action@04825f6d9e00f87422d6bf04e1a38b1f3ed60d99
       id: code-analysis
       with:
-        cmakeBuildDirectory: ${{github.workspace}}/build/$ENGINE_PRESET
+        cmakeBuildDirectory: ${{github.workspace}}/build/$env:ENGINE_PRESET
         
     - name: Upload Code Analysis
       uses: github/codeql-action/upload-sarif@v1
