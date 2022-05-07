@@ -1,3 +1,0 @@
-[submodule "nc/external/taskflow"]
-	path = engine/external/taskflow
-	url = https://github.com/McCallisterRomer/taskflow
