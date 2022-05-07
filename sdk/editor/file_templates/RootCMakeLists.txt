@@ -30,7 +30,7 @@ add_executable(${GAME_EXE})
 #Properties
 #set_target_properties(${GAME_EXE}
 #    PROPERTIES
-#        RUNTIME_OUTPUT_DIRECTORY ${ROOT_DIR}/..
+#        RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/..
 #)
 
 #Compile Options

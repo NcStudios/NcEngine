@@ -1,18 +1,18 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/graphics/Base.cpp
-        ${ROOT_DIR}/source/graphics/Commands.cpp
-        ${ROOT_DIR}/source/graphics/GpuAllocator.cpp
-        ${ROOT_DIR}/source/graphics/Graphics.cpp
-        ${ROOT_DIR}/source/graphics/GraphicsModuleImpl.cpp
-        ${ROOT_DIR}/source/graphics/Initializers.cpp
-        ${ROOT_DIR}/source/graphics/MeshBatcher.cpp
-        ${ROOT_DIR}/source/graphics/PerFrameRenderState.cpp
-        ${ROOT_DIR}/source/graphics/Renderer.cpp
-        ${ROOT_DIR}/source/graphics/ShaderUtilities.cpp
-        ${ROOT_DIR}/source/graphics/Swapchain.cpp
-        ${ROOT_DIR}/source/graphics/VertexDescriptions.cpp
-        ${ROOT_DIR}/source/graphics/vma.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/Base.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/Commands.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/GpuAllocator.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/Graphics.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/GraphicsModuleImpl.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/Initializers.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/MeshBatcher.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/PerFrameRenderState.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/Renderer.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/ShaderUtilities.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/Swapchain.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/VertexDescriptions.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/vma.cpp
 )
 
 add_subdirectory(resources)

@@ -1,6 +1,6 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/physics/dynamics/Dynamics.cpp
-        ${ROOT_DIR}/source/physics/dynamics/Joint.cpp
-        ${ROOT_DIR}/source/physics/dynamics/Solver.cpp
+        ${PROJECT_SOURCE_DIR}/source/physics/dynamics/Dynamics.cpp
+        ${PROJECT_SOURCE_DIR}/source/physics/dynamics/Joint.cpp
+        ${PROJECT_SOURCE_DIR}/source/physics/dynamics/Solver.cpp
 )

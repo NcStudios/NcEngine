@@ -1,17 +1,17 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/ecs/component/AudioSource.cpp
-        ${ROOT_DIR}/source/ecs/component/Camera.cpp
-        ${ROOT_DIR}/source/ecs/component/Collider.cpp
-        ${ROOT_DIR}/source/ecs/component/Component.cpp
-        ${ROOT_DIR}/source/ecs/component/ConcaveCollider.cpp
-        ${ROOT_DIR}/source/ecs/component/DebugWidget.cpp
-        ${ROOT_DIR}/source/ecs/component/FreeComponentGroup.cpp
-        ${ROOT_DIR}/source/ecs/component/MeshRenderer.cpp
-        ${ROOT_DIR}/source/ecs/component/NetworkDispatcher.cpp
-        ${ROOT_DIR}/source/ecs/component/ParticleEmitter.cpp
-        ${ROOT_DIR}/source/ecs/component/PhysicsBody.cpp
-        ${ROOT_DIR}/source/ecs/component/PointLight.cpp
-        ${ROOT_DIR}/source/ecs/component/SceneNavigationCamera.cpp
-        ${ROOT_DIR}/source/ecs/component/Transform.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/AudioSource.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/Camera.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/Collider.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/Component.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/ConcaveCollider.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/DebugWidget.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/FreeComponentGroup.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/MeshRenderer.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/NetworkDispatcher.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/ParticleEmitter.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/PhysicsBody.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/PointLight.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/SceneNavigationCamera.cpp
+        ${PROJECT_SOURCE_DIR}/source/ecs/component/Transform.cpp
 )

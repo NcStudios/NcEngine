@@ -1,4 +1,4 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/window/WindowImpl.cpp
+        ${PROJECT_SOURCE_DIR}/source/window/WindowImpl.cpp
 )

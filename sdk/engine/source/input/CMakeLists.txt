@@ -1,4 +1,4 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/input/Input.cpp
+        ${PROJECT_SOURCE_DIR}/source/input/Input.cpp
 )

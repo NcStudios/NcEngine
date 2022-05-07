@@ -1,8 +1,8 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/ui/UIElement.cpp
-        ${ROOT_DIR}/source/ui/UISystemImpl.cpp
-        ${ROOT_DIR}/source/ui/UIPosition.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/UIElement.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/UISystemImpl.cpp
+        ${PROJECT_SOURCE_DIR}/source/ui/UIPosition.cpp
 )
 
 add_subdirectory(editor)

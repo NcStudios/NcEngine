@@ -1,17 +1,17 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/graphics/resources/CubeMap.cpp
-        ${ROOT_DIR}/source/graphics/resources/CubeMapManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/RenderTarget.cpp
-        ${ROOT_DIR}/source/graphics/resources/EnvironmentDataManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/Environment.cpp
-        ${ROOT_DIR}/source/graphics/resources/ImmutableBuffer.cpp
-        ${ROOT_DIR}/source/graphics/resources/ImmutableImage.cpp
-        ${ROOT_DIR}/source/graphics/resources/ObjectDataManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/PointLightManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/RenderPassManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/ShaderDescriptorSets.cpp
-        ${ROOT_DIR}/source/graphics/resources/ShadowMapManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/TextureManager.cpp
-        ${ROOT_DIR}/source/graphics/resources/UniformBuffer.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/CubeMap.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/CubeMapManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/RenderTarget.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/EnvironmentDataManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/Environment.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ImmutableBuffer.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ImmutableImage.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ObjectDataManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/PointLightManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/RenderPassManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ShaderDescriptorSets.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ShadowMapManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/TextureManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/resources/UniformBuffer.cpp
 )

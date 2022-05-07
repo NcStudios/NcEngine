@@ -1,4 +1,4 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/math/Quaternion.cpp
+        ${PROJECT_SOURCE_DIR}/source/math/Quaternion.cpp
 )

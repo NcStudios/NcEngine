@@ -1,9 +1,9 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/graphics/techniques/EnvironmentTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/ParticleTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/PbrTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/ShadowMappingTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/UiTechnique.cpp
-        ${ROOT_DIR}/source/graphics/techniques/WireframeTechnique.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/techniques/EnvironmentTechnique.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/techniques/ParticleTechnique.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/techniques/PbrTechnique.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/techniques/ShadowMappingTechnique.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/techniques/UiTechnique.cpp
+        ${PROJECT_SOURCE_DIR}/source/graphics/techniques/WireframeTechnique.cpp
 )

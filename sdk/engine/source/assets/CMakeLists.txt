@@ -1,12 +1,12 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${ROOT_DIR}/source/assets/Assets.cpp
-        ${ROOT_DIR}/source/assets/AssetUtilities.cpp
-        ${ROOT_DIR}/source/assets/AudioClipAssetManager.cpp
-        ${ROOT_DIR}/source/assets/ConcaveColliderAssetManager.cpp
-        ${ROOT_DIR}/source/assets/ConvexHullAssetManager.cpp
-        ${ROOT_DIR}/source/assets/CubeMapAssetManager.cpp
-        ${ROOT_DIR}/source/assets/MeshAssetManager.cpp
-        ${ROOT_DIR}/source/assets/ShaderAssetManager.cpp
-        ${ROOT_DIR}/source/assets/TextureAssetManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/Assets.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/AssetUtilities.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/AudioClipAssetManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/ConcaveColliderAssetManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/ConvexHullAssetManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/CubeMapAssetManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/MeshAssetManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/ShaderAssetManager.cpp
+        ${PROJECT_SOURCE_DIR}/source/assets/TextureAssetManager.cpp
 )
