@@ -1,4 +1,4 @@
-target_sources(${GAME_EXE}
+target_sources(${NC_SAMPLE_EXE}
     PRIVATE
         FreeComponents.cpp
         GameLog.cpp

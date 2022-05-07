@@ -1,4 +1,4 @@
-target_sources(NcEngineLib 
+target_sources(${NC_ENGINE_LIB} 
     PRIVATE
         PacketBuffer.cpp
         Network.cpp

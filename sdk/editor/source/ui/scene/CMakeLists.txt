@@ -1,4 +1,4 @@
-target_sources(${EDITOR_EXE}
+target_sources(${NC_EDITOR_EXE}
     PRIVATE
         Inspector.cpp
         SceneGraph.cpp
