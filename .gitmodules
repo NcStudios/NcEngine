@@ -1,6 +1,3 @@
-[submodule "nc/external/directx"]
-	path = engine/external/directx
-	url = https://github.com/McCallisterRomer/DirectXMath
 [submodule "nc/external/taskflow"]
 	path = engine/external/taskflow
 	url = https://github.com/McCallisterRomer/taskflow
