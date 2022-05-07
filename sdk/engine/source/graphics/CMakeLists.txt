@@ -1,18 +1,18 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/graphics/Base.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/Commands.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/GpuAllocator.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/Graphics.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/GraphicsModuleImpl.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/Initializers.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/MeshBatcher.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/PerFrameRenderState.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/Renderer.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/ShaderUtilities.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/Swapchain.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/VertexDescriptions.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/vma.cpp
+        Base.cpp
+        Commands.cpp
+        GpuAllocator.cpp
+        Graphics.cpp
+        GraphicsModuleImpl.cpp
+        Initializers.cpp
+        MeshBatcher.cpp
+        PerFrameRenderState.cpp
+        Renderer.cpp
+        ShaderUtilities.cpp
+        Swapchain.cpp
+        VertexDescriptions.cpp
+        vma.cpp
 )
 
 add_subdirectory(resources)

@@ -1,17 +1,17 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/AudioSource.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/Camera.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/Collider.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/Component.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/ConcaveCollider.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/DebugWidget.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/FreeComponentGroup.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/MeshRenderer.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/NetworkDispatcher.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/ParticleEmitter.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/PhysicsBody.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/PointLight.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/SceneNavigationCamera.cpp
-        ${PROJECT_SOURCE_DIR}/source/ecs/component/Transform.cpp
+        AudioSource.cpp
+        Camera.cpp
+        Collider.cpp
+        Component.cpp
+        ConcaveCollider.cpp
+        DebugWidget.cpp
+        FreeComponentGroup.cpp
+        MeshRenderer.cpp
+        NetworkDispatcher.cpp
+        ParticleEmitter.cpp
+        PhysicsBody.cpp
+        PointLight.cpp
+        SceneNavigationCamera.cpp
+        Transform.cpp
 )

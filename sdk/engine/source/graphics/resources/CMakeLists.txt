@@ -1,17 +1,17 @@
 target_sources(NcEngineLib
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/CubeMap.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/CubeMapManager.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/RenderTarget.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/EnvironmentDataManager.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/Environment.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ImmutableBuffer.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ImmutableImage.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ObjectDataManager.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/PointLightManager.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/RenderPassManager.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ShaderDescriptorSets.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/ShadowMapManager.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/TextureManager.cpp
-        ${PROJECT_SOURCE_DIR}/source/graphics/resources/UniformBuffer.cpp
+        CubeMap.cpp
+        CubeMapManager.cpp
+        RenderTarget.cpp
+        EnvironmentDataManager.cpp
+        Environment.cpp
+        ImmutableBuffer.cpp
+        ImmutableImage.cpp
+        ObjectDataManager.cpp
+        PointLightManager.cpp
+        RenderPassManager.cpp
+        ShaderDescriptorSets.cpp
+        ShadowMapManager.cpp
+        TextureManager.cpp
+        UniformBuffer.cpp
 )

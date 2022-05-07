@@ -1,7 +1,7 @@
 target_sources(${EDITOR_EXE}
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/serialize/LoaderScene.cpp
-        ${PROJECT_SOURCE_DIR}/source/serialize/SceneDeleter.cpp
-        ${PROJECT_SOURCE_DIR}/source/serialize/SceneReader.cpp
-        ${PROJECT_SOURCE_DIR}/source/serialize/SceneWriter.cpp
+        LoaderScene.cpp
+        SceneDeleter.cpp
+        SceneReader.cpp
+        SceneWriter.cpp
 )

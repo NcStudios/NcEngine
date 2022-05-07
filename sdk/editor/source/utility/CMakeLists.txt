@@ -1,6 +1,6 @@
 target_sources(${EDITOR_EXE}
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/utility/DefaultComponents.cpp
-        ${PROJECT_SOURCE_DIR}/source/utility/Output.cpp
-        ${PROJECT_SOURCE_DIR}/source/utility/SkyboxEditor.cpp
+        DefaultComponents.cpp
+        Output.cpp
+        SkyboxEditor.cpp
 )

@@ -1,12 +1,12 @@
 target_sources(${GAME_EXE}
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/scenes/ClickEvents.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/CollisionEvents.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/CollisionBenchmark.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/JareTestScene.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/JointsTest.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/RenderingBenchmark.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/SpawnTest.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/SolarSystem.cpp
-        ${PROJECT_SOURCE_DIR}/source/scenes/Worms.cpp
+        ClickEvents.cpp
+        CollisionEvents.cpp
+        CollisionBenchmark.cpp
+        JareTestScene.cpp
+        JointsTest.cpp
+        RenderingBenchmark.cpp
+        SpawnTest.cpp
+        SolarSystem.cpp
+        Worms.cpp
 )

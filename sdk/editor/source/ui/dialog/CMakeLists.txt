@@ -1,12 +1,12 @@
 target_sources(${EDITOR_EXE}
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/ActiveDialogs.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/AssetBrowser.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/ChangeTagDialog.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/ConfigEditor.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/Dialog.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/FileBrowser.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/NewProjectDialog.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/NewSceneDialog.cpp
-        ${PROJECT_SOURCE_DIR}/source/ui/dialog/SkyboxBrowser.cpp
+        ActiveDialogs.cpp
+        AssetBrowser.cpp
+        ChangeTagDialog.cpp
+        ConfigEditor.cpp
+        Dialog.cpp
+        FileBrowser.cpp
+        NewProjectDialog.cpp
+        NewSceneDialog.cpp
+        SkyboxBrowser.cpp
 )
