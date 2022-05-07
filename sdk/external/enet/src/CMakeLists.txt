@@ -54,7 +54,7 @@ if(MSVC)
 endif()
 
 
-set(INCLUDE_FILES_PREFIX ${PROJECT_SOURCE_DIR}/external/enet)
+set(INCLUDE_FILES_PREFIX ${PROJECT_SOURCE_DIR}/sdk/external/enet)
 set(INCLUDE_FILES
     ${INCLUDE_FILES_PREFIX}/callbacks.h
     ${INCLUDE_FILES_PREFIX}/enet.h
@@ -66,7 +66,7 @@ set(INCLUDE_FILES
     ${INCLUDE_FILES_PREFIX}/win32.h
 )
 
-add_library(${ENET_LIB}
+add_library(enet
     STATIC
         ${INCLUDE_FILES}
         callbacks.c
@@ -79,13 +79,8 @@ add_library(${ENET_LIB}
         win32.c
 )
 
-target_include_directories(${ENET_LIB}
+target_include_directories(enet
     PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_EXTERNAL_DIR}
-)
-
-set_target_properties(${ENET_LIB}
-    PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${LIB_DIR}>
+        ${PROJECT_SOURCE_DIR}/sdk/external/enet
+        ${PROJECT_SOURCE_DIR}/sdk/engine/include
 )

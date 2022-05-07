@@ -1,57 +1,33 @@
-cmake_minimum_required(VERSION 3.20)
-project("NcEditor" LANGUAGES CXX)
-
-if(${PROJECT_SOURCE_DIR} EQUAL ${PROJECT_BINARY_DIR})
-    message(FATAL_ERROR "Don't be a fool, out-of-source build with your tool.")
+# NcEditor CMake Root
+if(NC_PROD_BUILD)
+    message(FATAL_ERROR "Error in CMake - Attempting to build NcEditor with NC_PROD_BUILD=ON")
 endif()
 
-if(NOT DEFINED NC_INSTALL_DIR)
-    message(FATAL_ERROR "NC_INSTALL_DIR is not defined.")
-endif()
+add_executable(${NC_EDITOR_EXE})
 
-#Variables
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(EDITOR_EXE "NcEditor")
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNING_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(WARNING_FLAGS /W3 /WX)
-endif()
-
-find_package(NcEngine REQUIRED PATHS ${NC_INSTALL_DIR})
-
-add_executable(${EDITOR_EXE})
-
-#Properties
-set_target_properties(${EDITOR_EXE}
-    PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/..>
-        #WIN32_EXECUTABLE TRUE
-)
-
-#Compile Options
-target_compile_options(${EDITOR_EXE}
+# Compile Options
+target_compile_options(${NC_EDITOR_EXE}
     PUBLIC
         ${WARNING_FLAGS}
 )
 
-#Include Dirs
-target_include_directories(${EDITOR_EXE}
-    PRIVATE
-        ${PROJECT_SOURCE_DIR}/source
+target_compile_definitions(${NC_EDITOR_EXE}
+    PUBLIC
+        ${NC_COMPILE_DEFINITIONS}
 )
 
-#Link Options
-target_link_libraries(${EDITOR_EXE}
+# Include Dirs
+target_include_directories(${NC_EDITOR_EXE}
     PRIVATE
-        Nc::NcEngineLib
+        source
+        ${NC_INCLUDE_DIR}
+        ${NC_EXTERNAL_DIR}
 )
 
-target_sources(${EDITOR_EXE}
+# Link Options
+target_link_libraries(${NC_EDITOR_EXE}
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/source/main.cpp
+        ${NC_ENGINE_LIB}
 )
 
 add_subdirectory(source)

@@ -1,90 +1,54 @@
 {
   "version": "0.2.1",
   "tasks": [
-
-    // NcEngine
     {
-      "taskLabel": "Release",
-      "appliesTo": "engine/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "NcEngine", "-Generator", "MSVC", "-PresetModifier", "Release" ]
+      "taskLabel": "Task: Sdk-Dev-Debug",
+      "appliesTo": "sdk/",
+      "type": "launch",
+      "commands": [
+        {
+          "command": "cmake",
+          "args": [ "-S ./ -B build/dev -DCMAKE_INSTALL_PREFIX=install" ]
+        },
+        {
+          "command": "cmake",
+          "args": [ "--build build/dev --target install --config Debug --parallel 12" ]
+        }
+      ]
     },
     {
-      "taskLabel": "Release-WithEditor",
-      "appliesTo": "engine/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "NcEngine", "-Generator", "MSVC", "-PresetModifier", "Release-WithEditor" ]
+      "taskLabel": "Task: Sdk-Dev-Release",
+      "appliesTo": "sdk/",
+      "type": "launch",
+      "commands": [
+        {
+          "command": "cmake",
+          "args": [ "-S ./ -B build/dev -DCMAKE_INSTALL_PREFIX=install" ]
+        },
+        {
+          "command": "cmake",
+          "args": [ "--build build/dev --target install --config Release --parallel 12" ]
+        }
+      ]
     },
     {
-      "taskLabel": "Release-WithProfiling",
-      "appliesTo": "engine/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "NcEngine", "-Generator", "MSVC", "-PresetModifier", "Release-WithProfiling" ]
-    },
-    {
-      "taskLabel": "Debug",
-      "appliesTo": "engine/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "NcEngine", "-Generator", "MSVC", "-PresetModifier", "Debug" ]
-    },
-
-    // Sample
-    {
-      "taskLabel": "Release",
-      "appliesTo": "sample/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "Sample", "-Generator", "MSVC", "-PresetModifier", "Release" ]
-    },
-    {
-      "taskLabel": "Release-WithEditor",
-      "appliesTo": "sample/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "Sample", "-Generator", "MSVC", "-PresetModifier", "Release-WithEditor" ]
-    },
-    {
-      "taskLabel": "Release-WithProfiling",
-      "appliesTo": "sample/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "Sample", "-Generator", "MSVC", "-PresetModifier", "Release-WithProfiling" ]
-    },
-    {
-      "taskLabel": "Debug",
-      "appliesTo": "sample/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "Sample", "-Generator", "MSVC", "-PresetModifier", "Debug" ]
-    },
-
-    // Editor
-    {
-      "taskLabel": "Release-WithEditor",
-      "appliesTo": "editor/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "NcEditor", "-Generator", "MSVC", "-PresetModifier", "Release-WithEditor" ]
-    },
-    {
-      "taskLabel": "Debug",
-      "appliesTo": "editor/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "NcEditor", "-Generator", "MSVC", "-PresetModifier", "Debug" ]
-    },
-
-    // Test
-    {
-      "taskLabel": "Tests",
-      "appliesTo": "test/",
-      "type": "default",
-      "command": "powershell.exe",
-      "args": [ "tools/build.ps1", "-TargetName", "Tests", "-Generator", "MSVC" ]
+      "taskLabel": "Task: Tests",
+      "appliesTo": "sdk/",
+      "type": "launch",
+      "commands": [
+        {
+          "command": "cmake",
+          "args": [ "-S test -B build/test" ]
+        },
+        {
+          "command": "cmake",
+          "args": [ "--build build/test --config Release --parallel 12" ]
+        },
+        {
+          "command": "ctest",
+          "args": [ "-V --test-dir build/test" ]
+        }
+      ]
     }
   ]
 }

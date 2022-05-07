@@ -1,6 +1,6 @@
-set(IMGUI_SOURCE_DIR "${ROOT_DIR}/external/imgui/src/")
+set(IMGUI_SOURCE_DIR ${PROJECT_SOURCE_DIR}/sdk/external/imgui/src/)
 
-add_library(${IMGUI_LIB}
+add_library(imgui
     STATIC
         ${IMGUI_SOURCE_DIR}/imgui_impl_win32.cpp
         ${IMGUI_SOURCE_DIR}/imgui_impl_vulkan.cpp
@@ -9,26 +9,18 @@ add_library(${IMGUI_LIB}
         ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
 )
 
-find_package(Vulkan REQUIRED)
-
-target_compile_definitions(${IMGUI_LIB}
+target_compile_definitions(imgui
     PUBLIC
         WIN32_LEAN_AND_MEAN
 )
 
-target_include_directories(${IMGUI_LIB}
+target_include_directories(imgui
     PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}
+        ${PROJECT_SOURCE_DIR}/sdk/external/
+        ${PROJECT_SOURCE_DIR}/sdk/engine/include
 )
 
-target_link_libraries(${IMGUI_LIB}
+target_link_libraries(imgui
     PRIVATE
         Vulkan::Vulkan
-)
-
-set_target_properties(${IMGUI_LIB}
-    PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY $<BUILD_INTERFACE:${LIB_DIR}>
 )
