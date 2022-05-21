@@ -16,7 +16,7 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  Build and Test:
+  Windows:
     runs-on: windows-2022
 
     permissions:
