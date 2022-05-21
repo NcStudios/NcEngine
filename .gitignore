@@ -13,10 +13,10 @@
 #directories
 .vs/
 .vscode/
+.idea/
 build/
 install/
 scratch/
-.idea/
 
 #gprof analysis
 analysis.txt
@@ -32,5 +32,4 @@ imgui.ini
 !nc/lib/libOptickCore.dll
 !nc/lib/libOptickCore.dll.a
 
-!tools/gen.exe
-!tools/asset_builder/build.exe
+!sdk/tools/asset_builder/nc-builder.exe

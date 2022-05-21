@@ -1,0 +1,12 @@
+target_sources(${NC_EDITOR_EXE}
+    PRIVATE
+        ActiveDialogs.cpp
+        AssetBrowser.cpp
+        ChangeTagDialog.cpp
+        ConfigEditor.cpp
+        Dialog.cpp
+        FileBrowser.cpp
+        NewProjectDialog.cpp
+        NewSceneDialog.cpp
+        SkyboxBrowser.cpp
+)

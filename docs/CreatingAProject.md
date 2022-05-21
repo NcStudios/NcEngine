@@ -119,37 +119,36 @@ int main()
 
 NcEngine is fully initialized after construction until Shutdown is called, and any functions may be called even if the game loop isn't running. For instance, the assets for the box could have been loaded before Start() instead of on scene load.
 
-One thing that isn't obvious in this example is how control is given back to WinMain. The Quit() function (Core.h) needs to be called to exit the game loop, however, NcEngine will internally call Quit() upon receiving a WM_CLOSE message.
+One thing that isn't obvious in this example is how control is given back to WinMain. NcEngine::Stop() needs to be called to exit the game loop, however, NcEngine will internally call Quit() upon receiving a WM_CLOSE message.
 
 ## Setting up the config file
 -------------------------
-For the config file, copy the defaults from [nc/source/config/default_config.ini](../nc/source/config/default_config.ini). The default asset paths are specified relative to the repository directory. If you have made your project directory somewhere else, these will need to be updated.
+For the config file, copy the defaults from [sdk/engine/source/config/default_config.ini](../sdk/engine/source/config/default_config.ini). The default asset paths are specified relative to the repository directory. If you have made your project directory somewhere else, these will need to be updated.
 
 ## Building
 ------------
-The CMakeLists.txt needs to be written before we can build. If the NcEngine install directory isn't your system default, you can tell find_package to search in \<path>/NcEngine/\<config>.
+The CMakeLists.txt needs to be written before we can build. Set the find_package search path according to your install location.
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project("Example" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-find_package(NcEngine REQUIRED PATHS "your-install-path/NcEngine/Release-WithEditor")
+find_package(NcEngine REQUIRED PATHS "my-install-prefix/NcSdk-x.y.z/NcEngine")
 add_executable(Example ${PROJECT_SOURCE_DIR}/Main.cpp)
-target_link_libraries(Example PRIVATE Nc::NcEngineLib)
+target_link_libraries(Example PRIVATE Nc::NcEngine-dev)
 ```
 
-We'll need to build and install the engine with the desired preset:
+Build and install the sdk, if you haven't already:
 ```
->cmake -S nc -B build/NcEngine-Ninja-Release-WithEditor --preset NcEngine-Ninja-Release-WithEditor
->cmake --build build/NcEngine-Ninja-Release-WithEditor
->cmake --install build/NcEngine-Ninja-Release-WithEditor
+cmake -S ./ -B build -DCMAKE_INSTALL_PREFIX=my-install-prefix
+cmake --build build --target install --config Release
 ```
 
 Then build the example:
 ```
 >mkdir build/example_project
->cmake -G "Ninja" -B build/example_project -S example
->cmake --build build/example_project
+>cmake -B build/example_project -S example
+>cmake --build build/example_project --config Release
 ```
 
 That's it! You should be able to run Example.exe and move the cube around. Pressing ` will toggle the editor, where you can tinker with the camera or point light properties. The editor has a pretty limited set of features, but there is an improved standalone version coming soon.

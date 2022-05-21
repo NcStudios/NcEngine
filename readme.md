@@ -1,5 +1,5 @@
 # NcEngine
-[![Tests](https://github.com/McCallisterRomer/NCEngine/actions/workflows/build.yml/badge.svg)](https://github.com/McCallisterRomer/NCEngine/actions?query=workflow%3ATests)
+[![Tests](https://github.com/NcStudios/NCEngine/actions/workflows/build.yml/badge.svg)](https://github.com/NcStudios/NCEngine/actions?query=workflow%3ATests)
 [![License](https://img.shields.io/github/license/McCallisterRomer/NCEngine.svg)](https://github.com/McCallisterRomer/NCEngine/blob/vnext/LICENSE)
 
 <p align="center">
@@ -11,10 +11,7 @@ NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively 
 -------------------
 * Getting Started
     * [Requirements](#requirements)
-    * [Targets](#targets)
-    * [Configuration and Presets](#configuration-and-presets)
-    * [Building from Command Line](#building-from-command-line)
-    * [Building in Visual Studio](#building-in-visual-studio)
+    * [Building](#building)
     * [Definitions](#definitions)
 * More Information
     * [Overview](docs/Overview.md)
@@ -30,123 +27,56 @@ NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively 
     * Visual Studio 17 2022
     * MinGW-w64 9.0.0
 
-> When cloning, use `--recurse-submodules`. If any subdirectories of nc/external are empty, the repo was cloned non-recursively. Use `git submodule update --init` to get the dependencies.
+## Building
+---
+Run CMake on the root CMakeLists with your required options. It is easiest to provide an install path and build the install target:
+```
+cmake -S ./ -B build -DCMAKE_INSTALL_PREFIX=NcSdk
+cmake --build build --target install --config Release
+```
 
-### Targets
------------
-* NcEngine: Core Library [Required]
-    * Type: Static Library
-    * Directory: engine
+There are also files with build tasks for Visual Studio and Visual Studio Code located in `sdk/tools/`.
+
+### Installation Items
+* NcEngine: Engine libraries and headers.
+  * To include in a CMake project use: `find_package(NcEngine PATHS install-path)` and link against `Nc::NcEngine-dev`.
 * NcEditor: Application for project creation and management.
-    * Type: Executable
-    * Directory: editor
-    * Dependencies: NcEngine [with -DNC_EDITOR_ENABLED=ON]
+  * Application and utilities are installed to `install-path/bin`.
 * Sample: Application containing demo, test, and benchmark scenes.
-    * Type: Executable
-    * Directory: sample
-    * Dependencies: NcEngine
-* Tests:
-    * Type: Executable(s)
-    * Directory: test
+  * Installed to `install-path/sample`.
 
-NcEngine is the library games link against. NcEditor and the sample application are optional and depend on NcEngine being built *and* installed.
-
-### Configuration and Presets
------------------------------
-Each target's root directory contains a CMakePresets.json file with common configuration and build presets for both Visual Studio and Ninja + MinGW. The available presets can be viewed with `cmake -S <target-source-dir> --list-presets`.
-
-Each of these presets follows the naming scheme `<target>-<generator>-<configuration>-[modifier]`, where modifier describes optional features to include:
-* WithEditor: Include editor-specific code.
-* WithProfiling: Include Optick profiling code.
-
-Each preset provides a different set of [definitions](#definitions). When adding custom presets to CMakeUserPresets.json, NC_INSTALL_DIR must be defined.
-
-More on CMake Presets:
-* [Documentation](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
-* [CMake Presets in Visual Studio](https://docs.microsoft.com/en-us/cpp/build/cmake-presets-vs?view=msvc-170)
-
-### Building from Command Line
-------------------------------
-Each target can be configured and built with:
-
-```
->cmake -S <target-directory> -B build/<Preset-Name> --preset <Preset-Name>
->cmake --build build/<Preset-Name>
-```
-
-NcEngine must be installed as well:
-```
->cmake --install build/<Preset-Name>
-```
-
-An example building everything using Ninja and Release configuration with the editor extension:
-```
->cmake -S nc -B build/NcEngine-Ninja-Release-WithEditor --preset NcEngine-Ninja-Release-WithEditor
->cmake --build build/NcEngine-Ninja-Release-WithEditor
->cmake --install build/NcEngine-Ninja-Release-WithEditor
-
->cmake -S editor -B build/NcEditor-Ninja-Release-WithEditor --preset NcEditor-Ninja-Release-WithEditor
->cmake --build build/Editor-Ninja-Release-WithEditor
-
->cmake -S sample -B build/Sample-Ninja-Release-WithEditor --preset Sample-Ninja-Release-WithEditor
->cmake --build build/Sample-Ninja-Release-WithEditor
-```
-
-### Building in Visual Studio
------------------------------
-
-> Ensure CMake presets are enabled in Visual Studio: Tools > Options > CMake > Use CMakePresets.json to drive CMake configure, build and test.
-
-Once cloned, open the repository in Visual Studio. The CMakePresets.json files should be automatically detected, displaying the Target System/Configuration/Build Preset dropdowns. Set the system to 'Local Machine' and select the desired NcEngine-MSVC option from the 'Configuration' menu. Update the 'Build' menu to match the configuration name, if it doesn't do so automatically. If configuration options are missing from the dropdown, first select 'Manage Configurations... (nc/CMakeLists.txt)'. A release build will look like:
-
-<p align="center">
-  <img src="docs/visual_studio_control.png" />
-</p>
-
-The configuration step should automatically start. Upon completion, build and install the engine. Once NcEngine is installed, NcEditor or the sample application may be built in the same way, excluding installation.
-
-Configure, build, and install steps may be manually triggered from the 'Project' and 'Build' menus or from a target's context menu from the solution explorer in 'CMake Targets View'.
-
-As an alternative: configure, build and install steps can be batched via build script through the included tools/tasks.vs.json file. The tasks are accessed via the context menu for the engine, sample, editor or test directories.
-
-This allows for a one-click option to configure, build, and install (if required) the chosen target and any dependent targets.
-
-To set these tasks up:
-
-1. Copy the contents of tools/tasks.vs.json to the clipboard. 
-2. Right click in the Solution Explorer and choose "Configure Tasks". 
-3. Replace the tasks.vs.json file that just opened with the contents of the clipboard and save. 
-This creates the context menu options that are wired up to invoke the build script.
-
-<p align="center">
-  <img src="docs/context_menu_build_tasks_vs.png" />
-</p>
+### Building a Production Library
+While the default `Nc::Engine-dev` target can be built with a Release configuration, it still includes extra code for profiling and inspection by NcEditor that is otherwise not needed by the project itself. This can be excluded by defining `NC_PROD_BUILD=ON` during the CMake configure step. The target will instead be exported as `Nc::Engine`, and additional items, like NcEditor and the sample, will not be built. Unique build and install directories should be used when enabling and disabling this option.
 
 ### Definitions
 ---------------
-#### NC_INSTALL_DIR
-    Default = install/NcEngine/${presetName}
-    The directory NcEngine will be installed to.
+#### NC_BUILD_TESTS
+    Default: OFF
+    Include tests when building the NcSdk project.
+
+#### NC_PROD_BUILD
+    Default: OFF
+    Build binaries with debug, utility, and profiling code stripped. Only NcEngine is built, and its target name is changed to 'Nc::NcEngine' (dropping the '-dev' suffix). NcEditor uses this for project release builds.
 
 #### NC_EDITOR_ENABLED
-    Default = OFF
+    Default: ON (OFF when NC_PROD_BUILD=ON)
     Flag used by both CMake and NcEngine specifying whether to include the debug editor in the final executable. Some blocks of coded required only by the editor are wrapped in #ifdefs. If this value is set to ON, it must be passed when building both the engine library and your project.
 
 #### NC_ASSERT_ENABLED
-    Default = ON
+    Default: ON (OFF when NC_PROD_BUILD=ON)
     Enables extra checks through the NC_ASSERT macro. These are enabled by default, even in release builds, as they are unlikely to have a serious effect on performance.
 
 #### NC_DEBUG_RENDERING_ENABLED
-    Default = OFF
+    Default: ON (OFF when NC_PROD_BUILD=ON)
     Allows rendering wireframe primitives for debugging purposes.
 
 #### NC_PROFILING_ENABLED
-    Default = OFF
+    Default: ON (OFF when NC_PROD_BUILD=ON)
     Enabled profiling with Optick. This also requires the Optick application (https://www.optickprofiler.com) and the Optick
     shared library (nc/lib/libOptick.dll).
 
 #### NC_VERBOSE_LOGGING_ENABLED
-    Default = OFF
+    Default: ON (OFF when NC_PROD_BUILD=ON)
     Flag used to enable extra logging of internal engine operations to the diagnostics file specified in config.ini.
 
 ## More Information
