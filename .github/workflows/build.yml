@@ -3,7 +3,7 @@ name: Tests
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ vnext ]
+    branches: [ vnext, release ]
     paths-ignore:
       - '**/*.md'
       - '**/*.txt'
@@ -19,16 +19,6 @@ jobs:
   Windows:
     runs-on: windows-2022
 
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'cpp' ]
-
     steps:
     - name: Checkout Branch
       uses: actions/checkout@v2
@@ -42,19 +32,11 @@ jobs:
         vulkan-query-version: 1.2.198.0
         vulkan-components: Vulkan-Headers, Vulkan-Loader
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.language }}
-
     - name: Configure
       run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
-      run: cmake --build ${{github.workspace}}/build --target install --config Release --parallel 4
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      run: cmake --build ${{github.workspace}}/build --target install --config Release
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/sdk/test
