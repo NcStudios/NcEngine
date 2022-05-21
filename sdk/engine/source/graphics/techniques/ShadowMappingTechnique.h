@@ -3,7 +3,7 @@
 #include "graphics/resources/ShaderDescriptorSets.h"
 #include "ITechnique.h"
 
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics

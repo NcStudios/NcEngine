@@ -1,6 +1,6 @@
 ### Math Tests ###
 add_executable(Math_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/math/Math_unit_tests.cpp
+    Math_unit_tests.cpp
 )
 
 target_include_directories(Math_unit_tests
@@ -25,7 +25,7 @@ add_test(Math_unit_tests Math_unit_tests)
 
 ### Random Tests ###
 add_executable(Random_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/math/Random_unit_tests.cpp
+    Random_unit_tests.cpp
 )
 
 target_include_directories(Random_unit_tests
@@ -48,7 +48,7 @@ add_test(Random_unit_tests Random_unit_tests)
 
 ### Vector Tests ###
 add_executable(Vector_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/math/Vector_unit_tests.cpp
+    Vector_unit_tests.cpp
 )
 
 target_include_directories(Vector_unit_tests

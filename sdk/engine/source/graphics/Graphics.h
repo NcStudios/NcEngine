@@ -4,7 +4,7 @@
 #include "GpuAllocator.h"
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #ifdef NC_DEBUG_RENDERING_ENABLED
 #include "DebugRenderer.h"
 #endif

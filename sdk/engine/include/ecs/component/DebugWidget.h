@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Collider.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 
 namespace nc
 {

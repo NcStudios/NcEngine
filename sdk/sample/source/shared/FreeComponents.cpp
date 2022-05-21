@@ -24,8 +24,7 @@ namespace
 namespace nc::sample
 {
     EdgePanCamera::EdgePanCamera(Entity entity)
-        : Camera(entity),
-          m_lastFrameZoom{0.0f}
+        : Camera(entity)
     {}
 
     void EdgePanCamera::Run(Entity self, Registry* registry, float dt)

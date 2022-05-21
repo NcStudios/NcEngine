@@ -5,7 +5,19 @@
             "label": "Configure-NcSdk-Dev",
             "type": "shell",
             "command": "cmake",
-            "args": ["-S", "./", "-B", "build/dev", "-DCMAKE_INSTALL_PREFIX=install"],
+            "args": ["-S", "./", "-B", "build/dev", "-DCMAKE_INSTALL_PREFIX=install", "-DNC_BUILD_TESTS=ON"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Configure-NcSdk-Prod",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "./", "-B", "build/prod", "-DCMAKE_INSTALL_PREFIX=NcSdk-0.1.0", "-DNC_PROD_BUILD=ON", "-DNC_BUILD_TESTS=OFF"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -17,7 +29,7 @@
             "label": "Build-NcSdk-Dev-Debug",
             "type": "shell",
             "command": "cmake",
-            "args": ["--build", "build/dev", "--target", "install", "--config", "Debug", "--parallel", "12"],
+            "args": ["--build", "build/dev", "--target", "install", "--config", "Debug", "--parallel", "8"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -30,7 +42,7 @@
             "label": "Build-NcSdk-Dev-Release",
             "type": "shell",
             "command": "cmake",
-            "args": ["--build", "build/dev", "--target", "install", "--config", "Release", "--parallel", "12"],
+            "args": ["--build", "build/dev", "--target", "install", "--config", "Release", "--parallel", "8"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -40,42 +52,29 @@
             "dependsOn": "Configure-NcSdk-Dev"
         },
         {
-            "label": "Configure-Tests",
+            "label": "Build-NcSdk-Prod",
             "type": "shell",
             "command": "cmake",
-            "args": ["-S", "test", "-B", "build/test"],
+            "args": ["--build", "build/prod", "--target", "install", "--config", "Release", "--parallel", "8"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-NcSdk-Prod"
+        },
+        {
+            "label": "Run-Tests",
+            "type": "shell",
+            "command": "ctest",
+            "args": ["-V", "--test-dir", "${workspaceFolder}/build/dev/sdk/test"],
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             },
             "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Build-Tests",
-            "type": "shell",
-            "command": "cmake",
-            "args": ["--build", "build/test", "--config", "Release", "--parallel", "12"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-Tests"
-        },
-        {
-            "label": "Run-Tests",
-            "type": "shell",
-            "command": "ctest",
-            "args": ["-V", "--test-dir", "build/test"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
-            },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "Build-Tests"
         }
     ]
 }

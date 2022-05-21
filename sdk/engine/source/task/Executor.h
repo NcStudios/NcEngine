@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Job.h"
-#include "taskflow/taskflow/taskflow.hpp"
+#include "taskflow/taskflow.hpp"
 
 namespace nc
 {

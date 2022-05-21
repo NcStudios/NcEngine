@@ -31,3 +31,14 @@ target_link_libraries(${NC_EDITOR_EXE}
 )
 
 add_subdirectory(source)
+
+# Install NcEditor Files
+install(TARGETS     ${NC_EDITOR_EXE}
+        DESTINATION bin
+)
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sdk/editor/file_templates
+        DESTINATION resources
+)
+install(FILES       ${PROJECT_SOURCE_DIR}/sdk/editor/config/engine_config.ini
+        DESTINATION bin
+)

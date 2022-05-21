@@ -1,7 +1,7 @@
 #pragma once
 
 #include "narrow_phase/Polytope.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 
 namespace nc::physics
 {

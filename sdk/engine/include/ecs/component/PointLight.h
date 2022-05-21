@@ -2,7 +2,7 @@
 
 #include "Component.h"
 #include "math/Vector.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 
 namespace nc
 {

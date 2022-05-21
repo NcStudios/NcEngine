@@ -1,6 +1,6 @@
 ### Manifold Tests ###
 add_executable(Manifold_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/physics/Manifold_unit_tests.cpp
+    Manifold_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/PhysicsPipelineTypes.cpp
 )
 
@@ -20,13 +20,14 @@ target_compile_options(Manifold_unit_tests
 target_link_libraries(Manifold_unit_tests
     PRIVATE
         gtest
+        DirectXMath
 )
 
 add_test(Manifold_unit_tests Manifold_unit_tests)
 
 ### ClientObjectProperties Tests ###
 add_executable(ClientObjectProperties_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/physics/ClientObjectProperties_unit_tests.cpp
+    ClientObjectProperties_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/PhysicsPipelineTypes.cpp
 )
 
@@ -46,6 +47,7 @@ target_compile_options(ClientObjectProperties_unit_tests
 target_link_libraries(ClientObjectProperties_unit_tests
     PRIVATE
         gtest
+        DirectXMath
 )
 
 add_test(ClientObjectProperties_unit_tests ClientObjectProperties_unit_tests)

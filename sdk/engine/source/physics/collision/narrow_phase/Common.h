@@ -1,7 +1,7 @@
 #pragma once
 
 #include "debug/Utils.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #include "physics/Geometry.h"
 
 #include <array>

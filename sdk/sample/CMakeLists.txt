@@ -28,10 +28,20 @@ target_link_libraries(${NC_SAMPLE_EXE}
         ${NC_ENGINE_LIB}
 )
 
-target_sources(${NC_SAMPLE_EXE}
-    PRIVATE
-        SampleMain.cpp
-)
+add_subdirectory(source)
 
-add_subdirectory(source/scenes)
-add_subdirectory(source/shared)
+# Install
+install(TARGETS     ${NC_SAMPLE_EXE}
+        DESTINATION sample
+)
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sdk/sample/assets
+        DESTINATION sample
+)
+install(FILES       ${PROJECT_SOURCE_DIR}/sdk/sample/config.ini
+        DESTINATION sample
+)
+if(${NC_PROFILING_ENABLED})
+    install(FILES       ${PROJECT_SOURCE_DIR}/sdk/engine/lib/OptickCore.dll
+            DESTINATION sample
+    )
+endif()

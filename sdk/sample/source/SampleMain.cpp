@@ -10,7 +10,7 @@ int main()
 
     try
     {
-        engine = nc::InitializeNcEngine("sample/config.ini");
+        engine = nc::InitializeNcEngine("config.ini");
         engine->Start(std::make_unique<nc::sample::Worms>());
     }
     catch(std::exception& e)

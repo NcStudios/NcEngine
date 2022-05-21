@@ -4,7 +4,7 @@
 #include "ecs/SoA.h"
 #include "math/Random.h"
 
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 
 #include <vector>
 

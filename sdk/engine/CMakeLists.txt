@@ -45,6 +45,8 @@ target_link_libraries(${NC_ENGINE_LIB}
         #enet add for project requiring networking
     PUBLIC
         Vulkan::Vulkan
+        DirectXMath
+        Taskflow
 )
 
 # Note - OptickCore.dll still needs to be copied to the executable's directory
@@ -67,3 +69,20 @@ target_include_directories(${NC_ENGINE_LIB}
 )
 
 add_subdirectory(source)
+
+# Install
+install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} ${ENET_LIB}
+        EXPORT      NcEngine-export
+        DESTINATION lib
+)
+install(EXPORT      NcEngine-export
+        FILE        NcEngineTargets.cmake
+        NAMESPACE   Nc::
+        DESTINATION lib/cmake/NcEngine
+)
+install(FILES       ${PROJECT_SOURCE_DIR}/NcEngineConfig.cmake
+        DESTINATION lib/cmake/NcEngine
+)
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sdk/engine/include/
+        DESTINATION include
+)

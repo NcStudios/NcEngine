@@ -1,10 +1,40 @@
 find_package(Vulkan REQUIRED)
 
-set(NC_TEST_COLLATERAL_DIRECTORY ${PROJECT_SOURCE_DIR}/unit/assets/collateral/)
+set(NC_TEST_COLLATERAL_DIRECTORY ${PROJECT_SOURCE_DIR}/sdk/test/unit/assets/collateral/)
+
+### AudioClipAssetManager Tests ###
+add_executable(AudioClipAssetManager_unit_tests
+    AudioClipAssetManager_unit_tests.cpp
+    ${NC_SOURCE_DIR}/assets/AudioClipAssetManager.cpp
+)
+
+target_compile_definitions(AudioClipAssetManager_unit_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+)
+
+target_include_directories(AudioClipAssetManager_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
+)
+
+target_compile_options(AudioClipAssetManager_unit_tests
+    PUBLIC
+        ${WARNING_FLAGS}
+)
+
+target_link_libraries(AudioClipAssetManager_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(AudioClipAssetManager_unit_tests AudioClipAssetManager_unit_tests)
 
 ### ConcaveColliderAssetManager Tests ###
 add_executable(ConcaveColliderAssetManager_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/assets/ConcaveColliderAssetManager_unit_tests.cpp
+    ConcaveColliderAssetManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/assets/ConcaveColliderAssetManager.cpp
 )
 
@@ -34,7 +64,7 @@ add_test(ConcaveColliderAssetManager_unit_tests ConcaveColliderAssetManager_unit
 
 ### ConvexHullAssetManager Tests ###
 add_executable(ConvexHullAssetManager_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/assets/ConvexHullAssetManager_unit_tests.cpp
+    ConvexHullAssetManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/assets/ConvexHullAssetManager.cpp
 )
 
@@ -64,7 +94,7 @@ add_test(ConvexHullAssetManager_unit_tests ConvexHullAssetManager_unit_tests)
 
 ### MeshAssetManager Tests ###
 add_executable(MeshAssetManager_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/assets/MeshAssetManager_unit_tests.cpp
+    MeshAssetManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/assets/MeshAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
 )
@@ -95,39 +125,9 @@ target_link_libraries(MeshAssetManager_unit_tests
 
 add_test(MeshAssetManager_unit_tests MeshAssetManager_unit_tests)
 
-### AudioClipAssetManager Tests ###
-add_executable(AudioClipAssetManager_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/assets/AudioClipAssetManager_unit_tests.cpp
-    ${NC_SOURCE_DIR}/assets/AudioClipAssetManager.cpp
-)
-
-target_compile_definitions(AudioClipAssetManager_unit_tests
-    PRIVATE
-        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
-)
-
-target_include_directories(AudioClipAssetManager_unit_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
-)
-
-target_compile_options(AudioClipAssetManager_unit_tests
-    PUBLIC
-        ${WARNING_FLAGS}
-)
-
-target_link_libraries(AudioClipAssetManager_unit_tests
-    PRIVATE
-        gtest
-)
-
-add_test(AudioClipAssetManager_unit_tests AudioClipAssetManager_unit_tests)
-
 ### ShaderAssetManager Tests ###
 add_executable(ShaderAssetManager_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/assets/ShaderAssetManager_unit_tests.cpp
+    ShaderAssetManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/assets/ShaderAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
 )

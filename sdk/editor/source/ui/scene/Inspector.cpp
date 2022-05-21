@@ -5,7 +5,7 @@
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
 
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #include "ecs/Registry.h"
 #include "ecs/component/All.h"
 #include "imgui/imgui.h"

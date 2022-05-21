@@ -1,6 +1,6 @@
 ### PacketBuffer Tests ###
 add_executable(PacketBuffer_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/network/PacketBuffer_unit_tests.cpp
+    PacketBuffer_unit_tests.cpp
     ${NC_SOURCE_DIR}/network/PacketBuffer.cpp
 )
 

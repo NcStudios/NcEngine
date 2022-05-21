@@ -1,6 +1,6 @@
 #pragma once
 
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #include "ecs/component/Component.h"
 #include "graphics/resources/ShaderDescriptorSets.h"
 #include "particle/EmitterState.h"

@@ -1,6 +1,6 @@
 ### PairCache Tests ###
 add_executable(PairCache_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/physics/collision/narrow_phase/PairCache_unit_tests.cpp
+    PairCache_unit_tests.cpp
 )
 
 target_include_directories(PairCache_unit_tests
@@ -25,7 +25,7 @@ add_test(PairCache_unit_tests PairCache_unit_tests)
 
 ### Simplex Tests ###
 add_executable(Simplex_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/physics/collision/narrow_phase/Simplex_unit_tests.cpp
+    Simplex_unit_tests.cpp
 )
 
 target_include_directories(Simplex_unit_tests

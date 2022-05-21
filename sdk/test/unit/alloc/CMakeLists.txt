@@ -1,6 +1,6 @@
 ### Allocator Tests ###
 add_executable(Allocator_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/alloc/Allocator_unit_tests.cpp
+    Allocator_unit_tests.cpp
 )
 
 target_include_directories(Allocator_unit_tests
@@ -24,7 +24,7 @@ add_test(Allocator_unit_tests Allocator_unit_tests)
 
 ### MakeUnique Tests ###
 add_executable(MakeUnique_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/alloc/MakeUnique_unit_tests.cpp
+    MakeUnique_unit_tests.cpp
 )
 
 target_include_directories(MakeUnique_unit_tests
@@ -48,7 +48,7 @@ add_test(MakeUnique_unit_tests MakeUnique_unit_tests)
 
 ### MemoryResource Tests ###
 add_executable(MemoryResource_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/alloc/MemoryResource_unit_tests.cpp
+    MemoryResource_unit_tests.cpp
 )
 
 target_include_directories(MemoryResource_unit_tests

@@ -3,7 +3,7 @@
 #include "debug/Utils.h"
 #include "Input.h"
 #include "Window.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 
 #include <algorithm>
 #include <limits>

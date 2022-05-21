@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs/Registry.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 
 #include <vector>
 

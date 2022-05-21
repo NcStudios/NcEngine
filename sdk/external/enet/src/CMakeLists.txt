@@ -81,6 +81,6 @@ add_library(enet
 
 target_include_directories(enet
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/sdk/external/enet
+        ${PROJECT_SOURCE_DIR}/sdk/external
         ${PROJECT_SOURCE_DIR}/sdk/engine/include
 )

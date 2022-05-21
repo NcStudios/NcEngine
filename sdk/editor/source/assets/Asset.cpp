@@ -16,7 +16,7 @@ namespace nc::editor
     const auto PngExtension = std::string{".png"};
     const auto JpgExtension = std::string{".jpg"};
     const auto JpegExtension = std::string{".jpeg"};
-    const auto ExeName = std::string{"tools/asset_builder/build.exe"};
+    const auto ExeName = std::string{"../NcTools/nc-build.exe"};
 
     std::string BuildAssetTypeArg(nc::editor::AssetType type)
     {

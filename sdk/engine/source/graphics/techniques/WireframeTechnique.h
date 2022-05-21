@@ -3,7 +3,7 @@
 
 #include "ecs/component/Component.h"
 #include "ecs/component/DebugWidget.h"
-#include "directx/Inc/DirectXMath.h"
+#include "DirectXMath.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"

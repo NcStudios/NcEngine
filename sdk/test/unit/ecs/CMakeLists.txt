@@ -1,6 +1,6 @@
 ### FreeComponentGroup Tests ###
 add_executable(FreeComponentGroup_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/ecs/FreeComponentGroup_unit_tests.cpp
+    FreeComponentGroup_unit_tests.cpp
     ${NC_SOURCE_DIR}/ecs/component/FreeComponentGroup.cpp
 )
 
@@ -25,7 +25,7 @@ add_test(FreeComponentGroup_unit_tests FreeComponentGroup_unit_tests)
 
 ### Entity Tests ###
 add_executable(Entity_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/ecs/Entity_unit_tests.cpp
+    Entity_unit_tests.cpp
 )
 
 target_include_directories(Entity_unit_tests
@@ -48,7 +48,7 @@ add_test(Entity_unit_tests Entity_unit_tests)
 
 ### Registry Tests ###
 add_executable(Registry_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/ecs/Registry_unit_tests.cpp
+    Registry_unit_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Registry.cpp
 )
 
@@ -74,7 +74,7 @@ add_test(Registry_unit_tests Registry_unit_tests)
 
 ### Transform Tests ###
 add_executable(Transform_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/ecs/Transform_unit_tests.cpp
+    Transform_unit_tests.cpp
     ${NC_SOURCE_DIR}/ecs/component/Transform.cpp
     ${NC_SOURCE_DIR}/ecs/Registry.cpp
     ${NC_SOURCE_DIR}/math/Quaternion.cpp
@@ -96,13 +96,14 @@ target_compile_options(Transform_unit_tests
 target_link_libraries(Transform_unit_tests
     PRIVATE
         gtest
+        DirectXMath
 )
 
 add_test(Transform_unit_tests Transform_unit_tests)
 
 ### View Tests ###
 add_executable(view_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/ecs/view_unit_tests.cpp
+    view_unit_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Registry.cpp
 )
 

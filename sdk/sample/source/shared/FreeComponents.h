@@ -13,42 +13,42 @@ namespace nc::sample
     class EdgePanCamera : public Camera
     {
         public:
-            EdgePanCamera(Entity entity);
+            EdgePanCamera(Entity self);
             void Run(Entity self, Registry* registry, float dt);
 
         private:
-            float m_lastFrameZoom;
             Vector3 m_lastFrameTranslation = Vector3::Zero();
+            float m_lastFrameZoom = 0.0f;
     };
 
     /** Applies a constant rotation around an axis to the parent object */
     class ConstantRotation : public FreeComponent
     {
         public:
-            ConstantRotation(Entity entity, Vector3 axis, float radiansPerSecond);
+            ConstantRotation(Entity self, Vector3 axis, float radiansPerSecond);
             void Run(Entity self, Registry* registry, float dt);
 
         private:
-            Vector3 m_axis;
-            float m_radiansPerSecond;
+            Vector3 m_axis = Vector3::Zero();
+            float m_radiansPerSecond = 0.0f;
     };
 
     /** Applies a constant translation along a vector to the parent object. */
     class ConstantTranslation : public FreeComponent
     {
         public:
-            ConstantTranslation(Entity entity, Vector3 velocity);
+            ConstantTranslation(Entity self, Vector3 velocity);
             void Run(Entity self, Registry* registry, float dt);
 
         private:
-            Vector3 m_velocity;
+            Vector3 m_velocity = Vector3::Zero();
     };
 
     /** Used by the Worms scene to make a point light track mouse movement. */
     class MouseFollower : public FreeComponent, public window::IOnResizeReceiver
     {
         public:
-            MouseFollower(Entity entity);
+            MouseFollower(Entity self);
             ~MouseFollower() noexcept;
             void Run(Entity self, Registry* registry, float dt);
             void OnResize(Vector2 screenDimensions) override;
@@ -64,7 +64,7 @@ namespace nc::sample
     class PrefabSelector : public FreeComponent
     {
         public:
-            PrefabSelector(Entity entity);
+            PrefabSelector(Entity self);
             void Run(Entity self, Registry* registry, float);
             void Select(ColliderType type);
 
@@ -79,7 +79,7 @@ namespace nc::sample
     class FPSTracker : public FreeComponent
     {
         public:
-            FPSTracker(Entity entity);
+            FPSTracker(Entity self);
             void Run(Entity self, Registry* registry, float dt);
             float GetFPS() const;
 
@@ -93,7 +93,7 @@ namespace nc::sample
     class Clickable : public FreeComponent, public IClickable
     {
         public:
-            Clickable(Entity entity, std::string tag, PhysicsModule* physicsModule);
+            Clickable(Entity self, std::string tag, PhysicsModule* physicsModule);
             ~Clickable() noexcept;
             void OnClick() override;
 
@@ -107,7 +107,7 @@ namespace nc::sample
     class ClickHandler : public FreeComponent
     {
         public:
-            ClickHandler(Entity entity, LayerMask mask, PhysicsModule* physicsModule);
+            ClickHandler(Entity self, LayerMask mask, PhysicsModule* physicsModule);
             void Run(Entity self, Registry* registry, float dt);
             void SetLayer(LayerMask mask);
 

@@ -1,6 +1,6 @@
 ### TaskGraph Tests ###
 add_executable(TaskGraph_unit_tests
-    ${PROJECT_SOURCE_DIR}/unit/task/TaskGraph_unit_tests.cpp
+    TaskGraph_unit_tests.cpp
 )
 
 target_include_directories(TaskGraph_unit_tests
@@ -19,6 +19,7 @@ target_compile_options(TaskGraph_unit_tests
 target_link_libraries(TaskGraph_unit_tests
     PRIVATE
         gtest
+        Taskflow
 )
 
 add_test(TaskGraph_unit_tests TaskGraph_unit_tests)
