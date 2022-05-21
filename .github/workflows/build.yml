@@ -15,59 +15,33 @@ on:
       - '**/*.jpg'
       - '**/*.jpeg'
 
-env:
-  ENGINE_PRESET: NcEngine-MSVC-Release-WithEditor
-  EDITOR_PRESET: NcEditor-MSVC-Release-WithEditor
-  SAMPLE_PRESET: Sample-MSVC-Release-WithEditor
-  TEST_PRESET: Tests-MSVC
-
 jobs:
   Windows:
     runs-on: windows-2022
 
-    steps:    
+    steps:
     - name: Checkout Branch
       uses: actions/checkout@v2
-      with:
-        submodules: recursive
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
- 
+
     - name: Setup Vulkan Sdk
       uses: humbletim/setup-vulkan-sdk@v1.2.0
       with:
         vulkan-query-version: 1.2.198.0
         vulkan-components: Vulkan-Headers, Vulkan-Loader
- 
-    - name: Configure NcEngine
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/engine -B ${{github.workspace}}/build/$env:ENGINE_PRESET --preset $env:ENGINE_PRESET
-          
-    - name: Build and Install NcEngine
-      run: cmake --build ${{github.workspace}}/build/$env:ENGINE_PRESET --target install --config Release
-    
-    - name: Configure NcEditor
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/editor -B ${{github.workspace}}/build/$env:EDITOR_PRESET --preset $env:EDITOR_PRESET
-      
-    - name: Build NcEditor
-      run: cmake --build ${{github.workspace}}/build/$env:EDITOR_PRESET --config Release
-    
-    - name: Configure Sample
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}}/sample -B ${{github.workspace}}/build/$env:SAMPLE_PRESET --preset $env:SAMPLE_PRESET
-    
-    - name: Build Sample
-      run: cmake --build ${{github.workspace}}/build/$env:SAMPLE_PRESET --config Release
-    
-    - name: Configure Tests
-      run: cmake -S ${{github.workspace}}/test -B ${{github.workspace}}/build/$env:TEST_PRESET --preset $env:TEST_PRESET
 
-    - name: Build Tests
-      run: cmake --build ${{github.workspace}}/build/$env:TEST_PRESET
+    - name: Configure
+      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
+
+    - name: Build and Install
+      run: cmake --build ${{github.workspace}}/build --target install --config Release --parallel 2
 
     - name: Run Tests
-      working-directory: ${{github.workspace}}/build/${{env.TEST_PRESET}}
+      working-directory: ${{github.workspace}}/build/sdk/test
       run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
-  
+
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
