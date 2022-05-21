@@ -1,5 +1,5 @@
 #include "ShaderAssetManager.h"
-#include "AssetUtilities.h"
+#include "AssetHelpers.h"
 #include "debug/NcError.h"
 
 #include <fstream>

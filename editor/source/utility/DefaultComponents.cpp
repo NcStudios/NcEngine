@@ -1,5 +1,5 @@
 #include "DefaultComponents.h"
-#include "Assets.h"
+#include "AssetUtilities.h"
 
 namespace nc::editor
 {

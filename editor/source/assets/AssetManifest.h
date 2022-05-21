@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Assets.h"
+#include "AssetUtilities.h"
 #include "AssetCollection.h"
 #include "framework/Callbacks.h"
 

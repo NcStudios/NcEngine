@@ -1,5 +1,5 @@
 #include "SolarSystem.h"
-#include "Assets.h"
+#include "AssetUtilities.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/Registry.h"
 #include "imgui/imgui.h"

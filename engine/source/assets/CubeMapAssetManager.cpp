@@ -1,5 +1,5 @@
 #include "CubeMapAssetManager.h"
-#include "assets/AssetUtilities.h"
+#include "assets/AssetHelpers.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/Initializers.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component.h"
-#include "Assets.h"
+#include "AssetUtilities.h"
 
 #include <span>
 

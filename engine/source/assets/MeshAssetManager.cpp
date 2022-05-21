@@ -1,5 +1,5 @@
 #include "MeshAssetManager.h"
-#include "AssetUtilities.h"
+#include "AssetHelpers.h"
 #include "graphics/Graphics.h"
 
 #include <cassert>
