@@ -33,4 +33,4 @@ imgui.ini
 !nc/lib/libOptickCore.dll.a
 
 !tools/gen.exe
-!tools/asset_builder/build.exe
+!tools/asset_builder/nc-builder.exe
