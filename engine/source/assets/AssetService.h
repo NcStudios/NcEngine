@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AssetUtilities.h"
+#include "assets/AssetUtilities.h"
 #include "service/ServiceLocator.h"
 
 namespace nc

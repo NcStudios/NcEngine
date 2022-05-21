@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component.h"
-#include "AssetUtilities.h"
+#include "assets/AssetUtilities.h"
 
 namespace nc
 {

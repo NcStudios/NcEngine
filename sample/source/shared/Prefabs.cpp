@@ -1,5 +1,5 @@
 #include "Prefabs.h"
-#include "AssetUtilities.h"
+#include "assets/AssetUtilities.h"
 #include "ecs/Registry.h"
 #include "ecs/component/Collider.h"
 #include "ecs/component/ConcaveCollider.h"

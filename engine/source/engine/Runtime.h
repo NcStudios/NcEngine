@@ -22,6 +22,7 @@ namespace nc
             auto Random() noexcept -> nc::Random* override;
             auto Registry() noexcept -> nc::Registry* override;
             auto Scene() noexcept -> SceneModule* override;
+            // auto Assets() noexcept -> nc::Assets* override;
 
         private:
             window::WindowImpl m_window;

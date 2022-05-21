@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assets/Assets.h"
 #include "audio/AudioModule.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
@@ -69,6 +70,12 @@ namespace nc
              * @return SceneModule*
              */
             virtual auto Scene() noexcept -> SceneModule* = 0;
+
+            // /**
+            //  * @brief Get a pointer to the global Assets instance.
+            //  * @return Assets*
+            //  */
+            // virtual auto Assets() noexcept -> nc::Assets* = 0;
     };
 
     /** @brief Flags controlling initialization of engine modules. */

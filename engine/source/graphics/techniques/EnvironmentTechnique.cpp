@@ -1,5 +1,5 @@
 #include "EnvironmentTechnique.h"
-#include "AssetUtilities.h"
+#include "assets/AssetUtilities.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
 #include "graphics/Graphics.h"

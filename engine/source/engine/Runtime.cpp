@@ -17,6 +17,7 @@ namespace
             .registry = nc::Registry{nc::config::GetMemorySettings().maxTransforms},
             .time = nc::time::Time{},
             .random = nc::Random{}
+            //, .assets = nc::Assets{nullptr, nc::config::GetProjectSettings(), nc::config::GetMemorySettings()} // TODO: Replace nullptr with graphics asset storage sink
         };
     }
 
@@ -49,7 +50,7 @@ namespace nc
 
     Runtime::Runtime(EngineInitFlags flags)
         : m_window{},
-          m_context{ BuildContext() },
+          m_context{ BuildContext() }, 
           m_modules{ BuildModules(&m_context.registry, &m_window, &m_context.time, std::bind_front(&Runtime::Clear, this), &m_dt, flags) },
           m_executor{},
           m_dt{ 0.0f },
@@ -104,6 +105,7 @@ namespace nc
     auto Runtime::Random()   noexcept -> nc::Random* { return &m_context.random; }
     auto Runtime::Registry() noexcept -> nc::Registry* { return &m_context.registry; }
     auto Runtime::Scene()    noexcept -> SceneModule* { return m_modules.sceneModule.get(); }
+    // auto Runtime::Assets()   noexcept -> nc::Assets* { return &m_context.assets; }
 
     void Runtime::BuildTaskGraph()
     {

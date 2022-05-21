@@ -1,6 +1,7 @@
 target_sources(NcEngineLib
     PRIVATE
         ${ROOT_DIR}/source/assets/Assets.cpp
+        ${ROOT_DIR}/source/assets/AssetUtilities.cpp
         ${ROOT_DIR}/source/assets/AssetHelpers.cpp
         ${ROOT_DIR}/source/assets/AudioClipAssetManager.cpp
         ${ROOT_DIR}/source/assets/ConcaveColliderAssetManager.cpp

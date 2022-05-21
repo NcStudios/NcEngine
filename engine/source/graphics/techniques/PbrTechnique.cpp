@@ -1,5 +1,5 @@
 #include "PbrTechnique.h"
-#include "AssetUtilities.h"
+#include "assets/AssetUtilities.h"
 #include "config/Config.h"
 #include "graphics/Graphics.h"
 #include "graphics/Commands.h"

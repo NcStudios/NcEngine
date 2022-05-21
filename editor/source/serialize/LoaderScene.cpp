@@ -31,7 +31,7 @@ namespace nc::editor
     {
         std::ofstream file{projectDirectory / "scenes\\GeneratedLoadScene.h"};
         file << "#pragma once\n\n"
-             << "#include \"AssetUtilities.h\"\n"
+             << "#include \"assets\\AssetUtilities.h\"\n"
              << "#include \"Scene.h\"\n\n"
              << "#include <string>\n"
              << "#include <vector>\n\n"
