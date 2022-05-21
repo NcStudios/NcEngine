@@ -1,0 +1,81 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure-NcSdk-Dev",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["-S", "./", "-B", "build/dev", "-DCMAKE_INSTALL_PREFIX=install", "-DNC_BUILD_TESTS=ON"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Build-NcSdk-Dev-Debug",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/dev", "--target", "install", "--config", "Debug", "--parallel", "8"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-NcSdk-Dev"
+        },
+        {
+            "label": "Build-NcSdk-Dev-Release",
+            "type": "shell",
+            "command": "cmake",
+            "args": ["--build", "build/dev", "--target", "install", "--config", "Release", "--parallel", "8"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOn": "Configure-NcSdk-Dev"
+        },
+        {
+            "label": "Run-Tests",
+            "type": "shell",
+            "command": "ctest",
+            "args": ["-V", "--test-dir", "${workspaceFolder}/build/dev/sdk/test"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Run-Sample",
+            "type": "shell",
+            "command": "${workspaceFolder}/install/sample/Sample.exe",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/install/sample"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Run-NcEditor",
+            "type": "shell",
+            "command": "${workspaceFolder}/install/bin/NcEditor.exe",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/install/bin"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}

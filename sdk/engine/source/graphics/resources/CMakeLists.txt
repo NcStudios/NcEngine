@@ -1,0 +1,17 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        CubeMap.cpp
+        CubeMapManager.cpp
+        RenderTarget.cpp
+        EnvironmentDataManager.cpp
+        Environment.cpp
+        ImmutableBuffer.cpp
+        ImmutableImage.cpp
+        ObjectDataManager.cpp
+        PointLightManager.cpp
+        RenderPassManager.cpp
+        ShaderDescriptorSets.cpp
+        ShadowMapManager.cpp
+        TextureManager.cpp
+        UniformBuffer.cpp
+)

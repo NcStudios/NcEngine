@@ -1,0 +1,17 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        AudioSource.cpp
+        Camera.cpp
+        Collider.cpp
+        Component.cpp
+        ConcaveCollider.cpp
+        DebugWidget.cpp
+        FreeComponentGroup.cpp
+        MeshRenderer.cpp
+        NetworkDispatcher.cpp
+        ParticleEmitter.cpp
+        PhysicsBody.cpp
+        PointLight.cpp
+        SceneNavigationCamera.cpp
+        Transform.cpp
+)
