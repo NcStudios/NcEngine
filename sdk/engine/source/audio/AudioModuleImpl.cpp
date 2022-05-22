@@ -1,6 +1,6 @@
 #include "AudioModuleImpl.h"
 #include "ecs/component/AudioSource.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 
 #include "optick/optick.h"
 #include <cstring>
@@ -215,7 +215,7 @@ namespace nc::audio
         const auto listenerPosition = listenerTransform->Position();
         const auto rightEar = listenerTransform->Right();
 
-        for(auto& source : view<AudioSource>{m_registry})
+        for(auto& source : View<AudioSource>{m_registry})
         {
             if(!source.IsPlaying())
                 continue;

@@ -27,7 +27,7 @@ namespace nc::detail
             auto EntityPool() noexcept -> std::vector<Entity>& { return entityPool; }
             auto SparseArray() const noexcept -> const std::vector<index_type>& { return sparseArray; }
             auto EntityPool() const noexcept -> const std::vector<Entity>& { return entityPool; }
-            auto size() const noexcept { return entityPool.size(); }
+            auto Size() const noexcept { return entityPool.size(); }
 
             virtual ~PerComponentStorageBase() = default;
             virtual void Clear() = 0;

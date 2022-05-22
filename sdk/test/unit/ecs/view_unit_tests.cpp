@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 
 using namespace nc;
 
@@ -42,12 +42,12 @@ struct Fake3 : public ComponentBase
 
 Registry g_registry{10u};
 
-class view_unit_tests : public ::testing::Test
+class View_unit_tests : public ::testing::Test
 {
     public:
         Registry& registry;
 
-        view_unit_tests()
+        View_unit_tests()
             : registry{g_registry}
         {
             registry.RegisterComponentType<Fake1>();
@@ -55,14 +55,14 @@ class view_unit_tests : public ::testing::Test
             registry.RegisterComponentType<Fake3>();
         }
 
-        ~view_unit_tests()
+        ~View_unit_tests()
         {
             registry.CommitStagedChanges();
             registry.Clear();
         }
 };
 
-TEST_F(view_unit_tests, Single_ForwardIteration_VisitsEach)
+TEST_F(View_unit_tests, Single_ForwardIteration_VisitsEach)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
     auto e2 = registry.Add<Entity>(EntityInfo{});
@@ -71,7 +71,7 @@ TEST_F(view_unit_tests, Single_ForwardIteration_VisitsEach)
     registry.Add<Fake1>(e2, 1);
     registry.Add<Fake1>(e3, 2);
     registry.CommitStagedChanges();
-    auto v = view<Fake1>{&registry};
+    auto v = View<Fake1>{&registry};
     EXPECT_EQ(v.size(), 3);
     auto beg = v.begin();
     auto end = v.end();
@@ -84,7 +84,7 @@ TEST_F(view_unit_tests, Single_ForwardIteration_VisitsEach)
     }
 }
 
-TEST_F(view_unit_tests, Single_ForwardIteration_ValidAfterAdd)
+TEST_F(View_unit_tests, Single_ForwardIteration_ValidAfterAdd)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
     auto e2 = registry.Add<Entity>(EntityInfo{});
@@ -93,7 +93,7 @@ TEST_F(view_unit_tests, Single_ForwardIteration_ValidAfterAdd)
     registry.Add<Fake1>(e1, 0);
     registry.Add<Fake1>(e2, 1);
     registry.CommitStagedChanges();
-    auto v = view<Fake1>{&registry};
+    auto v = View<Fake1>{&registry};
     registry.Add<Fake1>(e3, 2);
     registry.Add<Fake1>(e4, 3);
     EXPECT_EQ(v.size(), 2);
@@ -109,7 +109,7 @@ TEST_F(view_unit_tests, Single_ForwardIteration_ValidAfterAdd)
     EXPECT_EQ(count, 2);
 }
 
-TEST_F(view_unit_tests, Single_ReverseIteration_VisitsEach)
+TEST_F(View_unit_tests, Single_ReverseIteration_VisitsEach)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
     auto e2 = registry.Add<Entity>(EntityInfo{});
@@ -118,7 +118,7 @@ TEST_F(view_unit_tests, Single_ReverseIteration_VisitsEach)
     registry.Add<Fake1>(e2, 1);
     registry.Add<Fake1>(e3, 2);
     registry.CommitStagedChanges();
-    auto v = view<Fake1>{&registry};
+    auto v = View<Fake1>{&registry};
     EXPECT_EQ(v.size(), 3);
     auto rbeg = v.rbegin();
     auto rend = v.rend();
@@ -131,9 +131,9 @@ TEST_F(view_unit_tests, Single_ReverseIteration_VisitsEach)
     }
 }
 
-TEST_F(view_unit_tests, Single_EmptyView_SkipsLoop)
+TEST_F(View_unit_tests, Single_EmptyView_SkipsLoop)
 {
-    auto v = view<Fake1>{&registry};
+    auto v = View<Fake1>{&registry};
     EXPECT_EQ(v.size(), 0);
 
     auto beg = v.begin();
@@ -156,7 +156,7 @@ TEST_F(view_unit_tests, Single_EmptyView_SkipsLoop)
     EXPECT_EQ(count, 0);
 }
 
-TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
+TEST_F(View_unit_tests, Single_ReverseIteration_ValidAfterRemove)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
     auto e2 = registry.Add<Entity>(EntityInfo{});
@@ -165,7 +165,7 @@ TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
     registry.Add<Fake1>(e2, 1);
     registry.Add<Fake1>(e3, 2);
     registry.CommitStagedChanges();
-    auto v = view<Fake1>{&registry};
+    auto v = View<Fake1>{&registry};
     EXPECT_EQ(v.size(), 3);
     auto rbeg = v.rbegin();
     auto rend = v.rend();
@@ -181,24 +181,24 @@ TEST_F(view_unit_tests, Single_ReverseIteration_ValidAfterRemove)
     }
 }
 
-TEST_F(view_unit_tests, Single_ConstRegistry_ConstructsReadOnlyView)
+TEST_F(View_unit_tests, Single_ConstRegistry_ConstructsReadOnlyView)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
     registry.Add<Fake1>(e1, 0);
     registry.CommitStagedChanges();
     const auto* constRegistry = &registry;
-    auto v = view<const Fake1>{constRegistry};
+    auto v = View<const Fake1>{constRegistry};
     EXPECT_EQ(v.size(), 1);
 }
 
-TEST_F(view_unit_tests, Single_NonConstRegistryConstType_ReturnsReadOnlyValues)
+TEST_F(View_unit_tests, Single_NonConstRegistryConstType_ReturnsReadOnlyValues)
 {
     using expected_t = const Fake1&;
-    using actual_t = decltype(*view<const Fake1>{&registry}.begin());
+    using actual_t = decltype(*View<const Fake1>{&registry}.begin());
     EXPECT_TRUE((std::is_same_v<expected_t, actual_t>));
 }
 
-TEST_F(view_unit_tests, Multi_SizeUpperBound)
+TEST_F(View_unit_tests, Multi_SizeUpperBound)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
     auto e2 = registry.Add<Entity>(EntityInfo{});
@@ -211,20 +211,20 @@ TEST_F(view_unit_tests, Multi_SizeUpperBound)
     registry.Add<Fake3>(e2, 1);
     registry.CommitStagedChanges();
 
-    auto v12 = multi_view<Fake1, Fake2>{&registry};
+    auto v12 = MultiView<Fake1, Fake2>{&registry};
     EXPECT_EQ(v12.size_upper_bound(), 2);
 
-    auto v23 = multi_view<Fake2, Fake3>{&registry};
+    auto v23 = MultiView<Fake2, Fake3>{&registry};
     EXPECT_EQ(v23.size_upper_bound(), 1);
 
-    auto v13 = multi_view<Fake1, Fake3>{&registry};
+    auto v13 = MultiView<Fake1, Fake3>{&registry};
     EXPECT_EQ(v13.size_upper_bound(), 1);
 
-    auto v123 = multi_view<Fake1, Fake2, Fake3>{&registry};
+    auto v123 = MultiView<Fake1, Fake2, Fake3>{&registry};
     EXPECT_EQ(v123.size_upper_bound(), 1);
 }
 
-TEST_F(view_unit_tests, Multi_VisitsEach)
+TEST_F(View_unit_tests, Multi_VisitsEach)
 {
     auto e1 = registry.Add<Entity>(EntityInfo{});
     auto e2 = registry.Add<Entity>(EntityInfo{});
@@ -245,7 +245,7 @@ TEST_F(view_unit_tests, Multi_VisitsEach)
     const auto expectedFake2Value = 20;
     const auto expectedFake3Value = 30;
 
-    for(auto& [f1, f2, f3] : multi_view<Fake1, Fake2, Fake3>{&registry})
+    for(auto& [f1, f2, f3] : MultiView<Fake1, Fake2, Fake3>{&registry})
     {
         f1->value = expectedFake1Value;
         f2->value = expectedFake2Value;
@@ -260,9 +260,9 @@ TEST_F(view_unit_tests, Multi_VisitsEach)
     EXPECT_EQ(registry.Get<Fake3>(e4)->value, expectedFake3Value);
 }
 
-TEST_F(view_unit_tests, Multi_ConstAndNonConstComponents_PropagatesConst)
+TEST_F(View_unit_tests, Multi_ConstAndNonConstComponents_PropagatesConst)
 {
-    for(auto& [f1, f2] : multi_view<Fake1, const Fake2>{&registry})
+    for(auto& [f1, f2] : MultiView<Fake1, const Fake2>{&registry})
     {
         static_assert(!std::is_const_v<std::remove_pointer_t<decltype(f1)>>);
         static_assert(std::is_const_v<std::remove_pointer_t<decltype(f2)>>);

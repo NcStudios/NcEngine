@@ -1,6 +1,6 @@
 #pragma once
 
-#include "detail/view_utility.h"
+#include "detail/ViewUtility.h"
 
 namespace nc
 {
@@ -10,27 +10,27 @@ namespace nc
      * Represents a contiguous range of all objects of the specified type. Iterator
      * invalidation rules are the same as the registry.
      * 
-     * @tparam T The type, which models viewable, to be accessed.
+     * @tparam T The type, which models Viewable, to be accessed.
      */
-    template<viewable T>
-    class view
+    template<Viewable T>
+    class View
     {
         public:
-            using adaptor = detail::view_storage_adaptor<T>;
+            using adaptor = detail::ViewStorageAdaptor<T>;
             using storage = adaptor::storage_type;
 
             /**
              * @brief Constructs a new view.
              * @param registry Pointer to a Registry the view will be constructed from.
              */
-            view(Registry* registry)
+            View(Registry* registry)
                 : m_viewBasis{adaptor::basis(registry)} {}
 
             /**
              * @brief Constructs a new read-only view.
              * @param registry Pointer to a const Registry the view will be constructed from.
              */
-            view(const Registry* registry)
+            View(const Registry* registry)
                 : m_viewBasis{adaptor::basis(registry)} {}
 
             /**
@@ -61,7 +61,7 @@ namespace nc
              * @brief Returns the number of elements in the view.
              * @return size_t
              */
-            auto size() const noexcept { return m_viewBasis->size(); }
+            auto size() const noexcept { return m_viewBasis->Size(); }
 
         private:
             storage* m_viewBasis;
@@ -76,17 +76,17 @@ namespace nc
      * @tparam Ts The components, which model PooledComponent, to be viewed.
      */
     template<PooledComponent... Ts>
-    class multi_view
+    class MultiView
     {
         public:
-            using adaptor = detail::view_storage_adaptor<Ts...>;
+            using adaptor = detail::ViewStorageAdaptor<Ts...>;
             using storage = adaptor::storage_type;
 
             /**
-             * @brief Constructs a new multi_view.
+             * @brief Constructs a new MultiView.
              * @param registry Pointer to the Registry the view will be constructed from.
              */
-            multi_view(Registry* registry)
+            MultiView(Registry* registry)
                 : m_registry{registry}, m_viewBasis{adaptor::basis(registry)} {}
 
             /**
@@ -105,7 +105,7 @@ namespace nc
              * @brief Returns the maximum number of entities in the view.
              * @return size_t
              */
-            auto size_upper_bound() const noexcept { return m_viewBasis->size(); }
+            auto size_upper_bound() const noexcept { return m_viewBasis->Size(); }
 
         private:
             Registry* m_registry;

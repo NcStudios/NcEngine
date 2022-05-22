@@ -17,8 +17,8 @@ namespace nc::detail
     };
 
     /** Iterator for a single storage pool. */
-    template<viewable T>
-    class single_view_iterator final
+    template<Viewable T>
+    class SingleViewIterator final
     {
         public:
             using iterator_type = T*;
@@ -28,31 +28,31 @@ namespace nc::detail
             using reference = std::iterator_traits<iterator_type>::reference;
             using iterator_category = std::contiguous_iterator_tag;
 
-            single_view_iterator(iterator_type it) noexcept
+            SingleViewIterator(iterator_type it) noexcept
                 : m_cur{it}
             {
             }
 
-            auto operator++() noexcept -> single_view_iterator&
+            auto operator++() noexcept -> SingleViewIterator&
             {
                 ++m_cur;
                 return *this;
             }
 
-            auto operator--() noexcept -> single_view_iterator&
+            auto operator--() noexcept -> SingleViewIterator&
             {
                 --m_cur;
                 return *this;
             }
 
-            auto operator++(int) noexcept -> single_view_iterator
+            auto operator++(int) noexcept -> SingleViewIterator
             {
                 auto temp = *this;
                 operator++();
                 return temp;
             }
 
-            auto operator--(int) noexcept -> single_view_iterator
+            auto operator--(int) noexcept -> SingleViewIterator
             {
                 auto temp = *this;
                 operator--();
@@ -69,12 +69,12 @@ namespace nc::detail
                 return *m_cur;
             }
 
-            [[nodiscard]] friend bool operator==(const single_view_iterator<T>& lhs, const single_view_iterator<T>& rhs)
+            [[nodiscard]] friend bool operator==(const SingleViewIterator<T>& lhs, const SingleViewIterator<T>& rhs)
             {
                 return lhs.m_cur == rhs.m_cur;
             }
 
-            [[nodiscard]] friend bool operator!=(const single_view_iterator<T>& lhs, const single_view_iterator<T>& rhs)
+            [[nodiscard]] friend bool operator!=(const SingleViewIterator<T>& lhs, const SingleViewIterator<T>& rhs)
             {
                 return !(lhs == rhs);
             }
@@ -84,10 +84,10 @@ namespace nc::detail
     };
 
     template<PooledComponent... Ts>
-    class multi_view_iterator final
+    class MultiViewIterator final
     {
         public:
-            using basis_iterator = entity_storage::iterator;
+            using basis_iterator = EntityStorage::iterator;
             using value_type = std::tuple<Ts*...>;
             using pointer = value_type*;
             using const_pointer = const value_type*;
@@ -96,19 +96,19 @@ namespace nc::detail
             using difference_type = std::ptrdiff_t;
             using iterator_category = std::forward_iterator_tag;
 
-            multi_view_iterator(basis_iterator beg, basis_iterator end, Registry* registry) noexcept
+            MultiViewIterator(basis_iterator beg, basis_iterator end, Registry* registry) noexcept
                 : m_cur{beg}, m_end{end}, m_registry{registry}, m_currentValues{}
             {
                 if(m_cur != m_end && !fill_values()) operator++();
             }
 
-            auto operator++() noexcept -> multi_view_iterator&
+            auto operator++() noexcept -> MultiViewIterator&
             {
                 while(++m_cur != m_end && !fill_values()) {}
                 return *this;
             }
 
-            auto operator++(int) noexcept -> multi_view_iterator
+            auto operator++(int) noexcept -> MultiViewIterator
             {
                 auto temp = *this;
                 operator++();
@@ -135,12 +135,12 @@ namespace nc::detail
                 return *operator->();
             }
 
-            [[nodiscard]] friend bool operator==(const multi_view_iterator<Ts...>& lhs, const multi_view_iterator<Ts...>& rhs)
+            [[nodiscard]] friend bool operator==(const MultiViewIterator<Ts...>& lhs, const MultiViewIterator<Ts...>& rhs)
             {
                 return lhs.m_cur == rhs.m_cur;
             }
 
-            [[nodiscard]] friend bool operator!=(const multi_view_iterator<Ts...>& lhs, const multi_view_iterator<Ts...>& rhs)
+            [[nodiscard]] friend bool operator!=(const MultiViewIterator<Ts...>& lhs, const MultiViewIterator<Ts...>& rhs)
             {
                 return !(lhs == rhs);
             }
@@ -164,10 +164,10 @@ namespace nc::detail
     };
 
     /** Generalized access to registry storage for views over multiple components. */
-    template<viewable... Ts>
-    struct view_storage_adaptor
+    template<Viewable... Ts>
+    struct ViewStorageAdaptor
     {
-        using iterator = detail::multi_view_iterator<Ts...>;
+        using iterator = detail::MultiViewIterator<Ts...>;
         using storage_type = detail::PerComponentStorageBase;
 
         static auto basis(Registry* registry) -> storage_type*
@@ -175,7 +175,7 @@ namespace nc::detail
             return std::min<storage_type*>
             (
                 {registry->StorageFor<std::remove_const_t<Ts>>()...},
-                [](const auto* l, const auto* r) { return l->size() < r->size(); }
+                [](const auto* l, const auto* r) { return l->Size() < r->Size(); }
             );
         }
 
@@ -194,12 +194,12 @@ namespace nc::detail
 
     /** Specialization for views over entities. */
     template<std::same_as<Entity> T>
-    struct view_storage_adaptor<T>
+    struct ViewStorageAdaptor<T>
     {
         using value_type = std::remove_const_t<T>;
-        using iterator = detail::single_view_iterator<T>;
+        using iterator = detail::SingleViewIterator<T>;
         using reverse_iterator = std::reverse_iterator<iterator>;
-        using storage_type = constness_of<detail::entity_storage, T>::type;
+        using storage_type = constness_of<detail::EntityStorage, T>::type;
 
         static auto basis(Registry* registry) -> storage_type*
         {
@@ -213,23 +213,23 @@ namespace nc::detail
 
         static auto begin(storage_type* basis) noexcept -> iterator
         {
-            auto& pool = basis->pool();
+            auto& pool = basis->Pool();
             return iterator{pool.data()};
         }
 
         static auto end(storage_type* basis) noexcept -> iterator
         {
-            auto& pool = basis->pool();
+            auto& pool = basis->Pool();
             return iterator{pool.data() + pool.size()};
         }
     };
 
     /** Specialization for views over single components. */
     template<PooledComponent T>
-    struct view_storage_adaptor<T>
+    struct ViewStorageAdaptor<T>
     {
         using value_type = std::remove_const_t<T>;
-        using iterator = detail::single_view_iterator<T>;
+        using iterator = detail::SingleViewIterator<T>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using storage_type = constness_of<detail::PerComponentStorage<std::remove_const_t<T>>, T>::type;
 

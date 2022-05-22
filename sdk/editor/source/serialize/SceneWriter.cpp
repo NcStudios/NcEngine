@@ -1,6 +1,6 @@
 #include "SceneWriter.h"
 #include "EditorScene.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "utility/Output.h"
 #include "assets/AssetManifest.h"
 #include "utility/DefaultComponents.h"
@@ -85,7 +85,7 @@ namespace nc::editor
         const std::string entityString{"entity"};
         const std::string underscore{"_"};
         size_t i = 0u;
-        for(auto entity : view<Entity>{m_registry})
+        for(auto entity : View<Entity>{m_registry})
         {
             ++i;
             auto* tag = m_registry->Get<Tag>(entity);
@@ -158,7 +158,7 @@ namespace nc::editor
                << "{\n"
                << "auto* registry = engine->Registry();\n";
 
-        for(auto e : view<Entity>{m_registry})
+        for(auto e : View<Entity>{m_registry})
         {
             WriteEntity(e);
         }
