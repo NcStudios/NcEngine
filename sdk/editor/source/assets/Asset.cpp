@@ -3,7 +3,7 @@
 #include "utility/DefaultComponents.h"
 
 // Engine includes
-#include "Assets.h"
+#include "assets/AssetUtilities.h"
 #include "ecs/component/MeshRenderer.h"
 #include "platform/win32/NcWin32.h"
 

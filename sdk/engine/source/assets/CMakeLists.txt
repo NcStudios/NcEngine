@@ -1,6 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         Assets.cpp
+        AssetHelpers.cpp
         AssetUtilities.cpp
         AudioClipAssetManager.cpp
         ConcaveColliderAssetManager.cpp
