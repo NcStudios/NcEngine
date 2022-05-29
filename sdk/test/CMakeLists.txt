@@ -1,6 +1,8 @@
 # Fetch gtest
-set(BUILD_GMOCK OFF)
-set(INSTALL_GTEST OFF)
+set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+
+enable_testing()
 
 FetchContent_Declare(googletest
                      GIT_REPOSITORY https://github.com/NcStudios/googletest.git
@@ -10,8 +12,6 @@ FetchContent_Declare(googletest
 FetchContent_MakeAvailable(googletest)
 
 include(GoogleTest)
-
-enable_testing()
 
 add_definitions(-DNC_ASSERT_ENABLED)
 
