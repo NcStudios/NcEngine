@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "ecs/handle.h"
+#include "ecs/Handle.h"
 
 using namespace nc;
 

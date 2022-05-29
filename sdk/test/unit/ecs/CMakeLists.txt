@@ -102,12 +102,12 @@ target_link_libraries(Transform_unit_tests
 add_test(Transform_unit_tests Transform_unit_tests)
 
 ### View Tests ###
-add_executable(view_unit_tests
-    view_unit_tests.cpp
+add_executable(View_unit_tests
+    View_unit_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Registry.cpp
 )
 
-target_include_directories(view_unit_tests
+target_include_directories(View_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
@@ -115,14 +115,14 @@ target_include_directories(view_unit_tests
         ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
-target_compile_options(view_unit_tests
+target_compile_options(View_unit_tests
     PUBLIC
         ${WARNING_FLAGS}
 )
 
-target_link_libraries(view_unit_tests
+target_link_libraries(View_unit_tests
     PRIVATE
         gtest
 )
 
-add_test(view_unit_tests view_unit_tests)
+add_test(View_unit_tests View_unit_tests)

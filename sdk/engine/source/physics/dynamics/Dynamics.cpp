@@ -1,7 +1,7 @@
 #include "Dynamics.h"
 #include "ecs/component/Collider.h"
 #include "ecs/component/PhysicsBody.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "physics/PhysicsConstants.h"
 
 namespace
@@ -13,7 +13,7 @@ namespace nc::physics
 {
     void UpdateWorldInertiaTensors(Registry* registry)
     {
-        for(auto& body : view<PhysicsBody>{registry})
+        for(auto& body : View<PhysicsBody>{registry})
         {
             const auto* transform = registry->Get<Transform>(body.ParentEntity());
             body.UpdateWorldInertia(transform);
@@ -24,7 +24,7 @@ namespace nc::physics
     {
         const auto g = DirectX::XMVectorScale(GravityVector, dt);
 
-        for(auto& body : view<PhysicsBody>{registry})
+        for(auto& body : View<PhysicsBody>{registry})
         {
             if(body.UseGravity())
             {
@@ -35,7 +35,7 @@ namespace nc::physics
 
     void Integrate(Registry* registry, float dt)
     {
-        for(auto& body : view<PhysicsBody>{registry})
+        for(auto& body : View<PhysicsBody>{registry})
         {
             auto* transform = registry->Get<Transform>(body.ParentEntity());
 

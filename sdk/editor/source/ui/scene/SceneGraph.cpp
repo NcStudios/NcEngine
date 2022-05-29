@@ -1,6 +1,6 @@
 #include "SceneGraph.h"
 #include "assets/AssetManifest.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
@@ -94,7 +94,7 @@ namespace nc::editor
                     ImGui::EndPopup();
                 }
 
-                for(auto entity : view<Entity>{m_registry})
+                for(auto entity : View<Entity>{m_registry})
                 {
                     auto* transform = m_registry->Get<Transform>(entity);
                     if(transform->Parent().Valid()) // only draw root nodes

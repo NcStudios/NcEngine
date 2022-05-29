@@ -1,6 +1,6 @@
 #include "MeshBatcher.h"
 #include "ecs/Registry.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "physics/collision/IntersectionQueries.h"
 
 namespace
@@ -62,7 +62,7 @@ namespace nc::graphics
         m_batches.clear();
         Batch* current = nullptr;
 
-        for(const auto& renderer : view<MeshRenderer>{m_registry})
+        for(const auto& renderer : View<MeshRenderer>{m_registry})
         {
             const auto& modelMatrix = m_registry->Get<Transform>(renderer.ParentEntity())->TransformationMatrix();
 

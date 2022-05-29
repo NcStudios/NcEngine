@@ -79,7 +79,7 @@ namespace nc
 
         const auto translation = mouseDelta * dt;
         m_unitsTraveled += Magnitude(translation);
-        return Vector3{translation, 0.0f};
+        return Vector3{-1.0f * translation.x, translation.y, 0.0f};
     }
 
     auto SceneNavigationCamera::PanAndTilt(float dt, float speedMult, const Vector3& tiltAxis) -> Quaternion

@@ -34,15 +34,19 @@ endif()
 
 # Get dependencies
 find_package(Vulkan REQUIRED)
+
 include(FetchContent)
+
 FetchContent_Declare(DirectXMath
                      GIT_REPOSITORY https://github.com/NcStudios/DirectXMath.git
                      GIT_TAG        origin/main
 )
+
 FetchContent_Declare(taskflow
                      GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
                      GIT_TAG        origin/master
 )
+
 FetchContent_MakeAvailable(DirectXMath taskflow)
 
 # Add source
@@ -61,14 +65,3 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sdk/external/enet
         DESTINATION include
         PATTERN     "src" EXCLUDE
 )
-
-# Install NcTools
-if(NOT NC_PROD_BUILD)
-    install(FILES       ${PROJECT_SOURCE_DIR}/sdk/tools/asset_builder/nc-builder.exe
-                        ${PROJECT_SOURCE_DIR}/sdk/tools/asset_builder/libassimp.dll
-            DESTINATION bin
-    )
-    install(FILES       ${PROJECT_SOURCE_DIR}/sdk/tools/shaders.ps1
-            DESTINATION scripts
-    )
-endif()

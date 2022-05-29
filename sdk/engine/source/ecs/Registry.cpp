@@ -38,18 +38,18 @@ namespace nc
 
     void Registry::RemoveEntityWithoutNotifyingParent(Entity entity)
     {
-        NC_ASSERT(m_entities.contains(entity), "Bad Entity");
+        NC_ASSERT(m_entities.Contains(entity), "Bad Entity");
         auto* transform = Get<Transform>(entity);
 
         for(auto child : transform->Children())
             RemoveEntityWithoutNotifyingParent(child);
 
-        m_entities.remove(entity);
+        m_entities.Remove(entity);
     }
 
     void Registry::Clear()
     {
-        m_entities.clear();
+        m_entities.Clear();
 
         for(auto& storage : m_registeredStorage)
         {
