@@ -17,13 +17,13 @@ namespace nc::graphics
         Bind(data, size);
     }
 
-    UniformBuffer::UniformBuffer(UniformBuffer&& other)
+    UniformBuffer::UniformBuffer(UniformBuffer&& other) noexcept
         : m_allocator{std::exchange(other.m_allocator, nullptr)},
           m_buffer{std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{})}
     {
     }
 
-    UniformBuffer& UniformBuffer::operator = (UniformBuffer&& other)
+    UniformBuffer& UniformBuffer::operator=(UniformBuffer&& other) noexcept
     {
         m_allocator = std::exchange(other.m_allocator, nullptr);
         m_buffer = std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{});

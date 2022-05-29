@@ -10,8 +10,8 @@ namespace nc::graphics
         public:
             WriteableBuffer();
             WriteableBuffer(GpuAllocator* allocator, uint32_t size);
-            WriteableBuffer(WriteableBuffer&&);
-            WriteableBuffer& operator=(WriteableBuffer&&);
+            WriteableBuffer(WriteableBuffer&&) noexcept;
+            WriteableBuffer& operator=(WriteableBuffer&&) noexcept;
             WriteableBuffer& operator=(const WriteableBuffer&) = delete;
             WriteableBuffer(const WriteableBuffer&) = delete;
 
@@ -48,7 +48,7 @@ namespace nc::graphics
     }
 
     template<typename T>
-    WriteableBuffer<T>::WriteableBuffer(WriteableBuffer&& other)
+    WriteableBuffer<T>::WriteableBuffer(WriteableBuffer&& other) noexcept
         : m_allocator{std::exchange(other.m_allocator, nullptr)},
           m_buffer{std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{})},
           m_memorySize{std::exchange(other.m_memorySize, 0)}
@@ -56,7 +56,7 @@ namespace nc::graphics
     }
 
     template<typename T>
-    WriteableBuffer<T>& WriteableBuffer<T>::operator=(WriteableBuffer<T>&& other)
+    WriteableBuffer<T>& WriteableBuffer<T>::operator=(WriteableBuffer<T>&& other) noexcept
     {
         m_allocator = std::exchange(other.m_allocator, nullptr);
         m_buffer = std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{});

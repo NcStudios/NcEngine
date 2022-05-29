@@ -10,8 +10,8 @@ namespace nc::graphics
         public:
             UniformBuffer();
             UniformBuffer(GpuAllocator* allocator, const void* data, uint32_t size);
-            UniformBuffer(UniformBuffer&&);
-            UniformBuffer& operator=(UniformBuffer&&);
+            UniformBuffer(UniformBuffer&&) noexcept;
+            UniformBuffer& operator=(UniformBuffer&&) noexcept;
             UniformBuffer& operator=(const UniformBuffer&) = delete;
             UniformBuffer(const UniformBuffer&) = delete;
 
