@@ -23,8 +23,7 @@
                 "reveal": "always",
                 "panel": "shared"
             },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-NcSdk-Dev"
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "Build-NcSdk-Dev-Release",
@@ -36,8 +35,7 @@
                 "reveal": "always",
                 "panel": "shared"
             },
-            "problemMatcher": "$msCompile",
-            "dependsOn": "Configure-NcSdk-Dev"
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "Run-Tests",
