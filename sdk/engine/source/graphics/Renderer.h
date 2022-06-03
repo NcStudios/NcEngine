@@ -15,12 +15,13 @@ namespace nc
 
 namespace nc::graphics
 {
+    class AssetsSink;
     class Commands;
     class Graphics;
-    class RenderTarget;
-    class ShaderResourceServices;
     struct PerFrameRenderState;
     class RenderPassManager;
+    class RenderTarget;
+    class ShaderResourceServices;
 
     class Renderer
     {
@@ -31,14 +32,14 @@ namespace nc::graphics
 
             ~Renderer() noexcept;
             
-            void Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, uint32_t currentSwapChainImageIndex);
+            void Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, AssetsSink* assetsSink, uint32_t currentSwapChainImageIndex);
             void Clear() noexcept;
             void InitializeImgui();
 
         private:
             void RegisterTechniques();
             void RegisterRenderPasses();
-            vk::CommandBuffer* BeginFrame(Commands* commands, AssetServices* assetServices, uint32_t currentSwapChainImageIndex);
+            vk::CommandBuffer* BeginFrame(Commands* commands, AssetServices* assetServices, AssetsSink* assetsSink, uint32_t currentSwapChainImageIndex);
 
             graphics::Graphics* m_graphics;
             ShaderResourceServices* m_shaderResources;

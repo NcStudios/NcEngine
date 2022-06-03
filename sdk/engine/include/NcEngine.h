@@ -71,11 +71,11 @@ namespace nc
              */
             virtual auto Scene() noexcept -> SceneModule* = 0;
 
-            // /**
-            //  * @brief Get a pointer to the global Assets instance.
-            //  * @return Assets*
-            //  */
-            // virtual auto Assets() noexcept -> nc::Assets* = 0;
+            /**
+             * @brief Get a pointer to the global Assets instance.
+             * @return Assets*
+             */
+            virtual auto Assets() noexcept -> nc::Assets* = 0;
     };
 
     /** @brief Flags controlling initialization of engine modules. */
@@ -96,7 +96,7 @@ namespace nc
     }; DEFINE_BITWISE_OPERATORS(EngineInitFlags)
 
     /**
-     * @brief Create the engine runtime, context, and modules.
+     * @brief Create the engine runtime, utility classes, and modules.
      * 
      * @param configPath Path to an ini file specifying configuration settings.
      * @param flags Flags for controlling initialization behavior.

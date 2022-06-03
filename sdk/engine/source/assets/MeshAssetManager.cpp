@@ -1,6 +1,6 @@
 #include "MeshAssetManager.h"
 #include "AssetHelpers.h"
-#include "graphics/Graphics.h"
+#include "graphics/AssetsSink.h"
 
 #include <cassert>
 #include <fstream>
@@ -28,7 +28,7 @@ namespace
         return stream;
     }
 
-    void ReadVerticesFromAsset(std::ifstream& file, std::vector<Vertex>& vertices, size_t count)
+    void ReadVerticesFromAsset(std::ifstream& file, std::vector<nc::Vertex>& vertices, size_t count)
     {
         vertices.reserve(vertices.size() + count);
         nc::Vector3 ver, nrm, tan, bit;
@@ -58,7 +58,7 @@ namespace
         }
     }
 
-    auto ReadMesh(const std::string& meshPath, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
+    auto ReadMesh(const std::string& meshPath, std::vector<nc::Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
     {
         if(!nc::HasValidAssetExtension(meshPath))
             throw nc::NcError("Invalid extension: " + meshPath);
@@ -81,8 +81,8 @@ namespace
 
 namespace nc
 {
-    MeshAssetManager::MeshAssetManager(graphics::Graphics* graphics, const std::string& assetDirectory)
-        : m_graphics{graphics},
+    MeshAssetManager::MeshAssetManager(graphics::AssetsSink* assetsSink, const std::string& assetDirectory)
+        : m_assetsSink{assetsSink},
           m_vertexData{},
           m_indexData{},
           m_accessors{},
@@ -118,7 +118,15 @@ namespace nc
         };
 
         m_accessors.emplace(path, mesh);
-        UpdateBuffers();
+
+        MeshAsset assetData
+        {
+            m_vertexData.vertices,
+            m_indexData.indices
+        };
+
+        m_assetsSink->LoadMesh(assetData);
+
         return true;
     }
 
@@ -153,7 +161,13 @@ namespace nc
             totalIndexCount += indicesRead;
         }
 
-        UpdateBuffers();
+        MeshAsset assetData
+        {
+            m_vertexData.vertices,
+            m_indexData.indices
+        };
+
+        m_assetsSink->LoadMesh(assetData);
         return true;
     }
 
@@ -186,8 +200,16 @@ namespace nc
         }
 
         if(m_vertexData.vertices.size() != 0)
-            UpdateBuffers();
+        {
+            MeshAsset assetData
+            {
+                m_vertexData.vertices,
+                m_indexData.indices
+            };
 
+            m_assetsSink->LoadMesh(assetData);
+        }
+        
         return true;
     }
 
@@ -196,7 +218,6 @@ namespace nc
         m_accessors.clear();
         m_vertexData.vertices.clear();
         m_indexData.indices.clear();
-        // Don't call UpdateBuffers() with empty data.
     }
 
     auto MeshAssetManager::Acquire(const std::string& path) const -> MeshView
@@ -211,14 +232,5 @@ namespace nc
     bool MeshAssetManager::IsLoaded(const std::string& path) const
     {
         return m_accessors.contains(path);
-    }
-
-    void MeshAssetManager::UpdateBuffers()
-    {
-        m_vertexData.buffer.Clear();
-        m_vertexData.buffer = ImmutableBuffer(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_vertexData.vertices);
-
-        m_indexData.buffer.Clear();
-        m_indexData.buffer = ImmutableBuffer(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_indexData.indices);
     }
 }

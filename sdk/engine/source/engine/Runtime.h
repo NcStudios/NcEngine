@@ -1,9 +1,12 @@
 #pragma once
 
-#include "Context.h"
 #include "Modules.h"
+#include "assets/Assets.h"
+#include "ecs/Registry.h"
+#include "math/Random.h"
 #include "NcEngine.h"
 #include "task/Executor.h"
+#include "time/Time.h"
 #include "window/WindowImpl.h"
 
 namespace nc
@@ -22,17 +25,20 @@ namespace nc
             auto Random() noexcept -> nc::Random* override;
             auto Registry() noexcept -> nc::Registry* override;
             auto Scene() noexcept -> SceneModule* override;
-            // auto Assets() noexcept -> nc::Assets* override;
+            auto Assets() noexcept -> nc::Assets* override;
 
         private:
             window::WindowImpl m_window;
-            Context m_context;
+            nc::Registry m_registry;
+            time::Time m_time;
+            nc::Random m_random;
             Modules m_modules;
+            nc::Assets m_assets;
             Executor m_executor;
             float m_dt;
             float m_dtFactor;
             bool m_isRunning;
-            unsigned m_currentPhysicsIterations; /** @todo should go in physics_module_impl */
+            unsigned m_currentPhysicsIterations; /** @todo should go in PhysicsModuleImpl */
 
             void BuildTaskGraph(); /** @todo could maybe have graph builder class/func */
             void Clear();

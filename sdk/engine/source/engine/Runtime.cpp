@@ -9,18 +9,6 @@
 
 namespace
 {
-    auto BuildContext() -> nc::Context
-    {
-        V_LOG("BuildContext()");
-        return nc::Context
-        {
-            .registry = nc::Registry{nc::config::GetMemorySettings().maxTransforms},
-            .time = nc::time::Time{},
-            .random = nc::Random{}
-            //, .assets = nc::Assets{nullptr, nc::config::GetProjectSettings(), nc::config::GetMemorySettings()} // TODO: Replace nullptr with graphics asset storage sink
-        };
-    }
-
     auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, nc::time::Time* time, std::function<void()> clearCallback, float* dt, nc::EngineInitFlags flags) -> nc::Modules
     {
         V_LOG("BuildModules()");
@@ -50,13 +38,16 @@ namespace nc
 
     Runtime::Runtime(EngineInitFlags flags)
         : m_window{},
-          m_context{ BuildContext() }, 
-          m_modules{ BuildModules(&m_context.registry, &m_window, &m_context.time, std::bind_front(&Runtime::Clear, this), &m_dt, flags) },
+          m_registry{nc::config::GetMemorySettings().maxTransforms},
+          m_time{},
+          m_random{},
+          m_modules{BuildModules(&m_registry, &m_window, &m_time, std::bind_front(&Runtime::Clear, this), &m_dt, flags)},
+          m_assets{m_modules.graphicsModule->GetAssetsSink(), nc::config::GetProjectSettings(), nc::config::GetMemorySettings()},
           m_executor{},
-          m_dt{ 0.0f },
-          m_dtFactor{ 1.0f },
-          m_isRunning{ false },
-          m_currentPhysicsIterations{ 0u }
+          m_dt{0.0f},
+          m_dtFactor{1.0f},
+          m_isRunning{false},
+          m_currentPhysicsIterations{0u}
     {
         m_window.BindEngineDisableRunningCallback(std::bind_front(&Runtime::Stop, this));
         BuildTaskGraph();
@@ -71,7 +62,7 @@ namespace nc
     void Runtime::Start(std::unique_ptr<nc::Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
-        m_context.registry.VerifyCallbacks();
+        m_registry.VerifyCallbacks();
         m_modules.sceneModule->ChangeScene(std::move(initialScene));
         m_modules.sceneModule->DoSceneSwap(this);
         m_isRunning = true;
@@ -102,16 +93,16 @@ namespace nc
     auto Runtime::Audio()    noexcept -> AudioModule* { return m_modules.audioModule.get(); }
     auto Runtime::Graphics() noexcept -> GraphicsModule* { return m_modules.graphicsModule.get(); }
     auto Runtime::Physics()  noexcept -> PhysicsModule* { return m_modules.physicsModule.get(); }
-    auto Runtime::Random()   noexcept -> nc::Random* { return &m_context.random; }
-    auto Runtime::Registry() noexcept -> nc::Registry* { return &m_context.registry; }
+    auto Runtime::Random()   noexcept -> nc::Random* { return &m_random; }
+    auto Runtime::Registry() noexcept -> nc::Registry* { return &m_registry; }
     auto Runtime::Scene()    noexcept -> SceneModule* { return m_modules.sceneModule.get(); }
-    // auto Runtime::Assets()   noexcept -> nc::Assets* { return &m_context.assets; }
+    auto Runtime::Assets()   noexcept -> nc::Assets* { return &m_assets; }
 
     void Runtime::BuildTaskGraph()
     {
         V_LOG("Runtime::BuildTaskGraph()");
 
-        auto syncJob = [reg = &m_context.registry]
+        auto syncJob = [reg = &m_registry]
         {
             OPTICK_CATEGORY("Sync State", Optick::Category::None);
             reg->CommitStagedChanges();
@@ -127,11 +118,11 @@ namespace nc
     void Runtime::Clear()
     {
         m_modules.graphicsModule->Clear();
-        m_context.registry.Clear();
+        m_registry.Clear();
         m_modules.physicsModule->Clear();
         m_modules.audioModule->Clear();
-        m_context.time.ResetFrameDeltaTime();
-        m_context.time.ResetAccumulatedTime();
+        m_time.ResetFrameDeltaTime();
+        m_time.ResetAccumulatedTime();
     }
 
     void Runtime::Run()
@@ -139,7 +130,7 @@ namespace nc
         while(m_isRunning)
         {
             OPTICK_FRAME("Main Thread");
-            m_dt = m_dtFactor * m_context.time.UpdateTime();
+            m_dt = m_dtFactor * m_time.UpdateTime();
             m_currentPhysicsIterations = 0u;
             input::Flush();
             m_window.ProcessSystemMessages();

@@ -5,6 +5,7 @@
 #include "debug/Utils.h"
 #include "ecs/component/Camera.h"
 #include "config/Config.h"
+#include "graphics/AssetsSink.h"
 #include "optick/optick.h"
 #include "Renderer.h"
 #include "resources/ShaderResourceServices.h"
@@ -15,7 +16,7 @@
 
 namespace nc::graphics
 {
-    Graphics::Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    Graphics::Graphics(camera::MainCamera* mainCamera, AssetsSink* assetsSink, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_allocator{ std::make_unique<GpuAllocator>(m_base->GetPhysicalDevice(), m_base->GetDevice(), m_base->GetInstance())},
@@ -27,6 +28,7 @@ namespace nc::graphics
           m_debugRenderer{},
           #endif
           m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
+          m_assetsSink{assetsSink},
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
@@ -203,7 +205,7 @@ namespace nc::graphics
         OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
         if (m_isMinimized) return;
 
-        m_renderer->Record(m_commands.get(), state, m_assetServices.get(), m_imageIndex);
+        m_renderer->Record(m_commands.get(), state, m_assetServices.get(), m_assetsSink, m_imageIndex);
 
         // Executes the command buffer to render to the image
         RenderToImage(m_imageIndex);

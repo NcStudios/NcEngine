@@ -24,11 +24,12 @@ namespace nc::graphics
     class Renderer;
     class RenderPassManager;
     class ShaderResourceServices;
+    class AssetsSink;
 
     class Graphics
     {
         public:
-            Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(camera::MainCamera* mainCamera, AssetsSink* assetsSink, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
             ~Graphics() noexcept;
             Graphics(const Graphics&) = delete;
             Graphics(Graphics&&) = delete;
@@ -74,6 +75,7 @@ namespace nc::graphics
             graphics::DebugRenderer m_debugRenderer;
             #endif
             std::unique_ptr<Renderer> m_renderer;
+            AssetsSink* m_assetsSink;
 
             std::mutex m_resizingMutex;
             uint32_t m_imageIndex;

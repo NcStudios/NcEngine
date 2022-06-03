@@ -4,6 +4,7 @@
 #include "ecs/PointLightSystem.h"
 #include "ecs/ParticleEmitterSystem.h"
 #include "Graphics.h"
+#include "graphics/AssetsSinkImpl.h"
 #include "graphics/GraphicsModule.h"
 #include "resources/Environment.h"
 #include "task/Job.h"
@@ -31,10 +32,12 @@ namespace nc::graphics
             auto BuildWorkload()->std::vector<Job> override;
             void Clear() noexcept override;
             void Run();
+            auto GetAssetsSink()-> AssetsSink* override;
 
         private:
             Registry* m_registry;
             camera::MainCamera m_camera;
+            AssetsSinkImpl m_assetsSink;
             Graphics m_graphics;
             ui::UISystemImpl m_ui;
             Environment m_environment;

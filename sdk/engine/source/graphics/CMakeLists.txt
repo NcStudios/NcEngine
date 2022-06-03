@@ -1,5 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        AssetsSinkImpl.cpp
         Base.cpp
         Commands.cpp
         GpuAllocator.cpp

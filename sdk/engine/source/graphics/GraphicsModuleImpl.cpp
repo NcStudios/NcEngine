@@ -27,6 +27,7 @@ namespace
         void ClearEnvironment() override {}
         void Clear() noexcept override {}
         auto BuildWorkload() -> std::vector<nc::Job> { return {}; }
+        nc::graphics::AssetsSink* GetAssetsSink() override { return nullptr; }
 
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED
@@ -46,10 +47,12 @@ namespace nc::graphics
     GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, float* dt)
         : m_registry{ registry },
           m_camera{},
+          m_assetsSink{},
           m_graphics{ &m_camera,
-                     window->GetHWND(),
-                     window->GetHINSTANCE(),
-                     window->GetDimensions() },
+                      &m_assetsSink,
+                      window->GetHWND(),
+                      window->GetHINSTANCE(),
+                      window->GetDimensions() },
           m_ui{ window->GetHWND() },
           m_environment{},
           m_pointLightSystem{ registry },
@@ -141,5 +144,10 @@ namespace nc::graphics
         #endif
 
         m_graphics.FrameEnd();
+    }
+
+    AssetsSink* GraphicsModuleImpl::GetAssetsSink()
+    {
+        return &m_assetsSink;
     }
 }

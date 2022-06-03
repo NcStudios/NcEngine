@@ -15,7 +15,6 @@ namespace nc
         AssetServices(graphics::Graphics* graphics, const config::ProjectSettings& projectSettings, uint32_t maxTextures)
             : concaveManager{projectSettings.concaveCollidersPath},
               hullManager{projectSettings.hullCollidersPath},
-              meshManager{graphics, projectSettings.meshesPath},
               audioClipManager{projectSettings.audioClipsPath},
               textureManager{graphics, projectSettings.texturesPath, maxTextures},
               cubeMapAssetManager{graphics, projectSettings.cubeMapsPath, maxTextures}
@@ -24,7 +23,6 @@ namespace nc
 
         ConcaveColliderAssetManager concaveManager;
         ConvexHullAssetManager hullManager;
-        MeshAssetManager meshManager;
         AudioClipAssetManager audioClipManager;
         TextureAssetManager textureManager;
         CubeMapAssetManager cubeMapAssetManager;

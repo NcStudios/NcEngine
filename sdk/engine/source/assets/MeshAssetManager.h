@@ -8,24 +8,22 @@
 
 namespace nc
 {
-    namespace graphics { class Graphics; }
+    namespace graphics { class AssetsSink; }
 
     struct VertexData
     {
-        graphics::ImmutableBuffer buffer;
-        std::vector<graphics::Vertex> vertices;
+        std::vector<Vertex> vertices;
     };
 
     struct IndexData
     {
-        graphics::ImmutableBuffer buffer;
         std::vector<uint32_t> indices;
     };
 
     class MeshAssetManager : public IAssetService<MeshView, std::string>
     {
         public:
-            MeshAssetManager(graphics::Graphics* graphics, const std::string& assetDirectory);
+            MeshAssetManager(graphics::AssetsSink* assetsSink, const std::string& assetDirectory);
             ~MeshAssetManager() noexcept;
 
             bool Load(const std::string& path, bool isExternal) override;
@@ -35,11 +33,11 @@ namespace nc
             auto Acquire(const std::string& path) const -> MeshView override;
             bool IsLoaded(const std::string& path) const override;
 
-            auto GetVertexBuffer() const noexcept -> vk::Buffer { return m_vertexData.buffer.GetBuffer(); }
-            auto GetIndexBuffer() const noexcept -> vk::Buffer { return m_indexData.buffer.GetBuffer(); }
+            auto GetVertexBuffer() const noexcept -> vk::Buffer { return vk::Buffer{}; }
+            auto GetIndexBuffer() const noexcept -> vk::Buffer { return vk::Buffer{}; }
 
         private:
-            graphics::Graphics* m_graphics;
+            graphics::AssetsSink* m_assetsSink;
             VertexData m_vertexData;
             IndexData m_indexData; 
             std::unordered_map<std::string, MeshView> m_accessors;
