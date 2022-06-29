@@ -4,6 +4,7 @@
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
 #include "ecs/Registry.h"
+#include "graphics/AssetsStorage.h"
 #include "graphics/Base.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
@@ -46,10 +47,10 @@ namespace nc::graphics
         m_renderPasses.reset();
     }
 
-    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, AssetsSink* assetsSink, uint32_t currentSwapChainImageIndex)
+    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, AssetsStorage* assetsStorage, uint32_t currentSwapChainImageIndex)
     {
         OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
-        auto* cmd = BeginFrame(commands, assetServices, currentSwapChainImageIndex);
+        auto* cmd = BeginFrame(commands, assetServices, assetsStorage, currentSwapChainImageIndex);
 
         /** Shadow mapping pass */
         m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
@@ -96,7 +97,7 @@ namespace nc::graphics
         m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
     }
 
-    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, AssetsSink* assetsSink, uint32_t currentSwapChainImageIndex)
+    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, AssetsStorage* assetsStorage, uint32_t currentSwapChainImageIndex)
     {
         auto swapchain = m_graphics->GetSwapchainPtr();
         swapchain->WaitForFrameFence();
@@ -107,9 +108,11 @@ namespace nc::graphics
         SetViewportAndScissor(cmd, m_dimensions);
 
         vk::DeviceSize offsets[] = { 0 };
-        auto vertexBuffer = assetsSink->GetVertexBuffer();
+        auto& vertexData = assetsStorage->GetVertexData();
+        auto& indexData = assetsStorage->GetIndexData();
+        auto vertexBuffer = vertexData.buffer.GetBuffer();
         cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
-        cmd->bindIndexBuffer(assetsSink->GetIndexBuffer(), 0, vk::IndexType::eUint32);
+        cmd->bindIndexBuffer(indexData.buffer.GetBuffer(), 0, vk::IndexType::eUint32);
 
         return cmd;
     }

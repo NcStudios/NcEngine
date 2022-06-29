@@ -57,7 +57,7 @@ namespace nc::graphics
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, const std::vector<Vertex>& data)
+    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, const std::vector<nc::graphics::Vertex>& data)
         : m_buffer{CreateBuffer(base, allocator, data)}
     {
     }

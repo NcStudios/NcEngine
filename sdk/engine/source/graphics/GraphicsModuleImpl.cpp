@@ -47,12 +47,11 @@ namespace nc::graphics
     GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, float* dt)
         : m_registry{ registry },
           m_camera{},
-          m_assetsSink{},
           m_graphics{ &m_camera,
-                      &m_assetsSink,
                       window->GetHWND(),
                       window->GetHINSTANCE(),
                       window->GetDimensions() },
+          m_assetsSink{m_graphics.GetAssetsStoragePtr()},
           m_ui{ window->GetHWND() },
           m_environment{},
           m_pointLightSystem{ registry },

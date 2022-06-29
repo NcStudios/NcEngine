@@ -90,13 +90,13 @@ namespace nc
         debug::internal::CloseLog();
     }
 
+    auto Runtime::Assets()   noexcept -> nc::Assets* { return &m_assets; }
     auto Runtime::Audio()    noexcept -> AudioModule* { return m_modules.audioModule.get(); }
     auto Runtime::Graphics() noexcept -> GraphicsModule* { return m_modules.graphicsModule.get(); }
     auto Runtime::Physics()  noexcept -> PhysicsModule* { return m_modules.physicsModule.get(); }
     auto Runtime::Random()   noexcept -> nc::Random* { return &m_random; }
     auto Runtime::Registry() noexcept -> nc::Registry* { return &m_registry; }
     auto Runtime::Scene()    noexcept -> SceneModule* { return m_modules.sceneModule.get(); }
-    auto Runtime::Assets()   noexcept -> nc::Assets* { return &m_assets; }
 
     void Runtime::BuildTaskGraph()
     {

@@ -3,11 +3,9 @@
 
 namespace nc::graphics
 {
-    struct 
-
     class AssetsSink
     {
         public:
-            virtual void LoadMesh(const MeshAsset& meshAsset) = 0;
+            virtual void UpdateMeshBuffer(const MeshAsset& meshAsset) = 0;
     };
 }

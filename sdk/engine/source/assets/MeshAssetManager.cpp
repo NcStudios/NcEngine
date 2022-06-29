@@ -28,7 +28,7 @@ namespace
         return stream;
     }
 
-    void ReadVerticesFromAsset(std::ifstream& file, std::vector<nc::Vertex>& vertices, size_t count)
+    void ReadVerticesFromAsset(std::ifstream& file, std::vector<nc::graphics::Vertex>& vertices, size_t count)
     {
         vertices.reserve(vertices.size() + count);
         nc::Vector3 ver, nrm, tan, bit;
@@ -58,7 +58,7 @@ namespace
         }
     }
 
-    auto ReadMesh(const std::string& meshPath, std::vector<nc::Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
+    auto ReadMesh(const std::string& meshPath, std::vector<nc::graphics::Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
     {
         if(!nc::HasValidAssetExtension(meshPath))
             throw nc::NcError("Invalid extension: " + meshPath);
@@ -125,7 +125,7 @@ namespace nc
             m_indexData.indices
         };
 
-        m_assetsSink->LoadMesh(assetData);
+        m_assetsSink->UpdateMeshBuffer(assetData);
 
         return true;
     }
@@ -167,7 +167,7 @@ namespace nc
             m_indexData.indices
         };
 
-        m_assetsSink->LoadMesh(assetData);
+        m_assetsSink->UpdateMeshBuffer(assetData);
         return true;
     }
 
@@ -207,7 +207,7 @@ namespace nc
                 m_indexData.indices
             };
 
-            m_assetsSink->LoadMesh(assetData);
+            m_assetsSink->UpdateMeshBuffer(assetData);
         }
         
         return true;

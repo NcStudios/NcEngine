@@ -3,7 +3,7 @@
 #include "camera/MainCamera.h"
 #include "ecs/PointLightSystem.h"
 #include "ecs/ParticleEmitterSystem.h"
-#include "Graphics.h"
+#include "graphics/Graphics.h"
 #include "graphics/AssetsSinkImpl.h"
 #include "graphics/GraphicsModule.h"
 #include "resources/Environment.h"
@@ -37,8 +37,8 @@ namespace nc::graphics
         private:
             Registry* m_registry;
             camera::MainCamera m_camera;
-            AssetsSinkImpl m_assetsSink;
             Graphics m_graphics;
+            AssetsSinkImpl m_assetsSink;
             ui::UISystemImpl m_ui;
             Environment m_environment;
             ecs::PointLightSystem m_pointLightSystem;

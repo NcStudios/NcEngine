@@ -24,12 +24,12 @@ namespace nc::graphics
     class Renderer;
     class RenderPassManager;
     class ShaderResourceServices;
-    class AssetsSink;
+    class AssetsStorage;
 
     class Graphics
     {
         public:
-            Graphics(camera::MainCamera* mainCamera, AssetsSink* assetsSink, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
             ~Graphics() noexcept;
             Graphics(const Graphics&) = delete;
             Graphics(Graphics&&) = delete;
@@ -42,6 +42,7 @@ namespace nc::graphics
             void Clear();
             void InitializeUI();
 
+            AssetsStorage* GetAssetsStoragePtr() const noexcept;
             Base* GetBasePtr() const noexcept;
             GpuAllocator* GetAllocatorPtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
@@ -70,12 +71,12 @@ namespace nc::graphics
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
+            std::unique_ptr<AssetsStorage> m_assetsStorage;
             std::unique_ptr<AssetServices> m_assetServices;
             #ifdef NC_DEBUG_RENDERING_ENABLED
             graphics::DebugRenderer m_debugRenderer;
             #endif
             std::unique_ptr<Renderer> m_renderer;
-            AssetsSink* m_assetsSink;
 
             std::mutex m_resizingMutex;
             uint32_t m_imageIndex;

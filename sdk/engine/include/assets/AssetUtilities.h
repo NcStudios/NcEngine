@@ -60,6 +60,8 @@ namespace nc
     bool UnloadCubeMapAsset(const std::string& paths);
     void UnloadAllCubeMapAssets();
 
+    namespace graphics { struct Vertex; }
+
     struct ConcaveColliderView
     {
         std::span<const Triangle> triangles;
@@ -73,18 +75,9 @@ namespace nc
         float maxExtent;
     };
 
-    struct Vertex
-    {
-        Vector3 Position;
-        Vector3 Normal;
-        Vector2 UV;
-        Vector3 Tangent;
-        Vector3 Bitangent;
-    };
-
     struct MeshAsset
     {
-        std::vector<Vertex> vertices;
+        std::vector<graphics::Vertex> vertices;
         std::vector<uint32_t> indices;
     };
 

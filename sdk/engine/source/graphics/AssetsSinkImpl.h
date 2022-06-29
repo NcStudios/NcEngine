@@ -4,9 +4,16 @@
 
 namespace nc::graphics
 {
+    class AssetsStorage;
+
     class AssetsSinkImpl : public AssetsSink
     {
         public:
-            virtual void LoadMesh(const MeshAsset& meshAsset);
+            AssetsSinkImpl(AssetsStorage* assetsStorage);
+
+            void UpdateMeshBuffer(const MeshAsset& meshAsset) override;
+
+        private:
+            AssetsStorage* m_assetsStorage;
     };
 }

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "AssetService.h"
-#include "graphics/Resources/ImmutableBuffer.h"
-
+#include "graphics\Vertex.h"
 #include <string>
 #include <unordered_map>
 
@@ -12,7 +11,7 @@ namespace nc
 
     struct VertexData
     {
-        std::vector<Vertex> vertices;
+        std::vector<graphics::Vertex> vertices;
     };
 
     struct IndexData
@@ -32,9 +31,6 @@ namespace nc
             void UnloadAll() override;
             auto Acquire(const std::string& path) const -> MeshView override;
             bool IsLoaded(const std::string& path) const override;
-
-            auto GetVertexBuffer() const noexcept -> vk::Buffer { return vk::Buffer{}; }
-            auto GetIndexBuffer() const noexcept -> vk::Buffer { return vk::Buffer{}; }
 
         private:
             graphics::AssetsSink* m_assetsSink;

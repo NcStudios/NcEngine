@@ -23,7 +23,6 @@ namespace nc::graphics
       m_pipelineLayout{nullptr}
     {
         CreatePipeline(renderPass);
-        LoadMeshAsset(m_meshPath);
     }
 
     WireframeTechnique::~WireframeTechnique() noexcept

@@ -19,13 +19,13 @@ namespace nc
             void Start(std::unique_ptr<nc::Scene> initialScene) override;
             void Stop() noexcept override;
             void Shutdown() noexcept override;
+            auto Assets() noexcept -> nc::Assets* override;
             auto Audio() noexcept -> AudioModule* override;
             auto Graphics() noexcept -> GraphicsModule* override;
             auto Physics() noexcept -> PhysicsModule* override;
             auto Random() noexcept -> nc::Random* override;
             auto Registry() noexcept -> nc::Registry* override;
             auto Scene() noexcept -> SceneModule* override;
-            auto Assets() noexcept -> nc::Assets* override;
 
         private:
             window::WindowImpl m_window;
