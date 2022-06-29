@@ -2,7 +2,7 @@
 #include "graphics/GraphicsModule.h"
 #include "assets/AssetManifest.h"
 #include "ecs/component/Camera.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/Output.h"
 #include "utility/DefaultComponents.h"
@@ -32,7 +32,7 @@ namespace nc::editor
 
         if (ImGui::BeginCombo("Audio Listener", "Audio Listener"))
         {
-            for(const auto& entity : view<Entity>{m_registry})
+            for(const auto& entity : View<Entity>{m_registry})
             {
                 auto* tag = m_registry->Get<Tag>(entity);
 

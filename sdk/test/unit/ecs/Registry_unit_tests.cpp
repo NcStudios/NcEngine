@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "ecs/Registry.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 
 using namespace nc;
 
@@ -107,10 +107,10 @@ TEST_F(Registry_unit_tests, RemoveEntity_EntityExists_EntityRemovedFromActiveLis
 {
     auto handle = registry.Add<Entity>(TestInfo);
     registry.CommitStagedChanges();
-    auto entities = view<Entity>{&registry};
+    auto entities = View<Entity>{&registry};
     EXPECT_EQ(entities.size(), 1u);
     registry.Remove<Entity>(handle);
-    entities = view<Entity>{&registry};
+    entities = View<Entity>{&registry};
     EXPECT_EQ(entities.size(), 0u);
 }
 

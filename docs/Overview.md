@@ -75,10 +75,10 @@ When removing a Component:
 
 ## Views
 --------
-Views represent ranges of registry data. They come in two forms, `view<viewable>` and `multi_view<viewable...>`, where `viewable` is either `Entity` or models `PooledComponent`. They each provide their own iterator types, and can be used in range-based for loops and the like. Viewed types may be individually const-qualified. Example usage:
+Views represent ranges of registry data. They come in two forms, `View<Viewable>` and `MultiView<Viewable...>`, where `Viewable` is either `Entity` or models `PooledComponent`. They each provide their own iterator types, and can be used in range-based for loops and the like. Viewed types may be individually const-qualified. Example usage:
 
 ```cpp
-for(auto& [t, u, v] : multi_view<T, U, const V>{myRegistry})
+for(auto& [t, u, v] : MultiView<T, U, const V>{myRegistry})
 {
     /** ... */
 }
@@ -86,7 +86,7 @@ for(auto& [t, u, v] : multi_view<T, U, const V>{myRegistry})
 
 A `view<T>` will always be a contiguous range, either of all the active entities or all *committed* components of type T. This may exclude components added during the current frame, in accordance with the registry's staging behavior.
 
-A `multi_view<Ts...>` allows filtering the registry for all entities with the specified component list and viewing them as component sets. There is a mix of contiguous and random access used internally, which makes their cost context-dependent:
+A `MultiView<Ts...>` allows filtering the registry for all entities with the specified component list and viewing them as component sets. There is a mix of contiguous and random access used internally, which makes their cost context-dependent:
 * The number of registry reads during a full iteration is at *most* the number of components in the smallest pool mutiplied by the number of component types being viewed.
     * Consider the example code above, where there are 10 Ts, 20 Us, and 20 Vs. The entire iteration querries storage for T 10 times (sequential), U 10 times (random), and V at most 10 times (random).
 * The above point hints that some short-circuiting is possible. This can be taken advantage of by ordering template arguments by increasing component count (or an educated guess).

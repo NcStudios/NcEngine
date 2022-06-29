@@ -3,7 +3,7 @@
 #include "ecs/component/Camera.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/Transform.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "graphics/resources/Environment.h"
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
@@ -43,7 +43,7 @@ namespace nc::graphics
         OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
         const auto frustum = camera->CalculateFrustum();
         const auto viewProjection = camViewMatrix * projectionMatrix;
-        const auto renderers = view<MeshRenderer>{ registry };
+        const auto renderers = View<MeshRenderer>{ registry };
         objectData.reserve(renderers.size());
         meshes.reserve(renderers.size());
 
@@ -69,7 +69,7 @@ namespace nc::graphics
 
         #ifdef NC_EDITOR_ENABLED
         auto colliderIsSelected = false;
-        for (auto& collider : view<Collider>{ registry })
+        for (auto& collider : View<Collider>{ registry })
         {
             if (collider.GetEditorSelection())
             {
@@ -81,7 +81,7 @@ namespace nc::graphics
         if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
         #endif
 
-        auto pointLights = view<PointLight>{ registry };
+        auto pointLights = View<PointLight>{ registry };
         pointLightVPs.reserve(pointLights.size());
 
         for (auto& pointLight : pointLights)

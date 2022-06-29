@@ -1,0 +1,2 @@
+mesh nc/resources/mesh/capsule.fbx
+mesh nc/resources/mesh/sphere.fbx

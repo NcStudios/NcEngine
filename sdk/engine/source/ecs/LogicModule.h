@@ -2,7 +2,7 @@
 
 #include "ecs/component/Logic.h"
 #include "ecs/Registry.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "Module.h"
 #include "task/Job.h"
 
@@ -33,7 +33,7 @@ namespace nc
             {
                 OPTICK_CATEGORY("Logic", Optick::Category::GameLogic);
                 const float dt = *m_dt;
-                for(auto& logic : view<FrameLogic>{m_registry})
+                for(auto& logic : View<FrameLogic>{m_registry})
                     logic.Run(m_registry, dt);
             }
 

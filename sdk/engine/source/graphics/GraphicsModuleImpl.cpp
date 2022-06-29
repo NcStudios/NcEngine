@@ -1,5 +1,5 @@
 #include "GraphicsModuleImpl.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 #include "PerFrameRenderState.h"
 #include "window/WindowImpl.h"
 
@@ -139,7 +139,7 @@ namespace nc::graphics
         m_graphics.Draw(state);
 
         #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : view<Collider>{ m_registry }) collider.SetEditorSelection(false);
+        for(auto& collider : View<Collider>{m_registry}) collider.SetEditorSelection(false);
         #endif
 
         m_graphics.FrameEnd();

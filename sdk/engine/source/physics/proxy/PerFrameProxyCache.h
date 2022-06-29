@@ -2,7 +2,7 @@
 
 #include "GenericProxy.h"
 #include "ecs/component/PhysicsBody.h"
-#include "ecs/view.h"
+#include "ecs/View.h"
 
 #include <vector>
 
@@ -35,7 +35,7 @@ namespace nc::physics
     template<class ClientData>
     void PerFrameProxyCache<ClientData>::Update()
     {
-        const auto colliders = view<Collider>{m_client};
+        const auto colliders = View<Collider>{m_client};
         const auto colliderCount = colliders.size();
         m_proxies.clear();
         m_proxies.reserve(colliderCount);
