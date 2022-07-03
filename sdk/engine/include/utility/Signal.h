@@ -94,7 +94,7 @@ class Signal
             return m_slots.size();
         }
 
-        /** Invoke all  */
+        /** Invoke all slots */
         void Emit(Args... args)
         {
             Sync();
@@ -104,17 +104,18 @@ class Signal
             }
         }
 
+        /** Invoke all slots */
         void operator()(Args... args)
         {
             Emit(args...);
         }
 
     private:
-        std::unique_ptr<internal::ConnectionBacklink> m_link = std::make_unique<internal::ConnectionBacklink>();
-        std::unordered_map<int, Slot_t> m_slots{};
+        mutable std::unique_ptr<internal::ConnectionBacklink> m_link = std::make_unique<internal::ConnectionBacklink>();
+        mutable std::unordered_map<int, Slot_t> m_slots{};
         int m_currentId{0};
 
-        void Sync()
+        void Sync() const
         {
             if (m_link->HasPendingDisconnections())
             {

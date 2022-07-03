@@ -76,9 +76,9 @@ class Slot
     public:
         using SharedConnectionState_t = SharedConnectionState<Args...>;
 
-        Slot(std::function<void(Args...)> func, ConnectionBacklink* manager, int id)
+        Slot(std::function<void(Args...)> func, ConnectionBacklink* link, int id)
             : m_func{std::move(func)},
-              m_state{std::make_shared<SharedConnectionState_t>(manager, id)}
+              m_state{std::make_shared<SharedConnectionState_t>(link, id)}
         {
         }
 
