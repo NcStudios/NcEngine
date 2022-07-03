@@ -2,6 +2,8 @@
 
 #include "AssetService.h"
 #include "graphics\Vertex.h"
+#include "utility/Signal.h"
+
 #include <string>
 #include <unordered_map>
 
@@ -20,7 +22,7 @@ namespace nc
     class MeshAssetManager : public IAssetService<MeshView, std::string>
     {
         public:
-            MeshAssetManager(const std::string& assetDirectory);
+            MeshAssetManager(const std::string& assetDirectory, Signal<const MeshAsset&>* onMeshAdd);
             ~MeshAssetManager() noexcept;
 
             bool Load(const std::string& path, bool isExternal) override;
@@ -35,6 +37,7 @@ namespace nc
             IndexData m_indexData; 
             std::unordered_map<std::string, MeshView> m_accessors;
             std::string m_assetDirectory;
+            Signal<const MeshAsset&>* m_onMeshAdd;
 
             void UpdateBuffers();
     };

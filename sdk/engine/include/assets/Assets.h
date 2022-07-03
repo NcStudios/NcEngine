@@ -1,22 +1,37 @@
 #pragma once
 
+#include "assets/AssetUtilities.h"
 #include "config/Config.h"
+#include "utility/Signal.h"
 #include <memory>
 
 namespace nc
 {
+    /** @todo Implement once POC is complete
     class ConcaveColliderAssetManager;
     class ConvexHullAssetManager;
     class AudioClipAssetManager;
-    class MeshAssetManager;
     class TextureAssetManager;
     class CubeMapAssetManager;
+    */
 
-    struct Assets
+    class MeshAssetManager;
+
+    struct GpuAccessorChannels
     {
-        Assets(const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings);
-        ~Assets() noexcept; 
+        nc::Signal<const MeshAsset&> onMeshAdd;
+    };
 
-        std::unique_ptr<MeshAssetManager> meshManager;
+    class Assets
+    {
+        public:
+            Assets(const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings);
+            ~Assets() noexcept; 
+            
+            const GpuAccessorChannels& GpuAccessorChannels();
+
+        private:
+            nc::GpuAccessorChannels m_gpuAccessorChannels;
+            std::unique_ptr<MeshAssetManager> m_meshManager;
     };
 }

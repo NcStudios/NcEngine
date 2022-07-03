@@ -31,7 +31,7 @@ class MeshAssetManager_unit_tests : public ::testing::Test
     protected:
         void SetUp() override
         {
-            assetManager = std::make_unique<MeshAssetManager>(nullptr, NC_TEST_COLLATERAL_DIRECTORY);
+            assetManager = std::make_unique<MeshAssetManager>(NC_TEST_COLLATERAL_DIRECTORY, nullptr);
         }
 
         void TearDown() override

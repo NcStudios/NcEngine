@@ -93,11 +93,6 @@ namespace nc::graphics
         m_base->GetDevice().waitIdle();
     }
 
-    AssetsStorage* Graphics::GetAssetsStoragePtr() const noexcept
-    {
-        return m_assetsStorage.get();
-    }
-
     Base* Graphics::GetBasePtr() const noexcept
     {
         return m_base.get();

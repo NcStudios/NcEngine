@@ -80,11 +80,12 @@ namespace
 
 namespace nc
 {
-    MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
+    MeshAssetManager::MeshAssetManager(const std::string& assetDirectory, Signal<const MeshAsset&>* onMeshAdd)
         : m_vertexData{},
           m_indexData{},
           m_accessors{},
-          m_assetDirectory{assetDirectory}
+          m_assetDirectory{assetDirectory},
+          m_onMeshAdd{m_onMeshAdd}
     {
     }
 
@@ -123,7 +124,7 @@ namespace nc
             m_indexData.indices
         };
 
-        m_assetsSink->UpdateMeshBuffer(assetData);
+        // m_assetsSink->UpdateMeshBuffer(assetData);
 
         return true;
     }
@@ -165,7 +166,7 @@ namespace nc
             m_indexData.indices
         };
 
-        m_assetsSink->UpdateMeshBuffer(assetData);
+        // m_assetsSink->UpdateMeshBuffer(assetData);
         return true;
     }
 
@@ -205,7 +206,7 @@ namespace nc
                 m_indexData.indices
             };
 
-            m_assetsSink->UpdateMeshBuffer(assetData);
+            // m_assetsSink->UpdateMeshBuffer(assetData);
         }
         
         return true;
