@@ -32,8 +32,8 @@ namespace nc
             nc::Registry m_registry;
             time::Time m_time;
             nc::Random m_random;
-            Modules m_modules;
             nc::Assets m_assets;
+            Modules m_modules;
             Executor m_executor;
             float m_dt;
             float m_dtFactor;

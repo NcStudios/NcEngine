@@ -7,10 +7,6 @@
 namespace nc
 {
     class Registry;
-    namespace graphics
-    {
-        class AssetsSink;
-    }
 
     /** @brief Interface for general graphics functionality. */
     struct GraphicsModule : public Module
@@ -55,10 +51,5 @@ namespace nc
          * is not cleared as it can be set on a persistent Entity.
          */
         virtual void ClearEnvironment() = 0;
-
-        /**
-         * @brief Returns a pointer to the storage class for assets that have a graphical component. 
-         */
-        virtual graphics::AssetsSink* GetAssetsSink() = 0;
     };
 }

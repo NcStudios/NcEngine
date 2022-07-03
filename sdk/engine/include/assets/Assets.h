@@ -12,11 +12,9 @@ namespace nc
     class TextureAssetManager;
     class CubeMapAssetManager;
 
-    namespace graphics { class AssetsSink; }
-
     struct Assets
     {
-        Assets(graphics::AssetsSink* assetsSink, const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings);
+        Assets(const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings);
         ~Assets() noexcept; 
 
         std::unique_ptr<MeshAssetManager> meshManager;

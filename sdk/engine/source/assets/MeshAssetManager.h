@@ -7,8 +7,6 @@
 
 namespace nc
 {
-    namespace graphics { class AssetsSink; }
-
     struct VertexData
     {
         std::vector<graphics::Vertex> vertices;
@@ -22,7 +20,7 @@ namespace nc
     class MeshAssetManager : public IAssetService<MeshView, std::string>
     {
         public:
-            MeshAssetManager(graphics::AssetsSink* assetsSink, const std::string& assetDirectory);
+            MeshAssetManager(const std::string& assetDirectory);
             ~MeshAssetManager() noexcept;
 
             bool Load(const std::string& path, bool isExternal) override;
@@ -33,7 +31,6 @@ namespace nc
             bool IsLoaded(const std::string& path) const override;
 
         private:
-            graphics::AssetsSink* m_assetsSink;
             VertexData m_vertexData;
             IndexData m_indexData; 
             std::unordered_map<std::string, MeshView> m_accessors;

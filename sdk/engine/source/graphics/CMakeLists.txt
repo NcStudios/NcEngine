@@ -1,6 +1,5 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        AssetsSinkImpl.cpp
         AssetsStorage.cpp
         Base.cpp
         Commands.cpp

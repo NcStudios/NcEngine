@@ -1,6 +1,5 @@
 #include "MeshAssetManager.h"
 #include "AssetHelpers.h"
-#include "graphics/AssetsSink.h"
 
 #include <cassert>
 #include <fstream>
@@ -81,9 +80,8 @@ namespace
 
 namespace nc
 {
-    MeshAssetManager::MeshAssetManager(graphics::AssetsSink* assetsSink, const std::string& assetDirectory)
-        : m_assetsSink{assetsSink},
-          m_vertexData{},
+    MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
+        : m_vertexData{},
           m_indexData{},
           m_accessors{},
           m_assetDirectory{assetDirectory}

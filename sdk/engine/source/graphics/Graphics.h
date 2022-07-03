@@ -42,7 +42,6 @@ namespace nc::graphics
             void Clear();
             void InitializeUI();
 
-            AssetsStorage* GetAssetsStoragePtr() const noexcept;
             Base* GetBasePtr() const noexcept;
             GpuAllocator* GetAllocatorPtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
