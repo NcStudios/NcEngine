@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 namespace nc::internal
@@ -27,16 +28,19 @@ class ConnectionBacklink
 
         auto GetPendingDisconnections() -> std::vector<int>
         {
+            auto lock = std::lock_guard{m_mutex};
             return std::exchange(m_pending, std::vector<int>{});
         }
 
         void StageDisconnect(int id)
         {
+            auto lock = std::lock_guard{m_mutex};
             m_pending.push_back(id);
         }
 
     private:
         std::vector<int> m_pending;
+        std::mutex m_mutex;
 };
 
 template<class... Args>
@@ -48,12 +52,17 @@ class SharedConnectionState
         {
         }
 
-        bool IsConnected() const noexcept
+        auto Id() const noexcept -> int
+        {
+            return m_id;
+        }
+
+        auto IsConnected() const noexcept -> bool
         {
             return m_connected;
         }
 
-        bool Disconnect() noexcept
+        auto Disconnect() noexcept -> bool
         {
             const auto connected = std::exchange(m_connected, false);
             if (connected)
@@ -78,8 +87,14 @@ class Slot
 
         Slot(std::function<void(Args...)> func, ConnectionBacklink* link, int id)
             : m_func{std::move(func)},
-              m_state{std::make_shared<SharedConnectionState_t>(link, id)}
+              m_state{std::make_shared<SharedConnectionState_t>(link, id)},
+              m_id{id}
         {
+        }
+
+        auto Id() const noexcept -> int
+        {
+            return m_id;
         }
 
         void operator()(Args... args) const
@@ -95,5 +110,6 @@ class Slot
     private:
         std::function<void(Args...)> m_func;
         std::shared_ptr<SharedConnectionState_t> m_state;
+        int m_id;
 };
 } // namespace nc::internal
