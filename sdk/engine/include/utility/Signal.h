@@ -2,7 +2,7 @@
 
 #include "debug/Utils.h"
 #include "internal/SignalInternal.h"
-#include <unordered_map>
+#include <algorithm>
 
 namespace nc
 {
@@ -59,10 +59,8 @@ class Signal
         /** Connect a std::function */
         [[nodiscard]] auto Connect(std::function<void(Args...)> func) -> Connection_t
         {
-            const auto id = ++m_currentId;
-            auto [it, result] = m_slots.emplace(id, Slot_t{std::move(func), m_link.get(), id});
-            NC_ASSERT(result, "Signal::Connect failure");
-            return Connection_t{it->second.GetState()};
+            auto& result = m_slots.emplace_back(std::move(func), m_link.get(), ++m_currentId);
+            return Connection_t{result.GetState()};
         }
 
         /** Connect a member function */
@@ -82,9 +80,9 @@ class Signal
         /** Remove all connections */
         void DisconnectAll()
         {
-            m_link->GetPendingDisconnections(); // Don't need Sync() - just discard
             m_slots.clear();
             m_currentId = 0;
+            m_link->GetPendingDisconnections(); // Don't need Sync() - just discard
         }
 
         /** Get the number of active connections */
@@ -98,7 +96,7 @@ class Signal
         void Emit(Args... args)
         {
             Sync();
-            for (const auto& [id, slot] : m_slots)
+            for (const auto& slot : m_slots)
             {
                 slot(args...);
             }
@@ -112,18 +110,15 @@ class Signal
 
     private:
         mutable std::unique_ptr<internal::ConnectionBacklink> m_link = std::make_unique<internal::ConnectionBacklink>();
-        mutable std::unordered_map<int, Slot_t> m_slots{};
+        mutable std::vector<Slot_t> m_slots{};
         int m_currentId{0};
 
         void Sync() const
         {
-            if (m_link->HasPendingDisconnections())
+            const auto pendingRemovals = m_link->GetPendingDisconnections();
+            for(const auto id : pendingRemovals)
             {
-                auto pendingRemovals = m_link->GetPendingDisconnections();
-                for(auto id : pendingRemovals)
-                {
-                    m_slots.erase(id);
-                }
+                std::erase_if(m_slots, [id](const auto& state) { return state.Id() == id; });
             }
         }
 };
