@@ -1,5 +1,6 @@
 #include "runtime.h"
 #include "audio/AudioModuleImpl.h"
+#include "assets/Assets.h"
 #include "config/ConfigInternal.h"
 #include "graphics/GraphicsModuleImpl.h"
 #include "graphics/PerFrameRenderState.h"
@@ -9,7 +10,7 @@
 
 namespace
 {
-    auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, nc::time::Time* time, std::function<void()> clearCallback, float* dt, nc::EngineInitFlags flags) -> nc::Modules
+    auto BuildModules(nc::Registry* reg, nc::window::WindowImpl* window, nc::time::Time* time, nc::GpuAccessorChannels* gpuAccessorChannels, std::function<void()> clearCallback, float* dt, nc::EngineInitFlags flags) -> nc::Modules
     {
         V_LOG("BuildModules()");
         bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoGraphics);
@@ -17,7 +18,7 @@ namespace
         bool enableAudioModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
         return nc::Modules
         {
-            .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, window, dt),
+            .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, gpuAccessorChannels, window, dt),
             .physicsModule = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg, time),
             .audioModule = nc::audio::BuildAudioModule(enableAudioModule, reg),
             .sceneModule = std::make_unique<nc::scene::SceneModuleImpl>(std::move(clearCallback)),
@@ -42,7 +43,7 @@ namespace nc
           m_time{},
           m_random{},
           m_assets{nc::config::GetProjectSettings(), nc::config::GetMemorySettings()},
-          m_modules{BuildModules(&m_registry, &m_window, &m_time, std::bind_front(&Runtime::Clear, this), &m_dt, flags)},
+          m_modules{BuildModules(&m_registry, &m_window, &m_time, m_assets.GpuAccessorChannels(), std::bind_front(&Runtime::Clear, this), &m_dt, flags)},
           m_executor{},
           m_dt{0.0f},
           m_dtFactor{1.0f},

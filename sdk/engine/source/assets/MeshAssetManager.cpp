@@ -124,6 +124,8 @@ namespace nc
             m_indexData.indices
         };
 
+        m_onMeshAdd->Emit(assetData);
+
         // m_assetsSink->UpdateMeshBuffer(assetData);
 
         return true;

@@ -15,12 +15,12 @@ namespace nc::window { class WindowImpl; }
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window, float* dt)->std::unique_ptr<GraphicsModule>;
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, nc::GpuAccessorChannels* gpuAccessorChannels, window::WindowImpl* window, float* dt)->std::unique_ptr<GraphicsModule>;
 
     class GraphicsModuleImpl : public GraphicsModule
     {
         public:
-            GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, float* dt);
+            GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, nc::GpuAccessorChannels* gpuAccessorChannels, float* dt);
 
             void SetCamera(Camera* camera) noexcept override;
             auto GetCamera() noexcept -> Camera* override;

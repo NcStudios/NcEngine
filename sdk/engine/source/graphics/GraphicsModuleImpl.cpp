@@ -1,5 +1,6 @@
 #include "GraphicsModuleImpl.h"
 #include "ecs/View.h"
+#include "assets/Assets.h"
 #include "PerFrameRenderState.h"
 #include "window/WindowImpl.h"
 
@@ -37,19 +38,20 @@ namespace
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, window::WindowImpl* window, float* dt) -> std::unique_ptr<GraphicsModule>
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, nc::GpuAccessorChannels* gpuAccessorChannels, window::WindowImpl* window, float* dt) -> std::unique_ptr<GraphicsModule>
     {
-        if(enableModule) return std::make_unique<GraphicsModuleImpl>(reg, window, dt);
+        if(enableModule) return std::make_unique<GraphicsModuleImpl>(reg, window, gpuAccessorChannels, dt);
         return std::make_unique<GraphicsModuleStub>(reg);
     }
 
-    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, float* dt)
+    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, window::WindowImpl* window, nc::GpuAccessorChannels* gpuAccessorChannels, float* dt)
         : m_registry{ registry },
           m_camera{},
           m_graphics{ &m_camera,
                       window->GetHWND(),
                       window->GetHINSTANCE(),
-                      window->GetDimensions() },
+                      window->GetDimensions(),
+                      gpuAccessorChannels },
           m_ui{ window->GetHWND() },
           m_environment{},
           m_pointLightSystem{ registry },

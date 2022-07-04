@@ -28,7 +28,7 @@ namespace nc
             Assets(const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings);
             ~Assets() noexcept; 
             
-            const GpuAccessorChannels& GpuAccessorChannels();
+            GpuAccessorChannels* GpuAccessorChannels();
 
         private:
             nc::GpuAccessorChannels m_gpuAccessorChannels;

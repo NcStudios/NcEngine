@@ -1,15 +1,27 @@
+#include "assets/Assets.h"
 #include "graphics/AssetsStorage.h"
 #include "graphics/Base.h"
 #include "graphics/GpuAllocator.h"
 
 namespace nc::graphics
 {   
-    AssetsStorage::AssetsStorage(Base* base, GpuAllocator* allocator)
+    AssetsStorage::AssetsStorage(Base* base, GpuAllocator* allocator, nc::GpuAccessorChannels* gpuAccessorChannels)
         : m_base{base},
           m_allocator{allocator},
           m_vertexData{m_base, m_allocator},
-          m_indexData{m_base, m_allocator}
+          m_indexData{m_base, m_allocator},
+          m_gpuAccessorChannels{gpuAccessorChannels}
     {
+
+            // nc::Signal<int> signal;
+    // Foo foo;
+    // const Foo& constFoo = foo;
+    // auto connection = signal.Connect(&constFoo, &Foo::ConstTest);
+    // EXPECT_TRUE(connection.IsConnected());
+
+
+
+        m_gpuAccessorChannels->onMeshAdd.Connect(&AssetsStorage::UpdateMeshBuffer);
     }
 
     const VertexData& AssetsStorage::GetVertexData() const noexcept
@@ -32,6 +44,12 @@ namespace nc::graphics
     {
         m_indexData.buffer.Clear();
         m_indexData.buffer = ImmutableBuffer(m_base, m_allocator, indices);
+    }
+
+    void AssetsStorage::UpdateMeshBuffer(const MeshAsset& meshAsset)	
+    {	
+        SetVertexData(meshAsset.vertices);	
+        SetIndexData(meshAsset.indices);	
     }
 
     VertexData::VertexData(Base* base, GpuAllocator* allocator)

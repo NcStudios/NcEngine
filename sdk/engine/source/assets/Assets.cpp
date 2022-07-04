@@ -12,8 +12,8 @@ namespace nc
 
         Assets::~Assets() {}
 
-        const GpuAccessorChannels& Assets::GpuAccessorChannels()
+        GpuAccessorChannels* Assets::GpuAccessorChannels()
         {
-            return m_gpuAccessorChannels;
+            return &m_gpuAccessorChannels;
         }
 }

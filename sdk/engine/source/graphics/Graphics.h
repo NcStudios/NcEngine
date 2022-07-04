@@ -13,7 +13,11 @@
 #include <memory>
 #include <mutex>
 
-namespace nc { struct AssetServices; }
+namespace nc 
+{ 
+    struct AssetServices; 
+    struct GpuAccessorChannels; 
+}
 
 namespace nc::graphics
 {
@@ -29,7 +33,7 @@ namespace nc::graphics
     class Graphics
     {
         public:
-            Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions, nc::GpuAccessorChannels* gpuAccessorChannels);
             ~Graphics() noexcept;
             Graphics(const Graphics&) = delete;
             Graphics(Graphics&&) = delete;

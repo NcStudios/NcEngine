@@ -2,7 +2,10 @@
 
 #include "resources/ImmutableBuffer.h"
 
-namespace nc::graphics
+namespace nc
+{
+struct GpuAccessorChannels;
+namespace graphics
 {
     class Base; class GpuAllocator;
 
@@ -25,7 +28,7 @@ namespace nc::graphics
     class AssetsStorage
     {
         public:
-            AssetsStorage(Base* base, GpuAllocator* allocator);
+            AssetsStorage(Base* base, GpuAllocator* allocator, nc::GpuAccessorChannels* gpuAccessorChannels);
             ~AssetsStorage() = default;
 
             const VertexData& GetVertexData() const noexcept;
@@ -34,10 +37,14 @@ namespace nc::graphics
             void SetVertexData(const std::vector<graphics::Vertex>& vertices);
             void SetIndexData(const std::vector<uint32_t>& indices);
 
+            void UpdateMeshBuffer(const MeshAsset& meshAsset);
+
         private:
             Base* m_base;
+            nc::GpuAccessorChannels* m_gpuAccessorChannels;
             GpuAllocator* m_allocator;
             VertexData m_vertexData;
             IndexData m_indexData;
     };
+}
 }

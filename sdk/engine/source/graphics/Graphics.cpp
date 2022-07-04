@@ -1,5 +1,6 @@
 #include "Graphics.h"
 #include "assets/AssetServices.h"
+#include "assets/Assets.h"
 #include "Base.h"
 #include "Commands.h"
 #include "debug/Utils.h"
@@ -16,7 +17,7 @@
 
 namespace nc::graphics
 {
-    Graphics::Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    Graphics::Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions, nc::GpuAccessorChannels* gpuAccessorChannels)
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_allocator{ std::make_unique<GpuAllocator>(m_base->GetPhysicalDevice(), m_base->GetDevice(), m_base->GetInstance())},
@@ -28,7 +29,7 @@ namespace nc::graphics
           m_debugRenderer{},
           #endif
           m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
-          m_assetsStorage{std::make_unique<AssetsStorage>(m_base.get(), m_allocator.get())},
+          m_assetsStorage{std::make_unique<AssetsStorage>(m_base.get(), m_allocator.get(), gpuAccessorChannels)},
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
