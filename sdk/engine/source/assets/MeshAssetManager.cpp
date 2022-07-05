@@ -6,8 +6,6 @@
 
 namespace
 {
-    using namespace nc::graphics;
-
     struct MeshReadData
     {
         uint32_t verticesRead;
@@ -130,7 +128,7 @@ namespace nc
 
     bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
-        std::vector<Vertex> vertices;
+        std::vector<nc::graphics::Vertex> vertices;
         std::vector<uint32_t> indices;
         std::unordered_map<std::string, MeshView> meshes;
 
