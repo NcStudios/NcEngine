@@ -10,18 +10,9 @@ namespace nc::graphics
           m_allocator{allocator},
           m_vertexData{m_base, m_allocator},
           m_indexData{m_base, m_allocator},
-          m_gpuAccessorChannels{gpuAccessorChannels}
+          m_gpuAccessorChannels{gpuAccessorChannels},
+          m_meshChannel{m_gpuAccessorChannels->onMeshAdd.Connect(this, &AssetsStorage::UpdateMeshBuffer)}
     {
-
-            // nc::Signal<int> signal;
-    // Foo foo;
-    // const Foo& constFoo = foo;
-    // auto connection = signal.Connect(&constFoo, &Foo::ConstTest);
-    // EXPECT_TRUE(connection.IsConnected());
-
-
-
-        m_gpuAccessorChannels->onMeshAdd.Connect(&AssetsStorage::UpdateMeshBuffer);
     }
 
     const VertexData& AssetsStorage::GetVertexData() const noexcept
@@ -41,7 +32,7 @@ namespace nc::graphics
     }
 
     void AssetsStorage::SetIndexData(const std::vector<uint32_t>& indices)
-    {
+    {        
         m_indexData.buffer.Clear();
         m_indexData.buffer = ImmutableBuffer(m_base, m_allocator, indices);
     }

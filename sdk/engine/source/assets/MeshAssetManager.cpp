@@ -85,7 +85,7 @@ namespace nc
           m_indexData{},
           m_accessors{},
           m_assetDirectory{assetDirectory},
-          m_onMeshAdd{m_onMeshAdd}
+          m_onMeshAdd{onMeshAdd}
     {
     }
 
@@ -125,9 +125,6 @@ namespace nc
         };
 
         m_onMeshAdd->Emit(assetData);
-
-        // m_assetsSink->UpdateMeshBuffer(assetData);
-
         return true;
     }
 
@@ -168,7 +165,7 @@ namespace nc
             m_indexData.indices
         };
 
-        // m_assetsSink->UpdateMeshBuffer(assetData);
+        m_onMeshAdd->Emit(assetData);
         return true;
     }
 
@@ -208,7 +205,7 @@ namespace nc
                 m_indexData.indices
             };
 
-            // m_assetsSink->UpdateMeshBuffer(assetData);
+            m_onMeshAdd->Emit(assetData);
         }
         
         return true;
