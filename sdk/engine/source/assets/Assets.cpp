@@ -6,7 +6,6 @@ namespace nc
         Assets::Assets(const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings)
             : m_meshManager{std::make_unique<MeshAssetManager>(projectSettings.meshesPath)},
               m_gpuAccessorChannels{m_meshManager.get()->OnMeshAdd()}
-             
         {
         }
 
