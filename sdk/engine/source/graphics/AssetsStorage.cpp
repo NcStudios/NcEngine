@@ -11,7 +11,7 @@ namespace nc::graphics
           m_vertexData{m_base, m_allocator},
           m_indexData{m_base, m_allocator},
           m_gpuAccessorChannels{gpuAccessorChannels},
-          m_meshChannel{m_gpuAccessorChannels->onMeshAdd.Connect(this, &AssetsStorage::UpdateMeshBuffer)}
+          m_onMeshAddConnection{m_gpuAccessorChannels->onMeshAdd->Connect(this, &AssetsStorage::UpdateMeshBuffer)}
     {
     }
 

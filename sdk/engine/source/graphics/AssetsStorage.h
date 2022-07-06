@@ -45,7 +45,7 @@ namespace graphics
             GpuAllocator* m_allocator;
             VertexData m_vertexData;
             IndexData m_indexData;
-            nc::Connection<const nc::MeshAsset&> m_meshChannel;
+            nc::Connection<const nc::MeshAsset&> m_onMeshAddConnection;
     };
 }
 }

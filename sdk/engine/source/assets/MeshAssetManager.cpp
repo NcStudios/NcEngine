@@ -78,20 +78,13 @@ namespace
 
 namespace nc
 {
-    MeshAssetManager::MeshAssetManager(const std::string& assetDirectory, Signal<const MeshAsset&>* onMeshAdd)
+    MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
         : m_vertexData{},
           m_indexData{},
           m_accessors{},
           m_assetDirectory{assetDirectory},
-          m_onMeshAdd{onMeshAdd}
+          m_onMeshAdd{}
     {
-    }
-
-    MeshAssetManager::~MeshAssetManager() noexcept
-    {
-        m_vertexData = {};
-        m_indexData = {};
-        m_accessors.clear();
     }
 
     bool MeshAssetManager::Load(const std::string& path, bool isExternal)
@@ -122,7 +115,7 @@ namespace nc
             m_indexData.indices
         };
 
-        m_onMeshAdd->Emit(assetData);
+        m_onMeshAdd.Emit(assetData);
         return true;
     }
 
@@ -163,7 +156,7 @@ namespace nc
             m_indexData.indices
         };
 
-        m_onMeshAdd->Emit(assetData);
+        m_onMeshAdd.Emit(assetData);
         return true;
     }
 
@@ -203,7 +196,7 @@ namespace nc
                 m_indexData.indices
             };
 
-            m_onMeshAdd->Emit(assetData);
+            m_onMeshAdd.Emit(assetData);
         }
         
         return true;
@@ -228,5 +221,10 @@ namespace nc
     bool MeshAssetManager::IsLoaded(const std::string& path) const
     {
         return m_accessors.contains(path);
+    }
+
+    auto MeshAssetManager::OnMeshAdd() -> Signal<const MeshAsset&>*
+    {
+        return &m_onMeshAdd;
     }
 }

@@ -1,27 +1,14 @@
 #include "gtest/gtest.h"
-
-#include "graphics/GpuAllocator.h"
-#include "graphics/Graphics.h"
-#include "graphics/resources/ImmutableBuffer.h"
 #include "assets/MeshAssetManager.h"
+
+#include <array>
+#include <string>
 
 using namespace nc;
 
 const auto MeshPath_3Vertices = "mesh3Verts.nca";
 const auto MeshPath_6Vertices = "mesh6Verts.nca";
 const auto MeshPath_9Vertices = "mesh9Verts.nca";
-
-namespace nc::graphics
-{
-    auto GpuAllocator::CreateBuffer(uint32_t, vk::BufferUsageFlags, vma::MemoryUsage) -> GpuAllocation<vk::Buffer> { return {}; }
-    void GpuAllocator::Destroy(const GpuAllocation<vk::Buffer>&) const {}
-    ImmutableBuffer::ImmutableBuffer() {}
-    ImmutableBuffer::ImmutableBuffer(Base*, GpuAllocator*, const std::vector<uint32_t>&) {}
-    ImmutableBuffer::ImmutableBuffer(Base*, GpuAllocator*, const std::vector<Vertex>&) {}
-    void ImmutableBuffer::Clear() noexcept {}
-    auto Graphics::GetBasePtr() const noexcept -> Base* { return nullptr; }
-    auto Graphics::GetAllocatorPtr() const noexcept -> GpuAllocator* { return nullptr; }
-}
 
 class MeshAssetManager_unit_tests : public ::testing::Test
 {
@@ -31,7 +18,7 @@ class MeshAssetManager_unit_tests : public ::testing::Test
     protected:
         void SetUp() override
         {
-            assetManager = std::make_unique<MeshAssetManager>(NC_TEST_COLLATERAL_DIRECTORY, nullptr);
+            assetManager = std::make_unique<MeshAssetManager>(NC_TEST_COLLATERAL_DIRECTORY);
         }
 
         void TearDown() override

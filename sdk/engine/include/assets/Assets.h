@@ -19,7 +19,9 @@ namespace nc
 
     struct GpuAccessorChannels
     {
-        nc::Signal<const MeshAsset&> onMeshAdd;
+        GpuAccessorChannels(nc::Signal<const MeshAsset&>* _onMeshAdd);
+
+        nc::Signal<const MeshAsset&>* onMeshAdd;
     };
 
     class Assets
@@ -31,7 +33,7 @@ namespace nc
             GpuAccessorChannels* GpuAccessorChannels();
 
         private:
-            nc::GpuAccessorChannels m_gpuAccessorChannels;
             std::unique_ptr<MeshAssetManager> m_meshManager;
+            nc::GpuAccessorChannels m_gpuAccessorChannels;
     };
 }
