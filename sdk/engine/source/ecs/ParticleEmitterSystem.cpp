@@ -15,17 +15,10 @@ namespace nc::ecs
           m_dt{ dt },
           m_random{ Random() },
           m_getCamera{ getCamera },
-          m_registry{ registry }
+          m_registry{ registry },
+          m_onAddConnection{ registry->OnAdd<ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Add) },
+          m_onRemoveConnection{ registry->OnRemove<ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Remove)}
     {
-        registry->RegisterOnAddCallback<ParticleEmitter>
-        (
-            [this](ParticleEmitter& emitter) { this->Add(emitter); }
-        );
-
-        registry->RegisterOnRemoveCallback<ParticleEmitter>
-        (
-            [this](Entity entity) { this->Remove(entity); }
-        );
     }
 
     void ParticleEmitterSystem::Run()

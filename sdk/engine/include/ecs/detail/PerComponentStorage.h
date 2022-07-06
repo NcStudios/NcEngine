@@ -3,6 +3,7 @@
 #include "ecs/component/Component.h"
 #include "ecs/component/FreeComponentGroup.h"
 #include "debug/Utils.h"
+#include "utility/Signal.h"
 
 #include <algorithm>
 #include <functional>
@@ -40,15 +41,6 @@ namespace nc::detail
     };
 
     template<PooledComponent T>
-    struct SystemCallbacks
-    {
-        using on_add_type = std::function<void(T&)>;
-        using on_remove_type = std::function<void(Entity)>;
-        on_add_type OnAdd = nullptr;
-        on_remove_type OnRemove = nullptr;
-    };
-
-    template<PooledComponent T>
     class PerComponentStorage : public PerComponentStorageBase
     {
         struct StagedComponent
@@ -68,8 +60,8 @@ namespace nc::detail
             PerComponentStorage(const PerComponentStorage&) = delete;
             PerComponentStorage& operator=(const PerComponentStorage&) = delete;
 
-            auto ComponentPool() noexcept -> std::vector<T>& { return componentPool; }
-            auto ComponentPool() const noexcept -> const std::vector<T>& { return componentPool; }
+            auto ComponentPool() noexcept -> std::vector<T>& { return m_componentPool; }
+            auto ComponentPool() const noexcept -> const std::vector<T>& { return m_componentPool; }
 
             template<class... Args>
             auto Add(Entity entity, Args&&... args) -> T*;
@@ -83,8 +75,9 @@ namespace nc::detail
             template<std::predicate<const T&, const T&> Predicate>
             void Sort(Predicate&& comparesLessThan);
 
-            void RegisterOnAddCallback(SystemCallbacks<T>::on_add_type func);
-            void RegisterOnRemoveCallback(SystemCallbacks<T>::on_remove_type func);
+            auto OnAdd() -> Signal<T&>&;
+            auto OnRemove() -> Signal<Entity>&;
+
             void Swap(index_type firstEntity, index_type secondEntity);
             void ReserveHeadroom(size_t additionalRequiredCount);
 
@@ -93,17 +86,19 @@ namespace nc::detail
             void VerifyCallbacks() override;
 
         private:
-            std::vector<T> componentPool;
-            std::vector<StagedComponent> stagingPool;
-            SystemCallbacks<T> callbacks;
+            std::vector<T> m_componentPool;
+            std::vector<StagedComponent> m_stagingPool;
+            Signal<T&> m_onAdd;
+            Signal<Entity> m_onRemove;
     };
 
     template<PooledComponent T>
     PerComponentStorage<T>::PerComponentStorage(size_t maxEntities)
         : PerComponentStorageBase{maxEntities},
-          componentPool{},
-          stagingPool{},
-          callbacks{}
+          m_componentPool{},
+          m_stagingPool{},
+          m_onAdd{},
+          m_onRemove{}
     {}
 
     template<PooledComponent T>
@@ -111,10 +106,12 @@ namespace nc::detail
     auto PerComponentStorage<T>::Add(Entity entity, Args&&... args) -> T*
     {
         NC_ASSERT(!Contains(entity), "Cannot add multiple components of the same type");
-        auto& [emplacedEntity, emplacedComponent] = stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
+        auto& [emplacedEntity, emplacedComponent] = m_stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
 
         if constexpr(storage_policy<T>::requires_on_add_callback)
-            callbacks.OnAdd(emplacedComponent);
+        {
+            m_onAdd.Emit(emplacedComponent);
+        }
 
         return &emplacedComponent;
     }
@@ -127,8 +124,8 @@ namespace nc::detail
 
         NC_ASSERT(poolIndex != Entity::NullIndex, "Entity does not have component");
 
-        componentPool.at(poolIndex) = std::move(componentPool.back());
-        componentPool.pop_back();
+        m_componentPool.at(poolIndex) = std::move(m_componentPool.back());
+        m_componentPool.pop_back();
 
         auto movedEntity = entityPool.back(); // need to store in case we're removing the last element
         entityPool.at(poolIndex) = movedEntity;
@@ -140,7 +137,9 @@ namespace nc::detail
             sparseArray.at(movedEntity.Index()) = poolIndex;
 
         if constexpr(storage_policy<T>::requires_on_remove_callback)
-            callbacks.OnRemove(entity);
+        {
+            m_onRemove.Emit(entity);
+        }
     }
 
     template<PooledComponent T>
@@ -159,7 +158,7 @@ namespace nc::detail
         if(sparseArray.at(entity.Index()) != Entity::NullIndex)
             return true;
 
-        return stagingPool.cend() != std::ranges::find_if(stagingPool, [entity](const auto& pair)
+        return m_stagingPool.cend() != std::ranges::find_if(m_stagingPool, [entity](const auto& pair)
         {
             return entity == pair.entity;
         });
@@ -170,14 +169,14 @@ namespace nc::detail
     {
         auto poolIndex = sparseArray.at(entity.Index());
         if(poolIndex != Entity::NullIndex)
-            return &componentPool.at(poolIndex);
+            return &m_componentPool.at(poolIndex);
 
-        auto pos = std::ranges::find_if(stagingPool, [entity](const auto& pair)
+        auto pos = std::ranges::find_if(m_stagingPool, [entity](const auto& pair)
         {
             return pair.entity == entity;
         });
 
-        return pos == stagingPool.end() ? nullptr : &pos->component;
+        return pos == m_stagingPool.end() ? nullptr : &pos->component;
     }
 
     template<PooledComponent T>
@@ -185,14 +184,14 @@ namespace nc::detail
     {
         auto poolIndex = sparseArray.at(entity.Index());
         if(poolIndex != Entity::NullIndex)
-            return &componentPool.at(poolIndex);
+            return &m_componentPool.at(poolIndex);
 
-        const auto pos = std::ranges::find_if(stagingPool, [entity](const auto& pair)
+        const auto pos = std::ranges::find_if(m_stagingPool, [entity](const auto& pair)
         {
             return pair.entity == entity;
         });
 
-        return pos == stagingPool.end() ? nullptr : &pos->component;
+        return pos == m_stagingPool.end() ? nullptr : &pos->component;
     }
 
     template<PooledComponent T>
@@ -200,14 +199,14 @@ namespace nc::detail
     void PerComponentStorage<T>::Sort(Predicate&& comparesLessThan)
     {
         /** Create array of indices for an out-of-place sort. */
-        const auto size = componentPool.size();
+        const auto size = m_componentPool.size();
         std::vector<uint32_t> permutation(size);
         const auto beg = permutation.begin();
         const auto end = permutation.end();
         std::iota(beg, end, 0u);
 
         /** Extend the user-provided predicate to operate in terms of indices. */
-        auto compare = [&pool = componentPool, predicate = std::forward<Predicate>(comparesLessThan)](const auto lhs, const auto rhs)
+        auto compare = [&pool = m_componentPool, predicate = std::forward<Predicate>(comparesLessThan)](const auto lhs, const auto rhs)
         {
             return predicate(pool[lhs], pool[rhs]);
         };
@@ -230,7 +229,7 @@ namespace nc::detail
                 const auto i1 = permutation[cur];
                 const auto i2 = permutation[next];
                 std::swap(entityPool[i1], entityPool[i2]);
-                std::swap(componentPool[i1], componentPool[i2]);
+                std::swap(m_componentPool[i1], m_componentPool[i2]);
                 const auto sparse1 = entityPool[i1].Index();
                 const auto sparse2 = entityPool[i2].Index();
                 sparseArray[sparse1] = i2;
@@ -243,15 +242,15 @@ namespace nc::detail
     }
 
     template<PooledComponent T>
-    void PerComponentStorage<T>::RegisterOnAddCallback(typename SystemCallbacks<T>::on_add_type func)
+    auto PerComponentStorage<T>::OnAdd() -> Signal<T&>&
     {
-        callbacks.OnAdd = std::move(func);
+        return m_onAdd;
     }
 
     template<PooledComponent T>
-    void PerComponentStorage<T>::RegisterOnRemoveCallback(typename SystemCallbacks<T>::on_remove_type func)
+    auto PerComponentStorage<T>::OnRemove() -> Signal<Entity>&
     {
-        callbacks.OnRemove = std::move(func);
+        return m_onRemove;
     }
 
     template<PooledComponent T>
@@ -259,13 +258,13 @@ namespace nc::detail
     {
         if constexpr(storage_policy<T>::requires_on_add_callback)
         {
-            if(!callbacks.OnAdd)
+            if(m_onAdd.ConnectionCount() == 0)
                 throw NcError("OnAdd callback required but not set");
         }
 
         if constexpr(storage_policy<T>::requires_on_remove_callback)
         {
-            if(!callbacks.OnRemove)
+            if(m_onRemove.ConnectionCount() == 0)
                 throw NcError("OnRemove callback required but not set");
         }
     }
@@ -276,7 +275,7 @@ namespace nc::detail
         auto firstDenseIndex = sparseArray.at(firstEntity);
         auto secondDenseIndex = sparseArray.at(secondEntity);
         std::swap(entityPool.at(firstDenseIndex), entityPool.at(secondDenseIndex));
-        std::swap(componentPool.at(firstDenseIndex), componentPool.at(secondDenseIndex));
+        std::swap(m_componentPool.at(firstDenseIndex), m_componentPool.at(secondDenseIndex));
         sparseArray.at(firstEntity) = secondDenseIndex;
         sparseArray.at(secondEntity) = firstDenseIndex;
     }
@@ -284,8 +283,8 @@ namespace nc::detail
     template<PooledComponent T>
     void PerComponentStorage<T>::ReserveHeadroom(size_t additionalRequiredCount)
     {
-        auto requiredSize = componentPool.size() + additionalRequiredCount;
-        componentPool.reserve(requiredSize);
+        auto requiredSize = m_componentPool.size() + additionalRequiredCount;
+        m_componentPool.reserve(requiredSize);
         entityPool.reserve(requiredSize);
     }
 
@@ -295,19 +294,19 @@ namespace nc::detail
         for(auto entity : removed)
             TryRemove(entity);
 
-        for(auto& [entity, component] : stagingPool)
+        for(auto& [entity, component] : m_stagingPool)
         {
-            componentPool.push_back(std::move(component));
+            m_componentPool.push_back(std::move(component));
             auto sparseIndex = entity.Index();
             entityPool.push_back(entity);
-            sparseArray.at(sparseIndex) = static_cast<uint32_t>(componentPool.size() - 1);
+            sparseArray.at(sparseIndex) = static_cast<uint32_t>(m_componentPool.size() - 1);
         }
 
-        stagingPool.clear();
+        m_stagingPool.clear();
 
         if constexpr(std::same_as<T, FreeComponentGroup>)
         {
-            for(auto& group : componentPool)
+            for(auto& group : m_componentPool)
             {
                 group.CommitStagedComponents();
             }
@@ -317,8 +316,8 @@ namespace nc::detail
     template<PooledComponent T>
     void PerComponentStorage<T>::Clear()
     {
-        assert(stagingPool.empty());
-        stagingPool.shrink_to_fit();
+        assert(m_stagingPool.empty());
+        m_stagingPool.shrink_to_fit();
 
         std::ranges::fill(sparseArray, Entity::NullIndex);
 
@@ -331,13 +330,13 @@ namespace nc::detail
 
             sparseArray.at(entity.Index()) = swapToIndex;
             entityPool.at(swapToIndex) = entityPool.at(denseIndex);
-            componentPool.at(swapToIndex) = std::move(componentPool.at(denseIndex));
+            m_componentPool.at(swapToIndex) = std::move(m_componentPool.at(denseIndex));
             ++swapToIndex;
         }
 
         entityPool.erase(entityPool.begin() + swapToIndex, entityPool.end());
         entityPool.shrink_to_fit();
-        componentPool.erase(componentPool.begin() + swapToIndex, componentPool.end());
-        componentPool.shrink_to_fit();
+        m_componentPool.erase(m_componentPool.begin() + swapToIndex, m_componentPool.end());
+        m_componentPool.shrink_to_fit();
     }
 }

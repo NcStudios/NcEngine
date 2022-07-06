@@ -70,10 +70,10 @@ namespace nc
             void RegisterComponentType();
 
             template<PooledComponent T>
-            void RegisterOnAddCallback(detail::SystemCallbacks<T>::on_add_type func);
+            auto OnAdd() -> Signal<T&>&;
 
             template<PooledComponent T>
-            void RegisterOnRemoveCallback(detail::SystemCallbacks<T>::on_remove_type func);
+            auto OnRemove() -> Signal<Entity>&;
 
             /** Engine Functions */
             template<PooledComponent T>
@@ -308,17 +308,15 @@ namespace nc
     }
 
     template<PooledComponent T>
-    void Registry::RegisterOnAddCallback(typename detail::SystemCallbacks<T>::on_add_type func)
+    auto Registry::OnAdd() -> Signal<T&>&
     {
-        static_assert(storage_policy<T>::requires_on_add_callback, "Cannot register an OnAdd callback unless specified by storage_policy<T>");
-        StorageFor<T>()->RegisterOnAddCallback(std::move(func));
+        return StorageFor<T>()->OnAdd();
     }
 
     template<PooledComponent T>
-    void Registry::RegisterOnRemoveCallback(typename detail::SystemCallbacks<T>::on_remove_type func)
+    auto Registry::OnRemove() -> Signal<Entity>&
     {
-        static_assert(storage_policy<T>::requires_on_remove_callback, "Cannot register an OnRemove callback unless specified by storage_policy<T>");
-        StorageFor<T>()->RegisterOnRemoveCallback(std::move(func));
+        return StorageFor<T>()->OnRemove();
     }
 
     inline void Registry::CommitStagedChanges()

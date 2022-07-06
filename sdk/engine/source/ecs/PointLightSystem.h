@@ -1,7 +1,11 @@
 #pragma once
 
+#include "utility/Signal.h"
+
 namespace nc
 {
+    class Entity;
+    class PointLight;
     class Registry;
 }
 
@@ -13,14 +17,15 @@ namespace nc::ecs
             PointLightSystem(Registry* registry);
             PointLightSystem(PointLightSystem&&) = delete;
             PointLightSystem(const PointLightSystem&) = delete;
-            PointLightSystem& operator = (PointLightSystem&&) = delete;
-            PointLightSystem& operator = (const PointLightSystem&) = delete;
+            PointLightSystem& operator=(PointLightSystem&&) = delete;
+            PointLightSystem& operator=(const PointLightSystem&) = delete;
 
             bool CheckDirtyAndReset();
             void Clear();
 
         private:
-            Registry* m_registry;
+            Connection<PointLight&> m_onAddConnection;
+            Connection<Entity> m_onRemoveConnection;
             bool m_isSystemDirty;
     };
 }
