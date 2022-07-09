@@ -70,7 +70,6 @@ namespace nc
     void Runtime::Start(std::unique_ptr<nc::Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
-        m_context.registry.VerifyCallbacks();
         m_modules.sceneModule->ChangeScene(std::move(initialScene));
         m_modules.sceneModule->DoSceneSwap(this);
         m_isRunning = true;

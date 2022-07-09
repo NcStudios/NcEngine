@@ -89,7 +89,6 @@ namespace nc
             auto StorageFor() const -> const detail::EntityStorage*;
 
             void CommitStagedChanges();
-            void VerifyCallbacks();
             void Clear();
 
         private:

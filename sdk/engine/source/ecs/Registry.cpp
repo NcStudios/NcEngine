@@ -56,10 +56,4 @@ namespace nc
             storage->Clear();
         }
     }
-
-    void Registry::VerifyCallbacks()
-    {
-        for(auto& storage : m_registeredStorage)
-            storage->VerifyCallbacks();
-    }
 }

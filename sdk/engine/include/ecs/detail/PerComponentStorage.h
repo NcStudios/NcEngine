@@ -33,7 +33,6 @@ namespace nc::detail
             virtual ~PerComponentStorageBase() = default;
             virtual void Clear() = 0;
             virtual void CommitStagedComponents(const std::vector<Entity>& removed) = 0;
-            virtual void VerifyCallbacks() = 0;
 
         protected:
             std::vector<index_type> sparseArray;
@@ -83,7 +82,6 @@ namespace nc::detail
 
             void Clear() override;
             void CommitStagedComponents(const std::vector<Entity>& removed) override;
-            void VerifyCallbacks() override;
 
         private:
             std::vector<T> m_componentPool;
@@ -108,7 +106,7 @@ namespace nc::detail
         NC_ASSERT(!Contains(entity), "Cannot add multiple components of the same type");
         auto& [emplacedEntity, emplacedComponent] = m_stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
 
-        if constexpr(storage_policy<T>::requires_on_add_callback)
+        if constexpr(StoragePolicy<T>::enable_on_add_callbacks)
         {
             m_onAdd.Emit(emplacedComponent);
         }
@@ -136,7 +134,7 @@ namespace nc::detail
         if(sparseIndex != movedEntity.Index())
             sparseArray.at(movedEntity.Index()) = poolIndex;
 
-        if constexpr(storage_policy<T>::requires_on_remove_callback)
+        if constexpr(StoragePolicy<T>::enable_on_remove_callbacks)
         {
             m_onRemove.Emit(entity);
         }
@@ -251,22 +249,6 @@ namespace nc::detail
     auto PerComponentStorage<T>::OnRemove() -> Signal<Entity>&
     {
         return m_onRemove;
-    }
-
-    template<PooledComponent T>
-    void PerComponentStorage<T>::VerifyCallbacks()
-    {
-        if constexpr(storage_policy<T>::requires_on_add_callback)
-        {
-            if(m_onAdd.ConnectionCount() == 0)
-                throw NcError("OnAdd callback required but not set");
-        }
-
-        if constexpr(storage_policy<T>::requires_on_remove_callback)
-        {
-            if(m_onRemove.ConnectionCount() == 0)
-                throw NcError("OnRemove callback required but not set");
-        }
     }
 
     template<PooledComponent T>

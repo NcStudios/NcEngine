@@ -66,10 +66,10 @@ namespace nc
     };
 
     template<>
-    struct storage_policy<ParticleEmitter> : default_storage_policy
+    struct StoragePolicy<ParticleEmitter> : DefaultStoragePolicy
     {
-        static constexpr bool requires_on_add_callback = true;
-        static constexpr bool requires_on_remove_callback = true;
+        static constexpr bool enable_on_add_callbacks = true;
+        static constexpr bool enable_on_remove_callbacks = true;
     };
 
     #ifdef NC_EDITOR_ENABLED
