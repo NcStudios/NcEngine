@@ -67,6 +67,8 @@ namespace nc::physics
             std::vector<node_type> m_nodes;
             std::vector<TriMesh> m_triMeshes;
             NarrowPhysicsResult m_results;
+            Connection<ConcaveCollider&> m_onAddConnection;
+            Connection<Entity> m_onRemoveConnection;
 
             void AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex);
             void AddToInnerNode(const TriMesh& mesh, size_t meshIndex, InnerNode* innerNode);

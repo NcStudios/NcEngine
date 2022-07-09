@@ -72,19 +72,11 @@ namespace nc::physics
         : m_registry{registry},
           m_nodes{},
           m_triMeshes{},
-          m_results{}
+          m_results{},
+          m_onAddConnection{registry->OnAdd<ConcaveCollider>().Connect(this, &BspTree::OnAdd)},
+          m_onRemoveConnection{registry->OnRemove<ConcaveCollider>().Connect(this, &BspTree::OnRemove)}
     {
         m_nodes.push_back(LeafNode{});
-
-        registry->RegisterOnAddCallback<ConcaveCollider>
-        (
-            [this](ConcaveCollider& collider){ this->OnAdd(collider); }
-        );
-        
-        registry->RegisterOnRemoveCallback<ConcaveCollider>
-        (
-            [this](Entity entity) { this->OnRemove(entity); }
-        );
     }
 
     void BspTree::OnAdd(ConcaveCollider& collider)

@@ -44,11 +44,6 @@ Pooled components are intended for types that are numerous and processed in bulk
 ### Free Component
 Free components should be used for types that appear in small numbers - an input handler, for example. They also have the advantage of being pointer stable. Free components are grouped according to the Entities they belong to and do not have the additional memory overhead of pooled components. This, however, results in random access times that are linear in terms of the number of free components attached to an Entity. User-defined free components should derive from [FreeComponent](../nc/include/ecs/component/Component.h).
 
-### Systems, Callbacks, and Storage Policies
-Pooled components usually want to be processed as a whole or in batches by an external system. This can be set up in whatever way best suits the scenario. A simple solution is to implement the systems as FreeComponents attached to a single persistent Entity, which can then be invoked by a [FrameLogic or FixedLogic](EngineComponents.md#logic) component.
-
-Callbacks can be set in the Registry to receive on add/remove notifications for a particular type. First, a specialization of storage_policy must be provided specifying which callbacks will be used. Then `Registry::RegisterOnAddCallback<T>(cb)` and/or `Registry::RegisterOnRemoveCallback<T>(cb)` can be used. The callback signatures are `void Func(T&)` for additions and `void Func(Entity)` for removals.
-
 ## Registry
 -----------
 The registry contains storage for all entities and components and manages the associations between them. In order for objects of these types to be recognized by NcEngine, they must be created through one of the registry's Add member functions. There are also functions for retreiving, removing, and viewing ranges of objects, among other things.
@@ -72,6 +67,9 @@ When removing an Entity:
 
 When removing a Component:
 * It is destroyed before returning from Remove and changes are immediately reflected in returned ranges.
+
+### Callbacks
+It is possible to subscribe to on add and on remove events through the `Registry`. This must be enabled on a per-type basis by providing a specialization of `StoragePolicy` and specifying the allowed callbacks. Once enabled, a `Signal` can be retrieved through `Registry::OnAdd<T>()` and `Registry::OnRemove<T>()`, which can be used to connect the desired callable(s). Callable signatures should match `void F(T&)` for on add events and `void F(Entity)` for on remove.
 
 ## Views
 --------

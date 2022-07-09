@@ -57,10 +57,10 @@ namespace nc
     static_assert(sizeof(PointLightInfo) == PointLightInfoSize, "PointLight::PointLight Size of m_info must be 128 bytes.");
     
     template<>
-    struct storage_policy<PointLight> : default_storage_policy
+    struct StoragePolicy<PointLight> : DefaultStoragePolicy
     {
-        static constexpr bool requires_on_add_callback = true;
-        static constexpr bool requires_on_remove_callback = true;
+        static constexpr bool EnableOnAddCallbacks = true;
+        static constexpr bool EnableOnRemoveCallbacks = true;
     };
 
     #ifdef NC_EDITOR_ENABLED
