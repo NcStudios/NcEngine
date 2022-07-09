@@ -59,8 +59,8 @@ namespace nc
     template<>
     struct StoragePolicy<PointLight> : DefaultStoragePolicy
     {
-        static constexpr bool enable_on_add_callbacks = true;
-        static constexpr bool enable_on_remove_callbacks = true;
+        static constexpr bool EnableOnAddCallbacks = true;
+        static constexpr bool EnableOnRemoveCallbacks = true;
     };
 
     #ifdef NC_EDITOR_ENABLED

@@ -60,10 +60,10 @@ namespace nc
     struct DefaultStoragePolicy
     {
         /** @brief Allows OnAdd callbacks to be set in the registry. */
-        static constexpr bool enable_on_add_callbacks = false;
+        static constexpr bool EnableOnAddCallbacks = false;
 
         /** @brief Allows OnRemove callbacks to be set in the registry. */
-        static constexpr bool enable_on_remove_callbacks = false;
+        static constexpr bool EnableOnRemoveCallbacks = false;
     };
 
     /**

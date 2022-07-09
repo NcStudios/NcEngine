@@ -69,10 +69,10 @@ namespace nc
             template<PooledComponent T>
             void RegisterComponentType();
 
-            template<PooledComponent T>
+            template<PooledComponent T> requires StoragePolicy<T>::EnableOnAddCallbacks
             auto OnAdd() -> Signal<T&>&;
 
-            template<PooledComponent T>
+            template<PooledComponent T> requires StoragePolicy<T>::EnableOnRemoveCallbacks
             auto OnRemove() -> Signal<Entity>&;
 
             /** Engine Functions */
@@ -306,13 +306,13 @@ namespace nc
         m_registeredStorage.push_back(std::move(storage));
     }
 
-    template<PooledComponent T>
+    template<PooledComponent T> requires StoragePolicy<T>::EnableOnAddCallbacks
     auto Registry::OnAdd() -> Signal<T&>&
     {
         return StorageFor<T>()->OnAdd();
     }
 
-    template<PooledComponent T>
+    template<PooledComponent T> requires StoragePolicy<T>::EnableOnRemoveCallbacks
     auto Registry::OnRemove() -> Signal<Entity>&
     {
         return StorageFor<T>()->OnRemove();

@@ -106,7 +106,7 @@ namespace nc::detail
         NC_ASSERT(!Contains(entity), "Cannot add multiple components of the same type");
         auto& [emplacedEntity, emplacedComponent] = m_stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
 
-        if constexpr(StoragePolicy<T>::enable_on_add_callbacks)
+        if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
         {
             m_onAdd.Emit(emplacedComponent);
         }
@@ -134,7 +134,7 @@ namespace nc::detail
         if(sparseIndex != movedEntity.Index())
             sparseArray.at(movedEntity.Index()) = poolIndex;
 
-        if constexpr(StoragePolicy<T>::enable_on_remove_callbacks)
+        if constexpr(StoragePolicy<T>::EnableOnRemoveCallbacks)
         {
             m_onRemove.Emit(entity);
         }
