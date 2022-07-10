@@ -37,5 +37,7 @@ namespace nc::ecs
             Random m_random;
             std::function<nc::Camera* ()> m_getCamera;
             Registry* m_registry;
+            Connection<ParticleEmitter&> m_onAddConnection;
+            Connection<Entity> m_onRemoveConnection;
     };
 } // namespace nc::ecs

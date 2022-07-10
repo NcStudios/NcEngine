@@ -8,20 +8,15 @@ namespace
     struct BspTreeStub
     {
         BspTreeStub(nc::Registry* registry)
+            : onAddConnection{registry->OnAdd<nc::ConcaveCollider>().Connect(this, &BspTreeStub::OnAdd)},
+              onRemoveConnection{registry->OnRemove<nc::ConcaveCollider>().Connect(this, &BspTreeStub::OnRemove)}
         {
-            registry->RegisterOnAddCallback<nc::ConcaveCollider>
-            (
-                [this](nc::ConcaveCollider& collider){ this->OnAdd(collider); }
-            );
-            
-            registry->RegisterOnRemoveCallback<nc::ConcaveCollider>
-            (
-                [this](nc::Entity entity) { this->OnRemove(entity); }
-            );
         }
 
         void OnAdd(nc::ConcaveCollider&) {}
         void OnRemove(nc::Entity) {}
+        nc::Connection<nc::ConcaveCollider&> onAddConnection;
+        nc::Connection<nc::Entity> onRemoveConnection;
     };
 
     class PhysicsModuleStub : public nc::PhysicsModule

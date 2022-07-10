@@ -15,9 +15,9 @@ namespace
     struct GraphicsModuleStub : nc::GraphicsModule
     {
         GraphicsModuleStub(nc::Registry* reg)
+            : onAddConnection{reg->OnAdd<nc::PointLight>().Connect([](nc::PointLight&){})},
+              onRemoveConnection{reg->OnRemove<nc::PointLight>().Connect([](nc::Entity){})}
         {
-            reg->RegisterOnAddCallback<nc::PointLight>([](nc::PointLight&){});
-            reg->RegisterOnRemoveCallback<nc::PointLight>([](nc::Entity){});
         }
 
         void SetCamera(nc::Camera*) noexcept override {}
@@ -29,6 +29,8 @@ namespace
         void Clear() noexcept override {}
         auto BuildWorkload() -> std::vector<nc::Job> { return {}; }
 
+        nc::Connection<nc::PointLight&> onAddConnection;
+        nc::Connection<nc::Entity> onRemoveConnection;
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED
         nc::graphics::DebugRenderer debugRenderer;

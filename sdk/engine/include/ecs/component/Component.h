@@ -57,13 +57,13 @@ namespace nc
                               !std::derived_from<T, FreeComponent>;
 
     /** @brief Default storage behavior for pooled components. */
-    struct default_storage_policy
+    struct DefaultStoragePolicy
     {
-        /** @brief Requires an OnAdd callback to be set in the registry. */
-        static constexpr bool requires_on_add_callback = false;
+        /** @brief Allows OnAdd callbacks to be set in the registry. */
+        static constexpr bool EnableOnAddCallbacks = false;
 
-        /** @brief Requires an OnRemove callback to be set in the registry. */
-        static constexpr bool requires_on_remove_callback = false;
+        /** @brief Allows OnRemove callbacks to be set in the registry. */
+        static constexpr bool EnableOnRemoveCallbacks = false;
     };
 
     /**
@@ -73,7 +73,7 @@ namespace nc
      * @tparam T A component, which models PooledComponent, to customize.
      */
     template<PooledComponent T>
-    struct storage_policy : default_storage_policy {};
+    struct StoragePolicy : DefaultStoragePolicy {};
 
     #ifdef NC_EDITOR_ENABLED
     namespace internal
