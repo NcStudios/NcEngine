@@ -13,10 +13,10 @@ struct AssetServices
 {
     AssetServices(graphics::Graphics* graphics, const config::ProjectSettings& projectSettings, uint32_t maxTextures)
         : concaveManager{projectSettings.concaveCollidersPath},
-            hullManager{projectSettings.hullCollidersPath},
-            audioClipManager{projectSettings.audioClipsPath},
-            textureManager{graphics, projectSettings.texturesPath, maxTextures},
-            cubeMapAssetManager{graphics, projectSettings.cubeMapsPath, maxTextures}
+          hullManager{projectSettings.hullCollidersPath},
+          audioClipManager{projectSettings.audioClipsPath},
+          textureManager{graphics, projectSettings.texturesPath, maxTextures},
+          cubeMapAssetManager{graphics, projectSettings.cubeMapsPath, maxTextures}
     {
     }
 
