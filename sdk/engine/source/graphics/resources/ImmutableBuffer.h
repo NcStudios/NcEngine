@@ -14,8 +14,8 @@ namespace nc::graphics
     {
         public:
             ImmutableBuffer();
-            ImmutableBuffer(Base* base, GpuAllocator* allocator, const std::vector<uint32_t>& data);
-            ImmutableBuffer(Base* base, GpuAllocator* allocator, const std::vector<Vertex>& data);
+            ImmutableBuffer(Base* base, GpuAllocator* allocator, std::span<const uint32_t> data);
+            ImmutableBuffer(Base* base, GpuAllocator* allocator, std::span<const nc::Vertex> data);
             ImmutableBuffer(ImmutableBuffer&&) = default;
             ImmutableBuffer& operator=(ImmutableBuffer&&) = default;
             ImmutableBuffer& operator=(const ImmutableBuffer&) = delete;
