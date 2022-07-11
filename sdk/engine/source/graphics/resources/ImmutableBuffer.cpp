@@ -14,13 +14,13 @@ namespace
     }
 
     template<>
-    auto UsageFlags<nc::graphics::Vertex>() -> vk::BufferUsageFlags
+    auto UsageFlags<nc::Vertex>() -> vk::BufferUsageFlags
     {
         return vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
     }
 
     template<class T>
-    auto CreateBuffer(nc::graphics::Base* base, nc::graphics::GpuAllocator* allocator, const std::vector<T>& data) -> nc::graphics::GpuAllocation<vk::Buffer>
+    auto CreateBuffer(nc::graphics::Base* base, nc::graphics::GpuAllocator* allocator, std::span<const T> data) -> nc::graphics::GpuAllocation<vk::Buffer>
     {
         const auto size = static_cast<uint32_t>(sizeof(T) * data.size());
 
@@ -52,12 +52,12 @@ namespace nc::graphics
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, const std::vector<uint32_t>& data)
+    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, std::span<const uint32_t> data)
         : m_buffer{CreateBuffer(base, allocator, data)}
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, const std::vector<Vertex>& data)
+    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, std::span<const nc::Vertex> data)
         : m_buffer{CreateBuffer(base, allocator, data)}
     {
     }
