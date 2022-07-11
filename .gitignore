@@ -24,12 +24,6 @@ analysis.txt
 #imgui state file
 imgui.ini
 
-#assimp libs
-!libassimp.dll
-!libassimp.dll.a
-
 #external libs
 !nc/lib/libOptickCore.dll
 !nc/lib/libOptickCore.dll.a
-
-!sdk/tools/asset_builder/nc-builder.exe
