@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assets/AssetManagers.h"
 #include "camera/MainCamera.h"
 #include "GpuAllocator.h"
 #include "math/Vector.h"
@@ -19,6 +20,7 @@ namespace nc::graphics
 {
     class Base;
     class Commands;
+    class GpuAssetsStorage;
     struct PerFrameRenderState;
     class Swapchain;
     class Renderer;
@@ -28,7 +30,7 @@ namespace nc::graphics
     class Graphics
     {
         public:
-            Graphics(camera::MainCamera* mainCamera, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
             ~Graphics() noexcept;
             Graphics(const Graphics&) = delete;
             Graphics(Graphics&&) = delete;
@@ -70,6 +72,7 @@ namespace nc::graphics
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
+            std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
             #ifdef NC_DEBUG_RENDERING_ENABLED
             graphics::DebugRenderer m_debugRenderer;
             #endif
