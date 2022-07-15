@@ -2,6 +2,35 @@ find_package(Vulkan REQUIRED)
 
 set(NC_TEST_COLLATERAL_DIRECTORY ${PROJECT_SOURCE_DIR}/sdk/test/unit/assets/collateral/)
 
+### AssetId Tests ###
+add_executable(AssetId_tests
+    AssetId_tests.cpp
+)
+
+target_compile_definitions(AssetId_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+)
+
+target_include_directories(AssetId_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
+)
+
+target_compile_options(AssetId_tests
+    PUBLIC
+        ${WARNING_FLAGS}
+)
+
+target_link_libraries(AssetId_tests
+    PRIVATE
+        gtest
+)
+
+add_test(AssetId_tests AssetId_tests)
+
 ### AudioClipAssetManager Tests ###
 add_executable(AudioClipAssetManager_unit_tests
     AudioClipAssetManager_unit_tests.cpp
