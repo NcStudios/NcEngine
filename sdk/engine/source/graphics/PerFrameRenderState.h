@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Assets.h"
+#include "asset/Assets.h"
 #include "ecs/component/PointLight.h"
 #include "ecs/Registry.h"
 #ifdef NC_EDITOR_ENABLED

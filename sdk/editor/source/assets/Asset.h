@@ -1,5 +1,7 @@
 #pragma once
 
+#include "asset/AssetId.h"
+
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -18,19 +20,9 @@ namespace nc::editor
         /** The path to the .nca representation of the asset. Used for
          *  meshes, skyboxes and colliders. */
         std::optional<std::filesystem::path> ncaPath;
-        
+
         /** @todo add lastWriteTime and automatic rebuilding of assets */
         //std::filesystem::file_time_type lastWriteTime;
-    };
-
-    enum class AssetType
-    {
-        AudioClip,
-        ConcaveCollider,
-        HullCollider,
-        Mesh,
-        Texture,
-        Skybox
     };
 
     /** Create an Asset object from a path and type. This will not build any .nca
@@ -51,7 +43,7 @@ namespace nc::editor
 
     /** Check if a file's extension is valid for an asset type. */
     bool HasValidExtensionForAssetType(const std::filesystem::path& assetPath, AssetType type);
-    
+
     /** Check if an asset type uses an .nca file. */
     bool RequiresNcaFile(AssetType type);
 }

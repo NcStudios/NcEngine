@@ -13,7 +13,7 @@ constexpr auto path2 = "mesh/myMesh2.nca";
 
 TEST(AssetId_tests, Constructor_CompileTime_Succeeds)
 {
-    constexpr auto uut = AssetId<Asset_t::Mesh>(path1);
+    constexpr auto uut = AssetId<AssetType::Mesh>(path1);
     constexpr auto actual = uut.Hash();
     constexpr auto expected = hash::Fnv1a(path1);
     EXPECT_EQ(actual, expected);
@@ -24,7 +24,7 @@ TEST(AssetId_tests, Constructor_CompileTime_Succeeds)
 TEST(AssetId_tests, Constructor_Runtime_Succeeds)
 {
     const auto path = std::string{path1};
-    const auto id = AssetId<Asset_t::Mesh>(path);
+    const auto id = AssetId<AssetType::Mesh>(path);
     const auto actual = id.Hash();
     const auto expected = hash::Fnv1a(path);
     EXPECT_EQ(actual, expected);
@@ -32,7 +32,7 @@ TEST(AssetId_tests, Constructor_Runtime_Succeeds)
 
 TEST(AssetId_tests, EmptyString_ReturnsFnvBasis)
 {
-    constexpr auto uut = AssetId<Asset_t::Mesh>("");
+    constexpr auto uut = AssetId<AssetType::Mesh>("");
     constexpr auto actual = uut.Hash();
     constexpr auto expected = hash::FnvOffsetBasis;
     EXPECT_EQ(actual, expected);
@@ -40,16 +40,16 @@ TEST(AssetId_tests, EmptyString_ReturnsFnvBasis)
 
 TEST(AssetId_tests, ComparisonOperators_SameAssets_ReturnEqual)
 {
-    constexpr auto id1 = AssetId<Asset_t::Mesh>(path1);
-    constexpr auto id2 = AssetId<Asset_t::Mesh>(path1);
+    constexpr auto id1 = AssetId<AssetType::Mesh>(path1);
+    constexpr auto id2 = AssetId<AssetType::Mesh>(path1);
     EXPECT_TRUE(id1 == id2);
     EXPECT_FALSE(id1 != id2);
 }
 
 TEST(AssetId_tests, ComparisonOperators_DifferentAssets_ReturnsNotEqual)
 {
-    constexpr auto id1 = AssetId<Asset_t::Mesh>(path1);
-    constexpr auto id2 = AssetId<Asset_t::Mesh>(path2);
+    constexpr auto id1 = AssetId<AssetType::Mesh>(path1);
+    constexpr auto id2 = AssetId<AssetType::Mesh>(path2);
     EXPECT_FALSE(id1 == id2);
     EXPECT_TRUE(id1 != id2);
 }
@@ -75,7 +75,7 @@ TEST(AssetId_tests, Fnv1a_HashMany_NoCollisions)
     auto set = std::set<size_t>{};
     for(const auto& path : paths)
     {
-        set.emplace(AssetId<Asset_t::Mesh>{path}.Hash());
+        set.emplace(AssetId<AssetType::Mesh>{path}.Hash());
     }
     EXPECT_EQ(set.size(), paths.size());
 }

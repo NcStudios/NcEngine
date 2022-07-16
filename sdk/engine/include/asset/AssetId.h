@@ -4,18 +4,18 @@
 
 namespace nc
 {
-enum class Asset_t : uint8_t
+enum class AssetType
 {
     AudioClip,
     ConcaveCollider,
-    ConvexCollider,
-    CubeMap,
+    HullCollider,
     Mesh,
     Shader,
+    Skybox,
     Texture
 };
 
-template<Asset_t T>
+template<AssetType T>
 class AssetId
 {
     public:
@@ -33,13 +33,13 @@ class AssetId
         size_t m_hash;
 };
 
-template<Asset_t T>
+template<AssetType T>
 constexpr bool operator==(AssetId<T> lhs, AssetId<T> rhs)
 {
     return lhs.Hash() == rhs.Hash();
 }
 
-template<Asset_t T>
+template<AssetType T>
 constexpr bool operator!=(AssetId<T> lhs, AssetId<T> rhs)
 {
     return !(lhs == rhs);
