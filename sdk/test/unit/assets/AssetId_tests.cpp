@@ -1,10 +1,7 @@
 #include "gtest/gtest.h"
 #include "asset/AssetId.h"
 
-#include <fstream>
-#include <set>
 #include <string>
-#include <vector>
 
 using namespace nc;
 
