@@ -75,7 +75,7 @@ TEST(StringHash_tests, Fnv1a_HashMany_NoCollisions)
     auto set = std::set<size_t>{};
     for(const auto& path : paths)
     {
-        set.emplace(hash::StringHash{path}.Hash());
+        set.emplace(hash::Fnv1a(path));
     }
     EXPECT_EQ(set.size(), paths.size());
 }
