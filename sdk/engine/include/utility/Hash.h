@@ -16,4 +16,31 @@ constexpr auto Fnv1a(std::string_view path) -> size_t
     }
     return hash;
 }
+
+class StringHash
+{
+    public:
+        constexpr explicit StringHash(std::string_view path)
+            : m_hash{hash::Fnv1a(path)}
+        {
+        }
+
+        constexpr auto Hash() const noexcept -> size_t
+        {
+            return m_hash;
+        }
+
+    private:
+        size_t m_hash;
+};
+
+constexpr bool operator==(StringHash lhs, StringHash rhs)
+{
+    return lhs.Hash() == rhs.Hash();
+}
+
+constexpr bool operator!=(StringHash lhs, StringHash rhs)
+{
+    return !(lhs == rhs);
+}
 }

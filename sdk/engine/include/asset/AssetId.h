@@ -20,23 +20,23 @@ class AssetId
 {
     public:
         constexpr explicit AssetId(std::string_view path)
-            : m_hash{hash::Fnv1a(path)}
+            : m_hash{path}
         {
         }
 
-        constexpr auto Hash() const noexcept -> size_t
+        constexpr auto Id() const noexcept -> size_t
         {
-            return m_hash;
+            return m_hash.Hash();
         }
 
     private:
-        size_t m_hash;
+        hash::StringHash m_hash;
 };
 
 template<AssetType T>
 constexpr bool operator==(AssetId<T> lhs, AssetId<T> rhs)
 {
-    return lhs.Hash() == rhs.Hash();
+    return lhs.Id() == rhs.Id();
 }
 
 template<AssetType T>

@@ -1,0 +1,87 @@
+#include "gtest/gtest.h"
+#include "utility/Hash.h"
+
+#include <fstream>
+#include <set>
+#include <string>
+#include <vector>
+
+using namespace nc;
+
+constexpr auto testString1 = "Some test input";
+constexpr auto testString2 = "More input, but different";
+
+auto ReadCollateral() -> std::vector<std::string>
+{
+    std::vector<std::string> out;
+    std::ifstream inFile{NC_HASH_TEST_COLLATERAL_DIRECTORY"word_list.txt"};
+    std::string path;
+    while(inFile)
+    {
+        inFile >> path;
+        out.push_back(std::move(path));
+    }
+    return out;
+}
+
+TEST(StringHash_tests, Constructor_CompileTime_Succeeds)
+{
+    constexpr auto uut = hash::StringHash(testString1);
+    constexpr auto actual = uut.Hash();
+    constexpr auto expected = hash::Fnv1a(testString1);
+    EXPECT_EQ(actual, expected);
+    /** Prove compile time execution with a static_assert */
+    static_assert(actual == expected);
+}
+
+TEST(StringHash_tests, Constructor_Runtime_Succeeds)
+{
+    const auto path = std::string{testString1};
+    const auto id = hash::StringHash(path);
+    const auto actual = id.Hash();
+    const auto expected = hash::Fnv1a(path);
+    EXPECT_EQ(actual, expected);
+}
+
+TEST(StringHash_tests, EmptyString_ReturnsFnvBasis)
+{
+    constexpr auto uut = hash::StringHash("");
+    constexpr auto actual = uut.Hash();
+    constexpr auto expected = hash::FnvOffsetBasis;
+    EXPECT_EQ(actual, expected);
+}
+
+TEST(StringHash_tests, Comparison_Same_ReturnEqual)
+{
+    constexpr auto id1 = hash::StringHash(testString1);
+    constexpr auto id2 = hash::StringHash(testString1);
+    EXPECT_TRUE(id1 == id2);
+    EXPECT_FALSE(id1 != id2);
+}
+
+TEST(StringHash_tests, Comparison_Different_ReturnsNotEqual)
+{
+    constexpr auto id1 = hash::StringHash(testString1);
+    constexpr auto id2 = hash::StringHash(testString2);
+    EXPECT_FALSE(id1 == id2);
+    EXPECT_TRUE(id1 != id2);
+}
+
+TEST(StringHash_tests, Fnv1a_HashMany_NoCollisions)
+{
+    /** @note With enough input we will get collisions. This is just checking
+     *  nothing is horribly wrong with the implementation. */
+    const auto paths = ReadCollateral();
+    auto set = std::set<size_t>{};
+    for(const auto& path : paths)
+    {
+        set.emplace(hash::StringHash{path}.Hash());
+    }
+    EXPECT_EQ(set.size(), paths.size());
+}
+
+int main(int argc, char ** argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

@@ -7,11 +7,6 @@ add_executable(AssetId_tests
     AssetId_tests.cpp
 )
 
-target_compile_definitions(AssetId_tests
-    PRIVATE
-        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
-)
-
 target_include_directories(AssetId_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
