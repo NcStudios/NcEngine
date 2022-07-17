@@ -373,13 +373,6 @@ namespace nc::graphics
         m_commandPool = m_logicalDevice.createCommandPool(poolInfo);
     }
 
-    vk::UniqueSampler Base::CreateTextureSampler()
-    {
-        /** @todo This can be removed since we're just calling a free function. Anybody with a
-         *  Base pointer, can have a vk::Device instead and call the function directly. */
-        return nc::graphics::CreateTextureSampler(m_logicalDevice, vk::SamplerAddressMode::eRepeat);
-    }
-
     void Base::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout)
     {
         Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) 

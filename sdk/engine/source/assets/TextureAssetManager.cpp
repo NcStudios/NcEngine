@@ -39,7 +39,7 @@ namespace nc
           m_textures{},
           m_graphics{graphics},
           m_assetDirectory{texturesAssetDirectory},
-          m_sampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_sampler{graphics::CreateTextureSampler(m_graphics->GetBasePtr()->GetDevice(), vk::SamplerAddressMode::eRepeat)},
           m_maxTextureCount{maxTextures}
     {
     }

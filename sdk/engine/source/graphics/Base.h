@@ -7,7 +7,7 @@
 #endif
 #include "imgui/imgui_impl_vulkan.h"
 #include "GpuAllocator.h"
-#include "vk/VkTypes.h"
+#include "vk/QueueFamily.h"
 
 #include <optional>
 #include <unordered_map>
@@ -37,10 +37,7 @@ namespace nc::graphics
             const vk::Format& GetDepthFormat() const noexcept;
             vk::SampleCountFlagBits GetMaxSamplesCount();
 
-            vk::UniqueSampler CreateTextureSampler();
-
             void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers) noexcept;
-            //const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
             void QueryDepthFormatSupport();
             void InitializeImgui(const vk::RenderPass& defaultPass);
             void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout);

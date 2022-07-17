@@ -17,7 +17,7 @@ namespace nc
           m_cubeMaps{},
           m_graphics{graphics},
           m_assetDirectory{cubeMapAssetDirectory},
-          m_cubeMapSampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_cubeMapSampler{graphics::CreateTextureSampler(m_graphics->GetBasePtr()->GetDevice(), vk::SamplerAddressMode::eRepeat)},
           m_maxCubeMapsCount{maxCubeMapsCount}
     {
     }
