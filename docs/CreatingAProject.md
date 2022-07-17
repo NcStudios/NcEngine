@@ -16,7 +16,7 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 
 ```cpp
 /** ExampleScene.h */
-#include "Assets.h"
+#include "asset/Assets.h"
 #include "Input.h"
 #include "NcEngine.h"
 

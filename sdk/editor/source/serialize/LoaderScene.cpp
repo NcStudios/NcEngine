@@ -5,7 +5,7 @@
 
 namespace
 {
-    void WriteLoadsForType(std::ofstream& file, const nc::editor::AssetManifest& manifest, nc::editor::AssetType type, const char* funcName)
+    void WriteLoadsForType(std::ofstream& file, const nc::editor::AssetManifest& manifest, nc::AssetType type, const char* funcName)
     {
         static constexpr const char* tab = "    ";
         static constexpr const char* pathListType = "std::vector<std::string>";

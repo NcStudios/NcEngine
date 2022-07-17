@@ -7,24 +7,24 @@
 
 namespace
 {
-    bool IsDefaultAsset(const std::filesystem::path& path, nc::editor::AssetType type)
+    bool IsDefaultAsset(const std::filesystem::path& path, nc::AssetType type)
     {
         switch(type)
         {
-            case nc::editor::AssetType::AudioClip:
+            case nc::AssetType::AudioClip:
             {
                 /** @todo */
                 return false;
             }
-            case nc::editor::AssetType::ConcaveCollider:
+            case nc::AssetType::ConcaveCollider:
             {
                 return path.string() == nc::editor::PlaneConcaveColliderPath;
             }
-            case nc::editor::AssetType::HullCollider:
+            case nc::AssetType::HullCollider:
             {
                 return path.string() == nc::editor::CubeHullColliderPath;
             }
-            case nc::editor::AssetType::Mesh:
+            case nc::AssetType::Mesh:
             {
                 auto str = path.string();
                 return str == nc::editor::CubeMeshPath ||
@@ -32,14 +32,14 @@ namespace
                        str == nc::editor::SphereMeshPath ||
                        str == nc::editor::PlaneMeshPath;
             }
-            case nc::editor::AssetType::Texture:
+            case nc::AssetType::Texture:
             {
                 auto str = path.string();
                 return str == nc::editor::DefaultBaseColorPath ||
                        str == nc::editor::DefaultNormalPath ||
                        str == nc::editor::DefaultRoughnessPath;
             }
-            case nc::editor::AssetType::Skybox:
+            case nc::AssetType::Skybox:
             {
                 return path.string() == nc::editor::DefaultSkyboxPath;
             }

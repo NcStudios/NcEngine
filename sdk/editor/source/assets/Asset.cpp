@@ -3,7 +3,7 @@
 #include "utility/DefaultComponents.h"
 
 // Engine includes
-#include "Assets.h"
+#include "asset/Assets.h"
 #include "ecs/component/MeshRenderer.h"
 #include "platform/win32/NcWin32.h"
 
@@ -18,18 +18,16 @@ namespace nc::editor
     const auto JpegExtension = std::string{".jpeg"};
     const auto ExeName = std::string{"../NcTools/nc-build.exe"};
 
-    std::string BuildAssetTypeArg(nc::editor::AssetType type)
+    std::string BuildAssetTypeArg(AssetType type)
     {
-        if(type == nc::editor::AssetType::Mesh)
+        if(type == AssetType::Mesh)
             return std::string{" -a mesh "};
-        if(type == nc::editor::AssetType::ConcaveCollider)
+        if(type == AssetType::ConcaveCollider)
             return std::string{" -a concave-collider "};
-        if(type == nc::editor::AssetType::HullCollider)
+        if(type == AssetType::HullCollider)
             return std::string{" -a hull-collider "};
-        if(type == nc::editor::AssetType::Skybox)
-        {
+        if(type == AssetType::Skybox)
             return std::string{" -a skybox "};
-        }
         return std::string{};
     }
 
