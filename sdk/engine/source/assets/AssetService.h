@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Assets.h"
+#include "asset/Assets.h"
 #include "service/ServiceLocator.h"
 
 namespace nc
 {
     /** Interface for services that manage assets. */
-    template<AssetType T, class InputType>
+    template<AssetView T, class InputType>
     class IAssetService
     {
         public:
@@ -24,10 +24,10 @@ namespace nc
     };
 
     /** Helper alias for locating asset services. */
-    template<AssetType T, class InputType = std::string>
+    template<AssetView T, class InputType = std::string>
     using AssetService = ServiceLocator<IAssetService<T, InputType>>;
 
-    template<AssetType T, class InputType>
+    template<AssetView T, class InputType>
     IAssetService<T, InputType>::IAssetService()
     {
         AssetService<T, InputType>::Register(this);

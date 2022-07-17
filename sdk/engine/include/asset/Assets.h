@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssetId.h"
 #include "physics/Geometry.h"
 #include "utility/EnumUtilities.h"
 
@@ -150,7 +151,7 @@ namespace nc
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
-    concept AssetType = std::same_as<T, AudioClipView> ||
+    concept AssetView = std::same_as<T, AudioClipView> ||
                         std::same_as<T, ConvexHullView> ||
                         std::same_as<T, ConcaveColliderView> ||
                         std::same_as<T, MeshView> ||
