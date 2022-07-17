@@ -4,6 +4,41 @@
 
 namespace
 {
+/** Sequence our early frag write after previous (external) frag read. */
+constexpr auto earlyFragStencilWriteAfterFragRead = vk::SubpassDependency
+{
+    VK_SUBPASS_EXTERNAL,
+    0,
+    vk::PipelineStageFlagBits::eFragmentShader,
+    vk::PipelineStageFlagBits::eEarlyFragmentTests,
+    vk::AccessFlagBits::eShaderRead,
+    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+    vk::DependencyFlagBits::eByRegion
+};
+
+/** Sequence next (external) frag read after current late frag write. */
+constexpr auto lateFragStencilWriteBeforeFragRead = vk::SubpassDependency
+{
+    0,
+    VK_SUBPASS_EXTERNAL,
+    vk::PipelineStageFlagBits::eLateFragmentTests,
+    vk::PipelineStageFlagBits::eFragmentShader,
+    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+    vk::AccessFlagBits::eShaderRead,
+    vk::DependencyFlagBits::eByRegion
+};
+
+/** Sequence color and stencil writes after previous frame color and early frag. */
+constexpr auto colorAndDepthWriteAfterPrevious = vk::SubpassDependency
+{
+    VK_SUBPASS_EXTERNAL,
+    0,
+    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+    vk::AccessFlags(),
+    vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite
+};
+
 auto CreateAttachmentDescription(nc::graphics::AttachmentType type,
                                  vk::Format format,
                                  vk::SampleCountFlagBits numSamples,
@@ -61,41 +96,31 @@ auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& colorAttachmen
                               const nc::graphics::AttachmentSlot& depthAttachment,
                               const nc::graphics::AttachmentSlot& resolveAttachment) -> vk::SubpassDescription
 {
-    vk::SubpassDescription subpassDescription{};
-    subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
-    subpassDescription.setColorAttachmentCount(1);
-    subpassDescription.setPColorAttachments(&colorAttachment.reference);
-    subpassDescription.setPDepthStencilAttachment(&depthAttachment.reference);
-    subpassDescription.setPResolveAttachments(&resolveAttachment.reference);
-    return subpassDescription;
+    return vk::SubpassDescription
+    {
+        vk::SubpassDescriptionFlags{},
+        vk::PipelineBindPoint::eGraphics,
+        0u,
+        nullptr,
+        1u,
+        &colorAttachment.reference,
+        &resolveAttachment.reference,
+        &depthAttachment.reference
+    };
 }
 
 auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& depthAttachment) -> vk::SubpassDescription
 {
-    vk::SubpassDescription subpassDescription{};
-    subpassDescription.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics); // Vulkan may support compute subpasses later, so explicitly set this to a graphics bind point.
-    subpassDescription.setColorAttachmentCount(0);
-    subpassDescription.setPDepthStencilAttachment(&depthAttachment.reference);
-    return subpassDescription;
-}
-
-auto CreateSubpassDependency(uint32_t sourceSubpassIndex,
-                             uint32_t destSubpassIndex,
-                             vk::PipelineStageFlags sourceStageMask,
-                             vk::PipelineStageFlags destStageMask,
-                             vk::AccessFlags sourceAccessMask,
-                             vk::AccessFlags destAccessMask,
-                             vk::DependencyFlags flags = vk::DependencyFlags{}) -> vk::SubpassDependency
-{
-    return vk::SubpassDependency
+    return vk::SubpassDescription
     {
-        sourceSubpassIndex, // Refers to the implicit subpass prior to the render pass. (Would refer to the one after the render pass if put in setDstSubPass)
-        destSubpassIndex,   // The index of our subpass. **IMPORTANT. The index of the destination subpass must always be higher than the source subpass to prevent dependency graph cycles. (Unless the source is VK_SUBPASS_EXTERNAL)
-        sourceStageMask,    // The type of operation to wait on. (What our dependency is)
-        destStageMask,      // Specifies the type of operation that should do the waiting
-        sourceAccessMask,   // Specifies the specific operation that should do the waiting
-        destAccessMask,     // Specifies the specific operation that should do the waiting
-        flags
+        vk::SubpassDescriptionFlags{},
+        vk::PipelineBindPoint::eGraphics,
+        0u,
+        nullptr,
+        0u,
+        nullptr,
+        nullptr,
+        &depthAttachment.reference
     };
 }
 
@@ -153,7 +178,6 @@ auto CreateRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSl
 
     return device.createRenderPassUnique(renderPassInfo);
 }
-
 } // anonymous namespace
 
 namespace nc::graphics
@@ -166,30 +190,15 @@ AttachmentSlot::AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk
 {
 }
 
-Subpass::Subpass(const AttachmentSlot& depthAttachment)
-    : description{CreateSubpassDescription(depthAttachment)},
-      dependencies{CreateSubpassDependency(VK_SUBPASS_EXTERNAL, 0,
-                                             vk::PipelineStageFlagBits::eFragmentShader,
-                                             vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                                             vk::AccessFlagBits::eShaderRead,
-                                             vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-                                             vk::DependencyFlagBits::eByRegion),
-                    CreateSubpassDependency(0, VK_SUBPASS_EXTERNAL,
-                                            vk::PipelineStageFlagBits::eLateFragmentTests,
-                                            vk::PipelineStageFlagBits::eFragmentShader,
-                                            vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-                                            vk::AccessFlagBits::eShaderRead,
-                                            vk::DependencyFlagBits::eByRegion)}
+Subpass::Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment)
+    : description{CreateSubpassDescription(colorAttachment, depthAttachment, resolveAttachment)},
+      dependencies{::colorAndDepthWriteAfterPrevious}
 {
 }
 
-Subpass::Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment)
-    : description{CreateSubpassDescription(colorAttachment, depthAttachment, resolveAttachment)},
-      dependencies{CreateSubpassDependency(VK_SUBPASS_EXTERNAL, 0,
-                                             vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                                             vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                                             vk::AccessFlags(),
-                                             vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite)}
+Subpass::Subpass(const AttachmentSlot& depthAttachment)
+    : description{CreateSubpassDescription(depthAttachment)},
+      dependencies{::earlyFragStencilWriteAfterFragRead, ::lateFragStencilWriteBeforeFragRead}
 {
 }
 
@@ -202,5 +211,4 @@ RenderPass::RenderPass(std::span<const AttachmentSlot> attachmentSlots, std::spa
       clearFlags{clearFlags_}
 {
 }
-
 } // namespace nc::graphics

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/techniques/ITechnique.h"
 #include "math/Vector.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
@@ -7,13 +8,6 @@
 #include <memory>
 #include <span>
 #include <vector>
-
-
-
-
-#include "graphics/techniques/ITechnique.h"
-
-
 
 namespace nc::graphics
 {
@@ -52,8 +46,11 @@ struct AttachmentSlot
 
 struct Subpass
 {
-    Subpass(const AttachmentSlot& depthAttachment);
+    /** Create lit subpass */
     Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment);
+
+    /** Create shadow mapping subpass */
+    Subpass(const AttachmentSlot& depthAttachment);
 
     vk::SubpassDescription description;
     std::vector<vk::SubpassDependency> dependencies;
