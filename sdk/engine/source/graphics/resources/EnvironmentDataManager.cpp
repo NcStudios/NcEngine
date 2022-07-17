@@ -1,5 +1,5 @@
 #include "EnvironmentDataManager.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 #include "graphics/resources/Environment.h"
 
 namespace nc::graphics

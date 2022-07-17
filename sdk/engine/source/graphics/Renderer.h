@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics\GpuAssetsStorage.h"
-#include "graphics\Initializers.h"
+#include "graphics\vk/Initializers.h"
 
 #include <functional>
 #include <unordered_map>

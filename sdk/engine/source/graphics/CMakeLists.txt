@@ -6,12 +6,10 @@ target_sources(${NC_ENGINE_LIB}
         GpuAssetsStorage.cpp
         Graphics.cpp
         GraphicsModuleImpl.cpp
-        Initializers.cpp
         MeshBatcher.cpp
         PerFrameRenderState.cpp
         Renderer.cpp
         ShaderUtilities.cpp
-        Swapchain.cpp
         VertexDescriptions.cpp
         vma.cpp
 )

@@ -1,7 +1,7 @@
 #include "RenderPassManager.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Swapchain.h"
+#include "graphics/vk/Swapchain.h"
 #include "optick/optick.h"
 
 #include <iostream>

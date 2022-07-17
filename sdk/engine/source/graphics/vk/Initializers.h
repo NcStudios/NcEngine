@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vk/VkTypes.h"
+#include "VkTypes.h"
 
 namespace nc::graphics
 {

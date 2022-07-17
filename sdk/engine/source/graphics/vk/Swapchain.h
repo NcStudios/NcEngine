@@ -5,7 +5,9 @@
 
 namespace nc::graphics
 {
-    class Base; class RenderTarget;
+    // How many frames can be rendered concurrently.
+    // Each frame requires its own pair of semaphores.
+    constexpr uint32_t MaxFramesInFlight = 2u;
 
     enum class SemaphoreType : uint8_t
     {
@@ -19,15 +21,25 @@ namespace nc::graphics
         ImagesInFlight
     };
 
+    struct SwapChainSupportDetails
+    {
+        vk::SurfaceCapabilitiesKHR capabilities;
+        std::vector<vk::SurfaceFormatKHR> formats;
+        std::vector<vk::PresentModeKHR> presentModes;
+    };
+
+    auto QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) -> SwapChainSupportDetails;
+
     class Swapchain
     {
         public:
-            Swapchain(Base* base, Vector2 dimensions);
+            Swapchain(vk::Device device, vk::PhysicalDevice physicalDevice,
+                      vk::SurfaceKHR surface, const Vector2& dimensions);
             ~Swapchain() noexcept;
 
             // Swap chain
-            void Present(uint32_t imageIndex, bool& isSwapChainValid);
-            void Create(Vector2 dimensions);
+            void Present(vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid);
+            void Create(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Vector2 dimensions);
             void Cleanup() noexcept;
             const Vector2 GetExtentDimensions() const noexcept;
             const vk::Extent2D& GetExtent() const noexcept;
@@ -49,8 +61,7 @@ namespace nc::graphics
             const std::vector<vk::Semaphore>& GetSemaphores(SemaphoreType semaphoreType) const noexcept;
 
         private:
-            // External members
-            Base* m_base;
+            vk::Device m_device;
 
             // Internal members
             // Swap chain

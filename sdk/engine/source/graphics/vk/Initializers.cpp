@@ -2,8 +2,6 @@
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 
-#include <iostream>
-
 namespace nc::graphics
 {
 auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler
