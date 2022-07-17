@@ -1,9 +1,7 @@
 #pragma once
 
-#include "graphics/vk/Initializers.h"
-#include "graphics/techniques/ITechnique.h"
+#include "graphics/vk/RenderPass.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
 #include <concepts>
 #include <string>
 #include <typeinfo>

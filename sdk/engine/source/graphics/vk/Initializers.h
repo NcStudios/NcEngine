@@ -1,6 +1,7 @@
 #pragma once
 
-#include "VkTypes.h"
+#include "Common.h"
+#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {

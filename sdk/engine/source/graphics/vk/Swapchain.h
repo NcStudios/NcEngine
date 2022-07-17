@@ -78,4 +78,4 @@ namespace nc::graphics
             std::vector<vk::Semaphore> m_renderFinishedSemaphores; // One per concurrent frame. (MaxFramesInFlight). Controls when the swapchain image can be presented back to the swapchain.
             uint32_t m_currentFrameIndex; // Used to select which pair of semaphores and which fence to use as each frame in MaxFramesInFlight requires its own pair of semaphores and fence.
     };
-}
+} // namespace nc::graphics
