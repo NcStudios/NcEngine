@@ -27,9 +27,7 @@ namespace nc::editor
         if(type == AssetType::HullCollider)
             return std::string{" -a hull-collider "};
         if(type == AssetType::Skybox)
-        {
             return std::string{" -a skybox "};
-        }
         return std::string{};
     }
 
