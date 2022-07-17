@@ -6,12 +6,32 @@
 
 #include <iostream>
 
+namespace
+{
+auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags, const std::array<float, 4>& clearColor) -> std::vector<vk::ClearValue>
+{
+    std::vector<vk::ClearValue> clearValues;
+
+    if(clearFlags & nc::graphics::ClearValueFlags::Color)
+    {
+        clearValues.push_back(vk::ClearValue{vk::ClearColorValue{clearColor}});
+    }
+
+    if(clearFlags & nc::graphics::ClearValueFlags::Depth)
+    {
+        clearValues.push_back(vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}});
+    }
+
+    return clearValues;
+}
+}
+
 namespace nc::graphics
 {
     RenderPassManager::RenderPassManager(Graphics* graphics, const Vector2& dimensions)
-    : m_graphics(graphics),
-      m_renderPasses{},
-      m_frameBufferAttachments{}
+        : m_graphics{graphics},
+          m_renderPasses{},
+          m_frameBufferAttachments{}
     {
         auto* base = m_graphics->GetBasePtr();
         auto* swapchain = m_graphics->GetSwapchainPtr();
@@ -19,30 +39,30 @@ namespace nc::graphics
         /** Shadow mapping pass */
         std::array<AttachmentSlot, 1> shadowAttachmentSlots
         {
-            CreateAttachmentSlot(0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1)
+            AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
         };
 
         std::array<Subpass, 1> shadowSubpasses
         {
-            CreateSubpass(shadowAttachmentSlots.at(0))
+            Subpass{shadowAttachmentSlots[0]}
         };
 
-        Create(RenderPassManager::ShadowMappingPass, shadowAttachmentSlots, shadowSubpasses, ClearValue::Depth, dimensions);
+        Create(RenderPassManager::ShadowMappingPass, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, dimensions);
 
         /** Lit shading pass */
         std::array<AttachmentSlot, 3> litAttachmentSlots
         {
-            CreateAttachmentSlot(0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, base->GetMaxSamplesCount()),
-            CreateAttachmentSlot(1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, base->GetMaxSamplesCount()),
-            CreateAttachmentSlot(2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1)
+            AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, base->GetMaxSamplesCount()},
+            AttachmentSlot{1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, base->GetMaxSamplesCount()},
+            AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
         };
 
         std::array<Subpass, 1> litSubpasses
         {
-            CreateSubpass(litAttachmentSlots.at(0), litAttachmentSlots.at(1), litAttachmentSlots.at(2))
+            Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}
         };
-        
-        Create(RenderPassManager::LitShadingPass, litAttachmentSlots, litSubpasses, ClearValue::DepthAndColor, dimensions);
+
+        Create(RenderPassManager::LitShadingPass, litAttachmentSlots, litSubpasses, ClearValueFlags::Depth | ClearValueFlags::Color, dimensions);
     }
 
     RenderPassManager::~RenderPassManager() noexcept
@@ -74,11 +94,14 @@ namespace nc::graphics
 
     void RenderPassManager::Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
     {
-        auto clearValues = CreateClearValues(renderPass->valuesToClear, m_graphics->GetClearColor());
-        auto renderPassInfo = CreateRenderPassBeginInfo(renderPass->renderpass.get(), 
-                                                        GetFrameBufferAttachment(renderPass->uid, renderTargetIndex).frameBuffer.get(), 
-                                                        renderPass->renderTargetSize.extent, 
-                                                        clearValues);
+        const auto clearValues = CreateClearValues(renderPass->clearFlags, m_graphics->GetClearColor());
+        const auto renderPassInfo = vk::RenderPassBeginInfo
+        {
+            renderPass->renderpass.get(), GetFrameBufferAttachment(renderPass->uid, renderTargetIndex).frameBuffer.get(),
+            vk::Rect2D{vk::Offset2D{0, 0}, renderPass->renderTargetSize.extent},
+            static_cast<uint32_t>(clearValues.size()),
+            clearValues.data()
+        };
 
         cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
     }
@@ -103,31 +126,16 @@ namespace nc::graphics
         cmd->endRenderPass();
     }
 
-    void RenderPassManager::Create(const std::string& uid, 
+    void RenderPassManager::Create(const std::string& uid,
                                    std::span<const AttachmentSlot> attachmentSlots,
                                    std::span<const Subpass> subpasses,
-                                   ClearValue valuesToClear,
+                                   ClearValueFlags_t clearFlags,
                                    const Vector2& dimensions)
     {
         auto* base = m_graphics->GetBasePtr();
         auto* swapchain = m_graphics->GetSwapchainPtr();
-
-        RenderTargetSize renderTargetSize
-        {
-            .dimensions = dimensions,
-            .extent = swapchain->GetExtent()
-        };
-
-        RenderPass renderpass
-        {
-            .uid = uid,
-            .renderTargetSize = renderTargetSize,
-            .renderpass = CreateRenderPass(base->GetDevice(), attachmentSlots, subpasses),
-            .valuesToClear = valuesToClear,
-            .techniques = {}
-        };
-
-        m_renderPasses.push_back(std::move(renderpass));
+        const auto size = RenderTargetSize{dimensions, swapchain->GetExtent()};
+        m_renderPasses.emplace_back(attachmentSlots, subpasses, base->GetDevice(), size, uid, clearFlags);
     }
 
     void RenderPassManager::Resize(const Vector2& dimensions, vk::Extent2D extent)

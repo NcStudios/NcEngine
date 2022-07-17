@@ -18,3 +18,4 @@ target_sources(${NC_ENGINE_LIB}
 
 add_subdirectory(resources)
 add_subdirectory(techniques)
+add_subdirectory(vk)

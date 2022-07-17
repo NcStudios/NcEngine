@@ -25,6 +25,18 @@
 
 #include <span>
 
+namespace
+{
+void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& dimensions)
+{
+    const auto viewport = vk::Viewport{0.0f, 0.0f, dimensions.x, dimensions.y, 0.0f, 1.0f};
+    const auto extent = vk::Extent2D{static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y)};
+    const auto scissor = vk::Rect2D{vk::Offset2D{0, 0}, extent};
+    commandBuffer->setViewport(0, 1, &viewport);
+    commandBuffer->setScissor(0, 1, &scissor);
+}
+}
+
 namespace nc::graphics
 {
     Renderer::Renderer(Graphics* graphics, ShaderResourceServices* shaderResources, Vector2 dimensions)

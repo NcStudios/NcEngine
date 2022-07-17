@@ -41,8 +41,14 @@ namespace nc::graphics
 
         /* Add binding */
         auto bindingsIt = descriptorSet->bindings.find(bindingSlot);
-        if (bindingsIt != descriptorSet->bindings.end()) bindingsIt->second = CreateDescriptorSetLayoutBinding(bindingSlot, descriptorCount, descriptorType, shaderStages);
-        else descriptorSet->bindings.emplace(bindingSlot, CreateDescriptorSetLayoutBinding(bindingSlot, descriptorCount, descriptorType, shaderStages));
+        if (bindingsIt != descriptorSet->bindings.end())
+        {
+            bindingsIt->second = vk::DescriptorSetLayoutBinding{bindingSlot, descriptorType, descriptorCount, shaderStages, nullptr};
+        }
+        else
+        {
+            descriptorSet->bindings.emplace(bindingSlot, vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, descriptorCount, shaderStages));
+        }
 
         /* Add binding flag */
         auto flagsIt = descriptorSet->bindingFlags.find(bindingSlot);

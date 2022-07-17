@@ -374,16 +374,11 @@ namespace nc::graphics
 
     vk::UniqueSampler Base::CreateTextureSampler()
     {
-        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
-        return m_logicalDevice.createSamplerUnique(samplerInfo);
+        /** @todo This can be removed since we're just calling a free function. Anybody with a
+         *  Base pointer, can have a vk::Device instead and call the function directly. */
+        return nc::graphics::CreateTextureSampler(m_logicalDevice, vk::SamplerAddressMode::eRepeat);
     }
 
-    vk::UniqueSampler Base::CreateCubeMapSampler()
-    {
-        vk::SamplerCreateInfo samplerInfo = CreateSampler(vk::SamplerAddressMode::eRepeat);
-        return m_logicalDevice.createSamplerUnique(samplerInfo);
-    }
-    
     void Base::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout)
     {
         Commands::SubmitCommandImmediate(*this, [&](vk::CommandBuffer cmd) 

@@ -68,7 +68,6 @@ namespace nc::graphics
             vk::SampleCountFlagBits GetMaxSamplesCount();
 
             vk::UniqueSampler CreateTextureSampler();
-            vk::UniqueSampler CreateCubeMapSampler();
 
             void FreeCommandBuffers(std::vector<vk::CommandBuffer>* commandBuffers) noexcept;
             const SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) const;
