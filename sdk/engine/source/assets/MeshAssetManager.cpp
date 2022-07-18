@@ -83,7 +83,7 @@ MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
       m_indexData{},
       m_accessors{},
       m_assetDirectory{assetDirectory},
-      m_onMeshAdd{}
+      m_onUpdate{}
 {
 }
 
@@ -116,13 +116,14 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal)
 
     m_accessors.emplace(path, mesh);
 
-    MeshBufferData assetData
-    {
-        m_vertexData,
-        m_indexData
-    };
-
-    m_onMeshAdd.Emit(assetData);
+    m_onUpdate.Emit
+    (
+        MeshBufferData
+        {
+            m_vertexData,
+            m_indexData
+        }
+    );
     return true;
 }
 
@@ -157,13 +158,14 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal)
         totalIndexCount += indicesRead;
     }
 
-    MeshBufferData assetData
-    {
-        m_vertexData,
-        m_indexData
-    };
-
-    m_onMeshAdd.Emit(assetData);
+    m_onUpdate.Emit
+    (
+        MeshBufferData
+        {
+            m_vertexData,
+            m_indexData
+        }
+    );
     return true;
 }
 
@@ -197,13 +199,14 @@ bool MeshAssetManager::Unload(const std::string& path)
 
     if(m_vertexData.size() != 0)
     {
-        MeshBufferData assetData
-        {
-            m_vertexData,
-            m_indexData
-        };
-
-        m_onMeshAdd.Emit(assetData);
+        m_onUpdate.Emit
+        (
+            MeshBufferData
+            {
+                m_vertexData,
+                m_indexData
+            }
+        );
     }
     return true;
 }
@@ -230,8 +233,8 @@ bool MeshAssetManager::IsLoaded(const std::string& path) const
     return m_accessors.contains(path);
 }
 
-auto MeshAssetManager::OnMeshAdd() -> Signal<const MeshBufferData&>*
+auto MeshAssetManager::OnUpdate() -> Signal<const MeshBufferData&>*
 {
-    return &m_onMeshAdd;
+    return &m_onUpdate;
 }
 }

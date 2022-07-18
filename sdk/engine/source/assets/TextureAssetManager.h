@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assets/AssetService.h"
+#include "utility/Signal.h"
 
 #include <unordered_map>
 #include <vector>
@@ -8,16 +9,10 @@
 
 namespace nc
 {
-    namespace graphics
-    {
-        class Graphics;
-        struct Texture;
-    }
-
     class TextureAssetManager : public IAssetService<TextureView, std::string>
     {
         public:
-            TextureAssetManager(graphics::Graphics* graphics, const std::string& texturesAssetDirectory, uint32_t maxTextures);
+            TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures);
             ~TextureAssetManager() noexcept;
 
             bool Load(const std::string& path, bool isExternal) override;
@@ -26,13 +21,12 @@ namespace nc
             void UnloadAll() override;
             auto Acquire(const std::string& path) const -> TextureView override;
             bool IsLoaded(const std::string& path) const override;
+            auto OnUpdate() -> Signal<const TextureBufferData&>*;
 
         private:
             std::unordered_map<std::string, TextureView> m_accessors;
-            std::vector<graphics::Texture> m_textures;
-            graphics::Graphics* m_graphics;
             std::string m_assetDirectory;
-            vk::UniqueSampler m_sampler;
             uint32_t m_maxTextureCount;
+            Signal<const TextureBufferData&> m_onUpdate;
     };
 }

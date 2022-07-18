@@ -137,7 +137,7 @@ namespace nc::graphics
         subpass.description = CreateSubpassDescription(depthAttachment);
         subpass.dependencies =
         {
-            CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
+            auto ensureDepthReadComplete = CreateSubpassDependency(VK_SUBPASS_EXTERNAL,
                                     0,
                                     vk::PipelineStageFlagBits::eFragmentShader,
                                     vk::PipelineStageFlagBits::eEarlyFragmentTests,
@@ -145,7 +145,7 @@ namespace nc::graphics
                                     vk::AccessFlagBits::eDepthStencilAttachmentWrite,
                                     vk::DependencyFlagBits::eByRegion),
 
-            CreateSubpassDependency(0,
+            auto = ensureDepthWriteComplete = CreateSubpassDependency(0,
                                     VK_SUBPASS_EXTERNAL,
                                     vk::PipelineStageFlagBits::eLateFragmentTests,
                                     vk::PipelineStageFlagBits::eFragmentShader,

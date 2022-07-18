@@ -35,7 +35,7 @@ namespace nc::graphics
         );
     }
 
-    void TextureManager::Update(const std::vector<Texture>& data)
+    void TextureManager::Update(const std::vector<TextureImageInfo>& data)
     {
         assert(data.size() < m_maxTexturesCount && !data.empty());
 

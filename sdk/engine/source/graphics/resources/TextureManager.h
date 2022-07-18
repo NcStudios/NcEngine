@@ -3,6 +3,7 @@
 #include "ShaderResourceService.h"
 #include "ImmutableImage.h"
 #include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/GpuAssetsData.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -10,21 +11,14 @@ namespace nc::graphics
 {
     class Graphics;
 
-    struct Texture
-    {
-        ImmutableImage image;
-        vk::DescriptorImageInfo imageInfo;
-        std::string uid;
-    };
-
-    class TextureManager : public IShaderResourceService<Texture>
+    class TextureManager : public IShaderResourceService<TextureImageInfo>
     {
         public:
             TextureManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxTextures);
             ~TextureManager() noexcept;
 
             void Initialize() override;
-            void Update(const std::vector<Texture>& data) override;
+            void Update(const std::vector<TextureImageInfo>& data) override;
             void Reset() override;
 
         private:
