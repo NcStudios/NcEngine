@@ -47,10 +47,20 @@ FetchContent_Declare(taskflow
                      GIT_TAG        origin/master
 )
 
-FetchContent_MakeAvailable(DirectXMath taskflow)
+FetchContent_Declare(nc-tools
+                     URL      https://github.com/NcStudios/NcTools/releases/download/v0.1.1/nc-tools.zip
+                     URL_HASH SHA256=97BD697A4A3C6CF01713E984CF497DDCB1E2C8D09B0F6FC25E1FD6017F372671
+)
+
+FetchContent_MakeAvailable(DirectXMath taskflow nc-tools)
 
 # Add source
 add_subdirectory(sdk)
+
+# Install nc-tools
+install(FILES       ${nc-tools_SOURCE_DIR}/nc-tools.exe
+        DESTINATION bin
+)
 
 # Install Default Assets
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/sdk/resources/

@@ -1,7 +1,7 @@
 #include "ShadowMapManager.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 
 #include <vector>
 
@@ -37,7 +37,7 @@ namespace nc::graphics
         m_depthStencil.reset();
         m_depthStencil = std::make_unique<RenderTarget>(base, m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
-        auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+        auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
         m_descriptors->UpdateImage
@@ -77,7 +77,7 @@ namespace nc::graphics
 
         m_sampler = base->GetDevice().createSamplerUnique(samplerInfo);
 
-        auto descriptorImageInfo = CreateDescriptorImageInfo(&m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+        auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
 
         m_descriptors->RegisterDescriptor

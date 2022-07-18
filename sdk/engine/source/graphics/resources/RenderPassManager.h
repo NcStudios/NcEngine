@@ -1,9 +1,7 @@
 #pragma once
 
-#include "graphics/Initializers.h"
-#include "graphics/techniques/ITechnique.h"
+#include "graphics/vk/RenderPass.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
 #include <concepts>
 #include <string>
 #include <typeinfo>
@@ -39,7 +37,7 @@ namespace nc::graphics
             void RegisterTechnique(const std::string& uid);
             
         private:
-            void Create(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValue valuesToClear, const Vector2& dimensions);
+            void Create(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValueFlags_t clearFlags, const Vector2& dimensions);
             void Resize(const Vector2& dimensions, vk::Extent2D extent);
             void Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex);
             void End(vk::CommandBuffer* cmd);

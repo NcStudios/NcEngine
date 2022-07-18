@@ -5,7 +5,6 @@ add_subdirectory(engine)
 if(NOT NC_PROD_BUILD)
     add_subdirectory(editor)
     add_subdirectory(sample)
-    add_subdirectory(tools)
 endif()
 
 if(NC_BUILD_TESTS)

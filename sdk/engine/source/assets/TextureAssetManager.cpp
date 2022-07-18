@@ -1,7 +1,7 @@
 #include "TextureAssetManager.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -26,11 +26,11 @@ auto ReadTexture(const std::string& path) -> nc::TextureData
 
 namespace nc
 {
-TextureAssetManager::TextureAssetManager(graphics::Graphics* graphics, const std::string& texturesAssetDirectory, uint32_t maxTextures)
+TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures)
     : m_accessors{},
-        m_assetDirectory{texturesAssetDirectory},
-        m_maxTextureCount{maxTextures},
-        m_onUpdate{}
+      m_assetDirectory{texturesAssetDirectory},
+      m_maxTextureCount{maxTextures},
+      m_onUpdate{}
 {
 }
 
@@ -54,12 +54,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
 
     m_onUpdate.Emit
     (
-        TextureBufferData
-        {
-            .ids = std::vector<std::string>{fullPath},
-            .data = std::vector<TextureData>{ReadTexture(fullPath)},
-            .updateAction = UpdateAction::Load
-        }
+        TextureBufferData(UpdateAction::Load, std::vector<std::string>{fullPath}, std::vector<TextureData>{ReadTexture(fullPath)})
     );
     return true;
 }
@@ -71,12 +66,8 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
     if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
         throw NcError("Cannot exceed max texture count.");
 
-    auto textureBufferData = TextureBufferData
-    {
-        .ids = std::vector<std::string>{},
-        .data = std::vector<TextureData>{},
-        .updateAction = UpdateAction::Load
-    };
+    auto ids = std::vector<std::string>{};
+    auto data = std::vector<TextureData>{};
 
     for (const auto& path : paths)
     {
@@ -85,10 +76,14 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
         m_accessors.emplace(path, nextTextureIndex++);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        textureBufferData.data.push_back(std::move(ReadTexture(fullPath)));
-        textureBufferData.ids.push_back(fullPath);
+        data.push_back(std::move(ReadTexture(fullPath)));
+        ids.push_back(fullPath);
     }
-    m_onUpdate.Emit(textureBufferData);
+
+    m_onUpdate.Emit
+    (
+        TextureBufferData(UpdateAction::Load, ids, data)
+    );
     return true;
 }
 
@@ -97,15 +92,10 @@ bool TextureAssetManager::Unload(const std::string& path)
     auto removed = static_cast<bool>(m_accessors.erase(path));
     if(!removed)
         return false;
-    
+
     m_onUpdate.Emit
     (
-        TextureBufferData
-        {
-            .ids = std::vector<std::string>{path},
-            .data = std::vector<TextureData>{},
-            .updateAction = UpdateAction::Unload
-        }
+        TextureBufferData(UpdateAction::Unload, std::vector<std::string>{path}, std::vector<TextureData>{})
     );
     return true;
 }
@@ -115,12 +105,7 @@ void TextureAssetManager::UnloadAll()
     m_accessors.clear();
     m_onUpdate.Emit
     (
-        TextureBufferData
-        {
-            .ids = std::vector<std::string>{},
-            .data = std::vector<TextureData>{},
-            .updateAction = UpdateAction::UnloadAll
-        }
+        TextureBufferData(UpdateAction::UnloadAll, std::vector<std::string>{}, std::vector<TextureData>{})
     );
 }
 

@@ -10,7 +10,7 @@
 #include "Renderer.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
-#include "Swapchain.h"
+#include "vk/Swapchain.h"
 
 #include <iostream>
 
@@ -20,7 +20,7 @@ namespace nc::graphics
         : m_mainCamera{mainCamera},
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_allocator{ std::make_unique<GpuAllocator>(m_base->GetPhysicalDevice(), m_base->GetDevice(), m_base->GetInstance())},
-          m_swapchain{ std::make_unique<Swapchain>(m_base.get(), dimensions) },
+          m_swapchain{ std::make_unique<Swapchain>(m_base->GetDevice(), m_base->GetPhysicalDevice(), m_base->GetSurface(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
           m_assetServices{ std::make_unique<AssetServices>(this, config::GetProjectSettings(), config::GetMemorySettings().maxTextures) },
@@ -69,7 +69,7 @@ namespace nc::graphics
         // Recreate swapchain and resources
         auto shadowMap = ShadowMap { .dimensions = m_dimensions };
         m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
-        m_swapchain = std::make_unique<Swapchain>(m_base.get(), m_dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_base->GetDevice(), m_base->GetPhysicalDevice(), m_base->GetSurface(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
         m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), m_dimensions);
     }
@@ -170,7 +170,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("Graphics::PresentImage", Optick::Category::Rendering);
         bool isSwapChainValid = true;
-        m_swapchain->Present(imageIndex, isSwapChainValid);
+        m_swapchain->Present(m_base->GetQueue(QueueFamilyType::GraphicsFamily), imageIndex, isSwapChainValid);
 
         if (!isSwapChainValid)
         {
