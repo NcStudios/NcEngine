@@ -1,14 +1,14 @@
 #include "Base.h"
-#include "graphics/vk/Initializers.h"
+#include "config/Config.h"
+#include "debug/NcError.h"
 #include "graphics/Commands.h"
 #include "stb/stb_image.h"
-#include "debug/NcError.h"
-#include "config/Config.h"
+#include "vk/Initializers.h"
 #include "vk/Swapchain.h"
 
+#include <algorithm>
 #include <set>
 #include <string>
-#include <algorithm>
 
 namespace
 {
