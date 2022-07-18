@@ -1,7 +1,7 @@
 #include "CubeMapManager.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 #include "debug/Utils.h"
 
 #include <array>
@@ -43,11 +43,11 @@ namespace nc::graphics
     {
         assert(data.size() < m_maxCubeMapsCount && !data.empty());
 
-        m_cubeMapSampler = m_graphics->GetBasePtr()->CreateTextureSampler();
+        m_cubeMapSampler = graphics::CreateTextureSampler(m_graphics->GetBasePtr()->GetDevice(), vk::SamplerAddressMode::eRepeat);
 
-        m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxCubeMapsCount, CreateDescriptorImageInfo(&m_cubeMapSampler.get(), data.at(0).GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
+        m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxCubeMapsCount, CreateDescriptorImageInfo(m_cubeMapSampler.get(), data.at(0).GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
 
-        std::transform(data.cbegin(), data.cend(), m_imageInfos.begin(), [sampler = &m_cubeMapSampler.get()](const auto& cubeMap)
+        std::transform(data.cbegin(), data.cend(), m_imageInfos.begin(), [sampler = m_cubeMapSampler.get()](const auto& cubeMap)
         {
             return CreateDescriptorImageInfo(sampler, cubeMap.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
         });

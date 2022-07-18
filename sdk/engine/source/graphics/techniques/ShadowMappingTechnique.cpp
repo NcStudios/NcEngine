@@ -4,7 +4,7 @@
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 #include "graphics/resources/ShaderResourceServices.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
@@ -95,7 +95,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, vk::CullModeFlagBits::eFront, 1.0f, true);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMulitsampleCreateInfo(vk::SampleCountFlagBits::e1);
+        auto multisampling = CreateMultisampleCreateInfo(vk::SampleCountFlagBits::e1);
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);

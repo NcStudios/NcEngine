@@ -1,7 +1,7 @@
 #include "TextureAssetManager.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 #include "graphics/resources/TextureManager.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -13,7 +13,7 @@
 
 namespace
 {
-    auto ReadTexture(const std::string& path, nc::graphics::Graphics* graphics, vk::Sampler* sampler) -> nc::graphics::Texture
+    auto ReadTexture(const std::string& path, nc::graphics::Graphics* graphics, vk::Sampler sampler) -> nc::graphics::Texture
     {
         int32_t width, height, numChannels;
         stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
@@ -39,7 +39,7 @@ namespace nc
           m_textures{},
           m_graphics{graphics},
           m_assetDirectory{texturesAssetDirectory},
-          m_sampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_sampler{graphics::CreateTextureSampler(m_graphics->GetBasePtr()->GetDevice(), vk::SamplerAddressMode::eRepeat)},
           m_maxTextureCount{maxTextures}
     {
     }
@@ -66,7 +66,7 @@ namespace nc
 
         m_accessors.emplace(path, index);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        m_textures.push_back(ReadTexture(fullPath, m_graphics, &m_sampler.get()));
+        m_textures.push_back(ReadTexture(fullPath, m_graphics, m_sampler.get()));
         graphics::ShaderResourceService<graphics::Texture>::Get()->Update(m_textures);
         return true;
     }
@@ -84,7 +84,7 @@ namespace nc
                 continue;
 
             const auto fullPath = isExternal ? path : m_assetDirectory + path;
-            m_textures.push_back(ReadTexture(fullPath, m_graphics, &m_sampler.get()));
+            m_textures.push_back(ReadTexture(fullPath, m_graphics, m_sampler.get()));
             m_accessors.emplace(path, nextTextureIndex++);
         }
 

@@ -5,7 +5,7 @@
 #include "graphics/Base.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/resources/ImmutableBuffer.h"
@@ -76,7 +76,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMulitsampleCreateInfo(m_base->GetMaxSamplesCount());
+        auto multisampling = CreateMultisampleCreateInfo(m_base->GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);

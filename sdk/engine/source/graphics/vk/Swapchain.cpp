@@ -1,12 +1,53 @@
 #include "Swapchain.h"
 #include "Initializers.h"
-#include "Base.h"
 #include "debug/NcError.h"
+#include "QueueFamily.h"
 
 namespace nc::graphics
 {
-    Swapchain::Swapchain(Base* base, Vector2 dimensions)
-        : m_base{ base },
+    SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
+    {
+        SwapChainSupportDetails details;
+        if (device.getSurfaceCapabilitiesKHR(surface, &details.capabilities) != vk::Result::eSuccess)
+        {
+            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface capabilities.");
+        }
+
+        uint32_t formatCount;
+        if (device.getSurfaceFormatsKHR(surface, &formatCount, nullptr) != vk::Result::eSuccess)
+        {
+            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+        }
+
+        if (formatCount != 0)
+        {
+            details.formats.resize(formatCount);
+            if (device.getSurfaceFormatsKHR(surface, &formatCount, details.formats.data()) != vk::Result::eSuccess)
+            {
+                throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+            }
+        }
+
+        uint32_t presentModeCount;
+        if (device.getSurfacePresentModesKHR(surface, &presentModeCount, nullptr) != vk::Result::eSuccess)
+        {
+            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+        }
+
+        if (presentModeCount != 0)
+        {
+            details.presentModes.resize(presentModeCount);
+            if (device.getSurfacePresentModesKHR(surface, &presentModeCount, details.presentModes.data()) != vk::Result::eSuccess)
+            {
+                throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+            }
+        } 
+        return details;
+    }
+
+    Swapchain::Swapchain(vk::Device device, vk::PhysicalDevice physicalDevice,
+                         vk::SurfaceKHR surface, const Vector2& dimensions)
+        : m_device{ device },
           m_swapChain{},
           m_swapChainImages{},
           m_swapChainImageFormat{},
@@ -18,7 +59,7 @@ namespace nc::graphics
           m_renderFinishedSemaphores{},
           m_currentFrameIndex{0}
     {
-        Create(dimensions);
+        Create(physicalDevice, surface, dimensions);
         CreateSynchronizationObjects();
     }
     
@@ -30,26 +71,22 @@ namespace nc::graphics
 
     void Swapchain::DestroySynchronizationObjects() noexcept
     {
-        auto device = m_base->GetDevice();
-
         for (size_t i = 0; i < MaxFramesInFlight; ++i)
         {
-            device.destroySemaphore(m_imageAvailableSemaphores[i]);
-            device.destroySemaphore(m_renderFinishedSemaphores[i]);
-            device.destroyFence(m_framesInFlightFences[i]);
+            m_device.destroySemaphore(m_imageAvailableSemaphores[i]);
+            m_device.destroySemaphore(m_renderFinishedSemaphores[i]);
+            m_device.destroyFence(m_framesInFlightFences[i]);
         }
     }
 
     void Swapchain::Cleanup() noexcept
     {
-        auto device = m_base->GetDevice();
-
         for (auto& imageView : m_swapChainImageViews)
         {
-           device.destroyImageView(imageView, nullptr);
+           m_device.destroyImageView(imageView, nullptr);
         }
 
-       device.destroySwapchainKHR(m_swapChain);
+       m_device.destroySwapchainKHR(m_swapChain);
     }
 
     // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
@@ -69,12 +106,11 @@ namespace nc::graphics
         vk::FenceCreateInfo fenceInfo{};
         fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
 
-        auto device =  m_base->GetDevice();
         for (size_t i = 0; i < MaxFramesInFlight; ++i)
         {
-            m_imageAvailableSemaphores[i] = device.createSemaphore(semaphoreInfo);
-            m_renderFinishedSemaphores[i] = device.createSemaphore(semaphoreInfo);
-            m_framesInFlightFences[i] = device.createFence(fenceInfo);
+            m_imageAvailableSemaphores[i] = m_device.createSemaphore(semaphoreInfo);
+            m_renderFinishedSemaphores[i] = m_device.createSemaphore(semaphoreInfo);
+            m_framesInFlightFences[i] = m_device.createFence(fenceInfo);
         }
     }
 
@@ -83,7 +119,7 @@ namespace nc::graphics
         return m_currentFrameIndex;
     }
 
-    void Swapchain::Present(uint32_t imageIndex, bool& isSwapChainValid)
+    void Swapchain::Present(vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid)
     {
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setWaitSemaphoreCount(1);
@@ -95,7 +131,7 @@ namespace nc::graphics
         presentInfo.setPImageIndices(&imageIndex); //  Sets the index of the image for each swapchain.
         presentInfo.setPResults(nullptr);
 
-        auto result = m_base->GetQueue(QueueFamilyType::PresentFamily).presentKHR(&presentInfo);
+        auto result = queue.presentKHR(&presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
             isSwapChainValid = false;
@@ -117,7 +153,7 @@ namespace nc::graphics
     {
         if (m_imagesInFlightFences[imageIndex])
         {
-            if (m_base->GetDevice().waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
+            if (m_device.waitForFences(m_imagesInFlightFences[imageIndex], true, UINT64_MAX) != vk::Result::eSuccess)
             {
                 throw NcError("Could not wait for fences to complete.");
             }
@@ -134,9 +170,10 @@ namespace nc::graphics
         return m_swapChainImageFormat;
     }
 
-    void Swapchain::Create(Vector2 dimensions)
+    void Swapchain::Create(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Vector2 dimensions)
     {
-        auto swapChainSupport = m_base->QuerySwapChainSupport(m_base->GetPhysicalDevice(), m_base->GetSurface());
+        //auto swapChainSupport = m_base->QuerySwapChainSupport(m_base->GetPhysicalDevice(), m_base->GetSurface());
+        auto swapChainSupport = QuerySwapChainSupport(physicalDevice, surface);
 
         auto surfaceFormat = swapChainSupport.formats[0];
         for (const auto& availableFormat : swapChainSupport.formats)
@@ -185,7 +222,7 @@ namespace nc::graphics
         }
 
         vk::SwapchainCreateInfoKHR createInfo{};
-        createInfo.setSurface(m_base->GetSurface());
+        createInfo.setSurface(surface);
         createInfo.setMinImageCount(imageCount);
         createInfo.setImageFormat(surfaceFormat.format);
         createInfo.setImageColorSpace(surfaceFormat.colorSpace);
@@ -193,7 +230,7 @@ namespace nc::graphics
         createInfo.setImageArrayLayers(1);
         createInfo.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
 
-        auto queueFamilies = QueueFamilyIndices(m_base->GetPhysicalDevice(), m_base->GetSurface());
+        auto queueFamilies = QueueFamilyIndices(physicalDevice, surface);
         uint32_t queueFamilyIndices[] = { queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily) };
 
         if (queueFamilies.IsSeparatePresentQueue())
@@ -215,18 +252,17 @@ namespace nc::graphics
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = nullptr;
 
-        auto device = m_base->GetDevice();
-        m_swapChain = device.createSwapchainKHR(createInfo);
+        m_swapChain = m_device.createSwapchainKHR(createInfo);
 
         // Set swapchain images        
         uint32_t swapChainImageCount;
-        if (device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
+        if (m_device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
         {
             throw NcError("Error getting swapchain images count.");
         }
 
         m_swapChainImages.resize(swapChainImageCount);
-        if (device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
+        if (m_device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
         {
             throw NcError("Error getting swapchain images.");
         }
@@ -259,7 +295,7 @@ namespace nc::graphics
             imageViewCreateInfo.setComponents(swapChainComponents);
             imageViewCreateInfo.setSubresourceRange(swapChainSubresourceRange);
 
-            if (device.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
+            if (m_device.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
             {
                 throw NcError("Failed to create image view");
             }
@@ -268,7 +304,7 @@ namespace nc::graphics
 
     void Swapchain::WaitForFrameFence() const
     {
-        if (m_base->GetDevice().waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
+        if (m_device.waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
         {
             throw NcError("Could not wait for fences to complete.");
         }
@@ -281,7 +317,7 @@ namespace nc::graphics
 
     void Swapchain::ResetFrameFence()
     {
-        m_base->GetDevice().resetFences(m_framesInFlightFences[m_currentFrameIndex]);
+        m_device.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
     }
 
     const Vector2 Swapchain::GetExtentDimensions() const noexcept
@@ -301,7 +337,7 @@ namespace nc::graphics
 
     bool Swapchain::GetNextRenderReadyImageIndex(uint32_t* imageIndex)
     {
-        auto [result, index] = m_base->GetDevice().acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrameIndex]);
+        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrameIndex]);
         *imageIndex = index;
         return result != vk::Result::eErrorOutOfDateKHR;
     }

@@ -2,7 +2,7 @@
 #include "assets/AssetUtilities.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
-#include "graphics/Initializers.h"
+#include "graphics/vk/Initializers.h"
 #include "graphics/resources/ShaderResourceService.h"
 
 #include <cassert>
@@ -17,7 +17,7 @@ namespace nc
           m_cubeMaps{},
           m_graphics{graphics},
           m_assetDirectory{cubeMapAssetDirectory},
-          m_cubeMapSampler{m_graphics->GetBasePtr()->CreateTextureSampler()},
+          m_cubeMapSampler{graphics::CreateTextureSampler(m_graphics->GetBasePtr()->GetDevice(), vk::SamplerAddressMode::eRepeat)},
           m_maxCubeMapsCount{maxCubeMapsCount}
     {
     }
