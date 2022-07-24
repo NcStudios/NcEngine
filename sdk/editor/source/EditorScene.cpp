@@ -1,7 +1,9 @@
 #include "EditorScene.h"
+#include "framework/ProjectManager.h"
+
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
-#include "framework/ProjectManager.h"
+#include "graphics/GraphicsModule.h"
 
 namespace nc::editor
 {
@@ -10,13 +12,12 @@ namespace nc::editor
     {
     }
 
-    void EditorScene::Load(NcEngine* engine)
+    void EditorScene::Load(Registry* registry, ModuleRegistry* modules)
     {
-        auto* registry = engine->Registry();
         auto cameraEntity = registry->Add<Entity>({.position = Vector3{0, 0, -5}, .tag = EditorScene::EditorCameraTag});
         auto* camera = registry->Add<SceneNavigationCamera>(cameraEntity);
         registry->Add<FrameLogic>(cameraEntity, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
+        modules->Get<GraphicsModule>()->SetCamera(camera);
         m_projectManager->ReadNextScene();
     }
 

@@ -9,6 +9,9 @@
 #include "serialize/SceneWriter.h"
 #include "EditorScene.h"
 
+#include "graphics/GraphicsModule.h"
+#include "scene/SceneModule.h"
+
 #include <cctype>
 #include <fstream>
 
@@ -241,7 +244,8 @@ namespace nc::editor
             {
                 m_nextSceneIndex = i;
                 Output::Log("Loading scene: " + name);
-                m_engine->Scene()->ChangeScene(std::make_unique<EditorScene>(this));
+                auto* sceneModule = m_engine->Modules()->Get<SceneModule>();
+                sceneModule->ChangeScene(std::make_unique<EditorScene>(this));
                 return;
             }
         }
@@ -264,7 +268,9 @@ namespace nc::editor
 
         m_currentSceneIndex = m_nextSceneIndex;
 
-        NC_TRACE(SceneReader serialize{m_engine->Registry(), m_engine->Graphics(), m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
+        auto* registry = m_engine->Registry();
+        auto* graphics = m_engine->Modules()->Get<GraphicsModule>();
+        NC_TRACE(SceneReader serialize{registry, graphics, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
     }
 
     void ProjectManager::DeleteCurrentScene()
