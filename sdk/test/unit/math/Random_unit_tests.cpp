@@ -1,7 +1,14 @@
 #include "gtest/gtest.h"
 #include "math/Random.h"
+#include "task/Job.h"
 
 using namespace nc;
+
+namespace nc
+{
+auto Module::BuildWorkload() -> std::vector<Job> { return {}; }
+void Module::Clear() noexcept {}
+}
 
 TEST(Random_unit_tests, Fork_NewInstanceSeededFromNextValue)
 {
