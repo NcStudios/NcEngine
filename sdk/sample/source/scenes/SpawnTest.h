@@ -8,7 +8,7 @@ namespace nc::sample
     class SpawnTest : public Scene
     {
         public:
-            void Load(NcEngine* engine) override;
+            void Load(Registry* registry, ModuleRegistry* modules) override;
             void Unload() override;
         
         public:

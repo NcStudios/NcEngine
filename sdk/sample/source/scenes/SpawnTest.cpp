@@ -50,12 +50,10 @@ namespace
 
 namespace nc::sample
 {
-    void SpawnTest::Load(NcEngine* engine)
+    void SpawnTest::Load(Registry* registry, ModuleRegistry* modules)
     {
-        auto* registry = engine->Registry();
-
         // Setup
-        m_sceneHelper.Setup(engine, true, false, Widget);
+        m_sceneHelper.Setup(registry, modules, true, false, Widget);
 
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
@@ -67,7 +65,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 35.0f, -100.0f}, .rotation = Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
+        modules->Get<GraphicsModule>()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 30.0f, 0.0f}, .tag = "Point Light 1"});
@@ -111,7 +109,7 @@ namespace nc::sample
         };
 
         auto spawner = registry->Add<Entity>({});
-        auto spawnerPtr = registry->Add<Spawner>(spawner, engine->Random(), prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
+        auto spawnerPtr = registry->Add<Spawner>(spawner, modules->Get<Random>(), prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
         registry->Add<FrameLogic>(spawner, InvokeFreeComponent<Spawner>{});
         SpawnFunc = std::bind(&Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
         DestroyFunc = std::bind(&Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);

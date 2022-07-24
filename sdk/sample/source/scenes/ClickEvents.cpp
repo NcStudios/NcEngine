@@ -1,10 +1,13 @@
 #include "ClickEvents.h"
-#include "NcEngine.h"
-#include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/Prefabs.h"
 #include "shared/spawner/Spawner.h"
 
+#include "graphics/GraphicsModule.h"
+#include "math/Random.h"
+#include "physics/PhysicsModule.h"
+
+#include "imgui/imgui.h"
 #include <functional>
 
 namespace
@@ -48,18 +51,19 @@ namespace
 
 namespace nc::sample
 {
-    void ClickEvents::Load(NcEngine* engine)
+    void ClickEvents::Load(Registry* registry, ModuleRegistry* modules)
     {
-        auto* registry = engine->Registry();
-
         // Setup
-        m_sceneHelper.Setup(engine, true, false, Widget);
+        m_sceneHelper.Setup(registry, modules, true, false, Widget);
+        auto* graphics = modules->Get<GraphicsModule>();
+        auto* physics = modules->Get<PhysicsModule>();
+        auto* random = modules->Get<nc::Random>();
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<EdgePanCamera>(cameraHandle);
-        engine->Graphics()->SetCamera(camera);
-        auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, engine->Physics());
+        graphics->SetCamera(camera);
+        auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, physics);
         registry->Add<FrameLogic>(cameraHandle, [](Entity self, Registry* registry, float dt)
         {
             registry->Get<EdgePanCamera>(self)->Run(self, registry, dt);
@@ -92,19 +96,19 @@ namespace nc::sample
             .layer = CoinLayer
         };
 
-        auto spawnExtension = [registry, physicsSystem = engine->Physics()](Entity handle)
+        auto spawnExtension = [registry, physics](Entity handle)
         {
             registry->Get<Transform>(handle)->SetScale(Vector3::Splat(2.0f));
-            registry->Add<Clickable>(handle, registry->Get<Tag>(handle)->Value().data(), physicsSystem);
+            registry->Add<Clickable>(handle, registry->Get<Tag>(handle)->Value().data(), physics);
         };
 
         auto coinSpawnerHandle = registry->Add<Entity>({.tag = "Coin Spawner"});
-        auto coinSpawner = registry->Add<Spawner>(coinSpawnerHandle, engine->Random(), prefab::Resource::Coin, behavior, spawnExtension);
+        auto coinSpawner = registry->Add<Spawner>(coinSpawnerHandle, random, prefab::Resource::Coin, behavior, spawnExtension);
         coinSpawner->Spawn(registry, 20);
 
         behavior.layer = TokenLayer;
         auto tokenSpawnerHandle = registry->Add<Entity>({.tag = "Token Spawner"});
-        auto tokenSpawner = registry->Add<Spawner>(tokenSpawnerHandle, engine->Random(), prefab::Resource::Token, behavior, spawnExtension);
+        auto tokenSpawner = registry->Add<Spawner>(tokenSpawnerHandle, random, prefab::Resource::Token, behavior, spawnExtension);
         tokenSpawner->Spawn(registry, 20);
     }
 

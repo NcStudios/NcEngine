@@ -43,16 +43,14 @@ namespace
 
 namespace nc::sample
 {
-    void RenderingBenchmark::Load(NcEngine* engine)
+    void RenderingBenchmark::Load(Registry* registry, ModuleRegistry* modules)
     {
-        auto* registry = engine->Registry();
-
         // Setup
-        m_sceneHelper.Setup(engine, false, false, Widget);
+        m_sceneHelper.Setup(registry, modules, false, false, Widget);
 
         // Camera
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        engine->Graphics()->SetCamera(camera);
+        modules->Get<GraphicsModule>()->SetCamera(camera);
 
         // Spawner
         SpawnBehavior spawnBehavior
@@ -64,7 +62,7 @@ namespace nc::sample
         };
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
-        auto spawner = registry->Add<Spawner>(spawnerHandle, engine->Random(), prefab::Resource::Cube, spawnBehavior);
+        auto spawner = registry->Add<Spawner>(spawnerHandle, modules->Get<Random>(), prefab::Resource::Cube, spawnBehavior);
         registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
 
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FPSTracker"});

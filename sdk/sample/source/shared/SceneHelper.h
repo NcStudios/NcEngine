@@ -1,7 +1,10 @@
 #pragma once
 
-#include "NcEngine.h"
+#include "ModuleRegistry.h"
+#include "ecs/Registry.h"
 #include "ecs/component/PointLight.h"
+#include "graphics/GraphicsModule.h"
+
 #include "GameLog.h"
 #include "SampleUI.h"
 
@@ -14,27 +17,26 @@ namespace nc::sample
     class SceneHelper
     {
         public:
-            void Setup(NcEngine* engine, bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
+            void Setup(Registry* registry, ModuleRegistry* modules, bool enableLog = true, bool createLight = true, std::function<void()> widgetCallback = nullptr);
             void TearDown();
 
         private:
             std::unique_ptr<SampleUI> m_ui;
             std::unique_ptr<GameLog> m_log;
-            NcEngine* m_engine;
+            ModuleRegistry* m_modules;
     };
 
-    inline void SceneHelper::Setup(NcEngine* engine, bool enableLog, bool createLight, std::function<void()> widgetCallback)
+    inline void SceneHelper::Setup(Registry* registry, ModuleRegistry* modules, bool enableLog, bool createLight, std::function<void()> widgetCallback)
     {
-        m_engine = engine;
-        auto* registry = engine->Registry();
+        m_modules = modules;
 
         if(enableLog)
         {
             m_log = std::make_unique<GameLog>();
         }
 
-        m_ui = std::make_unique<SampleUI>(engine->Scene(), m_log.get(), widgetCallback);
-        engine->Graphics()->SetUi(m_ui.get());
+        m_ui = std::make_unique<SampleUI>(modules->Get<SceneModule>(), m_log.get(), widgetCallback);
+        modules->Get<GraphicsModule>()->SetUi(m_ui.get());
 
         if(createLight)
         {
@@ -47,7 +49,7 @@ namespace nc::sample
 
     inline void SceneHelper::TearDown()
     {
-        m_engine->Graphics()->SetUi(nullptr);
+        m_modules->Get<GraphicsModule>()->SetUi(nullptr);
         m_ui = nullptr;
         m_log = nullptr;
     }
