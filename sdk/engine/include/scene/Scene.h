@@ -4,13 +4,14 @@
 
 namespace nc
 {
-    class NcEngine;
+    class Registry;
+    class ModuleRegistry;
 
     class Scene
     {
         public:
             virtual ~Scene() = default;
-            virtual void Load(NcEngine* engine) = 0;
+            virtual void Load(Registry* registry, ModuleRegistry* modules) = 0;
             virtual void Unload() = 0;
     };
 }

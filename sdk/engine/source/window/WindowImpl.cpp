@@ -42,7 +42,7 @@ namespace nc::window
     }
 
     /* WindowImpl */
-    WindowImpl::WindowImpl()
+    WindowImpl::WindowImpl(std::function<void()> onQuit)
         : m_onResizeReceivers{},
           m_hwnd{nullptr},
           m_wndClass{},
@@ -51,7 +51,7 @@ namespace nc::window
           GraphicsOnResizeCallback{nullptr},
           GraphicsSetClearColorCallback{nullptr},
           UIWndMessageCallback{nullptr},
-          EngineDisableRunningCallback{nullptr}
+          EngineDisableRunningCallback{std::move(onQuit)}
     {
         g_instance = this;
         GetModuleHandleExA(0, NULL, &m_hInstance);
@@ -156,11 +156,6 @@ namespace nc::window
     void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
     {
         UIWndMessageCallback = std::move(callback);
-    }
-
-    void WindowImpl::BindEngineDisableRunningCallback(std::function<void()> callback) noexcept
-    {
-        EngineDisableRunningCallback = std::move(callback);
     }
 
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)

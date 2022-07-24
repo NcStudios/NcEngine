@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Module.h"
 #include "Vector.h"
 #include "Xoshiro256.h"
 
@@ -14,7 +15,7 @@ namespace nc
      * instances can be constructed, copied, and forked as needed.
      * 
      */
-    class Random
+    class Random : public Module
     {
         public:
             /**

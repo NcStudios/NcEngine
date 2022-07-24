@@ -1,13 +1,10 @@
 #pragma once
 
-#include "audio/AudioModule.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
 #include "ecs/component/All.h"
-#include "graphics/GraphicsModule.h"
-#include "math/Random.h"
-#include "physics/PhysicsModule.h"
-#include "scene/SceneModule.h"
+#include "ModuleRegistry.h"
+#include "scene/Scene.h"
 #include "utility/EnumUtilities.h"
 
 namespace nc
@@ -40,35 +37,8 @@ namespace nc
              */
             virtual auto Registry() noexcept -> nc::Registry* = 0;
 
-            /**
-             * @brief Get a pointer to the global random instance.
-             * @return Random*
-             */
-            virtual auto Random() noexcept -> nc::Random* = 0;
+            virtual auto Modules() noexcept -> nc::ModuleRegistry* = 0;
 
-            /**
-             * @brief Get a pointer to the audio module.
-             * @return AudioModule*
-             */
-            virtual auto Audio() noexcept -> AudioModule* = 0;
-
-            /**
-             * @brief Get a pointer to the graphics module.
-             * @return GraphicsModule*
-             */
-            virtual auto Graphics() noexcept -> GraphicsModule* = 0;
-
-            /**
-             * @brief Get a pointer to the physics module.
-             * @return PhysicsModule*
-             */
-            virtual auto Physics() noexcept -> PhysicsModule* = 0;
-
-            /**
-             * @brief Get a pointer to the scene module.
-             * @return SceneModule*
-             */
-            virtual auto Scene() noexcept -> SceneModule* = 0;
     };
 
     /** @brief Flags controlling initialization of engine modules. */

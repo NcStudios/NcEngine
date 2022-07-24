@@ -17,6 +17,6 @@ namespace nc
              * The default runtime will call this automatically once all tasks have finished
              * if a scene has been queued with ChangeScene.
              */
-            virtual void DoSceneSwap(NcEngine* engine) = 0;
+            virtual void DoSceneSwap(Registry* registry, ModuleRegistry* modules) = 0;
     };
 }

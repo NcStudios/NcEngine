@@ -1,5 +1,7 @@
 #include "Executor.h"
 
+#include "optick/optick.h"
+
 namespace
 {
     void Connect(std::vector<tf::Task>& predecessors, const std::vector<tf::Task>& successors)
@@ -39,11 +41,37 @@ namespace
 
 namespace nc
 {
-    Executor::Executor()
+    Executor::Executor(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
         : m_taskExecutor{8u},
           m_executionGraph{},
           m_jobRegistry{}
     {
+        Build(registry, modules);
+    }
+
+    void Executor::Build(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
+    {
+        V_LOG("Runtime::BuildTaskGraph()");
+
+        for(auto& module : modules)
+        {
+            Add(module->BuildWorkload());
+        }
+
+        auto syncJob = [registry]
+        {
+            OPTICK_CATEGORY("Sync State", Optick::Category::None);
+            registry->CommitStagedChanges();
+        };
+
+        Add(Job{ syncJob, "Sync", HookPoint::PreRenderSync });
+        auto tasks = ConvertJobsToTasks();
+        SetDependencies(tasks);
+
+        #if NC_OUTPUT_TASKFLOW
+        m_executionGraph.name("Main Loop");
+        m_executionGraph.dump(std::cout);
+        #endif
     }
 
     void Executor::Add(Job job)
@@ -58,17 +86,6 @@ namespace nc
         {
             Add(std::move(job));
         }
-    }
-
-    void Executor::Build()
-    {
-        auto tasks = ConvertJobsToTasks();
-        SetDependencies(tasks);
-
-        #if NC_OUTPUT_TASKFLOW
-        m_executionGraph.name("Main Loop");
-        m_executionGraph.dump(std::cout);
-        #endif
     }
 
     auto Executor::Run() -> tf::Future<void>
