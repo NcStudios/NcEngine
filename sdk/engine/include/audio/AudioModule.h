@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs/Entity.h"
-#include "Module.h"
+#include "module/Module.h"
 
 namespace nc
 {

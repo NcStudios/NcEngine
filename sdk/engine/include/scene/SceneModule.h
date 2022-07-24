@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Module.h"
 #include "Scene.h"
+#include "module/Module.h"
 
 namespace nc
 {
