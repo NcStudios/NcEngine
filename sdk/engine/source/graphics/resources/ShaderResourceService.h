@@ -13,7 +13,7 @@ namespace nc
         struct ShadowMap;
         class Graphics;
         struct ObjectData;
-        struct TextureData;
+        struct TextureImageInfo;
         class CubeMap;
     }
 }

@@ -6,7 +6,7 @@
 #include "EnvironmentDataManager.h"
 #include "ShaderDescriptorSets.h"
 #include "ShadowMapManager.h"
-#include "TextureManager.h"
+#include "graphics/textures/TextureManager.h"
 #include "config/Config.h"
 
 namespace nc::graphics
@@ -18,7 +18,7 @@ namespace nc::graphics
                 : m_ShaderDescriptorSets{graphics->GetBasePtr()},
                   m_objectDataManager{0, allocator, &m_ShaderDescriptorSets, memorySettings.maxRenderers},
                   m_pointLightManager{1, allocator, &m_ShaderDescriptorSets, memorySettings.maxPointLights},
-                  m_textureManager{2, graphics, &m_ShaderDescriptorSets, memorySettings.maxTextures},
+                  m_textureManager{2, &m_ShaderDescriptorSets, memorySettings.maxTextures},
                   m_shadowMapManager{3, graphics, &m_ShaderDescriptorSets, dimensions },
                   m_cubeMapManager{4, graphics, &m_ShaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
                   m_environmentDataManager{5, allocator, &m_ShaderDescriptorSets}

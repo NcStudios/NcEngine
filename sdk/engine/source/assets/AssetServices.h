@@ -4,7 +4,6 @@
 #include "ConcaveColliderAssetManager.h"
 #include "ConvexHullAssetManager.h"
 #include "CubeMapAssetManager.h"
-#include "TextureAssetManager.h"
 #include "config/Config.h"
 
 namespace nc
@@ -15,7 +14,6 @@ struct AssetServices
         : concaveManager{projectSettings.concaveCollidersPath},
           hullManager{projectSettings.hullCollidersPath},
           audioClipManager{projectSettings.audioClipsPath},
-          textureManager{graphics, projectSettings.texturesPath, maxTextures},
           cubeMapAssetManager{graphics, projectSettings.cubeMapsPath, maxTextures}
     {
     }
@@ -23,7 +21,6 @@ struct AssetServices
     ConcaveColliderAssetManager concaveManager;
     ConvexHullAssetManager hullManager;
     AudioClipAssetManager audioClipManager;
-    TextureAssetManager textureManager;
     CubeMapAssetManager cubeMapAssetManager;
 };
 }

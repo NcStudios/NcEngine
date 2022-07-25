@@ -1,6 +1,7 @@
 #include "Commands.h"
 #include "Base.h"
 #include "vk/Swapchain.h"
+#include "vk/Meshes.h"
 
 namespace nc::graphics
 {
@@ -112,5 +113,13 @@ namespace nc::graphics
         base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);
         base.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
         base.GetDevice().freeCommandBuffers(base.GetCommandPool(), tempCommandBuffer);
+    }
+
+    void Commands::BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData)
+    {
+        vk::DeviceSize offsets[] = { 0 };
+        auto vertexBuffer = vertexData.buffer.GetBuffer();
+        cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
+        cmd->bindIndexBuffer(indexData.buffer.GetBuffer(), 0, vk::IndexType::eUint32);
     }
 }

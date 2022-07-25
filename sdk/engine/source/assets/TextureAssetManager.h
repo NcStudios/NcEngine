@@ -1,11 +1,11 @@
 #pragma once
 
+#include "assets/AssetData.h"
 #include "assets/AssetService.h"
 #include "utility/Signal.h"
 
 #include <unordered_map>
 #include <vector>
-#include <vulkan/vulkan.hpp>
 
 namespace nc
 {

@@ -36,7 +36,7 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
 
 TextureAssetManager::~TextureAssetManager() noexcept
 {
-
+    m_accessors.clear();
 }
 
 bool TextureAssetManager::Load(const std::string& path, bool isExternal)
@@ -121,5 +121,10 @@ auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
 bool TextureAssetManager::IsLoaded(const std::string& path) const
 {
     return m_accessors.contains(path);
+}
+
+auto TextureAssetManager::OnUpdate() -> Signal<const TextureBufferData&>*
+{
+    return &m_onUpdate;
 }
 }

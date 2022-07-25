@@ -1,14 +1,14 @@
 #include "TextureManager.h"
 #include "graphics/vk/Initializers.h"
 #include "debug/Utils.h"
+#include "graphics/textures/TextureStorage.h"
 
 #include <array>
 
 namespace nc::graphics
 {
-    TextureManager::TextureManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxTextures)
-        : m_graphics{graphics},
-          m_descriptors{descriptors},
+    TextureManager::TextureManager(uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxTextures)
+        : m_descriptors{descriptors},
           m_imageInfos{},
           m_layout{},
           m_maxTexturesCount{maxTextures},

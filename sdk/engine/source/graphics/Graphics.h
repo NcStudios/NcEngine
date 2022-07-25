@@ -20,7 +20,7 @@ namespace nc::graphics
 {
     class Base;
     class Commands;
-    class GpuAssetsStorage;
+    struct GpuAssetsStorage;
     struct PerFrameRenderState;
     class Swapchain;
     class Renderer;

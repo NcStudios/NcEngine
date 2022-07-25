@@ -12,6 +12,5 @@ target_sources(${NC_ENGINE_LIB}
         RenderPassManager.cpp
         ShaderDescriptorSets.cpp
         ShadowMapManager.cpp
-        TextureManager.cpp
         UniformBuffer.cpp
 )

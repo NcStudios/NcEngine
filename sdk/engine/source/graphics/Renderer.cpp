@@ -58,10 +58,10 @@ namespace nc::graphics
         m_renderPasses.reset();
     }
 
-    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex)
+    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
     {
         OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
-        auto* cmd = BeginFrame(commands, assetServices, gpuAssetsStorage, currentSwapChainImageIndex);
+        auto* cmd = BeginFrame(commands, assetServices, meshStorage, currentSwapChainImageIndex);
 
         /** Shadow mapping pass */
         m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
@@ -108,7 +108,7 @@ namespace nc::graphics
         m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
     }
 
-    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex)
+    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
     {
         auto swapchain = m_graphics->GetSwapchainPtr();
         swapchain->WaitForFrameFence();
@@ -118,13 +118,7 @@ namespace nc::graphics
 
         SetViewportAndScissor(cmd, m_dimensions);
 
-        vk::DeviceSize offsets[] = { 0 };
-        const auto& vertexData = gpuAssetsStorage.GetVertexData();
-        const auto& indexData = gpuAssetsStorage.GetIndexData();
-        auto vertexBuffer = vertexData.buffer.GetBuffer();
-        cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
-        cmd->bindIndexBuffer(indexData.buffer.GetBuffer(), 0, vk::IndexType::eUint32);
-
+        commands->BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
         return cmd;
     }
 
