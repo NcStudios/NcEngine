@@ -15,11 +15,11 @@ namespace nc
         public:
             Runtime(EngineInitFlags flags);
             ~Runtime() noexcept;
-            void Start(std::unique_ptr<nc::Scene> initialScene) override;
+            void Start(std::unique_ptr<Scene> initialScene) override;
             void Stop() noexcept override;
             void Shutdown() noexcept override;
-            auto Registry() noexcept -> nc::Registry* override;
-            auto Modules() noexcept -> nc::ModuleRegistry* override;
+            auto GetRegistry() noexcept -> Registry* override;
+            auto GetModuleRegistry() noexcept -> ModuleRegistry* override;
 
         private:
             window::WindowImpl m_window;

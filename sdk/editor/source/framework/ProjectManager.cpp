@@ -191,7 +191,7 @@ namespace nc::editor
 
         Output::Log("Creating scene: " + name);
 
-        SceneWriter writer{m_engine->Registry(), m_manifest, m_projectData.projectDirectory / "scenes"};
+        SceneWriter writer{m_engine->GetRegistry(), m_manifest, m_projectData.projectDirectory / "scenes"};
         writer.WriteNewScene(name);
 
         m_projectData.scenes.push_back(name);
@@ -215,7 +215,7 @@ namespace nc::editor
             return;
         }
 
-        if(AssetDependencyChecker checkDependencies{m_engine->Registry(), m_manifest}; !checkDependencies.result)
+        if(AssetDependencyChecker checkDependencies{m_engine->GetRegistry(), m_manifest}; !checkDependencies.result)
         {
             Output::Log("Failure saving scene: Missing asset dependencies");
             checkDependencies.LogMissingDependencies();
@@ -225,7 +225,7 @@ namespace nc::editor
         /** @todo This is more of an "on project save" thing, which doesn't exist yet. */
         WriteLoaderScene(m_projectData.projectDirectory, *m_manifest);
 
-        SceneWriter writer{m_engine->Registry(), m_manifest, m_projectData.projectDirectory / "scenes"};
+        SceneWriter writer{m_engine->GetRegistry(), m_manifest, m_projectData.projectDirectory / "scenes"};
         writer.WriteCurrentScene(&m_sceneData, m_projectData.scenes.at(m_currentSceneIndex));
         Output::Log("Saved scene: " + m_projectData.scenes.at(m_currentSceneIndex));
     }
@@ -244,7 +244,7 @@ namespace nc::editor
             {
                 m_nextSceneIndex = i;
                 Output::Log("Loading scene: " + name);
-                auto* sceneModule = m_engine->Modules()->Get<SceneModule>();
+                auto* sceneModule = m_engine->GetModuleRegistry()->Get<SceneModule>();
                 sceneModule->ChangeScene(std::make_unique<EditorScene>(this));
                 return;
             }
@@ -268,8 +268,8 @@ namespace nc::editor
 
         m_currentSceneIndex = m_nextSceneIndex;
 
-        auto* registry = m_engine->Registry();
-        auto* graphics = m_engine->Modules()->Get<GraphicsModule>();
+        auto* registry = m_engine->GetRegistry();
+        auto* graphics = m_engine->GetModuleRegistry()->Get<GraphicsModule>();
         NC_TRACE(SceneReader serialize{registry, graphics, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
     }
 

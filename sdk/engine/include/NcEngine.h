@@ -33,12 +33,13 @@ namespace nc
 
             /**
              * @brief Get a pointer to the active registry.
-             * @return Registry*
              */
-            virtual auto Registry() noexcept -> nc::Registry* = 0;
+            virtual auto GetRegistry() noexcept -> Registry* = 0;
 
-            virtual auto Modules() noexcept -> nc::ModuleRegistry* = 0;
-
+            /**
+             * @brief Get a pointer to the module registry.
+             */
+            virtual auto GetModuleRegistry() noexcept -> ModuleRegistry* = 0;
     };
 
     /** @brief Flags controlling initialization of engine modules. */

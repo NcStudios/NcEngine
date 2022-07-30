@@ -5,6 +5,7 @@
 #include "graphics/GraphicsModuleImpl.h"
 #include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
+#include "module/ModuleProvider.h"
 #include "physics/PhysicsModuleImpl.h"
 #include "scene/SceneModuleImpl.h"
 
@@ -73,12 +74,12 @@ namespace nc
         Shutdown();
     }
 
-    void Runtime::Start(std::unique_ptr<nc::Scene> initialScene)
+    void Runtime::Start(std::unique_ptr<Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
         auto* sceneModule = m_modules.Get<SceneModule>();
         sceneModule->ChangeScene(std::move(initialScene));
-        sceneModule->DoSceneSwap(&m_registry, &m_modules);
+        sceneModule->DoSceneSwap(&m_registry, ModuleProvider{&m_modules});
         m_isRunning = true;
         Run();
     }
@@ -104,12 +105,12 @@ namespace nc
         debug::internal::CloseLog();
     }
 
-    auto Runtime::Registry() noexcept -> nc::Registry*
+    auto Runtime::GetRegistry() noexcept -> Registry*
     {
         return &m_registry;
     }
 
-    auto Runtime::Modules() noexcept -> ModuleRegistry*
+    auto Runtime::GetModuleRegistry() noexcept -> ModuleRegistry*
     {
         return &m_modules;
     }
@@ -133,7 +134,7 @@ namespace nc
             m_window.ProcessSystemMessages();
             auto result = m_executor.Run();
             result.wait();
-            m_modules.Get<SceneModule>()->DoSceneSwap(&m_registry, &m_modules);
+            m_modules.Get<SceneModule>()->DoSceneSwap(&m_registry, ModuleProvider{&m_modules});
         }
 
         Shutdown();

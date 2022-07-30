@@ -9,16 +9,16 @@
 
 namespace nc::sample
 {
-    void JointsTest::Load(Registry* registry, ModuleRegistry* modules)
+    void JointsTest::Load(Registry* registry, ModuleProvider modules)
     {
         m_sceneHelper.Setup(registry, modules, false, false, nullptr);
-        auto* physics = modules->Get<PhysicsModule>();
+        auto* physics = modules.Get<PhysicsModule>();
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules->Get<GraphicsModule>()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});

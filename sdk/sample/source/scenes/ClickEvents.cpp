@@ -51,13 +51,13 @@ namespace
 
 namespace nc::sample
 {
-    void ClickEvents::Load(Registry* registry, ModuleRegistry* modules)
+    void ClickEvents::Load(Registry* registry, ModuleProvider modules)
     {
         // Setup
         m_sceneHelper.Setup(registry, modules, true, false, Widget);
-        auto* graphics = modules->Get<GraphicsModule>();
-        auto* physics = modules->Get<PhysicsModule>();
-        auto* random = modules->Get<nc::Random>();
+        auto* graphics = modules.Get<GraphicsModule>();
+        auto* physics = modules.Get<PhysicsModule>();
+        auto* random = modules.Get<nc::Random>();
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -9.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});

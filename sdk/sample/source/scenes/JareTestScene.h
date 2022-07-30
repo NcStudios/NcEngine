@@ -8,7 +8,7 @@ namespace nc::sample
     class JareTestScene : public Scene
     {
         public:
-            void Load(Registry* registry, ModuleRegistry* modules) override;
+            void Load(Registry* registry, ModuleProvider modules) override;
             void Unload() override;
         private:
             SceneHelper m_sceneHelper;

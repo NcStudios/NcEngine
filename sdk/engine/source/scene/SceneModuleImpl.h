@@ -15,7 +15,7 @@ namespace nc::scene
             SceneModuleImpl(std::function<void()> clearOnSceneChangeCallback);
 
             void ChangeScene(std::unique_ptr<Scene> swapScene) override;
-            void DoSceneSwap(Registry* registry, ModuleRegistry* modules) override;
+            void DoSceneSwap(Registry* registry, ModuleProvider modules) override;
 
         private:
             std::unique_ptr<Scene> m_activeScene;

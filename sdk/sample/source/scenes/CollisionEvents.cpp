@@ -43,7 +43,7 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionEvents::Load(Registry* registry, ModuleRegistry* modules)
+    void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
     {
         // Setup
         m_sceneHelper.Setup(registry, modules, true, false, Widget);
@@ -58,7 +58,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto* camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules->Get<GraphicsModule>()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         // Movable Objects
         auto objectSpawner = registry->Add<Entity>({.tag = "Prefab Selector"});
@@ -95,7 +95,7 @@ namespace nc::sample
         registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-        modules->Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+        modules.Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
     }
 
     void CollisionEvents::Unload()

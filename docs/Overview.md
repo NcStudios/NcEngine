@@ -96,7 +96,7 @@ Scenes manage initialization of the game world. Scenes should derive from the ab
 
 ```cpp
 /** Scene.h */
-virtual void Load(NcEngine* engine) = 0;
+virtual void Load(Registry* registry, ModuleProvider modules) = 0;
 virtual void Unload() = 0;
 ```
 

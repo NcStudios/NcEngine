@@ -23,7 +23,7 @@ namespace
 
 namespace nc::sample
 {
-    void JareTestScene::Load(Registry* registry, ModuleRegistry* modules)
+    void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     {
         m_sceneHelper.Setup(registry, modules, true, false, Widget);
 
@@ -89,7 +89,7 @@ namespace nc::sample
 
         nc::LoadMeshAssets(sceneMeshes);
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-        modules->Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+        modules.Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
 
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
@@ -133,7 +133,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules->Get<GraphicsModule>()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
     }
 
     void JareTestScene::Unload()

@@ -1,17 +1,18 @@
 #pragma once
 
+#include "module/ModuleProvider.h"
+
 #include <memory>
 
 namespace nc
 {
     class Registry;
-    class ModuleRegistry;
 
     class Scene
     {
         public:
             virtual ~Scene() = default;
-            virtual void Load(Registry* registry, ModuleRegistry* modules) = 0;
+            virtual void Load(Registry* registry, ModuleProvider modules) = 0;
             virtual void Unload() = 0;
     };
 }

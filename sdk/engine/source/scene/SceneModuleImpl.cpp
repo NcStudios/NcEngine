@@ -1,4 +1,5 @@
 #include "SceneModuleImpl.h"
+#include "module/ModuleProvider.h"
 
 namespace nc::scene
 {
@@ -19,7 +20,7 @@ namespace nc::scene
         m_swapScene = std::move(swapScene);
     }
 
-    void SceneModuleImpl::DoSceneSwap(Registry* registry, ModuleRegistry* modules)
+    void SceneModuleImpl::DoSceneSwap(Registry* registry, ModuleProvider modules)
     {
         if(!m_swapScene)
         {

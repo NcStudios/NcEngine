@@ -72,7 +72,7 @@ namespace
 
 namespace nc::sample
 {
-    void SolarSystem::Load(Registry* registry, ModuleRegistry* modules)
+    void SolarSystem::Load(Registry* registry, ModuleProvider modules)
     {
         m_sceneHelper.Setup(registry, modules, true, false, Widget);
 
@@ -210,7 +210,7 @@ namespace nc::sample
 
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules->Get<GraphicsModule>()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         auto sun = registry->Add<Entity>({ .scale = Vector3::Splat(2.0f), .tag = "Sun" });
         registry->Add<MeshRenderer>(sun, "planet.nca", sunMaterial, TechniqueType::PhongAndUi);
