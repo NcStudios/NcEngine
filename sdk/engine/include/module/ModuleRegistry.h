@@ -39,9 +39,12 @@ class ModuleRegistry
                 return module.get() == target;
             });
 
-            target = nullptr;
+            m_typedModulePointer<T> = nullptr;
         }
 
+        /**
+         * @brief Notify all modules the data registry is about to be cleared.
+         */
         void Clear() noexcept
         {
             for(auto& module : m_modules)
@@ -54,21 +57,27 @@ class ModuleRegistry
          * @brief Check if a module matching a type is registered.
          */
         template<std::derived_from<Module> T>
-        bool IsRegistered() const noexcept { return Get<T>() != nullptr; }
+        bool IsRegistered() const noexcept
+        {
+            return Get<T>() != nullptr;
+        }
 
         /**
          * @brief Get a pointer to a module or nullptr if it is unregistered.
          */
         template<std::derived_from<Module> T>
-        auto Get() noexcept -> T* { return m_typedModulePointer<T>; }
-
-        template<std::derived_from<Module> T>
-        auto Get() const noexcept -> const T* { return m_typedModulePointer<T>; }
+        auto Get() const noexcept -> T*
+        {
+            return m_typedModulePointer<T>;
+        }
 
         /**
          * @brief Get the collection of all registered modules.
          */
-        auto GetAllModules() noexcept -> std::vector<std::unique_ptr<Module>>& { return m_modules; }
+        auto GetAllModules() noexcept -> std::vector<std::unique_ptr<Module>>&
+        {
+            return m_modules;
+        }
 
     private:
         std::vector<std::unique_ptr<Module>> m_modules;
