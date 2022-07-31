@@ -15,6 +15,11 @@ namespace nc::scene
     {
     }
 
+    bool SceneModuleImpl::IsSceneChangeScheduled() const
+    {
+        return static_cast<bool>(m_swapScene);
+    }
+
     void SceneModuleImpl::ChangeScene(std::unique_ptr<Scene> swapScene)
     {
         m_swapScene = std::move(swapScene);

@@ -9,6 +9,9 @@ namespace nc
     class SceneModule : public Module
     {
         public:
+            /** @brief Check if a scene change is scheduled. */
+            virtual bool IsSceneChangeScheduled() const = 0;
+
             /** @brief Queue a scene to be loaded upon completion of the current frame */
             virtual void ChangeScene(std::unique_ptr<Scene> scene) = 0;
 
