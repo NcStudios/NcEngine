@@ -29,11 +29,8 @@ namespace nc
             ModuleRegistry m_modules;
             Executor m_executor;
             float m_dt;
-            float m_dtFactor;
             bool m_isRunning;
-            unsigned m_currentPhysicsIterations; /** @todo should go in PhysicsModuleImpl */
 
-            void BuildTaskGraph(); /** @todo could maybe have graph builder class/func */
             void Clear();
             void Run();
     };

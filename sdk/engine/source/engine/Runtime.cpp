@@ -61,10 +61,8 @@ namespace nc
                                         std::bind_front(&Runtime::Clear, this),
                                         &m_dt, flags)},
           m_executor{&m_registry, m_modules.GetAllModules()},
-          m_dt{ 0.0f },
-          m_dtFactor{ 1.0f },
-          m_isRunning{ false },
-          m_currentPhysicsIterations{ 0u }
+          m_dt{0.0f},
+          m_isRunning{false}
     {
         V_LOG("Runtime Initialized");
     }
@@ -117,6 +115,7 @@ namespace nc
 
     void Runtime::Clear()
     {
+        V_LOG("Runtime::Clear()");
         m_modules.Clear();
         m_registry.Clear();
         m_time.ResetFrameDeltaTime();
@@ -125,16 +124,20 @@ namespace nc
 
     void Runtime::Run()
     {
+        V_LOG("Runtime::Run()");
         while(m_isRunning)
         {
             OPTICK_FRAME("Main Thread");
-            m_dt = m_dtFactor * m_time.UpdateTime();
-            m_currentPhysicsIterations = 0u;
+            m_dt = m_time.UpdateTime();
             input::Flush();
             m_window.ProcessSystemMessages();
             auto result = m_executor.Run();
             result.wait();
-            m_modules.Get<SceneModule>()->DoSceneSwap(&m_registry, ModuleProvider{&m_modules});
+            auto* sceneModule = m_modules.Get<SceneModule>();
+            if (sceneModule->IsSceneChangeScheduled())
+            {
+                sceneModule->DoSceneSwap(&m_registry, ModuleProvider{&m_modules});
+            }
         }
 
         Shutdown();
