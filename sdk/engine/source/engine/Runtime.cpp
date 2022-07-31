@@ -7,7 +7,6 @@
 #include "input/InputInternal.h"
 #include "module/ModuleProvider.h"
 #include "physics/PhysicsModuleImpl.h"
-#include "scene/SceneModuleImpl.h"
 
 namespace
 {
@@ -15,7 +14,6 @@ namespace
                              nc::window::WindowImpl* window,
                              nc::time::Time* time,
                              const nc::GpuAccessorSignals& gpuAccessorSignals,
-                             std::function<void()> clearCallback,
                              float* dt, nc::EngineInitFlags flags) -> nc::ModuleRegistry
     {
         V_LOG("BuildModules()");
@@ -26,7 +24,6 @@ namespace
         auto graphics = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, gpuAccessorSignals, window, dt);
         auto physics = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg, time);
         auto audio = nc::audio::BuildAudioModule(enableAudioModule, reg);
-        auto scene = nc::scene::BuildSceneModule(std::move(clearCallback));
         auto logic = std::make_unique<nc::LogicModule>(reg, dt);
         auto random = std::make_unique<nc::Random>();
 
@@ -34,7 +31,6 @@ namespace
         moduleRegistry.Register(std::move(graphics));
         moduleRegistry.Register(std::move(physics));
         moduleRegistry.Register(std::move(audio));
-        moduleRegistry.Register(std::move(scene));
         moduleRegistry.Register(std::move(logic));
         moduleRegistry.Register(std::move(random));
         return moduleRegistry;
@@ -58,9 +54,9 @@ namespace nc
           m_assets{nc::config::GetProjectSettings(), nc::config::GetMemorySettings()},
           m_modules{BuildModuleRegistry(&m_registry, &m_window, &m_time,
                                         m_assets.CreateGpuAccessorSignals(),
-                                        std::bind_front(&Runtime::Clear, this),
                                         &m_dt, flags)},
           m_executor{&m_registry, m_modules.GetAllModules()},
+          m_sceneManager{std::bind_front(&Runtime::Clear, this)},
           m_dt{0.0f},
           m_isRunning{false}
     {
@@ -75,9 +71,8 @@ namespace nc
     void Runtime::Start(std::unique_ptr<Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
-        auto* sceneModule = m_modules.Get<SceneModule>();
-        sceneModule->ChangeScene(std::move(initialScene));
-        sceneModule->DoSceneSwap(&m_registry, ModuleProvider{&m_modules});
+        m_sceneManager.QueueSceneChange(std::move(initialScene));
+        m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
         m_isRunning = true;
         Run();
     }
@@ -101,6 +96,16 @@ namespace nc
         }
 
         debug::internal::CloseLog();
+    }
+
+    bool Runtime::IsSceneChangeQueued() const noexcept
+    {
+        return m_sceneManager.IsSceneChangeQueued();
+    }
+
+    void Runtime::QueueSceneChange(std::unique_ptr<Scene> scene)
+    {
+        m_sceneManager.QueueSceneChange(std::move(scene));
     }
 
     auto Runtime::GetRegistry() noexcept -> Registry*
@@ -133,10 +138,9 @@ namespace nc
             m_window.ProcessSystemMessages();
             auto result = m_executor.Run();
             result.wait();
-            auto* sceneModule = m_modules.Get<SceneModule>();
-            if (sceneModule->IsSceneChangeScheduled())
+            if (m_sceneManager.IsSceneChangeQueued())
             {
-                sceneModule->DoSceneSwap(&m_registry, ModuleProvider{&m_modules});
+                m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
             }
         }
 

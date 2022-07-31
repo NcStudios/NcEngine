@@ -1,12 +1,14 @@
 #include "SolarSystem.h"
+#include "shared/Prefabs.h"
+#include "shared/FreeComponents.h"
+
+#include "NcEngine.h"
+#include "Window.h"
 #include "asset/Assets.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/Registry.h"
+#include "graphics/GraphicsModule.h"
 #include "imgui/imgui.h"
-#include "Window.h"
-#include "shared/Prefabs.h"
-#include "NcEngine.h"
-#include <shared/FreeComponents.h>
 
 namespace
 {
@@ -72,10 +74,13 @@ namespace
 
 namespace nc::sample
 {
+    SolarSystem::SolarSystem(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(::Widget);
+    }
+
     void SolarSystem::Load(Registry* registry, ModuleProvider modules)
     {
-        m_sceneHelper.Setup(registry, modules, true, false, Widget);
-
         // Load all scene textures
         const std::vector<std::string> texturePaths
         {
@@ -310,10 +315,5 @@ namespace nc::sample
 
         auto starEmitter = registry->Add<Entity>({ .tag = "Stars" });
         registry->Add<ParticleEmitter>(starEmitter, particleInfo);
-    }
-
-    void SolarSystem::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 }

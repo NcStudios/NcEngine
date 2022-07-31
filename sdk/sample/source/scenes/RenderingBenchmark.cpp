@@ -1,8 +1,10 @@
 #include "RenderingBenchmark.h"
-#include "NcEngine.h"
-#include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
+
+#include "NcEngine.h"
+#include "graphics/GraphicsModule.h"
+#include "imgui/imgui.h"
 
 #include <functional>
 
@@ -43,11 +45,13 @@ namespace
 
 namespace nc::sample
 {
+    RenderingBenchmark::RenderingBenchmark(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(::Widget);
+    }
+
     void RenderingBenchmark::Load(Registry* registry, ModuleProvider modules)
     {
-        // Setup
-        m_sceneHelper.Setup(registry, modules, false, false, Widget);
-
         // Camera
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
         modules.Get<GraphicsModule>()->SetCamera(camera);
@@ -88,6 +92,5 @@ namespace nc::sample
         GetFPSCallback = nullptr;
         SpawnCallback = nullptr;
         DestroyCallback = nullptr;
-        m_sceneHelper.TearDown();
     }
 }

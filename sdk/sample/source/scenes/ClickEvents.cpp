@@ -51,10 +51,13 @@ namespace
 
 namespace nc::sample
 {
+    ClickEvents::ClickEvents(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(::Widget);
+    }
+
     void ClickEvents::Load(Registry* registry, ModuleProvider modules)
     {
-        // Setup
-        m_sceneHelper.Setup(registry, modules, true, false, Widget);
         auto* graphics = modules.Get<GraphicsModule>();
         auto* physics = modules.Get<PhysicsModule>();
         auto* random = modules.Get<nc::Random>();
@@ -110,10 +113,5 @@ namespace nc::sample
         auto tokenSpawnerHandle = registry->Add<Entity>({.tag = "Token Spawner"});
         auto tokenSpawner = registry->Add<Spawner>(tokenSpawnerHandle, random, prefab::Resource::Token, behavior, spawnExtension);
         tokenSpawner->Spawn(registry, 20);
-    }
-
-    void ClickEvents::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 } //end namespace project
