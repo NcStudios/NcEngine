@@ -51,7 +51,7 @@ namespace nc
 
     void Executor::Build(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
     {
-        V_LOG("Runtime::BuildTaskGraph()");
+        V_LOG("Executor::Build()");
 
         for(auto& module : modules)
         {
