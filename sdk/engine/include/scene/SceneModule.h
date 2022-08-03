@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Module.h"
 #include "Scene.h"
+#include "module/Module.h"
 
 namespace nc
 {
@@ -9,6 +9,9 @@ namespace nc
     class SceneModule : public Module
     {
         public:
+            /** @brief Check if a scene change is scheduled. */
+            virtual bool IsSceneChangeScheduled() const = 0;
+
             /** @brief Queue a scene to be loaded upon completion of the current frame */
             virtual void ChangeScene(std::unique_ptr<Scene> scene) = 0;
 
@@ -17,6 +20,6 @@ namespace nc
              * The default runtime will call this automatically once all tasks have finished
              * if a scene has been queued with ChangeScene.
              */
-            virtual void DoSceneSwap(NcEngine* engine) = 0;
+            virtual void DoSceneSwap(Registry* registry, ModuleProvider modules) = 0;
     };
 }

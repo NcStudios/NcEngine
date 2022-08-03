@@ -7,7 +7,7 @@ namespace nc::sample
     class SolarSystem : public Scene
     {
     public:
-        void Load(NcEngine* engine) override;
+        void Load(Registry* registry, ModuleProvider modules) override;
         void Unload() override;
 
     private:

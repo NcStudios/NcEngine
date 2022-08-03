@@ -7,9 +7,9 @@ namespace nc::sample
     class CollisionBenchmark : public Scene
     {
         public:
-            void Load(NcEngine* engine) override;
+            void Load(Registry* registry, ModuleProvider modules) override;
             void Unload() override;
-        
+
         private:
             SceneHelper m_sceneHelper;
     };

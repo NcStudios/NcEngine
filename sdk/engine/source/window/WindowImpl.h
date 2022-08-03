@@ -16,7 +16,7 @@ namespace nc::window
     class WindowImpl
     {
         public:
-            WindowImpl();
+            WindowImpl(std::function<void()> onQuit);
             ~WindowImpl() noexcept;
             WindowImpl(const WindowImpl& other) = delete;
             WindowImpl(WindowImpl&& other) = delete;
@@ -30,7 +30,6 @@ namespace nc::window
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept;
             void BindGraphicsSetClearColorCallback(std::function<void(std::array<float, 4>)> callback) noexcept;
             void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept;
-            void BindEngineDisableRunningCallback(std::function<void()> callback) noexcept;
 
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;

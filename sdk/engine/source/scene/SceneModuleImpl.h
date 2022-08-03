@@ -7,15 +7,16 @@
 
 namespace nc::scene
 {
+    auto BuildSceneModule(std::function<void()> clearOnSceneChangeCallback) -> std::unique_ptr<SceneModule>;
+
     class SceneModuleImpl final : public SceneModule
     {
         public:
             SceneModuleImpl(std::function<void()> clearOnSceneChangeCallback);
 
+            bool IsSceneChangeScheduled() const override;
             void ChangeScene(std::unique_ptr<Scene> swapScene) override;
-            void DoSceneSwap(NcEngine* engine) override;
-            auto BuildWorkload() -> std::vector<Job> override { return {}; }
-            void Clear() noexcept override {}
+            void DoSceneSwap(Registry* registry, ModuleProvider modules) override;
 
         private:
             std::unique_ptr<Scene> m_activeScene;

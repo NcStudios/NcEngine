@@ -64,15 +64,13 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionBenchmark::Load(NcEngine* engine)
+    void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)
     {
-        auto* registry = engine->Registry();
-
         // Setup
-        m_sceneHelper.Setup(engine, false, true, Widget);
+        m_sceneHelper.Setup(registry, modules, false, true, Widget);
 
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        engine->Graphics()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         // Cube Spawner Options
         SpawnBehavior spawnBehavior
@@ -90,13 +88,13 @@ namespace nc::sample
 
         // Dynamic Cube Spawner
         auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
-        auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, engine->Random(), prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
+        auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, modules.Get<Random>(), prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
         registry->Add<FrameLogic>(dynamicSpawnerHandle, InvokeFreeComponent<Spawner>{});
 
         // Static Cube Spawner
         spawnBehavior.flags = Entity::Flags::Static;
         auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
-        auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, engine->Random(), prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
+        auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, modules.Get<Random>(), prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
         registry->Add<FrameLogic>(staticSpawnerHandle, InvokeFreeComponent<Spawner>{});
 
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});

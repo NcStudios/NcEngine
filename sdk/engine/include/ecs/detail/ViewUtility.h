@@ -69,6 +69,11 @@ namespace nc::detail
                 return *m_cur;
             }
 
+            [[nodiscard]] friend auto operator-(const SingleViewIterator<T>& lhs, const SingleViewIterator<T>& rhs) -> difference_type
+            {
+                return difference_type{lhs.m_cur - rhs.m_cur};
+            }
+
             [[nodiscard]] friend bool operator==(const SingleViewIterator<T>& lhs, const SingleViewIterator<T>& rhs)
             {
                 return lhs.m_cur == rhs.m_cur;

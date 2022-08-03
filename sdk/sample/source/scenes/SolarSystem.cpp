@@ -72,11 +72,9 @@ namespace
 
 namespace nc::sample
 {
-    void SolarSystem::Load(NcEngine* engine)
+    void SolarSystem::Load(Registry* registry, ModuleProvider modules)
     {
-        auto* registry = engine->Registry();
-
-        m_sceneHelper.Setup(engine, true, false, Widget);
+        m_sceneHelper.Setup(registry, modules, true, false, Widget);
 
         // Load all scene textures
         const std::vector<std::string> texturePaths
@@ -212,7 +210,7 @@ namespace nc::sample
 
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         auto sun = registry->Add<Entity>({ .scale = Vector3::Splat(2.0f), .tag = "Sun" });
         registry->Add<MeshRenderer>(sun, "planet.nca", sunMaterial, TechniqueType::PhongAndUi);
