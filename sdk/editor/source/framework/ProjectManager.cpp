@@ -15,8 +15,6 @@
 #include <cctype>
 #include <fstream>
 
-#include <iostream>
-
 namespace
 {
     auto ReadScenes(const std::filesystem::path& scenesPath) -> std::vector<std::string>
