@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scene/SceneModule.h"
-#include "task/Job.h"
+#include "module/Job.h"
 
 #include <functional>
 
