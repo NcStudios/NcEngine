@@ -26,8 +26,14 @@ TextureStorage::~TextureStorage() noexcept
     m_textureBuffers.resize(0);
 }
 
-void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferData)
+void TextureStorage::UpdateBuffer(const TextureBufferData& textureBufferData)
 {
+    m_textureBuffers.clear();
+    m_textureBuffers.resize(0);
+
+    m_textureImageInfos.clear();
+    m_textureImageInfos.resize(0);
+
     for (auto i = 0; i < textureBufferData.data.size(); ++i)
     {
         auto& textureData = textureBufferData.data[i];
@@ -43,47 +49,5 @@ void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferDat
     }
 
     graphics::ShaderResourceService<graphics::TextureImageInfo>::Get()->Update(m_textureImageInfos);
-}
-
-void TextureStorage::UnloadTextureBuffer(const TextureBufferData& textureBufferData)
-{
-    const auto& id = textureBufferData.ids[0];
-    auto pos = std::ranges::find_if(m_textureBuffers, [&id](const auto& texture)
-    {
-        return texture.uid == id;
-    });
-
-    assert(pos != m_textureBuffers.end());
-    m_textureBuffers.erase(pos);
-    graphics::ShaderResourceService<graphics::TextureImageInfo>::Get()->Update(m_textureImageInfos);
-}
-
-void TextureStorage::UnloadAllTextureBuffer()
-{
-    /** No need to write an empty buffer to the GPU. **/
-    m_textureBuffers.clear();
-    m_textureImageInfos.clear();
-}
-
-void TextureStorage::UpdateBuffer(const TextureBufferData& textureBufferData)
-{
-    switch (textureBufferData.updateAction)
-    {
-        case UpdateAction::Load:
-        {
-            LoadTextureBuffer(textureBufferData);
-            break;
-        }
-        case UpdateAction::Unload:
-        {
-            UnloadTextureBuffer(textureBufferData);
-            break;
-        }
-        case UpdateAction::UnloadAll:
-        {
-            UnloadAllTextureBuffer();
-            break;
-        }
-    }
 }
 }

@@ -12,7 +12,7 @@
 
 namespace
 {
-auto ReadTexture(const std::string& path) -> nc::TextureData
+auto ReadTexture(const std::string& path) -> std::unique_ptr<nc::TextureData, nc::TextureData::Deleter> 
 {
     int32_t width, height, numChannels;
     stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
@@ -20,14 +20,16 @@ auto ReadTexture(const std::string& path) -> nc::TextureData
     if(!pixels)
         throw nc::NcError("Failed to load texture file: " + path);
 
-    return nc::TextureData{.pixels = pixels, .width = width, .height = height};
+    return std::unique_ptr<nc::TextureData, nc::TextureData::Deleter>(pixels, width, height, nc::TextureData::Deleter());
 }
 }
 
 namespace nc
 {
 TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures)
-    : m_accessors{},
+    : m_ids{},
+      m_textureData{},
+      m_accessors{},
       m_assetDirectory{texturesAssetDirectory},
       m_maxTextureCount{maxTextures},
       m_onUpdate{}
@@ -36,6 +38,8 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
 
 TextureAssetManager::~TextureAssetManager() noexcept
 {
+    m_ids.clear();
+    m_textureData.clear();
     m_accessors.clear();
 }
 
@@ -49,12 +53,14 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     if(IsLoaded(path))
         return false;
 
-    m_accessors.emplace(path, index);
+    m_ids.push_back(path);
+    m_accessors.emplace_back(index);
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
+    m_textureData.push_back(std::move(ReadTexture(fullPath)));
 
     m_onUpdate.Emit
     (
-        TextureBufferData(UpdateAction::Load, std::vector<std::string>{fullPath}, std::vector<TextureData>{ReadTexture(fullPath)})
+        TextureBufferData(m_ids, m_textureData)
     );
     return true;
 }
@@ -66,36 +72,48 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
     if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
         throw NcError("Cannot exceed max texture count.");
 
-    auto ids = std::vector<std::string>{};
-    auto data = std::vector<TextureData>{};
-
     for (const auto& path : paths)
     {
         if(IsLoaded(path))
+        {
             continue;
-
-        m_accessors.emplace(path, nextTextureIndex++);
+        }
+        
+        m_accessors.emplace_back(nextTextureIndex++);
+        m_ids.push_back(path);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        data.push_back(std::move(ReadTexture(fullPath)));
-        ids.push_back(fullPath);
+        m_textureData.push_back(std::move(ReadTexture(fullPath)));
     }
 
     m_onUpdate.Emit
     (
-        TextureBufferData(UpdateAction::Load, ids, data)
+        TextureBufferData(m_ids, m_textureData)
     );
     return true;
 }
 
 bool TextureAssetManager::Unload(const std::string& path)
 {
-    auto removed = static_cast<bool>(m_accessors.erase(path));
-    if(!removed)
-        return false;
+    auto pos = std::ranges::find_if(m_ids, [&path](const auto& id)
+    {
+        return id == path;
+    });
+
+    assert(pos != m_ids.end());
+    auto index = std::distance(m_ids.begin(), pos);
+    m_accessors.erase(m_accessors.begin()+index);
+
+    for(auto& textureView : m_accessors)
+    {
+        if(textureView.index > index) --textureView.index;
+    }
+
+    m_textureData.erase(m_textureData.begin()+index);
+    m_ids.erase(m_ids.begin()+index);
 
     m_onUpdate.Emit
     (
-        TextureBufferData(UpdateAction::Unload, std::vector<std::string>{path}, std::vector<TextureData>{})
+        TextureBufferData(m_ids, m_textureData)
     );
     return true;
 }
@@ -103,24 +121,32 @@ bool TextureAssetManager::Unload(const std::string& path)
 void TextureAssetManager::UnloadAll()
 {
     m_accessors.clear();
-    m_onUpdate.Emit
-    (
-        TextureBufferData(UpdateAction::UnloadAll, std::vector<std::string>{}, std::vector<TextureData>{})
-    );
+    m_textureData.clear();
+    m_ids.clear();
+    /** No need to send signal to GPU - no need to write an empty buffer to the GPU. **/
 }
 
 auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
 {
-    const auto it = m_accessors.find(path);
-    if(it == m_accessors.cend())
-        throw NcError("Asset is not loaded: " + path);
-    
-    return it->second;
+    auto pos = std::ranges::find_if(m_ids, [&path](const auto& id)
+    {
+        return id == path;
+    });
+
+    if(pos == m_ids.end()) throw NcError("Asset is not loaded: " + path);
+
+    auto index = std::distance(m_ids.begin(), pos);
+    return m_accessors[index];
 }
 
 bool TextureAssetManager::IsLoaded(const std::string& path) const
 {
-    return m_accessors.contains(path);
+    auto pos = std::ranges::find_if(m_ids, [&path](const auto& id)
+    {
+        return id == path;
+    });
+
+    return (pos != m_ids.end());
 }
 
 auto TextureAssetManager::OnUpdate() -> Signal<const TextureBufferData&>*

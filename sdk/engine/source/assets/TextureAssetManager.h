@@ -4,7 +4,7 @@
 #include "assets/AssetService.h"
 #include "utility/Signal.h"
 
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 namespace nc
@@ -24,7 +24,9 @@ namespace nc
             auto OnUpdate() -> Signal<const TextureBufferData&>*;
 
         private:
-            std::unordered_map<std::string, TextureView> m_accessors;
+            std::vector<std::string> m_ids;
+            std::vector<std::unique_ptr<TextureData, TextureData::Deleter>> m_textureData;
+            std::vector<TextureView> m_accessors;
             std::string m_assetDirectory;
             uint32_t m_maxTextureCount;
             Signal<const TextureBufferData&> m_onUpdate;

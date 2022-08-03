@@ -6,6 +6,7 @@
 #include "imgui/imgui.h"
 #include "NcEngine.h"
 #include "shared/FreeComponents.h"
+#include "shared/Prefabs.h"
 
 #include <string>
 
@@ -28,6 +29,7 @@ namespace nc::sample
         auto* registry = engine->Registry();
         
         m_sceneHelper.Setup(engine, true, false, Widget);
+        prefab::InitializeResources();
 
         const std::vector<std::string> texturePaths
         {

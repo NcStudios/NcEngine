@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/Vertex.h"
+#include "stb/stb_image.h"
 
 #include <span>
 #include <string>
@@ -8,13 +9,6 @@
 
 namespace nc
 {
-enum class UpdateAction : uint8_t
-{
-    Load,
-    Unload,
-    UnloadAll
-};
-
 struct MeshBufferData
 {
     std::span<const Vertex> vertices;
@@ -23,6 +17,16 @@ struct MeshBufferData
 
 struct TextureData
 {
+    TextureData(unsigned char* pixels_, int32_t width_, int32_t height_);
+
+    struct Deleter
+    {
+        void operator()(unsigned char* pixels)
+        {
+            stbi_image_free(pixels);
+        }
+    };
+
     unsigned char* pixels;
     int32_t width;
     int32_t height;
@@ -30,10 +34,20 @@ struct TextureData
 
 struct TextureBufferData
 {
-    TextureBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::vector<TextureData> data_);
-
     std::vector<std::string> ids;
     std::vector<TextureData> data;
-    UpdateAction updateAction;
 };
+
+
+// #include <memory>
+// #include <cstdlib>
+
+// int main()
+// {
+//     int* ptr = (int*)malloc(sizeof(int));
+//     auto myPtr = std::unique_ptr<int, decltype(&::free)>(ptr, free);
+
+//     return 0;
+
+// }
 }

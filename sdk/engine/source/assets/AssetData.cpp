@@ -5,13 +5,10 @@
 
 namespace nc
 {
-    TextureBufferData::TextureBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::vector<TextureData> data_)
-        : updateAction{updateAction_},
-          ids{ids_},
-          data{data_}
+    TextureData::TextureData(unsigned char* pixels_, int32_t width_, int32_t height_)
+        : pixels{pixels_},
+          width{width_},
+          height{height_}
     {
-        if (updateAction == UpdateAction::Load && (data.empty() || ids.empty())) throw NcError("Cannot load texture. Texture data is empty.");
-        if (updateAction == UpdateAction::Unload && ids.empty()) throw NcError("Cannot unload texture. No ID was provided.");
     }
-
 }
