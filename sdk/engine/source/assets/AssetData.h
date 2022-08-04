@@ -3,9 +3,11 @@
 #include "graphics/Vertex.h"
 #include "stb/stb_image.h"
 
+#include <memory>
 #include <span>
 #include <string>
 #include <vector>
+#include <cstdlib>
 
 namespace nc
 {
@@ -18,16 +20,9 @@ struct MeshBufferData
 struct TextureData
 {
     TextureData(unsigned char* pixels_, int32_t width_, int32_t height_);
+    TextureData(TextureData&&) = default;
 
-    struct Deleter
-    {
-        void operator()(unsigned char* pixels)
-        {
-            stbi_image_free(pixels);
-        }
-    };
-
-    unsigned char* pixels;
+    std::unique_ptr<unsigned char, decltype(&::free)> pixels;
     int32_t width;
     int32_t height;
 };

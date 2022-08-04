@@ -12,7 +12,7 @@
 
 namespace
 {
-auto ReadTexture(const std::string& path) -> std::unique_ptr<nc::TextureData, nc::TextureData::Deleter> 
+auto ReadTexture(const std::string& path) -> nc::TextureData
 {
     int32_t width, height, numChannels;
     stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
@@ -20,7 +20,7 @@ auto ReadTexture(const std::string& path) -> std::unique_ptr<nc::TextureData, nc
     if(!pixels)
         throw nc::NcError("Failed to load texture file: " + path);
 
-    return std::unique_ptr<nc::TextureData, nc::TextureData::Deleter>(pixels, width, height, nc::TextureData::Deleter());
+    return nc::TextureData{pixels, width, height};
 }
 }
 

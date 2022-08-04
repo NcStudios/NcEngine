@@ -25,7 +25,7 @@ namespace nc
 
         private:
             std::vector<std::string> m_ids;
-            std::vector<std::unique_ptr<TextureData, TextureData::Deleter>> m_textureData;
+            std::vector<TextureData> m_textureData;
             std::vector<TextureView> m_accessors;
             std::string m_assetDirectory;
             uint32_t m_maxTextureCount;
