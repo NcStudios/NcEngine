@@ -7,54 +7,48 @@ namespace nc::config
 {
     struct ProjectSettings
     {
-        std::string projectName;
-        std::string logFilePath;
-        std::string audioClipsPath;
-        std::string concaveCollidersPath;
-        std::string hullCollidersPath;
-        std::string meshesPath;
-        std::string shadersPath;
-        std::string texturesPath;
-        std::string cubeMapsPath;
+        std::string projectName = "Project Name";
+        std::string logFilePath = "Diagnostics.log";
+        std::string audioClipsPath = "nc/resources/audio_clips/";
+        std::string concaveCollidersPath = "nc/resources/concave_colliders/";
+        std::string hullCollidersPath = "nc/resources/hull_colliders/";
+        std::string meshesPath = "nc/resources/meshes/";
+        std::string shadersPath = "nc/resources/shaders/";
+        std::string texturesPath = "nc/resources/textures/";
+        std::string cubeMapsPath = ""; // todo
     };
 
     struct MemorySettings
     {
-        unsigned maxDynamicColliders;
-        unsigned maxStaticColliders;
-        unsigned maxNetworkDispatchers;
-        unsigned maxParticleEmitters;
-        unsigned maxRenderers;
-        unsigned maxTransforms;
-        unsigned maxPointLights;
-        unsigned maxTextures;
+        unsigned maxDynamicColliders = 25000;
+        unsigned maxStaticColliders = 25000;
+        unsigned maxNetworkDispatchers = 0;
+        unsigned maxParticleEmitters = 1000;
+        unsigned maxRenderers = 100000;
+        unsigned maxTransforms = 100000;
+        unsigned maxPointLights = 10;
+        unsigned maxTextures = 1000;
     };
 
     struct GraphicsSettings
     {
-        bool useNativeResolution;
-        bool launchInFullscreen;
-        unsigned screenWidth;
-        unsigned screenHeight;
-        unsigned targetFPS;
-        float nearClip;
-        float farClip;
-        float frameUpdateInterval;
-        bool useShadows;
-        unsigned antialiasing;
-        bool useValidationLayers;
+        bool useNativeResolution = false;
+        bool launchInFullscreen = false;
+        unsigned screenWidth = 1000;
+        unsigned screenHeight = 1000;
+        unsigned targetFPS = 60;
+        float nearClip = 0.5f;
+        float farClip = 400.0f;
+        bool useShadows = true;
+        unsigned antialiasing = 8u;
+        bool useValidationLayers = false;
     };
 
     struct PhysicsSettings
     {
-        float fixedUpdateInterval;
-        float worldspaceExtent;
+        float fixedUpdateInterval = 0.01667f;
+        float worldspaceExtent = 1000.0f;
     };
-
-    [[nodiscard]] auto GetProjectSettings() -> const ProjectSettings&;
-    [[nodiscard]] auto GetMemorySettings() -> const MemorySettings&;
-    [[nodiscard]] auto GetGraphicsSettings() -> const GraphicsSettings&;
-    [[nodiscard]] auto GetPhysicsSettings() -> const PhysicsSettings&;
 
     struct Config
     {
@@ -64,7 +58,11 @@ namespace nc::config
         nc::config::PhysicsSettings physicsSettings;
     };
 
-    auto Load(std::string_view path) -> Config;
+    [[nodiscard]] auto GetProjectSettings() -> const ProjectSettings&;
+    [[nodiscard]] auto GetMemorySettings() -> const MemorySettings&;
+    [[nodiscard]] auto GetGraphicsSettings() -> const GraphicsSettings&;
+    [[nodiscard]] auto GetPhysicsSettings() -> const PhysicsSettings&;
+    [[nodiscard]] auto Load(std::string_view iniPath) -> Config;
+    [[nodiscard]] bool Validate(const Config& config);
     void Save(std::string_view path, const Config& config);
-    bool Validate(const Config& config);
 }

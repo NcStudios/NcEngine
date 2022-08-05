@@ -1,7 +1,6 @@
 #include "config/Config.h"
 #include "config/ConfigReader.h"
 #include "ConfigInternal.h"
-#include "debug/Utils.h"
 
 #include <fstream>
 #include <limits>
@@ -10,8 +9,7 @@
 
 namespace
 {
-    std::unique_ptr<nc::config::Config> g_config = nullptr;
-    std::string g_configPath = "";
+    auto g_config = nc::config::Config{};
 
     using namespace std::literals;
 
@@ -110,7 +108,6 @@ namespace
         else if (key == TargetFpsKey)
         {
             out->graphicsSettings.targetFPS = std::stoi(value);
-            out->graphicsSettings.frameUpdateInterval = 1.0f / static_cast<float>(out->graphicsSettings.targetFPS);
         }
         else if (key == NearClipKey)
             out->graphicsSettings.nearClip = std::stof(value);
@@ -132,26 +129,22 @@ namespace nc::config
     /* Api function implementation */
     const ProjectSettings& GetProjectSettings()
     {
-        NC_ASSERT(g_config, "No config loaded");
-        return g_config->projectSettings;
+        return g_config.projectSettings;
     }
 
     const MemorySettings& GetMemorySettings()
     {
-        NC_ASSERT(g_config, "No config loaded");
-        return g_config->memorySettings;
+        return g_config.memorySettings;
     }
 
     const GraphicsSettings& GetGraphicsSettings()
     {
-        NC_ASSERT(g_config, "No config loaded");
-        return g_config->graphicsSettings;
+        return g_config.graphicsSettings;
     }
 
     const PhysicsSettings& GetPhysicsSettings()
     {
-        NC_ASSERT(g_config, "No config loaded");
-        return g_config->physicsSettings;
+        return g_config.physicsSettings;
     }
 
     auto Load(std::string_view path) -> Config
@@ -221,19 +214,14 @@ namespace nc::config
                  (config.graphicsSettings.screenWidth != 0) &&
                  (config.graphicsSettings.screenHeight != 0) &&
                  (config.graphicsSettings.targetFPS != 0) &&
-                 (config.graphicsSettings.frameUpdateInterval > 0.0f) &&
                  (config.graphicsSettings.nearClip > 0.0f) &&
                  (config.graphicsSettings.farClip > 0.0f) &&
                  (config.graphicsSettings.antialiasing > 0)};
     }
 
     /* Internal function implementation */
-    void LoadInternal(std::string_view configPath)
+    void SetConfig(const Config& config)
     {
-        g_configPath = configPath;
-        g_config = std::make_unique<Config>();
-        nc::config::Read(configPath, MapKeyValue, g_config.get());
-        if(!Validate(*g_config))
-            throw NcError("Config validation failed");
+        g_config = config;
     }
-} // end namespace nc::config 
+} // end namespace nc::config
