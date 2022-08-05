@@ -1,11 +1,13 @@
 #include "JareTestScene.h"
+#include "shared/FreeComponents.h"
+
+#include "NcEngine.h"
 #include "asset/Assets.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
+#include "graphics/GraphicsModule.h"
 #include "imgui/imgui.h"
-#include "NcEngine.h"
-#include "shared/FreeComponents.h"
 
 #include <string>
 
@@ -23,10 +25,13 @@ namespace
 
 namespace nc::sample
 {
+    JareTestScene::JareTestScene(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(::Widget);
+    }
+
     void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     {
-        m_sceneHelper.Setup(registry, modules, true, false, Widget);
-
         const std::vector<std::string> texturePaths
         {
             "floor/BaseColor.png",
@@ -134,10 +139,5 @@ namespace nc::sample
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
         modules.Get<GraphicsModule>()->SetCamera(camera);
-    }
-
-    void JareTestScene::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 }

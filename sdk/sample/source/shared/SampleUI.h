@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene/SceneModule.h"
+#include "NcEngine.h"
 #include "ui/IUI.h"
 #include "Window.h"
 #include "shared/GameLog.h"
@@ -12,15 +12,16 @@ namespace nc::sample
     class SampleUI : public ui::IUI, public window::IOnResizeReceiver
     {
         public:
-            SampleUI(SceneModule* sceneModule, GameLog* gameLog = nullptr, std::function<void()> widgetCallback = nullptr);
+            SampleUI(NcEngine* engine);
             ~SampleUI() noexcept;
             void Draw() override;
             bool IsHovered() override;
             void OnResize(Vector2 dimensions) override;
+            void SetWidgetCallback(std::function<void()> func);
 
         private:
-            SceneModule* m_sceneModule;
-            GameLog* m_gameLog;
+            NcEngine* m_engine;
+            GameLog m_gameLog;
             std::function<void()> m_widgetCallback;
             Vector2 m_windowDimensions;
 
@@ -29,4 +30,6 @@ namespace nc::sample
             void DrawLog();
             void DrawSceneList();
     };
+
+    auto InitializeSampleUI(NcEngine* engine) -> std::unique_ptr<SampleUI>;
 } //end namespace project::ui

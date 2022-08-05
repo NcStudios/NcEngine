@@ -10,7 +10,6 @@
 #include "EditorScene.h"
 
 #include "graphics/GraphicsModule.h"
-#include "scene/SceneModule.h"
 
 #include <cctype>
 #include <fstream>
@@ -242,8 +241,7 @@ namespace nc::editor
             {
                 m_nextSceneIndex = i;
                 Output::Log("Loading scene: " + name);
-                auto* sceneModule = m_engine->GetModuleRegistry()->Get<SceneModule>();
-                sceneModule->ChangeScene(std::make_unique<EditorScene>(this));
+                m_engine->QueueSceneChange(std::make_unique<EditorScene>(this));
                 return;
             }
         }

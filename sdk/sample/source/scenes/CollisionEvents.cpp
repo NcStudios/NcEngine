@@ -1,10 +1,12 @@
 #include "CollisionEvents.h"
+#include "shared/Prefabs.h"
+#include "shared/FreeComponents.h"
+
 #include "NcEngine.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
+#include "graphics/GraphicsModule.h"
 #include "imgui/imgui.h"
-#include "shared/Prefabs.h"
-#include "shared/FreeComponents.h"
 
 #include <functional>
 
@@ -43,11 +45,13 @@ namespace
 
 namespace nc::sample
 {
+    CollisionEvents::CollisionEvents(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(::Widget);
+    }
+
     void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
     {
-        // Setup
-        m_sceneHelper.Setup(registry, modules, true, false, Widget);
-
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.1f, 4.2f, -5.8f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
@@ -96,10 +100,5 @@ namespace nc::sample
 
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
         modules.Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
-    }
-
-    void CollisionEvents::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 } //end namespace project

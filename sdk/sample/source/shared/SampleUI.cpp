@@ -1,10 +1,5 @@
 #include "SampleUI.h"
-#include "Window.h"
-#include "Input.h"
-#include "config/Version.h"
 #include "UIStyle.h"
-#include "imgui/imgui.h"
-
 #include "scenes/Worms.h"
 #include "scenes/ClickEvents.h"
 #include "scenes/SpawnTest.h"
@@ -14,6 +9,12 @@
 #include "scenes/RenderingBenchmark.h"
 #include "scenes/JareTestScene.h"
 #include "scenes/SolarSystem.h"
+
+#include "Window.h"
+#include "Input.h"
+#include "config/Version.h"
+#include "graphics/GraphicsModule.h"
+#include "imgui/imgui.h"
 
 namespace
 {
@@ -31,11 +32,19 @@ namespace
 
 namespace nc::sample
 {
-    SampleUI::SampleUI(SceneModule* sceneModule, GameLog* gameLog, std::function<void()> widgetCallback)
-        : m_sceneModule{ sceneModule },
-        m_gameLog{ gameLog },
-        m_widgetCallback{ widgetCallback },
-        m_windowDimensions{ window::GetDimensions() }
+    auto InitializeSampleUI(NcEngine* engine) -> std::unique_ptr<SampleUI>
+    {
+        auto ui = std::make_unique<SampleUI>(engine);
+        auto* graphics = engine->GetModuleRegistry()->Get<GraphicsModule>();
+        graphics->SetUi(ui.get());
+        return ui;
+    }
+
+    SampleUI::SampleUI(NcEngine* engine)
+        : m_engine{engine},
+          m_gameLog{},
+          m_widgetCallback{},
+          m_windowDimensions{window::GetDimensions()}
     {
         SetImGuiStyle();
         window::RegisterOnResizeReceiver(this);
@@ -53,14 +62,10 @@ namespace nc::sample
 
         if (ImGui::Begin("SampleUI", nullptr, WindowFlags))
         {
-            auto columnCount = m_gameLog ? 3 : 2;
-            ImGui::Columns(columnCount);
+            ImGui::Columns(3);
             m_widgetCallback ? m_widgetCallback() : DrawDefaultWidget();
-            if (m_gameLog)
-            {
-                ImGui::NextColumn();
-                DrawLog();
-            }
+            ImGui::NextColumn();
+            DrawLog();
             ImGui::NextColumn();
             DrawSceneList();
         } ImGui::End();
@@ -88,18 +93,18 @@ namespace nc::sample
         ImGui::Text("Log");
         ImGui::SameLine(columnWidth - 50);
         if (ImGui::Button("Clear", { 42, 18 }))
-            m_gameLog->Clear();
+            m_gameLog.Clear();
         ImGui::SameLine(columnWidth - 130);
         ImGui::SetNextItemWidth(70);
         if (ImGui::InputInt("##logcount", &ItemCount, 1, 5))
         {
             ItemCount = nc::math::Clamp(ItemCount, 0, 1000); //for sanity, since Dear ImGui doesn't deal with unsigned
-            m_gameLog->SetItemCount(ItemCount);
+            m_gameLog.SetItemCount(ItemCount);
         }
 
         if (ImGui::BeginChild("LogPanel", { 0,0 }, true))
         {
-            for (auto& item : m_gameLog->GetItems())
+            for (auto& item : m_gameLog.GetItems())
                 ImGui::Text(item.c_str());
         } ImGui::EndChild();
     }
@@ -111,31 +116,31 @@ namespace nc::sample
         {
             auto buttonSize = ImVec2{ ImGui::GetWindowWidth() - 20, 18 };
             if (ImGui::Button("Worms", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<Worms>());
+                m_engine->QueueSceneChange(std::make_unique<Worms>(this));
 
             if (ImGui::Button("Click Events", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<ClickEvents>());
+                m_engine->QueueSceneChange(std::make_unique<ClickEvents>(this));
 
             if (ImGui::Button("Collision Events", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<CollisionEvents>());
+                m_engine->QueueSceneChange(std::make_unique<CollisionEvents>(this));
 
             if (ImGui::Button("Joints Test", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<JointsTest>());
+                m_engine->QueueSceneChange(std::make_unique<JointsTest>(this));
 
             if (ImGui::Button("Spawn Test", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<SpawnTest>());
+                m_engine->QueueSceneChange(std::make_unique<SpawnTest>(this));
 
             if (ImGui::Button("Rendering Benchmark", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<RenderingBenchmark>());
+                m_engine->QueueSceneChange(std::make_unique<RenderingBenchmark>(this));
 
             if (ImGui::Button("Collision Benchmark", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<CollisionBenchmark>());
+                m_engine->QueueSceneChange(std::make_unique<CollisionBenchmark>(this));
 
             if (ImGui::Button("Jare Test", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<JareTestScene>());
+                m_engine->QueueSceneChange(std::make_unique<JareTestScene>(this));
 
             if (ImGui::Button("Solar System", buttonSize))
-                m_sceneModule->ChangeScene(std::make_unique<SolarSystem>());
+                m_engine->QueueSceneChange(std::make_unique<SolarSystem>(this));
         } ImGui::EndChild();
     }
 
@@ -147,5 +152,10 @@ namespace nc::sample
     void SampleUI::OnResize(nc::Vector2 dimensions)
     {
         m_windowDimensions = dimensions;
+    }
+
+    void SampleUI::SetWidgetCallback(std::function<void()> func)
+    {
+        m_widgetCallback = std::move(func);
     }
 } //end namespace project::ui
