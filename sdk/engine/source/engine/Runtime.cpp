@@ -60,7 +60,7 @@ namespace nc
                                         m_assets.CreateGpuAccessorSignals(),
                                         std::bind_front(&Runtime::Clear, this),
                                         &m_dt, flags)},
-          m_executor{&m_registry, m_modules.GetAllModules()},
+          m_executor{},
           m_dt{0.0f},
           m_isRunning{false}
     {
@@ -75,6 +75,7 @@ namespace nc
     void Runtime::Start(std::unique_ptr<Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
+        RebuildTaskGraph();
         auto* sceneModule = m_modules.Get<SceneModule>();
         sceneModule->ChangeScene(std::move(initialScene));
         sceneModule->DoSceneSwap(&m_registry, ModuleProvider{&m_modules});
@@ -111,6 +112,12 @@ namespace nc
     auto Runtime::GetModuleRegistry() noexcept -> ModuleRegistry*
     {
         return &m_modules;
+    }
+
+    void Runtime::RebuildTaskGraph()
+    {
+        V_LOG("Runtime::RebuildTaskGraph()");
+        m_executor.BuildTaskGraph(&m_registry, m_modules.GetAllModules());
     }
 
     void Runtime::Clear()

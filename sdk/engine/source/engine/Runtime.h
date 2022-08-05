@@ -20,6 +20,7 @@ namespace nc
             void Shutdown() noexcept override;
             auto GetRegistry() noexcept -> Registry* override;
             auto GetModuleRegistry() noexcept -> ModuleRegistry* override;
+            void RebuildTaskGraph() override;
 
         private:
             window::WindowImpl m_window;
