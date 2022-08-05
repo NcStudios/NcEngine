@@ -1,17 +1,23 @@
 #include "JointsTest.h"
-#include "NcEngine.h"
-#include "ecs/component/SceneNavigationCamera.h"
-#include "ecs/InvokeFreeComponent.h"
-#include "physics/PhysicsModule.h"
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
 
+#include "NcEngine.h"
+#include "ecs/component/SceneNavigationCamera.h"
+#include "ecs/InvokeFreeComponent.h"
+#include "graphics/GraphicsModule.h"
+#include "physics/PhysicsModule.h"
+
 namespace nc::sample
 {
+    JointsTest::JointsTest(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(nullptr);
+    }
+
     void JointsTest::Load(Registry* registry, ModuleProvider modules)
     {
-        m_sceneHelper.Setup(registry, modules, false, false, nullptr);
         auto* physics = modules.Get<PhysicsModule>();
 
         // Camera
@@ -157,10 +163,5 @@ namespace nc::sample
             physics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
             physics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
         }
-    }
-
-    void JointsTest::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 }

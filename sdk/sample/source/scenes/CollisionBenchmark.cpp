@@ -1,8 +1,10 @@
 #include "CollisionBenchmark.h"
-#include "NcEngine.h"
-#include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
+
+#include "NcEngine.h"
+#include "graphics/GraphicsModule.h"
+#include "imgui/imgui.h"
 
 namespace
 {
@@ -64,11 +66,13 @@ namespace
 
 namespace nc::sample
 {
+    CollisionBenchmark::CollisionBenchmark(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(::Widget);
+    }
+
     void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)
     {
-        // Setup
-        m_sceneHelper.Setup(registry, modules, false, true, Widget);
-
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
         modules.Get<GraphicsModule>()->SetCamera(camera);
 
@@ -125,6 +129,5 @@ namespace nc::sample
         SpawnStaticCallback = nullptr;
         DestroyStaticCallback = nullptr;
         GetFPSCallback = nullptr;
-        m_sceneHelper.TearDown();
     }
 }

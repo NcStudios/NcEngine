@@ -13,6 +13,6 @@ namespace nc
         public:
             virtual ~Scene() = default;
             virtual void Load(Registry* registry, ModuleProvider modules) = 0;
-            virtual void Unload() = 0;
+            virtual void Unload() {}
     };
 }

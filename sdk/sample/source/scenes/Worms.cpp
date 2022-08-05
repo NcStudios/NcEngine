@@ -1,16 +1,22 @@
 #include "Worms.h"
-#include "NcEngine.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
+
+#include "NcEngine.h"
+#include "graphics/GraphicsModule.h"
 
 #include <random>
 
 namespace nc::sample
 {
+    Worms::Worms(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(nullptr);
+    }
+
     void Worms::Load(Registry* registry, ModuleProvider modules)
     {
         // Setup
-        m_sceneHelper.Setup(registry, modules, false, false);
         prefab::InitializeResources();
 
         // Camera
@@ -49,10 +55,5 @@ namespace nc::sample
         auto spawner = registry->Add<Spawner>(spawnerHandle, modules.Get<Random>(), prefab::Resource::Worm, spawnBehavior);
         registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
         spawner->Spawn(registry, 40u);
-    }
-
-    void Worms::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 } // end namespace project
