@@ -13,14 +13,14 @@ struct ProjectSettings
 
 struct AssetSettings
 {
-    /** @todo These path defaults are no good. */
-    std::string audioClipsPath = "nc/resources/audio_clips/";
-    std::string concaveCollidersPath = "nc/resources/concave_colliders/";
-    std::string hullCollidersPath = "nc/resources/hull_colliders/";
-    std::string meshesPath = "nc/resources/meshes/";
-    std::string shadersPath = "nc/resources/shaders/";
-    std::string texturesPath = "nc/resources/textures/";
-    std::string cubeMapsPath = "";
+    /** @todo These defaults don't make much sense since we don't know the install path. */
+    std::string audioClipsPath = "resources/assets/audio_clips/";
+    std::string concaveCollidersPath = "resources/assets/concave_colliders/";
+    std::string hullCollidersPath = "resources/assets/hull_colliders/";
+    std::string meshesPath = "resources/assets/meshes/";
+    std::string shadersPath = "resources/assets/shaders/";
+    std::string texturesPath = "resources/assets/textures/";
+    std::string cubeMapsPath = "resources/assets/cube_maps";
 };
 
 struct MemorySettings
@@ -57,11 +57,11 @@ struct PhysicsSettings
 
 struct Config
 {
-    nc::config::ProjectSettings projectSettings;
-    nc::config::AssetSettings assetSettings;
-    nc::config::MemorySettings memorySettings;
-    nc::config::GraphicsSettings graphicsSettings;
-    nc::config::PhysicsSettings physicsSettings;
+    ProjectSettings projectSettings;
+    AssetSettings assetSettings;
+    MemorySettings memorySettings;
+    GraphicsSettings graphicsSettings;
+    PhysicsSettings physicsSettings;
 };
 
 [[nodiscard]] auto GetProjectSettings() -> const ProjectSettings&;
