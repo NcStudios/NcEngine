@@ -16,6 +16,8 @@ namespace
     // project
     constexpr auto ProjectNameKey = "project_name"sv;
     constexpr auto LogFilePathKey = "log_file_path"sv;
+
+    // asset
     constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
     constexpr auto ConcaveCollidersKey = "concave_colliders_path"sv;
     constexpr auto HullCollidersKey = "hull_colliders_path"sv;
@@ -57,20 +59,22 @@ namespace
             out->projectSettings.projectName = value;
         else if (key == LogFilePathKey)
             out->projectSettings.logFilePath = value;
+
+        // asset
         else if (key == AudioClipsPathKey)
-            out->projectSettings.audioClipsPath = value;
+            out->assetSettings.audioClipsPath = value;
         else if (key == ConcaveCollidersKey)
-            out->projectSettings.concaveCollidersPath = value;
+            out->assetSettings.concaveCollidersPath = value;
         else if (key == HullCollidersKey)
-            out->projectSettings.hullCollidersPath = value;
+            out->assetSettings.hullCollidersPath = value;
         else if (key == MeshesPathKey)
-            out->projectSettings.meshesPath = value;
+            out->assetSettings.meshesPath = value;
         else if (key == ShadersPathKey)
-            out->projectSettings.shadersPath = value;
+            out->assetSettings.shadersPath = value;
         else if (key == TexturesPathKey)
-            out->projectSettings.texturesPath = value;
+            out->assetSettings.texturesPath = value;
         else if (key == CubeMapsPathKey)
-            out->projectSettings.cubeMapsPath = value;
+            out->assetSettings.cubeMapsPath = value;
 
         // memory
         else if(key == MaxDynamicCollidersKey)
@@ -106,9 +110,7 @@ namespace
         else if (key == ScreenHeightKey)
             out->graphicsSettings.screenHeight = std::stoi(value);
         else if (key == TargetFpsKey)
-        {
             out->graphicsSettings.targetFPS = std::stoi(value);
-        }
         else if (key == NearClipKey)
             out->graphicsSettings.nearClip = std::stof(value);
         else if (key == FarClipKey)
@@ -132,6 +134,11 @@ namespace nc::config
         return g_config.projectSettings;
     }
 
+    const AssetSettings& GetAssetSettings()
+    {
+        return g_config.assetSettings;
+    }
+
     const MemorySettings& GetMemorySettings()
     {
         return g_config.memorySettings;
@@ -150,7 +157,7 @@ namespace nc::config
     auto Load(std::string_view path) -> Config
     {
         Config out;
-        Read(path, MapKeyValue, &out);
+        internal::Read(path, MapKeyValue, &out);
 
         if(!Validate(out))
             throw NcError("Config validation failed");
@@ -167,13 +174,14 @@ namespace nc::config
         file << "[project]\n"
              << ProjectNameKey           << '=' << config.projectSettings.projectName          << '\n'
              << LogFilePathKey           << '=' << config.projectSettings.logFilePath          << '\n'
-             << AudioClipsPathKey        << '=' << config.projectSettings.audioClipsPath       << '\n'
-             << ConcaveCollidersKey      << '=' << config.projectSettings.concaveCollidersPath << '\n'
-             << HullCollidersKey         << '=' << config.projectSettings.hullCollidersPath    << '\n'
-             << MeshesPathKey            << '=' << config.projectSettings.meshesPath           << '\n'
-             << ShadersPathKey           << '=' << config.projectSettings.shadersPath          << '\n'
-             << TexturesPathKey          << '=' << config.projectSettings.texturesPath         << '\n'
-             << CubeMapsPathKey          << '=' << config.projectSettings.cubeMapsPath         << '\n'
+             << "[asset]\n"
+             << AudioClipsPathKey        << '=' << config.assetSettings.audioClipsPath       << '\n'
+             << ConcaveCollidersKey      << '=' << config.assetSettings.concaveCollidersPath << '\n'
+             << HullCollidersKey         << '=' << config.assetSettings.hullCollidersPath    << '\n'
+             << MeshesPathKey            << '=' << config.assetSettings.meshesPath           << '\n'
+             << ShadersPathKey           << '=' << config.assetSettings.shadersPath          << '\n'
+             << TexturesPathKey          << '=' << config.assetSettings.texturesPath         << '\n'
+             << CubeMapsPathKey          << '=' << config.assetSettings.cubeMapsPath         << '\n'
              << "[memory]\n"
              << MaxDynamicCollidersKey   << '=' << config.memorySettings.maxDynamicColliders   << '\n'
              << MaxStaticCollidersKey    << '=' << config.memorySettings.maxStaticColliders    << '\n'
@@ -202,13 +210,13 @@ namespace nc::config
     {
         return { (config.projectSettings.projectName != "") &&
                  (config.projectSettings.logFilePath != "") &&
-                 (config.projectSettings.audioClipsPath != "") &&
-                 (config.projectSettings.concaveCollidersPath != "") &&
-                 (config.projectSettings.hullCollidersPath != "") &&
-                 (config.projectSettings.meshesPath != "") &&
-                 (config.projectSettings.shadersPath != "") &&
-                 (config.projectSettings.texturesPath != "") &&
-                 (config.projectSettings.cubeMapsPath != "") &&
+                 (config.assetSettings.audioClipsPath != "") &&
+                 (config.assetSettings.concaveCollidersPath != "") &&
+                 (config.assetSettings.hullCollidersPath != "") &&
+                 (config.assetSettings.meshesPath != "") &&
+                 (config.assetSettings.shadersPath != "") &&
+                 (config.assetSettings.texturesPath != "") &&
+                 (config.assetSettings.cubeMapsPath != "") &&
                  (config.physicsSettings.fixedUpdateInterval > 0.0f) &&
                  (config.physicsSettings.worldspaceExtent > 0.0f) &&
                  (config.graphicsSettings.screenWidth != 0) &&

@@ -55,7 +55,7 @@ namespace nc
         : m_window{std::bind_front(&Runtime::Stop, this)},
           m_registry{nc::config::GetMemorySettings().maxTransforms},
           m_time{},
-          m_assets{nc::config::GetProjectSettings(), nc::config::GetMemorySettings()},
+          m_assets{nc::config::GetAssetSettings(), nc::config::GetMemorySettings()},
           m_modules{BuildModuleRegistry(&m_registry, &m_window, &m_time,
                                         m_assets.CreateGpuAccessorSignals(),
                                         std::bind_front(&Runtime::Clear, this),

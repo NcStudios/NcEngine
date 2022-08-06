@@ -102,15 +102,15 @@ namespace nc::editor
 
     auto AssetManifest::GetAssetImportPath(const std::filesystem::path& assetPath, AssetType type) const -> std::filesystem::path
     {
-        const auto& projectSettings = m_getConfig().projectSettings;
+        const auto& assetSettings = m_getConfig().assetSettings;
         switch(type)
         {
-            case AssetType::AudioClip:       return projectSettings.audioClipsPath / assetPath.filename();
-            case AssetType::ConcaveCollider: return projectSettings.concaveCollidersPath / assetPath.filename();
-            case AssetType::HullCollider:    return projectSettings.hullCollidersPath / assetPath.filename();
-            case AssetType::Mesh:            return projectSettings.meshesPath / assetPath.filename();
-            case AssetType::Texture:         return projectSettings.texturesPath / assetPath.filename();
-            case AssetType::Skybox:          return projectSettings.cubeMapsPath / assetPath.filename();
+            case AssetType::AudioClip:       return assetSettings.audioClipsPath / assetPath.filename();
+            case AssetType::ConcaveCollider: return assetSettings.concaveCollidersPath / assetPath.filename();
+            case AssetType::HullCollider:    return assetSettings.hullCollidersPath / assetPath.filename();
+            case AssetType::Mesh:            return assetSettings.meshesPath / assetPath.filename();
+            case AssetType::Texture:         return assetSettings.texturesPath / assetPath.filename();
+            case AssetType::Skybox:          return assetSettings.cubeMapsPath / assetPath.filename();
             default: throw NcError("Unknown AssetType");
         }
     }
@@ -162,8 +162,8 @@ namespace nc::editor
         ReplaceSkyboxFile(previousPaths.leftPath, newPaths.leftPath);
 
         const auto subdirectory = std::filesystem::path(name);
-        const auto& projectSettings = m_getConfig().projectSettings;
-        const auto& ncaImportPath = projectSettings.cubeMapsPath/subdirectory/(name + ".nca");
+        const auto& assetSettings = m_getConfig().assetSettings;
+        const auto& ncaImportPath = assetSettings.cubeMapsPath/subdirectory/(name + ".nca");
         UnloadCubeMapAsset(ncaImportPath.string());
 
         auto asset = CreateAsset(ncaImportPath, AssetType::Skybox);
@@ -205,14 +205,14 @@ namespace nc::editor
         }
 
         const auto subdirectory = std::filesystem::path(name);
-        const auto& projectSettings = m_getConfig().projectSettings;
+        const auto& assetSettings = m_getConfig().assetSettings;
 
-        if (!std::filesystem::exists(projectSettings.cubeMapsPath/subdirectory))
+        if (!std::filesystem::exists(assetSettings.cubeMapsPath/subdirectory))
         {
-            std::filesystem::create_directory(projectSettings.cubeMapsPath/subdirectory);
+            std::filesystem::create_directory(assetSettings.cubeMapsPath/subdirectory);
         }
 
-        const auto importSubdirectory = std::filesystem::path{projectSettings.cubeMapsPath} / subdirectory;
+        const auto importSubdirectory = std::filesystem::path{assetSettings.cubeMapsPath} / subdirectory;
         auto copyFacePath = [&importSubdirectory](const std::string& inPath, const std::string& outName)
         {
             const auto sourcePath = std::filesystem::path{inPath};
@@ -237,13 +237,13 @@ namespace nc::editor
             Output::LogError("Error copying face path.", e.what());
         }
 
-        const auto& ncaImportPath = projectSettings.cubeMapsPath/subdirectory/(name + ".nca");
+        const auto& ncaImportPath = assetSettings.cubeMapsPath/subdirectory/(name + ".nca");
         if (std::filesystem::exists(ncaImportPath)) std::filesystem::remove(ncaImportPath);
         auto asset = CreateAsset(ncaImportPath, AssetType::Skybox);
 
-        if(!BuildNcaFile(projectSettings.cubeMapsPath/subdirectory, AssetType::Skybox))
+        if(!BuildNcaFile(assetSettings.cubeMapsPath/subdirectory, AssetType::Skybox))
         {
-            Output::LogError("Failure building nca file from:", (projectSettings.cubeMapsPath/subdirectory).string());
+            Output::LogError("Failure building nca file from:", (assetSettings.cubeMapsPath/subdirectory).string());
             return false;
         }
 
@@ -260,8 +260,8 @@ namespace nc::editor
 
      bool AssetManifest::AddSkybox(const std::string& name)
     {
-        const auto& projectSettings = m_getConfig().projectSettings;
-        const auto& ncaImportPath = std::filesystem::path(projectSettings.cubeMapsPath)/name;
+        const auto& assetSettings = m_getConfig().assetSettings;
+        const auto& ncaImportPath = std::filesystem::path(assetSettings.cubeMapsPath)/name;
 
         auto asset = CreateAsset(ncaImportPath, AssetType::Skybox);
         auto& collection = GetCollection(AssetType::Skybox);

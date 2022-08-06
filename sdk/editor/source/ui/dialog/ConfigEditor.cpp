@@ -57,13 +57,13 @@ namespace nc::editor
 
         m_nameBuffer = m_config.projectSettings.projectName;
         m_logPathBuffer = m_config.projectSettings.logFilePath;
-        m_audioClipPathBuffer = m_config.projectSettings.audioClipsPath;
-        m_concaveColliderPathBuffer = m_config.projectSettings.concaveCollidersPath;
-        m_hullColliderPathBuffer = m_config.projectSettings.hullCollidersPath;
-        m_meshPathBuffer = m_config.projectSettings.meshesPath;
-        m_shaderPathBuffer = m_config.projectSettings.shadersPath;
-        m_texturePathBuffer = m_config.projectSettings.texturesPath;
-        m_cubeMapPathBuffer = m_config.projectSettings.cubeMapsPath;
+        m_audioClipPathBuffer = m_config.assetSettings.audioClipsPath;
+        m_concaveColliderPathBuffer = m_config.assetSettings.concaveCollidersPath;
+        m_hullColliderPathBuffer = m_config.assetSettings.hullCollidersPath;
+        m_meshPathBuffer = m_config.assetSettings.meshesPath;
+        m_shaderPathBuffer = m_config.assetSettings.shadersPath;
+        m_texturePathBuffer = m_config.assetSettings.texturesPath;
+        m_cubeMapPathBuffer = m_config.assetSettings.cubeMapsPath;
     }
 
     void ConfigEditor::Draw()
@@ -86,6 +86,13 @@ namespace nc::editor
                 IMGUI_SCOPE(Indent);
                 InputText("Project Name", &m_nameBuffer);
                 InputText("Log Path", &m_nameBuffer);
+            }
+
+            ImGui::Separator();
+            ImGui::Text("Asset");
+            {
+                IMGUI_SCOPE_ID(ItemWidth, 2, 275.0f);
+                IMGUI_SCOPE(Indent);
                 InputText("AudioClip Path", &m_audioClipPathBuffer);
                 InputText("ConcaveCollider Path", &m_concaveColliderPathBuffer);
                 InputText("HullCollider Path", &m_hullColliderPathBuffer);
@@ -139,13 +146,13 @@ namespace nc::editor
             {
                 m_config.projectSettings.projectName = m_nameBuffer;
                 m_config.projectSettings.logFilePath = m_logPathBuffer;
-                m_config.projectSettings.audioClipsPath = m_audioClipPathBuffer;
-                m_config.projectSettings.concaveCollidersPath = m_concaveColliderPathBuffer;
-                m_config.projectSettings.hullCollidersPath = m_hullColliderPathBuffer;
-                m_config.projectSettings.meshesPath = m_meshPathBuffer;
-                m_config.projectSettings.shadersPath = m_shaderPathBuffer;
-                m_config.projectSettings.texturesPath = m_texturePathBuffer;
-                m_config.projectSettings.cubeMapsPath = m_cubeMapPathBuffer;
+                m_config.assetSettings.audioClipsPath = m_audioClipPathBuffer;
+                m_config.assetSettings.concaveCollidersPath = m_concaveColliderPathBuffer;
+                m_config.assetSettings.hullCollidersPath = m_hullColliderPathBuffer;
+                m_config.assetSettings.meshesPath = m_meshPathBuffer;
+                m_config.assetSettings.shadersPath = m_shaderPathBuffer;
+                m_config.assetSettings.texturesPath = m_texturePathBuffer;
+                m_config.assetSettings.cubeMapsPath = m_cubeMapPathBuffer;
 
                 if(config::Validate(m_config))
                 {
