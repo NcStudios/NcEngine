@@ -13,7 +13,7 @@ namespace nc
         struct ShadowMap;
         class Graphics;
         struct ObjectData;
-        struct TextureImageInfo;
+        struct TextureBuffer;
         class CubeMap;
     }
 }
@@ -30,7 +30,7 @@ namespace nc::graphics
     template<class T>
     concept ShaderResource = std::same_as<T, ObjectData> ||
                              std::same_as<T, PointLightInfo> ||
-                             std::same_as<T, TextureImageInfo> ||
+                             std::same_as<T, TextureBuffer> ||
                              std::same_as<T, ShadowMap> || 
                              std::same_as<T, EnvironmentData> ||
                              std::same_as<T, CubeMap>;

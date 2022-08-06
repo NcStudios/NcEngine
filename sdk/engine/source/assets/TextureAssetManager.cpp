@@ -34,6 +34,9 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
       m_maxTextureCount{maxTextures},
       m_onUpdate{}
 {
+    m_ids.reserve(m_maxTextureCount);
+    m_textureData.reserve(m_maxTextureCount);
+    m_accessors.reserve(m_maxTextureCount);
 }
 
 TextureAssetManager::~TextureAssetManager() noexcept
@@ -56,7 +59,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     m_ids.push_back(path);
     m_accessors.emplace_back(index);
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    m_textureData.push_back(std::move(ReadTexture(fullPath)));
+    m_textureData.push_back(ReadTexture(fullPath));
 
     m_onUpdate.Emit
     (
@@ -82,7 +85,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
         m_accessors.emplace_back(nextTextureIndex++);
         m_ids.push_back(path);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        m_textureData.push_back(std::move(ReadTexture(fullPath)));
+        m_textureData.push_back(ReadTexture(fullPath));
     }
 
     m_onUpdate.Emit
@@ -94,12 +97,16 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
 bool TextureAssetManager::Unload(const std::string& path)
 {
-    auto pos = std::ranges::find_if(m_ids, [&path](const auto& id)
-    {
-        return id == path;
-    });
+    auto pos = std::ranges::find(m_ids, path);
 
     assert(pos != m_ids.end());
+
+    // temp
+    if (pos == m_ids.end())
+    {
+        throw NcError("FAARRKK!");
+    }
+
     auto index = std::distance(m_ids.begin(), pos);
     m_accessors.erase(m_accessors.begin()+index);
 
@@ -121,17 +128,14 @@ bool TextureAssetManager::Unload(const std::string& path)
 void TextureAssetManager::UnloadAll()
 {
     m_accessors.clear();
-    m_textureData.clear();
+    // m_textureData.clear();
     m_ids.clear();
     /** No need to send signal to GPU - no need to write an empty buffer to the GPU. **/
 }
 
 auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
 {
-    auto pos = std::ranges::find_if(m_ids, [&path](const auto& id)
-    {
-        return id == path;
-    });
+    auto pos = std::ranges::find(m_ids, path);
 
     if(pos == m_ids.end()) throw NcError("Asset is not loaded: " + path);
 
@@ -141,10 +145,7 @@ auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
 
 bool TextureAssetManager::IsLoaded(const std::string& path) const
 {
-    auto pos = std::ranges::find_if(m_ids, [&path](const auto& id)
-    {
-        return id == path;
-    });
+    auto pos = std::ranges::find(m_ids, path);
 
     return (pos != m_ids.end());
 }
