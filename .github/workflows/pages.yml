@@ -28,7 +28,7 @@ jobs:
         uses: mattnotmitt/doxygen-action@v1.9.4
         with:
           working-directory: 'docs/'
-          doxyfile-path: './Doxygen'
+          doxyfile-path: './Doxyfile'
 
       - name: Setup Pages
         uses: actions/configure-pages@v1
