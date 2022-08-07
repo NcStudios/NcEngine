@@ -1,13 +1,15 @@
 #include "SpawnTest.h"
-#include "NcEngine.h"
-#include "ecs/component/PhysicsBody.h"
-#include "ecs/component/SceneNavigationCamera.h"
-#include "math/Random.h"
-#include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
 #include "shared/Spawner/Spawner.h"
+
+#include "NcEngine.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/SceneNavigationCamera.h"
+#include "imgui/imgui.h"
+#include "math/Random.h"
+#include "graphics/GraphicsModule.h"
 
 namespace
 {
@@ -37,24 +39,26 @@ namespace
 
             if(ImGui::Button("Destroy", {100, 20}))
                 DestroyFunc(DestroyCount);
-            
+
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Text("-middle mouse button + drag to pan");
             ImGui::Text("-right mouse button + drag to look");
             ImGui::Text("-mouse wheel to zoom");
         }
-        
+
         ImGui::EndChild();
     }
 }
 
 namespace nc::sample
 {
+    SpawnTest::SpawnTest(SampleUI* ui)
+    {
+        ui->SetWidgetCallback(::Widget);
+    }
+
     void SpawnTest::Load(Registry* registry, ModuleProvider modules)
     {
-        // Setup
-        m_sceneHelper.Setup(registry, modules, true, false, Widget);
-
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
         auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
@@ -113,10 +117,5 @@ namespace nc::sample
         registry->Add<FrameLogic>(spawner, InvokeFreeComponent<Spawner>{});
         SpawnFunc = std::bind(&Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
         DestroyFunc = std::bind(&Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);
-    }
-
-    void SpawnTest::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 } // end namespace project

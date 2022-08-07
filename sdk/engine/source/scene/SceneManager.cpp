@@ -1,31 +1,26 @@
-#include "SceneModuleImpl.h"
+#include "SceneManager.h"
 #include "module/ModuleProvider.h"
 
 namespace nc::scene
 {
-    auto BuildSceneModule(std::function<void()> clearOnSceneChangeCallback) -> std::unique_ptr<SceneModule>
-    {
-        return std::make_unique<SceneModuleImpl>(std::move(clearOnSceneChangeCallback));
-    }
-
-    SceneModuleImpl::SceneModuleImpl(std::function<void()> clearOnSceneChangeCallback)
+    SceneManager::SceneManager(std::function<void()> clearOnSceneChangeCallback)
         : m_activeScene{nullptr},
           m_swapScene{nullptr},
           m_clearCallback{std::move(clearOnSceneChangeCallback)}
     {
     }
 
-    bool SceneModuleImpl::IsSceneChangeScheduled() const
+    bool SceneManager::IsSceneChangeQueued() const noexcept
     {
         return static_cast<bool>(m_swapScene);
     }
 
-    void SceneModuleImpl::ChangeScene(std::unique_ptr<Scene> swapScene)
+    void SceneManager::QueueSceneChange(std::unique_ptr<Scene> swapScene) noexcept
     {
         m_swapScene = std::move(swapScene);
     }
 
-    void SceneModuleImpl::DoSceneSwap(Registry* registry, ModuleProvider modules)
+    void SceneManager::DoSceneChange(Registry* registry, ModuleProvider modules)
     {
         if(!m_swapScene)
         {
