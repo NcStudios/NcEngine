@@ -19,17 +19,16 @@ struct MeshBufferData
 
 struct TextureData
 {
-    TextureData(unsigned char* pixels_, int32_t width_, int32_t height_);
+    TextureData(unsigned char* pixels_, int32_t width_, int32_t height_, std::string id_);
 
     std::unique_ptr<unsigned char[], decltype(&::free)> pixels;
-    // unsigned char* pixels;
     int32_t width;
     int32_t height;
+    std::string id;
 };
 
 struct TextureBufferData
 {
-    std::span<const std::string> ids;
     std::span<const TextureData> data;
 };
 }

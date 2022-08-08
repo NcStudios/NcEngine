@@ -24,7 +24,6 @@ namespace nc
             auto OnUpdate() -> Signal<const TextureBufferData&>*;
 
         private:
-            std::vector<std::string> m_ids;
             std::vector<TextureData> m_textureData;
             std::vector<TextureView> m_accessors;
             std::string m_assetDirectory;

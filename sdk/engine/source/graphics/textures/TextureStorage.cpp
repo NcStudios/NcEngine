@@ -29,16 +29,15 @@ void TextureStorage::UpdateBuffer(const TextureBufferData& textureBufferData)
 {
     m_textureBuffers.clear();
 
-    for (auto i = 0; i < textureBufferData.ids.size(); ++i)
+    for (auto i = 0; i < textureBufferData.data.size(); ++i)
     {
         auto& textureData = textureBufferData.data[i];
-        auto& textureId = textureBufferData.ids[i];
 
         TextureBuffer textureBuffer
         {
             .image = graphics::ImmutableImage(m_base, m_allocator, textureData.pixels.get(), textureData.width, textureData.height),
             .imageInfo = graphics::CreateDescriptorImageInfo(m_sampler.get(), textureBuffer.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
-            .uid = textureId
+            .uid = textureData.id
         };
 
         m_textureBuffers.push_back(std::move(textureBuffer));
