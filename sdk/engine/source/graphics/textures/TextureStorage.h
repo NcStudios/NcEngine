@@ -17,6 +17,10 @@ class TextureStorage
         void UpdateBuffer(const TextureBufferData& textureBufferData);
 
     private:
+        void LoadTextureBuffer(const TextureBufferData& textureBufferData);
+        void UnloadTextureBuffer(const TextureBufferData& textureBufferData);
+        void UnloadAllTextureBuffer();
+
         Base* m_base;
         GpuAllocator* m_allocator;
         std::vector<TextureBuffer> m_textureBuffers;

@@ -10,4 +10,14 @@ namespace nc
           id{id_}
     {
     }
+
+    TextureBufferData::TextureBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureData> data_)
+        : updateAction{updateAction_},
+          ids{ids_},
+          data{data_}
+    {
+        if (updateAction == UpdateAction::Load && (data.empty() || ids.empty())) throw NcError("Cannot load texture. Texture data is empty.");
+        if (updateAction == UpdateAction::Unload && ids.empty()) throw NcError("Cannot unload texture. No ID was provided.");
+    }
+
 }

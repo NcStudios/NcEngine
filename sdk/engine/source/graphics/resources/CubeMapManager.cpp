@@ -45,9 +45,9 @@ namespace nc::graphics
 
         m_cubeMapSampler = graphics::CreateTextureSampler(m_graphics->GetBasePtr()->GetDevice(), vk::SamplerAddressMode::eRepeat);
 
-        m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxCubeMapsCount, CreateDescriptorImageInfo(m_cubeMapSampler.get(), data.at(0).GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal));
+        m_imageInfos = std::vector<vk::DescriptorImageInfo>();
 
-        std::transform(data.cbegin(), data.cend(), m_imageInfos.begin(), [sampler = m_cubeMapSampler.get()](const auto& cubeMap)
+        std::transform(data.cbegin(), data.cend(), std::back_inserter(m_imageInfos), [sampler = m_cubeMapSampler.get()](const auto& cubeMap)
         {
             return CreateDescriptorImageInfo(sampler, cubeMap.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
         });
@@ -56,7 +56,7 @@ namespace nc::graphics
         (
             BindFrequency::per_frame,
             m_imageInfos,
-            m_maxCubeMapsCount,
+            static_cast<uint32_t>(data.size()),
             vk::DescriptorType::eCombinedImageSampler,
             m_bindingSlot
         );

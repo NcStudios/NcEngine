@@ -1,6 +1,6 @@
 #include "NcEngine.h"
 #include "debug/Utils.h"
-#include "scenes/JareTestScene.h"
+#include "scenes/Worms.h"
 
 #include <iostream>
 
@@ -11,7 +11,7 @@ int main()
     try
     {
         engine = nc::InitializeNcEngine("config.ini");
-        engine->Start(std::make_unique<nc::sample::JareTestScene>());
+        engine->Start(std::make_unique<nc::sample::Worms>());
     }
     catch(std::exception& e)
     {

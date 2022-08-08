@@ -11,6 +11,13 @@
 
 namespace nc
 {
+enum class UpdateAction : uint8_t
+{
+    Load,
+    Unload,
+    UnloadAll
+};
+
 struct MeshBufferData
 {
     std::span<const Vertex> vertices;
@@ -29,6 +36,10 @@ struct TextureData
 
 struct TextureBufferData
 {
+    TextureBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureData> data_);
+
+    std::vector<std::string> ids;
     std::span<const TextureData> data;
+    UpdateAction updateAction;
 };
 }

@@ -39,13 +39,9 @@ namespace nc::graphics
     {
         assert(data.size() < m_maxTexturesCount && !data.empty());
 
-        // if (!m_texturesInitialized)
-        // {
-        m_imageInfos = std::vector<vk::DescriptorImageInfo>(m_maxTexturesCount, data.at(0).imageInfo);
-        //     m_texturesInitialized = true;
-        // }
-
-        std::transform(data.cbegin(), data.cend(), m_imageInfos.begin(), [](const auto& texture)
+        m_imageInfos = std::vector<vk::DescriptorImageInfo>();
+        
+        std::transform(data.cbegin(), data.cend(), std::back_inserter(m_imageInfos), [](const auto& texture)
         {
             return texture.imageInfo;
         });
@@ -54,7 +50,7 @@ namespace nc::graphics
         (
             BindFrequency::per_frame,
             m_imageInfos,
-            m_maxTexturesCount,
+            static_cast<uint32_t>(data.size()),
             vk::DescriptorType::eCombinedImageSampler,
             m_bindingSlot
         );

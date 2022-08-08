@@ -59,17 +59,21 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
 
     m_onUpdate.Emit
     (
-        TextureBufferData(m_textureData)
+        TextureBufferData(UpdateAction::Load, std::vector<std::string>{path}, std::span<const TextureData>{&m_textureData.back(), 1})
     );
     return true;
 }
 
 bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal)
 {
+    const auto newItemsIndex = m_accessors.size();
     const auto newTextureCount = static_cast<uint32_t>(paths.size());
-    auto nextTextureIndex = static_cast<uint32_t>(m_accessors.size());
+    auto nextTextureIndex = static_cast<uint32_t>(newItemsIndex);
     if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
         throw NcError("Cannot exceed max texture count.");
+
+    auto idsToLoad = std::vector<std::string>{};
+    idsToLoad.reserve(paths.size());
 
     for (const auto& path : paths)
     {
@@ -81,12 +85,16 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
         m_accessors.emplace_back(nextTextureIndex++);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
         m_textureData.push_back(ReadTexture(fullPath, path));
+        idsToLoad.push_back(path);
     }
 
-    m_onUpdate.Emit
-    (
-        TextureBufferData(m_textureData)
-    );
+    if (!idsToLoad.empty())
+    {
+        m_onUpdate.Emit
+        (
+            TextureBufferData(UpdateAction::Load, std::move(idsToLoad), std::span<const TextureData>{m_textureData.begin() + newItemsIndex, m_textureData.end()})
+        );
+    }
     return true;
 }
 
@@ -98,12 +106,6 @@ bool TextureAssetManager::Unload(const std::string& path)
     });
 
     assert(pos != m_textureData.end());
-
-    // temp
-    if (pos == m_textureData.end())
-    {
-        throw NcError("FAARRKK!");
-    }
 
     auto index = std::distance(m_textureData.begin(), pos);
     m_accessors.erase(m_accessors.begin()+index);
@@ -117,7 +119,7 @@ bool TextureAssetManager::Unload(const std::string& path)
 
     m_onUpdate.Emit
     (
-        TextureBufferData(m_textureData)
+        TextureBufferData(UpdateAction::Unload, std::vector<std::string>{path}, std::span<const TextureData>{})
     );
     return true;
 }
