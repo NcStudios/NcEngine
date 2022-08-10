@@ -1,6 +1,6 @@
 # Creating a Project
 
-NcEngine projects can be developed purely through source code or with the help of NcEditor. This document will walk through creating and building a simple project using the former method. The project will consist of a single scene with a camera, point light, and a cube that can be moved with the WASD keys. If anything is unclear, the [overview](Overview.md) or [engine components](EngineComponents.md) pages might offer clarification.
+NcEngine projects can be developed purely through source code or with the help of NcEditor. This document will walk through creating and building a simple project using the former method. The project will consist of a single scene with a camera, point light, and a cube that can be moved with the WASD keys.
 
 ## Setting up the project directory
 -----------------------------------
