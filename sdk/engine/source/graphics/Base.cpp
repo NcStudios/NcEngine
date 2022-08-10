@@ -7,6 +7,7 @@
 #include "vk/Swapchain.h"
 
 #include <algorithm>
+#include <array>
 #include <set>
 #include <string>
 
@@ -319,14 +320,14 @@ namespace nc::graphics
             uniqueQueueFamilies.emplace(indices.GetQueueFamilyIndex(QueueFamilyType::PresentFamily));
         }
 
-        float queuePriority = 1.0f;
+        std::array<float, 1> queuePriority = {1.0f};
         std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-        std::transform(uniqueQueueFamilies.cbegin(), uniqueQueueFamilies.cend(), std::back_inserter(queueCreateInfos), [queuePriority](auto queueFamily) 
+        std::transform(uniqueQueueFamilies.cbegin(), uniqueQueueFamilies.cend(), std::back_inserter(queueCreateInfos), [&queuePriority](auto queueFamily) 
         {
             vk::DeviceQueueCreateInfo queueCreateInfo{};
             queueCreateInfo.setQueueFamilyIndex(queueFamily);
             queueCreateInfo.setQueueCount(1);
-            queueCreateInfo.setPQueuePriorities(&queuePriority);
+            queueCreateInfo.setPQueuePriorities(queuePriority.data());
             return queueCreateInfo;
         });
 
