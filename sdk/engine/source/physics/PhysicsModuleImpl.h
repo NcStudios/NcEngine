@@ -5,7 +5,7 @@
 #include "PhysicsPipeline.h"
 #include "collision/broad_phase/SingleAxisPrune.h"
 #include "proxy/PerFrameProxyCache.h"
-#include "task/Job.h"
+#include "module/Job.h"
 #include "time/Time.h"
 
 namespace nc::physics

@@ -50,6 +50,12 @@ namespace nc
              * @brief Get a pointer to the module registry.
              */
             virtual auto GetModuleRegistry() noexcept -> ModuleRegistry* = 0;
+
+            /**
+             * @brief Compose a new task graph from all registered modules. This is required
+             *        only if module registration is changed after calling Start().
+             */
+            virtual void RebuildTaskGraph() = 0;
     };
 
     /** @brief Flags controlling initialization of engine modules. */
