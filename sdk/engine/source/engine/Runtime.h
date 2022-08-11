@@ -5,7 +5,7 @@
 #include "math/Random.h"
 #include "NcEngine.h"
 #include "scene/SceneManager.h"
-#include "task/Executor.h"
+#include "Executor.h"
 #include "time/Time.h"
 #include "window/WindowImpl.h"
 
@@ -23,6 +23,7 @@ namespace nc
             bool IsSceneChangeQueued() const noexcept override;
             auto GetRegistry() noexcept -> Registry* override;
             auto GetModuleRegistry() noexcept -> ModuleRegistry* override;
+            void RebuildTaskGraph() override;
 
         private:
             window::WindowImpl m_window;

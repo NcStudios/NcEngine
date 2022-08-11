@@ -41,17 +41,16 @@ namespace
 
 namespace nc
 {
-    Executor::Executor(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
+    Executor::Executor()
         : m_taskExecutor{8u},
           m_executionGraph{},
           m_jobRegistry{}
     {
-        Build(registry, modules);
     }
 
-    void Executor::Build(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
+    void Executor::BuildTaskGraph(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
     {
-        V_LOG("Executor::Build()");
+        V_LOG("Executor::BuildTaskGraph()");
 
         for(auto& module : modules)
         {

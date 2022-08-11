@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "math/Random.h"
-#include "task/Job.h"
+#include "module/Job.h"
 
 using namespace nc;
 
