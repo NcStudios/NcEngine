@@ -40,13 +40,13 @@ namespace
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window, float* dt) -> std::unique_ptr<GraphicsModule>
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window) -> std::unique_ptr<GraphicsModule>
     {
-        if(enableModule) return std::make_unique<GraphicsModuleImpl>(reg, gpuAccessorSignals, window, dt);
+        if(enableModule) return std::make_unique<GraphicsModuleImpl>(reg, gpuAccessorSignals, window);
         return std::make_unique<GraphicsModuleStub>(reg);
     }
 
-    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window, float* dt)
+    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window)
         : m_registry{ registry },
           m_camera{},
           m_graphics{ &m_camera,
@@ -57,7 +57,7 @@ namespace nc::graphics
           m_ui{ window->GetHWND() },
           m_environment{},
           m_pointLightSystem{ registry },
-          m_particleEmitterSystem{ registry, dt, std::bind_front(&GraphicsModule::GetCamera, this) }
+          m_particleEmitterSystem{ registry, std::bind_front(&GraphicsModule::GetCamera, this) }
     {
         m_graphics.InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));

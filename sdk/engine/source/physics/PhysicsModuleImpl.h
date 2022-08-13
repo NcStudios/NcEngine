@@ -6,11 +6,10 @@
 #include "collision/broad_phase/SingleAxisPrune.h"
 #include "proxy/PerFrameProxyCache.h"
 #include "module/Job.h"
-#include "time/Time.h"
 
 namespace nc::physics
 {
-    auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<PhysicsModule>;
+    auto BuildPhysicsModule(bool enableModule, Registry* registry) -> std::unique_ptr<PhysicsModule>;
 
     class PhysicsModuleImpl final : public PhysicsModule
     {
@@ -24,7 +23,7 @@ namespace nc::physics
         };
 
         public:
-            PhysicsModuleImpl(Registry* registry, time::Time* time);
+            PhysicsModuleImpl(Registry* registry);
 
             void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
             void RemoveJoint(Entity entityA, Entity entityB) override;
@@ -38,7 +37,7 @@ namespace nc::physics
         private:
             PhysicsPipeline<PipelineDescription> m_pipeline;
             ClickableSystem m_clickableSystem;
-            time::Time* m_time;
+            float m_accumulatedTime;
             unsigned m_currentIterations;
             tf::Taskflow m_tasks;
     };
