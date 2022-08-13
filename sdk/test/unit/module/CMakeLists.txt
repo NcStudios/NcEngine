@@ -1,7 +1,7 @@
 ### Random Tests ###
 add_executable(ModuleRegistry_tests
     ModuleRegistry_tests.cpp
-    ${PROJECT_SOURCE_DIR}/sdk/engine/source/engine/Module.cpp
+    ${PROJECT_SOURCE_DIR}/sdk/engine/source/module/Module.cpp
 )
 
 target_include_directories(ModuleRegistry_tests

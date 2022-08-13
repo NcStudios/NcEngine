@@ -1,9 +1,9 @@
 #pragma once
 
+#include "NcEngine.h"
 #include "assets/AssetManagers.h"
 #include "ecs/Registry.h"
 #include "math/Random.h"
-#include "NcEngine.h"
 #include "scene/SceneManager.h"
 #include "task/Executor.h"
 #include "time/Time.h"
@@ -11,11 +11,11 @@
 
 namespace nc
 {
-    class Runtime : public NcEngine
+    class NcEngineImpl : public NcEngine
     {
         public:
-            Runtime(EngineInitFlags flags);
-            ~Runtime() noexcept;
+            NcEngineImpl(EngineInitFlags flags);
+            ~NcEngineImpl() noexcept;
             void Start(std::unique_ptr<Scene> initialScene) override;
             void Stop() noexcept override;
             void Shutdown() noexcept override;

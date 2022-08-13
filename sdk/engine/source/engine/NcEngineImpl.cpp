@@ -1,4 +1,4 @@
-#include "Runtime.h"
+#include "NcEngineImpl.h"
 #include "audio/AudioModuleImpl.h"
 #include "config/ConfigInternal.h"
 #include "ecs/LogicModule.h"
@@ -16,7 +16,7 @@ namespace
                              const nc::GpuAccessorSignals& gpuAccessorSignals,
                              float* dt, nc::EngineInitFlags flags) -> nc::ModuleRegistry
     {
-        V_LOG("BuildModules()");
+        V_LOG("BuildModuleRegistry()");
         const bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoGraphics);
         const bool enablePhysicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoPhysics);
         const bool enableAudioModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
@@ -43,12 +43,12 @@ namespace nc
     {
         config::LoadInternal(configPath);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
-        V_LOG("Initializing Runtime");
-        return std::make_unique<Runtime>(flags);
+        V_LOG("InitializingNcEngine()");
+        return std::make_unique<NcEngineImpl>(flags);
     }
 
-    Runtime::Runtime(EngineInitFlags flags)
-        : m_window{std::bind_front(&Runtime::Stop, this)},
+    NcEngineImpl::NcEngineImpl(EngineInitFlags flags)
+        : m_window{std::bind_front(&NcEngineImpl::Stop, this)},
           m_registry{nc::config::GetMemorySettings().maxTransforms},
           m_time{},
           m_assets{nc::config::GetProjectSettings(), nc::config::GetMemorySettings()},
@@ -56,21 +56,21 @@ namespace nc
                                         m_assets.CreateGpuAccessorSignals(),
                                         &m_dt, flags)},
           m_executor{},
-          m_sceneManager{std::bind_front(&Runtime::Clear, this)},
+          m_sceneManager{std::bind_front(&NcEngineImpl::Clear, this)},
           m_dt{0.0f},
           m_isRunning{false}
     {
-        V_LOG("Runtime Initialized");
+        V_LOG("NcEngine Initialized");
     }
 
-    Runtime::~Runtime() noexcept
+    NcEngineImpl::~NcEngineImpl() noexcept
     {
         Shutdown();
     }
 
-    void Runtime::Start(std::unique_ptr<Scene> initialScene)
+    void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
     {
-        V_LOG("Runtime::Start()");
+        V_LOG("NcEngine::Start()");
         RebuildTaskGraph();
         m_sceneManager.QueueSceneChange(std::move(initialScene));
         m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
@@ -78,15 +78,15 @@ namespace nc
         Run();
     }
 
-    void Runtime::Stop() noexcept
+    void NcEngineImpl::Stop() noexcept
     {
-        V_LOG("Runtime::Stop()");
+        V_LOG("NcEngine::Stop()");
         m_isRunning = false;
     }
 
-    void Runtime::Shutdown() noexcept
+    void NcEngineImpl::Shutdown() noexcept
     {
-        V_LOG("Runtime::Shutdown()");
+        V_LOG("NcEngine::Shutdown()");
         try
         {
             Clear();
@@ -99,44 +99,44 @@ namespace nc
         debug::internal::CloseLog();
     }
 
-    bool Runtime::IsSceneChangeQueued() const noexcept
+    bool NcEngineImpl::IsSceneChangeQueued() const noexcept
     {
         return m_sceneManager.IsSceneChangeQueued();
     }
 
-    void Runtime::QueueSceneChange(std::unique_ptr<Scene> scene)
+    void NcEngineImpl::QueueSceneChange(std::unique_ptr<Scene> scene)
     {
         m_sceneManager.QueueSceneChange(std::move(scene));
     }
 
-    auto Runtime::GetRegistry() noexcept -> Registry*
+    auto NcEngineImpl::GetRegistry() noexcept -> Registry*
     {
         return &m_registry;
     }
 
-    auto Runtime::GetModuleRegistry() noexcept -> ModuleRegistry*
+    auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
     {
         return &m_modules;
     }
 
-    void Runtime::RebuildTaskGraph()
+    void NcEngineImpl::RebuildTaskGraph()
     {
-        V_LOG("Runtime::RebuildTaskGraph()");
+        V_LOG("NcEngine::RebuildTaskGraph()");
         m_executor.BuildTaskGraph(&m_registry, m_modules.GetAllModules());
     }
 
-    void Runtime::Clear()
+    void NcEngineImpl::Clear()
     {
-        V_LOG("Runtime::Clear()");
+        V_LOG("NcEngine::Clear()");
         m_modules.Clear();
         m_registry.Clear();
         m_time.ResetFrameDeltaTime();
         m_time.ResetAccumulatedTime();
     }
 
-    void Runtime::Run()
+    void NcEngineImpl::Run()
     {
-        V_LOG("Runtime::Run()");
+        V_LOG("NcEngine::Run()");
         while(m_isRunning)
         {
             OPTICK_FRAME("Main Thread");
