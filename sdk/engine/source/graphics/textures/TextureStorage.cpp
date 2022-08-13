@@ -85,4 +85,4 @@ void TextureStorage::UnloadAllTextureBuffer()
     /** No need to write an empty buffer to the GPU. **/
     m_textureBuffers.clear();
 }
-}
+} // namespace nc::graphics

@@ -31,4 +31,4 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         std::string m_assetDirectory;
         Signal<const MeshBufferData&> m_onUpdate;
 };
-}
+} // namespace nc

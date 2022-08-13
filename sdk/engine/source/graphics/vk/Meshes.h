@@ -19,4 +19,4 @@ struct IndexBuffer
     std::span<const uint32_t> indices;
     ImmutableBuffer buffer;
 };
-}
+} // namespace nc::graphics

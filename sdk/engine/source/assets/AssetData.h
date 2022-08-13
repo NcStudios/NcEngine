@@ -3,11 +3,11 @@
 #include "graphics/Vertex.h"
 #include "stb/stb_image.h"
 
+#include <cstdlib>
 #include <memory>
 #include <span>
 #include <string>
 #include <vector>
-#include <cstdlib>
 
 namespace nc
 {
@@ -42,4 +42,4 @@ struct TextureBufferData
     std::span<const TextureData> data;
     UpdateAction updateAction;
 };
-}
+} // namespace nc

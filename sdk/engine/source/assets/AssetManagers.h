@@ -30,4 +30,4 @@ class AssetManagers
         std::unique_ptr<MeshAssetManager> m_meshManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;
 };
-}
+} // namespace nc

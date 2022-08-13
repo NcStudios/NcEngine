@@ -237,4 +237,4 @@ auto MeshAssetManager::OnUpdate() -> Signal<const MeshBufferData&>*
 {
     return &m_onUpdate;
 }
-}
+} // namespace nc

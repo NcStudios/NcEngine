@@ -23,4 +23,4 @@ GpuAccessorSignals::GpuAccessorSignals(nc::Signal<const MeshBufferData&>* _onMes
       onTextureUpdate{_onTextureUpdate}
 {
 }
-}
+} // namespace nc

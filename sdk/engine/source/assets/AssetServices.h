@@ -2,9 +2,9 @@
 
 #include "AudioClipAssetManager.h"
 #include "ConcaveColliderAssetManager.h"
+#include "config/Config.h"
 #include "ConvexHullAssetManager.h"
 #include "CubeMapAssetManager.h"
-#include "config/Config.h"
 
 namespace nc
 {
@@ -23,4 +23,4 @@ struct AssetServices
     AudioClipAssetManager audioClipManager;
     CubeMapAssetManager cubeMapAssetManager;
 };
-}
+} // namespace nc

@@ -21,4 +21,4 @@ class MeshStorage
         IndexBuffer m_indexBuffer;
         nc::Connection<const MeshBufferData&> m_onMeshUpdateConnection;
 };
-}
+} // namespace nc::graphics

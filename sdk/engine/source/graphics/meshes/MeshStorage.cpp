@@ -44,4 +44,4 @@ void MeshStorage::UpdateBuffer(const MeshBufferData& meshBufferData)
     m_indexBuffer.buffer.Clear();
     m_indexBuffer.buffer = ImmutableBuffer(m_base, m_allocator, meshBufferData.indices);
 }
-}
+} // namespace nc::graphics

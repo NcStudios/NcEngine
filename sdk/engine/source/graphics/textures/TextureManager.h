@@ -28,4 +28,4 @@ class TextureManager : public IShaderResourceService<TextureBuffer>
         bool m_texturesInitialized;
         uint32_t m_bindingSlot;
 };
-}
+} // namespace nc::graphics

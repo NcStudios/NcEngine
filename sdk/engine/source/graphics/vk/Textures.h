@@ -10,8 +10,4 @@ struct TextureBuffer
     vk::DescriptorImageInfo imageInfo;
     std::string uid;
 };
-
-struct TextureImageInfo
-{
-};
-}
+} // namespace nc::graphics

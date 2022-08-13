@@ -35,94 +35,94 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& 
     commandBuffer->setViewport(0, 1, &viewport);
     commandBuffer->setScissor(0, 1, &scissor);
 }
-}
+} // anonymous namespace
 
 namespace nc::graphics
 {
-    Renderer::Renderer(Graphics* graphics, ShaderResourceServices* shaderResources, Vector2 dimensions)
-        : m_graphics{graphics},
-          m_shaderResources{shaderResources},
-          m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
-          m_dimensions{dimensions},
-          m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
-          m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
-    {
-        RegisterRenderPasses();
-        RegisterTechniques();
-    }
-
-    Renderer::~Renderer() noexcept
-    {
-        m_depthStencil.reset();
-        m_colorBuffer.reset();
-        m_renderPasses.reset();
-    }
-
-    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
-    {
-        OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
-        auto* cmd = BeginFrame(commands, assetServices, meshStorage, currentSwapChainImageIndex);
-
-        /** Shadow mapping pass */
-        m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
-
-        /** Lit shading pass */
-        m_renderPasses->Execute(RenderPassManager::LitShadingPass, cmd, currentSwapChainImageIndex, state);
-
-        cmd->end();
-    }
-
-    void Renderer::InitializeImgui()
-    {
-        m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire(RenderPassManager::LitShadingPass).renderpass.get());
-    }
-
-    void Renderer::RegisterRenderPasses()
-    {
-        auto* swapchain = m_graphics->GetSwapchainPtr();
-
-        /** Shadow mapping pass */
-        const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
-        m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
-
-        /** Lit shading pass */
-        auto& colorImageViews = swapchain->GetColorImageViews();
-        auto& depthImageView = m_depthStencil->GetImageView();
-        auto& colorResolveView = m_colorBuffer->GetImageView();
-        uint32_t index = 0;
-
-        for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, RenderPassManager::LitShadingPass, index++); }
-    }
-
-    void Renderer::RegisterTechniques()
-    {
-        m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
-
-        #ifdef NC_EDITOR_ENABLED
-        m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
-        #endif
-
-        m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
-        m_renderPasses->RegisterTechnique<PbrTechnique>(RenderPassManager::LitShadingPass);
-        m_renderPasses->RegisterTechnique<ParticleTechnique>(RenderPassManager::LitShadingPass);
-        m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
-    }
-
-    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
-    {
-        auto swapchain = m_graphics->GetSwapchainPtr();
-        swapchain->WaitForFrameFence();
-        auto& commandBuffers = *commands->GetCommandBuffers();
-        auto* cmd = &commandBuffers[currentSwapChainImageIndex];
-        cmd->begin(vk::CommandBufferBeginInfo{});
-
-        SetViewportAndScissor(cmd, m_dimensions);
-
-        commands->BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
-        return cmd;
-    }
-
-    void Renderer::Clear() noexcept
-    {
-    }
+Renderer::Renderer(Graphics* graphics, ShaderResourceServices* shaderResources, Vector2 dimensions)
+    : m_graphics{graphics},
+        m_shaderResources{shaderResources},
+        m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
+        m_dimensions{dimensions},
+        m_depthStencil{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount()) },
+        m_colorBuffer{ std::make_unique<RenderTarget>(m_graphics->GetBasePtr(), m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) }
+{
+    RegisterRenderPasses();
+    RegisterTechniques();
 }
+
+Renderer::~Renderer() noexcept
+{
+    m_depthStencil.reset();
+    m_colorBuffer.reset();
+    m_renderPasses.reset();
+}
+
+void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
+{
+    OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
+    auto* cmd = BeginFrame(commands, assetServices, meshStorage, currentSwapChainImageIndex);
+
+    /** Shadow mapping pass */
+    m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
+
+    /** Lit shading pass */
+    m_renderPasses->Execute(RenderPassManager::LitShadingPass, cmd, currentSwapChainImageIndex, state);
+
+    cmd->end();
+}
+
+void Renderer::InitializeImgui()
+{
+    m_graphics->GetBasePtr()->InitializeImgui(m_renderPasses->Acquire(RenderPassManager::LitShadingPass).renderpass.get());
+}
+
+void Renderer::RegisterRenderPasses()
+{
+    auto* swapchain = m_graphics->GetSwapchainPtr();
+
+    /** Shadow mapping pass */
+    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
+    m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
+
+    /** Lit shading pass */
+    auto& colorImageViews = swapchain->GetColorImageViews();
+    auto& depthImageView = m_depthStencil->GetImageView();
+    auto& colorResolveView = m_colorBuffer->GetImageView();
+    uint32_t index = 0;
+
+    for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, RenderPassManager::LitShadingPass, index++); }
+}
+
+void Renderer::RegisterTechniques()
+{
+    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
+
+    #ifdef NC_EDITOR_ENABLED
+    m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
+    #endif
+
+    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<PbrTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<ParticleTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
+}
+
+vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
+{
+    auto swapchain = m_graphics->GetSwapchainPtr();
+    swapchain->WaitForFrameFence();
+    auto& commandBuffers = *commands->GetCommandBuffers();
+    auto* cmd = &commandBuffers[currentSwapChainImageIndex];
+    cmd->begin(vk::CommandBufferBeginInfo{});
+
+    SetViewportAndScissor(cmd, m_dimensions);
+
+    commands->BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
+    return cmd;
+}
+
+void Renderer::Clear() noexcept
+{
+}
+} // namespace nc::graphics

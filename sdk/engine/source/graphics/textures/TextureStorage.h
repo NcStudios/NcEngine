@@ -27,4 +27,4 @@ class TextureStorage
         vk::UniqueSampler m_sampler;
         nc::Connection<const TextureBufferData&> m_onTextureUpdateConnection;
 };
-}
+} // namespace nc::graphics

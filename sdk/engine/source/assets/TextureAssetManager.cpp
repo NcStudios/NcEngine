@@ -1,7 +1,4 @@
 #include "TextureAssetManager.h"
-#include "graphics/Base.h"
-#include "graphics/Graphics.h"
-#include "graphics/vk/Initializers.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -22,7 +19,7 @@ auto ReadTexture(const std::string& path, const std::string& uid) -> nc::Texture
 
     return nc::TextureData{pixels, width, height, uid};
 }
-}
+} // anonymous namespace
 
 namespace nc
 {
@@ -105,7 +102,10 @@ bool TextureAssetManager::Unload(const std::string& path)
         return data.id == path;
     });
 
-    assert(pos != m_textureData.end());
+    if (pos == m_textureData.end())
+    {
+        return false;
+    }
 
     auto index = std::distance(m_textureData.begin(), pos);
     m_accessors.erase(m_accessors.begin()+index);
@@ -158,4 +158,4 @@ auto TextureAssetManager::OnUpdate() -> Signal<const TextureBufferData&>*
 {
     return &m_onUpdate;
 }
-}
+} // namespace nc
