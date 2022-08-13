@@ -17,13 +17,13 @@ typedef unsigned char stbi_uc;
 
 namespace nc::graphics
 {
-class Instance;
-class Commands;
-class TexturesData;
-struct Vertex;
+    class Instance;
+    class Commands;
+    class TexturesData;
+    struct Vertex;
 
-class Base
-{
+    class Base
+    {
         public:
             Base(HWND hwnd, HINSTANCE hinstance);
             ~Base() noexcept;
