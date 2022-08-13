@@ -1,13 +1,15 @@
 #include "SpawnTest.h"
-#include "NcEngine.h"
-#include "ecs/component/PhysicsBody.h"
-#include "ecs/component/SceneNavigationCamera.h"
-#include "math/Random.h"
-#include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
 #include "shared/Spawner/Spawner.h"
+
+#include "NcEngine.h"
+#include "ecs/component/PhysicsBody.h"
+#include "ecs/component/SceneNavigationCamera.h"
+#include "imgui/imgui.h"
+#include "math/Random.h"
+#include "graphics/GraphicsModule.h"
 
 namespace
 {
@@ -37,26 +39,26 @@ namespace
 
             if(ImGui::Button("Destroy", {100, 20}))
                 DestroyFunc(DestroyCount);
-            
+
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Text("-middle mouse button + drag to pan");
             ImGui::Text("-right mouse button + drag to look");
             ImGui::Text("-mouse wheel to zoom");
         }
-        
+
         ImGui::EndChild();
     }
 }
 
 namespace nc::sample
 {
-    void SpawnTest::Load(NcEngine* engine)
+    SpawnTest::SpawnTest(SampleUI* ui)
     {
-        auto* registry = engine->Registry();
+        ui->SetWidgetCallback(::Widget);
+    }
 
-        // Setup
-        m_sceneHelper.Setup(engine, true, false, Widget);
-
+    void SpawnTest::Load(Registry* registry, ModuleProvider modules)
+    {
         // Fps Tracker
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
         auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
@@ -67,7 +69,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 35.0f, -100.0f}, .rotation = Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 30.0f, 0.0f}, .tag = "Point Light 1"});
@@ -111,14 +113,9 @@ namespace nc::sample
         };
 
         auto spawner = registry->Add<Entity>({});
-        auto spawnerPtr = registry->Add<Spawner>(spawner, engine->Random(), prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
+        auto spawnerPtr = registry->Add<Spawner>(spawner, modules.Get<Random>(), prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
         registry->Add<FrameLogic>(spawner, InvokeFreeComponent<Spawner>{});
         SpawnFunc = std::bind(&Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
         DestroyFunc = std::bind(&Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);
-    }
-
-    void SpawnTest::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 } // end namespace project

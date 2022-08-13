@@ -1,4 +1,4 @@
-Overview
+NcEngine
 ========
 
 ## Contents
@@ -12,7 +12,6 @@ Overview
 * [Config File](#config)
 
 ## Entities
-------------
 Conceptually, Entities are the objects in a game: a player or a building, for example. Functionally, however, they are handles used to identify the set of internal objects that comprise the game object. An Entity representing a player, for instance, might map to a Transform, MeshRenderer, and Collider. It is these objects that actually describe what the player is and how it behaves, while the Entity forms an association between them. Because of this, they are cheap to copy and pass around as needed.
 
 Entities are made up of an index, layer, and flags. 
@@ -33,7 +32,6 @@ Entities do not inherit flags from their parents.
 When creating an Entity through the [registry](#registry), an EntityInfo struct is required, which has more information than is actually stored in the Entity. This is because the registry automatically adds a [Transform](EngineComponents.md#transform) and [Tag](EngineComponents.md#tag) to each new Entity, initialized with data from the EntityInfo.
 
 ## Components
--------------
 Components describe the behavior and properties of objects in a game. An Entity may have at most one Component of each type. A number of components are provided by NcEngine which are described [here](EngineComponents.md).
 
 Components must be added and removed through the Registry. They are expected to be move-only types.
@@ -45,7 +43,6 @@ Pooled components are intended for types that are numerous and processed in bulk
 Free components should be used for types that appear in small numbers - an input handler, for example. They also have the advantage of being pointer stable. Free components are grouped according to the Entities they belong to and do not have the additional memory overhead of pooled components. This, however, results in random access times that are linear in terms of the number of free components attached to an Entity. User-defined free components should derive from [FreeComponent](../nc/include/ecs/component/Component.h).
 
 ## Registry
------------
 The registry contains storage for all entities and components and manages the associations between them. In order for objects of these types to be recognized by NcEngine, they must be created through one of the registry's Add member functions. There are also functions for retreiving, removing, and viewing ranges of objects, among other things.
 
 A pointer to the registry may be retrieved from the NcEngine object, which is passed to each scene's Load() function. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
@@ -72,7 +69,6 @@ When removing a Component:
 It is possible to subscribe to on add and on remove events through the `Registry`. This must be enabled on a per-type basis by providing a specialization of `StoragePolicy` and specifying the allowed callbacks. Once enabled, a `Signal` can be retrieved through `Registry::OnAdd<T>()` and `Registry::OnRemove<T>()`, which can be used to connect the desired callable(s). Callable signatures should match `void F(T&)` for on add events and `void F(Entity)` for on remove.
 
 ## Views
---------
 Views represent ranges of registry data. They come in two forms, `View<Viewable>` and `MultiView<Viewable...>`, where `Viewable` is either `Entity` or models `PooledComponent`. They each provide their own iterator types, and can be used in range-based for loops and the like. Viewed types may be individually const-qualified. Example usage:
 
 ```cpp
@@ -91,12 +87,11 @@ A `MultiView<Ts...>` allows filtering the registry for all entities with the spe
 * The fragmentation of the individual pools relative to one another determines the cost of random accesses. Sorting the pools beforehand minimizes cache misses, but comes with its own cost.
 
 ## Scenes
----------
 Scenes manage initialization of the game world. Scenes should derive from the abstract base Scene and overload two functions:
 
 ```cpp
 /** Scene.h */
-virtual void Load(NcEngine* engine) = 0;
+virtual void Load(Registry* registry, ModuleProvider modules) = 0;
 virtual void Unload() = 0;
 ```
 
@@ -117,7 +112,6 @@ This may be called from anywhere, but the scene change will not happen until all
 4. newScene->Load(registry)
 
 ## Assets
----------
 Assets are the resources used by some built in components. The components that use assets are:
 
 * AudioSource: expects a path to a sound file.
@@ -131,7 +125,6 @@ Components do not load or own the assets they use, but instead obtain a view ove
 Assets related to 3d meshes(meshes, convex hulls, concave colliders) and skyboxes can only be loaded from .nca files. This is done to move runtime-independent calculations into a preprocessing step. Nca files can be generated from input files using the asset builder (tools/asset_builder/build.exe). Usage can be shown by running './build --h'. When using NcEditor, this process is handled automatically. Adding fbx files to the asset manifest will create the appropriate nca files.
 
 ## UI
------
 NcEngine does not have an proper solution for UI. [Dear ImGui](https://github.com/ocornut/imgui) is used internally, and, as a temporary stand-in, a method for hooking into the internal frame is provided:
 
 ```cpp
@@ -155,7 +148,6 @@ While registered, Draw() will be called when rendering between ImGui::NewFrame()
 This process is unrefined and easy to misuse. Whatever operations a registered UI performs are done during the render step, which is assumed to not modify the registry. It is recomended that registry pointers in UI functions be const-qualified to guard against segfaults.
 
 ## Config
---------------
 NcEngine reads some settings from a config file upon initialization. A default version can be found [here](../nc/source/config/default_config.ini). Modifications should conform to these rules:
 
 * One key-value pair per line separated with '='.

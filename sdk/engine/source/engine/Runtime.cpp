@@ -1,33 +1,39 @@
 #include "Runtime.h"
 #include "audio/AudioModuleImpl.h"
 #include "config/ConfigInternal.h"
+#include "ecs/LogicModule.h"
 #include "graphics/GraphicsModuleImpl.h"
 #include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
+#include "module/ModuleProvider.h"
 #include "physics/PhysicsModuleImpl.h"
-#include "scene/SceneModuleImpl.h"
 
 namespace
 {
-    auto BuildModules(nc::Registry* reg,
-                      nc::window::WindowImpl* window,
-                      nc::time::Time* time,
-                      const nc::GpuAccessorSignals& gpuAccessorSignals,
-                      std::function<void()> clearCallback,
-                      float* dt, nc::EngineInitFlags flags) -> nc::Modules
+    auto BuildModuleRegistry(nc::Registry* reg,
+                             nc::window::WindowImpl* window,
+                             nc::time::Time* time,
+                             const nc::GpuAccessorSignals& gpuAccessorSignals,
+                             float* dt, nc::EngineInitFlags flags) -> nc::ModuleRegistry
     {
         V_LOG("BuildModules()");
-        bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoGraphics);
-        bool enablePhysicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoPhysics);
-        bool enableAudioModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
-        return nc::Modules
-        {
-            .graphicsModule = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, gpuAccessorSignals, window, dt),
-            .physicsModule = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg, time),
-            .audioModule = nc::audio::BuildAudioModule(enableAudioModule, reg),
-            .sceneModule = std::make_unique<nc::scene::SceneModuleImpl>(std::move(clearCallback)),
-            .logicModule = std::make_unique<nc::LogicModule>(reg, dt)
-        };
+        const bool enableGraphicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoGraphics);
+        const bool enablePhysicsModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoPhysics);
+        const bool enableAudioModule = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
+
+        auto graphics = nc::graphics::BuildGraphicsModule(enableGraphicsModule, reg, gpuAccessorSignals, window, dt);
+        auto physics = nc::physics::BuildPhysicsModule(enablePhysicsModule, reg, time);
+        auto audio = nc::audio::BuildAudioModule(enableAudioModule, reg);
+        auto logic = std::make_unique<nc::LogicModule>(reg, dt);
+        auto random = std::make_unique<nc::Random>();
+
+        auto moduleRegistry = nc::ModuleRegistry{};
+        moduleRegistry.Register(std::move(graphics));
+        moduleRegistry.Register(std::move(physics));
+        moduleRegistry.Register(std::move(audio));
+        moduleRegistry.Register(std::move(logic));
+        moduleRegistry.Register(std::move(random));
+        return moduleRegistry;
     }
 }
 
@@ -42,20 +48,18 @@ namespace nc
     }
 
     Runtime::Runtime(EngineInitFlags flags)
-        : m_window{},
+        : m_window{std::bind_front(&Runtime::Stop, this)},
           m_registry{nc::config::GetMemorySettings().maxTransforms},
           m_time{},
-          m_random{},
           m_assets{nc::config::GetProjectSettings(), nc::config::GetMemorySettings()},
-          m_modules{ BuildModules(&m_registry, &m_window, &m_time, m_assets.CreateGpuAccessorSignals(), std::bind_front(&Runtime::Clear, this), &m_dt, flags) },
+          m_modules{BuildModuleRegistry(&m_registry, &m_window, &m_time,
+                                        m_assets.CreateGpuAccessorSignals(),
+                                        &m_dt, flags)},
           m_executor{},
-          m_dt{ 0.0f },
-          m_dtFactor{ 1.0f },
-          m_isRunning{ false },
-          m_currentPhysicsIterations{ 0u }
+          m_sceneManager{std::bind_front(&Runtime::Clear, this)},
+          m_dt{0.0f},
+          m_isRunning{false}
     {
-        m_window.BindEngineDisableRunningCallback(std::bind_front(&Runtime::Stop, this));
-        BuildTaskGraph();
         V_LOG("Runtime Initialized");
     }
 
@@ -64,11 +68,12 @@ namespace nc
         Shutdown();
     }
 
-    void Runtime::Start(std::unique_ptr<nc::Scene> initialScene)
+    void Runtime::Start(std::unique_ptr<Scene> initialScene)
     {
         V_LOG("Runtime::Start()");
-        m_modules.sceneModule->ChangeScene(std::move(initialScene));
-        m_modules.sceneModule->DoSceneSwap(this);
+        RebuildTaskGraph();
+        m_sceneManager.QueueSceneChange(std::move(initialScene));
+        m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
         m_isRunning = true;
         Run();
     }
@@ -94,52 +99,56 @@ namespace nc
         debug::internal::CloseLog();
     }
 
-    auto Runtime::Audio()    noexcept -> AudioModule* { return m_modules.audioModule.get(); }
-    auto Runtime::Graphics() noexcept -> GraphicsModule* { return m_modules.graphicsModule.get(); }
-    auto Runtime::Physics()  noexcept -> PhysicsModule* { return m_modules.physicsModule.get(); }
-    auto Runtime::Random()   noexcept -> nc::Random* { return &m_random; }
-    auto Runtime::Registry() noexcept -> nc::Registry* { return &m_registry; }
-    auto Runtime::Scene()    noexcept -> SceneModule* { return m_modules.sceneModule.get(); }
-
-    void Runtime::BuildTaskGraph()
+    bool Runtime::IsSceneChangeQueued() const noexcept
     {
-        V_LOG("Runtime::BuildTaskGraph()");
+        return m_sceneManager.IsSceneChangeQueued();
+    }
 
-        auto syncJob = [reg = &m_registry]
-        {
-            OPTICK_CATEGORY("Sync State", Optick::Category::None);
-            reg->CommitStagedChanges();
-        };
-        m_executor.Add(m_modules.audioModule->BuildWorkload());
-        m_executor.Add(m_modules.logicModule->BuildWorkload());
-        m_executor.Add(m_modules.physicsModule->BuildWorkload());
-        m_executor.Add(m_modules.graphicsModule->BuildWorkload());
-        m_executor.Add(Job{ syncJob, "Sync", HookPoint::PreRenderSync });
-        m_executor.Build();
+    void Runtime::QueueSceneChange(std::unique_ptr<Scene> scene)
+    {
+        m_sceneManager.QueueSceneChange(std::move(scene));
+    }
+
+    auto Runtime::GetRegistry() noexcept -> Registry*
+    {
+        return &m_registry;
+    }
+
+    auto Runtime::GetModuleRegistry() noexcept -> ModuleRegistry*
+    {
+        return &m_modules;
+    }
+
+    void Runtime::RebuildTaskGraph()
+    {
+        V_LOG("Runtime::RebuildTaskGraph()");
+        m_executor.BuildTaskGraph(&m_registry, m_modules.GetAllModules());
     }
 
     void Runtime::Clear()
     {
-        m_modules.graphicsModule->Clear();
+        V_LOG("Runtime::Clear()");
+        m_modules.Clear();
         m_registry.Clear();
-        m_modules.physicsModule->Clear();
-        m_modules.audioModule->Clear();
         m_time.ResetFrameDeltaTime();
         m_time.ResetAccumulatedTime();
     }
 
     void Runtime::Run()
     {
+        V_LOG("Runtime::Run()");
         while(m_isRunning)
         {
             OPTICK_FRAME("Main Thread");
-            m_dt = m_dtFactor * m_time.UpdateTime();
-            m_currentPhysicsIterations = 0u;
+            m_dt = m_time.UpdateTime();
             input::Flush();
             m_window.ProcessSystemMessages();
             auto result = m_executor.Run();
             result.wait();
-            m_modules.sceneModule->DoSceneSwap(this);
+            if (m_sceneManager.IsSceneChangeQueued())
+            {
+                m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
+            }
         }
 
         Shutdown();

@@ -3,7 +3,7 @@
 #include "audio/AudioModule.h"
 #include "ecs/Registry.h"
 #include "rtaudio/RtAudio.h"
-#include "task/Job.h"
+#include "module/Job.h"
 
 #include <mutex>
 #include <queue>

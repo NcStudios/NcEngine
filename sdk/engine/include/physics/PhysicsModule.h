@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Module.h"
-#include "physics/IClickable.h"
+#include "IClickable.h"
+#include "module/Module.h"
 
 namespace nc
 {

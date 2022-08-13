@@ -1,12 +1,14 @@
 #include "SolarSystem.h"
+#include "shared/Prefabs.h"
+#include "shared/FreeComponents.h"
+
+#include "NcEngine.h"
+#include "Window.h"
 #include "asset/Assets.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/Registry.h"
+#include "graphics/GraphicsModule.h"
 #include "imgui/imgui.h"
-#include "Window.h"
-#include "shared/Prefabs.h"
-#include "NcEngine.h"
-#include <shared/FreeComponents.h>
 
 namespace
 {
@@ -72,12 +74,13 @@ namespace
 
 namespace nc::sample
 {
-    void SolarSystem::Load(NcEngine* engine)
+    SolarSystem::SolarSystem(SampleUI* ui)
     {
-        auto* registry = engine->Registry();
+        ui->SetWidgetCallback(::Widget);
+    }
 
-        m_sceneHelper.Setup(engine, true, false, Widget);
-
+    void SolarSystem::Load(Registry* registry, ModuleProvider modules)
+    {
         // Load all scene textures
         const std::vector<std::string> texturePaths
         {
@@ -212,7 +215,7 @@ namespace nc::sample
 
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         auto sun = registry->Add<Entity>({ .scale = Vector3::Splat(2.0f), .tag = "Sun" });
         registry->Add<MeshRenderer>(sun, "planet.nca", sunMaterial, TechniqueType::PhongAndUi);
@@ -312,10 +315,5 @@ namespace nc::sample
 
         auto starEmitter = registry->Add<Entity>({ .tag = "Stars" });
         registry->Add<ParticleEmitter>(starEmitter, particleInfo);
-    }
-
-    void SolarSystem::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 }

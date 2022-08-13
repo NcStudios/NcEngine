@@ -3,6 +3,8 @@
 #include "ui/UIStyle.h"
 #include "utility/DefaultComponents.h"
 
+#include "graphics/GraphicsModule.h"
+
 namespace
 {
     auto CreateProjectCallbacks(nc::editor::ProjectManager* projectManager) -> nc::editor::ProjectCallbacks
@@ -69,8 +71,8 @@ namespace nc::editor
           m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
           m_assetManifest{m_editorConfig.recentProjectDirectory, [configEditor = &m_configEditor]() -> const config::Config& { return configEditor->GetConfig();}},
           m_projectManager{engine, &m_assetManifest},
-          m_environmentPanel{m_projectManager.GetSceneData(), engine->Registry(), &m_assetManifest, engine->Graphics()},
-          m_editorUI{engine->Registry(),
+          m_environmentPanel{m_projectManager.GetSceneData(), engine->GetRegistry(), &m_assetManifest, engine->GetModuleRegistry()->Get<GraphicsModule>()},
+          m_editorUI{engine->GetRegistry(),
                      &m_output,
                      &m_environmentPanel,
                      &m_assetManifest,
@@ -82,11 +84,11 @@ namespace nc::editor
           m_assetBrowser{m_editorUI.GetRegisterDialogCallback(), CreateOpenFileBrowserCallback(&m_fileBrowser), &m_assetManifest},
           m_newSceneDialog{m_editorUI.GetRegisterDialogCallback()},
           m_newProjectDialog{m_editorUI.GetRegisterDialogCallback()},
-          m_changeTagDialog{engine->Registry()},
+          m_changeTagDialog{engine->GetRegistry()},
           m_configEditor{m_editorConfig.recentProjectDirectory / "config\\config.ini"}
     {
         nc::editor::SetImGuiStyle();
-        engine->Graphics()->SetUi(&m_editorUI);
+        engine->GetModuleRegistry()->Get<GraphicsModule>()->SetUi(&m_editorUI);
 
         auto uiCallbacks = CreateUICallbacks(&m_editorUI);
         m_changeTagDialog.RegisterDialog(uiCallbacks.registerDialog);

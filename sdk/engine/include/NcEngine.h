@@ -1,13 +1,10 @@
 #pragma once
 
-#include "audio/AudioModule.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
 #include "ecs/component/All.h"
-#include "graphics/GraphicsModule.h"
-#include "math/Random.h"
-#include "physics/PhysicsModule.h"
-#include "scene/SceneModule.h"
+#include "module/ModuleRegistry.h"
+#include "scene/Scene.h"
 #include "utility/EnumUtilities.h"
 
 namespace nc
@@ -35,40 +32,30 @@ namespace nc
             virtual void Shutdown() noexcept = 0;
 
             /**
+             * @brief Queue a scene to be loaded upon completion of the current frame.
+             */
+            virtual void QueueSceneChange(std::unique_ptr<Scene> scene) = 0;
+
+            /**
+             * @brief Check if a scene change is scheduled.
+             */
+            virtual bool IsSceneChangeQueued() const noexcept = 0;
+
+            /**
              * @brief Get a pointer to the active registry.
-             * @return Registry*
              */
-            virtual auto Registry() noexcept -> nc::Registry* = 0;
+            virtual auto GetRegistry() noexcept -> Registry* = 0;
 
             /**
-             * @brief Get a pointer to the global random instance.
-             * @return Random*
+             * @brief Get a pointer to the module registry.
              */
-            virtual auto Random() noexcept -> nc::Random* = 0;
+            virtual auto GetModuleRegistry() noexcept -> ModuleRegistry* = 0;
 
             /**
-             * @brief Get a pointer to the audio module.
-             * @return AudioModule*
+             * @brief Compose a new task graph from all registered modules. This is required
+             *        only if module registration is changed after calling Start().
              */
-            virtual auto Audio() noexcept -> AudioModule* = 0;
-
-            /**
-             * @brief Get a pointer to the graphics module.
-             * @return GraphicsModule*
-             */
-            virtual auto Graphics() noexcept -> GraphicsModule* = 0;
-
-            /**
-             * @brief Get a pointer to the physics module.
-             * @return PhysicsModule*
-             */
-            virtual auto Physics() noexcept -> PhysicsModule* = 0;
-
-            /**
-             * @brief Get a pointer to the scene module.
-             * @return SceneModule*
-             */
-            virtual auto Scene() noexcept -> SceneModule* = 0;
+            virtual void RebuildTaskGraph() = 0;
     };
 
     /** @brief Flags controlling initialization of engine modules. */

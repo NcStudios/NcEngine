@@ -1,6 +1,5 @@
 #include "PhysicsModuleImpl.h"
 #include "config/Config.h"
-#include "engine/modules.h"
 #include "graphics/DebugRenderer.h"
 
 namespace

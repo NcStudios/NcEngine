@@ -1,10 +1,12 @@
 #include "CollisionEvents.h"
+#include "shared/Prefabs.h"
+#include "shared/FreeComponents.h"
+
 #include "NcEngine.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
+#include "graphics/GraphicsModule.h"
 #include "imgui/imgui.h"
-#include "shared/Prefabs.h"
-#include "shared/FreeComponents.h"
 
 #include <functional>
 
@@ -43,13 +45,13 @@ namespace
 
 namespace nc::sample
 {
-    void CollisionEvents::Load(NcEngine* engine)
+    CollisionEvents::CollisionEvents(SampleUI* ui)
     {
-        auto* registry = engine->Registry();
+        ui->SetWidgetCallback(::Widget);
+    }
 
-        // Setup
-        m_sceneHelper.Setup(engine, true, false, Widget);
-
+    void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
+    {
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.1f, 4.2f, -5.8f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
@@ -60,7 +62,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto* camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         // Movable Objects
         auto objectSpawner = registry->Add<Entity>({.tag = "Prefab Selector"});
@@ -97,11 +99,6 @@ namespace nc::sample
         registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-        engine->Graphics()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
-    }
-
-    void CollisionEvents::Unload()
-    {
-        m_sceneHelper.TearDown();
+        modules.Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
     }
 } //end namespace project

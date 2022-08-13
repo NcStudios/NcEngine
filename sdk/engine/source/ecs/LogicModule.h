@@ -3,8 +3,8 @@
 #include "ecs/component/Logic.h"
 #include "ecs/Registry.h"
 #include "ecs/View.h"
-#include "Module.h"
-#include "task/Job.h"
+#include "module/Module.h"
+#include "module/Job.h"
 
 #include "optick/optick.h"
 

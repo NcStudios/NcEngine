@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "task/TaskGraph.h"
+#include "module/Job.h"
 
 class TaskGraph_unit_tests : public ::testing::Test
 {

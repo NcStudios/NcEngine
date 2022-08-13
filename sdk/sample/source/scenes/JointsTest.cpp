@@ -1,26 +1,30 @@
 #include "JointsTest.h"
-#include "NcEngine.h"
-#include "ecs/component/SceneNavigationCamera.h"
-#include "ecs/InvokeFreeComponent.h"
-#include "physics/PhysicsModule.h"
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
 
+#include "NcEngine.h"
+#include "ecs/component/SceneNavigationCamera.h"
+#include "ecs/InvokeFreeComponent.h"
+#include "graphics/GraphicsModule.h"
+#include "physics/PhysicsModule.h"
+
 namespace nc::sample
 {
-    void JointsTest::Load(NcEngine* engine)
+    JointsTest::JointsTest(SampleUI* ui)
     {
-        auto* registry = engine->Registry();
-        auto* physics = engine->Physics();
+        ui->SetWidgetCallback(nullptr);
+    }
 
-        m_sceneHelper.Setup(engine, false, false, nullptr);
+    void JointsTest::Load(Registry* registry, ModuleProvider modules)
+    {
+        auto* physics = modules.Get<PhysicsModule>();
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});
@@ -159,10 +163,5 @@ namespace nc::sample
             physics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
             physics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
         }
-    }
-
-    void JointsTest::Unload()
-    {
-        m_sceneHelper.TearDown();
     }
 }

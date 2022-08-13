@@ -1,12 +1,13 @@
 #include "JareTestScene.h"
+#include "shared/FreeComponents.h"
+
+#include "NcEngine.h"
 #include "asset/Assets.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
+#include "graphics/GraphicsModule.h"
 #include "imgui/imgui.h"
-#include "NcEngine.h"
-#include "shared/FreeComponents.h"
-#include "shared/Prefabs.h"
 
 #include <string>
 
@@ -24,13 +25,13 @@ namespace
 
 namespace nc::sample
 {
-    void JareTestScene::Load(NcEngine* engine)
+    JareTestScene::JareTestScene(SampleUI* ui)
     {
-        auto* registry = engine->Registry();
-        
-        m_sceneHelper.Setup(engine, true, false, Widget);
-        prefab::InitializeResources();
+        ui->SetWidgetCallback(::Widget);
+    }
 
+    void JareTestScene::Load(Registry* registry, ModuleProvider modules)
+    {
         const std::vector<std::string> texturePaths
         {
             "floor/BaseColor.png",
@@ -93,8 +94,8 @@ namespace nc::sample
 
         nc::LoadMeshAssets(sceneMeshes);
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-        engine->Graphics()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
-        
+        modules.Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
         registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),
@@ -137,11 +138,6 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        engine->Graphics()->SetCamera(camera);
-    }
-
-    void JareTestScene::Unload()
-    {
-        m_sceneHelper.TearDown();
+        modules.Get<GraphicsModule>()->SetCamera(camera);
     }
 }

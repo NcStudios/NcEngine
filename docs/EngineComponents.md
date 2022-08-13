@@ -80,7 +80,7 @@ When creating a Collider, the type of properties struct passed will determine th
 3. Capsule
     * Defined by a center, height, and radius
 4. Hull
-    * Described by an [asset](Overview.md#assets) file containing a vertex list for a convex hull. As this is an asset, it must be loaded before attempting to create one.
+    * Described by an asset file containing a vertex list for a convex hull. As this is an asset, it must be loaded before attempting to create one.
 
 These values describing a shape cannot be modified after construction, but the shapes will be affected by the object's transform. For example, dynamically scaling a transform's scale will propagate to the collider. Transforms should always have a positive scale in each axis. Also, sphere colliders always assume uniform scaling.
 
@@ -104,7 +104,7 @@ Properties of the Colliders and PhysicsBodies, if present, determine the event t
 
 ### ConcaveCollider
 ------------------
-Concave colliders exist to support collision detection against objects that can't be accurately modelled with a standard collider. They are less efficient, so prefer approximating volumes with standard colliders over concave colliders. To minimize their added cost, concave colliders may only be added to static entities and do not collide with one another. Constructing a concave collider requires a path to an [asset](Overview.md#assets) file specifying the geometry as a triangle list.
+Concave colliders exist to support collision detection against objects that can't be accurately modelled with a standard collider. They are less efficient, so prefer approximating volumes with standard colliders over concave colliders. To minimize their added cost, concave colliders may only be added to static entities and do not collide with one another. Constructing a concave collider requires a path to an asset file specifying the geometry as a triangle list.
 
 Concave colliders act more like a collision surface than a volume. They may be used to represent unenclosed objects (imagine a plane deformed like a topography). When modeling an enclosed volume, they have no concept of their interior or exterior - just the surface. This makes them unsuitable for use as triggers.
 
@@ -122,7 +122,7 @@ Degrees of freedom may be restricted with the constructor's linear and angular f
 
 ### MeshRenderer
 ---------------
-Mesh renderers allows a mesh to be rendered using a material. They rely on multiple [assets](Overview.md#assets): one the mesh and four for the material's textures. They also require a technique type, but only one type is currently exposed in the API. Rendering will use the associated entity's transform for vertex transformations.
+Mesh renderers allows a mesh to be rendered using a material. They rely on multiple assets: one the mesh and four for the material's textures. They also require a technique type, but only one type is currently exposed in the API. Rendering will use the associated entity's transform for vertex transformations.
 
 ### PointLight
 -------------
@@ -130,7 +130,7 @@ Point lights components specify a light source at a point in space emitting ligh
 
 ### AudioSource
 --------------
-Audio sources are used to play sounds in a scene. Construction requires a path to an audio clip [asset](Overview.md#assets). Audio sources may optionally be spatial, in which case the associated transform's position will be used as the sound source location (3D sound is a work in progress). 
+Audio sources are used to play sounds in a scene. Construction requires a path to an audio clip asset. Audio sources may optionally be spatial, in which case the associated transform's position will be used as the sound source location (3D sound is a work in progress). 
 
 An audio listener must be registered for audio sources to play (Audio.h), even if spatial sound isn't used.
 

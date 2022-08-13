@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Job.h"
-#include "taskflow/taskflow.hpp"
+#include "module/Job.h"
+#include "module/Module.h"
+#include "ecs/Registry.h"
 
 namespace nc
 {
@@ -12,9 +13,8 @@ namespace nc
             using task_matrix = std::array<std::vector<T>, HookPointCount>;
 
             Executor();
-            void Add(Job job);
-            void Add(std::vector<Job> workload);
-            void Build();
+
+            void BuildTaskGraph(Registry* registry, std::vector<std::unique_ptr<Module>>& modules);
             auto Run() -> tf::Future<void>;
 
         private:
@@ -22,6 +22,8 @@ namespace nc
             tf::Taskflow m_executionGraph;
             task_matrix<Job> m_jobRegistry;
 
+            void Add(Job job);
+            void Add(std::vector<Job> workload);
             auto ConvertJobsToTasks() -> task_matrix<tf::Task>;
             auto ToTask(Job::single_job_t job) -> tf::Task;
             auto ToTask(Job::multi_job_t job) -> tf::Task;

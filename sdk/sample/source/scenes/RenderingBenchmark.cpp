@@ -1,8 +1,10 @@
 #include "RenderingBenchmark.h"
-#include "NcEngine.h"
-#include "imgui/imgui.h"
 #include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
+
+#include "NcEngine.h"
+#include "graphics/GraphicsModule.h"
+#include "imgui/imgui.h"
 
 #include <functional>
 
@@ -43,16 +45,16 @@ namespace
 
 namespace nc::sample
 {
-    void RenderingBenchmark::Load(NcEngine* engine)
+    RenderingBenchmark::RenderingBenchmark(SampleUI* ui)
     {
-        auto* registry = engine->Registry();
+        ui->SetWidgetCallback(::Widget);
+    }
 
-        // Setup
-        m_sceneHelper.Setup(engine, false, false, Widget);
-
+    void RenderingBenchmark::Load(Registry* registry, ModuleProvider modules)
+    {
         // Camera
         auto camera = registry->Add<Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        engine->Graphics()->SetCamera(camera);
+        modules.Get<GraphicsModule>()->SetCamera(camera);
 
         // Spawner
         SpawnBehavior spawnBehavior
@@ -64,7 +66,7 @@ namespace nc::sample
         };
 
         auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
-        auto spawner = registry->Add<Spawner>(spawnerHandle, engine->Random(), prefab::Resource::Cube, spawnBehavior);
+        auto spawner = registry->Add<Spawner>(spawnerHandle, modules.Get<Random>(), prefab::Resource::Cube, spawnBehavior);
         registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
 
         auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FPSTracker"});
@@ -90,6 +92,5 @@ namespace nc::sample
         GetFPSCallback = nullptr;
         SpawnCallback = nullptr;
         DestroyCallback = nullptr;
-        m_sceneHelper.TearDown();
     }
 }

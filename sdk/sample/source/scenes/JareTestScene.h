@@ -1,16 +1,14 @@
 #pragma once
 
 #include "scene/Scene.h"
-#include "shared/SceneHelper.h"
+#include "shared/SampleUI.h"
 
 namespace nc::sample
 {
     class JareTestScene : public Scene
     {
         public:
-            void Load(NcEngine* engine) override;
-            void Unload() override;
-        private:
-            SceneHelper m_sceneHelper;
+            JareTestScene(SampleUI* ui);
+            void Load(Registry* registry, ModuleProvider modules) override;
     };
 }

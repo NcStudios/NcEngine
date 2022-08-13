@@ -2,13 +2,36 @@
 
 #include "taskflow/taskflow.hpp"
 
-#include <exception>
+#include <array>
+#include <functional>
 #include <mutex>
-
-#define NC_OUTPUT_TASKFLOW 0
+#include <variant>
+#include <vector>
 
 namespace nc
 {
+    constexpr size_t HookPointCount = 6ull;
+
+    enum class HookPoint : uint8_t
+    {
+        Free          = 0,
+        Logic         = 1,
+        Physics       = 2,
+        PreRenderSync = 3,
+        Render        = 4,
+        PostFrameSync = 5
+    };
+
+    struct Job
+    {
+        using single_job_t = std::function<void()>;
+        using multi_job_t = tf::Taskflow*;
+        using inner_type = std::variant<single_job_t, multi_job_t>;
+        inner_type work;
+        const char* name = "unnamed job";
+        HookPoint hook;
+    };
+
     /** State shared between all tasks in a graph for storing
      *  an exception. */
     class TaskExceptionState
@@ -113,4 +136,4 @@ namespace nc
 
         return task;
     }
-} // namespace nc
+}
