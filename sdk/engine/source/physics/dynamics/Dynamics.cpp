@@ -11,7 +11,6 @@ const auto GravityVector = DirectX::XMVectorSet(0.0f, nc::physics::Gravity, 0.0f
 
 namespace nc::physics
 {
-
 void UpdateWorldInertiaTensors(Registry* registry)
 {
     for(auto& body : View<PhysicsBody>{registry})
@@ -50,5 +49,4 @@ void Integrate(Registry* registry, float dt)
         }
     }
 }
-
 } // namespace nc::physics

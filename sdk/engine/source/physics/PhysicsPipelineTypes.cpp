@@ -8,7 +8,6 @@
 
 namespace
 {
-
 using namespace nc;
 using namespace nc::physics;
 
@@ -244,5 +243,4 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         --removeCount;
     }
 }
-
 } // namespace nc::physics

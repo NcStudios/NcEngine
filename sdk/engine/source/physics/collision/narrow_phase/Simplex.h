@@ -6,7 +6,6 @@
 
 namespace nc::physics
 {
-
 class Simplex
 {
     friend class Polytope;
@@ -157,5 +156,4 @@ inline void Simplex::ToTriangle<0u, 1u, 3u>()
 
     m_localSupports[2] = m_localSupports[3];
 }
-
 } // namespace nc::physics

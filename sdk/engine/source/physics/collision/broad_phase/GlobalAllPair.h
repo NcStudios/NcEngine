@@ -7,7 +7,6 @@
 
 namespace nc::physics
 {
-
 /** Simple broad phase comparing all objects. */
 template<ProxyCache ProxyCacheType>
 class GlobalAllPair
@@ -77,5 +76,4 @@ void GlobalAllPair<ProxyCacheType>::FindPairs()
         }
     }
 }
-
 } // namespace nc::physics

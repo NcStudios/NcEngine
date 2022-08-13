@@ -5,7 +5,6 @@
 
 namespace nc::physics
 {
-
 class ManifoldCache : public PairCache<ManifoldCache, Manifold>
 {
     public:
@@ -48,5 +47,4 @@ class ManifoldCache : public PairCache<ManifoldCache, Manifold>
     private:
         std::vector<std::pair<Entity, Entity>> m_removed;
 };
-
 } // namespace nc::physics

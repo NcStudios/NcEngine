@@ -7,7 +7,6 @@
 
 namespace nc::physics
 {
-
 constexpr float FloatMax = std::numeric_limits<float>::max();
 constexpr size_t EpaMaxIterations = 32u;
 constexpr float EpaTolerance = 0.001f;
@@ -140,5 +139,4 @@ bool EpaVsTriangle(const BVA& a, const TriangleXM& b, DirectX::FXMMATRIX aMatrix
     stateOut->contact.muBitangent = 0.0f;
     return success;
 }
-
 } // namespace nc::physics

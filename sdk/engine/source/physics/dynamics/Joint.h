@@ -7,7 +7,6 @@
 
 namespace nc::physics
 {
-
 class PhysicsBody;
 
 struct Joint
@@ -45,5 +44,4 @@ class JointSystem
 
         void UpdateJoint(Joint& joint, float dt);
 };
-
 } // namespace nc::physics

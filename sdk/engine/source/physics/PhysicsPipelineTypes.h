@@ -7,12 +7,10 @@
 
 namespace nc
 {
-
 class Registry;
 
 namespace physics
 {
-
 class PhysicsBody;
 
 /** Specifies how to respond to a collision event. A physics response may be
@@ -159,7 +157,5 @@ concept ConcavePhase = requires(T phase)
     { phase.Pairs() } -> std::same_as<const NarrowPhysicsResult&>;
     phase.Clear();
 };
-
 } // namespace physics
-
 } // namespace nc

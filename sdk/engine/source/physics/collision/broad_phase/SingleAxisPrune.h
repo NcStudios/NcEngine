@@ -7,7 +7,6 @@
 
 namespace nc::physics
 {
-
 /** Broad phase for simple pruning along a single axis. It maintains a sorted list
  *  built from a coherence-exploiting radix sort. */
 template<ProxyCache ProxyCacheType>
@@ -157,5 +156,4 @@ float SingleAxisPrune<ProxyCacheType>::GetMax(const Sphere& estimate)
     else
         return estimate.center.z + estimate.radius;
 }
-
 } // namespace nc::physics

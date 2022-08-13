@@ -9,7 +9,6 @@
 
 namespace nc
 {
-
 /** Container for data associated with a pair of objects, typically Entities. This is a
  *  CRTP-based container and requires some member functions to be present in derived types.
  *  The behavior is similar to a flat map with the key (pair) embedded in the value.
@@ -239,5 +238,4 @@ uint32_t PairCache<Derived, DataType, IdType, InitialSize>::Hash(IdType first, I
         return ToDerived->Hash(first, second) & m_hashMask;
     }
 }
-
 } // namespace nc::physics

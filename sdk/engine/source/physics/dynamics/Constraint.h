@@ -6,7 +6,6 @@
 
 namespace nc::physics
 {
-
 /** Matrix representing a 12 element vector of velocity components.
  *  V = [Vax, Vay, Vaz,  Wax, Way, Waz,  Vbx, Vby, Vbz,  Wbx, Wby, Wbz] */
 class ConstraintMatrix
@@ -84,5 +83,4 @@ inline auto ConstraintMatrix::VelocityJacobian(DirectX::FXMVECTOR a, DirectX::FX
         DirectX::XMVector3Cross(b, direction)
     };
 }
-
 } // namespace nc::physics

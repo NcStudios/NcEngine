@@ -4,7 +4,7 @@
 #include "module/Module.h"
 #include "ui/IUI.h"
 
-namespace nc
+namespace nc::graphics
 {
     class Registry;
 

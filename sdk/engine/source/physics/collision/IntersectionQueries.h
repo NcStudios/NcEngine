@@ -5,7 +5,6 @@
 
 namespace nc::physics
 {
-
 enum class HalfspaceContainment
 {
     Intersecting,
@@ -29,5 +28,4 @@ bool Collide(const BoundingVolume& a, const Triangle& b, DirectX::FXMMATRIX aMat
 
 /** Test a sphere's location relative to a plane. */
 auto TestHalfspace(const Plane& plane, const Sphere& sphere) -> HalfspaceContainment;
-
 } // namespace nc::physics

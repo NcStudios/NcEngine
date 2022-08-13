@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AudioSource.h"
+#include "audio/AudioSource.h"
 #include "FreeComponentGroup.h"
 #include "Camera.h"
 #include "physics/Collider.h"

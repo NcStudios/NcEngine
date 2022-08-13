@@ -8,7 +8,6 @@ using namespace DirectX;
 
 namespace
 {
-
 using namespace nc;
 using namespace nc::physics;
 
@@ -170,12 +169,10 @@ bool CollisionDispatch(const BoundingVolume& a, const BoundingVolume& b, FXMMATR
         }
     }, a, b);
 }
-
 } // anonymous namespace
 
 namespace nc::physics
 {
-
 bool Intersect(const Sphere& a, const Sphere& b)
 {
     auto radii = a.radius + b.radius;
@@ -243,5 +240,4 @@ auto TestHalfspace(const Plane& plane, const Sphere& sphere) -> HalfspaceContain
     
     return HalfspaceContainment::Negative;
 }
-
 } // namespace nc::physics

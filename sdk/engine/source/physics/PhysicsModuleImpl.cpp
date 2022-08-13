@@ -4,7 +4,6 @@
 
 namespace
 {
-
 using namespace nc::physics;
 
 struct BspTreeStub
@@ -38,12 +37,10 @@ class PhysicsModuleStub : public nc::physics::PhysicsModule
         nc::task::TaskGraph m_tasks;
         BspTreeStub m_bspStub;
 };
-
 } // anonymous namespace
 
 namespace nc::physics
 {
-
 auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<PhysicsModule>
 {
     if(enableModule)
@@ -145,5 +142,4 @@ void PhysicsModuleImpl::Clear() noexcept
     m_pipeline.Clear();
     m_clickableSystem.Clear();
 }
-
 } // namespace nc::physics

@@ -5,7 +5,6 @@
 
 namespace nc::physics
 {
-
 class TriggerCache : public PairCache<TriggerCache, NarrowEvent, Entity, 256u>
 {
     public:
@@ -30,5 +29,4 @@ class TriggerCache : public PairCache<TriggerCache, NarrowEvent, Entity, 256u>
             return PairCache<TriggerCache, NarrowEvent, Entity, 256u>::Hash(event.first, event.second);
         }
 };
-
 } // namespace nc::physics

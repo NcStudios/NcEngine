@@ -7,7 +7,6 @@
 
 namespace nc::physics
 {
-
 NarrowPhase::NarrowPhase(Registry* registry)
     : m_registry{registry},
         m_manifoldCache{},
@@ -176,5 +175,4 @@ void NarrowPhase::Clear()
     m_manifoldCache.Clear();
     m_triggerCache.Clear();
 }
-
 } // namespace nc::physics

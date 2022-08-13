@@ -8,7 +8,6 @@
 
 namespace nc::physics
 {
-
 /** Copies all object data each step. */
 template<class ClientData>
 class PerFrameProxyCache
@@ -52,5 +51,4 @@ void PerFrameProxyCache<ClientData>::Update()
         m_proxies.emplace_back(matrix, volume, estimate, entity, properties);
     }
 }
-
 } // namespace nc::physics

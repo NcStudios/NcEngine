@@ -274,4 +274,4 @@ template<> void ComponentGuiElement<physics::Collider>(physics::Collider* collid
     /** @todo put widgets back */
 }
 #endif
-}
+} // namespace nc

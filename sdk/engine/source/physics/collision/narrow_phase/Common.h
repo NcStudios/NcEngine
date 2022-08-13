@@ -8,7 +8,6 @@
 
 namespace nc::physics
 {
-
 struct TriangleXM
 {
     DirectX::XMVECTOR a, b, c;
@@ -163,5 +162,4 @@ Supports MinkowskiSupports(const BVA& a,
     out.worldCSO = XMVectorSubtract(out.worldA, out.worldB);
     return out;
 }
-
 } // namespace nc::physics

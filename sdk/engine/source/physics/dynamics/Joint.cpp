@@ -4,7 +4,6 @@
 
 namespace
 {
-
 auto Skew(DirectX::FXMVECTOR vec) -> DirectX::XMMATRIX
 {
     nc::Vector3 v;
@@ -18,12 +17,10 @@ auto Skew(DirectX::FXMVECTOR vec) -> DirectX::XMMATRIX
         0.0f, 0.0f, 0.0f, 1.0f
     );
 }
-
 } // anonymous namespace
 
 namespace nc::physics
 {
-
 JointSystem::JointSystem(Registry* registry)
     : m_registry{registry},
         m_joints{}
@@ -150,5 +147,4 @@ void JointSystem::UpdateJoint(Joint& joint, float dt)
         joint.p = g_XMZero;
     }
 }
-
 } // namespace nc::physics

@@ -6,7 +6,6 @@
 
 namespace
 {
-
 using namespace nc;
 using namespace nc::physics;
 
@@ -65,12 +64,10 @@ auto KeepMaximum(Vector3 vec) -> Vector3
 
     return vec;
 }
-
 } // anonymous namespace
 
 namespace nc::physics
 {
-
 BspTree::BspTree(Registry* registry)
     : m_registry{registry},
         m_nodes{},
@@ -344,5 +341,4 @@ void BspTree::BroadTest(size_t currentNodeIndex, const Sphere& estimate, std::ve
         }
     }
 }
-
 } // namespace nc::physics

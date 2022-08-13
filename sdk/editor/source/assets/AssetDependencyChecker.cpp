@@ -2,10 +2,9 @@
 #include "AssetManifest.h"
 #include "utility/Output.h"
 
-#include "ecs/component/AudioSource.h"
+#include "audio/AudioSource.h"
 #include "physics/Collider.h"
 #include "ecs/component/ConcaveCollider.h"
-#include "ecs/component/AudioSource.h"
 #include "ecs/component/MeshRenderer.h"
 #include "ecs/View.h"
 
@@ -15,7 +14,7 @@ namespace nc::editor
         : missingDependencies{},
           result{false}
     {
-        for(const auto& audioSource : View<const AudioSource>{registry})
+        for(const auto& audioSource : View<const audio::AudioSource>{registry})
         {
             if(!manifest->Contains(audioSource.m_audioClipPath, AssetType::AudioClip))
                 missingDependencies.push_back(audioSource.m_audioClipPath);

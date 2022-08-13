@@ -5,7 +5,6 @@
 
 namespace nc::physics
 {
-
 /** Simple proxy with all data stored in a single object. */
 struct GenericProxy
 {
@@ -36,5 +35,4 @@ struct ForwardListProxy
     auto Id()         const noexcept -> Entity                  { return proxy.entity;     }
     auto Properties() const noexcept -> ClientObjectProperties  { return proxy.properties; }
 };
-
 } // namespace nc::physics

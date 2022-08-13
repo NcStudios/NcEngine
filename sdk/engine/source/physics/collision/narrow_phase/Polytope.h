@@ -7,7 +7,6 @@
 
 namespace nc::physics
 {
-
 struct Contact;
 
 struct NormalData
@@ -104,5 +103,4 @@ auto Polytope::ComputeNormalData_() -> size_t
 
     return minTriangle;
 }
-
 } // namespace nc::physics

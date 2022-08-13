@@ -18,7 +18,6 @@
 
 namespace nc::physics
 {
-
 template<class Stages>
 class PhysicsPipeline
 {
@@ -279,5 +278,4 @@ void PhysicsPipeline<Stages>::BuildTaskGraph(Registry* registry)
     notifyEventsTask.name("Narrow Phase - Notify Events");
     #endif
 }
-
 } // namespace nc::physics

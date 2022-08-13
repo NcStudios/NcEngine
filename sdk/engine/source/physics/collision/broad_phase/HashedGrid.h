@@ -8,7 +8,6 @@
 
 namespace nc::physics
 {
-
 /** Broad phase using hierarchical grids.
  *  @todo This guy needs work:
  *  - Neighboring cells are not checked. Straddling objects are just thrown up
@@ -352,5 +351,4 @@ auto HashedGrid<ProxyCacheType>::Intersect(proxy_type* current, proxy_type* next
 
     return GetEventType(current->InteractionType(), next->InteractionType());
 }
-
 } // namespace nc::physics

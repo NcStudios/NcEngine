@@ -4,7 +4,6 @@
 
 namespace nc::physics
 {
-
 constexpr size_t GjkMaxIterations = 10u;
 
 template<bool GenerateContacts, class BVA, class BVB>
@@ -261,5 +260,4 @@ bool Gjk(const BVA& a, const BVB& b)
 
     return false;
 }
-
 } // namespace nc::physics

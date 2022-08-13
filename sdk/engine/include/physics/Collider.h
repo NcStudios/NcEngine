@@ -10,14 +10,12 @@
 
 namespace nc
 {
-
 #ifdef NC_EDITOR_ENABLED
 struct DebugWidget;
 #endif
 
 namespace physics
 {
-
 enum class ColliderType : uint8_t
 {
     Box, Sphere, Capsule, Hull
@@ -106,11 +104,9 @@ class Collider final : public ComponentBase
 };
 
 const char* ToCString(ColliderType type);
-
 } // namespace physics
 
 #ifdef NC_EDITOR_ENABLED
 template<> void ComponentGuiElement<physics::Collider>(physics::Collider*);
 #endif
-
 } // namespace nc

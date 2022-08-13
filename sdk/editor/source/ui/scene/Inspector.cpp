@@ -99,16 +99,16 @@ namespace nc::editor
         if(auto* transform  = m_registry->Get<Transform>(entity))         { DrawTransform(transform); }
         if(auto* camera     = m_registry->Get<Camera>(entity))            { DrawCamera(camera); }
         if(auto* renderer   = m_registry->Get<MeshRenderer>(entity))      { DrawMeshRenderer(renderer); }
-        if(auto* light      = m_registry->Get<PointLight>(entity))        { DrawPointLight(light); }
-        if(auto* body       = m_registry->Get<physics::PhysicsBody>(entity))       { DrawPhysicsBody(body); }
-        if(auto* emitter    = m_registry->Get<ParticleEmitter>(entity))   { DrawParticleEmitter(emitter); }
-        if(auto* dispatcher = m_registry->Get<NetworkDispatcher>(entity)) { DrawNetworkDispatcher(dispatcher); }
-        if(auto* collider   = m_registry->Get<physics::Collider>(entity))          { DrawCollider(collider); }
-        if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))   { DrawConcaveCollider(collider); }
-        if(auto* source     = m_registry->Get<AudioSource>(entity))       { DrawAudioSource(source); }
+        if(auto* light      = m_registry->Get<PointLight>(entity))           { DrawPointLight(light); }
+        if(auto* body       = m_registry->Get<physics::PhysicsBody>(entity)) { DrawPhysicsBody(body); }
+        if(auto* emitter    = m_registry->Get<ParticleEmitter>(entity))      { DrawParticleEmitter(emitter); }
+        if(auto* dispatcher = m_registry->Get<NetworkDispatcher>(entity))    { DrawNetworkDispatcher(dispatcher); }
+        if(auto* collider   = m_registry->Get<physics::Collider>(entity))    { DrawCollider(collider); }
+        if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))      { DrawConcaveCollider(collider); }
+        if(auto* source     = m_registry->Get<audio::AudioSource>(entity))   { DrawAudioSource(source); }
     }
 
-    void Inspector::DrawAudioSource(AudioSource* audioSource)
+    void Inspector::DrawAudioSource(audio::AudioSource* audioSource)
     {
         ElementHeader(audioSource);
 

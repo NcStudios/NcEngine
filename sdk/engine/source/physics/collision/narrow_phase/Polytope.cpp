@@ -10,7 +10,6 @@ const auto InitialFaces = std::vector<size_t>{0u,1u,2u,  0u,3u,1u,  0u,2u,3u,  1
 
 namespace nc::physics
 {
-
 void Polytope::Initialize(const Simplex& simplex)
 {
     m_vertices.clear();
@@ -186,5 +185,4 @@ bool Polytope::GetContacts(size_t minFace, Contact* contact) const
     
     return true;
 }
-
 } // namespace nc::physics

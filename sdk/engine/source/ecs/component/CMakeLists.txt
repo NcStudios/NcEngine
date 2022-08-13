@@ -1,6 +1,5 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        AudioSource.cpp
         Camera.cpp
         Component.cpp
         ConcaveCollider.cpp

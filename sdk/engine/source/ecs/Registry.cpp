@@ -20,7 +20,7 @@ namespace nc
           m_maxEntities{maxEntities}
     {
         g_registry = this;
-        RegisterComponentType<AudioSource>();
+        RegisterComponentType<audio::AudioSource>();
         RegisterComponentType<FreeComponentGroup>();
         RegisterComponentType<physics::Collider>();
         RegisterComponentType<CollisionLogic>();

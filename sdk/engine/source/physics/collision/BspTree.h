@@ -9,7 +9,6 @@
 
 namespace nc::physics
 {
-
 /** Internal ConcaveCollider representation */
 struct TriMesh
 {
@@ -123,5 +122,4 @@ void BspTree::FindPairs(std::span<const ProxyType> proxies)
         }
     }
 }
-
 } // namespace nc::physics

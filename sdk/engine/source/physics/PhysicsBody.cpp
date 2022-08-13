@@ -12,7 +12,6 @@ using namespace DirectX;
 
 namespace
 {
-
 using namespace nc;
 using namespace nc::physics;
 
@@ -74,12 +73,10 @@ Vector3 CreateInverseInertiaTensor(Transform* transform, Collider* collider, flo
 
     return Vector3{1.0f / iX, 1.0f / iY, 1.0f / iZ};
 }
-
 } // anonymous namespace
 
 namespace nc::physics
 {
-
 PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 linearFreedom, Vector3 angularFreedom)
     : ComponentBase{entity},
         m_properties{properties},
@@ -211,12 +208,10 @@ IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
     transform->Rotate(rotQuat);
     return IntegrationResult::Integrated;
 }
-
 } // namespace nc::physics
 
 namespace nc
 {
-
 #ifdef NC_EDITOR_ENABLED
 template<> void ComponentGuiElement<physics::PhysicsBody>(physics::PhysicsBody* body)
 {
@@ -237,5 +232,4 @@ template<> void ComponentGuiElement<physics::PhysicsBody>(physics::PhysicsBody* 
     ImGui::EndGroup();
 }
 #endif
-
 } // namespace nc

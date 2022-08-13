@@ -4,7 +4,6 @@
 
 namespace nc
 {
-class AudioSource;
 class Camera;
 class ConcaveCollider;
 class MeshRenderer;
@@ -13,6 +12,11 @@ class ParticleEmitter;
 class PointLight;
 class Registry;
 class Transform;
+
+namespace audio
+{
+class AudioSource;
+}
 
 namespace physics
 {
@@ -37,7 +41,7 @@ namespace nc::editor
             Registry* m_registry;
             AssetManifest* m_assetManifest;
 
-            void DrawAudioSource(AudioSource* audioSource);
+            void DrawAudioSource(audio::AudioSource* audioSource);
             void DrawCamera(Camera* camera);
             void DrawCollider(physics::Collider* collider);
             void DrawConcaveCollider(ConcaveCollider* concaveCollider);

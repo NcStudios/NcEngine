@@ -11,7 +11,6 @@ using namespace DirectX;
 
 namespace
 {
-
 using namespace nc;
 using namespace nc::physics;
 
@@ -299,12 +298,10 @@ void ResolveJoint(Joint& joint)
         XMVector3Transform(XMVector3Cross(joint.rB, impulse), joint.bodyB->GetInverseInertia())
     );
 }
-
 } // anonymous namespace
 
 namespace nc::physics
 {
-
 Solver::Solver(Registry* registry)
     : m_registry{registry},
         m_contactConstraints{},
@@ -374,5 +371,4 @@ void Solver::ResolveConstraints(std::span<Joint> joints, float dt)
         }
     }
 }
-
 } // namespace nc::physics

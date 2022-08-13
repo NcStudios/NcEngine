@@ -10,7 +10,6 @@
 
 namespace nc::physics
 {
-
 /** @brief Factor for creating a physics module instance */
 auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<PhysicsModule>;
 
@@ -47,6 +46,4 @@ class PhysicsModuleImpl final : public PhysicsModule
         unsigned m_currentIterations;
         tf::Taskflow m_tasks;
 };
-
 } // namespace nc::physics
-

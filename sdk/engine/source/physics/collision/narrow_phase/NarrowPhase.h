@@ -11,12 +11,10 @@
 
 namespace nc
 {
-
 class CollisionLogic;
 
 namespace physics
 {
-
 class NarrowPhase
 {
     public:
@@ -113,6 +111,5 @@ void NarrowPhase::FindTriggerPairs(std::span<const BroadPair<ProxyType>> trigger
         }
     }
 }
-
 } // namespace physics
 } // namespace nc

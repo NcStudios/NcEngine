@@ -4,7 +4,6 @@
 
 namespace nc::physics
 {
-
 /** General Behavior */
 constexpr size_t MaxPhysicsIterations = 3u; // Maximum number of times physics can run per game loop iteration
 constexpr float Gravity = -9.81f;           // Gravitational acceleration
@@ -32,5 +31,4 @@ constexpr float SleepEpsilon = 0.01f;    // Velocity threshold for physics sleep
 constexpr uint8_t FramesUntilSleep = 5u; // How many frames below epsilon until an object sleeps
 
 #define NC_PHYSICS_DEBUGGING 0
-
 } // namespace nc::physics

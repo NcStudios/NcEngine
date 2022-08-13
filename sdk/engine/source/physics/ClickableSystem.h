@@ -6,7 +6,6 @@
 
 namespace nc::physics
 {
-
 class ClickableSystem
 {
     public:
@@ -20,5 +19,4 @@ class ClickableSystem
     private:
         std::vector<IClickable*> m_clickableComponents;
 };
-
 } // namespace nc::physics

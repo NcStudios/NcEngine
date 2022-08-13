@@ -6,7 +6,6 @@
 
 namespace nc::physics
 {
-
 class Solver
 {
     public:
@@ -29,5 +28,4 @@ class Solver
         std::vector<ContactConstraint> m_contactConstraints;
         std::vector<PositionConstraint> m_positionConstraints;
 };
-
 } // namespace nc::physics
