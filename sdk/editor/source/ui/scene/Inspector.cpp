@@ -100,10 +100,10 @@ namespace nc::editor
         if(auto* camera     = m_registry->Get<Camera>(entity))            { DrawCamera(camera); }
         if(auto* renderer   = m_registry->Get<MeshRenderer>(entity))      { DrawMeshRenderer(renderer); }
         if(auto* light      = m_registry->Get<PointLight>(entity))        { DrawPointLight(light); }
-        if(auto* body       = m_registry->Get<PhysicsBody>(entity))       { DrawPhysicsBody(body); }
+        if(auto* body       = m_registry->Get<physics::PhysicsBody>(entity))       { DrawPhysicsBody(body); }
         if(auto* emitter    = m_registry->Get<ParticleEmitter>(entity))   { DrawParticleEmitter(emitter); }
         if(auto* dispatcher = m_registry->Get<NetworkDispatcher>(entity)) { DrawNetworkDispatcher(dispatcher); }
-        if(auto* collider   = m_registry->Get<Collider>(entity))          { DrawCollider(collider); }
+        if(auto* collider   = m_registry->Get<physics::Collider>(entity))          { DrawCollider(collider); }
         if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))   { DrawConcaveCollider(collider); }
         if(auto* source     = m_registry->Get<AudioSource>(entity))       { DrawAudioSource(source); }
     }
@@ -130,7 +130,7 @@ namespace nc::editor
         ElementHeader(camera);
     }
 
-    void Inspector::DrawCollider(Collider* collider)
+    void Inspector::DrawCollider(physics::Collider* collider)
     {
         ElementHeader(collider);
 
@@ -142,17 +142,17 @@ namespace nc::editor
         ImGui::SetNextItemWidth(75);
         if(ImGui::BeginCombo("Type##collidertypecombo", ToCString(info.type)))
         {
-            if(ImGui::Selectable("Box") && info.type != ColliderType::Box)
+            if(ImGui::Selectable("Box") && info.type != physics::ColliderType::Box)
             {
-                collider->SetProperties(BoxProperties{.center = info.offset, .extents = info.scale});
+                collider->SetProperties(physics::BoxProperties{.center = info.offset, .extents = info.scale});
             }
-            if(ImGui::Selectable("Capsule") && info.type != ColliderType::Capsule)
+            if(ImGui::Selectable("Capsule") && info.type != physics::ColliderType::Capsule)
             {
-                collider->SetProperties(CapsuleProperties{.center = info.offset, .height = info.scale.y * 2.0f, .radius = info.scale.x * 0.5f});
+                collider->SetProperties(physics::CapsuleProperties{.center = info.offset, .height = info.scale.y * 2.0f, .radius = info.scale.x * 0.5f});
             }
-            if(ImGui::Selectable("Sphere") && info.type != ColliderType::Sphere)
+            if(ImGui::Selectable("Sphere") && info.type != physics::ColliderType::Sphere)
             {
-                collider->SetProperties(SphereProperties{.center = info.offset, .radius = info.scale.x * 0.5f});
+                collider->SetProperties(physics::SphereProperties{.center = info.offset, .radius = info.scale.x * 0.5f});
             }
             if(ImGui::BeginMenu("Hull"))
             {
@@ -162,7 +162,7 @@ namespace nc::editor
                     {
                         try
                         {
-                            collider->SetProperties(HullProperties{.assetPath = asset.ncaPath.value().string()});
+                            collider->SetProperties(physics::HullProperties{.assetPath = asset.ncaPath.value().string()});
                         }
                         catch(const std::runtime_error& e)
                         {
@@ -181,36 +181,36 @@ namespace nc::editor
 
         switch(collider->m_info.type)
         {
-            case ColliderType::Box:
+            case physics::ColliderType::Box:
             {
                 DrawBoxColliderWidget(collider);
                 break;
             }
-            case ColliderType::Capsule:
+            case physics::ColliderType::Capsule:
             {
                 DrawCapsuleColliderWidget(collider);
                 break;
             }
-            case ColliderType::Hull:
+            case physics::ColliderType::Hull:
             {
                 DrawHullColliderWidget(collider);
                 break;
             }
-            case ColliderType::Sphere:
+            case physics::ColliderType::Sphere:
             {
                 DrawSphereColliderWidget(collider);
             }
         }
     }
 
-    void Inspector::DrawBoxColliderWidget(Collider* collider)
+    void Inspector::DrawBoxColliderWidget(physics::Collider* collider)
     {
         xyzWidgetHeader("");
         InputVector3("Center", &collider->m_info.offset, 0.1f, -100.0f, 100.0f);
         InputVector3("Extents", &collider->m_info.scale, 0.1f, 0.01f, 1000.0f);
     }
 
-    void Inspector::DrawCapsuleColliderWidget(Collider* collider)
+    void Inspector::DrawCapsuleColliderWidget(physics::Collider* collider)
     {
         auto& info = collider->m_info;
 
@@ -225,17 +225,17 @@ namespace nc::editor
             collider->m_info.scale = Vector3{radius * 2.0f, height * 0.5f, radius * 2.0f};
     }
 
-    void Inspector::DrawHullColliderWidget(Collider* collider)
+    void Inspector::DrawHullColliderWidget(physics::Collider* collider)
     {
         const char* assetPath = collider->m_info.hullAssetPath.c_str();
         auto assets = m_assetManifest->View(AssetType::HullCollider);
         AssetCombo("##hullcombo", assetPath, CubeHullColliderPath, assets, [collider](const std::string& path)
         {
-            collider->SetProperties(HullProperties{.assetPath = path});
+            collider->SetProperties(physics::HullProperties{.assetPath = path});
         });
     }
 
-    void Inspector::DrawSphereColliderWidget(Collider* collider)
+    void Inspector::DrawSphereColliderWidget(physics::Collider* collider)
     {
         xyzWidgetHeader("      ");
         InputVector3("Center", &collider->m_info.offset, 0.1f, 100.0f, 100.0f);
@@ -324,7 +324,7 @@ namespace nc::editor
         ElementHeader(particleEmitter);
     }
 
-    void Inspector::DrawPhysicsBody(PhysicsBody* physicsBody)
+    void Inspector::DrawPhysicsBody(physics::PhysicsBody* physicsBody)
     {
         ElementHeader(physicsBody);
         IMGUI_SCOPE(ItemWidth, 50.0f);

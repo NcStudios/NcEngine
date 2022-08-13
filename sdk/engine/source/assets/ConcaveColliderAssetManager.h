@@ -9,7 +9,7 @@ namespace nc
 {
     struct ConcaveColliderFlyweight
     {
-        std::vector<Triangle> triangles;
+        std::vector<physics::Triangle> triangles;
         float maxExtent;
     };
 

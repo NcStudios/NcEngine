@@ -1,52 +1,54 @@
 #include "Dynamics.h"
-#include "ecs/component/Collider.h"
-#include "ecs/component/PhysicsBody.h"
 #include "ecs/View.h"
+#include "physics/Collider.h"
+#include "physics/PhysicsBody.h"
 #include "physics/PhysicsConstants.h"
 
 namespace
 {
-    const auto GravityVector = DirectX::XMVectorSet(0.0f, nc::physics::Gravity, 0.0f, 0.0f);
+const auto GravityVector = DirectX::XMVectorSet(0.0f, nc::physics::Gravity, 0.0f, 0.0f);
 }
 
 namespace nc::physics
 {
-    void UpdateWorldInertiaTensors(Registry* registry)
+
+void UpdateWorldInertiaTensors(Registry* registry)
+{
+    for(auto& body : View<PhysicsBody>{registry})
     {
-        for(auto& body : View<PhysicsBody>{registry})
+        const auto* transform = registry->Get<Transform>(body.ParentEntity());
+        body.UpdateWorldInertia(transform);
+    }
+}
+
+void ApplyGravity(Registry* registry, float dt)
+{
+    const auto g = DirectX::XMVectorScale(GravityVector, dt);
+
+    for(auto& body : View<PhysicsBody>{registry})
+    {
+        if(body.UseGravity())
         {
-            const auto* transform = registry->Get<Transform>(body.ParentEntity());
-            body.UpdateWorldInertia(transform);
+            body.ApplyVelocity(g);
         }
     }
+}
 
-    void ApplyGravity(Registry* registry, float dt)
+void Integrate(Registry* registry, float dt)
+{
+    for(auto& body : View<PhysicsBody>{registry})
     {
-        const auto g = DirectX::XMVectorScale(GravityVector, dt);
+        auto* transform = registry->Get<Transform>(body.ParentEntity());
 
-        for(auto& body : View<PhysicsBody>{registry})
+        if(body.Integrate(transform, dt) == IntegrationResult::PutToSleep)
         {
-            if(body.UseGravity())
+            if constexpr(EnableSleeping)
             {
-                body.ApplyVelocity(g);
-            }
-        }
-    }
-
-    void Integrate(Registry* registry, float dt)
-    {
-        for(auto& body : View<PhysicsBody>{registry})
-        {
-            auto* transform = registry->Get<Transform>(body.ParentEntity());
-
-            if(body.Integrate(transform, dt) == IntegrationResult::PutToSleep)
-            {
-                if constexpr(EnableSleeping)
-                {
-                    auto* collider = registry->Get<Collider>(body.ParentEntity());
-                    collider->Sleep();
-                }
+                auto* collider = registry->Get<Collider>(body.ParentEntity());
+                collider->Sleep();
             }
         }
     }
 }
+
+} // namespace nc::physics

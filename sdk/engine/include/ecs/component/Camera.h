@@ -33,7 +33,7 @@ namespace nc
              * @brief Calculate the camera's viewport.
              * @return Frustum
              */
-            auto CalculateFrustum() const noexcept -> Frustum;
+            auto CalculateFrustum() const noexcept -> physics::Frustum;
 
             /** @brief Construct a new view matrix based on the current transform. */
             virtual void UpdateViewMatrix();

@@ -5,46 +5,48 @@
 
 namespace nc::physics
 {
-    class ManifoldCache : public PairCache<ManifoldCache, Manifold>
-    {
-        public:
-            bool PairEqual(Entity a, Entity b, const Manifold& manifold)
-            {
-                return (a == manifold.Event().first && b == manifold.Event().second) ||
-                       (a == manifold.Event().second && b == manifold.Event().first);
-            }
 
-            void AddToExisting(Manifold* existing, CollisionEventType, const Contact& contact)
-            {
-                existing->AddContact(contact);
-            }
+class ManifoldCache : public PairCache<ManifoldCache, Manifold>
+{
+    public:
+        bool PairEqual(Entity a, Entity b, const Manifold& manifold)
+        {
+            return (a == manifold.Event().first && b == manifold.Event().second) ||
+                    (a == manifold.Event().second && b == manifold.Event().first);
+        }
 
-            auto ConstructNew(Entity a, Entity b, CollisionEventType type, const Contact& contact) -> Manifold
-            {
-                return Manifold{a, b, type, contact};
-            }
+        void AddToExisting(Manifold* existing, CollisionEventType, const Contact& contact)
+        {
+            existing->AddContact(contact);
+        }
 
-            auto Hash(const Manifold& manifold) -> uint32_t
-            {
-                return PairCache<ManifoldCache, Manifold>::Hash(manifold.Event().first, manifold.Event().second);
-            }
+        auto ConstructNew(Entity a, Entity b, CollisionEventType type, const Contact& contact) -> Manifold
+        {
+            return Manifold{a, b, type, contact};
+        }
 
-            void AddToRemoved(Entity a, Entity b)
-            {
-                m_removed.emplace_back(a, b);
-            }
+        auto Hash(const Manifold& manifold) -> uint32_t
+        {
+            return PairCache<ManifoldCache, Manifold>::Hash(manifold.Event().first, manifold.Event().second);
+        }
 
-            auto GetRemoved() -> std::span<const std::pair<Entity, Entity>>
-            {
-                return m_removed;
-            }
-            
-            void ClearRemoved()
-            {
-                m_removed.clear();
-            }
+        void AddToRemoved(Entity a, Entity b)
+        {
+            m_removed.emplace_back(a, b);
+        }
 
-        private:
-            std::vector<std::pair<Entity, Entity>> m_removed;
-    };
-}
+        auto GetRemoved() -> std::span<const std::pair<Entity, Entity>>
+        {
+            return m_removed;
+        }
+        
+        void ClearRemoved()
+        {
+            m_removed.clear();
+        }
+
+    private:
+        std::vector<std::pair<Entity, Entity>> m_removed;
+};
+
+} // namespace nc::physics

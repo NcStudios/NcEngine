@@ -201,10 +201,10 @@ namespace nc::editor
     void SceneGraph::EntityContextMenu(Entity entity)
     {
         bool hasCamera = m_registry->Contains<Camera>(entity);
-        bool hasCollider = m_registry->Contains<Collider>(entity);
+        bool hasCollider = m_registry->Contains<physics::Collider>(entity);
         bool hasConcaveCollider = m_registry->Contains<ConcaveCollider>(entity);
         bool hasMeshRenderer = m_registry->Contains<MeshRenderer>(entity);
-        bool hasPhysicsBody = m_registry->Contains<PhysicsBody>(entity);
+        bool hasPhysicsBody = m_registry->Contains<physics::PhysicsBody>(entity);
         bool hasPointLight = m_registry->Contains<PointLight>(entity);
 
         if(ImGui::Selectable("Make Root"))
@@ -231,16 +231,16 @@ namespace nc::editor
 
             if(!hasCollider && !hasConcaveCollider && ImGui::BeginMenu("Collider"))
             {
-                if(ImGui::Selectable("Box")) m_registry->Add<Collider>(entity, BoxProperties{}, false);
-                if(ImGui::Selectable("Capsule")) m_registry->Add<Collider>(entity, CapsuleProperties{}, false);
-                if(ImGui::Selectable("Sphere")) m_registry->Add<Collider>(entity, SphereProperties{}, false);
+                if(ImGui::Selectable("Box")) m_registry->Add<physics::Collider>(entity, physics::BoxProperties{}, false);
+                if(ImGui::Selectable("Capsule")) m_registry->Add<physics::Collider>(entity, physics::CapsuleProperties{}, false);
+                if(ImGui::Selectable("Sphere")) m_registry->Add<physics::Collider>(entity, physics::SphereProperties{}, false);
 
                 if(ImGui::BeginMenu("Hull"))
                 {
                     for(const auto& asset : m_assetManifest->View(AssetType::HullCollider))
                     {
                         if(ImGui::Selectable(asset.name.c_str()))
-                            m_registry->Add<Collider>(entity, HullProperties{.assetPath = asset.ncaPath.value().string()}, false);
+                            m_registry->Add<physics::Collider>(entity, physics::HullProperties{.assetPath = asset.ncaPath.value().string()}, false);
                     }
 
                     ImGui::EndMenu();
@@ -268,9 +268,9 @@ namespace nc::editor
             if(!hasPhysicsBody && ImGui::Selectable("PhysicsBody"))
             {
                 if(!hasCollider)
-                    m_registry->Add<Collider>(entity, BoxProperties{}, false);
+                    m_registry->Add<physics::Collider>(entity, physics::BoxProperties{}, false);
 
-                m_registry->Add<PhysicsBody>(entity, PhysicsProperties{});
+                m_registry->Add<physics::PhysicsBody>(entity, physics::PhysicsProperties{});
             }
             
             if(!hasPointLight && ImGui::Selectable("PointLight"))
@@ -285,16 +285,16 @@ namespace nc::editor
         {
             if(hasCollider && ImGui::Selectable("Collider"))
             {
-                m_registry->Remove<Collider>(entity);
+                m_registry->Remove<physics::Collider>(entity);
                 if(hasPhysicsBody)
-                    m_registry->Remove<PhysicsBody>(entity);
+                    m_registry->Remove<physics::PhysicsBody>(entity);
             }
 
             if(hasConcaveCollider && ImGui::Selectable("ConcaveCollider"))
             {
                 m_registry->Remove<ConcaveCollider>(entity);
                 if(hasPhysicsBody)
-                    m_registry->Remove<PhysicsBody>(entity);
+                    m_registry->Remove<physics::PhysicsBody>(entity);
             }
 
             if(hasMeshRenderer && ImGui::Selectable("MeshRenderer"))
@@ -304,7 +304,7 @@ namespace nc::editor
 
             if(hasPhysicsBody && ImGui::Selectable("PhysicsBody"))
             {
-                m_registry->Remove<PhysicsBody>(entity);
+                m_registry->Remove<physics::PhysicsBody>(entity);
             }
             
             if(hasPointLight && ImGui::Selectable("PointLight"))

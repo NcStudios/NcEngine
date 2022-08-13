@@ -25,7 +25,7 @@ namespace nc
         float maxExtent;
         file >> triangleCount >> maxExtent;
 
-        std::vector<Triangle> triangles;
+        std::vector<physics::Triangle> triangles;
         triangles.reserve(triangleCount);
         Vector3 a, b, c;
 
@@ -79,7 +79,7 @@ namespace nc
         
         return ConcaveColliderView
         {
-            .triangles = std::span<const Triangle>{it->second.triangles},
+            .triangles = std::span<const physics::Triangle>{it->second.triangles},
             .maxExtent = it->second.maxExtent
         };
     }

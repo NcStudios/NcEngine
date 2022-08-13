@@ -31,7 +31,7 @@ namespace nc::graphics
             MeshBatcher& operator =(MeshBatcher&&) = delete;
             MeshBatcher& operator =(const MeshBatcher&) = delete;
 
-            auto BuildBatches(const Frustum& cameraFrustum) -> std::span<const Batch>;
+            auto BuildBatches(const physics::Frustum& cameraFrustum) -> std::span<const Batch>;
             void Clear() noexcept;
 
         private:

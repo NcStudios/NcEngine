@@ -189,34 +189,34 @@ namespace nc::editor
     {
         ReadTokenFromAction(args);
         ReadTokenFromAction(args);
-        BoxProperties properties{ .center = ReadVector3FromAction(args), .extents = ReadVector3FromAction(args) };
-        m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
+        physics::BoxProperties properties{ .center = ReadVector3FromAction(args), .extents = ReadVector3FromAction(args) };
+        m_registry->Add<physics::Collider>(entity, properties, ReadBoolFromAction(args));
     }
 
     void SceneReader::LoadCapsuleCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
         ReadTokenFromAction(args);
-        CapsuleProperties properties
+        physics::CapsuleProperties properties
         {
             .center = ReadVector3FromAction(args),
             .height = ReadFloatFromAction(args),
             .radius = ReadFloatFromAction(args)
         };
-        m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
+        m_registry->Add<physics::Collider>(entity, properties, ReadBoolFromAction(args));
     }
 
     void SceneReader::LoadHullCollider(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
         ReadTokenFromAction(args);
-        HullProperties properties{ .assetPath = ReadQuotedStringFromAction(args) };
+        physics::HullProperties properties{ .assetPath = ReadQuotedStringFromAction(args) };
         bool isTrigger = ReadBoolFromAction(args);
 
         /** @todo should have specific exception so we don't mask other failures*/
         try
         {
-            m_registry->Add<Collider>(entity, properties, isTrigger);
+            m_registry->Add<physics::Collider>(entity, properties, isTrigger);
         }
         catch(const std::runtime_error&)
         {
@@ -229,8 +229,8 @@ namespace nc::editor
     {
         ReadTokenFromAction(args);
         ReadTokenFromAction(args);
-        SphereProperties properties{ .center = ReadVector3FromAction(args), .radius = ReadFloatFromAction(args) };
-        m_registry->Add<Collider>(entity, properties, ReadBoolFromAction(args));
+        physics::SphereProperties properties{ .center = ReadVector3FromAction(args), .radius = ReadFloatFromAction(args) };
+        m_registry->Add<physics::Collider>(entity, properties, ReadBoolFromAction(args));
     }
 
     void SceneReader::LoadConcaveCollider(Entity entity, std::stringstream& args)
@@ -256,7 +256,7 @@ namespace nc::editor
 
         ReadTokenFromAction(args);
         ReadTokenFromAction(args);
-        PhysicsProperties properties
+        physics::PhysicsProperties properties
         {
             .mass = ReadFloatFromAction(args),
             .drag = ReadFloatFromAction(args),
@@ -266,7 +266,7 @@ namespace nc::editor
             .useGravity = ReadBoolFromAction(args),
             .isKinematic = ReadBoolFromAction(args)
         };
-        m_registry->Add<PhysicsBody>(entity, properties);
+        m_registry->Add<physics::PhysicsBody>(entity, properties);
     }
 
     void SceneReader::LoadPointLight(Entity entity, std::stringstream& args)

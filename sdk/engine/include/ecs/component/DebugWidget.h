@@ -1,14 +1,15 @@
 #pragma once
 
-#include "Collider.h"
+#include "physics/Collider.h"
+
 #include "DirectXMath.h"
 
 namespace nc
 {
-    struct DebugWidget
-    {
-        DebugWidget(ColliderType colliderType, DirectX::FXMMATRIX matrix);
-        std::string meshUid;
-        DirectX::XMMATRIX transformationMatrix;
-    };
+struct DebugWidget
+{
+    DebugWidget(physics::ColliderType colliderType, DirectX::FXMMATRIX matrix);
+    std::string meshUid;
+    DirectX::XMMATRIX transformationMatrix;
+};
 }

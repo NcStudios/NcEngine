@@ -5,19 +5,17 @@
 
 namespace
 {
-    using namespace nc;
-
-    bool IsViewedByFrustum(const Frustum& frustum, const MeshRenderer& renderer, DirectX::FXMMATRIX transform)
+    bool IsViewedByFrustum(const nc::physics::Frustum& frustum, const nc::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
     {
-        const auto maxScaleExtent = GetMaxScaleExtent(transform);
+        const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
         const auto maxMeshExtent = renderer.GetMesh().maxExtent;
-        Sphere sphere{.center = Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent};
+        auto sphere = nc::physics::Sphere{.center = nc::Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent};
         DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
-        return physics::Intersect(frustum, sphere);
+        return nc::physics::Intersect(frustum, sphere);
     }
 
     /** @todo This is crap. We need a hash or id for materials. */
-    bool BelongsToBatch(const MeshRenderer& renderer, const graphics::Batch* batch)
+    bool BelongsToBatch(const nc::MeshRenderer& renderer, const nc::graphics::Batch* batch)
     {
         if(renderer.GetMesh().firstIndex != batch->mesh.firstIndex)
             return false;
@@ -52,7 +50,7 @@ namespace nc::graphics
         // m_registry->RegisterOnRemoveCallback<MeshRenderer>([this](Entity) { this->m_isDirty = true; });
     }
 
-    auto MeshBatcher::BuildBatches(const Frustum& cameraFrustum) -> std::span<const Batch>
+    auto MeshBatcher::BuildBatches(const physics::Frustum& cameraFrustum) -> std::span<const Batch>
     {
         if(m_isDirty)
         {

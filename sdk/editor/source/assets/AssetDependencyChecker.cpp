@@ -3,7 +3,7 @@
 #include "utility/Output.h"
 
 #include "ecs/component/AudioSource.h"
-#include "ecs/component/Collider.h"
+#include "physics/Collider.h"
 #include "ecs/component/ConcaveCollider.h"
 #include "ecs/component/AudioSource.h"
 #include "ecs/component/MeshRenderer.h"
@@ -21,9 +21,9 @@ namespace nc::editor
                 missingDependencies.push_back(audioSource.m_audioClipPath);
         }
 
-        for(const auto& collider : View<const Collider>{registry})
+        for(const auto& collider : View<const physics::Collider>{registry})
         {
-            if(collider.GetType() != ColliderType::Hull)
+            if(collider.GetType() != physics::ColliderType::Hull)
                 continue;
 
             if(!manifest->ContainsNca(collider.m_info.hullAssetPath, AssetType::HullCollider))

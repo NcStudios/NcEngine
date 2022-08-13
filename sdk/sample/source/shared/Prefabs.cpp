@@ -1,10 +1,10 @@
 #include "Prefabs.h"
 #include "asset/Assets.h"
 #include "ecs/Registry.h"
-#include "ecs/component/Collider.h"
+#include "physics/Collider.h"
 #include "ecs/component/ConcaveCollider.h"
 #include "ecs/component/MeshRenderer.h"
-#include "ecs/component/PhysicsBody.h"
+#include "physics/PhysicsBody.h"
 #include "ecs/component/PointLight.h"
 #include "ecs/component/Transform.h"
 

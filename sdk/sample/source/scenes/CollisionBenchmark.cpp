@@ -87,7 +87,7 @@ namespace nc::sample
 
         auto spawnExtension = [registry](Entity entity)
         {
-            registry->Add<Collider>(entity, BoxProperties{}, false);
+            registry->Add<physics::Collider>(entity, physics::BoxProperties{}, false);
         };
 
         // Dynamic Cube Spawner
@@ -130,4 +130,4 @@ namespace nc::sample
         DestroyStaticCallback = nullptr;
         GetFPSCallback = nullptr;
     }
-}
+} // namespace nc::sample

@@ -63,7 +63,7 @@ namespace nc
 
     struct ConcaveColliderView
     {
-        std::span<const Triangle> triangles;
+        std::span<const physics::Triangle> triangles;
         float maxExtent;
     };
 

@@ -6,17 +6,19 @@
 
 namespace nc::physics
 {
-    class ClickableSystem
-    {
-        public:
-            ClickableSystem();
 
-            void RegisterClickable(IClickable* toAdd);
-            void UnregisterClickable(IClickable* toRemove) noexcept;
-            IClickable* RaycastToClickables(LayerMask mask);
-            void Clear();
+class ClickableSystem
+{
+    public:
+        ClickableSystem();
 
-        private:
-            std::vector<IClickable*> m_clickableComponents;
-    };
-}
+        void RegisterClickable(IClickable* toAdd);
+        void UnregisterClickable(IClickable* toRemove) noexcept;
+        IClickable* RaycastToClickables(LayerMask mask);
+        void Clear();
+
+    private:
+        std::vector<IClickable*> m_clickableComponents;
+};
+
+} // namespace nc::physics

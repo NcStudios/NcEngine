@@ -66,11 +66,11 @@ namespace nc::sample
         public:
             PrefabSelector(Entity self);
             void Run(Entity self, Registry* registry, float);
-            void Select(ColliderType type);
+            void Select(physics::ColliderType type);
 
         private:
             Entity m_currentObject;
-            ColliderType m_typeToSpawn;
+            physics::ColliderType m_typeToSpawn;
             bool m_doSpawn;
     };
 
@@ -90,16 +90,16 @@ namespace nc::sample
     };
 
     /** Outputs to the game log when the parent object receives a click event. */
-    class Clickable : public FreeComponent, public IClickable
+    class Clickable : public FreeComponent, public physics::IClickable
     {
         public:
-            Clickable(Entity self, std::string tag, PhysicsModule* physicsModule);
+            Clickable(Entity self, std::string tag, physics::PhysicsModule* physicsModule);
             ~Clickable() noexcept;
             void OnClick() override;
 
         private:
             std::string m_Tag;
-            PhysicsModule* m_physicsModule;
+            physics::PhysicsModule* m_physicsModule;
     };
 
     /** Notifies the PhysicsSystem to perform a raycast against clickables 
@@ -107,12 +107,12 @@ namespace nc::sample
     class ClickHandler : public FreeComponent
     {
         public:
-            ClickHandler(Entity self, LayerMask mask, PhysicsModule* physicsModule);
+            ClickHandler(Entity self, physics::LayerMask mask, physics::PhysicsModule* physicsModule);
             void Run(Entity self, Registry* registry, float dt);
-            void SetLayer(LayerMask mask);
+            void SetLayer(physics::LayerMask mask);
 
         private:
-            LayerMask m_mask;
-            PhysicsModule* m_physicsModule;
+            physics::LayerMask m_mask;
+            physics::PhysicsModule* m_physicsModule;
     };
 }

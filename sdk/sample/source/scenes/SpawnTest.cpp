@@ -5,7 +5,7 @@
 #include "shared/Spawner/Spawner.h"
 
 #include "NcEngine.h"
-#include "ecs/component/PhysicsBody.h"
+#include "physics/PhysicsBody.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
 #include "math/Random.h"
@@ -79,23 +79,23 @@ namespace nc::sample
 
         // Collider that destroys anything leaving its bounded area
         auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(200.0f), .tag = "KillBox", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(killBox, BoxProperties{}, true);
+        registry->Add<physics::Collider>(killBox, physics::BoxProperties{}, true);
         registry->Add<CollisionLogic>(killBox, nullptr, nullptr, nullptr, DestroyOnTriggerExit);
 
         auto platform = prefab::Create(registry, prefab::Resource::Ground, {.position = Vector3{0.0f, 0.0f, 0.0f}, .scale = Vector3{160.0f, 6.0f, 160.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(platform, BoxProperties{}, false);
+        registry->Add<physics::Collider>(platform, physics::BoxProperties{}, false);
 
         auto w1 = prefab::Create(registry, prefab::Resource::Ground, {.position = Vector3{0.0f, 0.0f, 80.0f}, .scale = Vector3{160.0f, 8.0f, 1.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(w1, BoxProperties{}, false);
+        registry->Add<physics::Collider>(w1, physics::BoxProperties{}, false);
 
         auto w2 = prefab::Create(registry, prefab::Resource::Ground, {.position = Vector3{0.0f, 0.0f, -80.0f}, .scale = Vector3{160.0f, 8.0f, 1.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(w2, BoxProperties{}, false);
+        registry->Add<physics::Collider>(w2, physics::BoxProperties{}, false);
 
         auto w3 = prefab::Create(registry, prefab::Resource::Ground, {.position = Vector3{80.0f, 0.0f, 0.0f}, .scale = Vector3{1.0f, 8.0f, 160.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(w3, BoxProperties{}, false);
+        registry->Add<physics::Collider>(w3, physics::BoxProperties{}, false);
 
         auto w4 = prefab::Create(registry, prefab::Resource::Ground, {.position = Vector3{-80.0f, 0.0f, 0.0f}, .scale = Vector3{1.0f, 8.0f, 160.0f}, .tag = "Platform", .flags = Entity::Flags::Static});
-        registry->Add<Collider>(w4, BoxProperties{}, false);
+        registry->Add<physics::Collider>(w4, physics::BoxProperties{}, false);
 
         // Fixed interval spawner for moving cubes
         SpawnBehavior dynamicCubeBehavior
@@ -108,8 +108,8 @@ namespace nc::sample
 
         auto dynamicCubeExtension = [registry](Entity handle)
         {
-            registry->Add<Collider>(handle, BoxProperties{}, false);
-            registry->Add<PhysicsBody>(handle, PhysicsProperties{.mass = 5.0f});
+            registry->Add<physics::Collider>(handle, physics::BoxProperties{}, false);
+            registry->Add<physics::PhysicsBody>(handle, physics::PhysicsProperties{.mass = 5.0f});
         };
 
         auto spawner = registry->Add<Entity>({});

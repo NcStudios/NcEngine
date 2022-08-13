@@ -229,7 +229,7 @@ namespace nc::editor
 
     void SceneWriter::WriteCollider(Entity entity, const std::string& handleName)
     {
-        auto* collider = m_registry->Get<Collider>(entity);
+        auto* collider = m_registry->Get<physics::Collider>(entity);
 
         if(!collider)
             return;
@@ -240,24 +240,24 @@ namespace nc::editor
 
         switch(collider->GetType())
         {
-            case ColliderType::Box:
+            case physics::ColliderType::Box:
             {
                 m_file << SceneMacro::AddBoxCollider << "( " << handleName << " , " << SceneMacro::BoxProperties << "( " << center << " , " << scale << " ) , " << isTrigger << " )\n";
                 break;
             }
-            case ColliderType::Capsule:
+            case physics::ColliderType::Capsule:
             {
                 auto height = scale.y * 2.0f;
                 auto radius = scale.x * 0.5f;
                 m_file << SceneMacro::AddCapsuleCollider << "( " << handleName << " , " << SceneMacro::CapsuleProperties << "( " << center << " , " << height << " , " << radius << " ) , " << isTrigger << " )\n";
                 break;
             }
-            case ColliderType::Hull:
+            case physics::ColliderType::Hull:
             {
                 m_file << SceneMacro::AddHullCollider << "( " << handleName << " , " << SceneMacro::HullProperties << "( " << "\"" << collider->GetInfo().hullAssetPath << "\" ) , " << isTrigger << " )\n";
                 break;
             }
-            case ColliderType::Sphere:
+            case physics::ColliderType::Sphere:
             {
                 auto radius = scale.x * 0.5f;
                 m_file << SceneMacro::AddSphereCollider << "( " << handleName << " , " << SceneMacro::SphereProperties << "( " << center << " , " << radius << " ) , " << isTrigger << " );\n";
@@ -281,7 +281,7 @@ namespace nc::editor
     {
         /** @todo need linear and angular freedoms*/
 
-        auto* body = m_registry->Get<PhysicsBody>(entity);
+        auto* body = m_registry->Get<physics::PhysicsBody>(entity);
 
         if(!body)
             return;

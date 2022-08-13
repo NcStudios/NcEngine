@@ -100,7 +100,7 @@ namespace nc::sample
     PrefabSelector::PrefabSelector(Entity entity)
         : FreeComponent{entity},
           m_currentObject{Entity::Null()},
-          m_typeToSpawn{ColliderType::Box},
+          m_typeToSpawn{physics::ColliderType::Box},
           m_doSpawn{true}
     {
     }
@@ -114,44 +114,44 @@ namespace nc::sample
 
         if(m_currentObject.Valid())
         {
-            registry->Remove<Collider>(m_currentObject);
+            registry->Remove<physics::Collider>(m_currentObject);
             registry->Remove<Entity>(m_currentObject);
         }
 
         switch(m_typeToSpawn)
         {
-            case ColliderType::Box:
+            case physics::ColliderType::Box:
             {
                 m_currentObject = prefab::Create(registry, prefab::Resource::CubeBlue, {.tag = "Movable Object"});
-                registry->Add<Collider>(m_currentObject, BoxProperties{}, false);
+                registry->Add<physics::Collider>(m_currentObject, physics::BoxProperties{}, false);
                 break;
             }
-            case ColliderType::Sphere:
+            case physics::ColliderType::Sphere:
             {
                 m_currentObject = prefab::Create(registry, prefab::Resource::SphereBlue, {.tag = "Movable Object"});
-                registry->Add<Collider>(m_currentObject, SphereProperties{}, false);
+                registry->Add<physics::Collider>(m_currentObject, physics::SphereProperties{}, false);
                 break;
             }
-            case ColliderType::Capsule:
+            case physics::ColliderType::Capsule:
             {
                 m_currentObject = prefab::Create(registry, prefab::Resource::CapsuleBlue, {.tag = "Movable Object"});
-                registry->Add<Collider>(m_currentObject, CapsuleProperties{}, false);
+                registry->Add<physics::Collider>(m_currentObject, physics::CapsuleProperties{}, false);
                 break;
             }
-            case ColliderType::Hull:
+            case physics::ColliderType::Hull:
             {
                 m_currentObject = prefab::Create(registry, prefab::Resource::DiscBlue, {.tag = "Movable Object"});
-                registry->Add<Collider>(m_currentObject, HullProperties{.assetPath = "coin.nca"}, false);
+                registry->Add<physics::Collider>(m_currentObject, physics::HullProperties{.assetPath = "coin.nca"}, false);
                 break;
             }
         }
 
-        registry->Add<PhysicsBody>(m_currentObject, PhysicsProperties{});
+        registry->Add<physics::PhysicsBody>(m_currentObject, physics::PhysicsProperties{});
         registry->Add<FrameLogic>(m_currentObject, WasdBasedMovement);
         registry->Add<CollisionLogic>(m_currentObject, LogOnCollisionEnter, LogOnCollisionExit, LogOnTriggerEnter, LogOnCollisionExit);
     }
 
-    void PrefabSelector::Select(ColliderType type)
+    void PrefabSelector::Select(physics::ColliderType type)
     {
         m_typeToSpawn = type;
         m_doSpawn = true;
@@ -179,7 +179,7 @@ namespace nc::sample
         return m_latestFPS;
     }
 
-    Clickable::Clickable(Entity entity, std::string tag, PhysicsModule* physicsModule)
+    Clickable::Clickable(Entity entity, std::string tag, physics::PhysicsModule* physicsModule)
         : FreeComponent(entity),
           IClickable(entity, 40.0f),
           m_Tag{std::move(tag)},
@@ -188,7 +188,7 @@ namespace nc::sample
     {
         m_physicsModule->RegisterClickable(this);
         auto layer = entity.Layer();
-        IClickable::layers = ToLayerMask(layer);
+        physics::IClickable::layers = physics::ToLayerMask(layer);
     }
 
     Clickable::~Clickable() noexcept
@@ -201,7 +201,7 @@ namespace nc::sample
         GameLog::Log("Clicked: " + m_Tag);
     }
 
-    ClickHandler::ClickHandler(Entity entity, LayerMask mask, PhysicsModule* physicsModule)
+    ClickHandler::ClickHandler(Entity entity, physics::LayerMask mask, physics::PhysicsModule* physicsModule)
         : FreeComponent{entity},
           m_mask{mask},
           m_physicsModule{physicsModule}
@@ -218,7 +218,7 @@ namespace nc::sample
         }
     }
 
-    void ClickHandler::SetLayer(LayerMask mask)
+    void ClickHandler::SetLayer(physics::LayerMask mask)
     {
         m_mask = mask;
     }

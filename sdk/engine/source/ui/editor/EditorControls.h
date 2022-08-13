@@ -117,7 +117,7 @@ namespace nc::ui::editor::controls
         if (auto* pointLight = registry->Get<PointLight>(entity))
             ComponentGuiElement(pointLight);
 
-        if (auto* body = registry->Get<PhysicsBody>(entity))
+        if (auto* body = registry->Get<physics::PhysicsBody>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(body);
@@ -135,7 +135,7 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(dispatcher);
         }
 
-        if (auto* col = registry->Get<Collider>(entity); col)
+        if (auto* col = registry->Get<physics::Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
             col->SetEditorSelection(true);
@@ -247,10 +247,10 @@ namespace nc::ui::editor::controls
     /** @todo this will eventually need to be generic */
     void ComponentSystems(Registry* registry)
     {
-        ComponentSystemHeader<Collider>("Collider", View<Collider>(registry));
+        ComponentSystemHeader<physics::Collider>("Collider", View<physics::Collider>(registry));
         ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", View<NetworkDispatcher>(registry));
         ComponentSystemHeader<ParticleEmitter>("Particle Emitter", View<ParticleEmitter>(registry));
-        ComponentSystemHeader<PhysicsBody>("Physics Body", View<PhysicsBody>(registry));
+        ComponentSystemHeader<physics::PhysicsBody>("Physics Body", View<physics::PhysicsBody>(registry));
         ComponentSystemHeader<Transform>("Transform", View<Transform>(registry));
         ComponentSystemHeader<MeshRenderer>("Mesh Renderer", View<MeshRenderer>(registry));
         ComponentSystemHeader<PointLight>("Point Light", View<PointLight>(registry));

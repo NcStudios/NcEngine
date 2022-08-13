@@ -17,7 +17,7 @@ namespace nc::sample
     void ForceBasedMovement(Entity self, Registry* registry)
     {
         static constexpr float force = 0.7f;
-        auto* body = registry->Get<PhysicsBody>(self);
+        auto* body = registry->Get<physics::PhysicsBody>(self);
 
         if(!body)
             return;

@@ -11,15 +11,13 @@
 
 namespace
 {
-    using namespace nc;
-
-    bool IsViewedByFrustum(const Frustum& frustum, const MeshRenderer& renderer, DirectX::FXMMATRIX transform)
+    bool IsViewedByFrustum(const nc::physics::Frustum& frustum, const nc::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
     {
-        const auto maxScaleExtent = GetMaxScaleExtent(transform);
+        const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
         const auto maxMeshExtent = renderer.GetMesh().maxExtent;
-        Sphere sphere{ .center = Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent };
+        auto sphere = nc::physics::Sphere{ .center = nc::Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent };
         DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
-        return physics::Intersect(frustum, sphere);
+        return nc::physics::Intersect(frustum, sphere);
     }
 }
 
@@ -69,7 +67,7 @@ namespace nc::graphics
 
         #ifdef NC_EDITOR_ENABLED
         auto colliderIsSelected = false;
-        for (auto& collider : View<Collider>{ registry })
+        for (auto& collider : View<physics::Collider>{ registry })
         {
             if (collider.GetEditorSelection())
             {

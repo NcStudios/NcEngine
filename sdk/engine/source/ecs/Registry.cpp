@@ -22,14 +22,14 @@ namespace nc
         g_registry = this;
         RegisterComponentType<AudioSource>();
         RegisterComponentType<FreeComponentGroup>();
-        RegisterComponentType<Collider>();
+        RegisterComponentType<physics::Collider>();
         RegisterComponentType<CollisionLogic>();
         RegisterComponentType<ConcaveCollider>();
         RegisterComponentType<FrameLogic>();
         RegisterComponentType<FixedLogic>();
         RegisterComponentType<NetworkDispatcher>();
         RegisterComponentType<ParticleEmitter>();
-        RegisterComponentType<PhysicsBody>();
+        RegisterComponentType<physics::PhysicsBody>();
         RegisterComponentType<Tag>();
         RegisterComponentType<Transform>();
         RegisterComponentType<MeshRenderer>();

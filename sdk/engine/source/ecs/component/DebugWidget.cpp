@@ -3,7 +3,7 @@
 
 namespace
 {
-    using namespace nc;
+    using namespace nc::physics;
 
     const auto CubeMeshPath = std::string{"cube.nca"};
     const auto SphereMeshPath = std::string{"sphere.nca"};
@@ -32,7 +32,7 @@ namespace
             }
             default:
             {
-                throw NcError("Unknown ColliderType");
+                throw nc::NcError("Unknown ColliderType");
             }
         }
     }
@@ -40,7 +40,7 @@ namespace
 
 namespace nc
 {
-    DebugWidget::DebugWidget(ColliderType colliderType, DirectX::FXMMATRIX transform)
+    DebugWidget::DebugWidget(physics::ColliderType colliderType, DirectX::FXMMATRIX transform)
         : meshUid{GetMeshPathForCollider(colliderType)},
           transformationMatrix{transform}
     {

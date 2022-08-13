@@ -5,13 +5,15 @@
 
 namespace nc::physics
 {
-    /* Collision data produced by Gjk and consumed by Epa. */
-    struct CollisionState
-    {
-        Simplex simplex;
-        Polytope polytope;
-        Contact contact;
-        DirectX::XMVECTOR rotationA;
-        DirectX::XMVECTOR rotationB;
-    };
-}
+
+/* Collision data produced by Gjk and consumed by Epa. */
+struct CollisionState
+{
+    Simplex simplex;
+    Polytope polytope;
+    Contact contact;
+    DirectX::XMVECTOR rotationA;
+    DirectX::XMVECTOR rotationB;
+};
+
+} // namespace nc::physics

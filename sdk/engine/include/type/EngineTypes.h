@@ -15,7 +15,7 @@ namespace nc
     REGISTER_TYPE(AudioSource);
     REGISTER_TYPE(FreeComponentGroup);
     REGISTER_TYPE(Camera);
-    REGISTER_TYPE(Collider);
+    REGISTER_TYPE(physics::Collider);
     REGISTER_TYPE(CollisionLogic);
     REGISTER_TYPE(ConcaveCollider);
     REGISTER_TYPE(Entity);
@@ -24,7 +24,7 @@ namespace nc
     REGISTER_TYPE(MeshRenderer);
     REGISTER_TYPE(NetworkDispatcher);
     REGISTER_TYPE(ParticleEmitter);
-    REGISTER_TYPE(PhysicsBody);
+    REGISTER_TYPE(physics::PhysicsBody);
     REGISTER_TYPE(PointLight);
     REGISTER_TYPE(Tag);
     REGISTER_TYPE(Transform);

@@ -10,7 +10,7 @@ namespace nc::editor
 
     void AddDefaultHullCollider(Registry* registry, Entity entity, bool isTrigger)
     {
-        registry->Add<Collider>(entity, HullProperties{.assetPath = CubeHullColliderPath}, isTrigger);
+        registry->Add<physics::Collider>(entity, physics::HullProperties{.assetPath = CubeHullColliderPath}, isTrigger);
     }
 
     void AddDefaultConcaveCollider(Registry* registry, Entity entity)

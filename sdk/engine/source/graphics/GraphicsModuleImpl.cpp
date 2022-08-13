@@ -141,7 +141,7 @@ namespace nc::graphics
         m_graphics.Draw(state);
 
         #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : View<Collider>{m_registry}) collider.SetEditorSelection(false);
+        for(auto& collider : View<physics::Collider>{m_registry}) collider.SetEditorSelection(false);
         #endif
 
         m_graphics.FrameEnd();

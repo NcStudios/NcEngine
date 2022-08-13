@@ -32,10 +32,10 @@ namespace nc
         m_projection = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
     }
 
-    auto Camera::CalculateFrustum() const noexcept -> Frustum
+    auto Camera::CalculateFrustum() const noexcept -> physics::Frustum
     {
         using namespace DirectX;
-        Frustum out;
+        physics::Frustum out;
         const auto m = XMMatrixTranspose(m_view * m_projection);
 
         const auto left_v = XMPlaneNormalize(XMVectorAdd(m.r[3], m.r[0]));
