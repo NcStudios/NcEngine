@@ -5,9 +5,9 @@
 #include "NcEngine.h"
 #include "window/Window.h"
 #include "asset/Assets.h"
-#include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/Registry.h"
 #include "graphics/GraphicsModule.h"
+#include "graphics/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
 
 namespace
@@ -127,7 +127,7 @@ namespace nc::sample
         };
         nc::LoadTextureAssets(texturePaths);
 
-        auto earthMaterial = Material
+        auto earthMaterial = graphics::Material
         {
             .baseColor = "Planets/Earth/BaseColor.png",
             .normal = "Planets/Earth/Normal.png",
@@ -135,7 +135,7 @@ namespace nc::sample
             .metallic = "Planets/Earth/Roughness.png"
         };
 
-        auto jupiterMaterial = Material
+        auto jupiterMaterial = graphics::Material
         {
             .baseColor = "Planets/Jupiter/BaseColor.png",
             .normal = "Planets/Jupiter/Normal.png",
@@ -143,7 +143,7 @@ namespace nc::sample
             .metallic = "Planets/Jupiter/Roughness.png"
         };
 
-        auto marsMaterial = Material
+        auto marsMaterial = graphics::Material
         {
             .baseColor = "Planets/Mars/BaseColor.png",
             .normal = "Planets/Mars/Normal.png",
@@ -151,7 +151,7 @@ namespace nc::sample
             .metallic = "Planets/Mars/Roughness.png"
         };
 
-        auto mercuryMaterial = Material
+        auto mercuryMaterial = graphics::Material
         {
             .baseColor = "Planets/Mercury/BaseColor.png",
             .normal = "Planets/Mercury/Normal.png",
@@ -159,7 +159,7 @@ namespace nc::sample
             .metallic = "Planets/Mercury/Roughness.png"
         };
 
-        auto neptuneMaterial = Material
+        auto neptuneMaterial = graphics::Material
         {
             .baseColor = "Planets/Neptune/BaseColor.png",
             .normal = "Planets/Neptune/Normal.png",
@@ -167,7 +167,7 @@ namespace nc::sample
             .metallic = "Planets/Neptune/Roughness.png"
         };
 
-        auto plutoMaterial = Material
+        auto plutoMaterial = graphics::Material
         {
             .baseColor = "Planets/Pluto/BaseColor.png",
             .normal = "Planets/Pluto/Normal.png",
@@ -175,7 +175,7 @@ namespace nc::sample
             .metallic = "Planets/Pluto/Roughness.png"
         };
 
-        auto saturnMaterial = Material
+        auto saturnMaterial = graphics::Material
         {
             .baseColor = "Planets/Saturn/BaseColor.png",
             .normal = "Planets/Saturn/Normal.png",
@@ -183,7 +183,7 @@ namespace nc::sample
             .metallic = "Planets/Saturn/Roughness.png"
         };
 
-        auto sunMaterial = Material
+        auto sunMaterial = graphics::Material
         {
             .baseColor = "Planets/Sun/BaseColor.png",
             .normal = "Planets/Sun/Normal.png",
@@ -191,7 +191,7 @@ namespace nc::sample
             .metallic = "Planets/Sun/Roughness.png"
         };
 
-        auto uranusMaterial = Material
+        auto uranusMaterial = graphics::Material
         {
             .baseColor = "Planets/Uranus/BaseColor.png",
             .normal = "Planets/Uranus/Normal.png",
@@ -199,7 +199,7 @@ namespace nc::sample
             .metallic = "Planets/Uranus/Roughness.png"
         };
 
-        auto venusMaterial = Material
+        auto venusMaterial = graphics::Material
         {
             .baseColor = "Planets/Venus/BaseColor.png",
             .normal = "Planets/Venus/Normal.png",
@@ -213,12 +213,12 @@ namespace nc::sample
                                          .rotation = Quaternion::FromEulerAngles(0.5f, 0.9f, 0.0f),
                                          .tag = "Main Camera" });
 
-        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
-        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules.Get<GraphicsModule>()->SetCamera(camera);
+        auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
+        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
+        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
 
         auto sun = registry->Add<Entity>({ .scale = Vector3::Splat(2.0f), .tag = "Sun" });
-        registry->Add<MeshRenderer>(sun, "planet.nca", sunMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(sun, "planet.nca", sunMaterial, graphics::TechniqueType::PhongAndUi);
 
         // Planet Orbits
         auto mercuryPivot = registry->Add<Entity>({ .parent = sun, .tag = "Mercury Pivot" });
@@ -242,37 +242,36 @@ namespace nc::sample
         registry->Add<FrameLogic>(plutoPivot, InvokeFreeComponent<ConstantRotation>(plutoPivot, registry, Vector3::Up(), PlutoOrbitSpeed));
 
         auto mercury = registry->Add<Entity>({ .position = Vector3::Right() * MercuryDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), MercuryTilt), .scale = Vector3::Splat(MercurySize), .parent = mercuryPivot, .tag = "Mercury" });
-        registry->Add<MeshRenderer>(mercury, "planet.nca", mercuryMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(mercury, "planet.nca", mercuryMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto venus = registry->Add<Entity>({ .position = Vector3::Right() * VenusDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), VenusTilt), .scale = Vector3::Splat(VenusSize), .parent = venusPivot, .tag = "Venus" });
-        registry->Add<MeshRenderer>(venus, "planet.nca", venusMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(venus, "planet.nca", venusMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto earth = registry->Add<Entity>({ .position = Vector3::Right() * EarthDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), EarthTilt), .scale = Vector3::Splat(EarthSize), .parent = earthPivot, .tag = "Earth" });
-        registry->Add<MeshRenderer>(earth, "planet.nca", earthMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(earth, "planet.nca", earthMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto mars = registry->Add<Entity>({ .position = Vector3::Right() * MarsDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), MarsTilt), .scale = Vector3::Splat(MarsSize), .parent = marsPivot, .tag = "Mars" });
-        registry->Add<MeshRenderer>(mars, "planet.nca", marsMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(mars, "planet.nca", marsMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto jupiter = registry->Add<Entity>({ .position = Vector3::Right() * JupiterDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), JupiterTilt), .scale = Vector3::Splat(JupiterSize), .parent = jupiterPivot, .tag = "Jupiter" });
-        registry->Add<MeshRenderer>(jupiter, "planet.nca", jupiterMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(jupiter, "planet.nca", jupiterMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto saturn = registry->Add<Entity>({ .position = Vector3::Right() * SaturnDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), SaturnTilt), .scale = Vector3::Splat(SaturnSize), .parent = saturnPivot, .tag = "Saturn" });
-        registry->Add<MeshRenderer>(saturn, "planet.nca", saturnMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(saturn, "planet.nca", saturnMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto uranus = registry->Add<Entity>({ .position = Vector3::Right() * UranusDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), UranusTilt), .scale = Vector3::Splat(UranusSize), .parent = uranusPivot, .tag = "Uranus" });
-        registry->Add<MeshRenderer>(uranus, "planet.nca", uranusMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(uranus, "planet.nca", uranusMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto neptune = registry->Add<Entity>({ .position = Vector3::Right() * NeptuneDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), NeptuneTilt), .scale = Vector3::Splat(NeptuneSize), .parent = neptunePivot, .tag = "Neptune" });
-        registry->Add<MeshRenderer>(neptune, "planet.nca", neptuneMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(neptune, "planet.nca", neptuneMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto pluto = registry->Add<Entity>({ .position = Vector3::Right() * PlutoDistance, .rotation = Quaternion::FromAxisAngle(Vector3::Right(), PlutoTilt), .scale = Vector3::Splat(PlutoSize), .parent = plutoPivot, .tag = "Pluto" });
-        registry->Add<MeshRenderer>(pluto, "planet.nca", plutoMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(pluto, "planet.nca", plutoMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto lvHandle = registry->Add<Entity>({ .position = Vector3{0.0f, 0.0f, 0.0f}, .tag = "Point Light 1" });
-        registry->Add<PointLight>(lvHandle, PointLightInfo{ .ambient = Vector3{1.0f, 0.4f, 1.0f},
-                                                           .diffuseColor = Vector3{1.0f, 1.0f, 1.0f},
-                                                           .diffuseIntensity = 12.0f,
-            });
+        registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.ambient = Vector3{1.0f, 0.4f, 1.0f},
+                                                                               .diffuseColor = Vector3{1.0f, 1.0f, 1.0f},
+                                                                               .diffuseIntensity = 12.0f});
 
         // Planet Rotations
         registry->Add<FrameLogic>(mercury, InvokeFreeComponent<ConstantRotation>(mercury, registry, registry->Get<Transform>(earth)->Up(), MercuryRotationSpeed));
@@ -285,7 +284,7 @@ namespace nc::sample
         registry->Add<FrameLogic>(neptune, InvokeFreeComponent<ConstantRotation>(neptune, registry, registry->Get<Transform>(neptune)->Up(), NeptuneRotationSpeed));
         registry->Add<FrameLogic>(pluto, InvokeFreeComponent<ConstantRotation>(pluto, registry, registry->Get<Transform>(pluto)->Up(), PlutoRotationSpeed));
 
-        ParticleInfo particleInfo
+        graphics::ParticleInfo particleInfo
         {
             .emission =
             {
@@ -314,6 +313,6 @@ namespace nc::sample
         };
 
         auto starEmitter = registry->Add<Entity>({ .tag = "Stars" });
-        registry->Add<ParticleEmitter>(starEmitter, particleInfo);
+        registry->Add<graphics::ParticleEmitter>(starEmitter, particleInfo);
     }
 }

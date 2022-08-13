@@ -6,20 +6,23 @@ using namespace nc;
 
 namespace nc
 {
-    FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity} {}
-    void FreeComponentGroup::CommitStagedComponents() {}
+Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
+    : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
+{}
 
-    Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
-        : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
-    {}
+void Transform::SetParent(Entity entity) { m_parent = entity; }
 
-    void Transform::SetParent(Entity entity) { m_parent = entity; }
+std::span<Entity> Transform::Children() { return std::span<Entity>{m_children}; }
 
-    std::span<Entity> Transform::Children() { return std::span<Entity>{m_children}; }
+Quaternion::Quaternion(float X, float Y, float Z, float W)
+    : x{X}, y{Y}, z{Z}, w{W}
+{}
 
-    Quaternion::Quaternion(float X, float Y, float Z, float W)
-        : x{X}, y{Y}, z{Z}, w{W}
-    {}
+namespace ecs::detail
+{
+FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity} {}
+void FreeComponentGroup::CommitStagedComponents() {}
+}
 }
 
 struct Fake1 : public ComponentBase

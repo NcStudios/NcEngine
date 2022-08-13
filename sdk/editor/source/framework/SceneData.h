@@ -4,10 +4,10 @@
 
 namespace nc::editor
 {
-    struct SceneData
-    {
-        Entity mainCamera = Entity::Null();
-        Entity audioListener = Entity::Null();
-        std::string skybox = "";
-    };
-}
+struct SceneData
+{
+    Entity mainCamera = Entity::Null();
+    Entity audioListener = Entity::Null();
+    std::string skybox = "";
+};
+} // namespace nc::editor

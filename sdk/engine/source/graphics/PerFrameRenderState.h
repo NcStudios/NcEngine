@@ -1,10 +1,10 @@
 #pragma once
 
 #include "asset/Assets.h"
-#include "ecs/component/PointLight.h"
 #include "ecs/Registry.h"
+#include "graphics/PointLight.h"
 #ifdef NC_EDITOR_ENABLED
-#include "ecs/component/DebugWidget.h"
+#include "graphics/DebugWidget.h"
 #endif
 #include "particle/EmitterState.h"
 #include "resources/ObjectDataManager.h"
@@ -13,9 +13,9 @@
 
 namespace nc
 {
-    class Camera;
     class Environment;
     class Registry;
+    namespace graphics { class Camera; }
     #ifdef NC_DEBUG_RENDERING_ENABLED
     namespace physics { class PhysicsSystemImpl; }
     #endif
@@ -34,7 +34,7 @@ namespace nc::graphics
         std::vector<MeshView> meshes;
         std::vector<PointLightInfo> pointLightInfos;
         #ifdef NC_EDITOR_ENABLED
-        std::optional<nc::DebugWidget> colliderDebugWidget;
+        std::optional<nc::graphics::DebugWidget> colliderDebugWidget;
         #endif
         std::vector<DirectX::XMMATRIX> pointLightVPs;
         bool isPointLightBindRequired;

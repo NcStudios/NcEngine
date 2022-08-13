@@ -4,7 +4,7 @@
 
 #include "DirectXMath.h"
 
-namespace nc
+namespace nc::graphics
 {
 struct DebugWidget
 {

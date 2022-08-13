@@ -15,31 +15,31 @@
 
 namespace nc::editor
 {
-    /** Creates and sets callbacks for all of the core editor classes. */
-    class EditorFramework
-    {
-        public:
-            EditorFramework(NcEngine* engine);
-            EditorFramework(const EditorFramework&) = delete;
-            EditorFramework(EditorFramework&&) = delete;
-            EditorFramework& operator=(const EditorFramework&) = delete;
-            EditorFramework& operator=(EditorFramework&&) = delete;
+/** Creates and sets callbacks for all of the core editor classes. */
+class EditorFramework
+{
+    public:
+        EditorFramework(NcEngine* engine);
+        EditorFramework(const EditorFramework&) = delete;
+        EditorFramework(EditorFramework&&) = delete;
+        EditorFramework& operator=(const EditorFramework&) = delete;
+        EditorFramework& operator=(EditorFramework&&) = delete;
 
-            void SaveProjectData();
-            auto GetProjectManager() -> ProjectManager* { return &m_projectManager; }
+        void SaveProjectData();
+        auto GetProjectManager() -> ProjectManager* { return &m_projectManager; }
 
-        private:
-            Output m_output;
-            EditorConfig m_editorConfig;
-            AssetManifest m_assetManifest;
-            ProjectManager m_projectManager;
-            EnvironmentPanel m_environmentPanel;
-            EditorUI m_editorUI;
-            FileBrowser m_fileBrowser;
-            AssetBrowser m_assetBrowser;
-            NewSceneDialog m_newSceneDialog;
-            NewProjectDialog m_newProjectDialog;
-            ChangeTagDialog m_changeTagDialog;
-            ConfigEditor m_configEditor;
-    };
-}
+    private:
+        Output m_output;
+        EditorConfig m_editorConfig;
+        AssetManifest m_assetManifest;
+        ProjectManager m_projectManager;
+        EnvironmentPanel m_environmentPanel;
+        EditorUI m_editorUI;
+        FileBrowser m_fileBrowser;
+        AssetBrowser m_assetBrowser;
+        NewSceneDialog m_newSceneDialog;
+        NewProjectDialog m_newProjectDialog;
+        ChangeTagDialog m_changeTagDialog;
+        ConfigEditor m_configEditor;
+};
+} // namespace nc::editor

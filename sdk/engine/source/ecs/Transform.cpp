@@ -1,4 +1,4 @@
-#include "ecs/component/Transform.h"
+#include "ecs/Transform.h"
 #include "ecs/Registry.h"
 #include "debug/Utils.h"
 

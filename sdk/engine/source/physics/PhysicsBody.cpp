@@ -1,6 +1,6 @@
 #include "physics/PhysicsBody.h"
 #include "physics/Collider.h"
-#include "ecs/component/Transform.h"
+#include "ecs/Transform.h"
 #include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 

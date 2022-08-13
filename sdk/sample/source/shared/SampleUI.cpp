@@ -35,7 +35,7 @@ namespace nc::sample
     auto InitializeSampleUI(NcEngine* engine) -> std::unique_ptr<SampleUI>
     {
         auto ui = std::make_unique<SampleUI>(engine);
-        auto* graphics = engine->GetModuleRegistry()->Get<GraphicsModule>();
+        auto* graphics = engine->GetModuleRegistry()->Get<graphics::GraphicsModule>();
         graphics->SetUi(ui.get());
         return ui;
     }

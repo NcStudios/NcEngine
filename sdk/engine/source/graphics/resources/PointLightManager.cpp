@@ -24,7 +24,7 @@ namespace nc::graphics
 
         if (m_pointLightsArrayBuffer == nullptr)
         {
-            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<nc::PointLightInfo>>(m_allocator, bufferSize);
+            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<PointLightInfo>>(m_allocator, bufferSize);
         }
 
         m_descriptors->RegisterDescriptor

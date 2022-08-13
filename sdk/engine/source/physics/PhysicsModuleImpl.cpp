@@ -9,14 +9,14 @@ using namespace nc::physics;
 struct BspTreeStub
 {
     BspTreeStub(nc::Registry* registry)
-        : onAddConnection{registry->OnAdd<nc::ConcaveCollider>().Connect(this, &BspTreeStub::OnAdd)},
-            onRemoveConnection{registry->OnRemove<nc::ConcaveCollider>().Connect(this, &BspTreeStub::OnRemove)}
+        : onAddConnection{registry->OnAdd<ConcaveCollider>().Connect(this, &BspTreeStub::OnAdd)},
+            onRemoveConnection{registry->OnRemove<ConcaveCollider>().Connect(this, &BspTreeStub::OnRemove)}
     {
     }
 
-    void OnAdd(nc::ConcaveCollider&) {}
+    void OnAdd(ConcaveCollider&) {}
     void OnRemove(nc::Entity) {}
-    nc::Connection<nc::ConcaveCollider&> onAddConnection;
+    nc::Connection<ConcaveCollider&> onAddConnection;
     nc::Connection<nc::Entity> onRemoveConnection;
 };
 

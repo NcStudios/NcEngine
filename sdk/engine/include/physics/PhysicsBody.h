@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/component/Transform.h"
+#include "ecs/Transform.h"
 
 namespace nc::physics
 {

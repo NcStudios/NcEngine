@@ -4,12 +4,6 @@
 
 namespace nc
 {
-class Camera;
-class ConcaveCollider;
-class MeshRenderer;
-class NetworkDispatcher;
-class ParticleEmitter;
-class PointLight;
 class Registry;
 class Transform;
 
@@ -18,12 +12,25 @@ namespace audio
 class AudioSource;
 }
 
+namespace graphics
+{
+class Camera;
+class MeshRenderer;
+class ParticleEmitter;
+class PointLight;
+}
+
+namespace net
+{
+class NetworkDispatcher;
+}
+
 namespace physics
 {
 class Collider;
+class ConcaveCollider;
 class PhysicsBody;
 }
-
 } // namespace nc
 
 namespace nc::editor
@@ -42,14 +49,14 @@ namespace nc::editor
             AssetManifest* m_assetManifest;
 
             void DrawAudioSource(audio::AudioSource* audioSource);
-            void DrawCamera(Camera* camera);
+            void DrawCamera(graphics::Camera* camera);
             void DrawCollider(physics::Collider* collider);
-            void DrawConcaveCollider(ConcaveCollider* concaveCollider);
-            void DrawMeshRenderer(MeshRenderer* meshRenderer);
-            void DrawNetworkDispatcher(NetworkDispatcher* networkDispatcher);
-            void DrawParticleEmitter(ParticleEmitter* particleEmitter);
+            void DrawConcaveCollider(physics::ConcaveCollider* concaveCollider);
+            void DrawMeshRenderer(graphics::MeshRenderer* meshRenderer);
+            void DrawNetworkDispatcher(net::NetworkDispatcher* networkDispatcher);
+            void DrawParticleEmitter(graphics::ParticleEmitter* particleEmitter);
             void DrawPhysicsBody(physics::PhysicsBody* physicsBody);
-            void DrawPointLight(PointLight* pointLight);
+            void DrawPointLight(graphics::PointLight* pointLight);
             void DrawTransform(Transform* transform);
             void DrawBoxColliderWidget(physics::Collider* collider);
             void DrawCapsuleColliderWidget(physics::Collider* collider);

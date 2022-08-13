@@ -12,16 +12,16 @@
 
 namespace
 {
-    struct GraphicsModuleStub : nc::GraphicsModule
+    struct GraphicsModuleStub : nc::graphics::GraphicsModule
     {
         GraphicsModuleStub(nc::Registry* reg)
-            : onAddConnection{reg->OnAdd<nc::PointLight>().Connect([](nc::PointLight&){})},
-              onRemoveConnection{reg->OnRemove<nc::PointLight>().Connect([](nc::Entity){})}
+            : onAddConnection{reg->OnAdd<nc::graphics::PointLight>().Connect([](nc::graphics::PointLight&){})},
+              onRemoveConnection{reg->OnRemove<nc::graphics::PointLight>().Connect([](nc::Entity){})}
         {
         }
 
-        void SetCamera(nc::Camera*) noexcept override {}
-        auto GetCamera() noexcept -> nc::Camera* override { return nullptr; }
+        void SetCamera(nc::graphics::Camera*) noexcept override {}
+        auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
         void SetUi(nc::ui::IUI*) noexcept override {}
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
@@ -29,7 +29,7 @@ namespace
         void Clear() noexcept override {}
         auto BuildWorkload() -> std::vector<nc::task::Job> { return {}; }
 
-        nc::Connection<nc::PointLight&> onAddConnection;
+        nc::Connection<nc::graphics::PointLight&> onAddConnection;
         nc::Connection<nc::Entity> onRemoveConnection;
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED

@@ -2,7 +2,7 @@
 
 #include "ShaderResourceService.h"
 #include "WriteableBuffer.h"
-#include "ecs/component/PointLight.h"
+#include "graphics/PointLight.h"
 #include "graphics/resources/ShaderDescriptorSets.h"
 
 namespace nc::graphics
@@ -18,7 +18,7 @@ namespace nc::graphics
             void Reset() override;
 
         private:
-            std::unique_ptr<WriteableBuffer<nc::PointLightInfo>> m_pointLightsArrayBuffer;
+            std::unique_ptr<WriteableBuffer<PointLightInfo>> m_pointLightsArrayBuffer;
             ShaderDescriptorSets* m_descriptors;
             GpuAllocator* m_allocator;
             uint32_t m_maxPointLights;

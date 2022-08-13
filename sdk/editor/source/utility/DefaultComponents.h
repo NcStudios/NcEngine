@@ -2,7 +2,7 @@
 
 #include "ecs/Registry.h"
 
-#include "ecs/component/All.h"
+#include "ecs/All.h"
 
 namespace nc::editor
 {
@@ -15,7 +15,7 @@ namespace nc::editor
     const auto DefaultBaseColorPath     = std::string{"DefaultBaseColor.png"};
     const auto DefaultNormalPath        = std::string{"DefaultNormal.png"};
     const auto DefaultRoughnessPath     = std::string{"DefaultMetallic.png"};
-    const auto DefaultMaterial          = nc::Material{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath, DefaultRoughnessPath};
+    const auto DefaultMaterial          = nc::graphics::Material{DefaultBaseColorPath, DefaultNormalPath, DefaultRoughnessPath, DefaultRoughnessPath};
     const auto DefaultSkyboxPath        = std::string{"DefaultSkybox\\DefaultSkybox.nca"};
 
     /** Helper to create a mesh renderer using only default resources. */

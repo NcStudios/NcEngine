@@ -9,10 +9,10 @@
 #include "dynamics/Dynamics.h"
 #include "dynamics/Joint.h"
 #include "dynamics/Solver.h"
-#include "ecs/component/FreeComponentGroup.h"
-#include "ecs/component/Logic.h"
+#include "ecs/Logic.h"
 #include "ecs/Registry.h"
 #include "ecs/View.h"
+#include "ecs/detail/FreeComponentGroup.h"
 #include "optick/optick.h"
 #include "task/Job.h"
 

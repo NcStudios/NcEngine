@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/component/MeshRenderer.h"
+#include "graphics/MeshRenderer.h"
 
 #include <vector>
 

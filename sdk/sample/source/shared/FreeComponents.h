@@ -5,12 +5,12 @@
 
 #include "ecs/InvokeFreeComponent.h"
 #include "ecs/Registry.h"
-#include "ecs/component/All.h"
+#include "ecs/All.h"
 
 namespace nc::sample
 {
     /** Control camera by moving mouse to edge of the screen. */
-    class EdgePanCamera : public Camera
+    class EdgePanCamera : public graphics::Camera
     {
         public:
             EdgePanCamera(Entity self);

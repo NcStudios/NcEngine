@@ -1,6 +1,6 @@
 #include "physics/Collider.h"
-#include "ecs/component/DebugWidget.h"
 #include "ecs/Registry.h"
+#include "graphics/DebugWidget.h"
 #include "graphics/Renderer.h"
 #include "debug/Utils.h"
 #include "assets/AssetService.h"
@@ -209,7 +209,7 @@ bool Collider::GetEditorSelection()
     return m_selectedInEditor;
 }
 
-DebugWidget Collider::GetDebugWidget()
+graphics::DebugWidget Collider::GetDebugWidget()
 {
     const auto& scale = m_info.scale;
     const auto& offset = m_info.offset; 
@@ -221,7 +221,7 @@ DebugWidget Collider::GetDebugWidget()
         DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
     );
 
-    return DebugWidget(m_info.type, transformationMatrix);
+    return graphics::DebugWidget(m_info.type, transformationMatrix);
 }
 } // namespace nc::physics
 

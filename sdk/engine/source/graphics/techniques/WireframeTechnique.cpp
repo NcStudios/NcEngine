@@ -2,7 +2,7 @@
 #include "WireframeTechnique.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "ecs/component/Transform.h"
+#include "ecs/Transform.h"
 #include "ecs/Registry.h"
 #include "graphics/Base.h"
 #include "graphics/DebugRenderer.h"

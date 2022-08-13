@@ -7,7 +7,6 @@
 namespace nc
 {
     struct EnvironmentData;
-    struct PointLightInfo;
     namespace graphics
     {
         struct ShadowMap;
@@ -15,6 +14,7 @@ namespace nc
         struct ObjectData;
         struct Texture;
         class CubeMap;
+        struct PointLightInfo;
     }
 }
 

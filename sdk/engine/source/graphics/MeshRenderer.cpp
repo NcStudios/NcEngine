@@ -1,12 +1,12 @@
-#include "ecs/component/MeshRenderer.h"
-#include "ecs/Registry.h"
 #include "assets/AssetService.h"
+#include "ecs/Registry.h"
+#include "graphics/MeshRenderer.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"
 #endif
 
-namespace nc
+namespace nc::graphics
 {
     MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType)
     : ComponentBase{entity},
@@ -77,12 +77,6 @@ namespace nc
     }
 
     #ifdef NC_EDITOR_ENABLED
-    template<> void ComponentGuiElement<MeshRenderer>(MeshRenderer* meshRenderer)
-    {
-        ImGui::Text("Mesh Renderer");
-        meshRenderer->GetMaterial().EditorGuiElement();
-    }
-
     void Material::EditorGuiElement()
     {
         ImGui::SameLine();
@@ -96,4 +90,15 @@ namespace nc
         ImGui::Text(roughness.c_str());
     }
     #endif
+} // namespace nc::graphics
+
+namespace nc
+{
+#ifdef NC_EDITOR_ENABLED
+template<> void ComponentGuiElement<graphics::MeshRenderer>(graphics::MeshRenderer* meshRenderer)
+{
+    ImGui::Text("Mesh Renderer");
+    meshRenderer->GetMaterial().EditorGuiElement();
 }
+#endif
+} // namespace nc

@@ -1,5 +1,5 @@
 #include "ecs/Registry.h"
-#include "ecs/component/All.h"
+#include "ecs/All.h"
 
 /** @todo This needs to go away. */
 namespace
@@ -20,20 +20,21 @@ namespace nc
           m_maxEntities{maxEntities}
     {
         g_registry = this;
-        RegisterComponentType<audio::AudioSource>();
-        RegisterComponentType<FreeComponentGroup>();
-        RegisterComponentType<physics::Collider>();
+
         RegisterComponentType<CollisionLogic>();
-        RegisterComponentType<ConcaveCollider>();
         RegisterComponentType<FrameLogic>();
         RegisterComponentType<FixedLogic>();
-        RegisterComponentType<NetworkDispatcher>();
-        RegisterComponentType<ParticleEmitter>();
-        RegisterComponentType<physics::PhysicsBody>();
         RegisterComponentType<Tag>();
         RegisterComponentType<Transform>();
-        RegisterComponentType<MeshRenderer>();
-        RegisterComponentType<PointLight>();
+        RegisterComponentType<audio::AudioSource>();
+        RegisterComponentType<ecs::detail::FreeComponentGroup>();
+        RegisterComponentType<graphics::MeshRenderer>();
+        RegisterComponentType<graphics::ParticleEmitter>();
+        RegisterComponentType<graphics::PointLight>();
+        RegisterComponentType<net::NetworkDispatcher>();
+        RegisterComponentType<physics::Collider>();
+        RegisterComponentType<physics::ConcaveCollider>();
+        RegisterComponentType<physics::PhysicsBody>();
     }
 
     void Registry::RemoveEntityWithoutNotifyingParent(Entity entity)

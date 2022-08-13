@@ -11,11 +11,11 @@ namespace
 {
     constexpr char TAB[5]{"    "};
 
-    std::string ToString(nc::TechniqueType type)
+    std::string ToString(nc::graphics::TechniqueType type)
     {
-        if(type == nc::TechniqueType::PhongAndUi)
+        if(type == nc::graphics::TechniqueType::PhongAndUi)
             return "TechniqueType::PhongAndUi";
-        
+
         return "TechniqueType::None";
     }
 }
@@ -173,7 +173,7 @@ namespace nc::editor
 
     void SceneWriter::WriteSceneData(SceneData* sceneData)
     {
-        if(sceneData->mainCamera.Valid() && m_registry->Contains<Camera>(sceneData->mainCamera))
+        if(sceneData->mainCamera.Valid() && m_registry->Contains<graphics::Camera>(sceneData->mainCamera))
         {
             m_file << SceneMacro::SetCamera << "( " << m_handleNames.at(sceneData->mainCamera.Index()) << " );\n";
         }
@@ -268,7 +268,7 @@ namespace nc::editor
 
     void SceneWriter::WriteConcaveCollider(Entity entity, const std::string& handleName)
     {
-        auto* collider = m_registry->Get<ConcaveCollider>(entity);
+        auto* collider = m_registry->Get<physics::ConcaveCollider>(entity);
 
         if(!collider)
             return;
@@ -300,7 +300,7 @@ namespace nc::editor
 
     void SceneWriter::WritePointLight(Entity entity, const std::string& handleName)
     {
-        auto* light = m_registry->Get<PointLight>(entity);
+        auto* light = m_registry->Get<graphics::PointLight>(entity);
 
         if(!light)
             return;
@@ -322,7 +322,7 @@ namespace nc::editor
 
     void SceneWriter::WriteMeshRenderer(Entity entity, const std::string& handleName)
     {
-        auto* renderer = m_registry->Get<MeshRenderer>(entity);
+        auto* renderer = m_registry->Get<graphics::MeshRenderer>(entity);
 
         if(!renderer)
             return;
@@ -343,7 +343,7 @@ namespace nc::editor
 
     void SceneWriter::WriteCamera(Entity entity, const std::string& handleName)
     {
-        auto* camera = m_registry->Get<Camera>(entity);
+        auto* camera = m_registry->Get<graphics::Camera>(entity);
 
         if(!camera)
             return;

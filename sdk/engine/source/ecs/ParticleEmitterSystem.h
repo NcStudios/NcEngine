@@ -1,17 +1,17 @@
 #pragma once
 
 #include "ecs/Registry.h"
-#include "ecs/component/ParticleEmitter.h"
+#include "graphics/ParticleEmitter.h"
+#include "graphics/Camera.h"
 #include "particle/EmitterState.h"
 #include "math/Random.h"
-#include "ecs/component/Camera.h"
 
 namespace nc::ecs
 {
     class ParticleEmitterSystem
     {
         public:
-            ParticleEmitterSystem(Registry* registry, float* dt, std::function<nc::Camera* ()> getCamera);
+            ParticleEmitterSystem(Registry* registry, float* dt, std::function<graphics::Camera* ()> getCamera);
 
             /** Run is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -25,7 +25,7 @@ namespace nc::ecs
             void Emit(Entity entity, size_t count);
 
             // ComponentSystem Methods
-            void Add(ParticleEmitter& emitter);
+            void Add(graphics::ParticleEmitter& emitter);
             void Remove(Entity entity);
             void Clear();
 
@@ -35,9 +35,9 @@ namespace nc::ecs
             std::vector<Entity> m_toRemove;
             float* m_dt;
             Random m_random;
-            std::function<nc::Camera* ()> m_getCamera;
+            std::function<graphics::Camera* ()> m_getCamera;
             Registry* m_registry;
-            Connection<ParticleEmitter&> m_onAddConnection;
+            Connection<graphics::ParticleEmitter&> m_onAddConnection;
             Connection<Entity> m_onRemoveConnection;
     };
 } // namespace nc::ecs

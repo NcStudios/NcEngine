@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ecs/Registry.h"
-#include "ecs/component/ConcaveCollider.h"
+#include "physics/ConcaveCollider.h"
 #include "physics/PhysicsPipelineTypes.h"
 #include "physics/collision/IntersectionQueries.h"
 

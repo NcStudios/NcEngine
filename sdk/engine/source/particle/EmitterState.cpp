@@ -14,7 +14,7 @@ namespace
             DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
     }
 
-    particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset, Random* random)
+    particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vector3& positionOffset, Random* random)
     {
         const auto& [emission, init, kinematic] = info;
 
@@ -48,7 +48,7 @@ namespace
 
 namespace nc::particle
 {
-    EmitterState::EmitterState(Entity entity, const ParticleInfo& info, Random* random)
+    EmitterState::EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random)
         : m_soa{ info.emission.maxParticleCount },
         m_info{ info },
         m_entity{ entity },
@@ -95,7 +95,7 @@ namespace nc::particle
             m_soa.RemoveAtIndex(i);
     }
 
-    const ParticleInfo& EmitterState::GetInfo() const
+    const graphics::ParticleInfo& EmitterState::GetInfo() const
     {
         return m_info;
     }

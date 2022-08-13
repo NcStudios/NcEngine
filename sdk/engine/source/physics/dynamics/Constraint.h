@@ -1,7 +1,7 @@
 #pragma once
 
 #include "physics/PhysicsBody.h"
-#include "ecs/component/Transform.h"
+#include "ecs/Transform.h"
 #include "physics/PhysicsPipelineTypes.h"
 
 namespace nc::physics

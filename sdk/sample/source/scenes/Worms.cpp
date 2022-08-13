@@ -21,14 +21,14 @@ namespace nc::sample
 
         // Camera
         auto cameraEntity = registry->Add<Entity>({.tag = "Main Camera"});
-        auto camera = registry->Add<Camera>(cameraEntity);
-        modules.Get<GraphicsModule>()->SetCamera(camera);
+        auto camera = registry->Add<graphics::Camera>(cameraEntity);
+        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
 
         // Window
         window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});
 
         // Light
-        auto lightOneProperties = PointLightInfo
+        auto lightOneProperties = graphics::PointLightInfo
         {
             .pos = Vector3{0.05f, 3.0f, -5.0f},
             .ambient = Vector3{0.3f, 0.3f, 0.3f},
@@ -37,7 +37,7 @@ namespace nc::sample
         };
 
         auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});
-        registry->Add<PointLight>(lightHandle, lightOneProperties);
+        registry->Add<graphics::PointLight>(lightHandle, lightOneProperties);
         registry->Add<FrameLogic>(lightHandle, InvokeFreeComponent<MouseFollower>{lightHandle, registry});
 
         // Worm Spawner

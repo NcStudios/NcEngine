@@ -4,7 +4,7 @@
 #include "Commands.h"
 #include "config/Config.h"
 #include "debug/Utils.h"
-#include "ecs/component/Camera.h"
+#include "graphics/Camera.h"
 #include "graphics/GpuAssetsStorage.h"
 #include "optick/optick.h"
 #include "Renderer.h"

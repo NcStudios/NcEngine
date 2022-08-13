@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ecs/component/ParticleEmitter.h"
 #include "ecs/SoA.h"
+#include "graphics/ParticleEmitter.h"
 #include "math/Random.h"
 
 #include "DirectXMath.h"
@@ -34,12 +34,12 @@ namespace nc::particle
         static constexpr size_t ParticlesIndex = 0u;
         static constexpr size_t ModelMatrixIndex = 1u;
 
-        EmitterState(Entity entity, const ParticleInfo& info, Random* random);
+        EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random);
 
         void Emit(size_t count);
         void Update(float dt, const Quaternion& camRotation, const Vector3& camForward);
         const ParticleSoA* GetSoA() const;
-        const ParticleInfo& GetInfo() const;
+        const graphics::ParticleInfo& GetInfo() const;
         Entity GetEntity() const;
 
     private:
@@ -47,7 +47,7 @@ namespace nc::particle
         auto ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const->DirectX::XMMATRIX;
 
         ParticleSoA m_soa;
-        ParticleInfo m_info;
+        graphics::ParticleInfo m_info;
         Entity m_entity;
         float m_emissionCounter;
         Random* m_random;

@@ -1,7 +1,7 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
 #include "ecs/Registry.h"
-#include "ecs/component/All.h"
+#include "ecs/All.h"
 #include "ecs/View.h"
 #include "imgui/imgui.h"
 
@@ -111,10 +111,10 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(transform);
         }
 
-        if (auto* meshRenderer = registry->Get<MeshRenderer>(entity))
+        if (auto* meshRenderer = registry->Get<graphics::MeshRenderer>(entity))
             ComponentGuiElement(meshRenderer);
 
-        if (auto* pointLight = registry->Get<PointLight>(entity))
+        if (auto* pointLight = registry->Get<graphics::PointLight>(entity))
             ComponentGuiElement(pointLight);
 
         if (auto* body = registry->Get<physics::PhysicsBody>(entity))
@@ -123,13 +123,13 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(body);
         }
 
-        if (auto* emitter = registry->Get<ParticleEmitter>(entity))
+        if (auto* emitter = registry->Get<graphics::ParticleEmitter>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(emitter);
         }
 
-        if (auto* dispatcher = registry->Get<NetworkDispatcher>(entity))
+        if (auto* dispatcher = registry->Get<net::NetworkDispatcher>(entity))
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(dispatcher);
@@ -143,13 +143,13 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(col);
         }
 
-        if(auto* col = registry->Get<ConcaveCollider>(entity); col)
+        if(auto* col = registry->Get<physics::ConcaveCollider>(entity); col)
         {
             ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
             ComponentGuiElement(col);
         }
 
-        for(const auto& comp : registry->Get<FreeComponentGroup>(entity)->GetComponents())
+        for(const auto& comp : registry->Get<ecs::detail::FreeComponentGroup>(entity)->GetComponents())
             controls::FreeComponentElement(comp);
 
         ImGui::Separator();
@@ -248,12 +248,12 @@ namespace nc::ui::editor::controls
     void ComponentSystems(Registry* registry)
     {
         ComponentSystemHeader<physics::Collider>("Collider", View<physics::Collider>(registry));
-        ComponentSystemHeader<NetworkDispatcher>("NetworkDispatcher", View<NetworkDispatcher>(registry));
-        ComponentSystemHeader<ParticleEmitter>("Particle Emitter", View<ParticleEmitter>(registry));
+        ComponentSystemHeader<net::NetworkDispatcher>("NetworkDispatcher", View<net::NetworkDispatcher>(registry));
+        ComponentSystemHeader<graphics::ParticleEmitter>("Particle Emitter", View<graphics::ParticleEmitter>(registry));
         ComponentSystemHeader<physics::PhysicsBody>("Physics Body", View<physics::PhysicsBody>(registry));
         ComponentSystemHeader<Transform>("Transform", View<Transform>(registry));
-        ComponentSystemHeader<MeshRenderer>("Mesh Renderer", View<MeshRenderer>(registry));
-        ComponentSystemHeader<PointLight>("Point Light", View<PointLight>(registry));
+        ComponentSystemHeader<graphics::MeshRenderer>("Mesh Renderer", View<graphics::MeshRenderer>(registry));
+        ComponentSystemHeader<graphics::PointLight>("Point Light", View<graphics::PointLight>(registry));
     }
 
 } // end namespace nc::ui::editor

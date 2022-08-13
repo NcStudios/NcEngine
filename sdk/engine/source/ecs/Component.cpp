@@ -1,4 +1,4 @@
-#include "ecs/component/Component.h"
+#include "ecs/Component.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"

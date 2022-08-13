@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Component.h"
+#include "ecs/Component.h"
 #include "physics/Geometry.h"
 
 #include "DirectXMath.h"
 
-namespace nc
+namespace nc::graphics
 {
     /** @brief Basic camera component. */
     class Camera : public FreeComponent

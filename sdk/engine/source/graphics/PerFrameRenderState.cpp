@@ -1,9 +1,9 @@
 #include "PerFrameRenderState.h"
 #include "ecs/Registry.h"
-#include "ecs/component/Camera.h"
-#include "ecs/component/MeshRenderer.h"
-#include "ecs/component/Transform.h"
+#include "ecs/Transform.h"
 #include "ecs/View.h"
+#include "graphics/Camera.h"
+#include "graphics/MeshRenderer.h"
 #include "graphics/resources/Environment.h"
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
@@ -11,7 +11,7 @@
 
 namespace
 {
-    bool IsViewedByFrustum(const nc::physics::Frustum& frustum, const nc::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
+    bool IsViewedByFrustum(const nc::physics::Frustum& frustum, const nc::graphics::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
     {
         const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
         const auto maxMeshExtent = renderer.GetMesh().maxExtent;
@@ -23,7 +23,7 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters)
+    PerFrameRenderState::PerFrameRenderState(Registry* registry, graphics::Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters)
         : camViewMatrix{ camera->ViewMatrix() },
           projectionMatrix{ camera->ProjectionMatrix() },
           cameraPosition{ registry->Get<Transform>(camera->ParentEntity())->Position() },

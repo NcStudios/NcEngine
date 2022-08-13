@@ -7,7 +7,7 @@
 
 #include "DirectXMath.h"
 #include "ecs/Registry.h"
-#include "ecs/component/All.h"
+#include "ecs/All.h"
 #include "imgui/imgui.h"
 #include "type/UIStream.h"
 
@@ -96,16 +96,16 @@ namespace nc::editor
         ImGui::Text("Static  %d", entity.IsStatic());
         ImGui::Text("Persist %d", entity.IsPersistent());
 
-        if(auto* transform  = m_registry->Get<Transform>(entity))         { DrawTransform(transform); }
-        if(auto* camera     = m_registry->Get<Camera>(entity))            { DrawCamera(camera); }
-        if(auto* renderer   = m_registry->Get<MeshRenderer>(entity))      { DrawMeshRenderer(renderer); }
-        if(auto* light      = m_registry->Get<PointLight>(entity))           { DrawPointLight(light); }
-        if(auto* body       = m_registry->Get<physics::PhysicsBody>(entity)) { DrawPhysicsBody(body); }
-        if(auto* emitter    = m_registry->Get<ParticleEmitter>(entity))      { DrawParticleEmitter(emitter); }
-        if(auto* dispatcher = m_registry->Get<NetworkDispatcher>(entity))    { DrawNetworkDispatcher(dispatcher); }
-        if(auto* collider   = m_registry->Get<physics::Collider>(entity))    { DrawCollider(collider); }
-        if(auto* collider   = m_registry->Get<ConcaveCollider>(entity))      { DrawConcaveCollider(collider); }
-        if(auto* source     = m_registry->Get<audio::AudioSource>(entity))   { DrawAudioSource(source); }
+        if(auto* transform  = m_registry->Get<Transform>(entity))                 { DrawTransform(transform); }
+        if(auto* camera     = m_registry->Get<graphics::Camera>(entity))          { DrawCamera(camera); }
+        if(auto* renderer   = m_registry->Get<graphics::MeshRenderer>(entity))    { DrawMeshRenderer(renderer); }
+        if(auto* light      = m_registry->Get<graphics::PointLight>(entity))      { DrawPointLight(light); }
+        if(auto* body       = m_registry->Get<physics::PhysicsBody>(entity))      { DrawPhysicsBody(body); }
+        if(auto* emitter    = m_registry->Get<graphics::ParticleEmitter>(entity)) { DrawParticleEmitter(emitter); }
+        if(auto* dispatcher = m_registry->Get<net::NetworkDispatcher>(entity))    { DrawNetworkDispatcher(dispatcher); }
+        if(auto* collider   = m_registry->Get<physics::Collider>(entity))         { DrawCollider(collider); }
+        if(auto* collider   = m_registry->Get<physics::ConcaveCollider>(entity))  { DrawConcaveCollider(collider); }
+        if(auto* source     = m_registry->Get<audio::AudioSource>(entity))        { DrawAudioSource(source); }
     }
 
     void Inspector::DrawAudioSource(audio::AudioSource* audioSource)
@@ -125,7 +125,7 @@ namespace nc::editor
         }
     }
 
-    void Inspector::DrawCamera(Camera* camera)
+    void Inspector::DrawCamera(graphics::Camera* camera)
     {
         ElementHeader(camera);
     }
@@ -245,7 +245,7 @@ namespace nc::editor
             collider->m_info.scale = Vector3::Splat(radius) * 2.0f;
     }
 
-    void Inspector::DrawConcaveCollider(ConcaveCollider* concaveCollider)
+    void Inspector::DrawConcaveCollider(physics::ConcaveCollider* concaveCollider)
     {
         /** @todo Currently there is no way to change the asset for a conave collider */
         ElementHeader(concaveCollider);
@@ -253,7 +253,7 @@ namespace nc::editor
         ImGui::Text("  Path: %s", concaveCollider->GetPath().c_str());
     }
 
-    void Inspector::DrawMeshRenderer(MeshRenderer* meshRenderer)
+    void Inspector::DrawMeshRenderer(graphics::MeshRenderer* meshRenderer)
     {
         ElementHeader(meshRenderer);
         ImGui::Text("Mesh");
@@ -314,12 +314,12 @@ namespace nc::editor
         });
     }
 
-    void Inspector::DrawNetworkDispatcher(NetworkDispatcher* networkDispatcher)
+    void Inspector::DrawNetworkDispatcher(net::NetworkDispatcher* networkDispatcher)
     {
         ElementHeader(networkDispatcher);
     }
 
-    void Inspector::DrawParticleEmitter(ParticleEmitter* particleEmitter)
+    void Inspector::DrawParticleEmitter(graphics::ParticleEmitter* particleEmitter)
     {
         ElementHeader(particleEmitter);
     }
@@ -353,7 +353,7 @@ namespace nc::editor
         ImGui::DragFloat("Friction", &properties.friction, 0.001f, 0.0f, 1.0f, "%.2f");
     }
 
-    void Inspector::DrawPointLight(PointLight* pointLight)
+    void Inspector::DrawPointLight(graphics::PointLight* pointLight)
     {
         ElementHeader(pointLight);
         auto info = pointLight->GetInfo();

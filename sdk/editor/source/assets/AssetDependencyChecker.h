@@ -4,14 +4,14 @@
 
 namespace nc::editor
 {
-    class AssetManifest;
+class AssetManifest;
 
-    struct AssetDependencyChecker
-    {
-        AssetDependencyChecker(const Registry* registry, const AssetManifest* manifest);
-        void LogMissingDependencies();
+struct AssetDependencyChecker
+{
+    AssetDependencyChecker(const Registry* registry, const AssetManifest* manifest);
+    void LogMissingDependencies();
 
-        std::vector<std::string> missingDependencies;
-        bool result;
-    };
-}
+    std::vector<std::string> missingDependencies;
+    bool result;
+};
+} // namespace nc::editor

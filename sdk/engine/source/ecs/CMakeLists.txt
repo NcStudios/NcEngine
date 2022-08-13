@@ -1,9 +1,10 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        Component.cpp
+        FreeComponentGroup.cpp
         ParticleEmitterSystem.cpp
         PointLightSystem.cpp
         Registry.cpp
         SoA.cpp
+        Transform.cpp
 )
-
-add_subdirectory(component)

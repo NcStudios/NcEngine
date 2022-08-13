@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/component/Logic.h"
+#include "ecs/Logic.h"
 #include "ecs/Registry.h"
 #include "ecs/View.h"
 #include "module/Module.h"

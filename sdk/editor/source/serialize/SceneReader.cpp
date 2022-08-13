@@ -10,12 +10,12 @@ namespace
 {
     using namespace nc;
 
-    TechniqueType ToTechniqueType(const std::string& name)
+    nc::graphics::TechniqueType ToTechniqueType(const std::string& name)
     {
         if(name == "TechniqueType::PhongAndUi")
-            return TechniqueType::PhongAndUi;
-        
-        return TechniqueType::None;
+            return nc::graphics::TechniqueType::PhongAndUi;
+
+        return nc::graphics::TechniqueType::None;
     }
 
     std::string SplitLineToActionDescriptionAndArgs(std::string line, std::stringstream& argsOut)
@@ -101,7 +101,7 @@ namespace
 
 namespace nc::editor
 {
-    SceneReader::SceneReader(Registry* registry, GraphicsModule* graphics, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
+    SceneReader::SceneReader(Registry* registry, graphics::GraphicsModule* graphics, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
         : m_registry{registry},
           m_graphics{graphics},
           m_file{scenesDirectory / (sceneName + FileExtension::Generated.data())},
@@ -241,7 +241,7 @@ namespace nc::editor
         /** @todo should have specific exception so we don't mask other failures*/
         try
         {
-            m_registry->Add<ConcaveCollider>(entity, assetPath);
+            m_registry->Add<physics::ConcaveCollider>(entity, assetPath);
         }
         catch(const std::runtime_error&)
         {
@@ -281,14 +281,14 @@ namespace nc::editor
         auto diffuseColor = ReadVector3FromAction(args);
         auto diffuseIntensity = ReadFloatFromAction(args);
 
-        PointLightInfo properties
+        graphics::PointLightInfo properties
         {
             .pos = pos,
             .ambient = ambient,
             .diffuseColor = diffuseColor,
             .diffuseIntensity = diffuseIntensity,
         };
-        m_registry->Add<PointLight>(entity, properties);
+        m_registry->Add<graphics::PointLight>(entity, properties);
     }
 
     void SceneReader::LoadMeshRenderer(Entity entity, std::stringstream& args)
@@ -296,7 +296,7 @@ namespace nc::editor
         ReadTokenFromAction(args);
         ReadTokenFromAction(args);
         std::string mesh = ReadQuotedStringFromAction(args);
-        Material material
+        graphics::Material material
         {
             .baseColor = ReadQuotedStringFromAction(args),
             .normal = ReadQuotedStringFromAction(args),
@@ -308,7 +308,7 @@ namespace nc::editor
         /** @todo should have specific exception so we don't mask other failures*/
         try
         {
-            m_registry->Add<MeshRenderer>(entity, std::move(mesh), std::move(material), technique);
+            m_registry->Add<graphics::MeshRenderer>(entity, std::move(mesh), std::move(material), technique);
         }
         catch(const std::exception&)
         {
@@ -320,7 +320,7 @@ namespace nc::editor
     void SceneReader::LoadCamera(Entity entity, std::stringstream& args)
     {
         ReadTokenFromAction(args);
-        m_registry->Add<Camera>(entity);
+        m_registry->Add<graphics::Camera>(entity);
     }
 
     void SceneReader::LoadSkybox(std::stringstream& args)

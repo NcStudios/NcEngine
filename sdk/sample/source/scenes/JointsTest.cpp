@@ -4,9 +4,9 @@
 #include "shared/Prefabs.h"
 
 #include "NcEngine.h"
-#include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "graphics/GraphicsModule.h"
+#include "graphics/SceneNavigationCamera.h"
 #include "physics/PhysicsModule.h"
 
 namespace nc::sample
@@ -22,16 +22,16 @@ namespace nc::sample
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
-        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules.Get<GraphicsModule>()->SetCamera(camera);
+        auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
+        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
+        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.pos = Vector3::Zero(),
-                                                           .ambient = Vector3{0.443f, 0.412f, 0.412f},
-                                                           .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                           .diffuseIntensity = 600});
+        registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.pos = Vector3::Zero(),
+                                                                               .ambient = Vector3{0.443f, 0.412f, 0.412f},
+                                                                               .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
+                                                                               .diffuseIntensity = 600});
 
         // Movable object
         {
@@ -72,7 +72,7 @@ namespace nc::sample
         // Ramp
         {
             auto ramp = prefab::Create(registry, prefab::Resource::RampRed, {.position = Vector3{9.0f, 2.6f, 6.0f}, .scale = Vector3::Splat(3.0f), .flags = Entity::Flags::Static});
-            registry->Add<ConcaveCollider>(ramp, "ramp.nca");
+            registry->Add<physics::ConcaveCollider>(ramp, "ramp.nca");
         }
 
         // Hinge

@@ -2,6 +2,7 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         ClickableSystem.cpp
         Collider.cpp
+        ConcaveCollider.cpp
         PhysicsBody.cpp
         PhysicsPipelineTypes.cpp
         PhysicsModuleImpl.cpp

@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
-#include "ecs/component/FreeComponentGroup.h"
+#include "ecs/detail/FreeComponentGroup.h"
 
 using namespace nc;
+using namespace nc::ecs::detail;
 
 struct FakeComponent : public FreeComponent
 {

@@ -58,7 +58,7 @@ ClickEvents::ClickEvents(SampleUI* ui)
 
 void ClickEvents::Load(Registry* registry, ModuleProvider modules)
 {
-    auto* graphics = modules.Get<GraphicsModule>();
+    auto* graphics = modules.Get<graphics::GraphicsModule>();
     auto* physics = modules.Get<physics::PhysicsModule>();
     auto* random = modules.Get<nc::Random>();
 
@@ -76,14 +76,14 @@ void ClickEvents::Load(Registry* registry, ModuleProvider modules)
 
     // Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.8f, 2.3f, -4.7f}, .tag = "Point Light 1"});
-    registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3{0.325, 0.325, 0.325}, .diffuseColor = Vector3{0.9, 0.9, 0.9}, .diffuseIntensity = 48.0});
+    registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.ambient = Vector3{0.325, 0.325, 0.325}, .diffuseColor = Vector3{0.9, 0.9, 0.9}, .diffuseIntensity = 48.0});
 
     auto lvHandle2 = registry->Add<Entity>({.position = Vector3{5.1f, 3.7f, 1.6f}, .tag = "Point Light 2"});
-    registry->Add<PointLight>(lvHandle2, PointLightInfo{.ambient = Vector3{1.0, 1.0, 1.0}, .diffuseColor = Vector3{1.0, 1.0, 1.0}, .diffuseIntensity = 54.0});
+    registry->Add<graphics::PointLight>(lvHandle2, graphics::PointLightInfo{.ambient = Vector3{1.0, 1.0, 1.0}, .diffuseColor = Vector3{1.0, 1.0, 1.0}, .diffuseIntensity = 54.0});
 
     // Objects
     prefab::Create(registry,
-                    prefab::Resource::Table, 
+                    prefab::Resource::Table,
                     {.position = Vector3{0.0f, -0.4f, 0.0f},
                     .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
                     .scale = Vector3::Splat(7.5f),

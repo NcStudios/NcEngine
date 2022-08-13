@@ -1,16 +1,19 @@
 #pragma once
 
-namespace nc { class Camera; }
+namespace nc::graphics
+{
+class Camera;
+}
 
 namespace nc::camera
 {
     class MainCamera final
     {
         public:
-            void Set(Camera* camera) noexcept;
-            auto Get() noexcept -> Camera*;
+            void Set(graphics::Camera* camera) noexcept;
+            auto Get() noexcept -> graphics::Camera*;
         
         private:
-            Camera* m_camera = nullptr;
+            graphics::Camera* m_camera = nullptr;
     };
 }

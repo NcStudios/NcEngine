@@ -1,13 +1,16 @@
 #pragma once
 
-#include "ecs/component/Camera.h"
+#include "Camera.h"
 #include "module/Module.h"
 #include "ui/IUI.h"
 
+namespace
+{
+class Registry;
+}
+
 namespace nc::graphics
 {
-    class Registry;
-
     /** @brief Interface for general graphics functionality. */
     struct GraphicsModule : public Module
     {

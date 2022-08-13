@@ -1,14 +1,20 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         Base.cpp
+        Camera.cpp
         Commands.cpp
+        DebugWidget.cpp
         GpuAllocator.cpp
         GpuAssetsStorage.cpp
         Graphics.cpp
         GraphicsModuleImpl.cpp
         MeshBatcher.cpp
+        MeshRenderer.cpp
+        ParticleEmitter.cpp
         PerFrameRenderState.cpp
+        PointLight.cpp
         Renderer.cpp
+        SceneNavigationCamera.cpp
         ShaderUtilities.cpp
         VertexDescriptions.cpp
         vma.cpp

@@ -3,10 +3,10 @@
 
 #include "NcEngine.h"
 #include "asset/Assets.h"
-#include "ecs/component/MeshRenderer.h"
-#include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/InvokeFreeComponent.h"
 #include "graphics/GraphicsModule.h"
+#include "graphics/MeshRenderer.h"
+#include "graphics/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
 
 #include <string>
@@ -53,7 +53,7 @@ namespace nc::sample
 
         nc::LoadTextureAssets(texturePaths);
 
-        auto floorMaterial = Material
+        auto floorMaterial = graphics::Material
         { 
             .baseColor = "floor/BaseColor.png",
             .normal    = "floor/Normal.png",
@@ -61,7 +61,7 @@ namespace nc::sample
             .metallic  = "floor/Roughness.png"
         };
 
-        auto blacktopMaterial = Material
+        auto blacktopMaterial = graphics::Material
         { 
             .baseColor = "blacktop/BaseColor.png",
             .normal    = "blacktop/Normal.png",
@@ -69,7 +69,7 @@ namespace nc::sample
             .metallic  = "blacktop/Metallic.png"
         };
 
-        auto blueMaterial = Material
+        auto blueMaterial = graphics::Material
         { 
             .baseColor = "spheres/Blue/BaseColor.png",
             .normal    = "spheres/Blue/Normal.png",
@@ -77,7 +77,7 @@ namespace nc::sample
             .metallic  = "spheres/Blue/Metallic.png"
         };
 
-        auto grayMaterial = Material
+        auto grayMaterial = graphics::Material
         { 
             .baseColor = "spheres/Gray/BaseColor.png",
             .normal    = "spheres/Gray/Normal.png",
@@ -94,13 +94,13 @@ namespace nc::sample
 
         nc::LoadMeshAssets(sceneMeshes);
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-        modules.Get<GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+        modules.Get<graphics::GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
 
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),
-                                                           .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
-                                                           .diffuseIntensity = 88.0f});
+        registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.ambient = Vector3(0.4f, 0.4f, 0.4f),
+                                                                               .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
+                                                                               .diffuseIntensity = 88.0f});
 
         auto floor = registry->Add<Entity>(
         {.position = Vector3{0.0f, 0.0f, 0.0f},
@@ -108,7 +108,7 @@ namespace nc::sample
          .scale = Vector3{30.0f, 30.0f, 1.0f},
          .tag = "Floor"});
 
-        registry->Add<MeshRenderer>(floor, "plane.nca", floorMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(floor, "plane.nca", floorMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto blueSphere = registry->Add<Entity>(
         {.position = Vector3{0.0f, 1.0f, 2.0f},
@@ -116,7 +116,7 @@ namespace nc::sample
         .scale = Vector3{2.0f, 2.0f,2.0f},
         .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blueSphere, "sphere.nca", blueMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(blueSphere, "sphere.nca", blueMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto blackSphere = registry->Add<Entity>(
         {.position = Vector3{3.0f, 1.0f, 2.0f},
@@ -124,7 +124,7 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Sphere"});
 
-        registry->Add<MeshRenderer>(blackSphere, "sphere.nca", grayMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(blackSphere, "sphere.nca", grayMaterial, graphics::TechniqueType::PhongAndUi);
 
         auto blackBox = registry->Add<Entity>(
         {.position = Vector3{-3.0f, 1.0f, 2.0f},
@@ -132,12 +132,12 @@ namespace nc::sample
          .scale = Vector3{2.0f, 2.0f,2.0f},
          .tag = "Box"});
 
-        registry->Add<MeshRenderer>(blackBox, "cube.nca", blacktopMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(blackBox, "cube.nca", blacktopMaterial, graphics::TechniqueType::PhongAndUi);
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
-        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
-        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules.Get<GraphicsModule>()->SetCamera(camera);
+        auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
+        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
+        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
     }
 }

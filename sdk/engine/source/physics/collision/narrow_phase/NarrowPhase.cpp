@@ -1,6 +1,6 @@
 #include "NarrowPhase.h"
 #include "debug/Utils.h"
-#include "ecs/component/Logic.h"
+#include "ecs/Logic.h"
 #include "optick/optick.h"
 
 #include <algorithm>

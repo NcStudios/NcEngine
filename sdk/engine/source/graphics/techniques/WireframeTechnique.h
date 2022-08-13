@@ -1,8 +1,8 @@
 #ifdef NC_EDITOR_ENABLED
 #pragma once
 
-#include "ecs/component/Component.h"
-#include "ecs/component/DebugWidget.h"
+#include "ecs/Component.h"
+#include "graphics/DebugWidget.h"
 #include "DirectXMath.h"
 #include "ITechnique.h"
 

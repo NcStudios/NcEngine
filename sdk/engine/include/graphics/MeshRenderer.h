@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Component.h"
 #include "asset/Assets.h"
+#include "ecs/Component.h"
 
-namespace nc
+namespace nc::graphics
 {
     struct Material
     {
@@ -34,7 +34,7 @@ namespace nc
     class MeshRenderer : public ComponentBase
     {
         NC_ENABLE_IN_EDITOR(MeshRenderer)
-        
+
         public:
             MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType);
 
@@ -62,8 +62,11 @@ namespace nc
             TextureIndices m_textureIndices;
             TechniqueType m_techniqueType;
     };
-    
-    #ifdef NC_EDITOR_ENABLED
-    template<> void ComponentGuiElement<MeshRenderer>(MeshRenderer* meshRenderer);
-    #endif
-}
+} // namespace nc::graphics
+
+namespace nc
+{
+#ifdef NC_EDITOR_ENABLED
+template<> void ComponentGuiElement<graphics::MeshRenderer>(graphics::MeshRenderer* meshRenderer);
+#endif
+} // namespace nc

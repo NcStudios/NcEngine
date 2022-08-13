@@ -5,8 +5,8 @@
 namespace nc
 {
     class Entity;
-    class PointLight;
     class Registry;
+    namespace graphics { class PointLight; }
 }
 
 namespace nc::ecs
@@ -24,7 +24,7 @@ namespace nc::ecs
             void Clear();
 
         private:
-            Connection<PointLight&> m_onAddConnection;
+            Connection<graphics::PointLight&> m_onAddConnection;
             Connection<Entity> m_onRemoveConnection;
             bool m_isSystemDirty;
     };

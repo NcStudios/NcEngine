@@ -1,15 +1,15 @@
 #include "EnvironmentPanel.h"
-#include "graphics/GraphicsModule.h"
 #include "assets/AssetManifest.h"
-#include "ecs/component/Camera.h"
 #include "ecs/View.h"
+#include "graphics/Camera.h"
+#include "graphics/GraphicsModule.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/Output.h"
 #include "utility/DefaultComponents.h"
 
 namespace nc::editor
 {
-    EnvironmentPanel::EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, GraphicsModule* graphics)
+    EnvironmentPanel::EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, graphics::GraphicsModule* graphics)
         : m_sceneData{sceneData},
           m_registry{registry},
           m_assetManifest{assetManifest},
@@ -23,7 +23,7 @@ namespace nc::editor
             ImGui::Text("Main Camera: %u", m_sceneData->mainCamera.Index()) :
             ImGui::Text("Main Camera: None");
 
-        DragAndDropTarget<Camera>([sceneData = m_sceneData](Camera* camera)
+        DragAndDropTarget<graphics::Camera>([sceneData = m_sceneData](graphics::Camera* camera)
         {
             sceneData->mainCamera = camera->ParentEntity();
         });

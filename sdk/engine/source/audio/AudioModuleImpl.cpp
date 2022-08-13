@@ -219,7 +219,7 @@ void AudioModuleImpl::MixToBuffer(double* buffer)
     {
         if(!source.IsPlaying())
             continue;
-        
+
         if(source.IsSpatial())
         {
             auto* transform = m_registry->Get<Transform>(source.ParentEntity());

@@ -2,7 +2,7 @@
 
 #include "Geometry.h"
 #include "LayerMask.h"
-#include "ecs/component/Component.h"
+#include "ecs/Component.h"
 #include "math/DirectXMathUtility.h"
 
 #include <variant>
@@ -10,9 +10,12 @@
 
 namespace nc
 {
+namespace graphics
+{
 #ifdef NC_EDITOR_ENABLED
 struct DebugWidget;
 #endif
+}
 
 namespace physics
 {
@@ -89,7 +92,7 @@ class Collider final : public ComponentBase
         #ifdef NC_EDITOR_ENABLED
         void SetEditorSelection(bool state);
         bool GetEditorSelection();
-        DebugWidget GetDebugWidget();
+        graphics::DebugWidget GetDebugWidget();
         #endif
 
     private:

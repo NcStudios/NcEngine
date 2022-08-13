@@ -5,7 +5,7 @@ namespace nc::editor
 {
     void AddDefaultMeshRenderer(Registry* registry, Entity entity)
     {
-        registry->Add<MeshRenderer>(entity, CubeMeshPath, DefaultMaterial, TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(entity, CubeMeshPath, DefaultMaterial, graphics::TechniqueType::PhongAndUi);
     }
 
     void AddDefaultHullCollider(Registry* registry, Entity entity, bool isTrigger)
@@ -15,6 +15,6 @@ namespace nc::editor
 
     void AddDefaultConcaveCollider(Registry* registry, Entity entity)
     {
-        registry->Add<ConcaveCollider>(entity, PlaneConcaveColliderPath);
+        registry->Add<physics::ConcaveCollider>(entity, PlaneConcaveColliderPath);
     }
 }

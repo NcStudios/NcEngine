@@ -1,14 +1,14 @@
 #include "ParticleEmitterSystem.h"
+#include "ecs/Transform.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
-#include "ecs/component/Transform.h"
 
 #include "optick/optick.h"
 #include <algorithm>
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, float* dt, std::function<nc::Camera* ()> getCamera)
+    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, float* dt, std::function<nc::graphics::Camera* ()> getCamera)
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
@@ -16,8 +16,8 @@ namespace nc::ecs
           m_random{ Random() },
           m_getCamera{ getCamera },
           m_registry{ registry },
-          m_onAddConnection{ registry->OnAdd<ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Add) },
-          m_onRemoveConnection{ registry->OnRemove<ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Remove)}
+          m_onAddConnection{ registry->OnAdd<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Add) },
+          m_onRemoveConnection{ registry->OnRemove<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Remove)}
     {
     }
 
@@ -83,7 +83,7 @@ namespace nc::ecs
         return m_emitterStates;
     }
 
-    void ParticleEmitterSystem::Add(ParticleEmitter& emitter)
+    void ParticleEmitterSystem::Add(graphics::ParticleEmitter& emitter)
     {
         m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_random);
         emitter.RegisterSystem(this);

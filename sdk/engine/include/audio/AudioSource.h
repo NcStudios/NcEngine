@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/component/Component.h"
+#include "ecs/Component.h"
 #include "asset/Assets.h"
 
 #include <span>

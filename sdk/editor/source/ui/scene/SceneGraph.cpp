@@ -190,7 +190,7 @@ namespace nc::editor
         else if(ImGui::Selectable("New PointLight"))
         {
             m_selectedEntity = m_registry->Add<Entity>(EntityInfo{.tag = "PointLight"});
-            m_registry->Add<PointLight>(m_selectedEntity, PointLightInfo{});
+            m_registry->Add<graphics::PointLight>(m_selectedEntity, graphics::PointLightInfo{});
         }
         else
         {
@@ -200,12 +200,12 @@ namespace nc::editor
 
     void SceneGraph::EntityContextMenu(Entity entity)
     {
-        bool hasCamera = m_registry->Contains<Camera>(entity);
+        bool hasCamera = m_registry->Contains<graphics::Camera>(entity);
         bool hasCollider = m_registry->Contains<physics::Collider>(entity);
-        bool hasConcaveCollider = m_registry->Contains<ConcaveCollider>(entity);
-        bool hasMeshRenderer = m_registry->Contains<MeshRenderer>(entity);
+        bool hasConcaveCollider = m_registry->Contains<physics::ConcaveCollider>(entity);
+        bool hasMeshRenderer = m_registry->Contains<graphics::MeshRenderer>(entity);
         bool hasPhysicsBody = m_registry->Contains<physics::PhysicsBody>(entity);
-        bool hasPointLight = m_registry->Contains<PointLight>(entity);
+        bool hasPointLight = m_registry->Contains<graphics::PointLight>(entity);
 
         if(ImGui::Selectable("Make Root"))
         {
@@ -226,7 +226,7 @@ namespace nc::editor
         {
             if(!hasCamera && ImGui::Selectable("Camera"))
             {
-                m_registry->Add<Camera>(entity);
+                m_registry->Add<graphics::Camera>(entity);
             }
 
             if(!hasCollider && !hasConcaveCollider && ImGui::BeginMenu("Collider"))
@@ -254,7 +254,7 @@ namespace nc::editor
                 for(const auto& asset : m_assetManifest->View(AssetType::ConcaveCollider))
                 {
                     if(ImGui::Selectable(asset.name.c_str()))
-                        m_registry->Add<ConcaveCollider>(entity, asset.ncaPath.value().string());
+                        m_registry->Add<physics::ConcaveCollider>(entity, asset.ncaPath.value().string());
                 }
 
                 ImGui::EndMenu();
@@ -275,7 +275,7 @@ namespace nc::editor
             
             if(!hasPointLight && ImGui::Selectable("PointLight"))
             {
-                m_registry->Add<PointLight>(entity, PointLightInfo{});
+                m_registry->Add<graphics::PointLight>(entity, graphics::PointLightInfo{});
             }
 
             ImGui::EndMenu();
@@ -292,24 +292,24 @@ namespace nc::editor
 
             if(hasConcaveCollider && ImGui::Selectable("ConcaveCollider"))
             {
-                m_registry->Remove<ConcaveCollider>(entity);
+                m_registry->Remove<physics::ConcaveCollider>(entity);
                 if(hasPhysicsBody)
                     m_registry->Remove<physics::PhysicsBody>(entity);
             }
 
             if(hasMeshRenderer && ImGui::Selectable("MeshRenderer"))
             {
-                m_registry->Remove<MeshRenderer>(entity);
+                m_registry->Remove<graphics::MeshRenderer>(entity);
             }
 
             if(hasPhysicsBody && ImGui::Selectable("PhysicsBody"))
             {
                 m_registry->Remove<physics::PhysicsBody>(entity);
             }
-            
+
             if(hasPointLight && ImGui::Selectable("PointLight"))
             {
-                m_registry->Remove<PointLight>(entity);
+                m_registry->Remove<graphics::PointLight>(entity);
             }
 
             ImGui::EndMenu();

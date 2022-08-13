@@ -6,10 +6,10 @@
 
 #include "NcEngine.h"
 #include "physics/PhysicsBody.h"
-#include "ecs/component/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
 #include "math/Random.h"
 #include "graphics/GraphicsModule.h"
+#include "graphics/SceneNavigationCamera.h"
 
 namespace
 {
@@ -67,15 +67,15 @@ namespace nc::sample
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 35.0f, -100.0f}, .rotation = Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});
-        auto camera = registry->Add<SceneNavigationCamera>(cameraHandle);
-        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-        modules.Get<GraphicsModule>()->SetCamera(camera);
+        auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
+        registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
+        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 30.0f, 0.0f}, .tag = "Point Light 1"});
-        registry->Add<PointLight>(lvHandle, PointLightInfo{.ambient = Vector3(0.275f, 0.27f, 0.27f),
-                                                           .diffuseColor = Vector3(0.99f, 1.0f, 0.76f),
-                                                           .diffuseIntensity = 1000.0f});
+        registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.ambient = Vector3(0.275f, 0.27f, 0.27f),
+                                                                               .diffuseColor = Vector3(0.99f, 1.0f, 0.76f),
+                                                                               .diffuseIntensity = 1000.0f});
 
         // Collider that destroys anything leaving its bounded area
         auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(200.0f), .tag = "KillBox", .flags = Entity::Flags::Static});

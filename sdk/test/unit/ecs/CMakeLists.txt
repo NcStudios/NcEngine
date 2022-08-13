@@ -1,7 +1,7 @@
 ### FreeComponentGroup Tests ###
 add_executable(FreeComponentGroup_unit_tests
     FreeComponentGroup_unit_tests.cpp
-    ${NC_SOURCE_DIR}/ecs/component/FreeComponentGroup.cpp
+    ${NC_SOURCE_DIR}/ecs/FreeComponentGroup.cpp
 )
 
 target_include_directories(FreeComponentGroup_unit_tests
@@ -75,7 +75,7 @@ add_test(Registry_unit_tests Registry_unit_tests)
 ### Transform Tests ###
 add_executable(Transform_unit_tests
     Transform_unit_tests.cpp
-    ${NC_SOURCE_DIR}/ecs/component/Transform.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/ecs/Registry.cpp
     ${NC_SOURCE_DIR}/math/Quaternion.cpp
 )

@@ -5,10 +5,13 @@ using namespace nc;
 
 namespace nc
 {
-    Registry g_registry{10u};
+Registry g_registry{10u};
 
-    FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity}, m_components{} {}
-    void FreeComponentGroup::CommitStagedComponents() {}
+namespace ecs::detail
+{
+FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity}, m_components{} {}
+void FreeComponentGroup::CommitStagedComponents() {}
+}
 }
 
 constexpr auto TestLayer = Entity::layer_type{0u};

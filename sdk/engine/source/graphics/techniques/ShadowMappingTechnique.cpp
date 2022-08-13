@@ -1,7 +1,7 @@
 #include "ShadowMappingTechnique.h"
 #include "config/Config.h"
-#include "ecs/component/MeshRenderer.h"
 #include "ecs/Registry.h"
+#include "graphics/MeshRenderer.h"
 #include "graphics/Base.h"
 #include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"

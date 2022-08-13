@@ -5,7 +5,7 @@
 
 namespace
 {
-    bool IsViewedByFrustum(const nc::physics::Frustum& frustum, const nc::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
+    bool IsViewedByFrustum(const nc::physics::Frustum& frustum, const nc::graphics::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
     {
         const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
         const auto maxMeshExtent = renderer.GetMesh().maxExtent;
@@ -15,7 +15,7 @@ namespace
     }
 
     /** @todo This is crap. We need a hash or id for materials. */
-    bool BelongsToBatch(const nc::MeshRenderer& renderer, const nc::graphics::Batch* batch)
+    bool BelongsToBatch(const nc::graphics::MeshRenderer& renderer, const nc::graphics::Batch* batch)
     {
         if(renderer.GetMesh().firstIndex != batch->mesh.firstIndex)
             return false;

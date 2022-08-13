@@ -1,9 +1,11 @@
 #include "Renderer.h"
-#include "assets/AssetServices.h"
-#include "ecs/component/DebugWidget.h"
-#include "ecs/component/MeshRenderer.h"
-#include "ecs/component/Transform.h"
+
+#include "ecs/Transform.h"
 #include "ecs/Registry.h"
+#include "graphics/DebugWidget.h"
+#include "graphics/MeshRenderer.h"
+
+#include "assets/AssetServices.h"
 #include "graphics/Base.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"

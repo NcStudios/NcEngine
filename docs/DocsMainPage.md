@@ -37,10 +37,10 @@ Components describe the behavior and properties of objects in a game. An Entity 
 Components must be added and removed through the Registry. They are expected to be move-only types.
 
 ### Pooled Component
-Pooled components are intended for types that are numerous and processed in bulk. They are stored contiguously by type and have fixed size memory overhead for maintaining constant random access time. User-defined pooled components should derive from [ComponentBase](../nc/include/ecs/component/Component.h). Also, `Registry::RegisterComponentType<T>()` needs to be called once before interacting with the type in the Registry. This is done internally for all engine types.
+Pooled components are intended for types that are numerous and processed in bulk. They are stored contiguously by type and have fixed size memory overhead for maintaining constant random access time. User-defined pooled components should derive from [ComponentBase](../nc/include/ecs/Component.h). Also, `Registry::RegisterComponentType<T>()` needs to be called once before interacting with the type in the Registry. This is done internally for all engine types.
 
 ### Free Component
-Free components should be used for types that appear in small numbers - an input handler, for example. They also have the advantage of being pointer stable. Free components are grouped according to the Entities they belong to and do not have the additional memory overhead of pooled components. This, however, results in random access times that are linear in terms of the number of free components attached to an Entity. User-defined free components should derive from [FreeComponent](../nc/include/ecs/component/Component.h).
+Free components should be used for types that appear in small numbers - an input handler, for example. They also have the advantage of being pointer stable. Free components are grouped according to the Entities they belong to and do not have the additional memory overhead of pooled components. This, however, results in random access times that are linear in terms of the number of free components attached to an Entity. User-defined free components should derive from [FreeComponent](../nc/include/ecs/Component.h).
 
 ## Registry
 The registry contains storage for all entities and components and manages the associations between them. In order for objects of these types to be recognized by NcEngine, they must be created through one of the registry's Add member functions. There are also functions for retreiving, removing, and viewing ranges of objects, among other things.

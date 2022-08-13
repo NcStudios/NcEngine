@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "physics/PhysicsPipelineTypes.h"
-#include "ecs/component/Transform.h"
+#include "ecs/Transform.h"
 
 using namespace nc;
 
