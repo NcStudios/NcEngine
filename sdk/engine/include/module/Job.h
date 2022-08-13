@@ -10,16 +10,17 @@
 
 namespace nc
 {
-    constexpr size_t HookPointCount = 6ull;
+    constexpr size_t HookPointCount = 7ull;
 
     enum class HookPoint : uint8_t
     {
-        Free          = 0,
-        Logic         = 1,
-        Physics       = 2,
-        PreRenderSync = 3,
-        Render        = 4,
-        PostFrameSync = 5
+        Begin,
+        Free,
+        Logic,
+        Physics,
+        PreRenderSync,
+        Render,
+        PostFrameSync
     };
 
     struct Job
