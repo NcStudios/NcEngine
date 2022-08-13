@@ -6,7 +6,7 @@
 #include "Graphics.h"
 #include "graphics/GraphicsModule.h"
 #include "resources/Environment.h"
-#include "module/Job.h"
+#include "task/Job.h"
 #include "ui/UISystemImpl.h"
 
 #include <memory>
@@ -29,7 +29,7 @@ namespace nc::graphics
             bool IsUiHovered() const noexcept override;
             void SetSkybox(const std::string& path) override;
             void ClearEnvironment() override;
-            auto BuildWorkload()->std::vector<Job> override;
+            auto BuildWorkload()->std::vector<task::Job> override;
             void Clear() noexcept override;
             void Run();
 

@@ -8,11 +8,11 @@
 #include <variant>
 #include <vector>
 
-namespace nc
+namespace nc::task
 {
-    constexpr size_t HookPointCount = 6ull;
+    constexpr size_t ExecutionPhaseCount = 6ull;
 
-    enum class HookPoint : uint8_t
+    enum class ExecutionPhase : uint8_t
     {
         Free          = 0,
         Logic         = 1,
@@ -29,7 +29,7 @@ namespace nc
         using inner_type = std::variant<single_job_t, multi_job_t>;
         inner_type work;
         const char* name = "unnamed job";
-        HookPoint hook;
+        ExecutionPhase phase;
     };
 
     /** State shared between all tasks in a graph for storing

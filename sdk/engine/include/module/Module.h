@@ -4,7 +4,7 @@
 
 namespace nc
 {
-    struct Job;
+    namespace task { struct Job; }
 
     /** @brief Modules are extensions that provide functionality to the engine. */
     struct Module
@@ -13,9 +13,9 @@ namespace nc
 
         /**
          * @brief Builds a list of jobs required by the module. Returns an empty vector by default.
-         * @return std::vector<Job>
+         * @return std::vector<task::Job>
          */
-        virtual auto BuildWorkload() -> std::vector<Job>;
+        virtual auto BuildWorkload() -> std::vector<task::Job>;
 
         /** @brief Called prior to clearing the module's associated data registry. This includes
          *  scene changes and NcEngine::Shutdown(). */

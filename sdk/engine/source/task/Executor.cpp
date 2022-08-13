@@ -15,14 +15,14 @@ namespace
         }
     }
 
-    void SetDependencies(nc::Executor::task_matrix<tf::Task>& taskList)
+    void SetDependencies(nc::task::Executor::task_matrix<tf::Task>& taskList)
     {
-        constexpr auto freeIndex = static_cast<size_t>(nc::HookPoint::Free);
-        constexpr auto logicIndex = static_cast<size_t>(nc::HookPoint::Logic);
-        constexpr auto physicsIndex = static_cast<size_t>(nc::HookPoint::Physics);
-        constexpr auto renderIndex = static_cast<size_t>(nc::HookPoint::Render);
-        constexpr auto preRenderIndex = static_cast<size_t>(nc::HookPoint::PreRenderSync);
-        constexpr auto postFrameIndex = static_cast<size_t>(nc::HookPoint::PostFrameSync);
+        constexpr auto freeIndex = static_cast<size_t>(nc::task::ExecutionPhase::Free);
+        constexpr auto logicIndex = static_cast<size_t>(nc::task::ExecutionPhase::Logic);
+        constexpr auto physicsIndex = static_cast<size_t>(nc::task::ExecutionPhase::Physics);
+        constexpr auto renderIndex = static_cast<size_t>(nc::task::ExecutionPhase::Render);
+        constexpr auto preRenderIndex = static_cast<size_t>(nc::task::ExecutionPhase::PreRenderSync);
+        constexpr auto postFrameIndex = static_cast<size_t>(nc::task::ExecutionPhase::PostFrameSync);
 
         auto& freeTasks = taskList[freeIndex];
         auto& logicTasks = taskList[logicIndex];
@@ -39,7 +39,7 @@ namespace
     }
 }
 
-namespace nc
+namespace nc::task
 {
     Executor::Executor()
         : m_taskExecutor{8u},
@@ -63,7 +63,7 @@ namespace nc
             registry->CommitStagedChanges();
         };
 
-        Add(Job{ syncJob, "Sync", HookPoint::PreRenderSync });
+        Add(Job{ syncJob, "Sync", ExecutionPhase::PreRenderSync });
         auto tasks = ConvertJobsToTasks();
         SetDependencies(tasks);
 
@@ -75,7 +75,7 @@ namespace nc
 
     void Executor::Add(Job job)
     {
-        auto index = static_cast<unsigned>(job.hook);
+        auto index = static_cast<unsigned>(job.phase);
         m_jobRegistry.at(index).push_back(std::move(job));
     }
 

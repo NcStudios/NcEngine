@@ -1,12 +1,12 @@
 #include "gtest/gtest.h"
 #include "math/Random.h"
-#include "module/Job.h"
+#include "task/Job.h"
 
 using namespace nc;
 
 namespace nc
 {
-auto Module::BuildWorkload() -> std::vector<Job> { return {}; }
+auto Module::BuildWorkload() -> std::vector<task::Job> { return {}; }
 void Module::Clear() noexcept {}
 }
 

@@ -5,7 +5,7 @@
 #include "math/Random.h"
 #include "NcEngine.h"
 #include "scene/SceneManager.h"
-#include "Executor.h"
+#include "task/Executor.h"
 #include "time/Time.h"
 #include "window/WindowImpl.h"
 
@@ -31,7 +31,7 @@ namespace nc
             time::Time m_time;
             nc::AssetManagers m_assets;
             ModuleRegistry m_modules;
-            Executor m_executor;
+            task::Executor m_executor;
             scene::SceneManager m_sceneManager;
             float m_dt;
             bool m_isRunning;

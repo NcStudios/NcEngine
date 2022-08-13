@@ -27,7 +27,7 @@ namespace
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
         void Clear() noexcept override {}
-        auto BuildWorkload() -> std::vector<nc::Job> { return {}; }
+        auto BuildWorkload() -> std::vector<nc::task::Job> { return {}; }
 
         nc::Connection<nc::PointLight&> onAddConnection;
         nc::Connection<nc::Entity> onRemoveConnection;
@@ -105,13 +105,13 @@ namespace nc::graphics
         m_particleEmitterSystem.Clear();
     }
 
-    auto GraphicsModuleImpl::BuildWorkload() -> std::vector<Job>
+    auto GraphicsModuleImpl::BuildWorkload() -> std::vector<task::Job>
     {
-        return std::vector<Job>
+        return std::vector<task::Job>
         {
-            Job{ [this] {Run(); }, "GraphicsModule", HookPoint::Render },
-            Job{ [this] {m_particleEmitterSystem.Run(); }, "RunParticleEmitterSystem", HookPoint::Free },
-            Job{ [this] {m_particleEmitterSystem.ProcessFrameEvents(); }, "ProcessParticleFrameEvents", HookPoint::PostFrameSync }
+            task::Job{ [this] {Run(); }, "GraphicsModule", task::ExecutionPhase::Render },
+            task::Job{ [this] {m_particleEmitterSystem.Run(); }, "RunParticleEmitterSystem", task::ExecutionPhase::Free },
+            task::Job{ [this] {m_particleEmitterSystem.ProcessFrameEvents(); }, "ProcessParticleFrameEvents", task::ExecutionPhase::PostFrameSync }
         };
     }
 

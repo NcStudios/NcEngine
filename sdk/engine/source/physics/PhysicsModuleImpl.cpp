@@ -28,11 +28,11 @@ namespace
             void RegisterClickable(nc::IClickable*) override {}
             void UnregisterClickable(nc::IClickable*) noexcept override {}
             auto RaycastToClickables(nc::LayerMask = nc::LayerMaskAll) -> nc::IClickable* override { return nullptr;}
-            auto BuildWorkload() -> std::vector<nc::Job> override { return {}; }
+            auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
             void Clear() noexcept override {}
 
         private:
-            nc::TaskGraph m_tasks;
+            nc::task::TaskGraph m_tasks;
             BspTreeStub m_bspStub;
     };
 }
@@ -89,7 +89,7 @@ namespace nc::physics
         return m_clickableSystem.RaycastToClickables(mask);
     }
 
-    auto PhysicsModuleImpl::BuildWorkload() -> std::vector<Job>
+    auto PhysicsModuleImpl::BuildWorkload() -> std::vector<task::Job>
     {
         const auto fixedStep = config::GetPhysicsSettings().fixedUpdateInterval;
 
@@ -127,9 +127,9 @@ namespace nc::physics
         pipelineModule.precede(update);
         update.precede(condition);
 
-        return std::vector<Job>
+        return std::vector<task::Job>
         {
-            Job{ &m_tasks, "Physics Module", HookPoint::Physics }
+            task::Job{ &m_tasks, "Physics Module", task::ExecutionPhase::Physics }
         };
     }
 

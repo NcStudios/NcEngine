@@ -1,9 +1,9 @@
 #include "module/Module.h"
-#include "module/Job.h"
+#include "task/Job.h"
 
 namespace nc
 {
-auto Module::BuildWorkload() -> std::vector<Job>
+auto Module::BuildWorkload() -> std::vector<task::Job>
 {
     return {};
 }

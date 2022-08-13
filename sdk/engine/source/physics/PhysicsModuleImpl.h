@@ -5,7 +5,7 @@
 #include "PhysicsPipeline.h"
 #include "collision/broad_phase/SingleAxisPrune.h"
 #include "proxy/PerFrameProxyCache.h"
-#include "module/Job.h"
+#include "task/Job.h"
 #include "time/Time.h"
 
 namespace nc::physics
@@ -32,7 +32,7 @@ namespace nc::physics
             void RegisterClickable(IClickable* clickable) override;
             void UnregisterClickable(IClickable* clickable) noexcept override;
             auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
-            auto BuildWorkload() -> std::vector<Job> override;
+            auto BuildWorkload() -> std::vector<task::Job> override;
             void Clear() noexcept override;
 
         private:

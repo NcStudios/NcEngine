@@ -30,7 +30,7 @@ namespace
     struct AudioModuleStub : public nc::AudioModule
     {
         void RegisterListener(nc::Entity) noexcept override {}
-        auto BuildWorkload() -> std::vector<nc::Job> override { return {}; }
+        auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
         void Clear() noexcept override {}
     };
 }
@@ -136,11 +136,11 @@ namespace nc::audio
         }
     }
 
-    auto AudioModuleImpl::BuildWorkload() -> std::vector<Job>
+    auto AudioModuleImpl::BuildWorkload() -> std::vector<task::Job>
     {
-        return std::vector<Job>
+        return std::vector<task::Job>
         {
-            Job{ [this]{Run();}, "AudioModule", HookPoint::Free }
+            task::Job{ [this]{Run();}, "AudioModule", task::ExecutionPhase::Free }
         };
     }
 

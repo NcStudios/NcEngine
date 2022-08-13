@@ -3,7 +3,7 @@
 #include "audio/AudioModule.h"
 #include "ecs/Registry.h"
 #include "rtaudio/RtAudio.h"
-#include "module/Job.h"
+#include "task/Job.h"
 
 #include <mutex>
 #include <queue>
@@ -19,7 +19,7 @@ namespace nc::audio
             ~AudioModuleImpl() noexcept;
 
             void RegisterListener(Entity listener) noexcept override;
-            auto BuildWorkload() -> std::vector<Job> override;
+            auto BuildWorkload() -> std::vector<task::Job> override;
             void Clear() noexcept override;
             void Run();
             auto WriteToDeviceBuffer(double* output) -> int;

@@ -14,7 +14,7 @@
 #include "ecs/Registry.h"
 #include "ecs/View.h"
 #include "optick/optick.h"
-#include "module/Job.h"
+#include "task/Job.h"
 
 namespace nc::physics
 {
@@ -38,10 +38,10 @@ namespace nc::physics
             void Step(tf::Executor& executor);
             void Clear();
             auto GetJointSystem() -> JointSystem* { return &m_jointSystem; }
-            auto GetTasks() -> TaskGraph& { return m_tasks; }
+            auto GetTasks() -> task::TaskGraph& { return m_tasks; }
 
         private:
-            TaskGraph m_tasks;
+            task::TaskGraph m_tasks;
             proxy_cache m_proxyCache;
             broad_phase m_broadPhase;
             NarrowPhase m_narrowPhase;

@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
-#include "module/Job.h"
+#include "task/Job.h"
 
 class TaskGraph_unit_tests : public ::testing::Test
 {
     public:
         tf::Executor executor;
-        nc::TaskGraph taskGraph;
+        nc::task::TaskGraph taskGraph;
 
         TaskGraph_unit_tests() : executor{2u}, taskGraph{} {}
         ~TaskGraph_unit_tests() {}

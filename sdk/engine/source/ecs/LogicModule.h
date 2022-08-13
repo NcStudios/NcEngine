@@ -4,7 +4,7 @@
 #include "ecs/Registry.h"
 #include "ecs/View.h"
 #include "module/Module.h"
-#include "module/Job.h"
+#include "task/Job.h"
 
 #include "optick/optick.h"
 
@@ -19,11 +19,11 @@ namespace nc
             {
             }
 
-            auto BuildWorkload() -> std::vector<Job> override
+            auto BuildWorkload() -> std::vector<task::Job> override
             {
-                return std::vector<Job>
+                return std::vector<task::Job>
                 {
-                    Job{ [this]{Run();}, "LogicModule", HookPoint::Logic }
+                    task::Job{ [this]{Run();}, "LogicModule", task::ExecutionPhase::Logic }
                 };
             }
 

@@ -1,16 +1,16 @@
 #pragma once
 
-#include "module/Job.h"
-#include "module/Module.h"
 #include "ecs/Registry.h"
+#include "module/Module.h"
+#include "task/Job.h"
 
-namespace nc
+namespace nc::task
 {
     class Executor
     {
         public:
             template<class T>
-            using task_matrix = std::array<std::vector<T>, HookPointCount>;
+            using task_matrix = std::array<std::vector<T>, ExecutionPhaseCount>;
 
             Executor();
 
