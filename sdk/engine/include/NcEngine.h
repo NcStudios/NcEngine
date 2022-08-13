@@ -5,7 +5,6 @@
 #include "ecs/component/All.h"
 #include "module/ModuleRegistry.h"
 #include "scene/Scene.h"
-#include "time/Time.h"
 #include "utility/EnumUtilities.h"
 
 namespace nc

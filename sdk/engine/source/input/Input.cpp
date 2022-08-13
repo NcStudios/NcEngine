@@ -1,4 +1,4 @@
-#include "Input.h"
+#include "input/Input.h"
 #include "InputInternal.h"
 
 #include <algorithm>

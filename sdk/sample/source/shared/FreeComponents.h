@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Window.h"
+#include "window/Window.h"
 #include "physics/PhysicsModule.h"
 
 #include "ecs/InvokeFreeComponent.h"

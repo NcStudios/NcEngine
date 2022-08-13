@@ -1,7 +1,7 @@
 #include "ecs/component/Camera.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "Window.h"
+#include "window/Window.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UIPosition.h"
-#include "Window.h"
+#include "window/Window.h"
 
 namespace nc::ui
 {

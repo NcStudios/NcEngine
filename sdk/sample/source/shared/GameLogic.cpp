@@ -1,6 +1,6 @@
 #include "GameLogic.h"
 #include "GameLog.h"
-#include "Input.h"
+#include "input/Input.h"
 
 namespace nc::sample
 {

@@ -1,5 +1,5 @@
 #include "FreeComponents.h"
-#include "Input.h"
+#include "input/Input.h"
 #include "config/Config.h"
 #include "shared/Prefabs.h"
 #include "shared/GameLog.h"

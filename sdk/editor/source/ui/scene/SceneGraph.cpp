@@ -4,7 +4,7 @@
 #include "ui/ImGuiUtility.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
-#include "Window.h"
+#include "window/Window.h"
 
 namespace
 {

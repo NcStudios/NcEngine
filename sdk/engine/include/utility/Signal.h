@@ -1,7 +1,7 @@
 #pragma once
 
 #include "debug/Utils.h"
-#include "internal/SignalInternal.h"
+#include "detail/SignalInternal.h"
 #include <algorithm>
 
 namespace nc
@@ -10,7 +10,7 @@ template<class... Args>
 class Connection
 {
     public:
-        using ConnectionState_t = internal::SharedConnectionState<Args...>;
+        using ConnectionState_t = detail::SharedConnectionState<Args...>;
 
         explicit Connection(std::weak_ptr<ConnectionState_t> state) noexcept
             : m_state{std::move(state)}
@@ -47,7 +47,7 @@ template<class... Args>
 class Signal
 {
     public:
-        using Slot_t = internal::Slot<Args...>;
+        using Slot_t = detail::Slot<Args...>;
         using Connection_t = Connection<Args...>;
 
         Signal() = default;
@@ -109,7 +109,7 @@ class Signal
         }
 
     private:
-        mutable std::unique_ptr<internal::ConnectionBacklink> m_link = std::make_unique<internal::ConnectionBacklink>();
+        mutable std::unique_ptr<detail::ConnectionBacklink> m_link = std::make_unique<detail::ConnectionBacklink>();
         mutable std::vector<Slot_t> m_slots{};
         int m_currentId{0};
 

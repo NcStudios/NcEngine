@@ -10,8 +10,8 @@
 #include "scenes/JareTestScene.h"
 #include "scenes/SolarSystem.h"
 
-#include "Window.h"
-#include "Input.h"
+#include "window/Window.h"
+#include "input/Input.h"
 #include "config/Version.h"
 #include "graphics/GraphicsModule.h"
 #include "imgui/imgui.h"

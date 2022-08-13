@@ -3,7 +3,7 @@
 #include "shared/FreeComponents.h"
 
 #include "NcEngine.h"
-#include "Window.h"
+#include "window/Window.h"
 #include "asset/Assets.h"
 #include "ecs/component/SceneNavigationCamera.h"
 #include "ecs/Registry.h"

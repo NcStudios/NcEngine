@@ -5,7 +5,7 @@
 #include <mutex>
 #include <vector>
 
-namespace nc::internal
+namespace nc::detail
 {
 /** A link from a connection back to a signal. Directly pointing to a signal would
  *  require guaranteeing pointer stability. To avoid the burden of non-moveable

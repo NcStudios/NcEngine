@@ -1,8 +1,8 @@
 #include "ClickableSystem.h"
 #include "ecs/Registry.h"
 #include "debug/Utils.h"
-#include "Input.h"
-#include "Window.h"
+#include "input/Input.h"
+#include "window/Window.h"
 #include "DirectXMath.h"
 
 #include <algorithm>

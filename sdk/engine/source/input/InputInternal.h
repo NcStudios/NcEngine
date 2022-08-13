@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Input.h"
+#include "input/Input.h"
 #include "platform/win32/NcWin32.h"
 
 namespace nc::input

@@ -2,7 +2,7 @@
 
 #include "NcEngine.h"
 #include "ui/IUI.h"
-#include "Window.h"
+#include "window/Window.h"
 #include "shared/GameLog.h"
 
 #include <functional>

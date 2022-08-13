@@ -1,8 +1,8 @@
 #ifdef NC_EDITOR_ENABLED
 #include "Editor.h"
 #include "EditorControls.h"
-#include "Input.h"
-#include "Window.h"
+#include "input/Input.h"
+#include "window/Window.h"
 
 namespace
 {

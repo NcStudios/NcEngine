@@ -1,6 +1,7 @@
 #pragma once
-#include "EditorMeta.h"
+
 #include "ecs/Entity.h"
+#include "ecs/detail/EditorMacros.h"
 
 #include <concepts>
 #include <type_traits>
