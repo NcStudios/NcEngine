@@ -1,6 +1,9 @@
 #include "GameLogic.h"
 #include "GameLog.h"
+
+#include "ecs/Transform.h"
 #include "input/Input.h"
+#include "physics/PhysicsBody.h"
 
 namespace nc::sample
 {

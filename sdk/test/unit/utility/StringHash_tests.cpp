@@ -26,9 +26,9 @@ auto ReadCollateral() -> std::vector<std::string>
 
 TEST(StringHash_tests, Constructor_CompileTime_Succeeds)
 {
-    constexpr auto uut = hash::StringHash(testString1);
+    constexpr auto uut = utility::StringHash(testString1);
     constexpr auto actual = uut.Hash();
-    constexpr auto expected = hash::Fnv1a(testString1);
+    constexpr auto expected = utility::Fnv1a(testString1);
     EXPECT_EQ(actual, expected);
     /** Prove compile time execution with a static_assert */
     static_assert(actual == expected);
@@ -37,32 +37,32 @@ TEST(StringHash_tests, Constructor_CompileTime_Succeeds)
 TEST(StringHash_tests, Constructor_Runtime_Succeeds)
 {
     const auto path = std::string{testString1};
-    const auto id = hash::StringHash(path);
+    const auto id = utility::StringHash(path);
     const auto actual = id.Hash();
-    const auto expected = hash::Fnv1a(path);
+    const auto expected = utility::Fnv1a(path);
     EXPECT_EQ(actual, expected);
 }
 
 TEST(StringHash_tests, EmptyString_ReturnsFnvBasis)
 {
-    constexpr auto uut = hash::StringHash("");
+    constexpr auto uut = utility::StringHash("");
     constexpr auto actual = uut.Hash();
-    constexpr auto expected = hash::FnvOffsetBasis;
+    constexpr auto expected = utility::detail::FnvOffsetBasis;
     EXPECT_EQ(actual, expected);
 }
 
 TEST(StringHash_tests, Comparison_Same_ReturnEqual)
 {
-    constexpr auto id1 = hash::StringHash(testString1);
-    constexpr auto id2 = hash::StringHash(testString1);
+    constexpr auto id1 = utility::StringHash(testString1);
+    constexpr auto id2 = utility::StringHash(testString1);
     EXPECT_TRUE(id1 == id2);
     EXPECT_FALSE(id1 != id2);
 }
 
 TEST(StringHash_tests, Comparison_Different_ReturnsNotEqual)
 {
-    constexpr auto id1 = hash::StringHash(testString1);
-    constexpr auto id2 = hash::StringHash(testString2);
+    constexpr auto id1 = utility::StringHash(testString1);
+    constexpr auto id2 = utility::StringHash(testString2);
     EXPECT_FALSE(id1 == id2);
     EXPECT_TRUE(id1 != id2);
 }
@@ -75,7 +75,7 @@ TEST(StringHash_tests, Fnv1a_HashMany_NoCollisions)
     auto set = std::set<size_t>{};
     for(const auto& path : paths)
     {
-        set.emplace(hash::Fnv1a(path));
+        set.emplace(utility::Fnv1a(path));
     }
     EXPECT_EQ(set.size(), paths.size());
 }

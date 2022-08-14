@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ecs/Registry.h"
-#include "ecs/All.h"
 
 namespace nc::sample
 {

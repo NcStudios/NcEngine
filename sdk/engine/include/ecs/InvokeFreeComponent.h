@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Registry.h"
+#include "Logic.h"
 
 namespace nc
 {

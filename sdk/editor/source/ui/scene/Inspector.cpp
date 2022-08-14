@@ -7,7 +7,6 @@
 
 #include "DirectXMath.h"
 #include "ecs/Registry.h"
-#include "ecs/All.h"
 #include "imgui/imgui.h"
 #include "type/UIStream.h"
 

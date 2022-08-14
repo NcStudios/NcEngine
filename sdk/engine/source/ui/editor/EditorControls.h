@@ -1,9 +1,24 @@
 #pragma once
 #ifdef NC_EDITOR_ENABLED
+
+#include "audio/AudioSource.h"
+#include "ecs/Logic.h"
 #include "ecs/Registry.h"
-#include "ecs/All.h"
+#include "ecs/Tag.h"
+#include "ecs/Transform.h"
 #include "ecs/View.h"
+#include "ecs/detail/FreeComponentGroup.h"
+#include "graphics/Camera.h"
+#include "graphics/MeshRenderer.h"
+#include "graphics/ParticleEmitter.h"
+#include "graphics/PointLight.h"
+#include "network/NetworkDispatcher.h"
+#include "physics/Collider.h"
+#include "physics/ConcaveCollider.h"
+#include "physics/PhysicsBody.h"
+
 #include "imgui/imgui.h"
+
 
 namespace nc::ui::editor::controls
 {

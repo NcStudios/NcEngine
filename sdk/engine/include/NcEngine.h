@@ -2,7 +2,6 @@
 
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "ecs/All.h"
 #include "module/ModuleRegistry.h"
 #include "scene/Scene.h"
 #include "utility/EnumUtilities.h"

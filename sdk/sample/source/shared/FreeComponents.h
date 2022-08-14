@@ -1,11 +1,22 @@
 #pragma once
 
-#include "window/Window.h"
-#include "physics/NcPhysics.h"
-
+#include "audio/AudioSource.h"
 #include "ecs/InvokeFreeComponent.h"
+#include "ecs/Logic.h"
 #include "ecs/Registry.h"
-#include "ecs/All.h"
+#include "ecs/Tag.h"
+#include "ecs/Transform.h"
+#include "ecs/detail/FreeComponentGroup.h"
+#include "graphics/Camera.h"
+#include "graphics/MeshRenderer.h"
+#include "graphics/ParticleEmitter.h"
+#include "graphics/PointLight.h"
+#include "network/NetworkDispatcher.h"
+#include "physics/Collider.h"
+#include "physics/ConcaveCollider.h"
+#include "physics/NcPhysics.h"
+#include "physics/PhysicsBody.h"
+#include "window/Window.h"
 
 namespace nc::sample
 {
