@@ -11,7 +11,8 @@ int main()
 
     try
     {
-        engine = nc::InitializeNcEngine("engine_config.ini", nc::EngineInitFlags::NoPhysics);
+        const auto config = nc::config::Load("engine_config.ini");
+        engine = nc::InitializeNcEngine(config, nc::EngineInitFlags::NoPhysics);
         nc::editor::EditorFramework framework{engine.get()};
         engine->Start(std::make_unique<nc::editor::EditorScene>(framework.GetProjectManager()));
         framework.SaveProjectData();
