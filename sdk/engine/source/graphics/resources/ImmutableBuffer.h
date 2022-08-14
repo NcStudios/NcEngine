@@ -3,7 +3,7 @@
 #include "graphics/GpuAllocator.h"
 #include "graphics/Vertex.h"
 
-#include <vector>
+#include <span>
 
 namespace nc::graphics
 {

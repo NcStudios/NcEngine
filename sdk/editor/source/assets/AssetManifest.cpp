@@ -43,6 +43,11 @@ bool IsDefaultAsset(const std::filesystem::path& path, nc::AssetType type)
         {
             return path.string() == nc::editor::DefaultSkyboxPath;
         }
+        case nc::AssetType::Shader:
+        {
+            /** @todo */
+            return false;
+        }
     }
 
     return false;
@@ -319,6 +324,11 @@ bool AssetManifest::Remove(const std::filesystem::path& assetPath, AssetType typ
             nc::UnloadTextureAsset(assetPath.string());
             break;
         }
+        case AssetType::Shader:
+        {
+            /** @todo */
+            return false;
+        }
     }
 
     return GetCollection(type).Remove(assetPath);
@@ -417,6 +427,7 @@ auto AssetManifest::GetCollection(AssetType type) -> AssetCollection&
         case AssetType::Mesh:            return m_meshes;
         case AssetType::Texture:         return m_textures;
         case AssetType::Skybox:          return m_skyboxes;
+        case AssetType::Shader:          throw std::runtime_error("Not implemented"); /** @todo */
     }
 
     throw std::runtime_error("AssetManifest::GetCollection - Unknown AssetType");
@@ -432,6 +443,7 @@ auto AssetManifest::GetCollection(AssetType type) const -> const AssetCollection
         case AssetType::Mesh:            return m_meshes;
         case AssetType::Texture:         return m_textures;
         case AssetType::Skybox:          return m_skyboxes;
+        case AssetType::Shader:          throw std::runtime_error("AssetManifest::GetCollection - Not implemented"); /** @todo */
     }
 
     throw std::runtime_error("AssetManifest::GetCollection - Unknown AssetType");

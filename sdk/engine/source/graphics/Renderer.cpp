@@ -5,7 +5,6 @@
 #include "graphics/DebugWidget.h"
 #include "graphics/MeshRenderer.h"
 
-#include "assets/AssetServices.h"
 #include "graphics/Base.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
@@ -60,10 +59,10 @@ namespace nc::graphics
         m_renderPasses.reset();
     }
 
-    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex)
+    void Renderer::Record(Commands* commands, const PerFrameRenderState& state, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex)
     {
         OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
-        auto* cmd = BeginFrame(commands, assetServices, gpuAssetsStorage, currentSwapChainImageIndex);
+        auto* cmd = BeginFrame(commands, gpuAssetsStorage, currentSwapChainImageIndex);
 
         /** Shadow mapping pass */
         m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
@@ -110,7 +109,7 @@ namespace nc::graphics
         m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
     }
 
-    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex)
+    vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex)
     {
         auto swapchain = m_graphics->GetSwapchainPtr();
         swapchain->WaitForFrameFence();

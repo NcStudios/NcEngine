@@ -2,7 +2,7 @@
 
 namespace nc
 {
-AssetManagers::AssetManagers(const config::AssetSettings& assetSettings, const config::MemorySettings& memorySettings)
+AssetManagers::AssetManagers(const config::AssetSettings& assetSettings, const config::MemorySettings&)
     : m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)}
 {
 }

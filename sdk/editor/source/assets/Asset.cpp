@@ -140,6 +140,7 @@ bool HasValidExtensionForAssetType(const std::filesystem::path& assetPath, Asset
         case AssetType::Mesh:            return extension == FbxExtension;
         case AssetType::Texture:         return extension == PngExtension || extension == JpgExtension || extension == JpegExtension;
         case AssetType::Skybox:          return extension == PngExtension || extension == JpgExtension || extension == JpegExtension;
+        case AssetType::Shader:          return false; /** @todo */
     }
 
     return false;

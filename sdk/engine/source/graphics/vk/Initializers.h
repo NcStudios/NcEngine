@@ -3,6 +3,8 @@
 #include "Common.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
+#include <span>
+
 namespace nc::graphics
 {
 // Resources

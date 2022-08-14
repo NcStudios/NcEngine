@@ -10,7 +10,6 @@
 namespace nc
 {
     class MeshRenderer;
-    struct AssetServices;
     namespace particle { class ParticleRenderer; }
 }
 
@@ -32,14 +31,14 @@ namespace nc::graphics
 
             ~Renderer() noexcept;
             
-            void Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex);
+            void Record(Commands* commands, const PerFrameRenderState& state, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex);
             void Clear() noexcept;
             void InitializeImgui();
 
         private:
             void RegisterTechniques();
             void RegisterRenderPasses();
-            vk::CommandBuffer* BeginFrame(Commands* commands, AssetServices* assetServices, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex);
+            vk::CommandBuffer* BeginFrame(Commands* commands, const GpuAssetsStorage& gpuAssetsStorage, uint32_t currentSwapChainImageIndex);
 
             graphics::Graphics* m_graphics;
             ShaderResourceServices* m_shaderResources;
