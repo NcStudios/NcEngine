@@ -12,7 +12,7 @@ TEST(AssetId_tests, Constructor_CompileTime_Succeeds)
 {
     constexpr auto uut = AssetId<AssetType::Mesh>(path1);
     constexpr auto actual = uut.Id();
-    constexpr auto expected = hash::StringHash(path1).Hash();
+    constexpr auto expected = utility::StringHash(path1).Hash();
     EXPECT_EQ(actual, expected);
     /** Prove compile time execution with a static_assert */
     static_assert(actual == expected);
@@ -23,7 +23,7 @@ TEST(AssetId_tests, Constructor_Runtime_Succeeds)
     const auto path = std::string{path1};
     const auto id = AssetId<AssetType::Mesh>(path);
     const auto actual = id.Id();
-    const auto expected = hash::StringHash(path).Hash();
+    const auto expected = utility::StringHash(path).Hash();
     EXPECT_EQ(actual, expected);
 }
 

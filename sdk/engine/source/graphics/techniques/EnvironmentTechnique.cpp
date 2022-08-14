@@ -38,7 +38,7 @@ namespace nc::graphics
     void EnvironmentTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "EnvironmentVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "EnvironmentFragment.spv");
 

@@ -52,7 +52,7 @@ namespace nc::graphics
     void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
 

@@ -35,7 +35,7 @@ namespace nc::graphics
     void PbrTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PbrVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PbrFragment.spv");
 

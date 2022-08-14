@@ -30,7 +30,7 @@ class AssetId
         }
 
     private:
-        hash::StringHash m_hash;
+        utility::StringHash m_hash;
 };
 
 template<AssetType T>

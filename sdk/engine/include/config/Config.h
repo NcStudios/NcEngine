@@ -5,66 +5,71 @@
 
 namespace nc::config
 {
-    struct ProjectSettings
-    {
-        std::string projectName;
-        std::string logFilePath;
-        std::string audioClipsPath;
-        std::string concaveCollidersPath;
-        std::string hullCollidersPath;
-        std::string meshesPath;
-        std::string shadersPath;
-        std::string texturesPath;
-        std::string cubeMapsPath;
-    };
+struct ProjectSettings
+{
+    std::string projectName = "Project Name";
+    std::string logFilePath = "Diagnostics.log";
+};
 
-    struct MemorySettings
-    {
-        unsigned maxDynamicColliders;
-        unsigned maxStaticColliders;
-        unsigned maxNetworkDispatchers;
-        unsigned maxParticleEmitters;
-        unsigned maxRenderers;
-        unsigned maxTransforms;
-        unsigned maxPointLights;
-        unsigned maxTextures;
-    };
+struct AssetSettings
+{
+    /** @todo These defaults don't make much sense since we don't know the install path. */
+    std::string audioClipsPath = "resources/assets/audio_clips/";
+    std::string concaveCollidersPath = "resources/assets/concave_colliders/";
+    std::string hullCollidersPath = "resources/assets/hull_colliders/";
+    std::string meshesPath = "resources/assets/meshes/";
+    std::string shadersPath = "resources/assets/shaders/";
+    std::string texturesPath = "resources/assets/textures/";
+    std::string cubeMapsPath = "resources/assets/cube_maps";
+};
 
-    struct GraphicsSettings
-    {
-        bool useNativeResolution;
-        bool launchInFullscreen;
-        unsigned screenWidth;
-        unsigned screenHeight;
-        unsigned targetFPS;
-        float nearClip;
-        float farClip;
-        float frameUpdateInterval;
-        bool useShadows;
-        unsigned antialiasing;
-        bool useValidationLayers;
-    };
+struct MemorySettings
+{
+    unsigned maxDynamicColliders = 25000;
+    unsigned maxStaticColliders = 25000;
+    unsigned maxNetworkDispatchers = 0;
+    unsigned maxParticleEmitters = 1000;
+    unsigned maxRenderers = 100000;
+    unsigned maxTransforms = 100000;
+    unsigned maxPointLights = 10;
+    unsigned maxTextures = 1000;
+};
 
-    struct PhysicsSettings
-    {
-        float fixedUpdateInterval;
-        float worldspaceExtent;
-    };
+struct GraphicsSettings
+{
+    bool useNativeResolution = false;
+    bool launchInFullscreen = false;
+    unsigned screenWidth = 1000;
+    unsigned screenHeight = 1000;
+    unsigned targetFPS = 60;
+    float nearClip = 0.5f;
+    float farClip = 400.0f;
+    bool useShadows = true;
+    unsigned antialiasing = 8u;
+    bool useValidationLayers = false;
+};
 
-    [[nodiscard]] auto GetProjectSettings() -> const ProjectSettings&;
-    [[nodiscard]] auto GetMemorySettings() -> const MemorySettings&;
-    [[nodiscard]] auto GetGraphicsSettings() -> const GraphicsSettings&;
-    [[nodiscard]] auto GetPhysicsSettings() -> const PhysicsSettings&;
+struct PhysicsSettings
+{
+    float fixedUpdateInterval = 0.01667f;
+    float worldspaceExtent = 1000.0f;
+};
 
-    struct Config
-    {
-        nc::config::ProjectSettings projectSettings;
-        nc::config::MemorySettings memorySettings;
-        nc::config::GraphicsSettings graphicsSettings;
-        nc::config::PhysicsSettings physicsSettings;
-    };
+struct Config
+{
+    ProjectSettings projectSettings;
+    AssetSettings assetSettings;
+    MemorySettings memorySettings;
+    GraphicsSettings graphicsSettings;
+    PhysicsSettings physicsSettings;
+};
 
-    auto Load(std::string_view path) -> Config;
-    void Save(std::string_view path, const Config& config);
-    bool Validate(const Config& config);
-}
+[[nodiscard]] auto GetProjectSettings() -> const ProjectSettings&;
+[[nodiscard]] auto GetAssetSettings() -> const AssetSettings&;
+[[nodiscard]] auto GetMemorySettings() -> const MemorySettings&;
+[[nodiscard]] auto GetGraphicsSettings() -> const GraphicsSettings&;
+[[nodiscard]] auto GetPhysicsSettings() -> const PhysicsSettings&;
+[[nodiscard]] auto Load(std::string_view iniPath) -> Config;
+[[nodiscard]] bool Validate(const Config& config);
+void Save(std::string_view path, const Config& config);
+} // namespace nc::config
