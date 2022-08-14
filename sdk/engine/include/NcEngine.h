@@ -75,12 +75,12 @@ enum class EngineInitFlags : uint8_t
 
 }; DEFINE_BITWISE_OPERATORS(EngineInitFlags)
 
-    /**
-     * @brief Create an NcEngine instance and initialize engine-side modules.
-     * 
-     * @param config Configuration object specifying engine settings.
-     * @param flags Flags for controlling initialization behavior.
-     * @return std::unique_ptr<NcEngine>
-     */
-    auto InitializeNcEngine(const config::Config& config, EngineInitFlags flags = EngineInitFlags::None) -> std::unique_ptr<NcEngine>;
+/**
+ * @brief Create an NcEngine instance and initialize engine-side modules.
+ * 
+ * @param config Configuration object specifying engine settings.
+ * @param flags Flags for controlling initialization behavior.
+ * @return std::unique_ptr<NcEngine>
+ */
+auto InitializeNcEngine(const config::Config& config, EngineInitFlags flags = EngineInitFlags::None) -> std::unique_ptr<NcEngine>;
 } // namespace nc

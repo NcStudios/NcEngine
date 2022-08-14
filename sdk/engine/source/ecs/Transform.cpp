@@ -211,7 +211,7 @@ namespace nc
         UpdateWorldMatrix();
     }
 
-    void Transform::Translate(Vector3 translation)
+    void Transform::Translate(const Vector3& translation)
     {
         const auto trans_v = ToXMVector(translation);
         auto& localPos = m_localMatrix.r[3];
@@ -225,8 +225,8 @@ namespace nc
         localPos = XMVectorAdd(localPos, translation);
         UpdateWorldMatrix();
     }
-    
-    void Transform::TranslateLocalSpace(Vector3 translation)
+
+    void Transform::TranslateLocalSpace(const Vector3& translation)
     {
         auto trans_v = ToXMVector(translation);
         DirectX::XMVECTOR pos_v, rot_v, scl_v;
@@ -255,7 +255,7 @@ namespace nc
         UpdateWorldMatrix();
     }
 
-    void Transform::Rotate(Vector3 axis, float radians)
+    void Transform::Rotate(const Vector3& axis, float radians)
     {
         auto pos_v = m_localMatrix.r[3];
         m_localMatrix.r[3] = DirectX::g_XMIdentityR3;

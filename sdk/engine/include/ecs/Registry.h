@@ -18,15 +18,18 @@ auto ActiveRegistry() -> Registry*;
 template<class T>
 concept Viewable = PooledComponent<T> || std::same_as<T, Entity>;
 
+/**
+ * @brief Storage orchestrator for all Entities and Components.
+ */
 class Registry
 {
     using index_type = Entity::index_type;
 
     public:
         Registry(size_t maxEntities);
-        ~Registry() = default;
         Registry(Registry&&) = default;
         Registry& operator=(Registry&&) = default;
+        ~Registry() = default;
         Registry(const Registry&) = delete;
         Registry& operator=(const Registry&) = delete;
 
