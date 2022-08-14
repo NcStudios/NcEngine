@@ -6,7 +6,7 @@
 #include "window/Window.h"
 #include "asset/Assets.h"
 #include "ecs/Registry.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "graphics/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
 
@@ -215,7 +215,7 @@ namespace nc::sample
 
         auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
-        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+        modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
         auto sun = registry->Add<Entity>({ .scale = Vector3::Splat(2.0f), .tag = "Sun" });
         registry->Add<graphics::MeshRenderer>(sun, "planet.nca", sunMaterial, graphics::TechniqueType::PhongAndUi);

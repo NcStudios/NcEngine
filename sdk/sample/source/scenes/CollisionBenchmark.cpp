@@ -3,7 +3,7 @@
 #include "shared/spawner/Spawner.h"
 
 #include "NcEngine.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "imgui/imgui.h"
 
 namespace
@@ -74,7 +74,7 @@ namespace nc::sample
     void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)
     {
         auto camera = registry->Add<graphics::Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+        modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
         // Cube Spawner Options
         SpawnBehavior spawnBehavior

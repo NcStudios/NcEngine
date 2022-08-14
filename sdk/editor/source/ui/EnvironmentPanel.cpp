@@ -2,14 +2,14 @@
 #include "assets/AssetManifest.h"
 #include "ecs/View.h"
 #include "graphics/Camera.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/Output.h"
 #include "utility/DefaultComponents.h"
 
 namespace nc::editor
 {
-    EnvironmentPanel::EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, graphics::GraphicsModule* graphics)
+    EnvironmentPanel::EnvironmentPanel(SceneData* sceneData, Registry* registry, AssetManifest* assetManifest, graphics::NcGraphics* graphics)
         : m_sceneData{sceneData},
           m_registry{registry},
           m_assetManifest{assetManifest},

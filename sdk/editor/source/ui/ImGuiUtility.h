@@ -134,8 +134,8 @@ namespace nc::editor
     {
         if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
-            ImGui::SetDragDropPayload(Type<T>::name, item, sizeof(T));
-            ImGui::Text(Type<T>::name);
+            ImGui::SetDragDropPayload(type::Type<T>::name, item, sizeof(T));
+            ImGui::Text(type::Type<T>::name);
             ImGui::EndDragDropSource();
         }
     }
@@ -145,7 +145,7 @@ namespace nc::editor
     {
         if(ImGui::BeginDragDropTarget())
         {
-            if(const auto* payload = ImGui::AcceptDragDropPayload(Type<T>::name))
+            if(const auto* payload = ImGui::AcceptDragDropPayload(type::Type<T>::name))
             {
                 func(static_cast<std::add_pointer_t<T>>(payload->Data));
             }

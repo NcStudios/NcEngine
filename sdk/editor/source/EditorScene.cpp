@@ -2,7 +2,7 @@
 #include "framework/ProjectManager.h"
 
 #include "ecs/InvokeFreeComponent.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "graphics/SceneNavigationCamera.h"
 
 namespace nc::editor
@@ -17,7 +17,7 @@ namespace nc::editor
         auto cameraEntity = registry->Add<Entity>({.position = Vector3{0, 0, -5}, .tag = EditorScene::EditorCameraTag});
         auto* camera = registry->Add<graphics::SceneNavigationCamera>(cameraEntity);
         registry->Add<FrameLogic>(cameraEntity, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
-        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+        modules.Get<graphics::NcGraphics>()->SetCamera(camera);
         m_projectManager->ReadNextScene();
     }
 

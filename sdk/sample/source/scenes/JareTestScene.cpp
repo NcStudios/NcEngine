@@ -4,7 +4,7 @@
 #include "NcEngine.h"
 #include "asset/Assets.h"
 #include "ecs/InvokeFreeComponent.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "graphics/MeshRenderer.h"
 #include "graphics/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
@@ -94,7 +94,7 @@ namespace nc::sample
 
         nc::LoadMeshAssets(sceneMeshes);
         nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-        modules.Get<graphics::GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+        modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
 
         //Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
@@ -138,6 +138,6 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{-0.0f, 4.0f, -6.4f}, .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
-        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+        modules.Get<graphics::NcGraphics>()->SetCamera(camera);
     }
 }

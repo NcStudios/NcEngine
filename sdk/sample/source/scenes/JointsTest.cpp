@@ -5,7 +5,7 @@
 
 #include "NcEngine.h"
 #include "ecs/InvokeFreeComponent.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "graphics/SceneNavigationCamera.h"
 #include "physics/NcPhysics.h"
 
@@ -24,7 +24,7 @@ namespace nc::sample
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
         auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
         registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
-        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+        modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
         // Lights
         auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});

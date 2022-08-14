@@ -1,5 +1,5 @@
 #include "SceneReader.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
 
@@ -101,7 +101,7 @@ namespace
 
 namespace nc::editor
 {
-    SceneReader::SceneReader(Registry* registry, graphics::GraphicsModule* graphics, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
+    SceneReader::SceneReader(Registry* registry, graphics::NcGraphics* graphics, const std::filesystem::path& scenesDirectory, const std::string& sceneName)
         : m_registry{registry},
           m_graphics{graphics},
           m_file{scenesDirectory / (sceneName + FileExtension::Generated.data())},

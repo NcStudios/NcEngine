@@ -3,7 +3,7 @@
 #include "shared/spawner/Spawner.h"
 
 #include "NcEngine.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "imgui/imgui.h"
 
 #include <functional>
@@ -54,7 +54,7 @@ namespace nc::sample
     {
         // Camera
         auto camera = registry->Add<graphics::Camera>(registry->Add<Entity>({.tag = "Main Camera"}));
-        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+        modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
         // Spawner
         SpawnBehavior spawnBehavior

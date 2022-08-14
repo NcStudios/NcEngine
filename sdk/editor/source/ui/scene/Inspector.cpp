@@ -21,7 +21,7 @@ namespace
         IMGUI_SCOPE_ID(StyleColor, 1, ImGuiCol_ButtonHovered, Color::Accent);
         IMGUI_SCOPE_ID(StyleColor, 2, ImGuiCol_ButtonActive, Color::AccentDark);
         SeparatorSpaced();
-        ImGui::Button(nc::Type<T>::name, {-1,0});
+        ImGui::Button(nc::type::Type<T>::name, {-1,0});
         DragAndDropSource<T>(obj);
     }
 

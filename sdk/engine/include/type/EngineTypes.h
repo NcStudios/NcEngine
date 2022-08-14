@@ -3,7 +3,7 @@
 #include "Type.h"
 #include "ecs/All.h"
 
-namespace nc
+namespace nc::type
 {
 REGISTER_TYPE(Vector2, PROPERTY(Vector2, x), PROPERTY(Vector2, y));
 REGISTER_TYPE(Vector3, PROPERTY(Vector3, x), PROPERTY(Vector3, y), PROPERTY(Vector3, z));
@@ -28,4 +28,4 @@ REGISTER_TYPE(net::NetworkDispatcher);
 REGISTER_TYPE(physics::ConcaveCollider);
 REGISTER_TYPE(physics::Collider);
 REGISTER_TYPE(physics::PhysicsBody);
-} // namespace nc
+} // namespace nc::type

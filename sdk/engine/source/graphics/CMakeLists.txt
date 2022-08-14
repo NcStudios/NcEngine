@@ -7,9 +7,9 @@ target_sources(${NC_ENGINE_LIB}
         GpuAllocator.cpp
         GpuAssetsStorage.cpp
         Graphics.cpp
-        GraphicsModuleImpl.cpp
         MeshBatcher.cpp
         MeshRenderer.cpp
+        NcGraphicsImpl.cpp
         ParticleEmitter.cpp
         PerFrameRenderState.cpp
         PointLight.cpp

@@ -9,7 +9,7 @@
 #include "serialize/SceneWriter.h"
 #include "EditorScene.h"
 
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 
 #include <cctype>
 #include <fstream>
@@ -265,7 +265,7 @@ void ProjectManager::ReadNextScene()
     m_currentSceneIndex = m_nextSceneIndex;
 
     auto* registry = m_engine->GetRegistry();
-    auto* graphics = m_engine->GetModuleRegistry()->Get<graphics::GraphicsModule>();
+    auto* graphics = m_engine->GetModuleRegistry()->Get<graphics::NcGraphics>();
     NC_TRACE(SceneReader serialize{registry, graphics, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
 }
 

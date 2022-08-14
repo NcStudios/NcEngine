@@ -6,6 +6,12 @@
 
 namespace nc
 {
+/** @brief An RAII object managing a Signal connection.
+ * 
+ *  When a Connection goes out of scope or Disconnect() is explicitly called,
+ *  the associated function will be removed from the Signal, if the Signal
+ *  still exists. Signals and Connections may be destroyed in any order.
+ */
 template<class... Args>
 class Connection
 {
@@ -43,6 +49,7 @@ class Connection
         std::weak_ptr<ConnectionState_t> m_state;
 };
 
+/** @brief An event source supporting multiple Connections. */
 template<class... Args>
 class Signal
 {

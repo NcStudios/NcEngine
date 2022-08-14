@@ -1,4 +1,4 @@
-#include "GraphicsModuleImpl.h"
+#include "NcGraphicsImpl.h"
 #include "assets/AssetManagers.h"
 #include "ecs/View.h"
 #include "PerFrameRenderState.h"
@@ -12,9 +12,9 @@
 
 namespace
 {
-    struct GraphicsModuleStub : nc::graphics::GraphicsModule
+    struct NcGraphicsStub : nc::graphics::NcGraphics
     {
-        GraphicsModuleStub(nc::Registry* reg)
+        NcGraphicsStub(nc::Registry* reg)
             : onAddConnection{reg->OnAdd<nc::graphics::PointLight>().Connect([](nc::graphics::PointLight&){})},
               onRemoveConnection{reg->OnRemove<nc::graphics::PointLight>().Connect([](nc::Entity){})}
         {
@@ -36,17 +36,17 @@ namespace
         nc::graphics::DebugRenderer debugRenderer;
         #endif
     };
-}
+} // anonymous namespace
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window, float* dt) -> std::unique_ptr<GraphicsModule>
+    auto BuildGraphicsModule(bool enableModule, Registry* reg, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window, float* dt) -> std::unique_ptr<NcGraphics>
     {
-        if(enableModule) return std::make_unique<GraphicsModuleImpl>(reg, gpuAccessorSignals, window, dt);
-        return std::make_unique<GraphicsModuleStub>(reg);
+        if(enableModule) return std::make_unique<NcGraphicsImpl>(reg, gpuAccessorSignals, window, dt);
+        return std::make_unique<NcGraphicsStub>(reg);
     }
 
-    GraphicsModuleImpl::GraphicsModuleImpl(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window, float* dt)
+    NcGraphicsImpl::NcGraphicsImpl(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window, float* dt)
         : m_registry{ registry },
           m_camera{},
           m_graphics{ &m_camera,
@@ -57,7 +57,7 @@ namespace nc::graphics
           m_ui{ window->GetHWND() },
           m_environment{},
           m_pointLightSystem{ registry },
-          m_particleEmitterSystem{ registry, dt, std::bind_front(&GraphicsModule::GetCamera, this) }
+          m_particleEmitterSystem{ registry, dt, std::bind_front(&NcGraphics::GetCamera, this) }
     {
         m_graphics.InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
@@ -65,37 +65,37 @@ namespace nc::graphics
         window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
-    void GraphicsModuleImpl::SetCamera(Camera* camera) noexcept
+    void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
     {
         m_camera.Set(camera);
     }
 
-    auto GraphicsModuleImpl::GetCamera() noexcept -> Camera*
+    auto NcGraphicsImpl::GetCamera() noexcept -> Camera*
     {
         return m_camera.Get();
     }
 
-    void GraphicsModuleImpl::SetUi(ui::IUI* ui) noexcept
+    void NcGraphicsImpl::SetUi(ui::IUI* ui) noexcept
     {
         m_ui.Set(ui);
     }
 
-    bool GraphicsModuleImpl::IsUiHovered() const noexcept
+    bool NcGraphicsImpl::IsUiHovered() const noexcept
     {
         return m_ui.IsHovered();
     }
 
-    void GraphicsModuleImpl::SetSkybox(const std::string& path)
+    void NcGraphicsImpl::SetSkybox(const std::string& path)
     {
         m_environment.SetSkybox(path);
     }
 
-    void GraphicsModuleImpl::ClearEnvironment()
+    void NcGraphicsImpl::ClearEnvironment()
     {
         m_environment.Clear();
     }
 
-    void GraphicsModuleImpl::Clear() noexcept
+    void NcGraphicsImpl::Clear() noexcept
     {
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
@@ -105,7 +105,7 @@ namespace nc::graphics
         m_particleEmitterSystem.Clear();
     }
 
-    auto GraphicsModuleImpl::BuildWorkload() -> std::vector<task::Job>
+    auto NcGraphicsImpl::BuildWorkload() -> std::vector<task::Job>
     {
         return std::vector<task::Job>
         {
@@ -115,7 +115,7 @@ namespace nc::graphics
         };
     }
 
-    void GraphicsModuleImpl::Run()
+    void NcGraphicsImpl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
         auto* camera = m_camera.Get();
@@ -146,4 +146,4 @@ namespace nc::graphics
 
         m_graphics.FrameEnd();
     }
-}
+} // namespace nc::graphics

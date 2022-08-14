@@ -3,7 +3,7 @@
 #include "shared/Prefabs.h"
 #include "shared/spawner/Spawner.h"
 
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "math/Random.h"
 #include "physics/NcPhysics.h"
 
@@ -58,7 +58,7 @@ ClickEvents::ClickEvents(SampleUI* ui)
 
 void ClickEvents::Load(Registry* registry, ModuleProvider modules)
 {
-    auto* graphics = modules.Get<graphics::GraphicsModule>();
+    auto* graphics = modules.Get<graphics::NcGraphics>();
     auto* physics = modules.Get<physics::NcPhysics>();
     auto* random = modules.Get<nc::Random>();
 

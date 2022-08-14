@@ -4,7 +4,7 @@
 
 #include "NcEngine.h"
 #include "ecs/InvokeFreeComponent.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "graphics/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
 
@@ -64,7 +64,7 @@ void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
     auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
     auto* camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
     registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
-    modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+    modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
     // Movable Objects
     auto objectSpawner = registry->Add<Entity>({.tag = "Prefab Selector"});
@@ -101,6 +101,6 @@ void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
     registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
     nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-    modules.Get<graphics::GraphicsModule>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+    modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
 }
 } // namespace nc::sample

@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace nc
+namespace nc::utility
 {
     /**
      * @brief Convert an enum value to its underlying type.
@@ -13,31 +13,31 @@ namespace nc
     {
         return static_cast<std::underlying_type_t<T>>(t);
     }
-}
+} // namespace nc::utility
 
 /** Define operators for an enum. */
-#define DEFINE_BITWISE_OPERATORS(type)                                                  \
-constexpr type operator|(type l, type r)                                                \
-{                                                                                       \
-    return static_cast<type>(nc::to_underlying<type>(l) | nc::to_underlying<type>(r));  \
-}                                                                                       \
-constexpr type operator&(type l, type r)                                                \
-{                                                                                       \
-    return static_cast<type>(nc::to_underlying<type>(l) & nc::to_underlying<type>(r));  \
-}                                                                                       \
-constexpr type operator~(type v)                                                        \
-{                                                                                       \
-    return static_cast<type>(~nc::to_underlying<type>(v));                              \
-}                                                                                       \
-constexpr type operator^(type l, type r)                                                \
-{                                                                                       \
-    return static_cast<type>(nc::to_underlying<type>(l) ^ nc::to_underlying<type>(r));  \
-}                                                                                       \
-constexpr type operator<<(type l, type r)                                               \
-{                                                                                       \
-    return static_cast<type>(nc::to_underlying<type>(l) << nc::to_underlying<type>(r)); \
-}                                                                                       \
-constexpr type operator>>(type l, type r)                                               \
-{                                                                                       \
-    return static_cast<type>(nc::to_underlying<type>(l) >> nc::to_underlying<type>(r)); \
+#define DEFINE_BITWISE_OPERATORS(type)                                                                    \
+constexpr type operator|(type l, type r)                                                                  \
+{                                                                                                         \
+    return static_cast<type>(nc::utility::to_underlying<type>(l) | nc::utility::to_underlying<type>(r));  \
+}                                                                                                         \
+constexpr type operator&(type l, type r)                                                                  \
+{                                                                                                         \
+    return static_cast<type>(nc::utility::to_underlying<type>(l) & nc::utility::to_underlying<type>(r));  \
+}                                                                                                         \
+constexpr type operator~(type v)                                                                          \
+{                                                                                                         \
+    return static_cast<type>(~nc::utility::to_underlying<type>(v));                                       \
+}                                                                                                         \
+constexpr type operator^(type l, type r)                                                                  \
+{                                                                                                         \
+    return static_cast<type>(nc::utility::to_underlying<type>(l) ^ nc::utility::to_underlying<type>(r));  \
+}                                                                                                         \
+constexpr type operator<<(type l, type r)                                                                 \
+{                                                                                                         \
+    return static_cast<type>(nc::utility::to_underlying<type>(l) << nc::utility::to_underlying<type>(r)); \
+}                                                                                                         \
+constexpr type operator>>(type l, type r)                                                                 \
+{                                                                                                         \
+    return static_cast<type>(nc::utility::to_underlying<type>(l) >> nc::utility::to_underlying<type>(r)); \
 }

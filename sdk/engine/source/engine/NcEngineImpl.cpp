@@ -2,7 +2,7 @@
 #include "audio/NcAudioImpl.h"
 #include "config/ConfigInternal.h"
 #include "ecs/LogicModule.h"
-#include "graphics/GraphicsModuleImpl.h"
+#include "graphics/NcGraphicsImpl.h"
 #include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
 #include "module/ModuleProvider.h"

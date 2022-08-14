@@ -3,7 +3,7 @@
 #include "ui/UIStyle.h"
 #include "utility/DefaultComponents.h"
 
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 
 namespace
 {
@@ -71,7 +71,7 @@ EditorFramework::EditorFramework(NcEngine* engine)
         m_editorConfig{ReadConfig("editor/config/editor_config.ini")},
         m_assetManifest{m_editorConfig.recentProjectDirectory, [configEditor = &m_configEditor]() -> const config::Config& { return configEditor->GetConfig();}},
         m_projectManager{engine, &m_assetManifest},
-        m_environmentPanel{m_projectManager.GetSceneData(), engine->GetRegistry(), &m_assetManifest, engine->GetModuleRegistry()->Get<graphics::GraphicsModule>()},
+        m_environmentPanel{m_projectManager.GetSceneData(), engine->GetRegistry(), &m_assetManifest, engine->GetModuleRegistry()->Get<graphics::NcGraphics>()},
         m_editorUI{engine->GetRegistry(),
                     &m_output,
                     &m_environmentPanel,
@@ -88,7 +88,7 @@ EditorFramework::EditorFramework(NcEngine* engine)
         m_configEditor{m_editorConfig.recentProjectDirectory / "config\\config.ini"}
 {
     nc::editor::SetImGuiStyle();
-    engine->GetModuleRegistry()->Get<graphics::GraphicsModule>()->SetUi(&m_editorUI);
+    engine->GetModuleRegistry()->Get<graphics::NcGraphics>()->SetUi(&m_editorUI);
 
     auto uiCallbacks = CreateUICallbacks(&m_editorUI);
     m_changeTagDialog.RegisterDialog(uiCallbacks.registerDialog);

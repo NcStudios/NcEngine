@@ -13,7 +13,7 @@
 #include "window/Window.h"
 #include "input/Input.h"
 #include "config/Version.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 #include "imgui/imgui.h"
 
 namespace
@@ -35,7 +35,7 @@ namespace nc::sample
     auto InitializeSampleUI(NcEngine* engine) -> std::unique_ptr<SampleUI>
     {
         auto ui = std::make_unique<SampleUI>(engine);
-        auto* graphics = engine->GetModuleRegistry()->Get<graphics::GraphicsModule>();
+        auto* graphics = engine->GetModuleRegistry()->Get<graphics::NcGraphics>();
         graphics->SetUi(ui.get());
         return ui;
     }

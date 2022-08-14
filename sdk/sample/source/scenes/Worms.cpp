@@ -3,7 +3,7 @@
 #include "shared/spawner/Spawner.h"
 
 #include "NcEngine.h"
-#include "graphics/GraphicsModule.h"
+#include "graphics/NcGraphics.h"
 
 #include <random>
 
@@ -22,7 +22,7 @@ namespace nc::sample
         // Camera
         auto cameraEntity = registry->Add<Entity>({.tag = "Main Camera"});
         auto camera = registry->Add<graphics::Camera>(cameraEntity);
-        modules.Get<graphics::GraphicsModule>()->SetCamera(camera);
+        modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
         // Window
         window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});

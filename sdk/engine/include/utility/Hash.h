@@ -2,26 +2,31 @@
 
 #include <string_view>
 
-namespace nc::hash
+namespace nc::utility
+{
+namespace detail
 {
 constexpr size_t FnvOffsetBasis = 14695981039346656037ull;
 constexpr size_t FnvPrime = 1099511628211ull;
+}
 
+/** @brief FNV1-a hash algorithm */
 constexpr auto Fnv1a(std::string_view path) -> size_t
 {
-    auto hash = FnvOffsetBasis;
+    auto hash = detail::FnvOffsetBasis;
     for(auto c : path)
     {
-        hash = (hash ^ c) * FnvPrime;
+        hash = (hash ^ c) * detail::FnvPrime;
     }
     return hash;
 }
 
+/** @brief A constexpr string hash wrapper */
 class StringHash
 {
     public:
         constexpr explicit StringHash(std::string_view path)
-            : m_hash{hash::Fnv1a(path)}
+            : m_hash{Fnv1a(path)}
         {
         }
 
@@ -43,4 +48,4 @@ constexpr bool operator!=(StringHash lhs, StringHash rhs)
 {
     return !(lhs == rhs);
 }
-}
+} // namespace nc::hash
