@@ -1,6 +1,6 @@
 #pragma once
 
-#include "physics/PhysicsModule.h"
+#include "physics/NcPhysics.h"
 #include "ClickableSystem.h"
 #include "PhysicsPipeline.h"
 #include "collision/broad_phase/SingleAxisPrune.h"
@@ -11,12 +11,12 @@
 namespace nc::physics
 {
 /** @brief Factor for creating a physics module instance */
-auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<PhysicsModule>;
+auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<NcPhysics>;
 
 /** @brief Physics module implementation.
  * 
  * Handles the internal processing of Collider, ConcaveCollider, PhysicsBody, Joint, and IClickable types. */
-class PhysicsModuleImpl final : public PhysicsModule
+class NcPhysicsImpl final : public NcPhysics
 {
     struct PipelineDescription
     {
@@ -28,7 +28,7 @@ class PhysicsModuleImpl final : public PhysicsModule
     };
 
     public:
-        PhysicsModuleImpl(Registry* registry, time::Time* time);
+        NcPhysicsImpl(Registry* registry, time::Time* time);
 
         void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
         void RemoveJoint(Entity entityA, Entity entityB) override;

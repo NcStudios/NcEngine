@@ -1,12 +1,12 @@
 #include "NcEngineImpl.h"
-#include "audio/AudioModuleImpl.h"
+#include "audio/NcAudioImpl.h"
 #include "config/ConfigInternal.h"
 #include "ecs/LogicModule.h"
 #include "graphics/GraphicsModuleImpl.h"
 #include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
 #include "module/ModuleProvider.h"
-#include "physics/PhysicsModuleImpl.h"
+#include "physics/NcPhysicsImpl.h"
 
 namespace
 {

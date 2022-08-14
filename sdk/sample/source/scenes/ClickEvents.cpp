@@ -5,7 +5,7 @@
 
 #include "graphics/GraphicsModule.h"
 #include "math/Random.h"
-#include "physics/PhysicsModule.h"
+#include "physics/NcPhysics.h"
 
 #include "imgui/imgui.h"
 #include <functional>
@@ -59,7 +59,7 @@ ClickEvents::ClickEvents(SampleUI* ui)
 void ClickEvents::Load(Registry* registry, ModuleProvider modules)
 {
     auto* graphics = modules.Get<graphics::GraphicsModule>();
-    auto* physics = modules.Get<physics::PhysicsModule>();
+    auto* physics = modules.Get<physics::NcPhysics>();
     auto* random = modules.Get<nc::Random>();
 
     // Camera

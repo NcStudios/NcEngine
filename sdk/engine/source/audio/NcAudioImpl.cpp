@@ -1,4 +1,4 @@
-#include "AudioModuleImpl.h"
+#include "NcAudioImpl.h"
 #include "audio/AudioSource.h"
 #include "ecs/View.h"
 
@@ -23,33 +23,33 @@ int AudioSystemCallback(void* outputBuffer, void*, [[maybe_unused]] unsigned nBu
      *  quickly see when they happen. */
     if(status) std::cerr << "Audio stream underflow\n";
 
-    auto* system = static_cast<nc::audio::AudioModuleImpl*>(userData);
+    auto* system = static_cast<nc::audio::NcAudioImpl*>(userData);
     return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer));
 }
 
-struct AudioModuleStub : public nc::AudioModule
+struct NcAudioStub : public nc::audio::NcAudio
 {
     void RegisterListener(nc::Entity) noexcept override {}
     auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
     void Clear() noexcept override {}
 };
-} // namespace nc::audio
+} // anonymous namespace
 
 namespace nc::audio
 {
-auto BuildAudioModule(bool enableModule, Registry* reg) -> std::unique_ptr<AudioModule>
+auto BuildAudioModule(bool enableModule, Registry* reg) -> std::unique_ptr<NcAudio>
 {
     if(enableModule)
     {
-        return std::make_unique<AudioModuleImpl>(reg);
+        return std::make_unique<NcAudioImpl>(reg);
     }
     else
     {
-        return std::make_unique<AudioModuleStub>();
+        return std::make_unique<NcAudioStub>();
     }
 }
 
-AudioModuleImpl::AudioModuleImpl(Registry* registry)
+NcAudioImpl::NcAudioImpl(Registry* registry)
     : m_registry{registry},
         m_rtAudio{},
         m_readyBuffers{},
@@ -107,7 +107,7 @@ AudioModuleImpl::AudioModuleImpl(Registry* registry)
         throw NcError("Invalid number of buffer frames specified");
 }
 
-AudioModuleImpl::~AudioModuleImpl() noexcept
+NcAudioImpl::~NcAudioImpl() noexcept
 {
     Clear();
 
@@ -124,7 +124,7 @@ AudioModuleImpl::~AudioModuleImpl() noexcept
         m_rtAudio.closeStream();
 }
 
-void AudioModuleImpl::Clear() noexcept
+void NcAudioImpl::Clear() noexcept
 {
     m_listener = Entity::Null();
 
@@ -136,7 +136,7 @@ void AudioModuleImpl::Clear() noexcept
     }
 }
 
-auto AudioModuleImpl::BuildWorkload() -> std::vector<task::Job>
+auto NcAudioImpl::BuildWorkload() -> std::vector<task::Job>
 {
     return std::vector<task::Job>
     {
@@ -144,12 +144,12 @@ auto AudioModuleImpl::BuildWorkload() -> std::vector<task::Job>
     };
 }
 
-void AudioModuleImpl::RegisterListener(Entity listener) noexcept
+void NcAudioImpl::RegisterListener(Entity listener) noexcept
 {
     m_listener = listener;
 }
 
-int AudioModuleImpl::WriteToDeviceBuffer(double* output)
+int NcAudioImpl::WriteToDeviceBuffer(double* output)
 {
     // empty check before lock is only safe with 1 consumer
     if(m_readyBuffers.empty())
@@ -176,7 +176,7 @@ int AudioModuleImpl::WriteToDeviceBuffer(double* output)
     return 0;
 }
 
-void AudioModuleImpl::Run()
+void NcAudioImpl::Run()
 {
     OPTICK_CATEGORY("AudioModule", Optick::Category::Audio);
     if(!m_listener.Valid())
@@ -204,7 +204,7 @@ void AudioModuleImpl::Run()
     }
 }
 
-void AudioModuleImpl::MixToBuffer(double* buffer)
+void NcAudioImpl::MixToBuffer(double* buffer)
 {
     std::memset(buffer, 0, BufferSizeInBytes);
 
@@ -232,7 +232,7 @@ void AudioModuleImpl::MixToBuffer(double* buffer)
     }
 }
 
-auto AudioModuleImpl::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
+auto NcAudioImpl::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
 {
     unsigned deviceCount = m_rtAudio.getDeviceCount();
     std::vector<RtAudio::DeviceInfo> out;

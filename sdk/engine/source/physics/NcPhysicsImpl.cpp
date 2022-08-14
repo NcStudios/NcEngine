@@ -1,4 +1,4 @@
-#include "PhysicsModuleImpl.h"
+#include "NcPhysicsImpl.h"
 #include "config/Config.h"
 #include "graphics/DebugRenderer.h"
 
@@ -20,10 +20,10 @@ struct BspTreeStub
     nc::Connection<nc::Entity> onRemoveConnection;
 };
 
-class PhysicsModuleStub : public nc::physics::PhysicsModule
+class NcPhysicsStub : public nc::physics::NcPhysics
 {
     public:
-        PhysicsModuleStub(nc::Registry* reg, nc::time::Time*) : m_tasks{}, m_bspStub{reg} {}
+        NcPhysicsStub(nc::Registry* reg, nc::time::Time*) : m_tasks{}, m_bspStub{reg} {}
         void AddJoint(nc::Entity, nc::Entity, const nc::Vector3&, const nc::Vector3&, float = 0.2f, float = 0.0f) override {}
         void RemoveJoint(nc::Entity, nc::Entity) override {}
         void RemoveAllJoints(nc::Entity) override {}
@@ -41,57 +41,57 @@ class PhysicsModuleStub : public nc::physics::PhysicsModule
 
 namespace nc::physics
 {
-auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<PhysicsModule>
+auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<NcPhysics>
 {
     if(enableModule)
     {
-        return std::make_unique<PhysicsModuleImpl>(registry, time);
+        return std::make_unique<NcPhysicsImpl>(registry, time);
     }
     else
     {
-        return std::make_unique<PhysicsModuleStub>(registry, time);
+        return std::make_unique<NcPhysicsStub>(registry, time);
     }
 }
 
-PhysicsModuleImpl::PhysicsModuleImpl(Registry* registry, time::Time* time)
+NcPhysicsImpl::NcPhysicsImpl(Registry* registry, time::Time* time)
     : m_pipeline{registry, config::GetPhysicsSettings().fixedUpdateInterval},
-        m_clickableSystem{},
-        m_time{time},
-        m_currentIterations{0u}
+      m_clickableSystem{},
+      m_time{time},
+      m_currentIterations{0u}
 {
 }
 
-void PhysicsModuleImpl::AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness)
+void NcPhysicsImpl::AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness)
 {
     m_pipeline.GetJointSystem()->AddJoint(entityA, entityB, anchorA, anchorB, bias, softness);
 }
 
-void PhysicsModuleImpl::RemoveJoint(Entity entityA, Entity entityB)
+void NcPhysicsImpl::RemoveJoint(Entity entityA, Entity entityB)
 {
     m_pipeline.GetJointSystem()->RemoveJoint(entityA, entityB);
 }
 
-void PhysicsModuleImpl::RemoveAllJoints(Entity entity)
+void NcPhysicsImpl::RemoveAllJoints(Entity entity)
 {
     m_pipeline.GetJointSystem()->RemoveAllJoints(entity);
 }
 
-void PhysicsModuleImpl::RegisterClickable(IClickable* clickable)
+void NcPhysicsImpl::RegisterClickable(IClickable* clickable)
 {
     m_clickableSystem.RegisterClickable(clickable);
 }
 
-void PhysicsModuleImpl::UnregisterClickable(IClickable* clickable) noexcept
+void NcPhysicsImpl::UnregisterClickable(IClickable* clickable) noexcept
 {
     m_clickableSystem.UnregisterClickable(clickable);
 }
 
-auto PhysicsModuleImpl::RaycastToClickables(LayerMask mask) -> IClickable*
+auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
 {
     return m_clickableSystem.RaycastToClickables(mask);
 }
 
-auto PhysicsModuleImpl::BuildWorkload() -> std::vector<task::Job>
+auto NcPhysicsImpl::BuildWorkload() -> std::vector<task::Job>
 {
     const auto fixedStep = config::GetPhysicsSettings().fixedUpdateInterval;
 
@@ -135,7 +135,7 @@ auto PhysicsModuleImpl::BuildWorkload() -> std::vector<task::Job>
     };
 }
 
-void PhysicsModuleImpl::Clear() noexcept
+void NcPhysicsImpl::Clear() noexcept
 {
     /** @todo make sure these are noexcept */
 

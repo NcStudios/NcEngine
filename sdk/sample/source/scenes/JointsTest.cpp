@@ -7,7 +7,7 @@
 #include "ecs/InvokeFreeComponent.h"
 #include "graphics/GraphicsModule.h"
 #include "graphics/SceneNavigationCamera.h"
-#include "physics/PhysicsModule.h"
+#include "physics/NcPhysics.h"
 
 namespace nc::sample
 {
@@ -18,7 +18,7 @@ namespace nc::sample
 
     void JointsTest::Load(Registry* registry, ModuleProvider modules)
     {
-        auto* physics = modules.Get<physics::PhysicsModule>();
+        auto* physics = modules.Get<physics::NcPhysics>();
 
         // Camera
         auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});

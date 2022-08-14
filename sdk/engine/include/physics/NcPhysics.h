@@ -5,8 +5,12 @@
 
 namespace nc::physics
 {
-/** @brief Interface for general physics functionality. */
-struct PhysicsModule : public Module
+/** @brief Physics module interface
+ * 
+ *  Component Access:
+ *      Write: Collider, ConcaveCollider, PhysicsBody, Transform
+ */
+struct NcPhysics : public Module
 {
     /**
      * @brief A a joint between two entities.

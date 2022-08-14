@@ -3,9 +3,9 @@ target_sources(${NC_ENGINE_LIB}
         ClickableSystem.cpp
         Collider.cpp
         ConcaveCollider.cpp
+        NcPhysicsImpl.cpp
         PhysicsBody.cpp
         PhysicsPipelineTypes.cpp
-        PhysicsModuleImpl.cpp
 )
 
 add_subdirectory(collision)

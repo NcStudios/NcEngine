@@ -179,7 +179,7 @@ namespace nc::sample
         return m_latestFPS;
     }
 
-    Clickable::Clickable(Entity entity, std::string tag, physics::PhysicsModule* physicsModule)
+    Clickable::Clickable(Entity entity, std::string tag, physics::NcPhysics* physicsModule)
         : FreeComponent(entity),
           IClickable(entity, 40.0f),
           m_Tag{std::move(tag)},
@@ -201,7 +201,7 @@ namespace nc::sample
         GameLog::Log("Clicked: " + m_Tag);
     }
 
-    ClickHandler::ClickHandler(Entity entity, physics::LayerMask mask, physics::PhysicsModule* physicsModule)
+    ClickHandler::ClickHandler(Entity entity, physics::LayerMask mask, physics::NcPhysics* physicsModule)
         : FreeComponent{entity},
           m_mask{mask},
           m_physicsModule{physicsModule}
