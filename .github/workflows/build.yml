@@ -16,7 +16,7 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  Visual Studio:
+  VisualStudio:
     runs-on: windows-2022
 
     steps:
