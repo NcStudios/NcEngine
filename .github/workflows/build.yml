@@ -16,7 +16,7 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  Windows:
+  Visual Studio:
     runs-on: windows-2022
 
     steps:
@@ -33,17 +33,35 @@ jobs:
         vulkan-components: Vulkan-Headers, Vulkan-Loader
 
     - name: Configure
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
+      run: cmake -G "Visual Studio 17 2022" -S ./ -B build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
-      run: cmake --build ${{github.workspace}}/build --target install --config Release
+      run: cmake --build /build --target install --config Release
 
     - name: Run Tests
-      working-directory: ${{github.workspace}}/build/sdk/test
-      run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
+      working-directory: build/sdk/test
+      run: ctest -V --output-junit TestResults.xml
 
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
-        files: ${{github.workspace}}/TestResults.xml
+        files: TestResults.xml
+
+  MinGW:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v2
+
+    - name: Setup Vulkan Sdk
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.2.198.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+
+    - name: Configure
+      run: cmake -G "MinGW Makefiles" -S ./ -B build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build and Install
+      run: cmake --build build --target install
