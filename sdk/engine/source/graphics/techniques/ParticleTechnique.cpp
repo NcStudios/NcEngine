@@ -34,7 +34,7 @@ namespace nc::graphics
     void ParticleTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ParticleVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ParticleFragment.spv");
 

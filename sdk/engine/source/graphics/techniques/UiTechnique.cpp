@@ -40,7 +40,7 @@ namespace nc::graphics
     void UiTechnique::CreatePipeline(vk::RenderPass* renderPass)
     {
         // Shaders
-        auto defaultShaderPath = nc::config::GetProjectSettings().shadersPath;
+        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "UiVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "UiFragment.spv");
 

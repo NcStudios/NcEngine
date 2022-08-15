@@ -11,7 +11,8 @@ int main()
 
     try
     {
-        engine = nc::InitializeNcEngine("config.ini");
+        const auto config = nc::config::Load("config.ini");
+        engine = nc::InitializeNcEngine(config);
         auto ui = nc::sample::InitializeSampleUI(engine.get());
         engine->Start(std::make_unique<nc::sample::Worms>(ui.get()));
     }

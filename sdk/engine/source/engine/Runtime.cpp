@@ -41,9 +41,9 @@ namespace
 
 namespace nc
 {
-    auto InitializeNcEngine(std::string_view configPath, EngineInitFlags flags) -> std::unique_ptr<NcEngine>
+    auto InitializeNcEngine(const config::Config& config, EngineInitFlags flags) -> std::unique_ptr<NcEngine>
     {
-        config::LoadInternal(configPath);
+        config::SetConfig(config);
         debug::internal::OpenLog(config::GetProjectSettings().logFilePath);
         V_LOG("Initializing Runtime");
         return std::make_unique<Runtime>(flags);
@@ -52,7 +52,7 @@ namespace nc
     Runtime::Runtime(EngineInitFlags flags)
         : m_window{std::bind_front(&Runtime::Stop, this)},
           m_registry{nc::config::GetMemorySettings().maxTransforms},
-          m_assets{nc::config::GetProjectSettings(), nc::config::GetMemorySettings()},
+          m_assets{nc::config::GetAssetSettings(), nc::config::GetMemorySettings()},
           m_modules{BuildModuleRegistry(&m_registry, &m_window, m_assets.CreateGpuAccessorSignals(), flags)},
           m_executor{},
           m_sceneManager{std::bind_front(&Runtime::Clear, this)},
