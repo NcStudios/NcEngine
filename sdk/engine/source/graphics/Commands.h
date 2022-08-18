@@ -6,7 +6,10 @@
 
 namespace nc::graphics
 {
-    class Base; class Swapchain;
+class Base;
+class Swapchain;
+struct IndexBuffer;
+struct VertexBuffer;
 
     class Commands
     {
@@ -19,6 +22,7 @@ namespace nc::graphics
             void SubmitRenderCommand(uint32_t imageIndex);
             static void SubmitCopyCommandImmediate(const Base& base, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
             static void SubmitCommandImmediate(const Base& base, std::function<void(vk::CommandBuffer cmd)>&& function);
+            void BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData);
 
         private:
             // External members
@@ -32,4 +36,4 @@ namespace nc::graphics
             // Internal members
             std::vector<vk::CommandBuffer> m_commandBuffers;
     };
-}
+} // namespace nc::graphics

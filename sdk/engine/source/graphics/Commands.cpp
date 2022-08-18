@@ -1,17 +1,18 @@
 #include "Commands.h"
 #include "Base.h"
 #include "vk/Swapchain.h"
+#include "vk/Meshes.h"
 
 namespace nc::graphics
 {
     Commands::Commands(Base* base, const Swapchain& swapchain)
     : m_base{ base },
-      m_swapchain{ swapchain },
-      m_renderReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::ImageAvailableForRender) },
-      m_presentReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::PresentReady)  },
-      m_framesInFlightFences{ m_swapchain.GetFences(FenceType::FramesInFlight) },
-      m_imagesInFlightFences{ m_swapchain.GetFences(FenceType::ImagesInFlight) },
-      m_commandBuffers{} 
+        m_swapchain{ swapchain },
+        m_renderReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::ImageAvailableForRender) },
+        m_presentReadySemaphores{ m_swapchain.GetSemaphores(SemaphoreType::PresentReady)  },
+        m_framesInFlightFences{ m_swapchain.GetFences(FenceType::FramesInFlight) },
+        m_imagesInFlightFences{ m_swapchain.GetFences(FenceType::ImagesInFlight) },
+        m_commandBuffers{} 
     {
         // Create the command buffers.
         m_commandBuffers.resize(m_swapchain.GetColorImageViews().size()); // Need to have one command buffer per frame buffer, which have the same count as the image views.
@@ -90,7 +91,7 @@ namespace nc::graphics
 
     void Commands::SubmitCommandImmediate(const Base& base, std::function<void(vk::CommandBuffer cmd)>&& function)
     {
-        vk::CommandBufferAllocateInfo allocInfo{};
+        auto allocInfo = vk::CommandBufferAllocateInfo{};
         allocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
         allocInfo.setCommandPool(base.GetCommandPool());
         allocInfo.setCommandBufferCount(1);
@@ -98,7 +99,7 @@ namespace nc::graphics
         auto tempCommandBuffers = base.GetDevice().allocateCommandBuffers(allocInfo);
         auto tempCommandBuffer = tempCommandBuffers[0];
 
-        vk::CommandBufferBeginInfo beginInfo{};
+        auto beginInfo = vk::CommandBufferBeginInfo{};
         beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
         tempCommandBuffer.begin(beginInfo);
         {
@@ -106,11 +107,19 @@ namespace nc::graphics
         }
         tempCommandBuffer.end();
 
-         vk::SubmitInfo submitInfo{};
+        auto submitInfo = vk::SubmitInfo{};
         submitInfo.setCommandBufferCount(1);
         submitInfo.setPCommandBuffers(&tempCommandBuffer);
         base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);
         base.GetQueue(QueueFamilyType::GraphicsFamily).waitIdle();
         base.GetDevice().freeCommandBuffers(base.GetCommandPool(), tempCommandBuffer);
     }
-}
+
+    void Commands::BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData)
+    {
+        vk::DeviceSize offsets[] = { 0 };
+        auto vertexBuffer = vertexData.buffer.GetBuffer();
+        cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
+        cmd->bindIndexBuffer(indexData.buffer.GetBuffer(), 0, vk::IndexType::eUint32);
+    }
+}  // namespace nc::graphics

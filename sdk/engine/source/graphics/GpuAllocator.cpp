@@ -14,7 +14,7 @@ namespace
         allocatorInfo.instance = instance;
         return vma::createAllocator(allocatorInfo);
     }
-}
+} // anonymous namespace
 
 namespace nc::graphics
 {
@@ -114,7 +114,6 @@ namespace nc::graphics
         void* mappedData = Map(stagingBuffer.Allocation());
         std::memcpy(mappedData, pixels, imageSize);
         Unmap(stagingBuffer.Allocation());
-        stbi_image_free(pixels);
 
         auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         auto imageAllocation = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, vk::SampleCountFlagBits::e1);

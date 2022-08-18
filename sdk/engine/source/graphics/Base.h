@@ -67,4 +67,4 @@ namespace nc::graphics
             vk::DescriptorPool m_imguiDescriptorPool;
             vk::PhysicalDeviceProperties m_gpuProperties;
     };
-}
+} // namespace nc::graphics

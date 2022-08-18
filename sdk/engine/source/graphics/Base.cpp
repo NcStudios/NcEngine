@@ -7,6 +7,7 @@
 #include "vk/Swapchain.h"
 
 #include <algorithm>
+#include <array>
 #include <set>
 #include <string>
 
@@ -66,22 +67,22 @@ namespace
         instanceCreateInfo.setEnabledExtensionCount(static_cast<uint32_t>(GlobalExtensions.size()));
         instanceCreateInfo.setPpEnabledExtensionNames(GlobalExtensions.data());
     }
-}
+} // anonymous namespace
 
 namespace nc::graphics
 {
     Base::Base(HWND hwnd, HINSTANCE hinstance)
     : m_instance{},
-      m_surface{},
-      m_logicalDevice{},
-      m_physicalDevice{},
-      m_graphicsQueue{},
-      m_presentQueue{},
-      m_depthFormat{},
-      m_samplesCount{},
-      m_samplesInitialized{false},
-      m_commandPool{},
-      m_imguiDescriptorPool{}
+        m_surface{},
+        m_logicalDevice{},
+        m_physicalDevice{},
+        m_graphicsQueue{},
+        m_presentQueue{},
+        m_depthFormat{},
+        m_samplesCount{},
+        m_samplesInitialized{false},
+        m_commandPool{},
+        m_imguiDescriptorPool{}
     {
         CreateInstance();
         CreateSurface(hwnd, hinstance);
@@ -319,14 +320,14 @@ namespace nc::graphics
             uniqueQueueFamilies.emplace(indices.GetQueueFamilyIndex(QueueFamilyType::PresentFamily));
         }
 
-        float queuePriority = 1.0f;
+        const auto queuePriority = std::array<float, 1>{1.0f};
         std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-        std::transform(uniqueQueueFamilies.cbegin(), uniqueQueueFamilies.cend(), std::back_inserter(queueCreateInfos), [queuePriority](auto queueFamily) 
+        std::transform(uniqueQueueFamilies.cbegin(), uniqueQueueFamilies.cend(), std::back_inserter(queueCreateInfos), [&queuePriority](auto queueFamily) 
         {
             vk::DeviceQueueCreateInfo queueCreateInfo{};
             queueCreateInfo.setQueueFamilyIndex(queueFamily);
             queueCreateInfo.setQueueCount(1);
-            queueCreateInfo.setPQueuePriorities(&queuePriority);
+            queueCreateInfo.setPQueuePriorities(queuePriority.data());
             return queueCreateInfo;
         });
 
@@ -505,16 +506,16 @@ namespace nc::graphics
         std::vector<vk::Format> depthFormats = { vk::Format::eD32SfloatS8Uint, vk::Format::eD32Sfloat, vk::Format::eD24UnormS8Uint, vk::Format::eD16UnormS8Uint, vk::Format::eD16Unorm };
 
         for (auto& format : depthFormats)
-		{
-			vk::FormatProperties formatProperties;
-			m_physicalDevice.getFormatProperties(format, &formatProperties);
-			// Format must support depth stencil attachment for optimal tiling
-			if (formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
-			{
-				m_depthFormat = format;
+        {
+            vk::FormatProperties formatProperties;
+            m_physicalDevice.getFormatProperties(format, &formatProperties);
+            // Format must support depth stencil attachment for optimal tiling
+            if (formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+            {
+                m_depthFormat = format;
                 return;
-			}
-		}
-		throw NcError("Could not find a matching depth format");
+            }
+        }
+        throw NcError("Could not find a matching depth format");
     }
-}
+}  // namespace nc::graphics
