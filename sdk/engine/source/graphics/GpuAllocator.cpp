@@ -20,7 +20,7 @@ namespace nc::graphics
 {
     GpuAllocator::GpuAllocator(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::Instance instance)
         : m_allocator{CreateAllocator(physicalDevice, logicalDevice, instance)},
-            m_deviceProperties{physicalDevice.getProperties()}
+          m_deviceProperties{physicalDevice.getProperties()}
     {
     }
 

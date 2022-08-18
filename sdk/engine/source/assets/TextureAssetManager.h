@@ -12,7 +12,6 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
 {
     public:
         TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures);
-        ~TextureAssetManager() noexcept;
 
         bool Load(const std::string& path, bool isExternal) override;
         bool Load(std::span<const std::string> paths, bool isExternal) override;

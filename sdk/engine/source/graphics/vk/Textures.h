@@ -1,6 +1,6 @@
 #include "graphics/resources/ImmutableImage.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
+#include <string>
 
 namespace nc::graphics
 {

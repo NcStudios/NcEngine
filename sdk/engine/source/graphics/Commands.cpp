@@ -91,7 +91,7 @@ namespace nc::graphics
 
     void Commands::SubmitCommandImmediate(const Base& base, std::function<void(vk::CommandBuffer cmd)>&& function)
     {
-        vk::CommandBufferAllocateInfo allocInfo{};
+        auto allocInfo = vk::CommandBufferAllocateInfo{};
         allocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
         allocInfo.setCommandPool(base.GetCommandPool());
         allocInfo.setCommandBufferCount(1);
@@ -99,7 +99,7 @@ namespace nc::graphics
         auto tempCommandBuffers = base.GetDevice().allocateCommandBuffers(allocInfo);
         auto tempCommandBuffer = tempCommandBuffers[0];
 
-        vk::CommandBufferBeginInfo beginInfo{};
+        auto beginInfo = vk::CommandBufferBeginInfo{};
         beginInfo.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
         tempCommandBuffer.begin(beginInfo);
         {
@@ -107,7 +107,7 @@ namespace nc::graphics
         }
         tempCommandBuffer.end();
 
-            vk::SubmitInfo submitInfo{};
+        auto submitInfo = vk::SubmitInfo{};
         submitInfo.setCommandBufferCount(1);
         submitInfo.setPCommandBuffers(&tempCommandBuffer);
         base.GetQueue(QueueFamilyType::GraphicsFamily).submit(submitInfo, nullptr);

@@ -18,22 +18,22 @@ namespace nc::graphics
 {
     Graphics::Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
-            m_base{ std::make_unique<Base>(hwnd, hinstance) },
-            m_allocator{ std::make_unique<GpuAllocator>(m_base->GetPhysicalDevice(), m_base->GetDevice(), m_base->GetInstance())},
-            m_swapchain{ std::make_unique<Swapchain>(m_base->GetDevice(), m_base->GetPhysicalDevice(), m_base->GetSurface(), dimensions) },
-            m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
-            m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
-            m_assetServices{ std::make_unique<AssetServices>(this, config::GetProjectSettings(), config::GetMemorySettings().maxTextures) },
-            m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_base.get(), m_allocator.get(), gpuAccessorSignals) },
-            #ifdef NC_DEBUG_RENDERING_ENABLED
-            m_debugRenderer{},
-            #endif
-            m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
-            m_resizingMutex{},
-            m_imageIndex{UINT32_MAX},
-            m_dimensions{ dimensions },
-            m_isMinimized{ false },
-            m_clearColor{0.0f, 0.0f, 0.0f, 1.0f}
+          m_base{ std::make_unique<Base>(hwnd, hinstance) },
+          m_allocator{ std::make_unique<GpuAllocator>(m_base->GetPhysicalDevice(), m_base->GetDevice(), m_base->GetInstance())},
+          m_swapchain{ std::make_unique<Swapchain>(m_base->GetDevice(), m_base->GetPhysicalDevice(), m_base->GetSurface(), dimensions) },
+          m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
+          m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
+          m_assetServices{ std::make_unique<AssetServices>(this, config::GetProjectSettings(), config::GetMemorySettings().maxTextures) },
+          m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_base.get(), m_allocator.get(), gpuAccessorSignals) },
+          #ifdef NC_DEBUG_RENDERING_ENABLED
+          m_debugRenderer{},
+          #endif
+          m_renderer{ std::make_unique<Renderer>(this, m_shaderResources.get(), dimensions) },
+          m_resizingMutex{},
+          m_imageIndex{UINT32_MAX},
+          m_dimensions{ dimensions },
+          m_isMinimized{ false },
+          m_clearColor{0.0f, 0.0f, 0.0f, 1.0f}
     {
     }
 

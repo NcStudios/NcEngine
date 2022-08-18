@@ -72,24 +72,24 @@ namespace nc::graphics
     template<class T>
     GpuAllocation<T>::GpuAllocation() noexcept
         : m_data{},
-            m_allocation{},
-            m_allocator{nullptr}
+          m_allocation{},
+          m_allocator{nullptr}
     {
     }
 
     template<class T>
     GpuAllocation<T>::GpuAllocation(T data, vma::Allocation allocation, GpuAllocator* allocator) noexcept
         : m_data{data},
-            m_allocation{allocation},
-            m_allocator{allocator}
+          m_allocation{allocation},
+          m_allocator{allocator}
     {
     }
 
     template<class T>
     GpuAllocation<T>::GpuAllocation(GpuAllocation<T>&& other) noexcept
         : m_data{std::exchange(other.m_data, T{})},
-            m_allocation{std::exchange(other.m_allocation, vma::Allocation{})},
-            m_allocator{std::exchange(other.m_allocator, nullptr)}
+          m_allocation{std::exchange(other.m_allocation, vma::Allocation{})},
+          m_allocator{std::exchange(other.m_allocator, nullptr)}
     {
     }
 

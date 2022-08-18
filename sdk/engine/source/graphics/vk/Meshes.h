@@ -2,7 +2,7 @@
 #include "graphics/GpuAllocator.h"
 #include "graphics/resources/ImmutableBuffer.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
+#include <span>
 
 namespace nc::graphics
 {

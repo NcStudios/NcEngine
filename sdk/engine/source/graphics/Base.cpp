@@ -320,7 +320,7 @@ namespace nc::graphics
             uniqueQueueFamilies.emplace(indices.GetQueueFamilyIndex(QueueFamilyType::PresentFamily));
         }
 
-        std::array<float, 1> queuePriority = {1.0f};
+        const auto queuePriority = std::array<float, 1>{1.0f};
         std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
         std::transform(uniqueQueueFamilies.cbegin(), uniqueQueueFamilies.cend(), std::back_inserter(queueCreateInfos), [&queuePriority](auto queueFamily) 
         {

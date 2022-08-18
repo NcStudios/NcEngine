@@ -34,12 +34,6 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
     m_accessors.reserve(m_maxTextureCount);
 }
 
-TextureAssetManager::~TextureAssetManager() noexcept
-{
-    m_textureData.clear();
-    m_accessors.clear();
-}
-
 bool TextureAssetManager::Load(const std::string& path, bool isExternal)
 {
     const auto index = static_cast<uint32_t>(m_accessors.size());
