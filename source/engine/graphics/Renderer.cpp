@@ -59,10 +59,10 @@ Renderer::~Renderer() noexcept
     m_renderPasses.reset();
 }
 
-void Renderer::Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
+void Renderer::Record(Commands* commands, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
 {
     OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
-    auto* cmd = BeginFrame(commands, assetServices, meshStorage, currentSwapChainImageIndex);
+    auto* cmd = BeginFrame(commands, meshStorage, currentSwapChainImageIndex);
 
     /** Shadow mapping pass */
     m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
@@ -109,7 +109,7 @@ void Renderer::RegisterTechniques()
     m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
 }
 
-vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
+vk::CommandBuffer* Renderer::BeginFrame(Commands* commands, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
 {
     auto swapchain = m_graphics->GetSwapchainPtr();
     swapchain->WaitForFrameFence();

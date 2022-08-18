@@ -7,7 +7,7 @@
 
 using namespace nc;
 
-class ShaderAssetManager_unit_tests : public ::testing::Test
+class ShaderAssetManager_tests : public ::testing::Test
 {
     public:
         std::unique_ptr<ShaderAssetManager> assetManager;
@@ -24,45 +24,45 @@ class ShaderAssetManager_unit_tests : public ::testing::Test
         }
 };
 
-TEST_F(ShaderAssetManager_unit_tests, Load_NotLoaded_ReturnsTrue)
+TEST_F(ShaderAssetManager_tests, Load_NotLoaded_ReturnsTrue)
 {
     const auto actual = assetManager->Load("shader1", false);
     EXPECT_TRUE(actual);
 }
 
-TEST_F(ShaderAssetManager_unit_tests, Load_IsLoaded_ReturnsFalse)
+TEST_F(ShaderAssetManager_tests, Load_IsLoaded_ReturnsFalse)
 {
     assetManager->Load("shader1", false);
     const auto actual = assetManager->Load("shader1", false);
     EXPECT_FALSE(actual);
 }
 
-TEST_F(ShaderAssetManager_unit_tests, Load_BadPath_Throws)
+TEST_F(ShaderAssetManager_tests, Load_BadPath_Throws)
 {
     EXPECT_THROW(assetManager->Load("bad/path", false), std::runtime_error);
 }
 
-TEST_F(ShaderAssetManager_unit_tests, Load_Collection_ReturnsTrue)
+TEST_F(ShaderAssetManager_tests, Load_Collection_ReturnsTrue)
 {
     std::array<std::string, 2u> paths {"shader1", "shader2"};
     const auto actual = assetManager->Load(paths, false);
     EXPECT_TRUE(actual);
 }
 
-TEST_F(ShaderAssetManager_unit_tests, Unload_Loaded_ReturnsTrue)
+TEST_F(ShaderAssetManager_tests, Unload_Loaded_ReturnsTrue)
 {
     assetManager->Load("shader1", false);
     const auto actual = assetManager->Unload("shader1");
     EXPECT_TRUE(actual);
 }
 
-TEST_F(ShaderAssetManager_unit_tests, Unload_NotLoaded_ReturnsFalse)
+TEST_F(ShaderAssetManager_tests, Unload_NotLoaded_ReturnsFalse)
 {
     const auto actual = assetManager->Unload("shader1");
     EXPECT_FALSE(actual);
 }
 
-TEST_F(ShaderAssetManager_unit_tests, UnloadAll_HasAssets_RemovesAssets)
+TEST_F(ShaderAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 2u> paths {"shader1", "shader2"};
     assetManager->Load(paths, false);

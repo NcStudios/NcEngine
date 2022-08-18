@@ -15,4 +15,11 @@ include(GoogleTest)
 
 add_definitions(-DNC_ASSERT_ENABLED)
 
-add_subdirectory(unit)
+add_subdirectory(alloc)
+add_subdirectory(assets)
+add_subdirectory(ecs)
+add_subdirectory(math)
+add_subdirectory(module)
+add_subdirectory(network)
+add_subdirectory(physics)
+add_subdirectory(utility)

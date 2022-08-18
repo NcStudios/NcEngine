@@ -1,4 +1,4 @@
-set(IMGUI_SOURCE_DIR ${PROJECT_SOURCE_DIR}/sdk/external/imgui/src/)
+set(IMGUI_SOURCE_DIR ${PROJECT_SOURCE_DIR}/source/external/imgui/src/)
 
 add_library(imgui
     STATIC
@@ -16,8 +16,8 @@ target_compile_definitions(imgui
 
 target_include_directories(imgui
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/sdk/external/
-        ${PROJECT_SOURCE_DIR}/sdk/engine/include
+        ${PROJECT_SOURCE_DIR}/source/external/
+        ${PROJECT_SOURCE_DIR}/include
 )
 
 target_link_libraries(imgui

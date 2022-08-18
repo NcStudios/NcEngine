@@ -34,14 +34,14 @@ add_subdirectory(source)
 install(TARGETS     ${NC_SAMPLE_EXE}
         DESTINATION sample
 )
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sdk/sample/assets
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sample/assets
         DESTINATION sample
 )
-install(FILES       ${PROJECT_SOURCE_DIR}/sdk/sample/config.ini
+install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
         DESTINATION sample
 )
 if(${NC_PROFILING_ENABLED})
-    install(FILES       ${PROJECT_SOURCE_DIR}/sdk/engine/lib/OptickCore.dll
+    install(FILES       ${PROJECT_SOURCE_DIR}/source/external/lib/OptickCore.dll
             DESTINATION sample
     )
 endif()

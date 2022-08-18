@@ -30,19 +30,18 @@ class Renderer
 {
     public:
         Renderer(graphics::Graphics* graphics,
-                    ShaderResourceServices* shaderResources,
-                    Vector2 dimensions);
-
+                 ShaderResourceServices* shaderResources,
+                 Vector2 dimensions);
         ~Renderer() noexcept;
-        
-        void Record(Commands* commands, const PerFrameRenderState& state, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
+
+        void Record(Commands* commands, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
         void Clear() noexcept;
         void InitializeImgui();
 
     private:
         void RegisterTechniques();
         void RegisterRenderPasses();
-        vk::CommandBuffer* BeginFrame(Commands* commands, AssetServices* assetServices, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
+        vk::CommandBuffer* BeginFrame(Commands* commands, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
 
         graphics::Graphics* m_graphics;
         ShaderResourceServices* m_shaderResources;

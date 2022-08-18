@@ -15,7 +15,7 @@ struct TestModule2 : public Module
     bool cleared = false;
 };
 
-TEST(ModuleRegistry_tests, Register_NewModule_RegistersModule)
+TEST(ModuleRegistry_unit_tests, Register_NewModule_RegistersModule)
 {
     auto uut = ModuleRegistry{};
     auto module1 = std::make_unique<TestModule1>();
@@ -24,7 +24,7 @@ TEST(ModuleRegistry_tests, Register_NewModule_RegistersModule)
     EXPECT_TRUE(uut.IsRegistered<TestModule1>());
 }
 
-TEST(ModuleRegistry_tests, Register_ExistingModule_ReplacesModule)
+TEST(ModuleRegistry_unit_tests, Register_ExistingModule_ReplacesModule)
 {
     auto module1 = std::make_unique<TestModule1>();
     auto module2 = std::make_unique<TestModule1>();
@@ -39,7 +39,7 @@ TEST(ModuleRegistry_tests, Register_ExistingModule_ReplacesModule)
     EXPECT_EQ(uut.GetAllModules().size(), 1);
 }
 
-TEST(ModuleRegistry_tests, Unregister_ExistingModule_Unregisters)
+TEST(ModuleRegistry_unit_tests, Unregister_ExistingModule_Unregisters)
 {
     auto uut = ModuleRegistry{};
     uut.Register<TestModule1>(std::make_unique<TestModule1>());
@@ -50,7 +50,7 @@ TEST(ModuleRegistry_tests, Unregister_ExistingModule_Unregisters)
     EXPECT_EQ(uut.GetAllModules().size(), 0);
 }
 
-TEST(ModuleRegistry_tests, Unregister_NonexistentModule_Succeeds)
+TEST(ModuleRegistry_unit_tests, Unregister_NonexistentModule_Succeeds)
 {
     auto uut = ModuleRegistry{};
     uut.Unregister<TestModule1>();
@@ -60,7 +60,7 @@ TEST(ModuleRegistry_tests, Unregister_NonexistentModule_Succeeds)
     EXPECT_EQ(uut.GetAllModules().size(), 0);
 }
 
-TEST(ModuleRegistry_tests, Clear_NotifiesModules)
+TEST(ModuleRegistry_unit_tests, Clear_NotifiesModules)
 {
     auto uut = ModuleRegistry{};
     uut.Register<TestModule1>(std::make_unique<TestModule1>());

@@ -36,9 +36,9 @@ add_subdirectory(source)
 install(TARGETS     ${NC_EDITOR_EXE}
         DESTINATION bin
 )
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sdk/editor/file_templates
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/editor/file_templates
         DESTINATION resources
 )
-install(FILES       ${PROJECT_SOURCE_DIR}/sdk/editor/config/engine_config.ini
+install(FILES       ${PROJECT_SOURCE_DIR}/source/editor/config/engine_config.ini
         DESTINATION bin
 )

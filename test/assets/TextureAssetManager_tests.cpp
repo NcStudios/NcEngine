@@ -11,7 +11,7 @@ const auto Texture_normal = "texture_normal.png";
 const auto Texture_roughness = "texture_roughness.png";
 const uint32_t MaxTextures = 100;
 
-class TextureAssetManager_unit_tests : public ::testing::Test
+class TextureAssetManager_tests : public ::testing::Test
 {
     public:
         std::unique_ptr<TextureAssetManager> assetManager;
@@ -28,32 +28,32 @@ class TextureAssetManager_unit_tests : public ::testing::Test
         }
 };
 
-TEST_F(TextureAssetManager_unit_tests, Load_NotLoaded_ReturnsTrue)
+TEST_F(TextureAssetManager_tests, Load_NotLoaded_ReturnsTrue)
 {
     auto actual = assetManager->Load(Texture_base, false);
     EXPECT_TRUE(actual);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Load_IsLoaded_ReturnsFalse)
+TEST_F(TextureAssetManager_tests, Load_IsLoaded_ReturnsFalse)
 {
     assetManager->Load(Texture_base, false);
     auto actual = assetManager->Load(Texture_base, false);
     EXPECT_FALSE(actual);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Load_BadPath_Throws)
+TEST_F(TextureAssetManager_tests, Load_BadPath_Throws)
 {
     EXPECT_THROW(assetManager->Load("bad/path", false), std::runtime_error);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Load_Collection_ReturnsTrue)
+TEST_F(TextureAssetManager_tests, Load_Collection_ReturnsTrue)
 {
     std::array<std::string, 3u> paths {Texture_base, Texture_normal, Texture_roughness};
     auto actual = assetManager->Load(paths, false);
     EXPECT_TRUE(actual);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Load_Collection_OneAlreadyLoaded_IndexRemainsTheSame)
+TEST_F(TextureAssetManager_tests, Load_Collection_OneAlreadyLoaded_IndexRemainsTheSame)
 {
     std::array<std::string, 3u> paths {Texture_base, Texture_normal, Texture_roughness};
     assetManager->Load(paths, false);
@@ -67,33 +67,33 @@ TEST_F(TextureAssetManager_unit_tests, Load_Collection_OneAlreadyLoaded_IndexRem
     EXPECT_EQ(viewSecondLoad.index, 0u);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Unload_Loaded_ReturnsTrue)
+TEST_F(TextureAssetManager_tests, Unload_Loaded_ReturnsTrue)
 {
     assetManager->Load(Texture_base, false);
     auto actual = assetManager->Unload(Texture_base);
     EXPECT_TRUE(actual);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Unload_NotLoaded_ReturnsFalse)
+TEST_F(TextureAssetManager_tests, Unload_NotLoaded_ReturnsFalse)
 {
     auto actual = assetManager->Unload(Texture_base);
     EXPECT_FALSE(actual);
 }
 
-TEST_F(TextureAssetManager_unit_tests, IsLoaded_Loaded_ReturnsTrue)
+TEST_F(TextureAssetManager_tests, IsLoaded_Loaded_ReturnsTrue)
 {
     assetManager->Load(Texture_base, false);
     auto actual = assetManager->IsLoaded(Texture_base);
     EXPECT_TRUE(actual);
 }
 
-TEST_F(TextureAssetManager_unit_tests, IsLoaded_NotLoaded_ReturnsFalse)
+TEST_F(TextureAssetManager_tests, IsLoaded_NotLoaded_ReturnsFalse)
 {
     auto actual = assetManager->IsLoaded(Texture_base);
     EXPECT_FALSE(actual);
 }
 
-TEST_F(TextureAssetManager_unit_tests, UnloadAll_HasAssets_RemovesAssets)
+TEST_F(TextureAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 3u> paths {Texture_base, Texture_normal, Texture_roughness};
     assetManager->Load(paths, false);
@@ -103,12 +103,12 @@ TEST_F(TextureAssetManager_unit_tests, UnloadAll_HasAssets_RemovesAssets)
     EXPECT_FALSE(assetManager->IsLoaded(Texture_roughness));
 }
 
-TEST_F(TextureAssetManager_unit_tests, UnloadAll_Empty_Completes)
+TEST_F(TextureAssetManager_tests, UnloadAll_Empty_Completes)
 {
     assetManager->UnloadAll();
 }
 
-TEST_F(TextureAssetManager_unit_tests, Unload_FromBeginning_UpdatesAccesors)
+TEST_F(TextureAssetManager_tests, Unload_FromBeginning_UpdatesAccesors)
 {
     std::array<std::string, 3u> paths {Texture_base, Texture_normal, Texture_roughness};
     assetManager->Load(paths, false);
@@ -119,7 +119,7 @@ TEST_F(TextureAssetManager_unit_tests, Unload_FromBeginning_UpdatesAccesors)
     EXPECT_EQ(view2.index, 1u);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Unload_FromMiddle_UpdatesAccesors)
+TEST_F(TextureAssetManager_tests, Unload_FromMiddle_UpdatesAccesors)
 {
     std::array<std::string, 3u> paths {Texture_base, Texture_normal, Texture_roughness};
     assetManager->Load(paths, false);
@@ -130,7 +130,7 @@ TEST_F(TextureAssetManager_unit_tests, Unload_FromMiddle_UpdatesAccesors)
     EXPECT_EQ(view2.index, 1u);
 }
 
-TEST_F(TextureAssetManager_unit_tests, Unload_FromEnd_AccessorsNotUpdated)
+TEST_F(TextureAssetManager_tests, Unload_FromEnd_AccessorsNotUpdated)
 {
     std::array<std::string, 3u> paths {Texture_base, Texture_normal, Texture_roughness};
     assetManager->Load(paths, false);

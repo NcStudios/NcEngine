@@ -3,6 +3,7 @@
 #include "module/Module.h"
 
 #include <chrono>
+#include <memory>
 
 namespace nc::time
 {

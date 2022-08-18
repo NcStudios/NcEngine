@@ -13,14 +13,14 @@ struct Fake
     int val;
 };
 
-TEST(StaticPoolResource_unit_tests, Allocate_MemoryAvailable_ReturnsNonNull)
+TEST(StaticPoolResource_tests, Allocate_MemoryAvailable_ReturnsNonNull)
 {
     StaticPoolResource<Fake> pool(PoolDefaultSize);
     auto actual = pool.allocate(1u, DefaultAlignment);
     EXPECT_NE(actual, nullptr);
 }
 
-TEST(StaticPoolResource_unit_tests, Allocate_ConsecutiveCallsOnEmptyPool_AllocateSequentially)
+TEST(StaticPoolResource_tests, Allocate_ConsecutiveCallsOnEmptyPool_AllocateSequentially)
 {
     StaticPoolResource<Fake> pool(PoolDefaultSize);
     auto first = pool.allocate(1u, DefaultAlignment);
@@ -33,7 +33,7 @@ TEST(StaticPoolResource_unit_tests, Allocate_ConsecutiveCallsOnEmptyPool_Allocat
     EXPECT_EQ(actual, 1u);
 }
 
-TEST(StaticPoolResource_unit_tests, Allocate_CallAfterDeallocate_AllocatesFromFreeList)
+TEST(StaticPoolResource_tests, Allocate_CallAfterDeallocate_AllocatesFromFreeList)
 {
     StaticPoolResource<Fake> pool(PoolDefaultSize);
     auto expected = pool.allocate(1u, DefaultAlignment);
@@ -42,14 +42,14 @@ TEST(StaticPoolResource_unit_tests, Allocate_CallAfterDeallocate_AllocatesFromFr
     EXPECT_EQ(actual, expected);
 }
 
-TEST(StaticPoolResource_unit_tests, Allocate_MemoryNotAvailable_Throws)
+TEST(StaticPoolResource_tests, Allocate_MemoryNotAvailable_Throws)
 {
     StaticPoolResource<Fake> pool(sizeof(Fake));
     pool.allocate(1u, DefaultAlignment);
     EXPECT_THROW(pool.allocate(1u, DefaultAlignment), MemoryResourceBadAlloc);
 }
 
-TEST(StaticPoolResource_unit_tests, Allocate_CallAfterFreeAll_AllocatesFromBegining)
+TEST(StaticPoolResource_tests, Allocate_CallAfterFreeAll_AllocatesFromBegining)
 {
     StaticPoolResource<Fake> pool(PoolDefaultSize);
     auto expected = pool.allocate(1u, DefaultAlignment);
@@ -61,21 +61,21 @@ TEST(StaticPoolResource_unit_tests, Allocate_CallAfterFreeAll_AllocatesFromBegin
     EXPECT_EQ(actual, expected);
 }
 
-TEST(LinearBufferResource_unit_tests, Allocate_MemoryAvailable_ReturnsNonNull)
+TEST(LinearBufferResource_tests, Allocate_MemoryAvailable_ReturnsNonNull)
 {
     LinearBufferResource buffer(LinearBufferDefaultSize);
     auto actual = buffer.allocate(sizeof(Fake), alignof(Fake));
     EXPECT_NE(actual, nullptr);
 }
 
-TEST(LinearBufferResource_unit_tests, Allocate_BufferFull_Throws)
+TEST(LinearBufferResource_tests, Allocate_BufferFull_Throws)
 {
     LinearBufferResource buffer(LinearBufferDefaultSize);
     buffer.allocate(LinearBufferDefaultSize, DefaultAlignment);
     EXPECT_THROW(buffer.allocate(sizeof(Fake), alignof(Fake)), MemoryResourceBadAlloc);
 }
 
-TEST(LinearBufferResource_unit_tests, Allocate_ConsecutiveCalls_AllocateSequentially)
+TEST(LinearBufferResource_tests, Allocate_ConsecutiveCalls_AllocateSequentially)
 {
     LinearBufferResource buffer(LinearBufferDefaultSize);
     auto first = buffer.allocate(sizeof(Fake), alignof(Fake));
@@ -83,7 +83,7 @@ TEST(LinearBufferResource_unit_tests, Allocate_ConsecutiveCalls_AllocateSequenti
     EXPECT_GT(second, first);
 }
 
-TEST(LinearBufferResource_unit_tests, Allocate_CallAfterClear_AllocatesFromBeginning)
+TEST(LinearBufferResource_tests, Allocate_CallAfterClear_AllocatesFromBeginning)
 {
     LinearBufferResource buffer(LinearBufferDefaultSize);
     auto expected = buffer.allocate(sizeof(Fake), alignof(Fake));

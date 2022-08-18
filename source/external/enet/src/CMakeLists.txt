@@ -54,7 +54,7 @@ if(MSVC)
 endif()
 
 
-set(INCLUDE_FILES_PREFIX ${PROJECT_SOURCE_DIR}/sdk/external/enet)
+set(INCLUDE_FILES_PREFIX ${PROJECT_SOURCE_DIR}/source/external/enet)
 set(INCLUDE_FILES
     ${INCLUDE_FILES_PREFIX}/callbacks.h
     ${INCLUDE_FILES_PREFIX}/enet.h
@@ -81,6 +81,6 @@ add_library(enet
 
 target_include_directories(enet
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/sdk/external
-        ${PROJECT_SOURCE_DIR}/sdk/engine/include
+        ${PROJECT_SOURCE_DIR}/source/external
+        ${PROJECT_SOURCE_DIR}/include
 )

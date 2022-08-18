@@ -1,32 +1,32 @@
 ### Random Tests ###
-add_executable(ModuleRegistry_tests
-    ModuleRegistry_tests.cpp
-    ${PROJECT_SOURCE_DIR}/sdk/engine/source/module/Module.cpp
+add_executable(ModuleRegistry_unit_tests
+    ModuleRegistry_unit_tests.cpp
+    ${PROJECT_SOURCE_DIR}/source/engine/module/Module.cpp
 )
 
-target_include_directories(ModuleRegistry_tests
+target_include_directories(ModuleRegistry_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
-target_compile_options(ModuleRegistry_tests
+target_compile_options(ModuleRegistry_unit_tests
     PUBLIC
         ${WARNING_FLAGS}
 )
 
-target_link_libraries(ModuleRegistry_tests
+target_link_libraries(ModuleRegistry_unit_tests
     PRIVATE
         gtest
         Taskflow
 )
 
-add_test(ModuleRegistry_tests ModuleRegistry_tests)
+add_test(ModuleRegistry_unit_tests ModuleRegistry_unit_tests)
 
 ### TaskGraph Tests ###
 add_executable(TaskGraph_unit_tests
-    TaskGraph_tests.cpp
+    TaskGraph_unit_tests.cpp
 )
 
 target_include_directories(TaskGraph_unit_tests

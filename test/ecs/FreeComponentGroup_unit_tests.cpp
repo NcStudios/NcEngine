@@ -14,14 +14,14 @@ struct FakeComponent : public FreeComponent
 
 constexpr auto TestEntity = Entity{0, 0, 0};
 
-TEST(FreeComponentGroup_unit_tests, Add_ValidCall_ConstructsObject)
+TEST(FreeComponentGroup_unit_test, Add_ValidCall_ConstructsObject)
 {
     auto group = FreeComponentGroup{TestEntity};
     auto ptr = group.Add<FakeComponent>(TestEntity);
     EXPECT_EQ(ptr->ParentEntity(), TestEntity);
 }
 
-TEST(FreeComponentGroup_unit_tests, Add_ReplaceAfterRemove_ConstructsObject)
+TEST(FreeComponentGroup_unit_test, Add_ReplaceAfterRemove_ConstructsObject)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -32,7 +32,7 @@ TEST(FreeComponentGroup_unit_tests, Add_ReplaceAfterRemove_ConstructsObject)
     EXPECT_EQ(ptr->ParentEntity(), TestEntity);
 }
 
-TEST(FreeComponentGroup_unit_tests, Add_DoubleCall_Throws)
+TEST(FreeComponentGroup_unit_test, Add_DoubleCall_Throws)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -40,7 +40,7 @@ TEST(FreeComponentGroup_unit_tests, Add_DoubleCall_Throws)
     EXPECT_THROW(group.Add<FakeComponent>(TestEntity), std::runtime_error);
 }
 
-TEST(FreeComponentGroup_unit_tests, Remove_ComponentExists_Removes)
+TEST(FreeComponentGroup_unit_test, Remove_ComponentExists_Removes)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -51,13 +51,13 @@ TEST(FreeComponentGroup_unit_tests, Remove_ComponentExists_Removes)
     EXPECT_FALSE(actual);
 }
 
-TEST(FreeComponentGroup_unit_tests, Remove_ComponentDoesNotExist_Throws)
+TEST(FreeComponentGroup_unit_test, Remove_ComponentDoesNotExist_Throws)
 {
     auto group = FreeComponentGroup{TestEntity};
     EXPECT_THROW(group.Remove<FakeComponent>(), std::runtime_error);
 }
 
-TEST(FreeComponentGroup_unit_tests, Remove_DoubleCall_Throws)
+TEST(FreeComponentGroup_unit_test, Remove_DoubleCall_Throws)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -67,7 +67,7 @@ TEST(FreeComponentGroup_unit_tests, Remove_DoubleCall_Throws)
     EXPECT_THROW(group.Remove<FakeComponent>(), std::runtime_error);
 }
 
-TEST(FreeComponentGroup_unit_tests, Contains_Exists_ReturnsTrue)
+TEST(FreeComponentGroup_unit_test, Contains_Exists_ReturnsTrue)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -76,7 +76,7 @@ TEST(FreeComponentGroup_unit_tests, Contains_Exists_ReturnsTrue)
     EXPECT_TRUE(actual);
 }
 
-TEST(FreeComponentGroup_unit_tests, Contains_ExistsStaged_ReturnsTrue)
+TEST(FreeComponentGroup_unit_test, Contains_ExistsStaged_ReturnsTrue)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -84,14 +84,14 @@ TEST(FreeComponentGroup_unit_tests, Contains_ExistsStaged_ReturnsTrue)
     EXPECT_TRUE(actual);
 }
 
-TEST(FreeComponentGroup_unit_tests, Contains_DoesNotExist_ReturnsFalse)
+TEST(FreeComponentGroup_unit_test, Contains_DoesNotExist_ReturnsFalse)
 {
     auto group = FreeComponentGroup{TestEntity};
     auto actual = group.Contains<FakeComponent>();
     EXPECT_FALSE(actual);
 }
 
-TEST(FreeComponentGroup_unit_tests, Contains_AfterRemoved_ReturnsFalse)
+TEST(FreeComponentGroup_unit_test, Contains_AfterRemoved_ReturnsFalse)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -102,7 +102,7 @@ TEST(FreeComponentGroup_unit_tests, Contains_AfterRemoved_ReturnsFalse)
     EXPECT_FALSE(actual);
 }
 
-TEST(FreeComponentGroup_unit_tests, Get_Exists_ReturnsPointer)
+TEST(FreeComponentGroup_unit_test, Get_Exists_ReturnsPointer)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -111,7 +111,7 @@ TEST(FreeComponentGroup_unit_tests, Get_Exists_ReturnsPointer)
     EXPECT_NE(ptr, nullptr);
 }
 
-TEST(FreeComponentGroup_unit_tests, Get_ExistsStaged_ReturnsPointer)
+TEST(FreeComponentGroup_unit_test, Get_ExistsStaged_ReturnsPointer)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
@@ -119,14 +119,14 @@ TEST(FreeComponentGroup_unit_tests, Get_ExistsStaged_ReturnsPointer)
     EXPECT_NE(ptr, nullptr);
 }
 
-TEST(FreeComponentGroup_unit_tests, Get_DoesNotExist_ReturnsNull)
+TEST(FreeComponentGroup_unit_test, Get_DoesNotExist_ReturnsNull)
 {
     auto group = FreeComponentGroup{TestEntity};
     auto* ptr = group.Get<FakeComponent>();
     EXPECT_EQ(ptr, nullptr);
 }
 
-TEST(FreeComponentGroup_unit_tests, Get_CallAfterRemoved_ReturnsNull)
+TEST(FreeComponentGroup_unit_test, Get_CallAfterRemoved_ReturnsNull)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);

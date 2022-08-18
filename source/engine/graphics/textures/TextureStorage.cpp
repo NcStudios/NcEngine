@@ -49,10 +49,9 @@ void TextureStorage::UpdateBuffer(const TextureBufferData& textureBufferData)
 
 void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferData)
 {
-    for (auto i = 0; i < textureBufferData.ids.size(); ++i)
+    for (auto i = 0ull; i < textureBufferData.ids.size(); ++i)
     {
         auto& textureData = textureBufferData.data[i];
-        auto& textureId = textureBufferData.ids[i];
 
         TextureBuffer textureBuffer
         {

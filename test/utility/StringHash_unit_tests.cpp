@@ -24,7 +24,7 @@ auto ReadCollateral() -> std::vector<std::string>
     return out;
 }
 
-TEST(StringHash_tests, Constructor_CompileTime_Succeeds)
+TEST(StringHash_unit_tests, Constructor_CompileTime_Succeeds)
 {
     constexpr auto uut = utility::StringHash(testString1);
     constexpr auto actual = uut.Hash();
@@ -34,7 +34,7 @@ TEST(StringHash_tests, Constructor_CompileTime_Succeeds)
     static_assert(actual == expected);
 }
 
-TEST(StringHash_tests, Constructor_Runtime_Succeeds)
+TEST(StringHash_unit_tests, Constructor_Runtime_Succeeds)
 {
     const auto path = std::string{testString1};
     const auto id = utility::StringHash(path);
@@ -43,7 +43,7 @@ TEST(StringHash_tests, Constructor_Runtime_Succeeds)
     EXPECT_EQ(actual, expected);
 }
 
-TEST(StringHash_tests, EmptyString_ReturnsFnvBasis)
+TEST(StringHash_unit_tests, EmptyString_ReturnsFnvBasis)
 {
     constexpr auto uut = utility::StringHash("");
     constexpr auto actual = uut.Hash();
@@ -51,7 +51,7 @@ TEST(StringHash_tests, EmptyString_ReturnsFnvBasis)
     EXPECT_EQ(actual, expected);
 }
 
-TEST(StringHash_tests, Comparison_Same_ReturnEqual)
+TEST(StringHash_unit_tests, Comparison_Same_ReturnEqual)
 {
     constexpr auto id1 = utility::StringHash(testString1);
     constexpr auto id2 = utility::StringHash(testString1);
@@ -59,7 +59,7 @@ TEST(StringHash_tests, Comparison_Same_ReturnEqual)
     EXPECT_FALSE(id1 != id2);
 }
 
-TEST(StringHash_tests, Comparison_Different_ReturnsNotEqual)
+TEST(StringHash_unit_tests, Comparison_Different_ReturnsNotEqual)
 {
     constexpr auto id1 = utility::StringHash(testString1);
     constexpr auto id2 = utility::StringHash(testString2);
@@ -67,7 +67,7 @@ TEST(StringHash_tests, Comparison_Different_ReturnsNotEqual)
     EXPECT_TRUE(id1 != id2);
 }
 
-TEST(StringHash_tests, Fnv1a_HashMany_NoCollisions)
+TEST(StringHash_unit_tests, Fnv1a_HashMany_NoCollisions)
 {
     /** @note With enough input we will get collisions. This is just checking
      *  nothing is horribly wrong with the implementation. */

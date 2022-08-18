@@ -205,7 +205,7 @@ namespace nc::graphics
         OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
         if (m_isMinimized) return;
 
-        m_renderer->Record(m_commands.get(), state, m_assetServices.get(), m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
+        m_renderer->Record(m_commands.get(), state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
 
         // Executes the command buffer to render to the image
         RenderToImage(m_imageIndex);
