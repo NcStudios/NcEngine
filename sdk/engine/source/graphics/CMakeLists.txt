@@ -14,6 +14,8 @@ target_sources(${NC_ENGINE_LIB}
         vma.cpp
 )
 
+add_subdirectory(meshes)
 add_subdirectory(resources)
 add_subdirectory(techniques)
+add_subdirectory(textures)
 add_subdirectory(vk)

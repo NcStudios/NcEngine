@@ -20,7 +20,7 @@ namespace nc::graphics
 {
     class Base;
     class Commands;
-    class GpuAssetsStorage;
+    struct GpuAssetsStorage;
     struct PerFrameRenderState;
     class Swapchain;
     class Renderer;
@@ -84,4 +84,4 @@ namespace nc::graphics
             bool m_isMinimized;
             std::array<float, 4> m_clearColor;
     };
-}
+} // namespace nc::graphics

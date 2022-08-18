@@ -128,4 +128,4 @@ namespace nc::graphics
         m_allocation = vma::Allocation{};
         m_allocator = nullptr;
     }
-}
+} // namespace nc::graphics
