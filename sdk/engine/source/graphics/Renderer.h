@@ -9,11 +9,15 @@
 
 namespace nc
 {
-    class MeshRenderer;
-    namespace particle { class ParticleRenderer; }
-} // namespace nc
+class MeshRenderer;
+struct AssetServices;
 
-namespace nc::graphics
+namespace particle
+{
+class ParticleRenderer;
+}
+
+namespace graphics
 {
 class Commands;
 class Graphics;
@@ -47,4 +51,5 @@ class Renderer
         std::unique_ptr<RenderTarget> m_depthStencil;
         std::unique_ptr<RenderTarget> m_colorBuffer;
 };
-} // namespace nc::graphics
+} // namespace nc
+} // namespace graphics
