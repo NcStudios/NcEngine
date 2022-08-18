@@ -11,7 +11,7 @@ namespace nc::ecs
     class ParticleEmitterSystem
     {
         public:
-            ParticleEmitterSystem(Registry* registry, float* dt, std::function<nc::Camera* ()> getCamera);
+            ParticleEmitterSystem(Registry* registry, std::function<nc::Camera* ()> getCamera);
 
             /** Run is able to be run from the JobSystem, but it must finish before
              *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -33,7 +33,6 @@ namespace nc::ecs
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;
             std::vector<Entity> m_toRemove;
-            float* m_dt;
             Random m_random;
             std::function<nc::Camera* ()> m_getCamera;
             Registry* m_registry;
