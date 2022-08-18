@@ -144,7 +144,6 @@ target_compile_options(MeshAssetManager_unit_tests
 target_link_libraries(MeshAssetManager_unit_tests
     PRIVATE
         gtest
-        Vulkan::Vulkan
 )
 
 add_test(MeshAssetManager_unit_tests MeshAssetManager_unit_tests)
@@ -180,3 +179,35 @@ target_link_libraries(ShaderAssetManager_unit_tests
 )
 
 add_test(ShaderAssetManager_unit_tests ShaderAssetManager_unit_tests)
+
+### TextureAssetManager Tests ###
+add_executable(TextureAssetManager_unit_tests
+    TextureAssetManager_unit_tests.cpp
+    ${NC_SOURCE_DIR}/assets/TextureAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/AssetData.cpp
+)
+
+target_compile_definitions(TextureAssetManager_unit_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+)
+
+target_include_directories(TextureAssetManager_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
+)
+
+target_compile_options(TextureAssetManager_unit_tests
+    PUBLIC
+        ${WARNING_FLAGS}
+)
+
+target_link_libraries(TextureAssetManager_unit_tests
+    PRIVATE
+        gtest
+)
+
+add_test(TextureAssetManager_unit_tests TextureAssetManager_unit_tests)

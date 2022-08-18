@@ -1,5 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        AssetData.cpp
         AssetManagers.cpp
         Assets.cpp
         AssetUtilities.cpp
