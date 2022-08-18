@@ -29,7 +29,7 @@ namespace nc::editor
 
         try
         {
-            config::Read(filePath.string(), MapConfigKeyValue, &out);
+            config::internal::Read(filePath.string(), MapConfigKeyValue, &out);
         }
         catch(const std::runtime_error& e)
         {

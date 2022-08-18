@@ -23,7 +23,7 @@ struct GpuAccessorSignals
 class AssetManagers
 {
     public:
-        AssetManagers(const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings);
+        AssetManagers(const config::AssetSettings& assetSettings, const config::MemorySettings& memorySettings);
         GpuAccessorSignals CreateGpuAccessorSignals() noexcept;
 
     private:

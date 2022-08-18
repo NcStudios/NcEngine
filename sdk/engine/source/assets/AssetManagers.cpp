@@ -2,9 +2,9 @@
 
 namespace nc
 {
-AssetManagers::AssetManagers(const config::ProjectSettings& projectSettings, const config::MemorySettings& memorySettings)
-    : m_meshManager{std::make_unique<MeshAssetManager>(projectSettings.meshesPath)},
-      m_textureManager{std::make_unique<TextureAssetManager>(projectSettings.texturesPath, memorySettings.maxTextures)}
+AssetManagers::AssetManagers(const config::AssetSettings& assetSettings, const config::MemorySettings& memorySettings)
+    : m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)},
+      m_textureManager{std::make_unique<TextureAssetManager>(assetSettings.texturesPath, memorySettings.maxTextures)}
 {
 }
 

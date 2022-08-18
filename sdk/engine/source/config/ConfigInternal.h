@@ -4,5 +4,5 @@
 
 namespace nc::config
 {
-    void LoadInternal(std::string_view configPath);
+    void SetConfig(const Config& config);
 }

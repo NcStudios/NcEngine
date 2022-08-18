@@ -112,19 +112,19 @@ namespace nc::editor
     void CopyDefaultAssets(const std::filesystem::path& projectDirectory)
     {
         using std::filesystem::copy_file;
-        const auto& projectSettings = config::GetProjectSettings();
+        const auto& assetSettings = config::GetAssetSettings();
         auto projectAssetDirectory = projectDirectory / "assets\\";
 
         {
-            copy_file(std::filesystem::path{projectSettings.concaveCollidersPath} / PlaneConcaveColliderPath, projectAssetDirectory / "concave_colliders" / PlaneConcaveColliderPath);
-        }
-        
-        {
-            copy_file(std::filesystem::path{projectSettings.hullCollidersPath} / CubeHullColliderPath, projectAssetDirectory / "hull_colliders" / CubeHullColliderPath);
+            copy_file(std::filesystem::path{assetSettings.concaveCollidersPath} / PlaneConcaveColliderPath, projectAssetDirectory / "concave_colliders" / PlaneConcaveColliderPath);
         }
 
         {
-            auto engineMeshDirectory = std::filesystem::path{projectSettings.meshesPath};
+            copy_file(std::filesystem::path{assetSettings.hullCollidersPath} / CubeHullColliderPath, projectAssetDirectory / "hull_colliders" / CubeHullColliderPath);
+        }
+
+        {
+            auto engineMeshDirectory = std::filesystem::path{assetSettings.meshesPath};
             auto projectMeshDirectory = projectAssetDirectory / "meshes/";
             copy_file(engineMeshDirectory / CubeMeshPath, projectMeshDirectory / CubeMeshPath);
             copy_file(engineMeshDirectory / CapsuleMeshPath, projectMeshDirectory / CapsuleMeshPath);
@@ -133,7 +133,7 @@ namespace nc::editor
         }
 
         {
-            auto engineShaderDirectory = std::filesystem::path{projectSettings.shadersPath};
+            auto engineShaderDirectory = std::filesystem::path{assetSettings.shadersPath};
             auto projectShaderDirectory = projectAssetDirectory / "shaders";
             copy_file(engineShaderDirectory / "EnvironmentFragment.spv", projectShaderDirectory / "EnvironmentFragment.spv");
             copy_file(engineShaderDirectory / "EnvironmentVertex.spv", projectShaderDirectory / "EnvironmentVertex.spv");
@@ -150,7 +150,7 @@ namespace nc::editor
         }
 
         {
-            auto engineTextureDirectory = std::filesystem::path{projectSettings.texturesPath};
+            auto engineTextureDirectory = std::filesystem::path{assetSettings.texturesPath};
             auto projectTextureDirectory = projectAssetDirectory / "textures/";
             copy_file(engineTextureDirectory / DefaultBaseColorPath, projectTextureDirectory / DefaultBaseColorPath);
             copy_file(engineTextureDirectory / DefaultNormalPath, projectTextureDirectory / DefaultNormalPath);
@@ -158,7 +158,7 @@ namespace nc::editor
         }
 
         {
-            auto engineSkyboxesDirectory = std::filesystem::path{projectSettings.cubeMapsPath};
+            auto engineSkyboxesDirectory = std::filesystem::path{assetSettings.cubeMapsPath};
             auto projectTextureDirectory = projectAssetDirectory / "textures";
             auto projectSkyboxesDirectory = projectTextureDirectory / "cubemaps";
             copy(engineSkyboxesDirectory / "DefaultSkybox", projectSkyboxesDirectory / "DefaultSkybox");
