@@ -23,7 +23,6 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
 
     private:
         std::vector<TextureData> m_textureData;
-        std::vector<TextureView> m_accessors;
         std::string m_assetDirectory;
         uint32_t m_maxTextureCount;
         Signal<const TextureBufferData&> m_onUpdate;

@@ -25,18 +25,16 @@ namespace nc
 {
 TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures)
     : m_textureData{},
-      m_accessors{},
       m_assetDirectory{texturesAssetDirectory},
       m_maxTextureCount{maxTextures},
       m_onUpdate{}
 {
     m_textureData.reserve(m_maxTextureCount);
-    m_accessors.reserve(m_maxTextureCount);
 }
 
 bool TextureAssetManager::Load(const std::string& path, bool isExternal)
 {
-    const auto index = static_cast<uint32_t>(m_accessors.size());
+    const auto index = static_cast<uint32_t>(m_textureData.size());
 
     if (index + 1 >= m_maxTextureCount)
         throw NcError("Cannot exceed max texture count.");
@@ -44,7 +42,6 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     if(IsLoaded(path))
         return false;
 
-    m_accessors.emplace_back(index);
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     m_textureData.push_back(ReadTexture(fullPath, path));
 
@@ -57,7 +54,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
 
 bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal)
 {
-    const auto newItemsIndex = m_accessors.size();
+    const auto newItemsIndex = m_textureData.size();
     const auto newTextureCount = static_cast<uint32_t>(paths.size());
     auto nextTextureIndex = static_cast<uint32_t>(newItemsIndex);
     if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
@@ -72,8 +69,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
         {
             continue;
         }
-        
-        m_accessors.emplace_back(nextTextureIndex++);
+
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
         m_textureData.push_back(ReadTexture(fullPath, path));
         idsToLoad.push_back(path);
@@ -91,26 +87,17 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
 bool TextureAssetManager::Unload(const std::string& path)
 {
-    auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
+    const auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
     {
         return data.id == path;
     });
 
-    if (pos == m_textureData.end())
+    if (pos == m_textureData.cend())
     {
         return false;
     }
 
-    auto index = std::distance(m_textureData.begin(), pos);
-    m_accessors.erase(m_accessors.begin()+index);
-
-    for(auto& textureView : m_accessors)
-    {
-        if(textureView.index > index) --textureView.index;
-    }
-
-    m_textureData.erase(m_textureData.begin()+index);
-
+    m_textureData.erase(pos);
     m_onUpdate.Emit
     (
         TextureBufferData(UpdateAction::Unload, std::vector<std::string>{path}, std::span<const TextureData>{})
@@ -120,22 +107,21 @@ bool TextureAssetManager::Unload(const std::string& path)
 
 void TextureAssetManager::UnloadAll()
 {
-    m_accessors.clear();
     m_textureData.clear();
     /** No need to send signal to GPU - no need to write an empty buffer to the GPU. **/
 }
 
 auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
 {
-    auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
+    const auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
     {
         return data.id == path;
     });
 
-    if(pos == m_textureData.end()) throw NcError("Asset is not loaded: " + path);
+    if(pos == m_textureData.cend())throw NcError("Asset is not loaded: " + path);
 
-    auto index = std::distance(m_textureData.begin(), pos);
-    return m_accessors[index];
+    auto index = static_cast<uint32_t>(std::distance(m_textureData.cbegin(), pos));
+    return TextureView{index};
 }
 
 bool TextureAssetManager::IsLoaded(const std::string& path) const
