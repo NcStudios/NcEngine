@@ -1,6 +1,7 @@
 #include "NcPhysicsImpl.h"
 #include "config/Config.h"
 #include "graphics/DebugRenderer.h"
+#include "time/Time.h"
 
 namespace
 {
@@ -23,7 +24,7 @@ struct BspTreeStub
 class NcPhysicsStub : public nc::physics::NcPhysics
 {
     public:
-        NcPhysicsStub(nc::Registry* reg, nc::time::Time*) : m_tasks{}, m_bspStub{reg} {}
+        NcPhysicsStub(nc::Registry* reg) : m_tasks{}, m_bspStub{reg} {}
         void AddJoint(nc::Entity, nc::Entity, const nc::Vector3&, const nc::Vector3&, float = 0.2f, float = 0.0f) override {}
         void RemoveJoint(nc::Entity, nc::Entity) override {}
         void RemoveAllJoints(nc::Entity) override {}
@@ -41,22 +42,22 @@ class NcPhysicsStub : public nc::physics::NcPhysics
 
 namespace nc::physics
 {
-auto BuildPhysicsModule(bool enableModule, Registry* registry, time::Time* time) -> std::unique_ptr<NcPhysics>
+auto BuildPhysicsModule(bool enableModule, Registry* registry) -> std::unique_ptr<NcPhysics>
 {
     if(enableModule)
     {
-        return std::make_unique<NcPhysicsImpl>(registry, time);
+        return std::make_unique<NcPhysicsImpl>(registry);
     }
     else
     {
-        return std::make_unique<NcPhysicsStub>(registry, time);
+        return std::make_unique<NcPhysicsStub>(registry);
     }
 }
 
-NcPhysicsImpl::NcPhysicsImpl(Registry* registry, time::Time* time)
+NcPhysicsImpl::NcPhysicsImpl(Registry* registry)
     : m_pipeline{registry, config::GetPhysicsSettings().fixedUpdateInterval},
       m_clickableSystem{},
-      m_time{time},
+      m_accumulatedTime{0.0},
       m_currentIterations{0u}
 {
 }
@@ -98,26 +99,29 @@ auto NcPhysicsImpl::BuildWorkload() -> std::vector<task::Job>
     auto* tf = m_pipeline.GetTasks().GetTaskFlow();
     auto pipelineModule = m_tasks.composed_of(*tf).name("Physics Pipeline");
 
-    auto init = m_tasks.emplace([&it = m_currentIterations]
+    auto init = m_tasks.emplace(
+        [&iterations = m_currentIterations,
+         &fixedDt = m_accumulatedTime]
     {
-        it = 0u;
+        iterations = 0u;
+        fixedDt += time::DeltaTime();
     }).name("Init");
 
     auto condition = m_tasks.emplace(
         [&cur = m_currentIterations,
-            time = m_time,
-            fixedStep]
+         &fixedDt = m_accumulatedTime,
+         fixedStep]
     {
         constexpr auto maxIterations = physics::MaxPhysicsIterations;
-        return (cur < maxIterations && time->GetAccumulatedTime() > fixedStep) ? 1 : 0;
+        return (cur < maxIterations && fixedDt > fixedStep) ? 1 : 0;
     }).name("Condition");
 
     auto update = m_tasks.emplace(
         [&curIt = m_currentIterations,
-            time = m_time,
-            fixedStep]
+         &fixedDt = m_accumulatedTime,
+         fixedStep]
     {
-        time->DecrementAccumulatedTime(fixedStep);
+        fixedDt -= fixedStep;
         ++curIt;
         return 0;
     }).name("Update Accumulated Time");

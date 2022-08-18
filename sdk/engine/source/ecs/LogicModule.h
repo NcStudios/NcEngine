@@ -1,44 +1,21 @@
 #pragma once
 
-#include "ecs/Logic.h"
-#include "ecs/Registry.h"
-#include "ecs/View.h"
 #include "module/Module.h"
-#include "task/Job.h"
 
-#include "optick/optick.h"
+namespace nc { class Registry; }
 
-namespace nc
+namespace nc::ecs
 {
+    /** Module for updating FrameLogic components */
     class LogicModule : public Module
     {
         public:
-            LogicModule(Registry* registry, float* dt)
-                : m_registry{registry},
-                  m_dt{dt}
-            {
-            }
+            LogicModule(Registry* registry) noexcept;
 
-            auto BuildWorkload() -> std::vector<task::Job> override
-            {
-                return std::vector<task::Job>
-                {
-                    task::Job{ [this]{Run();}, "LogicModule", task::ExecutionPhase::Logic }
-                };
-            }
-
-            void Clear() noexcept override {}
-
-            void Run()
-            {
-                OPTICK_CATEGORY("Logic", Optick::Category::GameLogic);
-                const float dt = *m_dt;
-                for(auto& logic : View<FrameLogic>{m_registry})
-                    logic.Run(m_registry, dt);
-            }
+            auto BuildWorkload() -> std::vector<task::Job> override;
+            void Run();
 
         private:
             Registry* m_registry;
-            float* m_dt;
     };
 }

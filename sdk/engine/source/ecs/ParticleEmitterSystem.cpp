@@ -2,17 +2,17 @@
 #include "ecs/Transform.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
+#include "time/Time.h"
 
 #include "optick/optick.h"
 #include <algorithm>
 
 namespace nc::ecs
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, float* dt, std::function<nc::graphics::Camera* ()> getCamera)
+    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, std::function<nc::graphics::Camera* ()> getCamera)
         : m_emitterStates{},
           m_toAdd{},
           m_toRemove{},
-          m_dt{ dt },
           m_random{ Random() },
           m_getCamera{ getCamera },
           m_registry{ registry },
@@ -24,7 +24,7 @@ namespace nc::ecs
     void ParticleEmitterSystem::Run()
     {
         OPTICK_CATEGORY("ParticleModule", Optick::Category::VFX);
-        const float dt = *m_dt;
+        const float dt = time::DeltaTime();
         const auto* camera = m_getCamera();
         const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
         const auto camRotation = transform->Rotation();

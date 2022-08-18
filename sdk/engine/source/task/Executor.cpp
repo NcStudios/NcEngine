@@ -17,6 +17,7 @@ namespace
 
     void SetDependencies(nc::task::Executor::task_matrix<tf::Task>& taskList)
     {
+        constexpr auto beginIndex = static_cast<size_t>(nc::task::ExecutionPhase::Begin);
         constexpr auto freeIndex = static_cast<size_t>(nc::task::ExecutionPhase::Free);
         constexpr auto logicIndex = static_cast<size_t>(nc::task::ExecutionPhase::Logic);
         constexpr auto physicsIndex = static_cast<size_t>(nc::task::ExecutionPhase::Physics);
@@ -24,6 +25,7 @@ namespace
         constexpr auto preRenderIndex = static_cast<size_t>(nc::task::ExecutionPhase::PreRenderSync);
         constexpr auto postFrameIndex = static_cast<size_t>(nc::task::ExecutionPhase::PostFrameSync);
 
+        auto& beginTasks = taskList[beginIndex];
         auto& freeTasks = taskList[freeIndex];
         auto& logicTasks = taskList[logicIndex];
         auto& physicsTasks = taskList[physicsIndex];
@@ -31,6 +33,8 @@ namespace
         auto& preRenderTasks = taskList[preRenderIndex];
         auto& postFrameTasks = taskList[postFrameIndex];
 
+        Connect(beginTasks, freeTasks);
+        Connect(beginTasks, logicTasks);
         Connect(logicTasks, physicsTasks);
         Connect(physicsTasks, preRenderTasks);
         Connect(freeTasks, preRenderTasks);

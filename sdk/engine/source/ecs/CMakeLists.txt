@@ -1,5 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        LogicModule.cpp
         Component.cpp
         FreeComponentGroup.cpp
         ParticleEmitterSystem.cpp
