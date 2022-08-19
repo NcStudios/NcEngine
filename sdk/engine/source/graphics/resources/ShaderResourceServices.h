@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CubeMapManager.h"
+#include "graphics/cubemaps/CubeMapManager.h"
 #include "ObjectDataManager.h"
 #include "PointLightManager.h"
 #include "EnvironmentDataManager.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "assets/AssetService.h"
-#include "graphics/resources/CubeMap.h"
+#include "graphics/cubemaps/CubeMap.h"
 
 #include <unordered_map>
 #include <vector>

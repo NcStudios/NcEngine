@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ShaderResourceService.h"
 #include "CubeMap.h"
 #include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/resources/ShaderResourceService.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 

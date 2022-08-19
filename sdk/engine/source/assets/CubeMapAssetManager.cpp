@@ -44,11 +44,11 @@ namespace nc
             const std::filesystem::path currentFacePath = currentFace;
 
                  if (currentFacePath.stem().string() == "front") facePaths.frontPath = (parentPath / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "back") facePaths.backPath   = (parentPath / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "up") facePaths.upPath       = (parentPath / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "down") facePaths.downPath   = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "back")  facePaths.backPath  = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "up")    facePaths.upPath    = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "down")  facePaths.downPath  = (parentPath / currentFacePath).string();
             else if (currentFacePath.stem().string() == "right") facePaths.rightPath = (parentPath / currentFacePath).string();
-            else if (currentFacePath.stem().string() == "left") facePaths.leftPath   = (parentPath / currentFacePath).string();
+            else if (currentFacePath.stem().string() == "left")  facePaths.leftPath  = (parentPath / currentFacePath).string();
         }
 
         return facePaths;
