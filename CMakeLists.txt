@@ -17,9 +17,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(WARNING_FLAGS /W3 /WX)
 endif()
-set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/sdk/engine/include")
-set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/sdk/engine/source")
-set(NC_EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/sdk/external")
+set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
+set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/source/engine/")
+set(NC_EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/source/external")
 set(IMGUI_LIB "imgui")
 set(ENET_LIB "enet")
 if(NC_PROD_BUILD)
@@ -55,7 +55,15 @@ FetchContent_Declare(nc-tools
 FetchContent_MakeAvailable(DirectXMath taskflow nc-tools)
 
 # Add source
-add_subdirectory(sdk)
+add_subdirectory(source)
+
+if(NOT NC_PROD_BUILD)
+    add_subdirectory(sample)
+endif()
+
+if(NC_BUILD_TESTS)
+    add_subdirectory(test)
+endif()
 
 # Install nc-tools
 install(FILES       ${nc-tools_SOURCE_DIR}/nc-tools.exe
@@ -63,15 +71,15 @@ install(FILES       ${nc-tools_SOURCE_DIR}/nc-tools.exe
 )
 
 # Install Default Assets
-install(DIRECTORY      ${PROJECT_SOURCE_DIR}/sdk/resources/
+install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
         DESTINATION    resources/assets
         FILES_MATCHING REGEX ".*\.(nca)|(spv)|(png)|(jpg)"
 )
 
 # Install External Files
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sdk/external/enet
-                    ${PROJECT_SOURCE_DIR}/sdk/external/imgui
-                    ${PROJECT_SOURCE_DIR}/sdk/external/vulkan
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/enet
+                    ${PROJECT_SOURCE_DIR}/source/external/imgui
+                    ${PROJECT_SOURCE_DIR}/source/external/vulkan
         DESTINATION include
         PATTERN     "src" EXCLUDE
 )

@@ -29,13 +29,16 @@ NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively 
 
 ## Building
 ---
-Run CMake on the root CMakeLists with your required options. It is easiest to provide an install path and build the install target:
+Run CMake on the root CMakeLists with your required options:
 ```
 cmake -S ./ -B build -DCMAKE_INSTALL_PREFIX=NcSdk
 cmake --build build --target install --config Release
 ```
 
-There are also files with build tasks for Visual Studio and Visual Studio Code located in `sdk/tools/`.
+There is also a [build script](script/build.ps1) with optional parameters for configuring the generator and output directories:
+```
+script/build.ps1 -Generator msvc -BuildType Release
+```
 
 ### Installation Items
 * NcEngine: Engine libraries and headers.

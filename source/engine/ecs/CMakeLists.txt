@@ -1,0 +1,11 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        LogicModule.cpp
+        Component.cpp
+        FreeComponentGroup.cpp
+        ParticleEmitterSystem.cpp
+        PointLightSystem.cpp
+        Registry.cpp
+        SoA.cpp
+        Transform.cpp
+)

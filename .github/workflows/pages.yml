@@ -27,8 +27,7 @@ jobs:
       - name: Build documentation
         uses: mattnotmitt/doxygen-action@v1.9.4
         with:
-          working-directory: 'docs/'
-          doxyfile-path: './Doxyfile'
+          doxyfile-path: 'docs/Doxyfile'
 
       - name: Setup Pages
         uses: actions/configure-pages@v1
@@ -36,7 +35,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: 'docs/html'
+          path: 'build/docs/html'
 
       - name: Deploy to GitHub Pages
         id: deployment
