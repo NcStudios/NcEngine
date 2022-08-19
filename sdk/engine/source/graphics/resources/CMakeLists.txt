@@ -4,7 +4,6 @@ target_sources(${NC_ENGINE_LIB}
         EnvironmentDataManager.cpp
         Environment.cpp
         ImmutableBuffer.cpp
-        ImmutableImage.cpp
         ObjectDataManager.cpp
         PointLightManager.cpp
         RenderPassManager.cpp

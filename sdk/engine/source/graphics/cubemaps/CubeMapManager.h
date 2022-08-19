@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CubeMap.h"
+#include "graphics/vk/CubeMap.h"
 #include "graphics/resources/ShaderDescriptorSets.h"
 #include "graphics/resources/ShaderResourceService.h"
 
