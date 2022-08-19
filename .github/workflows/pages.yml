@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Create output directory
+        run: mkdir -p build/docs
+
       - name: Build documentation
         uses: mattnotmitt/doxygen-action@v1.9.4
         with:
