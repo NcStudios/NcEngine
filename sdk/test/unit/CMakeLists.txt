@@ -1,8 +1,0 @@
-add_subdirectory(alloc)
-add_subdirectory(assets)
-add_subdirectory(ecs)
-add_subdirectory(math)
-add_subdirectory(module)
-add_subdirectory(network)
-add_subdirectory(physics)
-add_subdirectory(utility)
