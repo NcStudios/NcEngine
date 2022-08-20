@@ -11,7 +11,7 @@ TextureStorage::TextureStorage(Base* base, GpuAllocator* allocator, const nc::Gp
       m_allocator{allocator},
       m_textureBuffers{},
       m_sampler{graphics::CreateTextureSampler(base->GetDevice(), vk::SamplerAddressMode::eRepeat)},
-      m_onTextureUpdateConnection{gpuAccessorSignals.onTextureUpdate->Connect(this, &TextureStorage::UpdateBuffer)}
+      m_onTextureUpdate{gpuAccessorSignals.onTextureUpdate->Connect(this, &TextureStorage::UpdateBuffer)}
 {
 }
 

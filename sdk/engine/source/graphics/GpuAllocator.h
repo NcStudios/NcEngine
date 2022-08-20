@@ -6,10 +6,11 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 #include "vulkan/vk_mem_alloc.hpp"
+#include "utility/Memory.h"
 
-typedef unsigned char stbi_uc;
-
-namespace nc::graphics
+namespace nc
+{
+namespace graphics
 {
     class Base;
     class GpuAllocator;
@@ -58,8 +59,8 @@ namespace nc::graphics
 
             auto CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>;
             auto CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>;
-            auto CreateTexture(Base* base, stbi_uc* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>;
-            auto CreateCubeMapTexture(Base* base, const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>;
+            auto CreateTexture(Base* base, unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>;
+            auto CreateCubeMapTexture(Base* base, const std::array<unique_stbi, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>;
 
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
@@ -128,4 +129,5 @@ namespace nc::graphics
         m_allocation = vma::Allocation{};
         m_allocator = nullptr;
     }
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

@@ -107,7 +107,7 @@ namespace nc::graphics
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
-    auto GpuAllocator::CreateTexture(Base* base, stbi_uc* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateTexture(Base* base, unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>
     {
         const auto imageSize = width * height * 4u;
         auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
@@ -126,7 +126,7 @@ namespace nc::graphics
         return imageAllocation;
     }
 
-    auto GpuAllocator::CreateCubeMapTexture(Base* base, const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateCubeMapTexture(Base* base, const std::array<unique_stbi, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>
     {
         auto stagingBuffer = CreateBuffer(cubeMapSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 
@@ -137,8 +137,7 @@ namespace nc::graphics
         for(uint32_t layer = 0u; layer < 6u; ++layer)
         {
             char* destination = static_cast<char*>(mappedData) + imageSize * layer;
-            std::memcpy(destination, pixels[layer], imageSize);
-            stbi_image_free(pixels[layer]);
+            std::memcpy(destination, pixels[layer].get(), imageSize);
         }
 
         Unmap(stagingBuffer.Allocation());

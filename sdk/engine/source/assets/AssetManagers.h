@@ -2,6 +2,7 @@
 
 #include "asset/Assets.h"
 #include "assets/AssetData.h"
+#include "assets/CubeMapAssetManager.h"
 #include "assets/MeshAssetManager.h"
 #include "assets/TextureAssetManager.h"
 #include "config/Config.h"
@@ -13,9 +14,11 @@ namespace nc
 {
 struct GpuAccessorSignals
 {
-    GpuAccessorSignals(Signal<const MeshBufferData&>* _onMeshUpdate,
+    GpuAccessorSignals(Signal<const CubeMapBufferData&>* _onCubeMapUpdate,
+                       Signal<const MeshBufferData&>* _onMeshUpdate,
                        Signal<const TextureBufferData&>* _onTextureUpdate
                       ) noexcept;
+    Signal<const CubeMapBufferData&>* onCubeMapUpdate;
     Signal<const MeshBufferData&>* onMeshUpdate;
     Signal<const TextureBufferData&>* onTextureUpdate;
 };
@@ -27,6 +30,7 @@ class AssetManagers
         GpuAccessorSignals CreateGpuAccessorSignals() noexcept;
 
     private:
+        std::unique_ptr<CubeMapAssetManager> m_cubeMapManager;
         std::unique_ptr<MeshAssetManager> m_meshManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;
 };
