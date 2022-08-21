@@ -51,7 +51,7 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
     uint32_t nextCubeMapIndex = static_cast<uint32_t>(m_cubeMapData.size());
 
     if(IsLoaded(path))
-        return true;
+        return false;
 
     std::array<stbi_uc*, 6> pixelArray = {};
     int32_t width, height, numChannels; // Same for all faces.
@@ -114,7 +114,9 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
 bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal)
 {
     const auto newCubeMapCount = paths.size();
-    uint32_t newCubeMapIndex = static_cast<uint32_t>(m_cubeMapData.size());
+    const auto newCubeMapIndex = static_cast<uint32_t>(m_cubeMapData.size());
+    auto itemIndex = newCubeMapIndex;
+
     if (newCubeMapCount + newCubeMapIndex >= m_maxCubeMapsCount)
         throw NcError("Cannot exceed max texture count.");
 
@@ -167,20 +169,17 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         pixelArray.at(5) = stbi_load(faces.leftPath.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
         if(!pixelArray.at(5)) throw nc::NcError("Failed to load texture file: " + faces.leftPath);
 
-        auto cubeMapView = CubeMapView
-        {
-            .usage = CubeMapUsage::Skybox,
-            .index = newCubeMapIndex++
-        };
-
         m_cubeMapData.emplace_back(pixelArray, width, height, width * height * STBI_rgb_alpha * 6, path);
         idsToLoad.push_back(path);
     }
 
-    m_onUpdate.Emit
-    (
-        CubeMapBufferData(UpdateAction::Load, std::move(idsToLoad), std::span<const CubeMapData>{m_cubeMapData.begin() + newCubeMapCount, m_cubeMapData.end()})
-    );
+    if (!idsToLoad.empty())
+    {
+        m_onUpdate.Emit
+        (
+            CubeMapBufferData(UpdateAction::Load, std::move(idsToLoad), std::span<const CubeMapData>{m_cubeMapData.begin() + newCubeMapIndex, m_cubeMapData.end()})
+        );
+    }
     return true;
 }
 
