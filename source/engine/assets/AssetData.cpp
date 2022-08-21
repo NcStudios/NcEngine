@@ -53,9 +53,9 @@ CubeMapData::CubeMapData(const std::array<unsigned char*, 6>& pixels, int32_t wi
 }
 
 CubeMapBufferData::CubeMapBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const CubeMapData> data_)
-    : updateAction{updateAction_},
-      ids{std::move(ids_)},
-      data{data_}
+    : ids{std::move(ids_)},
+      data{data_},
+      updateAction{updateAction_}
 {
     if (updateAction == UpdateAction::Load && (data.empty() || ids.empty()))
     {

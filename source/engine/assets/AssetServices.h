@@ -9,7 +9,7 @@ namespace nc
 {
 struct AssetServices
 {
-    AssetServices(graphics::Graphics* graphics, const config::AssetSettings& assetSettings, uint32_t maxTextures)
+    AssetServices(const config::AssetSettings& assetSettings)
         : concaveManager{assetSettings.concaveCollidersPath},
           hullManager{assetSettings.hullCollidersPath},
           audioClipManager{assetSettings.audioClipsPath}
