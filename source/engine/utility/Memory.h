@@ -5,6 +5,6 @@
 
 namespace nc
 {
-using unique_stbi = std::unique_ptr<unsigned char[], decltype(&::free)>;
-// using unique_stbi = std::unique_ptr<unsigned char[], decltype([](void* ptr){ ::free(ptr); })>;
+template<class T>
+using unique_c_ptr = std::unique_ptr<T, decltype(&::free)>;
 }

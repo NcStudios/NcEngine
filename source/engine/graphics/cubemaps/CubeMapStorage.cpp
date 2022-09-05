@@ -51,8 +51,7 @@ void CubeMapStorage::LoadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferDat
 {
     for (auto i = 0u; i < cubeMapBufferData.ids.size(); ++i)
     {
-        auto& cubeMapData = cubeMapBufferData.data[i];
-
+        const auto& cubeMapData = cubeMapBufferData.data[i];
         m_cubeMaps.emplace_back(m_base, m_allocator, cubeMapData.pixelArray, cubeMapData.width, cubeMapData.height, cubeMapData.size, cubeMapData.id);
     }
 

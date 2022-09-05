@@ -126,8 +126,8 @@ TEST_F(CubeMapAssetManager_tests, Unload_FromMiddle_UpdatesAccesors)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
     assetManager->Load(paths, false);
-    assetManager->Unload(skybox1);
-    auto view1 = assetManager->Acquire(skybox2);
+    assetManager->Unload(skybox2);
+    auto view1 = assetManager->Acquire(skybox1);
     auto view2 = assetManager->Acquire(skybox3);
     EXPECT_EQ(view1.index, 0u);
     EXPECT_EQ(view2.index, 1u);

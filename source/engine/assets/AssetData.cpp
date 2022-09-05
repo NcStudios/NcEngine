@@ -3,24 +3,24 @@
 
 namespace
 {
-    std::array<nc::unique_stbi, 6> CaptureAsUniqueStbiArray(const std::array<unsigned char*, 6>& pixels)
+    std::array<nc::unique_c_ptr<unsigned char[]>, 6> CaptureAsUniqueStbiArray(const std::array<unsigned char*, 6>& pixels)
     {
-        return std::array<nc::unique_stbi, 6>
+        return std::array<nc::unique_c_ptr<unsigned char[]>, 6>
         {
-            nc::unique_stbi(pixels[0], ::free),
-            nc::unique_stbi(pixels[1], ::free),
-            nc::unique_stbi(pixels[2], ::free),
-            nc::unique_stbi(pixels[3], ::free),
-            nc::unique_stbi(pixels[4], ::free),
-            nc::unique_stbi(pixels[5], ::free),
+            nc::unique_c_ptr<unsigned char[]>(pixels[0], ::free),
+            nc::unique_c_ptr<unsigned char[]>(pixels[1], ::free),
+            nc::unique_c_ptr<unsigned char[]>(pixels[2], ::free),
+            nc::unique_c_ptr<unsigned char[]>(pixels[3], ::free),
+            nc::unique_c_ptr<unsigned char[]>(pixels[4], ::free),
+            nc::unique_c_ptr<unsigned char[]>(pixels[5], ::free),
         };
     }
 }
 
 namespace nc
 {
-TextureData::TextureData(unsigned char* pixels_, int32_t width_, int32_t height_, std::string id_)
-    : pixels{unique_stbi(pixels_, ::free)},
+TextureData::TextureData(unsigned char* pixels_, int width_, int height_, std::string id_)
+    : pixels{unique_c_ptr<unsigned char[]>(pixels_, ::free)},
       width{width_},
       height{height_},
       id{std::move(id_)}
@@ -43,7 +43,7 @@ TextureBufferData::TextureBufferData(UpdateAction updateAction_, std::vector<std
     }
 }
 
-CubeMapData::CubeMapData(const std::array<unsigned char*, 6>& pixels, int32_t width_, int32_t height_, int size_, std::string id_)
+CubeMapData::CubeMapData(const std::array<unsigned char*, 6>& pixels, int width_, int height_, int size_, std::string id_)
     : pixelArray{CaptureAsUniqueStbiArray(pixels)},
       width{width_},
       height{height_},

@@ -4,6 +4,7 @@
 #include "assets/AssetService.h"
 #include "utility/Signal.h"
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -23,7 +24,7 @@ class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
         auto OnUpdate() -> Signal<const CubeMapBufferData&>*;
 
     private:
-        std::vector<CubeMapData> m_cubeMapData;
+        std::vector<std::string> m_cubeMapIds;
         std::string m_assetDirectory;
         uint32_t m_maxCubeMapsCount;
         Signal<const CubeMapBufferData&> m_onUpdate;

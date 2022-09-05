@@ -126,7 +126,7 @@ namespace nc::graphics
         return imageAllocation;
     }
 
-    auto GpuAllocator::CreateCubeMapTexture(Base* base, const std::array<unique_stbi, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateCubeMapTexture(Base* base, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>
     {
         auto stagingBuffer = CreateBuffer(cubeMapSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 

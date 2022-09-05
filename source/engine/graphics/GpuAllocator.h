@@ -60,7 +60,7 @@ namespace graphics
             auto CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>;
             auto CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>;
             auto CreateTexture(Base* base, unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>;
-            auto CreateCubeMapTexture(Base* base, const std::array<unique_stbi, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>;
+            auto CreateCubeMapTexture(Base* base, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>;
 
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
