@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ShaderResourceService.h"
-#include "CubeMap.h"
+#include "graphics/vk/CubeMap.h"
 #include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/resources/ShaderResourceService.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -14,7 +14,6 @@ class CubeMapManager : public IShaderResourceService<CubeMap>
 {
     public:
         CubeMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
-        ~CubeMapManager() noexcept;
 
         void Initialize() override;
         void Update(const std::vector<CubeMap>& data) override;

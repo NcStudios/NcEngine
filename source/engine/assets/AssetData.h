@@ -1,8 +1,9 @@
 #pragma once
 
 #include "graphics/Vertex.h"
-#include "stb/stb_image.h"
+#include "utility/Memory.h"
 
+#include <array>
 #include <cstdlib>
 #include <memory>
 #include <span>
@@ -26,20 +27,36 @@ struct MeshBufferData
 
 struct TextureData
 {
-    TextureData(unsigned char* pixels_, int32_t width_, int32_t height_, std::string id_);
-
-    std::unique_ptr<unsigned char[], decltype(&::free)> pixels;
-    int32_t width;
-    int32_t height;
+    TextureData(unsigned char* pixels_, int width_, int height_, std::string id_);
+    unique_c_ptr<unsigned char[]> pixels;
+    int width;
+    int height;
     std::string id;
 };
 
 struct TextureBufferData
 {
     TextureBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureData> data_);
-
     std::vector<std::string> ids;
     std::span<const TextureData> data;
+    UpdateAction updateAction;
+};
+
+struct CubeMapData
+{
+    CubeMapData(const std::array<unsigned char*, 6>& pixels, int width_, int height_, int size_, std::string id_);
+    std::array<unique_c_ptr<unsigned char[]>, 6> pixelArray;
+    int width;
+    int height;
+    int size;
+    std::string id;
+};
+
+struct CubeMapBufferData
+{
+    CubeMapBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const CubeMapData> data_);
+    std::vector<std::string> ids;
+    std::span<const CubeMapData> data;
     UpdateAction updateAction;
 };
 } // namespace nc

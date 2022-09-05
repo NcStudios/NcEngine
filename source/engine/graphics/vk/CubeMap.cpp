@@ -3,7 +3,7 @@
 
 namespace nc::graphics
 {
-    CubeMap::CubeMap(Base* base, GpuAllocator* allocator, const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, const std::string& uid)
+    CubeMap::CubeMap(Base* base, GpuAllocator* allocator, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, const std::string& uid)
         : m_base{base},
           m_allocator{allocator},
           m_image{},
@@ -38,7 +38,7 @@ namespace nc::graphics
         return *this;
     }
 
-    void CubeMap::Bind(const std::array<stbi_uc*, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize)
+    void CubeMap::Bind(const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize)
     {
         m_image = m_allocator->CreateCubeMapTexture(m_base, pixels, width, height, cubeMapSize);
         m_cubeMapview = CreateCubeMapTextureView(m_base->GetDevice(), m_image);

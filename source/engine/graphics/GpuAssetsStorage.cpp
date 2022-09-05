@@ -3,7 +3,8 @@
 namespace nc::graphics
 {
 GpuAssetsStorage::GpuAssetsStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
-    : meshStorage{base, allocator, gpuAccessorSignals},
+    : cubeMapStorage{base, allocator, gpuAccessorSignals},
+      meshStorage{base, allocator, gpuAccessorSignals},
       textureStorage{base, allocator, gpuAccessorSignals}
 {
 }

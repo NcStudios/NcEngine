@@ -116,6 +116,39 @@ target_link_libraries(ConvexHullAssetManager_tests
 
 add_test(ConvexHullAssetManager_tests ConvexHullAssetManager_tests)
 
+### CubeMapAssetManager Tests ###
+add_executable(CubeMapAssetManager_tests
+    CubeMapAssetManager_tests.cpp
+    ${NC_SOURCE_DIR}/assets/AssetData.cpp
+    ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
+    ${NC_SOURCE_DIR}/assets/CubeMapAssetManager.cpp
+)
+
+target_compile_definitions(CubeMapAssetManager_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+)
+
+target_include_directories(CubeMapAssetManager_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+        ${NC_EXTERNAL_DIR}/gtest/googletest/include
+)
+
+target_compile_options(CubeMapAssetManager_tests
+    PUBLIC
+        ${WARNING_FLAGS}
+)
+
+target_link_libraries(CubeMapAssetManager_tests
+    PRIVATE
+        gtest
+)
+
+add_test(CubeMapAssetManager_tests CubeMapAssetManager_tests)
+
 ### MeshAssetManager Tests ###
 add_executable(MeshAssetManager_tests
     MeshAssetManager_tests.cpp

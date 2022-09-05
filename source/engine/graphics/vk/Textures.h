@@ -1,4 +1,4 @@
-#include "graphics/resources/ImmutableImage.h"
+#include "ImmutableImage.h"
 
 #include <string>
 

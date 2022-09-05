@@ -1,5 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        CubeMap.cpp
+        ImmutableImage.cpp
         Initializers.cpp
         QueueFamily.cpp
         RenderPass.cpp

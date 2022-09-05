@@ -20,6 +20,7 @@ target_sources(${NC_ENGINE_LIB}
         vma.cpp
 )
 
+add_subdirectory(cubemaps)
 add_subdirectory(meshes)
 add_subdirectory(resources)
 add_subdirectory(techniques)

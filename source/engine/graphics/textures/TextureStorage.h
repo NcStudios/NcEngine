@@ -25,6 +25,6 @@ class TextureStorage
         GpuAllocator* m_allocator;
         std::vector<TextureBuffer> m_textureBuffers;
         vk::UniqueSampler m_sampler;
-        nc::Connection<const TextureBufferData&> m_onTextureUpdateConnection;
+        nc::Connection<const TextureBufferData&> m_onTextureUpdate;
 };
 } // namespace nc::graphics
