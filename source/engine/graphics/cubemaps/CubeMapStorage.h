@@ -13,7 +13,7 @@ class CubeMapStorage
 {
     public:
         CubeMapStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
-        ~CubeMapStorage() noexcept;
+
         void UpdateBuffer(const CubeMapBufferData& cubeMapBufferData);
 
     private:

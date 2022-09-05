@@ -21,11 +21,6 @@ CubeMapManager::CubeMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderD
     Initialize();
 }
 
-CubeMapManager::~CubeMapManager() noexcept
-{
-    m_cubeMapSampler.reset();
-}
-
 void CubeMapManager::Initialize()
 {
     m_descriptors->RegisterDescriptor

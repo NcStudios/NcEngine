@@ -15,16 +15,6 @@ CubeMapStorage::CubeMapStorage(Base* base, GpuAllocator* allocator, const nc::Gp
 {
 }
 
-CubeMapStorage::~CubeMapStorage() noexcept
-{
-    for(auto& cubeMap : m_cubeMaps)
-    {
-        cubeMap.Clear();
-    }
-
-    m_cubeMaps.clear();
-}
-
 void CubeMapStorage::UpdateBuffer(const CubeMapBufferData& CubeMapBufferData)
 {
     switch (CubeMapBufferData.updateAction)
