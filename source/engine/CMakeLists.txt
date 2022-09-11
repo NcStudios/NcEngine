@@ -9,6 +9,7 @@ configure_file(${NC_SOURCE_DIR}/config/Version.h.in
 # Definitions
 target_compile_definitions(${NC_ENGINE_LIB}
     PUBLIC
+        ${NC_COMPILE_DEFINITIONS}
         WIN32_LEAN_AND_MEAN
         $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="$ui/DearImGuiConversion.h">
         $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ui/DearImGuiConversion.h">
@@ -18,10 +19,6 @@ target_compile_definitions(${NC_ENGINE_LIB}
 
 if(NOT NC_PROD_BUILD)
     add_definitions(-DNC_ASSERT_ENABLED)
-    target_compile_definitions(${NC_ENGINE_LIB}
-        PUBLIC
-            ${NC_COMPILE_DEFINITIONS}
-    )
 endif()
 
 # Compile Options
@@ -103,4 +100,5 @@ add_subdirectory(scene)
 add_subdirectory(task)
 add_subdirectory(time)
 add_subdirectory(ui)
+add_subdirectory(utility)
 add_subdirectory(window)

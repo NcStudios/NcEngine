@@ -7,12 +7,10 @@ target_compile_options(${NC_SAMPLE_EXE}
         ${WARNING_FLAGS}
 )
 
-if(NOT NC_PROD_BUILD)
-    target_compile_definitions(${NC_SAMPLE_EXE}
-        PRIVATE
-            ${NC_COMPILE_DEFINITIONS}
-    )
-endif()
+target_compile_definitions(${NC_SAMPLE_EXE}
+    PRIVATE
+        ${NC_COMPILE_DEFINITIONS}
+)
 
 # Include Dirs
 target_include_directories(${NC_SAMPLE_EXE}

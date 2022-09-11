@@ -1,7 +1,8 @@
 #pragma once
 
-#include "debug/Utils.h"
+#include "NcError.h"
 #include "detail/SignalInternal.h"
+
 #include <algorithm>
 
 namespace nc

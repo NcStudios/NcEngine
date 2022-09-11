@@ -9,7 +9,7 @@ option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Variables
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23) # we only actually need 20, but michaelsoft dances to their own beat
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_DEBUG_POSTFIX d)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -23,10 +23,11 @@ set(NC_EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/source/external")
 set(IMGUI_LIB "imgui")
 set(ENET_LIB "enet")
 if(NC_PROD_BUILD)
+    set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=1)
     set(NC_ENGINE_LIB "NcEngine")
 else()
     # @todo add back NC_PROFILING_ENABLED - we don't currently fetch Optick
-    set(NC_COMPILE_DEFINITIONS NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED NC_VERBOSE_LOGGING_ENABLED)
+    set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED NC_VERBOSE_LOGGING_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
     set(NC_EDITOR_EXE "NcEditor")
     set(NC_SAMPLE_EXE "Sample")

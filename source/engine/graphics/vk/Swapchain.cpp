@@ -1,7 +1,7 @@
 #include "Swapchain.h"
 #include "Initializers.h"
-#include "debug/NcError.h"
 #include "QueueFamily.h"
+#include "utility/NcError.h"
 
 namespace nc::graphics
 {

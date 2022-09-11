@@ -1,5 +1,5 @@
 #include "QueueFamily.h"
-#include "debug/NcError.h"
+#include "utility/NcError.h"
 
 namespace nc::graphics
 {
