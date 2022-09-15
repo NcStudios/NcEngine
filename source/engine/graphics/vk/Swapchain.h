@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/Vector.h"
+#include "PerFrameGpuContext.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
@@ -48,17 +49,15 @@ namespace nc::graphics
             vk::ImageView& GetDepthView() const noexcept;
 
             // Image synchronization
-            void CreateSynchronizationObjects();
-            void DestroySynchronizationObjects() noexcept;
             bool GetNextRenderReadyImageIndex(uint32_t* imageIndex);
             uint32_t GetFrameIndex() const noexcept;
-            void WaitForFrameFence() const;
+            void WaitForFrameFence();
             void ResetFrameFence();
             void IncrementFrameIndex();
             void WaitForImageFence(uint32_t imageIndex);
             void SyncImageAndFrameFence(uint32_t imageIndex);
             const std::vector<vk::Fence>& GetFences(FenceType fenceType) const noexcept;
-            const std::vector<vk::Semaphore>& GetSemaphores(SemaphoreType semaphoreType) const noexcept;
+            PerFrameGpuContext& GetPerFrameGpuContext() noexcept { return m_perFrameGpuContext[m_currentFrameIndex]; }  /** @todo This won't live here long term. Just putting it here for incremental change. **/
 
         private:
             vk::Device m_device;
@@ -73,9 +72,7 @@ namespace nc::graphics
 
             // Synchronization
             std::vector<vk::Fence> m_imagesInFlightFences;
-            std::vector<vk::Fence> m_framesInFlightFences; // One per concurrent frame. (MaxFramesInFlight). Synchronizes the submission of the queues from the CPU with the completion of the queues on the GPU.
-            std::vector<vk::Semaphore> m_imageAvailableSemaphores; // One per concurrent frame. (MaxFramesInFlight). Controls when the swapchain image can be written to.
-            std::vector<vk::Semaphore> m_renderFinishedSemaphores; // One per concurrent frame. (MaxFramesInFlight). Controls when the swapchain image can be presented back to the swapchain.
+            std::vector<nc::graphics::PerFrameGpuContext> m_perFrameGpuContext; /** @todo This won't live here long term. Just putting it here for incremental change. **/
             uint32_t m_currentFrameIndex; // Used to select which pair of semaphores and which fence to use as each frame in MaxFramesInFlight requires its own pair of semaphores and fence.
     };
 } // namespace nc::graphics

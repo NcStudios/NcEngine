@@ -14,7 +14,7 @@ struct VertexBuffer;
     class Commands
     {
         public:
-            Commands(Base* base, const Swapchain& swapchain);
+            Commands(Base* base, Swapchain* swapchain);
             ~Commands() noexcept;
 
             std::vector<vk::CommandBuffer>* GetCommandBuffers();
@@ -27,11 +27,7 @@ struct VertexBuffer;
         private:
             // External members
             Base* m_base;
-            const Swapchain& m_swapchain;
-            const std::vector<vk::Semaphore>& m_renderReadySemaphores;
-            const std::vector<vk::Semaphore>& m_presentReadySemaphores;
-            const std::vector<vk::Fence>& m_framesInFlightFences;
-            const std::vector<vk::Fence>& m_imagesInFlightFences;
+            Swapchain* m_swapchain;
 
             // Internal members
             std::vector<vk::CommandBuffer> m_commandBuffers;

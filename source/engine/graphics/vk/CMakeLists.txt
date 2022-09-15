@@ -3,6 +3,7 @@ target_sources(${NC_ENGINE_LIB}
         CubeMap.cpp
         ImmutableImage.cpp
         Initializers.cpp
+        PerFrameGpuContext.cpp
         QueueFamily.cpp
         RenderPass.cpp
         Swapchain.cpp
