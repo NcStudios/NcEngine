@@ -1,7 +1,8 @@
-#include "NcEngine.h"
-#include "debug/Utils.h"
 #include "EditorScene.h"
 #include "framework/EditorFramework.h"
+
+#include "NcEngine.h"
+#include "utility/Log.h"
 
 #include <iostream>
 
@@ -19,12 +20,12 @@ int main()
     }
     catch(std::exception& e)
     {
-        nc::debug::LogException(e);
+        NC_LOG_EXCEPTION(e);
     }
     catch(...)
     {
+        NC_LOG_ERROR("WinMain - unkown exception");
         std::cerr << "WinMain - unkown exception caught\n";
-        nc::debug::LogToDiagnostics("WinMain - unkown exception");
     }
 
     if(engine) engine->Shutdown();

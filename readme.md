@@ -78,9 +78,9 @@ While the default `Nc::Engine-dev` target can be built with a Release configurat
     Enabled profiling with Optick. This also requires the Optick application (https://www.optickprofiler.com) and the Optick
     shared library (nc/lib/libOptick.dll).
 
-#### NC_VERBOSE_LOGGING_ENABLED
-    Default: ON (OFF when NC_PROD_BUILD=ON)
-    Flag used to enable extra logging of internal engine operations to the diagnostics file specified in config.ini.
+#### NC_LOG_LEVEL
+    Default: 2 (1 when NC_PROD_BUILD=ON)
+    Flag used to control logging verbosity to the diagnostics file specified in config.ini. Set to 0, 1, or 2 for off, standard, or verbose.
 
 ## More Information
 -------------------

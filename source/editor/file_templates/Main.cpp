@@ -1,6 +1,6 @@
 #include "platform/win32/NcWin32.h"
 #include "NcEngine.h"
-#include "debug/Utils.h"
+#include "utility/Log.h"
 #include "@INCLUDE_INITIAL_SCENE@"
 
 #include <iostream>
@@ -16,18 +16,12 @@ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
     }
     catch(std::exception& e)
     {
-        nc::debug::LogException(e);
+        LOG_EXCEPTION(e);
     }
     catch(...)
     {
         std::cerr << "WinMain.cpp - unkown exception caught\n";
-        nc::debug::LogToDiagnostics("WinMain.cpp - unkown exception");
-    }
-
-    if(engine)
-    {
-        engine->Shutdown();
-        engine = nullptr;
+        LOG_ERROR("WinMain.cpp - unkown exception");
     }
 
     return 0;

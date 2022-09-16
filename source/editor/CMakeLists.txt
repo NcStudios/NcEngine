@@ -8,7 +8,7 @@ add_executable(${NC_EDITOR_EXE})
 # Compile Options
 target_compile_options(${NC_EDITOR_EXE}
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_compile_definitions(${NC_EDITOR_EXE}

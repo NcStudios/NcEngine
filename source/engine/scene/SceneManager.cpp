@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "module/ModuleProvider.h"
+#include "utility/Log.h"
 
 namespace nc::scene
 {
@@ -17,11 +18,13 @@ namespace nc::scene
 
     void SceneManager::QueueSceneChange(std::unique_ptr<Scene> swapScene) noexcept
     {
+        NC_LOG_TRACE("Queueing scene change");
         m_swapScene = std::move(swapScene);
     }
 
     void SceneManager::DoSceneChange(Registry* registry, ModuleProvider modules)
     {
+        NC_LOG_TRACE("Changing scene");
         if(!m_swapScene)
         {
             return;
@@ -29,6 +32,7 @@ namespace nc::scene
 
         if(m_activeScene)
         {
+            NC_LOG_TRACE("Unloading active scene");
             m_activeScene->Unload();
             m_activeScene = nullptr;
         }
@@ -36,6 +40,7 @@ namespace nc::scene
         m_clearCallback();
         m_activeScene = std::move(m_swapScene);
         m_swapScene = nullptr;
+        NC_LOG_TRACE("Loading scene");
         m_activeScene->Load(registry, modules);
     }
 }

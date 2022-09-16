@@ -266,7 +266,7 @@ void ProjectManager::ReadNextScene()
 
     auto* registry = m_engine->GetRegistry();
     auto* graphics = m_engine->GetModuleRegistry()->Get<graphics::NcGraphics>();
-    NC_TRACE(SceneReader serialize{registry, graphics, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};);
+    SceneReader serialize{registry, graphics, m_projectData.projectDirectory / "scenes", m_projectData.scenes.at(m_nextSceneIndex)};
 }
 
 void ProjectManager::DeleteCurrentScene()

@@ -2,6 +2,7 @@
 #include "config/Config.h"
 #include "graphics/DebugRenderer.h"
 #include "time/Time.h"
+#include "utility/Log.h"
 
 namespace
 {
@@ -46,10 +47,12 @@ auto BuildPhysicsModule(bool enableModule, Registry* registry) -> std::unique_pt
 {
     if(enableModule)
     {
+        NC_LOG_TRACE("Creating NcPhysics module");
         return std::make_unique<NcPhysicsImpl>(registry);
     }
     else
     {
+        NC_LOG_TRACE("Creating NcPhysics module stub");
         return std::make_unique<NcPhysicsStub>(registry);
     }
 }
@@ -94,6 +97,7 @@ auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
 
 auto NcPhysicsImpl::BuildWorkload() -> std::vector<task::Job>
 {
+    NC_LOG_TRACE("Building NcPhysics workload");
     const auto fixedStep = config::GetPhysicsSettings().fixedUpdateInterval;
 
     auto* tf = m_pipeline.GetTasks().GetTaskFlow();

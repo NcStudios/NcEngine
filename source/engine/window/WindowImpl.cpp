@@ -1,10 +1,10 @@
 #include "WindowImpl.h"
-#include "window/Window.h"
-#include "config/Config.h"
 #include "NcEngine.h"
-#include "debug/Utils.h"
+#include "config/Config.h"
 #include "input/InputInternal.h"
 #include "math/Math.h"
+#include "utility/NcError.h"
+#include "window/Window.h"
 
 #include <algorithm>
 

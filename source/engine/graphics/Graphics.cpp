@@ -3,13 +3,14 @@
 #include "Base.h"
 #include "Commands.h"
 #include "config/Config.h"
-#include "debug/Utils.h"
 #include "graphics/Camera.h"
 #include "graphics/GpuAssetsStorage.h"
 #include "optick/optick.h"
 #include "Renderer.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
+#include "utility/Log.h"
+#include "utility/NcError.h"
 #include "vk/Swapchain.h"
 
 #include <iostream>
@@ -45,7 +46,7 @@ namespace nc::graphics
         }
         catch(const std::runtime_error& e) // from WaitIdle()
         {
-            debug::LogException(e);
+            NC_LOG_EXCEPTION(e);
         }
     }
 

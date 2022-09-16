@@ -1,5 +1,5 @@
-#include "debug/NcError.h"
 #include "graphics/DebugWidget.h"
+#include "utility/NcError.h"
 
 namespace
 {

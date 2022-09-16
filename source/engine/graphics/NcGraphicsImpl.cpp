@@ -2,6 +2,7 @@
 #include "assets/AssetManagers.h"
 #include "ecs/View.h"
 #include "PerFrameRenderState.h"
+#include "utility/Log.h"
 #include "window/WindowImpl.h"
 
 #include "optick/optick.h"
@@ -42,7 +43,13 @@ namespace nc::graphics
 {
     auto BuildGraphicsModule(bool enableModule, Registry* reg, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
-        if(enableModule) return std::make_unique<NcGraphicsImpl>(reg, gpuAccessorSignals, window);
+        if (enableModule)
+        {
+            NC_LOG_TRACE("Creating NcGraphics module");
+            return std::make_unique<NcGraphicsImpl>(reg, gpuAccessorSignals, window);
+        }
+
+        NC_LOG_TRACE("Creating NcGraphics module stub");
         return std::make_unique<NcGraphicsStub>(reg);
     }
 
@@ -67,6 +74,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
     {
+        NC_LOG_TRACE("Setting main camera to: {}", static_cast<void*>(camera));
         m_camera.Set(camera);
     }
 
@@ -77,6 +85,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::SetUi(ui::IUI* ui) noexcept
     {
+        NC_LOG_TRACE("Setting UI to {}", static_cast<void*>(ui));
         m_ui.Set(ui);
     }
 
@@ -87,6 +96,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::SetSkybox(const std::string& path)
     {
+        NC_LOG_TRACE("Setting skybox to {}", path);
         m_environment.SetSkybox(path);
     }
 
@@ -107,6 +117,7 @@ namespace nc::graphics
 
     auto NcGraphicsImpl::BuildWorkload() -> std::vector<task::Job>
     {
+        NC_LOG_TRACE("Building NcGraphics workload");
         return std::vector<task::Job>
         {
             task::Job{ [this] {Run(); }, "GraphicsModule", task::ExecutionPhase::Render },

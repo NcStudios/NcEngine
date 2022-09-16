@@ -1,6 +1,6 @@
 #include "ShaderUtilities.h"
 #include "graphics/Base.h"
-#include "debug/NcError.h"
+#include "utility/NcError.h"
 
 #include <fstream>
 

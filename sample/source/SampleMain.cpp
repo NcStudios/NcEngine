@@ -1,7 +1,7 @@
 #include "NcEngine.h"
-#include "debug/Utils.h"
 #include "scenes/Worms.h"
 #include "shared/SampleUI.h"
+#include "utility/Log.h"
 
 #include <iostream>
 
@@ -18,12 +18,12 @@ int main()
     }
     catch(std::exception& e)
     {
-        nc::debug::LogException(e);
+        NC_LOG_EXCEPTION(e);
     }
     catch(...)
     {
-        std::cerr << "WinMain.cpp - unkown exception caught\n";
-        nc::debug::LogToDiagnostics("WinMain.cpp - unkown exception");
+        NC_LOG_ERROR("SampleMain.cpp - unkown exception");
+        std::cerr << "SampleMain.cpp - unkown exception\n";
     }
 
     return 0;
