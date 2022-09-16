@@ -15,7 +15,7 @@ set(CMAKE_DEBUG_POSTFIX d)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNING_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(WARNING_FLAGS /W3 /WX)
+    set(WARNING_FLAGS /W3 /WX /MP)
 endif()
 set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/source/engine/")
@@ -33,6 +33,9 @@ else()
     set(NC_SAMPLE_EXE "Sample")
 endif()
 
+# TODO: Taskflow has deprecation warnings for std::aligned_XXX with c++23. We eventually want to remove this.
+add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
+
 # Get dependencies
 find_package(Vulkan REQUIRED)
 
@@ -40,12 +43,12 @@ include(FetchContent)
 
 FetchContent_Declare(DirectXMath
                      GIT_REPOSITORY https://github.com/NcStudios/DirectXMath.git
-                     GIT_TAG        origin/main
+                     GIT_TAG        4533e8faeb4f9d251a87ca3f67b863ae25196d2c # origin/main
 )
 
 FetchContent_Declare(taskflow
                      GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
-                     GIT_TAG        origin/master
+                     GIT_TAG        ab6c1b6cd2651d4a4b1a3204b2e1b95f75d06a56 # origin/master
 )
 
 FetchContent_Declare(nc-tools
