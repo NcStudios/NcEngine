@@ -1,5 +1,5 @@
 #include "physics/ConcaveCollider.h"
-#include "debug/NcError.h"
+#include "utility/NcError.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"

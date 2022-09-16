@@ -19,7 +19,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(GAME_EXE ${NC_EDITOR_PROJECT_NAME})
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNING_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+    set(NC_COMPILER_FLAGS -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
@@ -36,7 +36,7 @@ add_executable(${GAME_EXE})
 #Compile Options
 target_compile_options(${GAME_EXE}
     PRIVATE
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 #Include Dirs

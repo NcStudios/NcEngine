@@ -1,5 +1,5 @@
 #include "network/PacketBuffer.h"
-#include "debug/NcError.h"
+#include "utility/NcError.h"
 
 #include <cstring>
 

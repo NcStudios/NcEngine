@@ -1,8 +1,6 @@
 #include "GpuAllocator.h"
 #include "Base.h"
-#include "debug/NcError.h"
-
-#include "stb/stb_image.h"
+#include "utility/NcError.h"
 
 namespace
 {

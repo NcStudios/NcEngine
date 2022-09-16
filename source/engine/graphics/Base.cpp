@@ -1,8 +1,7 @@
 #include "Base.h"
 #include "config/Config.h"
-#include "debug/NcError.h"
 #include "graphics/Commands.h"
-#include "stb/stb_image.h"
+#include "utility/NcError.h"
 #include "vk/Initializers.h"
 #include "vk/Swapchain.h"
 

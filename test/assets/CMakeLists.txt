@@ -16,7 +16,7 @@ target_include_directories(AssetId_tests
 
 target_compile_options(AssetId_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(AssetId_tests
@@ -46,7 +46,7 @@ target_include_directories(AudioClipAssetManager_tests
 
 target_compile_options(AudioClipAssetManager_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(AudioClipAssetManager_tests
@@ -76,7 +76,7 @@ target_include_directories(ConcaveColliderAssetManager_tests
 
 target_compile_options(ConcaveColliderAssetManager_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(ConcaveColliderAssetManager_tests
@@ -106,7 +106,7 @@ target_include_directories(ConvexHullAssetManager_tests
 
 target_compile_options(ConvexHullAssetManager_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(ConvexHullAssetManager_tests
@@ -139,7 +139,7 @@ target_include_directories(CubeMapAssetManager_tests
 
 target_compile_options(CubeMapAssetManager_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(CubeMapAssetManager_tests
@@ -171,7 +171,7 @@ target_include_directories(MeshAssetManager_tests
 
 target_compile_options(MeshAssetManager_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(MeshAssetManager_tests
@@ -203,7 +203,7 @@ target_include_directories(ShaderAssetManager_tests
 
 target_compile_options(ShaderAssetManager_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(ShaderAssetManager_tests
@@ -235,7 +235,7 @@ target_include_directories(TextureAssetManager_tests
 
 target_compile_options(TextureAssetManager_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(TextureAssetManager_tests

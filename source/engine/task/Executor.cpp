@@ -54,8 +54,6 @@ namespace nc::task
 
     void Executor::BuildTaskGraph(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
     {
-        V_LOG("Executor::BuildTaskGraph()");
-
         for(auto& module : modules)
         {
             Add(module->BuildWorkload());
