@@ -19,7 +19,7 @@ target_include_directories(StringHash_unit_tests
 
 target_compile_options(StringHash_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(StringHash_unit_tests
@@ -42,7 +42,7 @@ target_include_directories(Signal_unit_tests
 
 target_compile_options(Signal_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Signal_unit_tests

@@ -4,7 +4,7 @@ add_executable(${NC_SAMPLE_EXE})
 # Compile Options
 target_compile_options(${NC_SAMPLE_EXE}
     PRIVATE
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_compile_definitions(${NC_SAMPLE_EXE}

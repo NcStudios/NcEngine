@@ -13,7 +13,7 @@ target_include_directories(Math_unit_tests
 
 target_compile_options(Math_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Math_unit_tests
@@ -37,7 +37,7 @@ target_include_directories(Random_unit_tests
 
 target_compile_options(Random_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Random_unit_tests
@@ -63,7 +63,7 @@ target_include_directories(Vector_unit_tests
 
 target_compile_options(Vector_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Vector_unit_tests

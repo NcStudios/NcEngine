@@ -24,7 +24,7 @@ endif()
 # Compile Options
 target_compile_options(${NC_ENGINE_LIB}
     PRIVATE
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 # Link libraries
