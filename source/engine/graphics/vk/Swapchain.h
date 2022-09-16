@@ -52,7 +52,7 @@ namespace nc::graphics
             bool GetNextRenderReadyImageIndex(uint32_t* imageIndex);
             uint32_t GetFrameIndex() const noexcept;
             void WaitForFrameFence();
-            void ResetFrameFence();
+            void ResetFrameFence() noexcept;
             void IncrementFrameIndex();
             void WaitForImageFence(uint32_t imageIndex);
             void SyncImageAndFrameFence(uint32_t imageIndex);
@@ -71,8 +71,8 @@ namespace nc::graphics
             std::vector<vk::ImageView> m_swapChainImageViews;
 
             // Synchronization
+            std::vector<PerFrameGpuContext> m_perFrameGpuContext; /** @todo This won't live here long term. Just putting it here for incremental change. **/
             std::vector<vk::Fence> m_imagesInFlightFences;
-            std::vector<nc::graphics::PerFrameGpuContext> m_perFrameGpuContext; /** @todo This won't live here long term. Just putting it here for incremental change. **/
             uint32_t m_currentFrameIndex; // Used to select which pair of semaphores and which fence to use as each frame in MaxFramesInFlight requires its own pair of semaphores and fence.
     };
 } // namespace nc::graphics

@@ -13,18 +13,17 @@ class PerFrameGpuContext
 {
     public:
         PerFrameGpuContext(vk::Device device);
-        ~PerFrameGpuContext() noexcept;
 
         void Wait(); // Waits until the fence has signaled
-        void Reset(); // Resets the fence
-        vk::Fence Fence() { return m_inFlightFence; }
-        vk::Semaphore& ImageAvailableSemaphore() { return m_imageAvailableSemaphore; }
-        vk::Semaphore& RenderFinishedSemaphore() { return m_renderFinishedSemaphore; }
+        void Reset() noexcept; // Resets the fence
+        vk::Fence Fence() const noexcept { return m_inFlightFence.get(); }
+        vk::Semaphore ImageAvailableSemaphore() const noexcept { return m_imageAvailableSemaphore.get(); }
+        vk::Semaphore RenderFinishedSemaphore() const noexcept { return m_renderFinishedSemaphore.get(); }
 
     private:
         vk::Device m_device;
-        vk::Semaphore m_imageAvailableSemaphore; // Controls when the swapchain image can be written to.
-        vk::Semaphore m_renderFinishedSemaphore; // Controls when the swapchain image can be presented back to the swapchain.
-        vk::Fence m_inFlightFence; // Synchronizes the submission of the queues from the CPU with the completion of the queues on the GPU.
+        vk::UniqueSemaphore m_imageAvailableSemaphore; // Controls when the swapchain image can be written to.
+        vk::UniqueSemaphore m_renderFinishedSemaphore; // Controls when the swapchain image can be presented back to the swapchain.
+        vk::UniqueFence m_inFlightFence; // Synchronizes the submission of the queues from the CPU with the completion of the queues on the GPU.
 };
 } // namespace nc::graphics
