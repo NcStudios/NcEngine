@@ -35,11 +35,11 @@ $FullBuildDirectory = "$BuildDirectory/$Generator-$BuildDirectorySuffix"
 
 if ($Generator -eq "msvc")
 {
-    cmake -G "Visual Studio 17 2022" -S "$SourceDir" -B "$FullBuildDirectory" -DCMAKE_INSTALL_PREFIX="$InstallDirectory"
+    cmake -G "Visual Studio 17 2022" -S "$SourceDir" -B "$FullBuildDirectory" -DCMAKE_INSTALL_PREFIX="$InstallDirectory" -DNC_BUILD_TESTS=ON
     cmake --build "$FullBuildDirectory" --target install --parallel 8 --config $BuildType
 }
 elseif ($Generator -eq "mingw")
 {
-    cmake -G "Ninja" -S "$SourceDir" -B "$FullBuildDirectory" -DCMAKE_INSTALL_PREFIX="$InstallDirectory" -DCMAKE_BUILD_TYPE="$BuildType"
+    cmake -G "Ninja" -S "$SourceDir" -B "$FullBuildDirectory" -DCMAKE_INSTALL_PREFIX="$InstallDirectory" -DCMAKE_BUILD_TYPE="$BuildType" -DNC_BUILD_TESTS=ON
     cmake --build "$FullBuildDirectory" --target install --parallel 8
 }
