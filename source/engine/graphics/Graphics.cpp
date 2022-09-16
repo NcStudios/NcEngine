@@ -22,7 +22,7 @@ namespace nc::graphics
           m_base{ std::make_unique<Base>(hwnd, hinstance) },
           m_allocator{ std::make_unique<GpuAllocator>(m_base->GetPhysicalDevice(), m_base->GetDevice(), m_base->GetInstance())},
           m_swapchain{ std::make_unique<Swapchain>(m_base->GetDevice(), m_base->GetPhysicalDevice(), m_base->GetSurface(), dimensions) },
-          m_commands{ std::make_unique<Commands>(m_base.get(), *m_swapchain) },
+          m_commands{ std::make_unique<Commands>(m_base.get(), m_swapchain.get()) },
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_base.get(), m_allocator.get(), gpuAccessorSignals) },
@@ -71,7 +71,7 @@ namespace nc::graphics
         auto shadowMap = ShadowMap { .dimensions = m_dimensions };
         m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
         m_swapchain = std::make_unique<Swapchain>(m_base->GetDevice(), m_base->GetPhysicalDevice(), m_base->GetSurface(), m_dimensions);
-        m_commands = std::make_unique<Commands>(m_base.get(), *m_swapchain);
+        m_commands = std::make_unique<Commands>(m_base.get(), m_swapchain.get());
         m_renderer = std::make_unique<Renderer>(this, m_shaderResources.get(), m_dimensions);
     }
 

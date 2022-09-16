@@ -3,6 +3,19 @@
 #include "QueueFamily.h"
 #include "utility/NcError.h"
 
+#include <algorithm>
+
+namespace
+{
+    std::vector<nc::graphics::PerFrameGpuContext> CreatePerFrameGpuContextVector(vk::Device& device)
+    {
+        auto out = std::vector<nc::graphics::PerFrameGpuContext>{};
+        out.reserve(nc::graphics::MaxFramesInFlight);
+        std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [device](){ return nc::graphics::PerFrameGpuContext(device); } );
+        return out;
+    }
+}
+
 namespace nc::graphics
 {
     SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
@@ -10,13 +23,13 @@ namespace nc::graphics
         SwapChainSupportDetails details;
         if (device.getSurfaceCapabilitiesKHR(surface, &details.capabilities) != vk::Result::eSuccess)
         {
-            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface capabilities.");
+            throw NcError("Could not enumerate surface capabilities.");
         }
 
         uint32_t formatCount;
         if (device.getSurfaceFormatsKHR(surface, &formatCount, nullptr) != vk::Result::eSuccess)
         {
-            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+            throw NcError("Could not enumerate surface formats.");
         }
 
         if (formatCount != 0)
@@ -24,14 +37,14 @@ namespace nc::graphics
             details.formats.resize(formatCount);
             if (device.getSurfaceFormatsKHR(surface, &formatCount, details.formats.data()) != vk::Result::eSuccess)
             {
-                throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface formats.");
+                throw NcError("Could not enumerate surface formats.");
             }
         }
 
         uint32_t presentModeCount;
         if (device.getSurfacePresentModesKHR(surface, &presentModeCount, nullptr) != vk::Result::eSuccess)
         {
-            throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+            throw NcError("Could not enumerate surface present modes.");
         }
 
         if (presentModeCount != 0)
@@ -39,7 +52,7 @@ namespace nc::graphics
             details.presentModes.resize(presentModeCount);
             if (device.getSurfacePresentModesKHR(surface, &presentModeCount, details.presentModes.data()) != vk::Result::eSuccess)
             {
-                throw NcError("SwapChain::QuerySwapChainSupport() - Could not enumerate surface present modes.");
+                throw NcError("Could not enumerate surface present modes.");
             }
         } 
         return details;
@@ -53,30 +66,19 @@ namespace nc::graphics
           m_swapChainImageFormat{},
           m_swapChainExtent{},
           m_swapChainImageViews{},
+          m_perFrameGpuContext{CreatePerFrameGpuContextVector(device)},
           m_imagesInFlightFences{},
-          m_framesInFlightFences{},
-          m_imageAvailableSemaphores{},
-          m_renderFinishedSemaphores{},
           m_currentFrameIndex{0}
     {
         Create(physicalDevice, surface, dimensions);
-        CreateSynchronizationObjects();
+
+        // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
+        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr); // To start, no frames in flight are using swapchain images, so explicitly initialize to nullptr.
     }
     
     Swapchain::~Swapchain() noexcept
     {
         Cleanup();
-        DestroySynchronizationObjects();
-    }
-
-    void Swapchain::DestroySynchronizationObjects() noexcept
-    {
-        for (size_t i = 0; i < MaxFramesInFlight; ++i)
-        {
-            m_device.destroySemaphore(m_imageAvailableSemaphores[i]);
-            m_device.destroySemaphore(m_renderFinishedSemaphores[i]);
-            m_device.destroyFence(m_framesInFlightFences[i]);
-        }
     }
 
     void Swapchain::Cleanup() noexcept
@@ -89,31 +91,6 @@ namespace nc::graphics
        m_device.destroySwapchainKHR(m_swapChain);
     }
 
-    // The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, 
-    // the semaphores below tell the GPU when either step can begin for a single image. Vulkan will render multiple swapchain images very rapidly, so MaxFramesInFlight here creates 
-    // a pair of semaphores for each frame up to MaxFramesInFlight. 
-    // The fences synchronize GPU - CPU and they are what limit Vulkan to submitting only MaxFramesInFlight amount of frame-render jobs to the command queues. 
-    // The fences in framesInFlightFences (one per frame in MAX_FRAMES_PER_FLIGHT) prevent more frame-render jobs than fences from being submitted until one frame-render job completes.
-    // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
-    void Swapchain::CreateSynchronizationObjects()
-    {
-        m_imageAvailableSemaphores.resize(MaxFramesInFlight);
-        m_renderFinishedSemaphores.resize(MaxFramesInFlight);
-        m_framesInFlightFences.resize(MaxFramesInFlight);
-        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr); // To start, no frames in flight are using swapchain images, so explicitly initialize to nullptr.
-
-        vk::SemaphoreCreateInfo semaphoreInfo{};
-        vk::FenceCreateInfo fenceInfo{};
-        fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
-
-        for (size_t i = 0; i < MaxFramesInFlight; ++i)
-        {
-            m_imageAvailableSemaphores[i] = m_device.createSemaphore(semaphoreInfo);
-            m_renderFinishedSemaphores[i] = m_device.createSemaphore(semaphoreInfo);
-            m_framesInFlightFences[i] = m_device.createFence(fenceInfo);
-        }
-    }
-
     uint32_t Swapchain::GetFrameIndex() const noexcept
     {
         return m_currentFrameIndex;
@@ -123,7 +100,8 @@ namespace nc::graphics
     {
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setWaitSemaphoreCount(1);
-        presentInfo.setPWaitSemaphores(&m_renderFinishedSemaphores[m_currentFrameIndex]); // Wait on this semaphore before presenting.
+        auto waitSemaphore = GetPerFrameGpuContext().RenderFinishedSemaphore();
+        presentInfo.setPWaitSemaphores(&waitSemaphore); // Wait on this semaphore before presenting.
 
         vk::SwapchainKHR swapChains[] = {m_swapChain};
         presentInfo.setSwapchainCount(1);
@@ -144,11 +122,6 @@ namespace nc::graphics
         }
     }
     
-    const std::vector<vk::Semaphore>& Swapchain::GetSemaphores(SemaphoreType semaphoreType) const noexcept
-    {
-        return semaphoreType == SemaphoreType::ImageAvailableForRender ? m_imageAvailableSemaphores : m_renderFinishedSemaphores;
-    }
-
     void Swapchain::WaitForImageFence(uint32_t imageIndex)
     {
         if (m_imagesInFlightFences[imageIndex])
@@ -162,7 +135,7 @@ namespace nc::graphics
 
     void Swapchain::SyncImageAndFrameFence(uint32_t imageIndex)
     {
-        m_imagesInFlightFences[imageIndex] = m_framesInFlightFences[m_currentFrameIndex];
+        m_imagesInFlightFences[imageIndex] = GetPerFrameGpuContext().Fence();
     }
 
     const vk::Format& Swapchain::GetFormat() const noexcept
@@ -172,7 +145,6 @@ namespace nc::graphics
 
     void Swapchain::Create(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Vector2 dimensions)
     {
-        //auto swapChainSupport = m_base->QuerySwapChainSupport(m_base->GetPhysicalDevice(), m_base->GetSurface());
         auto swapChainSupport = QuerySwapChainSupport(physicalDevice, surface);
 
         auto surfaceFormat = swapChainSupport.formats[0];
@@ -302,12 +274,9 @@ namespace nc::graphics
         }
     }
 
-    void Swapchain::WaitForFrameFence() const
+    void Swapchain::WaitForFrameFence()
     {
-        if (m_device.waitForFences(m_framesInFlightFences[m_currentFrameIndex], true, UINT64_MAX) != vk::Result::eSuccess)
-        {
-            throw NcError("Could not wait for fences to complete.");
-        }
+        GetPerFrameGpuContext().Wait();
     }
 
     void Swapchain::IncrementFrameIndex()
@@ -315,9 +284,9 @@ namespace nc::graphics
         m_currentFrameIndex = (m_currentFrameIndex + 1) % MaxFramesInFlight;
     }
 
-    void Swapchain::ResetFrameFence()
+    void Swapchain::ResetFrameFence() noexcept
     {
-        m_device.resetFences(m_framesInFlightFences[m_currentFrameIndex]);
+        GetPerFrameGpuContext().Reset();
     }
 
     const Vector2 Swapchain::GetExtentDimensions() const noexcept
@@ -337,13 +306,8 @@ namespace nc::graphics
 
     bool Swapchain::GetNextRenderReadyImageIndex(uint32_t* imageIndex)
     {
-        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrameIndex]);
+        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_perFrameGpuContext[m_currentFrameIndex].ImageAvailableSemaphore());
         *imageIndex = index;
         return result != vk::Result::eErrorOutOfDateKHR;
-    }
-
-    const std::vector<vk::Fence>& Swapchain::GetFences(FenceType fenceType) const noexcept
-    {
-        return fenceType == FenceType::FramesInFlight ? m_framesInFlightFences : m_imagesInFlightFences;
     }
 }
