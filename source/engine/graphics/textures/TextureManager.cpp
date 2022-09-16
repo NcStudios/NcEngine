@@ -1,8 +1,8 @@
 #include "TextureManager.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/vk/ImmutableImage.h"
-#include "debug/Utils.h"
 #include "graphics/textures/TextureStorage.h"
+#include "utility/NcError.h"
 
 #include <array>
 

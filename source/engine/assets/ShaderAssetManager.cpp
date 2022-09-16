@@ -1,6 +1,6 @@
 #include "ShaderAssetManager.h"
 #include "AssetUtilities.h"
-#include "debug/NcError.h"
+#include "utility/NcError.h"
 
 #include <fstream>
 #include <filesystem>

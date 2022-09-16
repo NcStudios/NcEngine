@@ -14,7 +14,7 @@ target_include_directories(Manifold_unit_tests
 
 target_compile_options(Manifold_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Manifold_unit_tests
@@ -41,7 +41,7 @@ target_include_directories(ClientObjectProperties_unit_tests
 
 target_compile_options(ClientObjectProperties_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(ClientObjectProperties_unit_tests

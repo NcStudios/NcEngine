@@ -1,7 +1,7 @@
 #pragma once
 
-#include "debug/Utils.h"
 #include "ecs/Component.h"
+#include "utility/NcError.h"
 
 #include <concepts>
 #include <memory>

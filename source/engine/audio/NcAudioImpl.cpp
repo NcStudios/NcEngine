@@ -1,6 +1,7 @@
 #include "NcAudioImpl.h"
 #include "audio/AudioSource.h"
 #include "ecs/View.h"
+#include "utility/Log.h"
 
 #include "optick/optick.h"
 #include <cstring>
@@ -41,10 +42,12 @@ auto BuildAudioModule(bool enableModule, Registry* reg) -> std::unique_ptr<NcAud
 {
     if(enableModule)
     {
+        NC_LOG_TRACE("Creating NcAudio module");
         return std::make_unique<NcAudioImpl>(reg);
     }
     else
     {
+        NC_LOG_TRACE("Creating NcAudio module stub");
         return std::make_unique<NcAudioStub>();
     }
 }
@@ -138,6 +141,7 @@ void NcAudioImpl::Clear() noexcept
 
 auto NcAudioImpl::BuildWorkload() -> std::vector<task::Job>
 {
+    NC_LOG_TRACE("Building NcAudio workload");
     return std::vector<task::Job>
     {
         task::Job{ [this]{Run();}, "AudioModule", task::ExecutionPhase::Free }
@@ -146,6 +150,7 @@ auto NcAudioImpl::BuildWorkload() -> std::vector<task::Job>
 
 void NcAudioImpl::RegisterListener(Entity listener) noexcept
 {
+    NC_LOG_TRACE("Registering audio listener: {}", listener.Index());
     m_listener = listener;
 }
 

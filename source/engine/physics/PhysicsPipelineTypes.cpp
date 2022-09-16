@@ -1,5 +1,4 @@
 #include "PhysicsPipelineTypes.h"
-#include "debug/Utils.h"
 #include "ecs/Registry.h"
 #include "physics/PhysicsBody.h"
 #include "physics/PhysicsConstants.h"

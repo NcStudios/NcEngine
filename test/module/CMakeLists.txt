@@ -13,7 +13,7 @@ target_include_directories(ModuleRegistry_unit_tests
 
 target_compile_options(ModuleRegistry_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(ModuleRegistry_unit_tests
@@ -39,7 +39,7 @@ target_include_directories(TaskGraph_unit_tests
 
 target_compile_options(TaskGraph_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(TaskGraph_unit_tests

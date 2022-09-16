@@ -1,9 +1,9 @@
 #include "physics/Collider.h"
+#include "assets/AssetService.h"
 #include "ecs/Registry.h"
 #include "graphics/DebugWidget.h"
 #include "graphics/Renderer.h"
-#include "debug/Utils.h"
-#include "assets/AssetService.h"
+#include "utility/NcError.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "ui/editor/Widgets.h"

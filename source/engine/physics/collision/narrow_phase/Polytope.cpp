@@ -1,5 +1,5 @@
 #include "Polytope.h"
-#include "debug/NcError.h"
+#include "utility/NcError.h"
 
 #include <algorithm>
 

@@ -1,6 +1,5 @@
 #include "ui/UIPosition.h"
-
-#include "debug/NcError.h"
+#include "utility/NcError.h"
 
 namespace nc::ui::utils
 {

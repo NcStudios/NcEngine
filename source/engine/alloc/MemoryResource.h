@@ -1,6 +1,6 @@
 #pragma once
 
-#include "debug/Utils.h"
+#include "utility/NcError.h"
 
 #include <memory>
 #include <new>

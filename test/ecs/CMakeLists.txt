@@ -13,7 +13,7 @@ target_include_directories(FreeComponentGroup_unit_test
 
 target_compile_options(FreeComponentGroup_unit_test
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(FreeComponentGroup_unit_test
@@ -36,7 +36,7 @@ target_include_directories(Entity_unit_tests
 
 target_compile_options(Entity_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Entity_unit_tests
@@ -62,7 +62,7 @@ target_include_directories(Registry_unit_tests
 
 target_compile_options(Registry_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Registry_unit_tests
@@ -90,7 +90,7 @@ target_include_directories(Transform_unit_tests
 
 target_compile_options(Transform_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(Transform_unit_tests
@@ -117,7 +117,7 @@ target_include_directories(View_unit_tests
 
 target_compile_options(View_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(View_unit_tests

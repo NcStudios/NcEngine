@@ -13,7 +13,7 @@ target_include_directories(PacketBuffer_unit_tests
 
 target_compile_options(PacketBuffer_unit_tests
     PUBLIC
-        ${WARNING_FLAGS}
+        ${NC_COMPILER_FLAGS}
 )
 
 target_link_libraries(PacketBuffer_unit_tests
