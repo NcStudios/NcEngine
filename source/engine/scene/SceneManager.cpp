@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "module/ModuleProvider.h"
 #include "utility/Log.h"
+
 namespace nc::scene
 {
     SceneManager::SceneManager(std::function<void()> clearOnSceneChangeCallback)
