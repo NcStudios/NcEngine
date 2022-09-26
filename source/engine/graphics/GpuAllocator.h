@@ -12,7 +12,7 @@ namespace nc
 {
 namespace graphics
 {
-    class Base;
+    class Commands;
     class GpuAllocator;
 
     /** @todo Add create image view (used in RenderTarget) */
@@ -45,7 +45,7 @@ namespace graphics
     class GpuAllocator
     {
         public:
-            GpuAllocator(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::Instance instance);
+            GpuAllocator( vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance, Commands* commands);
             ~GpuAllocator() noexcept;
             GpuAllocator(const GpuAllocator&) = delete;
             GpuAllocator(GpuAllocator&&) = delete;
@@ -57,15 +57,20 @@ namespace graphics
             auto Map(vma::Allocation allocation) const -> void*;
             void Unmap(vma::Allocation allocation) const;
 
+            void CopyBuffer(const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
             auto CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>;
             auto CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>;
-            auto CreateTexture(Base* base, unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>;
-            auto CreateCubeMapTexture(Base* base, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>;
+            auto CreateTexture(unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>;
+            auto CreateCubeMapTexture(const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>;
 
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
 
         private:
+            void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
+            void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
+            void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout);
+            Commands* m_commands;
             vma::Allocator m_allocator;
             vk::PhysicalDeviceProperties m_deviceProperties;
     };

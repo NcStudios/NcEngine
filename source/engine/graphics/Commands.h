@@ -1,12 +1,13 @@
 #pragma once
 
 #include "vulkan/vk_mem_alloc.hpp"
-
+#include "vk/QueueFamily.h"
 #include <vector>
 
 namespace nc::graphics
 {
-class Base;
+struct Engine;
+class PerFrameGpuContext;
 class Swapchain;
 struct IndexBuffer;
 struct VertexBuffer;
@@ -14,22 +15,20 @@ struct VertexBuffer;
     class Commands
     {
         public:
-            Commands(Base* base, Swapchain* swapchain);
-            ~Commands() noexcept;
+            Commands(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Swapchain* swapchain);
 
-            std::vector<vk::CommandBuffer>* GetCommandBuffers();
-            void FreeCommandBuffers() noexcept;
-            void SubmitRenderCommand(uint32_t imageIndex);
-            static void SubmitCopyCommandImmediate(const Base& base, const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
-            static void SubmitCommandImmediate(const Base& base, std::function<void(vk::CommandBuffer cmd)>&& function);
-            void BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData);
+            void SubmitQueue(PerFrameGpuContext* currentFrame);
+            void ExecuteCommand(std::function<void(vk::CommandBuffer cmd)>&& function);
+            const vk::Queue& GetCommandQueue(QueueFamilyType type) const noexcept;
 
         private:
             // External members
-            Base* m_base;
+            vk::Device m_device;
+            vk::PhysicalDevice m_physicalDevice;
+            vk::SurfaceKHR m_surface;
             Swapchain* m_swapchain;
 
-            // Internal members
-            std::vector<vk::CommandBuffer> m_commandBuffers;
+            vk::Queue m_graphicsQueue;
+            vk::Queue m_presentQueue;
     };
 } // namespace nc::graphics

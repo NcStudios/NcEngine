@@ -9,6 +9,7 @@
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
 #include "graphics/vk/Swapchain.h"
+#include "imgui/imgui_impl_vulkan.h"
 
 namespace nc::graphics
 {

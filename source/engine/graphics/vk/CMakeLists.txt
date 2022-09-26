@@ -1,6 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         CubeMap.cpp
+        Engine.cpp
         ImmutableImage.cpp
         Initializers.cpp
         PerFrameGpuContext.cpp

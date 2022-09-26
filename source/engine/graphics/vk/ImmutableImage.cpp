@@ -1,6 +1,8 @@
 #include "ImmutableImage.h"
 #include "graphics/Base.h"
 
+typedef unsigned char stbi_uc;
+
 namespace nc::graphics
 {
     ImmutableImage::ImmutableImage()
@@ -10,7 +12,7 @@ namespace nc::graphics
     }
 
     ImmutableImage::ImmutableImage(Base* base, GpuAllocator* allocator, stbi_uc* pixels, uint32_t width, uint32_t height)
-        : m_image{allocator->CreateTexture(base, pixels, width, height)},
+        : m_image{allocator->CreateTexture(pixels, width, height)},
           m_view{CreateTextureView(base->GetDevice(), m_image)}
     {
     }

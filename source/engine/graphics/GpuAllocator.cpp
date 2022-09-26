@@ -1,10 +1,10 @@
 #include "GpuAllocator.h"
-#include "Base.h"
+#include "Commands.h"
 #include "utility/NcError.h"
 
 namespace
 {
-    auto CreateAllocator(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::Instance instance) -> vma::Allocator
+    auto CreateAllocator(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance) -> vma::Allocator
     {
         vma::AllocatorCreateInfo allocatorInfo{};
         allocatorInfo.physicalDevice = physicalDevice;
@@ -16,8 +16,9 @@ namespace
 
 namespace nc::graphics
 {
-    GpuAllocator::GpuAllocator(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::Instance instance)
-        : m_allocator{CreateAllocator(physicalDevice, logicalDevice, instance)},
+    GpuAllocator::GpuAllocator(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance, Commands* commands)
+        : m_commands{commands},
+          m_allocator{CreateAllocator(logicalDevice, physicalDevice, instance)},
           m_deviceProperties{physicalDevice.getProperties()}
     {
     }
@@ -57,6 +58,16 @@ namespace nc::graphics
         }
 
         return alignedSize;
+    }
+
+    void GpuAllocator::CopyBuffer(const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size)
+    {
+        m_commands->ExecuteCommand([sourceBuffer, destinationBuffer, size](vk::CommandBuffer cmd)
+        {
+            vk::BufferCopy copyRegion{};
+            copyRegion.setSize(size);
+            cmd.copyBuffer(sourceBuffer, destinationBuffer, 1, &copyRegion);
+        });
     }
 
     auto GpuAllocator::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>
@@ -105,7 +116,7 @@ namespace nc::graphics
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
-    auto GpuAllocator::CreateTexture(Base* base, unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateTexture(unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>
     {
         const auto imageSize = width * height * 4u;
         auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
@@ -116,15 +127,15 @@ namespace nc::graphics
         auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         auto imageAllocation = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, vk::SampleCountFlagBits::e1);
 
-        base->TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, vk::ImageLayout::eTransferDstOptimal);
-        base->CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height);
-        base->TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eTransferDstOptimal, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
+        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, vk::ImageLayout::eTransferDstOptimal);
+        CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height);
+        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eTransferDstOptimal, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
 
         stagingBuffer.Release();
         return imageAllocation;
     }
 
-    auto GpuAllocator::CreateCubeMapTexture(Base* base, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateCubeMapTexture(const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>
     {
         auto stagingBuffer = CreateBuffer(cubeMapSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 
@@ -142,9 +153,9 @@ namespace nc::graphics
         auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         auto imageBuffer = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, vk::SampleCountFlagBits::e1);
 
-        base->TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
-        base->CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), width, height, 6);
-        base->TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, vk::ImageLayout::eShaderReadOnlyOptimal);
+        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
+        CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), width, height, 6);
+        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, vk::ImageLayout::eShaderReadOnlyOptimal);
 
         stagingBuffer.Release();
         return imageBuffer;
@@ -170,6 +181,98 @@ namespace nc::graphics
     void GpuAllocator::Unmap(vma::Allocation allocation) const
     {
         m_allocator.unmapMemory(allocation);
+    }
+
+    void GpuAllocator::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height)
+    {
+        m_commands->ExecuteCommand([&](vk::CommandBuffer cmd) 
+        {
+            vk::BufferImageCopy region{};
+            region.setBufferOffset(0);
+            region.setBufferRowLength(0);
+            region.setBufferImageHeight(0);
+
+            vk::ImageSubresourceLayers subresource{};
+            subresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresource.setMipLevel(0);
+            subresource.setBaseArrayLayer(0);
+            subresource.setLayerCount(1);
+
+            region.setImageSubresource(subresource);
+            region.setImageOffset({0, 0, 0});
+            region.setImageExtent({width, height, 1});
+
+            cmd.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &region);
+        });
+    }
+
+    void GpuAllocator::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount)
+    {
+        m_commands->ExecuteCommand([&](vk::CommandBuffer cmd) 
+        {
+            vk::BufferImageCopy region{};
+            region.setBufferOffset(0);
+            region.setBufferRowLength(0);
+            region.setBufferImageHeight(0);
+
+            vk::ImageSubresourceLayers subresource{};
+            subresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresource.setMipLevel(0);
+            subresource.setBaseArrayLayer(0);
+            subresource.setLayerCount(layerCount);
+
+            region.setImageSubresource(subresource);
+            region.setImageOffset({0, 0, 0});
+            region.setImageExtent({width, height, 1});
+
+            cmd.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &region);
+        });
+    }
+
+    void GpuAllocator::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout)
+    {
+        m_commands->ExecuteCommand([&](vk::CommandBuffer cmd) 
+        { 
+            vk::ImageMemoryBarrier barrier{};
+            barrier.setOldLayout(oldLayout);
+            barrier.setNewLayout(newLayout);
+            barrier.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+            barrier.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+            barrier.setImage(image);
+
+            vk::ImageSubresourceRange subresourceRange{};
+            subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresourceRange.setBaseMipLevel(0);
+            subresourceRange.setLevelCount(1);
+            subresourceRange.setBaseArrayLayer(0);
+            subresourceRange.setLayerCount(layerCount);
+
+            barrier.setSubresourceRange(subresourceRange);
+
+            vk::PipelineStageFlags sourceStage;
+            vk::PipelineStageFlags destinationStage;
+
+            if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
+            {
+                barrier.setSrcAccessMask(vk::AccessFlags());
+                barrier.setDstAccessMask(vk::AccessFlagBits::eTransferWrite);
+                sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+                destinationStage = vk::PipelineStageFlagBits::eTransfer;
+            }
+            else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+            {
+                barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
+                barrier.setDstAccessMask(vk::AccessFlagBits::eShaderRead);
+                sourceStage = vk::PipelineStageFlagBits::eTransfer;
+                destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+            }
+            else 
+            {
+                throw nc::NcError("Unsupported layout transition.");
+            }
+
+            cmd.pipelineBarrier(sourceStage, destinationStage, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+        });
     }
 
     auto CreateTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView
