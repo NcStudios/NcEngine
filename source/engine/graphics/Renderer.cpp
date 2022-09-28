@@ -20,7 +20,7 @@
 #include "resources/RenderTarget.h"
 #include "resources/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
-#include "vk/Engine.h"
+#include "vk/Core.h"
 #include "vk/PerFrameGpuContext.h"
 
 #ifdef NC_EDITOR_ENABLED

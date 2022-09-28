@@ -2,7 +2,7 @@
 #include "config/Config.h"
 #include "graphics/Commands.h"
 #include "utility/NcError.h"
-#include "vk/Engine.h"
+#include "vk/Core.h"
 #include "vk/Initializers.h"
 
 #include <algorithm>
@@ -11,7 +11,7 @@
 
 namespace nc::graphics
 {
-    Base::Base(Engine* engine)
+    Base::Base(Core* engine)
         : m_engine{engine},
           m_depthFormat{},
           m_samplesCount{},

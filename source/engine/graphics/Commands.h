@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-struct Engine;
+struct Core;
 class PerFrameGpuContext;
 class Swapchain;
 struct IndexBuffer;

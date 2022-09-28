@@ -10,12 +10,12 @@
 
 namespace nc::graphics
 {
-    struct Engine;
+    struct Core;
 
     class Base
     {
         public:
-            Base(Engine* engine);
+            Base(Core* engine);
 
             const vk::Device& GetDevice() const noexcept; /** @todo: Remove and update references in a separate PR */
             const vk::PhysicalDevice& GetPhysicalDevice() const noexcept; /** @todo: Remove and update references in a separate PR */
@@ -28,7 +28,7 @@ namespace nc::graphics
 
         private:
 
-            Engine* m_engine;
+            Core* m_engine;
             vk::Format m_depthFormat;
             vk::SampleCountFlagBits m_samplesCount;
             bool m_samplesInitialized;

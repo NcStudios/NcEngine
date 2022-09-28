@@ -6,9 +6,9 @@
 
 namespace nc::graphics
 {
-struct Engine
+struct Core
 {
-    Engine(HWND hwnd, HINSTANCE hinstance);
+    Core(HWND hwnd, HINSTANCE hinstance);
 
     vk::UniqueInstance instance;
     vk::UniqueSurfaceKHR surface;

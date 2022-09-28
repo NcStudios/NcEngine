@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "Core.h"
 #include "config/Config.h"
 #include "utility/NcError.h"
 #include "QueueFamily.h"
@@ -212,7 +212,7 @@ vk::UniqueDevice CreateLogicalDevice(vk::PhysicalDevice physicalDevice, vk::Surf
 
 namespace nc::graphics
 {
-Engine::Engine(HWND hwnd, HINSTANCE hinstance)
+Core::Core(HWND hwnd, HINSTANCE hinstance)
     : instance{CreateInstance()},
       surface{CreateSurface(hwnd, hinstance, instance.get())},
       physicalDevice{CreatePhysicalDevice(instance.get(), surface.get())},

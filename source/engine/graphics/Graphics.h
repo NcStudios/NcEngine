@@ -20,7 +20,7 @@ namespace nc::graphics
 {
     class Base;
     class Commands;
-    struct Engine;
+    struct Core;
     class FrameManager;
     struct GpuAssetsStorage;
     struct PerFrameRenderState;
@@ -64,7 +64,7 @@ namespace nc::graphics
             void RecreateSwapchain(Vector2 dimensions);
 
             camera::MainCamera* m_mainCamera;
-            std::unique_ptr<Engine> m_engine;
+            std::unique_ptr<Core> m_engine;
             std::unique_ptr<Base> m_base;
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
