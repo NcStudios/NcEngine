@@ -8,9 +8,9 @@
 
 namespace
 {
-const std::vector<const char*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-const std::vector<const char*> GlobalExtensions = { VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME };
-const std::vector<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+constexpr auto DeviceExtensions = std::array<const char*, 1>{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+constexpr auto GlobalExtensions = std::array<const char*, 2>{ VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME };
+constexpr auto ValidationLayers = std::array<const char*, 1>{ "VK_LAYER_KHRONOS_validation" };
 
 bool CheckValidationLayerSupport();
 void SetValidationLayersEnabled(bool isEnabled, vk::InstanceCreateInfo& instanceCreateInfo);

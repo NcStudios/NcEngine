@@ -16,8 +16,8 @@ class PerFrameGpuContext
         void Wait(); // Waits until the fence has signaled
         void Reset() noexcept; // Resets the fence
         vk::Fence Fence() const noexcept { return m_inFlightFence.get(); }
-        vk::Semaphore* ImageAvailableSemaphore() noexcept { return &(m_imageAvailableSemaphore.get()); }
-        vk::Semaphore* RenderFinishedSemaphore() noexcept { return &(m_renderFinishedSemaphore.get()); }
+        vk::Semaphore ImageAvailableSemaphore() noexcept { return m_imageAvailableSemaphore.get(); }
+        vk::Semaphore RenderFinishedSemaphore() noexcept { return m_renderFinishedSemaphore.get(); }
         vk::CommandBuffer* CommandBuffer() noexcept { return &(m_commandBuffer.get()); }
 
     private:

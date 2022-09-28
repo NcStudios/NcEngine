@@ -21,9 +21,9 @@ namespace nc::graphics
 
     void Commands::SubmitQueue(PerFrameGpuContext* currentFrame)
     {
-        vk::Semaphore waitSemaphores[] = {*(currentFrame->ImageAvailableSemaphore()) }; // Which semaphore to wait on before execution begins
+        vk::Semaphore waitSemaphores[] = {currentFrame->ImageAvailableSemaphore()}; // Which semaphore to wait on before execution begins
         vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput }; // Which stage of the pipeline to wait in
-        vk::Semaphore signalSemaphores[] = { *(currentFrame->RenderFinishedSemaphore()) }; // Which semaphore to signal when execution completes
+        vk::Semaphore signalSemaphores[] = {currentFrame->RenderFinishedSemaphore()}; // Which semaphore to signal when execution completes
 
         vk::SubmitInfo submitInfo{};
         submitInfo.setWaitSemaphoreCount(1);

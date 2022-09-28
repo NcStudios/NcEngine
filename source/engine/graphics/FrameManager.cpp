@@ -2,11 +2,11 @@
 
 namespace
 {
-std::vector<std::unique_ptr<nc::graphics::PerFrameGpuContext>> CreatePerFrameGpuContextVector(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface)
+std::vector<nc::graphics::PerFrameGpuContext> CreatePerFrameGpuContextVector(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface)
 {
-    auto out = std::vector<std::unique_ptr<nc::graphics::PerFrameGpuContext>>{};
+    auto out = std::vector<nc::graphics::PerFrameGpuContext>{};
     out.reserve(nc::graphics::MaxFramesInFlight);
-    std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [logicalDevice, physicalDevice, surface](){ return std::make_unique<nc::graphics::PerFrameGpuContext>(logicalDevice, physicalDevice, surface); } );
+    std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [logicalDevice, physicalDevice, surface](){ return nc::graphics::PerFrameGpuContext(logicalDevice, physicalDevice, surface); } );
     return out;
 }
 }

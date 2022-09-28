@@ -177,13 +177,11 @@ namespace nc::graphics
         m_renderer->Record(m_frameManager->CurrentFrameContext(), state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
 
         // Executes the command buffer to render to the image
-        OPTICK_CATEGORY("Graphics::RenderToImage", Optick::Category::Rendering);
         m_swapchain->WaitForImageFence(m_imageIndex);
         m_swapchain->SyncImageAndFrameFence(m_frameManager->CurrentFrameContext(), m_imageIndex);
         m_commands->SubmitQueue(m_frameManager->CurrentFrameContext());
 
         // Returns the image to the swapchain
-        OPTICK_CATEGORY("Graphics::PresentImage", Optick::Category::Rendering);
         bool isSwapChainValid = true;
         m_swapchain->Present(m_frameManager->CurrentFrameContext(), m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily), m_imageIndex, isSwapChainValid);
 

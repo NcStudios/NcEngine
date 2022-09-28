@@ -81,7 +81,8 @@ namespace nc::graphics
     {
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setWaitSemaphoreCount(1);
-        presentInfo.setPWaitSemaphores(currentFrame->RenderFinishedSemaphore()); // Wait on this semaphore before presenting.
+        auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
+        presentInfo.setPWaitSemaphores(&waitSemaphore); // Wait on this semaphore before presenting.
 
         vk::SwapchainKHR swapChains[] = {m_swapChain};
         presentInfo.setSwapchainCount(1);
@@ -271,7 +272,7 @@ namespace nc::graphics
 
     bool Swapchain::GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex)
     {
-        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, *(currentFrame->ImageAvailableSemaphore()));
+        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, currentFrame->ImageAvailableSemaphore());
         *imageIndex = index;
         return result != vk::Result::eErrorOutOfDateKHR;
     }

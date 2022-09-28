@@ -93,9 +93,9 @@ Renderer::~Renderer() noexcept
 
 void Renderer::Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
 {
+    OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
     auto cmd = currentFrame->CommandBuffer();
 
-    OPTICK_CATEGORY("Renderer::Record", Optick::Category::Rendering);
     SetViewportAndScissor(cmd, m_dimensions);
     BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
 
