@@ -32,10 +32,9 @@ namespace nc::graphics
     void ShadowMapManager::Update(const std::vector<ShadowMap>& data)
     {
         m_dimensions = data.at(0).dimensions;
-        auto* base = m_graphics->GetBasePtr();
 
         m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(base, m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
+        m_depthStencil = std::make_unique<RenderTarget>(m_graphics->GetBasePtr()->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
@@ -55,7 +54,7 @@ namespace nc::graphics
         auto* base = m_graphics->GetBasePtr();
 
         m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(base, m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
+        m_depthStencil = std::make_unique<RenderTarget>(base->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
         vk::SamplerCreateInfo samplerInfo = {};

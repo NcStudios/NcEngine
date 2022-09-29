@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         Camera.cpp
         Commands.cpp
         DebugWidget.cpp
+        FrameManager.cpp
         GpuAllocator.cpp
         GpuAssetsStorage.cpp
         Graphics.cpp

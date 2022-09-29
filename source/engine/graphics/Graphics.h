@@ -20,6 +20,8 @@ namespace nc::graphics
 {
     class Base;
     class Commands;
+    struct Core;
+    class FrameManager;
     struct GpuAssetsStorage;
     struct PerFrameRenderState;
     class Swapchain;
@@ -27,6 +29,7 @@ namespace nc::graphics
     class RenderPassManager;
     class ShaderResourceServices;
 
+    /** @todo: Plan is to have Graphics header be general enough to be implemented by Vulkan or DX, and eventually have a Vulkan (and potentially DX) version of Renderer, FrameManager, etc. Slowly working towards that. */
     class Graphics
     {
         public:
@@ -39,14 +42,12 @@ namespace nc::graphics
 
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
             void SetClearColor(std::array<float, 4> color);
-            void WaitIdle();
             void Clear();
             void InitializeUI();
 
             Base* GetBasePtr() const noexcept;
             GpuAllocator* GetAllocatorPtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
-            Commands* GetCommandsPtr() const noexcept;
             ShaderResourceServices* GetShaderResources() const noexcept;
             const Vector2 GetDimensions() const noexcept;
             const std::array<float, 4>& GetClearColor() const noexcept;
@@ -61,15 +62,13 @@ namespace nc::graphics
 
         private:
             void RecreateSwapchain(Vector2 dimensions);
-            void GetNextImageIndex();
-            void RenderToImage(uint32_t imageIndex);
-            bool PresentImage(uint32_t imageIndex);
 
             camera::MainCamera* m_mainCamera;
+            std::unique_ptr<Core> m_engine;
             std::unique_ptr<Base> m_base;
-            std::unique_ptr<GpuAllocator> m_allocator;
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
+            std::unique_ptr<GpuAllocator> m_allocator;
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
             std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
@@ -77,6 +76,7 @@ namespace nc::graphics
             graphics::DebugRenderer m_debugRenderer;
             #endif
             std::unique_ptr<Renderer> m_renderer;
+            std::unique_ptr<FrameManager> m_frameManager;
 
             std::mutex m_resizingMutex;
             uint32_t m_imageIndex;

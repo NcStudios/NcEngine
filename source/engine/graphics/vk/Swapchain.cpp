@@ -1,20 +1,10 @@
 #include "Swapchain.h"
 #include "Initializers.h"
+#include "PerFrameGpuContext.h"
 #include "QueueFamily.h"
 #include "utility/NcError.h"
 
 #include <algorithm>
-
-namespace
-{
-    std::vector<nc::graphics::PerFrameGpuContext> CreatePerFrameGpuContextVector(vk::Device& device)
-    {
-        auto out = std::vector<nc::graphics::PerFrameGpuContext>{};
-        out.reserve(nc::graphics::MaxFramesInFlight);
-        std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [device](){ return nc::graphics::PerFrameGpuContext(device); } );
-        return out;
-    }
-}
 
 namespace nc::graphics
 {
@@ -66,14 +56,10 @@ namespace nc::graphics
           m_swapChainImageFormat{},
           m_swapChainExtent{},
           m_swapChainImageViews{},
-          m_perFrameGpuContext{CreatePerFrameGpuContextVector(device)},
-          m_imagesInFlightFences{},
-          m_currentFrameIndex{0}
+          m_imagesInFlightFences{}
     {
         Create(physicalDevice, surface, dimensions);
-
-        // The fences in imagesInFlightFences (one per swapchain image) track for each swap chain image whether it is being used by a frame in flight.
-        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr); // To start, no frames in flight are using swapchain images, so explicitly initialize to nullptr.
+        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
     
     Swapchain::~Swapchain() noexcept
@@ -91,16 +77,11 @@ namespace nc::graphics
        m_device.destroySwapchainKHR(m_swapChain);
     }
 
-    uint32_t Swapchain::GetFrameIndex() const noexcept
-    {
-        return m_currentFrameIndex;
-    }
-
-    void Swapchain::Present(vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid)
+    void Swapchain::Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid)
     {
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setWaitSemaphoreCount(1);
-        auto waitSemaphore = GetPerFrameGpuContext().RenderFinishedSemaphore();
+        auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
         presentInfo.setPWaitSemaphores(&waitSemaphore); // Wait on this semaphore before presenting.
 
         vk::SwapchainKHR swapChains[] = {m_swapChain};
@@ -133,9 +114,9 @@ namespace nc::graphics
         }
     }
 
-    void Swapchain::SyncImageAndFrameFence(uint32_t imageIndex)
+    void Swapchain::SyncImageAndFrameFence(PerFrameGpuContext* currentFrame, uint32_t imageIndex)
     {
-        m_imagesInFlightFences[imageIndex] = GetPerFrameGpuContext().Fence();
+        m_imagesInFlightFences[imageIndex] = currentFrame->Fence();
     }
 
     const vk::Format& Swapchain::GetFormat() const noexcept
@@ -274,21 +255,6 @@ namespace nc::graphics
         }
     }
 
-    void Swapchain::WaitForFrameFence()
-    {
-        GetPerFrameGpuContext().Wait();
-    }
-
-    void Swapchain::IncrementFrameIndex()
-    {
-        m_currentFrameIndex = (m_currentFrameIndex + 1) % MaxFramesInFlight;
-    }
-
-    void Swapchain::ResetFrameFence() noexcept
-    {
-        GetPerFrameGpuContext().Reset();
-    }
-
     const Vector2 Swapchain::GetExtentDimensions() const noexcept
     {
         return Vector2(static_cast<float>(m_swapChainExtent.width), static_cast<float>(m_swapChainExtent.height));
@@ -304,9 +270,9 @@ namespace nc::graphics
         return m_swapChainImageViews;
     }
 
-    bool Swapchain::GetNextRenderReadyImageIndex(uint32_t* imageIndex)
+    bool Swapchain::GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex)
     {
-        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, m_perFrameGpuContext[m_currentFrameIndex].ImageAvailableSemaphore());
+        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, currentFrame->ImageAvailableSemaphore());
         *imageIndex = index;
         return result != vk::Result::eErrorOutOfDateKHR;
     }

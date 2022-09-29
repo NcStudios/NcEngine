@@ -6,16 +6,17 @@
 
 namespace nc::graphics
 {
+class GpuAllocator;
+
 class MeshStorage
 {
     public:
-        MeshStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        MeshStorage(GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
         void UpdateBuffer(const MeshBufferData& meshBufferData);
         const VertexBuffer& GetVertexData() const noexcept;
         const IndexBuffer& GetIndexData() const noexcept;
 
     private:
-        Base* m_base;
         GpuAllocator* m_allocator;
         VertexBuffer m_vertexBuffer;
         IndexBuffer m_indexBuffer;

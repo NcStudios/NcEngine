@@ -1,6 +1,4 @@
 #include "ImmutableBuffer.h"
-#include "graphics/Base.h"
-#include "graphics/Commands.h"
 
 namespace
 {
@@ -20,7 +18,7 @@ namespace
     }
 
     template<class T>
-    auto CreateBuffer(nc::graphics::Base* base, nc::graphics::GpuAllocator* allocator, std::span<const T> data) -> nc::graphics::GpuAllocation<vk::Buffer>
+    auto CreateBuffer(nc::graphics::GpuAllocator* allocator, std::span<const T> data) -> nc::graphics::GpuAllocation<vk::Buffer>
     {
         const auto size = static_cast<uint32_t>(sizeof(T) * data.size());
 
@@ -36,7 +34,7 @@ namespace
         auto buffer = allocator->CreateBuffer(size, UsageFlags<T>(), vma::MemoryUsage::eGpuOnly);
 
         // Copy staging into immutable buffer.
-        nc::graphics::Commands::SubmitCopyCommandImmediate(*base, stagingBuffer, buffer.Data(), size);
+        allocator->CopyBuffer(stagingBuffer, buffer.Data(), size);
 
         // Destroy the staging buffer.
         stagingBuffer.Release();
@@ -52,13 +50,13 @@ namespace nc::graphics
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, std::span<const uint32_t> data)
-        : m_buffer{CreateBuffer(base, allocator, data)}
+    ImmutableBuffer::ImmutableBuffer(GpuAllocator* allocator, std::span<const uint32_t> data)
+        : m_buffer{CreateBuffer(allocator, data)}
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(Base* base, GpuAllocator* allocator, std::span<const nc::Vertex> data)
-        : m_buffer{CreateBuffer(base, allocator, data)}
+    ImmutableBuffer::ImmutableBuffer(GpuAllocator* allocator, std::span<const nc::Vertex> data)
+        : m_buffer{CreateBuffer(allocator, data)}
     {
     }
 

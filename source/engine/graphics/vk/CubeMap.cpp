@@ -40,7 +40,7 @@ namespace nc::graphics
 
     void CubeMap::Bind(const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize)
     {
-        m_image = m_allocator->CreateCubeMapTexture(m_base, pixels, width, height, cubeMapSize);
+        m_image = m_allocator->CreateCubeMapTexture(pixels, width, height, cubeMapSize);
         m_cubeMapview = CreateCubeMapTextureView(m_base->GetDevice(), m_image);
     }
 

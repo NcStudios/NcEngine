@@ -1,21 +1,21 @@
-#include "graphics/Base.h"
-#include "graphics/GpuAllocator.h"
 #include "graphics/resources/ImmutableBuffer.h"
 
 #include <span>
 
 namespace nc::graphics
 {
+class GpuAllocator; 
+
 struct VertexBuffer
 {
-    VertexBuffer(Base* base, GpuAllocator* allocator);
+    VertexBuffer(GpuAllocator* allocator);
     std::span<const nc::Vertex> vertices;
     ImmutableBuffer buffer;
 };
 
 struct IndexBuffer
 {
-    IndexBuffer(Base* base, GpuAllocator* allocator);
+    IndexBuffer(GpuAllocator* allocator);
     std::span<const uint32_t> indices;
     ImmutableBuffer buffer;
 };
