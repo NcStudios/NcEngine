@@ -7,7 +7,7 @@
 #include "graphics/vk/Initializers.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/Environment.h"
 #include "graphics/resources/ImmutableBuffer.h"

@@ -5,7 +5,7 @@
 #include "graphics/DebugWidget.h"
 #include "graphics/MeshRenderer.h"
 
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
 #include "graphics/techniques/EnvironmentTechnique.h"

@@ -12,10 +12,10 @@ namespace nc::graphics
 {
     struct Core;
 
-    class Base
+    class GpuOptions
     {
         public:
-            Base(Core* engine);
+            GpuOptions(Core* engine);
 
             const vk::Device& GetDevice() const noexcept; /** @todo: Remove and update references in a separate PR */
             const vk::PhysicalDevice& GetPhysicalDevice() const noexcept; /** @todo: Remove and update references in a separate PR */

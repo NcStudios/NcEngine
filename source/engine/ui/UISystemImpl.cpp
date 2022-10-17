@@ -1,5 +1,5 @@
 #include "UISystemImpl.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/vk/Swapchain.h"
 #include "utility/NcError.h"
 

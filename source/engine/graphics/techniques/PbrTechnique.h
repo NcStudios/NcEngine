@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Base;
+    class Graphics; class GpuOptions;
 
     class PbrTechnique : public ITechnique
     {
@@ -27,7 +27,7 @@ namespace nc::graphics
         void CreatePipeline(vk::RenderPass* renderPass);
 
         Graphics* m_graphics;
-        Base* m_base;
+        GpuOptions* m_base;
         ShaderDescriptorSets* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;

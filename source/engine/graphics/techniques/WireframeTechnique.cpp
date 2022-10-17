@@ -4,7 +4,7 @@
 #include "config/Config.h"
 #include "ecs/Transform.h"
 #include "ecs/Registry.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/DebugRenderer.h"
 #include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"

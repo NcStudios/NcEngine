@@ -6,12 +6,12 @@
 
 namespace nc::graphics
 {
-    class Base;
+    class GpuOptions;
 
     class CubeMap
     {
         public:
-            CubeMap(Base* base, GpuAllocator* allocator, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, const std::string& uid);
+            CubeMap(GpuOptions* base, GpuAllocator* allocator, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, const std::string& uid);
             ~CubeMap() noexcept;
             CubeMap(CubeMap&&) noexcept;
             CubeMap& operator=(CubeMap&&) noexcept;
@@ -24,7 +24,7 @@ namespace nc::graphics
             const std::string& GetUid() const noexcept;
 
         private:
-            Base* m_base;
+            GpuOptions* m_base;
             GpuAllocator* m_allocator;
             GpuAllocation<vk::Image> m_image;
             vk::UniqueImageView m_cubeMapview;

@@ -1,12 +1,12 @@
 #include "CubeMapStorage.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/GpuAllocator.h"
 #include "graphics/cubemaps/CubeMapManager.h"
 #include "graphics/vk/Initializers.h"
 
 namespace nc::graphics
 {
-CubeMapStorage::CubeMapStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+CubeMapStorage::CubeMapStorage(GpuOptions* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
     : m_base{base},
       m_allocator{allocator},
       m_cubeMaps{},

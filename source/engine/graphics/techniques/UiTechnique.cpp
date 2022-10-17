@@ -2,7 +2,7 @@
 #include "assets/AssetService.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"

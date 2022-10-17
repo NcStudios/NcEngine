@@ -1,9 +1,9 @@
 #include "CubeMap.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 
 namespace nc::graphics
 {
-    CubeMap::CubeMap(Base* base, GpuAllocator* allocator, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, const std::string& uid)
+    CubeMap::CubeMap(GpuOptions* base, GpuAllocator* allocator, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, const std::string& uid)
         : m_base{base},
           m_allocator{allocator},
           m_image{},

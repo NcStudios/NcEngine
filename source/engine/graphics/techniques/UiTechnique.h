@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Base; class Swapchain;
+    class Graphics; class GpuOptions; class Swapchain;
 
     class UiTechnique : public ITechnique
     {
@@ -24,7 +24,7 @@ namespace nc::graphics
             void CreatePipeline(vk::RenderPass* renderPass);
 
             Graphics* m_graphics;
-            Base* m_base;
+            GpuOptions* m_base;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };

@@ -1,4 +1,4 @@
-#include "Base.h"
+#include "GpuOptions.h"
 #include "config/Config.h"
 #include "graphics/Commands.h"
 #include "utility/NcError.h"

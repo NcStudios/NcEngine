@@ -11,7 +11,7 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Commands; class Base; class Swapchain;
+    class Graphics; class Commands; class GpuOptions; class Swapchain;
 
     const auto PlaneMeshPath = std::string{ "plane.nca" };
 
@@ -45,7 +45,7 @@ namespace nc::graphics
         void CreatePipeline(vk::RenderPass* renderPass);
 
         Graphics* m_graphics;
-        Base* m_base;
+        GpuOptions* m_base;
         Swapchain* m_swapchain;
         ShaderDescriptorSets* m_descriptorSets;
         vk::UniquePipeline m_pipeline;

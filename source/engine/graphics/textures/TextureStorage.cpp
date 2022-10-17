@@ -1,12 +1,12 @@
 #include "TextureStorage.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/GpuAllocator.h"
 #include "graphics/textures/TextureManager.h"
 #include "graphics/vk/Initializers.h"
 
 namespace nc::graphics
 {
-TextureStorage::TextureStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+TextureStorage::TextureStorage(GpuOptions* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
     : m_base{base},
       m_allocator{allocator},
       m_textureBuffers{},

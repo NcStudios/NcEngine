@@ -1,5 +1,5 @@
 #include "ShadowMapManager.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
 

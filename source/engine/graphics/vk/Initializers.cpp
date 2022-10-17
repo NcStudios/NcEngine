@@ -1,5 +1,5 @@
 #include "Initializers.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/Graphics.h"
 
 namespace nc::graphics

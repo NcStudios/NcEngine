@@ -7,8 +7,8 @@
 
 namespace nc::graphics
 {
-    class Base;
+    class GpuOptions;
 
-    vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, Base* base);
+    vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, GpuOptions* base);
     std::vector<uint32_t> ReadShader(const std::string& filename);
 }

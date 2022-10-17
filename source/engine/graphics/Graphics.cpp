@@ -1,6 +1,6 @@
 #include "Graphics.h"
 #include "assets/AssetServices.h"
-#include "Base.h"
+#include "GpuOptions.h"
 #include "Commands.h"
 #include "config/Config.h"
 #include "FrameManager.h"
@@ -22,7 +22,7 @@ namespace nc::graphics
     Graphics::Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_engine{std::make_unique<Core>(hwnd, hinstance)},
-          m_base{ std::make_unique<Base>(m_engine.get()) },
+          m_base{ std::make_unique<GpuOptions>(m_engine.get()) },
           m_swapchain{ std::make_unique<Swapchain>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->surface.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->surface.get(), m_swapchain.get()) },
           m_allocator{ std::make_unique<GpuAllocator>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->instance.get(), m_commands.get())},
@@ -93,7 +93,7 @@ namespace nc::graphics
         RecreateSwapchain(m_dimensions);
     }
 
-    Base* Graphics::GetBasePtr() const noexcept
+    GpuOptions* Graphics::GetBasePtr() const noexcept
     {
         return m_base.get();
     }

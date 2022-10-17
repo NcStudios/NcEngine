@@ -2,7 +2,7 @@
 #include "config/Config.h"
 #include "ecs/Registry.h"
 #include "graphics/MeshRenderer.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/resources/ShaderResourceServices.h"

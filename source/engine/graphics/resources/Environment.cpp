@@ -1,6 +1,6 @@
 #include "Environment.h"
 #include "assets/AssetService.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "ShaderResourceService.h"
 
 namespace nc

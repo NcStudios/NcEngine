@@ -6,13 +6,13 @@
 
 namespace nc::graphics
 {
-class Base;
+class GpuOptions;
 class GpuAllocator;
 
 class TextureStorage
 {
     public:
-        TextureStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        TextureStorage(GpuOptions* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
         ~TextureStorage() noexcept;
         void UpdateBuffer(const TextureBufferData& textureBufferData);
 
@@ -21,7 +21,7 @@ class TextureStorage
         void UnloadTextureBuffer(const TextureBufferData& textureBufferData);
         void UnloadAllTextureBuffer();
 
-        Base* m_base;
+        GpuOptions* m_base;
         GpuAllocator* m_allocator;
         std::vector<TextureBuffer> m_textureBuffers;
         vk::UniqueSampler m_sampler;

@@ -1,5 +1,5 @@
 #include "ShaderDescriptorSets.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/vk/Initializers.h"
 
 namespace
@@ -26,7 +26,7 @@ namespace
 
 namespace nc::graphics
 {
-    ShaderDescriptorSets::ShaderDescriptorSets(Base* base)
+    ShaderDescriptorSets::ShaderDescriptorSets(GpuOptions* base)
         : m_renderingDescriptorPool{CreateRenderingDescriptorPool(base->GetDevice())},
           m_descriptorSets{},
           m_base{base}
