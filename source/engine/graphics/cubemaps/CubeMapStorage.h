@@ -12,7 +12,7 @@ class GpuAllocator;
 class CubeMapStorage
 {
     public:
-        CubeMapStorage(GpuOptions* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        CubeMapStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
 
         void UpdateBuffer(const CubeMapBufferData& cubeMapBufferData);
 
@@ -21,7 +21,7 @@ class CubeMapStorage
         void UnloadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferData);
         void UnloadAllCubeMapBuffer();
 
-        GpuOptions* m_base;
+        GpuOptions* m_gpuOptions;
         GpuAllocator* m_allocator;
         std::vector<CubeMap> m_cubeMaps;
         vk::UniqueSampler m_sampler;

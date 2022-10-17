@@ -12,7 +12,7 @@ class GpuAllocator;
 class TextureStorage
 {
     public:
-        TextureStorage(GpuOptions* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        TextureStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
         ~TextureStorage() noexcept;
         void UpdateBuffer(const TextureBufferData& textureBufferData);
 
@@ -21,7 +21,7 @@ class TextureStorage
         void UnloadTextureBuffer(const TextureBufferData& textureBufferData);
         void UnloadAllTextureBuffer();
 
-        GpuOptions* m_base;
+        GpuOptions* m_gpuOptions;
         GpuAllocator* m_allocator;
         std::vector<TextureBuffer> m_textureBuffers;
         vk::UniqueSampler m_sampler;

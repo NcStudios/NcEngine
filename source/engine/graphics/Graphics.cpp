@@ -21,19 +21,19 @@ namespace nc::graphics
 {
     Graphics::Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
-          m_engine{std::make_unique<Core>(hwnd, hinstance)},
-          m_base{ std::make_unique<GpuOptions>(m_engine.get()) },
-          m_swapchain{ std::make_unique<Swapchain>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->surface.get(), dimensions) },
-          m_commands{ std::make_unique<Commands>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->surface.get(), m_swapchain.get()) },
-          m_allocator{ std::make_unique<GpuAllocator>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->instance.get(), m_commands.get())},
+          m_core{std::make_unique<Core>(hwnd, hinstance)},
+          m_gpuOptions{ std::make_unique<GpuOptions>(m_core.get()) },
+          m_swapchain{ std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), dimensions) },
+          m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
+          m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
           m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
-          m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_base.get(), m_allocator.get(), gpuAccessorSignals) },
+          m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_gpuOptions.get(), m_allocator.get(), gpuAccessorSignals) },
           #ifdef NC_DEBUG_RENDERING_ENABLED
           m_debugRenderer{},
           #endif
-          m_renderer{ std::make_unique<Renderer>(this, m_engine->logicalDevice.get(), m_shaderResources.get(), dimensions) },
-          m_frameManager{std::make_unique<FrameManager>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->surface.get())},
+          m_renderer{ std::make_unique<Renderer>(this, m_core->logicalDevice.get(), m_shaderResources.get(), dimensions) },
+          m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
@@ -64,7 +64,7 @@ namespace nc::graphics
         std::lock_guard lock{m_resizingMutex};
 
         // Wait for all current commands to complete execution
-        m_engine->logicalDevice.get().waitIdle();
+        m_core->logicalDevice.get().waitIdle();
 
         m_dimensions = dimensions;
         m_renderer.reset();
@@ -74,9 +74,9 @@ namespace nc::graphics
         // Recreate swapchain and resources
         auto shadowMap = ShadowMap { .dimensions = m_dimensions };
         m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
-        m_swapchain = std::make_unique<Swapchain>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->surface.get(), m_dimensions);
-        m_commands = std::make_unique<Commands>(m_engine->logicalDevice.get(), m_engine->physicalDevice, m_engine->surface.get(), m_swapchain.get());
-        m_renderer = std::make_unique<Renderer>(this, m_engine->logicalDevice.get(), m_shaderResources.get(), m_dimensions);
+        m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
+        m_commands = std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get());
+        m_renderer = std::make_unique<Renderer>(this, m_core->logicalDevice.get(), m_shaderResources.get(), m_dimensions);
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
@@ -93,9 +93,9 @@ namespace nc::graphics
         RecreateSwapchain(m_dimensions);
     }
 
-    GpuOptions* Graphics::GetBasePtr() const noexcept
+    GpuOptions* Graphics::GetGpuOptions() const noexcept
     {
-        return m_base.get();
+        return m_gpuOptions.get();
     }
 
     GpuAllocator* Graphics::GetAllocatorPtr() const noexcept
@@ -127,7 +127,7 @@ namespace nc::graphics
 
     void Graphics::Clear()
     {
-        m_engine->logicalDevice.get().waitIdle();
+        m_core->logicalDevice.get().waitIdle();
         m_renderer->Clear();
         ShaderResourceService<ObjectData>::Get()->Reset();
         ShaderResourceService<PointLightInfo>::Get()->Reset();
@@ -147,7 +147,7 @@ namespace nc::graphics
 
     void Graphics::InitializeUI() /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
     {
-        m_renderer->InitializeImgui(m_engine->instance.get(), m_engine->physicalDevice, m_engine->logicalDevice.get(), m_commands.get(), static_cast<uint32_t>(m_base->GetMaxSamplesCount()));
+        m_renderer->InitializeImgui(m_core->instance.get(), m_core->physicalDevice, m_core->logicalDevice.get(), m_commands.get(), static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
     }
 
     bool Graphics::FrameBegin()

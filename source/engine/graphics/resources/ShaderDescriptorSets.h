@@ -50,7 +50,7 @@ namespace nc::graphics
     class ShaderDescriptorSets
     {
         public:
-            ShaderDescriptorSets(GpuOptions* base);
+            ShaderDescriptorSets(GpuOptions* gpuOptions);
 
             /* Shader resource services attach themselves to a shader slot by registering themselves here. */
             uint32_t RegisterDescriptor(uint32_t bindingSlot, BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
@@ -72,6 +72,6 @@ namespace nc::graphics
             std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
 
             /** @todo needs only Device & PadBufferOffset... */
-            GpuOptions* m_base;
+            GpuOptions* m_gpuOptions;
     };
 }

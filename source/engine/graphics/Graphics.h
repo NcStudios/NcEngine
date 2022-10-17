@@ -45,7 +45,7 @@ namespace nc::graphics
             void Clear();
             void InitializeUI();
 
-            GpuOptions* GetBasePtr() const noexcept;
+            GpuOptions* GetGpuOptions() const noexcept;
             GpuAllocator* GetAllocatorPtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
             ShaderResourceServices* GetShaderResources() const noexcept;
@@ -64,8 +64,8 @@ namespace nc::graphics
             void RecreateSwapchain(Vector2 dimensions);
 
             camera::MainCamera* m_mainCamera;
-            std::unique_ptr<Core> m_engine;
-            std::unique_ptr<GpuOptions> m_base;
+            std::unique_ptr<Core> m_core;
+            std::unique_ptr<GpuOptions> m_gpuOptions;
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<GpuAllocator> m_allocator;

@@ -33,7 +33,7 @@ namespace nc::graphics
           m_renderPasses{},
           m_frameBufferAttachments{}
     {
-        auto* base = m_graphics->GetBasePtr();
+        auto* gpuOptions = m_graphics->GetGpuOptions();
         auto* swapchain = m_graphics->GetSwapchainPtr();
 
         /** Shadow mapping pass */
@@ -52,8 +52,8 @@ namespace nc::graphics
         /** Lit shading pass */
         std::array<AttachmentSlot, 3> litAttachmentSlots
         {
-            AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, base->GetMaxSamplesCount()},
-            AttachmentSlot{1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, base->GetMaxSamplesCount()},
+            AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, gpuOptions->GetMaxSamplesCount()},
+            AttachmentSlot{1, AttachmentType::Depth, gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, gpuOptions->GetMaxSamplesCount()},
             AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
         };
 
@@ -132,15 +132,15 @@ namespace nc::graphics
                                    ClearValueFlags_t clearFlags,
                                    const Vector2& dimensions)
     {
-        auto* base = m_graphics->GetBasePtr();
+        auto* gpuOptions = m_graphics->GetGpuOptions();
         auto* swapchain = m_graphics->GetSwapchainPtr();
         const auto size = RenderTargetSize{dimensions, swapchain->GetExtent()};
-        m_renderPasses.emplace_back(attachmentSlots, subpasses, base->GetDevice(), size, uid, clearFlags);
+        m_renderPasses.emplace_back(attachmentSlots, subpasses, gpuOptions->GetDevice(), size, uid, clearFlags);
     }
 
     void RenderPassManager::Resize(const Vector2& dimensions, vk::Extent2D extent)
     {
-        auto* base = m_graphics->GetBasePtr();
+        auto* gpuOptions = m_graphics->GetGpuOptions();
 
         for (auto& renderPass : m_renderPasses)
         {
@@ -161,7 +161,7 @@ namespace nc::graphics
             framebufferInfo.setLayers(1);
 
             frameBufferAttachment.frameBuffer.reset();
-            frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+            frameBufferAttachment.frameBuffer = gpuOptions->GetDevice().createFramebufferUnique(framebufferInfo);
         }
     }
 
@@ -193,7 +193,7 @@ namespace nc::graphics
             m_frameBufferAttachments.pop_back();
         }
 
-        auto* base = m_graphics->GetBasePtr();
+        auto* gpuOptions = m_graphics->GetGpuOptions();
         auto frameBufferAttachment = FrameBufferAttachment{};
 
         frameBufferAttachment.attachmentHandles = std::move(attachmentHandles);
@@ -209,7 +209,7 @@ namespace nc::graphics
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+        frameBufferAttachment.frameBuffer = gpuOptions->GetDevice().createFramebufferUnique(framebufferInfo);
         m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 
@@ -226,7 +226,7 @@ namespace nc::graphics
             m_frameBufferAttachments.pop_back();
         }
 
-        auto* base = m_graphics->GetBasePtr();
+        auto* gpuOptions = m_graphics->GetGpuOptions();
         auto frameBufferAttachment = FrameBufferAttachment{};
 
         frameBufferAttachment.attachmentHandles.reserve(1);
@@ -243,7 +243,7 @@ namespace nc::graphics
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+        frameBufferAttachment.frameBuffer = gpuOptions->GetDevice().createFramebufferUnique(framebufferInfo);
         m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 }

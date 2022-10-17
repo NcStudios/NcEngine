@@ -24,7 +24,7 @@ namespace nc::graphics
             void CreatePipeline(vk::RenderPass* renderPass);
 
             Graphics* m_graphics;
-            GpuOptions* m_base;
+            GpuOptions* m_gpuOptions;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };

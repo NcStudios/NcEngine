@@ -10,7 +10,7 @@ namespace nc::graphics
     {
         public:
             ImmutableImage();
-            ImmutableImage(GpuOptions* base, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height);
+            ImmutableImage(GpuOptions* gpuOptions, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height);
             ImmutableImage(ImmutableImage&&) = default;
             ImmutableImage& operator=(ImmutableImage&&) = default;
             ImmutableImage& operator=(const ImmutableImage&) = delete;

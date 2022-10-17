@@ -9,9 +9,9 @@ namespace nc::graphics
     {
     }
 
-    ImmutableImage::ImmutableImage(GpuOptions* base, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height)
+    ImmutableImage::ImmutableImage(GpuOptions* gpuOptions, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height)
         : m_image{allocator->CreateTexture(pixels, width, height)},
-          m_view{CreateTextureView(base->GetDevice(), m_image)}
+          m_view{CreateTextureView(gpuOptions->GetDevice(), m_image)}
     {
     }
 

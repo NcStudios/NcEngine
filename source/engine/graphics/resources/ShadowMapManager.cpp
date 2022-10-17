@@ -34,7 +34,7 @@ namespace nc::graphics
         m_dimensions = data.at(0).dimensions;
 
         m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(m_graphics->GetBasePtr()->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
+        m_depthStencil = std::make_unique<RenderTarget>(m_graphics->GetGpuOptions()->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
@@ -51,10 +51,10 @@ namespace nc::graphics
 
     void ShadowMapManager::Initialize()
     {
-        auto* base = m_graphics->GetBasePtr();
+        auto* gpuOptions = m_graphics->GetGpuOptions();
 
         m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(base->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
+        m_depthStencil = std::make_unique<RenderTarget>(gpuOptions->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
         vk::SamplerCreateInfo samplerInfo = {};
@@ -74,7 +74,7 @@ namespace nc::graphics
         samplerInfo.setMinLod(0.0f);
         samplerInfo.setMaxLod(1.0f);
 
-        m_sampler = base->GetDevice().createSamplerUnique(samplerInfo);
+        m_sampler = gpuOptions->GetDevice().createSamplerUnique(samplerInfo);
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);

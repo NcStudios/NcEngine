@@ -15,7 +15,7 @@ class ShaderResourceServices
 {
     public:
         ShaderResourceServices(Graphics* graphics, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
-            : m_ShaderDescriptorSets{graphics->GetBasePtr()},
+            : m_ShaderDescriptorSets{graphics->GetGpuOptions()},
                 m_objectDataManager{0, allocator, &m_ShaderDescriptorSets, memorySettings.maxRenderers},
                 m_pointLightManager{1, allocator, &m_ShaderDescriptorSets, memorySettings.maxPointLights},
                 m_textureManager{2, &m_ShaderDescriptorSets, memorySettings.maxTextures},

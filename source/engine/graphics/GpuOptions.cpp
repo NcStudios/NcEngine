@@ -11,17 +11,17 @@
 
 namespace nc::graphics
 {
-    Base::Base(Core* engine)
-        : m_engine{engine},
+    GpuOptions::GpuOptions(Core* engine)
+        : m_core{engine},
           m_depthFormat{},
           m_samplesCount{},
           m_samplesInitialized{false},
-          m_gpuProperties{m_engine->physicalDevice.getProperties()}
+          m_gpuProperties{m_core->physicalDevice.getProperties()}
     {
         QueryDepthFormatSupport();
     }
 
-    vk::SampleCountFlagBits Base::GetMaxSamplesCount()
+    vk::SampleCountFlagBits GpuOptions::GetMaxSamplesCount()
     {
         if (m_samplesInitialized == true)
         {
@@ -31,7 +31,7 @@ namespace nc::graphics
         m_samplesInitialized = true;
 
         vk::PhysicalDeviceProperties properties{};
-        m_engine->physicalDevice.getProperties(&properties);
+        m_core->physicalDevice.getProperties(&properties);
 
         auto antialiasingSamples = nc::config::GetGraphicsSettings().antialiasing;
         vk::SampleCountFlags countsFromConfig = vk::SampleCountFlagBits::e1;
@@ -61,39 +61,39 @@ namespace nc::graphics
         return m_samplesCount;
     }
 
-    const vk::Device& Base::GetDevice() const noexcept /** @todo: Remove and update references in a separate PR */
+    const vk::Device& GpuOptions::GetDevice() const noexcept /** @todo: Remove and update references in a separate PR */
     {
-        return m_engine->logicalDevice.get();
+        return m_core->logicalDevice.get();
     }
 
-    const vk::PhysicalDevice& Base::GetPhysicalDevice() const noexcept /** @todo: Remove and update references in a separate PR */
+    const vk::PhysicalDevice& GpuOptions::GetPhysicalDevice() const noexcept /** @todo: Remove and update references in a separate PR */
     {
-        return m_engine->physicalDevice;
+        return m_core->physicalDevice;
     }
 
-    const vk::Instance& Base::GetInstance() const noexcept /** @todo: Remove and update references in a separate PR */
+    const vk::Instance& GpuOptions::GetInstance() const noexcept /** @todo: Remove and update references in a separate PR */
     {
-        return m_engine->instance.get();
+        return m_core->instance.get();
     }
 
-    const vk::SurfaceKHR& Base::GetSurface() const noexcept /** @todo: Remove and update references in a separate PR */
+    const vk::SurfaceKHR& GpuOptions::GetSurface() const noexcept /** @todo: Remove and update references in a separate PR */
     {
-        return m_engine->surface.get();
+        return m_core->surface.get();
     }
 
-    const vk::Format& Base::GetDepthFormat() const noexcept
+    const vk::Format& GpuOptions::GetDepthFormat() const noexcept
     {
         return m_depthFormat;
     }
 
-    void Base::QueryDepthFormatSupport()
+    void GpuOptions::QueryDepthFormatSupport()
     {
         std::vector<vk::Format> depthFormats = { vk::Format::eD32SfloatS8Uint, vk::Format::eD32Sfloat, vk::Format::eD24UnormS8Uint, vk::Format::eD16UnormS8Uint, vk::Format::eD16Unorm };
 
         for (auto& format : depthFormats)
         {
             vk::FormatProperties formatProperties;
-            m_engine->physicalDevice.getFormatProperties(format, &formatProperties);
+            m_core->physicalDevice.getFormatProperties(format, &formatProperties);
             // Format must support depth stencil attachment for optimal tiling
             if (formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
             {

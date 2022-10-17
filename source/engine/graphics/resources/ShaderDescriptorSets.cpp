@@ -26,10 +26,10 @@ namespace
 
 namespace nc::graphics
 {
-    ShaderDescriptorSets::ShaderDescriptorSets(GpuOptions* base)
-        : m_renderingDescriptorPool{CreateRenderingDescriptorPool(base->GetDevice())},
+    ShaderDescriptorSets::ShaderDescriptorSets(GpuOptions* gpuOptions)
+        : m_renderingDescriptorPool{CreateRenderingDescriptorPool(gpuOptions->GetDevice())},
           m_descriptorSets{},
-          m_base{base}
+          m_gpuOptions{gpuOptions}
     {
         m_descriptorSets.reserve(1);
         m_descriptorSets.emplace(BindFrequency::per_frame, DescriptorSet{});
@@ -79,7 +79,7 @@ namespace nc::graphics
                 writes.push_back(kv.second.write);
             }
 
-            m_base->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+            m_gpuOptions->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
             descriptorSet->isDirty = false;
         }
 
@@ -107,8 +107,8 @@ namespace nc::graphics
             bindingFlags.push_back(kv.second);
         }
 
-        descriptorSet->layout = CreateDescriptorSetLayout(m_base->GetDevice(), bindings, bindingFlags);
-        descriptorSet->set = CreateDescriptorSet(m_base->GetDevice(), &m_renderingDescriptorPool.get(), 1, &descriptorSet->layout.get());
+        descriptorSet->layout = CreateDescriptorSetLayout(m_gpuOptions->GetDevice(), bindings, bindingFlags);
+        descriptorSet->set = CreateDescriptorSet(m_gpuOptions->GetDevice(), &m_renderingDescriptorPool.get(), 1, &descriptorSet->layout.get());
     }
 
     void ShaderDescriptorSets::UpdateImage(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)

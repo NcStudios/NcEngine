@@ -76,8 +76,8 @@ Renderer::Renderer(Graphics* graphics, vk::Device device, ShaderResourceServices
       m_shaderResources{shaderResources},
       m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
       m_dimensions{dimensions},
-      m_depthStencil{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetBasePtr()->GetDepthFormat()) },
-      m_colorBuffer{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetBasePtr()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) },
+      m_depthStencil{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetGpuOptions()->GetDepthFormat()) },
+      m_colorBuffer{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) },
       m_imguiDescriptorPool{CreateImguiDescriptorPool(device)}
 {
     RegisterRenderPasses();

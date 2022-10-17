@@ -25,7 +25,7 @@ namespace nc::graphics
     ShadowMappingTechnique::ShadowMappingTechnique(Graphics* graphics, vk::RenderPass* renderPass)
     : 
       m_graphics{graphics},
-      m_base{graphics->GetBasePtr()},
+      m_gpuOptions{graphics->GetGpuOptions()},
       m_descriptorSets{m_graphics->GetShaderResources()->GetDescriptorSets()},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr},
@@ -57,7 +57,7 @@ namespace nc::graphics
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
-        auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
+        auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_gpuOptions);
 
         std::array<vk::PipelineShaderStageCreateInfo, 1u> shaderStages
         {
@@ -73,7 +73,7 @@ namespace nc::graphics
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
-        m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = m_gpuOptions->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
 
         // Graphics pipeline
         std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
@@ -108,8 +108,8 @@ namespace nc::graphics
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
+        m_pipeline = m_gpuOptions->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        m_gpuOptions->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
     }
 
     bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)

@@ -6,11 +6,11 @@
 
 namespace nc::graphics
 {
-TextureStorage::TextureStorage(GpuOptions* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
-    : m_base{base},
+TextureStorage::TextureStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+    : m_gpuOptions{gpuOptions},
       m_allocator{allocator},
       m_textureBuffers{},
-      m_sampler{graphics::CreateTextureSampler(base->GetDevice(), vk::SamplerAddressMode::eRepeat)},
+      m_sampler{graphics::CreateTextureSampler(gpuOptions->GetDevice(), vk::SamplerAddressMode::eRepeat)},
       m_onTextureUpdate{gpuAccessorSignals.onTextureUpdate->Connect(this, &TextureStorage::UpdateBuffer)}
 {
 }
@@ -55,7 +55,7 @@ void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferDat
 
         TextureBuffer textureBuffer
         {
-            .image = graphics::ImmutableImage(m_base, m_allocator, textureData.pixels.get(), textureData.width, textureData.height),
+            .image = graphics::ImmutableImage(m_gpuOptions, m_allocator, textureData.pixels.get(), textureData.width, textureData.height),
             .imageInfo = graphics::CreateDescriptorImageInfo(m_sampler.get(), textureBuffer.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
             .uid = textureData.id
         };

@@ -12,7 +12,7 @@ class GpuAllocator;
 
 struct GpuAssetsStorage
 {
-    GpuAssetsStorage(GpuOptions* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+    GpuAssetsStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
     CubeMapStorage cubeMapStorage;
     MeshStorage meshStorage;
     TextureStorage textureStorage;

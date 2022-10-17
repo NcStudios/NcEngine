@@ -43,7 +43,7 @@ namespace nc::graphics
             void CreatePipeline(vk::RenderPass* renderPass);
 
             nc::graphics::Graphics* m_graphics;
-            GpuOptions* m_base;
+            GpuOptions* m_gpuOptions;
             std::string m_meshPath;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;

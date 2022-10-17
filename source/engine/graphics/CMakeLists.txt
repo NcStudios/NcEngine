@@ -1,6 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        Base.cpp
+        GpuOptions.cpp
         Camera.cpp
         Commands.cpp
         DebugWidget.cpp

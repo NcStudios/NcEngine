@@ -9,6 +9,6 @@ namespace nc::graphics
 {
     class GpuOptions;
 
-    vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, GpuOptions* base);
+    vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, GpuOptions* gpuOptions);
     std::vector<uint32_t> ReadShader(const std::string& filename);
 }

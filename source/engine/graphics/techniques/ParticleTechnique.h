@@ -45,7 +45,7 @@ namespace nc::graphics
         void CreatePipeline(vk::RenderPass* renderPass);
 
         Graphics* m_graphics;
-        GpuOptions* m_base;
+        GpuOptions* m_gpuOptions;
         Swapchain* m_swapchain;
         ShaderDescriptorSets* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
