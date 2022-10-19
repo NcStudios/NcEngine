@@ -37,8 +37,7 @@ namespace nc::graphics
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
-          m_isMinimized{ false },
-          m_clearColor{0.0f, 0.0f, 0.0f, 1.0f}
+          m_isMinimized{ false }
     {
     }
 
@@ -113,11 +112,6 @@ namespace nc::graphics
         return m_shaderResources.get();
     }
 
-    const Vector2 Graphics::GetDimensions() const noexcept
-    {
-        return m_dimensions;
-    }
-
     #ifdef NC_DEBUG_RENDERING_ENABLED
     graphics::DebugData* Graphics::GetDebugData()
     {
@@ -133,16 +127,6 @@ namespace nc::graphics
         ShaderResourceService<PointLightInfo>::Get()->Reset();
         ShaderResourceService<ShadowMap>::Get()->Reset();
         ShaderResourceService<EnvironmentData>::Get()->Reset();
-    }
-
-    void Graphics::SetClearColor(std::array<float, 4> color)
-    {
-        m_clearColor = color;
-    }
-
-    const std::array<float, 4>& Graphics::GetClearColor() const noexcept
-    {
-        return m_clearColor;
     }
 
     void Graphics::InitializeUI() /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */

@@ -35,13 +35,8 @@ namespace nc::graphics
         public:
             Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
             ~Graphics() noexcept;
-            Graphics(const Graphics&) = delete;
-            Graphics(Graphics&&) = delete;
-            Graphics& operator=(const Graphics&) = delete;
-            Graphics& operator=(Graphics&&) = delete;
 
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
-            void SetClearColor(std::array<float, 4> color);
             void Clear();
             void InitializeUI();
 
@@ -49,8 +44,6 @@ namespace nc::graphics
             GpuAllocator* GetAllocatorPtr() const noexcept;
             Swapchain* GetSwapchainPtr() const noexcept;
             ShaderResourceServices* GetShaderResources() const noexcept;
-            const Vector2 GetDimensions() const noexcept;
-            const std::array<float, 4>& GetClearColor() const noexcept;
 
             #ifdef NC_DEBUG_RENDERING_ENABLED
             graphics::DebugData* GetDebugData();
@@ -82,6 +75,5 @@ namespace nc::graphics
             uint32_t m_imageIndex;
             Vector2 m_dimensions;
             bool m_isMinimized;
-            std::array<float, 4> m_clearColor;
     };
 } // namespace nc::graphics

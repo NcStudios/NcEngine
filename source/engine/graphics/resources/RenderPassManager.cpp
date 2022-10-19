@@ -8,13 +8,13 @@
 
 namespace
 {
-auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags, const std::array<float, 4>& clearColor) -> std::vector<vk::ClearValue>
+auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
 {
     std::vector<vk::ClearValue> clearValues;
 
     if(clearFlags & nc::graphics::ClearValueFlags::Color)
     {
-        clearValues.push_back(vk::ClearValue{vk::ClearColorValue{clearColor}});
+        clearValues.push_back(vk::ClearValue{vk::ClearColorValue{nc::graphics::ClearColor}});
     }
 
     if(clearFlags & nc::graphics::ClearValueFlags::Depth)
@@ -94,7 +94,7 @@ namespace nc::graphics
 
     void RenderPassManager::Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
     {
-        const auto clearValues = CreateClearValues(renderPass->clearFlags, m_graphics->GetClearColor());
+        const auto clearValues = CreateClearValues(renderPass->clearFlags);
         const auto renderPassInfo = vk::RenderPassBeginInfo
         {
             renderPass->renderpass.get(), GetFrameBufferAttachment(renderPass->uid, renderTargetIndex).frameBuffer.get(),

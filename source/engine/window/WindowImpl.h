@@ -28,13 +28,11 @@ namespace nc::window
             auto GetDimensions() const noexcept -> Vector2;
 
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept;
-            void BindGraphicsSetClearColorCallback(std::function<void(std::array<float, 4>)> callback) noexcept;
             void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept;
 
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
             void OnResize(float width, float height, WPARAM windowArg);
-            void SetClearColor(std::array<float, 4> color) noexcept;
 
             void ProcessSystemMessages();
 
@@ -48,7 +46,6 @@ namespace nc::window
             Vector2 m_dimensions;
 
             std::function<void(float,float,float,float,WPARAM)> GraphicsOnResizeCallback;
-            std::function<void(std::array<float, 4>)> GraphicsSetClearColorCallback;
             std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> UIWndMessageCallback;
             std::function<void()> EngineDisableRunningCallback;
     };

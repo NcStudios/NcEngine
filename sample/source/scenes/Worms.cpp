@@ -24,9 +24,6 @@ namespace nc::sample
         auto camera = registry->Add<graphics::Camera>(cameraEntity);
         modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
-        // Window
-        window::SetClearColor({0.05f, 0.05f, 0.05f, 1.0f});
-
         // Light
         auto lightOneProperties = graphics::PointLightInfo
         {
