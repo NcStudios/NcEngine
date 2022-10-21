@@ -81,7 +81,7 @@ Renderer::Renderer(Graphics* graphics, vk::Device device, ShaderResourceServices
       m_imguiDescriptorPool{CreateImguiDescriptorPool(device)}
 {
     RegisterRenderPasses();
-    RegisterTechniques();
+    RegisterTechniques(device);
 }
 
 Renderer::~Renderer() noexcept
@@ -142,18 +142,18 @@ void Renderer::RegisterRenderPasses()
     for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, RenderPassManager::LitShadingPass, index++); }
 }
 
-void Renderer::RegisterTechniques()
+void Renderer::RegisterTechniques(vk::Device device)
 {
-    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
+    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(device, RenderPassManager::ShadowMappingPass);
 
     #ifdef NC_EDITOR_ENABLED
-    m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<WireframeTechnique>(device, RenderPassManager::LitShadingPass);
     #endif
 
-    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<PbrTechnique>(RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<ParticleTechnique>(RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(device, RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<PbrTechnique>(device, RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<ParticleTechnique>(device, RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<UiTechnique>(device, RenderPassManager::LitShadingPass);
 }
 
 void Renderer::BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData)

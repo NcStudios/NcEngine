@@ -6,13 +6,13 @@
 
 namespace nc::graphics
 {
-    vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, GpuOptions* gpuOptions)
+    vk::ShaderModule CreateShaderModule(vk::Device device, const std::vector<uint32_t>& code)
     {
         vk::ShaderModuleCreateInfo createInfo{};
         createInfo.setCodeSize(code.size()*sizeof(uint32_t));
         createInfo.setPCode(code.data());
         vk::ShaderModule shaderModule;
-        if (gpuOptions->GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
+        if (device.createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
         {
             throw NcError("Failed to create shader module.");
         }

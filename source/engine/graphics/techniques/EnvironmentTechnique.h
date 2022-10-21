@@ -11,12 +11,12 @@
 
 namespace nc::graphics
 {
-    class Graphics; class GpuOptions; class Swapchain;
+    class Graphics;
 
     class EnvironmentTechnique : public ITechnique
     {
         public:
-            EnvironmentTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
+            EnvironmentTechnique(vk::Device device, nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
             ~EnvironmentTechnique() noexcept;
             
             bool CanBind(const PerFrameRenderState& frameData) override;
@@ -28,10 +28,6 @@ namespace nc::graphics
             void Clear() noexcept;
 
         private:
-            void CreatePipeline(vk::RenderPass* renderPass);
-
-            nc::graphics::Graphics* m_graphics;
-            GpuOptions* m_gpuOptions;
             ShaderDescriptorSets* m_descriptorSets;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;

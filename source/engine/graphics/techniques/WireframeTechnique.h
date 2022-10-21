@@ -18,7 +18,7 @@ namespace nc
 
 namespace nc::graphics
 {
-    class Graphics; class GpuOptions; class Swapchain;
+    class Graphics;
 
     struct WireframePushConstants
     {
@@ -30,7 +30,7 @@ namespace nc::graphics
     class WireframeTechnique : public ITechnique
     {
         public:
-            WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
+            WireframeTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass);
             ~WireframeTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
@@ -40,10 +40,7 @@ namespace nc::graphics
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         private:
-            void CreatePipeline(vk::RenderPass* renderPass);
-
             nc::graphics::Graphics* m_graphics;
-            GpuOptions* m_gpuOptions;
             std::string m_meshPath;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;

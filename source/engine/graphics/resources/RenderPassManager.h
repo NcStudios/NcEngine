@@ -36,7 +36,7 @@ namespace nc::graphics
             void RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid);
 
             template <std::derived_from<ITechnique> T>
-            void RegisterTechnique(const std::string& uid);
+            void RegisterTechnique(vk::Device device, const std::string& uid);
             
         private:
             void Create(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValueFlags_t clearFlags, const Vector2& dimensions);
@@ -51,7 +51,7 @@ namespace nc::graphics
     };
 
     template <std::derived_from<ITechnique> T>
-    void RenderPassManager::RegisterTechnique(const std::string& uid)
+    void RenderPassManager::RegisterTechnique(vk::Device device, const std::string& uid)
     {
         const auto& techniqueType = typeid(T);
         auto& renderpass = Acquire(uid);
@@ -66,7 +66,7 @@ namespace nc::graphics
             renderpass.techniques.pop_back();
         }
 
-        renderpass.techniques.push_back(std::make_unique<T>(m_graphics, &renderpass.renderpass.get()));
+        renderpass.techniques.push_back(std::make_unique<T>(device, m_graphics, &renderpass.renderpass.get()));
     }
 
 } // namespace nc

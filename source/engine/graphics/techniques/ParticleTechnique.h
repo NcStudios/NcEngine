@@ -11,7 +11,7 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Commands; class GpuOptions; class Swapchain;
+    class Graphics;
 
     const auto PlaneMeshPath = std::string{ "plane.nca" };
 
@@ -30,7 +30,7 @@ namespace nc::graphics
     class ParticleTechnique : public ITechnique
     {
     public:
-        ParticleTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
+        ParticleTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass);
         ~ParticleTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
@@ -42,11 +42,6 @@ namespace nc::graphics
         void Clear() noexcept;
 
     private:
-        void CreatePipeline(vk::RenderPass* renderPass);
-
-        Graphics* m_graphics;
-        GpuOptions* m_gpuOptions;
-        Swapchain* m_swapchain;
         ShaderDescriptorSets* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;

@@ -11,18 +11,72 @@
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
-#include "graphics/vk/Swapchain.h"
 
 namespace nc::graphics
 {
-    WireframeTechnique::WireframeTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
-    : m_graphics{graphics},
-      m_gpuOptions{graphics->GetGpuOptions()},
-      m_meshPath{"cube.nca"},
-      m_pipeline{nullptr},
-      m_pipelineLayout{nullptr}
+    WireframeTechnique::WireframeTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass)
+        : m_graphics{graphics},
+          m_meshPath{"cube.nca"},
+          m_pipeline{nullptr},
+          m_pipelineLayout{nullptr}
     {
-        CreatePipeline(renderPass);
+        auto* gpuOptions = graphics->GetGpuOptions();
+
+        // Shaders
+        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
+        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
+
+        auto vertexShaderModule = CreateShaderModule(device, vertexShaderByteCode);
+        auto fragmentShaderModule = CreateShaderModule(device, fragmentShaderByteCode);
+
+        std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
+        {
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+        };
+
+        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
+        m_pipelineLayout = device.createPipelineLayoutUnique(pipelineLayoutInfo);
+
+        std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+        vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
+        dynamicStateInfo.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
+        dynamicStateInfo.setDynamicStates(dynamicStates);
+
+        // Graphics pipeline
+        vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
+        pipelineCreateInfo.setStageCount(static_cast<uint32_t>(shaderStages.size())); // Shader stages
+        pipelineCreateInfo.setPStages(shaderStages.data()); // Shader stages
+        auto vertexBindingDescription = GetVertexBindingDescription();
+        auto vertexAttributeDescription = GetVertexAttributeDescriptions();
+        auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
+        pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
+        auto inputAssembly = CreateInputAssemblyCreateInfo();
+        pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
+        auto viewportState = CreateViewportCreateInfo();
+        pipelineCreateInfo.setPViewportState(&viewportState);
+        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine, 2.0f);
+        pipelineCreateInfo.setPRasterizationState(&rasterizer);
+        auto multisampling = CreateMultisampleCreateInfo(gpuOptions->GetMaxSamplesCount());
+        pipelineCreateInfo.setPMultisampleState(&multisampling);
+        auto depthStencil = CreateDepthStencilCreateInfo();
+        pipelineCreateInfo.setPDepthStencilState(&depthStencil);
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
+        pipelineCreateInfo.setPColorBlendState(&colorBlending);
+        pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
+        pipelineCreateInfo.setLayout(m_pipelineLayout.get());
+        pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+        pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
+        pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
+        pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
+
+        m_pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        device.destroyShaderModule(vertexShaderModule, nullptr);
+        device.destroyShaderModule(fragmentShaderModule, nullptr);
+
         LoadMeshAsset(m_meshPath);
     }
 
@@ -47,64 +101,6 @@ namespace nc::graphics
     void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    }
-
-    void WireframeTechnique::CreatePipeline(vk::RenderPass* renderPass)
-    {
-        // Shaders
-        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
-        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
-
-        auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_gpuOptions);
-        auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_gpuOptions);
-
-        std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
-        {
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
-        };
-
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
-        m_pipelineLayout = m_gpuOptions->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
-
-        std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
-        vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
-        dynamicStateInfo.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
-        dynamicStateInfo.setDynamicStates(dynamicStates);
-
-        // Graphics pipeline
-        vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
-        pipelineCreateInfo.setStageCount(static_cast<uint32_t>(shaderStages.size())); // Shader stages
-        pipelineCreateInfo.setPStages(shaderStages.data()); // Shader stages
-        auto vertexBindingDescription = GetVertexBindingDescription();
-        auto vertexAttributeDescription = GetVertexAttributeDescriptions();
-        auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
-        pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
-        auto inputAssembly = CreateInputAssemblyCreateInfo();
-        pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
-        auto viewportState = CreateViewportCreateInfo();
-        pipelineCreateInfo.setPViewportState(&viewportState);
-        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine, 2.0f);
-        pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMultisampleCreateInfo(m_gpuOptions->GetMaxSamplesCount());
-        pipelineCreateInfo.setPMultisampleState(&multisampling);
-        auto depthStencil = CreateDepthStencilCreateInfo();
-        pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
-        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
-        pipelineCreateInfo.setPColorBlendState(&colorBlending);
-        pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
-        pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-        pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
-        pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
-        pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
-        pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
-
-        m_pipeline = m_gpuOptions->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        m_gpuOptions->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
-        m_gpuOptions->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
     bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -134,8 +130,9 @@ namespace nc::graphics
 
         #ifdef NC_DEBUG_RENDERING_ENABLED
         const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(m_meshPath);
+        auto* debugData = m_graphics->GetDebugData();
 
-        for (const auto& point : m_graphics->GetDebugData()->points)
+        for (const auto& point : debugData->points)
         {
             pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
             pushConstants.model = point;
@@ -144,7 +141,7 @@ namespace nc::graphics
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
 
-        for (const auto& line : m_graphics->GetDebugData()->lines)
+        for (const auto& line : debugData->lines)
         {
             pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
             pushConstants.model = line;
@@ -153,7 +150,7 @@ namespace nc::graphics
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
 
-        for (const auto& plane : m_graphics->GetDebugData()->planes)
+        for (const auto& plane : debugData->planes)
         {
             pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
             pushConstants.model = plane;

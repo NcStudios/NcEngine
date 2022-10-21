@@ -42,7 +42,7 @@ class Renderer
 
     private:
         void BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData);
-        void RegisterTechniques();
+        void RegisterTechniques(vk::Device device);
         void RegisterRenderPasses();
 
         graphics::Graphics* m_graphics;
