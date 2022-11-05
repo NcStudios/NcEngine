@@ -40,14 +40,14 @@ jobs:
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/test
-      run: ctest -V --output-junit ${{github.workspace}}/VS17-TestResults.xml
+      run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
 
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
         check_name: "Win-VS17 Test Results"
-        files: ${{github.workspace}}/VS17-TestResults.xml
+        files: ${{github.workspace}}/TestResults.xml
 
   Win-MinGW-w64:
     runs-on: windows-2022
@@ -86,11 +86,11 @@ jobs:
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/test
-      run: ctest -V --output-junit MinGW-TestResults.xml
+      run: ctest -V --output-junit TestResults.xml
 
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
         check_name: "Win-MinGW Test Results"
-        files: build/test/MinGW-TestResults.xml
+        files: build/test/TestResults.xml

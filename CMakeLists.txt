@@ -56,6 +56,7 @@ FetchContent_Declare(nc-tools
                      URL_HASH SHA256=97BD697A4A3C6CF01713E984CF497DDCB1E2C8D09B0F6FC25E1FD6017F372671
 )
 
+# We only need {fmt} because GCC hasn't implemented std::format yet. Can be removed eventually.
 set(FMT_INSTALL ON)
 FetchContent_Declare(fmt
                      GIT_REPOSITORY https://github.com/fmtlib/fmt.git
