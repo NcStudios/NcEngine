@@ -65,7 +65,6 @@ jobs:
       with:
         msystem: 'mingw64'
         update: true
-        install: >-
           git
           make
         pacboy: >-
@@ -80,18 +79,18 @@ jobs:
         vulkan-components: Vulkan-Headers, Vulkan-Loader
 
     - name: Configure
-      run: cmake -G "Ninja" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -CMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
+      run: cmake -G "Ninja" -S . -B build -DCMAKE_INSTALL_PREFIX=install -CMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
-      run: cmake --build ${{github.workspace}}/build --target install --parallel 2
+      run: cmake --build build --target install --parallel 2
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/test
-      run: ctest -V --output-junit ${{github.workspace}}/MinGW-TestResults.xml
+      run: ctest -V --output-junit MinGW-TestResults.xml
 
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
         check_name: "Win-MinGW Test Results"
-        files: ${{github.workspace}}/MinGW-TestResults.xml
+        files: build/test/MinGW-TestResults.xml
