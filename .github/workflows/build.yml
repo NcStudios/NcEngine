@@ -79,7 +79,7 @@ jobs:
         vulkan-components: Vulkan-Headers, Vulkan-Loader
 
     - name: Configure
-      run: cmake -G "Ninja" -S . -B build -DCMAKE_INSTALL_PREFIX=install -CMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
+      run: cmake -G "Ninja" -S . -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
       run: cmake --build build --target install --parallel 2
