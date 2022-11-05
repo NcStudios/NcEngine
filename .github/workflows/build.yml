@@ -1,4 +1,4 @@
-name: Tests
+name: Build
 
 on:
   workflow_dispatch:
@@ -40,18 +40,25 @@ jobs:
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/test
-      run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
+      run: ctest -V --output-junit ${{github.workspace}}/VS17-TestResults.xml
 
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
-        files: ${{github.workspace}}/TestResults.xml
+        files: ${{github.workspace}}/VS17-TestResults.xml
 
   MinGW-w64:
     runs-on: windows-2022
 
+    defaults:
+      run:
+        shell: msys2 {0}
+
     steps:
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+
     - name: Checkout Branch
       uses: actions/checkout@v2
 
@@ -62,17 +69,17 @@ jobs:
         vulkan-components: Vulkan-Headers, Vulkan-Loader
 
     - name: Configure
-      run: cmake -G "MinGW Makefiles" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
+      run: cmake -G "MinGW Makefiles" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -CMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
-      run: cmake --build ${{github.workspace}}/build --target install --config Release
+      run: cmake --build ${{github.workspace}}/build --target install --parallel 2
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/test
-      run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
+      run: ctest -V --output-junit ${{github.workspace}}/MinGW-TestResults.xml
 
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
-        files: ${{github.workspace}}/TestResults.xml
+        files: ${{github.workspace}}/MinGW-TestResults.xml
