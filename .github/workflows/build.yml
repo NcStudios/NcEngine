@@ -16,7 +16,7 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  Windows:
+  VS 17 2022:
     runs-on: windows-2022
 
     steps:
@@ -34,6 +34,35 @@ jobs:
 
     - name: Configure
       run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
+
+    - name: Build and Install
+      run: cmake --build ${{github.workspace}}/build --target install --config Release
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}/build/test
+      run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
+
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action/composite@v1
+      if: always()
+      with:
+        files: ${{github.workspace}}/TestResults.xml
+
+  MinGW-w64:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v2
+
+    - name: Setup Vulkan Sdk
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.2.198.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+
+    - name: Configure
+      run: cmake -G "MinGW-Makefiles" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
       run: cmake --build ${{github.workspace}}/build --target install --config Release
