@@ -16,7 +16,7 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  VS-17-2022:
+  Win-VS-17-2022:
     runs-on: windows-2022
 
     steps:
@@ -46,9 +46,10 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
+        check_name: "Win-VS17 Test Results"
         files: ${{github.workspace}}/VS17-TestResults.xml
 
-  MinGW-w64:
+  Win-MinGW-w64:
     runs-on: windows-2022
 
     defaults:
@@ -56,11 +57,20 @@ jobs:
         shell: msys2 {0}
 
     steps:
-    - name: Setup MSYS2
-      uses: msys2/setup-msys2@v2
-
     - name: Checkout Branch
       uses: actions/checkout@v2
+
+    - name: Setup MSYS2
+      with:
+        msystem: 'mingw64'
+        update: true
+        install: >-
+          git
+          make
+        pacboy: >-
+          toolchain:p
+          cmake:p
+          ninja:p
 
     - name: Setup Vulkan Sdk
       uses: humbletim/setup-vulkan-sdk@v1.2.0
@@ -69,7 +79,7 @@ jobs:
         vulkan-components: Vulkan-Headers, Vulkan-Loader
 
     - name: Configure
-      run: cmake -G "MinGW Makefiles" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -CMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
+      run: cmake -G "Ninja" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -CMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
       run: cmake --build ${{github.workspace}}/build --target install --parallel 2
@@ -82,4 +92,5 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       if: always()
       with:
+        check_name: "Win-MinGW Test Results"
         files: ${{github.workspace}}/MinGW-TestResults.xml
