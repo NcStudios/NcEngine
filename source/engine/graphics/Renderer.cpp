@@ -74,7 +74,7 @@ namespace nc::graphics
 Renderer::Renderer(Graphics* graphics, vk::Device device, ShaderResourceServices* shaderResources, Vector2 dimensions)
     : m_graphics{graphics},
       m_shaderResources{shaderResources},
-      m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
+      m_renderPasses{std::make_unique<RenderPassManager>(device, m_graphics, m_graphics->GetSwapchainPtr(), m_graphics->GetGpuOptions(), dimensions)},
       m_dimensions{dimensions},
       m_depthStencil{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetGpuOptions()->GetDepthFormat()) },
       m_colorBuffer{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) },
@@ -144,16 +144,16 @@ void Renderer::RegisterRenderPasses()
 
 void Renderer::RegisterTechniques(vk::Device device)
 {
-    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(device, RenderPassManager::ShadowMappingPass);
+    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
 
     #ifdef NC_EDITOR_ENABLED
-    m_renderPasses->RegisterTechnique<WireframeTechnique>(device, RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
     #endif
 
-    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(device, RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<PbrTechnique>(device, RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<ParticleTechnique>(device, RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<UiTechnique>(device, RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<PbrTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<ParticleTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
 }
 
 void Renderer::BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData)

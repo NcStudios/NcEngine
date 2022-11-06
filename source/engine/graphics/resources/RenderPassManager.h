@@ -9,6 +9,8 @@
 namespace nc::graphics
 {
     class Graphics;
+    class GpuOptions;
+    class Swapchain;
 
     struct FrameBufferAttachment
     {
@@ -26,7 +28,7 @@ namespace nc::graphics
             inline static const std::string LitShadingPass = "Lit Pass";
             inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
             
-            RenderPassManager(Graphics* graphics, const Vector2& dimensions);
+            RenderPassManager(vk::Device device, Graphics* graphics, Swapchain* swapchain, GpuOptions* gpuOptions, const Vector2& dimensions);
             ~RenderPassManager() noexcept;
 
             void Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData);
@@ -36,7 +38,7 @@ namespace nc::graphics
             void RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid);
 
             template <std::derived_from<ITechnique> T>
-            void RegisterTechnique(vk::Device device, const std::string& uid);
+            void RegisterTechnique(const std::string& uid);
             
         private:
             void Create(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValueFlags_t clearFlags, const Vector2& dimensions);
@@ -45,13 +47,15 @@ namespace nc::graphics
             void End(vk::CommandBuffer* cmd);
             FrameBufferAttachment& GetFrameBufferAttachment(const std::string& uid, uint32_t index);
 
+            vk::Device m_device;
             Graphics* m_graphics;
+            Swapchain* m_swapchain;
             std::vector<RenderPass> m_renderPasses;
             std::vector<FrameBufferAttachment> m_frameBufferAttachments;
     };
 
     template <std::derived_from<ITechnique> T>
-    void RenderPassManager::RegisterTechnique(vk::Device device, const std::string& uid)
+    void RenderPassManager::RegisterTechnique(const std::string& uid)
     {
         const auto& techniqueType = typeid(T);
         auto& renderpass = Acquire(uid);
@@ -66,7 +70,7 @@ namespace nc::graphics
             renderpass.techniques.pop_back();
         }
 
-        renderpass.techniques.push_back(std::make_unique<T>(device, m_graphics, &renderpass.renderpass.get()));
+        renderpass.techniques.push_back(std::make_unique<T>(m_device, m_graphics, &renderpass.renderpass.get()));
     }
 
 } // namespace nc

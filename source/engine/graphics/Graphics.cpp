@@ -22,13 +22,13 @@ namespace nc::graphics
     Graphics::Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_core{std::make_unique<Core>(hwnd, hinstance)},
-          m_gpuOptions{ std::make_unique<GpuOptions>(m_core.get()) },
+          m_gpuOptions{ std::make_unique<GpuOptions>(m_core->physicalDevice) },
           m_swapchain{ std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
           m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
-          m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
+          m_shaderResources{ std::make_unique<ShaderResourceServices>(m_core->logicalDevice.get(), this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
-          m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_gpuOptions.get(), m_allocator.get(), gpuAccessorSignals) },
+          m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
           #ifdef NC_DEBUG_RENDERING_ENABLED
           m_debugRenderer{},
           #endif
@@ -155,19 +155,21 @@ namespace nc::graphics
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of MaxFramesInFlight sets of calls will be running at any given time.
     void Graphics::Draw(const PerFrameRenderState& state)
     {
+        auto* currentFrame = m_frameManager->CurrentFrameContext();
+
         OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
         if (m_isMinimized) return;
 
-        m_renderer->Record(m_frameManager->CurrentFrameContext(), state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
+        m_renderer->Record(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
 
         // Executes the command buffer to render to the image
         m_swapchain->WaitForImageFence(m_imageIndex);
-        m_swapchain->SyncImageAndFrameFence(m_frameManager->CurrentFrameContext(), m_imageIndex);
-        m_commands->SubmitQueue(m_frameManager->CurrentFrameContext());
+        m_swapchain->SyncImageAndFrameFence(currentFrame, m_imageIndex);
+        currentFrame->RenderFrame(m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily));
 
         // Returns the image to the swapchain
         bool isSwapChainValid = true;
-        m_swapchain->Present(m_frameManager->CurrentFrameContext(), m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily), m_imageIndex, isSwapChainValid);
+        m_swapchain->Present(currentFrame, m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily), m_imageIndex, isSwapChainValid);
 
         if (!isSwapChainValid)
         {

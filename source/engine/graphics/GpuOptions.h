@@ -4,21 +4,18 @@
 
 namespace nc::graphics
 {
-    struct Core;
-
-    /** This class deals with rendering options that are dependent on properties of the GPU. */
+    /** This class deals with rendering options that are dependent on properties of the GPU (the physical device). */
     class GpuOptions
     {
         public:
-            GpuOptions(Core* core);
+            GpuOptions(vk::PhysicalDevice physicalDevice);
 
-            const vk::Device& GetDevice() const noexcept; /** @todo: Remove and update references in a separate PR */
             const vk::Format& GetDepthFormat() noexcept;
             vk::SampleCountFlagBits GetMaxSamplesCount();
 
         private:
 
-            Core* m_core;
+            vk::PhysicalDevice m_physicalDevice;
             vk::Format m_depthFormat;
             vk::SampleCountFlagBits m_samplesCount;
             bool m_samplesInitialized;

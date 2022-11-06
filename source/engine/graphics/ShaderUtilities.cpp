@@ -1,5 +1,4 @@
 #include "ShaderUtilities.h"
-#include "graphics/GpuOptions.h"
 #include "utility/NcError.h"
 
 #include <fstream>

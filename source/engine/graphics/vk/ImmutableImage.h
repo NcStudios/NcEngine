@@ -4,13 +4,11 @@
 
 namespace nc::graphics
 {
-    class GpuOptions;
-
     class ImmutableImage
     {
         public:
             ImmutableImage();
-            ImmutableImage(GpuOptions* gpuOptions, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height);
+            ImmutableImage(vk::Device device, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height);
             ImmutableImage(ImmutableImage&&) = default;
             ImmutableImage& operator=(ImmutableImage&&) = default;
             ImmutableImage& operator=(const ImmutableImage&) = delete;

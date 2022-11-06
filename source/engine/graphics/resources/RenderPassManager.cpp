@@ -1,6 +1,5 @@
 #include "RenderPassManager.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/Graphics.h"
 #include "graphics/vk/Swapchain.h"
 #include "optick/optick.h"
 
@@ -28,14 +27,13 @@ auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vecto
 
 namespace nc::graphics
 {
-    RenderPassManager::RenderPassManager(Graphics* graphics, const Vector2& dimensions)
-        : m_graphics{graphics},
+    RenderPassManager::RenderPassManager(vk::Device device, Graphics* graphics, Swapchain* swapchain, GpuOptions* gpuOptions, const Vector2& dimensions)
+        : m_device{device},
+          m_graphics{graphics},
+          m_swapchain{swapchain},
           m_renderPasses{},
           m_frameBufferAttachments{}
     {
-        auto* gpuOptions = m_graphics->GetGpuOptions();
-        auto* swapchain = m_graphics->GetSwapchainPtr();
-
         /** Shadow mapping pass */
         std::array<AttachmentSlot, 1> shadowAttachmentSlots
         {
@@ -132,16 +130,12 @@ namespace nc::graphics
                                    ClearValueFlags_t clearFlags,
                                    const Vector2& dimensions)
     {
-        auto* gpuOptions = m_graphics->GetGpuOptions();
-        auto* swapchain = m_graphics->GetSwapchainPtr();
-        const auto size = RenderTargetSize{dimensions, swapchain->GetExtent()};
-        m_renderPasses.emplace_back(attachmentSlots, subpasses, gpuOptions->GetDevice(), size, uid, clearFlags);
+        const auto size = RenderTargetSize{dimensions, m_swapchain->GetExtent()};
+        m_renderPasses.emplace_back(attachmentSlots, subpasses, m_device, size, uid, clearFlags);
     }
 
     void RenderPassManager::Resize(const Vector2& dimensions, vk::Extent2D extent)
     {
-        auto* gpuOptions = m_graphics->GetGpuOptions();
-
         for (auto& renderPass : m_renderPasses)
         {
             renderPass.renderTargetSize.dimensions = dimensions;
@@ -161,7 +155,7 @@ namespace nc::graphics
             framebufferInfo.setLayers(1);
 
             frameBufferAttachment.frameBuffer.reset();
-            frameBufferAttachment.frameBuffer = gpuOptions->GetDevice().createFramebufferUnique(framebufferInfo);
+            frameBufferAttachment.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
         }
     }
 
@@ -193,7 +187,6 @@ namespace nc::graphics
             m_frameBufferAttachments.pop_back();
         }
 
-        auto* gpuOptions = m_graphics->GetGpuOptions();
         auto frameBufferAttachment = FrameBufferAttachment{};
 
         frameBufferAttachment.attachmentHandles = std::move(attachmentHandles);
@@ -209,7 +202,7 @@ namespace nc::graphics
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        frameBufferAttachment.frameBuffer = gpuOptions->GetDevice().createFramebufferUnique(framebufferInfo);
+        frameBufferAttachment.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
         m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 
@@ -226,7 +219,6 @@ namespace nc::graphics
             m_frameBufferAttachments.pop_back();
         }
 
-        auto* gpuOptions = m_graphics->GetGpuOptions();
         auto frameBufferAttachment = FrameBufferAttachment{};
 
         frameBufferAttachment.attachmentHandles.reserve(1);
@@ -243,7 +235,7 @@ namespace nc::graphics
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        frameBufferAttachment.frameBuffer = gpuOptions->GetDevice().createFramebufferUnique(framebufferInfo);
+        frameBufferAttachment.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
         m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 }

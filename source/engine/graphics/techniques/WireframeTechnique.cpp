@@ -20,8 +20,6 @@ namespace nc::graphics
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
-        auto* gpuOptions = graphics->GetGpuOptions();
-
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
@@ -59,7 +57,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine, 2.0f);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMultisampleCreateInfo(gpuOptions->GetMaxSamplesCount());
+        auto multisampling = CreateMultisampleCreateInfo(graphics->GetGpuOptions()->GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);

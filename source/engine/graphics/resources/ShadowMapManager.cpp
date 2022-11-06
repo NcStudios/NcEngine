@@ -1,14 +1,13 @@
 #include "ShadowMapManager.h"
-#include "graphics/GpuOptions.h"
-#include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
 
 #include <vector>
 
 namespace nc::graphics
 {
-    ShadowMapManager::ShadowMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, Vector2 dimensions)
-    : m_graphics{graphics},
+    ShadowMapManager::ShadowMapManager(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions)
+    : m_device{device},
+      m_allocator{allocator},
       m_descriptors{ descriptors },
       m_sampler{nullptr},
       m_depthStencil{nullptr},
@@ -34,7 +33,7 @@ namespace nc::graphics
         m_dimensions = data.at(0).dimensions;
 
         m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(m_graphics->GetGpuOptions()->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
+        m_depthStencil = std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
@@ -51,10 +50,8 @@ namespace nc::graphics
 
     void ShadowMapManager::Initialize()
     {
-        auto* gpuOptions = m_graphics->GetGpuOptions();
-
         m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(gpuOptions->GetDevice(), m_graphics->GetAllocatorPtr(), m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
+        m_depthStencil = std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
 
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
         vk::SamplerCreateInfo samplerInfo = {};
@@ -74,7 +71,7 @@ namespace nc::graphics
         samplerInfo.setMinLod(0.0f);
         samplerInfo.setMaxLod(1.0f);
 
-        m_sampler = gpuOptions->GetDevice().createSamplerUnique(samplerInfo);
+        m_sampler = m_device.createSamplerUnique(samplerInfo);
 
         auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);

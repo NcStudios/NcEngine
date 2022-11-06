@@ -14,23 +14,23 @@ namespace nc::graphics
 class ShaderResourceServices
 {
     public:
-        ShaderResourceServices(Graphics* graphics, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
-            : m_ShaderDescriptorSets{graphics->GetGpuOptions()},
-                m_objectDataManager{0, allocator, &m_ShaderDescriptorSets, memorySettings.maxRenderers},
-                m_pointLightManager{1, allocator, &m_ShaderDescriptorSets, memorySettings.maxPointLights},
-                m_textureManager{2, &m_ShaderDescriptorSets, memorySettings.maxTextures},
-                m_shadowMapManager{3, graphics, &m_ShaderDescriptorSets, dimensions },
-                m_cubeMapManager{4, graphics, &m_ShaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
-                m_environmentDataManager{5, allocator, &m_ShaderDescriptorSets}
+        ShaderResourceServices(vk::Device device, Graphics* graphics, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
+            : m_shaderDescriptorSets{device},
+              m_objectDataManager{0, allocator, &m_shaderDescriptorSets, memorySettings.maxRenderers},
+              m_pointLightManager{1, allocator, &m_shaderDescriptorSets, memorySettings.maxPointLights},
+              m_textureManager{2, &m_shaderDescriptorSets, memorySettings.maxTextures},
+              m_shadowMapManager{device, 3, allocator, &m_shaderDescriptorSets, dimensions },
+              m_cubeMapManager{device, 4, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
+              m_environmentDataManager{5, allocator, &m_shaderDescriptorSets}
         {
-            m_ShaderDescriptorSets.CreateSet(BindFrequency::per_frame);
+            m_shaderDescriptorSets.CreateSet(BindFrequency::per_frame);
         }
 
         auto GetShadowMapManager() noexcept -> ShadowMapManager& { return m_shadowMapManager; }
-        auto GetDescriptorSets() noexcept -> ShaderDescriptorSets* { return &m_ShaderDescriptorSets; }
+        auto GetDescriptorSets() noexcept -> ShaderDescriptorSets* { return &m_shaderDescriptorSets; }
 
     private:
-        ShaderDescriptorSets m_ShaderDescriptorSets;
+        ShaderDescriptorSets m_shaderDescriptorSets;
 
         ObjectDataManager m_objectDataManager;              // BINDING SLOT 0
         PointLightManager m_pointLightManager;              // BINDING SLOT 1

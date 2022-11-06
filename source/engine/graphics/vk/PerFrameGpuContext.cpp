@@ -35,7 +35,7 @@ PerFrameGpuContext::PerFrameGpuContext(vk::Device logicalDevice, vk::PhysicalDev
 {
 }
 
-void PerFrameGpuContext::Wait()
+void PerFrameGpuContext::WaitForSync()
 {
     if (m_device.waitForFences(m_inFlightFence.get(), true, UINT64_MAX) != vk::Result::eSuccess)
     {
@@ -43,8 +43,27 @@ void PerFrameGpuContext::Wait()
     }
 }
 
-void PerFrameGpuContext::Reset() noexcept
+void PerFrameGpuContext::ResetSync() noexcept
 {
     m_device.resetFences(m_inFlightFence.get());
+}
+
+void PerFrameGpuContext::RenderFrame(vk::Queue graphicsQueue)
+{
+    vk::Semaphore waitSemaphores[] = {ImageAvailableSemaphore()}; // Which semaphore to wait on before execution begins
+    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput }; // Which stage of the pipeline to wait in
+    vk::Semaphore signalSemaphores[] = {RenderFinishedSemaphore()}; // Which semaphore to signal when execution completes
+
+    vk::SubmitInfo submitInfo{};
+    submitInfo.setWaitSemaphoreCount(1);
+    submitInfo.setPWaitSemaphores(waitSemaphores);
+    submitInfo.setPWaitDstStageMask(waitStages);
+    submitInfo.setCommandBufferCount(1);
+    submitInfo.setPCommandBuffers(CommandBuffer());
+    submitInfo.setSignalSemaphoreCount(1);
+    submitInfo.setPSignalSemaphores(signalSemaphores);
+
+    m_device.resetFences(Fence());
+    graphicsQueue.submit(submitInfo, Fence());
 }
 } // namespace nc::graphics

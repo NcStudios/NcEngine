@@ -1,5 +1,4 @@
 #include "ShaderDescriptorSets.h"
-#include "graphics/GpuOptions.h"
 #include "graphics/vk/Initializers.h"
 
 namespace
@@ -26,10 +25,10 @@ namespace
 
 namespace nc::graphics
 {
-    ShaderDescriptorSets::ShaderDescriptorSets(GpuOptions* gpuOptions)
-        : m_renderingDescriptorPool{CreateRenderingDescriptorPool(gpuOptions->GetDevice())},
+    ShaderDescriptorSets::ShaderDescriptorSets(vk::Device device)
+        : m_renderingDescriptorPool{CreateRenderingDescriptorPool(device)},
           m_descriptorSets{},
-          m_gpuOptions{gpuOptions}
+          m_device{device}
     {
         m_descriptorSets.reserve(1);
         m_descriptorSets.emplace(BindFrequency::per_frame, DescriptorSet{});
@@ -79,7 +78,7 @@ namespace nc::graphics
                 writes.push_back(kv.second.write);
             }
 
-            m_gpuOptions->GetDevice().updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+            m_device.updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
             descriptorSet->isDirty = false;
         }
 
@@ -107,8 +106,8 @@ namespace nc::graphics
             bindingFlags.push_back(kv.second);
         }
 
-        descriptorSet->layout = CreateDescriptorSetLayout(m_gpuOptions->GetDevice(), bindings, bindingFlags);
-        descriptorSet->set = CreateDescriptorSet(m_gpuOptions->GetDevice(), &m_renderingDescriptorPool.get(), 1, &descriptorSet->layout.get());
+        descriptorSet->layout = CreateDescriptorSetLayout(m_device, bindings, bindingFlags);
+        descriptorSet->set = CreateDescriptorSet(m_device, &m_renderingDescriptorPool.get(), 1, &descriptorSet->layout.get());
     }
 
     void ShaderDescriptorSets::UpdateImage(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)

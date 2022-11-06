@@ -1,20 +1,19 @@
 #include "GpuOptions.h"
 #include "config/Config.h"
 #include "utility/NcError.h"
-#include "vk/Core.h"
 
 #include <string>
 
 namespace
 {
-vk::Format QueryDepthFormatSupport(nc::graphics::Core* core)
+vk::Format QueryDepthFormatSupport(vk::PhysicalDevice physicalDevice)
 {
     std::vector<vk::Format> depthFormats = { vk::Format::eD32SfloatS8Uint, vk::Format::eD32Sfloat, vk::Format::eD24UnormS8Uint, vk::Format::eD16UnormS8Uint, vk::Format::eD16Unorm };
 
     for (auto& format : depthFormats)
     {
         vk::FormatProperties formatProperties;
-        core->physicalDevice.getFormatProperties(format, &formatProperties);
+        physicalDevice.getFormatProperties(format, &formatProperties);
 
         // Format must support depth stencil attachment for optimal tiling
         if (formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
@@ -28,12 +27,12 @@ vk::Format QueryDepthFormatSupport(nc::graphics::Core* core)
 
 namespace nc::graphics
 {
-GpuOptions::GpuOptions(Core* engine)
-    : m_core{engine},
+GpuOptions::GpuOptions(vk::PhysicalDevice physicalDevice)
+    : m_physicalDevice{physicalDevice},
       m_depthFormat{},
       m_samplesCount{},
       m_samplesInitialized{false},
-      m_gpuProperties{m_core->physicalDevice.getProperties()}
+      m_gpuProperties{physicalDevice.getProperties()}
 {
 }
 
@@ -73,11 +72,6 @@ vk::SampleCountFlagBits GpuOptions::GetMaxSamplesCount()
     return m_samplesCount;
 }
 
-const vk::Device& GpuOptions::GetDevice() const noexcept /** @todo: Remove and update references in a separate PR */
-{
-    return m_core->logicalDevice.get();
-}
-
 const vk::Format& GpuOptions::GetDepthFormat() noexcept
 {
     if (m_depthInitialized == true)
@@ -86,7 +80,7 @@ const vk::Format& GpuOptions::GetDepthFormat() noexcept
     }
 
     m_depthInitialized = true;
-    m_depthFormat = QueryDepthFormatSupport(m_core);
+    m_depthFormat = QueryDepthFormatSupport(m_physicalDevice);
     return m_depthFormat;
 }
 }  // namespace nc::graphics
