@@ -46,7 +46,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.workflow }}-TestResults.xml
+        name: Win-VS-17-TestResults
         path: build/test/TestResults.xml
 
   Win-MinGW-w64:
@@ -92,7 +92,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ github.workflow }}-TestResults.xml
+        name: Win-MinGW-TestResults
         path: build/test/TestResults.xml
 
   Publish-Test-Results:
