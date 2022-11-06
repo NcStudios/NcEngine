@@ -1,0 +1,63 @@
+name: Win-MinGW-w64
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ vnext, release ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.config'
+      - '**/*.ini'
+      - '**/*.fbx'
+      - '**/*.nca'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+
+jobs:
+  Build-Test:
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v2
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: 'mingw64'
+        update: true
+          git
+          make
+        pacboy: >-
+          toolchain:p
+          cmake:p
+          ninja:p
+
+    - name: Setup Vulkan Sdk
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.2.198.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+
+    - name: Configure
+      run: cmake -G "Ninja" -S . -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
+
+    - name: Build and Install
+      run: cmake --build build --target install --parallel 2
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}/build/test
+      run: ctest -V --output-junit TestResults.xml
+
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action/composite@v1
+      if: always()
+      with:
+        check_name: "Win-MinGW Test Results"
+        files: build/test/TestResults.xml
