@@ -1,0 +1,29 @@
+name: Publish-Test-Results
+
+on:
+  workflow_run:
+    workflows: [Win-VS-17, Win-MinGW-w64]
+    types:
+      - completed
+
+jobs:
+  Publish:
+    runs-on: windows-2022
+
+    permissions:
+      checks: write
+
+    if: always()
+
+    steps:
+    - name: Download Test Results
+      uses: actions/download-artifact@v2
+      with:
+        path: artifacts
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/composite@v1
+      if: always()
+      with:
+        check_name: "Test Results"
+        junit_files: "artifacts/**/*.xml"

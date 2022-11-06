@@ -53,11 +53,11 @@ jobs:
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/test
-      run: ctest -V --output-junit TestResults.xml
+      run: ctest -V --output-on-failure --output-junit TestResults.xml
 
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action/composite@v1
-      if: always()
-      with:
-        check_name: "Win-MinGW Test Results"
-        files: build/test/TestResults.xml
+    - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.workflow }}-TestResults.xml
+          path: build/test/TestResults.xml
