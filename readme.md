@@ -1,6 +1,5 @@
 # NcEngine
-[![Win-VS17](https://github.com/NcStudios/NCEngine/actions/workflows/win-vs17.yml/badge.svg)](https://github.com/NcStudios/NCEngine/actions?query=workflow%3AWin-VS-17)
-[![Win-MinGW](https://github.com/NcStudios/NCEngine/actions/workflows/win-mingw.yml/badge.svg)](https://github.com/NcStudios/NCEngine/actions?query=workflow%3AWin-MinGW-w64)
+[![Build](https://github.com/NcStudios/NCEngine/actions/workflows/build.yml/badge.svg)](https://github.com/NcStudios/NCEngine/actions?query=workflow%3ABuild)
 [![Docs](docs/docs-badge.svg)](https://ncstudios.github.io/NcEngine)
 [![License](https://img.shields.io/github/license/McCallisterRomer/NCEngine.svg)](https://github.com/McCallisterRomer/NCEngine/blob/vnext/LICENSE)
 

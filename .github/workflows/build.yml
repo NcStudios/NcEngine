@@ -1,4 +1,4 @@
-name: Win-MinGW-w64
+name: Build
 
 on:
   workflow_dispatch:
@@ -16,7 +16,40 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  Build-Test:
+  Win-VS-17:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v2
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Setup Vulkan Sdk
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.2.198.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+
+    - name: Configure
+      run: cmake -G "Visual Studio 17 2022" -S . -B build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
+
+    - name: Build and Install
+      run: cmake --build build --target install --config Release
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}/build/test
+      run: ctest -V --output-on-failure --output-junit TestResults.xml
+
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.workflow }}-TestResults.xml
+        path: build/test/TestResults.xml
+
+  Win-MinGW-w64:
     runs-on: windows-2022
 
     defaults:
@@ -61,3 +94,22 @@ jobs:
       with:
         name: ${{ github.workflow }}-TestResults.xml
         path: build/test/TestResults.xml
+
+  Publish-Test-Results:
+    runs-on: windows-2022
+    needs: [Win-VS-17, Win-MinGW-w64]
+    permissions:
+      checks: write
+      pull-requests: write
+    if: always()
+
+    steps:
+    - name: Download Results
+      uses: actions/download-artifact@v2
+      with:
+        path: artifacts
+
+    - name: Publish Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        junit_files: "artifacts/**/*.xml"
