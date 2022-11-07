@@ -56,7 +56,14 @@ FetchContent_Declare(nc-tools
                      URL_HASH SHA256=97BD697A4A3C6CF01713E984CF497DDCB1E2C8D09B0F6FC25E1FD6017F372671
 )
 
-FetchContent_MakeAvailable(DirectXMath taskflow nc-tools)
+# We only need {fmt} because GCC hasn't implemented std::format yet. Can be removed eventually.
+set(FMT_INSTALL ON)
+FetchContent_Declare(fmt
+                     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+                     GIT_TAG        fc07217d85e6dcec52878807d6bbd89a9d9156a5
+)
+
+FetchContent_MakeAvailable(DirectXMath taskflow nc-tools fmt)
 
 # Add source
 add_subdirectory(source)

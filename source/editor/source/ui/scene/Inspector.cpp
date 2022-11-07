@@ -370,7 +370,9 @@ namespace nc::editor
     void Inspector::DrawTransform(Transform* transform)
     {
         auto& worldMatrix = transform->m_localMatrix;
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
+        DirectX::XMVECTOR scl_v{};
+        DirectX::XMVECTOR rot_v{};
+        DirectX::XMVECTOR pos_v{};
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, worldMatrix);
         Vector3 scl, pos;
         auto rot = Quaternion::Identity();

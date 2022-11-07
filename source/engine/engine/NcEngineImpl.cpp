@@ -39,10 +39,10 @@ auto InitializeNcEngine(const config::Config& config, EngineInitFlags flags) -> 
     config::SetConfig(config);
     utility::detail::InitializeLog(config::GetProjectSettings().logFilePath);
     NC_LOG_INFO("Creating NcEngine instance");
-    NC_LOG_INFO(R"(EngineInitFlags\n\tDisable Audio: {}\n\tDisable Graphics: {}\n\tDisable Physics: {})",
-                static_cast<int>(flags & nc::EngineInitFlags::NoAudio),
-                static_cast<int>(flags & nc::EngineInitFlags::NoGraphics),
-                static_cast<int>(flags & nc::EngineInitFlags::NoPhysics));
+    NC_LOG_INFO_FMT(R"(EngineInitFlags\n\tDisable Audio: {}\n\tDisable Graphics: {}\n\tDisable Physics: {})",
+                    static_cast<int>(flags & nc::EngineInitFlags::NoAudio),
+                    static_cast<int>(flags & nc::EngineInitFlags::NoGraphics),
+                    static_cast<int>(flags & nc::EngineInitFlags::NoPhysics));
     return std::make_unique<NcEngineImpl>(flags);
 }
 
