@@ -44,6 +44,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         Vulkan::Vulkan
         DirectXMath
         Taskflow
+        fmt::fmt
 )
 
 # Note - OptickCore.dll still needs to be copied to the executable's directory

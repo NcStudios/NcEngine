@@ -68,6 +68,7 @@ target_compile_options(Registry_unit_tests
 target_link_libraries(Registry_unit_tests
     PRIVATE
         gtest
+        DirectXMath
 )
 
 add_test(Registry_unit_tests Registry_unit_tests)
@@ -123,6 +124,7 @@ target_compile_options(View_unit_tests
 target_link_libraries(View_unit_tests
     PRIVATE
         gtest
+        DirectXMath
 )
 
 add_test(View_unit_tests View_unit_tests)
