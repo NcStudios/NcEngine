@@ -19,21 +19,18 @@ class ParticleRenderer;
 
 namespace graphics
 {
-class Commands;
-class Graphics;
+class Swapchain;
+class GpuOptions;
+struct PerFrameRenderState;
 class PerFrameGpuContext;
+class RenderPassManager;
 class RenderTarget;
 class ShaderResourceServices;
-struct PerFrameRenderState;
-class RenderPassManager;
 
 class Renderer
 {
     public:
-        Renderer(graphics::Graphics* graphics,
-                 vk::Device device, 
-                 ShaderResourceServices* shaderResources,
-                 Vector2 dimensions);
+        Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResourceServices* shaderResources, Vector2 dimensions);
         ~Renderer() noexcept;
 
         void Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
@@ -45,7 +42,8 @@ class Renderer
         void RegisterTechniques(vk::Device device);
         void RegisterRenderPasses();
 
-        graphics::Graphics* m_graphics;
+        Swapchain* m_swapchain;
+        GpuOptions* m_gpuOptions;
         ShaderResourceServices* m_shaderResources;
         std::unique_ptr<RenderPassManager> m_renderPasses;
         Vector2 m_dimensions;

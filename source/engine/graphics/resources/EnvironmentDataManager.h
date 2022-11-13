@@ -1,13 +1,11 @@
 #pragma once
 
 #include "ShaderResourceService.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
-#include "graphics/resources/UniformBuffer.h"
+#include "ShaderDescriptorSets.h"
+#include "UniformBuffer.h"
 
 namespace nc::graphics
 {
-    class Graphics;
-
     class EnvironmentDataManager : public IShaderResourceService<EnvironmentData>
     {
         public:

@@ -9,7 +9,6 @@
 #include "optick/optick.h"
 #include "Renderer.h"
 #include "resources/ShaderResourceServices.h"
-#include "resources/RenderPassManager.h"
 #include "utility/Log.h"
 #include "utility/NcError.h"
 #include "vk/Core.h"
@@ -26,13 +25,10 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
           m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
-          m_shaderResources{ std::make_unique<ShaderResourceServices>(m_core->logicalDevice.get(), this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
+          m_shaderResources{ std::make_unique<ShaderResourceServices>(m_core->logicalDevice.get(), m_allocator.get(), config::GetMemorySettings(), dimensions)},
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
-          #ifdef NC_DEBUG_RENDERING_ENABLED
-          m_debugRenderer{},
-          #endif
-          m_renderer{ std::make_unique<Renderer>(this, m_core->logicalDevice.get(), m_shaderResources.get(), dimensions) },
+          m_renderer{ std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
           m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
@@ -75,7 +71,7 @@ namespace nc::graphics
         m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
         m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get());
-        m_renderer = std::make_unique<Renderer>(this, m_core->logicalDevice.get(), m_shaderResources.get(), m_dimensions);
+        m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
@@ -90,34 +86,8 @@ namespace nc::graphics
         }
 
         RecreateSwapchain(m_dimensions);
+        InitializeUI();
     }
-
-    GpuOptions* Graphics::GetGpuOptions() const noexcept
-    {
-        return m_gpuOptions.get();
-    }
-
-    GpuAllocator* Graphics::GetAllocatorPtr() const noexcept
-    {
-        return m_allocator.get();
-    }
-
-    Swapchain* Graphics::GetSwapchainPtr() const noexcept
-    {
-        return m_swapchain.get();
-    }
-
-    ShaderResourceServices* Graphics::GetShaderResources() const noexcept
-    {
-        return m_shaderResources.get();
-    }
-
-    #ifdef NC_DEBUG_RENDERING_ENABLED
-    graphics::DebugData* Graphics::GetDebugData()
-    {
-        return m_debugRenderer.GetData();
-    }
-    #endif
 
     void Graphics::Clear()
     {
@@ -163,8 +133,7 @@ namespace nc::graphics
         m_renderer->Record(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
 
         // Executes the command buffer to render to the image
-        m_swapchain->WaitForImageFence(m_imageIndex);
-        m_swapchain->SyncImageAndFrameFence(currentFrame, m_imageIndex);
+        m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);
         currentFrame->RenderFrame(m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily));
 
         // Returns the image to the swapchain

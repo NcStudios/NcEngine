@@ -6,9 +6,6 @@
 #include "math/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "DirectXMath.h"
-#ifdef NC_DEBUG_RENDERING_ENABLED
-#include "DebugRenderer.h"
-#endif
 
 #include <array>
 #include <memory>
@@ -40,15 +37,6 @@ namespace nc::graphics
             void Clear();
             void InitializeUI();
 
-            GpuOptions* GetGpuOptions() const noexcept;
-            GpuAllocator* GetAllocatorPtr() const noexcept;
-            Swapchain* GetSwapchainPtr() const noexcept;
-            ShaderResourceServices* GetShaderResources() const noexcept;
-
-            #ifdef NC_DEBUG_RENDERING_ENABLED
-            graphics::DebugData* GetDebugData();
-            #endif
-
             bool FrameBegin();
             void Draw(const PerFrameRenderState& state);
             void FrameEnd();
@@ -65,9 +53,6 @@ namespace nc::graphics
             std::unique_ptr<ShaderResourceServices> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
             std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
-            #ifdef NC_DEBUG_RENDERING_ENABLED
-            graphics::DebugRenderer m_debugRenderer;
-            #endif
             std::unique_ptr<Renderer> m_renderer;
             std::unique_ptr<FrameManager> m_frameManager;
 

@@ -6,12 +6,12 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class GpuOptions; class ShaderDescriptorSets;
 
     class UiTechnique : public ITechnique
     {
         public:
-            UiTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass);
+            UiTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets*, vk::RenderPass* renderPass);
             ~UiTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;

@@ -6,6 +6,10 @@
 #include "DirectXMath.h"
 #include "ITechnique.h"
 
+#ifdef NC_DEBUG_RENDERING_ENABLED
+#include "graphics/DebugRenderer.h"
+#endif
+
 #include "vulkan/vk_mem_alloc.hpp"
 #include <vector>
 #include <span>
@@ -18,7 +22,7 @@ namespace nc
 
 namespace nc::graphics
 {
-    class Graphics;
+    struct DebugData; class GpuOptions; class ShaderDescriptorSets;
 
     struct WireframePushConstants
     {
@@ -30,7 +34,7 @@ namespace nc::graphics
     class WireframeTechnique : public ITechnique
     {
         public:
-            WireframeTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass);
+            WireframeTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets*, vk::RenderPass* renderPass);
             ~WireframeTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
@@ -40,10 +44,12 @@ namespace nc::graphics
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         private:
-            nc::graphics::Graphics* m_graphics;
             std::string m_meshPath;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
+            #ifdef NC_DEBUG_RENDERING_ENABLED
+            graphics::DebugRenderer m_debugRenderer;
+            #endif
     };
 }
 #endif

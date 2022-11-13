@@ -2,7 +2,6 @@
 
 #include "DirectXMath.h"
 #include "ecs/Component.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
 #include "particle/EmitterState.h"
 #include "ITechnique.h"
 
@@ -11,7 +10,7 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class GpuOptions; class ShaderDescriptorSets;
 
     const auto PlaneMeshPath = std::string{ "plane.nca" };
 
@@ -30,7 +29,7 @@ namespace nc::graphics
     class ParticleTechnique : public ITechnique
     {
     public:
-        ParticleTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass);
+        ParticleTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
         ~ParticleTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;

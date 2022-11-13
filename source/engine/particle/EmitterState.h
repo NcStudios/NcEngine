@@ -11,7 +11,6 @@
 namespace nc
 {
     class Transform;
-    namespace graphics { class Graphics; }
 }
 
 namespace nc::particle

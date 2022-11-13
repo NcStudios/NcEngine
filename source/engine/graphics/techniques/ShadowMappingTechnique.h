@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/resources/ShaderDescriptorSets.h"
 #include "ITechnique.h"
 
 #include "DirectXMath.h"
@@ -8,7 +7,7 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class GpuOptions; class ShaderDescriptorSets;
 
     struct ShadowMappingPushConstants
     {
@@ -19,7 +18,7 @@ namespace nc::graphics
     class ShadowMappingTechnique : public ITechnique
     {
         public:
-            ShadowMappingTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass);
+            ShadowMappingTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
             ~ShadowMappingTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;

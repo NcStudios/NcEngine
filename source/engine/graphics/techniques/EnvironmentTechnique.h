@@ -2,7 +2,6 @@
 
 #include "DirectXMath.h"
 #include "ecs/Component.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
@@ -11,12 +10,12 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class GpuOptions; class ShaderDescriptorSets;
 
     class EnvironmentTechnique : public ITechnique
     {
         public:
-            EnvironmentTechnique(vk::Device device, nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
+            EnvironmentTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
             ~EnvironmentTechnique() noexcept;
             
             bool CanBind(const PerFrameRenderState& frameData) override;

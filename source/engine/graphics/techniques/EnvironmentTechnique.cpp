@@ -2,8 +2,6 @@
 #include "asset/Assets.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "graphics/Graphics.h"
-#include "graphics/Commands.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
@@ -11,14 +9,15 @@
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/Environment.h"
 #include "graphics/resources/ImmutableBuffer.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "graphics/resources/ShaderResourceServices.h"
 #include "graphics/vk/Swapchain.h"
 #include "optick/optick.h"
 
 namespace nc::graphics
 {
-    EnvironmentTechnique::EnvironmentTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass)
-        : m_descriptorSets{graphics->GetShaderResources()->GetDescriptorSets()},
+    EnvironmentTechnique::EnvironmentTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+        : m_descriptorSets{descriptorSets},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -63,7 +62,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMultisampleCreateInfo(graphics->GetGpuOptions()->GetMaxSamplesCount());
+        auto multisampling = CreateMultisampleCreateInfo(gpuOptions->GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);

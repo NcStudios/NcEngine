@@ -71,13 +71,14 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& 
 
 namespace nc::graphics
 {
-Renderer::Renderer(Graphics* graphics, vk::Device device, ShaderResourceServices* shaderResources, Vector2 dimensions)
-    : m_graphics{graphics},
+Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResourceServices* shaderResources, Vector2 dimensions)
+    : m_swapchain{swapchain},
+      m_gpuOptions{gpuOptions},
       m_shaderResources{shaderResources},
-      m_renderPasses{std::make_unique<RenderPassManager>(device, m_graphics, m_graphics->GetSwapchainPtr(), m_graphics->GetGpuOptions(), dimensions)},
+      m_renderPasses{std::make_unique<RenderPassManager>(device, m_swapchain, m_gpuOptions, shaderResources->GetDescriptorSets(), dimensions)},
       m_dimensions{dimensions},
-      m_depthStencil{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetGpuOptions()->GetDepthFormat()) },
-      m_colorBuffer{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) },
+      m_depthStencil{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, true, m_gpuOptions->GetMaxSamplesCount(), m_gpuOptions->GetDepthFormat()) },
+      m_colorBuffer{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, false, m_gpuOptions->GetMaxSamplesCount(), m_swapchain->GetFormat()) },
       m_imguiDescriptorPool{CreateImguiDescriptorPool(device)}
 {
     RegisterRenderPasses();
@@ -127,14 +128,12 @@ void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physica
 
 void Renderer::RegisterRenderPasses()
 {
-    auto* swapchain = m_graphics->GetSwapchainPtr();
-
     /** Shadow mapping pass */
     const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
     m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
 
     /** Lit shading pass */
-    auto& colorImageViews = swapchain->GetColorImageViews();
+    auto& colorImageViews = m_swapchain->GetColorImageViews();
     auto& depthImageView = m_depthStencil->GetImageView();
     auto& colorResolveView = m_colorBuffer->GetImageView();
     uint32_t index = 0;

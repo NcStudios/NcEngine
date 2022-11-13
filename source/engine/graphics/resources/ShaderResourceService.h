@@ -10,7 +10,6 @@ struct EnvironmentData;
 namespace graphics
 {
 class CubeMap;
-class Graphics;
 struct PointLightInfo;
 struct ObjectData;
 struct ShadowMap;

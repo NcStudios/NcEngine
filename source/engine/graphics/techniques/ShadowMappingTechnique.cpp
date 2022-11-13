@@ -1,10 +1,9 @@
 #include "ShadowMappingTechnique.h"
 #include "config/Config.h"
-#include "ecs/Registry.h"
 #include "graphics/MeshRenderer.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "graphics/resources/ShaderResourceServices.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
@@ -22,11 +21,11 @@ namespace
 
 namespace nc::graphics
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass)
-    : m_descriptorSets{graphics->GetShaderResources()->GetDescriptorSets()},
-      m_pipeline{nullptr},
-      m_pipelineLayout{nullptr},
-      m_enabled{false}
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+        : m_descriptorSets{descriptorSets},
+          m_pipeline{nullptr},
+          m_pipelineLayout{nullptr},
+          m_enabled{false}
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;

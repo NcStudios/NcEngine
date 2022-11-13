@@ -3,25 +3,22 @@
 #include "config/Config.h"
 #include "ecs/Registry.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/Commands.h"
-#include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/resources/ImmutableBuffer.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "graphics/resources/ShaderResourceServices.h"
 #include "graphics/VertexDescriptions.h"
 #include "optick/optick.h"
 
 namespace nc::graphics
 {
-    ParticleTechnique::ParticleTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass)
-        : m_descriptorSets{ graphics->GetShaderResources()->GetDescriptorSets() },
-          m_pipeline{ nullptr },
-          m_pipelineLayout{ nullptr }
+    ParticleTechnique::ParticleTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+        : m_descriptorSets{descriptorSets},
+          m_pipeline{nullptr},
+          m_pipelineLayout{nullptr}
     {
-        auto* gpuOptions = graphics->GetGpuOptions();
-        
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ParticleVertex.spv");

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "graphics/cubemaps/CubeMapManager.h"
+#include "EnvironmentDataManager.h"
 #include "ObjectDataManager.h"
 #include "PointLightManager.h"
-#include "EnvironmentDataManager.h"
 #include "ShaderDescriptorSets.h"
 #include "ShadowMapManager.h"
 #include "graphics/textures/TextureManager.h"
@@ -14,7 +14,7 @@ namespace nc::graphics
 class ShaderResourceServices
 {
     public:
-        ShaderResourceServices(vk::Device device, Graphics* graphics, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
+        ShaderResourceServices(vk::Device device, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
             : m_shaderDescriptorSets{device},
               m_objectDataManager{0, allocator, &m_shaderDescriptorSets, memorySettings.maxRenderers},
               m_pointLightManager{1, allocator, &m_shaderDescriptorSets, memorySettings.maxPointLights},

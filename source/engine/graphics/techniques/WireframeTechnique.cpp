@@ -6,19 +6,21 @@
 #include "ecs/Registry.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/DebugRenderer.h"
-#include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
 
 namespace nc::graphics
 {
-    WireframeTechnique::WireframeTechnique(vk::Device device, Graphics* graphics, vk::RenderPass* renderPass)
-        : m_graphics{graphics},
-          m_meshPath{"cube.nca"},
+    WireframeTechnique::WireframeTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+        : m_meshPath{"cube.nca"},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
+          #ifdef NC_DEBUG_RENDERING_ENABLED
+          ,m_debugRenderer{}
+          #endif
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
@@ -57,7 +59,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine, 2.0f);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMultisampleCreateInfo(graphics->GetGpuOptions()->GetMaxSamplesCount());
+        auto multisampling = CreateMultisampleCreateInfo(gpuOptions->GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
@@ -90,9 +92,9 @@ namespace nc::graphics
         #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
-        || !m_graphics->GetDebugData()->points.empty()
-        || !m_graphics->GetDebugData()->planes.empty()
-        || !m_graphics->GetDebugData()->lines.empty();
+        || !m_debugRenderer.GetData()->points.empty()
+        || !m_debugRenderer.GetData()->planes.empty()
+        || !m_debugRenderer.GetData()->lines.empty();
         #endif
     }
 
@@ -107,9 +109,9 @@ namespace nc::graphics
         #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
-        || !m_graphics->GetDebugData()->points.empty()
-        || !m_graphics->GetDebugData()->planes.empty()
-        || !m_graphics->GetDebugData()->lines.empty();
+        || !m_debugRenderer.GetData()->points.empty()
+        || !m_debugRenderer.GetData()->planes.empty()
+        || !m_debugRenderer.GetData()->lines.empty();
         #endif
     }
 
@@ -128,7 +130,7 @@ namespace nc::graphics
 
         #ifdef NC_DEBUG_RENDERING_ENABLED
         const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(m_meshPath);
-        auto* debugData = m_graphics->GetDebugData();
+        auto* debugData = m_debugRenderer.GetData();
 
         for (const auto& point : debugData->points)
         {

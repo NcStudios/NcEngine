@@ -27,10 +27,11 @@ auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vecto
 
 namespace nc::graphics
 {
-    RenderPassManager::RenderPassManager(vk::Device device, Graphics* graphics, Swapchain* swapchain, GpuOptions* gpuOptions, const Vector2& dimensions)
+    RenderPassManager::RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions)
         : m_device{device},
-          m_graphics{graphics},
           m_swapchain{swapchain},
+          m_gpuOptions{gpuOptions},
+          m_descriptorSets{descriptorSets},
           m_renderPasses{},
           m_frameBufferAttachments{}
     {
