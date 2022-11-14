@@ -3,9 +3,9 @@
 #include "graphics/MeshRenderer.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/vk/Initializers.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
-#include "graphics/resources/ShaderResourceServices.h"
-#include "graphics/ShaderUtilities.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResourceServices.h"
+#include "graphics/shaders/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
 #include "optick/optick.h"
 

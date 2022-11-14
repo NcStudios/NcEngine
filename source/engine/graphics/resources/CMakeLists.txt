@@ -5,9 +5,6 @@ target_sources(${NC_ENGINE_LIB}
         Environment.cpp
         ImmutableBuffer.cpp
         ObjectDataManager.cpp
-        PointLightManager.cpp
         RenderPassManager.cpp
-        ShaderDescriptorSets.cpp
-        ShadowMapManager.cpp
         UniformBuffer.cpp
 )

@@ -1,9 +1,9 @@
-#include "PointLightManager.h"
+#include "PointLightShaderResource.h"
 #include "graphics/vk/Initializers.h"
 
 namespace nc::graphics
 {
-    PointLightManager::PointLightManager(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxPointLights)
+    PointLightShaderResource::PointLightShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxPointLights)
         : m_pointLightsArrayBuffer{nullptr},
           m_descriptors{descriptors},
           m_allocator{allocator},
@@ -13,12 +13,12 @@ namespace nc::graphics
         Initialize();
     }
 
-    PointLightManager::~PointLightManager() noexcept
+    PointLightShaderResource::~PointLightShaderResource() noexcept
     {
         m_pointLightsArrayBuffer->Clear();
     }
 
-    void PointLightManager::Initialize()
+    void PointLightShaderResource::Initialize()
     {
         const auto bufferSize = static_cast<uint32_t>(sizeof(PointLightInfo) * m_maxPointLights);
 
@@ -48,7 +48,7 @@ namespace nc::graphics
         );
     }
 
-    void PointLightManager::Update(const std::vector<PointLightInfo>& data)
+    void PointLightShaderResource::Update(const std::vector<PointLightInfo>& data)
     {
         m_pointLightsArrayBuffer->Map(data, [](PointLightInfo& info)
         {
@@ -56,7 +56,7 @@ namespace nc::graphics
         });
     }
 
-    void PointLightManager::Reset()
+    void PointLightShaderResource::Reset()
     {
         // // m_pointLightsArrayBuffer.Clear();
         Initialize();

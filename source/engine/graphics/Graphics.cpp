@@ -8,7 +8,7 @@
 #include "graphics/GpuAssetsStorage.h"
 #include "optick/optick.h"
 #include "Renderer.h"
-#include "resources/ShaderResourceServices.h"
+#include "shaders/ShaderResourceServices.h"
 #include "utility/Log.h"
 #include "utility/NcError.h"
 #include "vk/Core.h"
@@ -68,7 +68,7 @@ namespace nc::graphics
 
         // Recreate swapchain and resources
         auto shadowMap = ShadowMap { .dimensions = m_dimensions };
-        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
+        m_shaderResources.get()->GetShadowMapShaderResource().Update(std::vector<ShadowMap>{shadowMap});
         m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get());
         m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);

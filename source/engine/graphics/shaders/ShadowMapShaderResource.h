@@ -1,8 +1,8 @@
 #pragma once
 
-#include "RenderTarget.h"
-#include "ShaderResourceService.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/resources/RenderTarget.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResourceService.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -15,11 +15,11 @@ namespace nc::graphics
         Vector2 dimensions;
     };
 
-    class ShadowMapManager : public IShaderResourceService<ShadowMap>
+    class ShadowMapShaderResource : public IShaderResourceService<ShadowMap>
     {
         public:
-            ShadowMapManager(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions);
-            ~ShadowMapManager() noexcept;
+            ShadowMapShaderResource(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions);
+            ~ShadowMapShaderResource() noexcept;
 
             void Initialize() override;
             void Update(const std::vector<ShadowMap>& data) override;

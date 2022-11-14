@@ -2,13 +2,13 @@
 #include "asset/Assets.h"
 #include "config/Config.h"
 #include "graphics/vk/Initializers.h"
-#include "graphics/ShaderUtilities.h"
+#include "graphics/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
-#include "graphics/resources/ShaderResourceServices.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResourceServices.h"
 #include "optick/optick.h"
 
 namespace nc::graphics

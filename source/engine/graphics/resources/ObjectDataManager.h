@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ShaderResourceService.h"
 #include "WriteableBuffer.h"
 #include "DirectXMath.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResourceService.h"
 
 namespace nc::graphics
 {

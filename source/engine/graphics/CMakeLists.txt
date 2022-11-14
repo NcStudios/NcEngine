@@ -16,7 +16,6 @@ target_sources(${NC_ENGINE_LIB}
         PointLight.cpp
         Renderer.cpp
         SceneNavigationCamera.cpp
-        ShaderUtilities.cpp
         VertexDescriptions.cpp
         vma.cpp
 )
@@ -24,6 +23,7 @@ target_sources(${NC_ENGINE_LIB}
 add_subdirectory(cubemaps)
 add_subdirectory(meshes)
 add_subdirectory(resources)
+add_subdirectory(shaders)
 add_subdirectory(techniques)
 add_subdirectory(textures)
 add_subdirectory(vk)

@@ -18,7 +18,7 @@
 #include "optick/optick.h"
 #include "PerFrameRenderState.h"
 #include "resources/RenderTarget.h"
-#include "resources/ShaderResourceServices.h"
+#include "shaders/ShaderResourceServices.h"
 #include "resources/RenderPassManager.h"
 #include "vk/Core.h"
 #include "vk/PerFrameGpuContext.h"
@@ -129,7 +129,7 @@ void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physica
 void Renderer::RegisterRenderPasses()
 {
     /** Shadow mapping pass */
-    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
+    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapShaderResource().GetImageView();
     m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
 
     /** Lit shading pass */

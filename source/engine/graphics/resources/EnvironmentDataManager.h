@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ShaderResourceService.h"
-#include "ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResourceService.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
 #include "UniformBuffer.h"
 
 namespace nc::graphics

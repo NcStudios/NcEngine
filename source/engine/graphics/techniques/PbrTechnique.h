@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"

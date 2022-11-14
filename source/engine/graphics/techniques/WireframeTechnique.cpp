@@ -8,8 +8,8 @@
 #include "graphics/DebugRenderer.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
-#include "graphics/ShaderUtilities.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderUtilities.h"
 #include "graphics/VertexDescriptions.h"
 
 namespace nc::graphics
