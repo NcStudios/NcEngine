@@ -82,7 +82,7 @@ Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptio
       m_imguiDescriptorPool{CreateImguiDescriptorPool(device)}
 {
     RegisterRenderPasses();
-    RegisterTechniques(device);
+    RegisterTechniques();
 }
 
 Renderer::~Renderer() noexcept
@@ -141,7 +141,7 @@ void Renderer::RegisterRenderPasses()
     for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, RenderPassManager::LitShadingPass, index++); }
 }
 
-void Renderer::RegisterTechniques(vk::Device device)
+void Renderer::RegisterTechniques()
 {
     m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
 
