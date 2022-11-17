@@ -7,13 +7,15 @@
 
 namespace
 {
+constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
+
 auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
 {
     std::vector<vk::ClearValue> clearValues;
 
     if(clearFlags & nc::graphics::ClearValueFlags::Color)
     {
-        clearValues.push_back(vk::ClearValue{vk::ClearColorValue{nc::graphics::ClearColor}});
+        clearValues.push_back(vk::ClearValue{vk::ClearColorValue{ClearColor}});
     }
 
     if(clearFlags & nc::graphics::ClearValueFlags::Depth)
@@ -27,6 +29,7 @@ auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vecto
 
 namespace nc::graphics
 {
+
     RenderPassManager::RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions)
         : m_device{device},
           m_swapchain{swapchain},

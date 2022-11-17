@@ -21,7 +21,7 @@ namespace
 
 namespace nc::graphics
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, GpuOptions*, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
         : m_descriptorSets{descriptorSets},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr},

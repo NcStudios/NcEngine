@@ -20,8 +20,6 @@ namespace nc::graphics
         vk::UniqueFramebuffer frameBuffer;
     };
 
-    constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
-
     class RenderPassManager
     {
         public:
