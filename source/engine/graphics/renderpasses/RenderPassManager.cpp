@@ -1,6 +1,6 @@
 #include "RenderPassManager.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/vk/Swapchain.h"
+#include "graphics/Swapchain.h"
 #include "optick/optick.h"
 
 #include <iostream>

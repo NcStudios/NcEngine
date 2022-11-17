@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/resources/RenderTarget.h"
+#include "graphics/renderpasses/RenderTarget.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceService.h"
 

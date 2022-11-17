@@ -4,7 +4,7 @@
 #include "ecs/View.h"
 #include "graphics/Camera.h"
 #include "graphics/MeshRenderer.h"
-#include "graphics/resources/Environment.h"
+#include "graphics/shaders/Environment.h"
 #include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
 #include "shaders/ShaderResourceService.h"

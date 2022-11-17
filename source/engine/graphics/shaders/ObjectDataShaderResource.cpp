@@ -1,5 +1,5 @@
 #include "ObjectDataShaderResource.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 
 namespace nc::graphics
 {

@@ -1,5 +1,5 @@
 #include "CubeMapShaderResource.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 #include "utility/NcError.h"
 
 #include <array>

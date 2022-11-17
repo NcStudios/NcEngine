@@ -1,14 +1,14 @@
 #include "PbrTechnique.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/shaders/ShaderUtilities.h"
-#include "graphics/PerFrameRenderState.h"
+#include "graphics/buffers/ImmutableBuffer.h"
 #include "graphics/GpuOptions.h"
+#include "graphics/Initializers.h"
+#include "graphics/PerFrameRenderState.h"
 #include "graphics/meshes/VertexDescriptions.h"
-#include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceServices.h"
+#include "graphics/shaders/ShaderUtilities.h"
 #include "optick/optick.h"
 
 namespace nc::graphics

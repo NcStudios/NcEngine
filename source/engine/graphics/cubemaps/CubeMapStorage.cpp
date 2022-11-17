@@ -1,7 +1,7 @@
 #include "CubeMapStorage.h"
 #include "graphics/GpuAllocator.h"
 #include "graphics/shaders/CubeMapShaderResource.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 
 namespace nc::graphics
 {

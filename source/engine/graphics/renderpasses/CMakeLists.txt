@@ -1,0 +1,6 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        RenderPass.cpp
+        RenderPassManager.cpp
+        RenderTarget.cpp
+)

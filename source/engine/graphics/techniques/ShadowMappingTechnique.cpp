@@ -3,7 +3,7 @@
 #include "graphics/MeshRenderer.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/meshes/VertexDescriptions.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceServices.h"
 #include "graphics/shaders/ShaderUtilities.h"

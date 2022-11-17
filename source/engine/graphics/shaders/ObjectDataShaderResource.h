@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/resources/WriteableBuffer.h"
 #include "DirectXMath.h"
+#include "graphics/buffers/WriteableBuffer.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceService.h"
 

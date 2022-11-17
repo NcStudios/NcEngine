@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vulkan/vk_mem_alloc.hpp"
-#include "vk/QueueFamily.h"
+#include "QueueFamily.h"
 #include <vector>
 
 namespace nc::graphics

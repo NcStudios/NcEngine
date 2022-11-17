@@ -1,5 +1,5 @@
 #include "ShadowMapShaderResource.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 
 #include <vector>
 

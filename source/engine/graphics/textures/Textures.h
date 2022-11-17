@@ -1,4 +1,4 @@
-#include "graphics/vk/ImmutableImage.h"
+#include "graphics/textures/ImmutableImage.h"
 
 #include <string>
 

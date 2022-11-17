@@ -1,6 +1,6 @@
 #include "TextureShaderResource.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/vk/ImmutableImage.h"
+#include "graphics/Initializers.h"
+#include "graphics/textures/ImmutableImage.h"
 #include "graphics/textures/Textures.h"
 #include "utility/NcError.h"
 

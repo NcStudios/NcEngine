@@ -11,8 +11,8 @@
 #include "shaders/ShaderResourceServices.h"
 #include "utility/Log.h"
 #include "utility/NcError.h"
-#include "vk/Core.h"
-#include "vk/Swapchain.h"
+#include "Core.h"
+#include "Swapchain.h"
 
 #include <iostream>
 

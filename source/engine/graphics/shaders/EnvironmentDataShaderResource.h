@@ -1,8 +1,8 @@
 #pragma once
 
+#include "graphics/buffers/UniformBuffer.h"
 #include "graphics/shaders/ShaderResourceService.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/resources/UniformBuffer.h"
 
 namespace nc::graphics
 {
