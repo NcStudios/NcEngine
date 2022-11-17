@@ -1,12 +1,12 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        GpuOptions.cpp
         Camera.cpp
         Commands.cpp
         DebugWidget.cpp
         FrameManager.cpp
         GpuAllocator.cpp
         GpuAssetsStorage.cpp
+        GpuOptions.cpp
         Graphics.cpp
         MeshBatcher.cpp
         MeshRenderer.cpp

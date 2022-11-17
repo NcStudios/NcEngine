@@ -61,7 +61,6 @@ namespace nc::graphics
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
         pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
-        pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
         auto inputAssembly = CreateInputAssemblyCreateInfo();
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
         auto viewportState = CreateViewportCreateInfo();

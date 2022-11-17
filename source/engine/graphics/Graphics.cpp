@@ -125,9 +125,8 @@ namespace nc::graphics
     // Note: All calls below are asynchronous fire-and-forget methods. A maximum of MaxFramesInFlight sets of calls will be running at any given time.
     void Graphics::Draw(const PerFrameRenderState& state)
     {
-        auto* currentFrame = m_frameManager->CurrentFrameContext();
-
         OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
+        auto* currentFrame = m_frameManager->CurrentFrameContext();
         if (m_isMinimized) return;
 
         m_renderer->Record(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
