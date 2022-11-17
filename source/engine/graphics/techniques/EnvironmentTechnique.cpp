@@ -2,48 +2,32 @@
 #include "asset/Assets.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "graphics/Graphics.h"
-#include "graphics/Commands.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/Base.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/VertexDescriptions.h"
 #include "graphics/resources/Environment.h"
 #include "graphics/resources/ImmutableBuffer.h"
+#include "graphics/resources/ShaderDescriptorSets.h"
 #include "graphics/resources/ShaderResourceServices.h"
 #include "graphics/vk/Swapchain.h"
 #include "optick/optick.h"
 
 namespace nc::graphics
 {
-    struct Texture;
-
-    EnvironmentTechnique::EnvironmentTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
-    : m_graphics{graphics},
-      m_base{graphics->GetBasePtr()},
-      m_descriptorSets{ m_graphics->GetShaderResources()->GetDescriptorSets() },
-      m_pipeline{nullptr},
-      m_pipelineLayout{nullptr}
-    {
-        CreatePipeline(renderPass);
-    }
-
-    EnvironmentTechnique::~EnvironmentTechnique() noexcept
-    {
-        m_pipeline.reset();
-        m_pipelineLayout.reset();
-    }
-
-    void EnvironmentTechnique::CreatePipeline(vk::RenderPass* renderPass)
+    EnvironmentTechnique::EnvironmentTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+        : m_descriptorSets{descriptorSets},
+          m_pipeline{nullptr},
+          m_pipelineLayout{nullptr}
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "EnvironmentVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "EnvironmentFragment.spv");
 
-        auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_base);
-        auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_base);
+        auto vertexShaderModule = CreateShaderModule(device, vertexShaderByteCode);
+        auto fragmentShaderModule = CreateShaderModule(device, fragmentShaderByteCode);
 
         std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
@@ -57,7 +41,7 @@ namespace nc::graphics
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
-        m_pipelineLayout = m_base->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = device.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
@@ -78,7 +62,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMultisampleCreateInfo(m_base->GetMaxSamplesCount());
+        auto multisampling = CreateMultisampleCreateInfo(gpuOptions->GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
@@ -92,10 +76,15 @@ namespace nc::graphics
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
         
-        m_pipeline = m_base->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-       
-        m_base->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
-        m_base->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+        m_pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        device.destroyShaderModule(vertexShaderModule, nullptr);
+        device.destroyShaderModule(fragmentShaderModule, nullptr);
+    }
+
+    EnvironmentTechnique::~EnvironmentTechnique() noexcept
+    {
+        m_pipeline.reset();
+        m_pipelineLayout.reset();
     }
 
     bool EnvironmentTechnique::CanBind(const PerFrameRenderState& frameData)

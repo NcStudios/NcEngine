@@ -6,12 +6,12 @@
 
 namespace nc::graphics
 {
-    class Graphics; class Base; class Swapchain;
+    class GpuOptions; class ShaderDescriptorSets;
 
     class UiTechnique : public ITechnique
     {
         public:
-            UiTechnique(Graphics* graphics, vk::RenderPass* renderPass);
+            UiTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets*, vk::RenderPass* renderPass);
             ~UiTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
@@ -21,10 +21,6 @@ namespace nc::graphics
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         private:
-            void CreatePipeline(vk::RenderPass* renderPass);
-
-            Graphics* m_graphics;
-            Base* m_base;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };

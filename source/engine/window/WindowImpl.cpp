@@ -24,12 +24,6 @@ namespace nc::window
         return g_instance->GetDimensions();
     }
 
-    void SetClearColor(std::array<float, 4> color)
-    {
-        NC_ASSERT(g_instance, "window::SetClearColor - g_instance is not set");
-        g_instance->SetClearColor(color);
-    }
-
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
         NC_ASSERT(g_instance, "window::RegisterOnResizeReceiver - g_instance is not set");
@@ -49,7 +43,6 @@ namespace nc::window
           m_hInstance{},
           m_dimensions{},
           GraphicsOnResizeCallback{nullptr},
-          GraphicsSetClearColorCallback{nullptr},
           UIWndMessageCallback{nullptr},
           EngineDisableRunningCallback{std::move(onQuit)}
     {
@@ -148,11 +141,6 @@ namespace nc::window
         GraphicsOnResizeCallback = std::move(callback);
     }
 
-    void WindowImpl::BindGraphicsSetClearColorCallback(std::function<void(std::array<float, 4>)> callback) noexcept
-    {
-        GraphicsSetClearColorCallback = std::move(callback);
-    }
-
     void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
     {
         UIWndMessageCallback = std::move(callback);
@@ -187,11 +175,6 @@ namespace nc::window
         {
             receiver->OnResize(m_dimensions);
         }
-    }
-
-    void WindowImpl::SetClearColor(std::array<float, 4> color) noexcept
-    {
-        GraphicsSetClearColorCallback(color);
     }
 
     LRESULT CALLBACK WindowImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

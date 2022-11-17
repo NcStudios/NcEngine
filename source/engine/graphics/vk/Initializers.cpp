@@ -1,6 +1,4 @@
 #include "Initializers.h"
-#include "graphics/Base.h"
-#include "graphics/Graphics.h"
 
 namespace nc::graphics
 {

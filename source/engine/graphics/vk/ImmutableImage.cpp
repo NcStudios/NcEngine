@@ -1,5 +1,4 @@
 #include "ImmutableImage.h"
-#include "graphics/Base.h"
 
 namespace nc::graphics
 {
@@ -9,9 +8,9 @@ namespace nc::graphics
     {
     }
 
-    ImmutableImage::ImmutableImage(Base* base, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height)
+    ImmutableImage::ImmutableImage(vk::Device device, GpuAllocator* allocator, unsigned char* pixels, uint32_t width, uint32_t height)
         : m_image{allocator->CreateTexture(pixels, width, height)},
-          m_view{CreateTextureView(base->GetDevice(), m_image)}
+          m_view{CreateTextureView(device, m_image)}
     {
     }
 

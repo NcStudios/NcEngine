@@ -7,8 +7,6 @@
 
 namespace nc::graphics
 {
-    class Base;
-
-    vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, Base* base);
+    vk::ShaderModule CreateShaderModule(vk::Device device, const std::vector<uint32_t>& code);
     std::vector<uint32_t> ReadShader(const std::string& filename);
 }

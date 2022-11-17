@@ -103,7 +103,7 @@ namespace nc::graphics
         }
     }
     
-    void Swapchain::WaitForImageFence(uint32_t imageIndex)
+    void Swapchain::WaitForNextImage(PerFrameGpuContext* currentFrame, uint32_t imageIndex)
     {
         if (m_imagesInFlightFences[imageIndex])
         {
@@ -112,10 +112,7 @@ namespace nc::graphics
                 throw NcError("Could not wait for fences to complete.");
             }
         }
-    }
 
-    void Swapchain::SyncImageAndFrameFence(PerFrameGpuContext* currentFrame, uint32_t imageIndex)
-    {
         m_imagesInFlightFences[imageIndex] = currentFrame->Fence();
     }
 

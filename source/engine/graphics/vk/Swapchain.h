@@ -35,8 +35,7 @@ namespace nc::graphics
 
             // Image synchronization
             bool GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex);
-            void WaitForImageFence(uint32_t imageIndex);
-            void SyncImageAndFrameFence(PerFrameGpuContext* currentFrame, uint32_t imageIndex);
+            void WaitForNextImage(PerFrameGpuContext* currentFrame, uint32_t imageIndex);
 
         private:
             vk::Device m_device;

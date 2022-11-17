@@ -1,6 +1,5 @@
 #include "RenderPassManager.h"
-#include "graphics/Base.h"
-#include "graphics/Graphics.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/vk/Swapchain.h"
 #include "optick/optick.h"
 
@@ -8,13 +7,15 @@
 
 namespace
 {
-auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags, const std::array<float, 4>& clearColor) -> std::vector<vk::ClearValue>
+constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
+
+auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
 {
     std::vector<vk::ClearValue> clearValues;
 
     if(clearFlags & nc::graphics::ClearValueFlags::Color)
     {
-        clearValues.push_back(vk::ClearValue{vk::ClearColorValue{clearColor}});
+        clearValues.push_back(vk::ClearValue{vk::ClearColorValue{ClearColor}});
     }
 
     if(clearFlags & nc::graphics::ClearValueFlags::Depth)
@@ -28,14 +29,15 @@ auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags, const std::ar
 
 namespace nc::graphics
 {
-    RenderPassManager::RenderPassManager(Graphics* graphics, const Vector2& dimensions)
-        : m_graphics{graphics},
+
+    RenderPassManager::RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions)
+        : m_device{device},
+          m_swapchain{swapchain},
+          m_gpuOptions{gpuOptions},
+          m_descriptorSets{descriptorSets},
           m_renderPasses{},
           m_frameBufferAttachments{}
     {
-        auto* base = m_graphics->GetBasePtr();
-        auto* swapchain = m_graphics->GetSwapchainPtr();
-
         /** Shadow mapping pass */
         std::array<AttachmentSlot, 1> shadowAttachmentSlots
         {
@@ -52,8 +54,8 @@ namespace nc::graphics
         /** Lit shading pass */
         std::array<AttachmentSlot, 3> litAttachmentSlots
         {
-            AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, base->GetMaxSamplesCount()},
-            AttachmentSlot{1, AttachmentType::Depth, base->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, base->GetMaxSamplesCount()},
+            AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, gpuOptions->GetMaxSamplesCount()},
+            AttachmentSlot{1, AttachmentType::Depth, gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, gpuOptions->GetMaxSamplesCount()},
             AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
         };
 
@@ -94,7 +96,7 @@ namespace nc::graphics
 
     void RenderPassManager::Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
     {
-        const auto clearValues = CreateClearValues(renderPass->clearFlags, m_graphics->GetClearColor());
+        const auto clearValues = CreateClearValues(renderPass->clearFlags);
         const auto renderPassInfo = vk::RenderPassBeginInfo
         {
             renderPass->renderpass.get(), GetFrameBufferAttachment(renderPass->uid, renderTargetIndex).frameBuffer.get(),
@@ -132,16 +134,12 @@ namespace nc::graphics
                                    ClearValueFlags_t clearFlags,
                                    const Vector2& dimensions)
     {
-        auto* base = m_graphics->GetBasePtr();
-        auto* swapchain = m_graphics->GetSwapchainPtr();
-        const auto size = RenderTargetSize{dimensions, swapchain->GetExtent()};
-        m_renderPasses.emplace_back(attachmentSlots, subpasses, base->GetDevice(), size, uid, clearFlags);
+        const auto size = RenderTargetSize{dimensions, m_swapchain->GetExtent()};
+        m_renderPasses.emplace_back(attachmentSlots, subpasses, m_device, size, uid, clearFlags);
     }
 
     void RenderPassManager::Resize(const Vector2& dimensions, vk::Extent2D extent)
     {
-        auto* base = m_graphics->GetBasePtr();
-
         for (auto& renderPass : m_renderPasses)
         {
             renderPass.renderTargetSize.dimensions = dimensions;
@@ -161,7 +159,7 @@ namespace nc::graphics
             framebufferInfo.setLayers(1);
 
             frameBufferAttachment.frameBuffer.reset();
-            frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+            frameBufferAttachment.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
         }
     }
 
@@ -193,7 +191,6 @@ namespace nc::graphics
             m_frameBufferAttachments.pop_back();
         }
 
-        auto* base = m_graphics->GetBasePtr();
         auto frameBufferAttachment = FrameBufferAttachment{};
 
         frameBufferAttachment.attachmentHandles = std::move(attachmentHandles);
@@ -209,7 +206,7 @@ namespace nc::graphics
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+        frameBufferAttachment.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
         m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 
@@ -226,7 +223,6 @@ namespace nc::graphics
             m_frameBufferAttachments.pop_back();
         }
 
-        auto* base = m_graphics->GetBasePtr();
         auto frameBufferAttachment = FrameBufferAttachment{};
 
         frameBufferAttachment.attachmentHandles.reserve(1);
@@ -243,7 +239,7 @@ namespace nc::graphics
         framebufferInfo.setHeight(static_cast<uint32_t>(renderpass.renderTargetSize.dimensions.y));
         framebufferInfo.setLayers(1);
 
-        frameBufferAttachment.frameBuffer = base->GetDevice().createFramebufferUnique(framebufferInfo);
+        frameBufferAttachment.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
         m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 }

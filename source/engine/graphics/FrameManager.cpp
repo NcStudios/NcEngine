@@ -21,7 +21,7 @@ FrameManager::FrameManager(vk::Device logicalDevice, vk::PhysicalDevice physical
 
 void FrameManager::Begin()
 {
-    CurrentFrameContext()->Wait();
+    CurrentFrameContext()->WaitForSync();
 
     auto* cmd = CurrentFrameContext()->CommandBuffer();
     cmd->begin(vk::CommandBufferBeginInfo{});

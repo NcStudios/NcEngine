@@ -1,6 +1,4 @@
 #include "CubeMapManager.h"
-#include "graphics/Base.h"
-#include "graphics/Graphics.h"
 #include "graphics/vk/Initializers.h"
 #include "utility/NcError.h"
 
@@ -8,15 +6,15 @@
 
 namespace nc::graphics
 {
-CubeMapManager::CubeMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps)
-    : m_graphics{graphics},
-        m_descriptors{descriptors},
-        m_imageInfos{},
-        m_cubeMapSampler{},
-        m_layout{},
-        m_maxCubeMapsCount{maxCubeMaps},
-        m_cubeMapsInitialized{false},
-        m_bindingSlot{bindingSlot}
+CubeMapManager::CubeMapManager(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps)
+    : m_device{device},
+      m_descriptors{descriptors},
+      m_imageInfos{},
+      m_cubeMapSampler{},
+      m_layout{},
+      m_maxCubeMapsCount{maxCubeMaps},
+      m_cubeMapsInitialized{false},
+      m_bindingSlot{bindingSlot}
 {
     Initialize();
 }
@@ -38,7 +36,7 @@ void CubeMapManager::Update(const std::vector<CubeMap>& data)
 {
     assert(data.size() < m_maxCubeMapsCount && !data.empty());
 
-    m_cubeMapSampler = graphics::CreateTextureSampler(m_graphics->GetBasePtr()->GetDevice(), vk::SamplerAddressMode::eRepeat);
+    m_cubeMapSampler = graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat);
 
     m_imageInfos = std::vector<vk::DescriptorImageInfo>();
 

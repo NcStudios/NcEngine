@@ -17,7 +17,6 @@ struct VertexBuffer;
         public:
             Commands(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Swapchain* swapchain);
 
-            void SubmitQueue(PerFrameGpuContext* currentFrame);
             void ExecuteCommand(std::function<void(vk::CommandBuffer cmd)>&& function);
             const vk::Queue& GetCommandQueue(QueueFamilyType type) const noexcept;
 

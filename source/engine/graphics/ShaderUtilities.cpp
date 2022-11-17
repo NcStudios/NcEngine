@@ -1,18 +1,17 @@
 #include "ShaderUtilities.h"
-#include "graphics/Base.h"
 #include "utility/NcError.h"
 
 #include <fstream>
 
 namespace nc::graphics
 {
-    vk::ShaderModule CreateShaderModule(const std::vector<uint32_t>& code, Base* base)
+    vk::ShaderModule CreateShaderModule(vk::Device device, const std::vector<uint32_t>& code)
     {
         vk::ShaderModuleCreateInfo createInfo{};
         createInfo.setCodeSize(code.size()*sizeof(uint32_t));
         createInfo.setPCode(code.data());
         vk::ShaderModule shaderModule;
-        if (base->GetDevice().createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
+        if (device.createShaderModule(&createInfo, nullptr, &shaderModule) != vk::Result::eSuccess)
         {
             throw NcError("Failed to create shader module.");
         }

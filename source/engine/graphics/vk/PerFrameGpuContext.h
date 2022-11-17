@@ -13,8 +13,10 @@ class PerFrameGpuContext
     public:
         PerFrameGpuContext(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface);
 
-        void Wait(); // Waits until the fence has signaled
-        void Reset() noexcept; // Resets the fence
+        void WaitForSync(); // Waits until the fence has signaled
+        void ResetSync() noexcept; // Resets the fence
+        void RenderFrame(vk::Queue graphicsQueue); // Submits the recorded commands in the command buffer
+
         vk::Fence Fence() const noexcept { return m_inFlightFence.get(); }
         vk::Semaphore ImageAvailableSemaphore() noexcept { return m_imageAvailableSemaphore.get(); }
         vk::Semaphore RenderFinishedSemaphore() noexcept { return m_renderFinishedSemaphore.get(); }

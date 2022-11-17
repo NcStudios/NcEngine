@@ -7,8 +7,6 @@
 
 namespace nc::graphics
 {
-class Graphics;
-
 class TextureManager : public IShaderResourceService<TextureBuffer>
 {
     public:

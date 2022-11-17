@@ -6,13 +6,12 @@
 
 namespace nc::graphics
 {
-class Base;
 class GpuAllocator;
 
 class CubeMapStorage
 {
     public:
-        CubeMapStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        CubeMapStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
 
         void UpdateBuffer(const CubeMapBufferData& cubeMapBufferData);
 
@@ -21,7 +20,7 @@ class CubeMapStorage
         void UnloadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferData);
         void UnloadAllCubeMapBuffer();
 
-        Base* m_base;
+        vk::Device m_device;
         GpuAllocator* m_allocator;
         std::vector<CubeMap> m_cubeMaps;
         vk::UniqueSampler m_sampler;

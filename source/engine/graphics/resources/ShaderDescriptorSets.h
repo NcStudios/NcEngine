@@ -5,8 +5,6 @@
 
 namespace nc::graphics
 {
-    class Base;
-
     enum class BindFrequency : uint8_t
     {
         per_frame
@@ -50,7 +48,7 @@ namespace nc::graphics
     class ShaderDescriptorSets
     {
         public:
-            ShaderDescriptorSets(Base* base);
+            ShaderDescriptorSets(vk::Device device);
 
             /* Shader resource services attach themselves to a shader slot by registering themselves here. */
             uint32_t RegisterDescriptor(uint32_t bindingSlot, BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
@@ -70,8 +68,6 @@ namespace nc::graphics
         private:
             vk::UniqueDescriptorPool m_renderingDescriptorPool;
             std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
-
-            /** @todo needs only Device & PadBufferOffset... */
-            Base* m_base;
+            vk::Device m_device;
     };
 }

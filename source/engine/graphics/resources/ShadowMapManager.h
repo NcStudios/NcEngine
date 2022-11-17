@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class GpuAllocator;
 
     struct ShadowMap
     {
@@ -18,7 +18,7 @@ namespace nc::graphics
     class ShadowMapManager : public IShaderResourceService<ShadowMap>
     {
         public:
-            ShadowMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, Vector2 dimensions);
+            ShadowMapManager(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions);
             ~ShadowMapManager() noexcept;
 
             void Initialize() override;
@@ -28,7 +28,8 @@ namespace nc::graphics
             auto GetImageView() noexcept -> const vk::ImageView& { return m_depthStencil.get()->GetImageView(); }
 
         private:
-            Graphics* m_graphics;
+            vk::Device m_device;
+            GpuAllocator* m_allocator;
             ShaderDescriptorSets* m_descriptors;
             vk::UniqueSampler m_sampler;
             std::unique_ptr<RenderTarget> m_depthStencil;

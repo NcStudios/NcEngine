@@ -8,7 +8,9 @@
 
 namespace nc::graphics
 {
-    class Graphics;
+    class GpuOptions;
+    class ShaderDescriptorSets;
+    class Swapchain;
 
     struct FrameBufferAttachment
     {
@@ -24,7 +26,7 @@ namespace nc::graphics
             inline static const std::string LitShadingPass = "Lit Pass";
             inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
             
-            RenderPassManager(Graphics* graphics, const Vector2& dimensions);
+            RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions);
             ~RenderPassManager() noexcept;
 
             void Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData);
@@ -43,7 +45,10 @@ namespace nc::graphics
             void End(vk::CommandBuffer* cmd);
             FrameBufferAttachment& GetFrameBufferAttachment(const std::string& uid, uint32_t index);
 
-            Graphics* m_graphics;
+            vk::Device m_device;
+            Swapchain* m_swapchain;
+            GpuOptions* m_gpuOptions;
+            ShaderDescriptorSets* m_descriptorSets;
             std::vector<RenderPass> m_renderPasses;
             std::vector<FrameBufferAttachment> m_frameBufferAttachments;
     };
@@ -64,7 +69,7 @@ namespace nc::graphics
             renderpass.techniques.pop_back();
         }
 
-        renderpass.techniques.push_back(std::make_unique<T>(m_graphics, &renderpass.renderpass.get()));
+        renderpass.techniques.push_back(std::make_unique<T>(m_device, m_gpuOptions, m_descriptorSets, &renderpass.renderpass.get()));
     }
 
 } // namespace nc

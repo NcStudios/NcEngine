@@ -8,19 +8,17 @@
 
 namespace nc::graphics
 {
-class Graphics;
-
 class CubeMapManager : public IShaderResourceService<CubeMap>
 {
     public:
-        CubeMapManager(uint32_t bindingSlot, Graphics* graphics, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
+        CubeMapManager(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
 
         void Initialize() override;
         void Update(const std::vector<CubeMap>& data) override;
         void Reset() override;
 
     private:
-        Graphics* m_graphics;
+        vk::Device m_device;
         ShaderDescriptorSets* m_descriptors;
         std::vector<vk::DescriptorImageInfo> m_imageInfos;
         vk::UniqueSampler m_cubeMapSampler;

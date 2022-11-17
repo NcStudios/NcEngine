@@ -1,16 +1,15 @@
 #include "TextureStorage.h"
-#include "graphics/Base.h"
 #include "graphics/GpuAllocator.h"
 #include "graphics/textures/TextureManager.h"
 #include "graphics/vk/Initializers.h"
 
 namespace nc::graphics
 {
-TextureStorage::TextureStorage(Base* base, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
-    : m_base{base},
+TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+    : m_device{device},
       m_allocator{allocator},
       m_textureBuffers{},
-      m_sampler{graphics::CreateTextureSampler(base->GetDevice(), vk::SamplerAddressMode::eRepeat)},
+      m_sampler{graphics::CreateTextureSampler(device, vk::SamplerAddressMode::eRepeat)},
       m_onTextureUpdate{gpuAccessorSignals.onTextureUpdate->Connect(this, &TextureStorage::UpdateBuffer)}
 {
 }
@@ -55,7 +54,7 @@ void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferDat
 
         TextureBuffer textureBuffer
         {
-            .image = graphics::ImmutableImage(m_base, m_allocator, textureData.pixels.get(), textureData.width, textureData.height),
+            .image = graphics::ImmutableImage(m_device, m_allocator, textureData.pixels.get(), textureData.width, textureData.height),
             .imageInfo = graphics::CreateDescriptorImageInfo(m_sampler.get(), textureBuffer.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
             .uid = textureData.id
         };
