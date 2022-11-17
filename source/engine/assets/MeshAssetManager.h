@@ -2,7 +2,7 @@
 
 #include "AssetService.h"
 #include "assets/AssetData.h"
-#include "graphics/Vertex.h"
+#include "graphics/meshes/Vertex.h"
 #include "utility/Signal.h"
 
 #include <string>

@@ -3,10 +3,10 @@
 #include "config/Config.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/vk/Initializers.h"
+#include "graphics/meshes/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderUtilities.h"
-#include "graphics/VertexDescriptions.h"
 #include "imgui/imgui_impl_vulkan.h"
 
 namespace nc::graphics

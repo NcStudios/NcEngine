@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/GpuAllocator.h"
-#include "graphics/Vertex.h"
+#include "graphics/meshes/Vertex.h"
 
 #include <span>
 

@@ -1,10 +1,8 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         RenderTarget.cpp
-        EnvironmentDataManager.cpp
         Environment.cpp
         ImmutableBuffer.cpp
-        ObjectDataManager.cpp
         RenderPassManager.cpp
         UniformBuffer.cpp
 )

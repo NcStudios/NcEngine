@@ -9,7 +9,7 @@
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceServices.h"
-#include "graphics/VertexDescriptions.h"
+#include "graphics/meshes/VertexDescriptions.h"
 #include "optick/optick.h"
 
 namespace nc::graphics

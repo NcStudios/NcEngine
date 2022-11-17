@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/vk/CubeMap.h"
+#include "graphics/cubemaps/CubeMap.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceService.h"
 
@@ -8,10 +8,10 @@
 
 namespace nc::graphics
 {
-class CubeMapManager : public IShaderResourceService<CubeMap>
+class CubeMapShaderResource : public IShaderResourceService<CubeMap>
 {
     public:
-        CubeMapManager(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
+        CubeMapShaderResource(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
 
         void Initialize() override;
         void Update(const std::vector<CubeMap>& data) override;

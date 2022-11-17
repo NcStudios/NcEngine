@@ -7,11 +7,11 @@
 
 namespace nc::graphics
 {
-class TextureManager : public IShaderResourceService<TextureBuffer>
+class TextureShaderResource : public IShaderResourceService<TextureBuffer>
 {
     public:
-        TextureManager(uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxTextures);
-        ~TextureManager() noexcept;
+        TextureShaderResource(uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxTextures);
+        ~TextureShaderResource() noexcept;
 
         void Initialize() override;
         void Update(const std::vector<TextureBuffer>& data) override;

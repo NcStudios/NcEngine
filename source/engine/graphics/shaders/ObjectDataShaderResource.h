@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WriteableBuffer.h"
+#include "graphics/resources/WriteableBuffer.h"
 #include "DirectXMath.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceService.h"
@@ -21,11 +21,11 @@ namespace nc::graphics
         uint32_t metallicIndex;  // Todo: Make this more generic for materials
     };
 
-    class ObjectDataManager : public IShaderResourceService<ObjectData>
+    class ObjectDataShaderResource : public IShaderResourceService<ObjectData>
     {
         public:
-            ObjectDataManager(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxRenderers);
-            ~ObjectDataManager() noexcept;
+            ObjectDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxRenderers);
+            ~ObjectDataShaderResource() noexcept;
 
             void Initialize() override;
             void Update(const std::vector<ObjectData>& data) override;

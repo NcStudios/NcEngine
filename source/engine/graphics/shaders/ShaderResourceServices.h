@@ -1,12 +1,12 @@
 #pragma once
 
-#include "graphics/cubemaps/CubeMapManager.h"
-#include "graphics/resources/EnvironmentDataManager.h"
-#include "graphics/resources/ObjectDataManager.h"
+#include "graphics/shaders/CubeMapShaderResource.h"
+#include "graphics/shaders/EnvironmentDataShaderResource.h"
+#include "graphics/shaders/ObjectDataShaderResource.h"
 #include "graphics/shaders/PointLightShaderResource.h"
 #include "graphics/shaders/ShadowMapShaderResource.h"
-#include "graphics/textures/TextureManager.h"
-#include "ShaderDescriptorSets.h"
+#include "graphics/shaders/TextureShaderResource.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
 #include "config/Config.h"
 
 namespace nc::graphics
@@ -16,12 +16,12 @@ class ShaderResourceServices
     public:
         ShaderResourceServices(vk::Device device, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
             : m_shaderDescriptorSets{device},
-              m_objectDataManager{0, allocator, &m_shaderDescriptorSets, memorySettings.maxRenderers},
+              m_objectDataShaderResource{0, allocator, &m_shaderDescriptorSets, memorySettings.maxRenderers},
               m_pointLightShaderResource{1, allocator, &m_shaderDescriptorSets, memorySettings.maxPointLights},
-              m_textureManager{2, &m_shaderDescriptorSets, memorySettings.maxTextures},
+              m_textureShaderResource{2, &m_shaderDescriptorSets, memorySettings.maxTextures},
               m_shadowMapShaderResource{device, 3, allocator, &m_shaderDescriptorSets, dimensions },
-              m_cubeMapManager{device, 4, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
-              m_environmentDataManager{5, allocator, &m_shaderDescriptorSets}
+              m_cubeMapShaderResource{device, 4, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
+              m_environmentDataShaderResource{5, allocator, &m_shaderDescriptorSets}
         {
             m_shaderDescriptorSets.CreateSet(BindFrequency::per_frame);
         }
@@ -32,11 +32,11 @@ class ShaderResourceServices
     private:
         ShaderDescriptorSets m_shaderDescriptorSets;
 
-        ObjectDataManager m_objectDataManager;                // BINDING SLOT 0
-        PointLightShaderResource m_pointLightShaderResource;  // BINDING SLOT 1
-        TextureManager m_textureManager;                      // BINDING SLOT 2
-        ShadowMapShaderResource m_shadowMapShaderResource;    // BINDING SLOT 3
-        CubeMapManager m_cubeMapManager;                      // BINDING SLOT 4
-        EnvironmentDataManager m_environmentDataManager;      // BINDING SLOT 5
+        ObjectDataShaderResource m_objectDataShaderResource;           // BINDING SLOT 0
+        PointLightShaderResource m_pointLightShaderResource;           // BINDING SLOT 1
+        TextureShaderResource m_textureShaderResource;                 // BINDING SLOT 2
+        ShadowMapShaderResource m_shadowMapShaderResource;             // BINDING SLOT 3
+        CubeMapShaderResource m_cubeMapShaderResource;                 // BINDING SLOT 4
+        EnvironmentDataShaderResource m_environmentDataShaderResource; // BINDING SLOT 5
 };
 } // namespace nc::graphics

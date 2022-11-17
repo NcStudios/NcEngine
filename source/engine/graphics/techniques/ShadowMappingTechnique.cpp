@@ -2,11 +2,11 @@
 #include "config/Config.h"
 #include "graphics/MeshRenderer.h"
 #include "graphics/GpuOptions.h"
+#include "graphics/meshes/VertexDescriptions.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceServices.h"
 #include "graphics/shaders/ShaderUtilities.h"
-#include "graphics/VertexDescriptions.h"
 #include "optick/optick.h"
 
 namespace
@@ -60,7 +60,6 @@ namespace nc::graphics
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
-        pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
         pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
         auto inputAssembly = CreateInputAssemblyCreateInfo();
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);

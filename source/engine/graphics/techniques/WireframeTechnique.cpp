@@ -6,11 +6,11 @@
 #include "ecs/Registry.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/DebugRenderer.h"
+#include "graphics/meshes/VertexDescriptions.h"
 #include "graphics/vk/Initializers.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderUtilities.h"
-#include "graphics/VertexDescriptions.h"
 
 namespace nc::graphics
 {
@@ -118,10 +118,10 @@ namespace nc::graphics
     void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         auto pushConstants = WireframePushConstants{};
+        pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
 
         if (frameData.colliderDebugWidget.has_value())
         {
-            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
             pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
             const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
@@ -134,27 +134,21 @@ namespace nc::graphics
 
         for (const auto& point : debugData->points)
         {
-            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
             pushConstants.model = point;
-
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
 
         for (const auto& line : debugData->lines)
         {
-            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
             pushConstants.model = line;
-
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
 
         for (const auto& plane : debugData->planes)
         {
-            pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
             pushConstants.model = plane;
-
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(debugMeshAccessor.indexCount, 1, debugMeshAccessor.firstIndex, debugMeshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }

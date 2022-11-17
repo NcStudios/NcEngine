@@ -16,7 +16,6 @@ target_sources(${NC_ENGINE_LIB}
         PointLight.cpp
         Renderer.cpp
         SceneNavigationCamera.cpp
-        VertexDescriptions.cpp
         vma.cpp
 )
 

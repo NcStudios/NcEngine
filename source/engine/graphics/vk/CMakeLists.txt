@@ -1,6 +1,5 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        CubeMap.cpp
         Core.cpp
         ImmutableImage.cpp
         Initializers.cpp

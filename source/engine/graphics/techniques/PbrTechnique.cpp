@@ -5,7 +5,7 @@
 #include "graphics/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/VertexDescriptions.h"
+#include "graphics/meshes/VertexDescriptions.h"
 #include "graphics/resources/ImmutableBuffer.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceServices.h"

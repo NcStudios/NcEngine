@@ -7,7 +7,7 @@
 #include "graphics/DebugWidget.h"
 #endif
 #include "particle/EmitterState.h"
-#include "resources/ObjectDataManager.h"
+#include "shaders/ObjectDataShaderResource.h"
 
 #include <span>
 

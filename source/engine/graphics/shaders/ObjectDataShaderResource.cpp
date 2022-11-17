@@ -1,9 +1,9 @@
-#include "ObjectDataManager.h"
+#include "ObjectDataShaderResource.h"
 #include "graphics/vk/Initializers.h"
 
 namespace nc::graphics
 {
-    ObjectDataManager::ObjectDataManager(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxRenderers)
+    ObjectDataShaderResource::ObjectDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxRenderers)
         : m_allocator { allocator },
           m_descriptors{ descriptors },
           m_objectsDataBuffer{},
@@ -13,12 +13,12 @@ namespace nc::graphics
         Initialize();
     }
 
-    ObjectDataManager::~ObjectDataManager() noexcept
+    ObjectDataShaderResource::~ObjectDataShaderResource() noexcept
     {
         m_objectsDataBuffer.Clear();
     }
 
-    void ObjectDataManager::Initialize()
+    void ObjectDataShaderResource::Initialize()
     {
         const uint32_t objectsSize = (sizeof(ObjectData) * m_maxObjects);
         m_objectsDataBuffer = WriteableBuffer<ObjectData>(m_allocator, objectsSize);
@@ -44,12 +44,12 @@ namespace nc::graphics
         );
     }
 
-    void ObjectDataManager::Update(const std::vector<ObjectData>& data)
+    void ObjectDataShaderResource::Update(const std::vector<ObjectData>& data)
     {
         m_objectsDataBuffer.Map(data);
     }
 
-    void ObjectDataManager::Reset()
+    void ObjectDataShaderResource::Reset()
     {
         m_objectsDataBuffer.Clear();
         Initialize();
