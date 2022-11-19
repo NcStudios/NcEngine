@@ -1,8 +1,8 @@
 #include "Commands.h"
-#include "vk/Core.h"
-#include "vk/Meshes.h"
-#include "vk/PerFrameGpuContext.h"
-#include "vk/Swapchain.h"
+#include "meshes/Meshes.h"
+#include "Core.h"
+#include "PerFrameGpuContext.h"
+#include "Swapchain.h"
 
 namespace nc::graphics
 {
@@ -17,25 +17,6 @@ namespace nc::graphics
         auto queueFamilies = QueueFamilyIndices(m_physicalDevice, m_surface);
         m_graphicsQueue = m_device.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), 0);
         m_presentQueue = m_device.getQueue(queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily), 0);
-    }
-
-    void Commands::SubmitQueue(PerFrameGpuContext* currentFrame)
-    {
-        vk::Semaphore waitSemaphores[] = {currentFrame->ImageAvailableSemaphore()}; // Which semaphore to wait on before execution begins
-        vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput }; // Which stage of the pipeline to wait in
-        vk::Semaphore signalSemaphores[] = {currentFrame->RenderFinishedSemaphore()}; // Which semaphore to signal when execution completes
-
-        vk::SubmitInfo submitInfo{};
-        submitInfo.setWaitSemaphoreCount(1);
-        submitInfo.setPWaitSemaphores(waitSemaphores);
-        submitInfo.setPWaitDstStageMask(waitStages);
-        submitInfo.setCommandBufferCount(1);
-        submitInfo.setPCommandBuffers(currentFrame->CommandBuffer());
-        submitInfo.setSignalSemaphoreCount(1);
-        submitInfo.setPSignalSemaphores(signalSemaphores);
-
-        m_device.resetFences(currentFrame->Fence());
-        m_graphicsQueue.submit(submitInfo, currentFrame->Fence());
     }
 
     void Commands::ExecuteCommand(std::function<void(vk::CommandBuffer cmd)>&& function)

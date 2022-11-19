@@ -1,16 +1,15 @@
 #include "CubeMapStorage.h"
-#include "graphics/GpuOptions.h"
 #include "graphics/GpuAllocator.h"
-#include "graphics/cubemaps/CubeMapManager.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/shaders/CubeMapShaderResource.h"
+#include "graphics/Initializers.h"
 
 namespace nc::graphics
 {
-CubeMapStorage::CubeMapStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
-    : m_gpuOptions{gpuOptions},
+CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+    : m_device{device},
       m_allocator{allocator},
       m_cubeMaps{},
-      m_sampler{graphics::CreateTextureSampler(gpuOptions->GetDevice(), vk::SamplerAddressMode::eRepeat)},
+      m_sampler{graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat)},
       m_onCubeMapUpdate{gpuAccessorSignals.onCubeMapUpdate->Connect(this, &CubeMapStorage::UpdateBuffer)}
 {
 }
@@ -42,7 +41,7 @@ void CubeMapStorage::LoadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferDat
     for (auto i = 0u; i < cubeMapBufferData.ids.size(); ++i)
     {
         const auto& cubeMapData = cubeMapBufferData.data[i];
-        m_cubeMaps.emplace_back(m_gpuOptions, m_allocator, cubeMapData.pixelArray, cubeMapData.width, cubeMapData.height, cubeMapData.size, cubeMapData.id);
+        m_cubeMaps.emplace_back(m_device, m_allocator, cubeMapData.pixelArray, cubeMapData.width, cubeMapData.height, cubeMapData.size, cubeMapData.id);
     }
 
     graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);

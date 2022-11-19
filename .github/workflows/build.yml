@@ -1,4 +1,4 @@
-name: Tests
+name: Build
 
 on:
   workflow_dispatch:
@@ -16,12 +16,12 @@ on:
       - '**/*.jpeg'
 
 jobs:
-  Windows:
+  Win-VS-17:
     runs-on: windows-2022
 
     steps:
     - name: Checkout Branch
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -33,17 +33,84 @@ jobs:
         vulkan-components: Vulkan-Headers, Vulkan-Loader
 
     - name: Configure
-      run: cmake -G "Visual Studio 17 2022" -S ${{github.workspace}} -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
+      run: cmake -G "Visual Studio 17 2022" -S . -B build -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
     - name: Build and Install
-      run: cmake --build ${{github.workspace}}/build --target install --config Release
+      run: cmake --build build --target install --config Release
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build/test
-      run: ctest -V --output-junit ${{github.workspace}}/TestResults.xml
+      run: ctest -V --output-on-failure --output-junit TestResults.xml
 
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action/composite@v1
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Win-VS-17-TestResults
+        path: build/test/TestResults.xml
+
+  Win-MinGW-w64:
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v3
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: 'mingw64'
+        update: true
+          git
+          make
+        pacboy: >-
+          toolchain:p
+          cmake:p
+          ninja:p
+
+    - name: Setup Vulkan Sdk
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.2.198.0
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+
+    - name: Configure
+      run: cmake -G "Ninja" -S . -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -DNC_BUILD_TESTS=ON
+
+    - name: Build and Install
+      run: cmake --build build --target install --parallel 2
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}/build/test
+      run: ctest -V --output-on-failure --output-junit TestResults.xml
+
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Win-MinGW-TestResults
+        path: build/test/TestResults.xml
+
+  Publish-Test-Results:
+    runs-on: ubuntu-latest
+    needs: [Win-VS-17, Win-MinGW-w64]
+    permissions:
+      checks: write
+      pull-requests: write
+    if: always()
+
+    steps:
+    - name: Download Results
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Publish Results
+      uses: mikepenz/action-junit-report@v3
       if: always()
       with:
-        files: ${{github.workspace}}/TestResults.xml
+        report_paths: 'artifacts/**/*.xml'

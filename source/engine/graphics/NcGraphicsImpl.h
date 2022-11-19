@@ -5,7 +5,7 @@
 #include "ecs/ParticleEmitterSystem.h"
 #include "Graphics.h"
 #include "graphics/NcGraphics.h"
-#include "resources/Environment.h"
+#include "shaders/Environment.h"
 #include "task/Job.h"
 #include "ui/UISystemImpl.h"
 

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
 #include "ITechnique.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {
-    class Graphics; class GpuOptions;
+    class GpuOptions; class ShaderDescriptorSets;
 
     class PbrTechnique : public ITechnique
     {
     public:
-        PbrTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass);
+        PbrTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
         ~PbrTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
@@ -24,10 +24,6 @@ namespace nc::graphics
         void Clear() noexcept;
 
     private:
-        void CreatePipeline(vk::RenderPass* renderPass);
-
-        Graphics* m_graphics;
-        GpuOptions* m_gpuOptions;
         ShaderDescriptorSets* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;

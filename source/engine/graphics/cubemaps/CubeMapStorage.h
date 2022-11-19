@@ -2,17 +2,16 @@
 
 #include "assets/AssetData.h"
 #include "assets/AssetManagers.h"
-#include "graphics/vk/CubeMap.h"
+#include "graphics/cubemaps/CubeMap.h"
 
 namespace nc::graphics
 {
-class GpuOptions;
 class GpuAllocator;
 
 class CubeMapStorage
 {
     public:
-        CubeMapStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        CubeMapStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
 
         void UpdateBuffer(const CubeMapBufferData& cubeMapBufferData);
 
@@ -21,7 +20,7 @@ class CubeMapStorage
         void UnloadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferData);
         void UnloadAllCubeMapBuffer();
 
-        GpuOptions* m_gpuOptions;
+        vk::Device m_device;
         GpuAllocator* m_allocator;
         std::vector<CubeMap> m_cubeMaps;
         vk::UniqueSampler m_sampler;

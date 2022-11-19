@@ -68,13 +68,12 @@ namespace nc::graphics
     {
         m_graphics.InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
-        window->BindGraphicsSetClearColorCallback(std::bind_front(&Graphics::SetClearColor, &m_graphics));
         window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
     {
-        NC_LOG_TRACE("Setting main camera to: {}", static_cast<void*>(camera));
+        NC_LOG_TRACE_FMT("Setting main camera to: {}", static_cast<void*>(camera));
         m_camera.Set(camera);
     }
 
@@ -85,7 +84,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::SetUi(ui::IUI* ui) noexcept
     {
-        NC_LOG_TRACE("Setting UI to {}", static_cast<void*>(ui));
+        NC_LOG_TRACE_FMT("Setting UI to {}", static_cast<void*>(ui));
         m_ui.Set(ui);
     }
 
@@ -96,7 +95,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::SetSkybox(const std::string& path)
     {
-        NC_LOG_TRACE("Setting skybox to {}", path);
+        NC_LOG_TRACE_FMT("Setting skybox to {}", path);
         m_environment.SetSkybox(path);
     }
 

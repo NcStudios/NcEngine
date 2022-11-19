@@ -8,20 +8,20 @@
 #include "graphics/GpuOptions.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
+#include "graphics/renderpasses/RenderPassManager.h"
+#include "graphics/renderpasses/RenderTarget.h"
+#include "graphics/shaders/ShaderResources.h"
 #include "graphics/techniques/EnvironmentTechnique.h"
 #include "graphics/techniques/ParticleTechnique.h"
 #include "graphics/techniques/PbrTechnique.h"
 #include "graphics/techniques/UiTechnique.h"
 #include "graphics/techniques/ShadowMappingTechnique.h"
-#include "graphics/vk/Swapchain.h"
+#include "graphics/Swapchain.h"
 #include "imgui/imgui_impl_vulkan.h"
 #include "optick/optick.h"
 #include "PerFrameRenderState.h"
-#include "resources/RenderTarget.h"
-#include "resources/ShaderResourceServices.h"
-#include "resources/RenderPassManager.h"
-#include "vk/Core.h"
-#include "vk/PerFrameGpuContext.h"
+#include "Core.h"
+#include "PerFrameGpuContext.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "graphics/techniques/WireframeTechnique.h"
@@ -71,13 +71,14 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& 
 
 namespace nc::graphics
 {
-Renderer::Renderer(Graphics* graphics, vk::Device device, ShaderResourceServices* shaderResources, Vector2 dimensions)
-    : m_graphics{graphics},
+Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions)
+    : m_swapchain{swapchain},
+      m_gpuOptions{gpuOptions},
       m_shaderResources{shaderResources},
-      m_renderPasses{std::make_unique<RenderPassManager>(graphics, dimensions)},
+      m_renderPasses{std::make_unique<RenderPassManager>(device, m_swapchain, m_gpuOptions, shaderResources->GetDescriptorSets(), dimensions)},
       m_dimensions{dimensions},
-      m_depthStencil{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, true, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetGpuOptions()->GetDepthFormat()) },
-      m_colorBuffer{ std::make_unique<RenderTarget>(device, m_graphics->GetAllocatorPtr(), m_dimensions, false, m_graphics->GetGpuOptions()->GetMaxSamplesCount(), m_graphics->GetSwapchainPtr()->GetFormat()) },
+      m_depthStencil{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, true, m_gpuOptions->GetMaxSamplesCount(), m_gpuOptions->GetDepthFormat()) },
+      m_colorBuffer{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, false, m_gpuOptions->GetMaxSamplesCount(), m_swapchain->GetFormat()) },
       m_imguiDescriptorPool{CreateImguiDescriptorPool(device)}
 {
     RegisterRenderPasses();
@@ -127,14 +128,12 @@ void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physica
 
 void Renderer::RegisterRenderPasses()
 {
-    auto* swapchain = m_graphics->GetSwapchainPtr();
-
     /** Shadow mapping pass */
-    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
+    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapShaderResource().GetImageView();
     m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
 
     /** Lit shading pass */
-    auto& colorImageViews = swapchain->GetColorImageViews();
+    auto& colorImageViews = m_swapchain->GetColorImageViews();
     auto& depthImageView = m_depthStencil->GetImageView();
     auto& colorResolveView = m_colorBuffer->GetImageView();
     uint32_t index = 0;

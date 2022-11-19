@@ -1,13 +1,12 @@
 #include "ShadowMappingTechnique.h"
 #include "config/Config.h"
-#include "ecs/Registry.h"
 #include "graphics/MeshRenderer.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/Graphics.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/resources/ShaderResourceServices.h"
-#include "graphics/ShaderUtilities.h"
-#include "graphics/VertexDescriptions.h"
+#include "graphics/meshes/VertexDescriptions.h"
+#include "graphics/Initializers.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResources.h"
+#include "graphics/shaders/ShaderUtilities.h"
 #include "optick/optick.h"
 
 namespace
@@ -22,42 +21,16 @@ namespace
 
 namespace nc::graphics
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(Graphics* graphics, vk::RenderPass* renderPass)
-    : 
-      m_graphics{graphics},
-      m_gpuOptions{graphics->GetGpuOptions()},
-      m_descriptorSets{m_graphics->GetShaderResources()->GetDescriptorSets()},
-      m_pipeline{nullptr},
-      m_pipelineLayout{nullptr},
-      m_enabled{false}
-    {
-        CreatePipeline(renderPass);
-    }
-
-    ShadowMappingTechnique::~ShadowMappingTechnique() noexcept
-    {
-        m_pipeline.reset();
-        m_pipelineLayout.reset();
-    }
-
-    bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
-    {
-        return m_enabled = nc::config::GetGraphicsSettings().useShadows && !frameData.pointLightVPs.empty();
-    }
-
-    void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
-    {
-        OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
-    }
-
-    void ShadowMappingTechnique::CreatePipeline(vk::RenderPass* renderPass)
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, GpuOptions*, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+        : m_descriptorSets{descriptorSets},
+          m_pipeline{nullptr},
+          m_pipelineLayout{nullptr},
+          m_enabled{false}
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
-        auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_gpuOptions);
+        auto vertexShaderModule = CreateShaderModule(device, vertexShaderByteCode);
 
         std::array<vk::PipelineShaderStageCreateInfo, 1u> shaderStages
         {
@@ -73,7 +46,7 @@ namespace nc::graphics
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
-        m_pipelineLayout = m_gpuOptions->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = device.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         // Graphics pipeline
         std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
@@ -87,7 +60,6 @@ namespace nc::graphics
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();
         auto vertexInputInfo = CreateVertexInputCreateInfo(vertexBindingDescription, vertexAttributeDescription);
-        pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
         pipelineCreateInfo.setPVertexInputState(&vertexInputInfo);
         auto inputAssembly = CreateInputAssemblyCreateInfo();
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
@@ -108,8 +80,26 @@ namespace nc::graphics
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = m_gpuOptions->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        m_gpuOptions->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
+        m_pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        device.destroyShaderModule(vertexShaderModule, nullptr);
+    }
+
+    ShadowMappingTechnique::~ShadowMappingTechnique() noexcept
+    {
+        m_pipeline.reset();
+        m_pipelineLayout.reset();
+    }
+
+    bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
+    {
+        return m_enabled = nc::config::GetGraphicsSettings().useShadows && !frameData.pointLightVPs.empty();
+    }
+
+    void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
+    {
+        OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
+        m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)

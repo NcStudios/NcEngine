@@ -2,10 +2,10 @@
 
 namespace nc::graphics
 {
-GpuAssetsStorage::GpuAssetsStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
-    : cubeMapStorage{gpuOptions, allocator, gpuAccessorSignals},
+GpuAssetsStorage::GpuAssetsStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+    : cubeMapStorage{device, allocator, gpuAccessorSignals},
       meshStorage{allocator, gpuAccessorSignals},
-      textureStorage{gpuOptions, allocator, gpuAccessorSignals}
+      textureStorage{device, allocator, gpuAccessorSignals}
 {
 }
 } // namespace nc::graphics

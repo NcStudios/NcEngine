@@ -7,12 +7,11 @@
 
 namespace nc::graphics
 {
-class GpuOptions;
 class GpuAllocator;
 
 struct GpuAssetsStorage
 {
-    GpuAssetsStorage(GpuOptions* gpuOptions, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+    GpuAssetsStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
     CubeMapStorage cubeMapStorage;
     MeshStorage meshStorage;
     TextureStorage textureStorage;

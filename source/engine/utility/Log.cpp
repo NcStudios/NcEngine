@@ -57,7 +57,7 @@ void InitializeLog(std::string_view path)
     auto file = std::ofstream{g_logPath, std::ios::out | std::ios::trunc};
     if (!file)
     {
-        throw NcError(std::format("Failed to initialize log: {}", path));
+        throw NcError(fmt::format("Failed to initialize log: {}", path));
     }
 
     file << "Log started: " << ::GetDateTime();
@@ -85,7 +85,7 @@ void Log(std::string_view item, char prefix) noexcept
 
 void Log(const std::exception& e) noexcept
 {
-    Log(std::format("***Exception*** {}", e.what()), 'E');
+    Log(fmt::format("***Exception*** {}", e.what()), 'E');
     std::cerr << e.what();
 
     try

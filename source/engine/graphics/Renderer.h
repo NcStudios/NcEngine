@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/GpuAssetsStorage.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 
 #include <functional>
 #include <unordered_map>
@@ -19,21 +19,18 @@ class ParticleRenderer;
 
 namespace graphics
 {
-class Commands;
-class Graphics;
-class PerFrameGpuContext;
-class RenderTarget;
-class ShaderResourceServices;
+class Swapchain;
+class GpuOptions;
 struct PerFrameRenderState;
+class PerFrameGpuContext;
 class RenderPassManager;
+class RenderTarget;
+class ShaderResources;
 
 class Renderer
 {
     public:
-        Renderer(graphics::Graphics* graphics,
-                 vk::Device device, 
-                 ShaderResourceServices* shaderResources,
-                 Vector2 dimensions);
+        Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions);
         ~Renderer() noexcept;
 
         void Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
@@ -45,8 +42,9 @@ class Renderer
         void RegisterTechniques();
         void RegisterRenderPasses();
 
-        graphics::Graphics* m_graphics;
-        ShaderResourceServices* m_shaderResources;
+        Swapchain* m_swapchain;
+        GpuOptions* m_gpuOptions;
+        ShaderResources* m_shaderResources;
         std::unique_ptr<RenderPassManager> m_renderPasses;
         Vector2 m_dimensions;
         std::unique_ptr<RenderTarget> m_depthStencil;

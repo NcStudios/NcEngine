@@ -1,6 +1,5 @@
 #include "ParticleEmitterSystem.h"
 #include "ecs/Transform.h"
-#include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
 #include "time/Time.h"
 

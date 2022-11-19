@@ -1,52 +1,27 @@
 #include "UiTechnique.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "ecs/Registry.h"
+#include "graphics/buffers/ImmutableBuffer.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/Graphics.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/ShaderUtilities.h"
-#include "graphics/VertexDescriptions.h"
-#include "graphics/vk/Swapchain.h"
+#include "graphics/Initializers.h"
+#include "graphics/meshes/VertexDescriptions.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderUtilities.h"
 #include "imgui/imgui_impl_vulkan.h"
 
 namespace nc::graphics
 {
-    UiTechnique::UiTechnique(nc::graphics::Graphics* graphics, vk::RenderPass* renderPass)
-        : m_graphics{ graphics },
-        m_gpuOptions{ graphics->GetGpuOptions() },
-        m_pipeline{ nullptr },
-        m_pipelineLayout{ nullptr }
-    {
-        CreatePipeline(renderPass);
-    }
-
-    UiTechnique::~UiTechnique() noexcept
-    {
-        m_pipeline.reset();
-        m_pipelineLayout.reset();
-    }
-
-    bool UiTechnique::CanBind(const PerFrameRenderState&)
-    {
-        return true;
-    }
-
-    void UiTechnique::Bind(vk::CommandBuffer* cmd)
-    {
-        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    }
-
-    void UiTechnique::CreatePipeline(vk::RenderPass* renderPass)
+    UiTechnique::UiTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+        : m_pipeline{nullptr},
+          m_pipelineLayout{nullptr}
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "UiVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "UiFragment.spv");
 
-        auto vertexShaderModule = CreateShaderModule(vertexShaderByteCode, m_gpuOptions);
-        auto fragmentShaderModule = CreateShaderModule(fragmentShaderByteCode, m_gpuOptions);
+        auto vertexShaderModule = CreateShaderModule(device, vertexShaderByteCode);
+        auto fragmentShaderModule = CreateShaderModule(device, fragmentShaderByteCode);
 
         std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
@@ -55,7 +30,7 @@ namespace nc::graphics
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo();
-        m_pipelineLayout = m_gpuOptions->GetDevice().createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = device.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
@@ -76,7 +51,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMultisampleCreateInfo(m_gpuOptions->GetMaxSamplesCount());
+        auto multisampling = CreateMultisampleCreateInfo(gpuOptions->GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
@@ -90,9 +65,25 @@ namespace nc::graphics
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = m_gpuOptions->GetDevice().createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        m_gpuOptions->GetDevice().destroyShaderModule(vertexShaderModule, nullptr);
-        m_gpuOptions->GetDevice().destroyShaderModule(fragmentShaderModule, nullptr);
+        m_pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        device.destroyShaderModule(vertexShaderModule, nullptr);
+        device.destroyShaderModule(fragmentShaderModule, nullptr);
+    }
+
+    UiTechnique::~UiTechnique() noexcept
+    {
+        m_pipeline.reset();
+        m_pipelineLayout.reset();
+    }
+
+    bool UiTechnique::CanBind(const PerFrameRenderState&)
+    {
+        return true;
+    }
+
+    void UiTechnique::Bind(vk::CommandBuffer* cmd)
+    {
+        cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     }
 
     bool UiTechnique::CanRecord(const PerFrameRenderState&)

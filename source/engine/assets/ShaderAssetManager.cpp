@@ -2,6 +2,7 @@
 #include "AssetUtilities.h"
 #include "utility/NcError.h"
 
+#include <algorithm>
 #include <fstream>
 #include <filesystem>
 #include <ranges>

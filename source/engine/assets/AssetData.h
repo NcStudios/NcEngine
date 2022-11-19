@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/Vertex.h"
+#include "graphics/meshes/Vertex.h"
 #include "utility/Memory.h"
 
 #include <array>

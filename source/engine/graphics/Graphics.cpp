@@ -8,12 +8,11 @@
 #include "graphics/GpuAssetsStorage.h"
 #include "optick/optick.h"
 #include "Renderer.h"
-#include "resources/ShaderResourceServices.h"
-#include "resources/RenderPassManager.h"
+#include "shaders/ShaderResources.h"
 #include "utility/Log.h"
 #include "utility/NcError.h"
-#include "vk/Core.h"
-#include "vk/Swapchain.h"
+#include "Core.h"
+#include "Swapchain.h"
 
 #include <iostream>
 
@@ -22,23 +21,19 @@ namespace nc::graphics
     Graphics::Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
           m_core{std::make_unique<Core>(hwnd, hinstance)},
-          m_gpuOptions{ std::make_unique<GpuOptions>(m_core.get()) },
+          m_gpuOptions{ std::make_unique<GpuOptions>(m_core->physicalDevice) },
           m_swapchain{ std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
           m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
-          m_shaderResources{ std::make_unique<ShaderResourceServices>(this, m_allocator.get(), config::GetMemorySettings(), dimensions) },
+          m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), m_allocator.get(), config::GetMemorySettings(), dimensions)},
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
-          m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_gpuOptions.get(), m_allocator.get(), gpuAccessorSignals) },
-          #ifdef NC_DEBUG_RENDERING_ENABLED
-          m_debugRenderer{},
-          #endif
-          m_renderer{ std::make_unique<Renderer>(this, m_core->logicalDevice.get(), m_shaderResources.get(), dimensions) },
+          m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
+          m_renderer{ std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
           m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
-          m_isMinimized{ false },
-          m_clearColor{0.0f, 0.0f, 0.0f, 1.0f}
+          m_isMinimized{ false }
     {
     }
 
@@ -73,10 +68,10 @@ namespace nc::graphics
 
         // Recreate swapchain and resources
         auto shadowMap = ShadowMap { .dimensions = m_dimensions };
-        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
+        m_shaderResources.get()->GetShadowMapShaderResource().Update(std::vector<ShadowMap>{shadowMap});
         m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get());
-        m_renderer = std::make_unique<Renderer>(this, m_core->logicalDevice.get(), m_shaderResources.get(), m_dimensions);
+        m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
@@ -91,39 +86,8 @@ namespace nc::graphics
         }
 
         RecreateSwapchain(m_dimensions);
+        InitializeUI();
     }
-
-    GpuOptions* Graphics::GetGpuOptions() const noexcept
-    {
-        return m_gpuOptions.get();
-    }
-
-    GpuAllocator* Graphics::GetAllocatorPtr() const noexcept
-    {
-        return m_allocator.get();
-    }
-
-    Swapchain* Graphics::GetSwapchainPtr() const noexcept
-    {
-        return m_swapchain.get();
-    }
-
-    ShaderResourceServices* Graphics::GetShaderResources() const noexcept
-    {
-        return m_shaderResources.get();
-    }
-
-    const Vector2 Graphics::GetDimensions() const noexcept
-    {
-        return m_dimensions;
-    }
-
-    #ifdef NC_DEBUG_RENDERING_ENABLED
-    graphics::DebugData* Graphics::GetDebugData()
-    {
-        return m_debugRenderer.GetData();
-    }
-    #endif
 
     void Graphics::Clear()
     {
@@ -133,16 +97,6 @@ namespace nc::graphics
         ShaderResourceService<PointLightInfo>::Get()->Reset();
         ShaderResourceService<ShadowMap>::Get()->Reset();
         ShaderResourceService<EnvironmentData>::Get()->Reset();
-    }
-
-    void Graphics::SetClearColor(std::array<float, 4> color)
-    {
-        m_clearColor = color;
-    }
-
-    const std::array<float, 4>& Graphics::GetClearColor() const noexcept
-    {
-        return m_clearColor;
     }
 
     void Graphics::InitializeUI() /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
@@ -172,18 +126,18 @@ namespace nc::graphics
     void Graphics::Draw(const PerFrameRenderState& state)
     {
         OPTICK_CATEGORY("Graphics::Draw", Optick::Category::Rendering);
+        auto* currentFrame = m_frameManager->CurrentFrameContext();
         if (m_isMinimized) return;
 
-        m_renderer->Record(m_frameManager->CurrentFrameContext(), state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
+        m_renderer->Record(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
 
         // Executes the command buffer to render to the image
-        m_swapchain->WaitForImageFence(m_imageIndex);
-        m_swapchain->SyncImageAndFrameFence(m_frameManager->CurrentFrameContext(), m_imageIndex);
-        m_commands->SubmitQueue(m_frameManager->CurrentFrameContext());
+        m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);
+        currentFrame->RenderFrame(m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily));
 
         // Returns the image to the swapchain
         bool isSwapChainValid = true;
-        m_swapchain->Present(m_frameManager->CurrentFrameContext(), m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily), m_imageIndex, isSwapChainValid);
+        m_swapchain->Present(currentFrame, m_commands->GetCommandQueue(QueueFamilyType::GraphicsFamily), m_imageIndex, isSwapChainValid);
 
         if (!isSwapChainValid)
         {
