@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-    class PointLightShaderResource : public IShaderResourceService<PointLightInfo>
+    class PointLightShaderResource : public IShaderResource<PointLightInfo>
     {
         public:
             PointLightShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxPointLights);

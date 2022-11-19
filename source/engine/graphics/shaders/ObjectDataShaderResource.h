@@ -21,7 +21,7 @@ namespace nc::graphics
         uint32_t metallicIndex;  // Todo: Make this more generic for materials
     };
 
-    class ObjectDataShaderResource : public IShaderResourceService<ObjectData>
+    class ObjectDataShaderResource : public IShaderResource<ObjectData>
     {
         public:
             ObjectDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxRenderers);

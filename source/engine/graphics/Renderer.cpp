@@ -10,7 +10,7 @@
 #include "graphics/Graphics.h"
 #include "graphics/renderpasses/RenderPassManager.h"
 #include "graphics/renderpasses/RenderTarget.h"
-#include "graphics/shaders/ShaderResourceServices.h"
+#include "graphics/shaders/ShaderResources.h"
 #include "graphics/techniques/EnvironmentTechnique.h"
 #include "graphics/techniques/ParticleTechnique.h"
 #include "graphics/techniques/PbrTechnique.h"
@@ -71,7 +71,7 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& 
 
 namespace nc::graphics
 {
-Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResourceServices* shaderResources, Vector2 dimensions)
+Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions)
     : m_swapchain{swapchain},
       m_gpuOptions{gpuOptions},
       m_shaderResources{shaderResources},

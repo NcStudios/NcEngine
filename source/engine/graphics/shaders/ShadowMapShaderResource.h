@@ -15,7 +15,7 @@ namespace nc::graphics
         Vector2 dimensions;
     };
 
-    class ShadowMapShaderResource : public IShaderResourceService<ShadowMap>
+    class ShadowMapShaderResource : public IShaderResource<ShadowMap>
     {
         public:
             ShadowMapShaderResource(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions);

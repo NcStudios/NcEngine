@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-class TextureShaderResource : public IShaderResourceService<TextureBuffer>
+class TextureShaderResource : public IShaderResource<TextureBuffer>
 {
     public:
         TextureShaderResource(uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxTextures);

@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-    class EnvironmentDataShaderResource : public IShaderResourceService<EnvironmentData>
+    class EnvironmentDataShaderResource : public IShaderResource<EnvironmentData>
     {
         public:
             EnvironmentDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors);

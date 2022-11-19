@@ -7,7 +7,7 @@
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/meshes/VertexDescriptions.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/shaders/ShaderResourceServices.h"
+#include "graphics/shaders/ShaderResources.h"
 #include "graphics/shaders/ShaderUtilities.h"
 #include "optick/optick.h"
 

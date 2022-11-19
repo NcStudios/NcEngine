@@ -14,7 +14,6 @@ target_sources(${NC_ENGINE_LIB}
         PerFrameRenderState.cpp
         QueueFamily.cpp
         Renderer.cpp
-        SceneNavigationCamera.cpp
         Swapchain.cpp
         vma.cpp
 )

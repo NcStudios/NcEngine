@@ -11,10 +11,10 @@
 
 namespace nc::graphics
 {
-class ShaderResourceServices
+class ShaderResources
 {
     public:
-        ShaderResourceServices(vk::Device device, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
+        ShaderResources(vk::Device device, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
             : m_shaderDescriptorSets{device},
               m_objectDataShaderResource{0, allocator, &m_shaderDescriptorSets, memorySettings.maxRenderers},
               m_pointLightShaderResource{1, allocator, &m_shaderDescriptorSets, memorySettings.maxPointLights},

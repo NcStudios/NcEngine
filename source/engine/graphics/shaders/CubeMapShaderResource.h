@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-class CubeMapShaderResource : public IShaderResourceService<CubeMap>
+class CubeMapShaderResource : public IShaderResource<CubeMap>
 {
     public:
         CubeMapShaderResource(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
