@@ -1,5 +1,5 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        TextureManager.cpp
+        ImmutableImage.cpp
         TextureStorage.cpp
 )

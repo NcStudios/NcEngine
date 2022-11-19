@@ -1,12 +1,12 @@
-#include "CubeMapManager.h"
-#include "graphics/vk/Initializers.h"
+#include "CubeMapShaderResource.h"
+#include "graphics/Initializers.h"
 #include "utility/NcError.h"
 
 #include <array>
 
 namespace nc::graphics
 {
-CubeMapManager::CubeMapManager(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps)
+CubeMapShaderResource::CubeMapShaderResource(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps)
     : m_device{device},
       m_descriptors{descriptors},
       m_imageInfos{},
@@ -19,7 +19,7 @@ CubeMapManager::CubeMapManager(vk::Device device, uint32_t bindingSlot, ShaderDe
     Initialize();
 }
 
-void CubeMapManager::Initialize()
+void CubeMapShaderResource::Initialize()
 {
     m_descriptors->RegisterDescriptor
     (
@@ -32,7 +32,7 @@ void CubeMapManager::Initialize()
     );
 }
 
-void CubeMapManager::Update(const std::vector<CubeMap>& data)
+void CubeMapShaderResource::Update(const std::vector<CubeMap>& data)
 {
     assert(data.size() < m_maxCubeMapsCount && !data.empty());
 
@@ -55,7 +55,7 @@ void CubeMapManager::Update(const std::vector<CubeMap>& data)
     );
 }
 
-void CubeMapManager::Reset()
+void CubeMapShaderResource::Reset()
 {
     m_cubeMapSampler.reset();
     Initialize();

@@ -24,7 +24,7 @@ namespace nc::graphics
     class Swapchain;
     class Renderer;
     class RenderPassManager;
-    class ShaderResourceServices;
+    class ShaderResources;
 
     /** @todo: Plan is to have Graphics header be general enough to be implemented by Vulkan or DX, and eventually have a Vulkan (and potentially DX) version of Renderer, FrameManager, etc. Slowly working towards that. */
     class Graphics
@@ -50,7 +50,7 @@ namespace nc::graphics
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<GpuAllocator> m_allocator;
-            std::unique_ptr<ShaderResourceServices> m_shaderResources;
+            std::unique_ptr<ShaderResources> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
             std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
             std::unique_ptr<Renderer> m_renderer;

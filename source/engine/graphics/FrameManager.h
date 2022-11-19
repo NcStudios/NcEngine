@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vk/PerFrameGpuContext.h"
+#include "PerFrameGpuContext.h"
 
 #include <memory>
 #include <vector>

@@ -1,11 +1,11 @@
-#include "ShadowMapManager.h"
-#include "graphics/vk/Initializers.h"
+#include "ShadowMapShaderResource.h"
+#include "graphics/Initializers.h"
 
 #include <vector>
 
 namespace nc::graphics
 {
-    ShadowMapManager::ShadowMapManager(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions)
+    ShadowMapShaderResource::ShadowMapShaderResource(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions)
     : m_device{device},
       m_allocator{allocator},
       m_descriptors{ descriptors },
@@ -19,16 +19,16 @@ namespace nc::graphics
         Initialize();
     }
 
-    ShadowMapManager::~ShadowMapManager()
+    ShadowMapShaderResource::~ShadowMapShaderResource()
     {
         Reset();
     }
 
-    void ShadowMapManager::Reset()
+    void ShadowMapShaderResource::Reset()
     {
     }
 
-    void ShadowMapManager::Update(const std::vector<ShadowMap>& data)
+    void ShadowMapShaderResource::Update(const std::vector<ShadowMap>& data)
     {
         m_dimensions = data.at(0).dimensions;
 
@@ -48,7 +48,7 @@ namespace nc::graphics
         );
     }
 
-    void ShadowMapManager::Initialize()
+    void ShadowMapShaderResource::Initialize()
     {
         m_depthStencil.reset();
         m_depthStencil = std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);

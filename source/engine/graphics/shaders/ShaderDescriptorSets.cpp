@@ -1,5 +1,5 @@
 #include "ShaderDescriptorSets.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 
 namespace
 {

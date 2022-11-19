@@ -1,7 +1,7 @@
 #include "TextureStorage.h"
 #include "graphics/GpuAllocator.h"
-#include "graphics/textures/TextureManager.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/shaders/TextureShaderResource.h"
+#include "graphics/Initializers.h"
 
 namespace nc::graphics
 {

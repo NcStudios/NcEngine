@@ -8,11 +8,11 @@
 #include "graphics/GpuAssetsStorage.h"
 #include "optick/optick.h"
 #include "Renderer.h"
-#include "resources/ShaderResourceServices.h"
+#include "shaders/ShaderResources.h"
 #include "utility/Log.h"
 #include "utility/NcError.h"
-#include "vk/Core.h"
-#include "vk/Swapchain.h"
+#include "Core.h"
+#include "Swapchain.h"
 
 #include <iostream>
 
@@ -25,7 +25,7 @@ namespace nc::graphics
           m_swapchain{ std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
           m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
-          m_shaderResources{ std::make_unique<ShaderResourceServices>(m_core->logicalDevice.get(), m_allocator.get(), config::GetMemorySettings(), dimensions)},
+          m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), m_allocator.get(), config::GetMemorySettings(), dimensions)},
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
           m_renderer{ std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
@@ -68,7 +68,7 @@ namespace nc::graphics
 
         // Recreate swapchain and resources
         auto shadowMap = ShadowMap { .dimensions = m_dimensions };
-        m_shaderResources.get()->GetShadowMapManager().Update(std::vector<ShadowMap>{shadowMap});
+        m_shaderResources.get()->GetShadowMapShaderResource().Update(std::vector<ShadowMap>{shadowMap});
         m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get());
         m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);

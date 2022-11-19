@@ -62,7 +62,7 @@ namespace nc::graphics
             DescriptorSet* GetSet(BindFrequency bindFrequency);
             void BindSet(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
 
-            /* Called in ShaderResourceServices CTOR after each of the services have been initialized. */
+            /* Called in ShaderResources CTOR after each of the services have been initialized. */
             void CreateSet(BindFrequency bindFrequency);
 
         private:

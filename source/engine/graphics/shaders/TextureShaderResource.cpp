@@ -1,14 +1,14 @@
-#include "TextureManager.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/vk/ImmutableImage.h"
-#include "graphics/textures/TextureStorage.h"
+#include "TextureShaderResource.h"
+#include "graphics/Initializers.h"
+#include "graphics/textures/ImmutableImage.h"
+#include "graphics/textures/Textures.h"
 #include "utility/NcError.h"
 
 #include <array>
 
 namespace nc::graphics
 {
-TextureManager::TextureManager(uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxTextures)
+TextureShaderResource::TextureShaderResource(uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxTextures)
     : m_descriptors{descriptors},
         m_imageInfos{},
         m_layout{},
@@ -19,11 +19,11 @@ TextureManager::TextureManager(uint32_t bindingSlot, ShaderDescriptorSets* descr
     Initialize();
 }
 
-TextureManager::~TextureManager() noexcept
+TextureShaderResource::~TextureShaderResource() noexcept
 {
 }
 
-void TextureManager::Initialize()
+void TextureShaderResource::Initialize()
 {
     m_descriptors->RegisterDescriptor
     (
@@ -36,7 +36,7 @@ void TextureManager::Initialize()
     );
 }
 
-void TextureManager::Update(const std::vector<TextureBuffer>& data)
+void TextureShaderResource::Update(const std::vector<TextureBuffer>& data)
 {
     assert(data.size() < m_maxTexturesCount && !data.empty());
 
@@ -57,7 +57,7 @@ void TextureManager::Update(const std::vector<TextureBuffer>& data)
     );
 }
 
-void TextureManager::Reset()
+void TextureShaderResource::Reset()
 {
 }
 } // namespace nc::graphics

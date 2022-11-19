@@ -1,5 +1,5 @@
 #include "UISystemImpl.h"
-#include "graphics/vk/Swapchain.h"
+#include "graphics/Swapchain.h"
 #include "utility/NcError.h"
 
 #include "imgui/imgui.h"

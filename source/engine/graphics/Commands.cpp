@@ -1,8 +1,8 @@
 #include "Commands.h"
-#include "vk/Core.h"
-#include "vk/Meshes.h"
-#include "vk/PerFrameGpuContext.h"
-#include "vk/Swapchain.h"
+#include "meshes/Meshes.h"
+#include "Core.h"
+#include "PerFrameGpuContext.h"
+#include "Swapchain.h"
 
 namespace nc::graphics
 {

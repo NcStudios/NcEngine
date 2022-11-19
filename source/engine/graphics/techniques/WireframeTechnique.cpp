@@ -4,13 +4,13 @@
 #include "config/Config.h"
 #include "ecs/Transform.h"
 #include "ecs/Registry.h"
-#include "graphics/GpuOptions.h"
+#include "graphics/buffers/ImmutableBuffer.h"
 #include "graphics/DebugRenderer.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
-#include "graphics/ShaderUtilities.h"
-#include "graphics/VertexDescriptions.h"
+#include "graphics/GpuOptions.h"
+#include "graphics/Initializers.h"
+#include "graphics/meshes/VertexDescriptions.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderUtilities.h"
 
 namespace nc::graphics
 {

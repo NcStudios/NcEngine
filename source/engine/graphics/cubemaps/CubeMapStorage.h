@@ -2,7 +2,7 @@
 
 #include "assets/AssetData.h"
 #include "assets/AssetManagers.h"
-#include "graphics/vk/CubeMap.h"
+#include "graphics/cubemaps/CubeMap.h"
 
 namespace nc::graphics
 {

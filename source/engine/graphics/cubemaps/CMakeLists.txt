@@ -1,5 +1,5 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        CubeMapManager.cpp
+        CubeMap.cpp
         CubeMapStorage.cpp
 )

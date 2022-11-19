@@ -1,16 +1,16 @@
 #pragma once
 
-#include "ShaderResourceService.h"
-#include "ShaderDescriptorSets.h"
-#include "UniformBuffer.h"
+#include "graphics/buffers/UniformBuffer.h"
+#include "graphics/shaders/ShaderResourceService.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
 
 namespace nc::graphics
 {
-    class EnvironmentDataManager : public IShaderResourceService<EnvironmentData>
+    class EnvironmentDataShaderResource : public IShaderResource<EnvironmentData>
     {
         public:
-            EnvironmentDataManager(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors);
-            ~EnvironmentDataManager() noexcept;
+            EnvironmentDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors);
+            ~EnvironmentDataShaderResource() noexcept;
 
             void Initialize() override;
             void Update(const std::vector<EnvironmentData>& data) override;

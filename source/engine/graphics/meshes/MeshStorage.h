@@ -2,7 +2,7 @@
 
 #include "assets/AssetData.h"
 #include "assets/AssetManagers.h"
-#include "graphics/vk/Meshes.h"
+#include "graphics/meshes/Meshes.h"
 
 namespace nc::graphics
 {

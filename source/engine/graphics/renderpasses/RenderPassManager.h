@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/vk/RenderPass.h"
+#include "graphics/renderpasses/RenderPass.h"
 
 #include <concepts>
 #include <string>

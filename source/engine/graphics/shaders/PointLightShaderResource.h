@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ShaderResourceService.h"
-#include "WriteableBuffer.h"
+#include "graphics/buffers/WriteableBuffer.h"
 #include "graphics/PointLight.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResourceService.h"
 
 namespace nc::graphics
 {
-    class PointLightManager : public IShaderResourceService<PointLightInfo>
+    class PointLightShaderResource : public IShaderResource<PointLightInfo>
     {
         public:
-            PointLightManager(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxPointLights);
-            ~PointLightManager() noexcept;
+            PointLightShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxPointLights);
+            ~PointLightShaderResource() noexcept;
 
             void Initialize() override;
             void Update(const std::vector<PointLightInfo>& data) override;

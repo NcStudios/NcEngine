@@ -1,10 +1,10 @@
-#include "EnvironmentDataManager.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/resources/Environment.h"
+#include "EnvironmentDataShaderResource.h"
+#include "graphics/Initializers.h"
+#include "graphics/shaders/Environment.h"
 
 namespace nc::graphics
 {
-    EnvironmentDataManager::EnvironmentDataManager(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors)
+    EnvironmentDataShaderResource::EnvironmentDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors)
         : m_allocator{allocator},
           m_descriptors{descriptors},
           m_bindingSlot{bindingSlot}
@@ -12,11 +12,11 @@ namespace nc::graphics
         Initialize();
     }
 
-    EnvironmentDataManager::~EnvironmentDataManager() noexcept
+    EnvironmentDataShaderResource::~EnvironmentDataShaderResource() noexcept
     {
     }
 
-    void EnvironmentDataManager::Initialize()
+    void EnvironmentDataShaderResource::Initialize()
     {
         auto initialEnvironmentData = EnvironmentData{};
         initialEnvironmentData.cameraWorldPosition = Vector3{-0.0f, 4.0f, -6.4f};
@@ -46,12 +46,12 @@ namespace nc::graphics
         );
     }
 
-    void EnvironmentDataManager::Update(const std::vector<EnvironmentData>& data)
+    void EnvironmentDataShaderResource::Update(const std::vector<EnvironmentData>& data)
     {
        m_environmentDataBuffer->Bind(static_cast<const void*>(&data.at(0)), static_cast<uint32_t>(sizeof(EnvironmentData) * data.size()));
     }
 
-    void EnvironmentDataManager::Reset()
+    void EnvironmentDataShaderResource::Reset()
     {
         Initialize();
     }

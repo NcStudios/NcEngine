@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/GpuAssetsStorage.h"
-#include "graphics/vk/Initializers.h"
+#include "graphics/Initializers.h"
 
 #include <functional>
 #include <unordered_map>
@@ -25,12 +25,12 @@ struct PerFrameRenderState;
 class PerFrameGpuContext;
 class RenderPassManager;
 class RenderTarget;
-class ShaderResourceServices;
+class ShaderResources;
 
 class Renderer
 {
     public:
-        Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResourceServices* shaderResources, Vector2 dimensions);
+        Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions);
         ~Renderer() noexcept;
 
         void Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
@@ -44,7 +44,7 @@ class Renderer
 
         Swapchain* m_swapchain;
         GpuOptions* m_gpuOptions;
-        ShaderResourceServices* m_shaderResources;
+        ShaderResources* m_shaderResources;
         std::unique_ptr<RenderPassManager> m_renderPasses;
         Vector2 m_dimensions;
         std::unique_ptr<RenderTarget> m_depthStencil;

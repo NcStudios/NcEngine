@@ -1,12 +1,12 @@
 #include "UiTechnique.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
+#include "graphics/buffers/ImmutableBuffer.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/vk/Initializers.h"
-#include "graphics/resources/ImmutableBuffer.h"
-#include "graphics/resources/ShaderDescriptorSets.h"
-#include "graphics/ShaderUtilities.h"
-#include "graphics/VertexDescriptions.h"
+#include "graphics/Initializers.h"
+#include "graphics/meshes/VertexDescriptions.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderUtilities.h"
 #include "imgui/imgui_impl_vulkan.h"
 
 namespace nc::graphics

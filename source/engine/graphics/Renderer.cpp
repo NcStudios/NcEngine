@@ -8,20 +8,20 @@
 #include "graphics/GpuOptions.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
+#include "graphics/renderpasses/RenderPassManager.h"
+#include "graphics/renderpasses/RenderTarget.h"
+#include "graphics/shaders/ShaderResources.h"
 #include "graphics/techniques/EnvironmentTechnique.h"
 #include "graphics/techniques/ParticleTechnique.h"
 #include "graphics/techniques/PbrTechnique.h"
 #include "graphics/techniques/UiTechnique.h"
 #include "graphics/techniques/ShadowMappingTechnique.h"
-#include "graphics/vk/Swapchain.h"
+#include "graphics/Swapchain.h"
 #include "imgui/imgui_impl_vulkan.h"
 #include "optick/optick.h"
 #include "PerFrameRenderState.h"
-#include "resources/RenderTarget.h"
-#include "resources/ShaderResourceServices.h"
-#include "resources/RenderPassManager.h"
-#include "vk/Core.h"
-#include "vk/PerFrameGpuContext.h"
+#include "Core.h"
+#include "PerFrameGpuContext.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "graphics/techniques/WireframeTechnique.h"
@@ -71,7 +71,7 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& 
 
 namespace nc::graphics
 {
-Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResourceServices* shaderResources, Vector2 dimensions)
+Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions)
     : m_swapchain{swapchain},
       m_gpuOptions{gpuOptions},
       m_shaderResources{shaderResources},
@@ -129,7 +129,7 @@ void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physica
 void Renderer::RegisterRenderPasses()
 {
     /** Shadow mapping pass */
-    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapManager().GetImageView();
+    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapShaderResource().GetImageView();
     m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
 
     /** Lit shading pass */

@@ -2,7 +2,7 @@
 
 #include "assets/AssetData.h"
 #include "assets/AssetManagers.h"
-#include "graphics/vk/Textures.h"
+#include "graphics/textures/Textures.h"
 
 namespace nc::graphics
 {

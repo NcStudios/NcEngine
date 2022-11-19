@@ -1,4 +1,4 @@
-#include "graphics/resources/ImmutableBuffer.h"
+#include "graphics/buffers/ImmutableBuffer.h"
 
 #include <span>
 

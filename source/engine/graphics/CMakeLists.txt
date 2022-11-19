@@ -1,29 +1,28 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        Camera.cpp
         Commands.cpp
+        Core.cpp
         DebugWidget.cpp
         FrameManager.cpp
         GpuAllocator.cpp
         GpuAssetsStorage.cpp
         GpuOptions.cpp
         Graphics.cpp
-        MeshBatcher.cpp
-        MeshRenderer.cpp
+        Initializers.cpp
         NcGraphicsImpl.cpp
-        ParticleEmitter.cpp
+        PerFrameGpuContext.cpp
         PerFrameRenderState.cpp
-        PointLight.cpp
+        QueueFamily.cpp
         Renderer.cpp
-        SceneNavigationCamera.cpp
-        ShaderUtilities.cpp
-        VertexDescriptions.cpp
+        Swapchain.cpp
         vma.cpp
 )
 
+add_subdirectory(buffers)
+add_subdirectory(components)
 add_subdirectory(cubemaps)
 add_subdirectory(meshes)
-add_subdirectory(resources)
+add_subdirectory(renderpasses)
+add_subdirectory(shaders)
 add_subdirectory(techniques)
 add_subdirectory(textures)
-add_subdirectory(vk)
