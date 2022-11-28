@@ -6,8 +6,8 @@ add_executable(Allocator_unit_tests
 target_include_directories(Allocator_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(Allocator_unit_tests
@@ -17,6 +17,7 @@ target_compile_options(Allocator_unit_tests
 
 target_link_libraries(Allocator_unit_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -30,8 +31,8 @@ add_executable(MakeUnique_unit_tests
 target_include_directories(MakeUnique_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(MakeUnique_unit_tests
@@ -41,6 +42,7 @@ target_compile_options(MakeUnique_unit_tests
 
 target_link_libraries(MakeUnique_unit_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -54,8 +56,8 @@ add_executable(MemoryResource_unit_tests
 target_include_directories(MemoryResource_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(MemoryResource_unit_tests
@@ -65,6 +67,7 @@ target_compile_options(MemoryResource_unit_tests
 
 target_link_libraries(MemoryResource_unit_tests
     PRIVATE
+        NcUtility
         gtest
 )
 

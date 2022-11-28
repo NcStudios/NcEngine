@@ -16,7 +16,7 @@ auto CreateTriMesh(Registry* registry, const ConcaveCollider& collider) -> TriMe
     auto* transform = registry->Get<Transform>(entity);
     const auto& m = transform->TransformationMatrix();
     const auto& scale = transform->Scale();
-    auto maxScale = math::Max(math::Max(scale.x, scale.y), scale.z);
+    auto maxScale = Max(Max(scale.x, scale.y), scale.z);
     auto estimate = Sphere{transform->Position(), maxScale * meshView.maxExtent};
 
     std::vector<Triangle> triangles;

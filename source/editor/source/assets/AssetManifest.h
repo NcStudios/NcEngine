@@ -1,8 +1,9 @@
 #pragma once
 
-#include "asset/Assets.h"
 #include "AssetCollection.h"
 #include "framework/Callbacks.h"
+
+#include "ncengine/asset/Assets.h"
 
 namespace nc::editor
 {

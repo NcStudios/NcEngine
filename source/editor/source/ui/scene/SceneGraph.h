@@ -1,11 +1,12 @@
 #pragma once
 
-#include "ecs/Registry.h"
-#include "window/IOnResizeReceiver.h"
-#include "imgui/imgui.h"
-#include "ui/dialog/Dialog.h"
 #include "Inspector.h"
 #include "SceneManagementControl.h"
+#include "ui/dialog/Dialog.h"
+
+#include "imgui/imgui.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/window/IOnResizeReceiver.h"
 
 #include <functional>
 

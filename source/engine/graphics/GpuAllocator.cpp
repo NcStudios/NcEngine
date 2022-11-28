@@ -1,6 +1,6 @@
 #include "GpuAllocator.h"
 #include "Commands.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 namespace
 {

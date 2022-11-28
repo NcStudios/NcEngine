@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include <concepts>
 #include <cstdint>

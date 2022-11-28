@@ -1,11 +1,12 @@
 #include "EnvironmentPanel.h"
 #include "assets/AssetManifest.h"
-#include "ecs/View.h"
-#include "graphics/Camera.h"
-#include "graphics/NcGraphics.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/Output.h"
 #include "utility/DefaultComponents.h"
+
+#include "ncengine/ecs/View.h"
+#include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/NcGraphics.h"
 
 namespace nc::editor
 {

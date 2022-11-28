@@ -2,8 +2,8 @@
 #include "NcEngine.h"
 #include "config/Config.h"
 #include "input/InputInternal.h"
-#include "math/Math.h"
-#include "utility/NcError.h"
+#include "ncmath/Math.h"
+#include "ncutility/NcError.h"
 #include "window/Window.h"
 
 #include <algorithm>
@@ -74,8 +74,8 @@ namespace nc::window
             m_dimensions = Vector2{ static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight) };
         }
 
-        auto left = math::Clamp((nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
-        auto top = math::Clamp((nativeHeight - (int)m_dimensions.y) / 2, 0, nativeHeight);
+        auto left = Clamp((nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
+        auto top = Clamp((nativeHeight - (int)m_dimensions.y) / 2, 0, nativeHeight);
 
         auto clientRect = RECT
         {

@@ -1,5 +1,5 @@
 #include "utility/Log.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include <chrono>
 #include <fstream>

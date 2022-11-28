@@ -1,5 +1,5 @@
 #include "network/Network.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 namespace nc::net
 {

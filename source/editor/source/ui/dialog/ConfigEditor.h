@@ -1,8 +1,9 @@
 #pragma once
 
-#include "config/Config.h"
 #include "Dialog.h"
 #include "framework/Callbacks.h"
+
+#include "ncengine/config/Config.h"
 
 namespace nc::editor
 {

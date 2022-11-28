@@ -2,7 +2,8 @@
 
 #include "ui/EnvironmentPanel.h"
 #include "utility/Output.h"
-#include "window/IOnResizeReceiver.h"
+
+#include "ncengine/window/IOnResizeReceiver.h"
 
 namespace nc::editor
 {

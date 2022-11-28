@@ -5,11 +5,11 @@
 
 namespace
 {
-    bool IsViewedByFrustum(const nc::physics::Frustum& frustum, const nc::graphics::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
+    bool IsViewedByFrustum(const nc::Frustum& frustum, const nc::graphics::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
     {
         const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
         const auto maxMeshExtent = renderer.GetMesh().maxExtent;
-        auto sphere = nc::physics::Sphere{.center = nc::Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent};
+        auto sphere = nc::Sphere{.center = nc::Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent};
         DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
         return nc::physics::Intersect(frustum, sphere);
     }
@@ -50,7 +50,7 @@ namespace nc::graphics
         // m_registry->RegisterOnRemoveCallback<MeshRenderer>([this](Entity) { this->m_isDirty = true; });
     }
 
-    auto MeshBatcher::BuildBatches(const physics::Frustum& cameraFrustum) -> std::span<const Batch>
+    auto MeshBatcher::BuildBatches(const Frustum& cameraFrustum) -> std::span<const Batch>
     {
         if(m_isDirty)
         {

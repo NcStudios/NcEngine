@@ -1,8 +1,9 @@
 #pragma once
 #include "Dialog.h"
 #include "framework/Callbacks.h"
-#include "asset/Assets.h"
 #include "assets/AssetManifest.h"
+
+#include "ncengine/asset/Assets.h"
 
 namespace nc::editor
 {

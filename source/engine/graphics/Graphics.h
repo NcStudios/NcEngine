@@ -3,7 +3,7 @@
 #include "assets/AssetManagers.h"
 #include "camera/MainCamera.h"
 #include "GpuAllocator.h"
-#include "math/Vector.h"
+#include "ncmath/Vector.h"
 #include "platform/win32/NcWin32.h"
 #include "DirectXMath.h"
 

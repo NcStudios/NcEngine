@@ -162,7 +162,7 @@ TEST_F(Transform_unit_tests, Up_ReturnsNormalizedVector)
 
 TEST_F(Transform_unit_tests, Up_RotatedTransform_ReturnsCorrectAxis)
 {
-    auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
+    auto rot = Quaternion::FromEulerAngles(DegreesToRadians(90.0f), 0.0f, 0.0f);
     auto e = registry->Add<Entity>(EntityInfo{.rotation = rot});
     auto t = registry->Get<Transform>(e);
     auto actual = t->Up();
@@ -172,7 +172,7 @@ TEST_F(Transform_unit_tests, Up_RotatedTransform_ReturnsCorrectAxis)
 
 TEST_F(Transform_unit_tests, Up_RotatedParent_ChildReturnsCorrectAxis)
 {
-    auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
+    auto rot = Quaternion::FromEulerAngles(DegreesToRadians(90.0f), 0.0f, 0.0f);
     auto parent = registry->Add<Entity>(EntityInfo{.rotation = rot});
     auto child = registry->Add<Entity>(EntityInfo{.rotation = Quaternion::Identity(), .parent = parent});
     auto t = registry->Get<Transform>(child);
@@ -192,7 +192,7 @@ TEST_F(Transform_unit_tests, Forward_ReturnsNormalizedVector)
 
 TEST_F(Transform_unit_tests, Forward_RotatedTransform_ReturnsCorrectAxis)
 {
-    auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
+    auto rot = Quaternion::FromEulerAngles(DegreesToRadians(90.0f), 0.0f, 0.0f);
     auto e = registry->Add<Entity>(EntityInfo{.rotation = rot});
     auto t = registry->Get<Transform>(e);
     auto actual = t->Forward();
@@ -202,7 +202,7 @@ TEST_F(Transform_unit_tests, Forward_RotatedTransform_ReturnsCorrectAxis)
 
 TEST_F(Transform_unit_tests, Forward_RotatedParent_ChildReturnsCorrectAxis)
 {
-    auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
+    auto rot = Quaternion::FromEulerAngles(DegreesToRadians(90.0f), 0.0f, 0.0f);
     auto parent = registry->Add<Entity>(EntityInfo{.rotation = rot});
     auto child = registry->Add<Entity>(EntityInfo{.rotation = Quaternion::Identity(), .parent = parent});
     auto t = registry->Get<Transform>(child);
@@ -222,7 +222,7 @@ TEST_F(Transform_unit_tests, Right_ReturnsNormalizedVector)
 
 TEST_F(Transform_unit_tests, Right_RotatedTransform_ReturnsCorrectAxis)
 {
-    auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
+    auto rot = Quaternion::FromEulerAngles(DegreesToRadians(90.0f), 0.0f, 0.0f);
     auto e = registry->Add<Entity>(EntityInfo{.rotation = rot});
     auto t = registry->Get<Transform>(e);
     auto actual = t->Right();
@@ -232,7 +232,7 @@ TEST_F(Transform_unit_tests, Right_RotatedTransform_ReturnsCorrectAxis)
 
 TEST_F(Transform_unit_tests, Right_RotatedParent_ChildReturnsCorrectAxis)
 {
-    auto rot = Quaternion::FromEulerAngles(math::DegreesToRadians(90.0f), 0.0f, 0.0f);
+    auto rot = Quaternion::FromEulerAngles(DegreesToRadians(90.0f), 0.0f, 0.0f);
     auto parent = registry->Add<Entity>(EntityInfo{.rotation = rot});
     auto child = registry->Add<Entity>(EntityInfo{.rotation = Quaternion::Identity(), .parent = parent});
     auto t = registry->Get<Transform>(child);

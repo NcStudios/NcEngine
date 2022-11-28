@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-
 #include "alloc/MemoryResource.h"
 
 using namespace nc::alloc;

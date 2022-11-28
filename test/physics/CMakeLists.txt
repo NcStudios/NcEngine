@@ -7,9 +7,9 @@ add_executable(Manifold_unit_tests
 target_include_directories(Manifold_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(Manifold_unit_tests
@@ -19,8 +19,8 @@ target_compile_options(Manifold_unit_tests
 
 target_link_libraries(Manifold_unit_tests
     PRIVATE
+        NcMath
         gtest
-        DirectXMath
 )
 
 add_test(Manifold_unit_tests Manifold_unit_tests)
@@ -34,9 +34,9 @@ add_executable(ClientObjectProperties_unit_tests
 target_include_directories(ClientObjectProperties_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(ClientObjectProperties_unit_tests
@@ -46,8 +46,8 @@ target_compile_options(ClientObjectProperties_unit_tests
 
 target_link_libraries(ClientObjectProperties_unit_tests
     PRIVATE
+        NcMath
         gtest
-        DirectXMath
 )
 
 add_test(ClientObjectProperties_unit_tests ClientObjectProperties_unit_tests)

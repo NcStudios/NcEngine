@@ -77,7 +77,7 @@ float CalcArea4Points(const Vector3& p0, const Vector3& p1, const Vector3& p2, c
     float mag0 = SquareMagnitude(CrossProduct(p0-p1, p2-p3));
     float mag1 = SquareMagnitude(CrossProduct(p0-p2, p1-p3));
     float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
-    return math::Max(math::Max(mag0, mag1), mag2);
+    return Max(Max(mag0, mag1), mag2);
 }
 
 } // anonymous namespace

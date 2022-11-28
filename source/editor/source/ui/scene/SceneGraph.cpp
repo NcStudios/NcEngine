@@ -1,10 +1,11 @@
 #include "SceneGraph.h"
 #include "assets/AssetManifest.h"
-#include "ecs/View.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
-#include "window/Window.h"
+
+#include "ncengine/ecs/View.h"
+#include "ncengine/window/Window.h"
 
 namespace
 {

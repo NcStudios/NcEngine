@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/Vector.h"
+#include "ncmath/Vector.h"
 
 #include <string>
 

@@ -1,5 +1,5 @@
 #include "network/NetworkDispatcher.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"

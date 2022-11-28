@@ -32,10 +32,10 @@ void Camera::UpdateProjectionMatrix(float width, float height, float nearZ, floa
     m_projection = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
 }
 
-auto Camera::CalculateFrustum() const noexcept -> physics::Frustum
+auto Camera::CalculateFrustum() const noexcept -> Frustum
 {
     using namespace DirectX;
-    physics::Frustum out;
+    Frustum out;
     const auto m = XMMatrixTranspose(m_view * m_projection);
 
     const auto left_v = XMPlaneNormalize(XMVectorAdd(m.r[3], m.r[0]));

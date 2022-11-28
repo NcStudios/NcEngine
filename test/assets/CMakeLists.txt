@@ -10,8 +10,8 @@ add_executable(AssetId_tests
 target_include_directories(AssetId_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(AssetId_tests
@@ -21,6 +21,7 @@ target_compile_options(AssetId_tests
 
 target_link_libraries(AssetId_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -40,8 +41,8 @@ target_compile_definitions(AudioClipAssetManager_tests
 target_include_directories(AudioClipAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(AudioClipAssetManager_tests
@@ -51,6 +52,7 @@ target_compile_options(AudioClipAssetManager_tests
 
 target_link_libraries(AudioClipAssetManager_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -70,8 +72,8 @@ target_compile_definitions(ConcaveColliderAssetManager_tests
 target_include_directories(ConcaveColliderAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(ConcaveColliderAssetManager_tests
@@ -81,6 +83,7 @@ target_compile_options(ConcaveColliderAssetManager_tests
 
 target_link_libraries(ConcaveColliderAssetManager_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -100,8 +103,8 @@ target_compile_definitions(ConvexHullAssetManager_tests
 target_include_directories(ConvexHullAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(ConvexHullAssetManager_tests
@@ -111,6 +114,7 @@ target_compile_options(ConvexHullAssetManager_tests
 
 target_link_libraries(ConvexHullAssetManager_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -132,9 +136,9 @@ target_compile_definitions(CubeMapAssetManager_tests
 target_include_directories(CubeMapAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(CubeMapAssetManager_tests
@@ -144,6 +148,7 @@ target_compile_options(CubeMapAssetManager_tests
 
 target_link_libraries(CubeMapAssetManager_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -164,9 +169,9 @@ target_compile_definitions(MeshAssetManager_tests
 target_include_directories(MeshAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(MeshAssetManager_tests
@@ -176,6 +181,7 @@ target_compile_options(MeshAssetManager_tests
 
 target_link_libraries(MeshAssetManager_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -196,9 +202,9 @@ target_compile_definitions(ShaderAssetManager_tests
 target_include_directories(ShaderAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(ShaderAssetManager_tests
@@ -208,6 +214,7 @@ target_compile_options(ShaderAssetManager_tests
 
 target_link_libraries(ShaderAssetManager_tests
     PRIVATE
+        NcUtility
         gtest
 )
 
@@ -228,9 +235,9 @@ target_compile_definitions(TextureAssetManager_tests
 target_include_directories(TextureAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(TextureAssetManager_tests
@@ -240,6 +247,7 @@ target_compile_options(TextureAssetManager_tests
 
 target_link_libraries(TextureAssetManager_tests
     PRIVATE
+        NcUtility
         gtest
 )
 

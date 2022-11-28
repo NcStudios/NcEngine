@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/Entity.h"
+#include "ncengine/ecs/Entity.h"
 
 namespace nc::editor
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset/AssetId.h"
+#include "ncengine/asset/AssetId.h"
 
 #include <filesystem>
 #include <optional>

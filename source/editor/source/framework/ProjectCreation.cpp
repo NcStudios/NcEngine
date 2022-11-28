@@ -1,6 +1,7 @@
 #include "ProjectCreation.h"
 #include "utility/DefaultComponents.h"
-#include "config/Config.h"
+
+#include "ncengine/config/Config.h"
 
 #include <fstream>
 

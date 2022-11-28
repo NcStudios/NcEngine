@@ -1,7 +1,7 @@
 #pragma once
 
 #include "physics/Collider.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include <vector>
 

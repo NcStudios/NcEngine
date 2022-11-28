@@ -41,14 +41,9 @@ find_package(Vulkan REQUIRED)
 
 include(FetchContent)
 
-FetchContent_Declare(DirectXMath
-                     GIT_REPOSITORY https://github.com/NcStudios/DirectXMath.git
-                     GIT_TAG        4533e8faeb4f9d251a87ca3f67b863ae25196d2c # origin/main
-)
-
-FetchContent_Declare(taskflow
-                     GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
-                     GIT_TAG        ab6c1b6cd2651d4a4b1a3204b2e1b95f75d06a56 # origin/master
+FetchContent_Declare(NcCommon
+                     GIT_REPOSITORY https://github.com/NcStudios/NcCommon.git
+                     GIT_TAG        39ff59b4027854ad236a046446ecfbb5d91aec5f # origin/release
 )
 
 FetchContent_Declare(nc-tools
@@ -56,14 +51,12 @@ FetchContent_Declare(nc-tools
                      URL_HASH SHA256=97BD697A4A3C6CF01713E984CF497DDCB1E2C8D09B0F6FC25E1FD6017F372671
 )
 
-# We only need {fmt} because GCC hasn't implemented std::format yet. Can be removed eventually.
-set(FMT_INSTALL ON)
-FetchContent_Declare(fmt
-                     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-                     GIT_TAG        fc07217d85e6dcec52878807d6bbd89a9d9156a5
+FetchContent_Declare(taskflow
+                     GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
+                     GIT_TAG        ab6c1b6cd2651d4a4b1a3204b2e1b95f75d06a56 # origin/master
 )
 
-FetchContent_MakeAvailable(DirectXMath taskflow nc-tools fmt)
+FetchContent_MakeAvailable(NcCommon nc-tools taskflow)
 
 # Add source
 add_subdirectory(source)

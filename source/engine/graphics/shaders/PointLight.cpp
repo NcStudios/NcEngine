@@ -15,7 +15,7 @@
 namespace
 {
 // Angle of light's field of view.
-constexpr float LightFieldOfView = nc::math::DegreesToRadians(60.0f);
+constexpr float LightFieldOfView = nc::DegreesToRadians(60.0f);
 
 // Near clip of light's frustum
 constexpr float NearClip = 0.25f;

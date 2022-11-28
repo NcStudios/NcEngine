@@ -10,11 +10,12 @@
 #include "scenes/JareTestScene.h"
 #include "scenes/SolarSystem.h"
 
-#include "window/Window.h"
-#include "input/Input.h"
-#include "config/Version.h"
-#include "graphics/NcGraphics.h"
 #include "imgui/imgui.h"
+#include "ncengine/config/Version.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/input/Input.h"
+#include "ncengine/window/Window.h"
+
 
 namespace
 {
@@ -98,7 +99,7 @@ namespace nc::sample
         ImGui::SetNextItemWidth(70);
         if (ImGui::InputInt("##logcount", &ItemCount, 1, 5))
         {
-            ItemCount = nc::math::Clamp(ItemCount, 0, 1000); //for sanity, since Dear ImGui doesn't deal with unsigned
+            ItemCount = nc::Clamp(ItemCount, 0, 1000); //for sanity, since Dear ImGui doesn't deal with unsigned
             m_gameLog.SetItemCount(ItemCount);
         }
 

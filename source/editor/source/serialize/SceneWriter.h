@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ecs/Registry.h"
-
 #include "Common.h"
 #include "framework/SceneData.h"
+
+#include "ncengine/ecs/Registry.h"
 
 namespace nc::editor
 {

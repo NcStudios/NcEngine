@@ -1,10 +1,10 @@
 #include "FreeComponents.h"
-#include "input/Input.h"
-#include "config/Config.h"
 #include "shared/Prefabs.h"
 #include "shared/GameLog.h"
 #include "shared/GameLogic.h"
 
+#include "ncengine/config/Config.h"
+#include "ncengine/input/Input.h"
 namespace
 {
     constexpr float ZoomSpeed = -0.9f;
@@ -35,7 +35,7 @@ namespace nc::sample
         auto yPan = -1.0f * GetPan(y, EdgePanWidth, screenHeight - EdgePanWidth - HudHeight);
         auto pan = Normalize(Vector2{xPan, yPan}) * PanSpeed;
         auto zoom = (float)input::MouseWheel() * ZoomSpeed;
-        auto translation = math::Lerp(m_lastFrameTranslation, Vector3{pan.x, zoom, pan.y}, 0.1f);
+        auto translation = Lerp(m_lastFrameTranslation, Vector3{pan.x, zoom, pan.y}, 0.1f);
         if(translation == Vector3::Zero()) // b/c float equality
             translation = Vector3::Zero();
         m_lastFrameTranslation = translation;

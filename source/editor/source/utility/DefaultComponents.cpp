@@ -1,20 +1,21 @@
 #include "DefaultComponents.h"
-#include "asset/Assets.h"
+
+#include "ncengine/asset/Assets.h"
 
 namespace nc::editor
 {
-    void AddDefaultMeshRenderer(Registry* registry, Entity entity)
-    {
-        registry->Add<graphics::MeshRenderer>(entity, CubeMeshPath, DefaultMaterial, graphics::TechniqueType::PhongAndUi);
-    }
+void AddDefaultMeshRenderer(Registry* registry, Entity entity)
+{
+    registry->Add<graphics::MeshRenderer>(entity, CubeMeshPath, DefaultMaterial, graphics::TechniqueType::PhongAndUi);
+}
 
-    void AddDefaultHullCollider(Registry* registry, Entity entity, bool isTrigger)
-    {
-        registry->Add<physics::Collider>(entity, physics::HullProperties{.assetPath = CubeHullColliderPath}, isTrigger);
-    }
+void AddDefaultHullCollider(Registry* registry, Entity entity, bool isTrigger)
+{
+    registry->Add<physics::Collider>(entity, physics::HullProperties{.assetPath = CubeHullColliderPath}, isTrigger);
+}
 
-    void AddDefaultConcaveCollider(Registry* registry, Entity entity)
-    {
-        registry->Add<physics::ConcaveCollider>(entity, PlaneConcaveColliderPath);
-    }
+void AddDefaultConcaveCollider(Registry* registry, Entity entity)
+{
+    registry->Add<physics::ConcaveCollider>(entity, PlaneConcaveColliderPath);
+}
 }
