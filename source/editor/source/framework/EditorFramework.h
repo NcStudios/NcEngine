@@ -1,6 +1,5 @@
 #pragma once
 
-#include "NcEngine.h"
 #include "EditorConfig.h"
 #include "assets/AssetManifest.h"
 #include "framework/ProjectManager.h"
@@ -12,6 +11,8 @@
 #include "ui/dialog/NewSceneDialog.h"
 #include "ui/dialog/NewProjectDialog.h"
 #include "ui/dialog/ConfigEditor.h"
+
+#include "ncengine/NcEngine.h"
 
 namespace nc::editor
 {

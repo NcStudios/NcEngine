@@ -1,14 +1,15 @@
 #pragma once
 
-#include "scene/Scene.h"
 #include "shared/SampleUI.h"
+
+#include "ncengine/scene/Scene.h"
 
 namespace nc::sample
 {
-    class SolarSystem : public Scene
-    {
+class SolarSystem : public Scene
+{
     public:
         SolarSystem(SampleUI* ui);
         void Load(Registry* registry, ModuleProvider modules) override;
-    };
+};
 }

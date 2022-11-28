@@ -1,7 +1,7 @@
 #include "ConfigEditor.h"
 #include "ui/ImGuiUtility.h"
 #include "utility/Output.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include <cstring>
 

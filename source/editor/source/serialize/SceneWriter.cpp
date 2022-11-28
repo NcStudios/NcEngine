@@ -1,9 +1,10 @@
 #include "SceneWriter.h"
 #include "EditorScene.h"
-#include "ecs/View.h"
 #include "utility/Output.h"
 #include "assets/AssetManifest.h"
 #include "utility/DefaultComponents.h"
+
+#include "ncengine/ecs/View.h"
 
 #include <iostream>
 

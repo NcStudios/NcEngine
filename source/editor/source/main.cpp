@@ -1,8 +1,8 @@
 #include "EditorScene.h"
 #include "framework/EditorFramework.h"
 
-#include "NcEngine.h"
-#include "utility/Log.h"
+#include "ncengine/NcEngine.h"
+#include "ncengine/utility/Log.h"
 
 #include <iostream>
 

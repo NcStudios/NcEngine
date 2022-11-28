@@ -2,11 +2,11 @@
 #include "AssetManifest.h"
 #include "utility/Output.h"
 
-#include "audio/AudioSource.h"
-#include "graphics/MeshRenderer.h"
-#include "physics/Collider.h"
-#include "physics/ConcaveCollider.h"
-#include "ecs/View.h"
+#include "ncengine/audio/AudioSource.h"
+#include "ncengine/ecs/View.h"
+#include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/physics/Collider.h"
+#include "ncengine/physics/ConcaveCollider.h"
 
 namespace nc::editor
 {

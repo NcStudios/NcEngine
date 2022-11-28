@@ -7,8 +7,8 @@ add_executable(PacketBuffer_unit_tests
 target_include_directories(PacketBuffer_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(PacketBuffer_unit_tests
@@ -18,6 +18,7 @@ target_compile_options(PacketBuffer_unit_tests
 
 target_link_libraries(PacketBuffer_unit_tests
     PRIVATE
+        NcUtility
         gtest
 )
 

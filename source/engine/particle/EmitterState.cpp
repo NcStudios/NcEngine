@@ -1,7 +1,7 @@
 #include "EmitterState.h"
 #include "ecs/Registry.h"
 #include "math/Random.h"
-#include "math/Math.h"
+#include "ncmath/Math.h"
 
 namespace
 {
@@ -42,7 +42,7 @@ namespace
         particle->rotation += angVel * dt;
 
         auto& scale = particle->scale;
-        scale = math::Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
+        scale = Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
     }
 }
 
@@ -61,7 +61,7 @@ namespace nc::particle
     void EmitterState::Emit(size_t count)
     {
         auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
-        auto particleCount = math::Min(count, m_soa.GetRemainingSpace());
+        auto particleCount = Min(count, m_soa.GetRemainingSpace());
         for (size_t i = 0; i < particleCount; ++i)
         {
             m_soa.Add(CreateParticle(m_info, parentPosition, m_random), {});

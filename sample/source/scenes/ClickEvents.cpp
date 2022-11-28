@@ -3,11 +3,11 @@
 #include "shared/Prefabs.h"
 #include "shared/spawner/Spawner.h"
 
-#include "graphics/NcGraphics.h"
-#include "math/Random.h"
-#include "physics/NcPhysics.h"
-
 #include "imgui/imgui.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/math/Random.h"
+#include "ncengine/physics/NcPhysics.h"
+
 #include <functional>
 
 namespace

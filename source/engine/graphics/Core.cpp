@@ -1,6 +1,6 @@
 #include "Core.h"
 #include "config/Config.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 #include "QueueFamily.h"
 #include "Swapchain.h"
 

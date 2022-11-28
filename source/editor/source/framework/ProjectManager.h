@@ -1,11 +1,12 @@
 #pragma once
 
-#include "NcEngine.h"
 #include "Callbacks.h"
 #include "ProjectData.h"
 #include "SceneData.h"
 #include "ui/dialog/Dialog.h"
 #include "ui/dialog/NewSceneDialog.h"
+
+#include "ncengine/NcEngine.h"
 
 #include <filesystem>
 #include <string>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ecs/Registry.h"
-
 #include "Common.h"
+
+#include "ncengine/ecs/Registry.h"
 
 namespace nc::graphics
 {

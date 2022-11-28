@@ -6,9 +6,9 @@
 #include "utility/Output.h"
 
 #include "DirectXMath.h"
-#include "ecs/Registry.h"
 #include "imgui/imgui.h"
-#include "type/UIStream.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/type/UIStream.h"
 
 namespace
 {

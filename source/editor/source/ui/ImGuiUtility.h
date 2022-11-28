@@ -1,6 +1,6 @@
 #pragma once
 
-#include "type/EngineTypes.h"
+#include "ncengine/type/EngineTypes.h"
 #include "imgui/imgui.h"
 
 /** Create a variable to hold a scoped property. */

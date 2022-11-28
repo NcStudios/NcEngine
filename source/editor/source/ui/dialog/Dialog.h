@@ -1,7 +1,7 @@
 #pragma once
 
-#include "window/IOnResizeReceiver.h"
 #include "imgui/imgui.h"
+#include "ncengine/window/IOnResizeReceiver.h"
 
 #include <string>
 

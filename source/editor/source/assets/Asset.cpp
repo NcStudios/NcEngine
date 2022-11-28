@@ -3,9 +3,9 @@
 #include "utility/DefaultComponents.h"
 
 // Engine includes
-#include "asset/Assets.h"
-#include "graphics/MeshRenderer.h"
-#include "platform/win32/NcWin32.h"
+#include "ncengine/asset/Assets.h"
+#include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/platform/win32/NcWin32.h"
 
 #include <iostream>
 

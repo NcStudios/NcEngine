@@ -1,5 +1,5 @@
 #include "ShaderUtilities.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include <fstream>
 

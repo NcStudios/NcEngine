@@ -1,14 +1,15 @@
 #pragma once
 
-#include "ecs/Registry.h"
-#include "ui/IUI.h"
-#include "window/IOnResizeReceiver.h"
+#include "UtilitiesPanel.h"
 #include "framework/Callbacks.h"
+#include "scene/SceneGraph.h"
 #include "ui/EnvironmentPanel.h"
 #include "ui/dialog/Dialog.h"
 #include "ui/dialog/ActiveDialogs.h"
-#include "scene/SceneGraph.h"
-#include "UtilitiesPanel.h"
+
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/ui/IUI.h"
+#include "ncengine/window/IOnResizeReceiver.h"
 
 namespace nc::editor
 {

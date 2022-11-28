@@ -16,7 +16,7 @@ double CalculateAttenuation(nc::audio::AttenuationFunction curveType, double inn
         {
             double distance = std::sqrt(squareDistance);
             double distanceRatio = (distance - innerRadius) / (outerRadius - innerRadius);
-            return nc::math::Clamp(1.0 - distanceRatio, 0.0, 1.0);
+            return nc::Clamp(1.0 - distanceRatio, 0.0, 1.0);
         }
     }
 
@@ -38,7 +38,7 @@ AudioSource::AudioSource(Entity entity, const std::string& path, AudioSourceProp
         , m_audioClipPath{path}
         #endif
 {
-    m_properties.gain = math::Clamp(properties.gain, 0.0f, 1.0f);
+    m_properties.gain = Clamp(properties.gain, 0.0f, 1.0f);
 }
 
 void AudioSource::SetClip(const std::string& path)
@@ -63,9 +63,9 @@ void AudioSource::WriteSpatialSamples(double* buffer, size_t frames, const Vecto
 
     const auto sourceToListener = Normalize(listenerPosition - sourcePosition);
     const double dotRight = Dot(sourceToListener, rightEar);
-    const double rightPresence = dotRight <= 0.0 ? 1.0 : math::Clamp(1.0 - dotRight, 0.2, 1.0);
+    const double rightPresence = dotRight <= 0.0 ? 1.0 : Clamp(1.0 - dotRight, 0.2, 1.0);
     const double dotLeft = Dot(sourceToListener, -rightEar);
-    const double leftPresence = dotLeft <= 0.0 ? 1.0 : math::Clamp(1.0 - dotLeft, 0.2, 1.0);
+    const double leftPresence = dotLeft <= 0.0 ? 1.0 : Clamp(1.0 - dotLeft, 0.2, 1.0);
     const double attenuation = CalculateAttenuation(m_properties.attenuation, m_properties.innerRadius, m_properties.outerRadius, squareDistance);
     const double gain = 0.5 * attenuation * m_properties.gain;
 

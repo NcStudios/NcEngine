@@ -1,8 +1,9 @@
 #pragma once
 
-#include "config/Config.h"
-#include "ecs/Entity.h"
 #include "ProjectData.h"
+
+#include "ncengine/config/Config.h"
+#include "ncengine/ecs/Entity.h"
 
 #include <functional>
 

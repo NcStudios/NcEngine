@@ -1,7 +1,8 @@
-#include "NcEngine.h"
 #include "scenes/Worms.h"
 #include "shared/SampleUI.h"
-#include "utility/Log.h"
+
+#include "ncengine/NcEngine.h"
+#include "ncengine/utility/Log.h"
 
 #include <iostream>
 

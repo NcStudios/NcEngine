@@ -7,8 +7,8 @@ add_executable(ModuleRegistry_unit_tests
 target_include_directories(ModuleRegistry_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(ModuleRegistry_unit_tests
@@ -32,9 +32,9 @@ add_executable(TaskGraph_unit_tests
 target_include_directories(TaskGraph_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
         ${NC_EXTERNAL_DIR}
-        ${NC_EXTERNAL_DIR}/gtest/googletest/include
 )
 
 target_compile_options(TaskGraph_unit_tests

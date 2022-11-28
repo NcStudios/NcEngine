@@ -3,7 +3,7 @@ add_library(${NC_ENGINE_LIB} STATIC)
 
 # Propagate version
 configure_file(${NC_SOURCE_DIR}/config/Version.h.in
-               ${NC_INCLUDE_DIR}/config/Version.h
+               ${NC_INCLUDE_DIR}/ncengine/config/Version.h
 )
 
 # Definitions
@@ -11,8 +11,8 @@ target_compile_definitions(${NC_ENGINE_LIB}
     PUBLIC
         ${NC_COMPILE_DEFINITIONS}
         WIN32_LEAN_AND_MEAN
-        $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="$ui/DearImGuiConversion.h">
-        $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ui/DearImGuiConversion.h">
+        $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="$ncengine/ui/DearImGuiConversion.h">
+        $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ncengine/ui/DearImGuiConversion.h">
     PRIVATE
         __WINDOWS_WASAPI__
 )
@@ -41,10 +41,10 @@ target_link_libraries(${NC_ENGINE_LIB}
         wmcodecdspuuid
         #enet add for project requiring networking
     PUBLIC
+        NcMath
+        NcUtility
         Vulkan::Vulkan
-        DirectXMath
         Taskflow
-        fmt::fmt
 )
 
 # Note - OptickCore.dll still needs to be copied to the executable's directory
@@ -62,12 +62,13 @@ target_include_directories(${NC_ENGINE_LIB}
         $<INSTALL_INTERFACE:external/>
     PRIVATE
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${NC_INCLUDE_DIR}/ncengine>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
         $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
 )
 
 # Install
-install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} ${ENET_LIB}
+install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} ${ENET_LIB} NcMath NcUtility
         EXPORT      NcEngine-export
         DESTINATION lib
 )
@@ -79,7 +80,7 @@ install(EXPORT      NcEngine-export
 install(FILES       ${PROJECT_SOURCE_DIR}/NcEngineConfig.cmake
         DESTINATION lib/cmake/NcEngine
 )
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
         DESTINATION include
 )
 
@@ -92,7 +93,6 @@ add_subdirectory(ecs)
 add_subdirectory(engine)
 add_subdirectory(graphics)
 add_subdirectory(input)
-add_subdirectory(math)
 add_subdirectory(module)
 add_subdirectory(network)
 add_subdirectory(particle)

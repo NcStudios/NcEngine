@@ -1,7 +1,7 @@
 #include "ClickableSystem.h"
 #include "ecs/Registry.h"
 #include "input/Input.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 #include "window/Window.h"
 
 #include "DirectXMath.h"

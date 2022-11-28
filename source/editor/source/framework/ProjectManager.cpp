@@ -1,7 +1,6 @@
 #include "ProjectManager.h"
 #include "ProjectCreation.h"
 #include "assets/AssetDependencyChecker.h"
-#include "config/ConfigReader.h"
 #include "utility/Output.h"
 #include "serialize/LoaderScene.h"
 #include "serialize/SceneDeleter.h"
@@ -9,7 +8,8 @@
 #include "serialize/SceneWriter.h"
 #include "EditorScene.h"
 
-#include "graphics/NcGraphics.h"
+#include "ncengine/config/ConfigReader.h"
+#include "ncengine/graphics/NcGraphics.h"
 
 #include <cctype>
 #include <fstream>

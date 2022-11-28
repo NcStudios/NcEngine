@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/techniques/ITechnique.h"
-#include "math/Vector.h"
+#include "ncmath/Vector.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 #include <array>

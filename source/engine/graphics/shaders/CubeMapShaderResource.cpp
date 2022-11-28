@@ -1,6 +1,6 @@
 #include "CubeMapShaderResource.h"
 #include "graphics/Initializers.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include <array>
 

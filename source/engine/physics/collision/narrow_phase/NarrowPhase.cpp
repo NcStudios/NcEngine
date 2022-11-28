@@ -1,6 +1,6 @@
 #include "NarrowPhase.h"
 #include "ecs/Logic.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include "optick/optick.h"
 

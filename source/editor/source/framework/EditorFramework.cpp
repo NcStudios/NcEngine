@@ -3,7 +3,7 @@
 #include "ui/UIStyle.h"
 #include "utility/DefaultComponents.h"
 
-#include "graphics/NcGraphics.h"
+#include "ncengine/graphics/NcGraphics.h"
 
 namespace
 {

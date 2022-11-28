@@ -10,7 +10,7 @@
 #include "Renderer.h"
 #include "shaders/ShaderResources.h"
 #include "utility/Log.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 #include "Core.h"
 #include "Swapchain.h"
 

@@ -1,5 +1,6 @@
 #include "EditorConfig.h"
-#include "config/ConfigReader.h"
+
+#include "ncengine/config/ConfigReader.h"
 
 #include <iostream>
 #include <fstream>

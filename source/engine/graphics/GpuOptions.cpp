@@ -1,6 +1,6 @@
 #include "GpuOptions.h"
 #include "config/Config.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 #include <string>
 #include <algorithm>

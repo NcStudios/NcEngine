@@ -1,5 +1,5 @@
 #include "assets/AssetData.h"
-#include "utility/NcError.h"
+#include "ncutility/NcError.h"
 
 namespace
 {

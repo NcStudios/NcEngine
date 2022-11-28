@@ -1,7 +1,8 @@
 #include "SceneReader.h"
-#include "graphics/NcGraphics.h"
 #include "utility/DefaultComponents.h"
 #include "utility/Output.h"
+
+#include "ncengine/graphics/NcGraphics.h"
 
 #include <iostream>
 #include <sstream>

@@ -1,20 +1,19 @@
 #pragma once
 
-#include "ecs/Registry.h"
-
-#include "audio/AudioSource.h"
-#include "ecs/Logic.h"
-#include "ecs/Tag.h"
-#include "ecs/Transform.h"
-#include "ecs/detail/FreeComponentGroup.h"
-#include "graphics/Camera.h"
-#include "graphics/MeshRenderer.h"
-#include "graphics/ParticleEmitter.h"
-#include "graphics/PointLight.h"
-#include "network/NetworkDispatcher.h"
-#include "physics/Collider.h"
-#include "physics/ConcaveCollider.h"
-#include "physics/PhysicsBody.h"
+#include "ncengine/audio/AudioSource.h"
+#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/Tag.h"
+#include "ncengine/ecs/Transform.h"
+#include "ncengine/ecs/detail/FreeComponentGroup.h"
+#include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/ParticleEmitter.h"
+#include "ncengine/graphics/PointLight.h"
+#include "ncengine/network/NetworkDispatcher.h"
+#include "ncengine/physics/Collider.h"
+#include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/PhysicsBody.h"
 
 namespace nc::editor
 {

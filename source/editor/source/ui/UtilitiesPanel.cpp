@@ -1,6 +1,6 @@
 #include "UtilitiesPanel.h"
-#include "window/Window.h"
 
+#include "ncengine/window/Window.h"
 #include "imgui/imgui.h"
 
 namespace

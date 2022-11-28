@@ -1,8 +1,9 @@
 #pragma once
 
-#include "ecs/Registry.h"
 #include "Dialog.h"
 #include "framework/Callbacks.h"
+
+#include "ncengine/ecs/Registry.h"
 
 namespace nc::editor
 {

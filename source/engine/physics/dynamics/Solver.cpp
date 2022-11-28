@@ -85,7 +85,7 @@ Vector3 ComputeLagrangeMultipliers(ContactConstraint& c, const ConstraintMatrix&
 float ClampLambda(float newLambda, float* totalLambda)
 {
     float temp = *totalLambda;
-    *totalLambda = math::Max(0.0f, temp + newLambda);
+    *totalLambda = Max(0.0f, temp + newLambda);
     return *totalLambda - temp;
 }
 
@@ -93,7 +93,7 @@ float ClampLambda(float newLambda, float* totalLambda)
 float ClampMu(float newMu, float extent, float* totalMu)
 {
     float temp = *totalMu;
-    *totalMu = math::Clamp(temp + newMu, -1.0f * extent, extent);
+    *totalMu = Clamp(temp + newMu, -1.0f * extent, extent);
     return *totalMu - temp;
 }
 
@@ -219,14 +219,14 @@ void ResolveContactConstraint(ContactConstraint& constraint, float dt)
 
     if constexpr(EnableRestitutionSlop)
     {
-        restitution = math::Max(restitution - RestitutionSlop, 0.0f);
+        restitution = Max(restitution - RestitutionSlop, 0.0f);
     }
 
     auto bias = restitution * constraint.restitution;
 
     if constexpr(EnableBaumgarteStabilization)
     {
-        bias += math::Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * BaumgarteFactor / dt;
+        bias += Max(constraint.penetrationDepth - PenetrationSlop, 0.0f) * -1.0f * BaumgarteFactor / dt;
     }
 
     /** Compute impulse factors */

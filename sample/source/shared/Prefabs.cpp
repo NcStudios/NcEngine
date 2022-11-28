@@ -1,12 +1,13 @@
 #include "Prefabs.h"
-#include "asset/Assets.h"
-#include "ecs/Registry.h"
-#include "ecs/Transform.h"
-#include "graphics/MeshRenderer.h"
-#include "graphics/PointLight.h"
-#include "physics/Collider.h"
-#include "physics/ConcaveCollider.h"
-#include "physics/PhysicsBody.h"
+
+#include "ncengine/asset/Assets.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/Transform.h"
+#include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/PointLight.h"
+#include "ncengine/physics/Collider.h"
+#include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/PhysicsBody.h"
 
 namespace nc::sample::prefab
 {

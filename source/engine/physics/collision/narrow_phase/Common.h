@@ -1,8 +1,7 @@
 #pragma once
 
-#include "physics/Geometry.h"
-#include "utility/NcError.h"
-
+#include "ncmath/Geometry.h"
+#include "ncutility/NcError.h"
 #include "DirectXMath.h"
 
 #include <array>

@@ -1,9 +1,9 @@
 #include "EditorScene.h"
 #include "framework/ProjectManager.h"
 
-#include "ecs/InvokeFreeComponent.h"
-#include "graphics/NcGraphics.h"
-#include "graphics/SceneNavigationCamera.h"
+#include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/SceneNavigationCamera.h"
 
 namespace nc::editor
 {

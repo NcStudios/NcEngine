@@ -2,11 +2,11 @@
 #include "shared/Prefabs.h"
 #include "shared/FreeComponents.h"
 
-#include "NcEngine.h"
-#include "ecs/InvokeFreeComponent.h"
-#include "graphics/NcGraphics.h"
-#include "graphics/SceneNavigationCamera.h"
 #include "imgui/imgui.h"
+#include "ncengine/NcEngine.h"
+#include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/SceneNavigationCamera.h"
 
 #include <functional>
 
