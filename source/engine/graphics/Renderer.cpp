@@ -102,6 +102,7 @@ void Renderer::Record(PerFrameGpuContext* currentFrame, const PerFrameRenderStat
 
     /** Shadow mapping pass */
     m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
+    m_renderPasses->Execute(RenderPassManager::ShadowMappingPass2, cmd, 0u, state);
 
     /** Lit shading pass */
     m_renderPasses->Execute(RenderPassManager::LitShadingPass, cmd, currentSwapChainImageIndex, state);
@@ -129,8 +130,8 @@ void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physica
 void Renderer::RegisterRenderPasses()
 {
     /** Shadow mapping pass */
-    const auto& shadowDepthImageView = m_shaderResources->GetShadowMapShaderResource().GetImageView();
-    m_renderPasses->RegisterAttachment(shadowDepthImageView, RenderPassManager::ShadowMappingPass);
+    m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(0), RenderPassManager::ShadowMappingPass);
+    m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(1), RenderPassManager::ShadowMappingPass2);
 
     /** Lit shading pass */
     auto& colorImageViews = m_swapchain->GetColorImageViews();
@@ -144,6 +145,7 @@ void Renderer::RegisterRenderPasses()
 void Renderer::RegisterTechniques()
 {
     m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
+    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass2);
 
     #ifdef NC_EDITOR_ENABLED
     m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);

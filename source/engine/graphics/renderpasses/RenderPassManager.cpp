@@ -50,6 +50,7 @@ namespace nc::graphics
         };
 
         Create(RenderPassManager::ShadowMappingPass, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, dimensions);
+        Create(RenderPassManager::ShadowMappingPass2, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, dimensions);
 
         /** Lit shading pass */
         std::array<AttachmentSlot, 3> litAttachmentSlots
@@ -178,7 +179,7 @@ namespace nc::graphics
         return *frameBufferPos;
     }
 
-    void RenderPassManager::RegisterAttachments(std::vector<vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index)
+    void RenderPassManager::RegisterAttachments(std::span<const vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index)
     {
         auto frameBufferPos = std::ranges::find_if(m_frameBufferAttachments, [&uid, index](const auto& frameBufferAttachment)
         {
@@ -225,8 +226,8 @@ namespace nc::graphics
 
         auto frameBufferAttachment = FrameBufferAttachment{};
 
-        frameBufferAttachment.attachmentHandles.reserve(1);
-        frameBufferAttachment.attachmentHandles.push_back(attachmentHandle);
+        auto handles = std::vector<vk::ImageView>{attachmentHandle};
+        frameBufferAttachment.attachmentHandles = handles;
         frameBufferAttachment.renderPassUid = uid;
         frameBufferAttachment.index = 0;
 

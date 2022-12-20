@@ -19,7 +19,7 @@ class ShaderResources
               m_objectDataShaderResource{0, allocator, &m_shaderDescriptorSets, memorySettings.maxRenderers},
               m_pointLightShaderResource{1, allocator, &m_shaderDescriptorSets, memorySettings.maxPointLights},
               m_textureShaderResource{2, &m_shaderDescriptorSets, memorySettings.maxTextures},
-              m_shadowMapShaderResource{device, 3, allocator, &m_shaderDescriptorSets, dimensions },
+              m_shadowMapShaderResource{device, 3, allocator, &m_shaderDescriptorSets, dimensions, 2},
               m_cubeMapShaderResource{device, 4, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
               m_environmentDataShaderResource{5, allocator, &m_shaderDescriptorSets}
         {

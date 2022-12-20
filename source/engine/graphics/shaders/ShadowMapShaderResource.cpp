@@ -5,12 +5,13 @@
 
 namespace nc::graphics
 {
-    ShadowMapShaderResource::ShadowMapShaderResource(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions)
+    ShadowMapShaderResource::ShadowMapShaderResource(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions, uint32_t numLights)
     : m_device{device},
       m_allocator{allocator},
       m_descriptors{ descriptors },
-      m_sampler{nullptr},
-      m_depthStencil{nullptr},
+      m_numLights{numLights},
+      m_samplers{},
+      m_depthStencils{},
       m_dimensions{dimensions},
       m_bindingSlot{bindingSlot},
       m_imageInfos{},
@@ -32,17 +33,19 @@ namespace nc::graphics
     {
         m_dimensions = data.at(0).dimensions;
 
-        m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
-
-        auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
-        m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
+        m_depthStencils.clear();
+        m_imageInfos.clear();
+        for (uint32_t i = 0; i < m_numLights; ++i)
+        {
+            m_depthStencils.push_back(std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
+            m_imageInfos.push_back(CreateDescriptorImageInfo(m_samplers[i].get(), m_depthStencils.back()->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal));
+          }
 
         m_descriptors->UpdateImage
         (
             BindFrequency::per_frame,
             m_imageInfos,
-            1,
+            m_numLights,
             vk::DescriptorType::eCombinedImageSampler,
             m_bindingSlot
         );
@@ -50,9 +53,6 @@ namespace nc::graphics
 
     void ShadowMapShaderResource::Initialize()
     {
-        m_depthStencil.reset();
-        m_depthStencil = std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm);
-
         // Create sampler which will be used to sample in the fragment shader to get shadow data.
         vk::SamplerCreateInfo samplerInfo = {};
         samplerInfo.setMagFilter(vk::Filter::eNearest);
@@ -71,16 +71,20 @@ namespace nc::graphics
         samplerInfo.setMinLod(0.0f);
         samplerInfo.setMaxLod(1.0f);
 
-        m_sampler = m_device.createSamplerUnique(samplerInfo);
-
-        auto descriptorImageInfo = CreateDescriptorImageInfo(m_sampler.get(), m_depthStencil->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
-        m_imageInfos = std::vector<vk::DescriptorImageInfo>(1, descriptorImageInfo);
-
+        m_depthStencils.clear();
+        m_imageInfos.clear();
+        for (uint32_t i = 0; i < m_numLights; ++i)
+        {
+            m_samplers.push_back(m_device.createSamplerUnique(samplerInfo));
+            m_depthStencils.push_back(std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
+            m_imageInfos.push_back(CreateDescriptorImageInfo(m_samplers[i].get(), m_depthStencils.back()->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal));
+        }
+        
         m_descriptors->RegisterDescriptor
         (
             m_bindingSlot,
             BindFrequency::per_frame,
-            1,
+            m_numLights,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,
             vk::DescriptorBindingFlagBitsEXT()
@@ -91,7 +95,7 @@ namespace nc::graphics
         (
             BindFrequency::per_frame,
             m_imageInfos,
-            1,
+            m_numLights,
             vk::DescriptorType::eCombinedImageSampler,
             m_bindingSlot
         );

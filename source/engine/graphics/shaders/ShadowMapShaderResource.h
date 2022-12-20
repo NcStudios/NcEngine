@@ -18,21 +18,22 @@ namespace nc::graphics
     class ShadowMapShaderResource : public IShaderResource<ShadowMap>
     {
         public:
-            ShadowMapShaderResource(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions);
+            ShadowMapShaderResource(vk::Device device, uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions, uint32_t numLights);
             ~ShadowMapShaderResource() noexcept;
 
             void Initialize() override;
             void Update(const std::vector<ShadowMap>& data) override;
             void Reset() override;
 
-            auto GetImageView() noexcept -> const vk::ImageView& { return m_depthStencil.get()->GetImageView(); }
+            auto GetImageView(uint32_t index) noexcept -> vk::ImageView{return m_depthStencils[index].get()->GetImageView();}
 
         private:
             vk::Device m_device;
             GpuAllocator* m_allocator;
             ShaderDescriptorSets* m_descriptors;
-            vk::UniqueSampler m_sampler;
-            std::unique_ptr<RenderTarget> m_depthStencil;
+            uint32_t m_numLights;
+            std::vector<vk::UniqueSampler> m_samplers;
+            std::vector<std::unique_ptr<RenderTarget>> m_depthStencils;
             Vector2 m_dimensions;
             uint32_t m_bindingSlot;
             std::vector<vk::DescriptorImageInfo> m_imageInfos;

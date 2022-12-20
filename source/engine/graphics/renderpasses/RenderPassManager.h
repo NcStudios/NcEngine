@@ -16,7 +16,7 @@ namespace nc::graphics
     {
         std::string renderPassUid;
         uint32_t index;
-        std::vector<vk::ImageView> attachmentHandles;
+        std::span<const vk::ImageView> attachmentHandles;
         vk::UniqueFramebuffer frameBuffer;
     };
 
@@ -25,6 +25,7 @@ namespace nc::graphics
         public:
             inline static const std::string LitShadingPass = "Lit Pass";
             inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
+            inline static const std::string ShadowMappingPass2 = "Shadow Mapping Pass2";
             
             RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions);
             ~RenderPassManager() noexcept;
@@ -32,7 +33,7 @@ namespace nc::graphics
             void Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData);
             RenderPass& Acquire(const std::string& uid);
 
-            void RegisterAttachments(std::vector<vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index);
+            void RegisterAttachments(std::span<const vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index);
             void RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid);
 
             template <std::derived_from<ITechnique> T>
@@ -68,7 +69,7 @@ namespace nc::graphics
             *techniquePos = std::move(renderpass.techniques.back());
             renderpass.techniques.pop_back();
         }
-
+        
         renderpass.techniques.push_back(std::make_unique<T>(m_device, m_gpuOptions, m_descriptorSets, &renderpass.renderpass.get()));
     }
 

@@ -21,6 +21,8 @@ namespace
 
 namespace nc::graphics
 {
+    static uint32_t lightIndex = 0u;
+
     ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, GpuOptions*, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
         : m_descriptorSets{descriptorSets},
           m_pipeline{nullptr},
@@ -121,18 +123,23 @@ namespace nc::graphics
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        for (const auto& pointLightVP : frameData.pointLightVPs)
+        pushConstants.lightViewProjection = frameData.pointLightVPs[lightIndex];
+
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
+
+        uint32_t objectInstance = 0;
+        for (const auto& mesh : frameData.meshes)
         {
-            pushConstants.lightViewProjection = pointLightVP;
+            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            objectInstance++;
+        }
 
-            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
-
-            uint32_t objectInstance = 0;
-            for (const auto& mesh : frameData.meshes)
-            {
-                cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                objectInstance++;
-            }
+        if (lightIndex == 1)
+        {
+            lightIndex = 0;
+        }
+        else {
+            lightIndex = 1;
         }
     }
 }
