@@ -60,11 +60,11 @@ target_include_directories(${NC_ENGINE_LIB}
     PUBLIC
         $<INSTALL_INTERFACE:include/>
         $<INSTALL_INTERFACE:external/>
-    PRIVATE
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
+    PRIVATE
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}/ncengine>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
 )
 
 # Install

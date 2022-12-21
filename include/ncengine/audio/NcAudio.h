@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ecs/Entity.h"
-#include "module/Module.h"
+#include "ncengine/ecs/Entity.h"
+#include "ncengine/module/Module.h"
 
 namespace nc::audio
 {

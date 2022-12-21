@@ -27,6 +27,10 @@ class PhysicsBody final : public ComponentBase
     public:
         PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 linearFreedom = Vector3::One(), Vector3 angularFreedom = Vector3::One());
 
+        void SetProperties(const PhysicsProperties& properties);
+        void SetLinearFreedom(const Vector3& linearFreedom);
+        void SetAngularFreedom(const Vector3& angularFreedom);
+
         void ApplyImpulse(const Vector3& impulse);
         void ApplyImpulse(DirectX::FXMVECTOR impulse);
         void ApplyTorqueImpulse(const Vector3& torque);
