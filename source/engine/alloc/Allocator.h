@@ -96,7 +96,7 @@ namespace nc::alloc
     }
 
     template<class T, class Tag>
-    PoolAllocator<T, Tag>::value_type* PoolAllocator<T, Tag>::allocate(size_t)
+    typename PoolAllocator<T, Tag>::value_type* PoolAllocator<T, Tag>::allocate(size_t)
     {
         return m_memoryResource->allocate(1u, alignof(value_type));
     }
@@ -149,7 +149,7 @@ namespace nc::alloc
     }
 
     template<class T, class Tag>
-    LinearAllocator<T, Tag>::value_type* LinearAllocator<T, Tag>::allocate(size_t count)
+    typename LinearAllocator<T, Tag>::value_type* LinearAllocator<T, Tag>::allocate(size_t count)
     {
         return static_cast<value_type*>(m_memoryResource->allocate(count * sizeof(value_type), 16u));
     }
