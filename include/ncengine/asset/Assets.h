@@ -58,7 +58,7 @@ namespace nc
     *  to be done on scene change. */
     struct CubeMapFaces;
     bool LoadCubeMapAsset(const std::string& path, bool isExternal = false);
-    bool LoadCubeMapAssets(std::span<const std::string&> paths, bool isExternal = false);
+    bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal = false);
     bool UnloadCubeMapAsset(const std::string& paths);
     void UnloadAllCubeMapAssets();
 

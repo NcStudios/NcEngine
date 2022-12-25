@@ -33,10 +33,8 @@ AudioSource::AudioSource(Entity entity, const std::string& path, AudioSourceProp
         m_audioClip{AssetService<AudioClipView>::Get()->Acquire(path)},
         m_currentSampleIndex{0u},
         m_properties{properties},
+        m_audioClipPath{path},
         m_playing{false}
-        #ifdef NC_EDITOR_ENABLED
-        , m_audioClipPath{path}
-        #endif
 {
     m_properties.gain = Clamp(properties.gain, 0.0f, 1.0f);
 }

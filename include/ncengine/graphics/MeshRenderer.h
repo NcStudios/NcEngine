@@ -36,7 +36,10 @@ namespace nc::graphics
         NC_ENABLE_IN_EDITOR(MeshRenderer)
 
         public:
-            MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType);
+            MeshRenderer(Entity entity,
+                         std::string meshUid,
+                         Material material,
+                         TechniqueType techniqueType = TechniqueType::PhongAndUi);
 
             auto GetMesh() const -> const MeshView& { return m_mesh; }
             auto GetTextureIndices() const -> const TextureIndices& { return m_textureIndices; }

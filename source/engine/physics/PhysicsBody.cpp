@@ -111,6 +111,21 @@ PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 li
     m_properties.mass = 1.0f / m_properties.mass;
 }
 
+void PhysicsBody::SetProperties(const PhysicsProperties& properties)
+{
+    m_properties = properties;
+}
+
+void PhysicsBody::SetLinearFreedom(const Vector3& linearFreedom)
+{
+    m_linearFreedom = XMLoadVector3(&linearFreedom);
+}
+
+void PhysicsBody::SetAngularFreedom(const Vector3& angularFreedom)
+{
+    m_angularFreedom = XMLoadVector3(&angularFreedom);
+}
+
 void PhysicsBody::ApplyImpulse(const Vector3& impulse)
 {
     ApplyImpulse(XMLoadVector3(&impulse));
