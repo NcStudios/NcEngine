@@ -65,10 +65,10 @@ class Collider final : public ComponentBase
             bool isTrigger;
         };
 
-        Collider(Entity entity, SphereProperties properties, bool isTrigger);
-        Collider(Entity entity, BoxProperties properties, bool isTrigger);
-        Collider(Entity entity, CapsuleProperties properties, bool isTrigger);
-        Collider(Entity entity, HullProperties properties, bool isTrigger);
+        Collider(Entity entity, SphereProperties properties, bool isTrigger = false);
+        Collider(Entity entity, BoxProperties properties, bool isTrigger = false);
+        Collider(Entity entity, CapsuleProperties properties, bool isTrigger = false);
+        Collider(Entity entity, HullProperties properties, bool isTrigger = false);
         ~Collider() = default;
         Collider(const Collider&) = delete;
         Collider(Collider&&) = default;
