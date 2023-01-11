@@ -92,31 +92,31 @@ TEST(Signal_unit_tests, Connection_Destructor_InvalidConnection_DoesNotAttemptDi
 /** Signal Tests */
 TEST(Signal_unit_tests, Signal_Connect_Lambda_ReturnsValidConnection)
 {
-    nc::Signal<int> signal;
+    auto signal = nc::Signal<int>{};
     auto connection = signal.Connect([](int){});
     EXPECT_TRUE(connection.IsConnected());
 }
 
 TEST(Signal_unit_tests, Signal_Connect_MemberFunction_ReturnsValidConnection)
 {
-    nc::Signal<int> signal;
-    Foo foo;
+    auto signal = nc::Signal<int>{};
+    auto foo = Foo{};
     auto connection = signal.Connect(&foo, &Foo::Test);
     EXPECT_TRUE(connection.IsConnected());
 }
 
 TEST(Signal_unit_tests, Signal_Connect_ConstMemberFunction_ReturnsValidConnection)
 {
-    nc::Signal<int> signal;
-    Foo foo;
-    const Foo& constFoo = foo;
+    auto signal = nc::Signal<int>{};
+    auto foo = Foo{};
+    const auto& constFoo = foo;
     auto connection = signal.Connect(&constFoo, &Foo::ConstTest);
     EXPECT_TRUE(connection.IsConnected());
 }
 
 TEST(Signal_unit_tests, Signal_Connect_UpdatesConnectionCount)
 {
-    nc::Signal<int> signal;
+    auto signal = nc::Signal<int>{};
     EXPECT_EQ(signal.ConnectionCount(), 0);
     auto connection = signal.Connect([](int){});
     EXPECT_EQ(signal.ConnectionCount(), 1);
@@ -124,8 +124,8 @@ TEST(Signal_unit_tests, Signal_Connect_UpdatesConnectionCount)
 
 TEST(Signal_unit_tests, Signal_DisconnectAll_ClearsConnections)
 {
-    nc::Signal<int> signal;
-    int calls = 0;
+    auto signal = nc::Signal<int>{};
+    auto calls = 0;
     auto connection = signal.Connect([&calls](int v){calls += v;});
     signal.DisconnectAll();
     signal.Emit(1);
@@ -134,18 +134,77 @@ TEST(Signal_unit_tests, Signal_DisconnectAll_ClearsConnections)
 
 TEST(Signal_unit_tests, Signal_Emit_InvokesConnections)
 {
-    nc::Signal<int> signal;
-    int calls = 0;
+    auto signal = nc::Signal<int>{};
+    auto calls = 0;
     auto connection1 = signal.Connect([&calls](int v){calls += v;});
     auto connection2 = signal.Connect([&calls](int v){calls += v;});
     signal.Emit(1);
     EXPECT_EQ(calls, 2);
 }
 
+TEST(Signal_unit_tests, Signal_Emit_MultiplePriorities_CallsInOrder)
+{
+    static constexpr auto minPriority = 0ull;
+    static constexpr auto lowPriority = 1ull;
+    static constexpr auto highPriority = 2ull;
+    auto callOrder = std::vector<size_t>{};
+    auto minPriorityFunc = [&callOrder](int){ callOrder.push_back(minPriority); };
+    auto lowPriorityFunc = [&callOrder](int){ callOrder.push_back(lowPriority); };
+    auto highPriorityFunc = [&callOrder](int){ callOrder.push_back(highPriority); };
+    auto signal = nc::Signal<int>{};
+
+    {
+        auto connection1 = signal.Connect(minPriorityFunc, minPriority);
+        auto connection2 = signal.Connect(lowPriorityFunc, lowPriority);
+        auto connection3 = signal.Connect(highPriorityFunc, highPriority);
+        signal.Emit(0);
+        ASSERT_EQ(callOrder.size(), 3);
+        EXPECT_EQ(callOrder[0], highPriority);
+        EXPECT_EQ(callOrder[1], lowPriority);
+        EXPECT_EQ(callOrder[2], minPriority);
+    }
+
+    callOrder.clear();
+    signal.DisconnectAll();
+
+    {
+        auto connection1 = signal.Connect(highPriorityFunc, highPriority);
+        auto connection2 = signal.Connect(lowPriorityFunc, lowPriority);
+        auto connection3 = signal.Connect(minPriorityFunc, minPriority);
+        signal.Emit(0);
+        ASSERT_EQ(callOrder.size(), 3);
+        EXPECT_EQ(callOrder[0], highPriority);
+        EXPECT_EQ(callOrder[1], lowPriority);
+        EXPECT_EQ(callOrder[2], minPriority);
+    }
+
+    callOrder.clear();
+    signal.DisconnectAll();
+
+    {
+        auto connection1 = signal.Connect(highPriorityFunc, highPriority);
+        auto connection2 = signal.Connect(minPriorityFunc, minPriority);
+        auto connection3 = signal.Connect(lowPriorityFunc, lowPriority);
+        auto connection4 = signal.Connect(highPriorityFunc, highPriority);
+        auto connection5 = signal.Connect(highPriorityFunc, highPriority);
+        auto connection6 = signal.Connect(lowPriorityFunc, lowPriority);
+        auto connection7 = signal.Connect(minPriorityFunc, minPriority);
+        signal.Emit(0);
+        ASSERT_EQ(callOrder.size(), 7);
+        EXPECT_EQ(callOrder[0], highPriority);
+        EXPECT_EQ(callOrder[1], highPriority);
+        EXPECT_EQ(callOrder[2], highPriority);
+        EXPECT_EQ(callOrder[3], lowPriority);
+        EXPECT_EQ(callOrder[4], lowPriority);
+        EXPECT_EQ(callOrder[5], minPriority);
+        EXPECT_EQ(callOrder[6], minPriority);
+    }
+}
+
 TEST(Signal_unit_tests, Signal_Emit_AfterSignalSideDisconnect_DoesNothing)
 {
-    nc::Signal<int> signal;
-    int calls = 0;
+    auto signal = nc::Signal<int>{};
+    auto calls = 0;
     auto connection = signal.Connect([&calls](int v){calls += v;});
     signal.DisconnectAll();
     signal.Emit(1);
@@ -154,8 +213,8 @@ TEST(Signal_unit_tests, Signal_Emit_AfterSignalSideDisconnect_DoesNothing)
 
 TEST(Signal_unit_tests, Signal_Emit_AfterConnectionSideDisconnect_DoesNothing)
 {
-    nc::Signal<int> signal;
-    int calls = 0;
+    auto signal = nc::Signal<int>{};
+    auto calls = 0;
     auto connection = signal.Connect([&calls](int v){calls += v;});
     connection.Disconnect();
     signal.Emit(1);
@@ -172,10 +231,4 @@ TEST(Signal_unit_tests, Signal_Destructor_UpdatesSharedConnectionState)
     signal = nullptr;
     EXPECT_FALSE(connection1.IsConnected());
     EXPECT_FALSE(connection2.IsConnected());
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

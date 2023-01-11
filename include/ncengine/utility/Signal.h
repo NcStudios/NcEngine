@@ -66,24 +66,35 @@ class Signal
         Signal& operator=(const Signal&) = delete;
 
         /** Connect a std::function */
-        [[nodiscard]] auto Connect(std::function<void(Args...)> func) -> Connection_t
+        [[nodiscard]] auto Connect(std::function<void(Args...)> func, size_t priority = 0ull) -> Connection_t
         {
-            auto& result = m_slots.emplace_back(std::move(func), m_link.get(), ++m_currentId);
+            const auto pos = std::ranges::find_if(m_slots, [priority](auto&& slot)
+            {
+                return priority >= slot.Priority();
+            });
+
+            if (pos != m_slots.cend())
+            {
+                auto result = m_slots.emplace(pos, std::move(func), m_link.get(), priority, ++m_currentId);
+                return Connection_t{result->GetState()};
+            }
+
+            auto& result = m_slots.emplace_back(std::move(func), m_link.get(), priority, ++m_currentId);
             return Connection_t{result.GetState()};
         }
 
         /** Connect a member function */
         template<class T>
-        [[nodiscard]] auto Connect(T *inst, void (T::*func)(Args...)) -> Connection_t
+        [[nodiscard]] auto Connect(T *inst, void (T::*func)(Args...), size_t priority = 0ull) -> Connection_t
         {
-            return Connect([=](Args... args){ (inst->*func)(args...); });
+            return Connect([=](Args... args){ (inst->*func)(args...); }, priority);
         }
 
         /** Connect a const member function */
         template<class T>
-        [[nodiscard]] auto Connect(const T *inst, void (T::*func)(Args...) const) -> Connection_t
+        [[nodiscard]] auto Connect(const T *inst, void (T::*func)(Args...) const, size_t priority = 0ull) -> Connection_t
         {
-            return Connect([=](Args... args){ (inst->*func)(args...); });
+            return Connect([=](Args... args){ (inst->*func)(args...); }, priority);
         }
 
         /** Remove all connections */

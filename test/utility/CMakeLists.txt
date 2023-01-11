@@ -17,7 +17,7 @@ target_compile_options(Signal_unit_tests
 target_link_libraries(Signal_unit_tests
     PRIVATE
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(Signal_unit_tests Signal_unit_tests)
