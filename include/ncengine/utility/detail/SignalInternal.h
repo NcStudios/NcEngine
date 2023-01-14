@@ -86,9 +86,10 @@ class Slot
     public:
         using SharedConnectionState_t = SharedConnectionState<Args...>;
 
-        Slot(std::function<void(Args...)> func, ConnectionBacklink* link, int id)
+        Slot(std::function<void(Args...)> func, ConnectionBacklink* link, size_t priority, int id)
             : m_func{std::move(func)},
               m_state{std::make_shared<SharedConnectionState_t>(link, id)},
+              m_priority{priority},
               m_id{id}
         {
         }
@@ -96,6 +97,11 @@ class Slot
         auto Id() const noexcept -> int
         {
             return m_id;
+        }
+
+        auto Priority() const noexcept -> size_t
+        {
+            return m_priority;
         }
 
         void operator()(Args... args) const
@@ -111,6 +117,7 @@ class Slot
     private:
         std::function<void(Args...)> m_func;
         std::shared_ptr<SharedConnectionState_t> m_state;
+        size_t m_priority;
         int m_id;
 };
 } // namespace nc::internal
