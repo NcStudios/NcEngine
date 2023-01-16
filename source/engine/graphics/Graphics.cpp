@@ -1,5 +1,6 @@
 #include "Graphics.h"
 #include "assets/AssetServices.h"
+#include "ecs/Registry.h"
 #include "GpuOptions.h"
 #include "Commands.h"
 #include "config/Config.h"
@@ -18,17 +19,18 @@
 
 namespace nc::graphics
 {
-    Graphics::Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    Graphics::Graphics(camera::MainCamera* mainCamera, Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_mainCamera{mainCamera},
+          m_registry{registry},
           m_core{std::make_unique<Core>(hwnd, hinstance)},
           m_gpuOptions{ std::make_unique<GpuOptions>(m_core->physicalDevice) },
           m_swapchain{ std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), dimensions) },
           m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
           m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
-          m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), m_allocator.get(), config::GetMemorySettings(), dimensions)},
+          m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), registry, m_allocator.get(), config::GetMemorySettings(), dimensions)},
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
-          m_renderer{ std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
+          m_renderer{ std::make_unique<Renderer>(m_core->logicalDevice.get(), registry, m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
           m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
@@ -71,7 +73,7 @@ namespace nc::graphics
         m_shaderResources.get()->GetShadowMapShaderResource().Update(std::vector<ShadowMap>{shadowMap});
         m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get());
-        m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);
+        m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_registry, m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)

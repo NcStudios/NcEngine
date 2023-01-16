@@ -8,6 +8,7 @@
 #include "graphics/GpuOptions.h"
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
+#include "graphics/PointLight.h"
 #include "graphics/renderpasses/RenderPassManager.h"
 #include "graphics/renderpasses/RenderTarget.h"
 #include "graphics/shaders/ShaderResources.h"
@@ -71,18 +72,56 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& 
 
 namespace nc::graphics
 {
-Renderer::Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions)
-    : m_swapchain{swapchain},
+inline static const std::string LitShadingPass = "Lit Pass";
+inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
+
+Renderer::Renderer(vk::Device device, Registry* registry, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions)
+    : m_device{device},
+      m_swapchain{swapchain},
       m_gpuOptions{gpuOptions},
       m_shaderResources{shaderResources},
       m_renderPasses{std::make_unique<RenderPassManager>(device, m_swapchain, m_gpuOptions, shaderResources->GetDescriptorSets(), dimensions)},
       m_dimensions{dimensions},
       m_depthStencil{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, true, m_gpuOptions->GetMaxSamplesCount(), m_gpuOptions->GetDepthFormat()) },
       m_colorBuffer{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, false, m_gpuOptions->GetMaxSamplesCount(), m_swapchain->GetFormat()) },
-      m_imguiDescriptorPool{CreateImguiDescriptorPool(device)}
+      m_imguiDescriptorPool{CreateImguiDescriptorPool(device)},
+      m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){ this->AddShadowMappingPass();}, 0u)},
+      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){ this->RemoveShadowMappingPass();}, 0u)},
+      m_numShadowCasters{0}
 {
-    RegisterRenderPasses();
-    RegisterTechniques();
+        /** Lit shading pass */
+    std::array<AttachmentSlot, 3> litAttachmentSlots
+    {
+        AttachmentSlot{0, AttachmentType::Color, m_swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, m_gpuOptions->GetMaxSamplesCount()},
+        AttachmentSlot{1, AttachmentType::Depth, m_gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, m_gpuOptions->GetMaxSamplesCount()},
+        AttachmentSlot{2, AttachmentType::Resolve, m_swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+    };
+
+    std::array<Subpass, 1> litSubpasses
+    {
+        Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}
+    };
+
+    m_renderPasses->Add(LitShadingPass, litAttachmentSlots, litSubpasses, ClearValueFlags::Depth | ClearValueFlags::Color, m_dimensions);
+
+    auto& colorImageViews = m_swapchain->GetColorImageViews();
+    auto& depthImageView = m_depthStencil->GetImageView();
+    auto& colorResolveView = m_colorBuffer->GetImageView();
+
+    uint32_t index = 0;
+    for (auto& imageView : colorImageViews) 
+    {
+        m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, LitShadingPass, index++); 
+    }
+
+    #ifdef NC_EDITOR_ENABLED
+    m_renderPasses->RegisterTechnique<WireframeTechnique>(LitShadingPass);
+    #endif
+
+    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(LitShadingPass);
+    m_renderPasses->RegisterTechnique<PbrTechnique>(LitShadingPass);
+    m_renderPasses->RegisterTechnique<ParticleTechnique>(LitShadingPass);
+    m_renderPasses->RegisterTechnique<UiTechnique>(LitShadingPass);
 }
 
 Renderer::~Renderer() noexcept
@@ -101,11 +140,13 @@ void Renderer::Record(PerFrameGpuContext* currentFrame, const PerFrameRenderStat
     BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
 
     /** Shadow mapping pass */
-    m_renderPasses->Execute(RenderPassManager::ShadowMappingPass, cmd, 0u, state);
-    m_renderPasses->Execute(RenderPassManager::ShadowMappingPass2, cmd, 0u, state);
+    for (auto i = 0u; i < m_numShadowCasters; ++i)
+    {
+        m_renderPasses->Execute(ShadowMappingPass + std::to_string(i), cmd, 0u, state);
+    }
 
     /** Lit shading pass */
-    m_renderPasses->Execute(RenderPassManager::LitShadingPass, cmd, currentSwapChainImageIndex, state);
+    m_renderPasses->Execute(LitShadingPass, cmd, currentSwapChainImageIndex, state);
 
     cmd->end();
 }
@@ -122,39 +163,43 @@ void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physica
     initInfo.ImageCount = 3;
     initInfo.MSAASamples = VkSampleCountFlagBits(maxSamplesCount);
 
-    ImGui_ImplVulkan_Init(&initInfo, m_renderPasses->Acquire(RenderPassManager::LitShadingPass).renderpass.get());
+    ImGui_ImplVulkan_Init(&initInfo, m_renderPasses->Acquire(LitShadingPass).renderpass.get());
     commands->ExecuteCommand([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
-void Renderer::RegisterRenderPasses()
+void Renderer::AddShadowMappingPass()
 {
-    /** Shadow mapping pass */
-    m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(0), RenderPassManager::ShadowMappingPass);
-    m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(1), RenderPassManager::ShadowMappingPass2);
+    auto id = ShadowMappingPass + std::to_string(m_numShadowCasters);
 
-    /** Lit shading pass */
-    auto& colorImageViews = m_swapchain->GetColorImageViews();
-    auto& depthImageView = m_depthStencil->GetImageView();
-    auto& colorResolveView = m_colorBuffer->GetImageView();
-    uint32_t index = 0;
+    std::array<AttachmentSlot, 1> shadowAttachmentSlots
+    {
+        AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+    };
 
-    for (auto& imageView : colorImageViews) { m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, RenderPassManager::LitShadingPass, index++); }
+    std::array<Subpass, 1> shadowSubpasses
+    {
+        Subpass{shadowAttachmentSlots[0]}
+    };
+
+    m_renderPasses->Add(id, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, m_dimensions);
+    m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(m_numShadowCasters), id);
+
+
+    m_renderPasses->UnregisterTechnique<ShadowMappingTechnique>(id);
+    auto& renderpass = m_renderPasses->Acquire(id);
+    renderpass.techniques.push_back(std::make_unique<ShadowMappingTechnique>(m_device, m_gpuOptions, m_shaderResources->GetDescriptorSets(), &renderpass.renderpass.get(), m_numShadowCasters));
+    m_numShadowCasters++;
+
 }
 
-void Renderer::RegisterTechniques()
+void Renderer::RemoveShadowMappingPass()
 {
-    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass);
-    m_renderPasses->RegisterTechnique<ShadowMappingTechnique>(RenderPassManager::ShadowMappingPass2);
+    auto id = ShadowMappingPass + std::to_string(m_numShadowCasters-1);
 
-    #ifdef NC_EDITOR_ENABLED
-    m_renderPasses->RegisterTechnique<WireframeTechnique>(RenderPassManager::LitShadingPass);
-    #endif
-
-    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<PbrTechnique>(RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<ParticleTechnique>(RenderPassManager::LitShadingPass);
-    m_renderPasses->RegisterTechnique<UiTechnique>(RenderPassManager::LitShadingPass);
+    m_renderPasses->Remove(id);
+    m_renderPasses->UnregisterTechnique<ShadowMappingTechnique>(id);
+    m_numShadowCasters--;
 }
 
 void Renderer::BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData)

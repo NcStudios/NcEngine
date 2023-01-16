@@ -139,7 +139,7 @@ namespace nc::graphics
         for (const auto& availablePresentMode : swapChainSupport.presentModes)
         {
             // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPresentModeKHR.html
-            if (availablePresentMode == vk::PresentModeKHR::eMailbox)
+            if (availablePresentMode == vk::PresentModeKHR::eFifo)
             {
                 presentMode = availablePresentMode;
                 break;

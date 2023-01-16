@@ -23,24 +23,24 @@ namespace nc::graphics
     class RenderPassManager
     {
         public:
-            inline static const std::string LitShadingPass = "Lit Pass";
-            inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
-            inline static const std::string ShadowMappingPass2 = "Shadow Mapping Pass2";
-            
             RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions);
             ~RenderPassManager() noexcept;
 
+            void Add(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValueFlags_t clearFlags, const Vector2& dimensions);
+            void Remove(const std::string& uid);
             void Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData);
             RenderPass& Acquire(const std::string& uid);
 
             void RegisterAttachments(std::span<const vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index);
             void RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid);
-
+            
             template <std::derived_from<ITechnique> T>
             void RegisterTechnique(const std::string& uid);
             
+            template <std::derived_from<ITechnique> T>
+            void UnregisterTechnique(const std::string& uid);
+
         private:
-            void Create(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValueFlags_t clearFlags, const Vector2& dimensions);
             void Resize(const Vector2& dimensions, vk::Extent2D extent);
             void Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex);
             void End(vk::CommandBuffer* cmd);
@@ -57,6 +57,14 @@ namespace nc::graphics
     template <std::derived_from<ITechnique> T>
     void RenderPassManager::RegisterTechnique(const std::string& uid)
     {
+        UnregisterTechnique<T>(uid);
+        auto& renderpass = Acquire(uid);
+        renderpass.techniques.push_back(std::make_unique<T>(m_device, m_gpuOptions, m_descriptorSets, &renderpass.renderpass.get()));
+    }
+
+    template <std::derived_from<ITechnique> T>
+    void RenderPassManager::UnregisterTechnique(const std::string& uid)
+    {
         const auto& techniqueType = typeid(T);
         auto& renderpass = Acquire(uid);
         auto techniquePos = std::ranges::find_if(renderpass.techniques, [&techniqueType](const auto& foundTechnique)
@@ -69,8 +77,6 @@ namespace nc::graphics
             *techniquePos = std::move(renderpass.techniques.back());
             renderpass.techniques.pop_back();
         }
-        
-        renderpass.techniques.push_back(std::make_unique<T>(m_device, m_gpuOptions, m_descriptorSets, &renderpass.renderpass.get()));
     }
 
 } // namespace nc

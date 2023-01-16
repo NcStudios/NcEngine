@@ -11,7 +11,7 @@
 #include <memory>
 #include <mutex>
 
-namespace nc { struct AssetServices; }
+namespace nc { struct AssetServices; class Registry; }
 
 namespace nc::graphics
 {
@@ -30,7 +30,7 @@ namespace nc::graphics
     class Graphics
     {
         public:
-            Graphics(camera::MainCamera* mainCamera, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(camera::MainCamera* mainCamera, Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
             ~Graphics() noexcept;
 
             void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
@@ -45,6 +45,7 @@ namespace nc::graphics
             void RecreateSwapchain(Vector2 dimensions);
 
             camera::MainCamera* m_mainCamera;
+            Registry* m_registry;
             std::unique_ptr<Core> m_core;
             std::unique_ptr<GpuOptions> m_gpuOptions;
             std::unique_ptr<Swapchain> m_swapchain;

@@ -29,7 +29,6 @@ auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vecto
 
 namespace nc::graphics
 {
-
     RenderPassManager::RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions)
         : m_device{device},
           m_swapchain{swapchain},
@@ -38,34 +37,7 @@ namespace nc::graphics
           m_renderPasses{},
           m_frameBufferAttachments{}
     {
-        /** Shadow mapping pass */
-        std::array<AttachmentSlot, 1> shadowAttachmentSlots
-        {
-            AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
-        };
-
-        std::array<Subpass, 1> shadowSubpasses
-        {
-            Subpass{shadowAttachmentSlots[0]}
-        };
-
-        Create(RenderPassManager::ShadowMappingPass, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, dimensions);
-        Create(RenderPassManager::ShadowMappingPass2, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, dimensions);
-
-        /** Lit shading pass */
-        std::array<AttachmentSlot, 3> litAttachmentSlots
-        {
-            AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, gpuOptions->GetMaxSamplesCount()},
-            AttachmentSlot{1, AttachmentType::Depth, gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, gpuOptions->GetMaxSamplesCount()},
-            AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
-        };
-
-        std::array<Subpass, 1> litSubpasses
-        {
-            Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}
-        };
-
-        Create(RenderPassManager::LitShadingPass, litAttachmentSlots, litSubpasses, ClearValueFlags::Depth | ClearValueFlags::Color, dimensions);
+       
     }
 
     RenderPassManager::~RenderPassManager() noexcept
@@ -129,14 +101,25 @@ namespace nc::graphics
         cmd->endRenderPass();
     }
 
-    void RenderPassManager::Create(const std::string& uid,
-                                   std::span<const AttachmentSlot> attachmentSlots,
-                                   std::span<const Subpass> subpasses,
-                                   ClearValueFlags_t clearFlags,
-                                   const Vector2& dimensions)
+    void RenderPassManager::Add(const std::string& uid,
+                                std::span<const AttachmentSlot> attachmentSlots,
+                                std::span<const Subpass> subpasses,
+                                ClearValueFlags_t clearFlags,
+                                const Vector2& dimensions)
     {
         const auto size = RenderTargetSize{dimensions, m_swapchain->GetExtent()};
         m_renderPasses.emplace_back(attachmentSlots, subpasses, m_device, size, uid, clearFlags);
+    }
+
+    void RenderPassManager::Remove(const std::string& uid)
+    {
+        const auto it = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), ([uid](const auto& pass){return pass.uid == uid;}));
+
+        if(it == m_renderPasses.end())
+            throw NcError("Render pass does not exist: " + uid);
+
+        *it = std::move(m_renderPasses.back());
+        m_renderPasses.pop_back();
     }
 
     void RenderPassManager::Resize(const Vector2& dimensions, vk::Extent2D extent)

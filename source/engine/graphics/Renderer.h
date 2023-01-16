@@ -2,6 +2,7 @@
 
 #include "graphics/GpuAssetsStorage.h"
 #include "graphics/Initializers.h"
+#include "ecs/Registry.h"
 
 #include <functional>
 #include <unordered_map>
@@ -23,6 +24,7 @@ class Swapchain;
 class GpuOptions;
 struct PerFrameRenderState;
 class PerFrameGpuContext;
+class PointLight;
 class RenderPassManager;
 class RenderTarget;
 class ShaderResources;
@@ -30,7 +32,7 @@ class ShaderResources;
 class Renderer
 {
     public:
-        Renderer(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions);
+        Renderer(vk::Device device, Registry* registry, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions);
         ~Renderer() noexcept;
 
         void Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
@@ -39,9 +41,10 @@ class Renderer
 
     private:
         void BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData);
-        void RegisterTechniques();
-        void RegisterRenderPasses();
+        void AddShadowMappingPass();
+        void RemoveShadowMappingPass();
 
+        vk::Device m_device;
         Swapchain* m_swapchain;
         GpuOptions* m_gpuOptions;
         ShaderResources* m_shaderResources;
@@ -50,6 +53,9 @@ class Renderer
         std::unique_ptr<RenderTarget> m_depthStencil;
         std::unique_ptr<RenderTarget> m_colorBuffer;
         vk::UniqueDescriptorPool m_imguiDescriptorPool;
+        Connection<PointLight&> m_onAddPointLightConnection;
+        Connection<Entity> m_onRemovePointLightConnection;
+        uint32_t m_numShadowCasters;
 };
 } // namespace nc
 } // namespace graphics
