@@ -185,7 +185,6 @@ void Renderer::AddShadowMappingPass()
     m_renderPasses->Add(id, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, m_dimensions);
     m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(m_numShadowCasters), id);
 
-
     m_renderPasses->UnregisterTechnique<ShadowMappingTechnique>(id);
     auto& renderpass = m_renderPasses->Acquire(id);
     renderpass.techniques.push_back(std::make_unique<ShadowMappingTechnique>(m_device, m_gpuOptions, m_shaderResources->GetDescriptorSets(), &renderpass.renderpass.get(), m_numShadowCasters));
@@ -196,9 +195,8 @@ void Renderer::AddShadowMappingPass()
 void Renderer::RemoveShadowMappingPass()
 {
     auto id = ShadowMappingPass + std::to_string(m_numShadowCasters-1);
-
-    m_renderPasses->Remove(id);
     m_renderPasses->UnregisterTechnique<ShadowMappingTechnique>(id);
+    m_renderPasses->Remove(id);
     m_numShadowCasters--;
 }
 
@@ -212,5 +210,10 @@ void Renderer::BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& verte
 
 void Renderer::Clear() noexcept
 {
+    auto itemsToRemove = m_numShadowCasters;
+    for (uint32_t i = 0; i < itemsToRemove; ++i)
+    {
+        RemoveShadowMappingPass();
+    }
 }
 } // namespace nc::graphics

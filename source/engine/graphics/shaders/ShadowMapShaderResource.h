@@ -36,7 +36,7 @@ namespace nc::graphics
             vk::Device m_device;
             GpuAllocator* m_allocator;
             ShaderDescriptorSets* m_descriptors;
-            std::vector<vk::UniqueSampler> m_samplers;
+            vk::UniqueSampler m_sampler;
             std::vector<std::unique_ptr<RenderTarget>> m_depthStencils;
             Vector2 m_dimensions;
             uint32_t m_bindingSlot;
@@ -44,6 +44,5 @@ namespace nc::graphics
             Connection<PointLight&> m_onAddPointLightConnection;
             Connection<Entity> m_onRemovePointLightConnection;
             uint32_t m_numShadowCasters;
-            bool m_isRegistered;
     };
 }
