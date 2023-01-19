@@ -1,0 +1,234 @@
+{
+    "globalOptions": {
+        "outputDirectory": "./nca",
+        "workingDirectory": "./"
+    },
+    "audio-clip": [
+        {
+            "sourcePath": "raw/audio/drums.wav",
+            "assetName": "audio_clip/drums"
+        },
+        {
+            "sourcePath": "raw/audio/hit.wav",
+            "assetName": "audio_clip/hit"
+        }
+    ],
+    "concave-collider": [
+        {
+            "sourcePath": "raw/model/plane.fbx",
+            "assetName": "concave_collider/plane"
+        },
+        {
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "concave_collider/ramp"
+        }
+    ],
+    "cube-map": [
+        {
+            "sourcePath": "raw/image/cube_maps/DefaultSkybox.png",
+            "assetName": "cube_map/DefaultSkybox.nca"
+        }
+    ],
+    "hull-collider": [
+        {
+            "sourcePath": "raw/model/coin.fbx",
+            "assetName": "hull_collider/coin"
+        }
+    ],
+    "mesh": [
+        {
+            "sourcePath": "raw/model/capsule.fbx",
+            "assetName": "mesh/capsule"
+        },
+        {
+            "sourcePath": "raw/model/coin.fbx",
+            "assetName": "mesh/coin"
+        },
+        {
+            "sourcePath": "raw/model/cube.fbx",
+            "assetName": "mesh/cube"
+        },
+        {
+            "sourcePath": "raw/model/plane.fbx",
+            "assetName": "mesh/plane"
+        },
+        {
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "mesh/ramp"
+        },
+        {
+            "sourcePath": "raw/model/skybox.fbx",
+            "assetName": "mesh/skybox"
+        },
+        {
+            "sourcePath": "raw/model/sphere.fbx",
+            "assetName": "mesh/sphere"
+        },
+        {
+            "sourcePath": "raw/model/table.fbx",
+            "assetName": "mesh/table"
+        },
+        {
+            "sourcePath": "raw/model/token.fbx",
+            "assetName": "mesh/token"
+        },
+        {
+            "sourcePath": "raw/model/worm.fbx",
+            "assetName": "mesh/worm"
+        }
+    ],
+    "texture": [
+        {
+            "sourcePath": "raw/image/DefaultBaseColor.png",
+            "assetName": "texture/DefaultBaseColor"
+        },
+        {
+            "sourcePath": "raw/image/DefaultMetallic.png",
+            "assetName": "texture/DefaultMetallic"
+        },
+        {
+            "sourcePath": "raw/image/DefaultNormal.png",
+            "assetName": "texture/DefaultNormal"
+        },
+        {
+            "sourcePath": "raw/image/DefaultParticle.png",
+            "assetName": "texture/DefaultParticle"
+        },
+        {
+            "sourcePath": "raw/image/blacktop/BaseColor.png",
+            "assetName": "texture/blacktop/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/blacktop/Normal.png",
+            "assetName": "texture/blacktop/Normal"
+        },
+        {
+            "sourcePath": "raw/image/blacktop/Roughness.png",
+            "assetName": "texture/blacktop/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/blacktop/Metallic.png",
+            "assetName": "texture/blacktop/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/box/BaseColor.png",
+            "assetName": "texture/box/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/box/Normal.png",
+            "assetName": "texture/box/Normal"
+        },
+        {
+            "sourcePath": "raw/image/box/Roughness.png",
+            "assetName": "texture/box/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/coin/BaseColor.png",
+            "assetName": "texture/coin/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/coin/Normal.png",
+            "assetName": "texture/coin/Normal"
+        },
+        {
+            "sourcePath": "raw/image/coin/Roughness.png",
+            "assetName": "texture/coin/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/floor/BaseColor.png",
+            "assetName": "texture/floor/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/floor/Normal.png",
+            "assetName": "texture/floor/Normal"
+        },
+        {
+            "sourcePath": "raw/image/floor/Roughness.png",
+            "assetName": "texture/floor/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/logo/BaseColor.png",
+            "assetName": "texture/logo/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/logo/Normal.png",
+            "assetName": "texture/logo/Normal"
+        },
+        {
+            "sourcePath": "raw/image/logo/Roughness.png",
+            "assetName": "texture/logo/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/logo/Metallic.png",
+            "assetName": "texture/logo/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/solid_color/Blue.png",
+            "assetName": "texture/solid_color/Blue"
+        },
+        {
+            "sourcePath": "raw/image/solid_color/Red.png",
+            "assetName": "texture/solid_color/Red"
+        },
+        {
+            "sourcePath": "raw/image/solid_color/Green.png",
+            "assetName": "texture/solid_color/Green"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Blue/BaseColor.png",
+            "assetName": "texture/spheres/Blue/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Blue/Normal.png",
+            "assetName": "texture/spheres/Blue/Normal"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Blue/Roughness.png",
+            "assetName": "texture/spheres/Blue/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Blue/Metallic.png",
+            "assetName": "texture/spheres/Blue/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Gray/BaseColor.png",
+            "assetName": "texture/spheres/Gray/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Gray/Normal.png",
+            "assetName": "texture/spheres/Gray/Normal"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Gray/Roughness.png",
+            "assetName": "texture/spheres/Gray/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/spheres/Gray/Metallic.png",
+            "assetName": "texture/spheres/Gray/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/table/BaseColor.png",
+            "assetName": "texture/table/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/table/Normal.png",
+            "assetName": "texture/table/Normal"
+        },
+        {
+            "sourcePath": "raw/image/table/Roughness.png",
+            "assetName": "texture/table/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/token/BaseColor.png",
+            "assetName": "texture/token/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/token/Normal.png",
+            "assetName": "texture/token/Normal"
+        },
+        {
+            "sourcePath": "raw/image/token/Roughness.png",
+            "assetName": "texture/token/Roughness"
+        }
+    ]
+}
