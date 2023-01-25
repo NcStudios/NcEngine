@@ -2,6 +2,7 @@
 
 #include "assets/AssetManagers.h"
 #include "camera/MainCamera.h"
+#include "ecs/Registry.h"
 #include "GpuAllocator.h"
 #include "ncmath/Vector.h"
 #include "platform/win32/NcWin32.h"
@@ -21,9 +22,10 @@ namespace nc::graphics
     class FrameManager;
     struct GpuAssetsStorage;
     struct PerFrameRenderState;
+    class PointLight;
     class Swapchain;
     class Renderer;
-    class RenderPassManager;
+    class RenderPasses;
     class ShaderResources;
 
     /** @todo: Plan is to have Graphics header be general enough to be implemented by Vulkan or DX, and eventually have a Vulkan (and potentially DX) version of Renderer, FrameManager, etc. Slowly working towards that. */
@@ -54,6 +56,7 @@ namespace nc::graphics
             std::unique_ptr<ShaderResources> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
             std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
+            std::unique_ptr<RenderPasses> m_renderPasses;
             std::unique_ptr<Renderer> m_renderer;
             std::unique_ptr<FrameManager> m_frameManager;
 
@@ -61,5 +64,8 @@ namespace nc::graphics
             uint32_t m_imageIndex;
             Vector2 m_dimensions;
             bool m_isMinimized;
+            uint32_t m_numShadowCasters;
+            Connection<PointLight&> m_onAddPointLightConnection;
+            Connection<Entity> m_onRemovePointLightConnection;
     };
 } // namespace nc::graphics

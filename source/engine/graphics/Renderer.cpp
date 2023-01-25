@@ -1,7 +1,6 @@
 #include "Renderer.h"
 
 #include "ecs/Transform.h"
-#include "ecs/Registry.h"
 #include "graphics/DebugWidget.h"
 #include "graphics/MeshRenderer.h"
 
@@ -9,7 +8,7 @@
 #include "graphics/Commands.h"
 #include "graphics/Graphics.h"
 #include "graphics/PointLight.h"
-#include "graphics/renderpasses/RenderPassManager.h"
+#include "graphics/renderpasses/RenderPasses.h"
 #include "graphics/renderpasses/RenderTarget.h"
 #include "graphics/shaders/ShaderResources.h"
 #include "graphics/techniques/EnvironmentTechnique.h"
@@ -72,63 +71,29 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, const nc::Vector2& 
 
 namespace nc::graphics
 {
-inline static const std::string LitShadingPass = "Lit Pass";
 inline static const std::string ShadowMappingPass = "Shadow Mapping Pass";
 
-Renderer::Renderer(vk::Device device, Registry* registry, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions)
+Renderer::Renderer(vk::Device device, Registry* registry, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions, uint32_t numShadowCasters)
     : m_device{device},
       m_swapchain{swapchain},
       m_gpuOptions{gpuOptions},
       m_shaderResources{shaderResources},
-      m_renderPasses{std::make_unique<RenderPassManager>(device, m_swapchain, m_gpuOptions, shaderResources->GetDescriptorSets(), dimensions)},
       m_dimensions{dimensions},
-      m_depthStencil{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, true, m_gpuOptions->GetMaxSamplesCount(), m_gpuOptions->GetDepthFormat()) },
-      m_colorBuffer{ std::make_unique<RenderTarget>(device, gpuAllocator, m_dimensions, false, m_gpuOptions->GetMaxSamplesCount(), m_swapchain->GetFormat()) },
       m_imguiDescriptorPool{CreateImguiDescriptorPool(device)},
       m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){ this->AddShadowMappingPass();}, 0u)},
       m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){ this->RemoveShadowMappingPass();}, 0u)},
-      m_numShadowCasters{0}
+      m_numShadowCasters{numShadowCasters}
 {
-        /** Lit shading pass */
-    std::array<AttachmentSlot, 3> litAttachmentSlots
+    
+
+    for (auto i = 0u; i < m_numShadowCasters; ++i)
     {
-        AttachmentSlot{0, AttachmentType::Color, m_swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, m_gpuOptions->GetMaxSamplesCount()},
-        AttachmentSlot{1, AttachmentType::Depth, m_gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, m_gpuOptions->GetMaxSamplesCount()},
-        AttachmentSlot{2, AttachmentType::Resolve, m_swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
-    };
-
-    std::array<Subpass, 1> litSubpasses
-    {
-        Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}
-    };
-
-    m_renderPasses->Add(LitShadingPass, litAttachmentSlots, litSubpasses, ClearValueFlags::Depth | ClearValueFlags::Color, m_dimensions);
-
-    auto& colorImageViews = m_swapchain->GetColorImageViews();
-    auto& depthImageView = m_depthStencil->GetImageView();
-    auto& colorResolveView = m_colorBuffer->GetImageView();
-
-    uint32_t index = 0;
-    for (auto& imageView : colorImageViews) 
-    {
-        m_renderPasses->RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, LitShadingPass, index++); 
+        AddShadowMappingPass();
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    m_renderPasses->RegisterTechnique<WireframeTechnique>(LitShadingPass);
-    #endif
-
-    m_renderPasses->RegisterTechnique<EnvironmentTechnique>(LitShadingPass);
-    m_renderPasses->RegisterTechnique<PbrTechnique>(LitShadingPass);
-    m_renderPasses->RegisterTechnique<ParticleTechnique>(LitShadingPass);
-    m_renderPasses->RegisterTechnique<UiTechnique>(LitShadingPass);
 }
 
 Renderer::~Renderer() noexcept
 {
-    m_depthStencil.reset();
-    m_colorBuffer.reset();
-    m_renderPasses.reset();
 }
 
 void Renderer::Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex)
@@ -170,7 +135,9 @@ void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physica
 
 void Renderer::AddShadowMappingPass()
 {
-    auto id = ShadowMappingPass + std::to_string(m_numShadowCasters);
+    m_numShadowCasters++;
+    auto shadowCasterIndex = m_numShadowCasters-1;
+    auto id = ShadowMappingPass + std::to_string(shadowCasterIndex);
 
     std::array<AttachmentSlot, 1> shadowAttachmentSlots
     {
@@ -183,18 +150,17 @@ void Renderer::AddShadowMappingPass()
     };
 
     m_renderPasses->Add(id, shadowAttachmentSlots, shadowSubpasses, ClearValueFlags::Depth, m_dimensions);
-    m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(m_numShadowCasters), id);
+    m_renderPasses->RegisterAttachment(m_shaderResources->GetShadowMapShaderResource().GetImageView(shadowCasterIndex), id);
 
     m_renderPasses->UnregisterTechnique<ShadowMappingTechnique>(id);
     auto& renderpass = m_renderPasses->Acquire(id);
-    renderpass.techniques.push_back(std::make_unique<ShadowMappingTechnique>(m_device, m_gpuOptions, m_shaderResources->GetDescriptorSets(), &renderpass.renderpass.get(), m_numShadowCasters));
-    m_numShadowCasters++;
-
+    renderpass.techniques.push_back(std::make_unique<ShadowMappingTechnique>(m_device, m_gpuOptions, m_shaderResources->GetDescriptorSets(), &renderpass.renderpass.get(), shadowCasterIndex));
 }
 
 void Renderer::RemoveShadowMappingPass()
 {
-    auto id = ShadowMappingPass + std::to_string(m_numShadowCasters-1);
+    auto shadowCasterIndex = m_numShadowCasters-1;
+    auto id = ShadowMappingPass + std::to_string(shadowCasterIndex);
     m_renderPasses->UnregisterTechnique<ShadowMappingTechnique>(id);
     m_renderPasses->Remove(id);
     m_numShadowCasters--;

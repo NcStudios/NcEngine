@@ -30,12 +30,16 @@ namespace nc::graphics
           m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), registry, m_allocator.get(), config::GetMemorySettings(), dimensions)},
           m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
+          m_renderPasses{std::make_unique<RenderPasses>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources->GetDescriptorSets(), dimensions)},
           m_renderer{ std::make_unique<Renderer>(m_core->logicalDevice.get(), registry, m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
           m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
           m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
-          m_isMinimized{ false }
+          m_isMinimized{ false },
+          m_numShadowCasters{0u},
+          m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){ m_numShadowCasters++;}, 4u)},
+          m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){ m_numShadowCasters <= 1u ? m_numShadowCasters = 0 : m_numShadowCasters--;}, 4u)}
     {
     }
 
@@ -69,11 +73,12 @@ namespace nc::graphics
         m_swapchain.reset();
 
         // Recreate swapchain and resources
-        auto shadowMap = ShadowMap { .dimensions = m_dimensions };
-        m_shaderResources.get()->GetShadowMapShaderResource().Update(std::vector<ShadowMap>{shadowMap});
         m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
         m_commands = std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get());
-        m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_registry, m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);
+        m_renderer = std::make_unique<Renderer>(m_core->logicalDevice.get(), m_registry, m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions, m_numShadowCasters-1);
+
+        auto shadowMap = ShadowMap { .dimensions = m_dimensions };
+        m_shaderResources.get()->GetShadowMapShaderResource().Update(std::vector<ShadowMap>{shadowMap});
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
@@ -95,6 +100,7 @@ namespace nc::graphics
     {
         m_core->logicalDevice.get().waitIdle();
         m_renderer->Clear();
+        m_numShadowCasters = 0u;
         ShaderResourceService<ObjectData>::Get()->Reset();
         ShaderResourceService<PointLightInfo>::Get()->Reset();
         ShaderResourceService<ShadowMap>::Get()->Reset();

@@ -25,14 +25,14 @@ class GpuOptions;
 struct PerFrameRenderState;
 class PerFrameGpuContext;
 class PointLight;
-class RenderPassManager;
+class RenderPasses;
 class RenderTarget;
 class ShaderResources;
 
 class Renderer
 {
     public:
-        Renderer(vk::Device device, Registry* registry, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions);
+        Renderer(vk::Device device, Registry* registry, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderResources* shaderResources, Vector2 dimensions, uint32_t numShadowCasters = 0u);
         ~Renderer() noexcept;
 
         void Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
@@ -48,10 +48,7 @@ class Renderer
         Swapchain* m_swapchain;
         GpuOptions* m_gpuOptions;
         ShaderResources* m_shaderResources;
-        std::unique_ptr<RenderPassManager> m_renderPasses;
         Vector2 m_dimensions;
-        std::unique_ptr<RenderTarget> m_depthStencil;
-        std::unique_ptr<RenderTarget> m_colorBuffer;
         vk::UniqueDescriptorPool m_imguiDescriptorPool;
         Connection<PointLight&> m_onAddPointLightConnection;
         Connection<Entity> m_onRemovePointLightConnection;

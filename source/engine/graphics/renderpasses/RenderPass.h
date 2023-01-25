@@ -30,6 +30,14 @@ enum class AttachmentType : uint8_t
     Resolve
 };
 
+struct FrameBufferAttachment
+{
+    std::string renderPassUid;
+    uint32_t index;
+    std::span<const vk::ImageView> attachmentHandles;
+    vk::UniqueFramebuffer frameBuffer;
+};
+
 struct AttachmentSlot
 {
     AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp,

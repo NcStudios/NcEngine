@@ -8,23 +8,17 @@
 
 namespace nc::graphics
 {
+    class GpuAllocator;
     class GpuOptions;
+    class RenderTarget;
     class ShaderDescriptorSets;
     class Swapchain;
 
-    struct FrameBufferAttachment
-    {
-        std::string renderPassUid;
-        uint32_t index;
-        std::span<const vk::ImageView> attachmentHandles;
-        vk::UniqueFramebuffer frameBuffer;
-    };
-
-    class RenderPassManager
+    class RenderPasses
     {
         public:
-            RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions);
-            ~RenderPassManager() noexcept;
+            RenderPasses(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions);
+            ~RenderPasses() noexcept;
 
             void Add(const std::string& uid, std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses, ClearValueFlags_t clearFlags, const Vector2& dimensions);
             void Remove(const std::string& uid);
@@ -51,11 +45,13 @@ namespace nc::graphics
             GpuOptions* m_gpuOptions;
             ShaderDescriptorSets* m_descriptorSets;
             std::vector<RenderPass> m_renderPasses;
+            std::unique_ptr<RenderTarget> m_depthStencil;
+            std::unique_ptr<RenderTarget> m_colorBuffer;
             std::vector<FrameBufferAttachment> m_frameBufferAttachments;
     };
 
     template <std::derived_from<ITechnique> T>
-    void RenderPassManager::RegisterTechnique(const std::string& uid)
+    void RenderPasses::RegisterTechnique(const std::string& uid)
     {
         UnregisterTechnique<T>(uid);
         auto& renderpass = Acquire(uid);
@@ -63,7 +59,7 @@ namespace nc::graphics
     }
 
     template <std::derived_from<ITechnique> T>
-    void RenderPassManager::UnregisterTechnique(const std::string& uid)
+    void RenderPasses::UnregisterTechnique(const std::string& uid)
     {
         const auto& techniqueType = typeid(T);
         auto& renderpass = Acquire(uid);

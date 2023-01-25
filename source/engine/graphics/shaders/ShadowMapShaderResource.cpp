@@ -39,8 +39,8 @@ namespace nc::graphics
       m_dimensions{dimensions},
       m_bindingSlot{bindingSlot},
       m_imageInfos{},
-      m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){ this->AddShadowMapResource(); }, 1u)},
-      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){ this->RemoveShadowMapResource(); }, 1u)},
+      m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){ this->AddShadowMapResource(); }, 2u)},
+      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){ this->RemoveShadowMapResource(); }, 2u)},
       m_numShadowCasters{0}
     {
         Initialize();
@@ -53,6 +53,9 @@ namespace nc::graphics
 
     void ShadowMapShaderResource::Reset()
     {
+        m_numShadowCasters = 0u;
+        m_depthStencils.clear();
+        m_imageInfos.clear();
     }
 
     void ShadowMapShaderResource::Update(const std::vector<ShadowMap>& data)

@@ -1,6 +1,8 @@
-#include "RenderPassManager.h"
+#include "RenderPasses.h"
+#include "graphics/GpuAllocator.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/Swapchain.h"
+#include "graphics/renderpasses/RenderTarget.h"
 #include "optick/optick.h"
 
 #include <iostream>
@@ -27,28 +29,64 @@ auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vecto
 }
 }
 
+inline static const std::string LitShadingPass = "Lit Pass";
+
 namespace nc::graphics
 {
-    RenderPassManager::RenderPassManager(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions)
+    RenderPasses::RenderPasses(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, const Vector2& dimensions)
         : m_device{device},
           m_swapchain{swapchain},
           m_gpuOptions{gpuOptions},
           m_descriptorSets{descriptorSets},
           m_renderPasses{},
+          m_depthStencil{ std::make_unique<RenderTarget>(device, gpuAllocator, dimensions, true, m_gpuOptions->GetMaxSamplesCount(), m_gpuOptions->GetDepthFormat()) },
+          m_colorBuffer{ std::make_unique<RenderTarget>(device, gpuAllocator, dimensions, false, m_gpuOptions->GetMaxSamplesCount(), m_swapchain->GetFormat()) },
           m_frameBufferAttachments{}
     {
-       
+        /** Lit shading pass */
+        std::array<AttachmentSlot, 3> litAttachmentSlots
+        {
+            AttachmentSlot{0, AttachmentType::Color, m_swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, m_gpuOptions->GetMaxSamplesCount()},
+            AttachmentSlot{1, AttachmentType::Depth, m_gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, m_gpuOptions->GetMaxSamplesCount()},
+            AttachmentSlot{2, AttachmentType::Resolve, m_swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+        };
+
+        std::array<Subpass, 1> litSubpasses
+        {
+            Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}
+        };
+
+        Add(LitShadingPass, litAttachmentSlots, litSubpasses, ClearValueFlags::Depth | ClearValueFlags::Color, dimensions);
+
+        auto& colorImageViews = m_swapchain->GetColorImageViews();
+        auto& depthImageView = m_depthStencil->GetImageView();
+        auto& colorResolveView = m_colorBuffer->GetImageView();
+
+        uint32_t index = 0;
+        for (auto& imageView : colorImageViews) 
+        {
+            RegisterAttachments(std::vector<vk::ImageView>{colorResolveView, depthImageView, imageView}, LitShadingPass, index++); 
+        }
+
+        #ifdef NC_EDITOR_ENABLED
+        RegisterTechnique<WireframeTechnique>(LitShadingPass);
+        #endif
+
+        RegisterTechnique<EnvironmentTechnique>(LitShadingPass);
+        RegisterTechnique<PbrTechnique>(LitShadingPass);
+        RegisterTechnique<ParticleTechnique>(LitShadingPass);
+        RegisterTechnique<UiTechnique>(LitShadingPass);
     }
 
-    RenderPassManager::~RenderPassManager() noexcept
+    RenderPasses::~RenderPasses() noexcept
     {
         m_renderPasses.clear();
         m_frameBufferAttachments.clear();
     }
 
-    void RenderPassManager::Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData)
+    void RenderPasses::Execute(const std::string& uid, vk::CommandBuffer* cmd, uint32_t renderTargetIndex, const PerFrameRenderState& frameData)
     {
-        OPTICK_CATEGORY("RenderPassManager::Execute", Optick::Category::Rendering);
+        OPTICK_CATEGORY("RenderPasses::Execute", Optick::Category::Rendering);
         auto& renderPass = Acquire(uid);
 
         Begin(&renderPass, cmd, renderTargetIndex);
@@ -67,7 +105,7 @@ namespace nc::graphics
         End(cmd);
     }
 
-    void RenderPassManager::Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
+    void RenderPasses::Begin(RenderPass* renderPass, vk::CommandBuffer* cmd, uint32_t renderTargetIndex)
     {
         const auto clearValues = CreateClearValues(renderPass->clearFlags);
         const auto renderPassInfo = vk::RenderPassBeginInfo
@@ -81,7 +119,7 @@ namespace nc::graphics
         cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
     }
 
-    RenderPass& RenderPassManager::Acquire(const std::string& uid)
+    RenderPass& RenderPasses::Acquire(const std::string& uid)
     {
         auto renderPassPos = std::ranges::find_if(m_renderPasses, [uid](const auto& aRenderPass)
         {
@@ -90,18 +128,18 @@ namespace nc::graphics
 
         if (renderPassPos == m_renderPasses.end())
         {
-            throw std::runtime_error("RenderPassManager::Acquire - RenderPass does not exist.");
+            throw std::runtime_error("RenderPasses::Acquire - RenderPass does not exist.");
         }
 
         return *renderPassPos;
     }
 
-    void RenderPassManager::End(vk::CommandBuffer* cmd)
+    void RenderPasses::End(vk::CommandBuffer* cmd)
     {
         cmd->endRenderPass();
     }
 
-    void RenderPassManager::Add(const std::string& uid,
+    void RenderPasses::Add(const std::string& uid,
                                 std::span<const AttachmentSlot> attachmentSlots,
                                 std::span<const Subpass> subpasses,
                                 ClearValueFlags_t clearFlags,
@@ -111,7 +149,7 @@ namespace nc::graphics
         m_renderPasses.emplace_back(attachmentSlots, subpasses, m_device, size, uid, clearFlags);
     }
 
-    void RenderPassManager::Remove(const std::string& uid)
+    void RenderPasses::Remove(const std::string& uid)
     {
         const auto it = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), ([uid](const auto& pass){return pass.uid == uid;}));
 
@@ -122,7 +160,7 @@ namespace nc::graphics
         m_renderPasses.pop_back();
     }
 
-    void RenderPassManager::Resize(const Vector2& dimensions, vk::Extent2D extent)
+    void RenderPasses::Resize(const Vector2& dimensions, vk::Extent2D extent)
     {
         for (auto& renderPass : m_renderPasses)
         {
@@ -147,7 +185,7 @@ namespace nc::graphics
         }
     }
 
-    FrameBufferAttachment& RenderPassManager::GetFrameBufferAttachment(const std::string& uid, uint32_t index)
+    FrameBufferAttachment& RenderPasses::GetFrameBufferAttachment(const std::string& uid, uint32_t index)
     {
         auto frameBufferPos = std::ranges::find_if(m_frameBufferAttachments, [&uid, index](const auto& frameBufferAttachment)
         {
@@ -156,13 +194,13 @@ namespace nc::graphics
 
         if (frameBufferPos == m_frameBufferAttachments.end())
         {
-            throw std::runtime_error("RenderPassManager::GetFrameBufferAttachment - FrameBufferAttachment does not exist.");
+            throw std::runtime_error("RenderPasses::GetFrameBufferAttachment - FrameBufferAttachment does not exist.");
         }
 
         return *frameBufferPos;
     }
 
-    void RenderPassManager::RegisterAttachments(std::span<const vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index)
+    void RenderPasses::RegisterAttachments(std::span<const vk::ImageView> attachmentHandles, const std::string& uid, uint32_t index)
     {
         auto frameBufferPos = std::ranges::find_if(m_frameBufferAttachments, [&uid, index](const auto& frameBufferAttachment)
         {
@@ -194,7 +232,7 @@ namespace nc::graphics
         m_frameBufferAttachments.push_back(std::move(frameBufferAttachment));
     }
 
-    void RenderPassManager::RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid)
+    void RenderPasses::RegisterAttachment(vk::ImageView attachmentHandle, const std::string& uid)
     {
         auto frameBufferPos = std::ranges::find_if(m_frameBufferAttachments, [uid](const auto& frameBufferAttachment)
         {
