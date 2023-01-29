@@ -1,13 +1,15 @@
 #include "gtest/gtest.h"
 #include "assets/ConvexHullAssetManager.h"
 
+#include "ncasset/Assets.h"
+
 #include <array>
 #include <string>
 
 using namespace nc;
 
-const auto HullPath1 = "convex_hull1.nca";
-const auto HullPath2 = "convex_hull2.nca";
+const auto HullPath1 = "hull_collider1.nca";
+const auto HullPath2 = "hull_collider2.nca";
 
 class ConvexHullAssetManager_tests : public ::testing::Test
 {
@@ -103,10 +105,4 @@ TEST_F(ConvexHullAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 TEST_F(ConvexHullAssetManager_tests, UnloadAll_Empty_Completes)
 {
     assetManager->UnloadAll();
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

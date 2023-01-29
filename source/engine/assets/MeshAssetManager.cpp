@@ -1,80 +1,10 @@
 #include "MeshAssetManager.h"
 #include "AssetUtilities.h"
 
+#include "ncasset/Import.h"
+
 #include <cassert>
 #include <fstream>
-
-namespace
-{
-struct MeshReadData
-{
-    uint32_t verticesRead;
-    uint32_t indicesRead;
-    float meshMaxExtent;
-};
-
-std::ifstream& operator >>(std::ifstream& stream, nc::Vector2& vec)
-{
-    stream >> vec.x >> vec.y;
-    return stream;
-}
-
-std::ifstream& operator >>(std::ifstream& stream, nc::Vector3& vec)
-{
-    stream >> vec.x >> vec.y >> vec.z;
-    return stream;
-}
-
-void ReadVerticesFromAsset(std::ifstream& file, std::vector<nc::Vertex>& vertices, size_t count)
-{
-    vertices.reserve(vertices.size() + count);
-    nc::Vector3 ver, nrm, tan, bit;
-    nc::Vector2 tex;
-
-    for(size_t i = 0; i < count; ++i)
-    {
-        if(file.fail())
-            throw nc::NcError("Failure reading file");
-        
-        file >> ver >> nrm >> tex >> tan >> bit;
-        vertices.emplace_back(ver, nrm, tex, tan, bit);
-    }
-}
-
-void ReadIndicesFromAsset(std::ifstream& file, std::vector<uint32_t>& indices, size_t count)
-{
-    indices.reserve(indices.size() + count);
-    uint32_t index; //@todo: Update vulkan descriptors to accept 16_t and change here to 16_t
-    for(size_t i = 0; i < count; ++i)
-    {
-        if(file.fail())
-            throw nc::NcError("Failure reading file");
-
-        file >> index;
-        indices.push_back(index);
-    }
-}
-
-auto ReadMesh(const std::string& meshPath, std::vector<nc::Vertex>& vertices, std::vector<uint32_t>& indices) -> MeshReadData
-{
-    if(!nc::HasValidAssetExtension(meshPath))
-        throw nc::NcError("Invalid extension: " + meshPath);
-
-    std::ifstream file{meshPath};
-    if(!file.is_open())
-        throw nc::NcError("Could not open file: " + meshPath);
-
-    float maxExtent;
-    size_t vertexCount, indexCount;
-    file >> maxExtent;
-    file >> vertexCount;
-    ReadVerticesFromAsset(file, vertices, vertexCount);
-    file >> indexCount;
-    ReadIndicesFromAsset(file, indices, indexCount);
-
-    return MeshReadData{static_cast<uint32_t>(vertexCount), static_cast<uint32_t>(indexCount), maxExtent};
-}
-}
 
 namespace nc
 {
@@ -94,78 +24,49 @@ MeshAssetManager::~MeshAssetManager() noexcept
     m_accessors.clear();
 }
 
-bool MeshAssetManager::Load(const std::string& path, bool isExternal)
+void MeshAssetManager::AddMeshView(const std::string& path, bool isExternal)
 {
-    if(IsLoaded(path))
-        return false;
-
-    const auto existingVertexCount = static_cast<uint32_t>(m_vertexData.size());
-    const auto existingIndexCount = static_cast<uint32_t>(m_indexData.size());
-
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    auto [verticesRead, indicesRead, maxExtent] = ReadMesh(fullPath, m_vertexData, m_indexData);
+    const auto mesh = asset::ImportMesh(fullPath);
 
-    MeshView mesh
-    {
-        .firstVertex = existingVertexCount,
-        .vertexCount = verticesRead,
-        .firstIndex = existingIndexCount,
-        .indexCount = indicesRead,
-        .maxExtent = maxExtent
+    auto meshView = MeshView{
+        .firstVertex = static_cast<uint32_t>(m_vertexData.size()),
+        .vertexCount = static_cast<uint32_t>(mesh.vertices.size()),
+        .firstIndex = static_cast<uint32_t>(m_indexData.size()),
+        .indexCount = static_cast<uint32_t>(mesh.indices.size()),
+        .maxExtent = mesh.maxExtent
     };
 
-    m_accessors.emplace(path, mesh);
+    m_vertexData.insert(m_vertexData.end(), mesh.vertices.begin(), mesh.vertices.end());
+    m_indexData.insert(m_indexData.end(), mesh.indices.begin(), mesh.indices.end());
+    m_accessors.emplace(path, meshView);
+}
 
-    m_onUpdate.Emit
-    (
-        MeshBufferData
-        {
-            m_vertexData,
-            m_indexData
-        }
-    );
+bool MeshAssetManager::Load(const std::string& path, bool isExternal)
+{
+    if (IsLoaded(path))
+    {
+        return false;
+    }
+
+    AddMeshView(path, isExternal);
+    m_onUpdate.Emit(MeshBufferData{m_vertexData, m_indexData});
     return true;
 }
 
 bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal)
 {
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
-    std::unordered_map<std::string, MeshView> meshes;
-
-    auto totalVertexCount = static_cast<uint32_t>(m_vertexData.size());
-    auto totalIndexCount = static_cast<uint32_t>(m_indexData.size());
-
     for (const auto& path : paths)
     {
-        if(IsLoaded(path))
-            continue;
-
-        const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        auto [verticesRead, indicesRead, maxExtent] = ReadMesh(fullPath, m_vertexData, m_indexData);
-
-        MeshView mesh
+        if (IsLoaded(path))
         {
-            .firstVertex = totalVertexCount,
-            .vertexCount = verticesRead,
-            .firstIndex = totalIndexCount,
-            .indexCount = indicesRead,
-            .maxExtent = maxExtent
-        };
+            continue;
+        }
 
-        m_accessors.emplace(path, mesh);
-        totalVertexCount += verticesRead;
-        totalIndexCount += indicesRead;
+        AddMeshView(path, isExternal);
     }
 
-    m_onUpdate.Emit
-    (
-        MeshBufferData
-        {
-            m_vertexData,
-            m_indexData
-        }
-    );
+    m_onUpdate.Emit(MeshBufferData{m_vertexData, m_indexData});
     return true;
 }
 

@@ -1,7 +1,6 @@
 {
     "globalOptions": {
-        "outputDirectory": "./nca",
-        "workingDirectory": "./"
+        "outputDirectory": "./nca"
     },
     "audio-clip": [
         {

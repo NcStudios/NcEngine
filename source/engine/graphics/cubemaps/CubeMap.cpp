@@ -1,15 +1,17 @@
 #include "CubeMap.h"
 
+#include "assets/AssetData.h"
+
 namespace nc::graphics
 {
-    CubeMap::CubeMap(vk::Device device, GpuAllocator* allocator, const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize, const std::string& uid)
+    CubeMap::CubeMap(vk::Device device, GpuAllocator* allocator, const CubeMapData& data)
         : m_device{device},
           m_allocator{allocator},
           m_image{},
-          m_cubeMapview{},
-          m_uid{uid}
+          m_cubeMapView{},
+          m_uid{data.id}
     {
-        Bind(pixels, width, height, cubeMapSize);
+        Bind(data);
     }
 
     CubeMap::~CubeMap() noexcept
@@ -21,7 +23,7 @@ namespace nc::graphics
         : m_device{std::exchange(other.m_device, nullptr)},
           m_allocator{std::exchange(other.m_allocator, nullptr)},
           m_image{std::exchange(other.m_image, GpuAllocation<vk::Image>{})},
-          m_cubeMapview{std::move(other.m_cubeMapview)},
+          m_cubeMapView{std::move(other.m_cubeMapView)},
           m_uid{std::move(other.m_uid)}
     {
     }
@@ -31,21 +33,22 @@ namespace nc::graphics
         m_device = std::exchange(other.m_device, nullptr);
         m_allocator = std::exchange(other.m_allocator, nullptr);
         m_image = std::exchange(other.m_image, GpuAllocation<vk::Image>{});
-        m_cubeMapview = std::move(other.m_cubeMapview);
+        m_cubeMapView = std::move(other.m_cubeMapView);
         m_uid = std::move(other.m_uid);
 
         return *this;
     }
 
-    void CubeMap::Bind(const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize)
+    void CubeMap::Bind(const CubeMapData& data)
     {
-        m_image = m_allocator->CreateCubeMapTexture(pixels, width, height, cubeMapSize);
-        m_cubeMapview = CreateCubeMapTextureView(m_device, m_image);
+        const auto& cubeMap = data.cubeMap;
+        m_image = m_allocator->CreateCubeMapTexture(cubeMap.pixelData.data(), static_cast<uint32_t>(cubeMap.pixelData.size()), cubeMap.faceSideLength);
+        m_cubeMapView = CreateCubeMapTextureView(m_device, m_image);
     }
 
     const vk::ImageView& CubeMap::GetImageView() const noexcept
     {
-        return m_cubeMapview.get();
+        return m_cubeMapView.get();
     }
 
     const std::string& CubeMap::GetUid() const noexcept
@@ -56,6 +59,6 @@ namespace nc::graphics
     void CubeMap::Clear() noexcept
     {
         m_image.Release();
-        m_cubeMapview.reset();
+        m_cubeMapView.reset();
     }
 }

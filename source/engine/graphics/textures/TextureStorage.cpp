@@ -51,10 +51,11 @@ void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferDat
     for (auto i = 0ull; i < textureBufferData.ids.size(); ++i)
     {
         auto& textureData = textureBufferData.data[i];
+        auto& texture = textureData.texture;
 
         TextureBuffer textureBuffer
         {
-            .image = graphics::ImmutableImage(m_device, m_allocator, textureData.pixels.get(), textureData.width, textureData.height),
+            .image = graphics::ImmutableImage(m_device, m_allocator, texture.pixelData.data(), texture.width, texture.height),
             .imageInfo = graphics::CreateDescriptorImageInfo(m_sampler.get(), textureBuffer.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
             .uid = textureData.id
         };

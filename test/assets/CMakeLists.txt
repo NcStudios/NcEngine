@@ -21,8 +21,9 @@ target_compile_options(AssetId_tests
 
 target_link_libraries(AssetId_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(AssetId_tests AssetId_tests)
@@ -52,8 +53,9 @@ target_compile_options(AudioClipAssetManager_tests
 
 target_link_libraries(AudioClipAssetManager_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(AudioClipAssetManager_tests AudioClipAssetManager_tests)
@@ -83,8 +85,9 @@ target_compile_options(ConcaveColliderAssetManager_tests
 
 target_link_libraries(ConcaveColliderAssetManager_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(ConcaveColliderAssetManager_tests ConcaveColliderAssetManager_tests)
@@ -114,8 +117,9 @@ target_compile_options(ConvexHullAssetManager_tests
 
 target_link_libraries(ConvexHullAssetManager_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(ConvexHullAssetManager_tests ConvexHullAssetManager_tests)
@@ -148,8 +152,9 @@ target_compile_options(CubeMapAssetManager_tests
 
 target_link_libraries(CubeMapAssetManager_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(CubeMapAssetManager_tests CubeMapAssetManager_tests)
@@ -181,8 +186,9 @@ target_compile_options(MeshAssetManager_tests
 
 target_link_libraries(MeshAssetManager_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(MeshAssetManager_tests MeshAssetManager_tests)
@@ -214,8 +220,9 @@ target_compile_options(ShaderAssetManager_tests
 
 target_link_libraries(ShaderAssetManager_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(ShaderAssetManager_tests ShaderAssetManager_tests)
@@ -247,8 +254,9 @@ target_compile_options(TextureAssetManager_tests
 
 target_link_libraries(TextureAssetManager_tests
     PRIVATE
+        NcAsset
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(TextureAssetManager_tests TextureAssetManager_tests)

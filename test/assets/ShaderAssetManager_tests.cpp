@@ -70,9 +70,3 @@ TEST_F(ShaderAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
     EXPECT_FALSE(assetManager->IsLoaded("shader1"));
     EXPECT_FALSE(assetManager->IsLoaded("shader2"));
 }
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

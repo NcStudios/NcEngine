@@ -1,24 +1,6 @@
 #include "TextureAssetManager.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
-
-#include <cassert>
-#include <fstream>
-
-namespace
-{
-auto ReadTexture(const std::string& path, const std::string& uid) -> nc::TextureData
-{
-    int32_t width, height, numChannels;
-    stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-
-    if(!pixels)
-        throw nc::NcError("Failed to load texture file: " + path);
-
-    return nc::TextureData{pixels, width, height, uid};
-}
-} // anonymous namespace
+#include "ncasset/Import.h"
 
 namespace nc
 {
@@ -36,18 +18,24 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     const auto index = static_cast<uint32_t>(m_textureData.size());
 
     if (index + 1 >= m_maxTextureCount)
+    {
         throw NcError("Cannot exceed max texture count.");
+    }
 
-    if(IsLoaded(path))
+    if (IsLoaded(path))
+    {
         return false;
+    }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    m_textureData.push_back(ReadTexture(fullPath, path));
+    m_textureData.emplace_back(asset::ImportTexture(fullPath), path);
 
-    m_onUpdate.Emit
-    (
-        TextureBufferData(UpdateAction::Load, std::vector<std::string>{path}, std::span<const TextureData>{&m_textureData.back(), 1})
-    );
+    m_onUpdate.Emit(TextureBufferData{
+        UpdateAction::Load,
+        std::vector<std::string>{path},
+        std::span<const TextureData>{&m_textureData.back(), 1}
+    });
+
     return true;
 }
 
@@ -57,30 +45,35 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
     const auto newTextureCount = static_cast<uint32_t>(paths.size());
     auto nextTextureIndex = static_cast<uint32_t>(newItemsIndex);
     if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
+    {
         throw NcError("Cannot exceed max texture count.");
+    }
 
     auto idsToLoad = std::vector<std::string>{};
     idsToLoad.reserve(paths.size());
 
     for (const auto& path : paths)
     {
-        if(IsLoaded(path))
+        if (IsLoaded(path))
         {
             continue;
         }
 
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        m_textureData.push_back(ReadTexture(fullPath, path));
+
+        m_textureData.emplace_back(asset::ImportTexture(fullPath), path);
         idsToLoad.push_back(path);
     }
 
     if (!idsToLoad.empty())
     {
-        m_onUpdate.Emit
-        (
-            TextureBufferData(UpdateAction::Load, std::move(idsToLoad), std::span<const TextureData>{m_textureData.begin() + newItemsIndex, m_textureData.end()})
-        );
+        m_onUpdate.Emit(TextureBufferData{
+            UpdateAction::Load,
+            std::move(idsToLoad),
+            std::span<const TextureData>{m_textureData.begin() + newItemsIndex, m_textureData.end()}
+        });
     }
+
     return true;
 }
 
@@ -97,10 +90,12 @@ bool TextureAssetManager::Unload(const std::string& path)
     }
 
     m_textureData.erase(pos);
-    m_onUpdate.Emit
-    (
-        TextureBufferData(UpdateAction::Unload, std::vector<std::string>{path}, std::span<const TextureData>{})
-    );
+    m_onUpdate.Emit(TextureBufferData{
+        UpdateAction::Unload,
+        std::vector<std::string>{path},
+        std::span<const TextureData>{}
+    });
+
     return true;
 }
 
@@ -117,7 +112,10 @@ auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
         return data.id == path;
     });
 
-    if(pos == m_textureData.cend())throw NcError("Asset is not loaded: " + path);
+    if (pos == m_textureData.cend())
+    {
+        throw NcError("Asset is not loaded: " + path);
+    }
 
     auto index = static_cast<uint32_t>(std::distance(m_textureData.cbegin(), pos));
     return TextureView{index};

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "graphics/GpuAllocator.h"
-#include "graphics/meshes/Vertex.h"
+
+#include "ncasset/AssetsFwd.h"
 
 #include <span>
 
@@ -14,7 +15,7 @@ class ImmutableBuffer
     public:
         ImmutableBuffer();
         ImmutableBuffer(GpuAllocator* allocator, std::span<const uint32_t> data);
-        ImmutableBuffer(GpuAllocator* allocator, std::span<const nc::Vertex> data);
+        ImmutableBuffer(GpuAllocator* allocator, std::span<const asset::MeshVertex> data);
         ImmutableBuffer(ImmutableBuffer&&) = default;
         ImmutableBuffer& operator=(ImmutableBuffer&&) = default;
         ImmutableBuffer& operator=(const ImmutableBuffer&) = delete;

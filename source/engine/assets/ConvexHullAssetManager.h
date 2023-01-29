@@ -2,18 +2,13 @@
 
 #include "AssetService.h"
 
+#include "ncasset/AssetsFwd.h"
+
 #include <unordered_map>
 #include <vector>
 
 namespace nc
 {
-    struct ConvexHullFlyweight
-    {
-        std::vector<Vector3> vertices;
-        Vector3 extents;
-        float maxExtent;
-    };
-
     class ConvexHullAssetManager : public IAssetService<ConvexHullView, std::string>
     {
         public:
@@ -24,9 +19,9 @@ namespace nc
             void UnloadAll() override;
             auto Acquire(const std::string& path) const -> ConvexHullView override;
             bool IsLoaded(const std::string& path) const override;
-        
+
         private:
-            std::unordered_map<std::string, ConvexHullFlyweight> m_hullColliders;
+            std::unordered_map<std::string, asset::HullCollider> m_hullColliders;
             std::string m_assetDirectory;
     };
 }

@@ -2,17 +2,13 @@
 
 #include "AssetService.h"
 
+#include "ncasset/AssetsFwd.h"
+
 #include <unordered_map>
 #include <vector>
 
 namespace nc
 {
-    struct ConcaveColliderFlyweight
-    {
-        std::vector<Triangle> triangles;
-        float maxExtent;
-    };
-
     class ConcaveColliderAssetManager : public IAssetService<ConcaveColliderView, std::string>
     {
         public:
@@ -26,7 +22,7 @@ namespace nc
             bool IsLoaded(const std::string& path) const override;
         
         private:
-            std::unordered_map<std::string, ConcaveColliderFlyweight> m_concaveColliders;
+            std::unordered_map<std::string, asset::ConcaveCollider> m_concaveColliders;
             std::string m_assetDirectory;
     };
 }

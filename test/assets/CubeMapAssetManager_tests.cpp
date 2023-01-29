@@ -4,14 +4,11 @@
 #include <array>
 #include <string>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
-
 using namespace nc;
 
-const auto skybox1 = "skybox1/skybox1.nca";
-const auto skybox2 = "skybox2/skybox2.nca";
-const auto skybox3 = "skybox3/skybox3.nca";
+const auto skybox1 = "skybox1.nca";
+const auto skybox2 = "skybox2.nca";
+const auto skybox3 = "skybox3.nca";
 const uint32_t MaxTextures = 100;
 
 class CubeMapAssetManager_tests : public ::testing::Test
@@ -142,10 +139,4 @@ TEST_F(CubeMapAssetManager_tests, Unload_FromEnd_AccessorsNotUpdated)
     auto view2 = assetManager->Acquire(skybox2);
     EXPECT_EQ(view1.index, 0u);
     EXPECT_EQ(view2.index, 1u);
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

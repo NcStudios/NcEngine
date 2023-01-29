@@ -8,7 +8,6 @@
 #include "scenes/JointsTest.h"
 #include "scenes/RenderingBenchmark.h"
 #include "scenes/JareTestScene.h"
-#include "scenes/SolarSystem.h"
 
 #include "imgui/imgui.h"
 #include "ncengine/config/Version.h"
@@ -139,9 +138,6 @@ namespace nc::sample
 
             if (ImGui::Button("Jare Test", buttonSize))
                 m_engine->QueueSceneChange(std::make_unique<JareTestScene>(this));
-
-            if (ImGui::Button("Solar System", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<SolarSystem>(this));
         } ImGui::EndChild();
     }
 
