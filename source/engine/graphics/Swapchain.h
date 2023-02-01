@@ -32,6 +32,7 @@ namespace nc::graphics
             const vk::Format& GetFormat() const noexcept;
             const std::vector<vk::ImageView>& GetColorImageViews() const noexcept;
             vk::ImageView& GetDepthView() const noexcept;
+            void Resize(const Vector2& dimensions);
 
             // Image synchronization
             bool GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex);
@@ -39,6 +40,8 @@ namespace nc::graphics
 
         private:
             vk::Device m_device;
+            vk::PhysicalDevice m_physicalDevice;
+            vk::SurfaceKHR m_surface;
             vk::SwapchainKHR m_swapChain;
             std::vector<vk::Image> m_swapChainImages;
             vk::Format m_swapChainImageFormat;

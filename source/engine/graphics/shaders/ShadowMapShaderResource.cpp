@@ -1,6 +1,5 @@
 #include "ShadowMapShaderResource.h"
 #include "graphics/Initializers.h"
-#include "graphics/PointLight.h"
 
 #include <vector>
 
@@ -30,48 +29,35 @@ vk::UniqueSampler CreateShadowMapSampler(vk::Device device)
 }
 namespace nc::graphics
 {
-    ShadowMapShaderResource::ShadowMapShaderResource(uint32_t bindingSlot, vk::Device device, Registry* registry, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, Vector2 dimensions)
-    : m_device{device},
-      m_allocator{allocator},
-      m_descriptors{ descriptors },
-      m_sampler{CreateShadowMapSampler(m_device)},
-      m_depthStencils{},
-      m_dimensions{dimensions},
-      m_bindingSlot{bindingSlot},
+    ShadowMapShaderResource::ShadowMapShaderResource(uint32_t bindingSlot, vk::Device device, ShaderDescriptorSets* descriptors, uint32_t maxShadows)
+    : m_descriptors{ descriptors },
+      m_sampler{CreateShadowMapSampler(device)},
       m_imageInfos{},
-      m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){ this->AddShadowMapResource(); }, 2u)},
-      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){ this->RemoveShadowMapResource(); }, 2u)},
-      m_numShadowCasters{0}
+      m_bindingSlot{bindingSlot},
+      m_maxShadows{maxShadows}
     {
         Initialize();
     }
 
-    ShadowMapShaderResource::~ShadowMapShaderResource()
-    {
-        Reset();
-    }
-
     void ShadowMapShaderResource::Reset()
     {
-        m_numShadowCasters = 0u;
-        m_depthStencils.clear();
         m_imageInfos.clear();
     }
 
     void ShadowMapShaderResource::Update(const std::vector<ShadowMap>& data)
     {
-        m_dimensions = data.at(0).dimensions;
-        
-        for (uint32_t i = 0; i < m_numShadowCasters; ++i)
+        m_imageInfos.clear();
+        m_imageInfos.reserve(data.size());
+
+        for (uint32_t i = 0; i < static_cast<uint32_t>(data.size()); ++i)
         {
-            m_depthStencils.push_back(std::make_unique<RenderTarget>(m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
-            m_imageInfos.push_back(CreateDescriptorImageInfo(m_sampler.get(), m_depthStencils.back()->GetImageView(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal));
-          }
+            m_imageInfos.push_back(CreateDescriptorImageInfo(m_sampler.get(), data[i].imageView, vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal));
+        }
 
         m_descriptors->UpdateImage
         (   BindFrequency::per_frame,
             m_imageInfos,
-            m_numShadowCasters,
+            static_cast<uint32_t>(data.size()),
             vk::DescriptorType::eCombinedImageSampler,
             m_bindingSlot
         );
@@ -83,24 +69,10 @@ namespace nc::graphics
         (
             m_bindingSlot,
             BindFrequency::per_frame,
-            10,
+            m_maxShadows,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,
             vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
         );
-    }
-
-    void ShadowMapShaderResource::AddShadowMapResource()
-    {
-        m_numShadowCasters++;
-        auto shadowMap = ShadowMap { .dimensions = m_dimensions };
-        Update(std::vector<ShadowMap>{shadowMap});
-    }
-
-    void ShadowMapShaderResource::RemoveShadowMapResource()
-    {
-        m_numShadowCasters--;
-        auto shadowMap = ShadowMap { .dimensions = m_dimensions };
-        Update(std::vector<ShadowMap>{shadowMap});
     }
 }

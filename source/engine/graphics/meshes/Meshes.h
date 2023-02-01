@@ -1,3 +1,4 @@
+#pragma once
 #include "graphics/buffers/ImmutableBuffer.h"
 
 #include <span>

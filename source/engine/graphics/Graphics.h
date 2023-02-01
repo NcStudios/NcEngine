@@ -21,12 +21,14 @@ namespace nc::graphics
     struct Core;
     class FrameManager;
     struct GpuAssetsStorage;
+    class Lighting;
     struct PerFrameRenderState;
     class PointLight;
     class Swapchain;
-    class Renderer;
-    class RenderPasses;
-    class ShaderResources;
+    class Imgui;
+    class RenderGraph;
+    class ShaderDescriptorSets;
+    struct ShaderResources;
 
     /** @todo: Plan is to have Graphics header be general enough to be implemented by Vulkan or DX, and eventually have a Vulkan (and potentially DX) version of Renderer, FrameManager, etc. Slowly working towards that. */
     class Graphics
@@ -44,7 +46,7 @@ namespace nc::graphics
             void FrameEnd();
 
         private:
-            void RecreateSwapchain(Vector2 dimensions);
+            void Resize();
 
             camera::MainCamera* m_mainCamera;
             Registry* m_registry;
@@ -53,19 +55,18 @@ namespace nc::graphics
             std::unique_ptr<Swapchain> m_swapchain;
             std::unique_ptr<Commands> m_commands;
             std::unique_ptr<GpuAllocator> m_allocator;
+            std::unique_ptr<ShaderDescriptorSets> m_shaderDescriptorSets;
             std::unique_ptr<ShaderResources> m_shaderResources;
             std::unique_ptr<AssetServices> m_assetServices;
             std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
-            std::unique_ptr<RenderPasses> m_renderPasses;
-            std::unique_ptr<Renderer> m_renderer;
+            std::unique_ptr<RenderGraph> m_renderGraph;
+            std::unique_ptr<Imgui> m_imgui;
             std::unique_ptr<FrameManager> m_frameManager;
+            std::unique_ptr<Lighting> m_lighting;
 
             std::mutex m_resizingMutex;
             uint32_t m_imageIndex;
             Vector2 m_dimensions;
             bool m_isMinimized;
-            uint32_t m_numShadowCasters;
-            Connection<PointLight&> m_onAddPointLightConnection;
-            Connection<Entity> m_onRemovePointLightConnection;
     };
 } // namespace nc::graphics

@@ -51,6 +51,8 @@ namespace nc::graphics
     Swapchain::Swapchain(vk::Device device, vk::PhysicalDevice physicalDevice,
                          vk::SurfaceKHR surface, const Vector2& dimensions)
         : m_device{ device },
+          m_physicalDevice{physicalDevice},
+          m_surface{surface},
           m_swapChain{},
           m_swapChainImages{},
           m_swapChainImageFormat{},
@@ -59,7 +61,6 @@ namespace nc::graphics
           m_imagesInFlightFences{}
     {
         Create(physicalDevice, surface, dimensions);
-        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
     
     Swapchain::~Swapchain() noexcept
@@ -250,6 +251,8 @@ namespace nc::graphics
                 throw NcError("Failed to create image view");
             }
         }
+
+        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
 
     const Vector2 Swapchain::GetExtentDimensions() const noexcept
@@ -272,5 +275,11 @@ namespace nc::graphics
         auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, currentFrame->ImageAvailableSemaphore());
         *imageIndex = index;
         return result != vk::Result::eErrorOutOfDateKHR;
+    }
+
+    void Swapchain::Resize(const Vector2& dimensions)
+    {
+        Cleanup();
+        Create(m_physicalDevice, m_surface, dimensions);
     }
 }

@@ -12,32 +12,25 @@
 
 namespace nc::graphics
 {
-class ShaderResources
+struct ShaderResources
 {
-    public:
-        ShaderResources(vk::Device device, Registry* registry, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
-            : m_shaderDescriptorSets{device},
-              m_objectDataShaderResource{0, allocator, &m_shaderDescriptorSets, memorySettings.maxRenderers},
-              m_pointLightShaderResource{1, allocator, &m_shaderDescriptorSets, memorySettings.maxPointLights},
-              m_textureShaderResource{2, &m_shaderDescriptorSets, memorySettings.maxTextures},
-              m_shadowMapShaderResource{3, device, registry, allocator, &m_shaderDescriptorSets, dimensions},
-              m_cubeMapShaderResource{4, device, &m_shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
-              m_environmentDataShaderResource{5, allocator, &m_shaderDescriptorSets}
+
+        ShaderResources(vk::Device device, ShaderDescriptorSets* shaderDescriptorSets, Registry* registry, GpuAllocator* allocator, const config::MemorySettings& memorySettings, Vector2 dimensions)
+            : objectDataShaderResource{0, allocator, shaderDescriptorSets, memorySettings.maxRenderers},
+              pointLightShaderResource{1, allocator, shaderDescriptorSets, memorySettings.maxPointLights},
+              textureShaderResource{2, shaderDescriptorSets, memorySettings.maxTextures},
+              shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights},
+              cubeMapShaderResource{4, device, shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
+              environmentDataShaderResource{5, allocator, shaderDescriptorSets}
         {
-            m_shaderDescriptorSets.CreateSet(BindFrequency::per_frame);
+            shaderDescriptorSets->CreateSet(BindFrequency::per_frame);
         }
 
-        auto GetShadowMapShaderResource() noexcept -> ShadowMapShaderResource& { return m_shadowMapShaderResource; }
-        auto GetDescriptorSets() noexcept -> ShaderDescriptorSets* { return &m_shaderDescriptorSets; }
-
-    private:
-        ShaderDescriptorSets m_shaderDescriptorSets;
-
-        ObjectDataShaderResource m_objectDataShaderResource;          
-        PointLightShaderResource m_pointLightShaderResource;          
-        TextureShaderResource m_textureShaderResource;                
-        CubeMapShaderResource m_cubeMapShaderResource;                
-        EnvironmentDataShaderResource m_environmentDataShaderResource;
-        ShadowMapShaderResource m_shadowMapShaderResource;
+        ObjectDataShaderResource objectDataShaderResource;          
+        PointLightShaderResource pointLightShaderResource;          
+        TextureShaderResource textureShaderResource;                
+        CubeMapShaderResource cubeMapShaderResource;                
+        EnvironmentDataShaderResource environmentDataShaderResource;
+        ShadowMapShaderResource shadowMapShaderResource;
 };
 } // namespace nc::graphics

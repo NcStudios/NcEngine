@@ -17,7 +17,7 @@ namespace graphics
     class Commands;
     class GpuAllocator;
 
-    /** @todo Add create image view (used in RenderTarget) */
+    /** @todo Add create image view (used in Attachment) */
     auto CreateTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView;
     auto CreateCubeMapTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView;
 
