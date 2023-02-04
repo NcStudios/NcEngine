@@ -4,11 +4,6 @@ target_sources(${NC_ENGINE_LIB}
         AssetManagers.cpp
         Assets.cpp
         AssetUtilities.cpp
-        AudioClipAssetManager.cpp
-        ConcaveColliderAssetManager.cpp
-        ConvexHullAssetManager.cpp
-        CubeMapAssetManager.cpp
-        MeshAssetManager.cpp
-        ShaderAssetManager.cpp
-        TextureAssetManager.cpp
 )
+
+add_subdirectory(manager)

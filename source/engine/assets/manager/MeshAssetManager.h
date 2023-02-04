@@ -1,7 +1,6 @@
 #pragma once
 
-#include "AssetService.h"
-#include "assets/AssetData.h"
+#include "assets/AssetService.h"
 #include "utility/Signal.h"
 
 #include "ncasset/AssetsFwd.h"
@@ -11,10 +10,12 @@
 
 namespace nc
 {
+struct MeshBufferData;
+
 class MeshAssetManager : public IAssetService<MeshView, std::string>
 {
     public:
-        MeshAssetManager(const std::string& assetDirectory);
+        explicit MeshAssetManager(const std::string& assetDirectory);
         ~MeshAssetManager() noexcept;
 
         bool Load(const std::string& path, bool isExternal) override;

@@ -1,9 +1,8 @@
+#include "gtest/gtest.h"
+#include "assets/manager/ShaderAssetManager.h"
+
 #include <array>
 #include <filesystem>
-
-#include "gtest/gtest.h"
-
-#include "assets/ShaderAssetManager.h"
 
 using namespace nc;
 

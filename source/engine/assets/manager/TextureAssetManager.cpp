@@ -1,4 +1,5 @@
 #include "TextureAssetManager.h"
+#include "assets/AssetData.h"
 
 #include "ncasset/Import.h"
 

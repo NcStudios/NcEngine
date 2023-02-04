@@ -1,17 +1,20 @@
 #pragma once
 
-#include "assets/AssetData.h"
 #include "assets/AssetService.h"
 #include "utility/Signal.h"
 
+#include <string>
 #include <vector>
 
 namespace nc
 {
+struct TextureBufferData;
+struct TextureData;
+
 class TextureAssetManager : public IAssetService<TextureView, std::string>
 {
     public:
-        TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures);
+        explicit TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures);
 
         bool Load(const std::string& path, bool isExternal) override;
         bool Load(std::span<const std::string> paths, bool isExternal) override;

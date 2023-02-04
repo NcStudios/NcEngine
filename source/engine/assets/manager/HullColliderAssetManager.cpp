@@ -1,16 +1,16 @@
-#include "ConvexHullAssetManager.h"
+#include "HullColliderAssetManager.h"
 
 #include "ncasset/Import.h"
 
 namespace nc
 {
-    ConvexHullAssetManager::ConvexHullAssetManager(const std::string& assetDirectory)
+    HullColliderAssetManager::HullColliderAssetManager(const std::string& assetDirectory)
         : m_hullColliders{},
           m_assetDirectory{assetDirectory}
     {
     }
 
-    bool ConvexHullAssetManager::Load(const std::string& path, bool isExternal)
+    bool HullColliderAssetManager::Load(const std::string& path, bool isExternal)
     {
         if (IsLoaded(path))
         {
@@ -22,7 +22,7 @@ namespace nc
         return true;
     }
 
-    bool ConvexHullAssetManager::Load(std::span<const std::string> paths, bool isExternal)
+    bool HullColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     {
         bool anyLoaded = false;
 
@@ -42,17 +42,17 @@ namespace nc
         return anyLoaded;
     }
 
-    bool ConvexHullAssetManager::Unload(const std::string& path)
+    bool HullColliderAssetManager::Unload(const std::string& path)
     {
         return static_cast<bool>(m_hullColliders.erase(path));
     }
 
-    void ConvexHullAssetManager::UnloadAll()
+    void HullColliderAssetManager::UnloadAll()
     {
         m_hullColliders.clear();
     }
 
-    auto ConvexHullAssetManager::Acquire(const std::string& path) const -> ConvexHullView
+    auto HullColliderAssetManager::Acquire(const std::string& path) const -> ConvexHullView
     {
         const auto it = m_hullColliders.find(path);
         if (it == m_hullColliders.end())
@@ -68,7 +68,7 @@ namespace nc
         };
     }
 
-    bool ConvexHullAssetManager::IsLoaded(const std::string& path) const
+    bool HullColliderAssetManager::IsLoaded(const std::string& path) const
     {
         return m_hullColliders.contains(path);
     }

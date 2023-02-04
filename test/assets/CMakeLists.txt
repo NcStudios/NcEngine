@@ -31,7 +31,7 @@ add_test(AssetId_tests AssetId_tests)
 ### AudioClipAssetManager Tests ###
 add_executable(AudioClipAssetManager_tests
     AudioClipAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/assets/AudioClipAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/manager/AudioClipAssetManager.cpp
 )
 
 target_compile_definitions(AudioClipAssetManager_tests
@@ -63,7 +63,7 @@ add_test(AudioClipAssetManager_tests AudioClipAssetManager_tests)
 ### ConcaveColliderAssetManager Tests ###
 add_executable(ConcaveColliderAssetManager_tests
     ConcaveColliderAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/assets/ConcaveColliderAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/manager/ConcaveColliderAssetManager.cpp
 )
 
 target_compile_definitions(ConcaveColliderAssetManager_tests
@@ -92,44 +92,44 @@ target_link_libraries(ConcaveColliderAssetManager_tests
 
 add_test(ConcaveColliderAssetManager_tests ConcaveColliderAssetManager_tests)
 
-### ConvexHullAssetManager Tests ###
-add_executable(ConvexHullAssetManager_tests
-    ConvexHullAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/assets/ConvexHullAssetManager.cpp
+### HullColliderAssetManager Tests ###
+add_executable(HullColliderAssetManager_tests
+    HullColliderAssetManager_tests.cpp
+    ${NC_SOURCE_DIR}/assets/manager/HullColliderAssetManager.cpp
 )
 
-target_compile_definitions(ConvexHullAssetManager_tests
+target_compile_definitions(HullColliderAssetManager_tests
     PRIVATE
         NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
 )
 
-target_include_directories(ConvexHullAssetManager_tests
+target_include_directories(HullColliderAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
 )
 
-target_compile_options(ConvexHullAssetManager_tests
+target_compile_options(HullColliderAssetManager_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(ConvexHullAssetManager_tests
+target_link_libraries(HullColliderAssetManager_tests
     PRIVATE
         NcAsset
         NcUtility
         gtest_main
 )
 
-add_test(ConvexHullAssetManager_tests ConvexHullAssetManager_tests)
+add_test(HullColliderAssetManager_tests HullColliderAssetManager_tests)
 
 ### CubeMapAssetManager Tests ###
 add_executable(CubeMapAssetManager_tests
     CubeMapAssetManager_tests.cpp
     ${NC_SOURCE_DIR}/assets/AssetData.cpp
     ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
-    ${NC_SOURCE_DIR}/assets/CubeMapAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/manager/CubeMapAssetManager.cpp
 )
 
 target_compile_definitions(CubeMapAssetManager_tests
@@ -162,7 +162,7 @@ add_test(CubeMapAssetManager_tests CubeMapAssetManager_tests)
 ### MeshAssetManager Tests ###
 add_executable(MeshAssetManager_tests
     MeshAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/assets/MeshAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/manager/MeshAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
 )
 
@@ -196,7 +196,7 @@ add_test(MeshAssetManager_tests MeshAssetManager_tests)
 ### ShaderAssetManager Tests ###
 add_executable(ShaderAssetManager_tests
     ShaderAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/assets/ShaderAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/manager/ShaderAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
 )
 
@@ -230,7 +230,7 @@ add_test(ShaderAssetManager_tests ShaderAssetManager_tests)
 ### TextureAssetManager Tests ###
 add_executable(TextureAssetManager_tests
     TextureAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/assets/TextureAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/manager/TextureAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/AssetData.cpp
 )
 

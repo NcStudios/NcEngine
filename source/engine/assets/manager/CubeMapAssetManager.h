@@ -1,6 +1,5 @@
 #pragma once
 
-#include "assets/AssetData.h"
 #include "assets/AssetService.h"
 #include "utility/Signal.h"
 
@@ -10,10 +9,12 @@
 
 namespace nc
 {
+struct CubeMapBufferData;
+
 class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
 {
     public:
-        CubeMapAssetManager(const std::string& cubeMapAssetDirectory, uint32_t maxCubeMapsCount);
+        explicit CubeMapAssetManager(const std::string& cubeMapAssetDirectory, uint32_t maxCubeMapsCount);
 
         bool Load(const std::string& path, bool isExternal) override;
         bool Load(std::span<const std::string> paths, bool isExternal) override;
@@ -29,4 +30,5 @@ class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
         uint32_t m_maxCubeMapsCount;
         Signal<const CubeMapBufferData&> m_onUpdate;
 };
-}
+} // namesapce nc
+

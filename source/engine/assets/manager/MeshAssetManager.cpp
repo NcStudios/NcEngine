@@ -1,5 +1,6 @@
 #include "MeshAssetManager.h"
-#include "AssetUtilities.h"
+#include "assets/AssetData.h"
+#include "assets/AssetUtilities.h"
 
 #include "ncasset/Import.h"
 
