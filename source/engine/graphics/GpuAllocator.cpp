@@ -141,14 +141,6 @@ namespace nc::graphics
         auto* mappedData = Map(stagingBuffer.Allocation());
         std::memcpy(mappedData, pixels, cubeMapSize);
 
-        // const auto imageSize = width * height * 4u;
-
-        // for(uint32_t layer = 0u; layer < 6u; ++layer)
-        // {
-        //     char* destination = static_cast<char*>(mappedData) + imageSize * layer;
-        //     std::memcpy(destination, pixels[layer].get(), imageSize);
-        // }
-
         Unmap(stagingBuffer.Allocation());
         auto dimensions = Vector2{static_cast<float>(sideLength), static_cast<float>(sideLength)};
         auto imageBuffer = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, vk::SampleCountFlagBits::e1);
