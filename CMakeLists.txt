@@ -47,17 +47,19 @@ FetchContent_Declare(NcCommon
                      GIT_SHALLOW    TRUE
 )
 
-# FetchContent_Declare(nc-tools
-#                      URL      https://github.com/NcStudios/NcTools/releases/download/v0.1.1/nc-tools.zip
-#                      URL_HASH SHA256=97BD697A4A3C6CF01713E984CF497DDCB1E2C8D09B0F6FC25E1FD6017F372671
-# )
-
 set(NC_TOOLS_BUILD_CONVERTER OFF)
 set(NC_TOOLS_BUILD_TESTS OFF)
 FetchContent_Declare(nc-tools
                      GIT_REPOSITORY      https://github.com/NcStudios/NcTools.git
-                     GIT_TAG    origin/vnext
-                     GIT_SHALLOW TRUE
+                     GIT_TAG             v1.0.0
+                     GIT_SHALLOW         TRUE
+)
+
+# Get pre-built nc-convert.exe from NcTools so we don't have to build it and its dependencies
+FetchContent_Declare(nc-convert
+                     URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.0/nc-convert.exe
+                     URL_HASH            SHA256=281FA6A37D6A72111EF8586F4A8A415F3C9D52CA44B956E143911813A5759A3F
+                     DOWNLOAD_NO_EXTRACT TRUE
 )
 
 FetchContent_Declare(taskflow
@@ -66,7 +68,7 @@ FetchContent_Declare(taskflow
                      GIT_SHALLOW    TRUE
 )
 
-FetchContent_MakeAvailable(NcCommon nc-tools taskflow)
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow)
 
 # Add source
 add_subdirectory(source)
@@ -79,10 +81,10 @@ if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install nc-tools
-# install(FILES       ${nc-tools_SOURCE_DIR}/nc-tools.exe
-#         DESTINATION bin
-# )
+# Install nc-convert executable
+install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
+        DESTINATION bin
+)
 
 # Install Default Assets
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
