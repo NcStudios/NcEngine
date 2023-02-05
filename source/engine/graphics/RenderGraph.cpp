@@ -108,8 +108,8 @@ void RenderGraph::Execute(PerFrameGpuContext* currentFrame, const PerFrameRender
     uint32_t bufferIndex = 0u;
     for (auto& renderPass : m_renderPasses)
     {
-        BeginRenderPass(&renderPass, cmd, frameBufferIndex);
-        for (auto& technique : renderPass.techniques)
+        BeginRenderPass(renderPass.get(), cmd, frameBufferIndex);
+        for (auto& technique : renderPass->techniques)
         {
             if (!technique->CanBind(frameData)) continue;
 
@@ -124,22 +124,22 @@ void RenderGraph::Execute(PerFrameGpuContext* currentFrame, const PerFrameRender
     cmd->end();
 }
 
-RenderPass& RenderGraph::Acquire(const std::string& uid)
+RenderPass* RenderGraph::Acquire(const std::string& uid)
 {
-    auto renderPassPos = std::ranges::find_if(m_renderPasses, [uid](const auto& aRenderPass) { return (aRenderPass.uid == uid); });
+    auto renderPassPos = std::ranges::find_if(m_renderPasses, [uid](auto& renderPass) { return (renderPass->uid == uid); });
     if (renderPassPos == m_renderPasses.end()) throw NcError("RenderGraph::Acquire - Render pass does not exist.");
-    return *renderPassPos;
+    return (*renderPassPos).get();
 }
 
-void RenderGraph::Add(RenderPass renderPass)
+void RenderGraph::Add(std::unique_ptr<RenderPass> renderPass)
 {
     m_renderPasses.push_back(std::move(renderPass));
-    std::sort(m_renderPasses.begin(), m_renderPasses.end(), [](const auto& renderPassA, const auto& renderPassB) {return renderPassA.priority < renderPassB.priority;});
+    std::sort(m_renderPasses.begin(), m_renderPasses.end(), [](const auto& renderPassA, const auto& renderPassB) {return renderPassA->priority < renderPassB->priority;});
 }
 
 void RenderGraph::Remove(const std::string& uid)
 {
-    const auto it = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), ([uid](const auto& pass){return pass.uid == uid;}));
+    const auto it = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), ([uid](const auto& pass){return pass->uid == uid;}));
     if(it == m_renderPasses.end()) throw NcError("RenderGraph::Remove - Render pass does not exist: " + uid);
 
     *it = std::move(m_renderPasses.back());
@@ -149,14 +149,13 @@ void RenderGraph::Remove(const std::string& uid)
 void RenderGraph::RegisterShadowMappingTechnique(const std::string& uid, uint32_t shadowCasterIndex)
 {
     UnregisterTechnique<ShadowMappingTechnique>(uid);
-    auto& renderPass = Acquire(uid);
-    renderPass.techniques.push_back(std::make_unique<ShadowMappingTechnique>(m_device, m_gpuOptions, m_descriptorSets, &renderPass.renderPass.get(), shadowCasterIndex));
+    auto* renderPass = Acquire(uid);
+    renderPass->techniques.push_back(std::make_unique<ShadowMappingTechnique>(m_device, m_gpuOptions, m_descriptorSets, renderPass->renderPass.get(), shadowCasterIndex));
 }
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
     m_renderPasses.clear();
-
     m_dimensions = dimensions;
     Add(CreateLitPass(m_device, m_gpuAllocator, m_gpuOptions, m_swapchain, m_dimensions));
 

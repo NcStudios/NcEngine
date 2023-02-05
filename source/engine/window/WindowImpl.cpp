@@ -6,6 +6,7 @@
 #include "ncutility/NcError.h"
 #include "window/Window.h"
 
+#include <iostream>
 #include <algorithm>
 
 namespace
@@ -213,7 +214,14 @@ namespace nc::window
             }
             default:
             {
-                return DefWindowProc(hwnd, message, wParam, lParam);
+                try 
+                {
+                    return DefWindowProc(hwnd, message, wParam, lParam);
+                }
+                catch(...)
+                {
+                    std::cout << "test" << std::endl;
+                }
             }
         }
         return 0;

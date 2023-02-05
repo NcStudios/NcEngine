@@ -349,7 +349,7 @@ auto CreateFrameBuffer(vk::Device device, vk::RenderPass renderPass, std::span<c
     return device.createFramebufferUnique(framebufferInfo);
 }
 
-auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc::graphics::GpuOptions* gpuOptions, nc::graphics::Swapchain* swapchain, nc::Vector2 dimensions) -> nc::graphics::RenderPass 
+auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc::graphics::GpuOptions* gpuOptions, nc::graphics::Swapchain* swapchain, nc::Vector2 dimensions) -> std::unique_ptr<nc::graphics::RenderPass>
 {
     using namespace nc::graphics;
 
@@ -372,11 +372,11 @@ auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc:
     attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(device, 1u, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
+    auto renderPass = std::make_unique<RenderPass>(device, 1u, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
     auto& colorImageViews = swapchain->GetColorImageViews();
-    auto& depthImageView = renderPass.attachments[0]->view;
-    auto& colorResolveView = renderPass.attachments[1]->view;
+    auto& depthImageView = renderPass->attachments[0]->view;
+    auto& colorResolveView = renderPass->attachments[1]->view;
 
     uint32_t index = 0;
     for (auto& imageView : colorImageViews) 
@@ -387,12 +387,12 @@ auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc:
             depthImageView.get(), // Depth View
             imageView
         };
-        RegisterAttachments(device, &renderPass, imageViews, index++); 
+        RegisterAttachments(device, renderPass.get(), imageViews, index++); 
     }
     return std::move(renderPass);
 }
 
-nc::graphics::RenderPass CreateShadowMappingPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc::graphics::GpuOptions* gpuOptions, nc::graphics::Swapchain* swapchain, nc::Vector2 dimensions, uint32_t index)
+auto CreateShadowMappingPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc::graphics::GpuOptions* gpuOptions, nc::graphics::Swapchain* swapchain, nc::Vector2 dimensions, uint32_t index) -> std::unique_ptr<nc::graphics::RenderPass>
 {
     using namespace nc::graphics;
     auto id = ShadowMappingPassId + std::to_string(index);
@@ -411,9 +411,9 @@ nc::graphics::RenderPass CreateShadowMappingPass(vk::Device device, nc::graphics
     attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(device, 0u, id, shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
+    auto renderPass = std::make_unique<RenderPass>(device, 0u, id, shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
 
-    RegisterAttachment(device, &renderPass, renderPass.attachments[0]->view.get(), 0);
+    RegisterAttachment(device, renderPass.get(), renderPass->attachments[0]->view.get(), 0);
 
     return std::move(renderPass);
    }

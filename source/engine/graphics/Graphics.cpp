@@ -69,20 +69,32 @@ namespace nc::graphics
 
         // Wait for all current commands to complete execution
         m_core->logicalDevice.get().waitIdle();
-
+        m_frameManager.reset();
         m_swapchain->Resize(m_dimensions);
         m_renderGraph->Resize(m_dimensions);
         m_lighting->Resize(m_dimensions);
 
-        InitializeUI();
+
+        // m_renderGraph.reset();
+        // m_commands.reset();
+        // m_swapchain.reset();
+        // m_lighting.reset();
+
+
+        // m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
+        m_frameManager = std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get());
+        // m_renderGraph = std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), m_dimensions);
+        // m_lighting = std::make_unique<Lighting>(m_registry, m_core->logicalDevice.get(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), m_dimensions);
+        // InitializeUI();
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
         m_dimensions = Vector2{ width, height };
-        m_isMinimized = windowArg == 1;
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
-        Resize();
+        m_isMinimized = windowArg == 1;
+        // Resize();
+        // InitializeUI();
     }
 
     void Graphics::Clear()
@@ -97,7 +109,7 @@ namespace nc::graphics
 
     void Graphics::InitializeUI() /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
     {
-        m_imgui->InitializeImgui(m_core->instance.get(), m_core->physicalDevice, m_core->logicalDevice.get(), m_renderGraph->Acquire(LitPassId).renderPass.get(), m_commands.get(), static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
+        m_imgui->InitializeImgui(m_core->instance.get(), m_core->physicalDevice, m_core->logicalDevice.get(), (m_renderGraph->Acquire(LitPassId))->renderPass.get(), m_commands.get(), static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
     }
 
     bool Graphics::FrameBegin()

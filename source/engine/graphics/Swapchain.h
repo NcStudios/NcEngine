@@ -25,13 +25,10 @@ namespace nc::graphics
 
             // Swap chain
             void Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid);
-            void Create(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Vector2 dimensions);
             void Cleanup() noexcept;
-            const Vector2 GetExtentDimensions() const noexcept;
             const vk::Extent2D& GetExtent() const noexcept;
             const vk::Format& GetFormat() const noexcept;
             const std::vector<vk::ImageView>& GetColorImageViews() const noexcept;
-            vk::ImageView& GetDepthView() const noexcept;
             void Resize(const Vector2& dimensions);
 
             // Image synchronization
@@ -39,6 +36,8 @@ namespace nc::graphics
             void WaitForNextImage(PerFrameGpuContext* currentFrame, uint32_t imageIndex);
 
         private:
+            void Create(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Vector2 dimensions);
+
             vk::Device m_device;
             vk::PhysicalDevice m_physicalDevice;
             vk::SurfaceKHR m_surface;

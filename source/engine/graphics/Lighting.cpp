@@ -49,7 +49,7 @@ void Lighting::Clear()
 void Lighting::Resize(const Vector2& dimensions)
 {
     auto countBeforeClearing = m_numShadowCasters;
-    Clear();
+    m_numShadowCasters = 0u;
     for (auto i = 0u; i < countBeforeClearing; ++i)
     {
         OnAddPointLightConnection();
@@ -67,7 +67,7 @@ void Lighting::OnAddPointLightConnection()
     for (auto i = 0u; i < m_numShadowCasters + 1; ++i)
     {
         auto currentPassId = ShadowMappingPassId + std::to_string(i);
-        shadowMaps.push_back(ShadowMap{m_renderGraph->Acquire(currentPassId).attachments[0]->view.get()});
+        shadowMaps.push_back(ShadowMap{m_renderGraph->Acquire(currentPassId)->attachments[0]->view.get()});
     }
     m_shaderResources->shadowMapShaderResource.Update(std::vector<ShadowMap>{shadowMaps});
     m_numShadowCasters++;

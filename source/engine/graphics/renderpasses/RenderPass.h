@@ -97,8 +97,8 @@ struct RenderPass
 inline static const std::string LitPassId = "Lit Pass";
 inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
 
-auto CreateLitPass(vk::Device device, GpuAllocator* allocator, GpuOptions* gpuOptions, Swapchain* swapchain, Vector2 dimensions) -> RenderPass;
-auto CreateShadowMappingPass(vk::Device device, GpuAllocator* allocator, GpuOptions* gpuOptions, Swapchain* swapchain, nc::Vector2 dimensions, uint32_t index) -> RenderPass;
+auto CreateLitPass(vk::Device device, GpuAllocator* allocator, GpuOptions* gpuOptions, Swapchain* swapchain, Vector2 dimensions) -> std::unique_ptr<RenderPass>;
+auto CreateShadowMappingPass(vk::Device device, GpuAllocator* allocator, GpuOptions* gpuOptions, Swapchain* swapchain, nc::Vector2 dimensions, uint32_t index) -> std::unique_ptr<RenderPass>;
 auto CreateFrameBuffer(vk::Device device, vk::RenderPass renderPass, std::span<const vk::ImageView> attachmentHandles, uint32_t width, uint32_t height) -> vk::UniqueFramebuffer;
 auto GetFrameBuffer(nc::graphics::RenderPass* renderPass, uint32_t index) -> FrameBuffer*;
 } // namespace nc::graphics

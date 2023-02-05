@@ -21,7 +21,7 @@ namespace
 
 namespace nc::graphics
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, GpuOptions*, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass, uint32_t shadowCasterIndex)
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, GpuOptions*, ShaderDescriptorSets* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
         : m_descriptorSets{descriptorSets},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr},
@@ -76,7 +76,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-        pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility
+        pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.

@@ -61,6 +61,7 @@ namespace nc::graphics
           m_imagesInFlightFences{}
     {
         Create(physicalDevice, surface, dimensions);
+        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
     
     Swapchain::~Swapchain() noexcept
@@ -251,13 +252,6 @@ namespace nc::graphics
                 throw NcError("Failed to create image view");
             }
         }
-
-        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
-    }
-
-    const Vector2 Swapchain::GetExtentDimensions() const noexcept
-    {
-        return Vector2(static_cast<float>(m_swapChainExtent.width), static_cast<float>(m_swapChainExtent.height));
     }
 
     const vk::Extent2D& Swapchain::GetExtent() const noexcept
