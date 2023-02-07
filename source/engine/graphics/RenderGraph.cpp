@@ -153,11 +153,14 @@ void RenderGraph::RegisterShadowMappingTechnique(const std::string& uid, uint32_
     renderPass->techniques.push_back(std::make_unique<ShadowMappingTechnique>(m_device, m_gpuOptions, m_descriptorSets, renderPass->renderPass.get(), shadowCasterIndex));
 }
 
-void RenderGraph::Resize(const Vector2& dimensions)
+void RenderGraph::Resize(Swapchain* swapchain, const Vector2& dimensions)
 {
     m_renderPasses.clear();
     m_dimensions = dimensions;
+    m_swapchain = swapchain;
     Add(CreateLitPass(m_device, m_gpuAllocator, m_gpuOptions, m_swapchain, m_dimensions));
+    // ResizeLitPass(Acquire(LitPassId), m_swapchain, m_gpuAllocator, m_gpuOptions, m_dimensions)
+
 
     #ifdef NC_EDITOR_ENABLED
     RegisterTechnique<WireframeTechnique>(LitPassId);

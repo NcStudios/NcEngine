@@ -28,7 +28,7 @@ namespace nc::graphics
             void Cleanup() noexcept;
             const vk::Extent2D& GetExtent() const noexcept;
             const vk::Format& GetFormat() const noexcept;
-            const std::vector<vk::ImageView>& GetColorImageViews() const noexcept;
+            const std::vector<vk::UniqueImageView>& GetColorImageViews() const noexcept;
             void Resize(const Vector2& dimensions);
 
             // Image synchronization
@@ -41,11 +41,11 @@ namespace nc::graphics
             vk::Device m_device;
             vk::PhysicalDevice m_physicalDevice;
             vk::SurfaceKHR m_surface;
-            vk::SwapchainKHR m_swapChain;
+            vk::UniqueSwapchainKHR m_swapChain;
             std::vector<vk::Image> m_swapChainImages;
             vk::Format m_swapChainImageFormat;
             vk::Extent2D m_swapChainExtent;
-            std::vector<vk::ImageView> m_swapChainImageViews;
+            std::vector<vk::UniqueImageView> m_swapChainImageViews;
             std::vector<vk::Fence> m_imagesInFlightFences;
     };
 } // namespace nc::graphics

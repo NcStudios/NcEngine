@@ -46,7 +46,7 @@ namespace nc::graphics
             void FrameEnd();
 
         private:
-            void Resize();
+            void Resize(const Vector2& dimensions);
 
             camera::MainCamera* m_mainCamera;
             Registry* m_registry;

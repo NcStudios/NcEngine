@@ -5,6 +5,8 @@
 #include "ncutility/NcError.h"
 
 #include <algorithm>
+#include <iostream>
+
 
 namespace nc::graphics
 {
@@ -73,10 +75,11 @@ namespace nc::graphics
     {
         for (auto& imageView : m_swapChainImageViews)
         {
-           m_device.destroyImageView(imageView, nullptr);
+           imageView.reset();
         }
-
-       m_device.destroySwapchainKHR(m_swapChain);
+        m_swapChainImageViews.clear();
+        m_swapChain.reset();
+        m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
 
     void Swapchain::Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid)
@@ -86,7 +89,7 @@ namespace nc::graphics
         auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
         presentInfo.setPWaitSemaphores(&waitSemaphore); // Wait on this semaphore before presenting.
 
-        vk::SwapchainKHR swapChains[] = {m_swapChain};
+        vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
         presentInfo.setSwapchainCount(1);
         presentInfo.setPSwapchains(swapChains); // Sets the swapchain(s) to present to
         presentInfo.setPImageIndices(&imageIndex); //  Sets the index of the image for each swapchain.
@@ -204,26 +207,23 @@ namespace nc::graphics
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = nullptr;
 
-        m_swapChain = m_device.createSwapchainKHR(createInfo);
+        m_swapChain = m_device.createSwapchainKHRUnique(createInfo);
 
         // Set swapchain images        
         uint32_t swapChainImageCount;
-        if (m_device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, nullptr) != vk::Result::eSuccess)
+        if (m_device.getSwapchainImagesKHR(m_swapChain.get(), &swapChainImageCount, nullptr) != vk::Result::eSuccess)
         {
             throw NcError("Error getting swapchain images count.");
         }
 
         m_swapChainImages.resize(swapChainImageCount);
-        if (m_device.getSwapchainImagesKHR(m_swapChain, &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
+        if (m_device.getSwapchainImagesKHR(m_swapChain.get(), &swapChainImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
         {
             throw NcError("Error getting swapchain images.");
         }
 
         m_swapChainImageFormat = surfaceFormat.format;
         m_swapChainExtent = extent;
-
-        // Create image views
-        m_swapChainImageViews.resize(m_swapChainImages.size());
 
         auto swapChainComponents = vk::ComponentMapping{};
         swapChainComponents.setR(vk::ComponentSwizzle::eIdentity);
@@ -238,6 +238,9 @@ namespace nc::graphics
         swapChainSubresourceRange.setBaseArrayLayer(0);
         swapChainSubresourceRange.setLayerCount(1);
 
+        // Create image views
+        m_swapChainImageViews.reserve(m_swapChainImages.size());
+
         for (size_t i = 0; i < m_swapChainImages.size(); ++i)
         {
             vk::ImageViewCreateInfo imageViewCreateInfo{};
@@ -247,10 +250,7 @@ namespace nc::graphics
             imageViewCreateInfo.setComponents(swapChainComponents);
             imageViewCreateInfo.setSubresourceRange(swapChainSubresourceRange);
 
-            if (m_device.createImageView(&imageViewCreateInfo, nullptr, &m_swapChainImageViews[i]) != vk::Result::eSuccess)
-            {
-                throw NcError("Failed to create image view");
-            }
+            m_swapChainImageViews.emplace_back(m_device.createImageViewUnique(imageViewCreateInfo));
         }
     }
 
@@ -259,16 +259,25 @@ namespace nc::graphics
         return m_swapChainExtent;
     }
 
-    const std::vector<vk::ImageView>& Swapchain::GetColorImageViews() const noexcept
+    const std::vector<vk::UniqueImageView>& Swapchain::GetColorImageViews() const noexcept
     {
         return m_swapChainImageViews;
     }
 
     bool Swapchain::GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex)
     {
-        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain, UINT64_MAX, currentFrame->ImageAvailableSemaphore());
-        *imageIndex = index;
-        return result != vk::Result::eErrorOutOfDateKHR;
+        try
+        {
+            auto [result, index] = m_device.acquireNextImageKHR(m_swapChain.get(), UINT64_MAX, currentFrame->ImageAvailableSemaphore());
+            *imageIndex = index;
+        }
+        catch (vk::SystemError& error)
+        {
+            std::cout << error.what();
+            return false;
+        }
+
+        return true;
     }
 
     void Swapchain::Resize(const Vector2& dimensions)

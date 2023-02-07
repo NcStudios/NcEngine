@@ -58,7 +58,7 @@ namespace nc::graphics
         }
     }
 
-    void Graphics::Resize()
+    void Graphics::Resize(const Vector2& dimensions)
     {
         if (m_isMinimized)
         {
@@ -69,23 +69,12 @@ namespace nc::graphics
 
         // Wait for all current commands to complete execution
         m_core->logicalDevice.get().waitIdle();
-        m_frameManager.reset();
-        m_swapchain->Resize(m_dimensions);
-        m_renderGraph->Resize(m_dimensions);
-        m_lighting->Resize(m_dimensions);
 
-
-        // m_renderGraph.reset();
-        // m_commands.reset();
-        // m_swapchain.reset();
-        // m_lighting.reset();
-
-
-        // m_swapchain = std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_dimensions);
-        m_frameManager = std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get());
-        // m_renderGraph = std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), m_dimensions);
-        // m_lighting = std::make_unique<Lighting>(m_registry, m_core->logicalDevice.get(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), m_dimensions);
-        // InitializeUI();
+        m_swapchain->Resize(dimensions);
+        m_renderGraph.reset();
+        m_renderGraph = std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), m_dimensions);
+        m_lighting.reset();
+        m_lighting = std::make_unique<Lighting>(m_registry, m_core->logicalDevice.get(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), m_dimensions);
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
@@ -93,8 +82,8 @@ namespace nc::graphics
         m_dimensions = Vector2{ width, height };
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
-        // Resize();
-        // InitializeUI();
+        Resize(m_dimensions);
+        InitializeUI();
     }
 
     void Graphics::Clear()
@@ -120,7 +109,8 @@ namespace nc::graphics
         // Gets the next image in the swapchain
         if(!m_swapchain->GetNextRenderReadyImageIndex(m_frameManager->CurrentFrameContext(), &m_imageIndex))
         {
-            Resize();
+            Resize(m_dimensions);
+            // return false;
         }
 
         m_frameManager->Begin();
@@ -149,7 +139,7 @@ namespace nc::graphics
 
         if (!isSwapChainValid)
         {
-            Resize();
+            Resize(m_dimensions);
         }
     }
 

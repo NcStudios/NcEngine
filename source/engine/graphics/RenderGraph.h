@@ -26,7 +26,7 @@ class RenderGraph
         void Add(std::unique_ptr<RenderPass> renderPass);
         void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage& meshStorage, uint32_t frameBufferIndex, Vector2 dimensions);
         void Remove(const std::string& uid);
-        void Resize(const Vector2& dimensions);
+        void Resize(Swapchain* swapchain, const Vector2& dimensions);
 
         template <std::derived_from<ITechnique> T>
         void RegisterTechnique(const std::string& uid);

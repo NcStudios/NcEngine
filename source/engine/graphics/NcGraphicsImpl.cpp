@@ -68,7 +68,7 @@ namespace nc::graphics
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
     {
         m_graphics.InitializeUI();
-        //window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
+        window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
         window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
